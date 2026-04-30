@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { inject, Injectable } from '@angular/core';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 
 export interface DeleteImageByIdResult {
   ok: boolean;
@@ -14,6 +14,8 @@ export interface SingleMarkerContextPayload {
 
 @Injectable({ providedIn: 'root' })
 export class MarkerContextPhotoDeleteService {
+  private readonly supabaseService = inject(SupabaseService);
+
   getSingleImageTarget(
     payload: SingleMarkerContextPayload | null,
   ): { markerKey: string; mediaId: string } | null {
@@ -41,8 +43,8 @@ export class MarkerContextPhotoDeleteService {
     );
   }
 
-  async deleteImageById(client: SupabaseClient, mediaId: string): Promise<DeleteImageByIdResult> {
-    const { error } = await client
+  async deleteImageById(mediaId: string): Promise<DeleteImageByIdResult> {
+    const { error } = await this.supabaseService.client
       .from('media_items')
       .delete()
       .or(`id.eq.${mediaId},source_image_id.eq.${mediaId}`);

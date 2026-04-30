@@ -26,15 +26,30 @@ export class WorkspaceViewService {
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Input signals Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-  readonly rawImages = signal<WorkspaceImage[]>([]);
-  readonly selectedProjectIds = signal<Set<string>>(new Set());
-  readonly activeSorts = signal<SortConfig[]>(DEFAULT_SORTS);
-  readonly activeGroupings = signal<MetadataFieldRef[]>([]);
-  readonly thumbnailSizePreset = signal<ThumbnailSizePreset>(this.readThumbnailSizePreset());
-  readonly collapsedGroups = signal<Set<string>>(new Set());
-  readonly isLoading = signal(false);
+  private readonly _rawImages = signal<WorkspaceImage[]>([]);
+  readonly rawImages = this._rawImages.asReadonly();
+
+  private readonly _selectedProjectIds = signal<Set<string>>(new Set());
+  readonly selectedProjectIds = this._selectedProjectIds.asReadonly();
+
+  private readonly _activeSorts = signal<SortConfig[]>(DEFAULT_SORTS);
+  readonly activeSorts = this._activeSorts.asReadonly();
+
+  private readonly _activeGroupings = signal<MetadataFieldRef[]>([]);
+  readonly activeGroupings = this._activeGroupings.asReadonly();
+
+  private readonly _thumbnailSizePreset = signal<ThumbnailSizePreset>(this.readThumbnailSizePreset());
+  readonly thumbnailSizePreset = this._thumbnailSizePreset.asReadonly();
+
+  private readonly _collapsedGroups = signal<Set<string>>(new Set());
+  readonly collapsedGroups = this._collapsedGroups.asReadonly();
+
+  private readonly _isLoading = signal(false);
+  readonly isLoading = this._isLoading.asReadonly();
+
   /** True once a marker click triggers a load Ã¢â‚¬â€ distinguishes "no selection" from "empty result". */
-  readonly selectionActive = signal(false);
+  private readonly _selectionActive = signal(false);
+  readonly selectionActive = this._selectionActive.asReadonly();
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Pipeline: computed signal chain Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -44,8 +59,8 @@ export class WorkspaceViewService {
    * moved to the grouping position. New grouping keys default to ascending.
    */
   readonly effectiveSorts = computed<SortConfig[]>(() => {
-    const groupings = this.activeGroupings();
-    const userSorts = this.activeSorts();
+    const groupings = this._activeGroupings();
+    const userSorts = this._activeSorts();
 
     if (groupings.length === 0) return userSorts;
 
@@ -66,8 +81,8 @@ export class WorkspaceViewService {
 
   /** Step 1: Filter by project. Empty set = no filter (all projects). */
   private readonly projectFiltered = computed(() => {
-    const images = this.rawImages();
-    const projectIds = this.selectedProjectIds();
+    const images = this._rawImages();
+    const projectIds = this._selectedProjectIds();
     if (projectIds.size === 0) return images;
     return images.filter((img) => {
       const ids = img.projectIds?.length ? img.projectIds : img.projectId ? [img.projectId] : [];
@@ -115,7 +130,7 @@ export class WorkspaceViewService {
   /** Step 4: Group by active groupings (multi-level). */
   readonly groupedSections = computed<GroupedSection[]>(() => {
     const images = this.sorted();
-    const groupings = this.activeGroupings();
+    const groupings = this._activeGroupings();
     if (groupings.length === 0) {
       return [{ heading: '', headingLevel: 0, imageCount: images.length, images }];
     }
@@ -145,13 +160,13 @@ export class WorkspaceViewService {
     zoom: number,
   ): Promise<void> {
     const requestId = ++this.clusterLoadId;
-    this.selectionActive.set(true);
-    this.isLoading.set(true);
+    this._selectionActive.set(true);
+    this._isLoading.set(true);
     try {
       const images = await this.fetchClusterImages(cells, zoom);
       if (requestId !== this.clusterLoadId) return;
 
-      this.rawImages.set(images);
+      this._rawImages.set(images);
       if (images.length > 0) {
         this.resolveUnresolvedAddresses(images);
         void this.batchSignThumbnails(images);
@@ -159,7 +174,7 @@ export class WorkspaceViewService {
       }
     } finally {
       if (requestId === this.clusterLoadId) {
-        this.isLoading.set(false);
+        this._isLoading.set(false);
       }
     }
   }
@@ -240,8 +255,8 @@ export class WorkspaceViewService {
 
   /** Set images directly (e.g. from a radius selection). */
   setActiveSelectionImages(images: WorkspaceImage[]): void {
-    this.selectionActive.set(true);
-    this.rawImages.set(images);
+    this._selectionActive.set(true);
+    this._rawImages.set(images);
     this.resolveUnresolvedAddresses(images);
     void this.batchSignThumbnails(images);
     void this.loadMetadataValues(images);
@@ -394,29 +409,29 @@ export class WorkspaceViewService {
 
   /** Convenience: "select" state populated but holding zero rows (RPC returned nothing). */
   readonly emptySelection = computed(
-    () => this.selectionActive() && !this.isLoading() && this.rawImages().length === 0,
+    () => this._selectionActive() && !this._isLoading() && this._rawImages().length === 0,
   );
 
   /** Clear active selection data only Ã¢â‚¬â€ preserves toolbar settings (sort, filters, project, grouping). */
   clearActiveSelection(): void {
-    this.rawImages.set([]);
-    this.selectionActive.set(false);
-    this.collapsedGroups.set(new Set());
+    this._rawImages.set([]);
+    this._selectionActive.set(false);
+    this._collapsedGroups.set(new Set());
   }
 
   /** Clear active selection AND reset all toolbar settings to defaults. */
   clearActiveSelectionAndSettings(): void {
-    this.rawImages.set([]);
-    this.selectionActive.set(false);
-    this.selectedProjectIds.set(new Set());
+    this._rawImages.set([]);
+    this._selectionActive.set(false);
+    this._selectedProjectIds.set(new Set());
     this.filterService.clearAll();
-    this.activeSorts.set(DEFAULT_SORTS);
-    this.activeGroupings.set([]);
-    this.collapsedGroups.set(new Set());
+    this._activeSorts.set(DEFAULT_SORTS);
+    this._activeGroupings.set([]);
+    this._collapsedGroups.set(new Set());
   }
 
   toggleGroupCollapsed(groupKey: string): void {
-    this.collapsedGroups.update((set) => {
+    this._collapsedGroups.update((set) => {
       const next = new Set(set);
       if (next.has(groupKey)) {
         next.delete(groupKey);
@@ -428,8 +443,24 @@ export class WorkspaceViewService {
   }
 
   setThumbnailSizePreset(preset: ThumbnailSizePreset): void {
-    this.thumbnailSizePreset.set(preset);
+    this._thumbnailSizePreset.set(preset);
     this.persistThumbnailSizePreset(preset);
+  }
+
+  setSelectedProjectIds(projectIds: Set<string>): void {
+    this._selectedProjectIds.set(projectIds);
+  }
+
+  setActiveSorts(sorts: SortConfig[]): void {
+    this._activeSorts.set(sorts);
+  }
+
+  setActiveGroupings(groupings: MetadataFieldRef[]): void {
+    this._activeGroupings.set(groupings);
+  }
+
+  updateRawImages(updater: (images: WorkspaceImage[]) => WorkspaceImage[]): void {
+    this._rawImages.update(updater);
   }
 
   /** Batch-sign thumbnail URLs for a set of images. */
@@ -455,7 +486,7 @@ export class WorkspaceViewService {
     const attemptedIds = new Set(unsigned.map((img) => img.id));
 
     // Update signal: apply URLs or mark unavailable.
-    this.rawImages.update((all) =>
+    this._rawImages.update((all) =>
       all.map((img) => {
         const result = results.get(img.id);
         if (result?.url) return { ...img, signedThumbnailUrl: result.url };
@@ -477,7 +508,7 @@ export class WorkspaceViewService {
     const results = await this.locationResolver.resolveOnDemand(images);
     if (results.size === 0) return;
 
-    this.rawImages.update((all) =>
+    this._rawImages.update((all) =>
       all.map((existing) => {
         const resolved = results.get(existing.id);
         return resolved
@@ -521,7 +552,7 @@ export class WorkspaceViewService {
     const metadataMap = await this.metadata.loadMetadataValuesByLookupIds(lookupIds);
     if (metadataMap.size === 0) return;
 
-    this.rawImages.update((all) =>
+    this._rawImages.update((all) =>
       all.map((img) => {
         const values = metadataMap.get(img.id);
         return values ? { ...img, metadata: { ...img.metadata, ...values } } : img;

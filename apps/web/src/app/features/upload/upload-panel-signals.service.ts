@@ -45,8 +45,11 @@ export class UploadPanelSignalsService {
 
   // ── UI State (lane selection) ──────────────────────────────────────────────
 
-  readonly selectedLane = signal<UploadLane>('uploading');
-  readonly locationRequirementMode = signal<UploadLocationRequirementMode>('optional');
+  private readonly _selectedLane = signal<UploadLane>('uploading');
+  readonly selectedLane = this._selectedLane.asReadonly();
+
+  private readonly _locationRequirementMode = signal<UploadLocationRequirementMode>('optional');
+  readonly locationRequirementMode = this._locationRequirementMode.asReadonly();
 
   private readonly sessionLocationModeOverrides = signal<
     Map<string, UploadLocationRequirementMode>
@@ -54,8 +57,8 @@ export class UploadPanelSignalsService {
 
   // ── Computed (derived state) ───────────────────────────────────────────────
 
-  readonly effectiveLane = computed<UploadLane>(() => this.selectedLane());
-  readonly laneJobs = computed(() => this.state.laneBuckets()[this.selectedLane()]);
+  readonly effectiveLane = computed<UploadLane>(() => this._selectedLane());
+  readonly laneJobs = computed(() => this.state.laneBuckets()[this._selectedLane()]);
 
   private readonly activeProjectId = computed<string | undefined>(() => {
     const selected = this.workspaceView.selectedProjectIds();
@@ -68,13 +71,13 @@ export class UploadPanelSignalsService {
       const overrides = this.sessionLocationModeOverrides();
 
       if (!activeProjectId) {
-        this.locationRequirementMode.set('optional');
+        this._locationRequirementMode.set('optional');
         return;
       }
 
       const overridden = overrides.get(activeProjectId);
       if (overridden) {
-        this.locationRequirementMode.set(overridden);
+        this._locationRequirementMode.set(overridden);
         return;
       }
 
@@ -82,8 +85,12 @@ export class UploadPanelSignalsService {
     });
   }
 
+  setSelectedLane(lane: UploadLane): void {
+    this._selectedLane.set(lane);
+  }
+
   setLocationRequirementMode(mode: UploadLocationRequirementMode): void {
-    this.locationRequirementMode.set(mode);
+    this._locationRequirementMode.set(mode);
 
     const activeProjectId = this.activeProjectId();
     if (!activeProjectId) {
@@ -102,7 +109,7 @@ export class UploadPanelSignalsService {
     const project = projects.find((item) => item.id === projectId);
 
     if (!project) {
-      this.locationRequirementMode.set('optional');
+      this._locationRequirementMode.set('optional');
       return;
     }
 
@@ -114,6 +121,6 @@ export class UploadPanelSignalsService {
       return;
     }
 
-    this.locationRequirementMode.set(project.locationRequired ? 'required' : 'optional');
+    this._locationRequirementMode.set(project.locationRequired ? 'required' : 'optional');
   }
 }

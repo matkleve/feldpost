@@ -78,7 +78,7 @@ export class MediaDetailMediaEventsHelper {
   }
 
   private updateGridCache(imageId: string, newStoragePath: string): void {
-    this.deps.services.workspaceView.rawImages.update((all) =>
+    this.deps.services.workspaceView.updateRawImages((all) =>
       all.map((wi) =>
         wi.id === imageId
           ? {

@@ -9,12 +9,13 @@ let nextRuleId = 0;
 @Injectable({ providedIn: 'root' })
 export class FilterService {
   private readonly metadata = inject(MetadataService);
-  readonly rules = signal<FilterRule[]>([]);
+  private readonly _rules = signal<FilterRule[]>([]);
+  readonly rules = this._rules.asReadonly();
 
-  readonly activeCount = computed(() => this.rules().length);
+  readonly activeCount = computed(() => this._rules().length);
 
   addRule(): void {
-    this.rules.update((list) => [
+    this._rules.update((list) => [
       ...list,
       {
         id: `rule-${++nextRuleId}`,
@@ -27,15 +28,15 @@ export class FilterService {
   }
 
   updateRule(id: string, patch: Partial<FilterRule>): void {
-    this.rules.update((list) => list.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+    this._rules.update((list) => list.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
 
   removeRule(id: string): void {
-    this.rules.update((list) => list.filter((r) => r.id !== id));
+    this._rules.update((list) => list.filter((r) => r.id !== id));
   }
 
   clearAll(): void {
-    this.rules.set([]);
+    this._rules.set([]);
   }
 
   /**

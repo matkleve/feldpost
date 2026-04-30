@@ -282,7 +282,7 @@ describe('WorkspaceViewService â€” grouping with addresses', () => {
       makeImage({ id: 'c', district: 'Seefeld' }),
     ];
     service.setActiveSelectionImages(images);
-    service.activeGroupings.set([{ id: 'district', label: 'District', icon: '' }]);
+    service.setActiveGroupings([{ id: 'district', label: 'District', icon: '' }]);
 
     const sections = service.groupedSections();
     expect(sections.length).toBe(2);
@@ -297,7 +297,7 @@ describe('WorkspaceViewService â€” grouping with addresses', () => {
 
     const images = [makeImage({ id: 'a', district: null })];
     service.setActiveSelectionImages(images);
-    service.activeGroupings.set([{ id: 'district', label: 'District', icon: '' }]);
+    service.setActiveGroupings([{ id: 'district', label: 'District', icon: '' }]);
 
     const sections = service.groupedSections();
     expect(sections[0].heading).toBe('Unknown district');
@@ -308,7 +308,7 @@ describe('WorkspaceViewService â€” grouping with addresses', () => {
 
     const images = [makeImage({ id: 'a', city: 'ZÃ¼rich' }), makeImage({ id: 'b', city: 'Bern' })];
     service.setActiveSelectionImages(images);
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: '' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: '' }]);
 
     const sections = service.groupedSections();
     expect(sections.length).toBe(2);
@@ -363,7 +363,7 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
   it('auto-prepends grouping keys to effectiveSorts', () => {
     const service = setupSortGrouping();
 
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
 
     const effective = service.effectiveSorts();
     expect(effective[0]).toEqual({ key: 'city', direction: 'asc' });
@@ -374,7 +374,7 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
   it('groups are sorted alphabetically when grouping direction is asc', () => {
     const service = setupSortGrouping();
 
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
 
     const sections = service.groupedSections();
     const headings = sections.map((s) => s.heading);
@@ -384,9 +384,9 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
   it('groups are sorted reverse-alphabetically when grouping direction is desc', () => {
     const service = setupSortGrouping();
 
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
     // Change city sort direction to descending
-    service.activeSorts.set([
+    service.setActiveSorts([
       { key: 'city', direction: 'desc' },
       { key: 'date-captured', direction: 'desc' },
     ]);
@@ -399,7 +399,7 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
   it('multi-level grouping respects sort directions for both levels', () => {
     const service = setupSortGrouping();
 
-    service.activeGroupings.set([
+    service.setActiveGroupings([
       { id: 'city', label: 'City', icon: 'location_city' },
       { id: 'project', label: 'Project', icon: 'folder' },
     ]);
@@ -417,13 +417,13 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
     const service = setupSortGrouping();
 
     // User first activates city sort as descending
-    service.activeSorts.set([
+    service.setActiveSorts([
       { key: 'date-captured', direction: 'desc' },
       { key: 'city', direction: 'desc' },
     ]);
 
     // Then city is added as a grouping
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
 
     const effective = service.effectiveSorts();
     // City should be first (grouping position) and retain desc direction
@@ -434,11 +434,11 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
     const service = setupSortGrouping();
 
     // Activate grouping â€” city gets auto-added to sorts
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
     expect(service.effectiveSorts().some((s) => s.key === 'city')).toBe(true);
 
     // Remove the grouping
-    service.activeGroupings.set([]);
+    service.setActiveGroupings([]);
 
     const effective = service.effectiveSorts();
     // City was grouping-only â€” should be gone
@@ -451,16 +451,16 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
     const service = setupSortGrouping();
 
     // User explicitly adds city sort first
-    service.activeSorts.set([
+    service.setActiveSorts([
       { key: 'date-captured', direction: 'desc' },
       { key: 'city', direction: 'asc' },
     ]);
 
     // Then grouping is added for city
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
 
     // Then grouping is removed
-    service.activeGroupings.set([]);
+    service.setActiveGroupings([]);
 
     const effective = service.effectiveSorts();
     // City was in user sorts before grouping â€” should remain
@@ -471,13 +471,13 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
     const service = setupSortGrouping();
 
     // User has city in their sorts
-    service.activeSorts.set([
+    service.setActiveSorts([
       { key: 'date-captured', direction: 'desc' },
       { key: 'city', direction: 'desc' },
     ]);
 
     // Add city as grouping
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
 
     const effective = service.effectiveSorts();
     // City should appear exactly once (at grouping position)
@@ -489,7 +489,7 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
   it('images within a group are sorted by remaining sort keys', () => {
     const service = setupSortGrouping();
 
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
     // Default: date-captured desc â€” within Berlin group, b1 (March) should come before b2 (Jan)
 
     const sections = service.groupedSections();
@@ -501,14 +501,14 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
   it('changing sort direction on grouped property reorders groups', () => {
     const service = setupSortGrouping();
 
-    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    service.setActiveGroupings([{ id: 'city', label: 'City', icon: 'location_city' }]);
 
     // Verify initial Aâ†’Z order
     let sections = service.groupedSections();
     expect(sections[0].heading).toBe('Berlin');
 
     // Change city to descending
-    service.activeSorts.set([
+    service.setActiveSorts([
       { key: 'city', direction: 'desc' },
       { key: 'date-captured', direction: 'desc' },
     ]);
@@ -535,7 +535,7 @@ describe('WorkspaceViewService â€” numeric sorting', () => {
       makeImage({ id: 'd', metadata: { fang: '1' } }),
     ];
     service.setActiveSelectionImages(images);
-    service.activeSorts.set([{ key: 'fang', direction: 'asc' }]);
+    service.setActiveSorts([{ key: 'fang', direction: 'asc' }]);
 
     const sorted = service.groupedSections()[0].images;
     // Numeric order: 1, 5, 12, 100 (not lexicographic "1", "100", "12", "5")
@@ -554,7 +554,7 @@ describe('WorkspaceViewService â€” numeric sorting', () => {
       makeImage({ id: 'c', metadata: { fang: '12' } }),
     ];
     service.setActiveSelectionImages(images);
-    service.activeSorts.set([{ key: 'fang', direction: 'desc' }]);
+    service.setActiveSorts([{ key: 'fang', direction: 'desc' }]);
 
     const sorted = service.groupedSections()[0].images;
     expect(sorted.map((i) => i.id)).toEqual(['b', 'c', 'a']);
@@ -572,7 +572,7 @@ describe('WorkspaceViewService â€” numeric sorting', () => {
       makeImage({ id: 'c', metadata: { fang: '1' } }),
     ];
     service.setActiveSelectionImages(images);
-    service.activeSorts.set([{ key: 'fang', direction: 'asc' }]);
+    service.setActiveSorts([{ key: 'fang', direction: 'asc' }]);
 
     const sorted = service.groupedSections()[0].images;
     expect(sorted[0].id).toBe('c'); // 1
@@ -592,7 +592,7 @@ describe('WorkspaceViewService â€” numeric sorting', () => {
       makeImage({ id: 'c', metadata: { floor: '1' } }),
     ];
     service.setActiveSelectionImages(images);
-    service.activeGroupings.set([{ id: 'floor', label: 'Floor', icon: 'numbers' }]);
+    service.setActiveGroupings([{ id: 'floor', label: 'Floor', icon: 'numbers' }]);
 
     const sections = service.groupedSections();
     expect(sections.length).toBe(2);
@@ -783,7 +783,7 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     service.setActiveSelectionImages(images);
 
     // Step 3: Group by Bauphase
-    service.activeGroupings.set([{ id: 'uuid-bauphase', label: 'Bauphase', icon: 'tag' }]);
+    service.setActiveGroupings([{ id: 'uuid-bauphase', label: 'Bauphase', icon: 'tag' }]);
 
     // Step 4: Verify groups
     const sections = service.groupedSections();
@@ -841,7 +841,7 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     service.setActiveSelectionImages(images);
 
     // Step 3: Sort by Fang ascending
-    service.activeSorts.set([{ key: 'uuid-fang', direction: 'asc' }]);
+    service.setActiveSorts([{ key: 'uuid-fang', direction: 'asc' }]);
 
     // Step 4: Verify text-type sort (since DB has no key_type, defaults to text)
     // Text sort ascending: '100' < '12' < '5' (lexicographic)

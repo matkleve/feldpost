@@ -46,15 +46,15 @@ function createJsonResponse(body: unknown, status = 200): Response {
 function createWorkspacePaneShellHostStub(state: MapShellState): WorkspacePaneShellHost {
   return {
     openDetailView(mediaId: string): void {
-      state.photoPanelOpen.set(true);
-      state.detailMediaId.set(mediaId);
+      state.setPhotoPanelOpen(true);
+      state.setDetailMediaId(mediaId);
     },
     closeDetailView(): void {
-      state.detailMediaId.set(null);
+      state.setDetailMediaId(null);
     },
     closeWorkspacePane(): void {
-      state.photoPanelOpen.set(false);
-      state.detailMediaId.set(null);
+      state.setPhotoPanelOpen(false);
+      state.setDetailMediaId(null);
     },
     onWorkspaceWidthChange(_newWidth: number): void {},
     onWorkspacePaneActiveTabChange(_tab: WorkspacePaneTab): void {},
@@ -353,9 +353,9 @@ describe('MapShellComponent', () => {
       .spyOn(workspaceView, 'clearActiveSelection')
       .mockImplementation(() => {});
 
-    component.selectedMarkerKey.set('cluster-1');
-    component.selectedMarkerKeys.set(new Set(['cluster-1', 'cluster-2']));
-    component.detailMediaId.set('img-1');
+    TestBed.inject(MapShellState).setSelectedMarkerKey('cluster-1');
+    TestBed.inject(MapShellState).setSelectedMarkerKeys(new Set(['cluster-1', 'cluster-2']));
+    TestBed.inject(MapShellState).setDetailMediaId('img-1');
     component.clearRadiusSelectionVisuals = vi.fn();
 
     component.handleMapClick({
@@ -384,8 +384,8 @@ describe('MapShellComponent', () => {
       }) => void;
     };
 
-    component.selectedMarkerKey.set('cluster-1');
-    component.selectedMarkerKeys.set(new Set(['cluster-1', 'cluster-2']));
+    TestBed.inject(MapShellState).setSelectedMarkerKey('cluster-1');
+    TestBed.inject(MapShellState).setSelectedMarkerKeys(new Set(['cluster-1', 'cluster-2']));
     component.suppressMapClickUntil = Date.now() + 60_000;
 
     component.handleMapClick({
@@ -787,7 +787,7 @@ describe('MapShellComponent', () => {
     fixture.detectChanges();
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.rawImages.set([
+    workspaceView.setActiveSelectionImages([
       {
         id: 'img-1',
         latitude: 48.8566,
@@ -1072,20 +1072,20 @@ describe('MapShellComponent', () => {
       anyContextMenuOpen: () => boolean;
     };
 
-    component.mapContextMenuOpen.set(false);
-    component.radiusContextMenuOpen.set(false);
-    component.markerContextMenuOpen.set(false);
+    TestBed.inject(MapShellState).setMapContextMenuOpen(false);
+    TestBed.inject(MapShellState).setRadiusContextMenuOpen(false);
+    TestBed.inject(MapShellState).setMarkerContextMenuOpen(false);
     expect(component.anyContextMenuOpen()).toBe(false);
 
-    component.mapContextMenuOpen.set(true);
+    TestBed.inject(MapShellState).setMapContextMenuOpen(true);
     expect(component.anyContextMenuOpen()).toBe(true);
 
-    component.mapContextMenuOpen.set(false);
-    component.radiusContextMenuOpen.set(true);
+    TestBed.inject(MapShellState).setMapContextMenuOpen(false);
+    TestBed.inject(MapShellState).setRadiusContextMenuOpen(true);
     expect(component.anyContextMenuOpen()).toBe(true);
 
-    component.radiusContextMenuOpen.set(false);
-    component.markerContextMenuOpen.set(true);
+    TestBed.inject(MapShellState).setRadiusContextMenuOpen(false);
+    TestBed.inject(MapShellState).setMarkerContextMenuOpen(true);
     expect(component.anyContextMenuOpen()).toBe(true);
   });
 
@@ -1103,7 +1103,7 @@ describe('MapShellComponent', () => {
       onMapContextCreateMarkerHere: () => void;
     };
 
-    component.mapContextMenuCoords.set({ lat: 48.2, lng: 16.37 });
+    TestBed.inject(MapShellState).setMapContextMenuCoords({ lat: 48.2, lng: 16.37 });
     component.onMapContextCreateMarkerHere();
 
     expect(component.draftMediaMarker()).toEqual({ lat: 48.2, lng: 16.37, uploadCount: 0 });
@@ -1129,8 +1129,8 @@ describe('MapShellComponent', () => {
     };
 
     component.map = mapStub;
-    component.mapContextMenuOpen.set(true);
-    component.mapContextMenuCoords.set({ lat: 48.2, lng: 16.37 });
+    TestBed.inject(MapShellState).setMapContextMenuOpen(true);
+    TestBed.inject(MapShellState).setMapContextMenuCoords({ lat: 48.2, lng: 16.37 });
 
     component.onMapContextZoomStreetHere();
 
@@ -1149,7 +1149,7 @@ describe('MapShellComponent', () => {
 
     const focusSpy = vi.fn();
     component.mapContainerRef = () => ({ nativeElement: { focus: focusSpy } });
-    component.mapContextMenuOpen.set(true);
+    TestBed.inject(MapShellState).setMapContextMenuOpen(true);
 
     component.onMapMenuCloseRequested();
 
@@ -1187,8 +1187,12 @@ describe('MapShellComponent', () => {
       }) => void;
     };
 
-    component.draftMediaMarker.set({ lat: 48.2, lng: 16.37, uploadCount: 0 });
-    component.photoPanelOpen.set(true);
+    TestBed.inject(MapShellState).setDraftMediaMarker({
+      lat: 48.2,
+      lng: 16.37,
+      uploadCount: 0,
+    });
+    TestBed.inject(MapShellState).setPhotoPanelOpen(true);
 
     component.handleMapClick({
       latlng: { lat: 48.21, lng: 16.38 },
@@ -1459,7 +1463,7 @@ describe('MapShellComponent', () => {
       sourceCells: [{ lat: 48.2007, lng: 16.3707 }],
     });
 
-    component.selectedMarkerKeys.set(new Set(['single-1', 'single-2']));
+    TestBed.inject(MapShellState).setSelectedMarkerKeys(new Set(['single-1', 'single-2']));
     component.openMarkerContextMenu('single-1', { clientX: 220, clientY: 240 });
 
     expect(component.markerContextMenuPayload()?.isMultiSelection).toBe(true);
@@ -1484,7 +1488,11 @@ describe('MapShellComponent', () => {
       enterPlacementMode: (key: string) => void;
     };
 
-    component.draftMediaMarker.set({ lat: 48.2, lng: 16.37, uploadCount: 0 });
+    TestBed.inject(MapShellState).setDraftMediaMarker({
+      lat: 48.2,
+      lng: 16.37,
+      uploadCount: 0,
+    });
     component.uploadPanelChild = () => ({ placeFile });
 
     component.enterPlacementMode('job-1');
@@ -1620,10 +1628,10 @@ describe('MapShellComponent', () => {
       lng: 16.35,
       sourceCells: [{ lat: 48.25, lng: 16.35 }],
     });
-    component.selectedMarkerKeys.set(new Set(['already-selected']));
+    TestBed.inject(MapShellState).setSelectedMarkerKeys(new Set(['already-selected']));
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.rawImages.set([
+    workspaceView.setActiveSelectionImages([
       {
         id: 'img-existing',
         latitude: 48.25,
@@ -1812,7 +1820,7 @@ describe('MapShellComponent', () => {
     });
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.rawImages.set([
+    workspaceView.setActiveSelectionImages([
       {
         id: 'img-existing',
         latitude: 48.25,
@@ -1905,7 +1913,7 @@ describe('MapShellComponent', () => {
     });
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.rawImages.set([]);
+    workspaceView.setActiveSelectionImages([]);
 
     vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue([
       {
@@ -1951,7 +1959,7 @@ describe('MapShellComponent', () => {
     });
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.rawImages.set([
+    workspaceView.setActiveSelectionImages([
       {
         id: 'img-hovered',
         latitude: 48.2,
@@ -2059,7 +2067,7 @@ describe('MapShellComponent', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    fixture.componentInstance.photoPanelOpen.set(true);
+    TestBed.inject(MapShellState).setPhotoPanelOpen(true);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.photoPanelOpen()).toBe(true);
@@ -2073,7 +2081,7 @@ describe('MapShellComponent', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    fixture.componentInstance.photoPanelOpen.set(true);
+    TestBed.inject(MapShellState).setPhotoPanelOpen(true);
     fixture.detectChanges();
 
     const panelShell = (fixture.nativeElement as HTMLElement).querySelector(

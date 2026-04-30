@@ -17,24 +17,25 @@ export class UploadPanelInputHandlersService {
   private readonly uploadSignals = inject(UploadPanelSignalsService);
   private readonly workspaceView = inject(WorkspaceViewService);
 
-  readonly isDragging = signal(false);
+  private readonly _isDragging = signal(false);
+  readonly isDragging = this._isDragging.asReadonly();
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging.set(true);
+    this._isDragging.set(true);
   }
 
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging.set(false);
+    this._isDragging.set(false);
   }
 
   onDrop(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging.set(false);
+    this._isDragging.set(false);
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       this.uploadManager.submit(Array.from(files), {

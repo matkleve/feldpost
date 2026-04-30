@@ -26,6 +26,16 @@ export interface ProjectListItem extends ProjectRecord {
   country: string | null;
 }
 
+export interface ProjectSelectOption {
+  id: string;
+  name: string;
+}
+
+export interface ProjectMutationResult {
+  ok: boolean;
+  errorMessage: string | null;
+}
+
 export interface ProjectsSnapshot {
   projects: ProjectListItem[];
 }

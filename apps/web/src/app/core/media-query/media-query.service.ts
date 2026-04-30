@@ -24,6 +24,11 @@ interface MediaItemRow {
     | null;
 }
 
+interface MediaItemLookupRow {
+  id: string;
+  source_image_id: string | null;
+}
+
 export interface MediaLoadResult {
   items: ImageRecord[];
   totalCount: number | null;
@@ -34,6 +39,11 @@ export interface MediaLoadOptions {
   offset?: number;
   limit?: number;
   includeCount?: boolean;
+}
+
+export interface MediaMutationResult {
+  ok: boolean;
+  errorMessage: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -80,6 +90,49 @@ export class MediaQueryService {
     return { items, totalCount, projectNameById: new Map<string, string>() };
   }
 
+  async resolveMediaItemIdsByLookupIds(lookupIds: readonly string[]): Promise<string[]> {
+    const uniqueLookupIds = this.normalizeIds(lookupIds);
+    if (uniqueLookupIds.length === 0) {
+      return [];
+    }
+
+    const idList = uniqueLookupIds.join(',');
+    const { data, error } = await this.supabase.client
+      .from('media_items')
+      .select('id,source_image_id')
+      .or(`id.in.(${idList}),source_image_id.in.(${idList})`);
+
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        (data as MediaItemLookupRow[])
+          .map((row) => (typeof row.id === 'string' ? row.id : null))
+          .filter((id): id is string => !!id),
+      ),
+    );
+  }
+
+  async deleteMediaItems(mediaItemIds: readonly string[]): Promise<MediaMutationResult> {
+    const uniqueMediaItemIds = this.normalizeIds(mediaItemIds);
+    if (uniqueMediaItemIds.length === 0) {
+      return { ok: true, errorMessage: null };
+    }
+
+    const { error } = await this.supabase.client
+      .from('media_items')
+      .delete()
+      .in('id', uniqueMediaItemIds);
+
+    if (error) {
+      return { ok: false, errorMessage: error.message };
+    }
+
+    return { ok: true, errorMessage: null };
+  }
+
   private toImageRecord(row: MediaItemRow): ImageRecord {
     const unresolved = row.location_status === 'pending' || row.location_status === 'no_gps';
 
@@ -105,5 +158,9 @@ export class MediaQueryService {
       direction: null,
       location_unresolved: unresolved,
     };
+  }
+
+  private normalizeIds(ids: readonly string[]): string[] {
+    return Array.from(new Set(ids.filter((id) => typeof id === 'string' && id.length > 0)));
   }
 }

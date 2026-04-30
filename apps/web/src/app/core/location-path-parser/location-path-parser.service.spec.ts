@@ -1,9 +1,24 @@
-import { describe, expect, it } from 'vitest';
-import { LocationPathParserService } from './location-path-parser/location-path-parser.service';
-import { UploadLocationConfigService } from './upload/upload-location-config.service';
+import { TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { LocationPathParserService } from './location-path-parser.service';
+
+function provideService(config = new UploadLocationConfigService()): LocationPathParserService {
+  TestBed.configureTestingModule({
+    providers: [
+      LocationPathParserService,
+      { provide: UploadLocationConfigService, useValue: config },
+    ],
+  });
+  return TestBed.inject(LocationPathParserService);
+}
 
 describe('LocationPathParserService', () => {
-  const service = new LocationPathParserService();
+  let service: LocationPathParserService;
+
+  beforeEach(() => {
+    service = provideService();
+  });
 
   it('parses hierarchical folder path into city/zip/street/house components', () => {
     const result = service.parsePathSegments('/Austria/1070_Wien/Denisgasse 12/photo.jpg');
@@ -52,7 +67,8 @@ describe('LocationPathParserService', () => {
   it('uses configurable disambiguation auto-assign threshold', () => {
     const config = new UploadLocationConfigService();
     config.patchConfig({ disambiguationAutoAssignThreshold: 0.999 });
-    const configurableService = new LocationPathParserService(config);
+    TestBed.resetTestingModule();
+    const configurableService = provideService(config);
 
     const result = configurableService.parsePathSegments('/Austria/1070/Denisgasse 12/photo.jpg');
     expect(result.disambiguation.algorithm).toBe('cluster-majority');

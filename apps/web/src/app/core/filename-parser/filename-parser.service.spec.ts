@@ -1,10 +1,26 @@
-import { describe, expect, it } from 'vitest';
-import { FilenameParserService } from './filename-parser/filename-parser.service';
-import { LocationPathParserService } from './location-path-parser/location-path-parser.service';
-import { UploadLocationConfigService } from './upload/upload-location-config.service';
+import { TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { LocationPathParserService } from '../location-path-parser/location-path-parser.service';
+import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { FilenameParserService } from './filename-parser.service';
+
+function provideService(config = new UploadLocationConfigService()): FilenameParserService {
+  TestBed.configureTestingModule({
+    providers: [
+      FilenameParserService,
+      LocationPathParserService,
+      { provide: UploadLocationConfigService, useValue: config },
+    ],
+  });
+  return TestBed.inject(FilenameParserService);
+}
 
 describe('FilenameParserService', () => {
-  const service = new FilenameParserService();
+  let service: FilenameParserService;
+
+  beforeEach(() => {
+    service = provideService();
+  });
 
   it('extracts address from Wienzeile-style filename with high confidence (street suffix)', () => {
     const parsed = service.extractAddress('Linke Wienzeile 26, Wien_0327.jpg');
@@ -34,7 +50,8 @@ describe('FilenameParserService', () => {
   it('uses configurable single-word minimum length threshold', () => {
     const config = new UploadLocationConfigService();
     config.patchConfig({ filenameSingleWordMinLength: 10, filenameSingleWordCityMinLength: 4 });
-    const configurableService = new FilenameParserService(new LocationPathParserService(), config);
+    TestBed.resetTestingModule();
+    const configurableService = provideService(config);
 
     const parsed = configurableService.extractAddress('Fahrafeld 4.jpg');
     expect(parsed).toBeUndefined();

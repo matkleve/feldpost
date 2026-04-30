@@ -1,17 +1,18 @@
-import type { WritableSignal } from '@angular/core';
+import type { Signal } from '@angular/core';
 import { Injectable } from '@angular/core';
 import type { ProjectSelectOption } from '../../../shared/project-select-dialog/project-select-dialog.component';
 
 interface ProjectDialogSignals {
-  projectSelectionDialogOpen: WritableSignal<boolean>;
-  projectSelectionDialogTitle: WritableSignal<string>;
-  projectSelectionDialogMessage: WritableSignal<string>;
-  projectSelectionDialogOptions: WritableSignal<ReadonlyArray<ProjectSelectOption>>;
-  projectSelectionDialogSelectedId: WritableSignal<string | null>;
-  projectNameDialogOpen: WritableSignal<boolean>;
-  projectNameDialogTitle: WritableSignal<string>;
-  projectNameDialogMessage: WritableSignal<string>;
-  projectNameDialogInitialValue: WritableSignal<string>;
+  projectSelectionDialogOptions: Signal<ReadonlyArray<ProjectSelectOption>>;
+  setProjectSelectionDialogOpen(value: boolean): void;
+  setProjectSelectionDialogTitle(value: string): void;
+  setProjectSelectionDialogMessage(value: string): void;
+  setProjectSelectionDialogOptions(value: ReadonlyArray<ProjectSelectOption>): void;
+  setProjectSelectionDialogSelectedId(value: string | null): void;
+  setProjectNameDialogOpen(value: boolean): void;
+  setProjectNameDialogTitle(value: string): void;
+  setProjectNameDialogMessage(value: string): void;
+  setProjectNameDialogInitialValue(value: string): void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,11 +30,11 @@ export class MapProjectDialogService {
   ): Promise<{ id: string; name: string } | null> {
     this.resolveProjectSelection(signals, null);
 
-    signals.projectSelectionDialogOptions.set(options);
-    signals.projectSelectionDialogTitle.set(title);
-    signals.projectSelectionDialogMessage.set(message);
-    signals.projectSelectionDialogSelectedId.set(options.length > 0 ? options[0].id : null);
-    signals.projectSelectionDialogOpen.set(true);
+    signals.setProjectSelectionDialogOptions(options);
+    signals.setProjectSelectionDialogTitle(title);
+    signals.setProjectSelectionDialogMessage(message);
+    signals.setProjectSelectionDialogSelectedId(options.length > 0 ? options[0].id : null);
+    signals.setProjectSelectionDialogOpen(true);
 
     return new Promise((resolve) => {
       this.projectSelectionDialogResolver = resolve;
@@ -41,7 +42,7 @@ export class MapProjectDialogService {
   }
 
   setProjectSelectionSelectedId(signals: ProjectDialogSignals, projectId: string): void {
-    signals.projectSelectionDialogSelectedId.set(projectId);
+    signals.setProjectSelectionDialogSelectedId(projectId);
   }
 
   confirmProjectSelection(signals: ProjectDialogSignals, projectId: string): void {
@@ -67,10 +68,10 @@ export class MapProjectDialogService {
     message: string,
   ): Promise<string | null> {
     this.resolveProjectName(signals, null);
-    signals.projectNameDialogTitle.set(title);
-    signals.projectNameDialogMessage.set(message);
-    signals.projectNameDialogInitialValue.set(initialValue);
-    signals.projectNameDialogOpen.set(true);
+    signals.setProjectNameDialogTitle(title);
+    signals.setProjectNameDialogMessage(message);
+    signals.setProjectNameDialogInitialValue(initialValue);
+    signals.setProjectNameDialogOpen(true);
 
     return new Promise((resolve) => {
       this.projectNameDialogResolver = resolve;
@@ -96,9 +97,9 @@ export class MapProjectDialogService {
   ): void {
     const resolver = this.projectSelectionDialogResolver;
     this.projectSelectionDialogResolver = null;
-    signals.projectSelectionDialogOpen.set(false);
-    signals.projectSelectionDialogOptions.set([]);
-    signals.projectSelectionDialogSelectedId.set(null);
+    signals.setProjectSelectionDialogOpen(false);
+    signals.setProjectSelectionDialogOptions([]);
+    signals.setProjectSelectionDialogSelectedId(null);
     if (resolver) {
       resolver(value);
     }
@@ -107,7 +108,7 @@ export class MapProjectDialogService {
   private resolveProjectName(signals: ProjectDialogSignals, value: string | null): void {
     const resolver = this.projectNameDialogResolver;
     this.projectNameDialogResolver = null;
-    signals.projectNameDialogOpen.set(false);
+    signals.setProjectNameDialogOpen(false);
     if (resolver) {
       resolver(value);
     }

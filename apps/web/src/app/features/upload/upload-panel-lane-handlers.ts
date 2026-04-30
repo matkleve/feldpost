@@ -12,7 +12,7 @@ export class UploadPanelLaneHandlersService {
   private readonly signals = inject(UploadPanelSignalsService);
 
   setSelectedLane(lane: UploadLane): void {
-    this.signals.selectedLane.set(lane);
+    this.signals.setSelectedLane(lane);
   }
 
   onLaneSwitchValueChange(value: string | null): void {

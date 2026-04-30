@@ -42,7 +42,7 @@
       [class.upload-panel__dropzone--dragging]="isDragging()"
       (dragover)="inputHandlers.onDragOver($event)"
       (dragleave)="inputHandlers.onDragLeave($event)"
-      (drop)="inputHandlers.onDrop($event); selectedLane.set('uploading')"
+      (drop)="inputHandlers.onDrop($event); laneHandlers.setSelectedLane('uploading')"
       role="button"
       tabindex="0"
       aria-label="Drag files here or click to select"
@@ -74,7 +74,7 @@
       multiple
       aria-hidden="true"
       tabindex="-1"
-      (change)="inputHandlers.onFileInputChange($event); selectedLane.set('uploading')"
+      (change)="inputHandlers.onFileInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
 
     <button
@@ -131,7 +131,7 @@
       capture="environment"
       aria-hidden="true"
       tabindex="-1"
-      (change)="inputHandlers.onCaptureInputChange($event); selectedLane.set('uploading')"
+      (change)="inputHandlers.onCaptureInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
 
     <input
@@ -143,7 +143,7 @@
       directory
       aria-hidden="true"
       tabindex="-1"
-      (change)="inputHandlers.onFolderInputChange($event); selectedLane.set('uploading')"
+      (change)="inputHandlers.onFolderInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
   </div>
 
