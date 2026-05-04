@@ -12,6 +12,7 @@ Token-driven chrome from `styles/primitives/*`; composites (`app-card-grid`, etc
 
 - **Code:** `apps/web/src/app/shared/ui-primitives/`
 - **Global primitive CSS:** `apps/web/src/styles/primitives/*.scss` via `apps/web/src/styles.scss`
+- **Layout chrome:** [Toolbar pane (`app-pane-toolbar`)](../workspace/pane-toolbar.md) lives under `shared/pane-toolbar/`, not the `ui-primitives/` folder.
 
 ## Actions
 
@@ -50,6 +51,7 @@ shared/components/chip (semantic chip — see ui-primitives.chip.md)
 | Workspace tabs | Tab | [tab](./ui-primitives.tab.md) |
 | Settings switches | Toggle | [toggle](./ui-primitives.toggle.md) |
 | Menu anchor | Dropdown trigger | [dropdown trigger](./ui-primitives.dropdown-trigger.md) |
+| Three-slot toolbar row (layout only) | `app-pane-toolbar` | [Toolbar pane](../workspace/pane-toolbar.md) |
 
 ### Child specs
 
