@@ -1,0 +1,558 @@
+{
+  "light": {
+    "Color": {
+      "Bg": {
+        "Base": {
+          "$value": "#f9f7f4",
+          "$type": "color"
+        },
+        "Surface": {
+          "$value": "#ffffff",
+          "$type": "color"
+        },
+        "Elevated": {
+          "$value": "#ffffff",
+          "$type": "color"
+        }
+      },
+      "Border": {
+        "$value": "#e8e4de",
+        "$type": "color",
+        "Strong": {
+          "$value": "#c8c1b8",
+          "$type": "color"
+        }
+      },
+      "Text": {
+        "Primary": {
+          "$value": "#1a1714",
+          "$type": "color"
+        },
+        "Secondary": {
+          "$value": "#6b6259",
+          "$type": "color"
+        },
+        "Disabled": {
+          "$value": "#a89e95",
+          "$type": "color"
+        }
+      },
+      "Accent": {
+        "$value": "#7c3aed",
+        "$type": "color"
+      },
+      "Success": {
+        "$value": "#16a34a",
+        "$type": "color"
+      },
+      "Warning": {
+        "$value": "#c2610a",
+        "$type": "color"
+      },
+      "Danger": {
+        "$value": "#dc2626",
+        "$type": "color"
+      },
+      "Uploading": {
+        "$value": "#2f6fdb",
+        "$type": "color"
+      },
+      "Map": {
+        "User": {
+          "Marker": {
+            "$value": "#2f6fdb",
+            "$type": "color"
+          }
+        }
+      }
+    },
+    "Filetype": {
+      "Image": {
+        "$value": "#2f6fdb",
+        "$type": "color"
+      },
+      "Video": {
+        "$value": "#7c3aed",
+        "$type": "color"
+      },
+      "Document": {
+        "$value": "#4f5d95",
+        "$type": "color"
+      },
+      "Spreadsheet": {
+        "$value": "#16a34a",
+        "$type": "color"
+      },
+      "Presentation": {
+        "$value": "#d97706",
+        "$type": "color"
+      }
+    },
+    "Radius": {
+      "Sm": {
+        "$value": "0.25rem",
+        "$type": "dimension"
+      },
+      "Md": {
+        "$value": "0.5rem",
+        "$type": "dimension",
+        "Plus": {
+          "$value": "0.75rem",
+          "$type": "dimension"
+        }
+      },
+      "Lg": {
+        "$value": "1rem",
+        "$type": "dimension",
+        "Plus": {
+          "$value": "1.25rem",
+          "$type": "dimension"
+        }
+      },
+      "Xl": {
+        "$value": "1.75rem",
+        "$type": "dimension"
+      },
+      "Full": {
+        "$value": "9999px",
+        "$type": "dimension"
+      }
+    },
+    "Z": {
+      "Map": {
+        "$value": 0,
+        "$type": "number"
+      },
+      "Panel": {
+        "$value": 100,
+        "$type": "number"
+      },
+      "Upload": {
+        "Button": {
+          "$value": 200,
+          "$type": "number"
+        }
+      },
+      "Dropdown": {
+        "$value": 300,
+        "$type": "number"
+      },
+      "Toast": {
+        "$value": 400,
+        "$type": "number"
+      },
+      "Modal": {
+        "$value": 500,
+        "$type": "number"
+      }
+    },
+    "Spacing": {
+      "Unit": {
+        "$value": "0.25rem",
+        "$type": "dimension"
+      }
+    },
+    "Font": {
+      "Size": {
+        "Ratio": {
+          "$value": 1.13,
+          "$type": "number"
+        },
+        "2xs": {
+          "$value": "0.75rem",
+          "$type": "dimension"
+        }
+      },
+      "Weight": {
+        "Regular": {
+          "$value": 400,
+          "$type": "number"
+        },
+        "Medium": {
+          "$value": 500,
+          "$type": "number"
+        },
+        "Semibold": {
+          "$value": 600,
+          "$type": "number"
+        },
+        "Bold": {
+          "$value": 700,
+          "$type": "number"
+        }
+      }
+    },
+    "Line": {
+      "Height": {
+        "Tight": {
+          "$value": 1.2,
+          "$type": "number"
+        },
+        "Solid": {
+          "$value": 1,
+          "$type": "number"
+        },
+        "Snug": {
+          "$value": 1.1,
+          "$type": "number"
+        },
+        "Dense": {
+          "$value": 1.25,
+          "$type": "number"
+        },
+        "Cozy": {
+          "$value": 1.3,
+          "$type": "number"
+        },
+        "Reading": {
+          "$value": 1.4,
+          "$type": "number"
+        },
+        "Compact": {
+          "$value": 1.35,
+          "$type": "number"
+        },
+        "Normal": {
+          "$value": 1.45,
+          "$type": "number"
+        },
+        "Open": {
+          "$value": 1.5,
+          "$type": "number"
+        },
+        "Comfortable": {
+          "$value": 1.55,
+          "$type": "number"
+        },
+        "Relaxed": {
+          "$value": 1.6,
+          "$type": "number"
+        }
+      }
+    },
+    "Photo": {
+      "Marker": {
+        "Hit": {
+          "Size": {
+            "$value": "2.5rem",
+            "$type": "dimension"
+          }
+        },
+        "Correction": {
+          "Dot": {
+            "Size": {
+              "$value": "0.5rem",
+              "$type": "dimension"
+            }
+          }
+        },
+        "Selected": {
+          "Scale": {
+            "$value": 1.05,
+            "$type": "number"
+          }
+        }
+      }
+    },
+    "Layout": {
+      "Sidebar": {
+        "Width": {
+          "Expanded": {
+            "$value": "15rem",
+            "$type": "dimension"
+          }
+        },
+        "Icon": {
+          "Size": {
+            "$value": "1.25rem",
+            "$type": "dimension"
+          }
+        },
+        "Label": {
+          "Size": {
+            "$value": "0.8125rem",
+            "$type": "dimension"
+          }
+        }
+      },
+      "Workspace": {
+        "Pane": {
+          "Default": {
+            "Width": {
+              "$value": "22.5rem",
+              "$type": "dimension"
+            }
+          },
+          "Min": {
+            "Width": {
+              "$value": "17.5rem",
+              "$type": "dimension"
+            }
+          },
+          "Max": {
+            "Width": {
+              "$value": "40rem",
+              "$type": "dimension"
+            }
+          }
+        }
+      },
+      "Map": {
+        "Safe": {
+          "Min": {
+            "Width": {
+              "$value": "20rem",
+              "$type": "dimension"
+            }
+          }
+        }
+      }
+    },
+    "Pane": {
+      "Width": {
+        "Default": {
+          "$value": "61.8%",
+          "$type": "dimension"
+        },
+        "Max": {
+          "$value": "75%",
+          "$type": "dimension"
+        },
+        "Min": {
+          "$value": "25%",
+          "$type": "dimension"
+        }
+      }
+    },
+    "Content": {
+      "Clamp": {
+        "Text": {
+          "$value": "38rem",
+          "$type": "dimension"
+        },
+        "Default": {
+          "$value": "45rem",
+          "$type": "dimension"
+        },
+        "List": {
+          "$value": "52rem",
+          "$type": "dimension"
+        }
+      }
+    },
+    "Overlay": {
+      "Width": {
+        "Small": {
+          "Min": {
+            "$value": "20rem",
+            "$type": "dimension"
+          },
+          "Max": {
+            "$value": "25rem",
+            "$type": "dimension"
+          }
+        },
+        "Medium": {
+          "Min": {
+            "$value": "25rem",
+            "$type": "dimension"
+          },
+          "Max": {
+            "$value": "32rem",
+            "$type": "dimension"
+          }
+        },
+        "Large": {
+          "Min": {
+            "$value": "32rem",
+            "$type": "dimension"
+          },
+          "Max": {
+            "$value": "40rem",
+            "$type": "dimension"
+          }
+        }
+      },
+      "Rail": {
+        "Left": {
+          "Ratio": {
+            "Default": {
+              "$value": 0.38,
+              "$type": "number"
+            },
+            "Tablet": {
+              "$value": 0.35,
+              "$type": "number"
+            }
+          },
+          "Min": {
+            "$value": "14rem",
+            "$type": "dimension"
+          },
+          "Max": {
+            "$value": "17rem",
+            "$type": "dimension"
+          },
+          "Tablet": {
+            "Min": {
+              "$value": "12rem",
+              "$type": "dimension"
+            },
+            "Max": {
+              "$value": "15rem",
+              "$type": "dimension"
+            }
+          }
+        },
+        "Mobile": {
+          "Left": {
+            "Width": {
+              "$value": "11.5rem",
+              "$type": "dimension"
+            }
+          }
+        }
+      }
+    },
+    "Motion": {
+      "Duration": {
+        "Fast": {
+          "$value": "100ms",
+          "$type": "duration"
+        },
+        "Base": {
+          "$value": "200ms",
+          "$type": "duration"
+        },
+        "Slow": {
+          "$value": "300ms",
+          "$type": "duration"
+        }
+      },
+      "Ease": {
+        "Standard": {
+          "$value": [
+            0.4,
+            0,
+            0.2,
+            1
+          ],
+          "$type": "cubicBezier"
+        },
+        "In": {
+          "$value": [
+            0.4,
+            0,
+            1,
+            1
+          ],
+          "$type": "cubicBezier"
+        },
+        "Out": {
+          "$value": [
+            0,
+            0,
+            0.2,
+            1
+          ],
+          "$type": "cubicBezier"
+        }
+      }
+    },
+    "Transition": {
+      "Reveal": {
+        "Delay": {
+          "$value": "60ms",
+          "$type": "duration"
+        }
+      }
+    }
+  },
+  "dark": {
+    "Color": {
+      "Bg": {
+        "Base": {
+          "$value": "#0f0e0c",
+          "$type": "color"
+        },
+        "Surface": {
+          "$value": "#1a1917",
+          "$type": "color"
+        },
+        "Elevated": {
+          "$value": "#252320",
+          "$type": "color"
+        }
+      },
+      "Border": {
+        "$value": "#2e2b27",
+        "$type": "color",
+        "Strong": {
+          "$value": "#3d3830",
+          "$type": "color"
+        }
+      },
+      "Text": {
+        "Primary": {
+          "$value": "#edebe7",
+          "$type": "color"
+        },
+        "Secondary": {
+          "$value": "#908880",
+          "$type": "color"
+        },
+        "Disabled": {
+          "$value": "#4a4540",
+          "$type": "color"
+        }
+      },
+      "Accent": {
+        "$value": "#a78bfa",
+        "$type": "color"
+      },
+      "Success": {
+        "$value": "#22c55e",
+        "$type": "color"
+      },
+      "Warning": {
+        "$value": "#f59e0b",
+        "$type": "color"
+      },
+      "Danger": {
+        "$value": "#ef4444",
+        "$type": "color"
+      },
+      "Map": {
+        "User": {
+          "Marker": {
+            "$value": "#60a5fa",
+            "$type": "color"
+          }
+        }
+      }
+    },
+    "Filetype": {
+      "Image": {
+        "$value": "#60a5fa",
+        "$type": "color"
+      },
+      "Document": {
+        "$value": "#a5b4fc",
+        "$type": "color"
+      },
+      "Presentation": {
+        "$value": "#f59e0b",
+        "$type": "color"
+      }
+    }
+  },
+  "$metadata": {
+    "tokenSetOrder": [
+      "light",
+      "dark"
+    ],
+    "exportedFrom": "apps/web/src/styles/tokens.scss",
+    "generatedAt": "2026-05-04T14:25:46.067Z",
+    "note": "Generated by scripts/sync-tokens.mjs. Code is the source of truth — do not edit manually. Import via Tokens Studio or Variables Import plugin."
+  }
+}

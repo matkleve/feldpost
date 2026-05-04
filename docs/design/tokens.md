@@ -286,3 +286,67 @@ Icon sizing conventions:
 - Map markers: custom SVG (not icon font)
 
 All interactive icons must have a visible label or a `title` / `aria-label` attribute for accessibility.
+
+---
+
+## 3.8 Figma Bridge
+
+### Source of truth
+
+**Code is the source of truth. The direction is one-way:**
+
+```
+apps/web/src/styles/tokens.scss  →  docs/design/figma-tokens.json  →  Figma Variables
+```
+
+Figma represents code values; it does not define them. Token changes always flow through a code PR first, then a re-export. Figma changes do not flow back to code without a PR that updates `tokens.scss`.
+
+### Generating the export
+
+```bash
+npm run sync-tokens
+```
+
+This runs `scripts/sync-tokens.mjs`, which parses `tokens.scss` and overwrites `docs/design/figma-tokens.json` with a W3C Design Token Community Group (DTCG) format file containing `light` and `dark` token sets.
+
+Re-run whenever `tokens.scss` changes. Commit `figma-tokens.json` together with the SCSS change.
+
+### Human import step (the agent stops here)
+
+The agent's responsibility ends at `docs/design/figma-tokens.json`. Importing into Figma is a **manual step** performed by the designer:
+
+1. Open the Figma project.
+2. Use **Tokens Studio** plugin → sync from the JSON file, or
+3. Use the **Variables Import** plugin → import the JSON file directly.
+
+The agent must **never** attempt to automate the Figma-side import. If no enterprise Figma API access is available, the above manual route is the only supported path.
+
+### Naming convention
+
+CSS kebab-case → Figma Variable path: each hyphen-separated segment is capitalised and `/`-separated.
+
+| CSS custom property | Figma Variable path | DTCG `$type` | Exported? |
+|---|---|---|---|
+| `--color-bg-base` | `Color/Bg/Base` | `color` | ✓ primitive |
+| `--color-accent-brand` | `Color/Accent/Brand` | `color` | ✓ primitive |
+| `--color-primary` | `Color/Primary` | — | ✗ alias (`var()`) |
+| `--radius-md` | `Radius/Md` | `dimension` | ✓ primitive |
+| `--spacing-unit` | `Spacing/Unit` | `dimension` | ✓ primitive |
+| `--spacing-1` | `Spacing/1` | — | ✗ `calc()` |
+| `--font-size-2xs` | `Font/Size/2xs` | `dimension` | ✓ primitive |
+| `--font-size-md` | `Font/Size/Md` | — | ✗ `calc()` |
+| `--font-weight-regular` | `Font/Weight/Regular` | `number` | ✓ primitive |
+| `--motion-duration-fast` | `Motion/Duration/Fast` | `duration` | ✓ primitive |
+| `--motion-ease-standard` | `Motion/Ease/Standard` | `cubicBezier` | ✓ array `[P1x,P1y,P2x,P2y]` |
+| `--z-modal` | `Z/Modal` | `number` | ✓ primitive |
+
+### What is skipped and why
+
+| Reason | Examples | Action in Figma |
+|---|---|---|
+| `alias` — resolves to another token via `var()` | `--color-primary`, `--elevation-overlay` | Set manually as a Variable alias after primitives are imported |
+| `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
+| `color-mix` — computed at render time | `--interactive-border-muted`, `--state-success-bg` | Approximate with a manual opacity or solid value |
+| `complex` — multi-value shorthand | `--shadow-sm`, `--border-sm` | Set manually; shadows are not natively representable as a single Figma Variable |
+
+Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.
