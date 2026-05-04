@@ -2,76 +2,80 @@
 
 ## What It Is
 
-The `apps/web/src/app/shared/ui-primitives/` module: **directive-based host classes** for buttons, fields, lists, and layout; **small standalone components** (`CardGrid`, `CardVariantSwitch`, `GroupHeader`); **utilities** (`parseTimeInput`); and **directives** such as click-outside. It is the shared styling and micro-interaction layer consumed by dialogs, account, and workspace surfaces.
+Shared atoms (buttons, fields, shells, tabs, toggles, badges/`ui-chip`, **`app-chip`**) plus **CardGrid**, **CardVariantSwitch**, **GroupHeader**, **click-outside**, and **parseTimeInput**. One conceptual Button with presets—not parallel button species.
 
 ## What It Looks Like
 
-Directive hosts apply global `ui-*` / `toolbar-*` classes defined in `styles.scss` and component-local SCSS where noted. `CardGrid` provides responsive CSS grid columns with tokenized gaps. `CardVariantSwitch` wraps `app-segmented-switch` with thumbnail-size icons. `GroupHeader` renders an expandable group row with chevron rotation driven by the `collapsed` input.
+Token-driven chrome from `styles/primitives/*`; composites (`app-card-grid`, etc.) add layout-specific geometry per child specs.
 
 ## Where It Lives
 
 - **Code:** `apps/web/src/app/shared/ui-primitives/`
-- **Specs:** This folder (`docs/specs/component/ui-primitives/`).
+- **Global primitive CSS:** `apps/web/src/styles/primitives/*.scss` via `apps/web/src/styles.scss`
 
 ## Actions
 
-| #   | User Action | System Response | Surface |
-| --- | ----------- | --------------- | ------- |
-| 1   | Use `uiButton` + variants on `button` | Host classes apply Feldpost button chrome | directives |
-| 2   | Toggle group header | `toggle` output fires; parent flips `collapsed` | `GroupHeader` |
-| 3   | Pick card variant | `valueChange` emits `CardVariant` | `CardVariantSwitch` |
-| 4   | Compose grid of cards | Grid columns respond to `minColumnWidth` / `gap` | `CardGrid` |
+| # | User action | System response |
+| - | ----------- | ---------------- |
+| 1 | Use primitives in templates | Classes/directives apply Feldpost chrome |
+| 2 | Import barrel where needed | `UI_PRIMITIVE_DIRECTIVES` or fine-grained symbols |
 
 ## Component Hierarchy
 
 ```text
-ui-primitives (module)
-├── directives (ui-primitives.directive.ts + click-outside.directive.ts)
-├── parseTimeInput (pure function)
+ui-primitives module (folder)
+├── styling directives (migration target: typed hosts)
+├── click-outside + parseTimeInput
 ├── app-card-grid
 ├── app-card-variant-switch → app-segmented-switch
 └── app-group-header
+
+shared/components/chip (semantic chip — see ui-primitives.chip.md)
 ```
 
 ## Data
 
-| Artifact | Contract |
-| -------- | -------- |
-| `UI_PRIMITIVE_DIRECTIVES` barrel | Standalone directives array for dialog components |
-| `parseTimeInput(raw: string): string` | Normalizes flexible 24h input to `HH:MM` or `''` |
+### Primitive picker
 
-## File Map
+| Job | Primitive | Spec |
+| --- | --------- | ---- |
+| Actions | Button | [button](./ui-primitives.button.md) |
+| Status pill | Badge | [badges and chips](./ui-primitives.badges-and-chips.md) |
+| Filter pill | UI chip | [badges and chips](./ui-primitives.badges-and-chips.md) |
+| Rich / dismissible chip | `app-chip` | [Chip entry](./ui-primitives.chip.md) → [chip.md](../filters/chip.md) |
+| Panels/items | Container | [container](./ui-primitives.container.md) |
+| Grid cards | Card shell | [layout shells](./ui-primitives.layout-shells.md) |
+| Metadata rows | Row shell | [layout shells](./ui-primitives.layout-shells.md) |
+| Forms | Field controls | [field controls](./ui-primitives.field-controls.md) |
+| Workspace tabs | Tab | [tab](./ui-primitives.tab.md) |
+| Settings switches | Toggle | [toggle](./ui-primitives.toggle.md) |
+| Menu anchor | Dropdown trigger | [dropdown trigger](./ui-primitives.dropdown-trigger.md) |
 
-| File | Purpose |
-| ---- | ------- |
-| `docs/specs/component/ui-primitives/ui-primitives.md` | Parent index (this file) |
-| `apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts` | Host-class directives |
-| `apps/web/src/app/shared/ui-primitives/click-outside.directive.ts` | Click-outside helper |
-| `apps/web/src/app/shared/ui-primitives/card-grid.component.*` | Responsive card grid |
-| `apps/web/src/app/shared/ui-primitives/card-variant-switch.component.*` | Variant switch |
-| `apps/web/src/app/shared/ui-primitives/group-header.component.*` | Group row |
-| `apps/web/src/app/shared/ui-primitives/parse-time-input.ts` | Time parse util |
+### Child specs
+
+| Document | Topic |
+| -------- | ----- |
+| [ui-primitives.button.md](./ui-primitives.button.md) | Button |
+| [ui-primitives.badges-and-chips.md](./ui-primitives.badges-and-chips.md) | Badges + `ui-chip` |
+| [ui-primitives.chip.md](./ui-primitives.chip.md) | `app-chip` (semantic) |
+| [ui-primitives.layout-shells.md](./ui-primitives.layout-shells.md) | Card + row shell |
+| [ui-primitives.container.md](./ui-primitives.container.md) | Container |
+| [ui-primitives.field-controls.md](./ui-primitives.field-controls.md) | Fields |
+| [ui-primitives.tab.md](./ui-primitives.tab.md) | Tabs |
+| [ui-primitives.toggle.md](./ui-primitives.toggle.md) | Toggles |
+| [ui-primitives.dropdown-trigger.md](./ui-primitives.dropdown-trigger.md) | Dropdown trigger |
+| [ui-primitives.directives-and-utils.md](./ui-primitives.directives-and-utils.md) | Utilities |
+| [ui-primitives.card-grid.md](./ui-primitives.card-grid.md) | Card grid |
+| [ui-primitives.card-variant-switch.md](./ui-primitives.card-variant-switch.md) | Card variant switch |
+| [ui-primitives.group-header.md](./ui-primitives.group-header.md) | Group header |
 
 ## Wiring
 
-- Feature and shared components import only the symbols they need from `ui-primitives` paths or the `UI_PRIMITIVE_DIRECTIVES` spread.
-- **Invariant:** `ui-primitives` MUST NOT import from `features/*`.
-
-## Child Specs
-
-Normative detail lives in child specs (no duplicated matrices):
-
-- [Card grid](ui-primitives.card-grid.md)
-- [Card variant switch](ui-primitives.card-variant-switch.md)
-- [Group header](ui-primitives.group-header.md)
-- [Directives, click-outside, parse-time-input](ui-primitives.directives-and-utils.md)
-
-## Visual Behavior Contract
-
-This parent spec does not duplicate child ownership matrices. **Stacking and hit targets** for each interactive surface are defined in the child specs above. Module-level rule: directive hosts MUST NOT introduce nested interactive elements beyond the HTML element they decorate.
+- Import paths from `shared/ui-primitives` or spread `UI_PRIMITIVE_DIRECTIVES`.
+- **Invariant:** `ui-primitives` MUST NOT import `features/*`.
 
 ## Acceptance Criteria
 
-- [ ] Every production artifact under `ui-primitives/` has a matching child spec link from this index.
-- [ ] No `features/` imports exist inside `ui-primitives` code.
-- [ ] Dialog consumers continue to spread `UI_PRIMITIVE_DIRECTIVES` without circular DI.
+- [ ] Every artifact under `ui-primitives/` appears in **Child specs** or the picker.
+- [ ] No `features/` imports inside `ui-primitives`.
+- [ ] New atoms extend the picker or defer to an existing row.
