@@ -26,6 +26,7 @@ Active runtime tables covered in this document:
 - public.dedup_hashes
 - public.share_sets
 - public.share_set_items
+- public.share_set_recipients
 - public.qr_invites
 - public.invite_share_events
 - public.app_texts
@@ -231,6 +232,8 @@ Legacy image-era tables are removed from runtime schema:
 | expires_at      | timestamptz | nullable                           | docs/specs/ui/workspace/workspace-actions-bar.md |
 | revoked_at      | timestamptz | nullable                           | docs/specs/ui/workspace/workspace-actions-bar.md |
 | created_at      | timestamptz | not null/default now()             | docs/specs/ui/workspace/workspace-actions-bar.md |
+| audience        | share_link_audience | not null/default 'public'  | docs/specs/service/share-set/share-set-access-model.md |
+| share_grant     | share_link_grant | not null/default 'view'     | docs/specs/service/share-set/share-set-access-model.md |
 
 ### public.share_set_items
 
@@ -240,6 +243,14 @@ Legacy image-era tables are removed from runtime schema:
 | media_item_id | uuid        | not null               | docs/specs/ui/workspace/workspace-actions-bar.md |
 | item_order    | int         | not null               | docs/specs/ui/workspace/workspace-actions-bar.md |
 | created_at    | timestamptz | not null/default now() | docs/specs/ui/workspace/workspace-actions-bar.md |
+
+### public.share_set_recipients
+
+| column       | type        | null/default           | spec reference(s) |
+| ------------ | ----------- | ---------------------- | ------------------- |
+| share_set_id | uuid        | not null               | docs/specs/service/share-set/share-set-access-model.md |
+| user_id      | uuid        | not null               | docs/specs/service/share-set/share-set-access-model.md |
+| created_at   | timestamptz | not null/default now() | docs/specs/service/share-set/share-set-access-model.md |
 
 ### public.qr_invites
 

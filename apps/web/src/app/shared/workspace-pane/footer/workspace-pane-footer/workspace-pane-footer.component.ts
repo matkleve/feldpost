@@ -28,6 +28,8 @@ import {
   type ProjectSelectOption,
 } from '../../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
+import { ShareLinkAudienceDialogComponent } from '../../../../shared/share-link-audience-dialog/share-link-audience-dialog.component';
+import type { ShareAudienceDialogResult } from '../../../../core/share-set/share-set.types';
 
 const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
   'workspace.export.action.selectAll': 'Select all',
@@ -50,6 +52,7 @@ const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
     PaneFooterComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
+    ShareLinkAudienceDialogComponent,
   ],
   templateUrl: './workspace-pane-footer.component.html',
   styleUrl: './workspace-pane-footer.component.scss',
@@ -82,6 +85,8 @@ export class WorkspacePaneFooterComponent {
   readonly projectDialogSelectedId = signal<string | null>(null);
   readonly addressDialogOpen = signal(false);
   readonly deleteDialogOpen = signal(false);
+  readonly shareAudienceDialogOpen = signal(false);
+  private readonly shareAudienceDialogKind = signal<'clipboard' | 'native'>('native');
 
   readonly selectedImages = computed(() => {
     const selected = this.selectionService.selectedMediaIds();
@@ -307,14 +312,43 @@ export class WorkspacePaneFooterComponent {
   }
 
   async copyLink(): Promise<void> {
-    await this.createShareLink(true);
+    this.openShareAudienceDialog('clipboard');
   }
 
   async shareLink(): Promise<void> {
-    const url = await this.createShareLink(false);
-    if (!url) return;
+    this.openShareAudienceDialog('native');
+  }
 
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+  openShareAudienceDialog(kind: 'clipboard' | 'native'): void {
+    const selectedIds = Array.from(this.selectionService.selectedMediaIds());
+    if (selectedIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'error',
+      });
+      return;
+    }
+    this.shareAudienceDialogKind.set(kind);
+    this.shareAudienceDialogOpen.set(true);
+  }
+
+  closeShareAudienceDialog(): void {
+    this.shareAudienceDialogOpen.set(false);
+  }
+
+  async onShareAudienceDialogConfirmed(audience: ShareAudienceDialogResult): Promise<void> {
+    this.shareAudienceDialogOpen.set(false);
+    const kind = this.shareAudienceDialogKind();
+    const copyToClipboard = kind === 'clipboard';
+    const url = await this.createShareLinkWithAudience(copyToClipboard, audience);
+    if (!url) {
+      return;
+    }
+    if (
+      kind === 'native' &&
+      typeof navigator !== 'undefined' &&
+      'share' in navigator
+    ) {
       try {
         await navigator.share({
           title: this.t('workspace.export.share.title', 'Workspace export'),
@@ -379,7 +413,10 @@ export class WorkspacePaneFooterComponent {
     }
   }
 
-  private async createShareLink(copyToClipboard: boolean): Promise<string | null> {
+  private async createShareLinkWithAudience(
+    copyToClipboard: boolean,
+    audience: ShareAudienceDialogResult,
+  ): Promise<string | null> {
     const selectedIds = Array.from(this.selectionService.selectedMediaIds());
     if (selectedIds.length === 0) {
       this.toastService.show({
@@ -391,7 +428,12 @@ export class WorkspacePaneFooterComponent {
 
     this.pending.set(true);
     try {
-      const result = await this.shareSetService.createOrReuseShareSet(selectedIds);
+      const result = await this.shareSetService.createOrReuseShareSet(selectedIds, {
+        audience: audience.audience,
+        shareGrant: audience.shareGrant,
+        recipientUserIds:
+          audience.audience === 'named' ? audience.recipientUserIds : undefined,
+      });
       const url = `${window.location.origin}/?share=${result.token}`;
       this.shareUrl.set(url);
 

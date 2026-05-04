@@ -1,17 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
+import type {
+  ShareSetCreateOptions,
+  ShareSetCreateResult,
+  ShareSetItem,
+} from './share-set.types';
 
-export interface ShareSetCreateResult {
-  shareSetId: string;
-  token: string;
-  expiresAt: string;
-}
-
-export interface ShareSetItem {
-  shareSetId: string;
-  mediaId: string;
-  itemOrder: number;
-}
+export type { ShareSetCreateOptions, ShareSetCreateResult, ShareSetItem } from './share-set.types';
 
 @Injectable({ providedIn: 'root' })
 export class ShareSetService {
@@ -19,11 +14,21 @@ export class ShareSetService {
 
   async createOrReuseShareSet(
     mediaIds: string[],
-    expiresAt?: string,
+    options?: ShareSetCreateOptions,
   ): Promise<ShareSetCreateResult> {
+    const audience = options?.audience ?? 'public';
+    const shareGrant = options?.shareGrant ?? 'view';
+    const recipientUserIds =
+      audience === 'named' && options?.recipientUserIds?.length
+        ? options.recipientUserIds
+        : null;
+
     const { data, error } = await this.supabase.client.rpc('create_or_reuse_share_set', {
       p_image_ids: mediaIds,
-      p_expires_at: expiresAt ?? null,
+      p_expires_at: options?.expiresAt ?? null,
+      p_audience: audience,
+      p_share_grant: shareGrant,
+      p_recipient_user_ids: recipientUserIds,
     });
 
     if (error) {
@@ -42,6 +47,7 @@ export class ShareSetService {
     };
   }
 
+  /** Single gatekeeper RPC: server branches on stored audience + caller JWT. */
   async resolveShareSet(token: string): Promise<ShareSetItem[]> {
     const { data, error } = await this.supabase.client.rpc('resolve_share_set', {
       p_token: token,

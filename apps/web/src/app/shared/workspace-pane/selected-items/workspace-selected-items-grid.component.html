@@ -216,5 +216,12 @@
       (cancelled)="closeAddressDialog()"
     />
   }
+
+  @if (shareAudienceDialogOpen()) {
+    <app-share-link-audience-dialog
+      (confirmed)="onShareAudienceDialogConfirmed($event)"
+      (cancelled)="closeShareAudienceDialog()"
+    />
+  }
 </div>
   

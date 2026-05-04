@@ -1,0 +1,105 @@
+<button
+  type="button"
+  class="share-link-audience-dialog__backdrop"
+  [attr.aria-label]="t('workspace.export.dialog.cancel', 'Cancel')"
+  (click)="onCancel()"
+></button>
+
+<section
+  class="share-link-audience-dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="share-link-audience-title"
+>
+  <h3 id="share-link-audience-title" class="share-link-audience-dialog__title">
+    {{ t('workspace.shareAudience.title', 'Share link access') }}
+  </h3>
+  <p class="share-link-audience-dialog__message">
+    {{
+      t(
+        'workspace.shareAudience.message',
+        'Choose who can open this link. Anyone with the link still needs the secret token in the URL.'
+      )
+    }}
+  </p>
+
+  <fieldset class="share-link-audience-dialog__fieldset">
+    <legend class="share-link-audience-dialog__legend">
+      {{ t('workspace.shareAudience.audienceLegend', 'Who can resolve this link') }}
+    </legend>
+
+    <label class="share-link-audience-dialog__option">
+      <input
+        type="radio"
+        name="share-audience"
+        value="public"
+        [checked]="audience() === 'public'"
+        (change)="setAudience('public')"
+      />
+      <span>{{ t('workspace.shareAudience.option.public', 'Anyone with the link') }}</span>
+    </label>
+
+    <label class="share-link-audience-dialog__option">
+      <input
+        type="radio"
+        name="share-audience"
+        value="organization"
+        [checked]="audience() === 'organization'"
+        (change)="setAudience('organization')"
+      />
+      <span>{{
+        t(
+          'workspace.shareAudience.option.organization',
+          'Only people signed in to my organization'
+        )
+      }}</span>
+    </label>
+
+    <label class="share-link-audience-dialog__option">
+      <input
+        type="radio"
+        name="share-audience"
+        value="named"
+        [checked]="audience() === 'named'"
+        (change)="setAudience('named')"
+      />
+      <span>{{
+        t(
+          'workspace.shareAudience.option.named',
+          'Only specific people (by user ID, same organization)'
+        )
+      }}</span>
+    </label>
+  </fieldset>
+
+  @if (audience() === 'named') {
+    <div class="share-link-audience-dialog__named-block">
+      <label class="share-link-audience-dialog__label" for="share-named-recipients">
+        {{ t('workspace.shareAudience.recipientsLabel', 'Recipient user IDs') }}
+      </label>
+      <textarea
+        id="share-named-recipients"
+        class="share-link-audience-dialog__textarea"
+        rows="3"
+        [value]="namedRecipientsRaw()"
+        (input)="namedRecipientsRaw.set($any($event.target).value); inlineError.set(null)"
+        [attr.placeholder]="
+          t('workspace.shareAudience.recipientsPlaceholder', 'uuid, uuid, …')
+        "
+      ></textarea>
+    </div>
+  }
+
+  @if (inlineError(); as err) {
+    <p class="share-link-audience-dialog__error" role="alert">{{ err }}</p>
+  }
+
+  <div class="share-link-audience-dialog__actions">
+    <button uiButton type="button" (click)="onCancel()">
+      {{ t('workspace.export.dialog.cancel', 'Cancel') }}
+    </button>
+    <button uiButton uiButtonPrimary type="button" (click)="onConfirm()">
+      {{ t('workspace.shareAudience.confirm', 'Create link') }}
+    </button>
+  </div>
+</section>

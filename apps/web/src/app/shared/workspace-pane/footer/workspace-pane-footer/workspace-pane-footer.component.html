@@ -114,6 +114,13 @@
   </section>
 }
 
+@if (shareAudienceDialogOpen()) {
+  <app-share-link-audience-dialog
+    (confirmed)="onShareAudienceDialogConfirmed($event)"
+    (cancelled)="closeShareAudienceDialog()"
+  />
+}
+
 @if (zipDialogOpen()) {
   <button
     class="workspace-action__dialog-backdrop"
