@@ -120,7 +120,12 @@ export class AuthService {
       return { error: new Error('Invite code is required.') };
     }
 
-    const inviteTokenHash = await this.sha256(normalizedInviteCode);
+    let inviteTokenHash: string;
+    try {
+      inviteTokenHash = await this.sha256(normalizedInviteCode);
+    } catch (error) {
+      return { error: error instanceof Error ? error : new Error('Invite code hashing failed.') };
+    }
 
     const { error } = await this.supabase.client.auth.signUp({
       email,
@@ -286,7 +291,9 @@ export class AuthService {
 
   private async sha256(value: string): Promise<string> {
     if (typeof crypto === 'undefined' || typeof crypto.subtle === 'undefined') {
-      return value;
+      throw new Error(
+        'Secure hashing is unavailable in this environment (Web Crypto requires a secure context).',
+      );
     }
 
     const encoder = new TextEncoder();

@@ -94,11 +94,6 @@ interface ProfileOrgRow {
   organization_id: string | null;
 }
 
-interface ProjectInsertContext {
-  userId: string;
-  organizationId: string;
-}
-
 const DEFAULT_PROJECT_COLOR: ProjectColorKey = 'clay';
 const PROJECTS_CACHE_TTL_MS = 60_000;
 const SEARCH_COUNTS_CACHE_TTL_MS = 15_000;
@@ -117,8 +112,6 @@ export class ProjectsService {
     string,
     { value: ProjectScopedWorkspaceImage[]; expiresAt: number }
   >();
-  private projectInsertContextCache: ProjectInsertContext | null = null;
-
   async loadProjects(): Promise<ProjectListItem[]> {
     const now = Date.now();
     const cached = this.projectsCache;
@@ -662,16 +655,14 @@ export class ProjectsService {
     };
   }
 
-  private async resolveProjectInsertContext(): Promise<ProjectInsertContext | null> {
+  private async resolveProjectInsertContext(): Promise<{
+    userId: string;
+    organizationId: string;
+  } | null> {
     const { data: authData, error: authError } = await this.supabase.client.auth.getUser();
     const userId = authData.user?.id ?? null;
     if (authError || !userId) {
       return null;
-    }
-
-    const cached = this.projectInsertContextCache;
-    if (cached && cached.userId === userId) {
-      return cached;
     }
 
     const { data: profile, error: profileError } = await this.supabase.client
@@ -685,9 +676,7 @@ export class ProjectsService {
       return null;
     }
 
-    const context = { userId, organizationId };
-    this.projectInsertContextCache = context;
-    return context;
+    return { userId, organizationId };
   }
 
   private async collectTitleAndAddressMatches(

@@ -194,6 +194,20 @@ describe('AuthService', () => {
       expect(fakeSupabase.client.auth.signUp).not.toHaveBeenCalled();
     });
 
+    it('does not call signUp when Web Crypto is unavailable (fail closed)', async () => {
+      const { service, fakeSupabase } = setup();
+      const cryptoRef = globalThis.crypto as Crypto & { subtle?: SubtleCrypto };
+      const savedSubtle = cryptoRef.subtle;
+      Object.assign(cryptoRef, { subtle: undefined });
+      try {
+        const result = await service.signUp('a@b.com', 'pass', 'Bob', 'ab'.repeat(24));
+        expect(result.error?.message).toMatch(/Secure hashing|hashing failed/i);
+        expect(fakeSupabase.client.auth.signUp).not.toHaveBeenCalled();
+      } finally {
+        Object.assign(cryptoRef, { subtle: savedSubtle });
+      }
+    });
+
     it('returns { error: null } on success', async () => {
       const { service } = setup();
       const result = await service.signUp('a@b.com', 'pass', 'Bob', 'ab'.repeat(24));
