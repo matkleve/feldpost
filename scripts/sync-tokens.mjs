@@ -42,8 +42,10 @@ function inferType(value) {
   if (/^[\d.]+(?:rem|px|em|vw|vh|ch|%)$/.test(value)) return 'dimension';
   if (/^[\d.]+m?s$/.test(value)) return 'duration';
   if (/^cubic-bezier\(/.test(value)) return 'cubicBezier';
-  if (/^\d+$/.test(value)) return 'number';          // integer: z-index, font-weight
-  if (/^\d+\.\d+$/.test(value)) return 'number';     // decimal: line-height, ratio
+  if (/^\d+$/.test(value)) return 'number'; // integer: z-index, font-weight
+  if (/^\d+\.\d+$/.test(value)) return 'number'; // decimal: line-height, ratio
+  // Quoted font stacks (Figma / Base / font)
+  if (/^'[^']+'$/.test(value)) return 'fontFamily';
   return null;
 }
 
@@ -62,7 +64,31 @@ function parseCubicBezier(str) {
 function normaliseValue(value, type) {
   if (type === 'cubicBezier') return parseCubicBezier(value);
   if (type === 'number') return parseFloat(value);
+  if (type === 'fontFamily') return value.replace(/^'|'$/g, '');
   return value;
+}
+
+/** Expand simple var(--token) chains for export (Figma Alias → Base). */
+const VAR_REF = /^var\(--([a-zA-Z0-9-]+)\)$/;
+
+function buildDeclMap(declarations) {
+  const m = new Map();
+  for (const { name, rawValue } of declarations) {
+    m.set(name, rawValue);
+  }
+  return m;
+}
+
+function resolveVarChain(rawValue, map) {
+  let v = rawValue;
+  for (let i = 0; i < 30; i++) {
+    const match = v.match(VAR_REF);
+    if (!match) return v;
+    const next = map.get(match[1]);
+    if (next === undefined) return null;
+    v = next;
+  }
+  return null;
 }
 
 // ── Naming convention ─────────────────────────────────────────────────────────
@@ -136,24 +162,38 @@ function extractDeclarations(blockText) {
 
 /**
  * Build a W3C DTCG token tree from an array of declarations.
- * Non-exportable tokens (aliases, calc, color-mix, complex values) are pushed
- * into the provided skipped array rather than the tree.
+ * Resolves simple var(--*) aliases when the target resolves to a literal.
  */
 function buildTree(declarations, skipped) {
+  const map = buildDeclMap(declarations);
   const tree = {};
   for (const { name, rawValue } of declarations) {
-    const type = inferType(rawValue);
+    let lit = rawValue;
+    const trimmed = rawValue.trim();
+    if (VAR_REF.test(trimmed)) {
+      // Only expand Feldpost Alias → Base (avoid flattening all legacy var() chains into JSON)
+      if (!name.startsWith('fp-alias-')) {
+        skipped.push({ name, rawValue, reason: 'alias' });
+        continue;
+      }
+      const resolved = resolveVarChain(trimmed, map);
+      if (resolved === null || VAR_REF.test(resolved)) {
+        skipped.push({ name, rawValue, reason: 'alias' });
+        continue;
+      }
+      lit = resolved;
+    }
+    const type = inferType(lit);
     if (!type) {
       let reason = 'complex';
-      if (rawValue.startsWith('var(')) reason = 'alias';
-      else if (rawValue.startsWith('calc(')) reason = 'calc';
+      if (rawValue.startsWith('calc(')) reason = 'calc';
       else if (rawValue.startsWith('color-mix(')) reason = 'color-mix';
       skipped.push({ name, rawValue, reason });
       continue;
     }
     const path = cssVarToPath(name);
     setNested(tree, path, {
-      $value: normaliseValue(rawValue, type),
+      $value: normaliseValue(lit, type),
       $type: type,
     });
   }

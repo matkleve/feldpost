@@ -159,6 +159,11 @@
   --fp-sys-shape-small:        0.5rem;   // 8px
   --fp-sys-shape-medium:       0.75rem;  // 12px
   --fp-sys-shape-large:        1rem;     // 16px
+  // Distinct names avoid sync-tokens nesting collision with --fp-sys-shape-large
+  // Figma var(--radius-lg-plus) → 20px
+  --fp-sys-shape-radius-20:    1.25rem;
+  // Figma radius/r-24 → 24px
+  --fp-sys-shape-radius-24:    1.5rem;
   --fp-sys-shape-extra-large:  1.75rem;  // 28px
   --fp-sys-shape-full:         9999px;
 
@@ -298,6 +303,50 @@
   --fp-sys-motion-easing-emphasized:            cubic-bezier(0.2, 0, 0, 1);
   --fp-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
   --fp-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  // ── Feldpost / Base / scale (Figma: Feldpost.Base.scale — unit = px at 1×)
+  // Numeric keys match variable names base-0 … base-200.
+  --fp-base-0: 0;
+  --fp-base-1: 1px;
+  --fp-base-2: 2px;
+  --fp-base-4: 4px;
+  --fp-base-8: 8px;
+  --fp-base-12: 12px;
+  --fp-base-16: 16px;
+  --fp-base-20: 20px;
+  --fp-base-24: 24px;
+  --fp-base-28: 28px;
+  --fp-base-32: 32px;
+  --fp-base-40: 40px;
+  --fp-base-64: 64px;
+  --fp-base-80: 80px;
+  --fp-base-120: 120px;
+  --fp-base-160: 160px;
+  --fp-base-200: 200px;
+
+  // ── Feldpost / Base / font (Figma: Feldpost.Base.font — canonical: --fp-ref-typeface-* above)
+  --fp-base-font-heading: 'Cormorant Garamond';
+  --fp-base-font-body: 'DM Sans';
+
+  // ── Feldpost / Alias / spacing (Figma: Feldpost.Alias.spacing → scale/base-*)
+  --fp-alias-sp-0: var(--fp-base-0);
+  --fp-alias-sp-4: var(--fp-base-4);
+  --fp-alias-sp-8: var(--fp-base-8);
+  --fp-alias-sp-12: var(--fp-base-12);
+  --fp-alias-sp-16: var(--fp-base-16);
+  --fp-alias-sp-24: var(--fp-base-24);
+  --fp-alias-sp-32: var(--fp-base-32);
+  --fp-alias-sp-40: var(--fp-base-40);
+
+  // ── Feldpost / Alias / radius (Figma: Feldpost.Alias.radius → scale/base-*; full → 9999)
+  --fp-alias-r-0: var(--fp-base-0);
+  --fp-alias-r-4: var(--fp-base-4);
+  --fp-alias-r-8: var(--fp-base-8);
+  --fp-alias-r-12: var(--fp-base-12);
+  --fp-alias-r-16: var(--fp-base-16);
+  --fp-alias-r-24: var(--fp-base-24);
+  --fp-alias-r-32: var(--fp-base-32);
+  --fp-alias-r-full: var(--fp-sys-shape-full);
 
   /* ═══════════════════════════════════════════════════════════════════════
      LEGACY — Feldpost v1 tokens
