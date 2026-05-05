@@ -39,7 +39,11 @@ app-chip
 
 Import `ChipComponent` from `shared/components/chip`; do not duplicate `.ui-chip` filter styling unless bridging specs explicitly allow.
 
+## Geometry note
+
+Product contract: **one canonical chip height** and **pill vs rounded-control** shape rules live in [badges and chips](./ui-primitives.badges-and-chips.md) (do not fork here).
+
 ## Acceptance Criteria
 
 - [ ] Implementations match [chip.md](../filters/chip.md); this file does not fork normative behavior.
-- [ ] Call sites choosing between `app-chip` and `.ui-chip*` follow [badges and chips](./ui-primitives.badges-and-chips.md) **When to use which**.
+- [ ] Call sites choosing between `app-chip` and `.ui-chip*` follow [badges and chips](./ui-primitives.badges-and-chips.md) **Primitive reference — when to use which** and **Where each pill / chip is used and why**.

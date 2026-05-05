@@ -2,15 +2,17 @@
 
 ## What It Is
 
-A compact, inline label element that displays a single piece of information with optional leading icon, trailing action button, or both. Chips are reusable across the app for tags, filters, file types, and status indicators. Supports multiple size and state variants.
+A compact, inline label element that displays a single piece of information with optional leading icon, trailing action button, or both. Chips are reusable across the app for tags, filters, file types, and status indicators. **Product geometry uses a single canonical height** (see [badges-and-chips](../ui-primitives/ui-primitives.badges-and-chips.md)); variant-driven color tokens remain.
 
 ## What It Looks Like
 
-Small pill-shaped container (height 1.375rem / 22px) with rounded borders, consistent padding, and Material Icons support. Variations range from icon-only (1.375rem × 1.375rem square) to text-only (flexible width, min 2.5rem) to icon+text combinations. Trailing "X" button is optional; when present, it's slightly darker on hover. All variants use design tokens for colors, spacing, and typography.
+**Pill-shaped** container (`border-radius: full`) with rounded borders, consistent padding, and Material Icons support. Variations range from icon-only (square equal to chip height) to text-only (flexible width, min width per layout) to icon+text combinations. Trailing "X" button is optional; when present, it's slightly darker on hover. All variants use design tokens for colors, spacing, and typography.
 
 Chip visuals follow a **subtle look** by default: tinted background at 10-15% color mix, full-strength text/icon color for contrast, and optional fine border derived from the same base color. This prevents chips from overpowering nearby UI while keeping category distinctions clear.
 
-**Size Strategy**: Small (1.375rem), Medium (1.625rem / 26px), Large (2rem / 32px) chip heights align with button sizing (`--font-size-xs` → `--font-size-sm-soft` → `--font-size-md` respectively).
+**Geometry (product):** Feldpost uses **one canonical chip height** for content chips — **2rem (32px)** minimum height on the chip body. Do **not** introduce separate product “sizes” (small/medium/large) for new work; the `size` input exists for **backward compatibility** with existing call sites and should converge on the single height over time. Full UX inventory (pill vs toolbar rounded controls) is in [ui-primitives.badges-and-chips.md](../ui-primitives/ui-primitives.badges-and-chips.md).
+
+**Related shapes:** Toolbar **filter / grouping / sort / projects** triggers are **not** full pills — they use **control radius** (`--container-radius-control`). **Filter rule** conjunction controls (`Where` / `And` / `Or`) use **smaller radius** (`--radius-sm`). See badges-and-chips doc for the shape table.
 
 ## Where It Lives
 
@@ -20,7 +22,7 @@ Chip visuals follow a **subtle look** by default: tinted background at 10-15% co
 - **Settings Sections**: Multi-select option displays
 - **Search Results**: Inline category/type labels
 
-Chips are **global shared primitives** — defined in `apps/web/src/app/shared/components/chip/` and imported as needed.
+Chips are **global shared primitives** — defined in `apps/web/src/app/shared/components/chip/` and imported as needed. Product-wide **where used / which shape** lives in [badges-and-chips](../ui-primitives/ui-primitives.badges-and-chips.md).
 
 ## Actions & Interactions
 
@@ -74,7 +76,7 @@ chip.component.ts [selector: app-chip]
 - `icon: signal<string | undefined>` — Material Icon name (e.g., `'image'`, `'description'`)
 - `text: signal<string | undefined>` — Visible chip label (max 30 chars recommended; longer text truncates)
 - `dismissible: signal<boolean>` — Show trailing X button (default: false)
-- `size: signal<'sm' | 'md' | 'lg'>` — Chip height (default: 'sm')
+- `size: signal<'sm' | 'md' | 'lg'>` — **Legacy:** maps to CSS classes until single-height convergence; default `'sm'`; new work should rely on canonical **2rem** geometry ([badges-and-chips](../ui-primitives/ui-primitives.badges-and-chips.md)).
 - `variant: signal<'default' | 'primary' | 'status-success' | 'status-warning' | 'status-danger' | 'filetype-image' | 'filetype-video' | 'filetype-document' | 'filetype-spreadsheet' | 'filetype-presentation' | 'custom'>` — Color family
 - `color: signal<string | undefined>` — Optional CSS color token for custom variants (e.g., `'--color-uploading'`)
 - `maxWidth: signal<string>` — Max-width constraint (default: 'auto'; e.g., '8rem' for constrained contexts)
@@ -94,7 +96,7 @@ chip.component.ts [selector: app-chip]
 | `variant`            | `signal<'default' \| 'primary' \| 'status-success' \| 'status-warning' \| 'status-danger' \| 'filetype-image' \| 'filetype-video' \| 'filetype-document' \| 'filetype-spreadsheet' \| 'filetype-presentation' \| 'custom'>` | `'default'` | Color family                                             |
 | `color`              | `signal<string \| undefined>`                                                                                                                                                                                               | `undefined` | Custom CSS token for variant='custom'                    |
 | `maxWidth`           | `signal<string>`                                                                                                                                                                                                            | `'auto'`    | Max width constraint                                     |
-| `sizeClass()`        | `computed<string>`                                                                                                                                                                                                          | —           | Derives CSS class `chip--sm`, `chip--md`, `chip--lg`     |
+| `sizeClass()`        | `computed<string>`                                                                                                                                                                                                          | —           | Derives legacy CSS class `chip--sm`, `chip--md`, `chip--lg` (converge to one height) |
 | `variantClass()`     | `computed<string>`                                                                                                                                                                                                          | —           | Derives CSS class `chip--primary`, `chip--success`, etc. |
 | `dismissAriaLabel()` | `computed<string>`                                                                                                                                                                                                          | —           | Generates "Dismiss [text]" aria-label                    |
 
@@ -134,7 +136,6 @@ export class UploadAreaComponent {
     [text]="ft.type"
     [variant]="'custom'"
     [color]="ft.color"
-    [size]="'sm'"
   ></app-chip>
   }
 </div>
@@ -148,47 +149,35 @@ export class UploadAreaComponent {
 
 ## Sizing & Geometry
 
-### Size Definitions
+### Canonical single height (target state)
 
-| Size   | Height          | Icon Size       | Horizontal Padding   | Vertical Padding | Font Size                          | Line Height |
-| ------ | --------------- | --------------- | -------------------- | ---------------- | ---------------------------------- | ----------- |
-| **sm** | 1.375rem (22px) | 1.125rem (18px) | `--spacing-2` (8px)  | 0.125rem (2px)   | `--font-size-xs` (12px)            | solid       |
-| **md** | 1.625rem (26px) | 1.25rem (20px)  | `--spacing-3` (12px) | 0.1875rem (3px)  | `--font-size-sm-soft` (13px)       | solid       |
-| **lg** | 2rem (32px)     | 1.5rem (24px)   | `--spacing-3` (12px) | 0.25rem (4px)    | `--font-size-md-compact` (0.85rem) | solid       |
+| Property | Value (product default) |
+| -------- | ----------------------- |
+| **Min height** | **2rem (32px)** |
+| **Border radius** | Full pill: `var(--radius-full)` on `.chip` |
 
-**Gap between icon and text**: `--spacing-1` (4px) for all sizes.
+Typography, padding, and dismiss button proportions align to this one scale (reference implementation in `chip.component.scss`). Legacy classes `chip--sm` / `chip--md` / `chip--lg` remain until removed in a dedicated refactor.
+
+**Gap between icon and text**: `--spacing-1`.
 
 **X button dimensions** (when dismissible):
 
-- Always square; size derived from parent chip size
-- Width/Height = chip-height - (2 × vertical-padding) (accounts for internal spacing)
-- Icon inside button: 70% of button size (scale effect on hover)
+- Square hit target derived from the single chip height and vertical padding
+- Icon inside button: proportional (see SCSS)
 
-### Examples
+### Legacy size matrix (until removal)
 
-**Icon only (sm):**
+| Size   | Height (legacy) |
+| ------ | --------------- |
+| **sm** | 1.375rem (22px) |
+| **md** | 1.625rem (26px) |
+| **lg** | 2rem (32px) — matches **canonical** target |
 
-```
-┌─────────┐
-│    🖼️    │  1.375rem × 1.375rem
-└─────────┘
-```
+### Examples (canonical)
 
-**Icon + Text (md):**
+**Icon only:** square **2rem × 2rem** outer bounds.
 
-```
-┌────────────────────┐
-│  📄  filename.pdf  │  1.625rem tall, flexible width
-└────────────────────┘
-```
-
-**Text only (lg) with dismiss:**
-
-```
-┌──────────────────────────┐
-│   HEIC Format      ✕     │  2rem tall, dismiss button on right
-└──────────────────────────┘
-```
+**Icon + text / text + dismiss:** flexible width, **2rem** tall chip body.
 
 ## Styling Details
 
@@ -247,7 +236,7 @@ Each filetype variant uses:
 ## Acceptance Criteria
 
 - [x] Component file structure created (`chip.component.{ts,html,scss,spec.ts}`)
-- [x] All 4 sizes render at correct heights (1.375rem, 1.625rem, 2rem)
+- [x] Canonical height **2rem** documented; legacy triple-size classes still in CSS until refactor
 - [x] Icon-only variant displays as perfect square; no text shown
 - [x] Text-only variant renders without icon; width auto-adjusts
 - [x] Icon + Text variant displays both with proper gap (`--spacing-1`)

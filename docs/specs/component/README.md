@@ -110,6 +110,7 @@ Workspace chrome adjacent to the map/workspace split.
 ## ui-primitives/
 
 - [ui-primitives (parent index)](ui-primitives/ui-primitives.md)
+- [badges and chips](ui-primitives/ui-primitives.badges-and-chips.md) (inventory: pill vs toolbar control vs filter operator; canonical chip height)
 - [card grid](ui-primitives/ui-primitives.card-grid.md)
 - [card variant switch](ui-primitives/ui-primitives.card-variant-switch.md)
 - [group header](ui-primitives/ui-primitives.group-header.md)

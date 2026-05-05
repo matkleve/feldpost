@@ -449,6 +449,20 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 - **Compact Button**  
   28 px visual height. Workspace inline micro-actions, tab chips, command palette results.
 
+### Chips & badges
+
+- **Semantic chip (`app-chip`)**  
+  Shared Angular component for file-type tints, tags, and optional dismiss. Single canonical height (**2rem**) in product language; variants via tokens. Spec: [chip.md](specs/component/filters/chip.md); full UI inventory: [badges-and-chips](specs/component/ui-primitives/ui-primitives.badges-and-chips.md).
+
+- **UI chip (`uiChip` / `.ui-chip`)**  
+  Directive-applied primitive styles for toolbar-adjacent chips and quick-info bridges—not necessarily the same DOM as `app-chip`.
+
+- **Toolbar filter controls (grouping / filter / sort / projects)**  
+  Implemented as **`ui-button` + `ui-dropdown-trigger`**: **rounded control** radius (`--container-radius-control`), **not** a full pill. Opens dropdown panels; distinct from semantic loose chips.
+
+- **Filter rule conjunction control**  
+  Compact **rounded** chip (`--radius-sm`), not pill: toggles “Where” / “And” / “Or” inside the filter dropdown (`filter-rule__conj`).
+
 ### Spatial Selection
 
 - **Radius Selection Circle**  
