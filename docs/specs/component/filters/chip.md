@@ -2,15 +2,15 @@
 
 ## What It Is
 
-A compact, inline label element that displays a single piece of information with optional leading icon, trailing action button, or both. Chips are reusable across the app for tags, filters, file types, and status indicators. **Product geometry uses a single canonical height** (see [badges-and-chips](../ui-primitives/ui-primitives.badges-and-chips.md)); variant-driven color tokens remain.
+A compact, inline label element that displays a single piece of information with optional leading **Material icon**, **avatar image**, trailing dismiss control, or combinations. **Figma component set `96:74` (`Chip`) is the source of truth** for default chrome (height, padding, fills, label typescale); `variant` / `color` are Feldpost extensions for file-type and status tinting.
 
 ## What It Looks Like
 
-**Pill-shaped** container (`border-radius: full`) with rounded borders, consistent padding, and Material Icons support. Variations range from icon-only (square equal to chip height) to text-only (flexible width, min width per layout) to icon+text combinations. Trailing "X" button is optional; when present, it's slightly darker on hover. All variants use design tokens for colors, spacing, and typography.
+**Pill-shaped** container (`border-radius: full`). **Layouts:** `text-only`, **icon + text** (composed from `icon` + `text` — same shell as Figma spacing), `icon-only`, **`avatar-text`** (`avatarSrc` + `text`). Trailing dismiss is optional. Default label color uses **`--fp-sys-color-on-surface`** (Figma).
 
-Chip visuals follow a **subtle look** by default: tinted background at 10-15% color mix, full-strength text/icon color for contrast, and optional fine border derived from the same base color. This prevents chips from overpowering nearby UI while keeping category distinctions clear.
+**Geometry (Figma):** Chip body height **`var(--spacing-4)` (16px)**. Horizontal padding **`8px`** (`--spacing-2` / `--fp-alias-sp-8`). **Hover** on default: fill **`--fp-ref-primary-90`**. There is **no** `size` input — one geometry for `app-chip`.
 
-**Geometry (product):** Feldpost uses **one canonical chip height** for content chips — **2rem (32px)** minimum height on the chip body. Do **not** introduce separate product “sizes” (small/medium/large) for new work; the `size` input exists for **backward compatibility** with existing call sites and should converge on the single height over time. Full UX inventory (pill vs toolbar rounded controls) is in [ui-primitives.badges-and-chips.md](../ui-primitives/ui-primitives.badges-and-chips.md).
+**Icon + text (product):** Not a separate Figma layout name; use `icon` + `text` with the same 16px row and **`--spacing-1`** gap between glyph and label.
 
 **Related shapes:** Toolbar **filter / grouping / sort / projects** triggers are **not** full pills — they use **control radius** (`--container-radius-control`). **Filter rule** conjunction controls (`Where` / `And` / `Or`) use **smaller radius** (`--radius-sm`). See badges-and-chips doc for the shape table.
 
@@ -28,7 +28,7 @@ Chips are **global shared primitives** — defined in `apps/web/src/app/shared/c
 
 | Scenario                             | User Action                 | System Response                                                                                                   |
 | ------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **View chip**                        | Display static chip in page | Render appropriate size/variant; text truncates with ellipsis if >max-width                                       |
+| **View chip**                        | Display static chip in page | Render appropriate variant/layout; text truncates with ellipsis if >max-width |
 | **Hover static chip (no action)**    | Mouse enters chip bounds    | Optional subtle background highlight (semi-transparent primary)                                                   |
 | **Focus static chip (keyboard nav)** | Tab to chip or child button | Outline appears; focus ring uses `--color-primary`                                                                |
 | **Click dismissible chip X button**  | Click/tap trailing X icon   | Emit `chipDismissed($event)` Output; chip fades out (optional 150ms transition); parent removes from DOM or hides |
@@ -39,45 +39,53 @@ Chips are **global shared primitives** — defined in `apps/web/src/app/shared/c
 
 ```
 chip.component.ts [selector: app-chip]
-├── .chip (root container, uses --chip-size to derive dimensions)
-├── img.chip__icon—leading (optional <img>, Material Icon <span>, or SVG)
-├── span.chip__text (optional, single-line truncated text)
-└── button.chip__dismiss (optional, icon-only button)
+├── .chip (root; --chip-height, padding, typescale)
+├── img.chip__avatar (optional; Figma avatar-text — circular 16px)
+├── span.chip__icon (optional Material leading icon)
+├── span.chip__text (optional label)
+└── button.chip__dismiss (optional)
     └── span.material-icons (aria-hidden)
 ```
 
 **Template Structure:**
 
 ```html
-<div [class.chip]="true" [class]="sizeClass() + ' ' + variantClass()">
-  @if (icon()) {
-  <span class="chip__icon chip__icon--leading material-icons"
-    >{{ icon() }}</span
-  >
-  } @if (text()) {
-  <span class="chip__text">{{ text() }}</span>
-  } @if (dismissible()) {
-  <button
-    type="button"
-    class="chip__dismiss"
-    [attr.aria-label]="dismissAriaLabel()"
-    (click)="onDismiss()"
-  >
-    <span class="material-icons">close</span>
-  </button>
+<div [class]="chipClass()">
+  @if (isAvatarText()) {
+    <img class="chip__avatar" ... />
+  } @else if (icon()) {
+  <span class="chip__icon chip__icon--leading material-icons">...</span>
+  }
+  @if (text()) {
+  <span class="chip__text">...</span>
+  }
+  @if (dismissible()) {
+  <button type="button" class="chip__dismiss" ...>...</button>
   }
 </div>
 ```
+
+## Figma Variant Axes
+
+> **Source of truth: Figma component set `96:74` — `Chip`.**
+
+| Figma property | Figma values | Angular mapping |
+|----------------|--------------|-----------------|
+| **Layout** | `text-only`, `icon-only`, `avatar-text` | **text-only:** `text()` only (no `icon`, no `avatarSrc`). **icon-only:** `icon()` only. **avatar-text:** `avatarSrc()` + `text()` (Material `icon` hidden). **icon + text (product):** `icon()` + `text()` — same metrics as Figma row; not a separate Figma layout name. |
+| **State** | `default`, `hover` | CSS only: `:hover`, `:focus-visible`, `:disabled`. Never an Angular `@Input()`. |
+
+Color family (`variant` input) is a **Feldpost extension** beyond Figma's neutral chip — it drives `--chip-color` at runtime and is not a Figma variant axis.
 
 ## Data Requirements
 
 **Inputs** (via component `@Input()` signals):
 
-- `icon: signal<string | undefined>` — Material Icon name (e.g., `'image'`, `'description'`)
+- `icon: signal<string | undefined>` — Material Icon name when **not** using `avatarSrc`
 - `text: signal<string | undefined>` — Visible chip label (max 30 chars recommended; longer text truncates)
+- `avatarSrc: signal<string | undefined>` — URL for leading circular **avatar** image (Figma `avatar-text`). When set with `text()`, renders `img.chip__avatar` instead of Material `icon`.
+- `avatarAlt: signal<string | undefined>` — Optional `alt` for the avatar; when empty, image is **decorative** (`aria-hidden`)
 - `dismissible: signal<boolean>` — Show trailing X button (default: false)
-- `size: signal<'sm' | 'md' | 'lg'>` — **Legacy:** maps to CSS classes until single-height convergence; default `'sm'`; new work should rely on canonical **2rem** geometry ([badges-and-chips](../ui-primitives/ui-primitives.badges-and-chips.md)).
-- `variant: signal<'default' | 'primary' | 'status-success' | 'status-warning' | 'status-danger' | 'filetype-image' | 'filetype-video' | 'filetype-document' | 'filetype-spreadsheet' | 'filetype-presentation' | 'custom'>` — Color family
+- `variant: signal<'default' | 'primary' | ...>` — Color family (Feldpost extension; not a Figma variant axis)
 - `color: signal<string | undefined>` — Optional CSS color token for custom variants (e.g., `'--color-uploading'`)
 - `maxWidth: signal<string>` — Max-width constraint (default: 'auto'; e.g., '8rem' for constrained contexts)
 
@@ -89,15 +97,17 @@ chip.component.ts [selector: app-chip]
 
 | Signal               | Type                                                                                                                                                                                                                        | Default     | Purpose                                                  |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------- |
-| `icon`               | `signal<string \| undefined>`                                                                                                                                                                                               | `undefined` | Material Icon name (leading icon)                        |
+| `icon`               | `signal<string \| undefined>`                                                                                                                                                                                               | `undefined` | Material icon when not `avatar-text`                        |
 | `text`               | `signal<string \| undefined>`                                                                                                                                                                                               | `undefined` | Visible text content                                     |
+| `avatarSrc`          | `signal<string \| undefined>`                                                                                                                                                                                               | `undefined` | Avatar image URL (with `text()` → `chip--avatar-text`)   |
+| `avatarAlt`          | `signal<string \| undefined>`                                                                                                                                                                                               | `undefined` | Avatar `alt`; empty = decorative                         |
 | `dismissible`        | `signal<boolean>`                                                                                                                                                                                                           | `false`     | Show X button                                            |
-| `size`               | `signal<'sm' \| 'md' \| 'lg'>`                                                                                                                                                                                              | `'sm'`      | Chip height variant                                      |
 | `variant`            | `signal<'default' \| 'primary' \| 'status-success' \| 'status-warning' \| 'status-danger' \| 'filetype-image' \| 'filetype-video' \| 'filetype-document' \| 'filetype-spreadsheet' \| 'filetype-presentation' \| 'custom'>` | `'default'` | Color family                                             |
 | `color`              | `signal<string \| undefined>`                                                                                                                                                                                               | `undefined` | Custom CSS token for variant='custom'                    |
 | `maxWidth`           | `signal<string>`                                                                                                                                                                                                            | `'auto'`    | Max width constraint                                     |
-| `sizeClass()`        | `computed<string>`                                                                                                                                                                                                          | —           | Derives legacy CSS class `chip--sm`, `chip--md`, `chip--lg` (converge to one height) |
-| `variantClass()`     | `computed<string>`                                                                                                                                                                                                          | —           | Derives CSS class `chip--primary`, `chip--success`, etc. |
+| `chipClass()`        | `computed<string>`                                                                                                                                                                                                          | —           | Host classes: `chip`, `chip--{variant}`, layout modifiers |
+| `isAvatarText()`     | `computed<boolean>`                                                                                                                                                                                                         | —           | True when `avatarSrc` + `text` present                   |
+| `isIconOnly()`       | `computed<boolean>`                                                                                                                                                                                                         | —           | True when `icon` only (no text, no avatar)               |
 | `dismissAriaLabel()` | `computed<string>`                                                                                                                                                                                                          | —           | Generates "Dismiss [text]" aria-label                    |
 
 ## File Map
@@ -106,7 +116,7 @@ chip.component.ts [selector: app-chip]
 apps/web/src/app/shared/components/chip/
 ├── chip.component.ts           (59 lines: signals, computed, outputs)
 ├── chip.component.html         (19 lines: template structure)
-├── chip.component.scss         (145 lines: all size/variant styles)
+├── chip.component.scss         (variant + layout styles)
 └── chip.component.spec.ts      (68 lines: unit tests)
 ```
 
@@ -149,43 +159,31 @@ export class UploadAreaComponent {
 
 ## Sizing & Geometry
 
-### Canonical single height (target state)
+### Figma geometry (single scale)
 
-| Property | Value (product default) |
-| -------- | ----------------------- |
-| **Min height** | **2rem (32px)** |
-| **Border radius** | Full pill: `var(--radius-full)` on `.chip` |
+| Property | Value |
+| -------- | ----- |
+| **Height** | `var(--spacing-4)` (16px) |
+| **Border radius** | `var(--radius-full)` |
+| **Horizontal padding** | `var(--spacing-2)` (8px); avatar-text: `padding-inline-end` `var(--fp-base-8)` |
+| **Gap** | `var(--spacing-1)` (icon/text); avatar-text: `var(--fp-base-4)` between avatar and label |
+| **Default fills** | Rest: `--fp-ref-primary-95`; hover: `--fp-ref-primary-90` |
+| **Label** | `--fp-sys-typescale-label-small-*`, color `--fp-sys-color-on-surface` |
 
-Typography, padding, and dismiss button proportions align to this one scale (reference implementation in `chip.component.scss`). Legacy classes `chip--sm` / `chip--md` / `chip--lg` remain until removed in a dedicated refactor.
+### Examples
 
-**Gap between icon and text**: `--spacing-1`.
+**Icon-only:** outer bounds **16×16**. Inner glyph target **8px** (`--fp-base-8`).
 
-**X button dimensions** (when dismissible):
-
-- Square hit target derived from the single chip height and vertical padding
-- Icon inside button: proportional (see SCSS)
-
-### Legacy size matrix (until removal)
-
-| Size   | Height (legacy) |
-| ------ | --------------- |
-| **sm** | 1.375rem (22px) |
-| **md** | 1.625rem (26px) |
-| **lg** | 2rem (32px) — matches **canonical** target |
-
-### Examples (canonical)
-
-**Icon only:** square **2rem × 2rem** outer bounds.
-
-**Icon + text / text + dismiss:** flexible width, **2rem** tall chip body.
+**Avatar + text:** **16px** circle `img.chip__avatar` + label, Figma `avatar-text` padding/gap.
 
 ## Styling Details
 
 ### Default Variant
 
-- **Background**: `color-mix(in srgb, var(--color-border) 48%, transparent)`
-- **Text Color**: `var(--color-text-primary)`
-- **Border**: `1px solid var(--color-border)`
+- **Background**: `var(--fp-ref-primary-95)` (Figma: `fp/ref/primary/95` — warm cream fill)
+- **Text / icon label color (default variant):** `var(--fp-sys-color-on-surface)`
+- **Border**: transparent (no visible border on default chips)
+- **Dark mode**: tinted surface via `color-mix(in srgb, var(--fp-sys-color-primary) 26%, var(--color-bg-elevated))`
 
 ### Primary Variant
 
@@ -236,7 +234,7 @@ Each filetype variant uses:
 ## Acceptance Criteria
 
 - [x] Component file structure created (`chip.component.{ts,html,scss,spec.ts}`)
-- [x] Canonical height **2rem** documented; legacy triple-size classes still in CSS until refactor
+- [x] Single Figma height **16px**; no `size` input on `ChipComponent`
 - [x] Icon-only variant displays as perfect square; no text shown
 - [x] Text-only variant renders without icon; width auto-adjusts
 - [x] Icon + Text variant displays both with proper gap (`--spacing-1`)
@@ -250,18 +248,18 @@ Each filetype variant uses:
 - [x] X button click emits `chipDismissed` output event
 - [x] X button responds to keyboard (Space/Enter) and emits same event
 - [x] Chip text respects single-line constraint; newlines are stripped
-- [ ] Unit tests cover: rendering, size variants, color variants, click/keyboard dismiss, maxWidth truncation
+- [ ] Unit tests cover: rendering, color variants, avatar layout, click/keyboard dismiss, maxWidth truncation
 - [x] SCSS compiled without errors; no CSS budget exceeded
 
 ## Implementation Checklist
 
 - [ ] **Read specification** before coding
 - [x] **Create component files** in `apps/web/src/app/shared/components/chip/`
-- [x] **Implement signals & computed properties** (size/variant derived classes, aria-label)
+- [x] **Implement signals & computed properties** (variant/layout derived classes, aria-label)
 - [x] **Write template** following hierarchy exactly
-- [x] **Write SCSS** for all size + variant combinations (use tokens throughout)
+- [x] **Write SCSS** for variant + layout combinations (use tokens throughout)
 - [x] **Write unit tests** (integration tests in parent; unit tests for chip in isolation)
 - [x] **Build & verify** zero compilation errors
-- [ ] **Verify in browser** (all sizes, all variants, hover/focus, dismiss, maxWidth truncation)
+- [ ] **Verify in browser** (variants, layouts, hover/focus, dismiss, maxWidth truncation)
 - [ ] **Update glossary** (`docs/glossary.md`) with "Chip" entry if new terminology
 - [ ] **Document in settings registry** if chip becomes a customizable element

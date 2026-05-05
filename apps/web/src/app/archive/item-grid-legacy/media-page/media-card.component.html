@@ -31,14 +31,13 @@
 
       <div class="media-card__meta-chips">
         @if (projectName().length > 0) {
-          <app-chip class="media-card__chip" [text]="projectName()" [size]="'sm'"></app-chip>
+          <app-chip class="media-card__chip" [text]="projectName()"></app-chip>
         }
         @if (mediaTypeLabel.length > 0) {
           <app-chip
             class="media-card__chip"
             [icon]="mediaTypeIcon"
             [text]="mediaTypeLabel"
-            [size]="'sm'"
             [variant]="mediaTypeChipVariant"
           ></app-chip>
         }

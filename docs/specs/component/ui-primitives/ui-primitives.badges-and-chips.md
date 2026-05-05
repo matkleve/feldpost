@@ -37,17 +37,13 @@ Primitives (no single Angular host)
 
 ---
 
-## Canonical geometry — single chip height (product)
+## Canonical geometry — `app-chip` vs other primitives
 
-Feldpost does **not** use a small / medium / large chip scale in the product language. There is **one** comfortable inline height for content chips (`app-chip`) and pill-shaped metadata:
+**`app-chip` (semantic chip component):** Figma component set **`96:74`** is the source of truth for default chrome. Chip body height **`var(--spacing-4)` (16px)**, pill radius, **`--fp-ref-primary-95` / `--fp-ref-primary-90`** (hover), and label typography **`--fp-sys-typescale-label-small-*`** with text color **`--fp-sys-color-on-surface`**. `ChipComponent` has **no** `size` input — one geometry scale.
 
-- **Target height:** **2rem (32px)** minimum height on the chip body (equivalent to the former “large” row in the chip spec — dense enough for grids, large enough for legibility).
-- **Not** **16px** tall chips as the default: that is below practical touch and label readability for primary UI (dense exceptions must cite accessibility review).
-- **Not** **4rem** tall “chips”: that reads as a **button** or **field**, not an inline chip.
+**`ui-chip` (directive primitive + quick-info chips):** Uses [chip.scss](apps/web/src/styles/primitives/chip.scss) sizing (`ui-chip--sm` / `md` / `lg`) and interaction emphasis — **different** host and contracts from `app-chip`. Do not assume the same pixel height as Figma `app-chip` without checking that primitive’s spec.
 
-Implementation may still expose a `size` input on `ChipComponent` during convergence; **new UI** should use the **default canonical height** only and must not introduce alternate chip scales without a new design-system decision.
-
-Icon-only chips remain **square** at the same **outer** dimension as the single chip height (width = height).
+Icon-only **`app-chip`** remains **square** at the same outer dimension as the chip height (16px).
 
 ---
 

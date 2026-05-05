@@ -1,7 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
 
-export type ChipSize = 'sm' | 'md' | 'lg';
-
 export type ChipVariant =
   | 'default'
   | 'primary'
@@ -24,8 +22,11 @@ export type ChipVariant =
 export class ChipComponent {
   readonly icon = input<string | undefined>(undefined);
   readonly text = input<string | undefined>(undefined);
+  /** Leading circular image + label (Figma `avatar-text`). When set with `text()`, Material `icon` is not shown. */
+  readonly avatarSrc = input<string | undefined>(undefined);
+  /** Optional accessible name for the avatar image when it conveys meaning. */
+  readonly avatarAlt = input<string | undefined>(undefined);
   readonly dismissible = input(false);
-  readonly size = input<ChipSize>('sm');
   readonly variant = input<ChipVariant>('default');
   readonly color = input<string | undefined>(undefined);
   readonly maxWidth = input('auto');
@@ -33,11 +34,19 @@ export class ChipComponent {
 
   readonly chipDismissed = output<void>();
 
-  readonly isIconOnly = computed(() => !!this.icon() && !this.text());
+  readonly isAvatarText = computed(
+    () => !!this.avatarSrc()?.trim().length && !!this.text()?.trim().length,
+  );
+
+  readonly isIconOnly = computed(
+    () => !!this.icon() && !this.text() && !this.avatarSrc()?.trim().length,
+  );
 
   readonly chipClass = computed(() => {
-    const classes = ['chip', `chip--${this.size()}`, `chip--${this.variant()}`];
-    if (this.isIconOnly()) {
+    const classes = ['chip', `chip--${this.variant()}`];
+    if (this.isAvatarText()) {
+      classes.push('chip--avatar-text');
+    } else if (this.isIconOnly()) {
       classes.push('chip--icon-only');
     }
     if (this.dismissible()) {

@@ -16,6 +16,7 @@ See `architecture.md` for technical constraints that affect layout decisions.
 ## Design File Index
 
 - `docs/design/constitution.md` — non-negotiable design rules; always load for visual and product implementation tasks.
+- `docs/design/state-visuals.md` — canonical shared visuals for **disabled**, focus reminders, and future cross-cutting states.
 - `docs/design/tokens.md` — load for styling, sizing, colors, typography, radius, shadows, and iconography.
 - `docs/design/tokens.md § Figma Bridge` — naming convention (CSS→Figma Variable path), pipeline direction (code→Figma, not reverse), and human import step. Run `npm run sync-tokens` to regenerate `docs/design/figma-tokens.json`.
 - `docs/design/token-layers.md` — canonical token layer architecture (Layer A/B/C), alias ownership, and override rules.

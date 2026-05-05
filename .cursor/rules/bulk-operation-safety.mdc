@@ -1,0 +1,42 @@
+---
+description: Bulk operation safety gates — mandatory quality checks before any bulk find-replace or multi-file edit operation.
+alwaysApply: true
+---
+
+# Bulk Operation Safety (Mandatory Quality Gates)
+
+**QUALITY OVER SPEED. These gates prevent data loss and error cascades.**
+
+## Before Bulk-Replace Operations
+
+1. **Audit Phase** (Always First)
+   - `grep_search` for the pattern to find all occurrences
+   - Create audit table: file, line, exact snippet
+   - Verify no imports or critical methods will be affected
+   - Confirm no accidental matches in comments or strings
+
+2. **Isolation Phase**
+   - Max 3-5 related changes per `multi_replace_string_in_file` batch
+   - Each replacement must have 3-5 lines of context before AND after (no exceptions)
+   - Never combine unrelated concerns (e.g., rename + comment in same replace)
+   - Test-pilot one file if unsure
+
+3. **Verification Phase** (After Every Batch)
+   - Run `get_errors()` on modified files immediately
+   - Run `ng build` to verify TypeScript compilation
+   - If errors: STOP, do NOT proceed to next batch
+   - Check for orphaned imports, unused properties, broken method signatures
+
+## Comment Addition Safety
+
+- Comments must NOT be inserted between import statements or function signatures
+- Always insert before the import block or inside the function AFTER the signature
+- Use JSDoc `/** */` style, never inline `//` comments above imports
+- Verify exact line numbers with `read_file` before replacing
+
+## Slowdown = Quality
+
+- Parallel operations: ONLY for completely independent files
+- Sequential: Always for files in same feature/service hierarchy
+- Time cost of mistakes (rollback, git recovery, re-testing) >> time saved by batching
+- If unsure: read first, plan second, execute third — maintain separation

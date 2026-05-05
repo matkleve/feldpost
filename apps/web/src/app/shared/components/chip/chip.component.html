@@ -4,7 +4,16 @@
   [style.max-width]="maxWidth()"
   tabindex="0"
 >
-  @if (icon()) {
+  @if (isAvatarText()) {
+    <img
+      class="chip__avatar"
+      [src]="avatarSrc() ?? ''"
+      [alt]="avatarAlt() ?? ''"
+      [attr.aria-hidden]="avatarAlt()?.trim() ? null : true"
+      loading="lazy"
+      decoding="async"
+    />
+  } @else if (icon()) {
     <span class="chip__icon chip__icon--leading material-icons" aria-hidden="true">{{
       icon()
     }}</span>

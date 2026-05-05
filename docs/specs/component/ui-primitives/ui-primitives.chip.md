@@ -6,7 +6,7 @@ Semantic **chip** component for dismissible labels, file-type colors, and rich v
 
 ## What It Looks Like
 
-Rounded chip with optional icon, text, dismiss control, and variant-driven color tokens per canonical chip spec.
+Rounded chip with optional **Material icon**, **avatar image**, text, dismiss control, and variant-driven color tokens per [chip.md](../filters/chip.md).
 
 ## Where It Lives
 
@@ -41,7 +41,7 @@ Import `ChipComponent` from `shared/components/chip`; do not duplicate `.ui-chip
 
 ## Geometry note
 
-Product contract: **one canonical chip height** and **pill vs rounded-control** shape rules live in [badges and chips](./ui-primitives.badges-and-chips.md) (do not fork here).
+Normative dimensions and Figma mapping live in [chip.md](../filters/chip.md). **Pill vs rounded-control** inventory lives in [badges and chips](./ui-primitives.badges-and-chips.md) (do not fork here).
 
 ## Acceptance Criteria
 

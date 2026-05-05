@@ -1,0 +1,125 @@
+---
+description: Visual Behavior Contract and Ownership Triad Rule — mandatory before any component HTML or CSS is written.
+alwaysApply: true
+---
+
+# Visual Behavior Contract (Mandatory per Component Spec)
+
+Every component spec must include a `## Visual Behavior Contract` section
+before any implementation starts. This section defines in pseudo-CSS
+exactly which element owns which visual behavior.
+
+Required entries for every component with overlays, states, or interactions:
+
+## Ownership Matrix (Mandatory)
+
+Each spec must include one behavior-to-CSS ownership matrix with these columns:
+
+| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
+| --- | --- | --- | --- | --- | --- | --- |
+| example | `.media-frame` | `:host` | `.open-button` | `.media-frame--selected` | `surface/selected` | selected ring only around media frame |
+
+No implementation may start without this matrix.
+
+# Ownership Triad Rule (Hard Blocker)
+
+Every visual behavior in a component has exactly three owners.
+They must be explicitly declared before any HTML or CSS is written.
+
+| Owner | Responsible for | Forbidden from |
+| --- | --- | --- |
+| Geometry Owner | width, height, aspect-ratio, display | state classes, event bindings |
+| State Owner | state class bindings (`[class.x]`) | geometry properties |
+| Visual Owner | CSS rules that produce visible output (color, border, shadow, opacity, animation) | geometry of other elements |
+
+## The Core Rule (Default)
+
+Geometry Owner == State Owner == Visual Owner
+
+By default, all three point to the same element.
+If they diverge, the implementation is valid only as an explicitly documented exception.
+
+## Why they diverge (common failure modes)
+
+- State class on parent, visual effect intended on child → wrong
+- Geometry set on wrapper, visual owner is different element → wrong
+- `position: relative` on wrong element causes overlay to size against wrong container → wrong
+
+## Declaration format (mandatory per component spec)
+
+Every spec must declare this table before implementation:
+
+| Behavior | Geometry Owner | State Owner | Visual Owner | Same element? |
+| --- | --- | --- | --- | --- |
+| selected ring | `.media-item-render-surface__media-frame` | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅ |
+| loading pulse | `.item-state-frame__state-layer--loading` | `.item-state-frame__state-layer--loading` | `.item-state-frame__state-layer--loading` | ✅ |
+| hover reveal | `.media-item__quiet-actions` | `.media-item--selected` (on parent) | `.media-item__quiet-actions` | ⚠️ exception — document why |
+
+## Exceptions
+
+If the three owners cannot be the same element, the exception must be:
+1. Documented explicitly in the spec table with reason
+2. Solved via `position: absolute; inset: 0` on the visual owner relative to the geometry owner's stacking context
+3. Never solved by duplicating geometry on multiple layers
+
+## Stacking context rule
+
+Exactly one element per component declares `position: relative`. That element owns the stacking context for overlays, badges, and actions; those children use `position: absolute; inset: 0` relative to it. **Stacking context ownership** must be declared separately from **visual geometry ownership** when they differ.
+
+## Layer Order (z-index)
+
+Define every layer explicitly using named layer roles and concrete selectors.
+Recommended default mapping:
+- layer content: image, icon, text
+- layer upload: upload overlay
+- layer selected: selected emphasis
+- layer actions: quiet actions and controls
+
+No undeclared z-index values anywhere in the component.
+
+## State Ownership
+
+Every visual state must name its owner element:
+- loading pulse → item-state-frame
+- selected ring → visual geometry owner (for example media frame)
+- hover reveal → domain item quiet-actions
+- error surface → item-state-frame
+
+For each state, list the exact class/selector that renders the state.
+
+## Pseudo-CSS Contract Example
+
+```css
+:host {
+  display: block;
+  position: relative; /* sole stacking context owner */
+  aspect-ratio: [defined by domain item];
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: [declared value];
+}
+
+.selected-state {
+  /* Selected emphasis may be drawn on a nested visual owner */
+  box-shadow: inset 0 0 0 2px var(--color-clay);
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top center;
+}
+```
+
+Any implementation that deviates from this contract is a blocker.
+
+## Visual State Consistency
+
+- `docs/design/state-visuals.md` is the source of truth for canonical state visuals.
+- Before implementing a state treatment, check for canonical treatment in that file.
+- If canonical treatment is missing, define it in design docs first and then implement.
+- Per-component ad-hoc treatments for shared semantic states are forbidden.

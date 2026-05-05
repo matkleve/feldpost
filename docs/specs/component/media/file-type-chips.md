@@ -177,7 +177,6 @@ fileTypeChips = computed(() => {
       [text]="chip.type"
       [variant]="'custom'"
       [color]="chip.color"
-      [size]="'sm'"
     ></app-chip>
     }
   </div>
