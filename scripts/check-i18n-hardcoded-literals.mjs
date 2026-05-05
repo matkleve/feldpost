@@ -5,11 +5,7 @@ const repoRoot = process.cwd();
 const strict = process.argv.includes("--strict");
 
 const includeDirs = [
-  join(repoRoot, "apps", "web", "src", "app", "features", "auth"),
-  join(repoRoot, "apps", "web", "src", "app", "features", "settings-overlay"),
-  join(repoRoot, "apps", "web", "src", "app", "features", "map", "search-bar"),
-  join(repoRoot, "apps", "web", "src", "app", "features", "map", "map-shell"),
-  join(repoRoot, "apps", "web", "src", "app", "features", "projects"),
+  join(repoRoot, "apps", "web", "src", "app"),
 ];
 
 const findings = [];

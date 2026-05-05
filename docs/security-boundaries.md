@@ -177,16 +177,22 @@ Note: `media_items.organization_id` is denormalized from `profiles.organization_
   - **SELECT**: Authenticated users within same org (`organization_id = user_org_id()`), and only if not revoked and not expired.
   - **INSERT**: Creator must be `auth.uid()`, org must match `user_org_id()`, viewers cannot create.
   - **UPDATE / DELETE**: Creator or org admin only.
+  - **Audience / grant columns:** `audience` (`public` | `organization` | `named`) and `share_grant` (e.g. `view`) describe how `resolve_share_set` authorizes callers; see `docs/specs/service/share-set/share-set-access-model.md`.
 - `share_set_items`:
   - **SELECT**: Allowed only if parent `share_sets` row is visible under the same constraints.
   - **INSERT / DELETE**: Creator or org admin through parent set ownership.
+- `share_set_recipients` (for `named` audience):
+  - **Direct client access:** RLS enabled with no broad member policies; rows are written by `create_or_reuse_share_set` and read only inside **`SECURITY DEFINER`** resolve logic. Do not expose recipient lists through permissive SELECT policies.
 
 Token security rules:
 
 - Raw share token is never stored; only hash (`token_hash`) is persisted.
 - Resolve flow hashes incoming token server-side and compares against `token_hash`.
 - Revoked or expired sets return no media rows.
-- Cross-org token usage always returns denied/empty result.
+- **`resolve_share_set`:** single RPC for all audiences; server branches on `audience` + caller (`anon` vs authenticated, `user_org_id()`, recipient membership). Wrong audience for caller returns an **empty** result (no cross-org leakage).
+- **Share vs RLS:** `share_grant` limits **share-mediated** RPC behavior only. Authenticated org members using normal queries remain governed by table RLS and roles alone.
+
+Canonical matrix: `docs/specs/service/share-set/share-set-access-model.md`.
 
 ### Role Check Logic (Conceptual)
 

@@ -502,3 +502,35 @@ These follow from the UI state machine and animation contracts above. Enforce vi
 ### Stylelint
 
 - Optional future gate: `apps/web/stylelint.config.cjs` when Stylelint rules are introduced. Until then, SCSS contracts rely on review and `npm run design-system:check`.
+
+## Figma Integration Contract
+
+These two rules are non-negotiable and apply whenever Figma designs, screenshots, Dev Mode output, or Code Connect snippets are part of the task.
+
+### Token-First Gate (Hard Blocker)
+
+Before proposing any hardcoded color, spacing, radius, shadow, border, or motion value in component SCSS or Tailwind:
+
+1. Search `apps/web/src/styles/tokens.scss` for an existing token that matches the intent.
+2. If a matching token exists, use `var(--token-name)` — never write the raw value.
+3. If no matching token exists, **propose adding the token to `tokens.scss` first** and update `docs/design/tokens.md` before writing any component CSS.
+4. After adding a new token, run `npm run sync-tokens` to regenerate `docs/design/figma-tokens.json`.
+
+Hardcoded values in component SCSS or inline styles that duplicate or bypass a token are a blocker. This includes arbitrary Tailwind values (e.g. `text-[#cc7a4a]`) when a semantic token covers the intent.
+
+### i18n-First Gate for Figma Labels (Hard Blocker)
+
+Text labels visible in Figma screenshots, Dev Mode, or Code Connect snippets must **never** be written as literal strings in templates or component TypeScript.
+
+Required workflow for every visible label encountered in a Figma design:
+
+1. Search `docs/i18n/translation-workbench.csv` for the matching key.
+2. If the key exists, render it as `t('key', 'English fallback')` — **never** as `<span>Submit</span>`.
+3. If the key does not exist, **add it to the CSV first** (with `context` column filled), then run `node scripts/import-i18n-csv-to-sql.mjs` to regenerate `supabase/seed_i18n.sql`, then write the component.
+4. Commit the updated CSV and SQL seed in the same PR as the component.
+
+The agent is forbidden from inferring that a Figma label is "just a placeholder." All visible product copy is subject to this gate, including button labels, empty states, error messages, tooltips, and ARIA labels.
+
+### Figma import boundary
+
+The agent's responsibility for the Figma bridge ends at `docs/design/figma-tokens.json`. The agent must never attempt to automate importing tokens or components into Figma. That step is performed manually by the designer using Tokens Studio or the Variables Import plugin. See `docs/design/tokens.md § Figma Bridge`.

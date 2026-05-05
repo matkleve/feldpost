@@ -9,7 +9,78 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 Design tokens are CSS custom properties. All components use tokens — never raw hex or Tailwind arbitrary values in design-sensitive contexts.
 
-### Semantic token hierarchy
+### §3.1a — Feldpost v2 `--fp-*` Color System
+
+The v2 color system follows the Material Design 3 tonal architecture with the Feldpost `--fp-` prefix. It sits **above** the legacy `--color-*` tokens in `tokens.scss` and will replace them incrementally.
+
+#### Two-layer structure
+
+| Layer | Prefix | Purpose | Use in components? |
+|-------|--------|---------|-------------------|
+| Reference palette | `--fp-ref-primary-*` | Raw tonal stops (0→100). Primitives only. | No — Figma alias resolution only |
+| System roles | `--fp-sys-color-*` | Semantic role per surface/role pair. | Yes — this is the component API |
+
+#### Reference palette — primary tonal scale (seed `#CC7A4A`)
+
+| Stop | Hex | Note |
+|------|-----|------|
+| 0 | `#000000` | |
+| 10 | `#331200` | |
+| 20 | `#542200` | |
+| 30 | `#773300` | |
+| 40 | `#974811` | |
+| 50 | `#b66029` | |
+| 60 | `#d67840` | |
+| 70 | `#f69257` | |
+| 80 | `#ffb68e` | |
+| 87 | `#cc7a4a` | **seed** |
+| 90 | `#ffdbca` | |
+| 95 | `#ffede5` | |
+| 99 | `#fffbff` | |
+| 100 | `#ffffff` | |
+
+#### System color roles
+
+| Token | Light | Dark | Role |
+|-------|-------|------|------|
+| `--fp-sys-color-primary` | `#974811` | `#ffb68e` | Primary action fill |
+| `--fp-sys-color-on-primary` | `#ffffff` | `#542200` | Text/icon on primary |
+| `--fp-sys-color-primary-container` | `#ffdbca` | `#773300` | Tinted surface (chips, selected) |
+| `--fp-sys-color-on-primary-container` | `#331200` | `#ffdbca` | Text on primary container |
+| `--fp-sys-color-secondary` | `#765848` | `#e6beab` | Secondary action fill |
+| `--fp-sys-color-on-secondary` | `#ffffff` | `#432b1d` | Text/icon on secondary |
+| `--fp-sys-color-secondary-container` | `#ffdbca` | `#5c4132` | Tinted surface (secondary) |
+| `--fp-sys-color-on-secondary-container` | `#2b160a` | `#ffdbca` | Text on secondary container |
+| `--fp-sys-color-tertiary` | `#636032` | `#cec991` | Tertiary / accent fill |
+| `--fp-sys-color-on-tertiary` | `#ffffff` | `#343208` | Text/icon on tertiary |
+| `--fp-sys-color-tertiary-container` | `#eae5ab` | `#4b481d` | Tinted surface (tertiary) |
+| `--fp-sys-color-on-tertiary-container` | `#1e1c00` | `#eae5ab` | Text on tertiary container |
+| `--fp-sys-color-error` | `#ba1a1a` | `#ffb4ab` | Error / destructive fill |
+| `--fp-sys-color-on-error` | `#ffffff` | `#690005` | Text/icon on error |
+| `--fp-sys-color-error-container` | `#ffdad6` | `#93000a` | Tinted surface (error) |
+| `--fp-sys-color-on-error-container` | `#410002` | `#ffb4ab` | Text on error container |
+| `--fp-sys-color-background` | `#fffbff` | `#201a17` | App / page background |
+| `--fp-sys-color-on-background` | `#201a17` | `#ece0db` | Text on background |
+| `--fp-sys-color-surface` | `#fffbff` | `#201a17` | Panel / card surface |
+| `--fp-sys-color-on-surface` | `#201a17` | `#ece0db` | Text on surface |
+| `--fp-sys-color-surface-variant` | `#f4ded4` | `#52443c` | Lower-contrast tinted surface |
+| `--fp-sys-color-on-surface-variant` | `#52443c` | `#d7c2b9` | Text on surface-variant |
+| `--fp-sys-color-outline` | `#85746b` | `#9f8d84` | Low-emphasis strokes, dividers |
+| `--fp-sys-color-outline-variant` | `#d7c2b9` | `#52443c` | Hairline dividers |
+| `--fp-sys-color-shadow` | `#000000` | `#000000` | Drop-shadow tint |
+| `--fp-sys-color-scrim` | `#000000` | `#000000` | Sheet / modal scrim |
+| `--fp-sys-color-inverse-surface` | `#362f2c` | `#ece0db` | Snackbar / toast surface |
+| `--fp-sys-color-inverse-on-surface` | `#fbeee9` | `#362f2c` | Text on inverse surface |
+| `--fp-sys-color-inverse-primary` | `#ffb68e` | `#974811` | CTA on inverse surface |
+
+#### Migration rule
+
+New components: use `--fp-sys-color-*` directly.
+Existing components: continue using `--color-*` until the migration sprint. Do not mix both in the same component.
+
+---
+
+### Semantic token hierarchy (v1 — LEGACY)
 
 | Token                        | Light value | Dark value | Usage                                                         |
 | ---------------------------- | ----------- | ---------- | ------------------------------------------------------------- |
@@ -71,6 +142,143 @@ For MVP: use CartoDB Light (Positron) in light mode — already significantly cl
 - **Dark mode alternative:** Stadia Alidade Smooth Dark — `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png`
 
 The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes when `ThemeService` emits a theme change event.
+
+---
+
+### §3.1b — Shape (`--fp-sys-shape-*`)
+
+Border-radius scale. Use `var(--fp-sys-shape-*)` in components — never raw `px` or `rem` radius values.
+
+| Token | Value | Pixels | Usage |
+|-------|-------|--------|-------|
+| `--fp-sys-shape-none` | `0` | 0 | Sharp corners (inputs that hug content) |
+| `--fp-sys-shape-extra-small` | `0.25rem` | 4px | Chips, badges, small tags |
+| `--fp-sys-shape-small` | `0.5rem` | 8px | Buttons, inputs, dropdowns |
+| `--fp-sys-shape-medium` | `0.75rem` | 12px | Cards, thumbnails |
+| `--fp-sys-shape-large` | `1rem` | 16px | Panels, sidebar, workspace pane |
+| `--fp-sys-shape-extra-large` | `1.75rem` | 28px | Modals, dialogs, bottom sheets |
+| `--fp-sys-shape-full` | `9999px` | — | Pills, avatar circles, FAB |
+
+---
+
+### §3.1c — Spacing (`--fp-sys-spacing-*`)
+
+4px base grid. All values are in `rem` (1rem = 16px). Use these instead of arbitrary `rem`/`px` spacing in new components.
+
+| Token | Value | Pixels |
+|-------|-------|--------|
+| `--fp-sys-spacing-0` | `0` | 0 |
+| `--fp-sys-spacing-1` | `0.25rem` | 4px |
+| `--fp-sys-spacing-2` | `0.5rem` | 8px |
+| `--fp-sys-spacing-3` | `0.75rem` | 12px |
+| `--fp-sys-spacing-4` | `1rem` | 16px |
+| `--fp-sys-spacing-5` | `1.25rem` | 20px |
+| `--fp-sys-spacing-6` | `1.5rem` | 24px |
+| `--fp-sys-spacing-8` | `2rem` | 32px |
+| `--fp-sys-spacing-10` | `2.5rem` | 40px |
+| `--fp-sys-spacing-12` | `3rem` | 48px |
+| `--fp-sys-spacing-16` | `4rem` | 64px |
+
+---
+
+### §3.1d — Elevation (`--fp-sys-elevation-*`)
+
+MD3 box-shadow elevation levels 0–5. Shadow offsets and blur use `px` (project convention: `px` only for sub-pixel and shadow geometry values).
+
+| Token | Level | Usage |
+|-------|-------|-------|
+| `--fp-sys-elevation-0` | `none` | Flush surfaces, page background |
+| `--fp-sys-elevation-1` | `0px 1px 2px … 0px 1px 3px 1px …` | Raised card resting state |
+| `--fp-sys-elevation-2` | `0px 1px 2px … 0px 2px 6px 2px …` | Navigation rail, FAB resting |
+| `--fp-sys-elevation-3` | `0px 1px 3px … 0px 4px 8px 3px …` | FAB hovered, navigation drawer |
+| `--fp-sys-elevation-4` | `0px 2px 3px … 0px 6px 10px 4px …` | Navigation bar, bottom sheet |
+| `--fp-sys-elevation-5` | `0px 4px 4px … 0px 8px 12px 6px …` | Modal dialog, full-screen overlay |
+
+Note: elevation tokens are skipped by `sync-tokens.mjs` (complex multi-value shorthand). Set Figma elevation effects manually.
+
+---
+
+### §3.1e — Typeface & Typescale (`--fp-ref-typeface-*`, `--fp-sys-typescale-*`)
+
+#### Typefaces
+
+Google Fonts are imported globally in `tokens.scss`. Both families are bundled via `@import url(...)` at the top of the file.
+
+| Token | Value | Role |
+|-------|-------|------|
+| `--fp-ref-typeface-brand` | `'Cormorant Garamond'` | Display, headlines, editorial emphasis |
+| `--fp-ref-typeface-plain` | `'DM Sans'` | Body, labels, UI copy |
+| `--fp-ref-typeface-weight-regular` | `400` | |
+| `--fp-ref-typeface-weight-medium` | `500` | |
+| `--fp-ref-typeface-weight-bold` | `700` | |
+
+#### Type scale
+
+Token name format: `--fp-sys-typescale-{role}-{size|line-height|weight|tracking}`
+
+| Role | Size | Line-height | Weight | Tracking |
+|------|------|-------------|--------|---------|
+| `display-large` | `3.5625rem` | `4rem` | `400` | `-0.015625rem` |
+| `display-medium` | `2.8125rem` | `3.25rem` | `400` | `0rem` |
+| `display-small` | `2.25rem` | `2.75rem` | `400` | `0rem` |
+| `headline-large` | `2rem` | `2.5rem` | `400` | `0rem` |
+| `headline-medium` | `1.75rem` | `2.25rem` | `400` | `0rem` |
+| `headline-small` | `1.5rem` | `2rem` | `400` | `0rem` |
+| `title-large` | `1.375rem` | `1.75rem` | `400` | `0rem` |
+| `title-medium` | `1rem` | `1.5rem` | `500` | `0.009375rem` |
+| `title-small` | `0.875rem` | `1.25rem` | `500` | `0.00625rem` |
+| `body-large` | `1rem` | `1.5rem` | `400` | `0.03125rem` |
+| `body-medium` | `0.875rem` | `1.25rem` | `400` | `0.015625rem` |
+| `body-small` | `0.75rem` | `1rem` | `400` | `0.025rem` |
+| `label-large` | `0.875rem` | `1.25rem` | `500` | `0.00625rem` |
+| `label-medium` | `0.75rem` | `1rem` | `500` | `0.03125rem` |
+| `label-small` | `0.6875rem` | `0.75rem` | `500` | `0.03125rem` |
+
+---
+
+### §3.1f — State Layers (`--fp-sys-state-*`)
+
+Opacity multipliers for interactive state surfaces. Apply as the `opacity` of a filled overlay on the component's surface color.
+
+| Token | Value | State |
+|-------|-------|-------|
+| `--fp-sys-state-hover` | `0.08` | Pointer enters |
+| `--fp-sys-state-focus` | `0.12` | Keyboard focus |
+| `--fp-sys-state-pressed` | `0.12` | Active / pressed |
+| `--fp-sys-state-dragged` | `0.16` | Drag in progress |
+| `--fp-sys-state-disabled` | `0.38` | Disabled content opacity |
+
+---
+
+### §3.1g — Motion (`--fp-sys-motion-*`)
+
+#### Durations
+
+| Token | Value |
+|-------|-------|
+| `--fp-sys-motion-duration-short1` | `50ms` |
+| `--fp-sys-motion-duration-short2` | `100ms` |
+| `--fp-sys-motion-duration-short3` | `150ms` |
+| `--fp-sys-motion-duration-short4` | `200ms` |
+| `--fp-sys-motion-duration-medium1` | `250ms` |
+| `--fp-sys-motion-duration-medium2` | `300ms` |
+| `--fp-sys-motion-duration-medium3` | `350ms` |
+| `--fp-sys-motion-duration-medium4` | `400ms` |
+| `--fp-sys-motion-duration-long1` | `450ms` |
+| `--fp-sys-motion-duration-long2` | `500ms` |
+
+#### Easings
+
+| Token | Curve | Use |
+|-------|-------|-----|
+| `--fp-sys-motion-easing-standard` | `cubic-bezier(0.2, 0, 0, 1)` | Default UI transitions |
+| `--fp-sys-motion-easing-standard-decelerate` | `cubic-bezier(0, 0, 0, 1)` | Elements entering the screen |
+| `--fp-sys-motion-easing-standard-accelerate` | `cubic-bezier(0.3, 0, 1, 1)` | Elements leaving the screen |
+| `--fp-sys-motion-easing-emphasized` | `cubic-bezier(0.2, 0, 0, 1)` | High-attention transitions |
+| `--fp-sys-motion-easing-emphasized-decelerate` | `cubic-bezier(0.05, 0.7, 0.1, 1)` | Emphasized elements entering |
+| `--fp-sys-motion-easing-emphasized-accelerate` | `cubic-bezier(0.3, 0, 0.8, 0.15)` | Emphasized elements leaving |
+
+---
 
 ## 3.2 Typography
 
@@ -286,3 +494,67 @@ Icon sizing conventions:
 - Map markers: custom SVG (not icon font)
 
 All interactive icons must have a visible label or a `title` / `aria-label` attribute for accessibility.
+
+---
+
+## 3.8 Figma Bridge
+
+### Source of truth
+
+**Code is the source of truth. The direction is one-way:**
+
+```
+apps/web/src/styles/tokens.scss  →  docs/design/figma-tokens.json  →  Figma Variables
+```
+
+Figma represents code values; it does not define them. Token changes always flow through a code PR first, then a re-export. Figma changes do not flow back to code without a PR that updates `tokens.scss`.
+
+### Generating the export
+
+```bash
+npm run sync-tokens
+```
+
+This runs `scripts/sync-tokens.mjs`, which parses `tokens.scss` and overwrites `docs/design/figma-tokens.json` with a W3C Design Token Community Group (DTCG) format file containing `light` and `dark` token sets.
+
+Re-run whenever `tokens.scss` changes. Commit `figma-tokens.json` together with the SCSS change.
+
+### Human import step (the agent stops here)
+
+The agent's responsibility ends at `docs/design/figma-tokens.json`. Importing into Figma is a **manual step** performed by the designer:
+
+1. Open the Figma project.
+2. Use **Tokens Studio** plugin → sync from the JSON file, or
+3. Use the **Variables Import** plugin → import the JSON file directly.
+
+The agent must **never** attempt to automate the Figma-side import. If no enterprise Figma API access is available, the above manual route is the only supported path.
+
+### Naming convention
+
+CSS kebab-case → Figma Variable path: each hyphen-separated segment is capitalised and `/`-separated.
+
+| CSS custom property | Figma Variable path | DTCG `$type` | Exported? |
+|---|---|---|---|
+| `--color-bg-base` | `Color/Bg/Base` | `color` | ✓ primitive |
+| `--color-accent-brand` | `Color/Accent/Brand` | `color` | ✓ primitive |
+| `--color-primary` | `Color/Primary` | — | ✗ alias (`var()`) |
+| `--radius-md` | `Radius/Md` | `dimension` | ✓ primitive |
+| `--spacing-unit` | `Spacing/Unit` | `dimension` | ✓ primitive |
+| `--spacing-1` | `Spacing/1` | — | ✗ `calc()` |
+| `--font-size-2xs` | `Font/Size/2xs` | `dimension` | ✓ primitive |
+| `--font-size-md` | `Font/Size/Md` | — | ✗ `calc()` |
+| `--font-weight-regular` | `Font/Weight/Regular` | `number` | ✓ primitive |
+| `--motion-duration-fast` | `Motion/Duration/Fast` | `duration` | ✓ primitive |
+| `--motion-ease-standard` | `Motion/Ease/Standard` | `cubicBezier` | ✓ array `[P1x,P1y,P2x,P2y]` |
+| `--z-modal` | `Z/Modal` | `number` | ✓ primitive |
+
+### What is skipped and why
+
+| Reason | Examples | Action in Figma |
+|---|---|---|
+| `alias` — resolves to another token via `var()` | `--color-primary`, `--elevation-overlay` | Set manually as a Variable alias after primitives are imported |
+| `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
+| `color-mix` — computed at render time | `--interactive-border-muted`, `--state-success-bg` | Approximate with a manual opacity or solid value |
+| `complex` — multi-value shorthand | `--shadow-sm`, `--border-sm` | Set manually; shadows are not natively representable as a single Figma Variable |
+
+Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.

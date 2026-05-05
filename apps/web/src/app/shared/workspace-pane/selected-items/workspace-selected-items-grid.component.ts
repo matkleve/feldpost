@@ -21,6 +21,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { ShareSetService } from '../../../core/share-set/share-set.service';
+import type { ShareAudienceDialogResult } from '../../../core/share-set/share-set.types';
 import { MediaDownloadService } from '../../../core/media-download/media-download.service';
 import { MediaQueryService } from '../../../core/media-query/media-query.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
@@ -43,6 +44,7 @@ import {
   type ProjectSelectOption,
 } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
+import { ShareLinkAudienceDialogComponent } from '../../../shared/share-link-audience-dialog/share-link-audience-dialog.component';
 import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component';
 import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
@@ -249,6 +251,7 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
     DropdownShellComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
+    ShareLinkAudienceDialogComponent,
   ],
 })
 export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
@@ -300,6 +303,8 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   readonly projectOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
   readonly projectDialogSelectedId = signal<string | null>(null);
   readonly addressDialogOpen = signal(false);
+  readonly shareAudienceDialogOpen = signal(false);
+  private readonly shareAudienceDialogKind = signal<'clipboard' | 'silent' | 'native'>('silent');
 
   readonly sections = computed(() => this.viewService.groupedSections());
 
@@ -570,13 +575,13 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
         await this.downloadSelectionZip();
         break;
       case 'share_link':
-        await this.createShareLink(false);
+        this.openShareAudienceDialog('silent');
         break;
       case 'copy_link':
-        await this.createShareLink(true);
+        this.openShareAudienceDialog('clipboard');
         break;
       case 'native_share':
-        await this.nativeShareLink();
+        this.openShareAudienceDialog('native');
         break;
       case 'remove_from_project':
         await this.removeSelectedFromProject();
@@ -941,7 +946,51 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     });
   }
 
-  private async createShareLink(copyToClipboard: boolean): Promise<string | null> {
+  openShareAudienceDialog(kind: 'clipboard' | 'silent' | 'native'): void {
+    if (this.targetMediaIds().length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'error',
+      });
+      return;
+    }
+    this.shareAudienceDialogKind.set(kind);
+    this.shareAudienceDialogOpen.set(true);
+  }
+
+  closeShareAudienceDialog(): void {
+    this.shareAudienceDialogOpen.set(false);
+  }
+
+  async onShareAudienceDialogConfirmed(audience: ShareAudienceDialogResult): Promise<void> {
+    this.shareAudienceDialogOpen.set(false);
+    const kind = this.shareAudienceDialogKind();
+    const copyToClipboard = kind === 'clipboard';
+    const url = await this.createShareLinkWithAudience(copyToClipboard, audience);
+    if (!url) {
+      return;
+    }
+    if (
+      kind === 'native' &&
+      typeof navigator !== 'undefined' &&
+      'share' in navigator
+    ) {
+      try {
+        await navigator.share({
+          title: this.t('workspace.export.share.title', 'Workspace export'),
+          text: this.t('workspace.export.share.text', 'Shared media selection'),
+          url,
+        });
+      } catch {
+        // No-op: user may cancel native share.
+      }
+    }
+  }
+
+  private async createShareLinkWithAudience(
+    copyToClipboard: boolean,
+    audience: ShareAudienceDialogResult,
+  ): Promise<string | null> {
     const selectedIds = this.targetMediaIds();
     if (selectedIds.length === 0) {
       this.toastService.show({
@@ -952,7 +1001,12 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     }
 
     try {
-      const result = await this.shareSetService.createOrReuseShareSet(selectedIds);
+      const result = await this.shareSetService.createOrReuseShareSet(selectedIds, {
+        audience: audience.audience,
+        shareGrant: audience.shareGrant,
+        recipientUserIds:
+          audience.audience === 'named' ? audience.recipientUserIds : undefined,
+      });
       const url = `${window.location.origin}/?share=${result.token}`;
 
       if (copyToClipboard) {
@@ -988,23 +1042,6 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
         type: 'error',
       });
       return null;
-    }
-  }
-
-  private async nativeShareLink(): Promise<void> {
-    const url = await this.createShareLink(false);
-    if (!url || typeof navigator === 'undefined' || !('share' in navigator)) {
-      return;
-    }
-
-    try {
-      await navigator.share({
-        title: this.t('workspace.export.share.title', 'Workspace export'),
-        text: this.t('workspace.export.share.text', 'Shared media selection'),
-        url,
-      });
-    } catch {
-      // No-op: user may cancel native share.
     }
   }
 

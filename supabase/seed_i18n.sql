@@ -22415,4 +22415,345 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.title', 'Share link access', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share link access', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Freigabelink-Zugriff', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Accesso al link di condivisione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.message', 'Choose who can open this link. Anyone with the link still needs the secret token in the URL.', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Choose who can open this link. Anyone with the link still needs the secret token in the URL.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Waehle, wer diesen Link oeffnen darf. Der geheime Token in der URL bleibt erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scegli chi puo aprire questo link. Il token segreto nell URL resta obbligatorio.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.audienceLegend', 'Who can resolve this link', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Who can resolve this link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.audienceLegend'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wer diesen Link aufloesen darf', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.audienceLegend'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chi puo risolvere questo link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.audienceLegend'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.option.public', 'Anyone with the link', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Anyone with the link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.public'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Jeder mit dem Link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.public'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiunque abbia il link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.public'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.option.organization', 'Only people signed in to my organization', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Only people signed in to my organization', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.organization'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nur angemeldete Nutzer meiner Organisation', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.organization'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Solo persone connesse alla mia organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.organization'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.option.named', 'Only specific people (by user ID, same organization)', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Only specific people (by user ID, same organization)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.named'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nur bestimmte Personen (per Nutzer-ID, gleiche Organisation)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.named'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Solo persone specifiche (per ID utente stessa organizzazione)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.option.named'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.recipientsLabel', 'Recipient user IDs', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Recipient user IDs', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.recipientsLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Empfaenger-Nutzer-IDs', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.recipientsLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'ID utente destinatari', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.recipientsLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.recipientsPlaceholder', 'uuid, uuid, …', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'uuid, uuid, …', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.recipientsPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'uuid, uuid, …', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.recipientsPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'uuid, uuid, …', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.recipientsPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.confirm', 'Create link', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.error.invalidRecipients', 'Enter one or more valid user IDs separated by commas.', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter one or more valid user IDs separated by commas.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.error.invalidRecipients'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gib eine oder mehrere gueltige Nutzer-IDs durch Kommas getrennt ein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.error.invalidRecipients'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci uno o piu ID utente validi separati da virgole.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.error.invalidRecipients'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.shareAudience.error.namedRequiresRecipients', 'Named links need at least one recipient user ID.', 'en', 'apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Named links need at least one recipient user ID.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.error.namedRequiresRecipients'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benannte Links benoetigen mindestens eine Empfaenger-Nutzer-ID.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.error.namedRequiresRecipients'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'I link nominati richiedono almeno un ID destinatario.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.shareAudience.error.namedRequiresRecipients'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

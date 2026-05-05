@@ -197,7 +197,7 @@ export class UploadPanelDialogHandlersService {
         const lat = typeof result.lat === 'number' ? result.lat : null;
         const lng = typeof result.lng === 'number' ? result.lng : null;
 
-        if (!lat || !lng) {
+        if (lat === null || lng === null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
           return null;
         }
 

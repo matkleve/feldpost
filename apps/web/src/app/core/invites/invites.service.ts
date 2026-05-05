@@ -138,7 +138,9 @@ export class InvitesService {
 
   private async sha256(value: string): Promise<string> {
     if (typeof crypto === 'undefined' || typeof crypto.subtle === 'undefined') {
-      return value;
+      throw new Error(
+        'Secure hashing is unavailable in this environment (Web Crypto requires a secure context).',
+      );
     }
 
     const encoder = new TextEncoder();
