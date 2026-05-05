@@ -67,6 +67,10 @@ export class UploadPanelDialogActionsService {
   private readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   private options: UploadPanelDialogActionsRegisterOptions | null = null;
+  private readonly projectNameDialogOpen = signal(false);
+  private readonly projectNameDialogTitle = signal('');
+  private readonly projectNameDialogMessage = signal('');
+  private readonly projectNameDialogInitialValue = signal('');
 
   private readonly projectDialogSignals = {
     projectSelectionDialogOpen: this.dialogSignals.projectSelectionDialogOpen,
@@ -74,10 +78,25 @@ export class UploadPanelDialogActionsService {
     projectSelectionDialogMessage: this.dialogSignals.projectSelectionDialogMessage,
     projectSelectionDialogOptions: this.dialogSignals.projectSelectionDialogOptions,
     projectSelectionDialogSelectedId: this.dialogSignals.projectSelectionDialogSelectedId,
-    projectNameDialogOpen: signal(false),
-    projectNameDialogTitle: signal(''),
-    projectNameDialogMessage: signal(''),
-    projectNameDialogInitialValue: signal(''),
+    projectNameDialogOpen: this.projectNameDialogOpen.asReadonly(),
+    projectNameDialogTitle: this.projectNameDialogTitle.asReadonly(),
+    projectNameDialogMessage: this.projectNameDialogMessage.asReadonly(),
+    projectNameDialogInitialValue: this.projectNameDialogInitialValue.asReadonly(),
+    setProjectSelectionDialogOpen: (value: boolean) =>
+      this.dialogSignals.setProjectSelectionDialogOpen(value),
+    setProjectSelectionDialogTitle: (value: string) =>
+      this.dialogSignals.setProjectSelectionDialogTitle(value),
+    setProjectSelectionDialogMessage: (value: string) =>
+      this.dialogSignals.setProjectSelectionDialogMessage(value),
+    setProjectSelectionDialogOptions: (value: ReadonlyArray<{ id: string; name: string }>) =>
+      this.dialogSignals.setProjectSelectionDialogOptions(value),
+    setProjectSelectionDialogSelectedId: (value: string | null) =>
+      this.dialogSignals.setProjectSelectionDialogSelectedId(value),
+    setProjectNameDialogOpen: (value: boolean) => this.projectNameDialogOpen.set(value),
+    setProjectNameDialogTitle: (value: string) => this.projectNameDialogTitle.set(value),
+    setProjectNameDialogMessage: (value: string) => this.projectNameDialogMessage.set(value),
+    setProjectNameDialogInitialValue: (value: string) =>
+      this.projectNameDialogInitialValue.set(value),
   };
 
   register(options: UploadPanelDialogActionsRegisterOptions): void {
@@ -92,7 +111,7 @@ export class UploadPanelDialogActionsService {
   }
 
   onLocationAddressDialogQueryInput(query: string): void {
-    this.dialogSignals.locationAddressDialogQuery.set(query);
+    this.dialogSignals.setLocationAddressDialogQuery(query);
     const timeout = this.dialogSignals.getLocationAddressSearchTimeout();
     if (timeout) {
       clearTimeout(timeout);
@@ -100,8 +119,8 @@ export class UploadPanelDialogActionsService {
     }
 
     if (!query.trim()) {
-      this.dialogSignals.locationAddressDialogLoading.set(false);
-      this.dialogSignals.locationAddressDialogSuggestions.set([]);
+      this.dialogSignals.setLocationAddressDialogLoading(false);
+      this.dialogSignals.setLocationAddressDialogSuggestions([]);
       this.ctx.locationPreviewCleared();
       return;
     }
@@ -113,10 +132,10 @@ export class UploadPanelDialogActionsService {
   }
 
   onLocationAddressDialogClose(): void {
-    this.dialogSignals.locationAddressDialogOpen.set(false);
-    this.dialogSignals.locationAddressDialogQuery.set('');
-    this.dialogSignals.locationAddressDialogSuggestions.set([]);
-    this.dialogSignals.pendingLocationAddressJob.set(null);
+    this.dialogSignals.setLocationAddressDialogOpen(false);
+    this.dialogSignals.setLocationAddressDialogQuery('');
+    this.dialogSignals.setLocationAddressDialogSuggestions([]);
+    this.dialogSignals.setPendingLocationAddressJob(null);
     this.ctx.locationPreviewCleared();
   }
 
@@ -238,7 +257,7 @@ export class UploadPanelDialogActionsService {
     this.mapProjectDialogService.confirmProjectSelection(this.projectDialogSignals, projectId);
 
     if (!job || !selected) {
-      this.dialogSignals.pendingProjectAssignmentJob.set(null);
+      this.dialogSignals.setPendingProjectAssignmentJob(null);
       return;
     }
 
@@ -249,13 +268,13 @@ export class UploadPanelDialogActionsService {
         type: 'success',
         dedupe: true,
       });
-      this.dialogSignals.pendingProjectAssignmentJob.set(null);
+      this.dialogSignals.setPendingProjectAssignmentJob(null);
       this.ctx.setLane('uploading');
       return;
     }
 
     if (!job.imageId) {
-      this.dialogSignals.pendingProjectAssignmentJob.set(null);
+      this.dialogSignals.setPendingProjectAssignmentJob(null);
       return;
     }
 
@@ -277,12 +296,12 @@ export class UploadPanelDialogActionsService {
       });
     }
 
-    this.dialogSignals.pendingProjectAssignmentJob.set(null);
+    this.dialogSignals.setPendingProjectAssignmentJob(null);
   }
 
   onProjectSelectionDialogCancelled(): void {
     this.mapProjectDialogService.cancelProjectSelection(this.projectDialogSignals);
-    this.dialogSignals.pendingProjectAssignmentJob.set(null);
+    this.dialogSignals.setPendingProjectAssignmentJob(null);
   }
 
   onDuplicateResolutionApplyToBatchChange(event: Event): void {
@@ -290,7 +309,7 @@ export class UploadPanelDialogActionsService {
     if (!(target instanceof HTMLInputElement)) {
       return;
     }
-    this.dialogSignals.duplicateResolutionApplyToBatch.set(target.checked);
+    this.dialogSignals.setDuplicateResolutionApplyToBatch(target.checked);
   }
 
   async onDuplicateResolutionChoice(choice: DuplicateResolutionChoice): Promise<void> {
@@ -346,7 +365,7 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    this.dialogSignals.pendingProjectAssignmentJob.set(job);
+    this.dialogSignals.setPendingProjectAssignmentJob(job);
     const prioritizedOptions = this.prioritizeBoundProjectOptions(job, optionsResult.options);
     void this.mapProjectDialogService.openProjectSelectionDialog(
       this.projectDialogSignals,
@@ -357,15 +376,15 @@ export class UploadPanelDialogActionsService {
   }
 
   openDuplicateResolutionDialog(job: UploadJob): void {
-    this.dialogSignals.pendingDuplicateResolutionJob.set(job);
-    this.dialogSignals.duplicateResolutionApplyToBatch.set(false);
-    this.dialogSignals.duplicateResolutionDialogOpen.set(true);
+    this.dialogSignals.setPendingDuplicateResolutionJob(job);
+    this.dialogSignals.setDuplicateResolutionApplyToBatch(false);
+    this.dialogSignals.setDuplicateResolutionDialogOpen(true);
   }
 
   closeDuplicateResolutionDialog(): void {
-    this.dialogSignals.pendingDuplicateResolutionJob.set(null);
-    this.dialogSignals.duplicateResolutionApplyToBatch.set(false);
-    this.dialogSignals.duplicateResolutionDialogOpen.set(false);
+    this.dialogSignals.setPendingDuplicateResolutionJob(null);
+    this.dialogSignals.setDuplicateResolutionApplyToBatch(false);
+    this.dialogSignals.setDuplicateResolutionDialogOpen(false);
   }
 
   openLocationAddressDialog(job: UploadJob): void {
@@ -373,25 +392,25 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    this.dialogSignals.pendingLocationAddressJob.set(job);
-    this.dialogSignals.locationAddressDialogQuery.set('');
-    this.dialogSignals.locationAddressDialogSuggestions.set([]);
-    this.dialogSignals.locationAddressDialogLoading.set(false);
-    this.dialogSignals.locationAddressDialogOpen.set(true);
+    this.dialogSignals.setPendingLocationAddressJob(job);
+    this.dialogSignals.setLocationAddressDialogQuery('');
+    this.dialogSignals.setLocationAddressDialogSuggestions([]);
+    this.dialogSignals.setLocationAddressDialogLoading(false);
+    this.dialogSignals.setLocationAddressDialogOpen(true);
   }
 
   private async searchLocationAddress(query: string): Promise<void> {
     const normalized = query.trim();
     if (!normalized) {
-      this.dialogSignals.locationAddressDialogSuggestions.set([]);
-      this.dialogSignals.locationAddressDialogLoading.set(false);
+      this.dialogSignals.setLocationAddressDialogSuggestions([]);
+      this.dialogSignals.setLocationAddressDialogLoading(false);
       return;
     }
 
-    this.dialogSignals.locationAddressDialogLoading.set(true);
+    this.dialogSignals.setLocationAddressDialogLoading(true);
     const results = await this.geocodingService.search(normalized, { limit: 6 });
-    this.dialogSignals.locationAddressDialogLoading.set(false);
-    this.dialogSignals.locationAddressDialogSuggestions.set(
+    this.dialogSignals.setLocationAddressDialogLoading(false);
+    this.dialogSignals.setLocationAddressDialogSuggestions(
       mapSearchResultsToForwardSuggestions(results),
     );
   }

@@ -16,13 +16,14 @@ import {
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../../core/filter/filter.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
-import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { ShareSetService } from '../../../core/share-set/share-set.service';
 import { MediaDownloadService } from '../../../core/media-download/media-download.service';
+import { MediaQueryService } from '../../../core/media-query/media-query.service';
+import { ProjectsService } from '../../../core/projects/projects.service';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import type {
   GroupedSection,
@@ -254,7 +255,6 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
   protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
-  private readonly supabaseService = inject(SupabaseService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
   private readonly geocodingService = inject(GeocodingService);
@@ -262,6 +262,8 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   private readonly locationResolverService = inject(LocationResolverService);
   private readonly shareSetService = inject(ShareSetService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
+  private readonly mediaQueryService = inject(MediaQueryService);
+  private readonly projectsService = inject(ProjectsService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
 
@@ -466,7 +468,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
 
   clearFilters(): void {
     this.filterService.clearAll();
-    this.viewService.selectedProjectIds.set(new Set());
+    this.viewService.setSelectedProjectIds(new Set());
   }
 
   onScroll(): void {
@@ -664,7 +666,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     }
 
     const selectedImageIds = this.selectionService.selectedMediaIds();
-    this.viewService.rawImages.update((images) =>
+    this.viewService.updateRawImages((images) =>
       images.map((image) =>
         selectedImageIds.has(image.id)
           ? {
@@ -701,16 +703,13 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
       return;
     }
 
-    const rows = selectedMediaItemIds.map((mediaItemId) => ({
-      media_item_id: mediaItemId,
-      project_id: projectId,
-    }));
-    const { error } = await this.supabaseService.client
-      .from('media_projects')
-      .upsert(rows, { onConflict: 'media_item_id,project_id', ignoreDuplicates: true });
+    const result = await this.projectsService.assignMediaItemsToProject(
+      selectedMediaItemIds,
+      projectId,
+    );
 
-    if (error) {
-      this.toastService.show({ message: error.message, type: 'error' });
+    if (!result.ok) {
+      this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
       return;
     }
 
@@ -1010,12 +1009,9 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   }
 
   private async openProjectDialog(): Promise<void> {
-    const { data, error } = await this.supabaseService.client
-      .from('projects')
-      .select('id,name')
-      .order('name', { ascending: true });
+    const projectOptions = await this.projectsService.loadProjectSelectOptions();
 
-    if (error || !Array.isArray(data) || data.length === 0) {
+    if (projectOptions.length === 0) {
       this.toastService.show({
         message: this.t('workspace.export.error.noProjectsAvailable', 'No projects available.'),
         type: 'warning',
@@ -1023,41 +1019,14 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
       return;
     }
 
-    this.projectOptions.set(
-      data
-        .filter(
-          (row): row is { id: string; name: string } =>
-            typeof row.id === 'string' && typeof row.name === 'string' && row.name.length > 0,
-        )
-        .map((row) => ({ id: row.id, name: row.name })),
-    );
+    this.projectOptions.set(projectOptions);
     this.projectDialogSelectedId.set(this.projectOptions()[0]?.id ?? null);
     this.projectDialogOpen.set(true);
   }
 
   private async resolveSelectedMediaItemIds(): Promise<string[]> {
     const selectedIds = Array.from(this.selectionService.selectedMediaIds());
-    if (selectedIds.length === 0) {
-      return [];
-    }
-
-    const idList = selectedIds.join(',');
-    const { data, error } = await this.supabaseService.client
-      .from('media_items')
-      .select('id,source_image_id')
-      .or(`id.in.(${idList}),source_image_id.in.(${idList})`);
-
-    if (error || !Array.isArray(data)) {
-      return [];
-    }
-
-    return Array.from(
-      new Set(
-        data
-          .map((row) => (typeof row.id === 'string' ? row.id : null))
-          .filter((id): id is string => !!id),
-      ),
-    );
+    return this.mediaQueryService.resolveMediaItemIdsByLookupIds(selectedIds);
   }
 
   private async removeSelectedFromProject(): Promise<void> {
@@ -1070,18 +1039,15 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
       return;
     }
 
-    const { error } = await this.supabaseService.client
-      .from('media_projects')
-      .delete()
-      .in('media_item_id', selectedMediaItemIds);
+    const result = await this.projectsService.removeMediaItemsFromProjects(selectedMediaItemIds);
 
-    if (error) {
-      this.toastService.show({ message: error.message, type: 'error' });
+    if (!result.ok) {
+      this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
       return;
     }
 
     const selectedImageIds = this.selectionService.selectedMediaIds();
-    this.viewService.rawImages.update((images) =>
+    this.viewService.updateRawImages((images) =>
       images.map((image) =>
         selectedImageIds.has(image.id)
           ? {
@@ -1113,17 +1079,14 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     }
 
     const selectedIds = this.selectionService.selectedMediaIds();
-    const { error } = await this.supabaseService.client
-      .from('media_items')
-      .delete()
-      .in('id', selectedMediaItemIds);
+    const result = await this.mediaQueryService.deleteMediaItems(selectedMediaItemIds);
 
-    if (error) {
-      this.toastService.show({ message: error.message, type: 'error' });
+    if (!result.ok) {
+      this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
       return;
     }
 
-    this.viewService.rawImages.update((images) =>
+    this.viewService.updateRawImages((images) =>
       images.filter((image) => !selectedIds.has(image.id)),
     );
     this.selectionService.clearSelection();

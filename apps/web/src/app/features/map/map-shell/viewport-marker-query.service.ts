@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import type * as L from 'leaflet';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 
 export interface ViewportMarkerQueryResult<T> {
   data: T[] | null;
@@ -15,8 +15,9 @@ export interface ViewportMarkerQueryResult<T> {
 
 @Injectable({ providedIn: 'root' })
 export class ViewportMarkerQueryService {
+  private readonly supabaseService = inject(SupabaseService);
+
   async fetchViewportMarkers<T>(
-    client: SupabaseClient,
     map: L.Map,
     signal: AbortSignal,
   ): Promise<ViewportMarkerQueryResult<T>> {
@@ -33,7 +34,7 @@ export class ViewportMarkerQueryService {
     const fetchEast = bounds.getEast() + lngPad;
     const roundedZoom = Math.round(zoom);
 
-    const { data, error } = await client
+    const { data, error } = await this.supabaseService.client
       .rpc('viewport_markers', {
         min_lat: fetchSouth,
         min_lng: fetchWest,

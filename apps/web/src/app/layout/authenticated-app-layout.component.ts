@@ -73,7 +73,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     effect(() => {
       const id = this.workspacePaneObserver.detailImageId$();
       if (this.shellState.detailMediaId() !== id) {
-        this.shellState.detailMediaId.set(id);
+        this.shellState.setDetailMediaId(id);
       }
     });
 
@@ -89,22 +89,22 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
 
   openDetailView(mediaId: string): void {
     if (!this.shellState.photoPanelOpen()) {
-      this.shellState.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
+      this.shellState.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
     }
-    this.shellState.detailMediaId.set(mediaId);
+    this.shellState.setDetailMediaId(mediaId);
     this.workspacePaneObserver.setDetailImageId(mediaId);
-    this.shellState.photoPanelOpen.set(true);
+    this.shellState.setPhotoPanelOpen(true);
   }
 
   closeDetailView(): void {
-    this.shellState.detailMediaId.set(null);
+    this.shellState.setDetailMediaId(null);
     this.workspacePaneObserver.setDetailImageId(null);
   }
 
   closeWorkspacePane(): void {
     this.mapLayoutEffects.getMapEffects()?.onWorkspacePaneClosing();
-    this.shellState.photoPanelOpen.set(false);
-    this.shellState.detailMediaId.set(null);
+    this.shellState.setPhotoPanelOpen(false);
+    this.shellState.setDetailMediaId(null);
     this.workspacePaneObserver.setDetailImageId(null);
     this.workspacePaneObserver.setOpen(false);
     this.workspaceViewService.clearActiveSelection();
@@ -114,7 +114,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
 
   onWorkspaceWidthChange(newWidth: number): void {
     const clampedWidth = this.clampWorkspacePaneWidth(newWidth);
-    this.shellState.workspacePaneWidth.set(clampedWidth);
+    this.shellState.setWorkspacePaneWidth(clampedWidth);
     this.persistWorkspacePaneWidthPreference(clampedWidth);
     this.mapLayoutEffects.getMapEffects()?.invalidateMapSize();
   }
@@ -128,7 +128,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     if (!currentRequest || currentRequest.requestId !== requestId) {
       return;
     }
-    this.shellState.detailAddressSearchRequest.set(null);
+    this.shellState.setDetailAddressSearchRequest(null);
   }
 
   onZoomToLocationRequested(event: {
@@ -211,7 +211,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
 
     const clampedWidth = this.clampWorkspacePaneWidth(parsedWidth);
     this.preferredWorkspacePaneWidth.set(clampedWidth);
-    this.shellState.workspacePaneWidth.set(clampedWidth);
+    this.shellState.setWorkspacePaneWidth(clampedWidth);
   }
 
   private persistWorkspacePaneWidthPreference(width: number): void {

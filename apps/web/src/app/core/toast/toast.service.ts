@@ -15,7 +15,8 @@ function generateId(): string {
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  readonly items = signal<ToastItem[]>([]);
+  private readonly _items = signal<ToastItem[]>([]);
+  readonly items = this._items.asReadonly();
 
   private timers = new Map<string, ReturnType<typeof setTimeout>>();
 
@@ -24,7 +25,7 @@ export class ToastService {
     const duration = options.duration ?? (type === 'error' ? ERROR_DURATION : DEFAULT_DURATION);
 
     if (options.dedupe) {
-      const existing = this.items().find(
+      const existing = this._items().find(
         (t) => t.message === options.message && t.type === type && t.state !== 'exiting',
       );
       if (existing) return existing.id;
@@ -40,7 +41,7 @@ export class ToastService {
       startedAt: Date.now(),
     };
 
-    this.items.update((list) => [...list, item]);
+    this._items.update((list) => [...list, item]);
     this.enforceMaxLimit();
 
     if (duration > 0) {
@@ -51,26 +52,26 @@ export class ToastService {
   }
 
   dismiss(id: string): void {
-    const item = this.items().find((t) => t.id === id);
+    const item = this._items().find((t) => t.id === id);
     if (!item || item.state === 'exiting') return;
     this.clearTimer(id);
-    this.items.update((list) =>
+    this._items.update((list) =>
       list.map((t) => (t.id === id ? { ...t, state: 'exiting' as const } : t)),
     );
   }
 
   dismissAll(): void {
-    for (const item of this.items()) {
+    for (const item of this._items()) {
       this.clearTimer(item.id);
     }
-    this.items.update((list) =>
+    this._items.update((list) =>
       list.filter((t) => t.state !== 'exiting').map((t) => ({ ...t, state: 'exiting' as const })),
     );
   }
 
   /** Called by ToastItemComponent after its enter animation completes. */
   markVisible(id: string): void {
-    this.items.update((list) =>
+    this._items.update((list) =>
       list.map((t) =>
         t.id === id && t.state === 'entering' ? { ...t, state: 'visible' as const } : t,
       ),
@@ -79,24 +80,24 @@ export class ToastService {
 
   /** Called by ToastItemComponent after its exit animation completes. */
   afterExit(id: string): void {
-    this.items.update((list) => list.filter((t) => t.id !== id));
+    this._items.update((list) => list.filter((t) => t.id !== id));
   }
 
   pause(id: string): void {
-    const item = this.items().find((t) => t.id === id);
+    const item = this._items().find((t) => t.id === id);
     if (!item || item.duration === 0) return;
     this.clearTimer(id);
     const remaining = item.duration - (Date.now() - item.startedAt);
-    this.items.update((list) =>
+    this._items.update((list) =>
       list.map((t) => (t.id === id ? { ...t, remainingMs: Math.max(remaining, 0) } : t)),
     );
   }
 
   resume(id: string): void {
-    const item = this.items().find((t) => t.id === id);
+    const item = this._items().find((t) => t.id === id);
     if (!item || item.duration === 0 || item.state === 'exiting') return;
     const remaining = item.remainingMs ?? item.duration;
-    this.items.update((list) =>
+    this._items.update((list) =>
       list.map((t) => (t.id === id ? { ...t, startedAt: Date.now(), remainingMs: undefined } : t)),
     );
     this.startTimer(id, remaining);
@@ -106,7 +107,7 @@ export class ToastService {
   _testReset(): void {
     for (const timer of this.timers.values()) clearTimeout(timer);
     this.timers.clear();
-    this.items.set([]);
+    this._items.set([]);
   }
 
   private startTimer(id: string, ms: number): void {
@@ -129,7 +130,7 @@ export class ToastService {
   }
 
   private enforceMaxLimit(): void {
-    const active = this.items().filter((t) => t.state !== 'exiting');
+    const active = this._items().filter((t) => t.state !== 'exiting');
     if (active.length <= MAX_VISIBLE) return;
     const toRemove = active.slice(0, active.length - MAX_VISIBLE);
     for (const item of toRemove) {

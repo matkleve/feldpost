@@ -13,7 +13,7 @@
  *  - All search timeouts and state cleanup
  */
 
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, type Signal } from '@angular/core';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 import { GeocodingService } from '../../core/geocoding/geocoding.service';
 import { ToastService } from '../../core/toast/toast.service';
@@ -28,15 +28,16 @@ import type { ProjectSelectOption } from '../../shared/project-select-dialog/pro
 import type { GeocoderSearchResult } from '../../core/geocoding/geocoding.service';
 
 export interface DialogSignals {
-  projectSelectionDialogOpen: ReturnType<typeof signal<boolean>>;
-  projectSelectionDialogTitle: ReturnType<typeof signal<string>>;
-  projectSelectionDialogMessage: ReturnType<typeof signal<string>>;
-  projectSelectionDialogOptions: ReturnType<typeof signal<ReadonlyArray<ProjectSelectOption>>>;
-  projectSelectionDialogSelectedId: ReturnType<typeof signal<string | null>>;
-  projectNameDialogOpen: ReturnType<typeof signal<boolean>>;
-  projectNameDialogTitle: ReturnType<typeof signal<string>>;
-  projectNameDialogMessage: ReturnType<typeof signal<string>>;
-  projectNameDialogInitialValue: ReturnType<typeof signal<string>>;
+  projectSelectionDialogOptions: Signal<ReadonlyArray<ProjectSelectOption>>;
+  setProjectSelectionDialogOpen(value: boolean): void;
+  setProjectSelectionDialogTitle(value: string): void;
+  setProjectSelectionDialogMessage(value: string): void;
+  setProjectSelectionDialogOptions(value: ReadonlyArray<ProjectSelectOption>): void;
+  setProjectSelectionDialogSelectedId(value: string | null): void;
+  setProjectNameDialogOpen(value: boolean): void;
+  setProjectNameDialogTitle(value: string): void;
+  setProjectNameDialogMessage(value: string): void;
+  setProjectNameDialogInitialValue(value: string): void;
 }
 
 @Injectable()
@@ -54,28 +55,52 @@ export class UploadPanelDialogHandlersService {
 
   private locationAddressSearchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  readonly locationAddressDialogQuery = signal('');
-  readonly locationAddressDialogLoading = signal(false);
-  readonly locationAddressDialogSuggestions = signal<ForwardGeocodeResult[]>([]);
-  readonly locationAddressDialogOpen = signal(false);
+  private readonly _locationAddressDialogQuery = signal('');
+  readonly locationAddressDialogQuery = this._locationAddressDialogQuery.asReadonly();
 
-  readonly projectSelectionDialogOpen = signal(false);
-  readonly projectSelectionDialogTitle = signal(
+  private readonly _locationAddressDialogLoading = signal(false);
+  readonly locationAddressDialogLoading = this._locationAddressDialogLoading.asReadonly();
+
+  private readonly _locationAddressDialogSuggestions = signal<ForwardGeocodeResult[]>([]);
+  readonly locationAddressDialogSuggestions = this._locationAddressDialogSuggestions.asReadonly();
+
+  private readonly _locationAddressDialogOpen = signal(false);
+  readonly locationAddressDialogOpen = this._locationAddressDialogOpen.asReadonly();
+
+  private readonly _projectSelectionDialogOpen = signal(false);
+  readonly projectSelectionDialogOpen = this._projectSelectionDialogOpen.asReadonly();
+
+  private readonly _projectSelectionDialogTitle = signal(
     this.t('upload.item.menu.assignProject', 'Assign project'),
   );
-  readonly projectSelectionDialogMessage = signal('');
-  readonly projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
-  readonly projectSelectionDialogSelectedId = signal<string | null>(null);
+  readonly projectSelectionDialogTitle = this._projectSelectionDialogTitle.asReadonly();
 
-  readonly projectNameDialogOpen = signal(false);
-  readonly projectNameDialogTitle = signal('');
-  readonly projectNameDialogMessage = signal('');
-  readonly projectNameDialogInitialValue = signal('');
+  private readonly _projectSelectionDialogMessage = signal('');
+  readonly projectSelectionDialogMessage = this._projectSelectionDialogMessage.asReadonly();
 
-  readonly duplicateResolutionDialogOpen = signal(false);
-  readonly duplicateResolutionApplyToBatch = signal(false);
+  private readonly _projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
+  readonly projectSelectionDialogOptions = this._projectSelectionDialogOptions.asReadonly();
 
-  constructor() {}
+  private readonly _projectSelectionDialogSelectedId = signal<string | null>(null);
+  readonly projectSelectionDialogSelectedId = this._projectSelectionDialogSelectedId.asReadonly();
+
+  private readonly _projectNameDialogOpen = signal(false);
+  readonly projectNameDialogOpen = this._projectNameDialogOpen.asReadonly();
+
+  private readonly _projectNameDialogTitle = signal('');
+  readonly projectNameDialogTitle = this._projectNameDialogTitle.asReadonly();
+
+  private readonly _projectNameDialogMessage = signal('');
+  readonly projectNameDialogMessage = this._projectNameDialogMessage.asReadonly();
+
+  private readonly _projectNameDialogInitialValue = signal('');
+  readonly projectNameDialogInitialValue = this._projectNameDialogInitialValue.asReadonly();
+
+  private readonly _duplicateResolutionDialogOpen = signal(false);
+  readonly duplicateResolutionDialogOpen = this._duplicateResolutionDialogOpen.asReadonly();
+
+  private readonly _duplicateResolutionApplyToBatch = signal(false);
+  readonly duplicateResolutionApplyToBatch = this._duplicateResolutionApplyToBatch.asReadonly();
 
   // ── Location Address Dialog ────────────────────────────────────────────
 
@@ -86,16 +111,16 @@ export class UploadPanelDialogHandlersService {
       return;
     }
 
-    this.locationAddressDialogQuery.set('');
-    this.locationAddressDialogSuggestions.set([]);
-    this.locationAddressDialogLoading.set(false);
-    this.locationAddressDialogOpen.set(true);
+    this._locationAddressDialogQuery.set('');
+    this._locationAddressDialogSuggestions.set([]);
+    this._locationAddressDialogLoading.set(false);
+    this._locationAddressDialogOpen.set(true);
   }
 
   closeLocationAddressDialog(): void {
-    this.locationAddressDialogOpen.set(false);
-    this.locationAddressDialogQuery.set('');
-    this.locationAddressDialogSuggestions.set([]);
+    this._locationAddressDialogOpen.set(false);
+    this._locationAddressDialogQuery.set('');
+    this._locationAddressDialogSuggestions.set([]);
     if (this.locationAddressSearchTimeout) {
       clearTimeout(this.locationAddressSearchTimeout);
       this.locationAddressSearchTimeout = null;
@@ -103,15 +128,15 @@ export class UploadPanelDialogHandlersService {
   }
 
   onLocationAddressDialogQueryInput(query: string): void {
-    this.locationAddressDialogQuery.set(query);
+    this._locationAddressDialogQuery.set(query);
     if (this.locationAddressSearchTimeout) {
       clearTimeout(this.locationAddressSearchTimeout);
       this.locationAddressSearchTimeout = null;
     }
 
     if (!query.trim()) {
-      this.locationAddressDialogSuggestions.set([]);
-      this.locationAddressDialogLoading.set(false);
+      this._locationAddressDialogSuggestions.set([]);
+      this._locationAddressDialogLoading.set(false);
       return;
     }
 
@@ -154,14 +179,14 @@ export class UploadPanelDialogHandlersService {
   private async searchLocationAddress(query: string): Promise<void> {
     const normalized = query.trim();
     if (!normalized) {
-      this.locationAddressDialogSuggestions.set([]);
+      this._locationAddressDialogSuggestions.set([]);
       return;
     }
 
-    this.locationAddressDialogLoading.set(true);
+    this._locationAddressDialogLoading.set(true);
     const results = await this.geocodingService.search(normalized, { limit: 6 });
-    this.locationAddressDialogLoading.set(false);
-    this.locationAddressDialogSuggestions.set(this.mapSearchResultsToForwardSuggestions(results));
+    this._locationAddressDialogLoading.set(false);
+    this._locationAddressDialogSuggestions.set(this.mapSearchResultsToForwardSuggestions(results));
   }
 
   private mapSearchResultsToForwardSuggestions(
@@ -234,13 +259,13 @@ export class UploadPanelDialogHandlersService {
   // ── Duplicate Resolution Dialog ────────────────────────────────────────
 
   openDuplicateResolutionDialog(): void {
-    this.duplicateResolutionApplyToBatch.set(false);
-    this.duplicateResolutionDialogOpen.set(true);
+    this._duplicateResolutionApplyToBatch.set(false);
+    this._duplicateResolutionDialogOpen.set(true);
   }
 
   closeDuplicateResolutionDialog(): void {
-    this.duplicateResolutionApplyToBatch.set(false);
-    this.duplicateResolutionDialogOpen.set(false);
+    this._duplicateResolutionApplyToBatch.set(false);
+    this._duplicateResolutionDialogOpen.set(false);
   }
 
   onDuplicateResolutionApplyToBatchChange(event: Event): void {
@@ -248,6 +273,42 @@ export class UploadPanelDialogHandlersService {
     if (!(target instanceof HTMLInputElement)) {
       return;
     }
-    this.duplicateResolutionApplyToBatch.set(target.checked);
+    this._duplicateResolutionApplyToBatch.set(target.checked);
+  }
+
+  setProjectSelectionDialogOpen(value: boolean): void {
+    this._projectSelectionDialogOpen.set(value);
+  }
+
+  setProjectSelectionDialogTitle(value: string): void {
+    this._projectSelectionDialogTitle.set(value);
+  }
+
+  setProjectSelectionDialogMessage(value: string): void {
+    this._projectSelectionDialogMessage.set(value);
+  }
+
+  setProjectSelectionDialogOptions(value: ReadonlyArray<ProjectSelectOption>): void {
+    this._projectSelectionDialogOptions.set(value);
+  }
+
+  setProjectSelectionDialogSelectedId(value: string | null): void {
+    this._projectSelectionDialogSelectedId.set(value);
+  }
+
+  setProjectNameDialogOpen(value: boolean): void {
+    this._projectNameDialogOpen.set(value);
+  }
+
+  setProjectNameDialogTitle(value: string): void {
+    this._projectNameDialogTitle.set(value);
+  }
+
+  setProjectNameDialogMessage(value: string): void {
+    this._projectNameDialogMessage.set(value);
+  }
+
+  setProjectNameDialogInitialValue(value: string): void {
+    this._projectNameDialogInitialValue.set(value);
   }
 }

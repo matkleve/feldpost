@@ -12,7 +12,7 @@
  *   `low` for conservative fallback pattern matches.
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { LocationPathParserService } from '../location-path-parser/location-path-parser.service';
 import { UploadLocationConfigService } from '../upload/upload-location-config.service';
 
@@ -55,10 +55,8 @@ export interface ParsedAddress {
 
 @Injectable({ providedIn: 'root' })
 export class FilenameParserService {
-  constructor(
-    private readonly locationPathParser: LocationPathParserService = new LocationPathParserService(),
-    private readonly locationConfig: UploadLocationConfigService = new UploadLocationConfigService(),
-  ) {}
+  private readonly locationPathParser = inject(LocationPathParserService);
+  private readonly locationConfig = inject(UploadLocationConfigService);
 
   /**
    * Attempts to extract an address hint from a filename with confidence level.

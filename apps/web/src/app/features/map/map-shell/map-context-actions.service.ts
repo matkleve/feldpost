@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import type * as L from 'leaflet';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { WorkspaceImage } from '../../../core/workspace-view/workspace-view.types';
 
 export interface AssignImagesToProjectResult {
@@ -10,8 +10,15 @@ export interface AssignImagesToProjectResult {
   errorMessage?: string;
 }
 
+export interface RemoveImagesFromProjectsResult {
+  ok: boolean;
+  reason: 'success' | 'empty' | 'lookup-error' | 'remove-error';
+  errorMessage?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MapContextActionsService {
+  private readonly supabaseService = inject(SupabaseService);
   private readonly geocodingService = inject(GeocodingService);
 
   clampContextMenuPosition(x: number, y: number): { x: number; y: number } {
@@ -77,7 +84,6 @@ export class MapContextActionsService {
   }
 
   async assignImagesToProject(
-    client: SupabaseClient,
     mediaIds: string[],
     projectId: string,
   ): Promise<AssignImagesToProjectResult> {
@@ -85,34 +91,57 @@ export class MapContextActionsService {
       return { ok: false, reason: 'empty' };
     }
 
-    const { data: mediaRows, error: mediaLookupError } = await client
-      .from('media_items')
-      .select('id,source_image_id')
-      .or(`id.in.(${mediaIds.join(',')}),source_image_id.in.(${mediaIds.join(',')})`);
-
-    if (mediaLookupError) {
-      return { ok: false, reason: 'error', errorMessage: mediaLookupError.message };
+    const resolvedMediaItems = await this.resolveMediaItemIds(mediaIds);
+    if (!resolvedMediaItems.ok) {
+      return { ok: false, reason: 'error', errorMessage: resolvedMediaItems.errorMessage };
     }
 
-    const mediaItemIds = Array.from(
-      new Set((mediaRows ?? []).map((row: { id: string }) => row.id).filter(Boolean)),
-    );
-
-    if (mediaItemIds.length === 0) {
+    if (resolvedMediaItems.mediaItemIds.length === 0) {
       return { ok: false, reason: 'empty' };
     }
 
-    const membershipPayload = mediaItemIds.map((mediaItemId) => ({
+    const membershipPayload = resolvedMediaItems.mediaItemIds.map((mediaItemId) => ({
       media_item_id: mediaItemId,
       project_id: projectId,
     }));
 
-    const { error: membershipError } = await client
+    const { error: membershipError } = await this.supabaseService.client
       .from('media_projects')
       .upsert(membershipPayload, { onConflict: 'media_item_id,project_id' });
 
     if (membershipError) {
       return { ok: false, reason: 'error', errorMessage: membershipError.message };
+    }
+
+    return { ok: true, reason: 'success' };
+  }
+
+  async removeImagesFromProjects(mediaIds: string[]): Promise<RemoveImagesFromProjectsResult> {
+    const uniqueMediaIds = Array.from(new Set(mediaIds));
+    if (uniqueMediaIds.length === 0) {
+      return { ok: false, reason: 'empty' };
+    }
+
+    const resolvedMediaItems = await this.resolveMediaItemIds(uniqueMediaIds);
+    if (!resolvedMediaItems.ok) {
+      return {
+        ok: false,
+        reason: 'lookup-error',
+        errorMessage: resolvedMediaItems.errorMessage,
+      };
+    }
+
+    if (resolvedMediaItems.mediaItemIds.length === 0) {
+      return { ok: false, reason: 'empty' };
+    }
+
+    const { error: removeError } = await this.supabaseService.client
+      .from('media_projects')
+      .delete()
+      .in('media_item_id', resolvedMediaItems.mediaItemIds);
+
+    if (removeError) {
+      return { ok: false, reason: 'remove-error', errorMessage: removeError.message };
     }
 
     return { ok: true, reason: 'success' };
@@ -136,5 +165,26 @@ export class MapContextActionsService {
 
     const images = await fetchClusterImages(payload.sourceCells, zoom);
     return images.map((img) => img.id);
+  }
+
+  private async resolveMediaItemIds(
+    mediaIds: string[],
+  ): Promise<{ ok: true; mediaItemIds: string[] } | { ok: false; errorMessage: string }> {
+    const idList = Array.from(new Set(mediaIds)).join(',');
+    const { data: mediaRows, error: mediaLookupError } = await this.supabaseService.client
+      .from('media_items')
+      .select('id,source_image_id')
+      .or(`id.in.(${idList}),source_image_id.in.(${idList})`);
+
+    if (mediaLookupError) {
+      return { ok: false, errorMessage: mediaLookupError.message };
+    }
+
+    return {
+      ok: true,
+      mediaItemIds: Array.from(
+        new Set((mediaRows ?? []).map((row: { id: string }) => row.id).filter(Boolean)),
+      ),
+    };
   }
 }
