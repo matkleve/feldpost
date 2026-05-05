@@ -6,7 +6,11 @@ One **Button** primitive on native `<button>`: emphasis, size, layout, and loadi
 
 ## What It Looks Like
 
-Token borders and fills; hover/active/focus-visible; sizes `sm` / `md` / `lg`; emphasis `primary` / `secondary` / `ghost` / `danger`; layouts `default` / `icon-with-text` / `icon-only`; optional loading spinner on host.
+Token borders and fills; hover/active/focus-visible; sizes `sm` / `md` / `lg`; emphasis `primary` / `secondary` / `neutral` / `ghost` / `danger`; layouts `text` / `icon-text` / `icon-only` / `text-icon` / `icon-text-icon`; optional loading spinner on host.
+
+- **neutral** — transparent bg, pure `--color-border` border (no brand tint), `--color-text-secondary` text. Used for low-prominence toolbar utility actions.
+- **text-icon** — label + trailing icon (chevron, arrow). Dropdown trigger pattern.
+- **icon-text-icon** — leading icon + label + trailing icon. Dropdown trigger with category icon.
 
 ## Where It Lives
 
@@ -40,8 +44,8 @@ button (host)
 | Input | Type | Default |
 | ----- | ---- | ------- |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` |
-| `emphasis` | `'primary' \| 'secondary' \| 'ghost' \| 'danger'` | `'secondary'` |
-| `layout` | `'default' \| 'icon-with-text' \| 'icon-only'` | `'default'` |
+| `emphasis` | `'primary' \| 'secondary' \| 'neutral' \| 'ghost' \| 'danger'` | `'secondary'` |
+| `layout` | `'text' \| 'icon-text' \| 'icon-only' \| 'text-icon' \| 'icon-text-icon'` | `'text'` |
 | `loading` | `boolean` | `false` |
 | `density` | `'default' \| 'toolbar'` | `'default'` |
 
