@@ -1,5 +1,7 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, viewChild } from '@angular/core';
+import { BrnDialog, BrnDialogImports } from '@spartan-ng/brain/dialog';
 import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
+import { HLM_DIALOG_IMPORTS } from '../ui/dialog';
 
 export interface ProjectSelectOption {
   id: string;
@@ -9,11 +11,14 @@ export interface ProjectSelectOption {
 @Component({
   selector: 'app-project-select-dialog',
   standalone: true,
-  imports: [...UI_PRIMITIVE_DIRECTIVES],
+  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...UI_PRIMITIVE_DIRECTIVES],
   templateUrl: './project-select-dialog.component.html',
   styleUrl: './project-select-dialog.component.scss',
 })
 export class ProjectSelectDialogComponent {
+  /** BrnDialog on the root `ng-container`; used to close after confirm (no `brnDialogClose` on confirm). */
+  private readonly _brnDialog = viewChild(BrnDialog);
+
   readonly title = input.required<string>();
   readonly message = input('');
   readonly options = input.required<ReadonlyArray<ProjectSelectOption>>();
@@ -35,6 +40,6 @@ export class ProjectSelectDialogComponent {
       return;
     }
     this.confirmed.emit(selectedId);
+    this._brnDialog()?.close();
   }
 }
-

@@ -1,86 +1,61 @@
-:host {
-  display: contents;
-}
-
-.text-input-dialog-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-modal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-4);
-  isolation: isolate;
-}
-
-.text-input-dialog-overlay__backdrop {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  background: color-mix(in srgb, var(--color-bg-base) 80%, transparent);
-  backdrop-filter: blur(4px);
-}
-
-.text-input-dialog {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 30rem);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--elevation-modal);
-  background: var(--color-bg-elevated);
-  padding: var(--spacing-5);
-  display: grid;
-  gap: var(--spacing-3);
-}
-
-.text-input-dialog__title {
-  margin: 0;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-reading);
-  color: var(--color-text-primary);
-}
-
-.text-input-dialog__message {
-  margin: 0;
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-comfortable);
-  color: var(--color-text-secondary);
-}
-
-.text-input-dialog__input {
-  min-height: 3rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  padding: 0 var(--spacing-3);
-  font: inherit;
-
-  &:focus-visible {
-    outline: none;
-    border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
-    box-shadow: var(--shadow-focus);
+@layer components {
+  // Host participates in parent layout without creating an extra box.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  :host {
+    display: contents;
   }
-}
 
-.text-input-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-2);
-}
+  // Secondary copy under the dialog title.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__message {
+    margin: 0;
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-comfortable);
+    color: var(--color-text-secondary);
+  }
 
-.text-input-dialog__cancel,
-.text-input-dialog__confirm {
-  min-height: 2.75rem;
-  padding: 0 var(--spacing-4);
-}
+  // Single-line text field geometry and focus ring for the prompt.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__input {
+    min-height: 3rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    padding: 0 var(--spacing-3);
+    font: inherit;
 
-.text-input-dialog__confirm {
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
+    &:focus-visible {
+      outline: none;
+      border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+      box-shadow: var(--shadow-focus);
+    }
+  }
+
+  // Footer action row layout (geometry only).
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-2);
+  }
+
+  // Cancel control tap target and padding.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__cancel {
+    min-height: 2.75rem;
+    padding: 0 var(--spacing-4);
+  }
+
+  // Confirm control tap target, padding, and disabled affordance.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__confirm {
+    min-height: 2.75rem;
+    padding: 0 var(--spacing-4);
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   }
 }

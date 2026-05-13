@@ -4,7 +4,7 @@
 
 - **Current phase:** Phase 3 — Component migration (started 2026-05-13)
 - **Last updated:** 2026-05-13
-- **Phase 3 in progress — atoms + Card + Select + Dialog pilot:** Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅, Select ✅, **Confirm dialog** ✅ (`BrnDialog` + local `HLM_DIALOG_IMPORTS` in `apps/web/src/app/shared/ui/dialog/`; `ui-*` shims where applicable)
+- **Phase 3 in progress — atoms + Card + Select + Dialog pilot:** Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅, Select ✅, **Confirm dialog** ✅, **Text input dialog** ✅, **Project select dialog** ✅ (`BrnDialog` + local `HLM_DIALOG_IMPORTS` in `apps/web/src/app/shared/ui/dialog/`; `ui-*` shims where applicable)
 
 ---
 
@@ -93,8 +93,8 @@
 | Component | Path | Current primitives used | spartan/ui candidate | Notes |
 |-----------|------|------------------------|----------------------|-------|
 | Confirm Dialog | `shared/confirm-dialog/confirm-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + `button[uiButton]`** | `BrnDialog` + `HlmDialog` + `HlmButton` | Pilot done (2026-05-13): brain dialog + local hlm CVA; same pattern for other app dialogs |
-| Text Input Dialog | `shared/text-input-dialog/text-input-dialog.component.ts` | custom backdrop + `input`, `button` | `BrnDialog` + `HlmInput` | Shared app-wide |
-| Project Select Dialog | `shared/project-select-dialog/project-select-dialog.component.ts` | custom backdrop | `BrnDialog` + `HlmDialog` | Project picker |
+| Text Input Dialog | `shared/text-input-dialog/text-input-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + `input`, `button`** | `BrnDialog` + `HlmInput` | Migrated 2026-05-13: same shell pattern as confirm-dialog |
+| Project Select Dialog | `shared/project-select-dialog/project-select-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + list + `button`** | `BrnDialog` + `HlmDialog` | Migrated 2026-05-13: scroll list `overflow-y-auto max-h-64`; confirm closes via `BrnDialog.close()` |
 | Share Link Audience Dialog | `shared/share-link-audience-dialog/share-link-audience-dialog.component.ts` | custom backdrop | `BrnDialog` | Share flow |
 | Projects Confirm Dialog | `features/projects/projects-confirm-dialog.component.ts` | custom backdrop | `BrnDialog` | Delegate to `ConfirmDialog` |
 | Photo Lightbox | `shared/photo-lightbox/photo-lightbox.component.ts` | custom backdrop + `img` | `BrnDialog` (fullscreen variant) | Image viewer overlay |
