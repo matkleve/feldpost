@@ -12,21 +12,14 @@ import {
 import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import {
-  SegmentedSwitchComponent,
-  type SegmentedSwitchOption,
-} from '../../shared/segmented-switch/segmented-switch.component';
-import {
-  UiContainerDirective,
-  UiContainerSizeSmDirective,
-  UiIconButtonGhostDirective,
-  UiItemDirective,
-  UiItemLabelDirective,
-  UiItemMediaDirective,
-  UiRangeControlDirective,
-  UiSectionCardDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
-import { HLM_FORM_FIELD_IMPORTS } from '../../shared/ui/form-field';
+  toggleOptionLayout,
+  toggleSingleStringValue,
+} from '../../shared/ui/toggle-group/toggle-group-option.helpers';
+import { UiRangeControlDirective } from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HLM_LABEL_IMPORTS } from '../../shared/ui/label';
 import { HLM_SELECT_IMPORTS } from '../../shared/ui/select';
 import { HLM_SWITCH_IMPORTS } from '../../shared/ui/switch';
@@ -81,18 +74,11 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
   selector: 'ss-settings-overlay',
   standalone: true,
   imports: [
-    SegmentedSwitchComponent,
+    ...BrnToggleGroupImports,
     InviteManagementSectionComponent,
     AccountComponent,
-    UiContainerDirective,
-    UiContainerSizeSmDirective,
-    UiSectionCardDirective,
-    UiIconButtonGhostDirective,
-    UiItemDirective,
-    UiItemMediaDirective,
-    UiItemLabelDirective,
     UiRangeControlDirective,
-    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_BUTTON_IMPORTS,
     ...HLM_LABEL_IMPORTS,
     ...HLM_SELECT_IMPORTS,
     ...HLM_SWITCH_IMPORTS,
@@ -102,6 +88,9 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsOverlayComponent {
+  /** Template helper: icon/text layout for pill toggle options. */
+  readonly optLayout = toggleOptionLayout;
+
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
@@ -115,17 +104,17 @@ export class SettingsOverlayComponent {
     buildSettingsSectionList(this.t),
   );
 
-  readonly languageOptions: ReadonlyArray<SegmentedSwitchOption> = buildLanguageOptions();
+  readonly languageOptions: ReadonlyArray<ToggleGroupOption> = buildLanguageOptions();
 
-  readonly densityOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() =>
+  readonly densityOptions = computed<ReadonlyArray<ToggleGroupOption>>(() =>
     buildDensityOptions(this.t),
   );
 
-  readonly themeModeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() =>
+  readonly themeModeOptions = computed<ReadonlyArray<ToggleGroupOption>>(() =>
     buildThemeModeOptions(this.t),
   );
 
-  readonly markerMotionOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() =>
+  readonly markerMotionOptions = computed<ReadonlyArray<ToggleGroupOption>>(() =>
     buildMarkerMotionOptions(this.t),
   );
 
@@ -240,25 +229,29 @@ export class SettingsOverlayComponent {
     this.i18nService.setLanguage(language);
   }
 
-  onLanguageValueChange(value: string | null): void {
+  onLanguageValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
     if (value === 'en' || value === 'de' || value === 'it') {
       this.setLanguage(value);
     }
   }
 
-  onDensityValueChange(value: string | null): void {
+  onDensityValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
     if (value === 'compact' || value === 'comfortable') {
       this.setDensity(value);
     }
   }
 
-  onThemeModeValueChange(value: string | null): void {
+  onThemeModeValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
     if (value === 'light' || value === 'dark' || value === 'system' || value === 'sandstone') {
       this.setThemeMode(value);
     }
   }
 
-  onMarkerMotionValueChange(value: string | null): void {
+  onMarkerMotionValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
     if (value === 'off' || value === 'smooth') {
       this.setMarkerMotion(value);
     }

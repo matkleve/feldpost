@@ -6,7 +6,6 @@ import { inputVariants } from '../ui/input/input-variants';
 import { labelVariants } from '../ui/label/label-variants';
 import { selectVariants, type SelectVariants } from '../ui/select/select-variants';
 import { switchLegacyShimTrackVariants, toggleRowVariants, type ToggleRowVariants } from '../ui/switch/switch-variants';
-import { tabsListVariants, tabsTriggerVariants } from '../ui/tabs/tabs-variants';
 
 function computeUiButtonShimClasses(el: HTMLElement): string {
   const loading = el.hasAttribute('uibuttonloading');
@@ -89,17 +88,6 @@ function resolveToggleRowTone(el: HTMLElement): NonNullable<ToggleRowVariants['t
   if (el.hasAttribute('uitogglerowloading')) return 'loading';
   if (el.hasAttribute('uitogglerowerror')) return 'error';
   return 'default';
-}
-
-function computeUiTabShimClasses(el: HTMLElement): string {
-  const legacy = new Set<string>(['ui-tab']);
-  for (const c of el.classList) {
-    if (c.startsWith('ui-tab')) legacy.add(c);
-  }
-  if (el.hasAttribute('uitabsizesm')) legacy.add('ui-tab--sm');
-  else if (el.hasAttribute('uitabsizemd')) legacy.add('ui-tab--md');
-  else if (el.hasAttribute('uitabsizelg')) legacy.add('ui-tab--lg');
-  return twMerge(tabsTriggerVariants(), ...legacy);
 }
 
 function computeUiToggleRowShimClasses(el: HTMLElement): string {
@@ -516,62 +504,6 @@ export class UiToggleRowDirective {
     });
   }
 }
-
-// Shim: merges `tabsListVariants` + keeps `.ui-tab-list` for SCSS hooks until callsites use `[hlmTabsList][brnTabsList]`.
-// TODO(spartan-v4): After callsite migration, remove this shim and use `HlmTabsListDirective` on `brn-tabs-list`.
-// @see apps/web/src/app/shared/ui/tabs/
-@Directive({
-  selector: '[uiTabList]',
-  standalone: true,
-  host: {
-    '[class]': 'hostClass()',
-  },
-})
-export class UiTabListDirective {
-  protected readonly hostClass = computed(() => twMerge(tabsListVariants(), 'ui-tab-list'));
-}
-
-// Shim: merges `tabsTriggerVariants` + keeps `.ui-tab*` SCSS hooks until callsites use `[hlmTabsTrigger][brnTabsTrigger]`.
-// TODO(spartan-v4): After callsite migration, remove this shim and use `HlmTabsTriggerDirective` on `button[brnTabsTrigger]`.
-// @see apps/web/src/app/shared/ui/tabs/
-@Directive({
-  selector: 'button[uiTab]',
-  standalone: true,
-  host: {
-    '[class]': 'hostClass()',
-  },
-})
-export class UiTabDirective {
-  private readonly _el = inject(ElementRef<HTMLElement>);
-  protected readonly hostClass = signal('');
-
-  constructor() {
-    afterEveryRender(() => {
-      this.hostClass.set(computeUiTabShimClasses(this._el.nativeElement));
-    });
-  }
-}
-
-/** Marker — merged into {@link UiTabDirective} host classes. */
-@Directive({
-  selector: 'button[uiTabSizeSm]',
-  standalone: true,
-})
-export class UiTabSizeSmDirective {}
-
-/** Marker — merged into {@link UiTabDirective} host classes. */
-@Directive({
-  selector: 'button[uiTabSizeMd]',
-  standalone: true,
-})
-export class UiTabSizeMdDirective {}
-
-/** Marker — merged into {@link UiTabDirective} host classes. */
-@Directive({
-  selector: 'button[uiTabSizeLg]',
-  standalone: true,
-})
-export class UiTabSizeLgDirective {}
 
 /** Marker — merged into {@link UiToggleRowDirective} host classes. */
 @Directive({

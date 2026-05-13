@@ -1,13 +1,11 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
 
-      :host {
-        display: inline-flex;
-        align-items: center;
-        justify-content: flex-end;
-      }
-
-      app-segmented-switch {
-        --segmented-host-width: auto;
-        --segmented-group-width: auto;
-        min-inline-size: auto;
-      }
-    
+.hlm-pill-toggle {
+  --hlm-pill-toggle-width: auto;
+  --hlm-toggle-group-width: auto;
+  min-inline-size: auto;
+}

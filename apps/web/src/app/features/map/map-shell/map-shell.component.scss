@@ -27,7 +27,7 @@
   }
 }
 
-:host ::ng-deep .map-style-switch .segmented-switch__group {
+:host .map-style-switch .hlm-toggle-group {
   flex-direction: column;
   align-items: stretch;
   gap: var(--spacing-1);
@@ -35,7 +35,7 @@
   padding: var(--spacing-1);
 }
 
-:host ::ng-deep .map-style-switch .segmented-switch__button {
+:host .map-style-switch .hlm-toggle-group__item {
   justify-content: center;
   width: 2.75rem;
   min-width: 2.75rem;
@@ -43,7 +43,7 @@
   padding: 0;
 }
 
-:host ::ng-deep .map-style-switch .segmented-switch__label {
+:host .map-style-switch .hlm-toggle-group__label {
   display: none;
 }
 

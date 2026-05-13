@@ -1,5 +1,5 @@
 <section
-  class="invite-section ui-container ui-container--sm ui-section-card"
+  class="invite-section flex max-w-3xl flex-col gap-4 rounded-lg border border-border bg-card p-6"
   aria-labelledby="invite-section-title"
 >
   @if (panelMode() === 'error') {
@@ -12,8 +12,8 @@
       </button>
     </div>
   } @else {
-    <header class="invite-section__header ui-item">
-      <div class="invite-section__title-wrap ui-item-label">
+    <header class="invite-section__header">
+      <div class="invite-section__title-wrap min-w-0 flex-1">
         <h3 id="invite-section-title">
           {{ t('settings.inviteManagement.title', 'Invite Management') }}
         </h3>
@@ -127,9 +127,11 @@
       >
         <div class="invite-section__share-row">
           <button
-            uiIconButtonGhost
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
-            class="invite-section__icon-button icon-btn-ghost"
+            class="invite-section__icon-button"
             [attr.aria-label]="t('settings.inviteManagement.share.copy.aria', 'Copy invite link')"
             [attr.title]="t('settings.inviteManagement.share.copy.title', 'Copy invite link')"
             [disabled]="isShareDisabled()"
@@ -138,9 +140,11 @@
             <span class="material-icons" aria-hidden="true">content_copy</span>
           </button>
           <button
-            uiIconButtonGhost
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
-            class="invite-section__icon-button icon-btn-ghost"
+            class="invite-section__icon-button"
             [attr.aria-label]="
               t('settings.inviteManagement.share.email.aria', 'Share invite via email')
             "
@@ -151,9 +155,11 @@
             <span class="material-icons" aria-hidden="true">mail</span>
           </button>
           <button
-            uiIconButtonGhost
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
-            class="invite-section__icon-button icon-btn-ghost"
+            class="invite-section__icon-button"
             [attr.aria-label]="
               t('settings.inviteManagement.share.whatsapp.aria', 'Share invite via WhatsApp')
             "

@@ -18,13 +18,30 @@
   <app-pane-toolbar class="media-toolbar">
     <!-- Renders card-variant segmented control and emits selected variant changes. -->
     <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
-    <app-card-variant-switch
-      slot="right"
-      [value]="cardVariant()"
-      [allowed]="allowedCardVariants"
-      [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
-      (valueChange)="cardVariant.set($event)"
-    />
+    <div slot="right" class="hlm-pill-toggle hlm-pill-toggle--sm">
+      <div
+        class="hlm-toggle-group"
+        brnToggleGroup
+        type="single"
+        [nullable]="false"
+        [value]="cardVariant()"
+        (valueChange)="onCardVariantToggleChange($event)"
+        [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+      >
+        @for (opt of cardVariantToggleOptions(); track opt.id) {
+          <button
+            type="button"
+            class="hlm-toggle-group__item hlm-toggle-group__item--icon-only"
+            brnToggleGroupItem
+            [value]="opt.id"
+            [attr.aria-label]="opt.ariaLabel || opt.label"
+            [attr.title]="opt.title || opt.label"
+          >
+            <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ opt.icon }}</span>
+          </button>
+        }
+      </div>
+    </div>
   </app-pane-toolbar>
 
   <!-- Renders media content state machine and forwards item/retry events to page controller. -->

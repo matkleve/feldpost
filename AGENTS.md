@@ -110,6 +110,12 @@ Reference workflow and checklist:
 - **Styling stack (default):** Tailwind utility classes in templates **and** component SCSS are both standard. The "no mixing" rule means **do not solve the same visual concern twice** (e.g. duplicating spacing in Tailwind and SCSS) without an explicit plan—not "never use both languages."
 - Loading/Error/Empty are mutually exclusive. Each has exactly one visual owner.
 
+### Ownership Matrix (Mandatory)
+
+Per-component specs carry the full matrix and examples; column contract is fixed:
+
+| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
+
 ## Document Authority
 
 - **Project rules and invariants**: `AGENTS.md`
@@ -125,6 +131,8 @@ Reference workflow and checklist:
 4. Reuse shared UI and adapter abstractions before introducing new structure
 5. **Before creating any new Angular component, consult `docs/specs/component/registry.md`.** If the required component or variant exists, use it. If a variant is missing, flag it and ask. Do not implement inline HTML patterns that duplicate a registered component.
 6. Verify the result against `docs/agent-workflows/implementation-checklist.md`
+
+   *Figma-assisted flows (screenshots, Code Connect, strict No-Figma new-component gate from the archived rule): **(deferred — Figma work paused)**.*
 
 ## Component Spec Coverage (Mandatory)
 
@@ -179,4 +187,4 @@ Detailed normative contracts are in always-applied rule files under `.cursor/rul
 - `ui-state-machine.mdc` — FSM contract, stable state comments, animation/transition contract, component implementation order, ESLint gates
 - `i18n-workflow.mdc` — Mandatory i18n workflow and translation pipeline steps
 - `bulk-operation-safety.mdc` — Bulk replace/edit quality gates
-- `figma-integration.mdc` — Token-first gate, i18n-first gate for labels, component scan gate, import boundary
+- ~~`figma-integration.mdc`~~ — **archived** (Figma work deferred); recoverable at `.cursor/rules/archive/figma-integration.mdc.archived`. Token-first / i18n-from-Figma / component-scan / **No-Figma No-Component** gates in that file are **(deferred — Figma work paused)** — reference-only until the rule is restored to `.cursor/rules/figma-integration.mdc`.

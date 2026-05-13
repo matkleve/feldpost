@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
-import type { SegmentedSwitchOption } from '../../shared/segmented-switch/segmented-switch.component';
+import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import {
   buildLaneSwitchOptions,
   sortUploadedByPriority,
@@ -47,7 +47,7 @@ export class UploadPanelViewModelService {
     this.options.set(options);
   }
 
-  readonly laneSwitchOptions = computed<SegmentedSwitchOption[]>(() => {
+  readonly laneSwitchOptions = computed<ToggleGroupOption[]>(() => {
     const options = this.options();
     if (!options) {
       return [];

@@ -28,8 +28,6 @@ import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
 import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
 import { HLM_SELECT_IMPORTS } from '../../../shared/ui/select';
-import { UiIconButtonGhostDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
-
 @Component({
   selector: 'ss-invite-management-section',
   standalone: true,
@@ -40,7 +38,6 @@ import { UiIconButtonGhostDirective } from '../../../shared/ui-primitives/ui-pri
     ...HLM_FORM_FIELD_IMPORTS,
     ...HLM_LABEL_IMPORTS,
     ...HLM_SELECT_IMPORTS,
-    UiIconButtonGhostDirective,
   ],
   templateUrl: './invite-management-section.component.html',
   styleUrl: './invite-management-section.component.scss',

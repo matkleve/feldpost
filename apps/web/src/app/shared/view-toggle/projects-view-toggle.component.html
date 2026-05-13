@@ -1,7 +1,24 @@
-<app-segmented-switch
-  [ariaLabel]="t('projects.viewToggle.aria.group', 'View mode')"
-  [options]="viewOptions()"
-  [value]="viewMode()"
-  [size]="'sm'"
-  (valueChange)="onViewModeSelected($event)"
-/>
+<div class="hlm-pill-toggle hlm-pill-toggle--sm">
+  <div
+    class="hlm-toggle-group"
+    brnToggleGroup
+    type="single"
+    [nullable]="false"
+    [value]="viewMode()"
+    (valueChange)="onViewModeToggleChange($event)"
+    [attr.aria-label]="t('projects.viewToggle.aria.group', 'View mode')"
+  >
+    @for (option of viewOptions(); track option.id) {
+      <button
+        class="hlm-toggle-group__item hlm-toggle-group__item--icon-only"
+        type="button"
+        brnToggleGroupItem
+        [value]="option.id"
+        [attr.aria-label]="option.ariaLabel || option.label"
+        [attr.title]="option.title || option.label"
+      >
+        <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ option.icon }}</span>
+      </button>
+    }
+  </div>
+</div>

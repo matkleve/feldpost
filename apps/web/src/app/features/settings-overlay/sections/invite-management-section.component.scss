@@ -4,127 +4,254 @@
   --invite-border-muted: var(--menu-surface-border);
 }
 
-.invite-section {
-  --ui-container-gap: var(--spacing-4);
-  /* Border concept: surface/content containers are borderless; only actionable controls get borders. */
-  border: 0;
-  background: var(--color-bg-elevated);
-}
+@layer components {
+  // Invite section root: Tailwind handles card chrome; keep elevated surface token
+  // @see docs/specs/ui/settings-overlay
+  .invite-section {
+    background: var(--color-bg-elevated);
+  }
 
-.invite-section__header {
-  --ui-item-padding-inline: var(--spacing-3);
-  --ui-item-padding-block: var(--spacing-2);
-  --ui-item-media-size: 0;
+  // Header row: title stack + status chip + expiry line spanning full width
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: var(--spacing-3);
+    row-gap: var(--spacing-1);
+    border: 0;
+    background: transparent;
+  }
 
-  grid-template-columns: minmax(0, 1fr) auto;
-  border: 0;
-  background: transparent;
-}
+  // Title + subtitle stack in the header
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
 
-.invite-section__title-wrap {
-  gap: var(--spacing-1);
-}
+  // Primary heading color for invite title (scale from global h3)
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__title-wrap h3 {
+    color: var(--color-text-primary);
+  }
 
-.invite-section__title-wrap h3 {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-primary);
-}
+  // Subtitle copy under the invite title
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__title-wrap p {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+  }
 
-.invite-section__title-wrap p {
-  font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
-}
+  // Expiry line spans both header columns on the second row
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__expires {
+    grid-column: 1 / -1;
+    margin-top: var(--spacing-1);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
 
-.invite-section__expires {
-  grid-column: 1 / -1;
-  margin-top: var(--spacing-1);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
+  // Status chip surface next to the title stack
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: var(--radius-full);
+    border: 0;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
 
-.invite-section__status-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 2rem;
-  padding: 0.2rem 0.7rem;
-  border-radius: var(--radius-full);
-  border: 0;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
+  // Icon sizing inside the status chip
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__status-chip .material-icons {
+    font-size: var(--font-size-md-emphasis);
+  }
 
-.invite-section__status-chip .material-icons {
-  font-size: var(--font-size-md-emphasis);
-}
+  // Vertical stack for role / QR / share blocks
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
 
-.invite-section__stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
+  // Role field label sizing inside hlm-form-field
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__role-field label {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+  }
 
-.invite-section__role-field label {
-  font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
-}
+  // Action row next to the role select
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__role-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: var(--spacing-2);
+  }
 
-.invite-section__role-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: var(--spacing-2);
-}
+  // Native select chrome for invite role
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__select {
+    min-height: 2.75rem;
+    border: var(--invite-stroke-width) solid var(--invite-border-muted);
+    border-radius: var(--radius-md);
+    background: var(--field-bg);
+    color: var(--field-text);
+    padding: 0.6rem 0.75rem;
+  }
 
-.invite-section__select {
-  min-height: 2.75rem;
-  border: var(--invite-stroke-width) solid var(--invite-border-muted);
-  border-radius: var(--radius-md);
-  background: var(--field-bg);
-  color: var(--field-text);
-  padding: 0.6rem 0.75rem;
-}
+  // QR preview block vertical rhythm
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__qr-block {
+    display: grid;
+    gap: var(--spacing-2);
+  }
 
-.invite-section__qr-block {
-  display: grid;
-  gap: var(--spacing-2);
-}
+  // QR frame geometry and neutral surface
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__qr-frame {
+    position: relative;
+    display: grid;
+    place-items: center;
+    margin-inline: auto;
+    inline-size: 12rem;
+    block-size: 12rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
+  }
 
-.invite-section__qr-frame {
-  position: relative;
-  display: grid;
-  place-items: center;
-  margin-inline: auto;
-  inline-size: 12rem;
-  block-size: 12rem;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
-}
+  // Canvas fills the QR frame
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__qr-frame canvas {
+    inline-size: 12rem;
+    block-size: 12rem;
+  }
 
-.invite-section__qr-frame canvas {
-  inline-size: 12rem;
-  block-size: 12rem;
-}
+  // QR canvas fades in after render
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__qr-canvas {
+    opacity: 0;
+    transition: opacity 180ms ease-in-out;
+  }
 
-.invite-section__qr-canvas {
-  opacity: 0;
-  transition: opacity 180ms ease-in-out;
-}
+  // Visible state for rendered QR
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__qr-canvas--visible {
+    opacity: 1;
+  }
 
-.invite-section__qr-canvas--visible {
-  opacity: 1;
-}
+  // Loading spinner over the QR frame
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__qr-spinner {
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid color-mix(in srgb, var(--action-text-active) 20%, var(--color-border));
+    border-top-color: var(--action-text-active);
+    border-radius: var(--radius-full);
+    animation: invite-qr-spin 800ms linear infinite;
+  }
 
-.invite-section__qr-spinner {
-  position: absolute;
-  width: 2rem;
-  height: 2rem;
-  border: 2px solid color-mix(in srgb, var(--action-text-active) 20%, var(--color-border));
-  border-top-color: var(--action-text-active);
-  border-radius: var(--radius-full);
-  animation: invite-qr-spin 800ms linear infinite;
+  // Link label above the monospace preview
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__link-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+
+  // Invite URL preview surface
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__link-preview {
+    padding: var(--spacing-2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--color-bg-surface) 76%, transparent);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-reading);
+    word-break: break-all;
+  }
+
+  // Share icon button row
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__share-row {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: center;
+    gap: var(--spacing-2);
+  }
+
+  // Fixed hit target for ghost icon share buttons
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__icon-button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  // Material icon sizing inside share buttons
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__icon-button .material-icons {
+    font-size: var(--font-size-base-emphasis);
+  }
+
+  // Text buttons in the role row (regenerate / revoke)
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__button {
+    padding: 0.45rem 0.8rem;
+    font-size: var(--font-size-sm);
+  }
+
+  // Centered error state stack
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__state {
+    min-height: 16rem;
+    display: grid;
+    place-content: center;
+    gap: var(--spacing-2);
+    text-align: center;
+  }
+
+  // Error state icon color
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__state .material-icons {
+    justify-self: center;
+    color: var(--color-clay);
+  }
+
+  // Error state heading color (typography from global h3)
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__state h3 {
+    color: var(--color-text-primary);
+  }
+
+  // Error state body copy
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__state p {
+    color: var(--color-text-secondary);
+  }
+
+  // Retry ghost button padding in error state
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__ghost {
+    padding: 0.5rem 0.9rem;
+  }
+
+  // Non-blocking inline error under the stack
+  // @see docs/specs/ui/settings-overlay
+  .invite-section__inline-error {
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+  }
 }
 
 @keyframes invite-qr-spin {
@@ -137,90 +264,33 @@
   }
 }
 
-.invite-section__link-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.invite-section__link-preview {
-  padding: var(--spacing-2);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--color-bg-surface) 76%, transparent);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-reading);
-  word-break: break-all;
-}
-
-.invite-section__share-row {
-  display: grid;
-  grid-template-columns: repeat(3, auto);
-  justify-content: center;
-  gap: var(--spacing-2);
-}
-
-.invite-section__icon-button {
-  width: 2.75rem;
-  height: 2.75rem;
-}
-
-.invite-section__icon-button .material-icons {
-  font-size: var(--font-size-base-emphasis);
-}
-
-.invite-section__button {
-  padding: 0.45rem 0.8rem;
-  font-size: var(--font-size-sm);
-}
-
-.invite-section__state {
-  min-height: 16rem;
-  display: grid;
-  place-content: center;
-  gap: var(--spacing-2);
-  text-align: center;
-}
-
-.invite-section__state .material-icons {
-  justify-self: center;
-  color: var(--color-clay);
-}
-
-.invite-section__state h3 {
-  color: var(--color-text-primary);
-}
-
-.invite-section__state p {
-  color: var(--color-text-secondary);
-}
-
-.invite-section__ghost {
-  padding: 0.5rem 0.9rem;
-}
-
-.invite-section__inline-error {
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
-}
-
 @media (max-width: 47.9375rem) {
-  .invite-section__role-row {
-    grid-template-columns: 1fr;
-  }
+  @layer components {
+    // Stack role controls on narrow screens
+    // @see docs/specs/ui/settings-overlay
+    .invite-section__role-row {
+      grid-template-columns: 1fr;
+    }
 
-  .invite-section__share-row {
-    grid-template-columns: repeat(3, auto);
-    justify-content: center;
-  }
+    // Keep share icons centered on mobile
+    // @see docs/specs/ui/settings-overlay
+    .invite-section__share-row {
+      grid-template-columns: repeat(3, auto);
+      justify-content: center;
+    }
 
-  .invite-section__qr-frame {
-    inline-size: 10rem;
-    block-size: 10rem;
-  }
+    // Slightly smaller QR frame on mobile
+    // @see docs/specs/ui/settings-overlay
+    .invite-section__qr-frame {
+      inline-size: 10rem;
+      block-size: 10rem;
+    }
 
-  .invite-section__qr-frame canvas {
-    inline-size: 10rem;
-    block-size: 10rem;
+    // Match canvas to reduced frame
+    // @see docs/specs/ui/settings-overlay
+    .invite-section__qr-frame canvas {
+      inline-size: 10rem;
+      block-size: 10rem;
+    }
   }
 }

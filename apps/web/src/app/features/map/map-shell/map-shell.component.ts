@@ -59,10 +59,9 @@ import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/works
 import { SettingsPaneService } from '../../../core/settings-pane/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
-import {
-  SegmentedSwitchComponent,
-  type SegmentedSwitchOption,
-} from '../../../shared/segmented-switch/segmented-switch.component';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import type { ToggleGroupOption } from '../../../shared/ui/toggle-group/toggle-group-option.types';
+import { toggleOptionLayout, toggleSingleStringValue } from '../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
 import { ActionEngineService } from '../../../core/action/action-engine.service';
@@ -190,7 +189,7 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
     SearchBarComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
-    SegmentedSwitchComponent,
+    ...BrnToggleGroupImports,
     DropdownShellComponent,
     HlmMenuItemDirective,
     HlmMenuSeparatorDirective,
@@ -237,6 +236,8 @@ export class MapShellComponent implements OnDestroy {
   private static readonly MAP_SAFE_MIN_WIDTH = 320;
 
   readonly placeholderIconUrl = `url("${MEDIA_PLACEHOLDER_ICON}")`;
+  /** Template helper: icon/text layout for map style pill options. */
+  readonly optLayout = toggleOptionLayout;
   private readonly geocodingService = inject(GeocodingService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
@@ -442,7 +443,7 @@ export class MapShellComponent implements OnDestroy {
   readonly mapBasemap = signal<MapBasemapPreference>(
     this.mapPreferencesService.readBasemapPreference(MAP_BASEMAP_STORAGE_KEY),
   );
-  readonly mapViewOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+  readonly mapViewOptions = computed<ReadonlyArray<ToggleGroupOption>>(() => [
     {
       id: 'street',
       label: 'Street',
@@ -2064,7 +2065,8 @@ export class MapShellComponent implements OnDestroy {
     }
   }
 
-  onMapViewModeChange(mode: string | null): void {
+  onMapViewModeChange(raw: ToggleValue<string>): void {
+    const mode = toggleSingleStringValue(raw);
     if (mode === 'street' || mode === 'photo') {
       this.setMapViewMode(mode);
     }

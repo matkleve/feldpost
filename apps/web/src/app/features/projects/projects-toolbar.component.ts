@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import {
@@ -13,11 +14,12 @@ import {
   SortDropdownComponent,
   type SortDropdownOption,
 } from '../../shared/dropdown-trigger/sort-dropdown.component';
+import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import {
-  SegmentedSwitchComponent,
-  type SegmentedSwitchOption,
-} from '../../shared/segmented-switch/segmented-switch.component';
-import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-variant-switch.component';
+  toggleOptionLayout,
+  toggleSingleStringValue,
+} from '../../shared/ui/toggle-group/toggle-group-option.helpers';
+import { buildCardVariantToggleOptions } from '../../shared/ui-primitives/card-variant-toggle.helpers';
 import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
@@ -30,12 +32,11 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
   selector: 'app-projects-toolbar',
   standalone: true,
   imports: [
+    ...BrnToggleGroupImports,
     DropdownShellComponent,
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
-    SegmentedSwitchComponent,
-    CardVariantSwitchComponent,
     UiDropdownTriggerDirective,
     PaneToolbarComponent,
   ],
@@ -43,6 +44,9 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
   styleUrl: './projects-toolbar.component.scss',
 })
 export class ProjectsToolbarComponent {
+  /** Template helper: icon/text layout for status pill options. */
+  readonly optLayout = toggleOptionLayout;
+
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = ''): string => {
     const value = this.i18nService.t(key, fallback);
@@ -82,7 +86,7 @@ export class ProjectsToolbarComponent {
     return this.groupingOptions().filter((group) => !activeIds.has(group.id));
   });
   readonly activeGroupingIds = computed(() => this.activeGroupings().map((group) => group.id));
-  readonly statusOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+  readonly statusOptions = computed<ReadonlyArray<ToggleGroupOption>>(() => [
     {
       id: 'all',
       type: 'icon-with-text',
@@ -97,6 +101,11 @@ export class ProjectsToolbarComponent {
       inactive: !this.hasArchivedProjects(),
     },
   ]);
+  readonly statusActiveOptions = computed(() => this.statusOptions().filter((o) => !o.inactive));
+  readonly statusInactiveOptions = computed(() => this.statusOptions().filter((o) => !!o.inactive));
+  readonly cardVariantToggleOptions = computed(() =>
+    buildCardVariantToggleOptions(this.t, this.allowedCardVariants(), true),
+  );
   readonly buttons = computed(() => [
     {
       id: 'grouping' as const,
@@ -161,13 +170,20 @@ export class ProjectsToolbarComponent {
     this.groupingChanged.emit(active);
   }
 
+  onStatusFilterToggleChange(raw: ToggleValue<string>): void {
+    this.onStatusValueChange(toggleSingleStringValue(raw));
+  }
+
   onStatusValueChange(value: string | null): void {
     if (value === 'all' || value === 'active' || value === 'archived') {
       this.statusFilterChange.emit(value);
     }
   }
 
-  onCardVariantChanged(value: CardVariant): void {
-    this.cardVariantChange.emit(value);
+  onCardVariantToggleChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
+    if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
+      this.cardVariantChange.emit(value);
+    }
   }
 }

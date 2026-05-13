@@ -1,11 +1,13 @@
 ---
 description: Figma integration contract — token-first gate, i18n-first gate for labels, component scan gate, and import boundary rules.
-alwaysApply: true
+alwaysApply: false
 ---
+
+> **ARCHIVED:** Renamed from `.cursor/rules/figma-integration.mdc` so Cursor no longer always-applies it. Figma / Code Connect enforcement is **(deferred — Figma work paused)** until this file is moved back and `alwaysApply` is restored. All sections below (including **No-Figma No-Component Gate**) are retained verbatim for recovery.
 
 # Figma Integration Contract
 
-These rules are non-negotiable and apply whenever Figma designs, screenshots, Dev Mode output, or Code Connect snippets are part of the task.
+These rules are non-negotiable and apply whenever Figma designs, screenshots, Dev Mode output, or Code Connect snippets are part of the task. **(deferred — Figma work paused)** while this file lives only under `archive/`.
 
 ## Token-First Gate (Hard Blocker)
 
@@ -14,7 +16,7 @@ Before proposing any hardcoded color, spacing, radius, shadow, border, or motion
 1. Search `apps/web/src/styles/tokens.scss` for an existing token that matches the intent.
 2. If a matching token exists, use `var(--token-name)` — never write the raw value.
 3. If no matching token exists, **propose adding the token to `tokens.scss` first** and update `docs/design/tokens.md` before writing any component CSS.
-4. After adding a new token, run `npm run sync-tokens` to regenerate `docs/design/figma-tokens.json`.
+4. After adding a new token, run `npm run sync-tokens` to regenerate `docs/design/figma-tokens.json` (or use archived export at `docs/archive/figma-tokens.json` when design output is paused).
 
 Hardcoded values in component SCSS or inline styles that duplicate or bypass a token are a blocker. This includes arbitrary Tailwind values (e.g. `text-[#cc7a4a]`) when a semantic token covers the intent.
 
@@ -47,7 +49,7 @@ Before writing any code from a Figma URL:
 
 4. **Figma `State` rows = CSS pseudo-classes, not Angular inputs.** Never add an `@Input() state` or `@Input() hover` to reproduce what `:hover`, `:focus-visible`, or `:disabled` already handle natively.
 
-## No-Figma No-Component Gate (Hard Blocker)
+## No-Figma No-Component Gate (Hard Blocker) *(deferred — Figma work paused)*
 
 **Never implement a new visual component unless a Figma node has been provided for it.**
 
@@ -67,4 +69,4 @@ Does **not** block: bug fixes to existing components, token additions with a cle
 
 ## Figma import boundary
 
-The agent's responsibility for the Figma bridge ends at `docs/design/figma-tokens.json`. The agent must never attempt to automate importing tokens or components into Figma. That step is performed manually by the designer using Tokens Studio or the Variables Import plugin. See `docs/design/tokens.md § Figma Bridge`.
+The agent's responsibility for the Figma bridge ends at `docs/archive/figma-tokens.json` (archived snapshot) or `docs/design/figma-tokens.json` after `npm run sync-tokens`. The agent must never attempt to automate importing tokens or components into Figma. That step is performed manually by the designer using Tokens Studio or the Variables Import plugin. See `docs/design/tokens.md § Figma Bridge`.

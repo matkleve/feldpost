@@ -112,14 +112,39 @@
     </button>
 
     <div class="upload-panel__location-mode-row">
-      <app-segmented-switch
-        class="upload-panel__location-mode-switch"
-        [ariaLabel]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
-        [options]="locationModeSwitchOptions()"
-        [value]="locationRequirementMode()"
-        [size]="'sm'"
-        (valueChange)="onLocationModeValueChange($event)"
-      ></app-segmented-switch>
+      <div class="upload-panel__location-mode-switch hlm-pill-toggle hlm-pill-toggle--sm">
+        <div
+          class="hlm-toggle-group"
+          brnToggleGroup
+          type="single"
+          [nullable]="false"
+          [value]="locationRequirementMode()"
+          (valueChange)="onLocationModeValueChange($event)"
+          [attr.aria-label]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
+        >
+          @for (option of locationModeSwitchOptions(); track option.id) {
+            <button
+              class="hlm-toggle-group__item"
+              type="button"
+              brnToggleGroupItem
+              [value]="option.id"
+              [disabled]="!!option.disabled"
+              [class.hlm-toggle-group__item--attention]="!!option.attention"
+              [attr.aria-label]="option.ariaLabel || option.label"
+              [attr.title]="option.title || option.label"
+            >
+              @if (option.icon && optLayout(option) !== 'text-only') {
+                <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{
+                  option.icon
+                }}</span>
+              }
+              @if (optLayout(option) !== 'icon-only') {
+                <span class="hlm-toggle-group__label">{{ option.label }}</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
     </div>
 
     <input
@@ -147,14 +172,39 @@
   </div>
 
   @if (showProgressBoard()) {
-    <app-segmented-switch
-      class="upload-panel__area--switch"
-      [options]="laneSwitchOptions()"
-      [value]="effectiveLane()"
-      sizing="fill"
-      (valueChange)="laneHandlers.onLaneSwitchValueChange($event)"
-      [ariaLabel]="t('auto.0370.upload_lanes', 'Upload lanes')"
-    ></app-segmented-switch>
+    <div class="upload-panel__area--switch hlm-pill-toggle hlm-pill-toggle--fill">
+      <div
+        class="hlm-toggle-group"
+        brnToggleGroup
+        type="single"
+        [nullable]="false"
+        [value]="effectiveLane()"
+        (valueChange)="laneHandlers.onLaneSwitchValueChange($event)"
+        [attr.aria-label]="t('auto.0370.upload_lanes', 'Upload lanes')"
+      >
+        @for (option of laneSwitchOptions(); track option.id) {
+          <button
+            class="hlm-toggle-group__item"
+            type="button"
+            brnToggleGroupItem
+            [value]="option.id"
+            [disabled]="!!option.disabled"
+            [class.hlm-toggle-group__item--attention]="!!option.attention"
+            [attr.aria-label]="option.ariaLabel || option.label"
+            [attr.title]="option.title || option.label"
+          >
+            @if (option.icon && optLayout(option) !== 'text-only') {
+              <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{
+                option.icon
+              }}</span>
+            }
+            @if (optLayout(option) !== 'icon-only') {
+              <span class="hlm-toggle-group__label">{{ option.label }}</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
   }
 
   <!-- Per-file progress list -->

@@ -1,16 +1,17 @@
 @if (open()) {
   <section
-    uiContainer
-    class="settings-overlay ui-container"
+    class="settings-overlay w-full"
     data-i18n-skip
     role="dialog"
     aria-modal="true"
     [attr.aria-label]="t('settings.overlay.aria.dialog', 'Settings')"
   >
     <button
-      uiIconButtonGhost
+      hlmBtn
+      variant="ghost"
+      size="icon"
       type="button"
-      class="settings-overlay__close icon-btn-ghost"
+      class="settings-overlay__close"
       [attr.aria-label]="t('settings.overlay.aria.close', 'Close settings overlay')"
       (click)="requestClose()"
     >
@@ -39,20 +40,16 @@
         <div class="settings-overlay__section-list" role="list">
           @for (section of sectionList(); track section.id) {
             <button
-              uiItem
-              class="settings-overlay__section-item ui-item"
+              type="button"
+              class="settings-overlay__section-item"
               [class.settings-overlay__section-item--active]="isSectionSelected(section.id)"
               [attr.aria-current]="isSectionSelected(section.id) ? 'true' : null"
               (click)="selectSection(section.id)"
             >
-              <span
-                uiItemMedia
-                class="settings-overlay__section-media ui-item-media"
-                aria-hidden="true"
-              >
+              <span class="settings-overlay__section-media shrink-0" aria-hidden="true">
                 <span class="material-icons">{{ section.icon }}</span>
               </span>
-              <span uiItemLabel class="settings-overlay__section-label ui-item-label">
+              <span class="settings-overlay__section-label min-w-0 flex-1">
                 <strong>{{ section.title }}</strong>
                 <small>{{ section.subtitle }}</small>
               </span>
@@ -70,10 +67,7 @@
         @switch (selectedSectionId()) {
           @case ('general') {
             <section
-              uiContainer
-              uiContainerSizeSm
-              uiSectionCard
-              class="settings-overlay__detail-card ui-container ui-container--sm ui-section-card"
+              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.general.title', 'General') }}</h3>
               <p>
@@ -85,37 +79,87 @@
                 }}
               </p>
 
-              <hlm-form-field class="settings-overlay__field-row">
+              <div class="settings-overlay__field-row">
                 <label hlmLabel>{{ t('settings.overlay.general.language.label', 'Language') }}</label>
-                <app-segmented-switch
-                  class="settings-overlay__segmented"
-                  data-i18n-skip
-                  [ariaLabel]="t('settings.overlay.general.language.label', 'Language')"
-                  [options]="languageOptions"
-                  [value]="settingsModel().language"
-                  (valueChange)="onLanguageValueChange($event)"
-                />
-              </hlm-form-field>
+                <div class="settings-overlay__field-value">
+                  <div class="settings-overlay__segmented hlm-pill-toggle hlm-pill-toggle--md" data-i18n-skip>
+                  <div
+                    class="hlm-toggle-group"
+                    brnToggleGroup
+                    type="single"
+                    [nullable]="false"
+                    [value]="settingsModel().language"
+                    (valueChange)="onLanguageValueChange($event)"
+                    [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
+                  >
+                    @for (option of languageOptions; track option.id) {
+                      <button
+                        class="hlm-toggle-group__item"
+                        type="button"
+                        brnToggleGroupItem
+                        [value]="option.id"
+                        [disabled]="!!option.disabled"
+                        [attr.aria-label]="option.ariaLabel || option.label"
+                        [attr.title]="option.title || option.label"
+                      >
+                        @if (option.icon && optLayout(option) !== 'text-only') {
+                          <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{
+                            option.icon
+                          }}</span>
+                        }
+                        @if (optLayout(option) !== 'icon-only') {
+                          <span class="hlm-toggle-group__label">{{ option.label }}</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+                </div>
+              </div>
 
-              <hlm-form-field class="settings-overlay__field-row">
+              <div class="settings-overlay__field-row">
                 <label hlmLabel>{{ t('settings.overlay.general.density.label', 'Density') }}</label>
-                <app-segmented-switch
-                  class="settings-overlay__segmented"
-                  [ariaLabel]="t('settings.overlay.general.density.label', 'Density')"
-                  [options]="densityOptions()"
-                  [value]="settingsModel().density"
-                  (valueChange)="onDensityValueChange($event)"
-                />
-              </hlm-form-field>
+                <div class="settings-overlay__field-value">
+                  <div class="settings-overlay__segmented hlm-pill-toggle hlm-pill-toggle--md">
+                  <div
+                    class="hlm-toggle-group"
+                    brnToggleGroup
+                    type="single"
+                    [nullable]="false"
+                    [value]="settingsModel().density"
+                    (valueChange)="onDensityValueChange($event)"
+                    [attr.aria-label]="t('settings.overlay.general.density.label', 'Density')"
+                  >
+                    @for (option of densityOptions(); track option.id) {
+                      <button
+                        class="hlm-toggle-group__item"
+                        type="button"
+                        brnToggleGroupItem
+                        [value]="option.id"
+                        [disabled]="!!option.disabled"
+                        [attr.aria-label]="option.ariaLabel || option.label"
+                        [attr.title]="option.title || option.label"
+                      >
+                        @if (option.icon && optLayout(option) !== 'text-only') {
+                          <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{
+                            option.icon
+                          }}</span>
+                        }
+                        @if (optLayout(option) !== 'icon-only') {
+                          <span class="hlm-toggle-group__label">{{ option.label }}</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+                </div>
+              </div>
             </section>
           }
 
           @case ('appearance') {
             <section
-              uiContainer
-              uiContainerSizeSm
-              uiSectionCard
-              class="settings-overlay__detail-card ui-container ui-container--sm ui-section-card"
+              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.appearance.title', 'Appearance') }}</h3>
               <p>
@@ -126,27 +170,53 @@
                   )
                 }}
               </p>
-              <hlm-form-field class="settings-overlay__field-row">
+              <div class="settings-overlay__field-row">
                 <label hlmLabel>{{
                   t('settings.overlay.appearance.themeMode.label', 'Theme mode')
                 }}</label>
-                <app-segmented-switch
-                  class="settings-overlay__segmented settings-overlay__segmented--theme"
-                  [ariaLabel]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
-                  [options]="themeModeOptions()"
-                  [value]="settingsModel().themeMode"
-                  (valueChange)="onThemeModeValueChange($event)"
-                />
-              </hlm-form-field>
+                <div class="settings-overlay__field-value">
+                  <div
+                    class="settings-overlay__segmented settings-overlay__segmented--theme hlm-pill-toggle hlm-pill-toggle--md"
+                  >
+                  <div
+                    class="hlm-toggle-group"
+                    brnToggleGroup
+                    type="single"
+                    [nullable]="false"
+                    [value]="settingsModel().themeMode"
+                    (valueChange)="onThemeModeValueChange($event)"
+                    [attr.aria-label]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
+                  >
+                    @for (option of themeModeOptions(); track option.id) {
+                      <button
+                        class="hlm-toggle-group__item"
+                        type="button"
+                        brnToggleGroupItem
+                        [value]="option.id"
+                        [disabled]="!!option.disabled"
+                        [attr.aria-label]="option.ariaLabel || option.label"
+                        [attr.title]="option.title || option.label"
+                      >
+                        @if (option.icon && optLayout(option) !== 'text-only') {
+                          <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{
+                            option.icon
+                          }}</span>
+                        }
+                        @if (optLayout(option) !== 'icon-only') {
+                          <span class="hlm-toggle-group__label">{{ option.label }}</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+                </div>
+              </div>
             </section>
           }
 
           @case ('notifications') {
             <section
-              uiContainer
-              uiContainerSizeSm
-              uiSectionCard
-              class="settings-overlay__detail-card ui-container ui-container--sm ui-section-card"
+              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.notifications.title', 'Notifications') }}</h3>
               <p>
@@ -159,12 +229,11 @@
               </p>
 
               <button
-                uiItem
                 type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
+                class="settings-overlay__toggle-row"
                 (click)="toggleSetting('notificationsEnabled')"
               >
-                <span uiItemLabel class="ui-item-label">
+                <span class="settings-overlay__toggle-label">
                   <strong>{{
                     t('settings.overlay.notifications.inApp.title', 'In-app notifications')
                   }}</strong>
@@ -188,12 +257,11 @@
               </button>
 
               <button
-                uiItem
                 type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
+                class="settings-overlay__toggle-row"
                 (click)="toggleSetting('uploadFailureAlerts')"
               >
-                <span uiItemLabel class="ui-item-label">
+                <span class="settings-overlay__toggle-label">
                   <strong>
                     {{
                       t(
@@ -225,10 +293,7 @@
 
           @case ('map') {
             <section
-              uiContainer
-              uiContainerSizeSm
-              uiSectionCard
-              class="settings-overlay__detail-card ui-container ui-container--sm ui-section-card"
+              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.map.title', 'Map Preferences') }}</h3>
               <p>
@@ -241,12 +306,11 @@
               </p>
 
               <button
-                uiItem
                 type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
+                class="settings-overlay__toggle-row"
                 (click)="toggleSetting('mapAutoLocate')"
               >
-                <span uiItemLabel class="ui-item-label">
+                <span class="settings-overlay__toggle-label">
                   <strong>{{
                     t('settings.overlay.map.autoLocate.title', 'Auto-locate after login')
                   }}</strong>
@@ -270,12 +334,11 @@
               </button>
 
               <button
-                uiItem
                 type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
+                class="settings-overlay__toggle-row"
                 (click)="toggleSetting('mapGridOverlay')"
               >
-                <span uiItemLabel class="ui-item-label">
+                <span class="settings-overlay__toggle-label">
                   <strong>{{
                     t('settings.overlay.map.gridOverlay.title', 'Grid helper overlay')
                   }}</strong>
@@ -298,27 +361,51 @@
                 </span>
               </button>
 
-              <hlm-form-field class="settings-overlay__field-row">
+              <div class="settings-overlay__field-row">
                 <label hlmLabel>{{
                   t('settings.overlay.map.markerMotion.label', 'Marker motion')
                 }}</label>
-                <app-segmented-switch
-                  class="settings-overlay__segmented"
-                  [ariaLabel]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
-                  [options]="markerMotionOptions()"
-                  [value]="settingsModel().markerMotion"
-                  (valueChange)="onMarkerMotionValueChange($event)"
-                />
-              </hlm-form-field>
+                <div class="settings-overlay__field-value">
+                  <div class="settings-overlay__segmented hlm-pill-toggle hlm-pill-toggle--md">
+                  <div
+                    class="hlm-toggle-group"
+                    brnToggleGroup
+                    type="single"
+                    [nullable]="false"
+                    [value]="settingsModel().markerMotion"
+                    (valueChange)="onMarkerMotionValueChange($event)"
+                    [attr.aria-label]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
+                  >
+                    @for (option of markerMotionOptions(); track option.id) {
+                      <button
+                        class="hlm-toggle-group__item"
+                        type="button"
+                        brnToggleGroupItem
+                        [value]="option.id"
+                        [disabled]="!!option.disabled"
+                        [attr.aria-label]="option.ariaLabel || option.label"
+                        [attr.title]="option.title || option.label"
+                      >
+                        @if (option.icon && optLayout(option) !== 'text-only') {
+                          <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{
+                            option.icon
+                          }}</span>
+                        }
+                        @if (optLayout(option) !== 'icon-only') {
+                          <span class="hlm-toggle-group__label">{{ option.label }}</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+                </div>
+              </div>
             </section>
           }
 
           @case ('search') {
             <section
-              uiContainer
-              uiContainerSizeSm
-              uiSectionCard
-              class="settings-overlay__detail-card ui-container ui-container--sm ui-section-card"
+              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.search.title', 'Search Tuning') }}</h3>
               <p>
@@ -330,30 +417,32 @@
                 }}
               </p>
 
-              <hlm-form-field class="settings-overlay__field-row">
+              <div class="settings-overlay__field-row">
                 <label hlmLabel for="settings-search-bias">{{
                   t('settings.overlay.search.bias.label', 'Search bias')
                 }}</label>
-                <select
-                  hlmSelect
-                  id="settings-search-bias"
-                  class="settings-overlay__select"
-                  [value]="settingsModel().searchBias"
-                  (change)="setSearchBias($any($event.target).value)"
-                >
-                  <option value="balanced">
-                    {{ t('settings.overlay.search.bias.option.balanced', 'Balanced') }}
-                  </option>
-                  <option value="address-first">
-                    {{ t('settings.overlay.search.bias.option.addressFirst', 'Address first') }}
-                  </option>
-                  <option value="place-first">
-                    {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
-                  </option>
-                </select>
-              </hlm-form-field>
+                <div class="settings-overlay__field-value">
+                  <select
+                    hlmSelect
+                    id="settings-search-bias"
+                    class="settings-overlay__select"
+                    [value]="settingsModel().searchBias"
+                    (change)="setSearchBias($any($event.target).value)"
+                  >
+                    <option value="balanced">
+                      {{ t('settings.overlay.search.bias.option.balanced', 'Balanced') }}
+                    </option>
+                    <option value="address-first">
+                      {{ t('settings.overlay.search.bias.option.addressFirst', 'Address first') }}
+                    </option>
+                    <option value="place-first">
+                      {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
+                    </option>
+                  </select>
+                </div>
+              </div>
 
-              <hlm-form-field class="settings-overlay__field-row settings-overlay__field-row--stacked">
+              <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
                 <label hlmLabel for="settings-search-radius">{{
                   t('settings.overlay.search.radius.label', 'Default radius (km)')
                 }}</label>
@@ -368,16 +457,13 @@
                   (input)="setSearchRadius(+$any($event.target).value)"
                 />
                 <strong>{{ settingsModel().searchRadiusKm }} km</strong>
-              </hlm-form-field>
+              </div>
             </section>
           }
 
           @case ('data') {
             <section
-              uiContainer
-              uiContainerSizeSm
-              uiSectionCard
-              class="settings-overlay__detail-card ui-container ui-container--sm ui-section-card"
+              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.data.title', 'Data and Privacy') }}</h3>
               <p>
@@ -389,7 +475,7 @@
                 }}
               </p>
 
-              <hlm-form-field class="settings-overlay__field-row settings-overlay__field-row--stacked">
+              <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
                 <label hlmLabel for="settings-cache-retention">{{
                   t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
                 }}</label>
@@ -404,15 +490,14 @@
                   (input)="setCacheRetentionDays(+$any($event.target).value)"
                 />
                 <strong>{{ settingsModel().cacheRetentionDays }} days</strong>
-              </hlm-form-field>
+              </div>
 
               <button
-                uiItem
                 type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
+                class="settings-overlay__toggle-row"
                 (click)="toggleSetting('telemetryEnabled')"
               >
-                <span uiItemLabel class="ui-item-label">
+                <span class="settings-overlay__toggle-label">
                   <strong>{{
                     t('settings.overlay.data.telemetry.title', 'Diagnostics telemetry')
                   }}</strong>

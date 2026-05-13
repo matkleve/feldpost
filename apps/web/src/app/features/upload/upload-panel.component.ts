@@ -32,11 +32,13 @@ import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { HlmMenuItemDirective } from '../../shared/ui/menu';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectSelectDialogComponent } from '../../shared/project-select-dialog/project-select-dialog.component';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
+import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import {
-  SegmentedSwitchComponent,
-  type SegmentedSwitchOption,
-} from '../../shared/segmented-switch/segmented-switch.component';
+  toggleOptionLayout,
+  toggleSingleStringValue,
+} from '../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { DEFAULT_FILE_TYPE_CHIPS } from './upload-panel.constants';
 import { UploadPanelJobActionsService } from './upload-panel-job-actions.service';
 import { UploadPanelBulkActionsService } from './upload-panel-bulk-actions.service';
@@ -65,7 +67,7 @@ export type {
     CommonModule,
     UploadPanelItemComponent,
     ChipComponent,
-    SegmentedSwitchComponent,
+    ...BrnToggleGroupImports,
     UiButtonDirective,
     UiInputControlDirective,
     HlmMenuItemDirective,
@@ -104,6 +106,9 @@ export type {
  * @see docs/MIGRATION_PLAN.md — Upload panel decision 2026-05-13
  */
 export class UploadPanelComponent {
+  /** Template helper: icon/text layout for lane and location toggles. */
+  readonly optLayout = toggleOptionLayout;
+
   // Services
   private readonly uploadManager = inject(UploadManagerService);
   private readonly i18nService = inject(I18nService);
@@ -150,7 +155,7 @@ export class UploadPanelComponent {
   readonly priorityWorkflowEnabled = computed(() => this.embeddedInPane());
   readonly selectedLane = this.signals.selectedLane;
   readonly locationRequirementMode = this.signals.locationRequirementMode;
-  readonly locationModeSwitchOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+  readonly locationModeSwitchOptions = computed<ReadonlyArray<ToggleGroupOption>>(() => [
     {
       id: 'required',
       type: 'icon-with-text',
@@ -229,7 +234,8 @@ export class UploadPanelComponent {
     });
   }
 
-  onLocationModeValueChange(value: string | null): void {
+  onLocationModeValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
     if (value === 'required' || value === 'optional') {
       this.signals.setLocationRequirementMode(value);
     }

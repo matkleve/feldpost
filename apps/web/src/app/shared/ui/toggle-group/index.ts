@@ -9,6 +9,9 @@ export type { ToggleGroupItemVariantProps } from './toggle-group-variants';
 export { HlmToggleGroupDirective } from './hlm-toggle-group.directive';
 export { HlmToggleGroupItemDirective } from './hlm-toggle-group-item.directive';
 
+export type { ToggleGroupOption } from './toggle-group-option.types';
+export { toggleOptionLayout, toggleSingleStringValue } from './toggle-group-option.helpers';
+
 /** Local toggle-group helm shims (use with `BrnToggleGroupImports`). */
 export const HLM_TOGGLE_GROUP_IMPORTS = [
   HlmToggleGroupDirective,

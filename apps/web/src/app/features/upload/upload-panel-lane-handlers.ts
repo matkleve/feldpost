@@ -3,6 +3,8 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import type { ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { toggleSingleStringValue } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { isUploadLane } from './upload-panel-helpers';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
@@ -15,7 +17,8 @@ export class UploadPanelLaneHandlersService {
     this.signals.setSelectedLane(lane);
   }
 
-  onLaneSwitchValueChange(value: string | null): void {
+  onLaneSwitchValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
     if (!value || !isUploadLane(value)) {
       return;
     }

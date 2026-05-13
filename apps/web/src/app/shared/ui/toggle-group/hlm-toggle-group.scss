@@ -1,0 +1,303 @@
+// Shared pill toggle group chrome for BrnToggleGroup + plain div/button markup.
+// @see docs/MIGRATION_PLAN.md
+
+@layer components {
+  // Host row: aligns pill group with optional inactive strip and width tokens.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle {
+    --hlm-toggle-motion-duration: 180ms;
+    --hlm-toggle-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --hlm-toggle-button-height: 2.45rem;
+    --hlm-toggle-button-padding-inline: 0.95rem;
+    --hlm-toggle-button-font-size: var(--font-size-sm-tight);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    max-width: 100%;
+    width: var(--hlm-pill-toggle-width, auto);
+    transition: gap var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease);
+  }
+
+  // Full-width row: stretch inner pill and distribute segment buttons evenly.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle--fill {
+    width: 100%;
+
+    .hlm-toggle-group {
+      width: 100%;
+      display: flex;
+    }
+
+    .hlm-toggle-group__item {
+      flex: 1 1 0;
+    }
+  }
+
+  // Wider gap when an inactive strip sits beside the interactive group.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle--has-inactive {
+    gap: var(--spacing-4);
+  }
+
+  // Muted entire control when the toggle group is disabled.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle--disabled {
+    opacity: 0.7;
+  }
+
+  // Compact segment height and typography.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle--sm {
+    --hlm-toggle-button-height: 2rem;
+    --hlm-toggle-button-padding-inline: var(--spacing-2);
+    --hlm-toggle-button-font-size: var(--font-size-xs);
+  }
+
+  // Default segment height (matches prior md segmented switch).
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle--md {
+    --hlm-toggle-button-height: 2.45rem;
+    --hlm-toggle-button-padding-inline: 0.95rem;
+    --hlm-toggle-button-font-size: var(--font-size-sm-tight);
+  }
+
+  // Large segment height for dense touch targets.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle--lg {
+    --hlm-toggle-button-height: 2.75rem;
+    --hlm-toggle-button-padding-inline: var(--spacing-4);
+    --hlm-toggle-button-font-size: var(--font-size-md);
+  }
+
+  // Pill container chrome: frosted strip behind segment buttons.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    width: var(--hlm-toggle-group-width, auto);
+    border: 1.5px solid var(--action-border-default);
+    border-radius: var(--radius-full);
+    padding: 0.15rem;
+    background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
+    border-color: color-mix(in srgb, var(--menu-surface-border) 86%, transparent);
+    box-shadow: var(--elevation-subtle);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    max-width: 100%;
+    transition:
+      border-color var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      box-shadow var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      background-color var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease);
+  }
+
+  // Segment button base geometry and idle visuals inside the pill.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__item {
+    height: var(--hlm-toggle-button-height, 2.45rem);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--action-bg-default);
+    color: var(--action-text-default);
+    padding-inline: var(--hlm-toggle-button-padding-inline, 0.95rem);
+    flex: var(--hlm-toggle-button-flex, initial);
+    gap: var(--spacing-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--hlm-toggle-button-font-size, 0.8rem);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-solid);
+    white-space: nowrap;
+    transform: translateY(0);
+    transition:
+      color var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      background-color var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      border-color var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      box-shadow var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      transform var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      opacity var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease);
+  }
+
+  // Square icon-only segment matching control height.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__item--icon-only {
+    width: var(--hlm-toggle-button-height, 2.45rem);
+    padding-inline: 0;
+    flex: 0 0 auto;
+    gap: 0;
+  }
+
+  // Icon glyph inside a segment (never receives heading typography overrides).
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__icon {
+    display: block;
+    font-size: var(--font-size-lg-emphasis);
+    line-height: var(--line-height-solid);
+  }
+
+  // Visible label text beside optional icons.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__label {
+    display: inline-flex;
+    align-items: center;
+    line-height: var(--line-height-solid);
+    letter-spacing: 0.01em;
+  }
+
+  // Non-interactive strip placed beside the real toggle for “preview” segments.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__inactive-strip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    animation: hlm-toggle-group-inactive-enter var(--hlm-toggle-motion-duration)
+      var(--hlm-toggle-motion-ease) both;
+  }
+
+  // Disabled-look segment mirroring active segment geometry (no group wiring).
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__inactive-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--hlm-toggle-button-height, 2.45rem);
+    gap: var(--spacing-2);
+    border: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--menu-item-text) 84%, var(--color-text-secondary));
+    padding: 0 0.15rem;
+    font: inherit;
+    font-size: var(--hlm-toggle-button-font-size, 0.8rem);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    cursor: default;
+    transition:
+      color var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      opacity var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease),
+      transform var(--hlm-toggle-motion-duration) var(--hlm-toggle-motion-ease);
+    transform: translateX(0);
+
+    .hlm-toggle-group__icon {
+      opacity: 0.88;
+    }
+  }
+
+  // Square inactive icon slot aligned to icon-only segments.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__inactive-item--icon-only {
+    width: var(--hlm-toggle-button-height, 2.45rem);
+    padding: 0;
+    flex: 0 0 auto;
+    gap: 0;
+  }
+
+  @media (max-width: 767px) {
+    // Tighter pill row spacing on narrow viewports.
+    // @see docs/MIGRATION_PLAN.md
+    .hlm-pill-toggle {
+      gap: var(--spacing-3);
+    }
+
+    // Shorter segment buttons on small screens.
+    // @see docs/MIGRATION_PLAN.md
+    .hlm-toggle-group__item {
+      height: var(--hlm-toggle-button-height-mobile, 2.25rem);
+      padding-inline: var(--hlm-toggle-button-padding-inline-mobile, 0.7rem);
+    }
+
+    // Keep icon-only segments square using the mobile height token.
+    // @see docs/MIGRATION_PLAN.md
+    .hlm-toggle-group__item--icon-only {
+      width: var(--hlm-toggle-button-height-mobile, 2.25rem);
+      padding-inline: 0;
+    }
+
+    // Slightly smaller icons inside segments on mobile.
+    // @see docs/MIGRATION_PLAN.md
+    .hlm-toggle-group__icon {
+      font-size: var(--font-size-base-strong);
+    }
+
+    // Inactive strip items follow the same mobile height as live segments.
+    // @see docs/MIGRATION_PLAN.md
+    .hlm-toggle-group__inactive-item {
+      height: var(--hlm-toggle-button-height-mobile, 2.25rem);
+    }
+
+    .hlm-toggle-group__inactive-item--icon-only {
+      width: var(--hlm-toggle-button-height-mobile, 2.25rem);
+      padding: 0;
+    }
+
+    // Slightly reduced label size inside segments on mobile.
+    // @see docs/MIGRATION_PLAN.md
+    .hlm-toggle-group__label {
+      font-size: var(--font-size-xs-soft);
+    }
+  }
+}
+
+@layer states {
+  // Subtle warning ring on a segment that needs attention (e.g. issues lane).
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__item--attention {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 38%, transparent);
+    color: var(--color-warning);
+  }
+
+  // Hover feedback for enabled segments.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__item:hover:not(:disabled) {
+    color: var(--menu-item-text);
+    background: var(--action-bg-hover);
+  }
+
+  // Keyboard focus ring for segment buttons.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__item:focus-visible {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-clay) 18%, transparent),
+      0 1px 2px color-mix(in srgb, var(--color-clay) 12%, transparent);
+    outline: none;
+  }
+
+  // Selected segment: BrnToggleGroupItem sets data-state="on" when pressed.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-toggle-group__item[data-state='on'] {
+    background: var(--field-bg);
+    border-color: color-mix(in srgb, var(--action-border-active) 82%, transparent);
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
+    color: var(--action-text-active);
+    transform: translateY(0);
+  }
+}
+
+// Entrance motion for inactive strip appearing beside the live pill.
+// @see docs/MIGRATION_PLAN.md
+@keyframes hlm-toggle-group-inactive-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // Strip transitions/animations for reduced-motion users.
+  // @see docs/MIGRATION_PLAN.md
+  .hlm-pill-toggle,
+  .hlm-toggle-group,
+  .hlm-toggle-group__item,
+  .hlm-toggle-group__inactive-item {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}

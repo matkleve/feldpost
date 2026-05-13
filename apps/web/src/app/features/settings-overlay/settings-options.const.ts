@@ -1,10 +1,10 @@
-import type { SegmentedSwitchOption } from '../../shared/segmented-switch/segmented-switch.component';
+import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 
 /**
  * Factory for creating language options array.
  * Language labels stay in native form (never translated by active locale).
  */
-export function buildLanguageOptions(): ReadonlyArray<SegmentedSwitchOption> {
+export function buildLanguageOptions(): ReadonlyArray<ToggleGroupOption> {
   return [
     { id: 'en', label: 'English' },
     { id: 'de', label: 'Deutsch' },
@@ -17,7 +17,7 @@ export function buildLanguageOptions(): ReadonlyArray<SegmentedSwitchOption> {
  */
 export function buildDensityOptions(
   t: (key: string, fallback: string) => string,
-): ReadonlyArray<SegmentedSwitchOption> {
+): ReadonlyArray<ToggleGroupOption> {
   return [
     {
       id: 'compact',
@@ -32,7 +32,7 @@ export function buildDensityOptions(
 
 export function buildThemeModeOptions(
   t: (key: string, fallback: string) => string,
-): ReadonlyArray<SegmentedSwitchOption> {
+): ReadonlyArray<ToggleGroupOption> {
   return [
     {
       id: 'light',
@@ -55,7 +55,7 @@ export function buildThemeModeOptions(
 
 export function buildMarkerMotionOptions(
   t: (key: string, fallback: string) => string,
-): ReadonlyArray<SegmentedSwitchOption> {
+): ReadonlyArray<ToggleGroupOption> {
   return [
     {
       id: 'off',

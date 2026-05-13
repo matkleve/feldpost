@@ -289,6 +289,8 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 
 ## Phase Checklist
 
+> *Ecosystem — **Figma / Code Connect:** **(deferred — Figma paused)**. This plan has no separate Figma rows; see `.cursor/rules/archive/figma-integration.mdc.archived` and `docs/archive/figma-tokens.json`.*
+
 - [ ] **Phase 0** — Discovery & Planning ✅ (complete — this document)
 - [ ] **Phase 1** — Spec Cleanup
   - [ ] Resolve primary color decision: `--color-accent-brand` (warm orange) vs `--fp-sys-color-primary` (MD3 gold) as the single brand primary

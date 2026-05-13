@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
+import { MetadataService } from '../metadata/metadata.service';
+import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 import type { ImageRecord } from './media-query.types';
 
 interface MediaItemRow {
@@ -22,6 +24,40 @@ interface MediaItemRow {
     | 'no_gps'
     | 'unresolved'
     | null;
+}
+
+interface MediaGalleryDbRow {
+  id: string;
+  organization_id: string;
+  created_by: string | null;
+  storage_path: string | null;
+  thumbnail_path: string | null;
+  latitude: number | string | null;
+  longitude: number | string | null;
+  exif_latitude: number | null;
+  exif_longitude: number | null;
+  captured_at: string | null;
+  created_at: string;
+  location_status:
+    | 'pending'
+    | 'resolved'
+    | 'unresolvable'
+    | 'gps'
+    | 'no_gps'
+    | 'unresolved'
+    | null;
+  source_image_id: string | null;
+  address_label: string | null;
+  street: string | null;
+  city: string | null;
+  district: string | null;
+  country: string | null;
+}
+
+interface RawMediaProjectMembershipRow {
+  media_item_id: string;
+  project_id: string;
+  projects: { name: string | null } | Array<{ name: string | null }> | null;
 }
 
 interface MediaItemLookupRow {
@@ -48,7 +84,126 @@ export interface MediaMutationResult {
 
 @Injectable({ providedIn: 'root' })
 export class MediaQueryService {
+  private static readonly GALLERY_PAGE_SIZE = 500;
+  private static readonly MEMBERSHIP_QUERY_CHUNK = 120;
+
   private readonly supabase = inject(SupabaseService);
+  private readonly metadata = inject(MetadataService);
+
+  /**
+   * Loads all media items for the signed-in user as WorkspaceMedia rows (projects + metadata),
+   * intended for the /media gallery pipeline (client-side sort/filter/group like the workspace).
+   */
+  async loadAllCurrentUserWorkspaceMedia(): Promise<WorkspaceMedia[]> {
+    const {
+      data: { user },
+    } = await this.supabase.client.auth.getUser();
+
+    if (!user) {
+      return [];
+    }
+
+    const accum: MediaGalleryDbRow[] = [];
+    let offset = 0;
+
+    while (true) {
+      const { data, error } = await this.supabase.client
+        .from('media_items')
+        .select(
+          'id, organization_id, created_by, storage_path, thumbnail_path, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id, address_label, street, city, district, country',
+        )
+        .order('created_at', { ascending: false })
+        .range(offset, offset + MediaQueryService.GALLERY_PAGE_SIZE - 1);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const rows = Array.isArray(data) ? (data as MediaGalleryDbRow[]) : [];
+      accum.push(...rows);
+
+      if (rows.length < MediaQueryService.GALLERY_PAGE_SIZE) {
+        break;
+      }
+
+      offset += MediaQueryService.GALLERY_PAGE_SIZE;
+    }
+
+    if (accum.length === 0) {
+      return [];
+    }
+
+    const membershipByMediaId = new Map<string, Array<{ id: string; name: string | null }>>();
+    const mediaItemIds = accum.map((row) => row.id);
+
+    for (let i = 0; i < mediaItemIds.length; i += MediaQueryService.MEMBERSHIP_QUERY_CHUNK) {
+      const chunk = mediaItemIds.slice(i, i + MediaQueryService.MEMBERSHIP_QUERY_CHUNK);
+      const { data: membershipsData, error: membershipsError } = await this.supabase.client
+        .from('media_projects')
+        .select('media_item_id, project_id, projects(name)')
+        .in('media_item_id', chunk);
+
+      if (membershipsError || !Array.isArray(membershipsData)) {
+        continue;
+      }
+
+      for (const row of membershipsData as RawMediaProjectMembershipRow[]) {
+        const bucket = membershipByMediaId.get(row.media_item_id) ?? [];
+        const relatedProject = Array.isArray(row.projects) ? row.projects[0] : row.projects;
+        bucket.push({
+          id: row.project_id,
+          name: relatedProject?.name ?? null,
+        });
+        membershipByMediaId.set(row.media_item_id, bucket);
+      }
+    }
+
+    for (const memberships of membershipByMediaId.values()) {
+      memberships.sort((a, b) => {
+        const aName = (a.name ?? '').toLowerCase();
+        const bName = (b.name ?? '').toLowerCase();
+        return aName < bName ? -1 : aName > bName ? 1 : 0;
+      });
+    }
+
+    const userIds = Array.from(
+      new Set(accum.map((row) => row.created_by).filter((id): id is string => !!id)),
+    );
+    const profileNameById = new Map<string, string>();
+
+    if (userIds.length > 0) {
+      const { data: profilesData, error: profilesError } = await this.supabase.client
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
+
+      if (!profilesError && Array.isArray(profilesData)) {
+        for (const profile of profilesData as Array<{ id: string; full_name: string | null }>) {
+          if (profile.full_name) {
+            profileNameById.set(profile.id, profile.full_name);
+          }
+        }
+      }
+    }
+
+    const images: WorkspaceMedia[] = accum.map((row) =>
+      mapGalleryRowToWorkspaceMedia(
+        row,
+        membershipByMediaId.get(row.id) ?? [],
+        row.created_by ? (profileNameById.get(row.created_by) ?? null) : null,
+      ),
+    );
+
+    const metadataMap = await this.loadMetadataValuesChunked(mediaItemIds);
+    if (metadataMap.size === 0) {
+      return images;
+    }
+
+    return images.map((img) => {
+      const values = metadataMap.get(img.id);
+      return values ? { ...img, metadata: { ...img.metadata, ...values } } : img;
+    });
+  }
 
   async loadCurrentUserMedia(options: MediaLoadOptions = {}): Promise<MediaLoadResult> {
     const offset = Math.max(0, options.offset ?? 0);
@@ -163,4 +318,66 @@ export class MediaQueryService {
   private normalizeIds(ids: readonly string[]): string[] {
     return Array.from(new Set(ids.filter((id) => typeof id === 'string' && id.length > 0)));
   }
+
+  private async loadMetadataValuesChunked(
+    mediaItemIds: readonly string[],
+  ): Promise<Map<string, NonNullable<WorkspaceMedia['metadata']>>> {
+    const merged = new Map<string, NonNullable<WorkspaceMedia['metadata']>>();
+    const chunkSize = 400;
+
+    for (let i = 0; i < mediaItemIds.length; i += chunkSize) {
+      const chunk = mediaItemIds.slice(i, i + chunkSize);
+      const map = await this.metadata.loadMetadataValuesByLookupIds(chunk);
+      for (const [id, values] of map.entries()) {
+        merged.set(id, { ...(merged.get(id) ?? {}), ...values });
+      }
+    }
+
+    return merged;
+  }
+}
+
+function toFiniteNumber(value: number | string | null | undefined): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function mapGalleryRowToWorkspaceMedia(
+  row: MediaGalleryDbRow,
+  memberships: Array<{ id: string; name: string | null }>,
+  userName: string | null,
+): WorkspaceMedia {
+  const lat = toFiniteNumber(row.latitude);
+  const lng = toFiniteNumber(row.longitude);
+  const projectIds = memberships.map((m) => m.id);
+  const projectNames = memberships.map((m) => m.name ?? '').filter((name) => !!name);
+
+  return {
+    id: row.id,
+    latitude: lat ?? 0,
+    longitude: lng ?? 0,
+    thumbnailPath: row.thumbnail_path,
+    storagePath: row.storage_path,
+    capturedAt: row.captured_at,
+    createdAt: row.created_at,
+    projectId: projectIds[0] ?? null,
+    projectName: projectNames[0] ?? null,
+    projectIds,
+    projectNames,
+    direction: null,
+    exifLatitude: row.exif_latitude,
+    exifLongitude: row.exif_longitude,
+    addressLabel: row.address_label,
+    city: row.city,
+    district: row.district,
+    street: row.street,
+    streetNumber: null,
+    zip: null,
+    country: row.country,
+    userName,
+  };
 }

@@ -10,10 +10,12 @@ import { Component, HostListener, computed, effect, inject, signal } from '@angu
 import type { OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { auditTime, merge } from 'rxjs';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { VStackComponent } from '../../shared/containers';
 import { MediaPageHeaderComponent, type MediaPageHeaderState } from './media-page-header.component';
 import { MediaContentComponent, type MediaContentState } from './media-content.component';
-import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-variant-switch.component';
+import { buildCardVariantToggleOptions } from '../../shared/ui-primitives/card-variant-toggle.helpers';
+import { toggleSingleStringValue } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
 import type { SelectedItemsContextPort } from '../../core/workspace-pane/workspace-pane-context.port';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspace-pane-observer.adapter';
 import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
@@ -33,7 +35,7 @@ import { UploadManagerService } from '../../core/upload/upload-manager.service';
     VStackComponent,
     MediaPageHeaderComponent,
     MediaContentComponent,
-    CardVariantSwitchComponent,
+    ...BrnToggleGroupImports,
     PaneToolbarComponent,
   ],
   templateUrl: './media.component.html',
@@ -67,6 +69,9 @@ export class MediaComponent implements OnDestroy {
   readonly projectNameById = signal<ReadonlyMap<string, string>>(new Map<string, string>());
   readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('media'));
   readonly allowedCardVariants = CARD_VARIANTS;
+  readonly cardVariantToggleOptions = computed(() =>
+    buildCardVariantToggleOptions((k, f) => this.t(k, f), this.allowedCardVariants, true),
+  );
   readonly projectNameForFn = (projectId: string | null): string => this.projectNameFor(projectId);
   private readonly lastResolvedAuthUserId = signal<string | null | undefined>(undefined);
   readonly emptyReason = computed<'auth-required' | 'no-results'>(() => {
@@ -170,6 +175,13 @@ export class MediaComponent implements OnDestroy {
   t(key: string, fallback: string): string {
     const value = this.i18nService.t(key, fallback);
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+  }
+
+  onCardVariantToggleChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
+    if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
+      this.cardVariant.set(value);
+    }
   }
 
   private debugInteraction(stage: string, extra: Record<string, unknown> = {}): void {

@@ -12,13 +12,35 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
-  <app-segmented-switch
-    class="map-style-switch"
-    ariaLabel="Map style"
-    [options]="mapViewOptions()"
-    [value]="mapViewMode()"
-    (valueChange)="onMapViewModeChange($event)"
-  />
+  <div class="map-style-switch hlm-pill-toggle hlm-pill-toggle--md">
+    <div
+      class="hlm-toggle-group"
+      brnToggleGroup
+      type="single"
+      [nullable]="false"
+      [value]="mapViewMode()"
+      (valueChange)="onMapViewModeChange($event)"
+      aria-label="Map style"
+    >
+      @for (option of mapViewOptions(); track option.id) {
+        <button
+          class="hlm-toggle-group__item map-style-switch__option"
+          type="button"
+          brnToggleGroupItem
+          [value]="option.id"
+          [attr.aria-label]="option.ariaLabel || option.label"
+          [attr.title]="option.title || option.label"
+        >
+          @if (option.icon && optLayout(option) !== 'text-only') {
+            <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ option.icon }}</span>
+          }
+          @if (optLayout(option) !== 'icon-only') {
+            <span class="hlm-toggle-group__label">{{ option.label }}</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
 
   <!-- Upload button — top-right of map zone, visually over map -->
   <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">

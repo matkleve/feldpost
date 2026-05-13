@@ -37,7 +37,7 @@ import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
 import { UploadPanelLaneHandlersService } from './upload-panel-lane-handlers';
 import { UploadPanelRowHandlersService, type ZoomToLocationEvent } from './upload-panel-row-handlers';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
-import { UiButtonDirective, UiTabDirective, UiTabListDirective } from '../../shared/ui-primitives/ui-primitives.directive';
+import { UiButtonDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -50,7 +50,7 @@ export interface ImageUploadedEvent {
 @Component({
   selector: 'app-upload-panel',
   standalone: true,
-  imports: [CommonModule, UploadPanelItemComponent, UiTabListDirective, UiTabDirective, UiButtonDirective],
+  imports: [CommonModule, UploadPanelItemComponent, UiButtonDirective],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
 })

@@ -192,7 +192,7 @@ describe('MapShellComponent', () => {
     expect(bar).not.toBeNull();
   });
 
-  it('renders the top-left map style switch with three options', () => {
+  it('renders the top-left map style switch with two options', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
@@ -201,10 +201,9 @@ describe('MapShellComponent', () => {
       '.map-style-switch__option',
     );
     expect(switchRoot).not.toBeNull();
-    expect(options).toHaveLength(3);
+    expect(options).toHaveLength(2);
     expect(options[0]?.textContent?.trim()).toBe('Street');
     expect(options[1]?.textContent?.trim()).toBe('Photo');
-    expect(options[2]?.textContent?.trim()).toBe('Historic');
   });
 
   it('renders the map container element', () => {

@@ -1,5 +1,6 @@
 import type { OnInit } from '@angular/core';
 import { Component, signal, computed, HostListener, inject } from '@angular/core';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
@@ -18,7 +19,8 @@ import type {
 } from '../../../../core/workspace-view/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { UiDropdownTriggerDirective } from '../../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
-import { CardVariantSwitchComponent } from '../../../../shared/ui-primitives/card-variant-switch.component';
+import { buildCardVariantToggleOptions } from '../../../../shared/ui-primitives/card-variant-toggle.helpers';
+import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { CardVariantSettingsService } from '../../../../shared/ui-primitives/card-variant-settings.service';
 import {
   CARD_VARIANTS,
@@ -38,7 +40,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     SortDropdownComponent,
     ProjectsDropdownComponent,
     UiDropdownTriggerDirective,
-    CardVariantSwitchComponent,
+    ...BrnToggleGroupImports,
   ],
 })
 export class WorkspaceToolbarComponent implements OnInit {
@@ -61,6 +63,9 @@ export class WorkspaceToolbarComponent implements OnInit {
   readonly activeDropdown = signal<ToolbarDropdown>(null);
   readonly thumbnailSizePreset = computed(() => this.viewService.thumbnailSizePreset());
   readonly allowedCardVariants = CARD_VARIANTS;
+  readonly cardVariantToggleOptions = computed(() =>
+    buildCardVariantToggleOptions(this.t, this.allowedCardVariants, true),
+  );
 
   // Dropdown position (fixed, computed from button rect)
   readonly dropdownTop = signal(0);
@@ -167,7 +172,8 @@ export class WorkspaceToolbarComponent implements OnInit {
     this.activeDropdown.set(null);
   }
 
-  onThumbnailSizeChanged(value: string | null): void {
+  onThumbnailSizeToggleChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
     if (value !== 'row' && value !== 'small' && value !== 'medium' && value !== 'large') return;
     this.viewService.setThumbnailSizePreset(value as ThumbnailSizePreset);
     this.cardVariantSettings.setVariant('map', value as CardVariant);

@@ -7,7 +7,7 @@
 
 import type { ForwardGeocodeResult, GeocoderSearchResult } from '../../core/geocoding/geocoding.service';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
-import type { SegmentedSwitchOption } from '../../shared/segmented-switch/segmented-switch.component';
+import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import { UPLOAD_LANES } from './upload-panel.constants';
 import type { UploadLane } from './upload-phase.helpers';
 
@@ -51,7 +51,7 @@ export function buildLaneSwitchOptions(
   counts: UploadLaneCounts,
   issueAttentionPulse: boolean,
   effectiveLane: UploadLane,
-): SegmentedSwitchOption[] {
+): ToggleGroupOption[] {
   return [
     {
       id: 'uploading',

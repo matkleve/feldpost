@@ -24,292 +24,420 @@
   --settings-interactive-transition: var(--interactive-transition-standard);
 }
 
-.settings-overlay {
-  position: relative;
-  position: fixed;
-  top: 50%;
-  left: calc(var(--container-inset) + var(--layout-sidebar-width-collapsed) + var(--spacing-3));
-  transform: translateY(-50%);
-  z-index: var(--z-modal);
-  width: var(--settings-overlay-width);
-  max-width: var(--settings-overlay-width);
-  min-height: 26rem;
-  max-height: var(--settings-overlay-height);
-  padding: 0;
-  overflow: hidden;
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
-  background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
-  box-shadow: var(--elevation-dropdown);
-  backdrop-filter: blur(14px) saturate(1.08);
-  -webkit-backdrop-filter: blur(14px) saturate(1.08);
-}
-
-.settings-overlay__close {
-  --icon-btn-size: 2.25rem;
-  --icon-btn-radius: var(--radius-full);
-  --icon-btn-icon-size: 1.05rem;
-
-  position: absolute;
-  top: var(--spacing-2);
-  right: var(--spacing-2);
-  z-index: 2;
-}
-
-.settings-overlay__lead-divider {
-  width: 1px;
-  background: color-mix(in srgb, var(--color-border-strong) 55%, transparent);
-}
-
-.settings-overlay__shell {
-  display: flex;
-  align-items: stretch;
-  min-width: 0;
-  min-height: 26rem;
-  max-height: var(--settings-overlay-height);
-}
-
-.settings-overlay__sections {
-  flex: 0 0 var(--settings-overlay-left-width);
-  display: flex;
-  flex-direction: column;
-  gap: var(--container-gap);
-  min-height: 0;
-  padding: var(--spacing-4) var(--spacing-3) var(--spacing-3) var(--spacing-3);
-  background: color-mix(in srgb, var(--color-bg-surface) 80%, transparent);
-}
-
-.settings-overlay__sections-header {
-  display: grid;
-  gap: var(--spacing-1);
-}
-
-.settings-overlay__kicker {
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.settings-overlay__subtitle {
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__section-list {
-  display: grid;
-  flex: 1 1 auto;
-  gap: var(--spacing-1);
-  min-height: 0;
-  overflow: auto;
-  padding-right: var(--spacing-1);
-}
-
-.settings-overlay__section-item {
-  --ui-item-min-height: 3rem;
-  --ui-item-padding-inline: var(--spacing-2);
-  --ui-item-padding-block: var(--spacing-2);
-  --ui-item-gap: var(--spacing-2);
-  --ui-item-media-size: 1.75rem;
-
-  grid-template-columns: var(--ui-item-media-size) minmax(0, 1fr) auto;
-  width: 100%;
-  border: 1px solid transparent;
-  background: transparent;
-  text-align: left;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__section-item:hover {
-  background: var(--settings-hover-focus);
-}
-
-.settings-overlay__section-item--active {
-  border-color: color-mix(in srgb, var(--color-clay) 42%, transparent);
-  background: color-mix(in srgb, var(--color-clay) 12%, transparent);
-}
-
-.settings-overlay__section-item:focus-visible {
-  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
-  box-shadow: var(--settings-focus-ring);
-  outline: none;
-}
-
-.settings-overlay__section-media {
-  color: var(--color-clay);
-}
-
-.settings-overlay__section-label {
-  gap: 0.2rem;
-}
-
-.settings-overlay__section-label strong {
-  font-size: var(--font-size-md-soft);
-  font-weight: var(--font-weight-semibold);
-}
-
-.settings-overlay__section-label small {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__section-chevron {
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__column-divider {
-  flex: 0 0 1px;
-  background: color-mix(in srgb, var(--color-border) 88%, transparent);
-}
-
-.settings-overlay__detail {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: var(--spacing-4);
-  background: var(--color-bg-surface);
-  overflow: auto;
-}
-
-.settings-overlay__detail-card {
-  --ui-container-gap: var(--spacing-3);
-}
-
-.settings-overlay__detail-card h3 {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-primary);
-}
-
-.settings-overlay__detail-card > p {
-  font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__field-row label {
-  font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
-}
-
-:host ::ng-deep hlm-form-field.settings-overlay__field-row > div {
-  display: grid;
-  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
-  gap: var(--spacing-3);
-  align-items: center;
-}
-
-:host ::ng-deep hlm-form-field.settings-overlay__field-row--stacked > div {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--spacing-2);
-}
-
-.settings-overlay__segmented {
-  --segmented-host-width: 100%;
-  --segmented-group-width: 100%;
-  --segmented-button-flex: 1 1 0;
-}
-
-.settings-overlay__segmented--theme {
-  --segmented-button-padding-inline: 0.75rem;
-  --segmented-button-padding-inline-mobile: 0.6rem;
-}
-
-.settings-overlay__toggle-row .ui-item-label {
-  display: grid;
-  gap: var(--spacing-1);
-}
-
-.settings-overlay__toggle-row .ui-item-label strong {
-  font-size: var(--font-size-md);
-}
-
-.settings-overlay__toggle-row .ui-item-label small {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__range {
-  width: 100%;
-  accent-color: var(--color-clay);
-}
-
-.settings-overlay__identity {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: var(--spacing-3);
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
-  border-radius: var(--container-radius-control);
-  padding: var(--spacing-3);
-}
-
-.settings-overlay__identity .material-icons {
-  font-size: var(--font-size-4xl);
-  color: var(--color-clay);
-}
-
-.settings-overlay__identity strong {
-  display: block;
-  font-size: var(--font-size-md-plus);
-  color: var(--color-text-primary);
-}
-
-.settings-overlay__identity p {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__state {
-  min-height: 15rem;
-  display: grid;
-  place-content: center;
-  gap: var(--spacing-2);
-  text-align: center;
-}
-
-.settings-overlay__state .material-icons {
-  font-size: var(--font-size-3xl);
-  color: var(--color-clay);
-  justify-self: center;
-}
-
-.settings-overlay__state h3 {
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-}
-
-.settings-overlay__state p {
-  font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__logout-error {
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
-}
-
-.settings-overlay__subsection-highlight {
-  animation: settings-subsection-pulse 1.8s ease;
-}
-
-@keyframes settings-subsection-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-clay) 36%, transparent);
-    background-color: color-mix(in srgb, var(--color-clay) 14%, transparent);
+@layer components {
+  // Fixed settings pane shell geometry and elevation (map-adjacent overlay)
+  // @see docs/specs/ui/settings-overlay (iOS-style rail)
+  .settings-overlay {
+    position: relative;
+    position: fixed;
+    top: 50%;
+    left: calc(var(--container-inset) + var(--layout-sidebar-width-collapsed) + var(--spacing-3));
+    transform: translateY(-50%);
+    z-index: var(--z-modal);
+    width: var(--settings-overlay-width);
+    max-width: var(--settings-overlay-width);
+    min-height: 26rem;
+    max-height: var(--settings-overlay-height);
+    padding: 0;
+    overflow: hidden;
+    border: var(--settings-stroke-width) solid var(--settings-border-muted);
+    background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
+    box-shadow: var(--elevation-dropdown);
+    backdrop-filter: blur(14px) saturate(1.08);
+    -webkit-backdrop-filter: blur(14px) saturate(1.08);
   }
 
-  100% {
-    box-shadow: 0 0 0 0.9rem color-mix(in srgb, var(--color-clay) 0%, transparent);
-    background-color: transparent;
+  // Positions the dismiss control in the overlay chrome
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__close {
+    --icon-btn-size: 2.25rem;
+    --icon-btn-radius: var(--radius-full);
+    --icon-btn-icon-size: 1.05rem;
+
+    position: absolute;
+    top: var(--spacing-2);
+    right: var(--spacing-2);
+    z-index: 2;
+  }
+
+  // Vertical hairline between chrome and two-column shell
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__lead-divider {
+    width: 1px;
+    background: color-mix(in srgb, var(--color-border-strong) 55%, transparent);
+  }
+
+  // Two-column flex shell: section rail + detail column
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__shell {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    min-height: 26rem;
+    max-height: var(--settings-overlay-height);
+  }
+
+  // Left rail column: list + header stack
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__sections {
+    flex: 0 0 var(--settings-overlay-left-width);
+    display: flex;
+    flex-direction: column;
+    gap: var(--container-gap);
+    min-height: 0;
+    padding: var(--spacing-4) var(--spacing-3) var(--spacing-3) var(--spacing-3);
+    background: color-mix(in srgb, var(--color-bg-surface) 80%, transparent);
+  }
+
+  // Stacks kicker, title, subtitle in the rail header
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__sections-header {
+    display: grid;
+    gap: var(--spacing-1);
+  }
+
+  // Small uppercase kicker line above the rail title
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__kicker {
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  // Primary rail heading color (typography scale from global styles.scss)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__title {
+    color: var(--color-text-primary);
+  }
+
+  // Subtitle body under the rail title
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__subtitle {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-secondary);
+  }
+
+  // Scrollable vertical list of section entries
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-list {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--spacing-1);
+    min-height: 0;
+    overflow: auto;
+    padding-right: var(--spacing-1);
+  }
+
+  // Grid row for icon + label + chevron in the section rail
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-item {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--spacing-2);
+    min-height: 3rem;
+    padding-block: var(--spacing-2);
+    padding-inline: var(--spacing-2);
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: var(--container-radius-control);
+    background: transparent;
+    text-align: left;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: var(--settings-interactive-transition);
+  }
+
+  // Hover affordance for rail section buttons
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-item:hover {
+    background: var(--settings-hover-focus);
+  }
+
+  // Selected section emphasis on the rail row
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-item--active {
+    border-color: color-mix(in srgb, var(--color-clay) 42%, transparent);
+    background: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  }
+
+  // Focus ring for keyboard navigation on rail rows
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-item:focus-visible {
+    border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+    box-shadow: var(--settings-focus-ring);
+    outline: none;
+  }
+
+  // Clay-tinted icon cell in the rail row
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-media {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    color: var(--color-clay);
+  }
+
+  // Stacks title + subtitle in the label column
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  // Section title line in the rail list
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-label strong {
+    font-size: var(--font-size-md-soft);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  // Section subtitle line in the rail list
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-label small {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+  }
+
+  // Trailing chevron affordance in rail rows
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-chevron {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+  }
+
+  // Hairline between rail and detail column
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__column-divider {
+    flex: 0 0 1px;
+    background: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  // Right-hand detail column with scroll
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__detail {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--spacing-4);
+    background: var(--color-bg-surface);
+    overflow: auto;
+  }
+
+  // Detail card surface: section heading + body (Tailwind handles gap/padding on host)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__detail-card h3 {
+    color: var(--color-text-primary);
+  }
+
+  // Intro copy under section headings in the detail column
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__detail-card > p {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+  }
+
+  // Two-column label + control row for settings fields (no ng-deep)
+  // @see docs/MIGRATION_PLAN.md
+  .settings-overlay__field-row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+    gap: var(--spacing-3);
+    align-items: center;
+  }
+
+  // Stacked field layout for range rows (label, slider, readout)
+  // @see docs/MIGRATION_PLAN.md
+  .settings-overlay__field-row--stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+
+  // Control column wrapper so segmented controls can shrink correctly
+  // @see docs/MIGRATION_PLAN.md
+  .settings-overlay__field-value {
+    min-width: 0;
+  }
+
+  // Field row label sizing in the detail column
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__field-row label {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+  }
+
+  // Full-width pill toggle tokens in the settings value column
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__segmented {
+    --hlm-pill-toggle-width: 100%;
+    --hlm-toggle-group-width: 100%;
+    --hlm-toggle-button-flex: 1 1 0;
+  }
+
+  // Theme mode pill toggle tighter inline padding
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__segmented--theme {
+    --hlm-toggle-button-padding-inline: 0.75rem;
+    --hlm-toggle-button-padding-inline-mobile: 0.6rem;
+  }
+
+  // Full-width interactive row for switch-backed booleans
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__toggle-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--spacing-3);
+    min-height: 2.5rem;
+    width: 100%;
+    padding-block: var(--container-padding-block-compact);
+    padding-inline: var(--container-padding-inline-compact);
+    border: 1px solid transparent;
+    border-radius: var(--container-radius-control);
+    background: transparent;
+    text-align: left;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: var(--settings-interactive-transition);
+  }
+
+  // Hover surface for toggle rows (replaces legacy ui-item hover)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__toggle-row:hover {
+    background: color-mix(in srgb, var(--action-bg-hover) 65%, transparent);
+  }
+
+  // Focus ring for keyboard use on toggle rows
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__toggle-row:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  // Label stack inside a toggle row (title + helper)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__toggle-label {
+    display: grid;
+    gap: var(--spacing-1);
+    min-width: 0;
+  }
+
+  // Toggle row primary line
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__toggle-label strong {
+    font-size: var(--font-size-md);
+  }
+
+  // Toggle row helper line
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__toggle-label small {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+  }
+
+  // Native range input accent in detail fields
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__range {
+    width: 100%;
+    accent-color: var(--color-clay);
+  }
+
+  // Identity / profile summary card (legacy detail layout hook)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__identity {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--spacing-3);
+    border: var(--settings-stroke-width) solid var(--settings-border-muted);
+    border-radius: var(--container-radius-control);
+    padding: var(--spacing-3);
+  }
+
+  // Large avatar icon in identity card
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__identity .material-icons {
+    font-size: var(--font-size-4xl);
+    color: var(--color-clay);
+  }
+
+  // Identity name line
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__identity strong {
+    display: block;
+    font-size: var(--font-size-md-plus);
+    color: var(--color-text-primary);
+  }
+
+  // Identity secondary line
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__identity p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+
+  // Centered empty/error state block in detail column
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__state {
+    min-height: 15rem;
+    display: grid;
+    place-content: center;
+    gap: var(--spacing-2);
+    text-align: center;
+  }
+
+  // State block icon sizing
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__state .material-icons {
+    font-size: var(--font-size-3xl);
+    color: var(--color-clay);
+    justify-self: center;
+  }
+
+  // State block heading color (scale from global heading styles)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__state h3 {
+    color: var(--color-text-primary);
+  }
+
+  // State block body copy
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__state p {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+  }
+
+  // Inline error color for account hooks
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__logout-error {
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+  }
+}
+
+@layer states {
+  // Transient highlight when deep-linking to an account subsection
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__subsection-highlight {
+    animation: settings-subsection-pulse 1.8s ease;
+  }
+
+  @keyframes settings-subsection-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-clay) 36%, transparent);
+      background-color: color-mix(in srgb, var(--color-clay) 14%, transparent);
+    }
+
+    100% {
+      box-shadow: 0 0 0 0.9rem color-mix(in srgb, var(--color-clay) 0%, transparent);
+      background-color: transparent;
+    }
   }
 }
 
@@ -328,16 +456,24 @@
     );
   }
 
-  .settings-overlay {
-    width: var(--settings-overlay-width);
-  }
+  @layer components {
+    // Tablet width sync for the fixed pane
+    // @see docs/specs/ui/settings-overlay
+    .settings-overlay {
+      width: var(--settings-overlay-width);
+    }
 
-  .settings-overlay__shell {
-    display: flex;
-  }
+    // Preserve flex shell on tablet breakpoints
+    // @see docs/specs/ui/settings-overlay
+    .settings-overlay__shell {
+      display: flex;
+    }
 
-  .settings-overlay__sections {
-    flex-basis: var(--settings-overlay-left-width);
+    // Tablet rail basis follows tokenized left width
+    // @see docs/specs/ui/settings-overlay
+    .settings-overlay__sections {
+      flex-basis: var(--settings-overlay-left-width);
+    }
   }
 }
 
@@ -346,29 +482,38 @@
     --settings-overlay-left-width: var(--overlay-rail-mobile-left-width);
   }
 
-  .settings-overlay {
-    left: var(--container-inset);
-    width: calc(100vw - (var(--container-inset) * 2));
-    max-height: calc(100vh - (var(--container-inset) * 2));
-  }
+  @layer components {
+    // Mobile: full-bleed horizontal inset under the nav rail
+    // @see docs/specs/ui/settings-overlay
+    .settings-overlay {
+      left: var(--container-inset);
+      width: calc(100vw - (var(--container-inset) * 2));
+      max-height: calc(100vh - (var(--container-inset) * 2));
+    }
 
-  .settings-overlay__shell {
-    display: flex;
-  }
+    // Mobile shell remains two-column flex
+    // @see docs/specs/ui/settings-overlay
+    .settings-overlay__shell {
+      display: flex;
+    }
 
-  .settings-overlay__column-divider {
-    width: 1px;
-    height: auto;
-  }
+    // Divider spans full column height on narrow viewports
+    // @see docs/specs/ui/settings-overlay
+    .settings-overlay__column-divider {
+      width: 1px;
+      height: auto;
+    }
 
-  .settings-overlay__sections {
-    flex-basis: var(--settings-overlay-left-width);
-  }
+    // Mobile rail width token
+    // @see docs/specs/ui/settings-overlay
+    .settings-overlay__sections {
+      flex-basis: var(--settings-overlay-left-width);
+    }
 
-  :host
-    ::ng-deep
-    hlm-form-field.settings-overlay__field-row:not(.settings-overlay__field-row--stacked)
-    > div {
-    grid-template-columns: 1fr;
+    // Collapse settings field rows to a single column on small screens
+    // @see docs/MIGRATION_PLAN.md
+    .settings-overlay__field-row:not(.settings-overlay__field-row--stacked) {
+      grid-template-columns: 1fr;
+    }
   }
 }

@@ -21,15 +21,29 @@
 
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
-  <div class="workspace-toolbar__size-control">
-    <app-card-variant-switch
-      [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+  <div class="workspace-toolbar__size-control hlm-pill-toggle hlm-pill-toggle--sm">
+    <div
+      class="hlm-toggle-group"
+      brnToggleGroup
+      type="single"
+      [nullable]="false"
       [value]="thumbnailSizePreset()"
-      [allowed]="allowedCardVariants"
-      [size]="'sm'"
-      [iconOnly]="true"
-      (valueChange)="onThumbnailSizeChanged($event)"
-    />
+      (valueChange)="onThumbnailSizeToggleChange($event)"
+      [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+    >
+      @for (opt of cardVariantToggleOptions(); track opt.id) {
+        <button
+          type="button"
+          class="hlm-toggle-group__item hlm-toggle-group__item--icon-only"
+          brnToggleGroupItem
+          [value]="opt.id"
+          [attr.aria-label]="opt.ariaLabel || opt.label"
+          [attr.title]="opt.title || opt.label"
+        >
+          <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ opt.icon }}</span>
+        </button>
+      }
+    </div>
   </div>
 </div>
 
