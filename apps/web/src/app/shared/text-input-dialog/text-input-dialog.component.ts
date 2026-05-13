@@ -1,12 +1,13 @@
 import { Component, input, output, viewChild } from '@angular/core';
 import { BrnDialog, BrnDialogImports } from '@spartan-ng/brain/dialog';
-import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { HLM_DIALOG_IMPORTS } from '../ui/dialog';
+import { HLM_INPUT_IMPORTS } from '../ui/input';
 
 @Component({
   selector: 'app-text-input-dialog',
   standalone: true,
-  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...UI_PRIMITIVE_DIRECTIVES],
+  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...HLM_BUTTON_IMPORTS, ...HLM_INPUT_IMPORTS],
   templateUrl: './text-input-dialog.component.html',
   styleUrl: './text-input-dialog.component.scss',
 })

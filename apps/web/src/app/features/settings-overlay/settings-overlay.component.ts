@@ -16,7 +16,20 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
-import { UI_PRIMITIVE_DIRECTIVES } from '../../shared/ui-primitives/ui-primitives.directive';
+import {
+  UiContainerDirective,
+  UiContainerSizeSmDirective,
+  UiIconButtonGhostDirective,
+  UiItemDirective,
+  UiItemLabelDirective,
+  UiItemMediaDirective,
+  UiRangeControlDirective,
+  UiSectionCardDirective,
+} from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_FORM_FIELD_IMPORTS } from '../../shared/ui/form-field';
+import { HLM_LABEL_IMPORTS } from '../../shared/ui/label';
+import { HLM_SELECT_IMPORTS } from '../../shared/ui/select';
+import { HLM_SWITCH_IMPORTS } from '../../shared/ui/switch';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 import { AccountComponent } from '../../shared/account/account.component';
 import { buildSettingsSectionList } from './settings-sections.const';
@@ -71,7 +84,18 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
     SegmentedSwitchComponent,
     InviteManagementSectionComponent,
     AccountComponent,
-    ...UI_PRIMITIVE_DIRECTIVES,
+    UiContainerDirective,
+    UiContainerSizeSmDirective,
+    UiSectionCardDirective,
+    UiIconButtonGhostDirective,
+    UiItemDirective,
+    UiItemMediaDirective,
+    UiItemLabelDirective,
+    UiRangeControlDirective,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+    ...HLM_SELECT_IMPORTS,
+    ...HLM_SWITCH_IMPORTS,
   ],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',

@@ -18,6 +18,7 @@ import { MediaDownloadService } from '../../core/media-download/media-download.s
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
 import type { MediaRenderState, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
+import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../shared/ui/menu';
 import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 
 const UPLOAD_ITEM_MENU_WIDTH = 224;
@@ -88,6 +89,8 @@ export interface UploadItemActionEvent {
     ChipComponent,
     UniversalMediaComponent,
     DropdownShellComponent,
+    HlmMenuItemDirective,
+    HlmMenuSeparatorDirective,
   ],
   templateUrl: './upload-panel-item.component.html',
   styleUrl: './upload-panel-item.component.scss',

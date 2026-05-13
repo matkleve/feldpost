@@ -96,9 +96,9 @@
 
       <div hlmDialogFooter class="share-link-audience-dialog__actions">
         <button
-          uiButton
-          uiButtonGhost
-          class="share-link-audience-dialog__cancel ui-button ui-button--ghost"
+          hlmBtn
+          variant="ghost"
+          class="share-link-audience-dialog__cancel"
           type="button"
           brnDialogClose
           (click)="onCancel()"
@@ -106,9 +106,9 @@
           {{ t('workspace.export.dialog.cancel', 'Cancel') }}
         </button>
         <button
-          uiButton
-          uiButtonPrimary
-          class="share-link-audience-dialog__confirm ui-button ui-button--primary"
+          hlmBtn
+          variant="default"
+          class="share-link-audience-dialog__confirm"
           type="button"
           (click)="onConfirm()"
         >

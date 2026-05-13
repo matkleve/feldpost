@@ -1,6 +1,5 @@
 // Sort dropdown — component-specific styles.
-// Shared dd-* classes (dd-search, dd-item, dd-section-label, dd-divider, dd-empty)
-// are defined in styles.scss.
+// @see docs/specs/component/filters/dropdown-system.md
 
 :host {
   display: block;
@@ -31,17 +30,17 @@
     color 80ms ease-out,
     background 80ms ease-out;
 
-  .dd-item:hover & {
+  .sort-dropdown__option:hover & {
     opacity: 1;
     color: var(--color-clay);
   }
 
-  .dd-item--active & {
+  .text-primary & {
     opacity: 1;
     color: var(--color-clay);
   }
 
-  .dd-item--hovered & {
+  .sort-dropdown__option--hovered & {
     opacity: 1;
     color: var(--color-clay);
   }
@@ -52,15 +51,14 @@
   }
 
   &--preview,
-  .dd-item:hover &,
-  .dd-item--hovered & {
+  .sort-dropdown__option:hover &,
+  .sort-dropdown__option--hovered & {
     background: color-mix(in srgb, var(--color-clay) 12%, transparent);
     color: var(--color-clay);
   }
 }
 
-.dd-item--hovered .dd-item__icon,
-.dd-item:hover .dd-item__icon {
+.sort-dropdown__option--hovered .material-icons:first-of-type,
+.sort-dropdown__option:hover .material-icons:first-of-type {
   color: var(--color-clay);
 }
-

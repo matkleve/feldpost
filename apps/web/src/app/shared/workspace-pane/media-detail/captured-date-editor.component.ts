@@ -19,7 +19,7 @@ import {
 import type { OnDestroy, OnInit } from '@angular/core';
 import { parseTimeInput } from '../../../shared/ui-primitives/parse-time-input';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { UiInputControlDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 
 export interface DateSaveEvent {
   date: string | null; // YYYY-MM-DD or null
@@ -37,7 +37,7 @@ export interface CalendarDay {
 @Component({
   selector: 'app-captured-date-editor',
   standalone: true,
-  imports: [UiInputControlDirective],
+  imports: [...HLM_INPUT_IMPORTS],
   templateUrl: './captured-date-editor.component.html',
   styleUrl: './captured-date-editor.component.scss',
 })

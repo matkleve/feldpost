@@ -40,7 +40,7 @@
           @for (section of sectionList(); track section.id) {
             <button
               uiItem
-              class="settings-overlay__section-item ui-item dd-item"
+              class="settings-overlay__section-item ui-item"
               [class.settings-overlay__section-item--active]="isSectionSelected(section.id)"
               [attr.aria-current]="isSectionSelected(section.id) ? 'true' : null"
               (click)="selectSection(section.id)"
@@ -85,10 +85,8 @@
                 }}
               </p>
 
-              <div uiFieldRow class="settings-overlay__field-row ui-field-row">
-                <span uiFieldLabel class="ui-field-label">{{
-                  t('settings.overlay.general.language.label', 'Language')
-                }}</span>
+              <hlm-form-field class="settings-overlay__field-row">
+                <label hlmLabel>{{ t('settings.overlay.general.language.label', 'Language') }}</label>
                 <app-segmented-switch
                   class="settings-overlay__segmented"
                   data-i18n-skip
@@ -97,12 +95,10 @@
                   [value]="settingsModel().language"
                   (valueChange)="onLanguageValueChange($event)"
                 />
-              </div>
+              </hlm-form-field>
 
-              <div uiFieldRow class="settings-overlay__field-row ui-field-row">
-                <span uiFieldLabel class="ui-field-label">{{
-                  t('settings.overlay.general.density.label', 'Density')
-                }}</span>
+              <hlm-form-field class="settings-overlay__field-row">
+                <label hlmLabel>{{ t('settings.overlay.general.density.label', 'Density') }}</label>
                 <app-segmented-switch
                   class="settings-overlay__segmented"
                   [ariaLabel]="t('settings.overlay.general.density.label', 'Density')"
@@ -110,7 +106,7 @@
                   [value]="settingsModel().density"
                   (valueChange)="onDensityValueChange($event)"
                 />
-              </div>
+              </hlm-form-field>
             </section>
           }
 
@@ -130,10 +126,10 @@
                   )
                 }}
               </p>
-              <div uiFieldRow class="settings-overlay__field-row ui-field-row">
-                <span uiFieldLabel class="ui-field-label">{{
+              <hlm-form-field class="settings-overlay__field-row">
+                <label hlmLabel>{{
                   t('settings.overlay.appearance.themeMode.label', 'Theme mode')
-                }}</span>
+                }}</label>
                 <app-segmented-switch
                   class="settings-overlay__segmented settings-overlay__segmented--theme"
                   [ariaLabel]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
@@ -141,7 +137,7 @@
                   [value]="settingsModel().themeMode"
                   (valueChange)="onThemeModeValueChange($event)"
                 />
-              </div>
+              </hlm-form-field>
             </section>
           }
 
@@ -164,8 +160,6 @@
 
               <button
                 uiItem
-                uiToggleRow
-                uiToggleRowCompact
                 type="button"
                 class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
                 (click)="toggleSetting('notificationsEnabled')"
@@ -184,17 +178,17 @@
                   </small>
                 </span>
                 <span
-                  uiToggleSwitch
-                  uiToggleSwitchCompact
-                  class="ui-toggle-switch ui-toggle-switch--compact"
-                  [class.ui-toggle-switch--on]="settingsModel().notificationsEnabled"
-                ></span>
+                  hlmSwitch
+                  class="settings-overlay__switch"
+                  aria-hidden="true"
+                  [checked]="settingsModel().notificationsEnabled"
+                >
+                  <span hlmSwitchThumb [checked]="settingsModel().notificationsEnabled"></span>
+                </span>
               </button>
 
               <button
                 uiItem
-                uiToggleRow
-                uiToggleRowCompact
                 type="button"
                 class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
                 (click)="toggleSetting('uploadFailureAlerts')"
@@ -218,11 +212,13 @@
                   </small>
                 </span>
                 <span
-                  uiToggleSwitch
-                  uiToggleSwitchCompact
-                  class="ui-toggle-switch ui-toggle-switch--compact"
-                  [class.ui-toggle-switch--on]="settingsModel().uploadFailureAlerts"
-                ></span>
+                  hlmSwitch
+                  class="settings-overlay__switch"
+                  aria-hidden="true"
+                  [checked]="settingsModel().uploadFailureAlerts"
+                >
+                  <span hlmSwitchThumb [checked]="settingsModel().uploadFailureAlerts"></span>
+                </span>
               </button>
             </section>
           }
@@ -246,8 +242,6 @@
 
               <button
                 uiItem
-                uiToggleRow
-                uiToggleRowCompact
                 type="button"
                 class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
                 (click)="toggleSetting('mapAutoLocate')"
@@ -266,17 +260,17 @@
                   </small>
                 </span>
                 <span
-                  uiToggleSwitch
-                  uiToggleSwitchCompact
-                  class="ui-toggle-switch ui-toggle-switch--compact"
-                  [class.ui-toggle-switch--on]="settingsModel().mapAutoLocate"
-                ></span>
+                  hlmSwitch
+                  class="settings-overlay__switch"
+                  aria-hidden="true"
+                  [checked]="settingsModel().mapAutoLocate"
+                >
+                  <span hlmSwitchThumb [checked]="settingsModel().mapAutoLocate"></span>
+                </span>
               </button>
 
               <button
                 uiItem
-                uiToggleRow
-                uiToggleRowCompact
                 type="button"
                 class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
                 (click)="toggleSetting('mapGridOverlay')"
@@ -295,17 +289,19 @@
                   </small>
                 </span>
                 <span
-                  uiToggleSwitch
-                  uiToggleSwitchCompact
-                  class="ui-toggle-switch ui-toggle-switch--compact"
-                  [class.ui-toggle-switch--on]="settingsModel().mapGridOverlay"
-                ></span>
+                  hlmSwitch
+                  class="settings-overlay__switch"
+                  aria-hidden="true"
+                  [checked]="settingsModel().mapGridOverlay"
+                >
+                  <span hlmSwitchThumb [checked]="settingsModel().mapGridOverlay"></span>
+                </span>
               </button>
 
-              <div uiFieldRow class="settings-overlay__field-row ui-field-row">
-                <span uiFieldLabel class="ui-field-label">{{
+              <hlm-form-field class="settings-overlay__field-row">
+                <label hlmLabel>{{
                   t('settings.overlay.map.markerMotion.label', 'Marker motion')
-                }}</span>
+                }}</label>
                 <app-segmented-switch
                   class="settings-overlay__segmented"
                   [ariaLabel]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
@@ -313,7 +309,7 @@
                   [value]="settingsModel().markerMotion"
                   (valueChange)="onMarkerMotionValueChange($event)"
                 />
-              </div>
+              </hlm-form-field>
             </section>
           }
 
@@ -334,13 +330,14 @@
                 }}
               </p>
 
-              <div uiFieldRow class="settings-overlay__field-row ui-field-row">
-                <span uiFieldLabel class="ui-field-label">{{
+              <hlm-form-field class="settings-overlay__field-row">
+                <label hlmLabel for="settings-search-bias">{{
                   t('settings.overlay.search.bias.label', 'Search bias')
-                }}</span>
+                }}</label>
                 <select
-                  uiSelectControl
-                  class="settings-overlay__select ui-select-control"
+                  hlmSelect
+                  id="settings-search-bias"
+                  class="settings-overlay__select"
                   [value]="settingsModel().searchBias"
                   (change)="setSearchBias($any($event.target).value)"
                 >
@@ -354,18 +351,15 @@
                     {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
                   </option>
                 </select>
-              </div>
+              </hlm-form-field>
 
-              <div
-                uiFieldRow
-                uiFieldRowStacked
-                class="settings-overlay__field-row ui-field-row ui-field-row--stacked"
-              >
-                <span uiFieldLabel class="ui-field-label">{{
+              <hlm-form-field class="settings-overlay__field-row settings-overlay__field-row--stacked">
+                <label hlmLabel for="settings-search-radius">{{
                   t('settings.overlay.search.radius.label', 'Default radius (km)')
-                }}</span>
+                }}</label>
                 <input
                   uiRangeControl
+                  id="settings-search-radius"
                   class="settings-overlay__range"
                   type="range"
                   min="1"
@@ -374,7 +368,7 @@
                   (input)="setSearchRadius(+$any($event.target).value)"
                 />
                 <strong>{{ settingsModel().searchRadiusKm }} km</strong>
-              </div>
+              </hlm-form-field>
             </section>
           }
 
@@ -395,16 +389,13 @@
                 }}
               </p>
 
-              <div
-                uiFieldRow
-                uiFieldRowStacked
-                class="settings-overlay__field-row ui-field-row ui-field-row--stacked"
-              >
-                <span>{{
+              <hlm-form-field class="settings-overlay__field-row settings-overlay__field-row--stacked">
+                <label hlmLabel for="settings-cache-retention">{{
                   t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
-                }}</span>
+                }}</label>
                 <input
                   uiRangeControl
+                  id="settings-cache-retention"
                   class="settings-overlay__range"
                   type="range"
                   min="7"
@@ -413,12 +404,10 @@
                   (input)="setCacheRetentionDays(+$any($event.target).value)"
                 />
                 <strong>{{ settingsModel().cacheRetentionDays }} days</strong>
-              </div>
+              </hlm-form-field>
 
               <button
                 uiItem
-                uiToggleRow
-                uiToggleRowCompact
                 type="button"
                 class="settings-overlay__toggle-row ui-item ui-toggle-row ui-toggle-row--compact"
                 (click)="toggleSetting('telemetryEnabled')"
@@ -437,11 +426,13 @@
                   </small>
                 </span>
                 <span
-                  uiToggleSwitch
-                  uiToggleSwitchCompact
-                  class="ui-toggle-switch ui-toggle-switch--compact"
-                  [class.ui-toggle-switch--on]="settingsModel().telemetryEnabled"
-                ></span>
+                  hlmSwitch
+                  class="settings-overlay__switch"
+                  aria-hidden="true"
+                  [checked]="settingsModel().telemetryEnabled"
+                >
+                  <span hlmSwitchThumb [checked]="settingsModel().telemetryEnabled"></span>
+                </span>
               </button>
             </section>
           }

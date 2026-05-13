@@ -1,10 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import {
-  UiButtonDirective,
-  UiButtonIconOnlyDirective,
-  UiButtonSecondaryDirective,
-  UiButtonSizeSmDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 
 // Stable state: interactive-unselected, interactive-selected,
 // interactive-map-disabled, interactive-selected-map-disabled, disabled.
@@ -18,12 +13,7 @@ export type MediaItemQuietActionsState =
 
 @Component({
   selector: 'app-media-item-quiet-actions',
-  imports: [
-    UiButtonDirective,
-    UiButtonSizeSmDirective,
-    UiButtonSecondaryDirective,
-    UiButtonIconOnlyDirective,
-  ],
+  imports: [...HLM_BUTTON_IMPORTS],
   templateUrl: './media-item-quiet-actions.component.html',
   styleUrl: './media-item-quiet-actions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

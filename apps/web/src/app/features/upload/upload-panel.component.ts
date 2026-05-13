@@ -29,6 +29,7 @@ import {
   UiInputControlDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
 import { ChipComponent } from '../../shared/components/chip/chip.component';
+import { HlmMenuItemDirective } from '../../shared/ui/menu';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectSelectDialogComponent } from '../../shared/project-select-dialog/project-select-dialog.component';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
@@ -67,6 +68,7 @@ export type {
     SegmentedSwitchComponent,
     UiButtonDirective,
     UiInputControlDirective,
+    HlmMenuItemDirective,
     ProjectSelectDialogComponent,
     PaneFooterComponent,
   ],

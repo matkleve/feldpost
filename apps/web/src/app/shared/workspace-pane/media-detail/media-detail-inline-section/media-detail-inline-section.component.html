@@ -1,5 +1,5 @@
 <div class="detail-section">
-  <div class="dd-section-label">{{ detailViewLabel() }}</div>
+  <div hlmMenuLabel class="uppercase tracking-wide">{{ detailViewLabel() }}</div>
 
   <div
     uiRowShell
@@ -253,7 +253,7 @@
 </div>
 
 <div class="detail-section">
-  <div class="dd-section-label">
+  <div hlmMenuLabel class="uppercase tracking-wide">
     {{ t('workspace.imageDetail.section.location', 'Location') }}
   </div>
 
@@ -359,13 +359,9 @@
       <span class="detail-row__label">
         {{ t('workspace.imageDetail.field.coordinates', 'Coordinates') }}
         @if (isCorrected()) {
-          <span
-            uiStatusBadge
-            uiStatusBadgeSizeSm
-            uiStatusBadgeInfo
-            class="detail-correction-badge"
-            >{{ t('workspace.imageDetail.badge.corrected', 'Corrected') }}</span
-          >
+          <span hlmBadge variant="info" class="detail-correction-badge">{{
+            t('workspace.imageDetail.badge.corrected', 'Corrected')
+          }}</span>
         }
       </span>
       <span class="detail-row__value detail-row__value--static detail-row__value--mono">

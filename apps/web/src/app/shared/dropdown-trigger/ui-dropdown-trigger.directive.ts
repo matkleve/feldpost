@@ -10,9 +10,8 @@
  * rename/TODO and `apps/web/src/app/shared/ui/menu/` for local hlm menu shims.
  *
  * `menuItemVariants()` is merged so focus/hover tokens stay aligned with `[hlmMenuItem]`
- * rows inside the shell. Legacy pattern hook `.dropdown-item` stays on the host for
- * `styles/patterns/dropdown.scss` extensions (`.dropdown-section` is used on section
- * headings via `hlmMenuLabel` + `dd-section-label` in dropdown templates).
+ * rows inside the shell. Legacy pattern hook `.dropdown-item` may remain on the host for
+ * toolbar trigger chrome; section headings use `hlmMenuLabel` (see dropdown templates).
  */
 import { computed, Directive, input } from '@angular/core';
 import { twMerge } from 'tailwind-merge';

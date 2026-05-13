@@ -64,6 +64,7 @@ import {
   type SegmentedSwitchOption,
 } from '../../../shared/segmented-switch/segmented-switch.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
 import { ActionEngineService } from '../../../core/action/action-engine.service';
 import { ResolvedAction } from '../../../core/action/action-types';
 import { fileTypeBadge } from '../../../core/media/file-type-registry';
@@ -191,6 +192,8 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
     TextInputDialogComponent,
     SegmentedSwitchComponent,
     DropdownShellComponent,
+    HlmMenuItemDirective,
+    HlmMenuSeparatorDirective,
     UiButtonDirective,
     UiButtonIconOnlyDirective,
     UiButtonGhostDirective,
@@ -888,13 +891,13 @@ export class MapShellComponent implements OnDestroy {
     }
 
     const currentTarget = event.currentTarget as HTMLElement | null;
-    const container = currentTarget?.closest('.dd-items') as HTMLElement | null;
+    const container = currentTarget?.closest('[role="menu"]') as HTMLElement | null;
     if (!container) {
       return;
     }
 
     const focusableItems = Array.from(
-      container.querySelectorAll<HTMLButtonElement>('.dd-item:not(:disabled)'),
+      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]:not(:disabled)'),
     );
 
     if (focusableItems.length === 0) {
@@ -3990,7 +3993,9 @@ export class MapShellComponent implements OnDestroy {
     }
 
     window.requestAnimationFrame(() => {
-      const firstItem = document.querySelector<HTMLButtonElement>('.map-context-menu .dd-item');
+      const firstItem = document.querySelector<HTMLButtonElement>(
+        '.map-context-menu button[role="menuitem"]',
+      );
       firstItem?.focus();
     });
   }

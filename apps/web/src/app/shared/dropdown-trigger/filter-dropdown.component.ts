@@ -6,7 +6,13 @@ import { MetadataService } from '../../core/metadata/metadata.service';
 import type { MetadataValueType } from '../../core/metadata/metadata.types';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { HlmMenuItemDirective } from '../ui/menu';
-import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
+import { HLM_SELECT_IMPORTS } from '../ui/select';
+import {
+  UiIconButtonGhostDangerDirective,
+  UiIconButtonGhostDirective,
+  UiInputControlCompactDirective,
+  UiInputControlDirective,
+} from '../ui-primitives/ui-primitives.directive';
 
 export interface FilterDropdownPropertyOption {
   id: string;
@@ -18,7 +24,15 @@ export interface FilterDropdownPropertyOption {
   selector: 'app-filter-dropdown',
   templateUrl: './filter-dropdown.component.html',
   styleUrl: './filter-dropdown.component.scss',
-  imports: [StandardDropdownComponent, HlmMenuItemDirective, ...UI_PRIMITIVE_DIRECTIVES],
+  imports: [
+    StandardDropdownComponent,
+    HlmMenuItemDirective,
+    ...HLM_SELECT_IMPORTS,
+    UiInputControlDirective,
+    UiInputControlCompactDirective,
+    UiIconButtonGhostDirective,
+    UiIconButtonGhostDangerDirective,
+  ],
 })
 export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);

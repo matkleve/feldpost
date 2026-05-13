@@ -20,28 +20,27 @@ import type {
   InviteOpenContext,
   InvitePanelMode,
   InviteTargetRole,
+  InviteStatus,
   QrInviteViewModel,
 } from '../../../core/invites/invites.types';
-import {
-  UiButtonDangerDirective,
-  UiButtonDirective,
-  UiButtonGhostDirective,
-  UiIconButtonGhostDirective,
-  UiSelectControlDirective,
-  UiStatusBadgeDirective,
-} from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BADGE_IMPORTS } from '../../../shared/ui/badge';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
+import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
+import { HLM_SELECT_IMPORTS } from '../../../shared/ui/select';
+import { UiIconButtonGhostDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'ss-invite-management-section',
   standalone: true,
   imports: [
     CommonModule,
-    UiButtonDirective,
-    UiButtonGhostDirective,
-    UiButtonDangerDirective,
+    ...HLM_BADGE_IMPORTS,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+    ...HLM_SELECT_IMPORTS,
     UiIconButtonGhostDirective,
-    UiSelectControlDirective,
-    UiStatusBadgeDirective,
   ],
   templateUrl: './invite-management-section.component.html',
   styleUrl: './invite-management-section.component.scss',
@@ -64,6 +63,19 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   readonly inviteCreated = output<string>();
   readonly inviteRevoked = output<string>();
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
+  inviteStatusBadgeVariant(status: InviteStatus): 'success' | 'warning' | 'destructive' | 'info' {
+    switch (status) {
+      case 'active':
+        return 'success';
+      case 'expired':
+        return 'warning';
+      case 'revoked':
+        return 'destructive';
+      case 'accepted':
+        return 'info';
+    }
+  }
 
   readonly panelMode = signal<InvitePanelMode>('ready');
   readonly targetRole = signal<InviteTargetRole>('worker');

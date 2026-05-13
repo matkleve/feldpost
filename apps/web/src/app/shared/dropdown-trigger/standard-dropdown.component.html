@@ -1,8 +1,8 @@
 <div class="standard-dropdown">
   @if (showSearch()) {
-    <div class="dd-search">
+    <div class="flex items-center border-b border-border py-1 pl-3 pr-1">
       <input
-        class="dd-search__input"
+        class="min-w-0 flex-1 border-0 bg-transparent py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
         type="text"
         [placeholder]="searchPlaceholder()"
         [value]="searchTerm()"
@@ -12,7 +12,7 @@
       @if (showDefaultClearAction() && searchTerm()) {
         <button
           uiIconButtonGhost
-          class="dd-search__action icon-btn-ghost"
+          class="shrink-0 icon-btn-ghost"
           type="button"
           [attr.aria-label]="clearSearchAriaLabel()"
           (click)="clearRequested.emit()"
@@ -30,7 +30,12 @@
   </div>
 
   @if (actionLabel()) {
-    <button hlmMenuItem class="dd-action-row" type="button" (click)="actionRequested.emit()">
+    <button
+      hlmMenuItem
+      class="inline-flex w-full items-center justify-start gap-2 text-muted-foreground hover:text-foreground"
+      type="button"
+      (click)="actionRequested.emit()"
+    >
       <span class="material-icons" aria-hidden="true">{{ actionIcon() }}</span>
       {{ actionLabel() }}
     </button>

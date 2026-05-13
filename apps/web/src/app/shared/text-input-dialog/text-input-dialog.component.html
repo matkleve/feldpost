@@ -18,8 +18,8 @@
 
       <input
         #nameInput
-        uiInputControl
-        class="text-input-dialog__input ui-input-control"
+        hlmInput
+        class="text-input-dialog__input"
         type="text"
         [value]="initialValue()"
         [placeholder]="placeholder()"
@@ -32,9 +32,9 @@
 
       <div hlmDialogFooter class="text-input-dialog__actions">
         <button
-          uiButton
-          uiButtonGhost
-          class="text-input-dialog__cancel ui-button ui-button--ghost"
+          hlmBtn
+          variant="ghost"
+          class="text-input-dialog__cancel"
           type="button"
           brnDialogClose
           (click)="cancelled.emit()"
@@ -42,9 +42,9 @@
           {{ cancelLabel() }}
         </button>
         <button
-          uiButton
-          uiButtonPrimary
-          class="text-input-dialog__confirm ui-button ui-button--primary"
+          hlmBtn
+          variant="default"
+          class="text-input-dialog__confirm"
           type="button"
           [disabled]="nameInput.value.trim().length === 0"
           (click)="emitConfirmed(nameInput.value)"

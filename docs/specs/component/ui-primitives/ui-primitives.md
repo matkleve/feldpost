@@ -19,7 +19,7 @@ Token-driven chrome from `styles/primitives/*`; composites (`app-card-grid`, etc
 | # | User action | System response |
 | - | ----------- | ---------------- |
 | 1 | Use primitives in templates | Classes/directives apply Feldpost chrome |
-| 2 | Import barrel where needed | `UI_PRIMITIVE_DIRECTIVES` or fine-grained symbols |
+| 2 | Import directives where needed | Named `Ui*` symbols from `ui-primitives.directive.ts` or `HLM_*_IMPORTS` from `shared/ui/` |
 
 ## Component Hierarchy
 
@@ -73,7 +73,7 @@ shared/components/chip (semantic chip — see ui-primitives.chip.md)
 
 ## Wiring
 
-- Import paths from `shared/ui-primitives` or spread `UI_PRIMITIVE_DIRECTIVES`.
+- Import paths from `shared/ui-primitives` (named `Ui*` exports) or `HLM_*_IMPORTS` from `shared/ui/*`.
 - **Invariant:** `ui-primitives` MUST NOT import `features/*`.
 
 ## Acceptance Criteria

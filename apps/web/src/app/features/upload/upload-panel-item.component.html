@@ -134,28 +134,26 @@
       (closeRequested)="onMenuCloseRequested()"
     >
       <div
-        class="dd-items"
+        class="map-context-menu__items flex flex-col p-2"
         role="menu"
         [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
       >
         @for (action of availableMenuActions(); track action) {
           @if (isDestructiveAction(action)) {
-            <div class="dd-divider" aria-hidden="true"></div>
+            <div hlmMenuSeparator aria-hidden="true"></div>
           }
           <button
-            class="dd-item"
-            [class.dd-item--danger]="isDestructiveAction(action)"
+            hlmMenuItem
+            class="w-full"
+            [class.text-destructive]="isDestructiveAction(action)"
             type="button"
             role="menuitem"
             (click)="onMenuAction(action)"
           >
-            <span
-              class="material-icons dd-item__icon"
-              [class.dd-item__icon--danger]="isDestructiveAction(action)"
-              aria-hidden="true"
-              >{{ actionIcon(action) }}</span
-            >
-            <span class="dd-item__label">{{ actionLabel(action) }}</span>
+            <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{
+              actionIcon(action)
+            }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ actionLabel(action) }}</span>
           </button>
         }
       </div>

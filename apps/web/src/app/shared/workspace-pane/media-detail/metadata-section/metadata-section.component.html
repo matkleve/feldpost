@@ -1,4 +1,4 @@
-<div class="dd-section-label">{{ t('workspace.metadata.section.title', 'Metadata') }}</div>
+<div hlmMenuLabel class="uppercase tracking-wide">{{ t('workspace.metadata.section.title', 'Metadata') }}</div>
 
 @for (entry of entries(); track entry.metadataKeyId) {
   <div class="metadata-row-wrap">
@@ -25,17 +25,18 @@
         (keydown.enter)="newValueInput.focus()"
       />
       @if (keySuggestions().length > 0) {
-        <div class="add-metadata-suggestions option-menu-surface dd-items">
+        <div class="add-metadata-suggestions option-menu-surface flex flex-col p-2">
           @for (suggestion of keySuggestions(); track suggestion) {
             <button
-              class="dd-item"
+              hlmMenuItem
+              class="w-full"
               type="button"
               (click)="
                 newKeyInput.value = suggestion; keySuggestions.set([]); newValueInput.focus()
               "
             >
-              <span class="material-icons dd-item__icon" aria-hidden="true">label</span>
-              <span class="dd-item__label" data-i18n-skip>{{ suggestion }}</span>
+              <span class="material-icons shrink-0 text-base text-muted-foreground" aria-hidden="true">label</span>
+              <span class="min-w-0 flex-1 text-left" data-i18n-skip>{{ suggestion }}</span>
             </button>
           }
         </div>
@@ -51,7 +52,7 @@
       (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
     />
     <button
-      class="add-metadata-confirm dd-item"
+      class="add-metadata-confirm"
       type="button"
       [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
       (click)="addMetadata(newKeyInput.value, newValueInput.value)"
@@ -62,7 +63,12 @@
 }
 
 @if (!showAddForm()) {
-  <button class="add-metadata-btn dd-action-row" type="button" (click)="showAddForm.set(true)">
+  <button
+    hlmMenuItem
+    class="add-metadata-btn inline-flex w-full items-center justify-start gap-2 text-muted-foreground hover:text-foreground"
+    type="button"
+    (click)="showAddForm.set(true)"
+  >
     <span class="material-icons" aria-hidden="true">add</span>
     {{ t('workspace.metadata.action.add', 'Add metadata') }}
   </button>

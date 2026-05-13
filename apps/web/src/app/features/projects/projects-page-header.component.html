@@ -20,10 +20,9 @@
 
   <div class="projects-header__actions">
     <button
-      uiButton
-      uiButtonPrimary
+      hlmBtn
       type="button"
-      class="ui-button ui-button--primary projects-header__new"
+      class="projects-header__new"
       [disabled]="loading()"
       (click)="onNewProject()"
       [attr.aria-label]="t('projects.page.action.newProject', 'New project')"

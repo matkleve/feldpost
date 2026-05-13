@@ -286,10 +286,11 @@
       }
 
       @if (locationAddressDialogSuggestions().length > 0) {
-        <div class="upload-panel__location-editor-results dd-items" role="listbox">
+        <div class="upload-panel__location-editor-results flex flex-col p-2" role="listbox">
           @for (suggestion of locationAddressDialogSuggestions(); track suggestion.addressLabel) {
             <button
-              class="dd-item"
+              hlmMenuItem
+              class="w-full"
               type="button"
               role="option"
               (mouseenter)="actionHandlers.onLocationAddressSuggestionHover(suggestion)"
@@ -298,8 +299,8 @@
               (blur)="actionHandlers.onLocationAddressSuggestionHoverEnd()"
               (click)="actionHandlers.onLocationAddressSuggestionApply(suggestion)"
             >
-              <span class="material-icons dd-item__icon" aria-hidden="true">place</span>
-              <span class="dd-item__label">{{ suggestion.addressLabel }}</span>
+              <span class="material-icons shrink-0 text-base text-muted-foreground" aria-hidden="true">place</span>
+              <span class="min-w-0 flex-1 text-left">{{ suggestion.addressLabel }}</span>
             </button>
           }
         </div>

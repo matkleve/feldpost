@@ -107,35 +107,37 @@
       [panelClass]="mapMenuPanelClass()"
       (closeRequested)="onMapMenuCloseRequested()"
     >
-      <div class="dd-items" role="menu" tabindex="-1" aria-label="Map context menu">
+      <div class="map-context-menu__items flex flex-col p-2" role="menu" tabindex="-1" aria-label="Map context menu">
         @for (action of mapPrimaryActions(); track action.id) {
           <button
-            class="dd-item"
+            hlmMenuItem
+            class="w-full"
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
             (keydown)="onMapMenuKeydown($event)"
             (click)="onMapMenuActionSelected(action.id)"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-            <span class="dd-item__label">{{ action.label }}</span>
+            <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
           </button>
         }
 
         @if (mapSecondaryActions().length > 0) {
-          <div class="dd-divider" aria-hidden="true"></div>
+          <div hlmMenuSeparator aria-hidden="true"></div>
 
           @for (action of mapSecondaryActions(); track action.id) {
             <button
-              class="dd-item"
+              hlmMenuItem
+              class="w-full"
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
               (keydown)="onMapMenuKeydown($event)"
               (click)="onMapMenuActionSelected(action.id)"
             >
-              <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-              <span class="dd-item__label">{{ action.label }}</span>
+              <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+              <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
             </button>
           }
         }
@@ -154,36 +156,38 @@
     >
       <div class="map-context-menu__header option-menu-header">Radius Auswahl</div>
 
-      <div class="dd-items" role="menu" tabindex="-1" aria-label="Radius context menu">
+      <div class="map-context-menu__items flex flex-col p-2" role="menu" tabindex="-1" aria-label="Radius context menu">
         @for (action of radiusPrimaryActions(); track action.id) {
           <button
-            class="dd-item"
+            hlmMenuItem
+            class="w-full"
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
             (keydown)="onMapMenuKeydown($event)"
             (click)="onRadiusMenuActionSelected(action.id)"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-            <span class="dd-item__label">{{ action.label }}</span>
+            <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
           </button>
         }
 
         @if (radiusPrimaryActions().length > 0 && radiusDestructiveActions().length > 0) {
-          <div class="dd-divider" aria-hidden="true"></div>
+          <div hlmMenuSeparator aria-hidden="true"></div>
         }
 
         @for (action of radiusDestructiveActions(); track action.id) {
           <button
-            class="dd-item dd-item--danger"
+            hlmMenuItem
+            class="w-full text-destructive"
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
             (keydown)="onMapMenuKeydown($event)"
             (click)="onRadiusMenuActionSelected(action.id)"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-            <span class="dd-item__label">{{ action.label }}</span>
+            <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
           </button>
         }
       </div>
@@ -210,55 +214,58 @@
           }
         </div>
 
-        <div class="dd-items" role="menu" tabindex="-1" aria-label="Marker context menu">
+        <div class="map-context-menu__items flex flex-col p-2" role="menu" tabindex="-1" aria-label="Marker context menu">
           @for (action of markerPrimaryActions(); track action.id + '-' + action.label) {
             <button
-              class="dd-item"
+              hlmMenuItem
+              class="w-full"
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
               (keydown)="onMapMenuKeydown($event)"
               (click)="onMarkerMenuActionSelected(action.id)"
             >
-              <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-              <span class="dd-item__label">{{ action.label }}</span>
+              <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+              <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
             </button>
           }
 
           @if (markerPrimaryActions().length > 0 && markerSecondaryActions().length > 0) {
-            <div class="dd-divider" aria-hidden="true"></div>
+            <div hlmMenuSeparator aria-hidden="true"></div>
           }
 
           @for (action of markerSecondaryActions(); track action.id) {
             <button
-              class="dd-item"
+              hlmMenuItem
+              class="w-full"
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
               (keydown)="onMapMenuKeydown($event)"
               (click)="onMarkerMenuActionSelected(action.id)"
             >
-              <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-              <span class="dd-item__label">{{ action.label }}</span>
+              <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+              <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
             </button>
           }
 
           @if (markerDestructiveActions().length > 0) {
-            <div class="dd-divider" aria-hidden="true"></div>
+            <div hlmMenuSeparator aria-hidden="true"></div>
 
             @for (action of markerDestructiveActions(); track action.id) {
               <button
-                class="dd-item dd-item--danger"
+                hlmMenuItem
+                class="w-full text-destructive"
                 type="button"
                 role="menuitem"
                 [disabled]="action.disabled"
                 (keydown)="onMapMenuKeydown($event)"
                 (click)="onMarkerMenuActionSelected(action.id)"
               >
-                <span class="material-icons dd-item__icon" aria-hidden="true">{{
+                <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{
                   action.icon
                 }}</span>
-                <span class="dd-item__label">{{ action.label }}</span>
+                <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
               </button>
             }
           }

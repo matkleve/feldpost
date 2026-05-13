@@ -2,15 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
-import {
-  UiButtonDirective,
-  UiButtonPrimaryDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 
 @Component({
   selector: 'app-projects-page-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, UiButtonDirective, UiButtonPrimaryDirective],
+  imports: [CommonModule, RouterLink, ...HLM_BUTTON_IMPORTS],
   templateUrl: './projects-page-header.component.html',
   styleUrl: './projects-page-header.component.scss',
 })

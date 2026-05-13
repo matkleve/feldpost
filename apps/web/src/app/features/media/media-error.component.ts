@@ -1,15 +1,12 @@
 import { Component, output } from '@angular/core';
 import { inject } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
-import {
-  UiButtonDirective,
-  UiButtonSecondaryDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 
 @Component({
   selector: 'app-media-error',
   standalone: true,
-  imports: [UiButtonDirective, UiButtonSecondaryDirective],
+  imports: [...HLM_BUTTON_IMPORTS],
   templateUrl: './media-error.component.html',
   styleUrl: './media-error.component.scss',
   host: {

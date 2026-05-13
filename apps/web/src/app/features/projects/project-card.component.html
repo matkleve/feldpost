@@ -39,12 +39,10 @@
   <div class="project-card__actions">
     @if (project().status === 'active') {
       <button
-        uiButton
-        uiButtonSizeMd
-        uiButtonSecondary
-        uiButtonIconOnly
+        hlmBtn
+        variant="outline"
+        size="icon"
         type="button"
-        class="ui-button ui-button--secondary"
         (click)="onToggleColorPicker(project().id)"
       >
         <span class="material-icons" aria-hidden="true">palette</span>
@@ -61,12 +59,9 @@
 
       @if (variant() !== 'small') {
         <button
-          uiButton
-          uiButtonSizeMd
-          uiButtonSecondary
-          uiButtonIconWithText
+          hlmBtn
+          variant="outline"
           type="button"
-          class="ui-button ui-button--secondary"
           (click)="onDangerAction(project().id, 'archive')"
         >
           <span class="material-icons" aria-hidden="true">archive</span>
@@ -75,20 +70,18 @@
       }
     } @else {
       <button
-        uiButton
-        uiButtonSecondary
+        hlmBtn
+        variant="outline"
         type="button"
-        class="ui-button ui-button--secondary"
         (click)="onDangerAction(project().id, 'restore')"
       >
         <span>{{ t('projects.page.action.restoreProject', 'Restore') }}</span>
       </button>
 
       <button
-        uiButton
-        uiButtonDanger
+        hlmBtn
+        variant="destructive"
         type="button"
-        class="ui-button ui-button--danger"
         (click)="onDangerAction(project().id, 'delete')"
       >
         <span>{{ t('projects.page.action.deleteProject', 'Delete') }}</span>

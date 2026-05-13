@@ -7,13 +7,7 @@
       <span class="material-icons" aria-hidden="true">warning</span>
       <h3>{{ t('settings.inviteManagement.errorState.title', 'Invite unavailable') }}</h3>
       <p>{{ lastError() }}</p>
-      <button
-        uiButton
-        uiButtonGhost
-        type="button"
-        class="invite-section__ghost ui-button ui-button--ghost"
-        (click)="retry()"
-      >
+      <button hlmBtn variant="ghost" type="button" class="invite-section__ghost" (click)="retry()">
         {{ t('settings.inviteManagement.errorState.retry', 'Try again') }}
       </button>
     </div>
@@ -33,7 +27,11 @@
         </p>
       </div>
       @if (activeInvite(); as invite) {
-        <span uiStatusBadge class="invite-section__status-chip" [attr.data-status]="invite.status">
+        <span
+          hlmBadge
+          class="invite-section__status-chip"
+          [variant]="inviteStatusBadgeVariant(invite.status)"
+        >
           <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
           <span>{{ statusLabel() }}</span>
         </span>
@@ -49,47 +47,49 @@
         class="invite-section__role-block"
         [attr.aria-label]="t('settings.inviteManagement.aria.rolePicker', 'Role picker')"
       >
-        <label class="invite-section__label" for="invite-role-select">
-          {{ t('settings.inviteManagement.targetRole.label', 'Target role') }}
-        </label>
-        <div class="invite-section__role-row">
-          <select
-            uiSelectControl
-            #roleSelect
-            id="invite-role-select"
-            class="invite-section__select ui-select-control"
-            [value]="targetRole()"
-            [disabled]="isRegenerateDisabled()"
-            (change)="onRoleChange($event)"
-          >
-            <option value="worker">
-              {{ t('settings.inviteManagement.targetRole.option.worker', 'Worker') }}
-            </option>
-            <option value="clerk">
-              {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
-            </option>
-          </select>
-          <button
-            uiButton
-            uiButtonGhost
-            type="button"
-            class="invite-section__button ui-button ui-button--ghost"
-            [disabled]="isRegenerateDisabled()"
-            (click)="onRegenerate()"
-          >
-            {{ t('settings.inviteManagement.action.regenerate', 'Regenerate') }}
-          </button>
-          <button
-            uiButton
-            uiButtonDanger
-            type="button"
-            class="invite-section__button ui-button ui-button--danger"
-            [disabled]="activeInvite()?.status !== 'active'"
-            (click)="onRevoke()"
-          >
-            {{ t('settings.inviteManagement.action.revoke', 'Revoke') }}
-          </button>
-        </div>
+        <hlm-form-field class="invite-section__role-field">
+          <label hlmLabel for="invite-role-select">{{
+            t('settings.inviteManagement.targetRole.label', 'Target role')
+          }}</label>
+          <div class="invite-section__role-row">
+            <select
+              hlmSelect
+              #roleSelect
+              id="invite-role-select"
+              class="invite-section__select"
+              [value]="targetRole()"
+              [disabled]="isRegenerateDisabled()"
+              (change)="onRoleChange($event)"
+            >
+              <option value="worker">
+                {{ t('settings.inviteManagement.targetRole.option.worker', 'Worker') }}
+              </option>
+              <option value="clerk">
+                {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
+              </option>
+            </select>
+            <button
+              hlmBtn
+              variant="ghost"
+              type="button"
+              class="invite-section__button"
+              [disabled]="isRegenerateDisabled()"
+              (click)="onRegenerate()"
+            >
+              {{ t('settings.inviteManagement.action.regenerate', 'Regenerate') }}
+            </button>
+            <button
+              hlmBtn
+              variant="destructive"
+              type="button"
+              class="invite-section__button"
+              [disabled]="activeInvite()?.status !== 'active'"
+              (click)="onRevoke()"
+            >
+              {{ t('settings.inviteManagement.action.revoke', 'Revoke') }}
+            </button>
+          </div>
+        </hlm-form-field>
       </section>
 
       <section

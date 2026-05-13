@@ -78,11 +78,9 @@
           </td>
           <td class="project2-row__meta">
             <span
-              uiStatusBadge
-              uiStatusBadgeSizeSm
-              class="ui-status-badge ui-status-badge--sm"
-              [class.ui-status-badge--success]="project.status === 'active'"
-              [class.ui-status-badge--warning]="project.status === 'archived'"
+              hlmBadge
+              [variant]="project.status === 'active' ? 'success' : 'warning'"
+              class="project2-row__status-badge"
             >
               {{ statusLabel(project.status) }}
             </span>

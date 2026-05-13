@@ -60,35 +60,13 @@
   font-size: var(--font-size-md-emphasis);
 }
 
-.invite-section__status-chip[data-status='active'] {
-  color: var(--color-success);
-  background: color-mix(in srgb, var(--color-success) 12%, transparent);
-}
-
-.invite-section__status-chip[data-status='expired'] {
-  color: var(--color-warning);
-  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
-}
-
-.invite-section__status-chip[data-status='revoked'] {
-  color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
-}
-
-.invite-section__status-chip[data-status='accepted'] {
-  color: var(--color-map-user-marker);
-  background: color-mix(in srgb, var(--color-map-user-marker) 14%, transparent);
-}
-
 .invite-section__stack {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
 }
 
-.invite-section__label {
-  display: block;
-  margin-bottom: var(--spacing-2);
+.invite-section__role-field label {
   font-size: var(--font-size-md);
   color: var(--color-text-secondary);
 }

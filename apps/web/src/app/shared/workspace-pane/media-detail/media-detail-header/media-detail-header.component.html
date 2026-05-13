@@ -34,8 +34,8 @@
   }
 
   <span
-    uiStatusPill
-    uiStatusPillSizeSm
+    hlmBadge
+    variant="outline"
     class="detail-kind-chip"
     [attr.aria-label]="t('workspace.imageDetail.fileType.aria', 'File type')"
     >{{ mediaTypeLabel() }}</span
@@ -65,22 +65,23 @@
       panelClass="detail-context-menu option-menu-surface"
       (closeRequested)="onContextMenuCloseRequested()"
     >
-      <div class="dd-items" role="menu">
+      <div class="flex flex-col p-2" role="menu">
         @for (action of contextActions(); track action.id; let index = $index) {
           @if (index > 0 && contextActions()[index - 1]?.section !== action.section) {
-            <div class="dd-divider" role="separator"></div>
+            <div hlmMenuSeparator role="separator"></div>
           }
           <button
-            class="dd-item"
-            [class.dd-item--danger]="action.section === 'destructive'"
+            hlmMenuItem
+            class="w-full"
+            [class.text-destructive]="action.section === 'destructive'"
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
             (keydown)="onContextMenuKeydown($event)"
             (click)="actionSelected.emit(action.id)"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-            <span class="dd-item__label">{{ action.label }}</span>
+            <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
           </button>
         }
       </div>

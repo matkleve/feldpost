@@ -15,9 +15,9 @@
       </div>
       <div hlmDialogFooter>
         <button
-          uiButton
-          uiButtonGhost
-          class="dialog__cancel ui-button ui-button--ghost"
+          hlmBtn
+          variant="ghost"
+          class="dialog__cancel"
           type="button"
           brnDialogClose
           (click)="cancelled.emit()"
@@ -25,10 +25,9 @@
           {{ cancelLabel() }}
         </button>
         <button
-          uiButton
-          class="dialog__confirm ui-button"
-          [class.ui-button--danger]="danger()"
-          [class.ui-button--primary]="!danger()"
+          hlmBtn
+          [variant]="danger() ? 'destructive' : 'default'"
+          class="dialog__confirm"
           type="button"
           brnDialogClose
           (click)="confirmed.emit()"

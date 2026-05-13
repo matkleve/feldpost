@@ -142,7 +142,7 @@
   }
 }
 
-:host ::ng-deep .map-context-menu .dd-items {
+:host ::ng-deep .map-context-menu .map-context-menu__items {
   max-height: min(20rem, calc(100vh - 10rem));
   overflow-y: auto;
 }

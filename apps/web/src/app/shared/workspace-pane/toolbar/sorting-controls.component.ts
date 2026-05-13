@@ -1,16 +1,18 @@
 import { Component, signal } from '@angular/core';
-import { UiToolbarButtonDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 type SortOption = 'date-desc' | 'date-asc' | 'distance' | 'name';
 
 @Component({
   selector: 'app-sorting-controls',
-  imports: [UiToolbarButtonDirective],
+  imports: [...HLM_BUTTON_IMPORTS],
   template: `
     <div class="sorting-controls">
       @for (opt of options; track opt.value) {
         <button
-          uiToolbarButton
+          hlmBtn
+          variant="ghost"
+          size="sm"
           class="sorting-controls__btn"
           [class.sorting-controls__btn--active]="opt.value === activeSort()"
           (click)="activeSort.set(opt.value)"

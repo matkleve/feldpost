@@ -68,7 +68,7 @@
   |---|---|---|---|
   | `chips[].variant` | `string` | `default`, `filled`, `success`, `warning` | Chip background and icon color |
 - **Other inputs**: `chips: ChipDef[]` (each has `icon`, `text`, `variant?`, `title?`)
-- **Composed of**: `app-chip` (via `UI_PRIMITIVE_DIRECTIVES`)
+- **Composed of**: `app-chip` (via `UiChipDirective` / `[hlmBadge]` at callsites)
 - **Used in**: media detail view, workspace pane
 - **Gaps**: none
 

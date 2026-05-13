@@ -259,14 +259,6 @@
   vertical-align: middle;
 }
 
-:host ::ng-deep .upload-item-context-menu .dd-item--danger {
-  color: var(--color-danger);
-}
-
-:host ::ng-deep .upload-item-context-menu .dd-item__icon--danger {
-  color: var(--color-danger);
-}
-
 @keyframes upload-item-spin {
   to {
     transform: rotate(360deg);

@@ -2,15 +2,14 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import type { ForwardGeocodeResult} from '../../../../core/geocoding/geocoding.service';
 import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import {
-  UiIconButtonGhostDirective,
-  UiInputControlDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
+import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
+import { UiIconButtonGhostDirective } from '../../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-address-search',
   standalone: true,
-  imports: [UiInputControlDirective, UiIconButtonGhostDirective],
+  imports: [...HLM_INPUT_IMPORTS, UiIconButtonGhostDirective, HlmMenuItemDirective],
   templateUrl: './address-search.component.html',
   styleUrl: './address-search.component.scss',
 })

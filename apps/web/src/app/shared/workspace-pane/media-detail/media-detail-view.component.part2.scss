@@ -8,7 +8,7 @@
   gap: var(--spacing-1);
   overflow: visible;
 
-  .dd-section-label {
+  [hlmMenuLabel] {
     padding-top: var(--spacing-3);
     padding-bottom: 0;
   }

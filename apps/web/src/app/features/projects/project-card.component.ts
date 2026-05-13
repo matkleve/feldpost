@@ -2,13 +2,8 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { ProjectColorKey, ProjectListItem } from '../../core/projects/projects.types';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import {
-  UiButtonDangerDirective,
-  UiButtonDirective,
-  UiButtonIconOnlyDirective,
-  UiButtonIconWithTextDirective,
-  UiButtonSecondaryDirective,
-  UiButtonSizeMdDirective,
   UiCardShellDirective,
   UiCardShellSizeMdDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
@@ -20,12 +15,7 @@ import { inject } from '@angular/core';
   standalone: true,
   imports: [
     ProjectColorPickerComponent,
-    UiButtonDirective,
-    UiButtonSecondaryDirective,
-    UiButtonDangerDirective,
-    UiButtonIconOnlyDirective,
-    UiButtonIconWithTextDirective,
-    UiButtonSizeMdDirective,
+    ...HLM_BUTTON_IMPORTS,
     UiCardShellDirective,
     UiCardShellSizeMdDirective,
   ],

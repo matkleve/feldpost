@@ -21,13 +21,10 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
-import {
-  UiButtonDirective,
-  UiButtonPrimaryDirective,
-  UiFieldLabelDirective,
-  UiFieldRowDirective,
-  UiInputControlDirective,
-} from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
 import { AuthMapLayerComponent } from '../auth-map-layer/auth-map-layer.component';
 
 /** Custom validator: both password fields must match. */
@@ -43,11 +40,10 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
     AuthMapLayerComponent,
     ReactiveFormsModule,
     RouterLink,
-    UiFieldRowDirective,
-    UiFieldLabelDirective,
-    UiInputControlDirective,
-    UiButtonDirective,
-    UiButtonPrimaryDirective,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',

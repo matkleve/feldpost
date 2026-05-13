@@ -1,12 +1,12 @@
 import { Component, input, output, viewChild } from '@angular/core';
 import { BrnDialog, BrnDialogImports } from '@spartan-ng/brain/dialog';
-import { UI_PRIMITIVE_DIRECTIVES } from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HLM_DIALOG_IMPORTS } from '../../shared/ui/dialog';
 
 @Component({
   selector: 'app-projects-confirm-dialog',
   standalone: true,
-  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...UI_PRIMITIVE_DIRECTIVES],
+  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...HLM_BUTTON_IMPORTS],
   templateUrl: './projects-confirm-dialog.component.html',
   styleUrl: './projects-confirm-dialog.component.scss',
 })

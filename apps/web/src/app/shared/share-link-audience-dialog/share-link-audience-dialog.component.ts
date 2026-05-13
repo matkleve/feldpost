@@ -6,7 +6,7 @@ import type {
   ShareLinkAudience,
 } from '../../core/share-set/share-set.types';
 import { parseRecipientUserIdsFromCommaSeparatedInput } from '../../core/share-set/share-set.helpers';
-import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { HLM_DIALOG_IMPORTS } from '../ui/dialog';
 
 /**
@@ -16,7 +16,7 @@ import { HLM_DIALOG_IMPORTS } from '../ui/dialog';
 @Component({
   selector: 'app-share-link-audience-dialog',
   standalone: true,
-  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...UI_PRIMITIVE_DIRECTIVES],
+  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...HLM_BUTTON_IMPORTS],
   templateUrl: './share-link-audience-dialog.component.html',
   styleUrl: './share-link-audience-dialog.component.scss',
 })

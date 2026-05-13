@@ -16,9 +16,9 @@
         </div>
         <div hlmDialogFooter>
           <button
-            uiButton
-            uiButtonSecondary
-            class="projects-confirm__cancel ui-button ui-button--secondary"
+            hlmBtn
+            variant="outline"
+            class="projects-confirm__cancel"
             type="button"
             brnDialogClose
             [disabled]="busy()"
@@ -27,10 +27,9 @@
             {{ cancelLabel() }}
           </button>
           <button
-            uiButton
-            class="projects-confirm__confirm ui-button"
-            [class.ui-button--danger]="danger()"
-            [class.ui-button--primary]="!danger()"
+            hlmBtn
+            [variant]="danger() ? 'destructive' : 'default'"
+            class="projects-confirm__confirm"
             type="button"
             [disabled]="busy()"
             (click)="onConfirm()"

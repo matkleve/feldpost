@@ -2,13 +2,13 @@
   <div dropdown-items cdkDropListGroup>
     <div class="grouping-section">
       <div class="grouping-section__header">
-        <span hlmMenuLabel class="dd-section-label dropdown-section">{{
+        <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">{{
           t('workspace.grouping.section.groupedBy', 'Grouped by')
         }}</span>
         @if (activeGroupings().length > 0) {
           <button
             uiIconButtonGhost
-            class="dd-reset-btn icon-btn-ghost"
+            class="shrink-0 icon-btn-ghost"
             (click)="clearGroupings()"
             [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
           >
@@ -42,23 +42,23 @@
             (cdkDragStarted)="onDragStart()"
             (cdkDragEnded)="onDragEnd()"
             hlmMenuItem
-            class="dd-item dd-item--active"
+            class="grouping-dropdown__row text-primary"
             [class.grouping-row--selected]="selectedRows().has(prop.id)"
             tabindex="0"
             (click)="onRowClick(prop.id, $event)"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
-            <span class="dd-item__label">{{ prop.label }}</span>
-            <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
+            <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ prop.icon }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ prop.label }}</span>
+            <span class="grouping-dropdown__drag-handle material-icons shrink-0 text-base text-muted-foreground" cdkDragHandle aria-hidden="true"
               >drag_indicator</span
             >
           </div>
         }
       </div>
     </div>
-    <div hlmMenuSeparator class="dd-divider" aria-hidden="true"></div>
+    <div hlmMenuSeparator aria-hidden="true"></div>
     <div class="grouping-section">
-      <span hlmMenuLabel class="dd-section-label dropdown-section">{{
+      <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">{{
         t('workspace.grouping.section.available', 'Available')
       }}</span>
       <div
@@ -76,14 +76,14 @@
             (cdkDragStarted)="onDragStart()"
             (cdkDragEnded)="onDragEnd()"
             hlmMenuItem
-            class="dd-item dd-item--muted"
+            class="grouping-dropdown__row text-muted-foreground hover:text-foreground"
             [class.grouping-row--selected]="selectedRows().has(prop.id)"
             tabindex="0"
             (click)="onRowClick(prop.id, $event)"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
-            <span class="dd-item__label">{{ prop.label }}</span>
-            <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
+            <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ prop.icon }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ prop.label }}</span>
+            <span class="grouping-dropdown__drag-handle material-icons shrink-0 text-base text-muted-foreground" cdkDragHandle aria-hidden="true"
               >drag_indicator</span
             >
           </div>

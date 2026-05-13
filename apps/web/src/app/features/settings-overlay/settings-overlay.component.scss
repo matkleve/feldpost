@@ -193,9 +193,23 @@
   color: var(--color-text-secondary);
 }
 
-.settings-overlay__field-row .ui-field-label {
+.settings-overlay__field-row label {
   font-size: var(--font-size-md);
   color: var(--color-text-secondary);
+}
+
+:host ::ng-deep hlm-form-field.settings-overlay__field-row > div {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  gap: var(--spacing-3);
+  align-items: center;
+}
+
+:host ::ng-deep hlm-form-field.settings-overlay__field-row--stacked > div {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-2);
 }
 
 .settings-overlay__segmented {
@@ -351,7 +365,10 @@
     flex-basis: var(--settings-overlay-left-width);
   }
 
-  .settings-overlay__field-row {
+  :host
+    ::ng-deep
+    hlm-form-field.settings-overlay__field-row:not(.settings-overlay__field-row--stacked)
+    > div {
     grid-template-columns: 1fr;
   }
 }

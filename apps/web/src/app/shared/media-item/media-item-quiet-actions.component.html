@@ -7,10 +7,9 @@
 <button
   type="button"
   class="media-item-quiet-actions__button media-item-quiet-actions__button--select"
-  uiButton
-  uiButtonSizeSm
-  uiButtonSecondary
-  uiButtonIconOnly
+  hlmBtn
+  variant="outline"
+  size="icon"
   [attr.aria-pressed]="selected()"
   [attr.aria-label]="selectLabel()"
   (click)="onSelectClick($event)"
@@ -29,10 +28,9 @@
 <button
   type="button"
   class="media-item-quiet-actions__button media-item-quiet-actions__button--map"
-  uiButton
-  uiButtonSizeSm
-  uiButtonSecondary
-  uiButtonIconOnly
+  hlmBtn
+  variant="outline"
+  size="icon"
   [disabled]="mapActionDisabled()"
   [attr.aria-label]="mapLabel()"
   (click)="onMapClick($event)"

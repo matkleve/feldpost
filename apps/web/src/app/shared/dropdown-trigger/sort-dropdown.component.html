@@ -9,7 +9,7 @@
   @if (searchTerm() || hasCustomSort()) {
     <button
       dropdown-search-action
-      class="dd-search__action icon-btn-ghost"
+      class="shrink-0 icon-btn-ghost"
       type="button"
       (click)="onSearchActionClick()"
       [attr.aria-label]="searchActionAriaLabel()"
@@ -20,23 +20,23 @@
 
   <div dropdown-items>
     @if (groupedOptions().length > 0) {
-      <div hlmMenuLabel class="dd-section-label dropdown-section">
+      <div hlmMenuLabel class="dropdown-section uppercase tracking-wide">
         {{ t('workspace.sort.section.groupedBy', 'Sorted by grouping') }}
       </div>
       @for (opt of groupedOptions(); track opt.id) {
         <button
           hlmMenuItem
-          class="dd-item dd-item--active"
+          class="sort-dropdown__option text-primary"
           type="button"
-          [class.dd-item--hovered]="isRowHovered(opt.id)"
+          [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
           (mouseenter)="setHoveredSort(opt.id)"
           (mouseleave)="clearHoveredSort(opt.id)"
           (focus)="setHoveredSort(opt.id)"
           (blur)="clearHoveredSort(opt.id)"
           (click)="toggleSort(opt.id); $event.stopPropagation()"
         >
-          <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
-          <span class="dd-item__label">{{ opt.label }}</span>
+          <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ opt.icon }}</span>
+          <span class="min-w-0 flex-1 text-left">{{ opt.label }}</span>
           <span
             class="sort-direction sort-direction--visible"
             [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
@@ -47,23 +47,25 @@
           ></span>
         </button>
       }
-      <div hlmMenuSeparator class="dd-divider" aria-hidden="true"></div>
+      <div hlmMenuSeparator aria-hidden="true"></div>
     }
     @for (opt of filteredOptions(); track opt.id) {
       <button
         hlmMenuItem
-        class="dd-item"
+        class="sort-dropdown__option"
         type="button"
-        [class.dd-item--active]="isSortActive(opt.id)"
-        [class.dd-item--hovered]="isRowHovered(opt.id)"
+        [class.text-primary]="isSortActive(opt.id)"
+        [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
         (mouseenter)="setHoveredSort(opt.id)"
         (mouseleave)="clearHoveredSort(opt.id)"
         (focus)="setHoveredSort(opt.id)"
         (blur)="clearHoveredSort(opt.id)"
         (click)="toggleSort(opt.id); $event.stopPropagation()"
       >
-        <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
-        <span class="dd-item__label">{{ opt.label }}</span>
+        <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{
+          opt.icon
+        }}</span>
+        <span class="min-w-0 flex-1 text-left">{{ opt.label }}</span>
         <span
           class="sort-direction"
           [class.sort-direction--visible]="isSortActive(opt.id)"
@@ -76,7 +78,7 @@
       </button>
     }
     @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
-      <div class="dd-empty">
+      <div class="px-2 py-3 text-center text-sm text-muted-foreground">
         {{ t('workspace.sort.empty.noMatchingProperties', 'No matching properties') }}
       </div>
     }

@@ -1,13 +1,13 @@
 <div class="chips">
   @for (chip of chips(); track $index) {
     <button
-      uiChip
-      uiChipAction
-      class="chip ui-chip focus-ring-primary"
+      type="button"
+      hlmBadge
+      [variant]="chipBadgeVariant(chip)"
+      class="chip ui-chip focus-ring-primary cursor-pointer"
       [class.chip--filled]="chip.variant === 'filled'"
       [class.chip--success]="chip.variant === 'success'"
       [class.chip--warning]="chip.variant === 'warning'"
-      type="button"
       [title]="chip.title ?? chip.text"
       (click)="chipClicked.emit($index)"
     >

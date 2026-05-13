@@ -1,33 +1,35 @@
-<div class="dd-section-label">{{ t('workspace.detailActions.section.title', 'Actions') }}</div>
+<div hlmMenuLabel class="uppercase tracking-wide">{{ t('workspace.detailActions.section.title', 'Actions') }}</div>
 
 @for (action of actions(); track action.id) {
   @if (action.section === 'primary' || action.section === 'secondary') {
     <button
-      class="dd-item"
+      hlmMenuItem
+      class="w-full"
       type="button"
       [disabled]="action.disabled"
       (click)="actionSelected.emit(action.id)"
     >
-      <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-      <span class="dd-item__label">{{ action.label }}</span>
+      <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+      <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
     </button>
   }
 }
 
 @if (hasDestructiveActions()) {
-  <div class="dd-divider"></div>
+  <div hlmMenuSeparator></div>
 }
 
 @for (action of actions(); track action.id + '-danger') {
   @if (action.section === 'destructive') {
     <button
-      class="dd-item dd-item--danger"
+      hlmMenuItem
+      class="w-full text-destructive"
       type="button"
       [disabled]="action.disabled"
       (click)="actionSelected.emit(action.id)"
     >
-      <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
-      <span class="dd-item__label">{{ action.label }}</span>
+      <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+      <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
     </button>
   }
 }

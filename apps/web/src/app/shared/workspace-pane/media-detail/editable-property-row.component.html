@@ -4,15 +4,15 @@
   [class.prop-row--editing]="editing()"
   [class.prop-row--readonly]="readonly()"
 >
-  <span class="prop-key" [title]="label()">{{ label() }}</span>
+  <span class="prop-key" hlmLabel [title]="label()">{{ label() }}</span>
   <div uiInlineEditActions class="prop-edit ui-inline-edit-actions">
     @if (editing() && !readonly()) {
       @switch (inputType()) {
         @case ('date') {
           <input
             #editInput
-            uiInputControl
-            class="prop-input ui-input-control"
+            hlmInput
+            class="prop-input"
             type="datetime-local"
             [value]="dateInputValue()"
             [attr.aria-label]="
@@ -26,8 +26,8 @@
         @case ('select') {
           <select
             #editInput
-            uiSelectControl
-            class="prop-input prop-input--select ui-select-control"
+            hlmSelect
+            class="prop-input prop-input--select"
             [attr.aria-label]="
               t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
             "
@@ -44,8 +44,8 @@
         @default {
           <input
             #editInput
-            uiInputControl
-            class="prop-input ui-input-control"
+            hlmInput
+            class="prop-input"
             type="text"
             [value]="value()"
             [attr.aria-label]="

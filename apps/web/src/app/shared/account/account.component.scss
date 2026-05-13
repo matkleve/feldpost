@@ -148,7 +148,7 @@
   gap: var(--spacing-1);
 }
 
-.account-field span {
+.account-field label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
@@ -156,12 +156,6 @@
 .account-field input {
   width: 100%;
   min-width: 0;
-  min-height: 2.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--container-radius-control);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  padding: 0 var(--spacing-2);
 }
 
 .account-grid {

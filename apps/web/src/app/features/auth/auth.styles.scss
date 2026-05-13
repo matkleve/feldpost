@@ -118,8 +118,8 @@
   }
 }
 
-// Span both grid columns when field uses ui-field-row (register / reset / update)
-.field.ui-field-row > .field-error {
+// Error copy under control (hlm-form-field wraps label + input in inner stack)
+hlm-form-field.field .field-error {
   grid-column: 1 / -1;
 }
 
@@ -129,7 +129,7 @@
   margin-top: var(--spacing-1);
 }
 
-// Layout-only: full-width and top gap; visual treatment owned by .ui-button--primary
+// Layout-only: full-width and top gap; primary surface from `hlmBtn` default variant
 .btn-primary {
   width: 100%;
   margin-top: var(--spacing-2);

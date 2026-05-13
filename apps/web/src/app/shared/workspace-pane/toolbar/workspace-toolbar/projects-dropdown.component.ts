@@ -28,7 +28,7 @@ interface Project {
       (actionRequested)="isCreating.set(true)"
     >
       <div dropdown-items class="projects-list">
-        <label hlmMenuItem uiChoiceRow class="dd-item projects-row--all ui-choice-row">
+        <label hlmMenuItem uiChoiceRow class="projects-row--all ui-choice-row">
           <input
             uiChoiceControl
             type="checkbox"
@@ -37,10 +37,10 @@ interface Project {
             [indeterminate]="someSelected()"
             (change)="toggleAll()"
           />
-          <span class="dd-item__label">{{ t('workspace.projects.all', 'All projects') }}</span>
+          <span class="min-w-0 flex-1">{{ t('workspace.projects.all', 'All projects') }}</span>
         </label>
         @for (project of filteredProjects(); track project.id) {
-          <label hlmMenuItem uiChoiceRow class="dd-item ui-choice-row">
+          <label hlmMenuItem uiChoiceRow class="ui-choice-row">
             <input
               uiChoiceControl
               type="checkbox"
@@ -48,8 +48,8 @@ interface Project {
               [checked]="selectedIds().has(project.id)"
               (change)="toggleProject(project.id)"
             />
-            <span class="dd-item__label">{{ project.name }}</span>
-            <span class="dd-item__trailing projects-count">{{ project.imageCount }}</span>
+            <span class="min-w-0 flex-1">{{ project.name }}</span>
+            <span class="ml-auto shrink-0 projects-count">{{ project.imageCount }}</span>
           </label>
         }
       </div>

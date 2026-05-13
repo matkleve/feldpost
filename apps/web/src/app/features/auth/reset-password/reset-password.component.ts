@@ -13,24 +13,20 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
-import {
-  UiButtonDirective,
-  UiButtonPrimaryDirective,
-  UiFieldLabelDirective,
-  UiFieldRowDirective,
-  UiInputControlDirective,
-} from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
 
 @Component({
   selector: 'app-reset-password',
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    UiFieldRowDirective,
-    UiFieldLabelDirective,
-    UiInputControlDirective,
-    UiButtonDirective,
-    UiButtonPrimaryDirective,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
   ],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',

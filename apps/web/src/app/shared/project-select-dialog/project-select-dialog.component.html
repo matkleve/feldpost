@@ -42,9 +42,9 @@
 
       <div hlmDialogFooter class="project-select-dialog__actions">
         <button
-          uiButton
-          uiButtonGhost
-          class="project-select-dialog__cancel ui-button ui-button--ghost"
+          hlmBtn
+          variant="ghost"
+          class="project-select-dialog__cancel"
           type="button"
           brnDialogClose
           (click)="cancelled.emit()"
@@ -52,9 +52,9 @@
           {{ cancelLabel() }}
         </button>
         <button
-          uiButton
-          uiButtonPrimary
-          class="project-select-dialog__confirm ui-button ui-button--primary"
+          hlmBtn
+          variant="default"
+          class="project-select-dialog__confirm"
           type="button"
           [disabled]="!selectedId()"
           (click)="confirmSelection()"

@@ -3,7 +3,7 @@
     <span class="material-icons address-search__icon" aria-hidden="true">search</span>
     <input
       #addressSearchInput
-      uiInputControl
+      hlmInput
       class="address-search__input"
       type="text"
       [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
@@ -27,11 +27,11 @@
   </div>
 
   @if (suggestions().length > 0) {
-    <div class="address-search__results option-menu-surface dd-items">
+    <div class="address-search__results option-menu-surface flex flex-col p-2">
       @for (suggestion of suggestions(); track suggestion.addressLabel) {
-        <button class="dd-item" type="button" (click)="apply(suggestion)">
-          <span class="material-icons dd-item__icon" aria-hidden="true">place</span>
-          <span class="dd-item__label">{{ suggestion.addressLabel }}</span>
+        <button hlmMenuItem class="w-full" type="button" (click)="apply(suggestion)">
+          <span class="material-icons shrink-0 text-base text-muted-foreground" aria-hidden="true">place</span>
+          <span class="min-w-0 flex-1 text-left">{{ suggestion.addressLabel }}</span>
         </button>
       }
     </div>
@@ -43,9 +43,13 @@
     </div>
   }
 } @else {
-  <button class="address-search__trigger dd-item dd-item--muted" type="button" (click)="open()">
-    <span class="material-icons dd-item__icon" aria-hidden="true">search</span>
-    <span class="dd-item__label">{{
+  <button
+    class="address-search__trigger inline-flex min-h-8 w-full items-center gap-2 rounded-sm px-2 py-1 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+    type="button"
+    (click)="open()"
+  >
+    <span class="material-icons shrink-0 text-base" aria-hidden="true">search</span>
+    <span class="min-w-0 flex-1">{{
       currentAddress() || t('workspace.addressSearch.placeholder', 'Search address...')
     }}</span>
   </button>

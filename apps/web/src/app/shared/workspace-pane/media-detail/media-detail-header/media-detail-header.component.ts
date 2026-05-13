@@ -11,12 +11,12 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import { HLM_BADGE_IMPORTS } from '../../../../shared/ui/badge';
 import {
   UiIconButtonGhostDirective,
   UiInputControlDirective,
-  UiStatusBadgeDirective,
-  UiStatusBadgeSizeSmDirective,
 } from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import type { ResolvedAction } from '../../../../core/action/action-types';
 import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-actions.types';
 
@@ -27,8 +27,9 @@ import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-acti
     DropdownShellComponent,
     UiIconButtonGhostDirective,
     UiInputControlDirective,
-    UiStatusBadgeDirective,
-    UiStatusBadgeSizeSmDirective,
+    HlmMenuItemDirective,
+    HlmMenuSeparatorDirective,
+    ...HLM_BADGE_IMPORTS,
   ],
   templateUrl: './media-detail-header.component.html',
   styleUrl: '../media-detail-view.component.scss',
@@ -87,13 +88,13 @@ export class ImageDetailHeaderComponent {
     }
 
     const currentTarget = event.currentTarget as HTMLElement | null;
-    const container = currentTarget?.closest('.dd-items') as HTMLElement | null;
+    const container = currentTarget?.closest('[role="menu"]') as HTMLElement | null;
     if (!container) {
       return;
     }
 
     const focusableItems = Array.from(
-      container.querySelectorAll<HTMLButtonElement>('.dd-item:not(:disabled)'),
+      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]:not(:disabled)'),
     );
 
     if (focusableItems.length === 0) {
@@ -127,7 +128,7 @@ export class ImageDetailHeaderComponent {
     window.requestAnimationFrame(() => {
       this.positionContextMenu();
       const firstItem = this.contextMenuPanelRef()?.nativeElement.querySelector(
-        '.dd-item',
+        'button[role="menuitem"]',
       ) as HTMLButtonElement | null;
       firstItem?.focus();
     });

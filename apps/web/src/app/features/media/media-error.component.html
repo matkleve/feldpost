@@ -11,10 +11,10 @@
 <!-- Emits retry event so parent can restart media page loading. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
 <button
-  uiButton
-  uiButtonSecondary
+  hlmBtn
+  variant="outline"
   type="button"
-  class="ui-button ui-button--secondary media-error__retry"
+  class="media-error__retry"
   (click)="retry.emit()"
 >
   {{ t('media.page.retry', 'Retry') }}

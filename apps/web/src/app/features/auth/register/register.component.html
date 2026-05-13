@@ -17,12 +17,12 @@
       <div class="auth-card-scroll" role="region" aria-label="Create account form">
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <!-- Full name -->
-          <div uiFieldRow class="field ui-field-row">
-            <label uiFieldLabel class="ui-field-label" for="fullName">Full name</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="fullName">Full name</label>
             <input
-              uiInputControl
+              hlmInput
+              [error]="form.controls.fullName.touched && form.controls.fullName.invalid"
               id="fullName"
-              class="ui-input-control"
               type="text"
               formControlName="fullName"
               autocomplete="name"
@@ -31,15 +31,15 @@
             @if (form.controls.fullName.touched && form.controls.fullName.hasError('required')) {
               <span class="field-error">Full name is required.</span>
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Email -->
-          <div uiFieldRow class="field ui-field-row">
-            <label uiFieldLabel class="ui-field-label" for="email">Email</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="email">Email</label>
             <input
-              uiInputControl
+              hlmInput
+              [error]="form.controls.email.touched && form.controls.email.invalid"
               id="email"
-              class="ui-input-control"
               type="email"
               formControlName="email"
               autocomplete="email"
@@ -50,15 +50,15 @@
             } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
               <span class="field-error">Enter a valid email address.</span>
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Invite code -->
-          <div uiFieldRow class="field ui-field-row">
-            <label uiFieldLabel class="ui-field-label" for="inviteCode">Invite code</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="inviteCode">Invite code</label>
             <input
-              uiInputControl
+              hlmInput
+              [error]="form.controls.inviteCode.touched && form.controls.inviteCode.invalid"
               id="inviteCode"
-              class="ui-input-control"
               type="text"
               formControlName="inviteCode"
               autocomplete="off"
@@ -74,15 +74,15 @@
             ) {
               <span class="field-error">Invite code must be a 48-character hex value.</span>
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Password -->
-          <div uiFieldRow class="field ui-field-row">
-            <label uiFieldLabel class="ui-field-label" for="password">Password</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="password">Password</label>
             <input
-              uiInputControl
+              hlmInput
+              [error]="form.controls.password.touched && form.controls.password.invalid"
               id="password"
-              class="ui-input-control"
               type="password"
               formControlName="password"
               autocomplete="new-password"
@@ -97,17 +97,18 @@
                 >Password must include uppercase, lowercase, number, and symbol.</span
               >
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Confirm password -->
-          <div uiFieldRow class="field ui-field-row">
-            <label uiFieldLabel class="ui-field-label" for="confirmPassword"
-              >Confirm password</label
-            >
+          <hlm-form-field class="field">
+            <label hlmLabel for="confirmPassword">Confirm password</label>
             <input
-              uiInputControl
+              hlmInput
+              [error]="
+                (form.controls.confirmPassword.touched && form.controls.confirmPassword.invalid) ||
+                (form.controls.confirmPassword.touched && form.hasError('passwordsMismatch'))
+              "
               id="confirmPassword"
-              class="ui-input-control"
               type="password"
               formControlName="confirmPassword"
               autocomplete="new-password"
@@ -116,20 +117,14 @@
             @if (form.controls.confirmPassword.touched && form.hasError('passwordsMismatch')) {
               <span class="field-error">Passwords do not match.</span>
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Error banner -->
           @if (errorMessage()) {
             <div class="alert alert-error" role="alert">{{ errorMessage() }}</div>
           }
 
-          <button
-            uiButton
-            uiButtonPrimary
-            type="submit"
-            class="btn-primary ui-button ui-button--primary"
-            [disabled]="loading()"
-          >
+          <button hlmBtn type="submit" class="btn-primary" [disabled]="loading()">
             @if (loading()) {
               Creating account…
             } @else {

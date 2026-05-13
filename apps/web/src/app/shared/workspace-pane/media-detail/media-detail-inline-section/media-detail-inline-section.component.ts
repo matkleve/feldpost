@@ -17,14 +17,13 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../media-detail-view.utils';
 import type { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import { HlmBadgeDirective } from '../../../../shared/ui/badge';
+import { HlmMenuLabelDirective } from '../../../../shared/ui/menu';
 import {
   UiIconButtonGhostDirective,
   UiInputControlDirective,
   UiRowShellDirective,
   UiRowShellSizeSmDirective,
-  UiStatusBadgeDirective,
-  UiStatusBadgeInfoDirective,
-  UiStatusBadgeSizeSmDirective,
 } from '../../../../shared/ui-primitives/ui-primitives.directive';
 
 interface AddressFieldDefinition {
@@ -53,9 +52,8 @@ interface AddressFieldDefinition {
     UiInputControlDirective,
     UiRowShellDirective,
     UiRowShellSizeSmDirective,
-    UiStatusBadgeDirective,
-    UiStatusBadgeSizeSmDirective,
-    UiStatusBadgeInfoDirective,
+    HlmMenuLabelDirective,
+    HlmBadgeDirective,
   ],
   templateUrl: './media-detail-inline-section.component.html',
   styleUrl: '../media-detail-view.component.scss',

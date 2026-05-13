@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
+import { HLM_BADGE_IMPORTS } from '../ui/badge';
 
 export interface ChipDef {
   icon: string;
@@ -11,11 +11,24 @@ export interface ChipDef {
 @Component({
   selector: 'app-quick-info-chips',
   standalone: true,
-  imports: [...UI_PRIMITIVE_DIRECTIVES],
+  imports: [...HLM_BADGE_IMPORTS],
   templateUrl: './quick-info-chips.component.html',
   styleUrl: './quick-info-chips.component.scss',
 })
 export class QuickInfoChipsComponent {
   readonly chips = input<ChipDef[]>([]);
   readonly chipClicked = output<number>();
+
+  chipBadgeVariant(chip: ChipDef): 'outline' | 'success' | 'warning' | 'secondary' {
+    switch (chip.variant) {
+      case 'success':
+        return 'success';
+      case 'warning':
+        return 'warning';
+      case 'filled':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  }
 }

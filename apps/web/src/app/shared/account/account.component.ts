@@ -13,34 +13,22 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { UserProfileService } from '../../core/user-profile/user-profile.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import {
-  UiButtonDangerDirective,
-  UiButtonDirective,
-  UiButtonGhostDirective,
-  UiButtonPrimaryDirective,
-  UiFieldLabelDirective,
-  UiFieldRowDirective,
-  UiFieldRowStackedDirective,
-  UiInputControlDirective,
-  UiStatusBadgeDirective,
-  UiStatusBadgeSizeSmDirective,
-} from '../ui-primitives/ui-primitives.directive';
+import { HLM_BADGE_IMPORTS } from '../ui/badge';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../ui/form-field';
+import { HLM_INPUT_IMPORTS } from '../ui/input';
+import { HLM_LABEL_IMPORTS } from '../ui/label';
 
 @Component({
   selector: 'app-account',
   standalone: true,
   imports: [
     ConfirmDialogComponent,
-    UiButtonDirective,
-    UiButtonPrimaryDirective,
-    UiButtonGhostDirective,
-    UiButtonDangerDirective,
-    UiFieldRowDirective,
-    UiFieldRowStackedDirective,
-    UiFieldLabelDirective,
-    UiInputControlDirective,
-    UiStatusBadgeDirective,
-    UiStatusBadgeSizeSmDirective,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+    ...HLM_BADGE_IMPORTS,
   ],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',

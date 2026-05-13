@@ -1,6 +1,5 @@
-// Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button
-// Generic row/icon/label/divider/section-label styles come from global dd-* classes.
-
+// Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button.
+// @see docs/specs/component/filters/dropdown-system.md
 :host {
   display: block;
 }
@@ -89,6 +88,18 @@
   border-radius: var(--radius-sm);
 }
 
+// --- Drag handle (quiet until row hover) ---
+.grouping-dropdown__drag-handle {
+  margin-left: auto;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 80ms ease-out;
+}
+
+.grouping-dropdown__row:hover .grouping-dropdown__drag-handle {
+  opacity: 1;
+}
+
 // --- CDK drag preview (floating element while dragging) ---
 .cdk-drag-preview {
   border-radius: var(--radius-sm);
@@ -96,7 +107,7 @@
   box-shadow: var(--elevation-modal);
   opacity: 0.9;
 
-  .dd-drag-handle {
+  .grouping-dropdown__drag-handle {
     opacity: 1;
     cursor: grabbing;
   }
