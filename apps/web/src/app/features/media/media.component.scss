@@ -6,17 +6,29 @@
   padding: var(--spacing-4);
 }
 
-// Defines full-width toolbar host area for variant switch controls.
-// @see docs/specs/component/item-grid/item-grid.md#actions
-.media-toolbar {
-  width: 100%;
-}
+@layer components {
+  // Defines full-width toolbar host area for variant switch controls.
+  // @see docs/specs/component/item-grid/item-grid.md#actions
+  .media-toolbar {
+    width: 100%;
+  }
 
-// Styles loading-more footer text during incremental pagination.
-// @see docs/specs/component/item-grid/item-grid.md#actions
-.media-page__loading-more {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  text-align: center;
+  // Defines horizontal cluster layout for media toolbar dropdown triggers.
+  // @see docs/specs/component/item-grid/item-grid.md#actions
+  .media-toolbar__left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+
+  // Defines horizontal cluster layout for media toolbar view and size controls.
+  // @see docs/specs/component/item-grid/item-grid.md#actions
+  .media-toolbar__right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-2);
+  }
 }

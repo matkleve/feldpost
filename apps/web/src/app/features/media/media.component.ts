@@ -24,9 +24,30 @@ import { CardVariantSettingsService } from '../../shared/ui-primitives/card-vari
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { ImageRecord } from '../../core/media-query/media-query.types';
 import { MediaQueryService } from '../../core/media-query/media-query.service';
+import {
+  flattenGroupedSectionsToMediaRenderRows,
+  runMediaGalleryViewPipeline,
+} from '../../core/media-query/media-gallery-view.helpers';
+import { workspaceMediaToImageRecord } from '../../core/workspace-view/workspace-media-mapper';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import { AuthService } from '../../core/auth/auth.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import { FilterService } from '../../core/filter/filter.service';
+import { MetadataService } from '../../core/metadata/metadata.service';
+import type { SortConfig, WorkspaceMedia } from '../../core/workspace-view/workspace-view.types';
+import type { ProjectsViewMode } from '../../core/projects/projects.types';
+import {
+  GroupingDropdownComponent,
+  type GroupingProperty,
+} from '../../shared/dropdown-trigger/grouping-dropdown.component';
+import { FilterDropdownComponent } from '../../shared/dropdown-trigger/filter-dropdown.component';
+import { SortDropdownComponent } from '../../shared/dropdown-trigger/sort-dropdown.component';
+import { ProjectsDropdownComponent } from '../../shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
+import { ProjectsViewToggleComponent } from '../../shared/view-toggle/projects-view-toggle.component';
+import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
+import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
+import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 
 @Component({
   selector: 'app-media',
@@ -37,6 +58,13 @@ import { UploadManagerService } from '../../core/upload/upload-manager.service';
     MediaContentComponent,
     ...BrnToggleGroupImports,
     PaneToolbarComponent,
+    DropdownShellComponent,
+    UiDropdownTriggerDirective,
+    GroupingDropdownComponent,
+    FilterDropdownComponent,
+    SortDropdownComponent,
+    ProjectsDropdownComponent,
+    ProjectsViewToggleComponent,
   ],
   templateUrl: './media.component.html',
   styleUrl: './media.component.scss',
@@ -45,10 +73,6 @@ import { UploadManagerService } from '../../core/upload/upload-manager.service';
   },
 })
 export class MediaComponent implements OnDestroy {
-  private static readonly DEFAULT_CONTAINER_WIDTH_PX = 960;
-  private static readonly GRID_GAP_PX = 12;
-  private static readonly ROW_BATCH_MULTIPLIER = 3;
-  private static readonly SCROLL_PREFETCH_PX = 600;
   private static readonly MIN_RESET_LOADING_MS = 220;
 
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
@@ -58,36 +82,36 @@ export class MediaComponent implements OnDestroy {
   private readonly cardVariantSettings = inject(CardVariantSettingsService);
   private readonly authService = inject(AuthService);
   private readonly uploadManager = inject(UploadManagerService);
+  protected readonly viewService = inject(WorkspaceViewService);
+  private readonly filterService = inject(FilterService);
+  private readonly metadata = inject(MetadataService);
 
   readonly loading = signal(false);
-  readonly loadingMore = signal(false);
   readonly initialLoadSettled = signal(false);
   readonly loadError = signal<string | null>(null);
-  readonly mediaItems = signal<ImageRecord[]>([]);
-  readonly mediaTotalCount = signal<number | null>(null);
-  readonly nextOffset = signal(0);
-  readonly projectNameById = signal<ReadonlyMap<string, string>>(new Map<string, string>());
+  readonly rawWorkspaceImages = signal<WorkspaceMedia[]>([]);
+  readonly uploadRefreshTick = signal(0);
+  readonly activeDropdown = signal<ToolbarDropdown>(null);
+  readonly dropdownTop = signal(0);
+  readonly dropdownLeft = signal(0);
+  readonly activeGroupings = signal<GroupingProperty[]>(
+    this.viewService.activeGroupings().map((g) => ({ id: g.id, label: g.label, icon: g.icon })),
+  );
   readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('media'));
   readonly allowedCardVariants = CARD_VARIANTS;
   readonly cardVariantToggleOptions = computed(() =>
     buildCardVariantToggleOptions((k, f) => this.t(k, f), this.allowedCardVariants, true),
   );
   readonly projectNameForFn = (projectId: string | null): string => this.projectNameFor(projectId);
-  private readonly lastResolvedAuthUserId = signal<string | null | undefined>(undefined);
+  readonly projectsViewMode = computed<ProjectsViewMode>(() =>
+    this.cardVariant() === 'row' ? 'list' : 'cards',
+  );
   readonly emptyReason = computed<'auth-required' | 'no-results'>(() => {
     if (!this.authService.loading() && !this.authService.user()) {
       return 'auth-required';
     }
 
     return 'no-results';
-  });
-  readonly hasMore = computed(() => {
-    const total = this.mediaTotalCount();
-    if (typeof total !== 'number') {
-      return false;
-    }
-
-    return this.mediaItems().length < total;
   });
   readonly headerState = computed<MediaPageHeaderState>(() =>
     this.loading() ? 'loading' : 'ready',
@@ -105,9 +129,86 @@ export class MediaComponent implements OnDestroy {
     }
     return 'ready';
   });
+  readonly gallerySections = computed(() =>
+    runMediaGalleryViewPipeline({
+      images: this.rawWorkspaceImages(),
+      projectIds: this.viewService.selectedProjectIds(),
+      rules: this.filterService.rules(),
+      sorts: this.viewService.effectiveSorts(),
+      groupings: this.viewService.activeGroupings(),
+      filterService: this.filterService,
+      metadata: this.metadata,
+    }),
+  );
+  readonly mediaRenderRows = computed(() =>
+    flattenGroupedSectionsToMediaRenderRows(this.gallerySections(), workspaceMediaToImageRecord),
+  );
+  readonly flatDisplayItems = computed(() =>
+    this.mediaRenderRows()
+      .filter((r): r is { type: 'grid'; items: ImageRecord[] } => r.type === 'grid')
+      .flatMap((r) => r.items),
+  );
+  readonly projectNameById = computed(() => {
+    const map = new Map<string, string>();
+    for (const img of this.rawWorkspaceImages()) {
+      const ids = img.projectIds ?? [];
+      const names = img.projectNames ?? [];
+      for (let i = 0; i < ids.length; i++) {
+        const name = names[i];
+        if (name) {
+          map.set(ids[i]!, name);
+        }
+      }
+    }
+    return map as ReadonlyMap<string, string>;
+  });
+  readonly availableGroupings = computed<GroupingProperty[]>(() => {
+    const activeIds = new Set(this.activeGroupings().map((g) => g.id));
+    return this.metadata
+      .groupableMetadataFields()
+      .filter((field) => !activeIds.has(field.id))
+      .map((field) => ({ id: field.id, label: field.label, icon: field.icon }));
+  });
+  readonly hasGrouping = computed(() => this.viewService.activeGroupings().length > 0);
+  readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
+  readonly hasCustomSort = computed(() => {
+    const sorts = this.viewService.activeSorts();
+    return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';
+  });
+  readonly hasProject = computed(() => this.viewService.selectedProjectIds().size > 0);
+  readonly activeGroupingIds = computed(() => this.activeGroupings().map((g) => g.id));
+  readonly toolbarButtons = computed(() => {
+    this.i18nService.language();
+    return [
+      {
+        id: 'projects' as const,
+        label: this.t('workspace.toolbar.button.projects', 'Projects'),
+        active: this.hasProject,
+      },
+      {
+        id: 'filter' as const,
+        label: this.t('workspace.toolbar.button.filter', 'Filter'),
+        active: this.hasFilters,
+      },
+      {
+        id: 'sort' as const,
+        label: this.t('workspace.toolbar.button.sort', 'Sort'),
+        active: this.hasCustomSort,
+      },
+      {
+        id: 'grouping' as const,
+        label: this.t('workspace.toolbar.button.grouping', 'Grouping'),
+        active: this.hasGrouping,
+      },
+    ];
+  });
+  readonly isDragging = signal(false);
+
+  private loadRequestId = 0;
 
   constructor() {
-    // Bind media context to workspace pane
+    void this.metadata.refreshMetadataFields();
+
     const mediaSelectedItemsContext: SelectedItemsContextPort = {
       contextKey: 'media',
       selectedMediaIds$: this.workspaceSelectionService.selectedMediaIds,
@@ -122,19 +223,6 @@ export class MediaComponent implements OnDestroy {
       this.cardVariantSettings.setVariant('media', this.cardVariant());
     });
 
-    effect(() => {
-      const userId = this.authService.user()?.id ?? null;
-      if (this.lastResolvedAuthUserId() === userId) {
-        return;
-      }
-
-      this.lastResolvedAuthUserId.set(userId);
-      this.initialLoadSettled.set(false);
-      this.loadError.set(null);
-      this.resetPagination();
-      void this.loadMediaPage({ reset: true, includeCount: true });
-    });
-
     merge(
       this.uploadManager.batchComplete$,
       this.uploadManager.imageUploaded$,
@@ -143,29 +231,27 @@ export class MediaComponent implements OnDestroy {
     )
       .pipe(auditTime(300), takeUntilDestroyed())
       .subscribe(() => {
-        this.initialLoadSettled.set(false);
-        this.loadError.set(null);
-        this.resetPagination();
-        void this.loadMediaPage({ reset: true, includeCount: true });
+        this.uploadRefreshTick.update((n) => n + 1);
       });
-  }
 
-  @HostListener('window:scroll')
-  onWindowScroll(): void {
-    if (this.loading() || this.loadingMore() || !this.hasMore()) {
-      return;
-    }
+    effect(() => {
+      const user = this.authService.user();
+      void this.viewService.selectedProjectIds();
+      void this.viewService.effectiveSorts();
+      void this.viewService.activeGroupings();
+      void this.filterService.rules();
+      void this.uploadRefreshTick();
 
-    const documentElement = document.documentElement;
-    const nearBottom =
-      window.scrollY + window.innerHeight >=
-      documentElement.scrollHeight - MediaComponent.SCROLL_PREFETCH_PX;
+      if (!user) {
+        this.rawWorkspaceImages.set([]);
+        this.loadError.set(null);
+        this.initialLoadSettled.set(true);
+        this.loading.set(false);
+        return;
+      }
 
-    if (!nearBottom) {
-      return;
-    }
-
-    void this.loadMediaPage({ reset: false, includeCount: false });
+      void this.reloadMediaGallery();
+    });
   }
 
   ngOnDestroy(): void {
@@ -184,32 +270,24 @@ export class MediaComponent implements OnDestroy {
     }
   }
 
-  private debugInteraction(stage: string, extra: Record<string, unknown> = {}): void {
-    console.info('[media-page][interaction]', {
-      stage,
-      mediaCount: this.mediaItems().length,
-      totalCount: this.mediaTotalCount(),
-      cardVariant: this.cardVariant(),
-      loading: this.loading(),
-      loadingMore: this.loadingMore(),
-      selectedIds: Array.from(this.workspaceSelectionService.selectedMediaIds()),
-      timestamp: Date.now(),
-      ...extra,
-    });
+  onProjectsViewModeChange(mode: ProjectsViewMode): void {
+    if (mode === 'list') {
+      this.cardVariant.set('row');
+      return;
+    }
+    if (this.cardVariant() === 'row') {
+      this.cardVariant.set('medium');
+    }
   }
 
   onMediaItemClicked(mediaId: string): void {
-    // Open detail view in workspace pane without mutating selection state.
-    this.debugInteraction('itemClicked.received', { mediaId });
     this.workspacePaneObserver.setDetailImageId(mediaId);
-    this.debugInteraction('workspacePane.setDetailImageId.called', { mediaId });
   }
 
   onRetryLoad(): void {
-    this.initialLoadSettled.set(false);
     this.loadError.set(null);
-    this.resetPagination();
-    void this.loadMediaPage({ reset: true, includeCount: true });
+    this.initialLoadSettled.set(false);
+    void this.reloadMediaGallery();
   }
 
   projectNameFor(projectId: string | null): string {
@@ -223,73 +301,87 @@ export class MediaComponent implements OnDestroy {
     );
   }
 
-  async loadMediaPage(options: { reset: boolean; includeCount: boolean }): Promise<void> {
-    if (this.loading() || this.loadingMore()) {
+  onGroupingsChanged(active: GroupingProperty[]): void {
+    this.activeGroupings.set(active);
+    this.viewService.setActiveGroupings(
+      active.map((g) => ({ id: g.id, label: g.label, icon: g.icon })),
+    );
+  }
+
+  onSortChanged(sortConfigs: SortConfig[]): void {
+    this.viewService.setActiveSorts(sortConfigs);
+  }
+
+  onProjectsChanged(selectedIds: Set<string>): void {
+    this.viewService.setSelectedProjectIds(selectedIds);
+  }
+
+  onDragStarted(): void {
+    this.isDragging.set(true);
+  }
+
+  onDragEnded(): void {
+    setTimeout(() => this.isDragging.set(false));
+  }
+
+  toggleDropdown(id: ToolbarDropdown, event: MouseEvent): void {
+    if (this.activeDropdown() === id) {
+      this.activeDropdown.set(null);
       return;
     }
 
-    if (!options.reset && !this.hasMore()) {
+    const btn = event.currentTarget as HTMLElement;
+    const rect = btn.getBoundingClientRect();
+    const dropdownWidth = id === 'filter' ? 352 : 240;
+    const viewportWidth = window.innerWidth;
+    const padding = 16;
+
+    let left = rect.left;
+    if (left + dropdownWidth > viewportWidth - padding) {
+      left = Math.max(padding, viewportWidth - dropdownWidth - padding);
+    }
+
+    this.dropdownTop.set(rect.bottom + 4);
+    this.dropdownLeft.set(left);
+    this.activeDropdown.set(id);
+  }
+
+  closeDropdown(): void {
+    this.activeDropdown.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  onDocumentEscape(): void {
+    this.closeDropdown();
+  }
+
+  private async reloadMediaGallery(): Promise<void> {
+    if (!this.authService.user()) {
       return;
     }
 
-    const resetLoadStartedAtMs = options.reset ? Date.now() : null;
-
-    if (options.reset) {
-      this.loading.set(true);
-    } else {
-      this.loadingMore.set(true);
-    }
+    const requestId = ++this.loadRequestId;
+    const resetLoadStartedAtMs = Date.now();
+    this.loading.set(true);
 
     try {
-      const batchInsertSize = this.resolveBatchInsertSize();
-      const result = await this.mediaQueryService.loadCurrentUserMedia({
-        offset: this.nextOffset(),
-        limit: batchInsertSize,
-        includeCount: options.includeCount,
-      });
-
-      if (options.reset) {
-        this.mediaItems.set(result.items);
-      } else {
-        const existingIds = new Set(this.mediaItems().map((item) => item.id));
-        const nextItems = result.items.filter((item) => !existingIds.has(item.id));
-        this.mediaItems.update((current) => [...current, ...nextItems]);
-      }
-
-      if (result.totalCount !== null) {
-        this.mediaTotalCount.set(result.totalCount);
-      }
-
-      this.nextOffset.set(this.mediaItems().length);
-
-      const mergedProjectMap = new Map(this.projectNameById());
-      for (const [projectId, projectName] of result.projectNameById.entries()) {
-        mergedProjectMap.set(projectId, projectName);
-      }
-      this.projectNameById.set(mergedProjectMap);
-    } catch {
-      this.loadError.set(this.t('media.page.error', 'Failed to load media'));
-      if (options.reset) {
-        this.mediaItems.set([]);
-        this.mediaTotalCount.set(null);
-        this.projectNameById.set(new Map<string, string>());
-      }
-    } finally {
-      if (resetLoadStartedAtMs !== null) {
-        await this.ensureResetLoadingWindow(resetLoadStartedAtMs);
-        this.initialLoadSettled.set(true);
-      }
-
-      this.loading.set(false);
-      this.loadingMore.set(false);
-
-      if (options.reset && this.hasMore()) {
-        void this.loadMediaPage({ reset: false, includeCount: false });
+      const rows = await this.mediaQueryService.loadAllCurrentUserWorkspaceMedia();
+      if (requestId !== this.loadRequestId) {
         return;
       }
 
-      if (this.hasMore() && this.isNearBottomForPrefetch()) {
-        void this.loadMediaPage({ reset: false, includeCount: false });
+      this.rawWorkspaceImages.set(rows);
+      this.loadError.set(null);
+    } catch {
+      if (requestId === this.loadRequestId) {
+        this.loadError.set(this.t('media.page.error', 'Failed to load media'));
+        this.rawWorkspaceImages.set([]);
+      }
+    } finally {
+      if (requestId === this.loadRequestId) {
+        await this.ensureResetLoadingWindow(resetLoadStartedAtMs);
+        this.initialLoadSettled.set(true);
+        this.loading.set(false);
       }
     }
   }
@@ -305,78 +397,5 @@ export class MediaComponent implements OnDestroy {
     await new Promise<void>((resolve) => {
       setTimeout(resolve, remainingMs);
     });
-  }
-
-  private isNearBottomForPrefetch(): boolean {
-    if (typeof document === 'undefined' || typeof window === 'undefined') {
-      return false;
-    }
-
-    const documentElement = document.documentElement;
-    return (
-      window.scrollY + window.innerHeight >=
-      documentElement.scrollHeight - MediaComponent.SCROLL_PREFETCH_PX
-    );
-  }
-
-  private resetPagination(): void {
-    this.nextOffset.set(0);
-    this.mediaItems.set([]);
-    this.mediaTotalCount.set(null);
-    this.projectNameById.set(new Map<string, string>());
-  }
-
-  // Resolves deterministic /media batch size contract: current columns x 3.
-  // @see docs/specs/component/item-grid/item-grid.md#actions
-  private resolveBatchInsertSize(): number {
-    const mode = this.cardVariant();
-    if (mode === 'row') {
-      return MediaComponent.ROW_BATCH_MULTIPLIER;
-    }
-
-    const columnMin = this.resolveColumnMinPx(mode);
-    const width = this.resolveMediaContainerWidthPx();
-    const columns = Math.max(
-      1,
-      Math.floor((width + MediaComponent.GRID_GAP_PX) / (columnMin + MediaComponent.GRID_GAP_PX)),
-    );
-    return columns * 3;
-  }
-
-  // Uses rendered media container width when available, with stable fallback for first-load fetches.
-  // @see docs/specs/component/item-grid/item-grid.md#actions
-  private resolveMediaContainerWidthPx(): number {
-    if (typeof document !== 'undefined') {
-      const container = document.querySelector('.media-content');
-      if (container instanceof HTMLElement && container.clientWidth > 0) {
-        return container.clientWidth;
-      }
-    }
-
-    if (
-      typeof window !== 'undefined' &&
-      Number.isFinite(window.innerWidth) &&
-      window.innerWidth > 0
-    ) {
-      return window.innerWidth;
-    }
-
-    return MediaComponent.DEFAULT_CONTAINER_WIDTH_PX;
-  }
-
-  // Mirrors item-grid mode column minimums used by media-content placeholder geometry.
-  // @see docs/specs/component/item-grid/item-grid.md#data
-  private resolveColumnMinPx(variant: CardVariant): number {
-    switch (variant) {
-      case 'small':
-        return 128;
-      case 'large':
-        return 208;
-      case 'row':
-        return 1;
-      case 'medium':
-      default:
-        return 160;
-    }
   }
 }

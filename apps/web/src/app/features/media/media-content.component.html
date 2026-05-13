@@ -4,6 +4,40 @@
   <!-- Renders media error state branch when page-level load failed. -->
   <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
   <app-media-error (retry)="retry.emit()" />
+} @else if (useGroupedRenderLayout()) {
+  <!-- Renders grouped headers and item grids for toolbar-driven grouping on /media. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
+  @for (row of renderRows(); track $index) {
+    @if (!isRowHidden($index)) {
+      @switch (row.type) {
+        @case ('header') {
+          <app-group-header
+            [heading]="row.heading"
+            [imageCount]="row.imageCount"
+            [level]="row.level"
+            [collapsed]="collapsedGroupHeadings().has(row.heading)"
+            (toggle)="onGroupToggle(row.heading)"
+          />
+        }
+        @case ('grid') {
+          <app-item-grid [mode]="itemMode()" [role]="gridRole()">
+            @for (item of row.items; track item.id) {
+              <app-media-item
+                [itemId]="item.id"
+                [item]="item"
+                [mode]="itemMode()"
+                [state]="isSelected(item.id) ? 'selected' : 'idle'"
+                [actionContextId]="mediaItemActionContext"
+                (opened)="onItemOpened($event)"
+                (selectedChange)="onSelectionToggled(item.id, $event)"
+                (contextActionRequested)="onItemContextActionRequested($event)"
+              />
+            }
+          </app-item-grid>
+        }
+      }
+    }
+  }
 } @else if (showGrid()) {
   <app-item-grid [mode]="itemMode()" [role]="gridRole()">
     @for (slot of gridSlots(); track slot.trackId) {

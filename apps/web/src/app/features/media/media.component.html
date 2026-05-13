@@ -8,59 +8,108 @@
   <!-- @see docs/specs/component/item-grid/item-grid.md#data -->
   <app-media-page-header
     [title]="t('media.page.title', 'Media')"
-    [mediaCount]="mediaItems().length"
-    [totalCount]="mediaTotalCount()"
+    [mediaCount]="flatDisplayItems().length"
+    [totalCount]="flatDisplayItems().length"
     [state]="headerState()"
   />
 
-  <!-- Hosts right-aligned card-variant switch used to drive item-grid mode mapping. -->
+  <!-- Hosts workspace-aligned toolbar controls plus view and card-variant toggles. -->
   <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
   <app-pane-toolbar class="media-toolbar">
-    <!-- Renders card-variant segmented control and emits selected variant changes. -->
-    <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
-    <div slot="right" class="hlm-pill-toggle hlm-pill-toggle--sm">
-      <div
-        class="hlm-toggle-group"
-        brnToggleGroup
-        type="single"
-        [nullable]="false"
-        [value]="cardVariant()"
-        (valueChange)="onCardVariantToggleChange($event)"
-        [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
-      >
-        @for (opt of cardVariantToggleOptions(); track opt.id) {
-          <button
-            type="button"
-            class="hlm-toggle-group__item hlm-toggle-group__item--icon-only"
-            brnToggleGroupItem
-            [value]="opt.id"
-            [attr.aria-label]="opt.ariaLabel || opt.label"
-            [attr.title]="opt.title || opt.label"
-          >
-            <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ opt.icon }}</span>
-          </button>
-        }
+    <div slot="left" class="media-toolbar__left">
+      @for (btn of toolbarButtons(); track btn.id) {
+        <button
+          uiDropdownTrigger
+          class="ui-button ui-button--ghost ui-button--sm"
+          [class.ui-button--active]="btn.active()"
+          [open]="activeDropdown() === btn.id"
+          [attr.aria-expanded]="activeDropdown() === btn.id"
+          [attr.aria-haspopup]="true"
+          (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
+        >
+          <span class="ui-dropdown-trigger__label">{{ btn.label }}</span>
+          <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true">expand_more</span>
+        </button>
+      }
+    </div>
+
+    <div slot="right" class="media-toolbar__right">
+      <app-projects-view-toggle
+        [viewMode]="projectsViewMode()"
+        (viewModeChange)="onProjectsViewModeChange($event)"
+      />
+      <div class="hlm-pill-toggle hlm-pill-toggle--sm">
+        <div
+          class="hlm-toggle-group"
+          brnToggleGroup
+          type="single"
+          [nullable]="false"
+          [value]="cardVariant()"
+          (valueChange)="onCardVariantToggleChange($event)"
+          [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+        >
+          @for (opt of cardVariantToggleOptions(); track opt.id) {
+            <button
+              type="button"
+              class="hlm-toggle-group__item hlm-toggle-group__item--icon-only"
+              brnToggleGroupItem
+              [value]="opt.id"
+              [attr.aria-label]="opt.ariaLabel || opt.label"
+              [attr.title]="opt.title || opt.label"
+            >
+              <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ opt.icon }}</span>
+            </button>
+          }
+        </div>
       </div>
     </div>
   </app-pane-toolbar>
+
+  @if (activeDropdown()) {
+    <app-dropdown-shell
+      panelClass="toolbar-dropdown option-menu-surface"
+      [top]="dropdownTop()"
+      [left]="dropdownLeft()"
+      [outsideCloseEnabled]="!isDragging()"
+      (closeRequested)="closeDropdown()"
+    >
+      @switch (activeDropdown()) {
+        @case ('grouping') {
+          <app-grouping-dropdown
+            [activeGroupings]="activeGroupings()"
+            [availableProperties]="availableGroupings()"
+            (groupingsChanged)="onGroupingsChanged($event.active)"
+            (dragStarted)="onDragStarted()"
+            (dragEnded)="onDragEnded()"
+          />
+        }
+        @case ('filter') {
+          <app-filter-dropdown />
+        }
+        @case ('sort') {
+          <app-sort-dropdown
+            [groupingIdsInput]="activeGroupingIds()"
+            (sortChanged)="onSortChanged($event)"
+          />
+        }
+        @case ('projects') {
+          <app-projects-dropdown (projectsChanged)="onProjectsChanged($event)" />
+        }
+      }
+    </app-dropdown-shell>
+  }
 
   <!-- Renders media content state machine and forwards item/retry events to page controller. -->
   <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
   <app-media-content
     [state]="contentState()"
-    [items]="mediaItems()"
+    [items]="flatDisplayItems()"
+    [renderRows]="mediaRenderRows()"
+    [collapsedGroupHeadings]="viewService.collapsedGroups()"
     [emptyReason]="emptyReason()"
     [cardVariant]="cardVariant()"
     [projectNameFor]="projectNameForFn"
     (itemClicked)="onMediaItemClicked($event)"
     (retry)="onRetryLoad()"
   />
-
-  @if (loadingMore()) {
-    <!-- Shows incremental pagination feedback while additional pages are appended. -->
-    <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
-    <p class="media-page__loading-more">
-      {{ t('media.page.loading.more', 'Loading more media...') }}
-    </p>
-  }
 </app-vstack>

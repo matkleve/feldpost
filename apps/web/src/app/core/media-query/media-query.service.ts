@@ -201,7 +201,7 @@ export class MediaQueryService {
 
     return images.map((img) => {
       const values = metadataMap.get(img.id);
-      return values ? { ...img, metadata: { ...img.metadata, ...values } } : img;
+      return values ? { ...img, metadata: { ...(img.metadata ?? {}), ...values } } : img;
     });
   }
 

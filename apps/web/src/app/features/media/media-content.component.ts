@@ -15,11 +15,17 @@ import type { CardVariant } from '../../shared/ui-primitives/card-variant.types'
 import { MediaErrorComponent } from './media-error.component';
 import { MediaEmptyComponent } from './media-empty.component';
 import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ItemGridComponent } from '../../shared/item-grid/item-grid.component';
 import type { ItemContextActionEvent } from '../../shared/item-grid/item.component';
 import type { ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { MEDIA_ITEM_ACTION_CONTEXT, MediaItemComponent } from '../../shared/media-item/media-item.component';
+import { GroupHeaderComponent } from '../../shared/ui-primitives/group-header.component';
+import {
+  isMediaGalleryRenderRowHidden,
+  type MediaGalleryRenderRow,
+} from '../../core/media-query/media-gallery-view.helpers';
 
 export type MediaContentState = 'loading' | 'error' | 'ready';
 
@@ -33,7 +39,13 @@ type MediaContentGridSlot = {
 @Component({
   selector: 'app-media-content',
   standalone: true,
-  imports: [ItemGridComponent, MediaItemComponent, MediaErrorComponent, MediaEmptyComponent],
+  imports: [
+    ItemGridComponent,
+    MediaItemComponent,
+    MediaErrorComponent,
+    MediaEmptyComponent,
+    GroupHeaderComponent,
+  ],
   templateUrl: './media-content.component.html',
   styleUrl: './media-content.component.scss',
   host: {
@@ -46,6 +58,7 @@ export class MediaContentComponent implements AfterViewInit {
   private static readonly PLACEHOLDER_EXIT_DURATION_MS = 180;
 
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
+  private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly i18nService = inject(I18nService);
   private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
@@ -54,6 +67,12 @@ export class MediaContentComponent implements AfterViewInit {
 
   readonly state = input.required<MediaContentState>();
   readonly items = input.required<ImageRecord[]>();
+  /** Flattened header + grid rows for grouped gallery layout (used when state is ready). */
+  /** @see docs/specs/component/item-grid/item-grid.md#wiring */
+  readonly renderRows = input<readonly MediaGalleryRenderRow[]>([]);
+  /** Group collapse keys shared with WorkspaceViewService for consistent toolbar behavior. */
+  /** @see docs/specs/service/workspace-view/workspace-view-system.md */
+  readonly collapsedGroupHeadings = input<ReadonlySet<string>>(new Set());
   readonly emptyReason = input<'auth-required' | 'no-results'>('no-results');
   readonly cardVariant = input<CardVariant>('medium');
   readonly projectNameFor = input.required<(projectId: string | null) => string>();
@@ -91,14 +110,28 @@ export class MediaContentComponent implements AfterViewInit {
   );
   readonly loadingPlaceholderSnapshotCount = signal(0);
   readonly placeholderExitActive = signal(false);
+  readonly useGroupedRenderLayout = computed(
+    () => this.state() === 'ready' && this.renderRows().length > 0,
+  );
   readonly showGrid = computed(
-    () => this.state() === 'loading' || this.items().length > 0 || this.placeholderExitActive(),
+    () =>
+      this.state() === 'loading' ||
+      this.useGroupedRenderLayout() ||
+      this.items().length > 0 ||
+      this.placeholderExitActive(),
   );
   readonly showEmptyState = computed(
-    () => this.state() === 'ready' && this.items().length === 0 && !this.placeholderExitActive(),
+    () =>
+      this.state() === 'ready' &&
+      !this.useGroupedRenderLayout() &&
+      this.items().length === 0 &&
+      !this.placeholderExitActive(),
   );
   readonly gridRole = computed<string | null>(() =>
-    this.state() === 'ready' && this.items().length > 0 ? 'listbox' : null,
+    this.state() === 'ready' &&
+    (this.useGroupedRenderLayout() || this.items().length > 0)
+      ? 'listbox'
+      : null,
   );
   readonly gridSlots = computed<MediaContentGridSlot[]>(() => {
     const state = this.state();
@@ -289,6 +322,18 @@ export class MediaContentComponent implements AfterViewInit {
     });
   }
 
+  isRowHidden(index: number): boolean {
+    return isMediaGalleryRenderRowHidden(
+      this.renderRows(),
+      index,
+      this.collapsedGroupHeadings(),
+    );
+  }
+
+  onGroupToggle(heading: string): void {
+    this.workspaceViewService.toggleGroupCollapsed(heading);
+  }
+
   onDocumentClick(event: MouseEvent): void {
     this.debugInteraction('document.click.received', event);
 
@@ -303,7 +348,11 @@ export class MediaContentComponent implements AfterViewInit {
       return;
     }
 
-    if (target.closest('app-item-grid') || target.closest('app-media-item')) {
+    if (
+      target.closest('app-item-grid') ||
+      target.closest('app-media-item') ||
+      target.closest('app-group-header')
+    ) {
       this.debugInteraction('document.click.ignored.insideGridOrItem', event);
       return;
     }
