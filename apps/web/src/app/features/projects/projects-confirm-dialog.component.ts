@@ -1,5 +1,5 @@
-import { Component, input, output } from '@angular/core';
-import { BrnDialogImports } from '@spartan-ng/brain/dialog';
+import { Component, input, output, viewChild } from '@angular/core';
+import { BrnDialog, BrnDialogImports } from '@spartan-ng/brain/dialog';
 import { UI_PRIMITIVE_DIRECTIVES } from '../../shared/ui-primitives/ui-primitives.directive';
 import { HLM_DIALOG_IMPORTS } from '../../shared/ui/dialog';
 
@@ -11,6 +11,9 @@ import { HLM_DIALOG_IMPORTS } from '../../shared/ui/dialog';
   styleUrl: './projects-confirm-dialog.component.scss',
 })
 export class ProjectsConfirmDialogComponent {
+  /** BrnDialog on `ng-container`; confirm omits `brnDialogClose` so parent can unmount after async `busy()` without a race. */
+  private readonly _brnDialog = viewChild(BrnDialog);
+
   readonly open = input<boolean>(false);
   readonly title = input<string>('');
   readonly message = input<string>('');

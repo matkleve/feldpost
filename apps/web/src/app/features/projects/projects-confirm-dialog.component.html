@@ -27,15 +27,13 @@
             {{ cancelLabel() }}
           </button>
           <button
+            uiButton
+            class="projects-confirm__confirm ui-button"
+            [class.ui-button--danger]="danger()"
+            [class.ui-button--primary]="!danger()"
             type="button"
-            brnDialogClose
             [disabled]="busy()"
             (click)="onConfirm()"
-            [class]="
-              danger()
-                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                : 'bg-primary text-primary-foreground hover:bg-primary/90'
-            "
           >
             {{ confirmLabel() }}
           </button>
