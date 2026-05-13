@@ -2,6 +2,8 @@
   display: block;
 }
 
+// Card container: grid layout, themed border from project color
+// @see project-card.md
 .project-card {
   min-height: 12rem;
   padding: var(--spacing-3);
@@ -12,6 +14,17 @@
   gap: var(--spacing-2);
   align-content: start;
   position: relative;
+  transition: var(--interactive-transition-standard);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--action-border-active) 58%, var(--project-item-color, var(--color-border)));
+    background: color-mix(in srgb, var(--action-bg-hover) 18%, var(--color-bg-surface));
+  }
+
+  &:focus-within {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
 }
 
 .project-card--row {

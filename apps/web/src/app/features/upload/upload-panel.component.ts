@@ -33,6 +33,7 @@ import { HlmMenuItemDirective } from '../../shared/ui/menu';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectSelectDialogComponent } from '../../shared/project-select-dialog/project-select-dialog.component';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
 import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import {
@@ -68,6 +69,7 @@ export type {
     UploadPanelItemComponent,
     ChipComponent,
     ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
     UiButtonDirective,
     UiInputControlDirective,
     HlmMenuItemDirective,

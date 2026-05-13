@@ -32,3 +32,12 @@
     gap: var(--spacing-2);
   }
 }
+
+@layer states {
+  // Active state indicator for toolbar trigger buttons when a filter/grouping is applied.
+  // @see docs/specs/component/item-grid/item-grid.md#actions
+  button[uiDropdownTrigger][data-state='on'] {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+}

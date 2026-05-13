@@ -17,12 +17,12 @@
   .hlm-pill-toggle--fill {
     width: 100%;
 
-    .hlm-toggle-group {
+    [hlmToggleGroup] {
       width: 100%;
       display: inline-flex;
     }
 
-    .hlm-toggle-group__item {
+    [hlmToggleGroupItem] {
       flex: 1 1 0;
     }
   }
@@ -215,21 +215,24 @@
 
   // Hover feedback for enabled segments (subtle lift over muted track).
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item:hover:not(:disabled):not([data-state='on']) {
+  .hlm-toggle-group__item:hover:not(:disabled):not([data-state='on']),
+  [hlmToggleGroupItem]:hover:not(:disabled):not([data-state='on']) {
     color: var(--foreground);
     background-color: color-mix(in oklch, var(--foreground) 6%, transparent);
   }
 
   // Keyboard focus ring for segment buttons (shadcn ring pattern).
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item:focus-visible {
+  .hlm-toggle-group__item:focus-visible,
+  [hlmToggleGroupItem]:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
 
   // Active segment: BrnToggleGroupItem sets data-state="on" when pressed.
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item[data-state='on'] {
+  .hlm-toggle-group__item[data-state='on'],
+  [hlmToggleGroupItem][data-state='on'] {
     background-color: var(--background);
     color: var(--foreground);
     box-shadow: var(--shadow-sm);
@@ -237,7 +240,8 @@
 
   // Disabled segment item (Brn disabled or native :disabled).
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item:disabled {
+  .hlm-toggle-group__item:disabled,
+  [hlmToggleGroupItem]:disabled {
     pointer-events: none;
     opacity: 0.5;
   }
@@ -262,7 +266,9 @@
   // @see apps/web/src/app/shared/ui/toggle-group/
   .hlm-pill-toggle,
   .hlm-toggle-group,
+  [hlmToggleGroup],
   .hlm-toggle-group__item,
+  [hlmToggleGroupItem],
   .hlm-toggle-group__inactive-item {
     transition-duration: 1ms !important;
     animation-duration: 1ms !important;

@@ -1,5 +1,7 @@
 ## Open Questions / Blockers
 
+**Phase 6 / `tokens.scss`:** `tokens.scss` migration is blocked until all `var(--color-*)` usage in component SCSS is replaced with tweakcn equivalents (`var(--primary)`, `var(--muted)`, etc.).
+
 1. ~~**Primary color decision (Phase 1 blocker):**~~ **RESOLVED (2026-05-13)**: `--primary = oklch(0.6716 0.1368 48.5130)` ≈ warm orange `#cc7a4a`. MD3 gold `#745b0c` kept only as `--fp-sys-color-primary` alias.
 
 2. **spartan version pin:** spartan is under active development. Phase 3 pins `@spartan-ng/brain` to `^0.0.1-alpha.691` (verify Angular 21 + Tailwind v4 on each bump).

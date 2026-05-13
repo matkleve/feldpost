@@ -1,11 +1,11 @@
 <div
   uiInlineEditRow
-  class="prop-row ui-inline-edit-row"
+  class="prop-row"
   [class.prop-row--editing]="editing()"
   [class.prop-row--readonly]="readonly()"
 >
   <span class="prop-key" hlmLabel [title]="label()">{{ label() }}</span>
-  <div uiInlineEditActions class="prop-edit ui-inline-edit-actions">
+  <div uiInlineEditActions class="prop-edit">
     @if (editing() && !readonly()) {
       @switch (inputType()) {
         @case ('date') {

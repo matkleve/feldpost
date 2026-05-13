@@ -73,8 +73,12 @@
   min-width: 0;
 }
 
+// Fills available space in the flex row; prevents overflow truncation leak
+// @see projects-table-view.md
 .project2-row__name,
 .project2-card__name {
+  flex: 1 1 auto;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -8,48 +8,48 @@
 -->
 <nav class="sidebar" [attr.aria-label]="t('nav.aria.main', 'Main navigation')">
   <!-- Desktop sidebar panel -->
-  <div class="sidebar__panel ui-container">
+  <div class="sidebar__panel">
     <ul class="nav__list" role="list">
       @for (item of navItems(); track item.route) {
         <li class="sidebar__item">
           @if (item.disabled) {
             <span
-              class="nav__link nav__link--disabled ui-item"
+              class="nav__link nav__link--disabled"
               role="link"
               aria-disabled="true"
               tabindex="-1"
               [title]="t('nav.disabled.titlePrefix', 'Coming soon: ') + item.label"
               [attr.aria-describedby]="'nav-disabled-tip'"
             >
-              <span class="nav__media ui-item-media" aria-hidden="true">
+              <span class="nav__media" aria-hidden="true">
                 <span class="nav__icon material-icons">{{ item.icon }}</span>
               </span>
-              <span class="nav__label ui-item-label">{{ item.label }}</span>
+              <span class="nav__label">{{ item.label }}</span>
             </span>
           } @else {
             <a
-              class="nav__link ui-item"
+              class="nav__link"
               [routerLink]="item.route"
               routerLinkActive="nav__link--active"
               [routerLinkActiveOptions]="item.route === '/' ? { exact: true } : { exact: false }"
               [attr.aria-current]="null"
               [title]="item.label"
             >
-              <span class="nav__media ui-item-media" aria-hidden="true">
+              <span class="nav__media" aria-hidden="true">
                 <span class="nav__icon material-icons">{{ item.icon }}</span>
               </span>
-              <span class="nav__label ui-item-label">{{ item.label }}</span>
+              <span class="nav__label">{{ item.label }}</span>
             </a>
           }
         </li>
       }
 
-      <li class="sidebar__item sidebar__item--spacer ui-spacer" aria-hidden="true"></li>
+      <li class="sidebar__item sidebar__item--spacer" aria-hidden="true"></li>
 
       <li class="sidebar__item sidebar__item--account">
         <button
           type="button"
-          class="nav__link nav__account-link ui-item"
+          class="nav__link nav__account-link"
           [class.nav__link--active]="settingsOverlayOpen()"
           [title]="t('nav.settings.title', 'Settings')"
           [attr.aria-label]="t('nav.settings.openAria', 'Open settings overlay')"
@@ -57,7 +57,7 @@
           [attr.aria-expanded]="settingsOverlayOpen()"
           (click)="toggleSettingsOverlay()"
         >
-          <span class="nav__media ui-item-media" aria-hidden="true">
+          <span class="nav__media" aria-hidden="true">
             <span class="nav__avatar-badge">
               @if (avatarUrl(); as avatarImage) {
                 <img class="nav__avatar-image" [src]="avatarImage" alt="" />
@@ -66,7 +66,7 @@
               }
             </span>
           </span>
-          <span class="nav__label nav__account-name ui-item-label">{{
+          <span class="nav__label nav__account-name">{{
             t('nav.settings.label', 'Settings')
           }}</span>
         </button>

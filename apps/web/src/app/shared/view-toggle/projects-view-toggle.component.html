@@ -1,6 +1,6 @@
 <div class="hlm-pill-toggle hlm-pill-toggle--sm">
   <div
-    class="hlm-toggle-group"
+    hlmToggleGroup
     brnToggleGroup
     type="single"
     [nullable]="false"
@@ -10,7 +10,8 @@
   >
     @for (option of viewOptions(); track option.id) {
       <button
-        class="hlm-toggle-group__item hlm-toggle-group__item--icon-only"
+        hlmToggleGroupItem
+        class="hlm-toggle-group__item--icon-only"
         type="button"
         brnToggleGroupItem
         [value]="option.id"

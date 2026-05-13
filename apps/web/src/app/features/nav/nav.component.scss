@@ -78,11 +78,14 @@
   z-index: 2;
 
   @media (min-width: 768px) {
-    --ui-container-radius: var(--container-radius-panel);
-
+    display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
     min-height: 0;
+    padding-block: var(--container-padding-block-panel);
+    padding-inline: var(--container-padding-inline-panel);
+    border-radius: var(--container-radius-panel);
 
     // Frosted glass
     background: color-mix(in srgb, var(--color-bg-surface) 85%, transparent);
@@ -110,7 +113,7 @@
   @media (min-width: 768px) {
     display: flex;
     flex-direction: column;
-    gap: var(--ui-container-gap);
+    gap: var(--container-gap-panel);
     width: 100%;
     min-height: 0;
     flex: 1 1 auto;
@@ -139,6 +142,9 @@
 }
 
 .sidebar__item--spacer {
+  flex: 1 1 auto;
+  min-block-size: var(--spacing-2);
+
   @media (max-width: 767px) {
     display: none;
   }
@@ -153,17 +159,14 @@
 // ── Nav link — ghost button pattern (Notion-inspired) ────────────────────────
 
 .nav__link {
-  --ui-item-min-height: var(--sidebar-row-height);
-  --ui-item-padding-inline: var(--sidebar-row-padding-inline);
-  --ui-item-padding-block: var(--sidebar-row-padding-block);
-  --ui-item-gap: var(--sidebar-row-gap);
-  --ui-item-radius: var(--container-radius-control);
-  --ui-item-media-size: var(--sidebar-media-size);
-
   display: grid;
   grid-template-columns: var(--sidebar-media-size) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--sidebar-row-gap);
+  min-height: var(--sidebar-row-height);
+  padding-block: var(--sidebar-row-padding-block);
+  padding-inline: var(--sidebar-row-padding-inline);
+  border-radius: var(--container-radius-control);
   text-decoration: none;
   color: var(--color-text-secondary);
   white-space: nowrap;
@@ -227,6 +230,10 @@
 }
 
 .nav__media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   inline-size: var(--sidebar-media-size);
   block-size: var(--sidebar-media-size);
   min-inline-size: var(--sidebar-media-size);
@@ -235,12 +242,15 @@
 // ── Label text ────────────────────────────────────────────────────────────────
 
 .nav__label {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: var(--sidebar-label-size);
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   line-height: var(--line-height-solid);
   color: inherit;
-  min-width: 0;
   opacity: 0;
   visibility: hidden;
   overflow: hidden;

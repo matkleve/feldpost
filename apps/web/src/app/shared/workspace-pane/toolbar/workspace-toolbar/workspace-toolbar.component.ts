@@ -1,6 +1,7 @@
 import type { OnInit } from '@angular/core';
 import { Component, signal, computed, HostListener, inject } from '@angular/core';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
@@ -41,6 +42,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     ProjectsDropdownComponent,
     UiDropdownTriggerDirective,
     ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
   ],
 })
 export class WorkspaceToolbarComponent implements OnInit {

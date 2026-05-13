@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../ui/toggle-group';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { ProjectsViewMode } from '../../core/projects/projects.types';
 import type { ToggleGroupOption } from '../ui/toggle-group/toggle-group-option.types';
@@ -8,7 +9,7 @@ import { toggleSingleStringValue } from '../ui/toggle-group/toggle-group-option.
 @Component({
   selector: 'app-projects-view-toggle',
   standalone: true,
-  imports: [...BrnToggleGroupImports],
+  imports: [...BrnToggleGroupImports, ...HLM_TOGGLE_GROUP_IMPORTS],
   templateUrl: './projects-view-toggle.component.html',
   styleUrl: './projects-view-toggle.component.scss',
 })

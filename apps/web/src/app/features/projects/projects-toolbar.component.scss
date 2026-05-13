@@ -23,3 +23,12 @@
   justify-content: flex-end;
   flex: 0 0 auto;
 }
+
+@layer states {
+  // Active state indicator for toolbar trigger buttons when a filter/grouping is applied.
+  // @see docs/specs/ui/workspace/workspace-view-system.md
+  button[uiDropdownTrigger][data-state='on'] {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+}

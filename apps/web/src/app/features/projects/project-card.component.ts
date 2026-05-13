@@ -3,22 +3,13 @@ import type { CardVariant } from '../../shared/ui-primitives/card-variant.types'
 import type { ProjectColorKey, ProjectListItem } from '../../core/projects/projects.types';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
-import {
-  UiCardShellDirective,
-  UiCardShellSizeMdDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-project-card',
   standalone: true,
-  imports: [
-    ProjectColorPickerComponent,
-    ...HLM_BUTTON_IMPORTS,
-    UiCardShellDirective,
-    UiCardShellSizeMdDirective,
-  ],
+  imports: [ProjectColorPickerComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

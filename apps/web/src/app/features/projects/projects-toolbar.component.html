@@ -5,7 +5,7 @@
     [class.hlm-pill-toggle--has-inactive]="statusInactiveOptions().length > 0"
   >
     <div
-      class="hlm-toggle-group"
+      hlmToggleGroup
       brnToggleGroup
       type="single"
       [nullable]="false"
@@ -15,7 +15,7 @@
     >
       @for (option of statusActiveOptions(); track option.id) {
         <button
-          class="hlm-toggle-group__item"
+          hlmToggleGroupItem
           type="button"
           brnToggleGroupItem
           [value]="option.id"
@@ -64,7 +64,7 @@
       <button
         type="button"
         uiDropdownTrigger
-        [class.ui-button--active]="btn.active"
+        [attr.data-state]="btn.active ? 'on' : null"
         [open]="activeDropdown() === btn.id"
         [attr.aria-expanded]="activeDropdown() === btn.id"
         [attr.aria-haspopup]="true"
@@ -80,7 +80,7 @@
 
   <div slot="right" class="projects-toolbar__card-variant hlm-pill-toggle hlm-pill-toggle--sm">
     <div
-      class="hlm-toggle-group"
+      hlmToggleGroup
       brnToggleGroup
       type="single"
       [nullable]="false"
@@ -91,7 +91,8 @@
       @for (opt of cardVariantToggleOptions(); track opt.id) {
         <button
           type="button"
-          class="hlm-toggle-group__item hlm-toggle-group__item--icon-only"
+          hlmToggleGroupItem
+          class="hlm-toggle-group__item--icon-only"
           brnToggleGroupItem
           [value]="opt.id"
           [attr.aria-label]="opt.ariaLabel || opt.label"

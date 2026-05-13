@@ -14,6 +14,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import {
   toggleOptionLayout,
   toggleSingleStringValue,
@@ -75,6 +76,7 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
   standalone: true,
   imports: [
     ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
     InviteManagementSectionComponent,
     AccountComponent,
     UiRangeControlDirective,

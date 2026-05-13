@@ -14,7 +14,7 @@
 <div class="map-zone">
   <div class="map-style-switch hlm-pill-toggle hlm-pill-toggle--md">
     <div
-      class="hlm-toggle-group"
+      hlmToggleGroup
       brnToggleGroup
       type="single"
       [nullable]="false"
@@ -24,7 +24,8 @@
     >
       @for (option of mapViewOptions(); track option.id) {
         <button
-          class="hlm-toggle-group__item map-style-switch__option"
+          hlmToggleGroupItem
+          class="map-style-switch__option"
           type="button"
           brnToggleGroupItem
           [value]="option.id"

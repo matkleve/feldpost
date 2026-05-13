@@ -114,7 +114,7 @@
     <div class="upload-panel__location-mode-row">
       <div class="upload-panel__location-mode-switch hlm-pill-toggle hlm-pill-toggle--sm">
         <div
-          class="hlm-toggle-group"
+          hlmToggleGroup
           brnToggleGroup
           type="single"
           [nullable]="false"
@@ -124,7 +124,7 @@
         >
           @for (option of locationModeSwitchOptions(); track option.id) {
             <button
-              class="hlm-toggle-group__item"
+              hlmToggleGroupItem
               type="button"
               brnToggleGroupItem
               [value]="option.id"
@@ -174,7 +174,7 @@
   @if (showProgressBoard()) {
     <div class="upload-panel__area--switch hlm-pill-toggle hlm-pill-toggle--fill">
       <div
-        class="hlm-toggle-group"
+        hlmToggleGroup
         brnToggleGroup
         type="single"
         [nullable]="false"
@@ -184,7 +184,7 @@
       >
         @for (option of laneSwitchOptions(); track option.id) {
           <button
-            class="hlm-toggle-group__item"
+            hlmToggleGroupItem
             type="button"
             brnToggleGroupItem
             [value]="option.id"

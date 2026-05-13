@@ -1,25 +1,15 @@
-# Phase 6 — HLM Directive Conversion
+# Phase 6 — Redirect (split 2026-05-14)
 
-**Status:** Planning
+This document **formerly** held the full “full legacy removal” checklist (templates + tokens + globals in one phase).
 
-**Goal:** Convert all local `hlm*` atom/directive files from SCSS-based styling to `@HostBinding('class')` + Tailwind CVA — matching how spartan's published helm packages work. No component SCSS for atoms.
+That scope is now **split for execution clarity**:
 
-**Principle:** Every `hlm*` directive that is not a structural component (i.e. no internal DOM template) should carry its visual classes via `host: { class: '...' }` or `@HostBinding('class')` using CVA. Delete companion `.scss` files after conversion.
+| Topic | Canonical doc |
+|-------|----------------|
+| Template `ui-*` removal, `hlmToggleGroup` wiring, `hlmBtn`, delete `ui-primitives.directive.ts` | [**phase-6-template-cleanup.md**](./phase-6-template-cleanup.md) |
+| Delete `tokens.scss`, migrate `var(--color-*)` / `--fp-*` in component SCSS | [**phase-7-token-migration.md**](./phase-7-token-migration.md) |
+| Remove `styles/primitives/*`, slim `styles.scss`, retire `hlm-toggle-group.scss` | [**phase-8-global-scss-elimination.md**](./phase-8-global-scss-elimination.md) |
+| Published `@spartan-ng/ui-*-helm` swap | [**phase-9-spartan-upgrade.md**](./phase-9-spartan-upgrade.md) |
+| Cross-theme visual QA | [**phase-10-visual-qa.md**](./phase-10-visual-qa.md) |
 
-**Exceptions (keep as components):**
-- `hlm-form-field` — has internal template DOM
-- `hlm-spinner` — animated visual component  
-- `hlm-toast` — visual component with internal structure
-
-**Conversion table:** _To be populated after audit completes._
-
-**Conversion order:**
-1. Toggle group (highest priority — SCSS file currently in shared/ui/toggle-group/)
-2. Atoms: button, badge, input, label, select, switch, skeleton
-3. Molecules: card, tabs, dialog parts, popover, menu
-4. Delete `hlm-toggle-group.scss` + remove `@use` from `styles.scss` once directives carry all classes
-
-**Implementation notes:**
-- Use `cva()` from `class-variance-authority` for variant-bearing directives
-- `twMerge()` for class merging
-- `host: { '[class]': 'computedClass()' }` pattern for signal-based class computation
+**Status:** Use **phase-6-template-cleanup.md** for Phase 6 execution tracking.

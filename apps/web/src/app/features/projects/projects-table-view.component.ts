@@ -2,13 +2,12 @@ import { Component, inject, input } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { ProjectColorKey, ProjectListItem } from '../../core/projects/projects.types';
 import { HLM_BADGE_IMPORTS } from '../../shared/ui/badge';
-import { UiRowShellDirective, UiRowShellSizeSmDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 import type { ProjectGroupedSection } from './projects-page.config';
 
 @Component({
   selector: 'app-projects-table-view',
   standalone: true,
-  imports: [UiRowShellDirective, UiRowShellSizeSmDirective, ...HLM_BADGE_IMPORTS],
+  imports: [...HLM_BADGE_IMPORTS],
   templateUrl: './projects-table-view.component.html',
   styleUrl: './projects-table-view.component.scss',
 })

@@ -84,7 +84,7 @@
                 <div class="settings-overlay__field-value">
                   <div class="settings-overlay__segmented hlm-pill-toggle hlm-pill-toggle--md" data-i18n-skip>
                   <div
-                    class="hlm-toggle-group"
+                    hlmToggleGroup
                     brnToggleGroup
                     type="single"
                     [nullable]="false"
@@ -94,7 +94,7 @@
                   >
                     @for (option of languageOptions; track option.id) {
                       <button
-                        class="hlm-toggle-group__item"
+                        hlmToggleGroupItem
                         type="button"
                         brnToggleGroupItem
                         [value]="option.id"
@@ -122,7 +122,7 @@
                 <div class="settings-overlay__field-value">
                   <div class="settings-overlay__segmented hlm-pill-toggle hlm-pill-toggle--md">
                   <div
-                    class="hlm-toggle-group"
+                    hlmToggleGroup
                     brnToggleGroup
                     type="single"
                     [nullable]="false"
@@ -132,7 +132,7 @@
                   >
                     @for (option of densityOptions(); track option.id) {
                       <button
-                        class="hlm-toggle-group__item"
+                        hlmToggleGroupItem
                         type="button"
                         brnToggleGroupItem
                         [value]="option.id"
@@ -179,7 +179,7 @@
                     class="settings-overlay__segmented settings-overlay__segmented--theme hlm-pill-toggle hlm-pill-toggle--md"
                   >
                   <div
-                    class="hlm-toggle-group"
+                    hlmToggleGroup
                     brnToggleGroup
                     type="single"
                     [nullable]="false"
@@ -189,7 +189,7 @@
                   >
                     @for (option of themeModeOptions(); track option.id) {
                       <button
-                        class="hlm-toggle-group__item"
+                        hlmToggleGroupItem
                         type="button"
                         brnToggleGroupItem
                         [value]="option.id"
@@ -368,7 +368,7 @@
                 <div class="settings-overlay__field-value">
                   <div class="settings-overlay__segmented hlm-pill-toggle hlm-pill-toggle--md">
                   <div
-                    class="hlm-toggle-group"
+                    hlmToggleGroup
                     brnToggleGroup
                     type="single"
                     [nullable]="false"
@@ -378,7 +378,7 @@
                   >
                     @for (option of markerMotionOptions(); track option.id) {
                       <button
-                        class="hlm-toggle-group__item"
+                        hlmToggleGroupItem
                         type="button"
                         brnToggleGroupItem
                         [value]="option.id"

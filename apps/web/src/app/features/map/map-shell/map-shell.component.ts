@@ -60,6 +60,7 @@ import { SettingsPaneService } from '../../../core/settings-pane/settings-pane.s
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
 import type { ToggleGroupOption } from '../../../shared/ui/toggle-group/toggle-group-option.types';
 import { toggleOptionLayout, toggleSingleStringValue } from '../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
@@ -190,6 +191,7 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
     ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
     DropdownShellComponent,
     HlmMenuItemDirective,
     HlmMenuSeparatorDirective,

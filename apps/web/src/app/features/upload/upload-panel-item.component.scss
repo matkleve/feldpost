@@ -9,12 +9,17 @@
 }
 
 .upload-panel__file-main {
-  --ui-item-media-size: 2.75rem;
-
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--container-gap);
+  min-height: 2.5rem;
+  padding-block: var(--container-padding-block-compact);
+  padding-inline-start: var(--container-padding-inline-compact);
+  padding-inline-end: calc(var(--container-padding-inline-compact) + 2rem + var(--spacing-2));
   background: var(--color-bg-surface);
   border: 1px solid color-mix(in srgb, var(--color-border) 62%, transparent);
   box-shadow: var(--elevation-subtle);
-  padding-inline-end: calc(var(--container-padding-inline-compact) + 2rem + var(--spacing-2));
   transition:
     background 120ms ease-out,
     border-color 120ms ease-out;
@@ -181,6 +186,7 @@
 .upload-panel__file-meta {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   gap: 2px;
   min-width: 0;
   position: relative;

@@ -61,16 +61,14 @@
       @for (project of section().projects; track project.id) {
         <tr [style.--project-item-color]="itemColor(project.colorKey)">
           <th
-            uiRowShell
-            uiRowShellSizeSm
             scope="row"
-            class="project2-table__name-cell ui-row-shell ui-row-shell--sm"
+            class="project2-table__name-cell"
           >
             <span
-              class="project2-row__dot ui-row-shell__leading"
+              class="project2-row__dot"
               [style.background]="itemColor(project.colorKey)"
             ></span>
-            <span class="project2-row__name ui-row-shell__label">{{ project.name }}</span>
+            <span class="project2-row__name">{{ project.name }}</span>
           </th>
           <td>
             {{ project.totalImageCount }}

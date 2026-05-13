@@ -1,15 +1,13 @@
  
 <article
-  uiCardShell
-  uiCardShellSizeMd
-  class="ui-card-shell ui-card-shell--md project-card"
+  class="project-card"
   [class.project-card--row]="variant() === 'row'"
   [class.project-card--small]="variant() === 'small'"
   [class.project-card--medium]="variant() === 'medium'"
   [class.project-card--large]="variant() === 'large'"
   [style.--project-item-color]="colorTokenFor()(project().colorKey)"
 >
-  <div class="project-card__header ui-card-shell__header">
+  <div class="project-card__header">
     <span class="project-card__dot" [style.background]="colorTokenFor()(project().colorKey)"></span>
     <h3 class="project-card__name">{{ project().name }}</h3>
     @if (variant() === 'large') {

@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import {
@@ -33,6 +34,7 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
   standalone: true,
   imports: [
     ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
     DropdownShellComponent,
     GroupingDropdownComponent,
     FilterDropdownComponent,
