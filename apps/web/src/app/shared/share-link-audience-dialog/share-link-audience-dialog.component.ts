@@ -1,14 +1,13 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, output, signal, viewChild } from '@angular/core';
+import { BrnDialog, BrnDialogImports } from '@spartan-ng/brain/dialog';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type {
   ShareAudienceDialogResult,
   ShareLinkAudience,
 } from '../../core/share-set/share-set.types';
 import { parseRecipientUserIdsFromCommaSeparatedInput } from '../../core/share-set/share-set.helpers';
-import {
-  UiButtonDirective,
-  UiButtonPrimaryDirective,
-} from '../ui-primitives/ui-primitives.directive';
+import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
+import { HLM_DIALOG_IMPORTS } from '../ui/dialog';
 
 /**
  * Stable state: dialog open — user chooses share audience before link creation.
@@ -17,11 +16,14 @@ import {
 @Component({
   selector: 'app-share-link-audience-dialog',
   standalone: true,
-  imports: [UiButtonDirective, UiButtonPrimaryDirective],
+  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...UI_PRIMITIVE_DIRECTIVES],
   templateUrl: './share-link-audience-dialog.component.html',
   styleUrl: './share-link-audience-dialog.component.scss',
 })
 export class ShareLinkAudienceDialogComponent {
+  /** BrnDialog on the root `ng-container`; closes after successful confirm (validation may block). */
+  private readonly _brnDialog = viewChild(BrnDialog);
+
   private readonly i18n = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18n.t(key, fallback);
 
@@ -70,6 +72,7 @@ export class ShareLinkAudienceDialogComponent {
         shareGrant: 'view',
         recipientUserIds: parsed.ids,
       });
+      this._brnDialog()?.close();
       return;
     }
 
@@ -79,5 +82,6 @@ export class ShareLinkAudienceDialogComponent {
       shareGrant: 'view',
       recipientUserIds: [],
     });
+    this._brnDialog()?.close();
   }
 }

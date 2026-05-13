@@ -1,0 +1,15 @@
+@layer components {
+  // Flex column + scroll; border/bg/radius/shadow/text align with hlmPopover + tweakcn
+  // @see docs/specs/component/filters/dropdown-system.md
+  :host {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    overscroll-behavior: contain;
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+  }
+}

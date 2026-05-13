@@ -1,33 +1,46 @@
 @if (open()) {
-  <section class="projects-confirm" role="dialog" aria-modal="true">
-    <div class="projects-confirm__surface">
-      <h2>{{ title() }}</h2>
-      <p>{{ message() }}</p>
-      <div class="projects-confirm__actions">
-        <button
-          uiButton
-          uiButtonSecondary
-          type="button"
-          class="ui-button ui-button--secondary"
-          [disabled]="busy()"
-          (click)="onCancel()"
-        >
-          {{ cancelLabel() }}
-        </button>
-        <button
-          uiButton
-          type="button"
-          class="ui-button"
-          [class.ui-button--danger]="danger()"
-          [attr.uiButtonDanger]="danger() ? '' : null"
-          [class.ui-button--primary]="!danger()"
-          [attr.uiButtonPrimary]="!danger() ? '' : null"
-          [disabled]="busy()"
-          (click)="onConfirm()"
-        >
-          {{ confirmLabel() }}
-        </button>
+  <!-- Stable state: open — BrnDialog when pending action @see apps/web confirm-dialog pattern -->
+  <ng-container
+    brnDialog
+    [state]="'open'"
+    [closeOnBackdropClick]="false"
+    [aria-label]="title() || message() || 'Confirm'"
+    [aria-modal]="true"
+  >
+    <div hlmDialogOverlay></div>
+    <ng-template brnDialogContent>
+      <div hlmDialogContent [class]="'max-w-[26rem]'">
+        <div hlmDialogHeader>
+          <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">{{ title() }}</div>
+          <p brnDialogDescription hlmDialogDescription>{{ message() }}</p>
+        </div>
+        <div hlmDialogFooter>
+          <button
+            uiButton
+            uiButtonSecondary
+            class="projects-confirm__cancel ui-button ui-button--secondary"
+            type="button"
+            brnDialogClose
+            [disabled]="busy()"
+            (click)="onCancel()"
+          >
+            {{ cancelLabel() }}
+          </button>
+          <button
+            type="button"
+            brnDialogClose
+            [disabled]="busy()"
+            (click)="onConfirm()"
+            [class]="
+              danger()
+                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            "
+          >
+            {{ confirmLabel() }}
+          </button>
+        </div>
       </div>
-    </div>
-  </section>
+    </ng-template>
+  </ng-container>
 }

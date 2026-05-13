@@ -1,3 +1,10 @@
+/**
+ * Trigger styling for toolbar/menu buttons that open a floating shell.
+ *
+ * NAMING NOTE: Pairs with `DropdownShellComponent`, which is semantically a *popover
+ * shell* (fixed pixel anchor, arbitrary content). See that component’s JSDoc for
+ * rename/TODO and `apps/web/src/app/shared/ui/popover/` for the local hlm surface shim.
+ */
 import { Directive, input } from '@angular/core';
 
 @Directive({

@@ -2,9 +2,9 @@
 
 ## Status
 
-- **Current phase:** Phase 3 — Component migration (started 2026-05-13)
+- **Current phase:** Phase 3 — Component migration (complete for planned dialogs + prior atoms/molecules)
 - **Last updated:** 2026-05-13
-- **Phase 3 in progress — atoms + Card + Select + Dialog pilot:** Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅, Select ✅, **Confirm dialog** ✅, **Text input dialog** ✅, **Project select dialog** ✅ (`BrnDialog` + local `HLM_DIALOG_IMPORTS` in `apps/web/src/app/shared/ui/dialog/`; `ui-*` shims where applicable)
+- **Phase 3 complete — all planned molecules and organisms migrated** (within Phase 3 scope: Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅, Select ✅, **Confirm dialog** ✅, **Text input dialog** ✅, **Project select dialog** ✅, **Share link audience dialog** ✅, **Projects confirm dialog** ✅, **DropdownShell** ✅ (`hlmPopover` + `HLM_POPOVER_IMPORTS` in `apps/web/src/app/shared/ui/popover/`; rename to `app-popover-shell` deferred))
 
 ---
 
@@ -95,8 +95,8 @@
 | Confirm Dialog | `shared/confirm-dialog/confirm-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + `button[uiButton]`** | `BrnDialog` + `HlmDialog` + `HlmButton` | Pilot done (2026-05-13): brain dialog + local hlm CVA; same pattern for other app dialogs |
 | Text Input Dialog | `shared/text-input-dialog/text-input-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + `input`, `button`** | `BrnDialog` + `HlmInput` | Migrated 2026-05-13: same shell pattern as confirm-dialog |
 | Project Select Dialog | `shared/project-select-dialog/project-select-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + list + `button`** | `BrnDialog` + `HlmDialog` | Migrated 2026-05-13: scroll list `overflow-y-auto max-h-64`; confirm closes via `BrnDialog.close()` |
-| Share Link Audience Dialog | `shared/share-link-audience-dialog/share-link-audience-dialog.component.ts` | custom backdrop | `BrnDialog` | Share flow |
-| Projects Confirm Dialog | `features/projects/projects-confirm-dialog.component.ts` | custom backdrop | `BrnDialog` | Delegate to `ConfirmDialog` |
+| Share Link Audience Dialog | `shared/share-link-audience-dialog/share-link-audience-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + `button`** | `BrnDialog` + `HlmDialog` | Migrated 2026-05-13: same shell as confirm-dialog; confirm closes via `BrnDialog.close()` after validation |
+| Projects Confirm Dialog | `features/projects/projects-confirm-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + `button`** | `BrnDialog` + `HlmDialog` | Migrated 2026-05-13: `@if (open())` gate; destructive confirm uses Tailwind `bg-destructive` / `bg-primary` toggle |
 | Photo Lightbox | `shared/photo-lightbox/photo-lightbox.component.ts` | custom backdrop + `img` | `BrnDialog` (fullscreen variant) | Image viewer overlay |
 | Settings Overlay | `features/settings-overlay/settings-overlay.component.ts` | custom pane + `SegmentedSwitch`, `button`, `input`, `select` | `BrnSheet` (side panel) or keep custom | Large two-column settings panel — spartan Sheet may not fit |
 | Upload Panel | `features/upload/upload-panel.component.ts` | custom slide-in pane | `BrnSheet` | File upload side panel |
@@ -303,7 +303,7 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
   - [x] Legacy aliases block in `styles.scss` preserves backward compat for all existing components
   - [x] `postcss.config.json` created for Angular builder compatibility (Angular's `@angular/build` only reads JSON postcss configs)
   - [x] Run `ng build` — green baseline ✅ (exit 0, 61s)
-- [ ] **Phase 3** — Component Migration (in progress — 2026-05-13)
+- [x] **Phase 3** — Component Migration (complete for planned Phase 3 dialog + shim scope — 2026-05-13)
   - [x] **spartan/ui packages installed** (baseline: `@spartan-ng/brain` + CVA stack; see Gap Analysis correction for full helm set)
   - [ ] **Atoms** (recommended first — maximum leverage for Phase 3)
     - [x] `button[uiButton*]` → `buttonVariants` / `hlmBtn` — **shim:** `UiButtonDirective` now applies `buttonVariants` from DOM attributes; marker directives retained; `.ui-button--loading` kept for SCSS spinner
@@ -320,7 +320,8 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
   - [ ] **Molecules**
     - [x] **`hlmCard` molecule** — `HLM_CARD_IMPORTS` in `apps/web/src/app/shared/ui/card/` (local CVA; no published `@spartan-ng/ui-card-helm` until Tailwind v4 peers); legacy `[uiCardShell]` / `.ui-card-shell` unchanged until callsite migration
     - [x] **`hlmSelect` molecule (native)** — `HLM_SELECT_IMPORTS` in `apps/web/src/app/shared/ui/select/` (local CVA; overlay `BrnSelect` deferred); legacy `select[uiSelectControl*]` unchanged at callsites
-    - [ ] `app-dropdown-shell` + `app-standard-dropdown` → `brn-menu`
+    - [x] **`app-dropdown-shell` (DropdownShell)** — local `hlmPopover` / `HLM_POPOVER_IMPORTS` + rename doc (2026-05-13); full `app-popover-shell` + CDK Overlay deferred
+    - [ ] `app-dropdown-shell` + `app-standard-dropdown` → `brn-menu` (shell shim done; BrnMenu migration remains)
     - [ ] `app-popover` → `brn-popover`
     - [ ] `app-segmented-switch` → `brn-tabs`
     - [ ] `button[uiTab]` tabs → `hlm-tabs`
@@ -329,9 +330,10 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
     - [ ] Remove `styles/primitives/tab.scss`, `styles/patterns/dropdown.scss`, `styles/patterns/toolbar.scss`
   - [ ] **Organisms**
     - [x] `app-confirm-dialog` → **`BrnDialog` + `HLM_DIALOG_IMPORTS`** (pilot: CDK dialog under `@spartan-ng/brain/dialog`; focus trap + scroll block via CDK defaults; `text-input-dialog` / `project-select-dialog` reuse the same pattern)
-    - [ ] `app-text-input-dialog` → `brn-dialog` (same stack as confirm-dialog)
-    - [ ] `app-project-select-dialog` → `brn-dialog` (same stack as confirm-dialog)
-    - [ ] `app-share-link-audience-dialog` → `brn-dialog`
+    - [x] `app-text-input-dialog` → **`BrnDialog`** (same stack as confirm-dialog)
+    - [x] `app-project-select-dialog` → **`BrnDialog`** (same stack as confirm-dialog)
+    - [x] `app-share-link-audience-dialog` → **`BrnDialog`**
+    - [x] `app-projects-confirm-dialog` → **`BrnDialog`**
     - [ ] `app-photo-lightbox` → `brn-dialog` (fullscreen)
     - [ ] Upload panel → `brn-sheet` (evaluate) or keep custom resizable
     - [ ] Remove `styles/patterns/form.scss` (after form field migration)
@@ -393,3 +395,4 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 | 2026-05-13 | **Phase 3 start:** `@spartan-ng/brain` + CVA (`buttonVariants`) + `UiButtonDirective` shim; published `@spartan-ng/ui-*-helm` names mostly absent or Tailwind3-peered (`ui-core`) | npm reality + Tailwind v4; local `shared/ui/button` until helm install policy is set |
 | 2026-05-13 | Normalized hardcoded overlay z-index values and legacy token names to the `--z-*` token scale | Precondition for Brn overlay migration (modals, dialogs, map chrome, dropdowns); intra-component stacking still uses small integer offsets inside parent stacking contexts |
 | 2026-05-13 | **Confirm dialog:** `BrnDialog` + local `HLM_DIALOG_IMPORTS` (CVA) | `@spartan-ng/brain/dialog` wraps CDK Dialog (`Dialog.open`) — focus handling and scroll blocking come from CDK defaults; `node -e "require('@spartan-ng/brain/dialog')"` is not viable (Angular partial compilation / linker). |
+| 2026-05-13 | **DropdownShell** is semantically a popover shell (fixed-position arbitrary content, not an options list). Style-only `hlmPopover` shim in `shared/ui/popover/`. Full rename to `app-popover-shell` + CDK `FlexibleConnectedPositionStrategy` deferred to post–Phase 3. Callsite count documented in `dropdown-shell.component.ts` JSDoc. |

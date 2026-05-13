@@ -1,11 +1,35 @@
+/**
+ * DropdownShell — generic fixed-position floating container.
+ *
+ * NAMING NOTE: This component is semantically a *popover shell*, not a dropdown.
+ * A dropdown implies a list of options; this shell hosts arbitrary content anchored
+ * at caller-supplied pixel coordinates (toolbar menus, map context menus, etc.).
+ *
+ * TODO(rename): Rename to `PopoverShellComponent` / `app-popover-shell` when the
+ * full CDK Overlay migration is done. That migration will replace the manual
+ * top/left inputs with `@angular/cdk/overlay` FlexibleConnectedPositionStrategy,
+ * enabling proper collision detection, scroll strategies, and flip behavior.
+ * @see apps/web/src/app/shared/ui/popover/ for the hlm visual layer.
+ * @see https://github.com/goetzrobin/spartan — BrnPopover for the future brn layer.
+ *
+ * Callsite count: 9 instances in 7 templates (18 HTML tag matches; 19 total rg matches including this file's selector).
+ */
 import { Component, ElementRef, inject, input, output } from '@angular/core';
+import { HLM_POPOVER_IMPORTS, HlmPopoverDirective } from '../ui/popover';
 
 @Component({
   selector: 'app-dropdown-shell',
   standalone: true,
+  imports: [...HLM_POPOVER_IMPORTS],
+  hostDirectives: [
+    {
+      directive: HlmPopoverDirective,
+      inputs: ['class: panelClass'],
+    },
+  ],
   template: ` <ng-content /> `,
+  styleUrl: './dropdown-shell.component.scss',
   host: {
-    '[class]': 'hostClass()',
     '[style.position]': '"fixed"',
     '[style.top.px]': 'top()',
     '[style.left.px]': 'left()',
@@ -16,9 +40,6 @@ import { Component, ElementRef, inject, input, output } from '@angular/core';
     '(document:click)': 'onDocumentClick($event)',
     '(document:keydown.escape)': 'onEscape()',
   },
-  styles: [
-    ':host { display: block; overflow: auto; overscroll-behavior: contain; display: flex; flex-direction: column; background: var(--color-bg-elevated); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--elevation-dropdown); }',
-  ],
 })
 export class DropdownShellComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -31,10 +52,6 @@ export class DropdownShellComponent {
   readonly outsideCloseEnabled = input(true);
 
   readonly closeRequested = output<void>();
-
-  hostClass(): string {
-    return this.panelClass().trim();
-  }
 
   requestClose(): void {
     this.closeRequested.emit();

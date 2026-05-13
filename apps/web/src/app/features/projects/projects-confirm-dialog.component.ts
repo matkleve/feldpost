@@ -1,13 +1,12 @@
 import { Component, input, output } from '@angular/core';
-import {
-  UiButtonDirective,
-  UiButtonSecondaryDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { BrnDialogImports } from '@spartan-ng/brain/dialog';
+import { UI_PRIMITIVE_DIRECTIVES } from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_DIALOG_IMPORTS } from '../../shared/ui/dialog';
 
 @Component({
   selector: 'app-projects-confirm-dialog',
   standalone: true,
-  imports: [UiButtonDirective, UiButtonSecondaryDirective],
+  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...UI_PRIMITIVE_DIRECTIVES],
   templateUrl: './projects-confirm-dialog.component.html',
   styleUrl: './projects-confirm-dialog.component.scss',
 })
