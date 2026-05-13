@@ -5,7 +5,7 @@
   margin: 0;
   padding: 0;
   background: rgba(0, 0, 0, 0.3);
-  z-index: 19;
+  z-index: var(--z-modal);
 }
 
 .share-link-audience-dialog {
@@ -18,7 +18,7 @@
   background: var(--color-bg-surface);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-4);
-  z-index: 20;
+  z-index: calc(var(--z-modal) + 1);
 }
 
 .share-link-audience-dialog__title {

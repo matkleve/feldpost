@@ -81,5 +81,5 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   left: 0;
-  z-index: 10;
+  z-index: var(--z-dropdown);
 }

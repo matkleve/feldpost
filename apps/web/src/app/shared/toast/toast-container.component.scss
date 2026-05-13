@@ -2,7 +2,7 @@
   position: fixed;
   bottom: 1rem;
   left: 1rem;
-  z-index: var(--z-toast, 1300);
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);

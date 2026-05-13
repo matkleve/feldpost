@@ -4,7 +4,7 @@
 
 - **Current phase:** Phase 3 — Component migration (started 2026-05-13)
 - **Last updated:** 2026-05-13
-- **Phase 3 in progress — atoms:** Button ✅, Badge ✅, Input ✅, Label ✅ (`apps/web/src/app/shared/ui/*`; `ui-*` shims where applicable)
+- **Phase 3 in progress — atoms + Card:** Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅ (`apps/web/src/app/shared/ui/*`; `ui-*` shims where applicable)
 
 ---
 
@@ -318,6 +318,7 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
     - [ ] Loading spinner (`::after`) in buttons → `hlm-spinner`
     - [ ] Remove `styles/primitives/button.scss`, `field.scss`, `badge.scss`, `chip.scss`, `toggle.scss` (after all callsites migrated)
   - [ ] **Molecules**
+    - [x] **`hlmCard` molecule** — `HLM_CARD_IMPORTS` in `apps/web/src/app/shared/ui/card/` (local CVA; no published `@spartan-ng/ui-card-helm` until Tailwind v4 peers); legacy `[uiCardShell]` / `.ui-card-shell` unchanged until callsite migration
     - [ ] `app-dropdown-shell` + `app-standard-dropdown` → `brn-menu`
     - [ ] `app-popover` → `brn-popover`
     - [ ] `app-segmented-switch` → `brn-tabs`
@@ -389,3 +390,4 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 | 2026-05-13 | **--primary** = `oklch(0.6716 0.1368 48.5130)` (≈ warm orange #cc7a4a) — warm orange wins as single brand primary | Resolves Phase 1 blocker; MD3 gold `--fp-sys-color-primary: #745b0c` is kept as alias only |
 | 2026-05-13 | Tailwind v3 → v4 upgraded; single tweakcn CSS variable foundation installed | Phase 2 complete; tweakcn vars drive spartan/ui, legacy aliases keep existing components intact |
 | 2026-05-13 | **Phase 3 start:** `@spartan-ng/brain` + CVA (`buttonVariants`) + `UiButtonDirective` shim; published `@spartan-ng/ui-*-helm` names mostly absent or Tailwind3-peered (`ui-core`) | npm reality + Tailwind v4; local `shared/ui/button` until helm install policy is set |
+| 2026-05-13 | Normalized hardcoded overlay z-index values and legacy token names to the `--z-*` token scale | Precondition for Brn overlay migration (modals, dialogs, map chrome, dropdowns); intra-component stacking still uses small integer offsets inside parent stacking contexts |

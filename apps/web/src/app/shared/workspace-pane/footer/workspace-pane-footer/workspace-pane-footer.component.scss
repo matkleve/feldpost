@@ -52,6 +52,7 @@
   margin: 0;
   padding: 0;
   background: rgba(0, 0, 0, 0.3);
+  z-index: var(--z-modal);
 }
 
 .workspace-action__dialog {
@@ -64,7 +65,7 @@
   background: var(--color-bg-surface);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-4);
-  z-index: 20;
+  z-index: calc(var(--z-modal) + 1);
 
   h3 {
     margin: 0 0 var(--spacing-3);
