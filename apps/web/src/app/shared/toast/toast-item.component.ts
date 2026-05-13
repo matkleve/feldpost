@@ -1,6 +1,14 @@
-import { Component, inject, input } from '@angular/core';
-import type { ToastItem } from '../../core/toast/toast.types';
+import { Component, computed, inject, input } from '@angular/core';
+import type { ToastItem, ToastType } from '../../core/toast/toast.types';
 import { ToastService } from '../../core/toast/toast.service';
+import { HlmToastDirective, type ToastVariants } from '../ui/toast';
+
+function toastTypeToVariant(type: ToastType): NonNullable<ToastVariants['variant']> {
+  if (type === 'success' || type === 'error' || type === 'warning') {
+    return type;
+  }
+  return 'default';
+}
 
 const ICON_MAP: Record<string, string> = {
   success: 'check_circle',
@@ -12,6 +20,7 @@ const ICON_MAP: Record<string, string> = {
 @Component({
   selector: 'ss-toast-item',
   standalone: true,
+  imports: [HlmToastDirective],
   templateUrl: './toast-item.component.html',
   styleUrl: './toast-item.component.scss',
   host: {
@@ -29,6 +38,9 @@ export class ToastItemComponent {
   private readonly toast = inject(ToastService);
 
   readonly item = input.required<ToastItem>();
+
+  /** Maps `ToastType` to CVA variant (`info` → `default`). */
+  protected readonly toastVariant = computed(() => toastTypeToVariant(this.item().type));
 
   get icon(): string {
     return ICON_MAP[this.item().type] ?? 'info';

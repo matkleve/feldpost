@@ -11,7 +11,7 @@
       <div class="filter-rules">
         @for (rule of filterService.rules(); track rule.id; let i = $index) {
           <div class="filter-rule">
-            <button class="filter-rule__conj" (click)="toggleConjunction(rule.id)">
+            <button hlmMenuItem class="filter-rule__conj" type="button" (click)="toggleConjunction(rule.id)">
               {{ conjunctionLabel(i, rule.conjunction) }}
             </button>
             <select

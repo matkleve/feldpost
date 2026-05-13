@@ -18,7 +18,8 @@
   >
     <!-- Displays pulse placeholder block inside the shared loading layer. -->
     <!-- @see docs/specs/component/item-grid/item-grid.md#pulse-placeholder-contract-mandatory -->
-    <span class="item-state-frame__pulse-placeholder" aria-hidden="true"></span>
+    <!-- shim(spartan-v4): `hlmSkeleton` supplies pulse/surface/radius; geometry stays on `item-state-frame__pulse-placeholder`. -->
+    <span class="item-state-frame__pulse-placeholder" hlmSkeleton aria-hidden="true"></span>
   </div>
 }
 

@@ -12,18 +12,21 @@
  * @see apps/web/src/app/shared/ui/popover/ for the hlm visual layer.
  * @see https://github.com/goetzrobin/spartan — BrnPopover for the future brn layer.
  *
+ * TODO(brn-menu): `@spartan-ng/brain` has no `BrnMenu` / `./menu` export (alpha.691). Panel chrome uses
+ * local `hlmMenuContent`; positioning stays manual until brain ships a menu/popover trigger pair.
+ *
  * Callsite count: 9 instances in 7 templates (18 HTML tag matches; 19 total rg matches including this file's selector).
  */
 import { Component, ElementRef, inject, input, output } from '@angular/core';
-import { HLM_POPOVER_IMPORTS, HlmPopoverDirective } from '../ui/popover';
+import { HlmMenuContentDirective } from '../ui/menu';
 
 @Component({
   selector: 'app-dropdown-shell',
   standalone: true,
-  imports: [...HLM_POPOVER_IMPORTS],
+  imports: [HlmMenuContentDirective],
   hostDirectives: [
     {
-      directive: HlmPopoverDirective,
+      directive: HlmMenuContentDirective,
       inputs: ['class: panelClass'],
     },
   ],

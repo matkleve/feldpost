@@ -1,3 +1,8 @@
+// Brain `BrnTabs` root wraps list + panels; keep layout identical to the pre-tabs single wrapper.
+.group-tab-bar-root {
+  display: contents;
+}
+
 .group-tab-bar {
   display: flex;
   overflow-x: auto;
@@ -29,7 +34,7 @@
     color: var(--color-text-primary);
   }
 
-  &--active {
+  &[data-state='active'] {
     color: var(--color-text-primary);
     border-bottom-color: var(--color-accent);
   }

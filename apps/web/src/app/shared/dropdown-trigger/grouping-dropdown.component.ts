@@ -10,6 +10,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
 import { UiIconButtonGhostDirective } from '../ui-primitives/ui-primitives.directive';
 
 export interface GroupingProperty {
@@ -29,6 +30,9 @@ export interface GroupingProperty {
     CdkDrag,
     CdkDragHandle,
     UiIconButtonGhostDirective,
+    HlmMenuItemDirective,
+    HlmMenuLabelDirective,
+    HlmMenuSeparatorDirective,
   ],
 })
 export class GroupingDropdownComponent {

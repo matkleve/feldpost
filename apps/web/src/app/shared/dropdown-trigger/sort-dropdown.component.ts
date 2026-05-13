@@ -3,6 +3,7 @@ import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.s
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
+import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 
 export type SortDropdownOption = {
@@ -16,7 +17,12 @@ export type SortDropdownOption = {
   selector: 'app-sort-dropdown',
   templateUrl: './sort-dropdown.component.html',
   styleUrl: './sort-dropdown.component.scss',
-  imports: [StandardDropdownComponent],
+  imports: [
+    StandardDropdownComponent,
+    HlmMenuItemDirective,
+    HlmMenuLabelDirective,
+    HlmMenuSeparatorDirective,
+  ],
 })
 export class SortDropdownComponent {
   private readonly inactiveSymbol = '\u2013';

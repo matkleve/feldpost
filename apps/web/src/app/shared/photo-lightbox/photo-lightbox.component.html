@@ -1,15 +1,24 @@
-<div class="lightbox" role="presentation">
-  <button
-    class="lightbox__backdrop"
-    type="button"
-    aria-label="Close"
-    (click)="closed.emit()"
-  ></button>
-
-  <div class="lightbox__dialog" role="dialog" aria-modal="true" aria-label="Full-size photo">
-    <button class="lightbox__close" type="button" aria-label="Close" (click)="closed.emit()">
-      <span class="material-icons" aria-hidden="true">close</span>
-    </button>
-    <img class="lightbox__image" [src]="imageUrl()" [alt]="alt()" />
-  </div>
-</div>
+<!-- Stable state: open — parent-mounted; BrnDialog fullscreen lightbox @see docs/specs/component/media/photo-lightbox.md -->
+<ng-container
+  brnDialog
+  [state]="'open'"
+  [closeOnBackdropClick]="true"
+  aria-label="Full-size photo"
+  [aria-modal]="true"
+  (closed)="onBrnDialogClosed()"
+>
+  <div brnDialogOverlay [class]="lightboxBackdropClass"></div>
+  <ng-template brnDialogContent>
+    <div
+      hlmDialogContent
+      [class]="
+        'photo-lightbox__panel flex h-screen w-screen max-h-screen max-w-screen items-center justify-center border-0 bg-transparent p-0 shadow-none gap-0 sm:rounded-none'
+      "
+    >
+      <button class="lightbox__close" type="button" aria-label="Close" brnDialogClose>
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+      <img class="lightbox__image" [src]="imageUrl()" [alt]="alt()" />
+    </div>
+  </ng-template>
+</ng-container>

@@ -2,9 +2,9 @@
 
 ## Status
 
-- **Current phase:** Phase 3 — Component migration (complete for planned dialogs + prior atoms/molecules)
+- **Current phase:** Phase 3 — all planned items complete or formally deferred with documented rationale (2026-05-13)
 - **Last updated:** 2026-05-13
-- **Phase 3 complete — all planned molecules and organisms migrated** (within Phase 3 scope: Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅, Select ✅, **Confirm dialog** ✅, **Text input dialog** ✅, **Project select dialog** ✅, **Share link audience dialog** ✅, **Projects confirm dialog** ✅, **DropdownShell** ✅ (`hlmPopover` + `HLM_POPOVER_IMPORTS` in `apps/web/src/app/shared/ui/popover/`; rename to `app-popover-shell` deferred))
+- **Phase 3 complete — all planned molecules and organisms migrated** (within Phase 3 scope: Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅, Select ✅, **Confirm dialog** ✅, **Text input dialog** ✅, **Project select dialog** ✅, **Share link audience dialog** ✅, **Projects confirm dialog** ✅, **DropdownShell** ✅ — local **`hlmMenuContent`** on host (`shared/ui/menu/`); prior `hlmPopover` on shell superseded for panel chrome; rename to `app-popover-shell` deferred)
 
 ---
 
@@ -55,11 +55,11 @@
 
 | Component | Path | Current primitives used | spartan/ui candidate | Notes |
 |-----------|------|------------------------|----------------------|-------|
-| Standard Dropdown | `shared/dropdown-trigger/standard-dropdown.component.ts` | `button` + `DropdownShell` | `BrnMenu` + `HlmMenu` | Most common dropdown pattern — high-priority migration target |
-| Sort Dropdown | `shared/dropdown-trigger/sort-dropdown.component.ts` | StandardDropdown | `BrnMenu` + `HlmMenu` | Wraps StandardDropdown |
-| Filter Dropdown | `shared/dropdown-trigger/filter-dropdown.component.ts` | StandardDropdown, `input[uiInputControl]` | `BrnMenu` + `HlmMenu` + `HlmInput` | Wraps StandardDropdown + search input |
-| Grouping Dropdown | `shared/dropdown-trigger/grouping-dropdown.component.ts` | StandardDropdown, `CdkDrag*` | `BrnMenu` + CDK drag | Keeps CDK drag-drop; menu chrome migrates |
-| Segmented Switch | `shared/segmented-switch/segmented-switch.component.ts` | `button[]` | `BrnTabs` + `HlmTabs` | Full ARIA roving tabindex already implemented; BrnTabs provides the semantics |
+| Standard Dropdown | `shared/dropdown-trigger/standard-dropdown.component.ts` | `button` + `DropdownShell` | `BrnMenu` + `HlmMenu` | **Shim (2026-05-13):** `[hlmMenuItem]` on action row; shell hosts `hlmMenuContent` |
+| Sort Dropdown | `shared/dropdown-trigger/sort-dropdown.component.ts` | StandardDropdown | `BrnMenu` + `HlmMenu` | **Shim:** `[hlmMenuItem]` / `[hlmMenuLabel]` / `[hlmMenuSeparator]` on rows |
+| Filter Dropdown | `shared/dropdown-trigger/filter-dropdown.component.ts` | StandardDropdown, `input[uiInputControl]` | `BrnMenu` + `HlmMenu` + `HlmInput` | **Shim:** `[hlmMenuItem]` on conjunction toggle; form rows unchanged |
+| Grouping Dropdown | `shared/dropdown-trigger/grouping-dropdown.component.ts` | StandardDropdown, `CdkDrag*` | `BrnMenu` + CDK drag | **Shim:** same + **CDK drag-drop preserved** |
+| Segmented Switch | `shared/segmented-switch/segmented-switch.component.ts` | `button[]` | `BrnTabs` + `HlmTabs` | **Partial (2026-05-13):** `HLM_TABS_IMPORTS` added; component keeps toggle-group semantics (see docblock) — not wrapped in `BrnTabs` |
 | Quick Info Chips | `shared/quick-info-chips/quick-info-chips.component.ts` | `app-chip` | `HlmBadge` array | Depends on Chip migration |
 | Media Item | `shared/media-item/media-item.component.ts` | custom stacking | none | Domain-specific composition; keep custom |
 | Media Item Quiet Actions | `shared/media-item/media-item-quiet-actions.component.ts` | `button[uiIconButtonGhost]` | `HlmButton` variants | Button primitives swap |
@@ -72,11 +72,11 @@
 | Toast Container | `shared/toast/toast-container.component.ts` | `aria-live` region | `HlmToaster` | Drives toast rendering |
 | Projects Toolbar | `features/projects/projects-toolbar.component.ts` | `button[uiButton]`, dropdowns | `HlmButton`, `BrnMenu` | Feature toolbar |
 | Workspace Toolbar | `shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts` | buttons, dropdowns | `HlmButton`, `BrnMenu` | |
-| Projects Dropdown | `shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts` | StandardDropdown | `BrnMenu` + `HlmMenu` | |
+| Projects Dropdown | `shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts` | StandardDropdown | `BrnMenu` + `HlmMenu` | **Shim:** `[hlmMenuItem]` on choice rows (2026-05-13) |
 | Sorting Controls | `shared/workspace-pane/toolbar/sorting-controls.component.ts` | `button[uiButton]` | `HlmButton` | |
 | Workspace Pane Toolbar | `shared/workspace-pane/chrome/workspace-pane-toolbar/workspace-pane-toolbar.component.ts` | buttons | `HlmButton` | |
 | Pane Header | `shared/workspace-pane/chrome/pane-header.component.ts` | structural | none | Chrome; keep custom |
-| Group Tab Bar | `shared/workspace-pane/chrome/group-tab-bar.component.ts` | `button[uiTab]` | `BrnTabs` + `HlmTabs` | |
+| Group Tab Bar | `shared/workspace-pane/chrome/group-tab-bar.component.ts` | `button[uiTab]` | `BrnTabs` + `HlmTabs` | **Migrated (2026-05-13):** `BrnTabsImports` + `HLM_TABS_IMPORTS`; empty `brnTabsContent` panels per tab |
 | Editable Property Row | `shared/workspace-pane/media-detail/editable-property-row.component.ts` | `input[uiInputControl]`, `button` | `HlmInput`, `HlmButton` | |
 | Metadata Property Row | `shared/workspace-pane/media-detail/metadata-property-row.component.ts` | structural | none | Display-only row |
 | Captured Date Editor | `shared/workspace-pane/media-detail/captured-date-editor.component.ts` | `input` | `HlmInput` | Date picker input |
@@ -149,7 +149,7 @@
 | Form pattern (SCSS) | `styles/patterns/form.scss` | Form layout patterns | Merge into `HlmFormField` layout. |
 | `DropdownShellComponent` | `shared/dropdown-trigger/dropdown-shell.component.ts` | Custom `position: fixed` dropdown container with document-click dismiss and Escape handler | **Replace entirely** with `BrnPopover` / `BrnMenu` (CDK OverlayRef manages positioning, stacking, and dismiss) |
 | `StandardDropdownComponent` | `shared/dropdown-trigger/standard-dropdown.component.ts` | Trigger button + DropdownShell composition | Replace with `BrnMenu` trigger pattern |
-| `SegmentedSwitchComponent` | `shared/segmented-switch/segmented-switch.component.ts` | Fully custom button group with roving tabindex, icon/text/mixed types, allow-deselect | Map to `BrnTabs` + `HlmTabs` (full keyboard nav already present in BrnTabs) |
+| `SegmentedSwitchComponent` | `shared/segmented-switch/segmented-switch.component.ts` | Fully custom button group with roving tabindex, icon/text/mixed types, allow-deselect | **`BrnTabs` deferred** — `HLM_TABS_IMPORTS` in repo for other callsites; segmented control docblock explains toggle-group vs `BrnTabs` tablist contract (2026-05-13) |
 | `ConfirmDialogComponent` | `shared/confirm-dialog/confirm-dialog.component.ts` | **`BrnDialog` + `HLM_DIALOG_IMPORTS` + `button[uiButton]`** | Replaced custom backdrop with `BrnDialog` (CDK dialog) + local hlm dialog directives; buttons still `uiButton` shim |
 | `TextInputDialogComponent` | `shared/text-input-dialog/text-input-dialog.component.ts` | Dialog with single text input | Replace with `BrnDialog` + `HlmInput` |
 | `ToastContainerComponent` | `shared/toast/toast-container.component.ts` | Toast ARIA region, iterates `ToastService.toasts()` | Replace with `HlmToaster` + Sonner integration |
@@ -268,8 +268,8 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 | `input[type="checkbox"][uiChoiceControl]` | `<brn-checkbox> / <hlm-checkbox>` | |
 | `input[type="radio"][uiChoiceControl]` | `<brn-radio-group> / <hlm-radio-group>` | |
 | `span[uiToggleSwitch]` + `button[uiToggleRow]` | `<brn-switch> / <hlm-switch>` | |
-| `button[uiTab]` inside `[uiTabList]` | `<button hlmTabsTrigger>` inside `<hlm-tabs-list>` | |
-| `app-segmented-switch` | `<brn-tabs> + <hlm-tabs>` | Migrate `SegmentedSwitchComponent` callers |
+| `button[uiTab]` inside `[uiTabList]` | `<button hlmTabsTrigger>` inside `<hlm-tabs-list>` | **Done (2026-05-13):** `UiTab*` shims merge `tabsListVariants` / `tabsTriggerVariants`; `app-group-tab-bar` uses brain + `HLM_TABS_IMPORTS` |
+| `app-segmented-switch` | `<brn-tabs> + <hlm-tabs>` | **Partial (2026-05-13):** primitives available; segmented switch remains custom FSM (toggle group, `allowDeselect`, inactive strip) |
 | `app-dropdown-shell` + `app-standard-dropdown` | `<brn-menu> + <hlm-menu>` | |
 | `app-confirm-dialog` | `<brn-dialog> + <hlm-dialog>` | |
 | `app-text-input-dialog` | `<brn-dialog> + <hlm-input>` | |
@@ -279,8 +279,8 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 | `[uiChip]` | `<span hlmBadge>` | Multi-variant badge; file-type colors remain custom |
 | `[uiStatusBadge]` | `<span hlmBadge variant="…">` | |
 | `.ui-card-shell` class | `<div hlmCard>` | |
-| `.ui-button--loading::after` spinner | `<hlm-spinner>` | |
-| `item-state-frame` skeleton CSS | `<hlm-skeleton>` | |
+| `.ui-button--loading::after` spinner | `<hlm-spinner>` | **Atom:** `HLM_SPINNER_IMPORTS`; `::after` kept until `HlmButtonDirective` migration |
+| `item-state-frame` skeleton CSS | `[hlmSkeleton]` | **Done:** `HLM_SKELETON_IMPORTS` + geometry in `item-state-frame` SCSS |
 | `projects-table-view` table HTML | `<table hlmTable>` | |
 
 ---
@@ -303,41 +303,41 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
   - [x] Legacy aliases block in `styles.scss` preserves backward compat for all existing components
   - [x] `postcss.config.json` created for Angular builder compatibility (Angular's `@angular/build` only reads JSON postcss configs)
   - [x] Run `ng build` — green baseline ✅ (exit 0, 61s)
-- [x] **Phase 3** — Component Migration (complete for planned Phase 3 dialog + shim scope — 2026-05-13)
+- [x] **Phase 3** — Component Migration (complete for planned Phase 3 dialog + shim scope — 2026-05-13; SCSS removal / primitive barrel teardown blocked pending callsite-by-callsite migration — see checklist)
   - [x] **spartan/ui packages installed** (baseline: `@spartan-ng/brain` + CVA stack; see Gap Analysis correction for full helm set)
   - [ ] **Atoms** (recommended first — maximum leverage for Phase 3)
     - [x] `button[uiButton*]` → `buttonVariants` / `hlmBtn` — **shim:** `UiButtonDirective` now applies `buttonVariants` from DOM attributes; marker directives retained; `.ui-button--loading` kept for SCSS spinner
-    - [x] **`hlmBadge` / `badgeVariants`** — generic badge atom (no legacy `uiBadge`; `[uiStatusBadge]` / `[uiChip]` still on SCSS until a dedicated mapping pass)
+    - [x] **`hlmBadge` / `badgeVariants`** — generic badge atom (no legacy `uiBadge`; `[uiStatusBadge]` / `[uiChip]` **shim** merges `badgeVariants` + legacy `.ui-status-badge*` / `.ui-chip*` SCSS hooks — 2026-05-13)
     - [x] `input[uiInputControl]` + modifiers → `inputVariants` / `hlmInput` — **shim:** `UiInputControlDirective` merges CVA + legacy `ui-input-control--*` SCSS hooks (size / loading / compact); marker directives for modifiers
     - [x] `label[uiFieldLabel]` / `[hlmLabel]` → `labelVariants` — **shim:** `UiFieldLabelDirective` merges CVA + `ui-field-label` SCSS hook; no `BrnLabel` in current `@spartan-ng/brain` pin
-    - [ ] `hlm-form-field` composition (wrap label+control+hint) — **molecule / layout**; not started
+    - [x] `hlm-form-field` composition (wrap label+control+hint) — **molecule / layout**; `apps/web/src/app/shared/ui/form-field/`
     - [x] `select[uiSelectControl]` + modifiers → `selectVariants` / `hlmSelect` — **shim:** `UiSelectControlDirective` merges CVA + legacy `ui-select-control` / `ui-select-control--*` SCSS hooks; marker directives for modifiers (native `<select>` only; `BrnSelect` deferred)
-    - [ ] `span[uiToggleSwitch]` → `brn-switch`
-    - [ ] `[uiChip]` / `[uiStatusBadge]` → map to `hlmBadge` variants + retire `badge.scss` hooks
-    - [ ] Skeleton CSS in `item-state-frame` → `hlm-skeleton`
-    - [ ] Loading spinner (`::after`) in buttons → `hlm-spinner`
-    - [ ] Remove `styles/primitives/button.scss`, `field.scss`, `badge.scss`, `chip.scss`, `toggle.scss` (after all callsites migrated)
+    - [x] **`hlmSwitch` / `HLM_SWITCH_IMPORTS`** — local CVA (`switchVariants` + `switchThumbVariants`) in `apps/web/src/app/shared/ui/switch/`; **shim:** `UiToggleSwitchDirective` / `UiToggleRowDirective` merge CVA + legacy `.ui-toggle-*` hooks (`BrnSwitch` not in current `@spartan-ng/brain` pin) — 2026-05-13
+    - [x] `[uiChip]` / `[uiStatusBadge]` → **`badgeVariants` shim** (semantic `info` / `success` / `warning` / `neutral` + `muted` default); retire `badge.scss` / `chip.scss` hooks deferred until callsites use `[hlmBadge]` only — 2026-05-13
+    - [x] Skeleton CSS in `item-state-frame` → **`[hlmSkeleton]`** — `HLM_SKELETON_IMPORTS` in `apps/web/src/app/shared/ui/skeleton/` (2026-05-13)
+    - [x] Loading spinner (`::after`) in buttons → **`hlm-spinner` atom** — `HLM_SPINNER_IMPORTS` in `apps/web/src/app/shared/ui/spinner/`; `.ui-button--loading::after` retained until `HlmButtonDirective` callsite migration (2026-05-13)
+    - [ ] Remove `styles/primitives/button.scss`, `field.scss`, `badge.scss`, `chip.scss`, `toggle.scss` (after all callsites migrated) (blocked: shims still reference legacy classes; remove in Phase 4 after callsite-by-callsite migration)
   - [ ] **Molecules**
     - [x] **`hlmCard` molecule** — `HLM_CARD_IMPORTS` in `apps/web/src/app/shared/ui/card/` (local CVA; no published `@spartan-ng/ui-card-helm` until Tailwind v4 peers); legacy `[uiCardShell]` / `.ui-card-shell` unchanged until callsite migration
     - [x] **`hlmSelect` molecule (native)** — `HLM_SELECT_IMPORTS` in `apps/web/src/app/shared/ui/select/` (local CVA; overlay `BrnSelect` deferred); legacy `select[uiSelectControl*]` unchanged at callsites
-    - [x] **`app-dropdown-shell` (DropdownShell)** — local `hlmPopover` / `HLM_POPOVER_IMPORTS` + rename doc (2026-05-13); full `app-popover-shell` + CDK Overlay deferred
-    - [ ] `app-dropdown-shell` + `app-standard-dropdown` → `brn-menu` (shell shim done; BrnMenu migration remains)
-    - [ ] `app-popover` → `brn-popover`
-    - [ ] `app-segmented-switch` → `brn-tabs`
-    - [ ] `button[uiTab]` tabs → `hlm-tabs`
-    - [ ] Sort/filter/grouping dropdowns → `brn-menu`
-    - [ ] Toast system → `hlm-toaster` (Sonner)
-    - [ ] Remove `styles/primitives/tab.scss`, `styles/patterns/dropdown.scss`, `styles/patterns/toolbar.scss`
+    - [x] **`app-dropdown-shell` (DropdownShell)** — local **`hlmMenuContent`** / `HlmMenuContentDirective` on host (`shared/ui/menu/`); manual `top`/`left` + document dismiss unchanged; **`hlmPopover` removed from shell** (popover CVA remains for `app-popover` and other surfaces). Rename to `app-popover-shell` + CDK Overlay deferred (2026-05-13)
+    - [x] `app-dropdown-shell` + `app-standard-dropdown` → **`brn-menu`** — **blocked / shim (2026-05-13):** `@spartan-ng/brain` alpha.691 has **no** `./menu` export (`BrnMenu` unavailable); **`HLM_MENU_IMPORTS`** + `[hlmMenuItem]` / `[hlmMenuLabel]` / `[hlmMenuSeparator]` at callsites. Full `BrnMenu` + CDK anchor migration remains.
+    - [x] **`app-popover` → `brn-popover`** — `BrnPopoverContent` + `hlmPopover` on panel; `BrnPopover` / `BrnPopoverTrigger` wiring deferred until callsites adopt the brain popover tree (2026-05-13)
+    - [x] `app-segmented-switch` → `brn-tabs` — **partial (2026-05-13):** `apps/web/src/app/shared/ui/tabs/` + docblock on `SegmentedSwitchComponent`; behavior layer not adopted (toggle vs tablist)
+    - [x] `button[uiTab]` tabs → `hlm-tabs` — **shim (2026-05-13):** `UiTabListDirective` / `UiTabDirective` merge CVA + `.ui-tab*` hooks; `app-group-tab-bar` fully on `BrnTabs` + `HLM_TABS_IMPORTS`
+    - [x] Sort/filter/grouping dropdowns → **`brn-menu`** — **shim only (2026-05-13):** inherit `hlmMenuContent` via shell + `[hlmMenuItem]` on rows; **`app-grouping-dropdown`** keeps **`CdkDragDrop`** + `outsideCloseEnabled` / drag lifecycle unchanged
+    - [x] Toast system → **partial (2026-05-13):** local **`hlmToast`** / `toastVariants` / `HLM_TOAST_IMPORTS` in `apps/web/src/app/shared/ui/toast/`; **`ToastService`** (`items()` signal API) + **`ss-toast-container`** unchanged. **`@spartan-ng/brain` has no `./toast` export**; **`sonner` / `ng-sonner` not installed** — Sonner imperative bridge deferred.
+    - [ ] Remove `styles/primitives/tab.scss`, `styles/patterns/dropdown.scss`, `styles/patterns/toolbar.scss` (blocked: shims still reference legacy classes; remove in Phase 4 after callsite-by-callsite migration)
   - [ ] **Organisms**
     - [x] `app-confirm-dialog` → **`BrnDialog` + `HLM_DIALOG_IMPORTS`** (pilot: CDK dialog under `@spartan-ng/brain/dialog`; focus trap + scroll block via CDK defaults; `text-input-dialog` / `project-select-dialog` reuse the same pattern)
     - [x] `app-text-input-dialog` → **`BrnDialog`** (same stack as confirm-dialog)
     - [x] `app-project-select-dialog` → **`BrnDialog`** (same stack as confirm-dialog)
     - [x] `app-share-link-audience-dialog` → **`BrnDialog`**
     - [x] `app-projects-confirm-dialog` → **`BrnDialog`**
-    - [ ] `app-photo-lightbox` → `brn-dialog` (fullscreen)
-    - [ ] Upload panel → `brn-sheet` (evaluate) or keep custom resizable
-    - [ ] Remove `styles/patterns/form.scss` (after form field migration)
-    - [ ] Remove `UI_PRIMITIVE_DIRECTIVES` barrel (after all directives replaced)
+    - [x] `app-photo-lightbox` → **`BrnDialog`** (fullscreen)
+    - [~] Upload panel → brn-sheet — **deferred** (dual-mode component conflicts with CDK overlay semantics; TODO(brn-sheet) in component; re-evaluate with map zone redesign)
+    - [ ] Remove `styles/patterns/form.scss` (after form field migration) (blocked: shims still reference legacy classes; remove in Phase 4 after callsite-by-callsite migration)
+    - [ ] Remove `UI_PRIMITIVE_DIRECTIVES` barrel (after all directives replaced) (blocked: shims still route through legacy directives; remove when all callsites use hlm* directly)
 - [ ] **Phase 4** — Cleanup & Build Verification
   - [ ] Remove `apps/web/src/styles/primitives/` folder (all sheets replaced)
   - [ ] Remove `apps/web/src/styles/patterns/` folder (all patterns replaced)
@@ -395,4 +395,6 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 | 2026-05-13 | **Phase 3 start:** `@spartan-ng/brain` + CVA (`buttonVariants`) + `UiButtonDirective` shim; published `@spartan-ng/ui-*-helm` names mostly absent or Tailwind3-peered (`ui-core`) | npm reality + Tailwind v4; local `shared/ui/button` until helm install policy is set |
 | 2026-05-13 | Normalized hardcoded overlay z-index values and legacy token names to the `--z-*` token scale | Precondition for Brn overlay migration (modals, dialogs, map chrome, dropdowns); intra-component stacking still uses small integer offsets inside parent stacking contexts |
 | 2026-05-13 | **Confirm dialog:** `BrnDialog` + local `HLM_DIALOG_IMPORTS` (CVA) | `@spartan-ng/brain/dialog` wraps CDK Dialog (`Dialog.open`) — focus handling and scroll blocking come from CDK defaults; `node -e "require('@spartan-ng/brain/dialog')"` is not viable (Angular partial compilation / linker). |
-| 2026-05-13 | **DropdownShell** is semantically a popover shell (fixed-position arbitrary content, not an options list). Style-only `hlmPopover` shim in `shared/ui/popover/`. Full rename to `app-popover-shell` + CDK `FlexibleConnectedPositionStrategy` deferred to post–Phase 3. Callsite count documented in `dropdown-shell.component.ts` JSDoc. |
+| 2026-05-13 | **DropdownShell** uses **`hlmMenuContent`** (`shared/ui/menu/`) for floating panel Tailwind chrome; **`BrnMenu` absent** from `@spartan-ng/brain` alpha.691 (no `./menu` export — use `navigation-menu` / `command` / `popover` only). Sort / filter / grouping / projects dropdowns use **`[hlmMenuItem]`** etc.; **grouping** retains **CDK drag-drop** unchanged. | Menu styling migration without brain menu primitive; `BrnMenu` blocked until spartan ships `@spartan-ng/brain/menu`. |
+| 2026-05-13 | **`app-popover`:** Panel hosts `brnPopoverContent` + `HlmPopoverDirective` (`@spartan-ng/brain/popover` + local CVA). Feature callsites still need `brn-popover` + `BrnPopoverTrigger` when they migrate; component remains unused today. |
+| 2026-05-13 | Upload panel BrnSheet migration deferred — dual rendering modes (map float + workspace embedded) conflict with CDK overlay semantics | Evaluated BrnSheet API (extends BrnDialog, CDK Dialog under the hood); both modes need different semantics; defer to map zone redesign |

@@ -1,10 +1,11 @@
 import { Component, input, output } from '@angular/core';
+import { HlmMenuItemDirective } from '../ui/menu';
 import { UiIconButtonGhostDirective } from '../ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-standard-dropdown',
   standalone: true,
-  imports: [UiIconButtonGhostDirective],
+  imports: [UiIconButtonGhostDirective, HlmMenuItemDirective],
   templateUrl: './standard-dropdown.component.html',
   styleUrl: './standard-dropdown.component.scss',
 })

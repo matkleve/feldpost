@@ -1,24 +1,29 @@
-// Elevated menu/dropdown shell tokens — no feature content styling.
+// Elevated menu/dropdown shell — tweakcn semantic tokens; no feature content styling.
 // @see docs/specs/component/ui-primitives/popover.md §Token references
 
-// @layer fp-components — Tailwind disallows bare `components` in component SCSS without @tailwind here.
-
 @layer fp-components {
+  // Host is a transparent projection frame only (panel carries chrome).
+  // @see docs/specs/component/ui-primitives/popover.md §Visual Behavior Contract
+  :host {
+    display: block;
+  }
+
   // Block surface: background, border, radius, elevation, stacking index
   // @see docs/specs/component/ui-primitives/popover.md §Visual Behavior Contract
-  :host.popover {
+  .popover {
     display: block;
     position: relative;
-    background-color: var(--color-bg-elevated);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--elevation-dropdown);
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
     z-index: var(--z-dropdown);
   }
 
   // Optional scroll containment for tall panels
   // @see docs/specs/component/ui-primitives/popover.md §Variants
-  :host.popover.popover--scrollable {
+  .popover.popover--scrollable {
     overflow: auto;
     overscroll-behavior: contain;
   }

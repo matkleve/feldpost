@@ -5,6 +5,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { MetadataService } from '../../core/metadata/metadata.service';
 import type { MetadataValueType } from '../../core/metadata/metadata.types';
 import { StandardDropdownComponent } from './standard-dropdown.component';
+import { HlmMenuItemDirective } from '../ui/menu';
 import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
 
 export interface FilterDropdownPropertyOption {
@@ -17,7 +18,7 @@ export interface FilterDropdownPropertyOption {
   selector: 'app-filter-dropdown',
   templateUrl: './filter-dropdown.component.html',
   styleUrl: './filter-dropdown.component.scss',
-  imports: [StandardDropdownComponent, ...UI_PRIMITIVE_DIRECTIVES],
+  imports: [StandardDropdownComponent, HlmMenuItemDirective, ...UI_PRIMITIVE_DIRECTIVES],
 })
 export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);

@@ -39,14 +39,11 @@
 
 // Stable state: loading.
 // @see docs/specs/component/item-grid/item-state-frame.md#state-machine
-// Renders pulse placeholder geometry used as shared loading indicator.
+// Renders pulse placeholder geometry used as shared loading indicator (surface/pulse via `hlmSkeleton`).
 // @see docs/specs/component/item-grid/item-grid.md#pulse-placeholder-contract-mandatory
 .item-state-frame__pulse-placeholder {
   inline-size: 3.5rem;
   block-size: 1.25rem;
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-bg-base) 35%, var(--color-bg-surface));
-  animation: item-state-frame-pulse 1200ms ease-in-out infinite;
 }
 
 // Stable state: error.
@@ -96,15 +93,3 @@
   background: color-mix(in srgb, var(--color-clay) 10%, var(--color-bg-surface));
 }
 
-// Defines shared pulse animation for loading placeholder surfaces.
-// @see docs/specs/component/item-grid/item-grid.md#pulse-placeholder-contract-mandatory
-@keyframes item-state-frame-pulse {
-  0%,
-  100% {
-    opacity: 0.72;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}

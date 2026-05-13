@@ -1,9 +1,12 @@
 import { afterEveryRender, computed, Directive, ElementRef, inject, signal } from '@angular/core';
 import { twMerge } from 'tailwind-merge';
+import { badgeVariants, type BadgeVariants } from '../ui/badge/badge-variants';
 import { buttonVariants, type ButtonVariants } from '../ui/button/button-variants';
 import { inputVariants } from '../ui/input/input-variants';
 import { labelVariants } from '../ui/label/label-variants';
 import { selectVariants, type SelectVariants } from '../ui/select/select-variants';
+import { switchLegacyShimTrackVariants, toggleRowVariants, type ToggleRowVariants } from '../ui/switch/switch-variants';
+import { tabsListVariants, tabsTriggerVariants } from '../ui/tabs/tabs-variants';
 
 function computeUiButtonShimClasses(el: HTMLElement): string {
   const loading = el.hasAttribute('uibuttonloading');
@@ -65,6 +68,126 @@ function computeUiSelectControlShimClasses(el: HTMLElement): string {
   else if (el.hasAttribute('uiselectcontrolsizelg')) legacy.push('ui-select-control--lg');
 
   return twMerge(base, ...legacy);
+}
+
+function computeUiToggleSwitchShimClasses(el: HTMLElement): string {
+  const legacy = new Set<string>(['ui-toggle-switch']);
+  for (const c of el.classList) {
+    if (c.startsWith('ui-toggle-switch')) legacy.add(c);
+  }
+  if (el.hasAttribute('uitoggleswitchcompact')) legacy.add('ui-toggle-switch--compact');
+  if (el.hasAttribute('uitoggleswitchsizelg')) legacy.add('ui-toggle-switch--lg');
+  const checked = legacy.has('ui-toggle-switch--on');
+  return twMerge(
+    switchLegacyShimTrackVariants(),
+    checked ? 'bg-primary' : 'bg-input',
+    ...legacy,
+  );
+}
+
+function resolveToggleRowTone(el: HTMLElement): NonNullable<ToggleRowVariants['tone']> {
+  if (el.hasAttribute('uitogglerowloading')) return 'loading';
+  if (el.hasAttribute('uitogglerowerror')) return 'error';
+  return 'default';
+}
+
+function computeUiTabShimClasses(el: HTMLElement): string {
+  const legacy = new Set<string>(['ui-tab']);
+  for (const c of el.classList) {
+    if (c.startsWith('ui-tab')) legacy.add(c);
+  }
+  if (el.hasAttribute('uitabsizesm')) legacy.add('ui-tab--sm');
+  else if (el.hasAttribute('uitabsizemd')) legacy.add('ui-tab--md');
+  else if (el.hasAttribute('uitabsizelg')) legacy.add('ui-tab--lg');
+  return twMerge(tabsTriggerVariants(), ...legacy);
+}
+
+function computeUiToggleRowShimClasses(el: HTMLElement): string {
+  const legacy = new Set<string>(['ui-toggle-row']);
+  for (const c of el.classList) {
+    if (c.startsWith('ui-toggle-row')) legacy.add(c);
+  }
+  if (el.hasAttribute('uitogglerowsizesm')) legacy.add('ui-toggle-row--sm');
+  else if (el.hasAttribute('uitogglerowsizemd')) legacy.add('ui-toggle-row--md');
+  else if (el.hasAttribute('uitogglerowsizelg')) legacy.add('ui-toggle-row--lg');
+  if (el.hasAttribute('uitogglerowcompact')) legacy.add('ui-toggle-row--compact');
+  if (el.hasAttribute('uitogglerowloading')) legacy.add('ui-toggle-row--loading');
+  if (el.hasAttribute('uitogglerowerror')) legacy.add('ui-toggle-row--error');
+  const tone = resolveToggleRowTone(el);
+  return twMerge(toggleRowVariants({ tone }), ...legacy);
+}
+
+function computeUiChipShimClasses(el: HTMLElement): string {
+  const legacy = new Set<string>(['ui-chip']);
+  for (const c of el.classList) {
+    if (c.startsWith('ui-chip')) legacy.add(c);
+  }
+  if (el.hasAttribute('uichipsizesm')) legacy.add('ui-chip--sm');
+  else if (el.hasAttribute('uichipsizemd')) legacy.add('ui-chip--md');
+  else if (el.hasAttribute('uichipsizelg')) legacy.add('ui-chip--lg');
+  if (el.hasAttribute('uichiploading')) legacy.add('ui-chip--loading');
+  if (el.hasAttribute('uichiperror')) legacy.add('ui-chip--error');
+  if (el.hasAttribute('uichipdisabled')) legacy.add('ui-chip--disabled');
+  if (el.hasAttribute('uichipaction')) legacy.add('ui-chip--action');
+  if (el.hasAttribute('uichippassive')) legacy.add('ui-chip--passive');
+  if (el.hasAttribute('uichipselected')) legacy.add('ui-chip--selected');
+  return twMerge(badgeVariants({ variant: 'outline' }), ...legacy);
+}
+
+function resolveUiStatusBadgeVariant(el: HTMLElement): NonNullable<BadgeVariants['variant']> {
+  if (
+    el.hasAttribute('uistatusbadgeerror') ||
+    el.hasAttribute('uistatuspillerror') ||
+    el.classList.contains('ui-status-badge--error')
+  ) {
+    return 'destructive';
+  }
+  if (
+    el.hasAttribute('uistatusbadgewarning') ||
+    el.hasAttribute('uistatuspillwarning') ||
+    el.classList.contains('ui-status-badge--warning')
+  ) {
+    return 'warning';
+  }
+  if (
+    el.hasAttribute('uistatusbadgesuccess') ||
+    el.hasAttribute('uistatuspillsuccess') ||
+    el.classList.contains('ui-status-badge--success')
+  ) {
+    return 'success';
+  }
+  if (el.hasAttribute('uistatusbadgeinfo') || el.hasAttribute('uistatuspillinfo')) {
+    return 'info';
+  }
+  if (el.hasAttribute('uistatusbadgeneutral') || el.hasAttribute('uistatuspillneutral')) {
+    return 'neutral';
+  }
+  return 'muted';
+}
+
+function computeUiStatusBadgeShimClasses(el: HTMLElement): string {
+  const legacy = new Set<string>(['ui-status-badge']);
+  for (const c of el.classList) {
+    if (c.startsWith('ui-status-badge') || c.startsWith('ui-status-pill')) legacy.add(c);
+  }
+  applyUiStatusBadgeMarkerClasses(el, legacy);
+  const variant = resolveUiStatusBadgeVariant(el);
+  return twMerge(badgeVariants({ variant }), ...legacy);
+}
+
+/** Pushes legacy BEM hooks from marker attributes into `legacy` (deduped). */
+function applyUiStatusBadgeMarkerClasses(el: HTMLElement, legacy: Set<string>): void {
+  if (hasAnyAttribute(el, 'uistatusbadgesizesm', 'uistatuspillsizesm')) legacy.add('ui-status-badge--sm');
+  else if (hasAnyAttribute(el, 'uistatusbadgesizemd', 'uistatuspillsizemd')) legacy.add('ui-status-badge--md');
+  if (hasAnyAttribute(el, 'uistatusbadgeneutral', 'uistatuspillneutral')) legacy.add('ui-status-badge--neutral');
+  if (hasAnyAttribute(el, 'uistatusbadgeinfo', 'uistatuspillinfo')) legacy.add('ui-status-badge--info');
+  if (hasAnyAttribute(el, 'uistatusbadgesuccess', 'uistatuspillsuccess')) legacy.add('ui-status-badge--success');
+  if (hasAnyAttribute(el, 'uistatusbadgewarning', 'uistatuspillwarning')) legacy.add('ui-status-badge--warning');
+  if (hasAnyAttribute(el, 'uistatusbadgeerror', 'uistatuspillerror')) legacy.add('ui-status-badge--error');
+}
+
+function hasAnyAttribute(el: HTMLElement, ...attrs: string[]): boolean {
+  return attrs.some((a) => el.hasAttribute(a));
 }
 
 @Directive({ selector: '[uiContainer]', standalone: true, host: { class: 'ui-container' } })
@@ -214,7 +337,14 @@ export class UiIconButtonGhostLoadingDirective {}
 })
 export class UiIconButtonGhostDangerDirective {}
 
-@Directive({ selector: '[uiFieldRow]', standalone: true, host: { class: 'ui-field-row' } })
+// Shim: Tailwind stack must match `twMerge(formFieldVariants(), 'ui-field-row')` (string literal required for `host.class` AOT).
+// TODO(spartan-v4): After callsite migration, remove this shim or use `hlm-form-field` only.
+// @see apps/web/src/app/shared/ui/form-field/form-field-variants.ts
+@Directive({
+  selector: '[uiFieldRow]',
+  standalone: true,
+  host: { class: 'flex flex-col gap-1.5 ui-field-row' },
+})
 export class UiFieldRowDirective {}
 
 @Directive({
@@ -366,84 +496,157 @@ export class UiSelectControlErrorDirective {}
 })
 export class UiSelectControlCompactDirective {}
 
-@Directive({ selector: 'button[uiToggleRow]', standalone: true, host: { class: 'ui-toggle-row' } })
-export class UiToggleRowDirective {}
+// Shim: merges `toggleRowVariants` + keeps `.ui-toggle-row*` SCSS hooks until `BrnSwitch` / row migration.
+// TODO(spartan-v4): After callsite migration, replace with `HlmSwitch` + brain switch or drop shim.
+// @see apps/web/src/app/shared/ui/switch/
+@Directive({
+  selector: 'button[uiToggleRow]',
+  standalone: true,
+  host: {
+    '[class]': 'hostClass()',
+  },
+})
+export class UiToggleRowDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
 
-@Directive({ selector: '[uiTabList]', standalone: true, host: { class: 'ui-tab-list' } })
-export class UiTabListDirective {}
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiToggleRowShimClasses(this._el.nativeElement));
+    });
+  }
+}
 
-@Directive({ selector: 'button[uiTab]', standalone: true, host: { class: 'ui-tab' } })
-export class UiTabDirective {}
+// Shim: merges `tabsListVariants` + keeps `.ui-tab-list` for SCSS hooks until callsites use `[hlmTabsList][brnTabsList]`.
+// TODO(spartan-v4): After callsite migration, remove this shim and use `HlmTabsListDirective` on `brn-tabs-list`.
+// @see apps/web/src/app/shared/ui/tabs/
+@Directive({
+  selector: '[uiTabList]',
+  standalone: true,
+  host: {
+    '[class]': 'hostClass()',
+  },
+})
+export class UiTabListDirective {
+  protected readonly hostClass = computed(() => twMerge(tabsListVariants(), 'ui-tab-list'));
+}
 
-@Directive({ selector: 'button[uiTabSizeSm]', standalone: true, host: { class: 'ui-tab--sm' } })
+// Shim: merges `tabsTriggerVariants` + keeps `.ui-tab*` SCSS hooks until callsites use `[hlmTabsTrigger][brnTabsTrigger]`.
+// TODO(spartan-v4): After callsite migration, remove this shim and use `HlmTabsTriggerDirective` on `button[brnTabsTrigger]`.
+// @see apps/web/src/app/shared/ui/tabs/
+@Directive({
+  selector: 'button[uiTab]',
+  standalone: true,
+  host: {
+    '[class]': 'hostClass()',
+  },
+})
+export class UiTabDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
+
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiTabShimClasses(this._el.nativeElement));
+    });
+  }
+}
+
+/** Marker — merged into {@link UiTabDirective} host classes. */
+@Directive({
+  selector: 'button[uiTabSizeSm]',
+  standalone: true,
+})
 export class UiTabSizeSmDirective {}
 
-@Directive({ selector: 'button[uiTabSizeMd]', standalone: true, host: { class: 'ui-tab--md' } })
+/** Marker — merged into {@link UiTabDirective} host classes. */
+@Directive({
+  selector: 'button[uiTabSizeMd]',
+  standalone: true,
+})
 export class UiTabSizeMdDirective {}
 
-@Directive({ selector: 'button[uiTabSizeLg]', standalone: true, host: { class: 'ui-tab--lg' } })
+/** Marker — merged into {@link UiTabDirective} host classes. */
+@Directive({
+  selector: 'button[uiTabSizeLg]',
+  standalone: true,
+})
 export class UiTabSizeLgDirective {}
 
+/** Marker — merged into {@link UiToggleRowDirective} host classes. */
 @Directive({
   selector: 'button[uiToggleRowSizeSm]',
   standalone: true,
-  host: { class: 'ui-toggle-row--sm' },
 })
 export class UiToggleRowSizeSmDirective {}
 
+/** Marker — merged into {@link UiToggleRowDirective} host classes. */
 @Directive({
   selector: 'button[uiToggleRowSizeMd]',
   standalone: true,
-  host: { class: 'ui-toggle-row--md' },
 })
 export class UiToggleRowSizeMdDirective {}
 
+/** Marker — merged into {@link UiToggleRowDirective} host classes. */
 @Directive({
   selector: 'button[uiToggleRowSizeLg]',
   standalone: true,
-  host: { class: 'ui-toggle-row--lg' },
 })
 export class UiToggleRowSizeLgDirective {}
 
+/** Marker — merged into {@link UiToggleRowDirective} host classes. */
 @Directive({
   selector: 'button[uiToggleRowLoading]',
   standalone: true,
-  host: { class: 'ui-toggle-row--loading' },
 })
 export class UiToggleRowLoadingDirective {}
 
+/** Marker — merged into {@link UiToggleRowDirective} host classes. */
 @Directive({
   selector: 'button[uiToggleRowError]',
   standalone: true,
-  host: { class: 'ui-toggle-row--error' },
 })
 export class UiToggleRowErrorDirective {}
 
+/** Marker — merged into {@link UiToggleRowDirective} host classes. */
 @Directive({
   selector: 'button[uiToggleRowCompact]',
   standalone: true,
-  host: { class: 'ui-toggle-row--compact' },
 })
 export class UiToggleRowCompactDirective {}
 
+// Shim: merges `switchLegacyShimTrackVariants` + token checked bg; keeps `.ui-toggle-switch*` SCSS hooks (pseudo-thumb).
+// TODO(spartan-v4): After callsite migration, use `HLM_SWITCH_IMPORTS` + `BrnSwitch` when brain ships switch; drop shim.
+// @see apps/web/src/app/shared/ui/switch/
 @Directive({
   selector: 'span[uiToggleSwitch]',
   standalone: true,
-  host: { class: 'ui-toggle-switch' },
+  host: {
+    '[class]': 'hostClass()',
+  },
 })
-export class UiToggleSwitchDirective {}
+export class UiToggleSwitchDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
 
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiToggleSwitchShimClasses(this._el.nativeElement));
+    });
+  }
+}
+
+/** Marker — merged into {@link UiToggleSwitchDirective} host classes. */
 @Directive({
   selector: 'span[uiToggleSwitchSizeLg]',
   standalone: true,
-  host: { class: 'ui-toggle-switch--lg' },
 })
 export class UiToggleSwitchSizeLgDirective {}
 
+/** Marker — merged into {@link UiToggleSwitchDirective} host classes. */
 @Directive({
   selector: 'span[uiToggleSwitchCompact]',
   standalone: true,
-  host: { class: 'ui-toggle-switch--compact' },
 })
 export class UiToggleSwitchCompactDirective {}
 
@@ -454,90 +657,149 @@ export class UiToggleSwitchCompactDirective {}
 })
 export class UiRangeControlDirective {}
 
-@Directive({ selector: '[uiChip]', standalone: true, host: { class: 'ui-chip' } })
-export class UiChipDirective {}
+// Shim: merges `badgeVariants({ variant: 'outline' })` + keeps `.ui-chip*` SCSS hooks.
+// TODO(spartan-v4): After callsite migration, use `hlmBadge` / `HlmBadgeDirective`; retire primitive sheet when `app-chip` file-type tokens are reconciled (see `chip.component.ts` variants).
+// @see apps/web/src/app/shared/ui/badge/
+@Directive({
+  selector: '[uiChip]',
+  standalone: true,
+  host: {
+    '[class]': 'hostClass()',
+  },
+})
+export class UiChipDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
 
-@Directive({ selector: '[uiChipSizeSm]', standalone: true, host: { class: 'ui-chip--sm' } })
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiChipShimClasses(this._el.nativeElement));
+    });
+  }
+}
+
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({
+  selector: '[uiChipSizeSm]',
+  standalone: true,
+})
 export class UiChipSizeSmDirective {}
 
-@Directive({ selector: '[uiChipSizeMd]', standalone: true, host: { class: 'ui-chip--md' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({
+  selector: '[uiChipSizeMd]',
+  standalone: true,
+})
 export class UiChipSizeMdDirective {}
 
-@Directive({ selector: '[uiChipSizeLg]', standalone: true, host: { class: 'ui-chip--lg' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({
+  selector: '[uiChipSizeLg]',
+  standalone: true,
+})
 export class UiChipSizeLgDirective {}
 
-@Directive({ selector: '[uiChipLoading]', standalone: true, host: { class: 'ui-chip--loading' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({
+  selector: '[uiChipLoading]',
+  standalone: true,
+})
 export class UiChipLoadingDirective {}
 
-@Directive({ selector: '[uiChipError]', standalone: true, host: { class: 'ui-chip--error' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({
+  selector: '[uiChipError]',
+  standalone: true,
+})
 export class UiChipErrorDirective {}
 
-@Directive({ selector: '[uiChipDisabled]', standalone: true, host: { class: 'ui-chip--disabled' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({
+  selector: '[uiChipDisabled]',
+  standalone: true,
+})
 export class UiChipDisabledDirective {}
 
+// Shim: merges `badgeVariants` semantic surface + keeps `.ui-status-badge*` SCSS hooks (`uiStatusPill*` shares the same BEM tree).
+// TODO(spartan-v4): After callsite migration, use `[hlmBadge]` with explicit `variant` inputs; drop duplicate SCSS.
+// @see apps/web/src/app/shared/ui/badge/
 @Directive({
   selector: '[uiStatusBadge], [uiStatusPill]',
   standalone: true,
-  host: { class: 'ui-status-badge' },
+  host: {
+    '[class]': 'hostClass()',
+  },
 })
-export class UiStatusBadgeDirective {}
+export class UiStatusBadgeDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
 
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiStatusBadgeShimClasses(this._el.nativeElement));
+    });
+  }
+}
+
+/** Marker — merged into {@link UiStatusBadgeDirective} host classes. */
 @Directive({
   selector: '[uiStatusBadgeSizeSm], [uiStatusPillSizeSm]',
   standalone: true,
-  host: { class: 'ui-status-badge--sm' },
 })
 export class UiStatusBadgeSizeSmDirective {}
 
+/** Marker — merged into {@link UiStatusBadgeDirective} host classes. */
 @Directive({
   selector: '[uiStatusBadgeSizeMd], [uiStatusPillSizeMd]',
   standalone: true,
-  host: { class: 'ui-status-badge--md' },
 })
 export class UiStatusBadgeSizeMdDirective {}
 
+/** Marker — merged into {@link UiStatusBadgeDirective} host classes. */
 @Directive({
   selector: '[uiStatusBadgeNeutral], [uiStatusPillNeutral]',
   standalone: true,
-  host: { class: 'ui-status-badge--neutral' },
 })
 export class UiStatusBadgeNeutralDirective {}
 
+/** Marker — merged into {@link UiStatusBadgeDirective} host classes. */
 @Directive({
   selector: '[uiStatusBadgeInfo], [uiStatusPillInfo]',
   standalone: true,
-  host: { class: 'ui-status-badge--info' },
 })
 export class UiStatusBadgeInfoDirective {}
 
+/** Marker — merged into {@link UiStatusBadgeDirective} host classes. */
 @Directive({
   selector: '[uiStatusBadgeSuccess], [uiStatusPillSuccess]',
   standalone: true,
-  host: { class: 'ui-status-badge--success' },
 })
 export class UiStatusBadgeSuccessDirective {}
 
+/** Marker — merged into {@link UiStatusBadgeDirective} host classes. */
 @Directive({
   selector: '[uiStatusBadgeWarning], [uiStatusPillWarning]',
   standalone: true,
-  host: { class: 'ui-status-badge--warning' },
 })
 export class UiStatusBadgeWarningDirective {}
 
+/** Marker — merged into {@link UiStatusBadgeDirective} host classes. */
 @Directive({
   selector: '[uiStatusBadgeError], [uiStatusPillError]',
   standalone: true,
-  host: { class: 'ui-status-badge--error' },
 })
 export class UiStatusBadgeErrorDirective {}
 
-@Directive({ selector: '[uiChipAction]', standalone: true, host: { class: 'ui-chip--action' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({ selector: '[uiChipAction]', standalone: true })
 export class UiChipActionDirective {}
 
-@Directive({ selector: '[uiChipPassive]', standalone: true, host: { class: 'ui-chip--passive' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({ selector: '[uiChipPassive]', standalone: true })
 export class UiChipPassiveDirective {}
 
-@Directive({ selector: '[uiChipSelected]', standalone: true, host: { class: 'ui-chip--selected' } })
+/** Marker — merged into {@link UiChipDirective} host classes. */
+@Directive({ selector: '[uiChipSelected]', standalone: true })
 export class UiChipSelectedDirective {}
 
 @Directive({ selector: 'label[uiChoiceRow]', standalone: true, host: { class: 'ui-choice-row' } })

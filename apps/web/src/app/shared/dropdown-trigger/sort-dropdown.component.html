@@ -20,11 +20,12 @@
 
   <div dropdown-items>
     @if (groupedOptions().length > 0) {
-      <div class="dd-section-label">
+      <div hlmMenuLabel class="dd-section-label dropdown-section">
         {{ t('workspace.sort.section.groupedBy', 'Sorted by grouping') }}
       </div>
       @for (opt of groupedOptions(); track opt.id) {
         <button
+          hlmMenuItem
           class="dd-item dd-item--active"
           type="button"
           [class.dd-item--hovered]="isRowHovered(opt.id)"
@@ -46,10 +47,11 @@
           ></span>
         </button>
       }
-      <div class="dd-divider"></div>
+      <div hlmMenuSeparator class="dd-divider" aria-hidden="true"></div>
     }
     @for (opt of filteredOptions(); track opt.id) {
       <button
+        hlmMenuItem
         class="dd-item"
         type="button"
         [class.dd-item--active]="isSortActive(opt.id)"

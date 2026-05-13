@@ -140,6 +140,9 @@
   visibility: hidden;
 }
 
+// TODO(spartan-v4): Replace this ::after spinner with <hlm-spinner> component
+// after all uiButton callsites are migrated to HlmButtonDirective.
+// @see apps/web/src/app/shared/ui/spinner/
 .ui-button--loading::after {
   content: '';
   position: absolute;

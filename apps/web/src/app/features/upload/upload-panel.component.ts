@@ -85,6 +85,22 @@ export type {
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
 })
+/**
+ * Upload panel — dual-mode floating/embedded surface.
+ *
+ * MODE 1 (map floating): shown via `visible` input above the map at z-upload-button,
+ * no backdrop, anchored under the upload button zone.
+ * MODE 2 (embedded in workspace pane): `embeddedInPane=true`, always visible in the
+ * Upload tab, inline layout — never an overlay.
+ *
+ * TODO(brn-sheet): BrnSheet was evaluated for the map floating mode but deferred.
+ * Reasons: (1) BrnSheet uses CDK overlay semantics that conflict with the
+ * `z-upload-button` stacking and no-backdrop requirement; (2) the embedded pane
+ * mode cannot use an overlay; (3) migrating would require either splitting the
+ * component or adding CDK `attachTo`/`positionStrategy` non-trivially.
+ * Re-evaluate when the map zone overlay contract is redesigned.
+ * @see docs/MIGRATION_PLAN.md — Upload panel decision 2026-05-13
+ */
 export class UploadPanelComponent {
   // Services
   private readonly uploadManager = inject(UploadManagerService);

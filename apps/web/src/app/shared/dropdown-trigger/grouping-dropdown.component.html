@@ -2,7 +2,7 @@
   <div dropdown-items cdkDropListGroup>
     <div class="grouping-section">
       <div class="grouping-section__header">
-        <span class="dd-section-label">{{
+        <span hlmMenuLabel class="dd-section-label dropdown-section">{{
           t('workspace.grouping.section.groupedBy', 'Grouped by')
         }}</span>
         @if (activeGroupings().length > 0) {
@@ -41,6 +41,7 @@
             [cdkDragData]="prop"
             (cdkDragStarted)="onDragStart()"
             (cdkDragEnded)="onDragEnd()"
+            hlmMenuItem
             class="dd-item dd-item--active"
             [class.grouping-row--selected]="selectedRows().has(prop.id)"
             tabindex="0"
@@ -55,9 +56,9 @@
         }
       </div>
     </div>
-    <div class="dd-divider"></div>
+    <div hlmMenuSeparator class="dd-divider" aria-hidden="true"></div>
     <div class="grouping-section">
-      <span class="dd-section-label">{{
+      <span hlmMenuLabel class="dd-section-label dropdown-section">{{
         t('workspace.grouping.section.available', 'Available')
       }}</span>
       <div
@@ -74,6 +75,7 @@
             [cdkDragData]="prop"
             (cdkDragStarted)="onDragStart()"
             (cdkDragEnded)="onDragEnd()"
+            hlmMenuItem
             class="dd-item dd-item--muted"
             [class.grouping-row--selected]="selectedRows().has(prop.id)"
             tabindex="0"

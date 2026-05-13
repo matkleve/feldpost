@@ -1,39 +1,20 @@
+// Toast item layout host; surface chrome comes from `[hlmToast]` + `toastVariants`.
+// @see docs/MIGRATION_PLAN.md
+
 :host {
   display: block;
-  background: color-mix(in srgb, var(--color-bg-elevated) 90%, var(--color-bg-surface));
-  box-shadow: var(--elevation-overlay);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  border-left: 0.25rem solid var(--color-text-secondary);
-  pointer-events: auto;
+}
+
+:host(.entering) [data-toast-surface] {
   animation: toast-enter 200ms ease-out forwards;
 }
 
-// Type-based left border
-:host(.success) {
-  border-left-color: var(--color-success);
-}
-:host(.error) {
-  border-left-color: var(--color-danger);
-}
-:host(.warning) {
-  border-left-color: var(--color-warning);
-}
-:host(.info) {
-  border-left-color: var(--color-text-secondary);
-}
-
-// Animation states
-:host(.entering) {
-  animation: toast-enter 200ms ease-out forwards;
-}
-
-:host(.visible) {
+:host(.visible) [data-toast-surface] {
   opacity: 1;
   transform: translateY(0);
 }
 
-:host(.exiting) {
+:host(.exiting) [data-toast-surface] {
   animation: toast-exit 200ms ease-in forwards;
 }
 
@@ -60,10 +41,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :host(.entering) {
+  :host(.entering) [data-toast-surface] {
     animation: toast-enter-reduced 1ms forwards;
   }
-  :host(.exiting) {
+  :host(.exiting) [data-toast-surface] {
     animation: toast-exit-reduced 1ms forwards;
   }
 
@@ -83,13 +64,6 @@
       opacity: 0;
     }
   }
-}
-
-.toast-body {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-3);
 }
 
 .toast-icon-wrap {
@@ -135,7 +109,6 @@
   margin-top: 0.08rem;
   font-size: var(--font-size-md);
   line-height: var(--line-height-compact);
-  color: var(--color-text-primary);
   word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 3;

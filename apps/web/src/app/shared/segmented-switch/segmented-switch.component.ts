@@ -14,6 +14,12 @@ export interface SegmentedSwitchOption {
 
 export type SegmentedSwitchSize = 'sm' | 'md' | 'lg';
 
+/**
+ * Segmented control uses `role="group"` + `aria-pressed` (toggle group), optional `allowDeselect`,
+ * and a separate inactive strip — not the `tablist` / `tabpanel` contract enforced by `BrnTabs`.
+ * Styling-only `[hlmTabs*]` hooks require `brn-tabs-*` hosts; we keep the local FSM + roving focus here.
+ * TODO(spartan-v4): Revisit only if product accepts tab semantics for every callsite or a brain-level toggle-group ships.
+ */
 @Component({
   selector: 'app-segmented-switch',
   standalone: true,
@@ -68,6 +74,8 @@ export class SegmentedSwitchComponent {
     this.valueChange.emit(next);
   }
 
+  /** Roving tabindex for `role="group"` segments — not delegated to `BrnTabs` (see component docblock). */
+  // TODO(spartan-v4): Replace with `BrnTabs`/`FocusKeyManager` only if callsites adopt tab semantics end-to-end.
   onSegmentedKeydown(event: KeyboardEvent): void {
     if (
       event.key !== 'ArrowRight' &&

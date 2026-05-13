@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { HLM_SKELETON_IMPORTS } from '../ui/skeleton';
 import type { ItemDisplayMode, ItemVisualState } from './item.component';
 
 @Component({
   selector: 'app-item-state-frame',
-  imports: [],
+  imports: [...HLM_SKELETON_IMPORTS],
   templateUrl: './item-state-frame.component.html',
   styleUrl: './item-state-frame.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

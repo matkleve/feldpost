@@ -30,7 +30,7 @@
   </div>
 
   @if (actionLabel()) {
-    <button class="dd-action-row" type="button" (click)="actionRequested.emit()">
+    <button hlmMenuItem class="dd-action-row" type="button" (click)="actionRequested.emit()">
       <span class="material-icons" aria-hidden="true">{{ actionIcon() }}</span>
       {{ actionLabel() }}
     </button>
