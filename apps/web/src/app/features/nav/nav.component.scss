@@ -271,7 +271,7 @@
   flex-shrink: 0;
   border-radius: var(--radius-full);
   background: var(--color-clay, var(--color-primary));
-  color: #fff;
+  color: var(--primary-foreground);
   font-size: var(--sidebar-label-size);
   font-weight: var(--font-weight-semibold);
   transition:

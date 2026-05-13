@@ -7,20 +7,30 @@
   [class.segmented-switch--md]="size() === 'md'"
   [class.segmented-switch--lg]="size() === 'lg'"
 >
-  <div class="segmented-switch__group" role="group" [attr.aria-label]="ariaLabel()">
+  <div
+    class="segmented-switch__group"
+    brnToggleGroup
+    hlmToggleGroup
+    type="single"
+    [nullable]="allowDeselect()"
+    [disabled]="disabled()"
+    [value]="value()"
+    (valueChange)="onToggleGroupValueChange($event)"
+    [attr.aria-label]="ariaLabel()"
+  >
     @for (option of segmentedOptions(); track option.id) {
       <button
         class="segmented-switch__button"
         type="button"
-        [class.segmented-switch__button--active]="isSelected(option)"
+        brnToggleGroupItem
+        hlmToggleGroupItem
+        [size]="size()"
         [class.segmented-switch__button--icon-only]="resolveType(option) === 'icon-only'"
         [class.segmented-switch__button--attention]="!!option.attention"
-        [attr.aria-pressed]="isSelected(option)"
-        [attr.aria-label]="option.ariaLabel || option.label"
-        [attr.title]="option.title || option.label"
+        [value]="option.id"
         [disabled]="disabled() || !!option.disabled"
-        (keydown)="onSegmentedKeydown($event)"
-        (click)="selectOption(option)"
+        [ariaLabel]="option.ariaLabel || option.label"
+        [attr.title]="option.title || option.label"
       >
         @if (option.icon && resolveType(option) !== 'text-only') {
           <span class="material-icons segmented-switch__icon" aria-hidden="true">{{

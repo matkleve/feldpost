@@ -157,18 +157,18 @@
 .ui-button--primary {
   border-color: var(--color-clay);
   background: var(--color-clay);
-  color: #fff;
+  color: var(--primary-foreground);
 
   &:hover:not(:disabled) {
     border-color: color-mix(in srgb, var(--color-clay) 86%, #000);
     background: color-mix(in srgb, var(--color-clay) 86%, #000);
-    color: #fff;
+    color: var(--primary-foreground);
   }
 
   &:active:not(:disabled) {
     border-color: color-mix(in srgb, var(--color-clay) 76%, #000);
     background: color-mix(in srgb, var(--color-clay) 76%, #000);
-    color: #fff;
+    color: var(--primary-foreground);
   }
 }
 

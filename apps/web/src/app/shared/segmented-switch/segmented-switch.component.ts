@@ -1,4 +1,7 @@
 import { Component, computed, input, output } from '@angular/core';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../ui/toggle-group';
 
 export interface SegmentedSwitchOption {
   id: string;
@@ -15,14 +18,15 @@ export interface SegmentedSwitchOption {
 export type SegmentedSwitchSize = 'sm' | 'md' | 'lg';
 
 /**
- * Segmented control uses `role="group"` + `aria-pressed` (toggle group), optional `allowDeselect`,
- * and a separate inactive strip — not the `tablist` / `tabpanel` contract enforced by `BrnTabs`.
- * Styling-only `[hlmTabs*]` hooks require `brn-tabs-*` hosts; we keep the local FSM + roving focus here.
- * TODO(spartan-v4): Revisit only if product accepts tab semantics for every callsite or a brain-level toggle-group ships.
+ * Segmented control: single-select toggle group with optional deselect (`allowDeselect`),
+ * inactive strip, and icon/text variants. Backed by `BrnToggleGroup` + local `hlmToggleGroup*`
+ * (not `BrnTabs` — tablist/tabpanel semantics do not match this control).
+ * @see docs/MIGRATION_PLAN.md
  */
 @Component({
   selector: 'app-segmented-switch',
   standalone: true,
+  imports: [...BrnToggleGroupImports, ...HLM_TOGGLE_GROUP_IMPORTS],
   templateUrl: './segmented-switch.component.html',
   styleUrl: './segmented-switch.component.scss',
 })
@@ -60,63 +64,11 @@ export class SegmentedSwitchComponent {
     return 'text-only';
   }
 
-  isSelected(option: SegmentedSwitchOption): boolean {
-    return this.value() === option.id;
-  }
-
-  selectOption(option: SegmentedSwitchOption): void {
-    if (this.disabled() || option.disabled || option.inactive) {
+  onToggleGroupValueChange(raw: ToggleValue<string>): void {
+    if (Array.isArray(raw)) {
       return;
     }
-
-    const currentlySelected = this.value();
-    const next = this.allowDeselect() && currentlySelected === option.id ? null : option.id;
+    const next = raw === undefined ? null : raw;
     this.valueChange.emit(next);
-  }
-
-  /** Roving tabindex for `role="group"` segments — not delegated to `BrnTabs` (see component docblock). */
-  // TODO(spartan-v4): Replace with `BrnTabs`/`FocusKeyManager` only if callsites adopt tab semantics end-to-end.
-  onSegmentedKeydown(event: KeyboardEvent): void {
-    if (
-      event.key !== 'ArrowRight' &&
-      event.key !== 'ArrowLeft' &&
-      event.key !== 'Home' &&
-      event.key !== 'End'
-    ) {
-      return;
-    }
-
-    const currentTarget = event.currentTarget as HTMLElement | null;
-    const container = currentTarget?.closest('.segmented-switch__group') as HTMLElement | null;
-    if (!container) {
-      return;
-    }
-
-    const focusableButtons = Array.from(
-      container.querySelectorAll<HTMLButtonElement>('.segmented-switch__button:not(:disabled)'),
-    );
-
-    if (focusableButtons.length === 0) {
-      return;
-    }
-
-    event.preventDefault();
-
-    if (event.key === 'Home') {
-      focusableButtons[0]?.focus();
-      return;
-    }
-
-    if (event.key === 'End') {
-      focusableButtons[focusableButtons.length - 1]?.focus();
-      return;
-    }
-
-    const activeIndex = focusableButtons.findIndex((button) => button === document.activeElement);
-    const fallbackIndex = event.key === 'ArrowRight' ? -1 : 0;
-    const currentIndex = activeIndex >= 0 ? activeIndex : fallbackIndex;
-    const delta = event.key === 'ArrowRight' ? 1 : -1;
-    const nextIndex = (currentIndex + delta + focusableButtons.length) % focusableButtons.length;
-    focusableButtons[nextIndex]?.focus();
   }
 }

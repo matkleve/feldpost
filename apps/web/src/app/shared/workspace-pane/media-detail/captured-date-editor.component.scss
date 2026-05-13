@@ -160,7 +160,7 @@
 
     &--selected {
       background: var(--action-text-active);
-      color: #fff;
+      color: var(--primary-foreground);
       font-weight: var(--font-weight-semibold);
     }
   }
