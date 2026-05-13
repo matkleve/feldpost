@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import { buttonVariants, type ButtonVariants } from '../ui/button/button-variants';
 import { inputVariants } from '../ui/input/input-variants';
 import { labelVariants } from '../ui/label/label-variants';
+import { selectVariants, type SelectVariants } from '../ui/select/select-variants';
 
 function computeUiButtonShimClasses(el: HTMLElement): string {
   const loading = el.hasAttribute('uibuttonloading');
@@ -38,6 +39,30 @@ function computeUiInputControlShimClasses(el: HTMLElement): string {
   if (el.hasAttribute('uiinputcontrolsizesm')) legacy.push('ui-input-control--sm');
   else if (el.hasAttribute('uiinputcontrolsizemd')) legacy.push('ui-input-control--md');
   else if (el.hasAttribute('uiinputcontrolsizelg')) legacy.push('ui-input-control--lg');
+
+  return twMerge(base, ...legacy);
+}
+
+function resolveUiSelectControlSize(el: HTMLElement): NonNullable<SelectVariants['size']> {
+  if (el.hasAttribute('uiselectcontrolsizesm')) return 'sm';
+  if (el.hasAttribute('uiselectcontrolsizemd')) return 'md';
+  if (el.hasAttribute('uiselectcontrolsizelg')) return 'lg';
+  if (el.hasAttribute('uiselectcontrolcompact')) return 'sm';
+  return 'md';
+}
+
+function computeUiSelectControlShimClasses(el: HTMLElement): string {
+  const error = el.hasAttribute('uiselectcontrolerror');
+  const size = resolveUiSelectControlSize(el);
+  const base = selectVariants({ size, error });
+
+  const legacy: string[] = ['ui-select-control'];
+  if (el.hasAttribute('uiselectcontrolerror')) legacy.push('ui-select-control--error');
+  if (el.hasAttribute('uiselectcontrolloading')) legacy.push('ui-select-control--loading');
+  if (el.hasAttribute('uiselectcontrolcompact')) legacy.push('ui-select-control--compact');
+  if (el.hasAttribute('uiselectcontrolsizesm')) legacy.push('ui-select-control--sm');
+  else if (el.hasAttribute('uiselectcontrolsizemd')) legacy.push('ui-select-control--md');
+  else if (el.hasAttribute('uiselectcontrolsizelg')) legacy.push('ui-select-control--lg');
 
   return twMerge(base, ...legacy);
 }
@@ -277,52 +302,67 @@ export class UiInputControlErrorDirective {}
 })
 export class UiInputControlCompactDirective {}
 
+// Shim: delegates to hlmSelect CVA until all callsites are migrated.
+// TODO(spartan-v4): After callsite migration, replace with HlmSelectDirective.
+// When spartan ships v4-compatible ui-select-helm, swap the local CVA.
+// @see apps/web/src/app/shared/ui/select/
 @Directive({
   selector: 'select[uiSelectControl]',
   standalone: true,
-  host: { class: 'ui-select-control' },
+  host: {
+    '[class]': 'hostClass()',
+  },
 })
-export class UiSelectControlDirective {}
+export class UiSelectControlDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
 
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiSelectControlShimClasses(this._el.nativeElement));
+    });
+  }
+}
+
+/** Marker — merged into {@link UiSelectControlDirective} host classes. */
 @Directive({
   selector: 'select[uiSelectControlSizeSm]',
   standalone: true,
-  host: { class: 'ui-select-control--sm' },
 })
 export class UiSelectControlSizeSmDirective {}
 
+/** Marker — merged into {@link UiSelectControlDirective} host classes. */
 @Directive({
   selector: 'select[uiSelectControlSizeMd]',
   standalone: true,
-  host: { class: 'ui-select-control--md' },
 })
 export class UiSelectControlSizeMdDirective {}
 
+/** Marker — merged into {@link UiSelectControlDirective} host classes. */
 @Directive({
   selector: 'select[uiSelectControlSizeLg]',
   standalone: true,
-  host: { class: 'ui-select-control--lg' },
 })
 export class UiSelectControlSizeLgDirective {}
 
+/** Marker — merged into {@link UiSelectControlDirective} host classes. */
 @Directive({
   selector: 'select[uiSelectControlLoading]',
   standalone: true,
-  host: { class: 'ui-select-control--loading' },
 })
 export class UiSelectControlLoadingDirective {}
 
+/** Marker — merged into {@link UiSelectControlDirective} host classes. */
 @Directive({
   selector: 'select[uiSelectControlError]',
   standalone: true,
-  host: { class: 'ui-select-control--error' },
 })
 export class UiSelectControlErrorDirective {}
 
+/** Marker — merged into {@link UiSelectControlDirective} host classes. */
 @Directive({
   selector: 'select[uiSelectControlCompact]',
   standalone: true,
-  host: { class: 'ui-select-control--compact' },
 })
 export class UiSelectControlCompactDirective {}
 

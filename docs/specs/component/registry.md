@@ -30,6 +30,22 @@
 
 ---
 
+### `select[hlmSelect]` — Native Select (spartan-style CVA)
+
+- **File**: `apps/web/src/app/shared/ui/select/` (`HlmSelectDirective`, `selectVariants`, `HLM_SELECT_IMPORTS`)
+- **Purpose**: Token-backed styling for native `<select>`; no overlay (`BrnSelect` is a separate future migration).
+- **Spec**: `docs/MIGRATION_PLAN.md` (Phase 3); legacy shim `select[uiSelectControl]` in `ui-primitives.directive.ts`
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `size` | `input` | `sm`, `md`, `lg` | Height, padding, text size |
+  | `error` | `boolean` | `false`, `true` | Destructive border / focus ring |
+- **Composed of**: standalone directive + CVA
+- **Used in**: (opt-in) anywhere a native select uses `hlmSelect`; current callsites still use `[uiSelectControl]` shim
+- **Gaps**: overlay combobox (`BrnSelect`) not covered here
+
+---
+
 ### `<app-group-header>` — Group Header
 
 - **File**: `apps/web/src/app/shared/ui-primitives/group-header.component.ts`

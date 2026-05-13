@@ -1,27 +1,41 @@
-<div class="dialog-overlay" role="dialog" aria-modal="true" [attr.aria-label]="title()">
-  <div class="dialog">
-    <h2 class="dialog__title">{{ title() }}</h2>
-    <p class="dialog__body">{{ message() }}</p>
-    <div class="dialog__actions">
-      <button
-        uiButton
-        uiButtonGhost
-        class="dialog__cancel ui-button ui-button--ghost"
-        type="button"
-        (click)="cancelled.emit()"
-      >
-        {{ cancelLabel() }}
-      </button>
-      <button
-        uiButton
-        class="dialog__confirm ui-button"
-        [class.ui-button--danger]="danger()"
-        [class.ui-button--primary]="!danger()"
-        type="button"
-        (click)="confirmed.emit()"
-      >
-        {{ confirmLabel() }}
-      </button>
+<!-- Stable state: open — parent-mounted; BrnDialog opens CDK portal on mount @see docs/specs/component/confirm-dialog/confirm-dialog.md -->
+<ng-container
+  brnDialog
+  [state]="'open'"
+  [closeOnBackdropClick]="false"
+  [aria-label]="title()"
+  [aria-modal]="true"
+>
+  <div hlmDialogOverlay></div>
+  <ng-template brnDialogContent>
+    <div hlmDialogContent [class]="'max-w-[20rem]'">
+      <div hlmDialogHeader>
+        <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">{{ title() }}</div>
+        <p brnDialogDescription hlmDialogDescription>{{ message() }}</p>
+      </div>
+      <div hlmDialogFooter>
+        <button
+          uiButton
+          uiButtonGhost
+          class="dialog__cancel ui-button ui-button--ghost"
+          type="button"
+          brnDialogClose
+          (click)="cancelled.emit()"
+        >
+          {{ cancelLabel() }}
+        </button>
+        <button
+          uiButton
+          class="dialog__confirm ui-button"
+          [class.ui-button--danger]="danger()"
+          [class.ui-button--primary]="!danger()"
+          type="button"
+          brnDialogClose
+          (click)="confirmed.emit()"
+        >
+          {{ confirmLabel() }}
+        </button>
+      </div>
     </div>
-  </div>
-</div>
+  </ng-template>
+</ng-container>
