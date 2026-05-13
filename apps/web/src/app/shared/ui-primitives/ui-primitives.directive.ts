@@ -1,6 +1,8 @@
-import { afterEveryRender, Directive, ElementRef, inject, signal } from '@angular/core';
+import { afterEveryRender, computed, Directive, ElementRef, inject, signal } from '@angular/core';
 import { twMerge } from 'tailwind-merge';
 import { buttonVariants, type ButtonVariants } from '../ui/button/button-variants';
+import { inputVariants } from '../ui/input/input-variants';
+import { labelVariants } from '../ui/label/label-variants';
 
 function computeUiButtonShimClasses(el: HTMLElement): string {
   const loading = el.hasAttribute('uibuttonloading');
@@ -23,6 +25,21 @@ function resolveUiButtonSize(el: HTMLElement): NonNullable<ButtonVariants['size'
   if (el.hasAttribute('uibuttonsizesm')) return 'sm';
   if (el.hasAttribute('uibuttonsizelg')) return 'lg';
   return 'default';
+}
+
+function computeUiInputControlShimClasses(el: HTMLElement): string {
+  const error = el.hasAttribute('uiinputcontrolerror');
+  const base = inputVariants({ error });
+
+  const legacy: string[] = [];
+  // Legacy class kept for SCSS state hook — TODO: migrate to data-state after hlm swap
+  if (el.hasAttribute('uiinputcontrolloading')) legacy.push('ui-input-control--loading');
+  if (el.hasAttribute('uiinputcontrolcompact')) legacy.push('ui-input-control--compact');
+  if (el.hasAttribute('uiinputcontrolsizesm')) legacy.push('ui-input-control--sm');
+  else if (el.hasAttribute('uiinputcontrolsizemd')) legacy.push('ui-input-control--md');
+  else if (el.hasAttribute('uiinputcontrolsizelg')) legacy.push('ui-input-control--lg');
+
+  return twMerge(base, ...legacy);
 }
 
 @Directive({ selector: '[uiContainer]', standalone: true, host: { class: 'ui-container' } })
@@ -75,6 +92,9 @@ export class UiToolbarButtonDirective {}
  * Maps legacy `uiButton*` attributes to `buttonVariants` (tweakcn / shadcn tokens); keeps `.ui-button--loading` for SCSS spinner.
  * @see docs/MIGRATION_PLAN.md
  */
+// Shim: delegates to hlmButton CVA until all callsites are migrated.
+// TODO(spartan-v4): After callsite migration, remove this shim and use HlmButtonDirective directly.
+// @see apps/web/src/app/shared/ui/button/hlm-button.directive.ts
 @Directive({
   selector: 'button[uiButton]',
   standalone: true,
@@ -179,55 +199,81 @@ export class UiFieldRowDirective {}
 })
 export class UiFieldRowStackedDirective {}
 
-@Directive({ selector: '[uiFieldLabel]', standalone: true, host: { class: 'ui-field-label' } })
-export class UiFieldLabelDirective {}
+// Shim: delegates to hlmLabel CVA until all callsites are migrated.
+// TODO(spartan-v4): After callsite migration, remove this shim and use HlmLabelDirective directly.
+// @see apps/web/src/app/shared/ui/label/hlm-label.directive.ts
+@Directive({
+  selector: '[uiFieldLabel]',
+  standalone: true,
+  host: {
+    '[class]': 'hostClass()',
+  },
+})
+export class UiFieldLabelDirective {
+  // Legacy class kept for SCSS state hook — TODO: migrate to data-state after hlm swap
+  protected readonly hostClass = computed(() => twMerge(labelVariants(), 'ui-field-label'));
+}
 
+// Shim: delegates to hlmInput CVA until all callsites are migrated.
+// TODO(spartan-v4): After callsite migration, remove this shim and use HlmInputDirective directly.
+// @see apps/web/src/app/shared/ui/input/hlm-input.directive.ts
 @Directive({
   selector: 'input[uiInputControl], textarea[uiInputControl]',
   standalone: true,
-  host: { class: 'ui-input-control' },
+  host: {
+    '[class]': 'hostClass()',
+  },
 })
-export class UiInputControlDirective {}
+export class UiInputControlDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
 
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiInputControlShimClasses(this._el.nativeElement));
+    });
+  }
+}
+
+/** Marker — merged into {@link UiInputControlDirective} host classes. */
 @Directive({
   selector: 'input[uiInputControlSizeSm], textarea[uiInputControlSizeSm]',
   standalone: true,
-  host: { class: 'ui-input-control--sm' },
 })
 export class UiInputControlSizeSmDirective {}
 
+/** Marker — merged into {@link UiInputControlDirective} host classes. */
 @Directive({
   selector: 'input[uiInputControlSizeMd], textarea[uiInputControlSizeMd]',
   standalone: true,
-  host: { class: 'ui-input-control--md' },
 })
 export class UiInputControlSizeMdDirective {}
 
+/** Marker — merged into {@link UiInputControlDirective} host classes. */
 @Directive({
   selector: 'input[uiInputControlSizeLg], textarea[uiInputControlSizeLg]',
   standalone: true,
-  host: { class: 'ui-input-control--lg' },
 })
 export class UiInputControlSizeLgDirective {}
 
+/** Marker — merged into {@link UiInputControlDirective} host classes. */
 @Directive({
   selector: 'input[uiInputControlLoading], textarea[uiInputControlLoading]',
   standalone: true,
-  host: { class: 'ui-input-control--loading' },
 })
 export class UiInputControlLoadingDirective {}
 
+/** Marker — merged into {@link UiInputControlDirective} host classes. */
 @Directive({
   selector: 'input[uiInputControlError], textarea[uiInputControlError]',
   standalone: true,
-  host: { class: 'ui-input-control--error' },
 })
 export class UiInputControlErrorDirective {}
 
+/** Marker — merged into {@link UiInputControlDirective} host classes. */
 @Directive({
   selector: 'input[uiInputControlCompact], textarea[uiInputControlCompact]',
   standalone: true,
-  host: { class: 'ui-input-control--compact' },
 })
 export class UiInputControlCompactDirective {}
 

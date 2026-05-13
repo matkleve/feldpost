@@ -4,6 +4,7 @@
 
 - **Current phase:** Phase 3 — Component migration (started 2026-05-13)
 - **Last updated:** 2026-05-13
+- **Phase 3 in progress — atoms:** Button ✅, Badge ✅, Input ✅, Label ✅ (`apps/web/src/app/shared/ui/*`; `ui-*` shims where applicable)
 
 ---
 
@@ -306,10 +307,13 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
   - [x] **spartan/ui packages installed** (baseline: `@spartan-ng/brain` + CVA stack; see Gap Analysis correction for full helm set)
   - [ ] **Atoms** (recommended first — maximum leverage for Phase 3)
     - [x] `button[uiButton*]` → `buttonVariants` / `hlmBtn` — **shim:** `UiButtonDirective` now applies `buttonVariants` from DOM attributes; marker directives retained; `.ui-button--loading` kept for SCSS spinner
-    - [ ] `input[uiInputControl]` + `label[uiFieldLabel]` → `hlmInput` + `hlmLabel` + `hlm-form-field`
+    - [x] **`hlmBadge` / `badgeVariants`** — generic badge atom (no legacy `uiBadge`; `[uiStatusBadge]` / `[uiChip]` still on SCSS until a dedicated mapping pass)
+    - [x] `input[uiInputControl]` + modifiers → `inputVariants` / `hlmInput` — **shim:** `UiInputControlDirective` merges CVA + legacy `ui-input-control--*` SCSS hooks (size / loading / compact); marker directives for modifiers
+    - [x] `label[uiFieldLabel]` / `[hlmLabel]` → `labelVariants` — **shim:** `UiFieldLabelDirective` merges CVA + `ui-field-label` SCSS hook; no `BrnLabel` in current `@spartan-ng/brain` pin
+    - [ ] `hlm-form-field` composition (wrap label+control+hint) — **molecule / layout**; not started
     - [ ] `select[uiSelectControl]` → `brn-select`
     - [ ] `span[uiToggleSwitch]` → `brn-switch`
-    - [ ] `[uiChip]` / `[uiStatusBadge]` → `hlmBadge`
+    - [ ] `[uiChip]` / `[uiStatusBadge]` → map to `hlmBadge` variants + retire `badge.scss` hooks
     - [ ] Skeleton CSS in `item-state-frame` → `hlm-skeleton`
     - [ ] Loading spinner (`::after`) in buttons → `hlm-spinner`
     - [ ] Remove `styles/primitives/button.scss`, `field.scss`, `badge.scss`, `chip.scss`, `toggle.scss` (after all callsites migrated)
@@ -367,6 +371,8 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 11. **Workspace pane resizable divider:** `shared/workspace-pane/shell/drag-divider/drag-divider.component.ts` uses raw pointer events and CSS custom properties for resizing. spartan has no `ResizablePanels` primitive. Keep as custom.
 
 12. **`@angular/cdk/overlay-prebuilt.css` import:** Currently imported at the top of `tokens.scss`. Once spartan's CDK overlay is the system overlay, verify whether this import is still needed or is now provided by spartan.
+
+13. **Molecules (Card, Dialog, Popover, Select):** Published `@spartan-ng/ui-*-helm` packages remain Tailwind **^3**–peered — continue **local CVA + `@spartan-ng/brain`** until spartan ships v4-compatible helm. **Select:** confirm `BrnSelect` + overlay stacking with map/workspace panes. **Popover / Menu:** `DropdownShell` pixel positioning vs CDK `FlexibleConnectedPositionStrategy` (see Q7) blocks drop-in. **Dialog:** five custom dialogs need `BrnDialog` contract + focus trap parity audit before swap.
 
 ---
 
