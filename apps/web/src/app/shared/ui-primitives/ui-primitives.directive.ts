@@ -1,4 +1,29 @@
-import { Directive } from '@angular/core';
+import { afterEveryRender, Directive, ElementRef, inject, signal } from '@angular/core';
+import { twMerge } from 'tailwind-merge';
+import { buttonVariants, type ButtonVariants } from '../ui/button/button-variants';
+
+function computeUiButtonShimClasses(el: HTMLElement): string {
+  const loading = el.hasAttribute('uibuttonloading');
+  return twMerge(
+    buttonVariants({ variant: resolveUiButtonVariant(el), size: resolveUiButtonSize(el) }),
+    loading ? 'ui-button--loading' : '',
+  );
+}
+
+function resolveUiButtonVariant(el: HTMLElement): NonNullable<ButtonVariants['variant']> {
+  if (el.hasAttribute('uibuttondanger')) return 'destructive';
+  if (el.hasAttribute('uibuttonprimary')) return 'default';
+  if (el.hasAttribute('uibuttonghost')) return 'ghost';
+  if (el.hasAttribute('uibuttonsecondary')) return 'outline';
+  return 'outline';
+}
+
+function resolveUiButtonSize(el: HTMLElement): NonNullable<ButtonVariants['size']> {
+  if (el.hasAttribute('uibuttonicononly')) return 'icon';
+  if (el.hasAttribute('uibuttonsizesm')) return 'sm';
+  if (el.hasAttribute('uibuttonsizelg')) return 'lg';
+  return 'default';
+}
 
 @Directive({ selector: '[uiContainer]', standalone: true, host: { class: 'ui-container' } })
 export class UiContainerDirective {}
@@ -46,84 +71,60 @@ export class UiSpacerDirective {}
 })
 export class UiToolbarButtonDirective {}
 
-@Directive({ selector: 'button[uiButton]', standalone: true, host: { class: 'ui-button' } })
-export class UiButtonDirective {}
-
+/**
+ * Maps legacy `uiButton*` attributes to `buttonVariants` (tweakcn / shadcn tokens); keeps `.ui-button--loading` for SCSS spinner.
+ * @see docs/MIGRATION_PLAN.md
+ */
 @Directive({
-  selector: 'button[uiButtonSizeSm]',
+  selector: 'button[uiButton]',
   standalone: true,
-  host: { class: 'ui-button--sm' },
+  host: {
+    '[class]': 'hostClass()',
+  },
 })
+export class UiButtonDirective {
+  private readonly _el = inject(ElementRef<HTMLElement>);
+  protected readonly hostClass = signal('');
+
+  constructor() {
+    afterEveryRender(() => {
+      this.hostClass.set(computeUiButtonShimClasses(this._el.nativeElement));
+    });
+  }
+}
+
+/** Marker directives only — classes come from {@link UiButtonDirective}. */
+@Directive({ selector: 'button[uiButtonSizeSm]', standalone: true })
 export class UiButtonSizeSmDirective {}
 
-@Directive({
-  selector: 'button[uiButtonSizeMd]',
-  standalone: true,
-  host: { class: 'ui-button--md' },
-})
+@Directive({ selector: 'button[uiButtonSizeMd]', standalone: true })
 export class UiButtonSizeMdDirective {}
 
-@Directive({
-  selector: 'button[uiButtonSizeLg]',
-  standalone: true,
-  host: { class: 'ui-button--lg' },
-})
+@Directive({ selector: 'button[uiButtonSizeLg]', standalone: true })
 export class UiButtonSizeLgDirective {}
 
-@Directive({
-  selector: 'button[uiButtonIconOnly]',
-  standalone: true,
-  host: { class: 'ui-button--icon-only' },
-})
+@Directive({ selector: 'button[uiButtonIconOnly]', standalone: true })
 export class UiButtonIconOnlyDirective {}
 
-@Directive({
-  selector: 'button[uiButtonIconWithText]',
-  standalone: true,
-  host: { class: 'ui-button--icon-with-text' },
-})
+@Directive({ selector: 'button[uiButtonIconWithText]', standalone: true })
 export class UiButtonIconWithTextDirective {}
 
-@Directive({
-  selector: 'button[uiButtonTextOnly]',
-  standalone: true,
-  host: { class: 'ui-button--text-only' },
-})
+@Directive({ selector: 'button[uiButtonTextOnly]', standalone: true })
 export class UiButtonTextOnlyDirective {}
 
-@Directive({
-  selector: 'button[uiButtonLoading]',
-  standalone: true,
-  host: { class: 'ui-button--loading' },
-})
+@Directive({ selector: 'button[uiButtonLoading]', standalone: true })
 export class UiButtonLoadingDirective {}
 
-@Directive({
-  selector: 'button[uiButtonPrimary]',
-  standalone: true,
-  host: { class: 'ui-button--primary' },
-})
+@Directive({ selector: 'button[uiButtonPrimary]', standalone: true })
 export class UiButtonPrimaryDirective {}
 
-@Directive({
-  selector: 'button[uiButtonSecondary]',
-  standalone: true,
-  host: { class: 'ui-button--secondary' },
-})
+@Directive({ selector: 'button[uiButtonSecondary]', standalone: true })
 export class UiButtonSecondaryDirective {}
 
-@Directive({
-  selector: 'button[uiButtonGhost]',
-  standalone: true,
-  host: { class: 'ui-button--ghost' },
-})
+@Directive({ selector: 'button[uiButtonGhost]', standalone: true })
 export class UiButtonGhostDirective {}
 
-@Directive({
-  selector: 'button[uiButtonDanger]',
-  standalone: true,
-  host: { class: 'ui-button--danger' },
-})
+@Directive({ selector: 'button[uiButtonDanger]', standalone: true })
 export class UiButtonDangerDirective {}
 
 @Directive({

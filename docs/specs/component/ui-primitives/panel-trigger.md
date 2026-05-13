@@ -6,15 +6,16 @@ A compact toolbar control that opens or closes an anchored panel (popover). It o
 
 ## What It Looks Like
 
-**Implement this design from Figma (Dev Mode):**  
-https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev
+**Figma (Dev Mode):** https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev
 
 Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal control, **1rem** total height (`--fp-base-16`), **0.25rem** corner radius (`--fp-alias-r-4`, Figma `scale/base-4`), internal row gap **0.25rem** (`--fp-base-4`). Default/rest surface uses **`--fp-ref-neutral-variant-95`**. Hover (and pressed pointer while interactive) uses **`--fp-ref-primary-95`**. Label uses **label small** typescale (`--fp-sys-typescale-label-small-*`) and **`--fp-sys-color-on-surface`**. Trailing **expand_more** chevron is **12px** (`--fp-base-12`); when **`data-state="open"`**, the chevron rotates **180deg** (points up). Optional leading icon slot is **8px** (`--fp-base-8`) — content is projected; Figma uses a placeholder square. **text-action** layout: padding-left **`--fp-base-8`**, padding-right **`--fp-base-4`**. **icon-text-action** layout: horizontal padding **`--fp-alias-sp-4`** on both sides. No separate visible border in the reference; edge is read from fill vs parent surface.
 
+**Token verification (2026-05-05):** All Figma variables from node `164:2177` map to existing `apps/web/src/styles/tokens.scss` entries. Figma → CSS: `--fp/ref/neutral-variant/95` → `--fp-ref-neutral-variant-95`; `--fp/ref/primary/95` → `--fp-ref-primary-95`; `--scale/base-*` → `--fp-base-*`; `--spacing/sp-*` → `--fp-alias-sp-*`; `--fp/sys/color/on-surface` → `--fp-sys-color-on-surface`; `--typescale/label/small/*` → `--fp-sys-typescale-label-small-*`.
+
 ## Where It Lives
 
-- **Design reference (Dev Mode):** https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev — file `eCgblR1PiQnIKoFBYhCWwA`, node `164:2177`.
-- **Code (planned):** `apps/web/src/app/shared/panel-trigger/panel-trigger.component.ts` (+ `.html`, `.scss`).
+- **Design reference:** Figma file `eCgblR1PiQnIKoFBYhCWwA`, node `164:2177`.
+- **Code:** `apps/web/src/app/shared/panel-trigger/panel-trigger.component.ts` (+ `.html`, `.scss`).
 - **Use:** Workspace and projects toolbars — any surface that today uses `ui-button` + `ui-dropdown-trigger` for filter / grouping / sort / projects may adopt this component for visual parity with the Figma **PanelTrigger** set.
 
 ## Angular component
@@ -33,7 +34,7 @@ Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal con
 | `layout` | `'icon-text-action' \| 'text-action'` | `'icon-text-action'` | Matches Figma **Layout** |
 | `disabled` | `boolean` | `false` | Accessibility / interaction gate; not a substitute for `panelState` |
 
-**Outputs (recommended):**
+**Outputs:**
 
 | Output | Payload | Notes |
 | --- | --- | --- |
@@ -46,8 +47,8 @@ Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal con
 | Trigger layout, padding, radius, background for default / hover / pressed / `open` pairing per Figma | Popover or dropdown body content |
 | Chevron rotation reflecting `closed` vs `open` | Overlay positioning math (`getBoundingClientRect`), CDK overlay config |
 | Optional leading icon projection + label projection | Which filter rules, groupings, or projects are listed |
-| Emits **click** (or dedicated **toggleRequested**) for parent to flip panel | Document click-outside, Escape, scroll lock, focus trap (parent or shell component) |
-| `disabled` presentation when host is disabled (native) | Toolbar “active dot” or feature-active semantics (parent derives) |
+| Emits `toggleRequested` for parent to flip panel | Document click-outside, Escape, scroll lock, focus trap (parent or shell component) |
+| `disabled` presentation when host is disabled (native) | Toolbar "active dot" or feature-active semantics (parent derives) |
 
 ## Actions
 
@@ -63,15 +64,15 @@ Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal con
 ```text
 app-panel-trigger [data-state=closed|open]
 ├── [optional] ng-content (select: leading icon)
-├── span / projected label region
-└── span.chevron (expand_more)
+├── span.panel-trigger__label
+└── span.panel-trigger__chevron (expand_more)
 ```
 
 ## Data
 
 | Field / input | Source | Notes |
 | --- | --- | --- |
-| Label text | Parent | MUST go through i18n (`t(key, fallback)`) at parent; trigger accepts string or projected content per implementation choice |
+| Label text | Parent | MUST go through i18n (`t(key, fallback)`) at call site; trigger accepts projected content |
 | `panelState` | Parent | Single source for chevron / `[attr.data-state]` |
 
 ## State
@@ -83,7 +84,7 @@ app-panel-trigger [data-state=closed|open]
 | Panel closed | `closed` | Down | `--fp-ref-neutral-variant-95` |
 | Panel open | `open` | Up (rotate 180deg) | `--fp-ref-neutral-variant-95` |
 
-**CSS-only interaction (not FSM states):** `:hover`, `:focus-visible`, `:active` match Figma **Interaction** axis — backgrounds use **`--fp-ref-primary-95`** where Figma shows hover/hover+open rows. **Disabled:** native `disabled` or `aria-disabled`; visuals follow **`docs/design/state-visuals.md`** § Disabled (no invented treatment).
+**CSS-only interaction (not FSM states):** `:hover`, `:focus-visible`, `:active` match Figma **Interaction** axis — backgrounds use **`--fp-ref-primary-95`** where Figma shows hover/hover+open rows. **Disabled:** native `disabled` or `aria-disabled`; visuals follow `docs/design/state-visuals.md` § Disabled (no invented treatment).
 
 ### Transition map (choreography)
 
@@ -92,7 +93,7 @@ app-panel-trigger [data-state=closed|open]
 | `closed` | `open` | parent opens panel | Chevron **0deg → 180deg** | `transform` over `--fp-sys-motion-duration-short2` (`100ms`), easing `--motion-ease-standard` |
 | `open` | `closed` | parent closes panel | Chevron **180deg → 0deg** | same |
 
-Background cross-fades use **`--interactive-transition-standard`** (already composes duration + easing tokens) where background changes apply.
+Background cross-fades use **`--interactive-transition-standard`** where background changes apply.
 
 ### Transition guard
 
@@ -130,11 +131,11 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 
 | Behavior | Visual geometry owner | Stacking context owner | Interaction hit-area owner | Selector(s) | Layer (z-index/token) | Test oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Trigger footprint | `:host` | `:host` | `:host` button | `.panel-trigger` | stacking: none special; inherits toolbar context | Hit area matches compact toolbar control |
+| Trigger footprint | `:host` | `:host` | `.panel-trigger` button | `.panel-trigger` | inherits toolbar context | Hit area matches compact toolbar control |
 | Default / open fill | `:host` | `:host` | — | `[data-state=closed]`, `[data-state=open]` | — | Closed and open use **neutral-variant-95** at rest per Figma |
-| Hover / pressed fill | `:host` | `:host` | — | `:host(:hover)`, `:host(:active)` (and focus ring partner below) | — | Rest → **primary-95** when hover rows match Figma |
-| Chevron orientation | `.panel-trigger__chevron` | `:host` | — | `[data-state=open] .panel-trigger__chevron` | layer: content | Open ⇒ chevron rotated 180deg |
-| Focus ring | `:host` | `:host` | `:host` | `:focus-visible` | `--interactive-focus-ring` / `--shadow-focus-ring` | Keyboard focus shows ring; no ring on pointer-only |
+| Hover / pressed fill | `:host` | `:host` | — | `:host(:hover)`, `:host(:active)` | — | Switches to **primary-95** on hover |
+| Chevron orientation | `.panel-trigger__chevron` | `:host` | — | `:host([data-state=open]) .panel-trigger__chevron` | layer: content | Open ⇒ chevron rotated 180deg |
+| Focus ring | `.panel-trigger` | `:host` | `.panel-trigger` | `.panel-trigger:focus-visible` | `--interactive-focus-ring` | Keyboard focus shows ring; no ring on pointer-only |
 
 ### Ownership triad
 
@@ -144,7 +145,7 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 | Rest background | `:host` | `:host[data-state]` | `:host` | ✅ |
 | Hover background | `:host` | `:host:hover` (pseudo) | `:host` | ✅ |
 
-**Stacking context:** `:host` is the single `position: relative` owner for internal stacking (chevron vs label).
+**Stacking context:** `:host` is the single `position: relative` owner.
 
 ## File Map
 
@@ -152,24 +153,20 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 | --- | --- |
 | `apps/web/src/app/shared/panel-trigger/panel-trigger.component.ts` | Inputs, outputs, `data-state` |
 | `apps/web/src/app/shared/panel-trigger/panel-trigger.component.html` | Layout branches for `layout` |
-| `apps/web/src/app/shared/panel-trigger/panel-trigger.component.scss` | `@layer components` / `@layer states`; token-only values |
+| `apps/web/src/app/shared/panel-trigger/panel-trigger.component.scss` | `@layer fp-components` / `@layer fp-states`; token-only values |
 
 ## Wiring
 
 - Parent sets **`[panelState]`** (`'closed' \| 'open'`) from its dropdown / popover controller.
-- Parent listens to **click** or **`toggleRequested`** to open/close shell.
-- **Chevron asset:** reuse the same Material Symbol / SVG approach as `ui-dropdown-trigger` or shared icon pipeline — no hardcoded raster from Figma MCP URLs in production.
+- Parent listens to **`toggleRequested`** or native click to open/close shell.
+- **Chevron asset:** reuse the Material Symbol / SVG approach as `ui-dropdown-trigger` — no hardcoded raster URLs.
 
 ## Acceptance Criteria
 
-- [ ] Host exposes **`[attr.data-state]="'closed' \| 'open'"`** driven only by **`panelState`** (no separate boolean for open/closed).
-- [ ] **`layout`** matches Figma **`icon-text-action`** and **`text-action`** padding rules using tokens in § Token references.
-- [ ] At rest, closed and open matches use **`--fp-ref-neutral-variant-95`**; hover / pressed paths use **`--fp-ref-primary-95`** per Figma matrix.
+- [ ] Host exposes **`[attr.data-state]="'closed' \| 'open'"`** driven only by `panelState` (no separate boolean for open/closed).
+- [ ] `layout` matches Figma `icon-text-action` and `text-action` padding rules using tokens in § Token references.
+- [ ] At rest, both states use **`--fp-ref-neutral-variant-95`**; hover / pressed paths use **`--fp-ref-primary-95`**.
 - [ ] Chevron points **down** when `closed`, **up** when `open`, with transition using listed motion tokens only.
-- [ ] SCSS uses **`@layer components`** and **`@layer states`**; no geometry changes in state layer beyond allowed transforms on chevron.
-- [ ] No user-visible strings added inside the trigger without i18n registration (prefer parent-supplied label already translated).
-- [ ] **Disabled:** match `docs/design/state-visuals.md` § **Compact toolbar triggers (Panel Trigger, `app-panel-trigger`)** (native `disabled` + host opacity; no hover fill).
-
-## Canonical docs note
-
-This file lives under **`specs/`** at repo root per task layout. For **`lint-specs`** and the component index, mirror or move to **`docs/specs/component/ui-primitives/ui-primitives.panel-trigger.md`** when you want repo-wide spec gates to enforce this contract.
+- [ ] SCSS uses `@layer fp-components` / `@layer fp-states`; no geometry changes in state layer beyond chevron `transform`.
+- [ ] No user-visible strings inside the trigger without i18n registration (label is parent-supplied and pre-translated).
+- [ ] **Disabled:** match `docs/design/state-visuals.md` § Compact toolbar triggers — native `disabled` + host `opacity: 0.66`; no hover fill.

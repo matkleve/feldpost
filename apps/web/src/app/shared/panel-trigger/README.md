@@ -1,6 +1,6 @@
 # Panel trigger (`app-panel-trigger`)
 
-**Normative spec:** `specs/panel-trigger.spec.md` (mirror to `docs/specs/component/ui-primitives/ui-primitives.panel-trigger.md` when gated).
+**Normative spec:** `docs/specs/component/ui-primitives/panel-trigger.md`
 
 **Implement this design from Figma (Dev Mode):**  
 https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev

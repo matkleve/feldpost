@@ -47,6 +47,24 @@ Before writing any code from a Figma URL:
 
 4. **Figma `State` rows = CSS pseudo-classes, not Angular inputs.** Never add an `@Input() state` or `@Input() hover` to reproduce what `:hover`, `:focus-visible`, or `:disabled` already handle natively.
 
+## No-Figma No-Component Gate (Hard Blocker)
+
+**Never implement a new visual component unless a Figma node has been provided for it.**
+
+This applies unconditionally even when a component appears "obviously necessary" from context (e.g. a popover shell that "must exist" to pair with a trigger). Logical inference is not a substitute for a design artifact.
+
+Required workflow:
+
+1. If a Figma URL points to component A and implementation of A appears to need companion component B, **STOP before creating B**.
+2. Ask the user for a Figma URL or explicit approval to implement B without a design.
+3. If the user explicitly instructs "implement without Figma", treat that instruction as the gate — document `@no-figma` in the component spec and a sentence explaining why.
+
+**Applies to:** new component files (`.component.ts`/`.html`/`.scss`), new directive files, and new SCSS utilities that introduce layout, color, radius, or shadow decisions not already defined in tokens.
+
+Does **not** block: bug fixes to existing components, token additions with a clear Figma reference, refactoring with zero net-new visual decisions.
+
+> **Registry check**: Before creating a new component, also consult `docs/specs/component/registry.md` to confirm no existing registered component covers the pattern. A Figma node is still required even when the registry has no match.
+
 ## Figma import boundary
 
 The agent's responsibility for the Figma bridge ends at `docs/design/figma-tokens.json`. The agent must never attempt to automate importing tokens or components into Figma. That step is performed manually by the designer using Tokens Studio or the Variables Import plugin. See `docs/design/tokens.md § Figma Bridge`.

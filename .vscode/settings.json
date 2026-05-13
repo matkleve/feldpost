@@ -1,4 +1,15 @@
 {
+  "git.autoRepositoryDetection": true,
+  "git.repositoryScanMaxDepth": 2,
+  "git.repositoryScanIgnoredFolders": [
+    "node_modules",
+    "dist",
+    ".angular",
+    "coverage",
+    ".turbo",
+    ".cache",
+    "tmp"
+  ],
   "chat.useAgentsMdFile": true,
   "chat.useNestedAgentsMdFiles": true,
   "editor.formatOnSave": true,

@@ -114,4 +114,6 @@ Workspace chrome adjacent to the map/workspace split.
 - [card grid](ui-primitives/ui-primitives.card-grid.md)
 - [card variant switch](ui-primitives/ui-primitives.card-variant-switch.md)
 - [group header](ui-primitives/ui-primitives.group-header.md)
+- [panel trigger](ui-primitives/panel-trigger.md) (`app-panel-trigger` — compact toolbar trigger; Figma node `164:2177`)
+- [popover](ui-primitives/popover.md) (`app-popover` — chrome-only floating surface shell; `@no-figma`)
 - [directives, click-outside, parse-time-input](ui-primitives/ui-primitives.directives-and-utils.md)

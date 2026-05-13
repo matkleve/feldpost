@@ -1,3 +1,8 @@
+/* DEPRECATED: migrating to tweakcn variables — see styles.scss.
+   Legacy tokens below remain active for backward compat during the spartan/ui
+   migration (Phase 2 → Phase 3).  Do not add new tokens here.
+   @see docs/MIGRATION_PLAN.md §Phase 3 cleanup */
+
 @import '@angular/cdk/overlay-prebuilt.css';
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap');
 
