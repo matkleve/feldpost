@@ -1,10 +1,7 @@
-/* DEPRECATED: migrating to tweakcn variables — see styles.scss.
-   Legacy tokens below remain active for backward compat during the spartan/ui
-   migration (Phase 2 → Phase 3).  Do not add new tokens here.
+/* Phase 7: former tokens.scss — layout / fp-ref / semantic aliases.
+   Loaded after tweakcn :root in styles.scss via meta.load-css.
+   CDK overlay lives in styles.scss. Do not add new tokens here.
    @see docs/MIGRATION_PLAN.md §Phase 3 cleanup */
-
-@import '@angular/cdk/overlay-prebuilt.css';
-/* Google Fonts: loaded via <link> in index.html so @import stays valid (CDK overlay inlines rules above). */
 
 /* =============================================================
    Feldpost — Global Styles & Design Token System
@@ -354,44 +351,37 @@
   --fp-alias-r-full: var(--fp-sys-shape-full);
 
   /* ═══════════════════════════════════════════════════════════════════════
-     LEGACY — Feldpost v1 tokens
-     Values are unchanged. New components should use --fp-sys-color-*.
-     Do not remove until all components are migrated.
+     LEGACY — Feldpost v1 `--color-*` bridges (Phase 7)
+     Maps legacy names to tweakcn :root semantics in styles.scss.
      @see docs/design/tokens.md §3.1
      ═══════════════════════════════════════════════════════════════════════ */
 
-  // Backgrounds (warm off-whites, never cold grays)
-  --color-bg-base: #f9f7f4;
-  --color-bg-surface: #ffffff;
-  --color-bg-elevated: #ffffff;
+  // Backgrounds — bridge to tweakcn semantic :root (Phase 7)
+  --color-bg-base: var(--background);
+  --color-bg-surface: var(--card);
+  --color-bg-elevated: var(--popover);
 
   // Borders
-  --color-border: #e8e4de;
-  --color-border-strong: #c8c1b8;
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
 
-  // Text (warm near-black / warm secondary)
-  --color-text-primary: #1a1714;
-  --color-text-secondary: #6b6259;
-  --color-text-disabled: #a89e95;
+  // Text
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+  --color-text-disabled: var(--text-disabled);
 
-  // Brand / semantic
-  --color-accent-brand: #cc7a4a;
-  --color-accent-brand-hover: #b8663a;
-  --color-primary: var(--color-accent-brand);
-  --color-primary-hover: var(--color-accent-brand-hover);
-  --color-success: #16a34a;
-  --color-warning: #c2610a;
-  --color-danger: #dc2626;
-  --color-uploading: #2f6fdb;
-  --color-accent: #7c3aed;
-  --filetype-image: #2f6fdb;
-  --filetype-video: #7c3aed;
-  --filetype-document: #4f5d95;
-  --filetype-spreadsheet: #16a34a;
-  --filetype-presentation: #d97706;
-  --filetype-office: color-mix(in srgb, var(--color-text-secondary) 92%, black 8%);
-  --color-map-user-marker: #2f6fdb;
-  --color-map-search-marker: var(--color-accent-brand);
+  // Brand / semantic — Tailwind extend + legacy SCSS still reference --color-*
+  --color-accent-brand: var(--primary);
+  --color-accent-brand-hover: var(--primary-hover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--destructive);
+  --color-uploading: var(--chart-1);
+  --color-accent: var(--app-violet-accent);
+  --color-map-user-marker: var(--map-marker-user);
+  --color-map-search-marker: var(--map-marker-search);
 
   // Border radius
   --radius-sm: 0.25rem;
@@ -684,34 +674,29 @@
   --fp-sys-color-inverse-on-surface:     #343027;
   --fp-sys-color-inverse-primary:        #745b0c;
 
-  // ── LEGACY v1 dark overrides (unchanged) ─────────────────────────────────
-  --color-bg-base: #0f0e0c;
-  --color-bg-surface: #1a1917;
-  --color-bg-elevated: #252320;
+  // ── LEGACY v1 dark overrides — bridge to html[data-theme="dark"] tweakcn ───
+  --color-bg-base: var(--background);
+  --color-bg-surface: var(--card);
+  --color-bg-elevated: var(--popover);
 
-  --color-border: #2e2b27;
-  --color-border-strong: #3d3830;
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
 
-  --color-text-primary: #edebe7;
-  --color-text-secondary: #908880;
-  --color-text-disabled: #4a4540;
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+  --color-text-disabled: var(--text-disabled);
 
-  --color-accent-brand: #d9895a;
-  --color-accent-brand-hover: #e89a6e;
-  --color-primary: var(--color-accent-brand);
-  --color-primary-hover: var(--color-accent-brand-hover);
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-accent: #a78bfa;
-  --filetype-image: #60a5fa;
-  --filetype-video: var(--color-accent);
-  --filetype-document: #a5b4fc;
-  --filetype-spreadsheet: var(--color-success);
-  --filetype-presentation: #f59e0b;
-  --filetype-office: color-mix(in srgb, var(--color-text-secondary) 90%, white 10%);
-  --color-map-user-marker: #60a5fa;
-  --color-map-search-marker: var(--color-accent-brand);
+  --color-accent-brand: var(--primary);
+  --color-accent-brand-hover: var(--primary-hover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--destructive);
+  --color-accent: var(--app-violet-accent);
+  --color-uploading: var(--chart-1);
+  --color-map-user-marker: var(--map-marker-user);
+  --color-map-search-marker: var(--map-marker-search);
 
   // Shadows — higher opacity so they punch through dark surfaces
   --shadow-sm: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.28), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.18);
@@ -751,20 +736,20 @@
 // Optional custom profile to validate themeability of semantic aliases.
 // Activate manually via: document.documentElement.setAttribute('data-theme', 'sandstone')
 [data-theme='sandstone'] {
-  --color-bg-base: #f3efe8;
-  --color-bg-surface: #fdfaf4;
-  --color-bg-elevated: #fffaf0;
-  --color-border: #d8cdbf;
-  --color-border-strong: #b9ab98;
-  --color-text-primary: #2f271f;
-  --color-text-secondary: #655749;
-  --color-text-disabled: #9e8f80;
-  --color-accent-brand: #a56137;
-  --color-accent-brand-hover: #8d4f2a;
-  --color-primary: var(--color-accent-brand);
-  --color-primary-hover: #8d4f2a;
-  --color-map-user-marker: #2f5f89;
-  --color-map-search-marker: var(--color-accent-brand);
+  --color-bg-base: var(--background);
+  --color-bg-surface: var(--card);
+  --color-bg-elevated: var(--popover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+  --color-text-disabled: var(--text-disabled);
+  --color-accent-brand: var(--primary);
+  --color-accent-brand-hover: var(--primary-hover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-map-user-marker: var(--map-marker-user);
+  --color-map-search-marker: var(--map-marker-search);
 
   --action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
   --action-bg-active: color-mix(in srgb, var(--color-accent-brand) 22%, transparent);

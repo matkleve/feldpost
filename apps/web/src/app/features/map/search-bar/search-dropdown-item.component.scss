@@ -20,7 +20,7 @@
   width: 100%;
   border: 0;
   background: transparent;
-  color: var(--color-text-primary);
+  color: var(--foreground);
   text-align: left;
   cursor: pointer;
   transition:
@@ -30,7 +30,7 @@
 
 .search-dropdown-item:hover,
 .search-dropdown-item--active {
-  background: color-mix(in srgb, var(--color-clay) 12%, var(--color-bg-elevated));
+  background: color-mix(in srgb, var(--primary) 12%, var(--popover));
 }
 
 // Icon slot: fixed-size inline-flex cell; aligns icon top within the row.
@@ -63,7 +63,7 @@
 .search-dropdown-item__icon {
   font-size: 1rem;
   line-height: 1.5rem;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .search-dropdown-item__label,
@@ -79,7 +79,7 @@
 }
 
 .search-dropdown-item__secondary {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: 0.8125rem;
   line-height: 1.4;
   overflow: hidden;
@@ -88,7 +88,7 @@
 }
 
 .search-dropdown-item__meta {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: 0.75rem;
   line-height: 1.4;
 }

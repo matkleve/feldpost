@@ -19,9 +19,9 @@
 }
 
 :host([data-has-item='false']) {
-  background: var(--color-skeleton-surface);
+  background: var(--muted);
   animation: var(--animation-skeleton-pulse);
-  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
 }
 
 /* 2. INNERER WRAPPER: Hier schneiden wir den Inhalt (Bild) ab.
@@ -47,7 +47,7 @@
   transition: box-shadow var(--transition-fade-in);
 
   /* DEFAULT BORDER: 1px, fast transparent */
-  border: 1px color-mix(in srgb, var(--color-clay, #000) 10%, transparent);
+  border: 1px color-mix(in srgb, var(--primary, #000) 10%, transparent);
 
   /* DEFAULT SCHATTEN (ganz dezent) */
   box-shadow: var(--shadow-sm);
@@ -87,7 +87,7 @@
 }
 
 .media-item__open:focus-visible {
-  outline: 2px solid var(--color-clay);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 

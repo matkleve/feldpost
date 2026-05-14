@@ -3,7 +3,7 @@
 ## Status
 
 - **Migration complete — Phase 4 cleanup done (2026-05-13)**
-- **Current phase:** Phase 5 in progress — Group A (partial) + **Groups C, E, F, G done (2026-05-13)** — dialogs cleaned to `HLM_*` imports; badges/chips → `hlmBadge`; selects → `hlmSelect`; settings toggles → `hlmSwitch`. **Phase 6 in progress (2026-05-14)** — template `ui-*` removal + toggle unification; see [phase-6-template-cleanup.md](./migration/phase-6-template-cleanup.md) (old filename: [phase-6-hlm-directive-conversion.md](./migration/phase-6-hlm-directive-conversion.md) redirect).
+- **Current phase:** Phase 5 in progress — Group A (partial) + **Groups C, E, F, G done (2026-05-13)** — dialogs cleaned to `HLM_*` imports; badges/chips → `hlmBadge`; selects → `hlmSelect`; settings toggles → `hlmSwitch`. **Phase 6 in progress (2026-05-14)** — template `ui-*` removal + toggle unification; see [phase-6-template-cleanup.md](./migration/phase-6-template-cleanup.md) (old filename: [phase-6-hlm-directive-conversion.md](./migration/phase-6-hlm-directive-conversion.md) redirect). **Next (planned):** [Phase 11 — spec sync](./migration/phase-11-spec-sync.md) after Phases 6–7 (and ideally Phase 10) stabilize shipped UI.
 - **Last updated:** 2026-05-14
 - **Phase 3 complete — all planned molecules and organisms migrated** (within Phase 3 scope: Button ✅, Badge ✅, Input ✅, Label ✅, Card ✅, Select ✅, **Confirm dialog** ✅, **Text input dialog** ✅, **Project select dialog** ✅, **Share link audience dialog** ✅, **Projects confirm dialog** ✅, **DropdownShell** ✅ — local **`hlmMenuContent`** on host (`shared/ui/menu/`); prior `hlmPopover` on shell superseded for panel chrome; rename to `app-popover-shell` deferred)
 
@@ -34,11 +34,12 @@
 | 8 — Global SCSS elimination | [phase-8-global-scss-elimination.md](./migration/phase-8-global-scss-elimination.md) | **Planned** — Empty `styles/primitives/`; drop `hlm-toggle-group.scss`; minimal `styles.scss` `@use` set. |
 | 9 — Spartan package upgrade | [phase-9-spartan-upgrade.md](./migration/phase-9-spartan-upgrade.md) | **Planned** — Swap local `shared/ui/*` shims for published `@spartan-ng/ui-*-helm` when Tailwind v4 peers unblock. |
 | 10 — Visual QA & polish | [phase-10-visual-qa.md](./migration/phase-10-visual-qa.md) | **Planned** — Cross-theme / cross-screen verification; no new `::ng-deep`; budget-clean `ng build`. |
+| 11 — Specification sync | [phase-11-spec-sync.md](./migration/phase-11-spec-sync.md) | **Planned** — Reconcile `docs/specs/` with shipped `hlm*` / tokens / selectors; `lint-specs` green. |
 
 ---
 
 ## Quick links by concern
 
 - **Inventory & npm reality:** [phase-0-discovery.md](./migration/phase-0-discovery.md) (Component Inventory, Gap Analysis, Design Token Mapping, spartan/ui Mapping)
-- **Execution checklists:** [phase-1-spec-cleanup.md](./migration/phase-1-spec-cleanup.md) through [phase-5-callsite-migration.md](./migration/phase-5-callsite-migration.md); legacy removal track [phase-6-template-cleanup.md](./migration/phase-6-template-cleanup.md) → [phase-10-visual-qa.md](./migration/phase-10-visual-qa.md)
+- **Execution checklists:** [phase-1-spec-cleanup.md](./migration/phase-1-spec-cleanup.md) through [phase-5-callsite-migration.md](./migration/phase-5-callsite-migration.md); legacy removal track [phase-6-template-cleanup.md](./migration/phase-6-template-cleanup.md) → [phase-10-visual-qa.md](./migration/phase-10-visual-qa.md) → [phase-11-spec-sync.md](./migration/phase-11-spec-sync.md)
 - **Cross-phase risks (Phase 5):** [wiring-risks.md](./migration/wiring-risks.md)

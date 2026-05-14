@@ -67,18 +67,18 @@ export class RadiusVisualsService {
 
     const circle = L.circle(center, {
       radius: radiusMeters,
-      color: 'var(--color-clay)',
+      color: 'var(--primary)',
       weight: 2,
       opacity: 0.95,
-      fillColor: 'var(--color-clay)',
+      fillColor: 'var(--primary)',
       fillOpacity: 0.1,
       interactive: false,
     }).addTo(map);
 
     const centerDot = L.circleMarker(center, {
       radius: 4,
-      color: 'var(--color-clay)',
-      fillColor: 'var(--color-clay)',
+      color: 'var(--primary)',
+      fillColor: 'var(--primary)',
       fillOpacity: 1,
       weight: 0,
       interactive: false,

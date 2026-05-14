@@ -34,7 +34,7 @@
 }
 
 .media-display__layer--loading-surface {
-  background: var(--color-skeleton-surface);
+  background: var(--muted);
 }
 
 .media-display__layer--staged-content {
@@ -50,8 +50,8 @@
 }
 
 .media-display__layer--icon-only {
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
-  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--card) 92%, var(--background));
+  color: var(--muted-foreground);
 }
 
 .media-display__icon {
@@ -60,17 +60,17 @@
 }
 
 .media-display__layer--error {
-  background: color-mix(in srgb, var(--color-bg-base) 65%, transparent);
+  background: color-mix(in srgb, var(--background) 65%, transparent);
 }
 
 .media-display__layer--no-media {
   flex-direction: column;
   gap: var(--spacing-2);
-  background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-bg-base));
+  background: color-mix(in srgb, var(--card) 88%, var(--background));
 }
 
 .media-display__no-media-label {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: var(--font-size-label, 0.875rem);
   text-align: center;
 }

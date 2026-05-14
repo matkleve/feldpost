@@ -13,7 +13,7 @@
   block-size: 100%;
   align-items: flex-end;
   overflow: hidden;
-  background: color-mix(in srgb, var(--color-bg-base) 45%, transparent);
+  background: color-mix(in srgb, var(--background) 45%, transparent);
   pointer-events: none;
 }
 
@@ -24,7 +24,7 @@
   inset-inline-start: 0;
   inset-block-end: 0;
   block-size: 0.2rem;
-  background: color-mix(in srgb, var(--color-primary) 82%, white);
+  background: color-mix(in srgb, var(--primary) 82%, white);
 }
 
 // Defines upload status content strip above progress bar.
@@ -37,7 +37,7 @@
   gap: 0.25rem;
   width: 100%;
   padding: 0.25rem;
-  color: var(--color-text-inverse, white);
+  color: white;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
 }
 

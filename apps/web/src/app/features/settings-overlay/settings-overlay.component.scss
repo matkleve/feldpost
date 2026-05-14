@@ -41,7 +41,7 @@
     padding: 0;
     overflow: hidden;
     border: var(--settings-stroke-width) solid var(--settings-border-muted);
-    background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
+    background: color-mix(in srgb, var(--popover) 92%, transparent);
     box-shadow: var(--elevation-dropdown);
     backdrop-filter: blur(14px) saturate(1.08);
     -webkit-backdrop-filter: blur(14px) saturate(1.08);
@@ -64,7 +64,7 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__lead-divider {
     width: 1px;
-    background: color-mix(in srgb, var(--color-border-strong) 55%, transparent);
+    background: color-mix(in srgb, color-mix(in srgb, var(--border) 78%, var(--foreground)) 55%, transparent);
   }
 
   // Two-column flex shell: section rail + detail column
@@ -86,7 +86,7 @@
     gap: var(--container-gap);
     min-height: 0;
     padding: var(--spacing-4) var(--spacing-3) var(--spacing-3) var(--spacing-3);
-    background: color-mix(in srgb, var(--color-bg-surface) 80%, transparent);
+    background: color-mix(in srgb, var(--card) 80%, transparent);
   }
 
   // Stacks kicker, title, subtitle in the rail header
@@ -102,13 +102,13 @@
     font-size: var(--font-size-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Primary rail heading color (typography scale from global styles.scss)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__title {
-    color: var(--color-text-primary);
+    color: var(--foreground);
   }
 
   // Subtitle body under the rail title
@@ -116,7 +116,7 @@
   .settings-overlay__subtitle {
     font-size: var(--font-size-sm);
     line-height: var(--line-height-normal);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Scrollable vertical list of section entries
@@ -130,13 +130,12 @@
     padding-right: var(--spacing-1);
   }
 
-  // Grid row for icon + label + chevron in the section rail
+  // Flex row for icon + stacked label + chevron in the section rail
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-item {
-    display: grid;
-    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    display: flex;
     align-items: center;
-    column-gap: var(--spacing-2);
+    gap: var(--spacing-3);
     min-height: 3rem;
     padding-block: var(--spacing-2);
     padding-inline: var(--spacing-2);
@@ -145,7 +144,7 @@
     border-radius: var(--container-radius-control);
     background: transparent;
     text-align: left;
-    color: var(--color-text-primary);
+    color: var(--foreground);
     cursor: pointer;
     transition: var(--settings-interactive-transition);
   }
@@ -159,63 +158,42 @@
   // Selected section emphasis on the rail row
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-item--active {
-    border-color: color-mix(in srgb, var(--color-clay) 42%, transparent);
-    background: color-mix(in srgb, var(--color-clay) 12%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 42%, transparent);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
   }
 
   // Focus ring for keyboard navigation on rail rows
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-item:focus-visible {
-    border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
     box-shadow: var(--settings-focus-ring);
     outline: none;
   }
 
-  // Clay-tinted icon cell in the rail row
+  // Clay-tinted icon cell in the rail row (20px box; layout utilities on host in template)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-media {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 1.75rem;
-    block-size: 1.75rem;
-    color: var(--color-clay);
+    color: var(--primary);
   }
 
-  // Stacks title + subtitle in the label column
-  // @see docs/specs/ui/settings-overlay
-  .settings-overlay__section-label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  // Section title line in the rail list
+  // Section title line in the rail list (stacking + truncation utilities on host in template)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-label strong {
     font-size: var(--font-size-md-soft);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  // Section subtitle line in the rail list
-  // @see docs/specs/ui/settings-overlay
-  .settings-overlay__section-label small {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
   }
 
   // Trailing chevron affordance in rail rows
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-chevron {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Hairline between rail and detail column
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__column-divider {
     flex: 0 0 1px;
-    background: color-mix(in srgb, var(--color-border) 88%, transparent);
+    background: color-mix(in srgb, var(--border) 88%, transparent);
   }
 
   // Right-hand detail column with scroll
@@ -224,21 +202,21 @@
     flex: 1 1 auto;
     min-width: 0;
     padding: var(--spacing-4);
-    background: var(--color-bg-surface);
+    background: var(--card);
     overflow: auto;
   }
 
   // Detail card surface: section heading + body (Tailwind handles gap/padding on host)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail-card h3 {
-    color: var(--color-text-primary);
+    color: var(--foreground);
   }
 
   // Intro copy under section headings in the detail column
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail-card > p {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Two-column label + control row for settings fields (no ng-deep)
@@ -269,7 +247,7 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__field-row label {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Full-width pill toggle tokens in the settings value column
@@ -302,7 +280,7 @@
     border-radius: var(--container-radius-control);
     background: transparent;
     text-align: left;
-    color: var(--color-text-primary);
+    color: var(--foreground);
     cursor: pointer;
     transition: var(--settings-interactive-transition);
   }
@@ -338,14 +316,14 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__toggle-label small {
     font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Native range input accent in detail fields
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__range {
     width: 100%;
-    accent-color: var(--color-clay);
+    accent-color: var(--primary);
   }
 
   // Identity / profile summary card (legacy detail layout hook)
@@ -364,7 +342,7 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__identity .material-icons {
     font-size: var(--font-size-4xl);
-    color: var(--color-clay);
+    color: var(--primary);
   }
 
   // Identity name line
@@ -372,14 +350,14 @@
   .settings-overlay__identity strong {
     display: block;
     font-size: var(--font-size-md-plus);
-    color: var(--color-text-primary);
+    color: var(--foreground);
   }
 
   // Identity secondary line
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__identity p {
     font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Centered empty/error state block in detail column
@@ -396,27 +374,27 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__state .material-icons {
     font-size: var(--font-size-3xl);
-    color: var(--color-clay);
+    color: var(--primary);
     justify-self: center;
   }
 
   // State block heading color (scale from global heading styles)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__state h3 {
-    color: var(--color-text-primary);
+    color: var(--foreground);
   }
 
   // State block body copy
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__state p {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Inline error color for account hooks
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__logout-error {
-    color: var(--color-danger);
+    color: var(--destructive);
     font-size: var(--font-size-sm);
   }
 }
@@ -430,12 +408,12 @@
 
   @keyframes settings-subsection-pulse {
     0% {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-clay) 36%, transparent);
-      background-color: color-mix(in srgb, var(--color-clay) 14%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 36%, transparent);
+      background-color: color-mix(in srgb, var(--primary) 14%, transparent);
     }
 
     100% {
-      box-shadow: 0 0 0 0.9rem color-mix(in srgb, var(--color-clay) 0%, transparent);
+      box-shadow: 0 0 0 0.9rem color-mix(in srgb, var(--primary) 0%, transparent);
       background-color: transparent;
     }
   }

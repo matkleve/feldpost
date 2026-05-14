@@ -4,7 +4,7 @@
 //   collapsed  → 48px (3rem) icon rail, icons centred
 //   expanded   → 240px (15rem) panel, icon + label
 //   Frosted glass: surface at 85% opacity + 16px blur
-//   Active link: --color-clay accent
+//   Active link: primary accent
 //   Ghost buttons: transparent bg, fill on hover (Notion pattern)
 //
 // Mobile: fixed full-width bottom tab bar, icons only, 56px tall.
@@ -65,8 +65,8 @@
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    background: var(--color-bg-surface);
-    border-top: 1px solid var(--color-border);
+    background: var(--card);
+    border-top: 1px solid var(--border);
     box-shadow: var(--elevation-subtle);
   }
 }
@@ -88,11 +88,11 @@
     border-radius: var(--container-radius-panel);
 
     // Frosted glass
-    background: color-mix(in srgb, var(--color-bg-surface) 85%, transparent);
+    background: color-mix(in srgb, var(--card) 85%, transparent);
     backdrop-filter: blur(16px) saturate(1.2);
     -webkit-backdrop-filter: blur(16px) saturate(1.2);
     box-shadow: var(--elevation-overlay);
-    border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   }
 
   @media (max-width: 767px) {
@@ -168,7 +168,7 @@
   padding-inline: var(--sidebar-row-padding-inline);
   border-radius: var(--container-radius-control);
   text-decoration: none;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   white-space: nowrap;
   cursor: pointer;
   margin: 0;
@@ -194,29 +194,29 @@
 
   // Ghost hover — transparent fill appears
   &:hover {
-    background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
-    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--foreground) 6%, transparent);
+    color: var(--foreground);
   }
 
-  // Active route — clay accent
+  // Active route — primary accent
   &--active {
-    color: var(--color-clay, var(--color-primary));
-    background: color-mix(in srgb, var(--color-clay, var(--color-primary)) 10%, transparent);
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
 
     .nav__icon {
-      color: var(--color-clay, var(--color-primary));
+      color: var(--primary);
     }
   }
 
   &--active:hover {
-    background: color-mix(in srgb, var(--color-clay, var(--color-primary)) 14%, transparent);
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
   }
 
   &--disabled {
     opacity: 0.3;
     cursor: default;
     pointer-events: none;
-    color: var(--color-text-disabled);
+    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
   }
 }
 
@@ -269,7 +269,7 @@
   background: transparent;
   width: 100%;
   text-align: left;
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 .nav__avatar-badge {
@@ -280,7 +280,7 @@
   height: var(--sidebar-media-size);
   flex-shrink: 0;
   border-radius: var(--radius-full);
-  background: var(--color-clay, var(--color-primary));
+  background: var(--primary);
   color: var(--primary-foreground);
   font-size: var(--sidebar-label-size);
   font-weight: var(--font-weight-semibold);
@@ -290,7 +290,7 @@
   user-select: none;
 
   .nav__account-link:hover & {
-    background: color-mix(in srgb, var(--color-clay, var(--color-primary)) 85%, #000);
+    background: color-mix(in srgb, var(--primary) 85%, #000);
     transform: scale(1.03);
   }
 }
@@ -307,7 +307,7 @@
 }
 
 .nav__account-name {
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 // ── Screen-reader only ────────────────────────────────────────────────────────

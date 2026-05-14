@@ -118,8 +118,8 @@
   // Subtle warning emphasis on a segment (e.g. upload issues lane).
   // @see apps/web/src/app/shared/ui/toggle-group/
   [hlmToggleGroupItem][data-attention='true']:not([data-state='on']) {
-    color: var(--color-warning);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 38%, transparent);
+    color: var(--chart-2);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--chart-2) 38%, transparent);
   }
 
   // Hover feedback for enabled segments (subtle lift over muted track).

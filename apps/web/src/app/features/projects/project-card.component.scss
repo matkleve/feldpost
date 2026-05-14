@@ -7,9 +7,9 @@
 .project-card {
   min-height: 12rem;
   padding: var(--spacing-3);
-  border: 1px solid var(--project-item-color, var(--color-border));
+  border: 1px solid var(--project-item-color, var(--border));
   border-radius: var(--container-radius-panel);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
+  background: color-mix(in srgb, var(--card) 92%, var(--background));
   display: grid;
   gap: var(--spacing-2);
   align-content: start;
@@ -17,8 +17,8 @@
   transition: var(--interactive-transition-standard);
 
   &:hover {
-    border-color: color-mix(in srgb, var(--action-border-active) 58%, var(--project-item-color, var(--color-border)));
-    background: color-mix(in srgb, var(--action-bg-hover) 18%, var(--color-bg-surface));
+    border-color: color-mix(in srgb, var(--action-border-active) 58%, var(--project-item-color, var(--border)));
+    background: color-mix(in srgb, var(--action-bg-hover) 18%, var(--card));
   }
 
   &:focus-within {
@@ -66,7 +66,7 @@
 .project-card__status {
   margin-left: auto;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   text-transform: capitalize;
 }
 

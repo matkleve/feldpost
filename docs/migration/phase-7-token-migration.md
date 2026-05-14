@@ -115,3 +115,11 @@ Re-run before execution; archive components under `archive/` may still reference
 - Acceptance table green.
 - `docs/migration/open-questions.md` updated if any token decision resolves Q1/Q12-style CDK notes.
 - Phase 8 pre-flight re-run; attach to `phase-8-global-scss-elimination.md` §Baseline.
+
+---
+
+## Archive vs delete
+
+- **Archive first:** Before deleting `apps/web/src/styles/tokens.scss`, copy it to a non-imported snapshot — for example `docs/archive/tokens.legacy.snapshot.scss` or `apps/web/src/styles/archive/tokens.legacy.snapshot.scss` — with a file header comment: `Archived 2026-05-14 — superseded by tweakcn + styles.scss; do not import in builds.` Adjust the date on the day of archival.
+- **Delete:** Remove `tokens.scss` and `@use './styles/tokens'` from `styles.scss` only after Phase 7 acceptance gates pass and `cd apps/web && npx ng build` is green **without** that file in the graph.
+- **Legacy alias block** in `styles.scss` (`:root { --color-* … }`): strip only when `rg 'var\(--color-'` across consuming code is negligible or fully migrated; record the go/no-go in this section or [decisions-log.md](./decisions-log.md) so later agents do not assume the alias block is intentional forever.

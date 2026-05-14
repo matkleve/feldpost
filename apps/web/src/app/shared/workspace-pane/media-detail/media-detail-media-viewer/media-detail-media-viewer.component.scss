@@ -14,11 +14,11 @@
   transition: box-shadow 120ms ease-out;
 
   &:hover {
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 
@@ -42,8 +42,8 @@
   --universal-media-slot-radius: var(--radius-lg);
   --universal-media-slot-background: linear-gradient(
     135deg,
-    var(--color-bg-subtle, var(--color-bg-surface)) 0%,
-    var(--color-bg-muted, var(--color-bg-base)) 100%
+    var(--card) 0%,
+    var(--background) 100%
   );
   --universal-media-slot-max-height: 33vh;
   --universal-media-asset-width: auto;
@@ -69,8 +69,8 @@
   width: 100%;
   background: linear-gradient(
     135deg,
-    var(--color-bg-subtle, var(--color-bg-surface)) 0%,
-    var(--color-bg-muted, var(--color-bg-base)) 100%
+    var(--card) 0%,
+    var(--background) 100%
   );
   display: flex;
   align-items: center;
@@ -89,7 +89,7 @@
   &__icon {
     width: 2rem;
     height: 2rem;
-    background: var(--color-text-disabled);
+    background: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
     mask-image: var(--placeholder-icon);
     mask-size: contain;
     mask-repeat: no-repeat;
@@ -151,8 +151,8 @@
   height: 2rem;
   border: none;
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-clay) 85%, transparent);
-  color: var(--color-bg-surface);
+  background: color-mix(in srgb, var(--primary) 85%, transparent);
+  color: var(--card);
   cursor: pointer;
   opacity: 0;
   transition:
@@ -164,11 +164,11 @@
   }
 
   &:hover {
-    background: var(--color-clay);
+    background: var(--primary);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
     opacity: 1;
   }
@@ -176,7 +176,7 @@
   &:disabled {
     cursor: not-allowed;
     opacity: 1;
-    background: color-mix(in srgb, var(--color-clay) 60%, transparent);
+    background: color-mix(in srgb, var(--primary) 60%, transparent);
   }
 
   &__spinner {
@@ -197,7 +197,7 @@
   margin-top: var(--spacing-1);
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-xs);
-  color: var(--color-danger);
+  color: var(--destructive);
   text-align: center;
 }
 
@@ -209,7 +209,7 @@
   margin: var(--spacing-3) auto 0;
   padding: var(--spacing-6) var(--spacing-4);
   width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
-  background: var(--color-bg-base);
+  background: var(--background);
   border-radius: var(--radius-lg);
 
   &__placeholder {
@@ -222,7 +222,7 @@
   &__icon {
     width: 2.5rem;
     height: 2.5rem;
-    background: var(--color-text-disabled);
+    background: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
     mask-image: var(--no-photo-icon);
     mask-size: contain;
     mask-repeat: no-repeat;
@@ -232,7 +232,7 @@
 
   &__text {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   &__button {
@@ -242,8 +242,8 @@
     padding: var(--spacing-2) var(--spacing-4);
     border: none;
     border-radius: var(--radius-md);
-    background: var(--color-clay);
-    color: var(--color-bg-surface);
+    background: var(--primary);
+    color: var(--primary-foreground);
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-semibold);
     cursor: pointer;
@@ -252,11 +252,11 @@
       opacity 80ms ease-out;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--color-clay) 85%, black);
+      background: color-mix(in srgb, var(--primary) 85%, black);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--color-primary);
+      outline: 2px solid var(--primary);
       outline-offset: 2px;
     }
 

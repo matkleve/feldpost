@@ -36,9 +36,9 @@
 .media-loading__tile {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-border) 65%, transparent) 0%,
-    color-mix(in srgb, var(--color-bg-surface) 75%, transparent) 50%,
-    color-mix(in srgb, var(--color-border) 65%, transparent) 100%
+    color-mix(in srgb, var(--border) 65%, transparent) 0%,
+    color-mix(in srgb, var(--card) 75%, transparent) 50%,
+    color-mix(in srgb, var(--border) 65%, transparent) 100%
   );
   background-size: 200% 100%;
   animation: media-loading-pulse 1.2s ease-in-out infinite;

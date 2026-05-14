@@ -77,14 +77,14 @@
 
     .detail-row__value--static {
       cursor: default;
-      color: var(--color-text-secondary);
+      color: var(--muted-foreground);
     }
   }
 
   &__icon {
     font-size: var(--font-size-base);
     // Match dd-item__icon styling
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     flex-shrink: 0;
     width: 1.25rem;
     text-align: center;
@@ -92,7 +92,7 @@
 
   &__label {
     font-size: var(--font-size-sm); // matches dd-item font-size
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     white-space: nowrap;
     flex-shrink: 0;
     min-width: 5rem;
@@ -105,7 +105,7 @@
     flex: 1 1 auto;
     min-width: 0;
     font-size: var(--font-size-sm); // match dd-item font-size for consistency
-    color: var(--color-text-primary);
+    color: var(--foreground);
     text-align: right;
     white-space: nowrap;
     overflow: hidden;
@@ -126,7 +126,7 @@
       cursor: default;
 
       &:hover {
-        color: var(--color-text-secondary);
+        color: var(--muted-foreground);
       }
     }
 
@@ -150,7 +150,7 @@
     display: inline-block;
     max-width: 15rem;
     font-size: var(--font-size-label);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     text-align: right;
     white-space: normal;
     line-height: var(--line-height-compact);
@@ -178,8 +178,8 @@
 
   &__edit {
     font-size: var(--font-size-md);
-    color: var(--color-text-disabled);
-    opacity: 0;
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
+  opacity: 0;
     flex-shrink: 0;
     transition: opacity 80ms ease-out;
     pointer-events: none;
@@ -230,8 +230,8 @@
   }
 
   &--danger:hover {
-    color: var(--color-danger);
-    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+    color: var(--destructive);
+    background: color-mix(in srgb, var(--destructive) 10%, transparent);
   }
 }
 
@@ -275,7 +275,7 @@
 
     .material-icons {
       font-size: var(--font-size-md);
-      color: var(--color-text-secondary);
+      color: var(--muted-foreground);
     }
 
     &:hover {
@@ -295,8 +295,8 @@
     align-items: center;
     padding: 0.0625rem 0.25rem;
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--color-warning) 18%, transparent);
-    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--chart-2) 18%, transparent); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+    color: var(--foreground);
     font-size: var(--font-size-caption);
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-tight);
@@ -339,7 +339,7 @@
     padding: var(--spacing-1) var(--spacing-2);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     letter-spacing: 0.02em;
   }
 
@@ -410,7 +410,7 @@
     }
 
     &--active {
-      color: var(--color-warning);
+      color: var(--chart-2); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
       background: var(--state-warning-bg);
     }
   }
@@ -431,7 +431,7 @@
     width: 0.25rem;
     align-self: stretch;
     border-radius: 0.125rem;
-    background: color-mix(in srgb, var(--color-clay) 72%, var(--color-success));
+    background: color-mix(in srgb, var(--primary) 72%, var(--chart-1)); /* TODO(phase8): --color-success has no tweakcn equiv yet */
     margin-right: 0.125rem;
     flex-shrink: 0;
   }
@@ -463,7 +463,7 @@
     padding: var(--spacing-1) var(--spacing-2);
     border-radius: var(--radius-sm);
     background: var(--state-warning-bg);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     font-size: var(--font-size-sm);
     line-height: var(--line-height-compact);
   }
@@ -496,8 +496,8 @@
   align-items: center;
   padding: 0.0625rem var(--spacing-1);
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
-  color: var(--color-accent);
+  background: color-mix(in srgb, var(--secondary) 16%, transparent);
+  color: var(--secondary);
   font-size: var(--font-size-label);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.02em;
@@ -510,7 +510,7 @@
 .detail-correction-history {
   margin: 0 var(--spacing-1);
   padding: var(--spacing-2);
-  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  background: color-mix(in srgb, var(--secondary) 6%, transparent);
   border-radius: var(--radius-sm);
 
   &__row {
@@ -523,12 +523,12 @@
 
   &__key {
     font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   &__value {
     font-size: var(--font-size-xs);
-    color: var(--color-text-primary);
+    color: var(--foreground);
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   }
 }

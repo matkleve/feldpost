@@ -62,7 +62,7 @@ export class ChipComponent {
     }
 
     if (variant === 'custom') {
-      return this.asCssColor(this.color() ?? '--color-primary');
+      return this.asCssColor(this.color() ?? '--primary');
     }
 
     return this.asCssColor(this.variantToColorToken(variant));
@@ -86,13 +86,13 @@ export class ChipComponent {
   private variantToColorToken(variant: Exclude<ChipVariant, 'default' | 'custom'>): string {
     switch (variant) {
       case 'primary':
-        return '--color-primary';
+        return '--primary';
       case 'status-success':
-        return '--color-success';
+        return '--success';
       case 'status-warning':
-        return '--color-warning';
+        return '--warning';
       case 'status-danger':
-        return '--color-danger';
+        return '--destructive';
       case 'filetype-image':
         return '--filetype-image';
       case 'filetype-video':

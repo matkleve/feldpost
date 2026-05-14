@@ -43,7 +43,7 @@ export class MapLeafletService {
 
   createRadiusDraftLine(map: MapInstance, startLatLng: MapLatLng): MapPolyline {
     return L.polyline([startLatLng, startLatLng], {
-      color: 'var(--color-clay)',
+      color: 'var(--primary)',
       weight: 2,
       opacity: 0.95,
       dashArray: '6 4',
@@ -54,10 +54,10 @@ export class MapLeafletService {
   createRadiusDraftCircle(map: MapInstance, startLatLng: MapLatLng): MapCircle {
     return L.circle(startLatLng, {
       radius: 1,
-      color: 'var(--color-clay)',
+      color: 'var(--primary)',
       weight: 2,
       opacity: 0.95,
-      fillColor: 'var(--color-clay)',
+      fillColor: 'var(--primary)',
       fillOpacity: 0.1,
       interactive: false,
     }).addTo(map);

@@ -141,11 +141,7 @@ import type {
   RadiusActionContext,
   RadiusMenuActionId,
 } from './map-workspace-actions.types';
-import {
-  UiButtonDirective,
-  UiButtonGhostDirective,
-  UiButtonIconOnlyDirective,
-} from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapViewMode = 'street' | 'photo';
@@ -195,9 +191,7 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
     DropdownShellComponent,
     HlmMenuItemDirective,
     HlmMenuSeparatorDirective,
-    UiButtonDirective,
-    UiButtonIconOnlyDirective,
-    UiButtonGhostDirective,
+    ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './map-shell.component.html',
   styleUrl: './map-shell.component.scss',

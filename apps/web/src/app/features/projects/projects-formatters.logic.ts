@@ -64,10 +64,10 @@ export function colorTokenFor(key: ProjectColorKey): string {
       return `hsl(${hue} 58% 52%)`;
     }
   }
-  if (key === 'accent') return 'var(--color-accent)';
-  if (key === 'success') return 'var(--color-success)';
-  if (key === 'warning') return 'var(--color-warning)';
-  return 'var(--color-clay)';
+  if (key === 'accent') return 'var(--secondary)';
+  if (key === 'success') return 'var(--chart-1)';
+  if (key === 'warning') return 'var(--chart-2)';
+  return 'var(--primary)';
 }
 
 export function formatRelativeDate(

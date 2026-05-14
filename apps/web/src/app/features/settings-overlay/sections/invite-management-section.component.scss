@@ -8,7 +8,7 @@
   // Invite section root: Tailwind handles card chrome; keep elevated surface token
   // @see docs/specs/ui/settings-overlay
   .invite-section {
-    background: var(--color-bg-elevated);
+    background: var(--popover);
   }
 
   // Header row: title stack + status chip + expiry line spanning full width
@@ -34,14 +34,14 @@
   // Primary heading color for invite title (scale from global h3)
   // @see docs/specs/ui/settings-overlay
   .invite-section__title-wrap h3 {
-    color: var(--color-text-primary);
+    color: var(--foreground);
   }
 
   // Subtitle copy under the invite title
   // @see docs/specs/ui/settings-overlay
   .invite-section__title-wrap p {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Expiry line spans both header columns on the second row
@@ -50,7 +50,7 @@
     grid-column: 1 / -1;
     margin-top: var(--spacing-1);
     font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Status chip surface next to the title stack
@@ -87,7 +87,7 @@
   // @see docs/specs/ui/settings-overlay
   .invite-section__role-field label {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Action row next to the role select
@@ -127,7 +127,7 @@
     block-size: 12rem;
     border: 0;
     border-radius: var(--radius-md);
-    background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
+    background: color-mix(in srgb, var(--card) 92%, transparent);
   }
 
   // Canvas fills the QR frame
@@ -156,7 +156,7 @@
     position: absolute;
     width: 2rem;
     height: 2rem;
-    border: 2px solid color-mix(in srgb, var(--action-text-active) 20%, var(--color-border));
+    border: 2px solid color-mix(in srgb, var(--action-text-active) 20%, var(--border));
     border-top-color: var(--action-text-active);
     border-radius: var(--radius-full);
     animation: invite-qr-spin 800ms linear infinite;
@@ -166,7 +166,7 @@
   // @see docs/specs/ui/settings-overlay
   .invite-section__link-label {
     font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Invite URL preview surface
@@ -175,8 +175,8 @@
     padding: var(--spacing-2);
     border: 0;
     border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-bg-surface) 76%, transparent);
-    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--card) 76%, transparent);
+    color: var(--foreground);
     font-size: var(--font-size-sm);
     line-height: var(--line-height-reading);
     word-break: break-all;
@@ -225,19 +225,19 @@
   // @see docs/specs/ui/settings-overlay
   .invite-section__state .material-icons {
     justify-self: center;
-    color: var(--color-clay);
+    color: var(--primary);
   }
 
   // Error state heading color (typography from global h3)
   // @see docs/specs/ui/settings-overlay
   .invite-section__state h3 {
-    color: var(--color-text-primary);
+    color: var(--foreground);
   }
 
   // Error state body copy
   // @see docs/specs/ui/settings-overlay
   .invite-section__state p {
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   // Retry ghost button padding in error state
@@ -249,7 +249,7 @@
   // Non-blocking inline error under the stack
   // @see docs/specs/ui/settings-overlay
   .invite-section__inline-error {
-    color: var(--color-danger);
+    color: var(--destructive);
     font-size: var(--font-size-sm);
   }
 }

@@ -12,12 +12,12 @@
 
 .meta-row:hover,
 .meta-row--editing {
-  background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
 .meta-row__label {
   font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -26,7 +26,7 @@
 
 .meta-row__value {
   font-size: 0.9375rem;
-  color: var(--color-text-primary);
+  color: var(--foreground);
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -42,7 +42,7 @@
 .meta-row:hover .meta-row__value,
 .meta-row:focus-within .meta-row__label,
 .meta-row:focus-within .meta-row__value {
-  color: var(--color-clay);
+  color: var(--primary);
 }
 
 .detail-row-action {
@@ -53,7 +53,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease-out;
@@ -76,17 +76,17 @@
 .meta-row--editing .detail-row-action {
   opacity: 1;
   pointer-events: auto;
-  color: var(--color-clay);
+  color: var(--primary);
 }
 
 .detail-row-action:hover {
-  color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
 .detail-row-action--danger:hover {
-  color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--destructive);
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
 }
 
 @media (hover: none) {
@@ -98,9 +98,9 @@
 
 .meta-row__input {
   font-size: 0.9375rem;
-  color: var(--color-text-primary);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-primary);
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--primary);
   border-radius: var(--radius-sm);
   padding: 0.125rem var(--spacing-2);
   width: 100%;

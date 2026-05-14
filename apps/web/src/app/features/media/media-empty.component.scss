@@ -1,9 +1,9 @@
 // Defines empty-state card surface for /media no-results and auth-required branches.
 // @see docs/specs/component/item-grid/item-grid.md#state
 :host {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: var(--container-radius-panel);
-  background: var(--color-bg-surface);
+  background: var(--card);
   padding: var(--spacing-4);
   display: grid;
   gap: var(--spacing-2);
@@ -13,14 +13,14 @@
 // @see docs/specs/component/item-grid/item-grid.md#state
 .media-empty__title {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 // Styles empty-state body copy typography.
 // @see docs/specs/component/item-grid/item-grid.md#state
 .media-empty__body {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 // Aligns empty-state primary action button to the start of the card.

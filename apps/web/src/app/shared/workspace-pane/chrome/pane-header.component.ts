@@ -17,7 +17,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
           >
             <span
               class="pane-header__color-swatch"
-              [style.background]="colorToken() ?? 'var(--color-clay)'"
+              [style.background]="colorToken() ?? 'var(--primary)'"
             ></span>
             <span class="pane-header__color-icon material-icons" aria-hidden="true">palette</span>
           </button>

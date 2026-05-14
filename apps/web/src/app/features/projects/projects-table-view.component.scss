@@ -4,9 +4,9 @@
 
 .projects-list {
   overflow-x: auto;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: var(--container-radius-control);
-  background: color-mix(in srgb, var(--color-bg-surface) 94%, var(--color-bg-base));
+  background: color-mix(in srgb, var(--card) 94%, var(--background));
 }
 
 .projects-table {
@@ -19,15 +19,15 @@
   text-align: left;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
 }
 
 .projects-table thead th[data-sort-direction='asc']::after,
 .projects-table thead th[data-sort-direction='desc']::after {
   margin-left: var(--spacing-1);
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 .projects-table thead th[data-sort-direction='asc']::after {
@@ -39,12 +39,12 @@
 }
 
 .projects-table tbody tr {
-  border-left: 3px solid var(--project-item-color, var(--color-border));
+  border-left: 3px solid var(--project-item-color, var(--border));
 }
 
 .projects-table tbody tr + tr td,
 .projects-table tbody tr + tr th {
-  border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
 }
 
 .projects-table tbody td,
@@ -89,7 +89,7 @@
 
 .project2-row__meta,
 .project2-card__meta {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
 }

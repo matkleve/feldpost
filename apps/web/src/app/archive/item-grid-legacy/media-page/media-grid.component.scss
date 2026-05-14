@@ -11,7 +11,7 @@
   transition: outline-color 0.2s;
 
   &:focus-visible {
-    outline-color: var(--color-brand);
+    outline-color: var(--primary);
   }
 
   &:hover app-media-card {
@@ -19,6 +19,6 @@
   }
 
   &--selected app-media-card {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid var(--primary);
   }
 }

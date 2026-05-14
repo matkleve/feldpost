@@ -19,7 +19,7 @@ import {
   toggleOptionLayout,
   toggleSingleStringValue,
 } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
-import { UiRangeControlDirective } from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_INPUT_IMPORTS } from '../../shared/ui/input';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HLM_LABEL_IMPORTS } from '../../shared/ui/label';
 import { HLM_SELECT_IMPORTS } from '../../shared/ui/select';
@@ -79,7 +79,7 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
     ...HLM_TOGGLE_GROUP_IMPORTS,
     InviteManagementSectionComponent,
     AccountComponent,
-    UiRangeControlDirective,
+    ...HLM_INPUT_IMPORTS,
     ...HLM_BUTTON_IMPORTS,
     ...HLM_LABEL_IMPORTS,
     ...HLM_SELECT_IMPORTS,

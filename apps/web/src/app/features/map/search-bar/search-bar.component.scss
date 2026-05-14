@@ -50,9 +50,9 @@
   grid-template-rows: var(--search-bar-row-height) minmax(0, 0fr);
   row-gap: 0;
   width: 100%;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: var(--container-radius-panel);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
   box-shadow: var(--elevation-subtle);
   overflow: hidden;
   contain: layout paint;
@@ -71,7 +71,7 @@
   min-height: var(--search-bar-row-height);
   align-items: center;
   column-gap: var(--search-bar-gap);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -104,7 +104,7 @@
 }
 
 .search-bar__icon {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .search-bar__input {
@@ -112,14 +112,14 @@
   min-width: 0;
   border: 0;
   background: transparent;
-  color: var(--color-text-primary);
+  color: var(--foreground);
   font-size: var(--font-size-md-plus);
   line-height: var(--line-height-reading);
   outline: 0;
   padding-block: 0;
 
   &::placeholder {
-    color: var(--color-text-disabled);
+    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   }
 }
 
@@ -142,7 +142,7 @@
 }
 
 .search-bar__ghost-suffix {
-  color: var(--color-text-muted);
+  color: var(--muted-foreground);
   opacity: 0.4;
 }
 
@@ -157,7 +157,7 @@
   pointer-events: none;
   font-size: var(--font-size-md-plus);
   line-height: var(--line-height-reading);
-  color: var(--color-text-disabled);
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   overflow: hidden;
   white-space: nowrap;
   grid-column: 2;
@@ -174,15 +174,15 @@
 .search-bar__ghost-action {
   border: 0;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   cursor: pointer;
   transition:
     background-color 120ms ease-in-out,
     color 120ms ease-in-out;
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 10%, transparent);
-    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--foreground);
   }
 }
 
@@ -201,7 +201,7 @@
   min-height: 0;
   width: 100%;
   border-top: 1px solid transparent;
-  background: var(--color-bg-elevated);
+  background: var(--popover);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -213,7 +213,7 @@
 }
 
 .search-bar--expanded .search-bar__dropdown {
-  border-top-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  border-top-color: color-mix(in srgb, var(--border) 82%, transparent);
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -239,7 +239,7 @@
 
 .search-bar__section-label {
   padding: 0;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.04em;
@@ -249,7 +249,7 @@
 .search-bar__divider {
   height: 1px;
   margin: 0;
-  background: var(--color-border);
+  background: var(--border);
 }
 
 .search-bar__empty-state {
@@ -260,14 +260,14 @@
 
 .search-bar__empty-title {
   margin: 0;
-  color: var(--color-text-primary);
+  color: var(--foreground);
   font-size: var(--font-size-md-plus);
   line-height: var(--line-height-reading);
 }
 
 .search-bar__empty-copy {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-open);
 }
@@ -276,7 +276,7 @@
   min-width: 0;
   align-self: flex-start;
   padding-inline: var(--search-bar-padding-inline);
-  color: var(--color-clay);
+  color: var(--primary);
 }
 
 .search-bar__skeleton-list {
@@ -299,9 +299,9 @@
 .search-bar__skeleton-line {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-border) 70%, transparent) 0%,
-    color-mix(in srgb, var(--color-bg-surface) 65%, transparent) 50%,
-    color-mix(in srgb, var(--color-border) 70%, transparent) 100%
+    color-mix(in srgb, var(--border) 70%, transparent) 0%,
+    color-mix(in srgb, var(--card) 65%, transparent) 50%,
+    color-mix(in srgb, var(--border) 70%, transparent) 100%
   );
   background-size: 200% 100%;
   animation: search-bar-skeleton 1.2s ease-in-out infinite;

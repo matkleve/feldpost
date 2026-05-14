@@ -64,8 +64,9 @@
 
     <!-- Icon button (always visible) -->
     <button
-      uiButton
-      uiButtonIconOnly
+      hlmBtn
+      variant="default"
+      size="icon"
       class="map-upload-btn"
       type="button"
       [attr.aria-label]="t('auto.0369.upload_images', 'Upload images')"
@@ -307,8 +308,9 @@
 
   <!-- GPS button — bottom-right of map zone -->
   <button
-    uiButton
-    uiButtonIconOnly
+    hlmBtn
+    variant="outline"
+    size="icon"
     class="map-gps-btn"
     type="button"
     [attr.aria-label]="
@@ -343,8 +345,9 @@
       <span class="material-icons" aria-hidden="true">pin_drop</span>
       {{ placementBannerText() }}
       <button
-        uiButton
-        uiButtonGhost
+        hlmBtn
+        variant="ghost"
+        size="sm"
         class="map-placement-banner__cancel"
         type="button"
         (click)="cancelPlacement()"

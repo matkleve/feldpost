@@ -26,7 +26,7 @@
   align-items: center;
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-sm);
-  color: var(--color-text-disabled);
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -50,41 +50,41 @@
   }
 
   &--empty.grouping-drop-zone--dragging {
-    background: color-mix(in srgb, var(--color-clay) 4%, transparent);
-    outline: 1.5px dashed var(--color-border);
+    background: color-mix(in srgb, var(--primary) 4%, transparent);
+    outline: 1.5px dashed var(--border);
     outline-offset: -1.5px;
 
     .grouping-empty-slot {
-      color: var(--color-text-secondary);
+      color: var(--muted-foreground);
     }
   }
 
   &--empty.cdk-drop-list-receiving,
   &--empty.grouping-drop-zone--dragging.cdk-drop-list-receiving {
-    background: color-mix(in srgb, var(--color-clay) 10%, transparent);
-    outline: 1.5px dashed var(--color-clay);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    outline: 1.5px dashed var(--primary);
     outline-offset: -1.5px;
 
     .grouping-empty-slot {
-      color: var(--color-text-primary);
+      color: var(--foreground);
     }
   }
 }
 
 // --- Selected row (multi-select via Ctrl+Click) ---
 .grouping-row--selected {
-  background: color-mix(in srgb, var(--color-clay) 14%, transparent);
-  border-left: 2px solid var(--color-clay);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border-left: 2px solid var(--primary);
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 18%, transparent);
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
   }
 }
 
 // --- CDK drag placeholder (ghost in source list) ---
 .cdk-drag-placeholder {
   opacity: 0.4;
-  border: 1px dashed var(--color-border);
+  border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
 }
 
@@ -103,7 +103,7 @@
 // --- CDK drag preview (floating element while dragging) ---
 .cdk-drag-preview {
   border-radius: var(--radius-sm);
-  background: var(--color-bg-elevated);
+  background: var(--popover);
   box-shadow: var(--elevation-modal);
   opacity: 0.9;
 

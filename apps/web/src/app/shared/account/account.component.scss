@@ -18,7 +18,7 @@
   display: grid;
   place-content: center;
   gap: var(--spacing-2);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .account-card {
@@ -30,18 +30,18 @@
   border-radius: var(--container-radius-control);
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-elevated);
+  border: 1px solid var(--border);
+  background: var(--card);
 }
 
 .account-card h2 {
   font-size: var(--font-size-base-strong);
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 .account-card > p {
   font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .account-card--identity {
@@ -58,19 +58,19 @@
   display: grid;
   place-items: center;
   font-weight: var(--font-weight-semibold);
-  background: color-mix(in srgb, var(--color-clay) 18%, var(--color-bg-surface));
-  color: var(--color-clay);
+  background: color-mix(in srgb, var(--primary) 18%, var(--card));
+  color: var(--primary);
 }
 
 .account-card__identity-copy h1 {
   min-width: 0;
   font-size: var(--font-size-base-emphasis);
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 .account-card__identity-copy p {
   font-size: var(--font-size-md-compact);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .account-card__badges {
@@ -83,20 +83,20 @@
   min-height: 1.75rem;
   padding: 0 var(--spacing-2);
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   display: inline-flex;
   align-items: center;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .account-skeleton {
   display: inline-block;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-border) 68%, transparent) 0%,
-    color-mix(in srgb, var(--color-border) 36%, transparent) 50%,
-    color-mix(in srgb, var(--color-border) 68%, transparent) 100%
+    color-mix(in srgb, var(--border) 68%, transparent) 0%,
+    color-mix(in srgb, var(--border) 36%, transparent) 50%,
+    color-mix(in srgb, var(--border) 68%, transparent) 100%
   );
   background-size: 220% 100%;
   animation: account-skeleton-shimmer 1.2s ease-in-out infinite;
@@ -139,9 +139,9 @@
   border-radius: var(--container-radius-control);
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-border) 68%, transparent) 0%,
-    color-mix(in srgb, var(--color-border) 36%, transparent) 50%,
-    color-mix(in srgb, var(--color-border) 68%, transparent) 100%
+    color-mix(in srgb, var(--border) 68%, transparent) 0%,
+    color-mix(in srgb, var(--border) 36%, transparent) 50%,
+    color-mix(in srgb, var(--border) 68%, transparent) 100%
   );
   background-size: 220% 100%;
   animation: account-skeleton-shimmer 1.2s ease-in-out infinite;
@@ -154,7 +154,7 @@
 
 .account-field label {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .account-field input {
@@ -174,7 +174,7 @@
 }
 
 .account-card--danger {
-  border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
+  border-color: color-mix(in srgb, var(--destructive) 30%, var(--border));
 }
 
 .account-factor-list {
@@ -187,7 +187,7 @@
   justify-content: space-between;
   gap: var(--spacing-2);
   align-items: center;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: var(--container-radius-control);
   padding: var(--spacing-2);
 }
@@ -195,24 +195,24 @@
 .account-factor strong {
   display: block;
   font-size: var(--font-size-md);
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 .account-factor small {
   display: block;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .account-muted {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: var(--font-size-sm);
 }
 
 .account-enroll {
   display: grid;
   gap: var(--spacing-2);
-  border: 1px dashed var(--color-border);
+  border: 1px dashed var(--border);
   border-radius: var(--container-radius-control);
   padding: var(--spacing-2);
 }
@@ -221,8 +221,8 @@
   width: 10rem;
   height: 10rem;
   object-fit: contain;
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
 
@@ -230,7 +230,7 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-modal);
-  background: color-mix(in srgb, var(--color-bg-base) 50%, transparent);
+  background: color-mix(in srgb, var(--background) 50%, transparent);
   display: grid;
   place-items: center;
   padding: var(--spacing-3);
@@ -244,8 +244,8 @@
   padding-inline: var(--spacing-3);
   border-radius: var(--container-radius-control);
   width: min(26rem, 100%);
-  background: var(--color-bg-elevated);
-  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--destructive) 28%, var(--border));
 }
 
 @keyframes account-skeleton-shimmer {

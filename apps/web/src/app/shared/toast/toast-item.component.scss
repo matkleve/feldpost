@@ -74,7 +74,7 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-text-secondary) 12%, transparent);
+  background: color-mix(in srgb, var(--muted-foreground) 12%, transparent);
 }
 
 .toast-icon {
@@ -83,25 +83,25 @@
 }
 
 :host(.success) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  background: color-mix(in srgb, var(--chart-1) 14%, transparent); /* TODO(phase8): --color-success has no tweakcn equiv yet */
 }
 :host(.success) .toast-icon {
-  color: var(--color-success);
+  color: var(--chart-1); /* TODO(phase8): --color-success has no tweakcn equiv yet */
 }
 :host(.error) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  background: color-mix(in srgb, var(--destructive) 14%, transparent);
 }
 :host(.error) .toast-icon {
-  color: var(--color-danger);
+  color: var(--destructive);
 }
 :host(.warning) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+  background: color-mix(in srgb, var(--chart-2) 14%, transparent); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
 }
 :host(.warning) .toast-icon {
-  color: var(--color-warning);
+  color: var(--chart-2); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
 }
 :host(.info) .toast-icon {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .toast-message {
@@ -127,7 +127,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   cursor: pointer;
   padding: 0;
   transition: color 120ms;
@@ -137,7 +137,7 @@
   }
 
   &:hover {
-    color: var(--color-text-primary);
-    background: color-mix(in srgb, var(--color-bg-surface) 65%, transparent);
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--card) 65%, transparent);
   }
 }

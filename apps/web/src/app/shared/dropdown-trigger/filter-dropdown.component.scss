@@ -31,16 +31,16 @@
   flex: 0 0 auto;
   min-width: 3rem;
   padding: var(--spacing-1) var(--spacing-1);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: transparent;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   cursor: pointer;
   text-align: center;
 
   &:hover {
-    background: color-mix(in srgb, var(--color-text-secondary) 8%, transparent);
+    background: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
   }
 }
 

@@ -21,7 +21,7 @@ export class ProjectColorPickerComponent {
         return `hsl(${hue} 58% 52%)`;
       }
     }
-    return 'var(--color-clay)';
+    return 'var(--primary)';
   }
 
   protected pickRandomBrandHue(): void {

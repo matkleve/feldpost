@@ -21,7 +21,7 @@
 
   &__icon {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     flex-shrink: 0;
   }
 
@@ -59,7 +59,7 @@
   &__loading {
     padding: var(--spacing-2);
     font-size: var(--font-size-xs);
-    color: var(--color-text-disabled);
+    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
     text-align: center;
   }
 }

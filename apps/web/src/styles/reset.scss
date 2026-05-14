@@ -3,12 +3,12 @@
 // paths and the tile-pane focus outline. Override here so all Leaflet chrome
 // uses the app's orange primary token instead.
 .leaflet-interactive:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 .leaflet-container a {
-  color: var(--color-primary);
+  color: var(--primary);
 }
 
 // ── Global Reset ──────────────────────────────────────────────────────────────
@@ -34,8 +34,8 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
-  background: var(--color-bg-base);
-  color: var(--color-text-primary);
+  background: var(--background);
+  color: var(--foreground);
 }
 
 

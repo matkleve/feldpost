@@ -11,7 +11,7 @@
   justify-content: center;
   height: 100dvh;
   min-height: 100vh;
-  background: var(--color-bg-base);
+  background: var(--background);
   padding: var(--spacing-5);
   position: relative;
   overflow: hidden;
@@ -23,11 +23,11 @@
   background:
     radial-gradient(
       circle at 16% 20%,
-      color-mix(in srgb, var(--color-accent-brand) 20%, transparent),
+      color-mix(in srgb, var(--primary) 20%, transparent),
       transparent 46%
     ),
     radial-gradient(circle at 84% 84%, rgba(37, 99, 235, 0.2), transparent 40%),
-    var(--color-bg-base);
+    var(--background);
 }
 
 // Auth modal surface — standalone flex card replacing legacy ui-container--md.
@@ -39,7 +39,7 @@
   padding-block: var(--spacing-6);
   padding-inline: var(--spacing-6);
   border-radius: var(--container-radius-panel);
-  background: var(--color-bg-surface);
+  background: var(--card);
   box-shadow: var(--elevation-dropdown);
   width: 100%;
   max-width: 420px;
@@ -50,7 +50,7 @@
 
 // Subtitle paragraph — secondary color directly below the page h1
 .auth-subtitle {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   margin-bottom: var(--spacing-6);
 }
 
@@ -63,10 +63,10 @@
   padding-right: var(--spacing-1);
   position: relative;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-color: color-mix(in srgb, var(--border) 78%, var(--foreground)) transparent; /* TODO(phase8): no tweakcn equiv yet */
   background:
-    linear-gradient(var(--color-bg-surface) 45%, rgba(255, 255, 255, 0)) center top,
-    linear-gradient(rgba(255, 255, 255, 0), var(--color-bg-surface) 55%) center bottom,
+    linear-gradient(var(--card) 45%, rgba(255, 255, 255, 0)) center top,
+    linear-gradient(rgba(255, 255, 255, 0), var(--card) 55%) center bottom,
     radial-gradient(farthest-side at 50% 0, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0))
       center top,
     radial-gradient(farthest-side at 50% 100%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0))
@@ -89,19 +89,19 @@
 }
 
 .auth-card-scroll::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--color-border-strong) 74%, transparent);
+  background: color-mix(in srgb, color-mix(in srgb, var(--border) 78%, var(--foreground)) 74%, transparent); /* TODO(phase8): no tweakcn equiv yet */
   border-radius: 999px;
 }
 
 .auth-card-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-strong);
+  background: color-mix(in srgb, var(--border) 78%, var(--foreground)); /* TODO(phase8): no tweakcn equiv yet */
 }
 
 :root.dark .auth-card-scroll,
 [data-theme='dark'] .auth-card-scroll {
   background:
-    linear-gradient(var(--color-bg-surface) 45%, rgba(15, 14, 12, 0)) center top,
-    linear-gradient(rgba(15, 14, 12, 0), var(--color-bg-surface) 55%) center bottom,
+    linear-gradient(var(--card) 45%, rgba(15, 14, 12, 0)) center top,
+    linear-gradient(rgba(15, 14, 12, 0), var(--card) 55%) center bottom,
     radial-gradient(farthest-side at 50% 0, rgba(237, 235, 231, 0.16), rgba(237, 235, 231, 0))
       center top,
     radial-gradient(farthest-side at 50% 100%, rgba(237, 235, 231, 0.16), rgba(237, 235, 231, 0))
@@ -131,7 +131,7 @@ hlm-form-field.field .field-error {
 
 .field-error {
   font-size: var(--font-size-sm);
-  color: var(--color-danger);
+  color: var(--destructive);
   margin-top: var(--spacing-1);
 }
 
@@ -148,14 +148,14 @@ hlm-form-field.field .field-error {
   font-size: var(--font-size-md);
   margin-bottom: var(--spacing-4);
   background: var(--state-danger-bg);
-  color: var(--color-danger);
-  border: 1px solid color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+  color: var(--destructive);
+  border: 1px solid color-mix(in srgb, var(--destructive) 40%, var(--border));
 }
 
 // Centered footer navigation text
 .auth-footer {
   text-align: center;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   margin-top: var(--spacing-5);
 }
 
@@ -164,7 +164,7 @@ hlm-form-field.field .field-error {
   text-align: center;
 
   p {
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     line-height: var(--line-height-relaxed);
   }
 }

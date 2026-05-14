@@ -17,8 +17,8 @@
   padding-block: var(--container-padding-block-compact);
   padding-inline-start: var(--container-padding-inline-compact);
   padding-inline-end: calc(var(--container-padding-inline-compact) + 2rem + var(--spacing-2));
-  background: var(--color-bg-surface);
-  border: 1px solid color-mix(in srgb, var(--color-border) 62%, transparent);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent);
   box-shadow: var(--elevation-subtle);
   transition:
     background 120ms ease-out,
@@ -39,13 +39,13 @@
 }
 
 .upload-panel__file-item--error .upload-panel__file-main {
-  background: color-mix(in srgb, var(--color-danger) 5%, var(--color-bg-surface));
-  border-color: color-mix(in srgb, var(--color-danger) 24%, var(--color-border));
+  background: color-mix(in srgb, var(--destructive) 5%, var(--card));
+  border-color: color-mix(in srgb, var(--destructive) 24%, var(--border));
 }
 
 .upload-panel__file-item--missing_data .upload-panel__file-main {
-  background: color-mix(in srgb, var(--color-warning) 5%, var(--color-bg-surface));
-  border-color: color-mix(in srgb, var(--color-warning) 24%, var(--color-border));
+  background: color-mix(in srgb, var(--chart-2) 5%, var(--card));
+  border-color: color-mix(in srgb, var(--chart-2) 24%, var(--border));
 }
 
 .upload-panel__selection {
@@ -61,7 +61,7 @@
   inline-size: 1rem;
   block-size: 1rem;
   margin: 0;
-  accent-color: var(--color-clay);
+  accent-color: var(--primary);
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease-out;
@@ -76,7 +76,7 @@
 }
 
 .upload-panel__file-main--selectable.upload-panel__file-main--selected {
-  background: color-mix(in srgb, var(--color-clay) 10%, var(--color-bg-surface));
+  background: color-mix(in srgb, var(--primary) 10%, var(--card));
 }
 
 .upload-panel__file-main--interactive {
@@ -84,8 +84,8 @@
 }
 
 .upload-panel__file-main--interactive:hover {
-  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg-surface));
-  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  background: color-mix(in srgb, var(--primary) 4%, var(--card));
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
 
   .upload-panel__thumbnail-helper {
     opacity: 0;
@@ -101,12 +101,12 @@
 }
 
 .upload-panel__file-main--interactive:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
 
 .upload-panel__row-main-action:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
 
@@ -168,8 +168,8 @@
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--color-bg-surface) 35%, transparent);
-  border-top-color: var(--color-clay);
+  border: 2px solid color-mix(in srgb, var(--card) 35%, transparent);
+  border-top-color: var(--primary);
   animation: upload-item-spin 700ms linear infinite;
   z-index: 1;
   pointer-events: none;
@@ -206,7 +206,7 @@
   min-width: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -232,7 +232,7 @@
   gap: 4px;
   margin: 0;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -240,7 +240,7 @@
 }
 
 .upload-panel__file-status--awaiting_placement {
-  color: var(--color-warning);
+  color: var(--chart-2);
 }
 
 .upload-panel__file-status .material-icons {
@@ -249,15 +249,15 @@
 }
 
 .upload-panel__file-status--complete {
-  color: var(--color-success);
+  color: var(--chart-1);
 }
 
 .upload-panel__file-status--error {
-  color: var(--color-danger);
+  color: var(--destructive);
 }
 
 .upload-panel__file-status--uploading {
-  color: var(--color-primary);
+  color: var(--primary);
 }
 
 .upload-panel__success-indicator {

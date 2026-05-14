@@ -19,7 +19,7 @@
 
   // Focus ring (Accessibility spec)
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 }
@@ -46,7 +46,7 @@
 .drag-divider__bar {
   width: 2px;
   height: 100%;
-  background: var(--color-border);
+  background: var(--border);
   border-radius: 1px;
   transition:
     width 80ms ease-out,
@@ -59,7 +59,7 @@
 :host:focus-visible .drag-divider__bar,
 :host.dragging .drag-divider__bar {
   width: 4px;
-  background: var(--color-border-strong);
+  background: color-mix(in srgb, var(--border) 78%, var(--foreground));
 }
 
 // ── Grip indicator — pill badge with drag icon ───────────────────────────────
@@ -76,8 +76,8 @@
   width: var(--spacing-5);
   height: var(--spacing-6); // 32px — taller than wide
   border-radius: var(--container-radius-control); // same corners as .ui-item-media (8px)
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
+  background: var(--card);
+  border: 1px solid var(--border);
   box-shadow: var(--elevation-subtle);
   opacity: 0;
   transition:
@@ -91,19 +91,19 @@
 :host:focus-visible .drag-divider__grip,
 :host.dragging .drag-divider__grip {
   opacity: 1;
-  border-color: var(--color-border-strong);
+  border-color: color-mix(in srgb, var(--border) 78%, var(--foreground));
   box-shadow: var(--elevation-overlay);
 }
 
 .drag-divider__grip-icon {
   font-size: var(--font-size-base); // 16px — inline-with-text icon size
-  color: var(--color-text-disabled);
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   transition: color 80ms ease-out;
   user-select: none;
 }
 
 :host:hover .drag-divider__grip-icon {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 // ── Reduced motion ───────────────────────────────────────────────────────────

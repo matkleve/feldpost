@@ -6,7 +6,7 @@
   display: flex;
   align-items: baseline;
   gap: var(--spacing-1);
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 .workspace-action__actions {
@@ -21,16 +21,16 @@
   align-items: center;
   gap: var(--spacing-1);
   min-height: 2.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   background: transparent;
-  color: var(--color-text-primary);
+  color: var(--foreground);
   border-radius: var(--radius-md);
   padding: 0 var(--spacing-3);
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: var(--color-clay);
-    background: var(--color-bg-elevated, var(--color-bg-surface));
+    border-color: var(--primary);
+    background: var(--popover);
   }
 
   &:disabled {
@@ -40,9 +40,9 @@
 }
 
 .workspace-action__btn--primary {
-  background: var(--color-clay);
-  color: var(--color-text-primary);
-  border-color: var(--color-clay);
+  background: var(--primary);
+  color: var(--foreground);
+  border-color: var(--primary);
 }
 
 .workspace-action__dialog-backdrop {
@@ -60,9 +60,9 @@
   right: var(--spacing-4);
   bottom: var(--spacing-4);
   width: min(24rem, calc(100vw - var(--spacing-8)));
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: var(--color-bg-surface);
+  background: var(--card);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-4);
   z-index: calc(var(--z-modal) + 1);
@@ -74,16 +74,16 @@
   label {
     display: block;
     margin-bottom: var(--spacing-1);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   input {
     width: 100%;
     min-height: 2.75rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    background: var(--color-bg-base);
-    color: var(--color-text-primary);
+    background: var(--background);
+    color: var(--foreground);
     padding: 0 var(--spacing-2);
   }
 }
@@ -92,11 +92,11 @@
   margin-top: var(--spacing-3);
   height: 1.5rem;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   background: linear-gradient(
     90deg,
-    var(--color-clay) 0,
-    var(--color-clay) var(--progress),
+    var(--primary) 0,
+    var(--primary) var(--progress),
     transparent var(--progress),
     transparent 100%
   );

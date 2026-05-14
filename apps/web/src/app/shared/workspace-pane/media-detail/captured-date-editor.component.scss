@@ -62,13 +62,13 @@
   &__month-label {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--foreground);
     flex: 1 1 auto;
   }
 
   &__now-btn {
     font-size: var(--font-size-label);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     background: none;
     border: none;
     padding: 0.125rem var(--spacing-1);
@@ -94,7 +94,7 @@
     border: none;
     border-radius: var(--radius-sm);
     background: none;
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     cursor: pointer;
     transition:
       color 80ms ease-out,
@@ -122,7 +122,7 @@
   &__weekday {
     font-size: var(--font-size-caption);
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     padding: 0.125rem 0;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -136,7 +136,7 @@
     height: 1.625rem;
     margin: 0 auto;
     font-size: var(--font-size-label);
-    color: var(--color-text-primary);
+    color: var(--foreground);
     background: none;
     border: none;
     border-radius: var(--radius-full);
@@ -151,7 +151,7 @@
     }
 
     &--other-month {
-      color: var(--color-text-disabled);
+      color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
     }
 
     &--today:not(&--selected) {
@@ -190,11 +190,11 @@
   }
 
   &__clear-btn {
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
 
     &:hover {
-      color: var(--color-danger);
-      background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+      color: var(--destructive);
+      background: color-mix(in srgb, var(--destructive) 8%, transparent);
     }
   }
 

@@ -1,7 +1,7 @@
 // Figma Dev URL: https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev
 // @see docs/specs/component/ui-primitives/panel-trigger.md
 
-// Layers use fp-* names so Tailwind does not require @tailwind in this file.
+// Layers use descriptive names; tokens are now tweakcn-aligned.
 // @see .cursor/rules/scss-ownership.mdc (maps to components / states split)
 
 @layer fp-components {
@@ -12,8 +12,8 @@
     position: relative;
   }
 
-  // Stable state: panelState='closed' — neutral-variant-95 fill, chevron down
-  // Stable state: panelState='open'   — neutral-variant-95 fill, chevron up (rotated in @layer fp-states)
+  // Stable state: panelState='closed' — muted fill, chevron down
+  // Stable state: panelState='open'   — muted fill, chevron up (rotated in @layer fp-states)
   // @see docs/specs/component/ui-primitives/panel-trigger.md §State
 
   // Primary visual chrome: geometry, fill, typography, interaction affordance
@@ -24,16 +24,16 @@
     gap: var(--fp-base-4);
     height: var(--fp-base-16);
     padding: 0;
-    background-color: var(--fp-ref-neutral-variant-95);
+    background-color: var(--muted);
     border: none;
     border-radius: var(--fp-alias-r-4);
     appearance: none;
-    color: var(--fp-sys-color-on-surface);
-    font-family: var(--fp-ref-typeface-plain), sans-serif;
-    font-size: var(--fp-sys-typescale-label-small-size);
-    line-height: var(--fp-sys-typescale-label-small-line-height);
-    font-weight: var(--fp-sys-typescale-label-small-weight);
-    letter-spacing: var(--fp-sys-typescale-label-small-tracking);
+    color: var(--foreground);
+    font-family: var(--font-sans), sans-serif;
+    font-size: 0.6875rem;
+    line-height: 1;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.03125rem;
     cursor: pointer;
     white-space: nowrap;
     transition: var(--interactive-transition-standard);
@@ -82,16 +82,16 @@
     overflow: hidden;
     // Chevron rotation transition per spec choreography table
     // @see docs/specs/component/ui-primitives/panel-trigger.md §Transition map
-    transition: transform var(--fp-sys-motion-duration-short2) var(--motion-ease-standard);
+    transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
   }
 }
 
 @layer fp-states {
-  // Hover and pressed: warm primary-95 fill per Figma interaction rows
+  // Hover and pressed: warm primary tint per Figma interaction rows
   // @see docs/specs/component/ui-primitives/panel-trigger.md §State, §Actions #2
   .panel-trigger:hover,
   .panel-trigger:active {
-    background-color: var(--fp-ref-primary-95);
+    background-color: var(--muted);
   }
 
   // Open state: chevron rotates 180deg (points up); disabled keeps chevron down per state-visuals
@@ -123,6 +123,6 @@
   // @see docs/design/state-visuals.md §Disabled
   .panel-trigger:disabled:hover,
   .panel-trigger:disabled:active {
-    background-color: var(--fp-ref-neutral-variant-95);
+    background-color: var(--muted);
   }
 }

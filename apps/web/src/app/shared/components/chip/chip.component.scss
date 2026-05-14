@@ -20,12 +20,12 @@
   padding: var(--chip-padding-block) var(--chip-padding-inline);
   border: 1px solid transparent;
   border-radius: var(--radius-full);
-  background: var(--fp-ref-primary-95);
-  color: var(--fp-sys-color-on-surface);
-  font-size: var(--fp-sys-typescale-label-small-size);
-  font-weight: var(--fp-sys-typescale-label-small-weight);
-  line-height: var(--fp-sys-typescale-label-small-line-height);
-  letter-spacing: var(--fp-sys-typescale-label-small-tracking);
+  background: color-mix(in srgb, var(--primary) 10%, var(--background));
+  color: var(--foreground);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  letter-spacing: 0.03125rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -36,7 +36,7 @@
 }
 
 .chip:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--primary);
   outline-offset: 1px;
 }
 
@@ -115,24 +115,24 @@
 }
 
 .chip--default {
-  background: var(--fp-ref-primary-95);
-  color: var(--fp-sys-color-on-surface);
+  background: color-mix(in srgb, var(--primary) 10%, var(--background));
+  color: var(--foreground);
   border-color: transparent;
 }
 
 .chip--default:hover {
-  background: var(--fp-ref-primary-90);
+  background: color-mix(in srgb, var(--primary) 16%, var(--background));
   border-color: transparent;
 }
 
 :host-context([data-theme='dark']) {
   .chip--default {
-    background: color-mix(in srgb, var(--fp-sys-color-primary) 26%, var(--color-bg-elevated));
+    background: color-mix(in srgb, var(--primary) 26%, var(--card));
     border-color: transparent;
   }
 
   .chip--default:hover {
-    background: color-mix(in srgb, var(--fp-sys-color-primary) 34%, var(--color-bg-elevated));
+    background: color-mix(in srgb, var(--primary) 34%, var(--card));
   }
 }
 
@@ -146,9 +146,9 @@
 .chip--filetype-spreadsheet,
 .chip--filetype-presentation,
 .chip--custom {
-  background: color-mix(in srgb, var(--chip-color) 12%, var(--color-bg-surface));
+  background: color-mix(in srgb, var(--chip-color) 12%, var(--card));
   color: var(--chip-color);
-  border-color: color-mix(in srgb, var(--chip-color) 28%, var(--color-border));
+  border-color: color-mix(in srgb, var(--chip-color) 28%, var(--border));
 }
 
 .chip--primary:hover,
@@ -161,6 +161,6 @@
 .chip--filetype-spreadsheet:hover,
 .chip--filetype-presentation:hover,
 .chip--custom:hover {
-  background: color-mix(in srgb, var(--chip-color) 18%, var(--color-bg-surface));
-  border-color: color-mix(in srgb, var(--chip-color) 38%, var(--color-border));
+  background: color-mix(in srgb, var(--chip-color) 18%, var(--card));
+  border-color: color-mix(in srgb, var(--chip-color) 38%, var(--border));
 }

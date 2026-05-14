@@ -46,16 +46,20 @@
               [attr.aria-current]="isSectionSelected(section.id) ? 'true' : null"
               (click)="selectSection(section.id)"
             >
-              <span class="settings-overlay__section-media shrink-0" aria-hidden="true">
-                <span class="material-icons">{{ section.icon }}</span>
-              </span>
-              <span class="settings-overlay__section-label min-w-0 flex-1">
-                <strong>{{ section.title }}</strong>
-                <small>{{ section.subtitle }}</small>
-              </span>
-              <span class="settings-overlay__section-chevron material-icons" aria-hidden="true"
-                >chevron_right</span
+              <span
+                class="settings-overlay__section-media flex size-5 shrink-0 items-center justify-center"
+                aria-hidden="true"
               >
+                <span class="material-icons text-base leading-none">{{ section.icon }}</span>
+              </span>
+              <span class="settings-overlay__section-label flex min-w-0 flex-1 flex-col gap-0.5">
+                <strong class="min-w-0 truncate font-semibold">{{ section.title }}</strong>
+                <small class="min-w-0 truncate text-xs text-muted-foreground">{{ section.subtitle }}</small>
+              </span>
+              <span
+                class="settings-overlay__section-chevron material-icons ml-auto shrink-0"
+                aria-hidden="true"
+                >chevron_right</span>
             </button>
           }
         </div>
@@ -447,7 +451,7 @@
                   t('settings.overlay.search.radius.label', 'Default radius (km)')
                 }}</label>
                 <input
-                  uiRangeControl
+                  hlmInput
                   id="settings-search-radius"
                   class="settings-overlay__range"
                   type="range"
@@ -480,7 +484,7 @@
                   t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
                 }}</label>
                 <input
-                  uiRangeControl
+                  hlmInput
                   id="settings-cache-retention"
                   class="settings-overlay__range"
                   type="range"

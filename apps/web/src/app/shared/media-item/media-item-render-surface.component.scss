@@ -35,9 +35,9 @@
   position: relative;
   width: 100%;
   height: 100%;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: var(--container-radius-control);
-  background: var(--color-bg-surface);
+  background: var(--card);
   overflow: hidden;
 }
 
@@ -46,8 +46,8 @@
 // Renders selected-state ring strictly on media-frame geometry bounds.
 // @see docs/specs/component/media/media-item.md#visual-behavior-contract
 [data-state='content-selected'] .media-item-render-surface__media-frame {
-  outline: 2px solid var(--color-clay);
-  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent));
+  outline: 2px solid var(--primary);
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--primary) 32%, transparent));
 }
 
 // Aligns document media-frame to top-center inside square tile.
@@ -87,7 +87,7 @@
 // Defines loading placeholder layer with pulse animation and centered icon.
 // @see docs/specs/component/media/media-item.md#acceptance-criteria
 .media-item-render-surface__fallback--loading {
-  background: var(--color-skeleton-surface);
+  background: var(--muted);
   animation: var(--animation-skeleton-pulse);
 }
 
@@ -96,7 +96,7 @@
 // Defines no-photo and error layer tone for unavailable preview states.
 // @see docs/specs/component/media/media-item.md#actions--interactions
 .media-item-render-surface__fallback--no-photo {
-  background: color-mix(in srgb, var(--color-bg-base) 8%, transparent);
+  background: color-mix(in srgb, var(--background) 8%, transparent);
 }
 
 // Stable state: content (non-image) renders deterministic icon-only fallback.
@@ -104,8 +104,8 @@
 // Defines icon-only layer color semantics for non-image media types.
 // @see docs/specs/component/media/media-item.md#state-normalization-decision-mandatory
 .media-item-render-surface__fallback--icon-only {
-  color: var(--color-text-secondary);
-  background: color-mix(in srgb, var(--color-bg-base) 6%, transparent);
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--background) 6%, transparent);
 }
 
 // Defines no-photo icon dimensions and reduced emphasis opacity.

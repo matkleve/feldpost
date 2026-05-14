@@ -59,6 +59,17 @@ Mark each row **Pass / Fail** with ticket link on fail.
 | Nav — desktop | [ ] | [ ] | [ ] |
 | Nav — mobile | [ ] | [ ] | [ ] |
 
+### Settings overlay — concrete checks (from 2026-05-14 audit)
+
+- [ ] `settings-overlay__lead-divider`: visible full-height hairline or removed (no zero-height artifact).
+- [ ] Fixed pane: outer padding / close-button alignment matches spec (not accidental `padding: 0`).
+- [ ] **Account** section: same card chrome as other tabs (`rounded-lg border border-border bg-card p-6`) or documented waiver.
+- [ ] **Themes (light / dark / sandstone):** rail idle/hover/active tint; pill `bg-muted` track visible; selected segment `bg-background` + shadow; `hlmSwitch` track/thumb; invite status chip, QR frame, link preview, spinner.
+- [ ] **Widths:** segmented groups fill value column where SCSS sets `--hlm-pill-toggle-width: 100%`.
+- [ ] **Breakpoints:** field rows stack on small viewports; invite role row stacks; QR 10rem on mobile acceptable.
+- [ ] **A11y:** boolean rows expose correct `aria-pressed` / `role="switch"` semantics (not only decorative `hlmSwitch`).
+- [ ] **Phase 6 gate:** zero `uiRangeControl` references in settings templates.
+
 ---
 
 ## Interactive state matrix (sample per component class)

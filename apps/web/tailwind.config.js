@@ -88,28 +88,28 @@ module.exports = {
       //   text-text-primary   → color: var(--color-text-primary)
       //   border-border       → border-color: var(--color-border)
       colors: {
-        // Backgrounds
-        'bg-base': 'var(--color-bg-base)',
-        'bg-surface': 'var(--color-bg-surface)',
-        'bg-elevated': 'var(--color-bg-elevated)',
+        // Backgrounds — map legacy utility names to tweakcn semantics (Phase 7)
+        'bg-base': 'var(--background)',
+        'bg-surface': 'var(--card)',
+        'bg-elevated': 'var(--popover)',
 
         // Borders
-        border: 'var(--color-border)',
-        'border-strong': 'var(--color-border-strong)',
+        border: 'var(--border)',
+        'border-strong': 'var(--border-strong)',
 
         // Text
-        'text-primary': 'var(--color-text-primary)',
-        'text-secondary': 'var(--color-text-secondary)',
-        'text-disabled': 'var(--color-text-disabled)',
+        'text-primary': 'var(--foreground)',
+        'text-secondary': 'var(--muted-foreground)',
+        'text-disabled': 'var(--text-disabled)',
 
         // Brand / semantic
-        primary: 'var(--color-primary)',
-        'primary-hover': 'var(--color-primary-hover)',
-        success: 'var(--color-success)',
-        warning: 'var(--color-warning)',
-        danger: 'var(--color-danger)',
-        accent: 'var(--color-accent)',
-        clay: 'var(--color-clay)',
+        primary: 'var(--primary)',
+        'primary-hover': 'var(--primary-hover)',
+        success: 'var(--success)',
+        warning: 'var(--warning)',
+        danger: 'var(--destructive)',
+        accent: 'var(--accent)',
+        clay: 'var(--primary)',
       },
 
       // ── Typography ────────────────────────────────────────────────────────

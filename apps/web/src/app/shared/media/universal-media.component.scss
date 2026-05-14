@@ -3,12 +3,12 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  --universal-media-slot-border: 1px solid var(--color-border);
+  --universal-media-slot-border: 1px solid var(--border);
   --universal-media-slot-radius: var(--radius-md);
   --universal-media-slot-background: color-mix(
     in srgb,
-    var(--color-bg-surface) 92%,
-    var(--color-bg-base)
+    var(--card) 92%,
+    var(--background)
   );
   --universal-media-slot-max-height: none;
   --universal-media-asset-width: 100%;
@@ -51,11 +51,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .universal-media__layer--loading {
-  color: var(--color-clay);
+  color: var(--primary);
 }
 
 .universal-media__spinner {
@@ -68,7 +68,7 @@
 }
 
 .universal-media__layer--error {
-  color: var(--color-danger);
+  color: var(--destructive);
 }
 
 .universal-media__badge {
@@ -80,8 +80,8 @@
   font-size: var(--font-size-label);
   line-height: 1;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-bg-base) 86%, transparent);
-  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--background) 86%, transparent);
+  color: var(--foreground);
 }
 
 .universal-media__upload-overlay {
@@ -92,14 +92,14 @@
   align-items: flex-end;
   justify-content: stretch;
   overflow: hidden;
-  background: color-mix(in srgb, var(--color-bg-base) 45%, transparent);
+  background: color-mix(in srgb, var(--background) 45%, transparent);
 }
 
 .universal-media__upload-overlay-fill {
   position: absolute;
   inset: auto 0 0 0;
   block-size: 0.2rem;
-  background: color-mix(in srgb, var(--color-primary) 82%, white);
+  background: color-mix(in srgb, var(--primary) 82%, white);
 }
 
 .universal-media__upload-overlay-content {
