@@ -20,33 +20,33 @@
           brnToggleGroupItem
           [value]="option.id"
           [disabled]="!!option.disabled"
-          [class.hlm-toggle-group__item--icon-only]="optLayout(option) === 'icon-only'"
+          [size]="optLayout(option) === 'icon-only' ? 'icon' : 'md'"
           [attr.aria-label]="option.ariaLabel || option.label"
           [attr.title]="option.title || option.label"
         >
           @if (option.icon && optLayout(option) !== 'text-only') {
-            <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ option.icon }}</span>
+            <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
           }
           @if (optLayout(option) !== 'icon-only') {
-            <span class="hlm-toggle-group__label">{{ option.label }}</span>
+            <span>{{ option.label }}</span>
           }
         </button>
       }
     </div>
     @if (statusInactiveOptions().length > 0) {
-      <div class="hlm-toggle-group__inactive-strip" aria-hidden="true">
+      <div class="projects-toolbar__inactive-strip" aria-hidden="true">
         @for (option of statusInactiveOptions(); track option.id) {
           <button
-            class="hlm-toggle-group__inactive-item"
-            [class.hlm-toggle-group__inactive-item--icon-only]="optLayout(option) === 'icon-only'"
+            class="projects-toolbar__inactive-item"
+            [class.projects-toolbar__inactive-item--icon-only]="optLayout(option) === 'icon-only'"
             type="button"
             disabled
           >
             @if (option.icon && optLayout(option) !== 'text-only') {
-              <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ option.icon }}</span>
+              <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
             }
             @if (optLayout(option) !== 'icon-only') {
-              <span class="hlm-toggle-group__label">{{ option.label }}</span>
+              <span>{{ option.label }}</span>
             }
           </button>
         }
@@ -92,13 +92,13 @@
         <button
           type="button"
           hlmToggleGroupItem
-          class="hlm-toggle-group__item--icon-only"
+          size="icon"
           brnToggleGroupItem
           [value]="opt.id"
           [attr.aria-label]="opt.ariaLabel || opt.label"
           [attr.title]="opt.title || opt.label"
         >
-          <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ opt.icon }}</span>
+          <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
         </button>
       }
     </div>

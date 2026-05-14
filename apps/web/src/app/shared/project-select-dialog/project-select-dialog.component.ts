@@ -1,6 +1,5 @@
 import { Component, input, output, viewChild } from '@angular/core';
 import { BrnDialog, BrnDialogImports } from '@spartan-ng/brain/dialog';
-import { UiItemDirective } from '../ui-primitives/ui-primitives.directive';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { HLM_DIALOG_IMPORTS } from '../ui/dialog';
 
@@ -12,7 +11,7 @@ export interface ProjectSelectOption {
 @Component({
   selector: 'app-project-select-dialog',
   standalone: true,
-  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...HLM_BUTTON_IMPORTS, UiItemDirective],
+  imports: [...BrnDialogImports, ...HLM_DIALOG_IMPORTS, ...HLM_BUTTON_IMPORTS],
   templateUrl: './project-select-dialog.component.html',
   styleUrl: './project-select-dialog.component.scss',
 })

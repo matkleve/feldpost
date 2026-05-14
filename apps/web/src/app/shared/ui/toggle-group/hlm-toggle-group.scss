@@ -33,6 +33,44 @@
     gap: var(--spacing-4);
   }
 
+  // Vertical pill toggle: column shell and segment corners inset from track padding
+  // @see apps/web/src/app/shared/ui/toggle-group/
+  .hlm-pill-toggle--vertical {
+    --hlm-pill-vertical-item-radius: calc(
+      var(--hlm-pill-vertical-shell-radius, var(--radius-full)) -
+        var(--hlm-pill-vertical-shell-padding, var(--spacing-1))
+    );
+
+    flex-direction: column;
+
+    [hlmToggleGroup] {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    [hlmToggleGroupItem]:first-child:last-child {
+      border-radius: var(--hlm-pill-vertical-item-radius);
+    }
+
+    [hlmToggleGroupItem]:first-child:not(:last-child) {
+      border-top-left-radius: var(--hlm-pill-vertical-item-radius);
+      border-top-right-radius: var(--hlm-pill-vertical-item-radius);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    [hlmToggleGroupItem]:last-child:not(:first-child) {
+      border-bottom-left-radius: var(--hlm-pill-vertical-item-radius);
+      border-bottom-right-radius: var(--hlm-pill-vertical-item-radius);
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    [hlmToggleGroupItem]:not(:first-child):not(:last-child) {
+      border-radius: 0;
+    }
+  }
+
   // Mutes entire control when the toggle group is disabled at the shell level.
   // @see apps/web/src/app/shared/ui/toggle-group/
   .hlm-pill-toggle--disabled {
@@ -67,140 +105,11 @@
     --hlm-toggle-icon-only-min: 2.5rem;
   }
 
-  // Muted rounded track wrapping toggle items (shadcn ToggleGroup container).
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    width: var(--hlm-toggle-group-width, auto);
-    max-width: 100%;
-    padding: 0.25rem;
-    border-radius: var(--radius-md);
-    background-color: var(--muted);
-    border: none;
-    box-shadow: none;
-  }
-
-  // Segment control: idle transparent pill inside muted track.
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-2);
-    flex: var(--hlm-toggle-button-flex, initial);
-    padding: var(--hlm-toggle-item-padding-y, 0.375rem) var(--hlm-toggle-item-padding-x, 0.75rem);
-    border: none;
-    border-radius: calc(var(--radius-md) - 2px);
-    background: transparent;
-    color: var(--muted-foreground);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-solid);
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    transition:
-      background-color var(--motion-duration-fast) var(--motion-ease-out),
-      color var(--motion-duration-fast) var(--motion-ease-out),
-      box-shadow var(--motion-duration-fast) var(--motion-ease-out),
-      opacity var(--motion-duration-fast) var(--motion-ease-out);
-  }
-
-  // Square icon-only segment aligned to min size tokens.
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item--icon-only {
-    aspect-ratio: 1;
-    flex: 0 0 auto;
-    gap: 0;
-    padding: var(--hlm-toggle-item-padding-y, 0.375rem);
-    min-width: var(--hlm-toggle-icon-only-min, 2.25rem);
-    min-height: var(--hlm-toggle-icon-only-min, 2.25rem);
-  }
-
-  // Icon glyph inside a segment (avoids global heading typography overrides).
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__icon {
-    display: block;
-    font-size: var(--font-size-lg-emphasis);
-    line-height: var(--line-height-solid);
-  }
-
-  // Visible label text beside optional icons.
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__label {
-    display: inline-flex;
-    align-items: center;
-    line-height: var(--line-height-solid);
-    letter-spacing: 0.01em;
-  }
-
-  // Non-interactive strip beside the live toggle for preview-only segments.
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__inactive-strip {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-1);
-    animation: hlm-toggle-group-inactive-enter var(--motion-duration-base)
-      var(--motion-ease-standard) both;
-  }
-
-  // Inactive preview segment mirroring live item geometry without interaction.
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__inactive-item {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-2);
-    padding: var(--hlm-toggle-item-padding-y, 0.375rem) var(--hlm-toggle-item-padding-x, 0.75rem);
-    border: 0;
-    background: transparent;
-    color: var(--muted-foreground);
-    font: inherit;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    white-space: nowrap;
-    cursor: default;
-    opacity: 0.72;
-    transition:
-      color var(--motion-duration-fast) var(--motion-ease-out),
-      opacity var(--motion-duration-fast) var(--motion-ease-out);
-
-    .hlm-toggle-group__icon {
-      opacity: 0.88;
-    }
-  }
-
-  // Square inactive icon slot aligned to icon-only segments.
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__inactive-item--icon-only {
-    aspect-ratio: 1;
-    flex: 0 0 auto;
-    gap: 0;
-    padding: var(--hlm-toggle-item-padding-y, 0.375rem);
-    min-width: var(--hlm-toggle-icon-only-min, 2.25rem);
-    min-height: var(--hlm-toggle-icon-only-min, 2.25rem);
-  }
-
   @media (max-width: 767px) {
     // Tighter pill row spacing on narrow viewports.
     // @see apps/web/src/app/shared/ui/toggle-group/
     .hlm-pill-toggle {
       gap: var(--spacing-3);
-    }
-
-    // Slightly smaller icons inside segments on mobile.
-    // @see apps/web/src/app/shared/ui/toggle-group/
-    .hlm-toggle-group__icon {
-      font-size: var(--font-size-base-strong);
-    }
-
-    // Slightly reduced label size inside segments on mobile.
-    // @see apps/web/src/app/shared/ui/toggle-group/
-    .hlm-toggle-group__label {
-      font-size: var(--font-size-xs-soft);
     }
   }
 }
@@ -208,14 +117,13 @@
 @layer states {
   // Subtle warning emphasis on a segment (e.g. upload issues lane).
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item--attention:not([data-state='on']) {
+  [hlmToggleGroupItem][data-attention='true']:not([data-state='on']) {
     color: var(--color-warning);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 38%, transparent);
   }
 
   // Hover feedback for enabled segments (subtle lift over muted track).
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item:hover:not(:disabled):not([data-state='on']),
   [hlmToggleGroupItem]:hover:not(:disabled):not([data-state='on']) {
     color: var(--foreground);
     background-color: color-mix(in oklch, var(--foreground) 6%, transparent);
@@ -223,41 +131,16 @@
 
   // Keyboard focus ring for segment buttons (shadcn ring pattern).
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item:focus-visible,
   [hlmToggleGroupItem]:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
 
-  // Active segment: BrnToggleGroupItem sets data-state="on" when pressed.
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item[data-state='on'],
-  [hlmToggleGroupItem][data-state='on'] {
-    background-color: var(--background);
-    color: var(--foreground);
-    box-shadow: var(--shadow-sm);
-  }
-
   // Disabled segment item (Brn disabled or native :disabled).
   // @see apps/web/src/app/shared/ui/toggle-group/
-  .hlm-toggle-group__item:disabled,
   [hlmToggleGroupItem]:disabled {
     pointer-events: none;
     opacity: 0.5;
-  }
-}
-
-// Entrance motion for inactive strip appearing beside the live pill.
-// @see apps/web/src/app/shared/ui/toggle-group/
-@keyframes hlm-toggle-group-inactive-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -265,11 +148,8 @@
   // Strip transitions/animations for reduced-motion users.
   // @see apps/web/src/app/shared/ui/toggle-group/
   .hlm-pill-toggle,
-  .hlm-toggle-group,
   [hlmToggleGroup],
-  .hlm-toggle-group__item,
-  [hlmToggleGroupItem],
-  .hlm-toggle-group__inactive-item {
+  [hlmToggleGroupItem] {
     transition-duration: 1ms !important;
     animation-duration: 1ms !important;
   }

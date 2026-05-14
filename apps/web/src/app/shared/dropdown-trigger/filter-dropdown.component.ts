@@ -7,6 +7,7 @@ import type { MetadataValueType } from '../../core/metadata/metadata.types';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { HlmMenuItemDirective } from '../ui/menu';
 import { HLM_SELECT_IMPORTS } from '../ui/select';
+import { HLM_INPUT_IMPORTS } from '../ui/input';
 import {
   UiIconButtonGhostDangerDirective,
   UiIconButtonGhostDirective,
@@ -28,6 +29,7 @@ export interface FilterDropdownPropertyOption {
     StandardDropdownComponent,
     HlmMenuItemDirective,
     ...HLM_SELECT_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
     UiInputControlDirective,
     UiInputControlCompactDirective,
     UiIconButtonGhostDirective,

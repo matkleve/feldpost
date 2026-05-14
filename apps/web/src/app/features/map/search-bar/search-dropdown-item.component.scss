@@ -1,18 +1,22 @@
+// Item row: grid layout with icon column + content column; configurable via context tokens.
+// @see docs/migration/phase-6-template-cleanup.md §ui-item → component-local row classes
 .search-dropdown-item {
-  --ui-item-min-height: var(--search-dropdown-item-row-min-height, 3rem);
-  --ui-item-padding-inline: var(
-    --search-dropdown-item-padding-inline,
-    var(--container-padding-inline)
-  );
-  --ui-item-padding-block: var(
-    --search-dropdown-item-padding-block,
-    var(--container-padding-block-compact)
-  );
-  --ui-item-gap: var(--search-dropdown-item-gap, var(--container-gap));
-  --ui-item-radius: var(--search-dropdown-item-radius, var(--container-radius-control));
-  --ui-item-media-size: var(--search-dropdown-item-media-size, var(--spacing-6));
-  --ui-item-content-gap: var(--search-dropdown-item-content-gap, var(--container-gap-panel));
+  --item-min-height: var(--search-dropdown-item-row-min-height, 3rem);
+  --item-padding-inline: var(--search-dropdown-item-padding-inline, var(--container-padding-inline));
+  --item-padding-block: var(--search-dropdown-item-padding-block, var(--container-padding-block-compact));
+  --item-gap: var(--search-dropdown-item-gap, var(--container-gap));
+  --item-radius: var(--search-dropdown-item-radius, var(--container-radius-control));
+  --item-media-size: var(--search-dropdown-item-media-size, var(--spacing-6));
+  --item-content-gap: var(--search-dropdown-item-content-gap, var(--container-gap-panel));
 
+  display: grid;
+  grid-template-columns: var(--item-media-size) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--item-gap);
+  min-height: var(--item-min-height);
+  padding-block: var(--item-padding-block);
+  padding-inline: var(--item-padding-inline);
+  border-radius: var(--item-radius);
   width: 100%;
   border: 0;
   background: transparent;
@@ -29,8 +33,31 @@
   background: color-mix(in srgb, var(--color-clay) 12%, var(--color-bg-elevated));
 }
 
+// Icon slot: fixed-size inline-flex cell; aligns icon top within the row.
+// @see docs/migration/phase-6-template-cleanup.md §ui-item-media → component-local
 .search-dropdown-item__media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--item-media-size);
+  block-size: var(--item-media-size);
+  min-inline-size: var(--item-media-size);
+  flex-shrink: 0;
   align-self: start;
+}
+
+// Content column: flex column for label + secondary lines; allows text truncation.
+// @see docs/migration/phase-6-template-cleanup.md §ui-item-label → component-local
+.search-dropdown-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--item-content-gap);
+  min-width: 0;
+  flex: 1 1 auto;
+
+  > * {
+    min-width: 0;
+  }
 }
 
 .search-dropdown-item__icon {

@@ -28,10 +28,9 @@
 }
 
 .search-bar {
-  --ui-container-radius: var(--container-radius-panel);
-  --search-bar-padding-inline: var(--ui-container-padding-inline);
-  --search-bar-padding-block: var(--ui-container-padding-block);
-  --search-bar-gap: var(--ui-container-gap);
+  --search-bar-padding-inline: var(--container-padding-inline-panel);
+  --search-bar-padding-block: var(--container-padding-block-panel);
+  --search-bar-gap: var(--container-gap-panel);
   --search-bar-dropdown-padding-inline: var(--container-padding-inline-panel);
   --search-bar-dropdown-padding-block: var(--container-padding-block-panel);
   --search-bar-dropdown-gap: var(--container-gap-panel);
@@ -52,7 +51,7 @@
   row-gap: 0;
   width: 100%;
   border: 1px solid var(--color-border);
-  border-radius: var(--ui-container-radius);
+  border-radius: var(--container-radius-panel);
   background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
   box-shadow: var(--elevation-subtle);
   overflow: hidden;
@@ -87,9 +86,16 @@
   flex-shrink: 0;
 }
 
+// Icon and clear inner-slot: centers icon inside the slot-wrapper column.
+// @see search-bar.component.html §icon-slot / clear-slot structure
 .search-bar__icon-slot,
 .search-bar__clear-slot {
-  --ui-item-media-size: var(--search-bar-media-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--search-bar-media-size);
+  block-size: var(--search-bar-media-size);
+  flex-shrink: 0;
 }
 
 .search-bar__icon,

@@ -5,6 +5,23 @@ alwaysApply: true
 
 # Visual Behavior Contract (Mandatory per Component Spec)
 
+## Migration Exemption
+
+Work classified as **migration cleanup** (Phase 6–8 per `docs/migration/phase-6-template-cleanup.md`) is exempt from the ownership matrix and FSM contract pre-requisites defined in this file.
+
+Migration cleanup is defined as:
+- Replacing `ui-*` BEM class names with Tailwind utilities or `hlm*` directives in existing component templates
+- Wiring existing spartan `hlm*` / `brn*` directives to components that already have DOM structure
+- Removing legacy SCSS files or class names that duplicate CVA
+- Replacing legacy token variables (`var(--color-*)`) with tweakcn equivalents in existing SCSS
+
+**Migration cleanup does NOT cover:**
+- Creating new components or new visual layouts
+- Adding new states, animations, or interaction patterns
+- Any net-new visual decision not already expressed in the existing component
+
+If a change introduces a net-new visual element, the exemption does not apply and the full ownership matrix / FSM contract is required.
+
 Every component spec must include a `## Visual Behavior Contract` section
 before any implementation starts. This section defines in pseudo-CSS
 exactly which element owns which visual behavior.

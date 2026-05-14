@@ -11,14 +11,14 @@
     @for (option of viewOptions(); track option.id) {
       <button
         hlmToggleGroupItem
-        class="hlm-toggle-group__item--icon-only"
+        size="icon"
         type="button"
         brnToggleGroupItem
         [value]="option.id"
         [attr.aria-label]="option.ariaLabel || option.label"
         [attr.title]="option.title || option.label"
       >
-        <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ option.icon }}</span>
+        <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
       </button>
     }
   </div>

@@ -12,7 +12,7 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
-  <div class="map-style-switch hlm-pill-toggle hlm-pill-toggle--md">
+  <div class="map-style-switch hlm-pill-toggle hlm-pill-toggle--md hlm-pill-toggle--vertical">
     <div
       hlmToggleGroup
       brnToggleGroup
@@ -33,10 +33,10 @@
           [attr.title]="option.title || option.label"
         >
           @if (option.icon && optLayout(option) !== 'text-only') {
-            <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ option.icon }}</span>
+            <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
           }
           @if (optLayout(option) !== 'icon-only') {
-            <span class="hlm-toggle-group__label">{{ option.label }}</span>
+            <span class="map-style-switch__option-label">{{ option.label }}</span>
           }
         </button>
       }

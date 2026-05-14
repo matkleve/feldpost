@@ -35,13 +35,13 @@
         <button
           type="button"
           hlmToggleGroupItem
-          class="hlm-toggle-group__item--icon-only"
+          size="icon"
           brnToggleGroupItem
           [value]="opt.id"
           [attr.aria-label]="opt.ariaLabel || opt.label"
           [attr.title]="opt.title || opt.label"
         >
-          <span class="material-icons hlm-toggle-group__icon" aria-hidden="true">{{ opt.icon }}</span>
+          <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
         </button>
       }
     </div>

@@ -138,8 +138,8 @@
     <label for="zip-title">{{ t('workspace.export.dialog.field.title', 'Title') }}</label>
     <input
       uiInputControl
+      hlmInput
       id="zip-title"
-      class="ui-input-control"
       type="text"
       [value]="zipTitle()"
       (input)="zipTitle.set($any($event.target).value)"

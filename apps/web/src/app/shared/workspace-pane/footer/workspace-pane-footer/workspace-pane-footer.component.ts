@@ -20,6 +20,7 @@ import {
   UiButtonIconWithTextDirective,
   UiInputControlDirective,
 } from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
 import { WORKSPACE_EXPORT_ACTION_DEFINITIONS } from '../workspace-export-actions.registry';
 import type { WorkspaceExportActionId } from '../workspace-export-actions.types';
@@ -49,6 +50,7 @@ const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
     UiButtonIconOnlyDirective,
     UiButtonIconWithTextDirective,
     UiInputControlDirective,
+    ...HLM_INPUT_IMPORTS,
     PaneFooterComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,

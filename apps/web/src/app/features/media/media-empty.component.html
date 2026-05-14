@@ -9,10 +9,10 @@
 <!-- Triggers sign-in navigation or retry event depending on resolved empty-state reason. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
 <button
-  uiButton
-  uiButtonSecondary
+  hlmBtn
+  variant="secondary"
   type="button"
-  class="ui-button ui-button--secondary media-empty__retry"
+  class="media-empty__retry"
   (click)="onPrimaryAction()"
 >
   {{ actionLabel() }}

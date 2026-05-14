@@ -27,7 +27,7 @@
   }
 }
 
-:host .map-style-switch .hlm-toggle-group {
+:host .map-style-switch [hlmToggleGroup] {
   flex-direction: column;
   align-items: stretch;
   gap: var(--spacing-1);
@@ -35,7 +35,11 @@
   padding: var(--spacing-1);
 }
 
-:host .map-style-switch .hlm-toggle-group__item {
+:host .map-style-switch [hlmToggleGroupItem] {
+  border-radius: calc(var(--radius-full) - var(--spacing-1));
+}
+
+:host .map-style-switch [hlmToggleGroupItem] {
   justify-content: center;
   width: 2.75rem;
   min-width: 2.75rem;
@@ -43,7 +47,7 @@
   padding: 0;
 }
 
-:host .map-style-switch .hlm-toggle-group__label {
+:host .map-style-switch .map-style-switch__option-label {
   display: none;
 }
 

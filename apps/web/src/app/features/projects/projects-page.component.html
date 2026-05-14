@@ -44,10 +44,9 @@
         <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
         <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
         <button
-          uiButton
-          uiButtonSecondary
+          hlmBtn
+          variant="secondary"
           type="button"
-          class="ui-button ui-button--secondary"
           (click)="refreshProjects()"
         >
           {{ t('projects.page.error.retry', 'Retry') }}

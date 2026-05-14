@@ -37,7 +37,6 @@ import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.s
 import { FilterService } from '../../core/filter/filter.service';
 import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig, WorkspaceMedia } from '../../core/workspace-view/workspace-view.types';
-import type { ProjectsViewMode } from '../../core/projects/projects.types';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
@@ -45,7 +44,6 @@ import {
 import { FilterDropdownComponent } from '../../shared/dropdown-trigger/filter-dropdown.component';
 import { SortDropdownComponent } from '../../shared/dropdown-trigger/sort-dropdown.component';
 import { ProjectsDropdownComponent } from '../../shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
-import { ProjectsViewToggleComponent } from '../../shared/view-toggle/projects-view-toggle.component';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
 import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
@@ -66,7 +64,6 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsDropdownComponent,
-    ProjectsViewToggleComponent,
   ],
   templateUrl: './media.component.html',
   styleUrl: './media.component.scss',
@@ -105,9 +102,6 @@ export class MediaComponent implements OnDestroy {
     buildCardVariantToggleOptions((k, f) => this.t(k, f), this.allowedCardVariants, true),
   );
   readonly projectNameForFn = (projectId: string | null): string => this.projectNameFor(projectId);
-  readonly projectsViewMode = computed<ProjectsViewMode>(() =>
-    this.cardVariant() === 'row' ? 'list' : 'cards',
-  );
   readonly emptyReason = computed<'auth-required' | 'no-results'>(() => {
     if (!this.authService.loading() && !this.authService.user()) {
       return 'auth-required';
@@ -272,15 +266,6 @@ export class MediaComponent implements OnDestroy {
     }
   }
 
-  onProjectsViewModeChange(mode: ProjectsViewMode): void {
-    if (mode === 'list') {
-      this.cardVariant.set('row');
-      return;
-    }
-    if (this.cardVariant() === 'row') {
-      this.cardVariant.set('medium');
-    }
-  }
 
   onMediaItemClicked(mediaId: string): void {
     this.workspacePaneObserver.setDetailImageId(mediaId);

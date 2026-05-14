@@ -1,5 +1,5 @@
 <button
-  class="search-dropdown-item ui-item"
+  class="search-dropdown-item"
   type="button"
   role="option"
   [id]="optionId()"
@@ -8,11 +8,11 @@
   (mousedown)="$event.preventDefault()"
   (click)="selected.emit(candidate())"
 >
-  <span class="search-dropdown-item__media ui-item-media" aria-hidden="true">
+  <span class="search-dropdown-item__media" aria-hidden="true">
     <span class="material-icons search-dropdown-item__icon">{{ iconName() }}</span>
   </span>
 
-  <span class="search-dropdown-item__content ui-item-label">
+  <span class="search-dropdown-item__content">
     <span class="search-dropdown-item__label">{{ candidate().label }}</span>
 
     @if (candidate().secondaryLabel) {

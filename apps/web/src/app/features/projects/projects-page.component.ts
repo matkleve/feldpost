@@ -40,10 +40,7 @@ import { ProjectsTableViewComponent } from './projects-table-view.component';
 import { ProjectsToolbarComponent } from './projects-toolbar.component';
 import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
-import {
-  UiButtonDirective,
-  UiButtonSecondaryDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 
 import {
   FILTER_OPTIONS,
@@ -64,8 +61,7 @@ import {
     ProjectsPageHeaderComponent,
     ProjectsTableViewComponent,
     ProjectsToolbarComponent,
-    UiButtonDirective,
-    UiButtonSecondaryDirective,
+    ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.scss',

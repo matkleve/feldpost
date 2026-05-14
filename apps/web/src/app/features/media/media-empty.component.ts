@@ -4,15 +4,12 @@ import { input } from '@angular/core';
 import { output } from '@angular/core';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
-import {
-  UiButtonDirective,
-  UiButtonSecondaryDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 
 @Component({
   selector: 'app-media-empty',
   standalone: true,
-  imports: [UiButtonDirective, UiButtonSecondaryDirective],
+  imports: [...HLM_BUTTON_IMPORTS],
   templateUrl: './media-empty.component.html',
   styleUrl: './media-empty.component.scss',
   host: {

@@ -131,6 +131,35 @@ Re-run before execution; numbers drift.
 
 ---
 
+## Molecules Audit
+
+Molecules = app-level components composed from multiple atoms. Every molecule must use `hlm*` atoms internally and Tailwind for layout — no `ui-*` class names.
+
+| Molecule | File | Uses ui-* | Target |
+|---|---|---|---|
+| Project card | `features/projects/project-card.component.html` | `ui-card-shell` | `hlmCard` |
+| Search dropdown item | `features/map/search-bar/search-dropdown-item.component.html` | `ui-*` | Tailwind + `hlmBadge` |
+| Upload panel item | `features/upload/upload-panel-item.component.html` | `ui-item`, `ui-item-media`, `ui-item-label` | component classes + Tailwind |
+| Project select dialog item | `shared/project-select-dialog/project-select-dialog.component.html` | `ui-item` | `flex items-center gap-3` |
+| Filter dropdown | `shared/dropdown-trigger/filter-dropdown.component.html` | `ui-input-control` | `hlmInput` |
+| Workspace pane footer | `shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.html` | `ui-input-control` | `hlmInput` |
+| Quick-info chips | `shared/quick-info-chips/quick-info-chips.component.html` | `ui-chip` | `hlmBadge` |
+| Media empty | `features/media/media-empty.component.html` | `ui-button--secondary` | `hlmBtn variant="outline"` |
+| Projects empty / page | `features/projects/projects-page.component.html` | `ui-button--secondary` | `hlmBtn variant="outline"` |
+
+All of the above are covered by Phase 6 work items 4–9. This table is the acceptance checklist — every row must have zero `ui-*` hits before Phase 6 is marked complete.
+
+### shared/ui/ molecules (already correct)
+These use CVA + `host: { '[class]' }` — no action needed:
+- `hlmCard` / `hlmCardHeader` / `hlmCardContent` / `hlmCardFooter` / `hlmCardTitle` / `hlmCardDescription`
+- `hlmFormField` / `hlmFormFieldError` / `hlmFormFieldHint`
+- `hlmDialogContent` / `hlmDialogHeader` / `hlmDialogFooter` / `hlmDialogTitle` / `hlmDialogDescription`
+- `hlmTabsList` / `hlmTabsTrigger` / `hlmTabsContent`
+- `hlmPopover`
+- `hlmMenuContent` / `hlmMenuItem` / `hlmMenuSeparator` / `hlmMenuLabel`
+
+---
+
 ## Risk notes
 
 - **Toggle inactive / “fake” items** (`projects-toolbar`): ensure **no nested interactive** elements and **keyboard** parity when moving markup from BEM divs to directives + plain layout.
