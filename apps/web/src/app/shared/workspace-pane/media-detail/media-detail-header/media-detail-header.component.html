@@ -1,7 +1,9 @@
 <div class="detail-header">
   <button
-    uiIconButtonGhost
-    class="detail-back-btn icon-btn-ghost"
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-back-btn"
     type="button"
     [attr.aria-label]="t('workspace.imageDetail.action.back.aria', 'Back to gallery')"
     [attr.title]="t('workspace.imageDetail.action.back.title', 'Back to gallery')"
@@ -42,9 +44,11 @@
   >
 
   <button
-    uiIconButtonGhost
     #contextMenuTrigger
-    class="detail-actions-btn icon-btn-ghost"
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-actions-btn"
     type="button"
     [attr.aria-label]="t('workspace.imageDetail.action.more.aria', 'More actions')"
     [attr.title]="t('workspace.imageDetail.action.more.title', 'More actions')"

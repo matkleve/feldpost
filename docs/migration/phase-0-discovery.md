@@ -4,7 +4,7 @@
 
 > *Ecosystem — **Figma / Code Connect:** **(deferred — Figma paused)**. This plan has no separate Figma rows; see `.cursor/rules/archive/figma-integration.mdc.archived` and `docs/archive/figma-tokens.json`.*
 
-- [ ] **Phase 0** — Discovery & Planning ✅ (complete — this document)
+- [x] **Phase 0** — Discovery & Planning ✅ (complete — this document)
 
 ## Project Setup Summary
 

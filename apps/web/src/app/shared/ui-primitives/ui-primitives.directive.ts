@@ -582,13 +582,6 @@ export class UiToggleSwitchSizeLgDirective {}
 })
 export class UiToggleSwitchCompactDirective {}
 
-@Directive({
-  selector: 'input[type="range"][uiRangeControl]',
-  standalone: true,
-  host: { class: 'ui-range-control' },
-})
-export class UiRangeControlDirective {}
-
 // Shim: merges `badgeVariants({ variant: 'outline' })` + keeps `.ui-chip*` SCSS hooks.
 // TODO(spartan-v4): After callsite migration, use `hlmBadge` / `HlmBadgeDirective`; retire primitive sheet when `app-chip` file-type tokens are reconciled (see `chip.component.ts` variants).
 // @see apps/web/src/app/shared/ui/badge/

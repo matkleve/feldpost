@@ -12,10 +12,8 @@ import {
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HLM_BADGE_IMPORTS } from '../../../../shared/ui/badge';
-import {
-  UiIconButtonGhostDirective,
-  UiInputControlDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { UiInputControlDirective } from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import type { ResolvedAction } from '../../../../core/action/action-types';
 import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-actions.types';
@@ -25,7 +23,7 @@ import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-acti
   standalone: true,
   imports: [
     DropdownShellComponent,
-    UiIconButtonGhostDirective,
+    ...HLM_BUTTON_IMPORTS,
     UiInputControlDirective,
     HlmMenuItemDirective,
     HlmMenuSeparatorDirective,

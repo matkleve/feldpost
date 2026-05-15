@@ -18,22 +18,21 @@
   flex-direction: row;
 }
 
-.ui-dropdown-trigger__chevron {
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-solid);
+// Chevron geometry + open rotation (Tailwind handles base sizing at callsites; keep transform here for host `--open`)
+// @see apps/web/src/app/shared/dropdown-trigger/ui-dropdown-trigger.directive.ts
+.ui-dropdown-trigger [data-dd-part='chevron'] {
   flex-shrink: 0;
   transition: transform 150ms ease-out;
 }
 
-// Emphasis: open state
-.ui-dropdown-trigger--open .ui-dropdown-trigger__chevron {
+.ui-dropdown-trigger--open [data-dd-part='chevron'] {
   transform: rotate(180deg);
 }
 
 // Layout: responsive collapse modifiers
 // label hidden, icon + chevron visible
 .ui-dropdown-trigger--compact {
-  .ui-dropdown-trigger__label {
+  [data-dd-part='label'] {
     display: none;
   }
 }
@@ -43,16 +42,16 @@
   font-size: 0;
   line-height: 0;
 
-  .ui-dropdown-trigger__label {
+  [data-dd-part='label'] {
     display: none;
   }
-  .ui-dropdown-trigger__chevron {
+  [data-dd-part='chevron'] {
     display: none;
   }
 
   .material-icons,
   .material-symbols-outlined,
-  .ui-dropdown-trigger__icon {
+  [data-dd-part='icon'] {
     font-size: var(--font-size-base);
     line-height: var(--line-height-solid);
   }

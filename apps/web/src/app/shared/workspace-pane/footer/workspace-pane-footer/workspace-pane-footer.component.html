@@ -8,10 +8,9 @@
     @for (action of actions(); track action.id) {
       @if (action.id === 'download_zip') {
         <button
-          uiButton
-          uiButtonPrimary
-          uiButtonSizeSm
-          uiButtonIconWithText
+          hlmBtn
+          variant="default"
+          size="sm"
           type="button"
           [disabled]="pending() || action.disabled"
           (click)="onActionSelected(action.id)"
@@ -23,9 +22,9 @@
         </button>
       } @else {
         <button
-          uiButton
-          uiButtonSizeSm
-          uiButtonIconOnly
+          hlmBtn
+          variant="outline"
+          size="icon"
           type="button"
           [disabled]="pending() || action.disabled"
           (click)="onActionSelected(action.id)"
@@ -92,7 +91,8 @@
 
     <div class="workspace-action__dialog-actions">
       <button
-        uiButton
+        hlmBtn
+        variant="outline"
         type="button"
         class="workspace-action__btn"
         [disabled]="pending()"
@@ -101,8 +101,8 @@
         {{ t('workspace.export.dialog.cancel', 'Cancel') }}
       </button>
       <button
-        uiButton
-        uiButtonPrimary
+        hlmBtn
+        variant="default"
         type="button"
         class="workspace-action__btn workspace-action__btn--primary"
         [disabled]="pending()"
@@ -152,7 +152,8 @@
 
     <div class="workspace-action__dialog-actions">
       <button
-        uiButton
+        hlmBtn
+        variant="outline"
         type="button"
         class="workspace-action__btn"
         [disabled]="pending()"
@@ -161,8 +162,8 @@
         {{ t('workspace.export.dialog.cancel', 'Cancel') }}
       </button>
       <button
-        uiButton
-        uiButtonPrimary
+        hlmBtn
+        variant="default"
         type="button"
         class="workspace-action__btn workspace-action__btn--primary"
         [disabled]="pending()"

@@ -1,6 +1,6 @@
 # Phase 6 — Template BEM Sweep & Toggle Unification
 
-**Status:** In Progress (2026-05-14)
+**Status:** In Progress (2026-05-15)
 
 **Goal:** Zero `ui-*` class names in any Angular template. Every toggle cluster uses `hlmToggleGroup` / `hlmToggleGroupItem` (no hand-rolled BEM for group chrome). Toolbar actions use `hlmBtn` with explicit variants. `apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts` is removed once nothing binds legacy `ui-*` classes.
 
@@ -41,18 +41,18 @@ Optional: count lines for burn-down charts.
 rg '\bui-' apps/web/src/app --glob "*.html" -c
 ```
 
-### Baseline snapshot (2026-05-14, informational)
+### Baseline snapshot (2026-05-15, re-scanned)
 
 Re-run before execution; numbers drift.
 
-| Scan | Result (approx.) |
-|------|-------------------|
-| Templates with `\bui-` | **24** files under `apps/web/src/app` (includes auth, media, projects, workspace, dropdowns, etc.) |
-| `ui-button--active\|ghost\|secondary` in HTML | **2** hits (`projects-page`, `media-empty`) — extend search for `ui-button` without suffix |
-| SCSS `var(--color-*)` in `apps/web/src/app` | **51** files — **Phase 7**, not blocking template cleanup except where templates and SCSS must move together |
-| `hlm-toggle-group__*` / `hlm-pill-toggle__*` in HTML | Multiple callsites (`upload-panel`, `settings-overlay`, `workspace-toolbar`, `projects-toolbar`, `projects-view-toggle`, `map-shell`, `media`) — remove BEM strings per acceptance criteria |
+| Scan | Result |
+|------|--------|
+| Templates with `\bui-` (hyphenated `ui-…`) | **2** files: `panel-trigger.component.html`, `popover.component.html` — matches only **`@see docs/specs/component/ui-primitives/...`** comment paths (**no** `class="…ui-…"` or binding markup). |
+| `ui-button--active\|ghost\|secondary` in HTML | **0** hits |
+| SCSS `var(--color…)` in `apps/web/src/app` (`*.scss`) | **0** files (pattern `var\(--color`; Phase 7 may still cover other legacy `var(--*` tokens) |
+| `hlm-toggle-group__*` / `hlm-pill-toggle__*` in HTML | **0** hits |
 
-**`styles/primitives/` inventory (2026-05-14):** `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — first three align with `ui-container` / `ui-row-shell` / `ui-card-shell`; `dropdown-trigger.scss` is tracked in Phase 8 for deletion or relocation if unused.
+**`styles/primitives/` inventory (2026-05-15):** `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — first three align with `ui-container` / `ui-row-shell` / `ui-card-shell`; `dropdown-trigger.scss` remains in use for `ui-dropdown-trigger` + `[data-dd-part]` (Phase 8 when host migrates off `ui-button`).
 
 ---
 
@@ -182,7 +182,7 @@ These use CVA + `host: { '[class]' }` — no action needed:
 ## Definition of done
 
 - All acceptance criteria green.
-- `docs/MIGRATION_PLAN.md` status for Phase 6 flipped to **Done** with date.
+- `docs/migration/README.md` status for Phase 6 flipped to **Done** with date.
 - Phase 7 pre-flight token scan re-run and attached to `phase-7-token-migration.md` §Baseline.
 
 ## Phase 6 Post-patches
@@ -214,11 +214,11 @@ These structural fixes were identified after Phase 6 acceptance gates passed.
 | Rail | Active state uses legacy `var(--color-clay)` mixes | Phase 7 token migration + Phase 10 theme QA | 7 / 10 |
 | Toggle groups | Directive wiring OK; visual issues are token-related (`--muted` not resolving) | Phase 7 then Phase 10 matrix | 7 / 10 |
 | Toggle groups | `data-i18n-skip` only on language segmented wrapper, not density/theme/marker | Align across all clusters | 6-patch |
-| Form rows | `uiRangeControl` on search radius + cache retention range inputs (legacy primitive) | Replace with supported range pattern; unblocks primitive deletion | 6-patch / 8 |
+| Form rows | Search radius + cache retention use `<input type="range" hlmInput>` (`UiRangeControlDirective` removed). | Any remaining work is track/thumb sizing and token alignment — Phase 7 tokens + Phase 10 visual QA. | 7 / 10 |
 | Switch rows | Row `<button>` lacks explicit `aria-pressed` / `role="switch"` while `hlmSwitch` is decorative | Add ARIA semantics on row | 10 |
 | Tokens | `var(--color-*)` throughout `settings-overlay.component.scss` and `invite-management-section.component.scss` | Phase 7 mapping to tweakcn | 7 |
 | Invite | `bg-card` utility overridden by SCSS `var(--color-bg-elevated)` — mixed token eras | Single surface owner after token migration | 7 / 10 |
 | Invite | `invite-section__select` may double-style `hlmSelect` (local chrome + directive) | Consolidate to one owner | 6-patch / 10 |
 | Invite | Spinner `800ms` hardcoded animation duration | Map to motion token or document waiver | 10 |
 
-**Phase 10 Visual QA (settings overlay):** lead divider visibility; pane/close padding; account card parity; three-theme check for rail, segmented controls, switches, invite QR/link; mobile field + invite layouts; a11y for switch rows; confirm `uiRangeControl` gone.
+**Phase 10 Visual QA (settings overlay):** lead divider visibility; pane/close padding; account card parity; three-theme check for rail, segmented controls, switches, invite QR/link; mobile field + invite layouts; a11y for switch rows; range sliders (`hlmInput` + `type="range"`) track/thumb and value readout across themes.

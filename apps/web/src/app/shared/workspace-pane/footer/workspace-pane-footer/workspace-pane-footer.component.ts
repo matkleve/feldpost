@@ -12,14 +12,8 @@ import { MediaQueryService } from '../../../../core/media-query/media-query.serv
 import { ProjectsService } from '../../../../core/projects/projects.service';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ACTION_CONTEXT_IDS } from '../../../../core/action/action-context-ids';
-import {
-  UiButtonDirective,
-  UiButtonPrimaryDirective,
-  UiButtonSizeSmDirective,
-  UiButtonIconOnlyDirective,
-  UiButtonIconWithTextDirective,
-  UiInputControlDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { UiInputControlDirective } from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
 import { WORKSPACE_EXPORT_ACTION_DEFINITIONS } from '../workspace-export-actions.registry';
@@ -44,11 +38,7 @@ const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
   selector: 'app-workspace-pane-footer',
   standalone: true,
   imports: [
-    UiButtonDirective,
-    UiButtonPrimaryDirective,
-    UiButtonSizeSmDirective,
-    UiButtonIconOnlyDirective,
-    UiButtonIconWithTextDirective,
+    ...HLM_BUTTON_IMPORTS,
     UiInputControlDirective,
     ...HLM_INPUT_IMPORTS,
     PaneFooterComponent,

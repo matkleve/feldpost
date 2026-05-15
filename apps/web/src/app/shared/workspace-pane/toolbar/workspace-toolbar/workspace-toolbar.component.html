@@ -12,10 +12,12 @@
       [attr.aria-haspopup]="true"
       (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
     >
-      <span class="ui-dropdown-trigger__label">{{ btn.label }}</span>
-      <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true"
-        >expand_more</span
-      >
+      <span data-dd-part="label" class="min-w-0 flex-1 truncate text-left">{{ btn.label }}</span>
+      <span
+        data-dd-part="chevron"
+        class="material-icons shrink-0 text-base leading-none transition-transform duration-150 ease-out"
+        aria-hidden="true"
+        >expand_more</span>
     </button>
   }
 

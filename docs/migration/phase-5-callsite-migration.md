@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 
-- [~] **Phase 5** — Callsite Migration & Legacy Removal — **SCSS cleanup + `UI_PRIMITIVE_DIRECTIVES` barrel removed (2026-05-14);** Group D (dropdown shell callers), shim directive file deletion, legacy alias removal, and `design-system:check` green remain open
+- [~] **Phase 5** — Callsite Migration & Legacy Removal — **SCSS cleanup + `UI_PRIMITIVE_DIRECTIVES` barrel removed (2026-05-14);** Group D (dropdown shell callers), shim file deletion, and legacy alias removal remain open; **`npm run design-system:check` green (2026-05-15)** — root `AGENTS.md` includes required Ownership Matrix column header (`scripts/guard-visual-behavior.mjs`)
   - [x] **Pre-flight** (do before ANY callsite changes)
     - [x] Audit which components import `UI_PRIMITIVE_DIRECTIVES` barrel vs individual directives — **done (2026-05-14):** `apps/web/src` had **zero** barrel imports after `filter-dropdown` narrowed; barrel export deleted
     - [ ] Map each directive to its callsites (how many templates use `[uiButton]`, `[uiInputControl]`, etc.) — **optional housekeeping**
@@ -42,11 +42,11 @@
     - [x] Delete `apps/web/src/styles/patterns/form.scss` — **done (2026-05-14)**
   - [~] **Barrel removal**
     - [x] Remove `UI_PRIMITIVE_DIRECTIVES` export from `ui-primitives.directive.ts` — **done (2026-05-14)** (last callsite was `filter-dropdown`; Group D unchanged)
-    - [ ] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **deferred:** many components still import named `Ui*` shims
+    - [ ] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **blocked (2026-05-15):** **14** production files under `apps/web/src` still `import … from '…/ui-primitives.directive'` (named `Ui*` shims); `rg 'ui-primitives\\.directive' apps/web/src` — delete only after Phase 6 / Group D clears those callsites
     - [ ] Remove legacy alias block from `apps/web/src/styles.scss` (verify no remaining `--color-*` / `--fp-sys-*` references) — **deferred:** `rg "var\\(--color-" apps/web/src` still matches widespread component SCSS + `styles.scss` link baseline (`var(--color-primary)` on `a`)
     - [ ] Delete `apps/web/src/styles/tokens.scss` (after alias block removed and CDK overlay import moved)
   - [~] **Final verification**
     - [x] `ng build` — **green (2026-05-14)** — zero errors; pre-existing map-shell style budget + CommonJS warnings unchanged
-    - [ ] `npm run design-system:check` — **fails (2026-05-14):** `scripts/guard-visual-behavior.mjs` reports root `AGENTS.md` missing Ownership Matrix table columns (**not introduced** by Phase 5 SCSS edits)
+    - [x] `npm run design-system:check` — **green (2026-05-15):** registry + panel audit + `guard-visual-behavior.mjs` (root `AGENTS.md` matrix column row present)
     - [ ] Visual QA: open app, verify light/dark/sandstone themes, verify all interactive states
-    - [x] Update `docs/MIGRATION_PLAN.md` — **this pass (2026-05-14)**
+    - [x] Update `docs/migration/README.md` (migration index) — **this pass (2026-05-14)**

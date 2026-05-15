@@ -24,13 +24,13 @@
 
 // Preserve Tailwind v3 theme extensions (custom radius, colors, spacing, etc.)
 // during the migration.  Remove after all callsites are migrated to v4 tokens.
-// @see docs/MIGRATION_PLAN.md §Phase 3 cleanup
+// @see docs/migration/phase-7-token-migration.md
 @config "../tailwind.config.js";
 
 // ── tweakcn design token foundation — light mode ───────────────────────────────
 // Single CSS variable foundation for spartan/ui.
 // --primary = oklch(0.6716 0.1368 48.5130) ≈ Feldpost warm orange #cc7a4a.
-// @see docs/MIGRATION_PLAN.md §Phase 2
+// @see docs/migration/phase-2-foundation.md
 :root {
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0.2101 0.0318 264.6645);
@@ -85,7 +85,7 @@
   --tracking-normal: 0rem;
   --spacing: 0.25rem;
   // Semantic states and file-type accents (single definition point; Phase 7)
-  // @see docs/MIGRATION_PLAN.md §Phase 3 cleanup
+  // @see docs/migration/phase-7-token-migration.md
   --success: oklch(0.52 0.145 152);
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.58 0.14 55);
@@ -106,7 +106,7 @@
 
 // ── Dark mode token overrides ──────────────────────────────────────────────────
 // Activated by [data-theme="dark"] on <html>.
-// @see docs/MIGRATION_PLAN.md §Phase 2
+// @see docs/migration/phase-2-foundation.md
 html[data-theme="dark"] {
   --background: oklch(0.1797 0.0043 308.1928);
   --foreground: oklch(0.8109 0 0);
@@ -175,7 +175,7 @@ html[data-theme="dark"] {
 // ── Sandstone theme — warm tinted surface overrides ───────────────────────────
 // Activated by [data-theme="sandstone"] on <html>.
 // Derived from light-mode values with warmer surfaces and borders.
-// @see docs/MIGRATION_PLAN.md §Phase 2
+// @see docs/migration/phase-2-foundation.md
 html[data-theme="sandstone"] {
   --background: oklch(0.9800 0.0080 75.0000);
   --card: oklch(0.9700 0.0090 72.0000);

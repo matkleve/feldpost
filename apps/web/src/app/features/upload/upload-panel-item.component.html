@@ -60,10 +60,9 @@
       }
       @if (showDuplicateExistingMediaShortcut()) {
         <button
-          uiButton
-          uiButtonPrimary
-          uiButtonIconOnly
-          uiButtonSizeSm
+          hlmBtn
+          variant="default"
+          size="icon"
           type="button"
           class="upload-panel__thumbnail-action-btn upload-panel__thumbnail-action-btn--interactive"
           [attr.aria-label]="t('upload.item.menu.issue.openExisting', 'Open existing media')"
@@ -110,10 +109,9 @@
     </div>
 
     <button
-      uiButton
-      uiButtonGhost
-      uiButtonIconOnly
-      uiButtonSizeSm
+      hlmBtn
+      variant="ghost"
+      size="icon"
       class="upload-panel__row-action upload-panel__row-action--menu"
       type="button"
       [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"

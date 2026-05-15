@@ -2,13 +2,7 @@ import type { OnDestroy} from '@angular/core';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
-import {
-  UiButtonDirective,
-  UiButtonGhostDirective,
-  UiButtonIconOnlyDirective,
-  UiButtonPrimaryDirective,
-  UiButtonSizeSmDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 import { getIssueKind, getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { statusLabelText, actionLabel, actionIcon } from './upload-panel-item-helpers';
@@ -81,11 +75,7 @@ export interface UploadItemActionEvent {
   standalone: true,
   imports: [
     CommonModule,
-    UiButtonDirective,
-    UiButtonSizeSmDirective,
-    UiButtonIconOnlyDirective,
-    UiButtonPrimaryDirective,
-    UiButtonGhostDirective,
+    ...HLM_BUTTON_IMPORTS,
     ChipComponent,
     UniversalMediaComponent,
     DropdownShellComponent,

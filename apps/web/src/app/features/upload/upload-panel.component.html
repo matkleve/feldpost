@@ -77,7 +77,8 @@
     />
 
     <button
-      uiButton
+      hlmBtn
+      variant="outline"
       class="upload-panel__intake-btn upload-panel__intake-btn--folder"
       type="button"
       [disabled]="scanning() || !folderImportSupported"
@@ -99,7 +100,8 @@
     }
 
     <button
-      uiButton
+      hlmBtn
+      variant="outline"
       class="upload-panel__intake-btn upload-panel__intake-btn--capture"
       type="button"
       [disabled]="scanning()"
@@ -247,7 +249,9 @@
       <div class="upload-panel__bulk-actions" slot="right">
         @if (hasRetryableSelection()) {
           <button
-            uiButton
+            hlmBtn
+            variant="outline"
+            size="icon"
             type="button"
             (click)="bulkHandlers.retrySelectedUploads()"
             [attr.aria-label]="t('projects.page.error.retry', 'Retry')"
@@ -259,7 +263,9 @@
 
         @if (canDownloadSelectedUploads()) {
           <button
-            uiButton
+            hlmBtn
+            variant="outline"
+            size="icon"
             type="button"
             (click)="bulkHandlers.downloadSelectedUploads()"
             [attr.aria-label]="t('auto.0099.download', 'Download')"
@@ -270,7 +276,9 @@
         }
 
         <button
-          uiButton
+          hlmBtn
+          variant="outline"
+          size="icon"
           type="button"
           class="upload-panel__bulk-remove"
           (click)="bulkHandlers.removeSelectedUploads()"
@@ -281,7 +289,9 @@
         </button>
 
         <button
-          uiButton
+          hlmBtn
+          variant="outline"
+          size="icon"
           type="button"
           (click)="bulkHandlers.clearSelectedUploads()"
           [attr.aria-label]="t('workspace.export.action.selectNone', 'Select none')"
@@ -303,8 +313,9 @@
           {{ t('upload.item.menu.section.location', 'Change location') }}
         </h4>
         <button
-          uiButton
-          uiButtonGhost
+          hlmBtn
+          variant="ghost"
+          size="icon"
           type="button"
           class="upload-panel__location-editor-close"
           [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"
@@ -388,22 +399,24 @@
 
         <div class="upload-panel__duplicate-dialog-actions">
           <button
-            uiButton
+            hlmBtn
+            variant="outline"
             type="button"
             (click)="actionHandlers.onDuplicateResolutionChoice('use_existing')"
           >
             {{ t('upload.duplicate.dialog.action.useExisting', 'Use existing') }}
           </button>
           <button
-            uiButton
+            hlmBtn
+            variant="outline"
             type="button"
             (click)="actionHandlers.onDuplicateResolutionChoice('upload_anyway')"
           >
             {{ t('upload.duplicate.dialog.action.uploadAnyway', 'Upload anyway') }}
           </button>
           <button
-            uiButton
-            uiButtonGhost
+            hlmBtn
+            variant="ghost"
             type="button"
             (click)="actionHandlers.onDuplicateResolutionChoice('reject')"
           >

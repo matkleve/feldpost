@@ -68,7 +68,7 @@ Mark each row **Pass / Fail** with ticket link on fail.
 - [ ] **Widths:** segmented groups fill value column where SCSS sets `--hlm-pill-toggle-width: 100%`.
 - [ ] **Breakpoints:** field rows stack on small viewports; invite role row stacks; QR 10rem on mobile acceptable.
 - [ ] **A11y:** boolean rows expose correct `aria-pressed` / `role="switch"` semantics (not only decorative `hlmSwitch`).
-- [ ] **Phase 6 gate:** zero `uiRangeControl` references in settings templates.
+- [ ] **Settings ranges:** search radius + cache retention `<input type="range" hlmInput>` — track/thumb, focus ring, and value column alignment on all three themes (no separate range directive; regressions are token/visual, not template wiring).
 
 ---
 
@@ -120,5 +120,5 @@ For **buttons**, **toggles**, **inputs**, **dialogs**, **dropdowns**:
 ## Definition of done
 
 - Acceptance table green.
-- `docs/MIGRATION_PLAN.md` migration banner updated to “Phases 6–10 complete” with date.
+- `docs/migration/README.md` migration banner updated to “Phases 6–10 complete” with date.
 - Optional: archive migration detail docs under `docs/migration/archive/` if the team wants a slimmer index — **do not** delete decision logs.
