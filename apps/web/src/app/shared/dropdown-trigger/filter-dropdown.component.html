@@ -55,9 +55,11 @@
               (input)="updateValue(rule.id, $any($event.target).value)"
             />
             <button
-              uiIconButtonGhost
-              uiIconButtonGhostDanger
-              class="filter-rule__remove icon-btn-ghost icon-btn-ghost--danger"
+              hlmBtn
+              variant="destructive"
+              size="icon"
+              class="filter-rule__remove"
+              type="button"
               (click)="removeRule(rule.id)"
               [attr.aria-label]="t('workspace.filter.remove.aria', 'Remove filter')"
             >

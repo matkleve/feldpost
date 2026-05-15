@@ -19,8 +19,8 @@ import type { DetailEditingField, ImageRecord, SelectOption } from '../media-det
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HlmBadgeDirective } from '../../../../shared/ui/badge';
 import { HlmMenuLabelDirective } from '../../../../shared/ui/menu';
+import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import {
-  UiIconButtonGhostDirective,
   UiInputControlDirective,
   UiRowShellDirective,
   UiRowShellSizeSmDirective,
@@ -48,7 +48,7 @@ interface AddressFieldDefinition {
     CapturedDateEditorComponent,
     AddressSearchComponent,
     DropdownShellComponent,
-    UiIconButtonGhostDirective,
+    ...HLM_BUTTON_IMPORTS,
     UiInputControlDirective,
     UiRowShellDirective,
     UiRowShellSizeSmDirective,

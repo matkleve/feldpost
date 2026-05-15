@@ -4,12 +4,12 @@ import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
-import { UiIconButtonGhostDirective } from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 
 @Component({
   selector: 'app-address-search',
   standalone: true,
-  imports: [...HLM_INPUT_IMPORTS, UiIconButtonGhostDirective, HlmMenuItemDirective],
+  imports: [...HLM_INPUT_IMPORTS, ...HLM_BUTTON_IMPORTS, HlmMenuItemDirective],
   templateUrl: './address-search.component.html',
   styleUrl: './address-search.component.scss',
 })

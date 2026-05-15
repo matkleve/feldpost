@@ -17,20 +17,14 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PhotoLightboxComponent } from '../../../../shared/photo-lightbox/photo-lightbox.component';
 import { UniversalMediaComponent } from '../../../../shared/media/universal-media.component';
 import type { MediaRenderState } from '../../../../core/media/media-renderer.types';
-import {
-  UiButtonDirective,
-  UiButtonPrimaryDirective,
-  UiIconButtonGhostDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 @Component({
   selector: 'app-media-detail-media-viewer',
   standalone: true,
   imports: [
     PhotoLightboxComponent,
     UniversalMediaComponent,
-    UiIconButtonGhostDirective,
-    UiButtonDirective,
-    UiButtonPrimaryDirective,
+    ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './media-detail-media-viewer.component.html',
   styleUrl: './media-detail-media-viewer.component.scss',

@@ -33,7 +33,9 @@
     </button>
 
     <button
-      uiIconButtonGhost
+      hlmBtn
+      variant="ghost"
+      size="icon"
       class="detail-image-edit-btn"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.replaceMedia.aria', 'Replace media')"
@@ -61,8 +63,8 @@
       }}</span>
     </div>
     <button
-      uiButton
-      uiButtonPrimary
+      hlmBtn
+      variant="default"
       class="detail-upload-prompt__button"
       type="button"
       [disabled]="replacing()"

@@ -11,7 +11,7 @@ import {
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
-import { UiIconButtonGhostDirective } from '../ui-primitives/ui-primitives.directive';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 
 export interface GroupingProperty {
   id: string;
@@ -29,7 +29,7 @@ export interface GroupingProperty {
     CdkDropList,
     CdkDrag,
     CdkDragHandle,
-    UiIconButtonGhostDirective,
+    ...HLM_BUTTON_IMPORTS,
     HlmMenuItemDirective,
     HlmMenuLabelDirective,
     HlmMenuSeparatorDirective,

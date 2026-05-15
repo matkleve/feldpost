@@ -7,8 +7,10 @@
     class="detail-row detail-row--readonly"
   >
     <button
-      uiIconButtonGhost
-      class="detail-row-action icon-btn-ghost detail-row-action--left"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
       [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -29,8 +31,10 @@
     [class.detail-row--editing]="editingField() === 'captured_at'"
   >
     <button
-      uiIconButtonGhost
-      class="detail-row-action icon-btn-ghost detail-row-action--left"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
       [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -55,8 +59,10 @@
       </button>
     }
     <button
-      uiIconButtonGhost
-      class="detail-row-action icon-btn-ghost detail-row-action--right"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--right"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
       [attr.title]="t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')"
@@ -73,8 +79,10 @@
     [class.detail-row--editing]="editingField() === 'project_ids'"
   >
     <button
-      uiIconButtonGhost
-      class="detail-row-action icon-btn-ghost detail-row-action--left"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
       [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -205,8 +213,10 @@
         {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
       </button>
       <button
-        uiIconButtonGhost
-        class="detail-row-action icon-btn-ghost detail-row-action--right"
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--right"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.projects.edit.aria', 'Edit projects')"
         [attr.title]="t('workspace.imageDetail.projects.edit.title', 'Edit projects')"
@@ -223,8 +233,10 @@
     class="detail-row detail-row--readonly"
   >
     <button
-      uiIconButtonGhost
-      class="detail-row-action icon-btn-ghost detail-row-action--left"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
       [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -240,8 +252,10 @@
       uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
     }}</span>
     <button
-      uiIconButtonGhost
-      class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
+      hlmBtn
+      variant="destructive"
+      size="icon"
+      class="detail-row-action detail-row-action--right detail-row-action--danger"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.delete', 'Delete media')"
       [attr.title]="t('workspace.imageDetail.action.delete', 'Delete media')"
@@ -270,8 +284,10 @@
       [class.detail-row--editing]="editingField() === fieldDef.name"
     >
       <button
-        uiIconButtonGhost
-        class="detail-row-action icon-btn-ghost detail-row-action--left"
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
         [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -296,8 +312,10 @@
           (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
         />
         <button
-          uiIconButtonGhost
-          class="detail-row-action icon-btn-ghost detail-row-action--right"
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--right"
           type="button"
           [attr.aria-label]="t(fieldDef.saveAriaKey, fieldDef.saveAriaFallback)"
           [attr.title]="t(fieldDef.saveTitleKey, fieldDef.saveTitleFallback)"
@@ -314,8 +332,10 @@
           {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
         </button>
         <button
-          uiIconButtonGhost
-          class="detail-row-action icon-btn-ghost detail-row-action--right"
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--right"
           type="button"
           [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
           [attr.title]="t(fieldDef.editTitleKey, fieldDef.editTitleFallback)"
@@ -334,8 +354,10 @@
       class="detail-row detail-row--readonly"
     >
       <button
-        uiIconButtonGhost
-        class="detail-row-action icon-btn-ghost detail-row-action--left-outer"
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--left-outer"
         type="button"
         [attr.aria-label]="
           t('workspace.imageDetail.action.zoomToLocation.aria', 'Zoom to location')
@@ -346,8 +368,10 @@
         <span class="material-icons" aria-hidden="true">zoom_in_map</span>
       </button>
       <button
-        uiIconButtonGhost
-        class="detail-row-action icon-btn-ghost detail-row-action--left"
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
         [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -368,8 +392,10 @@
         {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
       </span>
       <button
-        uiIconButtonGhost
-        class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
+        hlmBtn
+        variant="destructive"
+        size="icon"
+        class="detail-row-action detail-row-action--right detail-row-action--danger"
         type="button"
         [attr.aria-label]="
           t('workspace.imageDetail.action.revertCoordinates.aria', 'Revert corrected coordinates')
@@ -413,8 +439,10 @@
       class="detail-row detail-row--readonly"
     >
       <button
-        uiIconButtonGhost
-        class="detail-row-action icon-btn-ghost detail-row-action--left"
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
         [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"

@@ -15,8 +15,10 @@
     />
     @if (query()) {
       <button
-        uiIconButtonGhost
-        class="address-search__clear icon-btn-ghost"
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="address-search__clear"
         type="button"
         [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"
         (click)="query.set(''); addressSearchInput.focus()"

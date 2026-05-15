@@ -5,8 +5,10 @@
   [class.meta-row--editing]="editing()"
 >
   <button
-    uiIconButtonGhost
-    class="detail-row-action icon-btn-ghost detail-row-action--left"
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-row-action detail-row-action--left"
     type="button"
     [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
     [title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
@@ -40,8 +42,10 @@
   }
 
   <button
-    uiIconButtonGhost
-    class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
+    hlmBtn
+    variant="destructive"
+    size="icon"
+    class="detail-row-action detail-row-action--right detail-row-action--danger"
     type="button"
     [attr.aria-label]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"
     [attr.title]="t('workspace.metadata.row.removeTitle', 'Remove metadata')"

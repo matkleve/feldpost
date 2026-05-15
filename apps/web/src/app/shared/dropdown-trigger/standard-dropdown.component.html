@@ -11,8 +11,10 @@
 
       @if (showDefaultClearAction() && searchTerm()) {
         <button
-          uiIconButtonGhost
-          class="shrink-0 icon-btn-ghost"
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="shrink-0"
           type="button"
           [attr.aria-label]="clearSearchAriaLabel()"
           (click)="clearRequested.emit()"

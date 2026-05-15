@@ -7,8 +7,11 @@
         }}</span>
         @if (activeGroupings().length > 0) {
           <button
-            uiIconButtonGhost
-            class="shrink-0 icon-btn-ghost"
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            class="shrink-0"
+            type="button"
             (click)="clearGroupings()"
             [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
           >
