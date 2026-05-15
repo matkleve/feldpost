@@ -206,9 +206,15 @@ export class AuthService {
       };
     }
 
+    const narrowAal = (v: typeof data.currentLevel): 'aal1' | 'aal2' | null => {
+      if (v === 'aal1') return 'aal1';
+      if (v === 'aal2') return 'aal2';
+      return null;
+    };
+
     return {
-      currentLevel: data.currentLevel ?? null,
-      nextLevel: data.nextLevel ?? null,
+      currentLevel: narrowAal(data.currentLevel ?? null),
+      nextLevel: narrowAal(data.nextLevel ?? null),
       error: null,
     };
   }
