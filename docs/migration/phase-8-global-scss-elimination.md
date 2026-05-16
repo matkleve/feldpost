@@ -71,11 +71,13 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 ### 7. Inventory remaining `styles/` tree
 
-**Keep (expected):** `reset.scss`, `layout/app.scss`, `layout/clamp.scss`.
+**Keep (expected):** `reset.scss`, `map-leaflet-host.scss` (Leaflet map chrome), `layout/app.scss`, `layout/clamp.scss`.
 
 **Review:** any other `@use` from `styles.scss` not listed above — justify or delete.
 
-**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is exactly **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./app/shared/ui/toggle-group/hlm-toggle-group`** (plus Sass **`meta`** for **`load-css`**). No stray **`primitives/*`** or **`tokens`** references.
+**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is **`./styles/map-leaflet-host`**, **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./app/shared/ui/toggle-group/hlm-toggle-group`** (plus Sass **`meta`** for **`load-css`**). No stray **`primitives/*`** or **`tokens`** references.
+
+**Progress (2026-05-16, slice — map host partial):** Leaflet focus / link overrides moved out of **`reset.scss`** into **`apps/web/src/styles/map-leaflet-host.scss`** (map surface chrome). **`styles.scss`** **`@use './styles/map-leaflet-host'`** before **`reset`** so output order stays Leaflet-first then document reset. **`layout/app.scss`:** removed dead **`@keyframes ui-spin`** (no `animation: ui-spin` callsites).
 
 ### 8. Final gates
 
@@ -91,7 +93,7 @@ npm run design-system:check
 | Gate | Condition |
 |------|-----------|
 | `styles/primitives/` | **Empty** or directory **deleted** |
-| `styles.scss` `@use` block | Only **`reset`**, **`layout/app`**, **`layout/clamp`** (+ any explicitly approved non-primitive helpers) — **no** `primitives/*`, **no** `tokens`, **no** `hlm-toggle-group` once deleted |
+| `styles.scss` `@use` block | **`map-leaflet-host`** (Leaflet map chrome), **`reset`**, **`layout/app`**, **`layout/clamp`** (+ **`hlm-toggle-group`** until deleted), **`meta`** for **`load-css`** — **no** `primitives/*`, **no** `tokens` |
 | `hlm-toggle-group.scss` | **Deleted**, or file exists with **no** `@layer states` / selector-driven segment states (**hover**, **data-attention**, focus, disabled) — those live in **CVA**; **OK** if **`@layer components`** (pill shell) + **`prefers-reduced-motion`** clamp remain |
 | Build / DS | `ng build` and `npm run design-system:check` → **0** |
 

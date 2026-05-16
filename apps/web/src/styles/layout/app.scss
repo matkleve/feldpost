@@ -11,9 +11,3 @@ router-outlet + * {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-
-@keyframes ui-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}

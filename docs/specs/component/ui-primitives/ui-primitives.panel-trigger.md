@@ -44,7 +44,7 @@ Compact horizontal pill: 16px height, 4px radius, warm neutral fill at rest, war
 | # | User action | System response |
 | --- | --- | --- |
 | 1 | Click trigger (enabled) | Parent toggles panel; trigger visual follows `panelState` |
-| 2 | Hover / pointer down | Background switches to `--fp-ref-primary-95` |
+| 2 | Hover / pointer down | Background switches to **primary ladder stop 95** — `docs/design/tokens.md` §3.1a |
 | 3 | `panelState` becomes `open` | Chevron rotates 180deg |
 | 4 | `disabled` | No toggle; opacity 0.66; no hover fill |
 
@@ -70,12 +70,14 @@ app-panel-trigger [data-state=closed|open] [data-layout=...]
 | **State** | `default`, `active` | `panelState` `'closed' \| 'open'` → `[attr.data-state]` |
 | **Interaction** | `default`, `hover`, `active` | CSS `:hover`, `:active`, `:focus-visible` — no inputs |
 
-## Token Map (Figma var → CSS var)
+## Token Map (Figma parity → implementation)
+
+Reference-palette fills: **neutral-variant stop 95** (rest), **primary stop 95** (hover / pressed) — canonical hex and mapping in **`docs/design/tokens.md` §3.1a** (do not use removed `--fp-ref-*` CSS variables).
 
 | Concern | CSS token |
 | --- | --- |
-| Default fill | `--fp-ref-neutral-variant-95` |
-| Hover / pressed fill | `--fp-ref-primary-95` |
+| Default fill | Neutral-variant stop 95 — §3.1a |
+| Hover / pressed fill | Primary stop 95 — §3.1a |
 | Label color | `--fp-sys-color-on-surface` |
 | Height | `var(--spacing-4)` |
 | Gap | `var(--spacing-1)` |
@@ -93,7 +95,7 @@ Follows `docs/design/state-visuals.md` § **Compact toolbar triggers**: native `
 
 - [ ] Host exposes `[attr.data-state]="'closed' | 'open'"` driven only by `panelState`.
 - [ ] `layout` matches Figma `icon-text-action` and `text-action` padding rules using tokens.
-- [ ] At rest, closed and open use `--fp-ref-neutral-variant-95`; hover / pressed use `--fp-ref-primary-95`.
+- [ ] At rest, closed and open use **neutral-variant stop 95**; hover / pressed use **primary stop 95** — `docs/design/tokens.md` §3.1a.
 - [ ] Chevron points down when `closed`, up when `open`, with transition using listed motion tokens only.
 - [ ] SCSS uses `@layer components` and `@layer states`; no geometry changes in state layer beyond chevron transform.
 - [ ] No user-visible strings inside the trigger without i18n registration (label is parent-supplied).

@@ -8,9 +8,9 @@ A compact toolbar control that opens or closes an anchored panel (popover). It o
 
 **Figma (Dev Mode):** https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev
 
-Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal control, **1rem** total height (`var(--spacing-4)`), **0.25rem** corner radius (`--fp-alias-r-4`, Figma `scale/base-4`), internal row gap **0.25rem** (`var(--spacing-1)`). Default/rest surface uses **`--fp-ref-neutral-variant-95`**. Hover (and pressed pointer while interactive) uses **`--fp-ref-primary-95`**. Label uses **label small** typescale (`--fp-sys-typescale-label-small-*`) and **`--fp-sys-color-on-surface`**. Trailing **expand_more** chevron is **12px** (`var(--spacing-3)`); when **`data-state="open"`**, the chevron rotates **180deg** (points up). Optional leading icon slot is **8px** (`var(--spacing-2)`) — content is projected; Figma uses a placeholder square. **text-action** layout: padding-left **`var(--spacing-2)`**, padding-right **`var(--spacing-1)`**. **icon-text-action** layout: horizontal padding **`--fp-alias-sp-4`** on both sides. No separate visible border in the reference; edge is read from fill vs parent surface.
+Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal control, **1rem** total height (`var(--spacing-4)`), **0.25rem** corner radius (`--fp-alias-r-4`, Figma `scale/base-4`), internal row gap **0.25rem** (`var(--spacing-1)`). Default/rest surface matches **neutral-variant ladder stop 95** (`fp/ref/neutral-variant/95` in Figma). Hover (and pressed pointer while interactive) matches **primary ladder stop 95** (`fp/ref/primary/95`). **Canonical hex and Figma-path ↔ ladder mapping:** `docs/design/tokens.md` §3.1a (do not use removed `--fp-ref-*` CSS variables in implementation). Label uses **label small** typescale (`--fp-sys-typescale-label-small-*`) and **`--fp-sys-color-on-surface`** — typescale contract: §3.1e in the same file. Trailing **expand_more** chevron is **12px** (`var(--spacing-3)`); when **`data-state="open"`**, the chevron rotates **180deg** (points up). Optional leading icon slot is **8px** (`var(--spacing-2)`) — content is projected; Figma uses a placeholder square. **text-action** layout: padding-left **`var(--spacing-2)`**, padding-right **`var(--spacing-1)`**. **icon-text-action** layout: horizontal padding **`--fp-alias-sp-4`** on both sides. No separate visible border in the reference; edge is read from fill vs parent surface.
 
-**Token verification:** Figma scale `base-*` px values map to **`var(--spacing-*)`** / **`--fp-alias-*`** per `docs/migration/phase-7-token-migration.md`. Figma → CSS: `--fp/ref/neutral-variant/95` → `--fp-ref-neutral-variant-95`; `--fp/ref/primary/95` → `--fp-ref-primary-95`; `--spacing/sp-*` → `--fp-alias-sp-*`; `--fp/sys/color/on-surface` → `--fp-sys-color-on-surface` (bridged to tweakcn `--foreground` in the legacy token file); `--typescale/label/small/*` → `--fp-sys-typescale-label-small-*`.
+**Token verification:** Figma scale `base-*` px values map to **`var(--spacing-*)`** / **`--fp-alias-*`** per `docs/migration/phase-7-token-migration.md`. Reference-palette parity names (`fp/ref/…`) and ladder stops are centralized in **`docs/design/tokens.md` §3.1a**; **`--fp/sys/color/on-surface`** → **`--fp-sys-color-on-surface`** (bridged to tweakcn `--foreground` in the legacy token file). Label small metrics: **`docs/design/tokens.md` §3.1e** (`--fp-sys-typescale-label-small-*`).
 
 ## Where It Lives
 
@@ -55,7 +55,7 @@ Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal con
 | # | User action | System response |
 | --- | --- | --- |
 | 1 | Click trigger (enabled) | Parent toggles panel; trigger visual follows `panelState` |
-| 2 | Hover / pointer down | Background matches Figma **hover** / **pressed** rows (`--fp-ref-primary-95` while interactive) |
+| 2 | Hover / pointer down | Background matches Figma **hover** / **pressed** rows (primary ladder stop 95 — `docs/design/tokens.md` §3.1a) |
 | 3 | `panelState` becomes `open` | Chevron rotates to **open** orientation per Figma |
 | 4 | `disabled` | No toggle; uses disabled visual token contract (see acceptance) |
 
@@ -81,10 +81,10 @@ app-panel-trigger [data-state=closed|open]
 
 | State | `data-state` | Chevron | Default background (no hover) |
 | --- | --- | --- | --- |
-| Panel closed | `closed` | Down | `--fp-ref-neutral-variant-95` |
-| Panel open | `open` | Up (rotate 180deg) | `--fp-ref-neutral-variant-95` |
+| Panel closed | `closed` | Down | Neutral-variant stop 95 — §3.1a |
+| Panel open | `open` | Up (rotate 180deg) | Neutral-variant stop 95 — §3.1a |
 
-**CSS-only interaction (not FSM states):** `:hover`, `:focus-visible`, `:active` match Figma **Interaction** axis — backgrounds use **`--fp-ref-primary-95`** where Figma shows hover/hover+open rows. **Disabled:** native `disabled` or `aria-disabled`; visuals follow `docs/design/state-visuals.md` § Disabled (no invented treatment).
+**CSS-only interaction (not FSM states):** `:hover`, `:focus-visible`, `:active` match Figma **Interaction** axis — backgrounds use **primary stop 95** per §3.1a where Figma shows hover/hover+open rows (`docs/design/tokens.md`). **Disabled:** native `disabled` or `aria-disabled`; visuals follow `docs/design/state-visuals.md` § Disabled (no invented treatment).
 
 ### Transition map (choreography)
 
@@ -111,10 +111,10 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 
 | Concern | Token(s) |
 | --- | --- |
-| Default fill | `--fp-ref-neutral-variant-95` |
-| Hover / pressed fill | `--fp-ref-primary-95` |
+| Default fill | Neutral-variant ladder stop 95 — `docs/design/tokens.md` §3.1a |
+| Hover / pressed fill | Primary ladder stop 95 — §3.1a |
 | Label color | `--fp-sys-color-on-surface` |
-| Label typography | `--fp-sys-typescale-label-small-size`, `-line-height`, `-weight`, `-tracking` |
+| Label typography | `--fp-sys-typescale-label-small-size`, `-line-height`, `-weight`, `-tracking` — §3.1e |
 | Height | `var(--spacing-4)` |
 | Gap (icon, label, chevron) | `var(--spacing-1)` |
 | Radius | `--fp-alias-r-4` |
@@ -132,8 +132,8 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 | Behavior | Visual geometry owner | Stacking context owner | Interaction hit-area owner | Selector(s) | Layer (z-index/token) | Test oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Trigger footprint | `:host` | `:host` | `.panel-trigger` button | `.panel-trigger` | inherits toolbar context | Hit area matches compact toolbar control |
-| Default / open fill | `:host` | `:host` | — | `[data-state=closed]`, `[data-state=open]` | — | Closed and open use **neutral-variant-95** at rest per Figma |
-| Hover / pressed fill | `:host` | `:host` | — | `:host(:hover)`, `:host(:active)` | — | Switches to **primary-95** on hover |
+| Default / open fill | `:host` | `:host` | — | `[data-state=closed]`, `[data-state=open]` | — | Closed and open use **neutral-variant stop 95** at rest per Figma (§3.1a) |
+| Hover / pressed fill | `:host` | `:host` | — | `:host(:hover)`, `:host(:active)` | — | Switches to **primary stop 95** on hover (§3.1a) |
 | Chevron orientation | `.panel-trigger__chevron` | `:host` | — | `:host([data-state=open]) .panel-trigger__chevron` | layer: content | Open ⇒ chevron rotated 180deg |
 | Focus ring | `.panel-trigger` | `:host` | `.panel-trigger` | `.panel-trigger:focus-visible` | `--interactive-focus-ring` | Keyboard focus shows ring; no ring on pointer-only |
 
@@ -165,7 +165,7 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 
 - [ ] Host exposes **`[attr.data-state]="'closed' \| 'open'"`** driven only by `panelState` (no separate boolean for open/closed).
 - [ ] `layout` matches Figma `icon-text-action` and `text-action` padding rules using tokens in § Token references.
-- [ ] At rest, both states use **`--fp-ref-neutral-variant-95`**; hover / pressed paths use **`--fp-ref-primary-95`**.
+- [ ] At rest, both states use **neutral-variant stop 95**; hover / pressed paths use **primary stop 95** — `docs/design/tokens.md` §3.1a.
 - [ ] Chevron points **down** when `closed`, **up** when `open`, with transition using listed motion tokens only.
 - [ ] SCSS uses `@layer fp-components` / `@layer fp-states`; no geometry changes in state layer beyond chevron `transform`.
 - [ ] No user-visible strings inside the trigger without i18n registration (label is parent-supplied and pre-translated).

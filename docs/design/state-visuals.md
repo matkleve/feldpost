@@ -36,8 +36,8 @@ Figma reference: **PanelTrigger** (see `specs/panel-trigger.spec.md` for node id
 
 | Concern | Treatment |
 | ------- | ----------- |
-| **Rest fill when disabled** | Keep **neutral** rest fill **`--fp-ref-neutral-variant-95`** (same token as closed/open *rest* in the panel-trigger spec) so the trigger does not read as “hovered” when inert |
-| **Hover fill** | **Suppressed** — disabled host must not switch to **`--fp-ref-primary-95`** |
+| **Rest fill when disabled** | Keep **neutral** rest fill matching **neutral-variant ladder stop 95** (same as closed/open *rest* in the panel-trigger spec — `docs/design/tokens.md` §3.1a) so the trigger does not read as “hovered” when inert |
+| **Hover fill** | **Suppressed** — disabled host must not switch to **primary stop 95** (§3.1a) |
 | **Chevron** | Does **not** rotate for “open” when disabled; parent must keep `panelState` `'closed'` or still pass `'open'` only if product explicitly allows (discouraged); visually **muted** via host `opacity` |
 
 ### `aria-disabled` without native `disabled`

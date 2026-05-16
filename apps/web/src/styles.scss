@@ -1,6 +1,7 @@
 // ── SCSS Module Imports ────────────────────────────────────────────────────────
 // Sass @use statements must appear before all other rules (Sass language rule).
 @use 'sass:meta';
+@use './styles/map-leaflet-host';
 @use './styles/reset';
 @use './styles/layout/app';
 @use './styles/layout/clamp';
