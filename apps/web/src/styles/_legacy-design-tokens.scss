@@ -1,4 +1,4 @@
-/* Phase 7: former tokens.scss — layout / fp-ref / semantic aliases.
+/* Phase 7: former tokens.scss — layout / semantic aliases.
    Loaded after tweakcn :root in styles.scss via meta.load-css.
    CDK overlay lives in styles.scss. Do not add new tokens here.
    @see docs/migration/phase-7-token-migration.md */
@@ -11,111 +11,11 @@
 // ── Light-mode tokens (default) ──────────────────────────────────────────────
 :root {
   /* ═══════════════════════════════════════════════════════════════════════
-     Feldpost v2 — --fp- token system
-     Architecture: ref → sys  (components use --fp-sys-color-* only)
-     Seed color:   #C9A84C  |  MD3 tonal algorithm
-     @see docs/design/tokens.md §3.1a
+     Feldpost v2 — --fp- token system (bridge)
+     MD3 reference tonal ladders (primary seed #c9a84c @ stop 70) live in
+     docs/design/tokens.md §3.1a — not emitted as --fp-ref-* on :root (Batch 5b).
+     @see docs/migration/phase-7-token-migration.md § Batch 5b
      ═══════════════════════════════════════════════════════════════════════ */
-
-  // ── fp-ref: Primary tonal palette (raw scale — never use in components) ────
-  --fp-ref-primary-0:    #000000;
-  --fp-ref-primary-5:    #171000;
-  --fp-ref-primary-10:   #241a00;
-  --fp-ref-primary-15:   #302400;
-  --fp-ref-primary-20:   #3d2e00;
-  --fp-ref-primary-25:   #4b3900;
-  --fp-ref-primary-30:   #584400;
-  --fp-ref-primary-35:   #664f00;
-  --fp-ref-primary-40:   #755b00;
-  --fp-ref-primary-50:   #90741b;
-  --fp-ref-primary-60:   #ac8d34;
-  --fp-ref-primary-70:   #c9a84c; // seed
-  --fp-ref-primary-80:   #e6c364;
-  --fp-ref-primary-90:   #ffe08f;
-  --fp-ref-primary-95:   #ffefce;
-  --fp-ref-primary-98:   #fff8f1;
-  --fp-ref-primary-99:   #fffbff;
-  --fp-ref-primary-100:  #ffffff;
-
-  // ── fp-ref: Secondary tonal palette (blue-indigo — never use in components) ─
-  --fp-ref-secondary-0:    #000000;
-  --fp-ref-secondary-5:    #001127;
-  --fp-ref-secondary-10:   #001c3a;
-  --fp-ref-secondary-15:   #00264b;
-  --fp-ref-secondary-20:   #00315e;
-  --fp-ref-secondary-25:   #003c71;
-  --fp-ref-secondary-30:   #064883;
-  --fp-ref-secondary-35:   #1c538f;
-  --fp-ref-secondary-40:   #2c609c;
-  --fp-ref-secondary-50:   #4979b7;
-  --fp-ref-secondary-60:   #6493d2;
-  --fp-ref-secondary-70:   #7fadef;
-  --fp-ref-secondary-80:   #a4c8ff;
-  --fp-ref-secondary-90:   #d4e3ff;
-  --fp-ref-secondary-95:   #ebf1ff;
-  --fp-ref-secondary-98:   #f9f9ff;
-  --fp-ref-secondary-99:   #fdfcff;
-  --fp-ref-secondary-100:  #ffffff;
-
-  // ── fp-ref: Tertiary tonal palette (violet-purple — never use in components) ─
-  --fp-ref-tertiary-0:    #000000;
-  --fp-ref-tertiary-5:    #1a0b1e;
-  --fp-ref-tertiary-10:   #261629;
-  --fp-ref-tertiary-15:   #312034;
-  --fp-ref-tertiary-20:   #3c2a3f;
-  --fp-ref-tertiary-25:   #48354a;
-  --fp-ref-tertiary-30:   #544056;
-  --fp-ref-tertiary-35:   #604c62;
-  --fp-ref-tertiary-40:   #6c576e;
-  --fp-ref-tertiary-50:   #867088;
-  --fp-ref-tertiary-60:   #a189a2;
-  --fp-ref-tertiary-70:   #bca3bd;
-  --fp-ref-tertiary-80:   #d9bed9;
-  --fp-ref-tertiary-90:   #f6daf6;
-  --fp-ref-tertiary-95:   #ffebfd;
-  --fp-ref-tertiary-98:   #fff7fb;
-  --fp-ref-tertiary-99:   #fffbff;
-  --fp-ref-tertiary-100:  #ffffff;
-
-  // ── fp-ref: Neutral tonal palette (warm grey — never use in components) ────
-  --fp-ref-neutral-0:    #000000;
-  --fp-ref-neutral-5:    #13110d;
-  --fp-ref-neutral-10:   #1d1b17;
-  --fp-ref-neutral-15:   #282521;
-  --fp-ref-neutral-20:   #33302b;
-  --fp-ref-neutral-25:   #3e3b36;
-  --fp-ref-neutral-30:   #494641;
-  --fp-ref-neutral-35:   #55524d;
-  --fp-ref-neutral-40:   #615e58;
-  --fp-ref-neutral-50:   #7b7670;
-  --fp-ref-neutral-60:   #95908a;
-  --fp-ref-neutral-70:   #b0aaa4;
-  --fp-ref-neutral-80:   #cbc6bf;
-  --fp-ref-neutral-90:   #e8e1da;
-  --fp-ref-neutral-95:   #f6f0e8;
-  --fp-ref-neutral-98:   #fff8f1;
-  --fp-ref-neutral-99:   #fffbff;
-  --fp-ref-neutral-100:  #ffffff;
-
-  // ── fp-ref: Neutral-Variant tonal palette (warm taupe — never use in components)
-  --fp-ref-neutral-variant-0:    #000000;
-  --fp-ref-neutral-variant-5:    #141108;
-  --fp-ref-neutral-variant-10:   #1f1b12;
-  --fp-ref-neutral-variant-15:   #29251c;
-  --fp-ref-neutral-variant-20:   #343026;
-  --fp-ref-neutral-variant-25:   #403b31;
-  --fp-ref-neutral-variant-30:   #4b463b;
-  --fp-ref-neutral-variant-35:   #575247;
-  --fp-ref-neutral-variant-40:   #645e52;
-  --fp-ref-neutral-variant-50:   #7d766a;
-  --fp-ref-neutral-variant-60:   #979083;
-  --fp-ref-neutral-variant-70:   #b2aa9d;
-  --fp-ref-neutral-variant-80:   #cec5b7;
-  --fp-ref-neutral-variant-90:   #eae1d3;
-  --fp-ref-neutral-variant-95:   #f9f0e1;
-  --fp-ref-neutral-variant-98:   #fff8f1;
-  --fp-ref-neutral-variant-99:   #fffbff;
-  --fp-ref-neutral-variant-100:  #ffffff;
 
   // ── fp-sys: System color roles — LIGHT ────────────────────────────────────
   // Phase 7: core roles bridge to tweakcn :root (loaded before this file in styles.scss).
@@ -194,13 +94,6 @@
   --fp-sys-elevation-3: 0px 1px 3px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
   --fp-sys-elevation-4: 0px 2px 3px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
   --fp-sys-elevation-5: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
-
-  // ── fp-ref: Typeface ───────────────────────────────────────────────────────
-  --fp-ref-typeface-brand:           'Cormorant Garamond';
-  --fp-ref-typeface-plain:           'DM Sans';
-  --fp-ref-typeface-weight-regular:  400;
-  --fp-ref-typeface-weight-medium:   500;
-  --fp-ref-typeface-weight-bold:     700;
 
   // ── fp-sys: Typescale (15 roles × size / line-height / weight / tracking) ──
   // Display

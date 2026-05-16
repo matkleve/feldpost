@@ -2,7 +2,7 @@
 
 **Status:** Planned (**hard-blocked** until Phase 6 template gates and Phase 7 token migration are complete)
 
-**Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. Toggle-group global sheet (`hlm-toggle-group.scss`) **co-located** under `app/shared/ui/toggle-group/` and **`@use`’d** from `styles.scss` until **deleted** or reduced to **zero** stateful rules (CVA + templates own behavior).
+**Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. Toggle-group global sheet (`hlm-toggle-group.scss`) **co-located** under `app/shared/ui/toggle-group/` and **`@use`’d** from `styles.scss` until **deleted** or reduced to **zero** `@layer states` rules (segment hover / attention / focus / disabled live in **CVA**; global file keeps pill shell geometry, density tokens, and reduced-motion shell overrides).
 
 ---
 
@@ -25,7 +25,7 @@ rg "hlm-toggle-group" apps/web/src/styles.scss
 
 **`styles/primitives/` (2026-05-16):** **Removed** from disk after last primitive deletion (Group D); acceptance remains **empty or deleted**. ~~Prior inventory (2026-05-14):~~ `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — all gone.
 
-**Progress (2026-05-16):** **Deduped** focus/disabled globals against **CVA** (§6). **`hlm-toggle-group.scss`** co-located at **`apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss`**; **`styles.scss`** **`@use './app/shared/ui/toggle-group/hlm-toggle-group'`** (global `@layer` emission unchanged; aligns with **phase-6** path). Removed **`apps/web/src/styles/hlm-toggle-group.scss`**.
+**Progress (2026-05-16):** **Deduped** focus/disabled globals against **CVA** (§6). **`hlm-toggle-group.scss`** co-located at **`apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss`**; **`styles.scss`** **`@use './app/shared/ui/toggle-group/hlm-toggle-group'`** (global `@layer components` + reduced-motion unchanged). Removed **`apps/web/src/styles/hlm-toggle-group.scss`**. **`@layer states`** removed from **`hlm-toggle-group.scss`** — **hover** (off segments), **`data-attention`**, and **`motion-reduce`** segment behavior moved to **`toggle-group-variants.ts`** (CVA / Tailwind).
 
 ---
 
@@ -63,7 +63,9 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 2. Strip **state** rules from `hlm-toggle-group.scss`; keep only **documented** pill shell / density if still needed.
 3. End state: **delete** `apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss` and remove `@use './app/shared/ui/toggle-group/hlm-toggle-group'` from `styles.scss` **if** all visuals live in CVA strings or component `@layer states`.
 
-**Progress (2026-05-16, slice):** Removed **duplicate** global `:focus-visible` and `:disabled` rules for `[hlmToggleGroupItem]` — **CVA** (`toggle-group-variants.ts`) already applies `focus-visible:ring-*` and `disabled:*`. Global `@layer states` still owns **hover** (off segments) and **`data-attention`** emphasis; `@layer components` + reduced-motion unchanged.
+**Progress (2026-05-16, slice):** Removed **duplicate** global `:focus-visible` and `:disabled` rules for `[hlmToggleGroupItem]` — **CVA** (`toggle-group-variants.ts`) already applies `focus-visible:ring-*` and `disabled:*`.
+
+**Progress (2026-05-16, slice — hover / attention / motion):** Deleted **`@layer states`** from **`hlm-toggle-group.scss`**. **CVA** now carries **`data-[state=off]:hover:*`**, **`data-[attention=true]:data-[state=off]:*`** (chart-2 text + 1px mix ring), and **`motion-reduce:transition-none`** on group + item hosts. Global sheet retains **`@layer components`** (pill shell / density / vertical radii) and the **`prefers-reduced-motion`** block for shell + group + item duration clamp.
 
 **Progress (2026-05-16, slice — co-location):** **`hlm-toggle-group.scss`** source file moved from **`apps/web/src/styles/`** to **`apps/web/src/app/shared/ui/toggle-group/`** (same `@use` from `styles.scss`, new path **`./app/shared/ui/toggle-group/hlm-toggle-group`**). **`styles/hlm-toggle-group.scss`** removed.
 
@@ -90,7 +92,7 @@ npm run design-system:check
 |------|-----------|
 | `styles/primitives/` | **Empty** or directory **deleted** |
 | `styles.scss` `@use` block | Only **`reset`**, **`layout/app`**, **`layout/clamp`** (+ any explicitly approved non-primitive helpers) — **no** `primitives/*`, **no** `tokens`, **no** `hlm-toggle-group` once deleted |
-| `hlm-toggle-group.scss` | **Deleted**, or file exists with **no** state-driven visual rules (document which) |
+| `hlm-toggle-group.scss` | **Deleted**, or file exists with **no** `@layer states` / selector-driven segment states (**hover**, **data-attention**, focus, disabled) — those live in **CVA**; **OK** if **`@layer components`** (pill shell) + **`prefers-reduced-motion`** clamp remain |
 | Build / DS | `ng build` and `npm run design-system:check` → **0** |
 
 ---

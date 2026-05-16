@@ -115,24 +115,8 @@
   }
 }
 
-@layer states {
-  // Subtle warning emphasis on a segment (e.g. upload issues lane).
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  [hlmToggleGroupItem][data-attention='true']:not([data-state='on']) {
-    color: var(--chart-2);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--chart-2) 38%, transparent);
-  }
-
-  // Hover feedback for enabled segments (subtle lift over muted track).
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  [hlmToggleGroupItem]:hover:not(:disabled):not([data-state='on']) {
-    color: var(--foreground);
-    background-color: color-mix(in oklch, var(--foreground) 6%, transparent);
-  }
-
-  // Focus ring and disabled chrome live on `toggleGroupItemVariants` (CVA + Tailwind).
-  // @see apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts
-}
+// Hover, data-attention, focus, and disabled visuals live on `toggleGroupItemVariants` (CVA + Tailwind).
+// @see apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts
 
 @media (prefers-reduced-motion: reduce) {
   // Strip transitions/animations for reduced-motion users.

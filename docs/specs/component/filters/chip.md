@@ -8,7 +8,7 @@ A compact, inline label element that displays a single piece of information with
 
 **Pill-shaped** container (`border-radius: full`). **Layouts:** `text-only`, **icon + text** (composed from `icon` + `text` — same shell as Figma spacing), `icon-only`, **`avatar-text`** (`avatarSrc` + `text`). Trailing dismiss is optional. Default label color uses **`--fp-sys-color-on-surface`** (Figma).
 
-**Geometry (Figma):** Chip body height **`var(--spacing-4)` (16px)**. Horizontal padding **`8px`** (`--spacing-2` / `--fp-alias-sp-8`). **Hover** on default: fill **`--fp-ref-primary-90`**. There is **no** `size` input — one geometry for `app-chip`.
+**Geometry (Figma):** Chip body height **`var(--spacing-4)` (16px)**. Horizontal padding **`8px`** (`--spacing-2` / `--fp-alias-sp-8`). **Hover** on default: stronger primary tint via **`color-mix`** (see **Styling Details**). There is **no** `size` input — one geometry for `app-chip`.
 
 **Icon + text (product):** Not a separate Figma layout name; use `icon` + `text` with the same 16px row and **`--spacing-1`** gap between glyph and label.
 
@@ -167,7 +167,7 @@ export class UploadAreaComponent {
 | **Border radius** | `var(--radius-full)` |
 | **Horizontal padding** | `var(--spacing-2)` (8px); avatar-text: `padding-inline-end` `var(--spacing-2)` |
 | **Gap** | `var(--spacing-1)` (icon/text); avatar-text: `var(--spacing-1)` between avatar and label |
-| **Default fills** | Rest: `--fp-ref-primary-95`; hover: `--fp-ref-primary-90` |
+| **Default fills** | Rest: `color-mix(in srgb, var(--primary) 10%, var(--background))`; hover: `color-mix(in srgb, var(--primary) 16%, var(--background))` (Figma ref stops **95 / 90** for warm cream / tint: **`#ffefce`** / **`#ffe08f`** — `docs/design/tokens.md` §3.1a) |
 | **Label** | `--fp-sys-typescale-label-small-*`, color `--fp-sys-color-on-surface` |
 
 ### Examples
@@ -180,10 +180,10 @@ export class UploadAreaComponent {
 
 ### Default Variant
 
-- **Background**: `var(--fp-ref-primary-95)` (Figma: `fp/ref/primary/95` — warm cream fill)
-- **Text / icon label color (default variant):** `var(--fp-sys-color-on-surface)`
+- **Background (default variant):** `color-mix(in srgb, var(--primary) 10%, var(--background))` (Figma `fp/ref/primary/95` warm cream ≈ **`#ffefce`** — see **`docs/design/tokens.md` §3.1a**; dark: `color-mix` with **`var(--card)`** per `chip.component.scss`)
+- **Text / icon label color (default variant):** `var(--foreground)` (via `--fp-sys-color-on-surface` bridge where applicable)
 - **Border**: transparent (no visible border on default chips)
-- **Dark mode**: tinted surface via `color-mix(in srgb, var(--fp-sys-color-primary) 26%, var(--color-bg-elevated))`
+- **Dark mode**: tinted surface via `color-mix(in srgb, var(--primary) 26%, var(--card))` (hover 34%)
 
 ### Primary Variant
 

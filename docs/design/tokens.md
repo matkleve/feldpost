@@ -11,33 +11,129 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 
 ### §3.1a — Feldpost v2 `--fp-*` Color System
 
-The v2 color system follows the Material Design 3 tonal architecture with the Feldpost `--fp-` prefix. It sits **above** the legacy `--color-*` tokens in `tokens.scss` and will replace them incrementally.
+The v2 color system follows the Material Design 3 tonal architecture with the Feldpost `--fp-` prefix. **`--fp-sys-color-*`** roles are still bridged from **`apps/web/src/styles/_legacy-design-tokens.scss`**; **reference tonal ladders are not emitted as `--fp-ref-*` custom properties on `:root`** (Phase 7 Batch 5b, 2026-05-16) — canonical hex for every stop lives in the tables below. Figma paths such as `fp/ref/primary/95` correspond to **stop 95** in the primary ladder.
 
 #### Two-layer structure
 
 | Layer | Prefix | Purpose | Use in components? |
 |-------|--------|---------|-------------------|
-| Reference palette | `--fp-ref-primary-*` | Raw tonal stops (0→100). Primitives only. | No — Figma alias resolution only |
-| System roles | `--fp-sys-color-*` | Semantic role per surface/role pair. | Yes — this is the component API |
+| Reference palette (logical) | `fp/ref/…` in Figma; stops **0–100** below | Raw MD3 tonal stops. | **No** — do not use removed `--fp-ref-*` CSS vars; use tweakcn / `--fp-sys-color-*` / semantic tokens in implementation |
+| System roles | `--fp-sys-color-*` | Semantic role per surface/role pair. | Yes — bridge API until full tweakcn migration |
 
-#### Reference palette — primary tonal scale (seed `#CC7A4A`)
+#### Reference palette — primary (gold-amber, seed `#c9a84c` @ stop 70)
 
-| Stop | Hex | Note |
-|------|-----|------|
-| 0 | `#000000` | |
-| 10 | `#331200` | |
-| 20 | `#542200` | |
-| 30 | `#773300` | |
-| 40 | `#974811` | |
-| 50 | `#b66029` | |
-| 60 | `#d67840` | |
-| 70 | `#f69257` | |
-| 80 | `#ffb68e` | |
-| 87 | `#cc7a4a` | **seed** |
-| 90 | `#ffdbca` | |
-| 95 | `#ffede5` | |
-| 99 | `#fffbff` | |
-| 100 | `#ffffff` | |
+| Stop | Hex |
+|------|-----|
+| 0 | `#000000` |
+| 5 | `#171000` |
+| 10 | `#241a00` |
+| 15 | `#302400` |
+| 20 | `#3d2e00` |
+| 25 | `#4b3900` |
+| 30 | `#584400` |
+| 35 | `#664f00` |
+| 40 | `#755b00` |
+| 50 | `#90741b` |
+| 60 | `#ac8d34` |
+| 70 | `#c9a84c` | **seed** |
+| 80 | `#e6c364` |
+| 90 | `#ffe08f` |
+| 95 | `#ffefce` |
+| 98 | `#fff8f1` |
+| 99 | `#fffbff` |
+| 100 | `#ffffff` |
+
+#### Reference palette — secondary (blue-indigo)
+
+| Stop | Hex |
+|------|-----|
+| 0 | `#000000` |
+| 5 | `#001127` |
+| 10 | `#001c3a` |
+| 15 | `#00264b` |
+| 20 | `#00315e` |
+| 25 | `#003c71` |
+| 30 | `#064883` |
+| 35 | `#1c538f` |
+| 40 | `#2c609c` |
+| 50 | `#4979b7` |
+| 60 | `#6493d2` |
+| 70 | `#7fadef` |
+| 80 | `#a4c8ff` |
+| 90 | `#d4e3ff` |
+| 95 | `#ebf1ff` |
+| 98 | `#f9f9ff` |
+| 99 | `#fdfcff` |
+| 100 | `#ffffff` |
+
+#### Reference palette — tertiary (violet-purple)
+
+| Stop | Hex |
+|------|-----|
+| 0 | `#000000` |
+| 5 | `#1a0b1e` |
+| 10 | `#261629` |
+| 15 | `#312034` |
+| 20 | `#3c2a3f` |
+| 25 | `#48354a` |
+| 30 | `#544056` |
+| 35 | `#604c62` |
+| 40 | `#6c576e` |
+| 50 | `#867088` |
+| 60 | `#a189a2` |
+| 70 | `#bca3bd` |
+| 80 | `#d9bed9` |
+| 90 | `#f6daf6` |
+| 95 | `#ffebfd` |
+| 98 | `#fff7fb` |
+| 99 | `#fffbff` |
+| 100 | `#ffffff` |
+
+#### Reference palette — neutral (warm grey)
+
+| Stop | Hex |
+|------|-----|
+| 0 | `#000000` |
+| 5 | `#13110d` |
+| 10 | `#1d1b17` |
+| 15 | `#282521` |
+| 20 | `#33302b` |
+| 25 | `#3e3b36` |
+| 30 | `#494641` |
+| 35 | `#55524d` |
+| 40 | `#615e58` |
+| 50 | `#7b7670` |
+| 60 | `#95908a` |
+| 70 | `#b0aaa4` |
+| 80 | `#cbc6bf` |
+| 90 | `#e8e1da` |
+| 95 | `#f6f0e8` |
+| 98 | `#fff8f1` |
+| 99 | `#fffbff` |
+| 100 | `#ffffff` |
+
+#### Reference palette — neutral-variant (warm taupe)
+
+| Stop | Hex |
+|------|-----|
+| 0 | `#000000` |
+| 5 | `#141108` |
+| 10 | `#1f1b12` |
+| 15 | `#29251c` |
+| 20 | `#343026` |
+| 25 | `#403b31` |
+| 30 | `#4b463b` |
+| 35 | `#575247` |
+| 40 | `#645e52` |
+| 50 | `#7d766a` |
+| 60 | `#979083` |
+| 70 | `#b2aa9d` |
+| 80 | `#cec5b7` |
+| 90 | `#eae1d3` |
+| 95 | `#f9f0e1` |
+| 98 | `#fff8f1` |
+| 99 | `#fffbff` |
+| 100 | `#ffffff` |
 
 #### System color roles
 
@@ -198,19 +294,19 @@ Note: elevation tokens are skipped by `sync-tokens.mjs` (complex multi-value sho
 
 ---
 
-### §3.1e — Typeface & Typescale (`--fp-ref-typeface-*`, `--fp-sys-typescale-*`)
+### §3.1e — Typeface & Typescale (canonical names + `--fp-sys-typescale-*`)
 
 #### Typefaces
 
-Google Fonts are imported globally in `tokens.scss`. Both families are bundled via `@import url(...)` at the top of the file.
+Google Fonts load from **`apps/web/src/styles.scss`** (global). **These are canonical design names** — they are **not** exported as `--fp-ref-typeface-*` on `:root` after Phase 7 Batch 5b.
 
-| Token | Value | Role |
-|-------|-------|------|
-| `--fp-ref-typeface-brand` | `'Cormorant Garamond'` | Display, headlines, editorial emphasis |
-| `--fp-ref-typeface-plain` | `'DM Sans'` | Body, labels, UI copy |
-| `--fp-ref-typeface-weight-regular` | `400` | |
-| `--fp-ref-typeface-weight-medium` | `500` | |
-| `--fp-ref-typeface-weight-bold` | `700` | |
+| Name | Value | Role |
+|------|-------|------|
+| Brand / display | `'Cormorant Garamond'` | Display, headlines, editorial emphasis |
+| Plain / UI | `'DM Sans'` | Body, labels, UI copy |
+| Weight regular | `400` | |
+| Weight medium | `500` | |
+| Weight bold | `700` | |
 
 #### Type scale
 

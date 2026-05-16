@@ -1,8 +1,8 @@
 # Phase 7 — Token System Unification
 
-**Status:** In progress (2026-05-16) — Batch 1: cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale). **Batch 2:** rewired **`_legacy-design-tokens.scss`** internal chains (**`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`**) to existing **`--spacing-*`** / **`--radius-*`** (literals kept for 20px + 40px steps with no spacing-N match). **Batch 3:** removed duplicate **`--fp-base-*`** scale from the legacy bridge (no `var(--fp-base-*)` in `apps/web/src`); bridged unambiguous **`--fp-sys-color-*`** roles to tweakcn **`--primary`**, **`--background`**, **`--muted`**, **`--border`**, **`--destructive`**, **`--shadow-color`**, etc.; specs now cite **`var(--spacing-*)`** for former base px. **Batch 4:** tweakcn dark palette shared mixin + **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`** (system theme) mirrors **`html[data-theme="dark"]`** — see § Batch 4. **Batch 5:** full-tree grep inventory for **`var(--fp-*)`**, **`--fp-ref-*`**, **`--fp-sys-color`** under **`apps/web/src`** — see § Batch 5.
+**Status:** In progress (2026-05-16) — Batch 1: cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale). **Batch 2:** rewired **`_legacy-design-tokens.scss`** internal chains (**`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`**) to existing **`--spacing-*`** / **`--radius-*`** (literals kept for 20px + 40px steps with no spacing-N match). **Batch 3:** removed duplicate **`--fp-base-*`** scale from the legacy bridge (no `var(--fp-base-*)` in `apps/web/src`); bridged unambiguous **`--fp-sys-color-*`** roles to tweakcn **`--primary`**, **`--background`**, **`--muted`**, **`--border`**, **`--destructive`**, **`--shadow-color`**, etc.; specs now cite **`var(--spacing-*)`** for former base px. **Batch 4:** tweakcn dark palette shared mixin + **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`** (system theme) mirrors **`html[data-theme="dark"]`** — see § Batch 4. **Batch 5:** full-tree grep inventory for **`var(--fp-*)`**, **`--fp-ref-*`**, **`--fp-sys-color`** under **`apps/web/src`** — see § Batch 5. **Batch 5b:** removed **`--fp-ref-*`** `:root` definitions; canonical hex → **`docs/design/tokens.md`** §3.1a — see § Batch 5b.
 
-**Goal:** Shrink or retire **`apps/web/src/styles/_legacy-design-tokens.scss`** (successor to the removed monolithic `tokens.scss`) so **component** SCSS uses **tweakcn** semantics (`--primary`, `--background`, `--muted`, `--foreground`, `--border`, `--destructive`, **`--spacing-*`**, etc.) — not legacy **`--color-*`**, **`--fp-sys-*`**, or **`--fp-ref-*`** hand-offs where avoidable.
+**Goal:** Shrink or retire **`apps/web/src/styles/_legacy-design-tokens.scss`** (successor to the removed monolithic `tokens.scss`) so **component** SCSS uses **tweakcn** semantics (`--primary`, `--background`, `--muted`, `--foreground`, `--border`, `--destructive`, **`--spacing-*`**, etc.) — not legacy **`--color-*`**, **`--fp-sys-*`**, or **`--fp-ref-*`** hand-offs where avoidable. **Reference tonal hex** after Batch 5b: **`docs/design/tokens.md`** §3.1a (no **`--fp-ref-*`** on `:root`).
 
 **Prerequisites:**
 
@@ -85,7 +85,7 @@ Replaced with **`var(--spacing-1|2|3|4)`** where values match the legacy fp pixe
 
 **Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
 
-**Still deferred after Batch 3:** **`--fp-ref-*`** tables; MD3 **container / tertiary / inverse / outline-variant** `--fp-sys-color-*` lines above; app SCSS gate **`var(--color-|var(--fp-sys-|var(--fp-ref-`**. (**System OS dark + tweakcn** resolved in **Batch 4** — see below.)
+**Batch 5b resolution:** **`--fp-ref-*`** `:root` definitions **removed** (canonical hex → `docs/design/tokens.md` §3.1a). **Still deferred after Batch 3:** MD3 **container / tertiary / inverse / outline-variant** `--fp-sys-color-*` lines above; app SCSS gate **`var(--color-|var(--fp-sys-|var(--fp-ref-`**. (**System OS dark + tweakcn** resolved in **Batch 4** — see below.)
 
 ### Batch 4 — system dark + tweakcn alignment (**4a**, 2026-05-16)
 
@@ -122,15 +122,37 @@ rg -e 'var\(--fp-sys-color' apps/web/src
 | Pattern | Total matches (`rg -c`, `apps/web/src`) | Files with hits | Top consumer files (by match count) |
 |---------|------------------------------------------|-----------------|-------------------------------------|
 | `var(--fp-` | **0** | **0** | — |
-| `--fp-ref-` | **95** | **1** | `apps/web/src/styles/_legacy-design-tokens.scss` (**95**) — tonal ladder + typeface **definitions** only |
+| `--fp-ref-` | **0** | **0** | — (**Batch 5b**, 2026-05-16: tonal + typeface **`--fp-ref-*` definitions removed** from `_legacy-design-tokens.scss`; canonical hex → `docs/design/tokens.md` §3.1a / §3.1e) |
 | `--fp-sys-color` | **59** | **1** | `apps/web/src/styles/_legacy-design-tokens.scss` (**59**) — `--fp-sys-color-*` **property names** in light/dark `:root` blocks (+ header comment) |
 
-**Interpretation:** No **application** SCSS/TS/HTML under `apps/web/src` references **`var(--fp-*)`**, **`var(--fp-ref-*)`**, or **`var(--fp-sys-color*)`**. All **`--fp-ref-*`** / **`--fp-sys-color`** *text* in this tree lives in the legacy bridge file (definitions and sys token names).
+**Interpretation:** No **application** SCSS/TS/HTML under `apps/web/src` references **`var(--fp-*)`**, **`var(--fp-ref-*)`**, or **`var(--fp-sys-color*)`**. **`--fp-sys-color`** *text* in this tree lives in the legacy bridge file (definitions and sys token names). **`--fp-ref-*` CSS custom properties are no longer defined** on `:root` (see **§ Batch 5b**).
 
 **Do not map yet** (explicitly tied to **Batch 3** deferred roles — literal hex / no tweakcn 1:1 until product or tweakcn adds named roles; see **Batch 4** policy **4a** vs **4b**):
 
 - **`--fp-sys-color-*` rows still on literals or without proven tweakcn twins:** `primary-container`, `on-primary-container`, `secondary-container`, `on-secondary-container`, the full **`tertiary`** set (`tertiary`, `on-tertiary`, `tertiary-container`, `on-tertiary-container`), **`error-container`**, **`on-error-container`**, **`outline-variant`**, **`inverse-surface`**, **`inverse-on-surface`**, **`inverse-primary`** (and any adjacent MD3-only rows the bridge keeps on hex for parity).
-- **`--fp-ref-*`:** entire **reference palette** (primary / secondary / tertiary / neutral / neutral-variant steps + **typeface** reference tokens). These stay **bridge-internal** inputs to MD3-style sys mapping — **do not** wire component SCSS to **`var(--fp-ref-*)`**; replace downstream usage with tweakcn semantics when a row-level mapping exists.
+- **`--fp-ref-*` (removed from bridge):** MD3 reference ladders + typeface weights are **document-only** in **`docs/design/tokens.md` §3.1a / §3.1e** — use tweakcn / **`--fp-sys-color-*`** in implementation; Figma **`fp/ref/…`** paths map to stop rows in that doc.
+
+### Batch 5b — `--fp-ref-*` bridge removal + doc canonical hex (2026-05-16)
+
+**Grep proof (repository root)** — no runtime consumers of reference vars:
+
+```bash
+# TS / HTML / SCSS / CSS: zero `var(--fp-ref-*)` call sites
+rg --glob '*.{ts,html,scss,css}' 'var\(--fp-ref-' .
+# → 0 matches (2026-05-16)
+
+# Markdown / migration text still mentions the *pattern* in migration docs (not CSS consumers)
+rg 'var\(--fp-ref-' docs/migration docs/specs --glob '*.md'
+# → phase-7-token-migration.md (gate / strategy prose only); chip spec updated same batch to drop `var(--fp-ref-*)`
+```
+
+**`--fp-ref-` token *name* references in docs** (Figma alignment / prose — not `:root` exports after this batch): `docs/specs/component/ui-primitives/panel-trigger.md`, `docs/specs/component/ui-primitives/ui-primitives.panel-trigger.md`, `docs/specs/component/ui-primitives/ui-primitives.badges-and-chips.md`, `docs/design/state-visuals.md`, `docs/migration/phase-0-discovery.md`, `docs/migration/README.md`, `docs/migration/phase-7-token-migration.md` — align copy to **`docs/design/tokens.md` §3.1a** hex + Figma path labels in a follow-up if specs still imply live **`--fp-ref-*`** CSS variables.
+
+**Code:** **`apps/web/src/styles/_legacy-design-tokens.scss`** — deleted all **`--fp-ref-*`** custom property **definitions** (five tonal ladders + five typeface lines). **`--fp-sys-color-*`** literals unchanged (already matched ref hex where applicable).
+
+**Docs:** **`docs/design/tokens.md`** §3.1a / §3.1e — full tonal tables + typeface names as canonical numbers; **`docs/specs/component/filters/chip.md`** — default fill documents **`color-mix`** + Figma stop **95/90** hex pointers.
+
+**Verify:** `cd apps/web && npx ng build` → exit **0**.
 
 ## Risks / QA
 
