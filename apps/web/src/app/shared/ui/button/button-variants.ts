@@ -27,6 +27,16 @@ export const buttonVariants = cva(
       variant: 'default',
       size: 'default',
     },
+    // Outline + sm: override `sm` horizontal padding to **spacing-2** (8px / `px-2`), not `px-3`.
+    // twMerge keeps a single `px-*` on the host. Matches toolbar trigger `padding-inline: var(--spacing-2)`.
+    // @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
+    compoundVariants: [
+      {
+        variant: 'outline',
+        size: 'sm',
+        class: 'px-2',
+      },
+    ],
   },
 );
 

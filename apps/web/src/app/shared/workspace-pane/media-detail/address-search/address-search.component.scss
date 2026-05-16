@@ -8,7 +8,7 @@
     width: 100%;
     // Closed trigger horizontal inset (outline-sm rhythm; avoids flush label edge).
     // @see docs/migration/README.md (anchored UI padding)
-    padding-inline: var(--spacing-3);
+    padding-inline: var(--spacing-2);
   }
 
   &__input-wrap {

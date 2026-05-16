@@ -12,9 +12,9 @@ export const menuContentVariants = cva(
 
 /** Single selectable row inside a menu / dropdown list. */
 export const menuItemVariants = cva(
-  'relative flex cursor-default select-none items-center rounded-sm px-3 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+  'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 );
 
 export const menuSeparatorVariants = cva('my-1 h-px bg-muted');
 
-export const menuLabelVariants = cva('px-3 py-1.5 text-xs font-semibold text-muted-foreground');
+export const menuLabelVariants = cva('px-2 py-1.5 text-xs font-semibold text-muted-foreground');

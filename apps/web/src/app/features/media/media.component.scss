@@ -13,7 +13,7 @@
     justify-content: space-between;
     // Adds symmetric horizontal inset on the closed trigger (popover list uses `.standard-dropdown` padding separately).
     // @see docs/specs/component/item-grid/item-grid.md#actions
-    padding-inline: var(--spacing-3);
+    padding-inline: var(--spacing-2);
   }
 
   // Chevron rotation target for open dropdown shell.

@@ -1,30 +1,35 @@
 // ── Global Reset ──────────────────────────────────────────────────────────────
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+// Wrapped in `@layer base` so Tailwind `@layer utilities` (e.g. `.px-3`, `.px-4`) wins
+// over this universal `padding: 0`. Unlayered rules here previously beat all utilities.
+// @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
 
-html,
-body {
-  height: 100%;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  // Stack matches tweakcn `--font-sans` (DM Sans); var resolves after :root in this bundle.
-  // @see apps/web/src/styles.scss (:root --font-sans); docs/migration/phase-8-global-scss-elimination.md §7
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  background: var(--background);
-  color: var(--foreground);
-}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
+  html,
+  body {
+    height: 100%;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    // Stack matches tweakcn `--font-sans` (DM Sans); var resolves after :root in this bundle.
+    // @see apps/web/src/styles.scss (:root --font-sans); docs/migration/phase-8-global-scss-elimination.md §7
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+  }
 
-html {
-  scrollbar-gutter: stable;
-}
+  html {
+    scrollbar-gutter: stable;
+  }
 
-app-root {
-  display: block;
-  height: 100%;
+  app-root {
+    display: block;
+    height: 100%;
+  }
 }

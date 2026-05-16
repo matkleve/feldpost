@@ -1,0 +1,194 @@
+# Padding and hit-area audit — buttons & inputs (2026-05-16)
+
+## 1. Executive summary
+
+- **Verified:** Shared `hlmBtn` / `hlmInput` directives apply **default horizontal padding via Tailwind utilities** in CVA (`px-*` on `button[hlmBtn]` sizes; `px-3` on `input[hlmInput]`). No evidence that splitting component SCSS with Sass `@use` (e.g. map-shell pulling in `_map-shell-context-menu.scss`) **changes emitted padding** — `@use` only affects **authoring structure** and compile-time order of rules, not a separate “padding layer.”
+- **Trigger vs panel:** **Dropdown triggers** (toolbar `*__menu-trigger` + `hlmBtn` + `justify-content: space-between`) were a real pain point: CVA `size="sm"` alone yields `px-3`, but **label + chevron** layouts need **extra symmetric inset** so the label is not glued to the left edge. **Companion SCSS** now sets `padding-inline: var(--spacing-3)` on `.workspace-toolbar__menu-trigger`, `.media-toolbar__menu-trigger`, and `.projects-toolbar__menu-trigger` (see §3 table). **Panel / menu content** uses separate tokens (e.g. `.map-context-menu__items` `padding-inline`, standard dropdown `--std-dropdown-padding-inline`) — fixing the **panel** does not fix a **trigger** that still lacks inset.
+- **Still at risk:** (a) **Component SCSS** that sets `padding: 0`, `padding-block: 0`, or `padding-inline: 0` on the **same element** that carries Tailwind padding from `hlmBtn` / `hlmInput`, depending on **source order and specificity**; (b) **`min-w-0 shrink` + `justify-content: space-between`** on triggers — correct for truncation but **reduces perceived** horizontal breathing room if companion `padding-inline` is missing; (c) **`size="icon"`** — CVA uses `h-10 w-10` with **no explicit `px-*`** (square hit box by design); (d) **custom primitives** (e.g. `.panel-trigger`) that use **`padding: 0` base** and only add horizontal padding per `data-layout` variant — easy to regress.
+- **Grep snapshot** (this repo revision): **34** template files contain `hlmBtn` (33 `*.html` + `sorting-controls.component.ts` inline template); **~18** `*.html` files reference `hlmInput`. No same-line `hlmBtn` + `px-0` / `p-0` / `px-1` matches; **`min-w-0` near `hlmBtn`** appears in **3** toolbar templates (paired with **explicit** `padding-inline` in SCSS).
+- **Heuristic `outline` + `size="sm"` + `hlmBtn`:** Automated scan found **exactly three** `<button>` instances (workspace, media, projects toolbars); each component’s `.scss` **does** contain `padding-inline` (for the menu trigger). No orphan outline/sm triggers lacking a companion rule were found by that heuristic.
+- **Inputs:** `hlmInput` defaults include **`px-3`**; composite layouts (e.g. map search) add **layout SCSS** on a second class (`.search-bar__input`) that may alter **vertical** padding (`padding-block: 0`) while leaving horizontal padding to utilities — **worth visual QA** when utilities and SCSS both target the same node.
+- **Recommendation shape:** Prefer **one owner** for horizontal inset on composed controls (either tokenized utility merge or **explicit `padding-inline` + documented exception**), plus **manual QA** on narrow viewports, keyboard focus rings, and **scrollbar-gutter** for overflowing panels.
+
+## 2. How padding is supposed to work
+
+### 2.1 `HLM_BUTTON_IMPORTS` / `hlmBtn` CVA
+
+- **Barrel / imports:** `HLM_BUTTON_IMPORTS` is defined in `apps/web/src/app/shared/ui/button/index.ts` (exports `[HlmButtonDirective]`).
+- **Directive:** `apps/web/src/app/shared/ui/button/hlm-button.directive.ts` — selector `button[hlmBtn],a[hlmBtn]`; `host: { '[class]': 'hostClass()' }` merges **`buttonVariants({ variant, size })`** via `twMerge` (lines **13–28**).
+- **CVA (padding-relevant excerpt):** `apps/web/src/app/shared/ui/button/button-variants.ts`
+
+```7:24:apps/web/src/app/shared/ui/button/button-variants.ts
+export const buttonVariants = cva(
+  'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+        icon: 'h-10 w-10',
+      },
+    },
+```
+
+- **Interpretation:** **`default`** → `px-4 py-2`; **`sm`** → `px-3`; **`lg`** → `px-8`; **`icon`** → **no `px-*`** (fixed square `w-10 h-10`). **Outline** variant does not add padding — it only adds **border** and surface colors.
+
+### 2.2 `hlmInput` / field padding defaults
+
+- **Directive:** `apps/web/src/app/shared/ui/input/hlm-input.directive.ts` — lines **14–24** apply `twMerge(inputVariants({ error }))` on `input[hlmInput], textarea[hlmInput]`.
+- **CVA:** `apps/web/src/app/shared/ui/input/input-variants.ts` — base string includes **`px-3 py-2`** (horizontal padding **12px** in default Tailwind scale) plus full-width and border treatments:
+
+```12:18:apps/web/src/app/shared/ui/input/input-variants.ts
+export const inputVariants = cva(
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  {
+    variants: {
+      error: {
+        true: 'border-destructive focus-visible:ring-destructive',
+```
+
+### 2.3 Global `styles.scss` / Preflight
+
+- **Entry:** `apps/web/src/styles.scss` — **lines 19–26** import Tailwind (`@import "tailwindcss";`) and `@source "./**/*.{html,ts,scss}"` so utilities used in templates and CVA strings are generated.
+- **Order note (commented in file):** Top `@use` blocks emit **before** Tailwind; typography baseline is loaded **after** Preflight via `meta.load-css('styles/typography-baseline')` (see **lines 8–8** and **line 21** region) — relevant for **headings**, not for resetting button/input padding beyond Preflight.
+- **Secondary doc link:** `apps/web/src/styles/_typography-baseline.scss` — global heading/anchor rhythm; **not** the primary owner for control padding.
+
+**Net:** Default padding for Spartan-style controls lives in **CVA strings** processed as Tailwind utilities. Overrides come from **later rules** (component SCSS, other utilities on the same host), not from `@use` file boundaries by themselves.
+
+## 3. Grep inventory (counts & top paths)
+
+**Method:** `rg` from repo root on `apps/web/src/app`; counts are **occurrence totals** (`-c` sums) or **file counts** (`rg -l`) as stated per table.
+
+### 3.1 `hlmBtn` in `*.html` and inline templates in `*.component.ts`
+
+| Metric | Value |
+| --- | ---: |
+| Files with `hlmBtn` (`*.html`) | **33** |
+| Files with `hlmBtn` (`*.component.ts` only; includes inline `template:`) | **1** (`sorting-controls.component.ts`; directive file excluded from “template” count) |
+| Combined unique template paths (html + ts inline) | **34** |
+| Total `hlmBtn` matches in `*.html` (sum of per-file counts) | **90** |
+| Matches in `*.component.ts` templates | **1** |
+
+**Top `*.html` files by `hlmBtn` count (descending):**
+
+| Count | Path |
+| ---: | --- |
+| 14 | `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html` |
+| 11 | `apps/web/src/app/shared/account/account.component.html` |
+| 10 | `apps/web/src/app/features/upload/upload-panel.component.html` |
+| 6 | `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.html` |
+| 6 | `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html` |
+| 4 | `apps/web/src/app/features/projects/project-card.component.html` |
+| 3 | `apps/web/src/app/features/map/map-shell/map-shell.component.html` |
+| 2 | *(several files at 2)* — metadata rows, dialogs, quiet actions, etc. |
+
+### 3.2 `hlmBtn` + stripping / tight utilities (same-line & short-range multiline)
+
+| Pattern | Count / result |
+| --- | --- |
+| Same-line `hlmBtn` + `px-0` / `p-0` / `px-1` | **0** |
+| Multiline (≤200 chars between) `hlmBtn` + `px-0` / `p-0` / `px-1` | **0** |
+| Multiline `hlmBtn` + `min-w-0` | **12** matching lines across **3** files: `workspace-toolbar`, `media`, `projects-toolbar` component templates (toolbar menu triggers) |
+
+### 3.3 Heuristic: `variant="outline"` + `size="sm"` on same `<button hlmBtn…>` vs companion `.scss` containing `padding-inline`
+
+**Automated rule:** Parse `*.html` / `*.component.ts` for `<button…hlmBtn…>` tags containing both `variant="outline"` and `size="sm"`; check sibling `*.scss` for substring `padding-inline`.
+
+| Rows (cap 25) | Component | Companion `.scss` includes `padding-inline`? |
+| --- | --- | --- |
+| 1 | `workspace-toolbar.component.html` | **Yes** — `.workspace-toolbar__menu-trigger` |
+| 2 | `media.component.html` | **Yes** — `.media-toolbar__menu-trigger` |
+| 3 | `projects-toolbar.component.html` | **Yes** — `.projects-toolbar__menu-trigger` |
+
+**Result:** **3 / 3** pass. No additional rows to list under this exact heuristic.
+
+### 3.4 `hlmInput` / horizontal padding risk
+
+| Metric | Value |
+| --- | ---: |
+| `*.html` files with at least one `hlmInput` | **18** |
+| Same-line `hlmInput` + (`px-0` / `pl-0` / `pr-0`) | **0** |
+
+**Top `*.html` files by `hlmInput` count:**
+
+| Count | Path |
+| ---: | --- |
+| 7 | `apps/web/src/app/shared/account/account.component.html` |
+| 5 | `apps/web/src/app/features/auth/register/register.component.html` |
+| 2 | *(several)* — inline section, editable rows, captured date, settings overlay, auth flows |
+
+**`w-full` without explicit `px-*` on the same tag (manual spot-check, not exhaustive):** `search-bar.component.html` uses `hlmInput` + `class="search-bar__input"` (no `px-*` in template). Horizontal padding then depends on **`inputVariants` utilities** vs `.search-bar__input` SCSS (see §4 — `padding-block: 0` only; no `padding-inline: 0`).
+
+### 3.5 `__menu-trigger` / `menu-trigger` / `panel-trigger` in SCSS — `padding-inline` vs omit
+
+| Selector / file | Sets `padding-inline`? | Notes |
+| --- | --- | --- |
+| `.workspace-toolbar__menu-trigger` — `workspace-toolbar.component.scss` | **Yes** (`var(--spacing-3)`) | Also `justify-content: space-between` |
+| `.media-toolbar__menu-trigger` — `media.component.scss` | **Yes** | Same pattern |
+| `.projects-toolbar__menu-trigger` — `projects-toolbar.component.scss` | **Yes** | Same pattern |
+| `.panel-trigger` — `panel-trigger.component.scss` | **Partial** | Base `.panel-trigger` uses **`padding: 0`** (lines **21–26**); **`padding-inline`** added per `data-layout` (e.g. `icon-text-action` at lines **44+**) |
+
+**`menu-trigger` substring:** other matches are the **toolbar** classes above; no additional generic `menu-trigger` SCSS hits beyond those toolbars and panel-trigger naming.
+
+### 3.6 Related: `padding-inline: 0` / `padding: 0` hot spots (secondary signal)
+
+Examples useful for §4 hypotheses (not exhaustive): `grouping-dropdown.component.scss` (`.grouping-section { padding-inline: 0; }`), `chip.component.scss` (`padding-inline: 0` in a state), `panel-trigger.component.scss` (base `padding: 0`), multiple `padding: 0` resets in `search-bar`, `map-shell`, `nav`, upload, and media-detail SCSS — each needs **context** (wrapper vs interactive surface).
+
+## 4. Root-cause hypotheses (numbered)
+
+1. **Template / SCSS overrides CVA utilities** — Extra `class="..."` on `button[hlmBtn]` or `input[hlmInput]` plus component SCSS can set `padding`, `padding-inline`, or `padding-block` with equal or higher specificity than utilities, **removing** effective horizontal inset.
+2. **Composite flex layouts (`justify-content: space-between`)** — Chevron + label rows **feel** “flush” unless **`padding-inline`** (or inner label padding) is applied on the **trigger**; CVA `px-3` may be **psychologically** insufficient for long labels + icon columns.
+3. **`min-w-0 shrink` on the button** — Legitimate for **truncate** flows; combined with (2), users perceive “no horizontal padding” even when **some** padding exists.
+4. **`size="icon"`** — No `px-*` in CVA; designers may expect **inner icon padding** that is actually implemented via **child** layout (e.g. nested spans) — if missing, icon touches edges inside the square.
+5. **`w-full` + `overflow: hidden` on an ancestor** — Focus rings or text can clip; separate from padding math but **feels** like “no room.”
+6. **Custom BEM surfaces parallel to `hlmBtn`** — Primitives like `.panel-trigger` or legacy rows use **tokenized** padding inconsistently (`padding: 0` base), so **some layouts** miss horizontal inset unless the correct `data-layout` branch is active.
+7. **Icon-only / clear controls** — e.g. search bar clear slot uses **`padding: 0`** on a **non-`hlmBtn`** button (`.search-bar__clear`) — acceptable for square targets but easy to confuse with “broken padding” when auditing quickly.
+
+## 5. Prioritized fix playbook
+
+| Priority | Action | Rationale |
+| --- | --- | --- |
+| **P0** | **Visual QA matrix** for: toolbar dropdown triggers, map search input, panel-trigger each `data-layout`, upload intake `hlmBtn` rows | Confirms real vs perceived padding issues before token churn |
+| **P0** | Where SCSS targets **`button[hlmBtn]`** or **`input[hlmInput]`**, assert **either** (a) no `padding` reset on that node, **or** (b) explicit `padding-inline` / `padding-block` contract in the same spec slice | Stops specificity roulette |
+| **P1** | Consider a **shared trigger modifier** (utility or SCSS mixin) for **`justify-content: space-between` + chevron** pattern: `padding-inline` + `min-w-0` documented once | DRY across workspace/media/projects toolbars |
+| **P1** | Optional design token **`--hlm-btn-padding-inline`** (or per-size tokens) consumed from CVA **if** product wants **wider** default sm triggers than Tailwind `px-3` | Avoids one-off SCSS on every page |
+| **P2** | **Lint / guard idea:** warn when `hlmBtn` shares a host with `padding: 0` / `padding-inline: 0` in the same component SCSS without a compensating `padding-inline` on a documented child | No implementation in this audit |
+| **P2** | Storybook or **Playwright** screenshot diffs for toolbar + search bar at **320–390px** width | Catches scrollbar + truncation interactions |
+
+**Explicit non-goals (this audit):** No refactors, no token implementation, no mass template edits.
+
+## 6. Verification protocol
+
+### 6.1 Manual (required)
+
+- **Toolbar triggers (3 surfaces):** Open each dropdown; confirm **closed** trigger shows symmetric inset (label not flush to left border); **focus-visible** ring fully visible L/R.
+- **Map search:** Type until dropdown opens; verify **input text** not underlap with search icon column; **clear** control remains square and centered; **scrollbar** inside results does not eat label padding awkwardly.
+- **Panel trigger:** Cycle layouts / routes using `app-panel-trigger`; verify **each** `data-layout` has expected horizontal inset.
+- **Icon buttons:** Map upload / GPS (`size="icon"`) — confirm **44px-class** target still meets product hit-area policy (icon optically centered).
+- **Keyboard:** Tab through dense toolbars; ensure **no clipped** focus ring from `overflow: hidden` parents.
+
+### 6.2 Optional (`ng serve`)
+
+- Run **`cd apps/web && ng serve`**; repeat §6.1 on **Chrome + Firefox**, **light + dark**, **mobile width** (dev tools 360px).
+- Toggle **`scrollbar-gutter: stable`** surfaces (search results, long menus) and confirm **no horizontal jump** that hides padding.
+
+---
+
+## Appendix: Implemented follow-ups (2026-05-16)
+
+- **`styles/reset.scss`:** Wrapped the universal reset in **`@layer base`**. Previously **`*, *::before, *::after { padding: 0 }`** was **unlayered** (emitted before `@import "tailwindcss"`), so it **beat `@layer utilities`** (e.g. `.px-4`) in the cascade — utilities looked “dead” in DevTools. Layered reset restores **utilities > base**.
+- **`button-variants.ts`:** `compoundVariants` for **`variant: 'outline'` + `size: 'sm'`** adds **`px-4`** so bordered small buttons get **16px** horizontal inset (overrides `sm`’s `px-3` via merged class list). Covers toolbars and dialogs that do not add companion `padding-inline` in SCSS.
+- **`panel-trigger.component.scss`:** Base `.panel-trigger` uses **`padding-block: 0`** + **`padding-inline: var(--spacing-1)`** instead of **`padding: 0`**, so the default chrome is never flush; **`text-action`** still overrides with asymmetric pl/pr.
+
+## Appendix: `lint-specs.mjs` scope
+
+`node scripts/lint-specs.mjs` (default) walks **`docs/specs`** per `resolveDefaultSpecDir` in `scripts/lint-specs.mjs` — **this report path is not element-spec linted**. Adding files under `docs/migration/reports/` does not engage spec section rules unless a custom glob is passed.

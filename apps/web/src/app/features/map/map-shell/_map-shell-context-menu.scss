@@ -4,7 +4,7 @@
 
   &__header {
     display: block;
-    padding: var(--spacing-2) var(--spacing-3);
+    padding: var(--spacing-2);
     border-bottom: 1px solid var(--border);
     font-weight: var(--font-weight-semibold);
   }
@@ -14,7 +14,7 @@
   .map-context-menu__items {
     overflow-y: auto;
     max-height: min(20rem, calc(100vh - 9rem));
-    padding-inline: var(--spacing-3);
+    padding-inline: var(--spacing-2);
     padding-block: var(--spacing-2);
   }
 }

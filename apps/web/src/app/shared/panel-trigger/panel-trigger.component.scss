@@ -23,7 +23,11 @@
     align-items: center;
     gap: var(--spacing-1);
     height: var(--spacing-4);
-    padding: 0;
+    // Minimum horizontal inset on all layouts; `text-action` / `icon-text-action` override below.
+    // Replaces `padding: 0` so no host layout ships flush-to-border by default.
+    // @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
+    padding-block: 0;
+    padding-inline: var(--spacing-2);
     background-color: var(--muted);
     border: none;
     border-radius: var(--spacing-1);
@@ -39,11 +43,8 @@
     transition: var(--interactive-transition-standard);
   }
 
-  // icon-text-action: 4px symmetric inline padding per Figma px-sp-4
+  // icon-text-action: same symmetric inline as base (see `.panel-trigger` above).
   // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
-  :host([data-layout='icon-text-action']) .panel-trigger {
-    padding-inline: var(--spacing-1);
-  }
 
   // text-action: asymmetric padding 8px left, 4px right per Figma pl-base-8 pr-base-4
   // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references

@@ -147,6 +147,6 @@
   overflow-y: auto;
   // Anchored shell list inset (matches StandardDropdown `--std-dropdown-padding-inline` rhythm).
   // @see docs/specs/component/filters/dropdown-system.md
-  --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
+  --std-dropdown-padding-inline: var(--spacing-2, 0.5rem);
   padding-inline: var(--std-dropdown-padding-inline);
 }
