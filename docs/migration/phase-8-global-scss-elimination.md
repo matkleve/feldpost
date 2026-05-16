@@ -23,7 +23,7 @@ rg "@use '\./styles/primitives/" apps/web/src/styles.scss
 rg "hlm-toggle-group" apps/web/src/styles.scss
 ```
 
-**Current primitives folder (2026-05-14):** `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss`.
+**Current primitives folder (2026-05-16):** `apps/web/src/styles/primitives/` is **empty** (`dropdown-trigger.scss` deleted with **`UiDropdownTriggerDirective`** / Group D). ~~Prior inventory (2026-05-14):~~ `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — all removed from disk or folder cleared.
 
 ---
 
@@ -51,10 +51,9 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 2. Delete `card-shell.scss`.
 3. Gates.
 
-### 5. `dropdown-trigger.scss`
+### 5. ~~`dropdown-trigger.scss`~~ **Deleted (2026-05-16)**
 
-- If **only** used by removed `ui-*` / old dropdown shell: delete file + `@use` if present (today: file exists — verify any `@use` in `styles.scss` or partial imports).
-- If still required for **non-legacy** chrome, **relocate** styles to `dropdown-shell.component.scss` (or the owning shared component) per SCSS ownership rules — **no** orphan global primitive.
+- File **removed** with **`UiDropdownTriggerDirective`** (Phase 5 Group D); chevron / open rules moved to **`media.component.scss`**, **`projects-toolbar.component.scss`**, **`workspace-toolbar.component.scss`**. No `@use` remained in `styles.scss`.
 
 ### 6. Toggle group global SCSS
 

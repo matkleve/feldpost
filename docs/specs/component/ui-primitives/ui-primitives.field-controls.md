@@ -10,8 +10,8 @@ Filled controls with token borders; sizes and compact mode; error/loading emphas
 
 ## Where It Lives
 
-- **Styles:** `apps/web/src/styles/primitives/field.scss`; field row/label in `patterns/toolbar.scss`
-- **Integration:** `ui-primitives.directive.ts`
+- **Styles:** ~~`apps/web/src/styles/primitives/field.scss`~~ **deleted** (Phase 5) — **`hlmInput`** / **`hlmFormField`** / Tailwind
+- **Integration:** ~~`ui-primitives.directive.ts`~~ **removed (2026-05-16)** — use **`hlmInput`**, **`hlmSelect`**, **`HLM_FORM_FIELD_IMPORTS`** per Phase 5.
 
 ## Actions
 

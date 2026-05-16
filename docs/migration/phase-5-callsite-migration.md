@@ -1,28 +1,27 @@
 # Phase 5 — Callsite Migration & Legacy Removal
 
-**Status:** In Progress
+**Status:** In Progress (callsite groups **A–G + D** complete **2026-05-16**; legacy alias / `tokens.scss` removal still open)
 
-- [~] **Phase 5** — Callsite Migration & Legacy Removal — **SCSS cleanup + `UI_PRIMITIVE_DIRECTIVES` barrel removed (2026-05-14);** Group D (dropdown shell callers), shim file deletion, and legacy alias removal remain open; **`npm run design-system:check` green (2026-05-15)** — root `AGENTS.md` includes required Ownership Matrix column header (`scripts/guard-visual-behavior.mjs`)
+- [~] **Phase 5** — Callsite Migration & Legacy Removal — **SCSS cleanup + `UI_PRIMITIVE_DIRECTIVES` barrel removed (2026-05-14);** **Group D done (2026-05-16);** shim file deletion done; legacy alias removal remains open; **`npm run design-system:check` green (2026-05-15)** — root `AGENTS.md` includes required Ownership Matrix column header (`scripts/guard-visual-behavior.mjs`)
   - [x] **Pre-flight** (do before ANY callsite changes)
     - [x] Audit which components import `UI_PRIMITIVE_DIRECTIVES` barrel vs individual directives — **done (2026-05-14):** `apps/web/src` had **zero** barrel imports after `filter-dropdown` narrowed; barrel export deleted
     - [ ] Map each directive to its callsites (how many templates use `[uiButton]`, `[uiInputControl]`, etc.) — **optional housekeeping**
     - [x] Confirm `ng build` is green before starting — **verified (2026-05-14)**
-  - [ ] **Callsite migration order** (migrate in this sequence — each group must be done together)
+  - [x] **Callsite migration order** (migrate in this sequence — each group must be done together)
     - [x] Group A — Form fields (always migrate label + input + field-row together per component)
       - [x] Auth pages: login, register, reset-password, update-password (2026-05-13 — `HLM_*_IMPORTS`; `[error]` on inputs)
       - [x] Account settings section (`app-account` — `hlm-form-field`, `hlmInput`, `hlmLabel`, `hlmBtn`; no select on account)
       - [x] Settings overlay form sections (`settings-overlay`, `invite-management-section` — `hlm-form-field` / `hlmLabel` / `hlmSelect` / `hlmBtn`)
       - [x] Address search, editable property row, captured date editor (`hlmInput`; `hlmLabel` on editable row key)
     - [x] Group B — Buttons (standalone, no form dependency) (2026-05-13 — `hlmBtn` / `HLM_BUTTON_IMPORTS`; map search-bar & GPS had no `uiButton`; media-page-header, projects-toolbar, detail-actions, workspace-pane-toolbar, nav, card-variant-switch had none; sorting-controls: `uiToolbarButton` → `hlmBtn`)
-      - [x] Map chrome: search bar, GPS button, toolbar buttons (verified: search-bar/GPS no `uiButton`; toolbar dropdown triggers unchanged)
+      - [x] Map chrome: search bar, GPS button, toolbar buttons (verified: search-bar/GPS no `uiButton`; toolbar dropdown triggers → **`hlmBtn`** in Group D **2026-05-16**)
       - [x] Media detail actions, quiet actions (`detail-actions` plain buttons; `media-item-quiet-actions` → `hlmBtn`)
       - [x] Projects page header, media page header (`projects-page-header` migrated; `media-page-header` had no buttons; `media-error` retry migrated)
       - [x] Nav buttons (verified: no `uiButton` on nav)
     - [x] Group C — Dialogs (already use BrnDialog; clean up UI_PRIMITIVE_DIRECTIVES from imports) — **done (2026-05-13):** `HLM_BUTTON_IMPORTS` + `HLM_INPUT_IMPORTS` where needed; `project-select-dialog` keeps `UiItemDirective` only
       - [x] confirm-dialog, text-input-dialog, project-select-dialog
       - [x] share-link-audience-dialog, projects-confirm-dialog
-    - [ ] Group D — Dropdowns (migrate StandardDropdown + callers when BrnMenu ships)
-      - [ ] Toolbar dropdowns, sort/filter/grouping (blocked on BrnMenu — defer)
+    - [x] Group D — Toolbar dropdown triggers — **done (2026-05-16):** `uiDropdownTrigger` removed from **`media`**, **`projects-toolbar`**, **`workspace-toolbar`** templates; **`hlmBtn`** (`outline` / `sm`) + per-toolbar `*__menu-trigger` classes + existing **`DropdownShellComponent`**; **`ui-dropdown-trigger.directive.ts`** and **`styles/primitives/dropdown-trigger.scss`** deleted
     - [x] Group E — Badges/chips — **done (2026-05-13):** `HLM_BADGE_IMPORTS` from `shared/ui/badge/` (barrel exports `HLM_BADGE_IMPORTS`); status → `variant` mapping where needed
       - [x] `[uiStatusBadge]` / `[uiStatusPill]` → `[hlmBadge]` (projects table, invite header, media detail, account)
       - [x] `[uiChip]` → `[hlmBadge]` (`quick-info-chips`; interactive rows keep `cursor-pointer` + existing chip SCSS hooks)
@@ -42,7 +41,7 @@
     - [x] Delete `apps/web/src/styles/patterns/form.scss` — **done (2026-05-14)**
   - [~] **Barrel removal**
     - [x] Remove `UI_PRIMITIVE_DIRECTIVES` export from `ui-primitives.directive.ts` — **done (2026-05-14)** (last callsite was `filter-dropdown`; Group D unchanged)
-    - [ ] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **blocked (re-verified 2026-05-16):** **1** file under `apps/web/src` still matches `import … from '…/ui-primitives.directive'` — `rg "from ['\"].*ui-primitives\\.directive" apps/web/src -l | wc -l` — delete only after Phase 6 / Group D clears those callsites
+    - [x] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **done (2026-05-16):** `rg "from ['\"].*ui-primitives\\.directive" apps/web/src -l` → **0**; file removed after `projects-dropdown` dropped `UiChoice*`. **`UiDropdownTriggerDirective`** removed **2026-05-16** with Group D (toolbar templates + deleted `ui-dropdown-trigger.directive.ts`).
     - [ ] Remove legacy alias block from `apps/web/src/styles.scss` (verify no remaining `--color-*` / `--fp-sys-*` references) — **deferred:** `rg "var\\(--color-" apps/web/src` still matches widespread component SCSS + `styles.scss` link baseline (`var(--color-primary)` on `a`)
     - [ ] Delete `apps/web/src/styles/tokens.scss` (after alias block removed and CDK overlay import moved)
   - [~] **Final verification**

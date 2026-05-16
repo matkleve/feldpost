@@ -1,8 +1,8 @@
 # Phase 7 — Token System Unification
 
-**Status:** Planned (blocked until Phase 6 template gates are green unless a file already has zero `ui-*` and can migrate independently — prefer **sequential** completion to avoid churn)
+**Status:** In progress (2026-05-16) — Batch 1: cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale).
 
-**Goal:** Remove `apps/web/src/styles/tokens.scss` and stop `@use './styles/tokens'` from `styles.scss`. All **component** SCSS (and any feature SCSS) references **tweakcn** semantic variables (`--primary`, `--background`, `--muted`, `--foreground`, `--border`, `--destructive`, etc.) — not legacy `--color-*`, `--fp-sys-*`, or `--fp-ref-*`.
+**Goal:** Shrink or retire **`apps/web/src/styles/_legacy-design-tokens.scss`** (successor to the removed monolithic `tokens.scss`) so **component** SCSS uses **tweakcn** semantics (`--primary`, `--background`, `--muted`, `--foreground`, `--border`, `--destructive`, **`--spacing-*`**, etc.) — not legacy **`--color-*`**, **`--fp-sys-*`**, or **`--fp-ref-*`** hand-offs where avoidable.
 
 **Prerequisites:**
 
@@ -13,7 +13,7 @@
 
 ## Why this is its own phase
 
-`tokens.scss` still carries the **full Feldpost v2 fp-ref/fp-sys palette** and the **`@angular/cdk/overlay-prebuilt.css` import**. `styles.scss` already hosts the **tweakcn** stack and a **legacy alias** block (`:root { --color-* … }`) for backward compatibility. Phase 7 is the controlled burn-down of that dual system: migrate consumers, relocate CDK import, delete `tokens.scss`, delete or shrink the legacy alias block.
+The former monolithic **`tokens.scss`** content now lives in **`_legacy-design-tokens.scss`** (see that file’s header). **`styles.scss`** loads tweakcn, **CDK overlay** (once), Tailwind, then **`@include meta.load-css('styles/legacy-design-tokens')`** as the bridge. Phase 7 is the controlled burn-down of that bridge and any remaining **fp** / **`--color-*`** indirection in SCSS consumers.
 
 ---
 
@@ -23,6 +23,7 @@ From repository root:
 
 ```bash
 rg 'var\(--color-' apps/web/src/app --glob "*.scss" -l
+rg 'var\(--fp-' apps/web/src/app --glob "*.scss" -l
 rg 'var\(--fp-sys-|var\(--fp-ref-' apps/web/src/app --glob "*.scss" -l
 rg 'var\(--color-|var\(--fp-sys-|var\(--fp-ref-' apps/web/src --glob "*.scss" -l
 ```
@@ -38,10 +39,20 @@ rg 'var\(--fp-sys-|var\(--fp-ref-' apps/web/src/app --glob "*.scss" -c
 
 | Pattern | Files (`apps/web/src/app`, approx.) |
 |---------|--------------------------------------|
-| `var(--color-` | **51** SCSS paths |
-| `var(--fp-sys-` or `var(--fp-ref-` | **2** (`panel-trigger.component.scss`, `chip.component.scss`) |
+| `var(--color-` | **0** files in `apps/web/src/app` (`*.scss`) — legacy **`var(--color-*)`** remains inside **`_legacy-design-tokens.scss`** only |
+| `var(--fp-` (base / alias spacing in components) | **2** files (`panel-trigger`, `chip`) — **Batch 1 cleared 2026-05-16** → **0** |
 
 Re-run before execution; archive components under `archive/` may still reference legacy vars — decide **migrate vs exclude** explicitly in §Baseline.
+
+### Batch 1 — `var(--fp-*)` in app component SCSS (2026-05-16)
+
+| Pattern | Before (`apps/web/src/app`, `*.scss`) | After |
+|---------|----------------------------------------|-------|
+| `var(--fp-` | **2** files, **18** matches (`panel-trigger`, `chip`) | **0** files, **0** matches |
+
+Replaced with **`var(--spacing-1|2|3|4)`** where values match the legacy fp pixel scale (4 / 8 / 12 / 16 px → `spacing-1` … `spacing-4` per `apps/web/tailwind.config.js` §Spacing scale). **`border-radius`** on panel trigger uses **`var(--spacing-1)`** (4px) in place of **`--fp-alias-r-4`**.
+
+**Still out of scope for this batch:** `_legacy-design-tokens.scss` (bridge definitions), `var(--color-*)` inside the legacy bridge file, and any **`--fp-sys-*` / `--fp-ref-*`** remaining inside non–`src/app` SCSS.
 
 ---
 
@@ -49,7 +60,7 @@ Re-run before execution; archive components under `archive/` may still reference
 
 | Legacy / alias | tweakcn / semantic target | Notes |
 |----------------|---------------------------|--------|
-| `--color-primary` (where used as **ink** on links) | Prefer **`--primary`** or **`--foreground`** depending on context | `styles.scss` link baseline today uses `var(--color-primary)` — migrate to **`--primary`** or a dedicated **link** token if contrast requires |
+| `--color-primary` (where used as **ink** on links) | Prefer **`--primary`** or **`--foreground`** depending on context | `styles.scss` link baseline uses **`var(--primary)`** today |
 | `--color-bg-base` / `--color-surface` | `--background` | |
 | `--color-bg-surface` / `--color-surface-elevated` | `--card` | Surfaces / elevated panels |
 | `--color-bg-muted` / `--color-surface-variant` | `--muted` | |
@@ -70,12 +81,11 @@ Re-run before execution; archive components under `archive/` may still reference
 ## Special cases
 
 1. **`@import '@angular/cdk/overlay-prebuilt.css'`**  
-   - Today: top of `tokens.scss`.  
-   - Action: move to **`styles.scss`** immediately **before** or **after** Tailwind import per CDK + bundler constraints; verify overlays (menus, dialogs, map panes) once moved.
+   - **Done:** loaded from **`styles.scss`** (not from the removed `tokens.scss` graph). Re-verify overlays when changing load order.
 
-2. **`styles.scss` legacy alias block** (`:root { --color-accent-brand: var(--primary); … }`)  
+2. **`styles.scss` legacy alias block** (`:root { --color-accent-brand: var(--primary); … }` inside the bridge)  
    - Delete **only after** `rg 'var\(--color-'` on component SCSS is zero **and** no remaining TS/SCSS references alias names.  
-   - **Link baseline** (`a { color: var(--color-primary) }`) must be updated in the same PR that removes `--color-primary` alias.
+   - **Link baseline** uses **`var(--primary)`** in `styles.scss` today; keep aligned when removing **`--color-primary`** aliases from the bridge.
 
 3. **Map tokens** (marker colors, cluster halo, selection rings)  
    - If they still use `--color-*` or raw hex, introduce **`--map-*`** (or reuse chart tokens) in tweakcn blocks with three-theme coverage.
@@ -100,9 +110,10 @@ Re-run before execution; archive components under `archive/` may still reference
 
 | Gate | Condition |
 |------|-----------|
-| No legacy vars in app SCSS | `rg 'var\(--color-|var\(--fp-sys-|var\(--fp-ref-' apps/web/src/app --glob "*.scss"` → **zero** hits (explicit waiver list empty unless archived code deleted) |
-| `tokens.scss` gone | File **deleted** from `apps/web/src/styles/tokens.scss` |
-| No `@use` of tokens | `styles.scss` has **no** `@use './styles/tokens'` |
+| No legacy **`var(--fp-*)`** in app SCSS | `rg 'var\(--fp-' apps/web/src/app --glob "*.scss"` → **zero** (**2026-05-16**, post–Batch 1) |
+| No legacy color / fp-sys in app SCSS | `rg 'var\(--color-|var\(--fp-sys-|var\(--fp-ref-' apps/web/src/app --glob "*.scss"` → **zero** (explicit waiver list empty unless archived code deleted) |
+| Monolithic `tokens.scss` | **Removed** — payload lives in **`_legacy-design-tokens.scss`** (tracked shrink target) |
+| No `@use './styles/tokens'` | `styles.scss` has **no** `@use './styles/tokens'` |
 | CDK overlay | Still loaded exactly **once** from `styles.scss` (or documented alternative) |
 | Build | `cd apps/web && npx ng build` → exit **0** |
 
@@ -120,6 +131,6 @@ Re-run before execution; archive components under `archive/` may still reference
 
 ## Archive vs delete
 
-- **Archive first:** Before deleting `apps/web/src/styles/tokens.scss`, copy it to a non-imported snapshot — for example `docs/archive/tokens.legacy.snapshot.scss` or `apps/web/src/styles/archive/tokens.legacy.snapshot.scss` — with a file header comment: `Archived 2026-05-14 — superseded by tweakcn + styles.scss; do not import in builds.` Adjust the date on the day of archival.
-- **Delete:** Remove `tokens.scss` and `@use './styles/tokens'` from `styles.scss` only after Phase 7 acceptance gates pass and `cd apps/web && npx ng build` is green **without** that file in the graph.
+- **Archive first:** Historical snapshot optional — canonical bridge today is **`_legacy-design-tokens.scss`** (header notes former `tokens.scss`).
+- **Delete / shrink bridge:** Retire **`_legacy-design-tokens.scss`** (or replace with minimal stubs) only after Phase 7 acceptance gates pass and `cd apps/web && npx ng build` is green **without** remaining consumers of its **`--color-*` / `--fp-*`** outputs.
 - **Legacy alias block** in `styles.scss` (`:root { --color-* … }`): strip only when `rg 'var\(--color-'` across consuming code is negligible or fully migrated; record the go/no-go in this section or [decisions-log.md](./decisions-log.md) so later agents do not assume the alias block is intentional forever.

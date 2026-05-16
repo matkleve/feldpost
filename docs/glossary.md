@@ -458,7 +458,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   Directive-applied primitive styles for toolbar-adjacent chips and quick-info bridges—not necessarily the same DOM as `app-chip`.
 
 - **Toolbar filter controls (grouping / filter / sort / projects)**  
-  Implemented as **`ui-button` + `ui-dropdown-trigger`**: **rounded control** radius (`--container-radius-control`), **not** a full pill. Opens dropdown panels; distinct from semantic loose chips.
+  **`hlmBtn`** (`variant="outline"`, `size="sm"`) plus per-toolbar **`*__menu-trigger`** classes; opens panels via **`DropdownShellComponent`**. **Rounded control** radius (`--container-radius-control`), **not** a full pill; distinct from semantic loose chips.
 
 - **Filter rule conjunction control**  
   Compact **rounded** chip (`--radius-sm`), not pill: toggles “Where” / “And” / “Or” inside the filter dropdown (`filter-rule__conj`).

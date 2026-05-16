@@ -19,9 +19,13 @@
     <div slot="left" class="media-toolbar__left">
       @for (btn of toolbarButtons(); track btn.id) {
         <button
-          uiDropdownTrigger
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="media-toolbar__menu-trigger min-w-0 shrink"
+          [class.media-toolbar__menu-trigger--open]="activeDropdown() === btn.id"
           [attr.data-state]="btn.active() ? 'on' : null"
-          [open]="activeDropdown() === btn.id"
           [attr.aria-expanded]="activeDropdown() === btn.id"
           [attr.aria-haspopup]="true"
           (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"

@@ -6,12 +6,12 @@ Shared atoms (buttons, fields, shells, tabs, toggles, badges/`ui-chip`, **`app-c
 
 ## What It Looks Like
 
-Token-driven chrome from `styles/primitives/*`; composites (`app-card-grid`, etc.) add layout-specific geometry per child specs.
+Token-driven chrome from **`hlm*`** directives / Tailwind; composites (`app-card-grid`, etc.) add layout-specific geometry per child specs.
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/ui-primitives/`
-- **Global primitive CSS:** `apps/web/src/styles/primitives/*.scss` via `apps/web/src/styles.scss`
+- **Code:** `apps/web/src/app/shared/ui-primitives/` (non-directive utilities and composites; **~~`ui-primitives.directive.ts`~~ removed 2026-05-16**)
+- **Global primitive CSS:** ~~`apps/web/src/styles/primitives/*.scss`~~ **removed** — **`styles/primitives/`** directory **empty** (2026-05-16); tokens via Tailwind + component SCSS
 - **Layout chrome:** [Toolbar pane (`app-pane-toolbar`)](../workspace/pane-toolbar.md) lives under `shared/pane-toolbar/`, not the `ui-primitives/` folder.
 
 ## Actions
@@ -19,7 +19,7 @@ Token-driven chrome from `styles/primitives/*`; composites (`app-card-grid`, etc
 | # | User action | System response |
 | - | ----------- | ---------------- |
 | 1 | Use primitives in templates | Classes/directives apply Feldpost chrome |
-| 2 | Import directives where needed | Named `Ui*` symbols from `ui-primitives.directive.ts` or `HLM_*_IMPORTS` from `shared/ui/` |
+| 2 | Import directives where needed | **`HLM_*_IMPORTS`** from `shared/ui/` (legacy `ui-primitives.directive.ts` **removed 2026-05-16**) |
 
 ## Component Hierarchy
 

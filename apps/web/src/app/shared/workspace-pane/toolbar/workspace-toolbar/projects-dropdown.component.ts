@@ -4,10 +4,6 @@ import { ProjectsService } from '../../../../core/projects/projects.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { StandardDropdownComponent } from '../../../../shared/dropdown-trigger/standard-dropdown.component';
 import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
-import {
-  UiChoiceControlDirective,
-  UiChoiceRowDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
 
 interface Project {
   id: string;
@@ -28,9 +24,8 @@ interface Project {
       (actionRequested)="isCreating.set(true)"
     >
       <div dropdown-items class="projects-list">
-        <label hlmMenuItem uiChoiceRow class="projects-row--all ui-choice-row">
+        <label hlmMenuItem class="projects-row--all ui-choice-row">
           <input
-            uiChoiceControl
             type="checkbox"
             class="projects-checkbox ui-choice-control"
             [checked]="allSelected()"
@@ -40,9 +35,8 @@ interface Project {
           <span class="min-w-0 flex-1">{{ t('workspace.projects.all', 'All projects') }}</span>
         </label>
         @for (project of filteredProjects(); track project.id) {
-          <label hlmMenuItem uiChoiceRow class="ui-choice-row">
+          <label hlmMenuItem class="ui-choice-row">
             <input
-              uiChoiceControl
               type="checkbox"
               class="projects-checkbox ui-choice-control"
               [checked]="selectedIds().has(project.id)"
@@ -56,7 +50,7 @@ interface Project {
     </app-standard-dropdown>
   `,
   styleUrl: './projects-dropdown.component.scss',
-  imports: [StandardDropdownComponent, UiChoiceRowDirective, UiChoiceControlDirective, HlmMenuItemDirective],
+  imports: [StandardDropdownComponent, HlmMenuItemDirective],
 })
 export class ProjectsDropdownComponent {
   private readonly i18nService = inject(I18nService);

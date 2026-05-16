@@ -2,7 +2,7 @@
 
 ## What It Is
 
-**Click-outside** directive and **`parseTimeInput`** helper; styling directives remain in `ui-primitives.directive.ts`—see child specs under [ui-primitives.md](./ui-primitives.md).
+**Click-outside** directive and **`parseTimeInput`** helper; styling directives that lived in ~~`ui-primitives.directive.ts`~~ **were removed (2026-05-16)** — see child specs under [ui-primitives.md](./ui-primitives.md) and Phase 5 migration docs.
 
 ## What It Looks Like
 

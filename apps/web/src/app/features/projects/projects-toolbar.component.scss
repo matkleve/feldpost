@@ -25,6 +25,19 @@
 }
 
 @layer components {
+  // Toolbar dropdown trigger: label + trailing chevron (hlmBtn supplies base control chrome).
+  // @see docs/specs/ui/workspace/workspace-view-system.md
+  .projects-toolbar__menu-trigger {
+    justify-content: space-between;
+  }
+
+  // Chevron rotation target for open dropdown shell.
+  // @see docs/specs/ui/workspace/workspace-view-system.md
+  .projects-toolbar__menu-trigger [data-dd-part='chevron'] {
+    flex-shrink: 0;
+    transition: transform 150ms ease-out;
+  }
+
   // Non-interactive preview strip beside the live status toggle; appears when archived projects exist.
   // @see docs/specs/ui/workspace/workspace-view-system.md
   .projects-toolbar__inactive-strip {
@@ -71,9 +84,15 @@
 @layer states {
   // Active state indicator for toolbar trigger buttons when a filter/grouping is applied.
   // @see docs/specs/ui/workspace/workspace-view-system.md
-  button[uiDropdownTrigger][data-state='on'] {
+  button.projects-toolbar__menu-trigger[data-state='on'] {
     background-color: var(--accent);
     color: var(--accent-foreground);
+  }
+
+  // Open shell: rotate trailing chevron.
+  // @see docs/specs/ui/workspace/workspace-view-system.md
+  .projects-toolbar__menu-trigger--open [data-dd-part='chevron'] {
+    transform: rotate(180deg);
   }
 }
 

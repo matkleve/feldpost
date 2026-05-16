@@ -10,8 +10,8 @@ Bordered row with hover/focus; circular thumb sliding inside track; compact and 
 
 ## Where It Lives
 
-- **Styles:** `apps/web/src/styles/primitives/toggle.scss`
-- **Integration:** `ui-primitives.directive.ts` (`uiToggleRow*`, `uiToggleSwitch*`)
+- **Styles:** ~~`apps/web/src/styles/primitives/toggle.scss`~~ **deleted** (Phase 5) — **`hlmSwitch`** / Tailwind
+- **Integration:** ~~`ui-primitives.directive.ts`~~ **removed (2026-05-16)** — use **`HLM_SWITCH_IMPORTS`** / `hlmSwitch` per Phase 5.
 
 ## Actions
 

@@ -26,11 +26,32 @@
   min-inline-size: auto;
 }
 
+@layer components {
+  // Toolbar dropdown trigger: label + trailing chevron (hlmBtn supplies base control chrome).
+  // @see docs/specs/ui/workspace/workspace-view-system.md
+  .workspace-toolbar__menu-trigger {
+    justify-content: space-between;
+  }
+
+  // Chevron rotation target for open dropdown shell.
+  // @see docs/specs/ui/workspace/workspace-view-system.md
+  .workspace-toolbar__menu-trigger [data-dd-part='chevron'] {
+    flex-shrink: 0;
+    transition: transform 150ms ease-out;
+  }
+}
+
 @layer states {
   // Active state indicator for toolbar trigger buttons when a filter/grouping is applied.
   // @see docs/specs/ui/workspace/workspace-view-system.md
-  button[uiDropdownTrigger][data-state='on'] {
+  button.workspace-toolbar__menu-trigger[data-state='on'] {
     background-color: var(--accent);
     color: var(--accent-foreground);
+  }
+
+  // Open shell: rotate trailing chevron.
+  // @see docs/specs/ui/workspace/workspace-view-system.md
+  .workspace-toolbar__menu-trigger--open [data-dd-part='chevron'] {
+    transform: rotate(180deg);
   }
 }

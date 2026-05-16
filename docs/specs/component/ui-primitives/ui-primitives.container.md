@@ -10,8 +10,8 @@ Containers column-stack with token gaps; items use two-column grid with media + 
 
 ## Where It Lives
 
-- **Styles:** `apps/web/src/styles/primitives/container.scss`; `ui-section-card` in `patterns/toolbar.scss` / `patterns/form.scss`
-- **Integration:** `ui-primitives.directive.ts` (`uiContainer*`, `uiItem*`, `uiSectionCard`, `uiSpacer`)
+- **Styles:** ~~`apps/web/src/styles/primitives/container.scss`~~ **deleted** — Tailwind / feature SCSS per Phase 6; `ui-section-card` patterns removed with `patterns/toolbar.scss` / `patterns/form.scss`
+- **Integration:** ~~`ui-primitives.directive.ts`~~ **removed (2026-05-16)** — migrate containers to Tailwind / feature SCSS per Phase 6.
 
 ## Actions
 

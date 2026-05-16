@@ -45,7 +45,7 @@ import { FilterDropdownComponent } from '../../shared/dropdown-trigger/filter-dr
 import { SortDropdownComponent } from '../../shared/dropdown-trigger/sort-dropdown.component';
 import { ProjectsDropdownComponent } from '../../shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
-import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 
 @Component({
@@ -59,7 +59,7 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
     ...HLM_TOGGLE_GROUP_IMPORTS,
     PaneToolbarComponent,
     DropdownShellComponent,
-    UiDropdownTriggerDirective,
+    ...HLM_BUTTON_IMPORTS,
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,

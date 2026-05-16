@@ -19,7 +19,7 @@ import type {
   ThumbnailSizePreset,
 } from '../../../../core/workspace-view/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
-import { UiDropdownTriggerDirective } from '../../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
+import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { buildCardVariantToggleOptions } from '../../../../shared/ui-primitives/card-variant-toggle.helpers';
 import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { CardVariantSettingsService } from '../../../../shared/ui-primitives/card-variant-settings.service';
@@ -40,7 +40,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsDropdownComponent,
-    UiDropdownTriggerDirective,
+    ...HLM_BUTTON_IMPORTS,
     ...BrnToggleGroupImports,
     ...HLM_TOGGLE_GROUP_IMPORTS,
   ],

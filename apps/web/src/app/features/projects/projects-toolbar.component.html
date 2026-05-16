@@ -63,9 +63,12 @@
     @for (btn of buttons(); track btn.id) {
       <button
         type="button"
-        uiDropdownTrigger
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="projects-toolbar__menu-trigger min-w-0 shrink"
+        [class.projects-toolbar__menu-trigger--open]="activeDropdown() === btn.id"
         [attr.data-state]="btn.active ? 'on' : null"
-        [open]="activeDropdown() === btn.id"
         [attr.aria-expanded]="activeDropdown() === btn.id"
         [attr.aria-haspopup]="true"
         (click)="toggleDropdown(btn.id, $event)"

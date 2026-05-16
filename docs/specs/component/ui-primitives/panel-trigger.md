@@ -16,7 +16,7 @@ Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal con
 
 - **Design reference:** Figma file `eCgblR1PiQnIKoFBYhCWwA`, node `164:2177`.
 - **Code:** `apps/web/src/app/shared/panel-trigger/panel-trigger.component.ts` (+ `.html`, `.scss`).
-- **Use:** Workspace and projects toolbars — any surface that today uses `ui-button` + `ui-dropdown-trigger` for filter / grouping / sort / projects may adopt this component for visual parity with the Figma **PanelTrigger** set.
+- **Use:** Workspace and projects toolbars — any surface that today uses **`hlmBtn`** + toolbar menu-trigger classes for filter / grouping / sort / projects may adopt this component for visual parity with the Figma **PanelTrigger** set.
 
 ## Angular component
 
@@ -159,7 +159,7 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 
 - Parent sets **`[panelState]`** (`'closed' \| 'open'`) from its dropdown / popover controller.
 - Parent listens to **`toggleRequested`** or native click to open/close shell.
-- **Chevron asset:** reuse the Material Symbol / SVG approach as `ui-dropdown-trigger` — no hardcoded raster URLs.
+- **Chevron asset:** reuse the Material Symbol / SVG approach as on **`hlmBtn`** toolbar menu triggers — no hardcoded raster URLs.
 
 ## Acceptance Criteria
 

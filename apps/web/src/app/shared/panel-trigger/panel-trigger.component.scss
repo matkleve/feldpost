@@ -21,12 +21,12 @@
   .panel-trigger {
     display: flex;
     align-items: center;
-    gap: var(--fp-base-4);
-    height: var(--fp-base-16);
+    gap: var(--spacing-1);
+    height: var(--spacing-4);
     padding: 0;
     background-color: var(--muted);
     border: none;
-    border-radius: var(--fp-alias-r-4);
+    border-radius: var(--spacing-1);
     appearance: none;
     color: var(--foreground);
     font-family: var(--font-sans), sans-serif;
@@ -42,21 +42,21 @@
   // icon-text-action: 4px symmetric inline padding per Figma px-sp-4
   // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
   :host([data-layout='icon-text-action']) .panel-trigger {
-    padding-inline: var(--fp-alias-sp-4);
+    padding-inline: var(--spacing-1);
   }
 
   // text-action: asymmetric padding 8px left, 4px right per Figma pl-base-8 pr-base-4
   // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
   :host([data-layout='text-action']) .panel-trigger {
-    padding-left: var(--fp-base-8);
-    padding-right: var(--fp-base-4);
+    padding-left: var(--spacing-2);
+    padding-right: var(--spacing-1);
   }
 
   // Icon slot container: fixed 8px × 8px per Figma leading-icon placeholder
   // @see docs/specs/component/ui-primitives/panel-trigger.md §What It Looks Like
   .panel-trigger__icon {
-    width: var(--fp-base-8);
-    height: var(--fp-base-8);
+    width: var(--spacing-2);
+    height: var(--spacing-2);
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -74,9 +74,9 @@
   // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
   .panel-trigger__chevron {
     flex-shrink: 0;
-    font-size: var(--fp-base-12);
-    width: var(--fp-base-12);
-    height: var(--fp-base-12);
+    font-size: var(--spacing-3);
+    width: var(--spacing-3);
+    height: var(--spacing-3);
     line-height: 1;
     display: block;
     overflow: hidden;

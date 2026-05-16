@@ -21,7 +21,7 @@ import {
   toggleSingleStringValue,
 } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { buildCardVariantToggleOptions } from '../../shared/ui-primitives/card-variant-toggle.helpers';
-import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
@@ -39,7 +39,7 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
-    UiDropdownTriggerDirective,
+    ...HLM_BUTTON_IMPORTS,
     PaneToolbarComponent,
   ],
   templateUrl: './projects-toolbar.component.html',

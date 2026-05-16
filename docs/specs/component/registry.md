@@ -34,7 +34,7 @@
 
 - **File**: `apps/web/src/app/shared/ui/select/` (`HlmSelectDirective`, `selectVariants`, `HLM_SELECT_IMPORTS`)
 - **Purpose**: Token-backed styling for native `<select>`; no overlay (`BrnSelect` is a separate future migration).
-- **Spec**: `docs/migration/README.md` (Phase 3); legacy shim `select[uiSelectControl]` in `ui-primitives.directive.ts`
+- **Spec**: `docs/migration/README.md` (Phase 3); native `select[hlmSelect]` in `shared/ui/select/` (legacy `ui-primitives.directive.ts` **removed** 2026-05-16)
 - **Variant axes**:
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
