@@ -1,0 +1,42 @@
+// ── Typography baseline ────────────────────────────────────────────────────────
+// Must run after Tailwind Preflight so heading metrics are not reset away.
+// @see apps/web/AGENTS.md (typography ownership — global baseline only)
+
+h1 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+h2 {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+h3 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+}
+
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-snug);
+}
+
+// ── Link baseline ─────────────────────────────────────────────────────────────
+// Must follow @tailwind base; aligns default anchors with primary token.
+// @see apps/web/AGENTS.md (typography / link ownership)
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

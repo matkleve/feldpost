@@ -286,39 +286,6 @@ html[data-theme="sandstone"] {
   }
 }
 
-// ── Typography baseline — must follow @tailwind base (Preflight resets headings)
-h1 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-}
-
-h2 {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-}
-
-h3 {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-snug);
-}
-
-h4,
-h5,
-h6 {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-snug);
-}
-
-// ── Link baseline — must follow @tailwind base ────────────────────────────────
-a {
-  color: var(--primary);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
+// Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).
+// @see docs/migration/phase-8-global-scss-elimination.md §7
+@include meta.load-css('styles/typography-baseline');
