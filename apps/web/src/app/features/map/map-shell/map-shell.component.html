@@ -131,7 +131,7 @@
       [panelClass]="mapMenuPanelClass()"
       (closeRequested)="onMapMenuCloseRequested()"
     >
-      <div class="map-context-menu__items flex flex-col p-2" role="menu" tabindex="-1" aria-label="Map context menu">
+      <div class="map-context-menu__items flex flex-col" role="menu" tabindex="-1" aria-label="Map context menu">
         @for (action of mapPrimaryActions(); track action.id) {
           <button
             hlmMenuItem
@@ -180,7 +180,7 @@
     >
       <div class="map-context-menu__header option-menu-header">Radius Auswahl</div>
 
-      <div class="map-context-menu__items flex flex-col p-2" role="menu" tabindex="-1" aria-label="Radius context menu">
+      <div class="map-context-menu__items flex flex-col" role="menu" tabindex="-1" aria-label="Radius context menu">
         @for (action of radiusPrimaryActions(); track action.id) {
           <button
             hlmMenuItem
@@ -238,7 +238,7 @@
           }
         </div>
 
-        <div class="map-context-menu__items flex flex-col p-2" role="menu" tabindex="-1" aria-label="Marker context menu">
+        <div class="map-context-menu__items flex flex-col" role="menu" tabindex="-1" aria-label="Marker context menu">
           @for (action of markerPrimaryActions(); track action.id + '-' + action.label) {
             <button
               hlmMenuItem

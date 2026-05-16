@@ -133,3 +133,10 @@ npm run design-system:check
 - Acceptance table green.
 - Phase 9 can start **planning** in parallel but package upgrade execution remains blocked per Phase 9 upstream note.
 - Phase 10 checklist gets a “global SCSS risk” sign-off line.
+
+## Open (remaining weight)
+
+**Build:** `ng build` may still warn on **`MapShellComponent` `anyComponentStyle` budget** — the stylesheet is large by design (Leaflet `::ng-deep` markers, photo panel, upload chrome). **Approach:** split into co-located partials (for example `_map-markers.scss`, `_map-chrome.scss`) without changing selectors, or defer until after Phase 9 tooling gates; avoid tiny line-shaves unless they measurably shrink emitted CSS.
+
+**§6:** Removing global **`hlm-toggle-group.scss`** stays blocked until **`@layer components`** pill shell + **`prefers-reduced-motion`** clamp are fully replaceable by CVA / callers; then drop **`@use`** from **`styles.scss`** and delete the file.
+

@@ -499,6 +499,10 @@
     border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
     border-radius: var(--radius-sm);
     background: var(--popover);
+    // Address suggestion list inset (same rhythm as StandardDropdown).
+    // @see docs/specs/component/filters/dropdown-system.md
+    --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
+    padding-inline: var(--std-dropdown-padding-inline);
   }
 
   &__duplicate-dialog-overlay {

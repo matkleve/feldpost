@@ -265,9 +265,13 @@
     font-weight: var(--font-weight-semibold);
   }
 
+  // Symmetric horizontal inset for menu rows (matches StandardDropdown `--std-dropdown-padding-inline` rhythm).
+  // @see docs/specs/component/filters/dropdown-system.md
   .map-context-menu__items {
     overflow-y: auto;
     max-height: min(20rem, calc(100vh - 9rem));
+    padding-inline: var(--spacing-3);
+    padding-block: var(--spacing-2);
   }
 }
 

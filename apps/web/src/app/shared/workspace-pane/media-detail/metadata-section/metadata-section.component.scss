@@ -77,4 +77,8 @@
   top: 100%;
   z-index: var(--z-dropdown);
   margin-top: var(--spacing-1);
+  // Key-suggestion list horizontal inset (anchored surface rhythm).
+  // @see docs/specs/component/filters/dropdown-system.md
+  --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
+  padding-inline: var(--std-dropdown-padding-inline);
 }

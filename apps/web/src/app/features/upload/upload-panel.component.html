@@ -347,7 +347,7 @@
       }
 
       @if (locationAddressDialogSuggestions().length > 0) {
-        <div class="upload-panel__location-editor-results flex flex-col p-2" role="listbox">
+        <div class="upload-panel__location-editor-results flex flex-col" role="listbox">
           @for (suggestion of locationAddressDialogSuggestions(); track suggestion.addressLabel) {
             <button
               hlmMenuItem

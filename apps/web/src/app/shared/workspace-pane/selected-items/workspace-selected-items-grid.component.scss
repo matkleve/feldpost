@@ -145,4 +145,8 @@
 :host ::ng-deep .map-context-menu .map-context-menu__items {
   max-height: min(20rem, calc(100vh - 10rem));
   overflow-y: auto;
+  // Anchored shell list inset (matches StandardDropdown `--std-dropdown-padding-inline` rhythm).
+  // @see docs/specs/component/filters/dropdown-system.md
+  --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
+  padding-inline: var(--std-dropdown-padding-inline);
 }
