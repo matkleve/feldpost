@@ -2,7 +2,7 @@
 
 **Status:** Planned (**hard-blocked** until Phase 6 template gates and Phase 7 token migration are complete)
 
-**Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. **`hlm-toggle-group.scss`** deleted or reduced to **zero** stateful rules (CVA + templates own behavior).
+**Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. Toggle-group global sheet (`hlm-toggle-group.scss`) **co-located** under `app/shared/ui/toggle-group/` and **`@use`’d** from `styles.scss` until **deleted** or reduced to **zero** stateful rules (CVA + templates own behavior).
 
 ---
 
@@ -25,7 +25,7 @@ rg "hlm-toggle-group" apps/web/src/styles.scss
 
 **`styles/primitives/` (2026-05-16):** **Removed** from disk after last primitive deletion (Group D); acceptance remains **empty or deleted**. ~~Prior inventory (2026-05-14):~~ `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — all gone.
 
-**Progress (2026-05-16):** Globally emitted **`hlm-toggle-group.scss`** **relocated** from `app/shared/ui/toggle-group/` to **`apps/web/src/styles/hlm-toggle-group.scss`**; `styles.scss` now **`@use './styles/hlm-toggle-group'`** (same rules / load order slice; CVA + eventual deletion per §6 unchanged). **Deduped** focus/disabled globals against **CVA** (see §6 progress).
+**Progress (2026-05-16):** **Deduped** focus/disabled globals against **CVA** (§6). **`hlm-toggle-group.scss`** co-located at **`apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss`**; **`styles.scss`** **`@use './app/shared/ui/toggle-group/hlm-toggle-group'`** (global `@layer` emission unchanged; aligns with **phase-6** path). Removed **`apps/web/src/styles/hlm-toggle-group.scss`**.
 
 ---
 
@@ -61,9 +61,11 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 1. Confirm **CVA** on `hlmToggleGroup` / `hlmToggleGroupItem` covers selected / hover / focus-visible / disabled.
 2. Strip **state** rules from `hlm-toggle-group.scss`; keep only **documented** pill shell / density if still needed.
-3. End state: **delete** `apps/web/src/styles/hlm-toggle-group.scss` and remove `@use './styles/hlm-toggle-group'` from `styles.scss` **if** all visuals live in CVA strings or component `@layer states`.
+3. End state: **delete** `apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss` and remove `@use './app/shared/ui/toggle-group/hlm-toggle-group'` from `styles.scss` **if** all visuals live in CVA strings or component `@layer states`.
 
 **Progress (2026-05-16, slice):** Removed **duplicate** global `:focus-visible` and `:disabled` rules for `[hlmToggleGroupItem]` — **CVA** (`toggle-group-variants.ts`) already applies `focus-visible:ring-*` and `disabled:*`. Global `@layer states` still owns **hover** (off segments) and **`data-attention`** emphasis; `@layer components` + reduced-motion unchanged.
+
+**Progress (2026-05-16, slice — co-location):** **`hlm-toggle-group.scss`** source file moved from **`apps/web/src/styles/`** to **`apps/web/src/app/shared/ui/toggle-group/`** (same `@use` from `styles.scss`, new path **`./app/shared/ui/toggle-group/hlm-toggle-group`**). **`styles/hlm-toggle-group.scss`** removed.
 
 ### 7. Inventory remaining `styles/` tree
 
@@ -71,7 +73,7 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Review:** any other `@use` from `styles.scss` not listed above — justify or delete.
 
-**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is exactly **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./styles/hlm-toggle-group`** (plus Sass **`meta`** for **`load-css`**). No stray **`primitives/*`** or **`tokens`** references.
+**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is exactly **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./app/shared/ui/toggle-group/hlm-toggle-group`** (plus Sass **`meta`** for **`load-css`**). No stray **`primitives/*`** or **`tokens`** references.
 
 ### 8. Final gates
 

@@ -1,4 +1,5 @@
 // Shadcn-style ToggleGroup chrome (muted track, card-like active segment).
+// Loaded once from `styles.scss` via `@use` (global emission); source lives with the module.
 // @see apps/web/src/app/shared/ui/toggle-group/
 
 @layer components {

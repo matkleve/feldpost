@@ -7,8 +7,8 @@ Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tai
 - **Phase 4** cleanup done (2026-05-13).
 - **Phase 5** — **Groups A–G + Group D done (2026-05-16).** **`ui-primitives.directive.ts`** and **`UiDropdownTriggerDirective`** / primitive **`dropdown-trigger.scss`** removed; toolbar triggers use **`hlmBtn`**. See [phase-5-callsite-migration.md](./phase-5-callsite-migration.md).
 - **Phase 6** in progress — Gate A + helm BEM done; **`ui-primitives.directive.ts` removed**; **Gate B** → **0** HTML files with residual **`uiCamelCase`** directives (`rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l` → empty), after **Phase 5 Group D** toolbar **`hlmBtn`** work. See [phase-6-template-cleanup.md](./phase-6-template-cleanup.md).
-- **Next:** [Phase 7 — token migration](./phase-7-token-migration.md) **in progress** (Batch 1 landed 2026-05-16); then 8–11 per table below.
-- **Last updated:** 2026-05-16 (Group D toolbar triggers + Gate B = 0).
+- **Next:** [Phase 7 — token migration](./phase-7-token-migration.md) **in progress** (Batches 1–4 landed; **§Batch 5** grep inventory 2026-05-16); then 8–11 per table below.
+- **Last updated:** 2026-05-16 (Phase 7 §Batch 5 inventory + Group D / Gate B snapshot).
 
 ---
 
@@ -33,7 +33,7 @@ Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tai
 | 4 — Cleanup & Build | [phase-4-cleanup.md](./phase-4-cleanup.md) | Hygiene, `design-system:check`, `ng build`, lint notes, deferred folder removals. **Done** (deferred items noted). |
 | 5 — Callsite migration | [phase-5-callsite-migration.md](./phase-5-callsite-migration.md) | Groups A–G + **Group D (2026-05-16)** complete; **`ui-primitives.directive.ts`** + **`ui-dropdown-trigger.directive.ts`** removed. |
 | 6 — Template BEM sweep & toggles | [phase-6-template-cleanup.md](./phase-6-template-cleanup.md) | **In progress** — Gate A done; **Gate B = 0** (`uiCamelCase` cleared, incl. post–Phase 5 Group D toolbar triggers). Redirect: [phase-6-hlm-directive-conversion.md](./phase-6-hlm-directive-conversion.md). |
-| 7 — Token system unification | [phase-7-token-migration.md](./phase-7-token-migration.md) | **In progress (2026-05-16)** — Batch 1–3: spacing + bridge + fp color rewires; **Batch 4:** tweakcn dark palette in **`styles.scss`** also under **`prefers-color-scheme: dark`** for **`:root:not([data-theme])`** (system theme). **`_legacy-design-tokens.scss`** shrink / MD3 container → tweakcn still open. |
+| 7 — Token system unification | [phase-7-token-migration.md](./phase-7-token-migration.md) | **In progress (2026-05-16)** — Batches 1–4: spacing, bridge chains, fp-base removal + partial **`--fp-sys-color-*` → tweakcn**, system-dark mixin; **§Batch 5:** `apps/web/src` grep — **0** `var(--fp-*)` / `var(--fp-ref-*)` / `var(--fp-sys-color*)` outside the bridge file. **`_legacy-design-tokens.scss`** shrink + Batch-3–deferred MD3 roles + **`--fp-ref-*`** tables still open. |
 | 8 — Global SCSS elimination | [phase-8-global-scss-elimination.md](./phase-8-global-scss-elimination.md) | **Planned** — empty `styles/primitives/`; drop `hlm-toggle-group.scss`; minimal `styles.scss` `@use` set. |
 | 9 — Spartan package upgrade | [phase-9-spartan-upgrade.md](./phase-9-spartan-upgrade.md) | **Planned** — swap local `shared/ui/*` shims for published `@spartan-ng/ui-*-helm` when Tailwind v4 peers unblock. |
 | 10 — Visual QA & polish | [phase-10-visual-qa.md](./phase-10-visual-qa.md) | **Planned** — cross-theme / cross-screen verification; no new `::ng-deep`; budget-clean `ng build`. |

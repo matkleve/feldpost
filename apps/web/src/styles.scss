@@ -4,7 +4,7 @@
 @use './styles/reset';
 @use './styles/layout/app';
 @use './styles/layout/clamp';
-@use './styles/hlm-toggle-group';
+@use './app/shared/ui/toggle-group/hlm-toggle-group';
 
 // ── Angular CDK overlay — moved from tokens.scss (Phase 7 cleanup) ─────────────
 @import "@angular/cdk/overlay-prebuilt.css";
