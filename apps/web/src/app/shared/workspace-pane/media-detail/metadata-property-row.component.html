@@ -1,6 +1,4 @@
 <div
-  uiRowShell
-  uiRowShellSizeSm
   class="meta-row"
   [class.meta-row--editing]="editing()"
 >
@@ -22,7 +20,7 @@
   @if (editing()) {
     <input
       #editInput
-      uiInputControl
+      hlmInput
       class="meta-row__input"
       type="text"
       [value]="metaValue()"

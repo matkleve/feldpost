@@ -22,7 +22,7 @@ import { SearchOrchestratorService } from '../../../core/search/search-orchestra
 import type { GhostTrieEntry } from '../../../core/search/search-bar.service';
 import { SearchBarService } from '../../../core/search/search-bar.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
-import { UiInputControlDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 import type {
   SearchCandidate,
   SearchQueryContext,
@@ -56,7 +56,7 @@ type SearchSectionsState = {
 @Component({
   selector: 'ss-search-bar',
   standalone: true,
-  imports: [CommonModule, SearchDropdownItemComponent, UiInputControlDirective],
+  imports: [CommonModule, SearchDropdownItemComponent, ...HLM_INPUT_IMPORTS],
   templateUrl: './search-bar.component.html',
   styleUrl: './search-bar.component.scss',
   host: {

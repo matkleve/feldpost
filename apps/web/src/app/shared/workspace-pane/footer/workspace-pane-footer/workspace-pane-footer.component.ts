@@ -12,7 +12,6 @@ import { MediaQueryService } from '../../../../core/media-query/media-query.serv
 import { ProjectsService } from '../../../../core/projects/projects.service';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ACTION_CONTEXT_IDS } from '../../../../core/action/action-context-ids';
-import { UiInputControlDirective } from '../../../../shared/ui-primitives/ui-primitives.directive';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
@@ -39,7 +38,6 @@ const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
   standalone: true,
   imports: [
     ...HLM_BUTTON_IMPORTS,
-    UiInputControlDirective,
     ...HLM_INPUT_IMPORTS,
     PaneFooterComponent,
     ProjectSelectDialogComponent,

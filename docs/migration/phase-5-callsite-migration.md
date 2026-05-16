@@ -42,7 +42,7 @@
     - [x] Delete `apps/web/src/styles/patterns/form.scss` — **done (2026-05-14)**
   - [~] **Barrel removal**
     - [x] Remove `UI_PRIMITIVE_DIRECTIVES` export from `ui-primitives.directive.ts` — **done (2026-05-14)** (last callsite was `filter-dropdown`; Group D unchanged)
-    - [ ] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **blocked (2026-05-15):** **14** production files under `apps/web/src` still `import … from '…/ui-primitives.directive'` (named `Ui*` shims); `rg 'ui-primitives\\.directive' apps/web/src` — delete only after Phase 6 / Group D clears those callsites
+    - [ ] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **blocked (re-verified 2026-05-16):** **1** file under `apps/web/src` still matches `import … from '…/ui-primitives.directive'` — `rg "from ['\"].*ui-primitives\\.directive" apps/web/src -l | wc -l` — delete only after Phase 6 / Group D clears those callsites
     - [ ] Remove legacy alias block from `apps/web/src/styles.scss` (verify no remaining `--color-*` / `--fp-sys-*` references) — **deferred:** `rg "var\\(--color-" apps/web/src` still matches widespread component SCSS + `styles.scss` link baseline (`var(--color-primary)` on `a`)
     - [ ] Delete `apps/web/src/styles/tokens.scss` (after alias block removed and CDK overlay import moved)
   - [~] **Final verification**

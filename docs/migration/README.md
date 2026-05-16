@@ -8,7 +8,7 @@ Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tai
 - **Phase 5** in progress — Groups A–C, E–G done; **Group D** (dropdowns / BrnMenu) and final barrel cleanup open. See [phase-5-callsite-migration.md](./phase-5-callsite-migration.md).
 - **Phase 6** in progress — template `ui-*` removal, toggles; see [phase-6-template-cleanup.md](./phase-6-template-cleanup.md).
 - **Next (planned):** [Phase 7 — token migration](./phase-7-token-migration.md), then 8–11 per table below.
-- **Last updated:** 2026-05-15 (index moved from `docs/MIGRATION_PLAN.md`).
+- **Last updated:** 2026-05-16 (phase 5/6 migration doc snapshots refreshed).
 
 ---
 

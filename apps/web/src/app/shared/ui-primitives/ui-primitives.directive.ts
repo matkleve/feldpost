@@ -737,45 +737,6 @@ export class UiChoiceRowDirective {}
 })
 export class UiChoiceControlDirective {}
 
-@Directive({
-  selector: '[uiInlineEditRow]',
-  standalone: true,
-  host: { class: 'ui-inline-edit-row' },
-})
-export class UiInlineEditRowDirective {}
-
-@Directive({
-  selector: '[uiInlineEditActions]',
-  standalone: true,
-  host: { class: 'ui-inline-edit-actions' },
-})
-export class UiInlineEditActionsDirective {}
-
-@Directive({ selector: '[uiRowShell]', standalone: true, host: { class: 'ui-row-shell' } })
-export class UiRowShellDirective {}
-
-@Directive({
-  selector: '[uiRowShellSizeSm]',
-  standalone: true,
-  host: { class: 'ui-row-shell--sm' },
-})
-export class UiRowShellSizeSmDirective {}
-
-@Directive({
-  selector: '[uiRowShellSizeMd]',
-  standalone: true,
-  host: { class: 'ui-row-shell--md' },
-})
-export class UiRowShellSizeMdDirective {}
-
-@Directive({
-  selector: '[uiRowShellSizeLg]',
-  standalone: true,
-  host: { class: 'ui-row-shell--lg' },
-})
-export class UiRowShellSizeLgDirective {}
-
-@Directive({ selector: '[uiCardShell]', standalone: true, host: { class: 'ui-card-shell' } })
 export class UiCardShellDirective {}
 
 @Directive({

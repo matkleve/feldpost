@@ -6,20 +6,14 @@ import type { ElementRef } from '@angular/core';
 import { Component, inject, input, output, signal, viewChild } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
-import {
-  UiInputControlDirective,
-  UiRowShellDirective,
-  UiRowShellSizeSmDirective,
-} from '../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 
 @Component({
   selector: 'app-metadata-property-row',
   standalone: true,
   imports: [
     ...HLM_BUTTON_IMPORTS,
-    UiInputControlDirective,
-    UiRowShellDirective,
-    UiRowShellSizeSmDirective,
+    ...HLM_INPUT_IMPORTS,
   ],
   templateUrl: './metadata-property-row.component.html',
   styleUrl: './metadata-property-row.component.scss',

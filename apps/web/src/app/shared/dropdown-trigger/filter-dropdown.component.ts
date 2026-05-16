@@ -9,10 +9,6 @@ import { HlmMenuItemDirective } from '../ui/menu';
 import { HLM_SELECT_IMPORTS } from '../ui/select';
 import { HLM_INPUT_IMPORTS } from '../ui/input';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
-import {
-  UiInputControlCompactDirective,
-  UiInputControlDirective,
-} from '../ui-primitives/ui-primitives.directive';
 
 export interface FilterDropdownPropertyOption {
   id: string;
@@ -30,8 +26,6 @@ export interface FilterDropdownPropertyOption {
     ...HLM_SELECT_IMPORTS,
     ...HLM_INPUT_IMPORTS,
     ...HLM_BUTTON_IMPORTS,
-    UiInputControlDirective,
-    UiInputControlCompactDirective,
   ],
 })
 export class FilterDropdownComponent {

@@ -1,8 +1,8 @@
 # Phase 6 — Template BEM Sweep & Toggle Unification
 
-**Status:** In Progress (2026-05-15)
+**Status:** In Progress (2026-05-16 snapshot)
 
-**Goal:** Zero `ui-*` class names in any Angular template. Every toggle cluster uses `hlmToggleGroup` / `hlmToggleGroupItem` (no hand-rolled BEM for group chrome). Toolbar actions use `hlmBtn` with explicit variants. `apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts` is removed once nothing binds legacy `ui-*` classes.
+**Goal:** Zero legacy **`ui-*` hyphenated class tokens** in any Angular template (Gate A). Every toggle cluster uses `hlmToggleGroup` / `hlmToggleGroupItem` (no hand-rolled BEM for group chrome). Toolbar actions use `hlmBtn` with explicit variants. `apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts` is removed once **Gate B** (`uiCamelCase` shim attrs) is clear and nothing imports the file.
 
 **Prerequisites:** Phase 5 callsite migration substantially complete (HLM imports, dialogs, switches). Phase 6 is intentionally **template + directive surface only**; token deletion and global primitive SCSS removal are **Phase 7** and **Phase 8** respectively.
 
@@ -12,14 +12,15 @@
 
 ## Current global load order (context)
 
-`apps/web/src/styles.scss` (top of file, before Tailwind):
+`apps/web/src/styles.scss` (top of file, before Tailwind) — **2026-05-16:**
 
-- `@use './styles/tokens'` — legacy palette + **CDK overlay prebuilt** import (must relocate before `tokens.scss` deletion in Phase 7).
-- `@use './styles/reset'`, `./styles/layout/app'`, `./styles/layout/clamp'`.
-- `@use './styles/primitives/container'`, `row-shell`, `card-shell` — global BEM still backing some `ui-*` templates until this phase finishes.
-- `@use './app/shared/ui/toggle-group/hlm-toggle-group'` — pill/toggle group shell until CVA + directives own visuals.
+- `@use './styles/reset'`, `./styles/layout/app`, `./styles/layout/clamp`.
+- `@use './app/shared/ui/toggle-group/hlm-toggle-group'` — toggle group shell until CVA + directives own visuals.
+- **CDK overlay:** `@import "@angular/cdk/overlay-prebuilt.css"` (inline; not via deleted `tokens.scss`).
+- **Tailwind v4** `@import "tailwindcss"` + `@config` bridge.
+- **Legacy bridge:** `@include meta.load-css('styles/legacy-design-tokens')` after tweakcn `:root` (Phase 7 replaces this body).
 
-After Phase 6, templates must not depend on `ui-*` directive bindings; Phase 8 then deletes the primitive SCSS that only existed for those classes.
+`styles/primitives/` no longer has `container` / `row-shell` / `card-shell` (removed after template migration including `uiRowShell`). After Phase 6, templates must not carry legacy **`ui-*` class strings**; remaining **`uiCamelCase`** attribute directives (Gate B) clear when `ui-primitives.directive.ts` is deleted (§10). Phase 8 drops leftover global SCSS such as `styles/primitives/dropdown-trigger.scss` once hosts no longer need those selectors.
 
 ---
 
@@ -41,18 +42,20 @@ Optional: count lines for burn-down charts.
 rg '\bui-' apps/web/src/app --glob "*.html" -c
 ```
 
-### Baseline snapshot (2026-05-15, re-scanned)
+### Baseline snapshot (2026-05-16, re-scanned)
 
 Re-run before execution; numbers drift.
 
 | Scan | Result |
 |------|--------|
-| Templates with `\bui-` (hyphenated `ui-…`) | **2** files: `panel-trigger.component.html`, `popover.component.html` — matches only **`@see docs/specs/component/ui-primitives/...`** comment paths (**no** `class="…ui-…"` or binding markup). |
-| `ui-button--active\|ghost\|secondary` in HTML | **0** hits |
-| SCSS `var(--color…)` in `apps/web/src/app` (`*.scss`) | **0** files (pattern `var\(--color`; Phase 7 may still cover other legacy `var(--*` tokens) |
-| `hlm-toggle-group__*` / `hlm-pill-toggle__*` in HTML | **0** hits |
+| Templates whose `class="…"` value contains substring `ui-` | `rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l` → **0** files |
+| Templates with `\bui-` (hyphenated `ui-…`) | `rg '\bui-' apps/web/src/app --glob "*.html" -l` → **2** files: `panel-trigger.component.html`, `popover.component.html` — matches only **`@see docs/specs/component/ui-primitives/...`** comment paths (**no** `class="…ui-…"` markup). |
+| `ui-button--active\|ghost\|secondary` in HTML | `rg 'ui-button--active\|ui-button--ghost\|ui-button--secondary' apps/web/src/app --glob "*.html"` → **0** hits |
+| Kebab `hlm-toggle-group` token in HTML (class strings) | `rg 'hlm-toggle-group\b' apps/web/src/app --glob "*.html" -l` → **0** files (toggle markup uses **`hlmToggleGroup`** / **`hlmToggleGroupItem`** directives, not `hlm-toggle-group` literals) |
+| SCSS `var(--color…)` in `apps/web/src/app` (`*.scss`) | `rg 'var\(--color' apps/web/src/app --glob "*.scss" -l` → **0** files (Phase 7 may still cover other legacy `var(--*` tokens) |
+| `hlm-toggle-group__*` / `hlm-pill-toggle__*` in HTML | `rg 'hlm-toggle-group__\|hlm-pill-toggle__' apps/web/src/app --glob "*.html"` → **0** hits |
 
-**`styles/primitives/` inventory (2026-05-15):** `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — first three align with `ui-container` / `ui-row-shell` / `ui-card-shell`; `dropdown-trigger.scss` remains in use for `ui-dropdown-trigger` + `[data-dd-part]` (Phase 8 when host migrates off `ui-button`).
+**`styles/primitives/` inventory (2026-05-16):** only **`dropdown-trigger.scss`** remains on disk (`container` / `row-shell` / `card-shell` **removed**). It still defines `.ui-dropdown-trigger*` + `[data-dd-part]` rules for **`UiDropdownTriggerDirective`** hosts; it is **not** `@use`d from `styles.scss` today — reconcile in Phase 8 when toolbar triggers drop legacy class hooks.
 
 ---
 
@@ -97,6 +100,7 @@ Re-run before execution; numbers drift.
 **Targets:** `media-detail-inline-section`, `metadata-property-row`, `editable-property-row`, `projects-table-view`.
 
 - Define **one row geometry owner** per component (SCSS `@layer components`), not a global primitive.
+- **Status (2026-05-16):** `ui-row-shell` / `uiRowShell` **cleared** from templates; global `row-shell.scss` removed. **Redesign backlog (do not lose):** IA/a11y follow-ups in [`docs/archive/design-notes/media-detail-metadata-layout-redesign-2026-05.md`](../archive/design-notes/media-detail-metadata-layout-redesign-2026-05.md).
 
 ### 6. `ui-card-shell` → `hlmCard`
 
@@ -110,11 +114,11 @@ Re-run before execution; numbers drift.
 
 - Replace `ui-chip` with **`hlmBadge`** + variant/size.
 
-### 8. `ui-input-control` remnants → `hlmInput`
+### 8. `ui-input-control` / `uiInputControl*` remnants → `hlmInput`
 
-**Targets:** `workspace-pane-footer`, `filter-dropdown`.
+**Targets:** `filter-dropdown`, `workspace-pane-footer` (zip dialog field), `search-bar`, `upload-panel`, `media-detail-*` — clear any host still carrying **`uiInputControl`** / **`uiInputControlCompact`** in templates (Gate B); **`editable-property-row`** uses **`hlmInput`** / **`hlmSelect`** only.
 
-- Ensure form controls use **`hlmInput`** / **`hlmFormField`** per registry; no `ui-input-control` class string.
+- Ensure form controls use **`hlmInput`** / **`hlmFormField`** per registry; drop shim attribute directives when `ui-primitives.directive.ts` is removed.
 
 ### 9. `ui-spacer` → `flex-1`
 
@@ -124,7 +128,7 @@ Re-run before execution; numbers drift.
 
 ### 10. Delete `ui-primitives.directive.ts` and verify build
 
-1. `rg` gates below → zero.
+1. **Gate A**, **Gate B**, and helm-toggle BEM rows in **Acceptance criteria** → zero (see **Closure** note for Phase 6 vs §10 ordering).
 2. Remove **`ui-primitives.directive.ts`** and any **barrel / module** references.
 3. `cd apps/web && npx ng build`
 4. From repo root: `npm run design-system:check`
@@ -133,21 +137,21 @@ Re-run before execution; numbers drift.
 
 ## Molecules Audit
 
-Molecules = app-level components composed from multiple atoms. Every molecule must use `hlm*` atoms internally and Tailwind for layout — no `ui-*` class names.
+Molecules = app-level components composed from multiple atoms. Every molecule must use `hlm*` atoms internally and Tailwind for layout — no legacy **`ui-*` class strings** in HTML (Gate A). Remaining **`uiCamelCase`** attribute directives are listed explicitly and are tracked by **Gate B** until `ui-primitives.directive.ts` is deleted.
 
-| Molecule | File | Uses ui-* | Target |
+| Molecule | File | Legacy `ui-*` classes / attrs (2026-05-16) | Target |
 |---|---|---|---|
-| Project card | `features/projects/project-card.component.html` | `ui-card-shell` | `hlmCard` |
-| Search dropdown item | `features/map/search-bar/search-dropdown-item.component.html` | `ui-*` | Tailwind + `hlmBadge` |
-| Upload panel item | `features/upload/upload-panel-item.component.html` | `ui-item`, `ui-item-media`, `ui-item-label` | component classes + Tailwind |
-| Project select dialog item | `shared/project-select-dialog/project-select-dialog.component.html` | `ui-item` | `flex items-center gap-3` |
-| Filter dropdown | `shared/dropdown-trigger/filter-dropdown.component.html` | `ui-input-control` | `hlmInput` |
-| Workspace pane footer | `shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.html` | `ui-input-control` | `hlmInput` |
-| Quick-info chips | `shared/quick-info-chips/quick-info-chips.component.html` | `ui-chip` | `hlmBadge` |
-| Media empty | `features/media/media-empty.component.html` | `ui-button--secondary` | `hlmBtn variant="outline"` |
-| Projects empty / page | `features/projects/projects-page.component.html` | `ui-button--secondary` | `hlmBtn variant="outline"` |
+| Project card | `features/projects/project-card.component.html` | — | — |
+| Search dropdown item | `features/map/search-bar/search-dropdown-item.component.html` | — | — |
+| Upload panel item | `features/upload/upload-panel-item.component.html` | — | — |
+| Project select dialog | `shared/project-select-dialog/project-select-dialog.component.html` | — | — |
+| Filter dropdown | `shared/dropdown-trigger/filter-dropdown.component.html` | — | — |
+| Workspace pane footer | `shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.html` | — | — |
+| Quick-info chips | `shared/quick-info-chips/quick-info-chips.component.html` | — | — |
+| Media empty | `features/media/media-empty.component.html` | — | — |
+| Projects page | `features/projects/projects-page.component.html` | — | — |
 
-All of the above are covered by Phase 6 work items 4–9. This table is the acceptance checklist — every row must have zero `ui-*` hits before Phase 6 is marked complete.
+All of the above are covered by Phase 6 work items 4–9. **Gate A** must be zero for completion of the template BEM sweep; **Gate B** must be zero before deleting `ui-primitives.directive.ts` (§10).
 
 ### shared/ui/ molecules (already correct)
 These use CVA + `host: { '[class]' }` — no action needed:
@@ -172,16 +176,20 @@ These use CVA + `host: { '[class]' }` — no action needed:
 
 | Gate | Command / condition |
 |------|---------------------|
-| No legacy `ui-*` classes in templates | `rg 'ui-item|ui-container|ui-row-shell|ui-card-shell|ui-chip|ui-button|ui-spacer|ui-badge|ui-input-control' apps/web/src/app --glob "*.html"` → **zero** hits |
+| **Gate A — Legacy `ui-*` class substrings** in templates (hyphenated tokens in markup: `ui-item`, `ui-input-control`, `ui-button`, …). Does **not** match **`uiCamelCase`** attribute directives (`uiInputControl`, `uiDropdownTrigger`, `[uiInlineEditRow]`, …). | `rg 'ui-item|ui-container|ui-row-shell|ui-card-shell|ui-chip|ui-button|ui-spacer|ui-badge|ui-input-control' apps/web/src/app --glob "*.html"` → **zero** hits |
+| **Gate B — Remaining `ui-primitives` / shim attribute directives** on element hosts (`uiCamelCase` in templates; not matched by Gate A). | `rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html"` → **3** files (2026-05-16); **zero** required before deleting `ui-primitives.directive.ts` §10. **Acceptance note (2026-05-16):** `rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l \| wc -l` → **3** (down from 11). The only surviving **`uiCamelCase`** hooks in HTML are **`uiDropdownTrigger`**, each in one file: `features/media/media.component.html`, `features/projects/projects-toolbar.component.html`, `shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.html`. **`uiInlineEditRow` / `uiInlineEditActions`** removed from `editable-property-row.component.html` (`.prop-row` / `.prop-edit` SCSS own layout). |
 | No BEM leakage for helm toggle in HTML | `rg 'hlm-toggle-group__|hlm-pill-toggle__' apps/web/src/app --glob "*.html"` → **zero** hits |
 | Build | `cd apps/web && npx ng build` → exit **0** |
 | Design system | `npm run design-system:check` → exit **0** |
+
+**Closure:** Treat **Gate A** + helm BEM + build + design-system as the Phase 6 **template BEM sweep** bar. **Gate B** is tracked here but must hit **zero** before §10 removes `ui-primitives.directive.ts` (aligns with Phase 5 barrel deletion).
 
 ---
 
 ## Definition of done
 
-- All acceptance criteria green.
+- Gate A, helm-toggle BEM leakage, build, and design-system rows above are green.
+- Gate B is green before executing §10 (shim file deletion).
 - `docs/migration/README.md` status for Phase 6 flipped to **Done** with date.
 - Phase 7 pre-flight token scan re-run and attached to `phase-7-token-migration.md` §Baseline.
 

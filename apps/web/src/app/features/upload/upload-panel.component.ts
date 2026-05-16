@@ -24,8 +24,8 @@ import {
 } from './upload-panel-row-handlers';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
 import { dropzoneLabelText } from './upload-panel-helpers';
-import { UiInputControlDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
+import { HLM_INPUT_IMPORTS } from '../../shared/ui/input';
 import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { HlmMenuItemDirective } from '../../shared/ui/menu';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -69,7 +69,7 @@ export type {
     ...BrnToggleGroupImports,
     ...HLM_TOGGLE_GROUP_IMPORTS,
     ...HLM_BUTTON_IMPORTS,
-    UiInputControlDirective,
+    ...HLM_INPUT_IMPORTS,
     HlmMenuItemDirective,
     ProjectSelectDialogComponent,
     PaneFooterComponent,

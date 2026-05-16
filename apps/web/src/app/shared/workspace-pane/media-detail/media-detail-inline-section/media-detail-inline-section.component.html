@@ -2,8 +2,6 @@
   <div hlmMenuLabel class="uppercase tracking-wide">{{ detailViewLabel() }}</div>
 
   <div
-    uiRowShell
-    uiRowShellSizeSm
     class="detail-row detail-row--readonly"
   >
     <button
@@ -25,8 +23,6 @@
   </div>
 
   <div
-    uiRowShell
-    uiRowShellSizeSm
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'captured_at'"
   >
@@ -73,8 +69,6 @@
   </div>
 
   <div
-    uiRowShell
-    uiRowShellSizeSm
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'project_ids'"
   >
@@ -123,7 +117,7 @@
 
           <input
             #projectSearchInput
-            uiInputControl
+            hlmInput
             class="detail-tags__input"
             type="text"
             [value]="projectSearch()"
@@ -228,8 +222,6 @@
   </div>
 
   <div
-    uiRowShell
-    uiRowShellSizeSm
     class="detail-row detail-row--readonly"
   >
     <button
@@ -278,8 +270,6 @@
 
   @for (fieldDef of addressFields; track fieldDef.name) {
     <div
-      uiRowShell
-      uiRowShellSizeSm
       class="detail-row"
       [class.detail-row--editing]="editingField() === fieldDef.name"
     >
@@ -300,7 +290,7 @@
       @if (editingField() === fieldDef.name) {
         <input
           #fieldInput
-          uiInputControl
+          hlmInput
           class="detail-row__input"
           type="text"
           [value]="fieldValue(fieldDef.name)"
@@ -349,8 +339,6 @@
 
   @if (image().latitude != null) {
     <div
-      uiRowShell
-      uiRowShellSizeSm
       class="detail-row detail-row--readonly"
     >
       <button
@@ -434,8 +422,6 @@
 
   @if (image().latitude == null || image().longitude == null) {
     <div
-      uiRowShell
-      uiRowShellSizeSm
       class="detail-row detail-row--readonly"
     >
       <button

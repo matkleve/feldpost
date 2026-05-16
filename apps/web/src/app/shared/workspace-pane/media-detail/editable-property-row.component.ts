@@ -16,10 +16,6 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
 import { HLM_SELECT_IMPORTS } from '../../../shared/ui/select';
-import {
-  UiInlineEditActionsDirective,
-  UiInlineEditRowDirective,
-} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 export interface SelectOption {
   id: string;
@@ -32,8 +28,6 @@ export interface SelectOption {
   templateUrl: './editable-property-row.component.html',
   styleUrl: './editable-property-row.component.scss',
   imports: [
-    UiInlineEditRowDirective,
-    UiInlineEditActionsDirective,
     ...HLM_INPUT_IMPORTS,
     ...HLM_LABEL_IMPORTS,
     ...HLM_SELECT_IMPORTS,

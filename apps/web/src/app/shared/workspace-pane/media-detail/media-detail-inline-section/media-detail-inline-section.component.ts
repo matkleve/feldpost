@@ -20,11 +20,7 @@ import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/drop
 import { HlmBadgeDirective } from '../../../../shared/ui/badge';
 import { HlmMenuLabelDirective } from '../../../../shared/ui/menu';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
-import {
-  UiInputControlDirective,
-  UiRowShellDirective,
-  UiRowShellSizeSmDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 
 interface AddressFieldDefinition {
   name: 'street' | 'city' | 'district' | 'country';
@@ -49,9 +45,7 @@ interface AddressFieldDefinition {
     AddressSearchComponent,
     DropdownShellComponent,
     ...HLM_BUTTON_IMPORTS,
-    UiInputControlDirective,
-    UiRowShellDirective,
-    UiRowShellSizeSmDirective,
+    ...HLM_INPUT_IMPORTS,
     HlmMenuLabelDirective,
     HlmBadgeDirective,
   ],
