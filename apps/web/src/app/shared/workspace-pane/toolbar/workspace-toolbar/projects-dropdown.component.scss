@@ -12,6 +12,10 @@
 .projects-list {
   max-height: 18rem;
   overflow-y: auto;
+  // Inner scroll: stable gutter + inline-end so counts stay clear of the scrollbar.
+  // @see docs/specs/component/filters/dropdown-system.md
+  padding-inline-end: var(--spacing-1);
+  scrollbar-gutter: stable;
 }
 
 .projects-row--all {

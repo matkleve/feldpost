@@ -1,6 +1,9 @@
 :host {
   display: block;
   min-height: 0;
+  // Default horizontal inset for search row, scroll list, and footer action (callers may override).
+  // @see docs/specs/component/filters/dropdown-system.md
+  --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
 }
 
 .standard-dropdown {
@@ -8,5 +11,15 @@
   flex-direction: column;
   max-height: inherit;
   min-height: 0;
+  // Owns symmetric horizontal padding for all sections; avoids shell + list double-counting.
+  // @see docs/specs/component/filters/dropdown-system.md
+  box-sizing: border-box;
+  padding-inline: var(--std-dropdown-padding-inline);
+}
+
+// Reserves space for vertical scrollbar so list content stays aligned with search/action edges.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__items {
+  scrollbar-gutter: stable;
 }
 

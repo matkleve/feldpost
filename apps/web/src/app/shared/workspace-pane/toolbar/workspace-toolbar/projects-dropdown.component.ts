@@ -24,7 +24,7 @@ interface Project {
       (actionRequested)="isCreating.set(true)"
     >
       <div dropdown-items class="projects-list">
-        <label hlmMenuItem class="projects-row--all ui-choice-row">
+        <label hlmMenuItem class="projects-row--all ui-choice-row gap-2">
           <input
             type="checkbox"
             class="projects-checkbox ui-choice-control"
@@ -35,7 +35,7 @@ interface Project {
           <span class="min-w-0 flex-1">{{ t('workspace.projects.all', 'All projects') }}</span>
         </label>
         @for (project of filteredProjects(); track project.id) {
-          <label hlmMenuItem class="ui-choice-row">
+          <label hlmMenuItem class="ui-choice-row gap-2">
             <input
               type="checkbox"
               class="projects-checkbox ui-choice-control"

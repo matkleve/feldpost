@@ -11,6 +11,11 @@
 - Phase 6: zero `ui-*` in templates; `ui-primitives.directive.ts` removed.
 - Phase 7: `tokens.scss` deleted; no `var(--color-*|fp-sys|fp-ref)` in component SCSS; legacy alias block in `styles.scss` removed or verified unused.
 
+**Related (anchored toolbar UI)**
+
+- [Anchored UI (toolbar menus)](./README.md#anchored-ui-toolbar-menus) in the migration index — naming (**toolbar menu** / **menu panel** vs informal “dropdown” / library **Popover**), two-layer padding (trigger vs panel), regression checklist.
+- [Toolbar menus & naming](../glossary.md#toolbar-menus--naming) in the glossary.
+
 ---
 
 ## Pre-flight scan (paste into §Baseline)
@@ -97,9 +102,13 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Progress (2026-05-16, slice — `.focus-ring-primary` verification):** **`rg 'focus-ring-primary' apps/web/src`** → **0** matches (no class string, no SCSS selector). **`styles/layout/app.scss`** contains **no** focus-ring helper. Remaining repo **`focus-ring`** strings are **token** names (**`--interactive-focus-ring`**, **`--shadow-focus-ring`** in **`_legacy-design-tokens.scss`** and per-component **`:focus-visible`** **box-shadow**), not the removed global utility. **No template/SCSS edits** this slice.
 
+**Progress (2026-05-16, slice — map-shell SCSS dedup):** Merged duplicate **`:host .map-style-switch [hlmToggleGroupItem]`** blocks in **`map-shell.component.scss`** into one rule (same computed styles; trims bytes toward **`anyComponentStyle`** budget). **Files:** **`apps/web/src/app/features/map/map-shell/map-shell.component.scss`**.
+
 ### 8. Final gates
 
 **Progress (2026-05-16, slice):** **`npm run design-system:check`** (registry + panel MQ audit + visual-behavior guard) and **`cd apps/web && npx ng build`** → **exit 0** (Angular build warnings only: map-shell SCSS budget, CommonJS deps).
+
+**Progress (2026-05-16, slice — post map-shell dedup gates):** **`npm run design-system:check`** and **`cd apps/web && npx ng build`** → **exit 0** after **`[hlmToggleGroupItem]`** merge (budget warning may still appear until further splits).
 
 ```bash
 cd apps/web && npx ng build

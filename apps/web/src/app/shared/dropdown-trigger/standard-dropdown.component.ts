@@ -26,7 +26,8 @@ export class StandardDropdownComponent {
 
   itemsHostClass(): string {
     const extra = this.itemsClass().trim();
-    const base = 'standard-dropdown__items flex flex-col p-2 min-h-0 overflow-y-auto';
+    const base =
+      'standard-dropdown__items flex flex-1 flex-col gap-0 py-2 min-h-0 overflow-y-auto overflow-x-hidden pe-1';
     return extra ? `${base} ${extra}` : base;
   }
 }

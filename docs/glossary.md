@@ -409,6 +409,24 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 - **Workspace View System**  
   The mechanism for switching between workspace display modes (grid view, list view, map-only). Controlled via the workspace toolbar.
 
+### Toolbar menus & naming
+
+- **Toolbar menu**  
+  Anchored toolbar pattern: a **menu trigger** toggles a **menu panel** of options (sort, group, project scope, filters). Prefer this term in specs and tickets over vague “dropdown.”  
+  - See also: **Menu trigger**, **Menu panel**, [Anchored UI (toolbar menus)](migration/README.md#anchored-ui-toolbar-menus).
+
+- **Menu panel**  
+  The open surface listing choices (e.g. `hlmMenuContent`, scroll list, or `StandardDropdown`); horizontal padding tokens such as `--std-dropdown-padding-inline` apply here, separate from the closed trigger.  
+  - See also: **Toolbar menu**, **Menu trigger**.
+
+- **Menu trigger**  
+  The closed control that opens a toolbar menu (commonly `hlmBtn` with outline/sm sizing plus `*__menu-trigger` or `sorting-controls__btn`); trigger-side `padding-inline` aligns the affordance with the panel.  
+  - See also: **Toolbar menu**, **Toolbar filter controls (grouping / filter / sort / projects)**.
+
+- **Dropdown (informal)**  
+  Colloquial label for any list that opens from a control; use **toolbar menu** / **menu panel** when writing durable docs. Not synonymous with the Radix/shadcn **Popover** primitive name—reserve **Popover** for library-level discussion.  
+  - See also: **Toolbar menu**.
+
 ### Panels & Detail Views
 
 - **Filter Panel**  

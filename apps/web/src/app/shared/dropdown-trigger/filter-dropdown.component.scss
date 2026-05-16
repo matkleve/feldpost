@@ -11,9 +11,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
-  padding: var(--spacing-1) var(--spacing-2);
+  // Vertical-only inset; horizontal padding owned by app-standard-dropdown.
+  // @see docs/specs/component/filters/dropdown-system.md
+  padding-block: var(--spacing-1);
   max-height: 20rem;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .filter-rule {

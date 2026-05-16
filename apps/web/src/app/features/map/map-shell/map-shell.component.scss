@@ -39,9 +39,6 @@
 
 :host .map-style-switch [hlmToggleGroupItem] {
   border-radius: calc(var(--radius-full) - var(--spacing-1));
-}
-
-:host .map-style-switch [hlmToggleGroupItem] {
   justify-content: center;
   width: 2.75rem;
   min-width: 2.75rem;

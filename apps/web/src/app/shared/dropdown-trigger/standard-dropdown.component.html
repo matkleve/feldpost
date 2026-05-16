@@ -1,8 +1,10 @@
-<div class="standard-dropdown">
+<div class="standard-dropdown flex min-h-0 flex-1 flex-col">
   @if (showSearch()) {
-    <div class="flex items-center border-b border-border py-1 pl-3 pr-1">
+    <div
+      class="standard-dropdown__search flex min-h-tap min-w-0 shrink-0 items-center gap-2 border-b border-border px-0 py-2"
+    >
       <input
-        class="min-w-0 flex-1 border-0 bg-transparent py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+        class="min-w-0 flex-1 border-0 bg-transparent px-3 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
         type="text"
         [placeholder]="searchPlaceholder()"
         [value]="searchTerm()"
@@ -29,17 +31,16 @@
 
   <div [class]="itemsHostClass()">
     <ng-content select="[dropdown-items]" />
+    @if (actionLabel()) {
+      <button
+        hlmMenuItem
+        class="inline-flex w-full shrink-0 items-center justify-start gap-2 text-muted-foreground hover:text-foreground"
+        type="button"
+        (click)="actionRequested.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">{{ actionIcon() }}</span>
+        {{ actionLabel() }}
+      </button>
+    }
   </div>
-
-  @if (actionLabel()) {
-    <button
-      hlmMenuItem
-      class="inline-flex w-full items-center justify-start gap-2 text-muted-foreground hover:text-foreground"
-      type="button"
-      (click)="actionRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">{{ actionIcon() }}</span>
-      {{ actionLabel() }}
-    </button>
-  }
 </div>
