@@ -16,14 +16,16 @@
 ## Pre-flight scan (paste into §Baseline)
 
 ```bash
-rg '\.ui-container|\.ui-item|\.ui-row-shell|\.ui-card-shell' apps/web/src/styles/primitives --glob "*.scss"
+rg '\.ui-container|\.ui-item|\.ui-row-shell|\.ui-card-shell' apps/web/src/styles --glob "*.scss"
 rg 'hlm-toggle-group|hlm-pill-toggle' apps/web/src/app --glob "*.html" -l
-ls apps/web/src/styles/primitives/
+test ! -d apps/web/src/styles/primitives && echo "primitives: absent (OK)" || ls apps/web/src/styles/primitives/
 rg "@use '\./styles/primitives/" apps/web/src/styles.scss
 rg "hlm-toggle-group" apps/web/src/styles.scss
 ```
 
-**Current primitives folder (2026-05-16):** `apps/web/src/styles/primitives/` is **empty** (`dropdown-trigger.scss` deleted with **`UiDropdownTriggerDirective`** / Group D). ~~Prior inventory (2026-05-14):~~ `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — all removed from disk or folder cleared.
+**`styles/primitives/` (2026-05-16):** **Removed** from disk after last primitive deletion (Group D); acceptance remains **empty or deleted**. ~~Prior inventory (2026-05-14):~~ `container.scss`, `row-shell.scss`, `card-shell.scss`, `dropdown-trigger.scss` — all gone.
+
+**Progress (2026-05-16):** Globally emitted **`hlm-toggle-group.scss`** **relocated** from `app/shared/ui/toggle-group/` to **`apps/web/src/styles/hlm-toggle-group.scss`**; `styles.scss` now **`@use './styles/hlm-toggle-group'`** (same rules / load order slice; CVA + eventual deletion per §6 unchanged). **Deduped** focus/disabled globals against **CVA** (see §6 progress).
 
 ---
 
@@ -59,13 +61,17 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 1. Confirm **CVA** on `hlmToggleGroup` / `hlmToggleGroupItem` covers selected / hover / focus-visible / disabled.
 2. Strip **state** rules from `hlm-toggle-group.scss`; keep only **documented** pill shell / density if still needed.
-3. End state: **delete** `hlm-toggle-group.scss` and remove `@use './app/shared/ui/toggle-group/hlm-toggle-group'` from `styles.scss` **if** all visuals live in CVA strings or component `@layer states`.
+3. End state: **delete** `apps/web/src/styles/hlm-toggle-group.scss` and remove `@use './styles/hlm-toggle-group'` from `styles.scss` **if** all visuals live in CVA strings or component `@layer states`.
+
+**Progress (2026-05-16, slice):** Removed **duplicate** global `:focus-visible` and `:disabled` rules for `[hlmToggleGroupItem]` — **CVA** (`toggle-group-variants.ts`) already applies `focus-visible:ring-*` and `disabled:*`. Global `@layer states` still owns **hover** (off segments) and **`data-attention`** emphasis; `@layer components` + reduced-motion unchanged.
 
 ### 7. Inventory remaining `styles/` tree
 
 **Keep (expected):** `reset.scss`, `layout/app.scss`, `layout/clamp.scss`.
 
 **Review:** any other `@use` from `styles.scss` not listed above — justify or delete.
+
+**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is exactly **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./styles/hlm-toggle-group`** (plus Sass **`meta`** for **`load-css`**). No stray **`primitives/*`** or **`tokens`** references.
 
 ### 8. Final gates
 

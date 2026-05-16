@@ -11,7 +11,7 @@ Card shell: bordered panel, hover/focus-within, size variants. Row shell: single
 ## Where It Lives
 
 - **Styles:** `apps/web/src/styles/primitives/card-shell.scss`, `row-shell.scss`
-- **Integration:** `ui-primitives.directive.ts` (`uiCardShell*`, `uiRowShell*`)
+- **Integration:** ~~`ui-primitives.directive.ts`~~ **removed (2026-05-16)** — apply **`card-shell.scss`** / **`row-shell.scss`** host classes from templates and feature SCSS per Phase 6.
 
 ## Actions
 

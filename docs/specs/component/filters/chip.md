@@ -165,14 +165,14 @@ export class UploadAreaComponent {
 | -------- | ----- |
 | **Height** | `var(--spacing-4)` (16px) |
 | **Border radius** | `var(--radius-full)` |
-| **Horizontal padding** | `var(--spacing-2)` (8px); avatar-text: `padding-inline-end` `var(--fp-base-8)` |
-| **Gap** | `var(--spacing-1)` (icon/text); avatar-text: `var(--fp-base-4)` between avatar and label |
+| **Horizontal padding** | `var(--spacing-2)` (8px); avatar-text: `padding-inline-end` `var(--spacing-2)` |
+| **Gap** | `var(--spacing-1)` (icon/text); avatar-text: `var(--spacing-1)` between avatar and label |
 | **Default fills** | Rest: `--fp-ref-primary-95`; hover: `--fp-ref-primary-90` |
 | **Label** | `--fp-sys-typescale-label-small-*`, color `--fp-sys-color-on-surface` |
 
 ### Examples
 
-**Icon-only:** outer bounds **16×16**. Inner glyph target **8px** (`--fp-base-8`).
+**Icon-only:** outer bounds **16×16**. Inner glyph target **8px** (`var(--spacing-2)`).
 
 **Avatar + text:** **16px** circle `img.chip__avatar` + label, Figma `avatar-text` padding/gap.
 

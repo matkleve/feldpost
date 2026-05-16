@@ -8,9 +8,9 @@ A compact toolbar control that opens or closes an anchored panel (popover). It o
 
 **Figma (Dev Mode):** https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev
 
-Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal control, **1rem** total height (`--fp-base-16`), **0.25rem** corner radius (`--fp-alias-r-4`, Figma `scale/base-4`), internal row gap **0.25rem** (`--fp-base-4`). Default/rest surface uses **`--fp-ref-neutral-variant-95`**. Hover (and pressed pointer while interactive) uses **`--fp-ref-primary-95`**. Label uses **label small** typescale (`--fp-sys-typescale-label-small-*`) and **`--fp-sys-color-on-surface`**. Trailing **expand_more** chevron is **12px** (`--fp-base-12`); when **`data-state="open"`**, the chevron rotates **180deg** (points up). Optional leading icon slot is **8px** (`--fp-base-8`) — content is projected; Figma uses a placeholder square. **text-action** layout: padding-left **`--fp-base-8`**, padding-right **`--fp-base-4`**. **icon-text-action** layout: horizontal padding **`--fp-alias-sp-4`** on both sides. No separate visible border in the reference; edge is read from fill vs parent surface.
+Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal control, **1rem** total height (`var(--spacing-4)`), **0.25rem** corner radius (`--fp-alias-r-4`, Figma `scale/base-4`), internal row gap **0.25rem** (`var(--spacing-1)`). Default/rest surface uses **`--fp-ref-neutral-variant-95`**. Hover (and pressed pointer while interactive) uses **`--fp-ref-primary-95`**. Label uses **label small** typescale (`--fp-sys-typescale-label-small-*`) and **`--fp-sys-color-on-surface`**. Trailing **expand_more** chevron is **12px** (`var(--spacing-3)`); when **`data-state="open"`**, the chevron rotates **180deg** (points up). Optional leading icon slot is **8px** (`var(--spacing-2)`) — content is projected; Figma uses a placeholder square. **text-action** layout: padding-left **`var(--spacing-2)`**, padding-right **`var(--spacing-1)`**. **icon-text-action** layout: horizontal padding **`--fp-alias-sp-4`** on both sides. No separate visible border in the reference; edge is read from fill vs parent surface.
 
-**Token verification (2026-05-05):** All Figma variables from node `164:2177` map to existing `apps/web/src/styles/tokens.scss` entries. Figma → CSS: `--fp/ref/neutral-variant/95` → `--fp-ref-neutral-variant-95`; `--fp/ref/primary/95` → `--fp-ref-primary-95`; `--scale/base-*` → `--fp-base-*`; `--spacing/sp-*` → `--fp-alias-sp-*`; `--fp/sys/color/on-surface` → `--fp-sys-color-on-surface`; `--typescale/label/small/*` → `--fp-sys-typescale-label-small-*`.
+**Token verification:** Figma scale `base-*` px values map to **`var(--spacing-*)`** / **`--fp-alias-*`** per `docs/migration/phase-7-token-migration.md`. Figma → CSS: `--fp/ref/neutral-variant/95` → `--fp-ref-neutral-variant-95`; `--fp/ref/primary/95` → `--fp-ref-primary-95`; `--spacing/sp-*` → `--fp-alias-sp-*`; `--fp/sys/color/on-surface` → `--fp-sys-color-on-surface` (bridged to tweakcn `--foreground` in the legacy token file); `--typescale/label/small/*` → `--fp-sys-typescale-label-small-*`.
 
 ## Where It Lives
 
@@ -115,13 +115,13 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 | Hover / pressed fill | `--fp-ref-primary-95` |
 | Label color | `--fp-sys-color-on-surface` |
 | Label typography | `--fp-sys-typescale-label-small-size`, `-line-height`, `-weight`, `-tracking` |
-| Height | `--fp-base-16` |
-| Gap (icon, label, chevron) | `--fp-base-4` |
+| Height | `var(--spacing-4)` |
+| Gap (icon, label, chevron) | `var(--spacing-1)` |
 | Radius | `--fp-alias-r-4` |
 | Padding (icon layout) | `--fp-alias-sp-4` inline |
-| Padding (text-only layout) | `padding-left: var(--fp-base-8)`, `padding-right: var(--fp-base-4)` |
-| Chevron box | `--fp-base-12` |
-| Leading icon box | `--fp-base-8` |
+| Padding (text-only layout) | `padding-left: var(--spacing-2)`, `padding-right: var(--spacing-1)` |
+| Chevron box | `var(--spacing-3)` |
+| Leading icon box | `var(--spacing-2)` |
 | Chevron rotation transition | `--fp-sys-motion-duration-short2`, `--motion-ease-standard` |
 | Background transition | `--interactive-transition-standard` |
 

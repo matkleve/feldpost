@@ -15,7 +15,7 @@ Token borders and fills; hover/active/focus-visible; sizes `sm` / `md` / `lg`; e
 ## Where It Lives
 
 - **Styles:** `apps/web/src/styles/primitives/button.scss`
-- **Integration:** `apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts` (`uiButton*`, `uiIconButtonGhost*`)
+- **Integration:** ~~`apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts`~~ **removed (2026-05-16)** — prefer **`hlmBtn`** / **`HLM_BUTTON_IMPORTS`**; legacy **`ui-button`** chrome remains in **`button.scss`** until Phase 8.
 
 ## Actions
 
@@ -63,7 +63,7 @@ When `density === 'toolbar'` and `layout === 'icon-only'`, implementation MAY ap
 | File | Purpose |
 | ---- | ------- |
 | `styles/primitives/button.scss` | Canonical chrome |
-| `ui-primitives.directive.ts` | Directive hosts |
+| ~~`ui-primitives.directive.ts`~~ (removed) | Replaced by **`hlmBtn`** at callsites |
 
 ## Acceptance Criteria
 

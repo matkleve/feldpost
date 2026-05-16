@@ -13,7 +13,7 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 
 ## Folder Taxonomy
 
-- docs/specs/component/: reusable component contracts, grouped in topic subfolders (`filters/`, `item-grid/`, `map/`, `media/`, `project/`, `upload/`, `workspace/`). Index: docs/specs/component/README.md.
+- docs/specs/component/: reusable component contracts, grouped in topic subfolders (`filters/`, `item-grid/`, `map/`, `media/`, `project/`, `upload/`, `workspace/`). Index: docs/specs/component/README.md. **Component reuse catalog:** docs/specs/component/registry.md (index) + docs/specs/component/registry.*.supplement.md (tables).
 - docs/specs/page/: route/page-level contracts.
 - docs/specs/service/: service facade and adapter contracts.
 - docs/specs/system/: cross-cutting orchestration contracts.

@@ -10,12 +10,12 @@ The remainder of this file documents the **removed** directive contract for arch
 
 `UiDropdownTriggerDirective` styled **`button[uiDropdownTrigger]`** and **`a[uiDropdownTrigger]`** hosts that open a floating shell (popover/menu). The directive merged **menu-item surface tokens** (`menuItemVariants()`), **`ui-button`** size classes, and **dropdown modifiers** (`ui-dropdown-trigger`, `--open`, `--compact`, `--icon-only`). It did **not** render inner chrome — **callsites** supplied label/chevron (and optional leading icon) using **`data-dd-part`** so global SCSS could target geometry and open/collapse behavior without BEM `__chevron` / `__label` wrappers.
 
-## What It Looked Like (archived)
+## What It Looks Like (archived)
 
 - **Open:** host got `ui-dropdown-trigger--open`; chevron rotation was applied to **`[data-dd-part='chevron']`** (see removed SCSS).
 - **Compact / icon-only:** modifiers hid **`[data-dd-part='label']`**; icon-only also hid the chevron and restored icon font metrics on **`.material-icons` / `[data-dd-part='icon']`** per removed `dropdown-trigger.scss`.
 
-## Where It Lived (removed)
+## Where It Lives (removed)
 
 - **Directive (deleted):** ~~`apps/web/src/app/shared/dropdown-trigger/ui-dropdown-trigger.directive.ts`~~
 - **Global SCSS (deleted):** ~~`apps/web/src/styles/primitives/dropdown-trigger.scss`~~

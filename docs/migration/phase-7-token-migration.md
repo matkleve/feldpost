@@ -1,6 +1,6 @@
 # Phase 7 — Token System Unification
 
-**Status:** In progress (2026-05-16) — Batch 1: cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale).
+**Status:** In progress (2026-05-16) — Batch 1: cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale). **Batch 2:** rewired **`_legacy-design-tokens.scss`** internal chains (**`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`**) to existing **`--spacing-*`** / **`--radius-*`** (literals kept for 20px + 40px steps with no spacing-N match). **Batch 3:** removed duplicate **`--fp-base-*`** scale from the legacy bridge (no `var(--fp-base-*)` in `apps/web/src`); bridged unambiguous **`--fp-sys-color-*`** roles to tweakcn **`--primary`**, **`--background`**, **`--muted`**, **`--border`**, **`--destructive`**, **`--shadow-color`**, etc.; specs now cite **`var(--spacing-*)`** for former base px. **Batch 4:** tweakcn dark palette shared mixin + **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`** (system theme) mirrors **`html[data-theme="dark"]`** — see § Batch 4.
 
 **Goal:** Shrink or retire **`apps/web/src/styles/_legacy-design-tokens.scss`** (successor to the removed monolithic `tokens.scss`) so **component** SCSS uses **tweakcn** semantics (`--primary`, `--background`, `--muted`, `--foreground`, `--border`, `--destructive`, **`--spacing-*`**, etc.) — not legacy **`--color-*`**, **`--fp-sys-*`**, or **`--fp-ref-*`** hand-offs where avoidable.
 
@@ -54,7 +54,61 @@ Replaced with **`var(--spacing-1|2|3|4)`** where values match the legacy fp pixe
 
 **Still out of scope for this batch:** `_legacy-design-tokens.scss` (bridge definitions), `var(--color-*)` inside the legacy bridge file, and any **`--fp-sys-*` / `--fp-ref-*`** remaining inside non–`src/app` SCSS.
 
----
+### Batch 2 — Legacy bridge internal chains (`_legacy-design-tokens.scss`, 2026-05-16)
+
+**Slice:** `apps/web/src/styles/_legacy-design-tokens.scss` only — **`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`** now reference **`var(--spacing-1..8)`** and **`var(--radius-sm|md|md-plus|lg|lg-plus|xl|full)`** defined later in the same **`:root`** block (CSS forward refs). **`--fp-sys-spacing-5`** (20px) and **`--fp-sys-spacing-10`** (40px) stay **literal `rem`** because **`--spacing-5`** is 24px and there is no **`--spacing-*`** for 40px. **`--fp-alias-sp-40`** uses literal **`2.5rem`**. **`--fp-sys-shape-radius-24`** and **`--fp-alias-r-24`** use **`var(--spacing-5)`** (24px). **`var(--fp-base-*)` indirection** was removed from the alias + sys spacing/shape chains in Batch 2; the **`--fp-base-*`** definition block itself was **removed in Batch 3** (see below).
+
+| Grep (repo root) | Before | After |
+|------------------|--------|-------|
+| `rg 'var\\(--fp-base-' apps/web/src/styles/_legacy-design-tokens.scss` | **18** matches | **0** |
+| `var(--spacing-*\|var(--radius-*)` on **`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`** rows only (approx.) | **0** (literals / `var(--fp-base-*)`) | **29** (`var(--spacing-1..8)` / `var(--radius-sm\|…\|full)` / `var(--spacing-5)` for 24px radii) |
+
+**Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
+
+**Still deferred:** full **`--fp-ref-*`** tonal tables; **`--fp-sys-color-*`** rows without a tweakcn 1:1 (container / tertiary / inverse / outline-variant / error-container — see Batch 3 table); and any **`nav` / `authenticated-app-layout`** SCSS if new **`var(--color-*)`** regressions appear. (**Batch 4** aligned tweakcn **`:root`** semantics with OS dark when **`data-theme` is absent**; Tailwind **`dark:`** still keys off **`[data-theme="dark"]`** only.)
+
+### Batch 3 — `--fp-base-*` removal + `--fp-sys-color-*` → tweakcn (2026-05-16)
+
+**Slice:** `apps/web/src/styles/_legacy-design-tokens.scss` + spec doc references (no app code used `var(--fp-base-*)`).
+
+| Grep (repo root) | Before | After |
+|------------------|--------|-------|
+| `rg '--fp-base-' apps/web/src` | **17** lines (`_legacy-design-tokens.scss` property definitions) | **0** matches |
+| `rg 'var\\(--fp-base-' apps/web/src` | **0** files | **0** files |
+| `rg 'var\\(--fp-sys-color' apps/web/src` | **0** files (consumers) | **0** files |
+
+**`--fp-sys-color-*` rewired** (light `:root` + `dark-theme-overrides`): `--primary` / `--primary-foreground`, `--secondary` / `--secondary-foreground`, `--destructive` / `--destructive-foreground`, `--background`, `--foreground`, `--muted`, `--muted-foreground`, `--border`, `--shadow-color` (shadow + scrim). **`--fp-sys-color-surface`** aligned with legacy parity as **`var(--background)`** (same role as pre-change shared surface tint).
+
+**Deferred (hex unchanged until tweakcn adds 1:1 or explicit decision):** `--fp-sys-color-primary-container`, `--on-primary-container`, `--secondary-container`, `--on-secondary-container`, all **`--fp-sys-color-tertiary-*`**, **`--error-container`**, **`--on-error-container`**, **`--outline-variant`**, **`--inverse-*`**.
+
+**Spec sync (Figma base px → spacing bridge):** `docs/specs/component/ui-primitives/panel-trigger.md`, `docs/specs/component/ui-primitives/ui-primitives.panel-trigger.md`, `docs/specs/component/filters/chip.md`.
+
+**Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
+
+**Still deferred after Batch 3:** **`--fp-ref-*`** tables; MD3 **container / tertiary / inverse / outline-variant** `--fp-sys-color-*` lines above; app SCSS gate **`var(--color-|var(--fp-sys-|var(--fp-ref-`**. (**System OS dark + tweakcn** resolved in **Batch 4** — see below.)
+
+### Batch 4 — system dark + tweakcn alignment (**4a**, 2026-05-16)
+
+**Policy (4a vs 4b):** Chose **4a**. Product behavior already defines **ThemeService `"system"`** as **`data-theme` removed** on `<html>` and **OS `prefers-color-scheme: dark`** as the dark driver for legacy bridge mixins — see **`docs/specs/ui/settings-overlay/theme-toggle.md`** (system follows OS), **`docs/playbooks/setup-guide.md`** (OS fallback), **`docs/migration/phase-0-discovery.md`**, and **`settings-overlay.component.ts`** (`applyThemeMode` removes attribute for `system`). **4b** (extra **`--fp-sys-color-*` → `--card` / `--accent` / …**) was **not** applied: MD3 container / tertiary / inverse roles have **no grep-proven 1:1** to those tweakcn names in the bridge (mapping table in § Token mapping stays guidance only).
+
+**Code:** **`apps/web/src/styles.scss`** — introduced **`@mixin tweakcn-dark-semantic-palette`** (same declarations as former **`html[data-theme="dark"]`** block), **`html[data-theme="dark"] { @include … }`**, and **`@media (prefers-color-scheme: dark) { :root:not([data-theme]) { @include … } }`**. Selector **`:root:not([data-theme])`** matches **system** only (explicit **light** / **dark** / **sandstone** keep an attribute and do not receive this stack). **Tailwind `@custom-variant dark`** stays the one-line selector **`&:is([data-theme="dark"] *)`** — **`dark:`** utilities still **do not** activate for **system + OS dark** (semantic CSS variables do, via the mixin). Extending **`dark:`** to mirror system dark requires Tailwind’s long-form **`@custom-variant`** with **`@slot`**, which **Angular’s Sass pass rejects** (`Top-level selectors may not contain the parent selector "&"`). Mitigation options: plain **`.css`** entry for Tailwind-only directives (split from `styles.scss`), or JS-driven **`data-theme="dark"`** when system prefers dark (product decision).
+
+| Grep (repo root) | Before | After |
+|------------------|--------|-------|
+| `rg -e '--fp-sys-color-(primary-container\|on-primary-container\|secondary-container\|on-secondary-container\|tertiary\|error-container\|on-error-container\|outline-variant\|inverse)' apps/web/src/styles/_legacy-design-tokens.scss -c` | **24** | **24** (unchanged — deferred hex / no new 1:1) |
+| `rg -e 'var\\(--(card\|popover\|accent\|secondary\|ring\|input)\\)' apps/web/src/styles/_legacy-design-tokens.scss -c` | **8** | **8** (unchanged) |
+
+**Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
+
+**Follow-ups (not this batch):** **4b**-style mappings when tweakcn adds named roles for MD3 containers; **`dark:`** + system OS alignment via a **non-Sass** Tailwind entry or ThemeService behavior change; legacy **`@media (prefers-color-scheme: dark)`** + **`sandstone`** interaction remains as pre-Batch-4 behavior (narrow if QA flags it).
+
+## Risks / QA
+
+**Theming — `dark:` vs semantic dark**
+
+- **`@custom-variant dark`** in **`apps/web/src/styles.scss`** is **`&:is([data-theme="dark"] *)`** only. **`html[data-theme="dark"]`** and **`@media (prefers-color-scheme: dark) { :root:not([data-theme]) { … } }`** both apply **`@mixin tweakcn-dark-semantic-palette`** to CSS variables, so **token-driven** colors track system dark. **`dark:`** Tailwind utilities (e.g. **`dark:bg-*`**) apply **only** under explicit **`data-theme="dark"`**, not under **system + OS dark**.
+- **Attempted fix (2026-05-16):** long-form **`@custom-variant dark { … @slot … }`** with a second branch for **`html:not([data-theme])`** + **`prefers-color-scheme: dark`**. **Reverted:** Angular **`ng build`** fails because Sass compiles **`styles.scss`** first and rejects **top-level `&`** inside that block (`Top-level selectors may not contain the parent selector "&"`). A short comment above **`@custom-variant`** in **`styles.scss`** points here.
+- **Manual QA:** (1) Set theme **Dark** — confirm **`dark:`** utilities and variables match. (2) Set theme **Light** on OS dark — confirm light **`dark:`** + light variables. (3) Set theme **System** with OS **dark** — confirm **variables** look dark while noting **`dark:`** utilities may stay on light-class output until variant split or ThemeService change. (4) **Sandstone** + OS dark — confirm **`data-theme="sandstone"`** does not pick up **`@media (prefers-color-scheme: dark)`** variable override on **`:root:not([data-theme])`** (attribute present).
 
 ## Token mapping table (extend as you discover variants)
 

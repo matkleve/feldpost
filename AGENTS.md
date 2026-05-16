@@ -129,7 +129,7 @@ Per-component specs carry the full matrix and examples; column contract is fixed
 2. Read the relevant **service facade spec** under `docs/specs/service/<module>/` when the feature depends on that boundary (see `docs/specs/service/README.md` index).
 3. Read additional design docs only if the spec or service contract does not answer the question
 4. Reuse shared UI and adapter abstractions before introducing new structure
-5. **Before creating any new Angular component, consult `docs/specs/component/registry.md`.** If the required component or variant exists, use it. If a variant is missing, flag it and ask. Do not implement inline HTML patterns that duplicate a registered component.
+5. **Before creating any new Angular component, consult the component registry:** `docs/specs/component/registry.md` (index: slice map and workflow) **and** the linked `docs/specs/component/registry.*.supplement.md` files (selector/variant tables). If the required component or variant exists, use it. If a variant is missing, flag it and ask. Do not implement inline HTML patterns that duplicate a registered component.
 6. Verify the result against `docs/agent-workflows/implementation-checklist.md`
 
    *Figma-assisted flows (screenshots, Code Connect, strict No-Figma new-component gate from the archived rule): **(deferred — Figma work paused)**.*

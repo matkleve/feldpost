@@ -33,7 +33,7 @@ Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tai
 | 4 — Cleanup & Build | [phase-4-cleanup.md](./phase-4-cleanup.md) | Hygiene, `design-system:check`, `ng build`, lint notes, deferred folder removals. **Done** (deferred items noted). |
 | 5 — Callsite migration | [phase-5-callsite-migration.md](./phase-5-callsite-migration.md) | Groups A–G + **Group D (2026-05-16)** complete; **`ui-primitives.directive.ts`** + **`ui-dropdown-trigger.directive.ts`** removed. |
 | 6 — Template BEM sweep & toggles | [phase-6-template-cleanup.md](./phase-6-template-cleanup.md) | **In progress** — Gate A done; **Gate B = 0** (`uiCamelCase` cleared, incl. post–Phase 5 Group D toolbar triggers). Redirect: [phase-6-hlm-directive-conversion.md](./phase-6-hlm-directive-conversion.md). |
-| 7 — Token system unification | [phase-7-token-migration.md](./phase-7-token-migration.md) | **In progress (2026-05-16)** — Batch 1: `var(--fp-*)` → `var(--spacing-*)` in `panel-trigger` + `chip`; shrink **`_legacy-design-tokens.scss`** / color bridge still open. |
+| 7 — Token system unification | [phase-7-token-migration.md](./phase-7-token-migration.md) | **In progress (2026-05-16)** — Batch 1–3: spacing + bridge + fp color rewires; **Batch 4:** tweakcn dark palette in **`styles.scss`** also under **`prefers-color-scheme: dark`** for **`:root:not([data-theme])`** (system theme). **`_legacy-design-tokens.scss`** shrink / MD3 container → tweakcn still open. |
 | 8 — Global SCSS elimination | [phase-8-global-scss-elimination.md](./phase-8-global-scss-elimination.md) | **Planned** — empty `styles/primitives/`; drop `hlm-toggle-group.scss`; minimal `styles.scss` `@use` set. |
 | 9 — Spartan package upgrade | [phase-9-spartan-upgrade.md](./phase-9-spartan-upgrade.md) | **Planned** — swap local `shared/ui/*` shims for published `@spartan-ng/ui-*-helm` when Tailwind v4 peers unblock. |
 | 10 — Visual QA & polish | [phase-10-visual-qa.md](./phase-10-visual-qa.md) | **Planned** — cross-theme / cross-screen verification; no new `::ng-deep`; budget-clean `ng build`. |
@@ -43,6 +43,7 @@ Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tai
 
 ## Quick links by concern
 
+- **Shared UI reuse (selectors / variants):** [registry.md](../specs/component/registry.md) (index) + `registry.*.supplement.md` in the same folder
 - **Inventory & npm reality:** [phase-0-discovery.md](./phase-0-discovery.md)
 - **Execution checklists:** [phase-1-spec-cleanup.md](./phase-1-spec-cleanup.md) through [phase-5-callsite-migration.md](./phase-5-callsite-migration.md); legacy removal track [phase-6-template-cleanup.md](./phase-6-template-cleanup.md) → [phase-10-visual-qa.md](./phase-10-visual-qa.md) → [phase-11-spec-sync.md](./phase-11-spec-sync.md)
 - **Cross-phase risks (Phase 5):** [wiring-risks.md](./wiring-risks.md)

@@ -77,13 +77,13 @@ app-panel-trigger [data-state=closed|open] [data-layout=...]
 | Default fill | `--fp-ref-neutral-variant-95` |
 | Hover / pressed fill | `--fp-ref-primary-95` |
 | Label color | `--fp-sys-color-on-surface` |
-| Height | `--fp-base-16` |
-| Gap | `--fp-base-4` |
+| Height | `var(--spacing-4)` |
+| Gap | `var(--spacing-1)` |
 | Radius | `--fp-alias-r-4` |
 | Padding (icon layout) | `--fp-alias-sp-4` inline |
-| Padding (text layout) | `--fp-base-8` left, `--fp-base-4` right |
-| Chevron box | `--fp-base-12` |
-| Leading icon box | `--fp-base-8` |
+| Padding (text layout) | `var(--spacing-2)` left, `var(--spacing-1)` right |
+| Chevron box | `var(--spacing-3)` |
+| Leading icon box | `var(--spacing-2)` |
 
 ## Disabled Visuals
 

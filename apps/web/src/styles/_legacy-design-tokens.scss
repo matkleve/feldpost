@@ -118,14 +118,16 @@
   --fp-ref-neutral-variant-100:  #ffffff;
 
   // ── fp-sys: System color roles — LIGHT ────────────────────────────────────
+  // Phase 7: core roles bridge to tweakcn :root (loaded before this file in styles.scss).
+  // Container / tertiary / inverse / outline-variant / error-container: no 1:1 tweakcn token — hex deferred (see phase-7 doc).
   // Primary (gold-amber)
-  --fp-sys-color-primary:                #745b0c;
-  --fp-sys-color-on-primary:             #ffffff;
+  --fp-sys-color-primary:                var(--primary);
+  --fp-sys-color-on-primary:             var(--primary-foreground);
   --fp-sys-color-primary-container:      #ffe08f;
   --fp-sys-color-on-primary-container:   #584400;
   // Secondary (blue-indigo)
-  --fp-sys-color-secondary:              #3b608f;
-  --fp-sys-color-on-secondary:           #ffffff;
+  --fp-sys-color-secondary:              var(--secondary);
+  --fp-sys-color-on-secondary:           var(--secondary-foreground);
   --fp-sys-color-secondary-container:    #d4e3ff;
   --fp-sys-color-on-secondary-container: #214876;
   // Tertiary (violet-purple)
@@ -134,53 +136,55 @@
   --fp-sys-color-tertiary-container:     #fdd6ff;
   --fp-sys-color-on-tertiary-container:  #603768;
   // Error
-  --fp-sys-color-error:                  #ba1a1a;
-  --fp-sys-color-on-error:               #ffffff;
+  --fp-sys-color-error:                  var(--destructive);
+  --fp-sys-color-on-error:               var(--destructive-foreground);
   --fp-sys-color-error-container:        #ffdad6;
   --fp-sys-color-on-error-container:     #93000a;
   // Backgrounds & surfaces
-  --fp-sys-color-background:             #fff8f1;
-  --fp-sys-color-on-background:          #1f1b13;
-  --fp-sys-color-surface:                #fff8f1;
-  --fp-sys-color-on-surface:             #1f1b13;
-  --fp-sys-color-surface-variant:        #ece1cf;
-  --fp-sys-color-on-surface-variant:     #4c4639;
+  --fp-sys-color-background:             var(--background);
+  --fp-sys-color-on-background:          var(--foreground);
+  --fp-sys-color-surface:                var(--background);
+  --fp-sys-color-on-surface:             var(--foreground);
+  --fp-sys-color-surface-variant:        var(--muted);
+  --fp-sys-color-on-surface-variant:     var(--muted-foreground);
   // Outlines
-  --fp-sys-color-outline:                #7e7667;
+  --fp-sys-color-outline:                var(--border);
   --fp-sys-color-outline-variant:        #cfc5b4;
   // Utility
-  --fp-sys-color-shadow:                 #000000;
-  --fp-sys-color-scrim:                  #000000;
+  --fp-sys-color-shadow:                 var(--shadow-color);
+  --fp-sys-color-scrim:                  var(--shadow-color);
   --fp-sys-color-inverse-surface:        #343027;
   --fp-sys-color-inverse-on-surface:     #f9f0e2;
   --fp-sys-color-inverse-primary:        #e4c36c;
 
   // ── fp-sys: Shape (border-radius scale) ───────────────────────────────────
+  // Resolves to same px as prior literals via `--radius-*` / `--spacing-5` (24px) in this :root block.
   --fp-sys-shape-none:         0;
-  --fp-sys-shape-extra-small:  0.25rem;  // 4px
-  --fp-sys-shape-small:        0.5rem;   // 8px
-  --fp-sys-shape-medium:       0.75rem;  // 12px
-  --fp-sys-shape-large:        1rem;     // 16px
+  --fp-sys-shape-extra-small:  var(--radius-sm);
+  --fp-sys-shape-small:        var(--radius-md);
+  --fp-sys-shape-medium:       var(--radius-md-plus);
+  --fp-sys-shape-large:        var(--radius-lg);
   // Distinct names avoid sync-tokens nesting collision with --fp-sys-shape-large
   // Figma var(--radius-lg-plus) → 20px
-  --fp-sys-shape-radius-20:    1.25rem;
-  // Figma radius/r-24 → 24px
-  --fp-sys-shape-radius-24:    1.5rem;
-  --fp-sys-shape-extra-large:  1.75rem;  // 28px
-  --fp-sys-shape-full:         9999px;
+  --fp-sys-shape-radius-20:    var(--radius-lg-plus);
+  // Figma radius/r-24 → 24px (= --spacing-5)
+  --fp-sys-shape-radius-24:    var(--spacing-5);
+  --fp-sys-shape-extra-large:  var(--radius-xl);
+  --fp-sys-shape-full:         var(--radius-full);
 
   // ── fp-sys: Spacing (4px base grid) ───────────────────────────────────────
+  // Aligns with `--spacing-*` / tailwind.config.js; 20px + 40px keep literals (no spacing-N match).
   --fp-sys-spacing-0:   0;
-  --fp-sys-spacing-1:   0.25rem;  // 4px
-  --fp-sys-spacing-2:   0.5rem;   // 8px
-  --fp-sys-spacing-3:   0.75rem;  // 12px
-  --fp-sys-spacing-4:   1rem;     // 16px
-  --fp-sys-spacing-5:   1.25rem;  // 20px
-  --fp-sys-spacing-6:   1.5rem;   // 24px
-  --fp-sys-spacing-8:   2rem;     // 32px
-  --fp-sys-spacing-10:  2.5rem;   // 40px
-  --fp-sys-spacing-12:  3rem;     // 48px
-  --fp-sys-spacing-16:  4rem;     // 64px
+  --fp-sys-spacing-1:   var(--spacing-1);
+  --fp-sys-spacing-2:   var(--spacing-2);
+  --fp-sys-spacing-3:   var(--spacing-3);
+  --fp-sys-spacing-4:   var(--spacing-4);
+  --fp-sys-spacing-5:   1.25rem; // 20px
+  --fp-sys-spacing-6:   var(--spacing-5);
+  --fp-sys-spacing-8:   var(--spacing-6);
+  --fp-sys-spacing-10:  2.5rem; // 40px
+  --fp-sys-spacing-12:  var(--spacing-7);
+  --fp-sys-spacing-16:  var(--spacing-8);
 
   // ── fp-sys: Elevation (box-shadow levels 0–5) ──────────────────────────────
   // px used for shadow offsets/blur per project convention (see tokens.md §3.1c)
@@ -306,49 +310,27 @@
   --fp-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
   --fp-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
 
-  // ── Feldpost / Base / scale (Figma: Feldpost.Base.scale — unit = px at 1×)
-  // Numeric keys match variable names base-0 … base-200.
-  --fp-base-0: 0;
-  --fp-base-1: 1px;
-  --fp-base-2: 2px;
-  --fp-base-4: 4px;
-  --fp-base-8: 8px;
-  --fp-base-12: 12px;
-  --fp-base-16: 16px;
-  --fp-base-20: 20px;
-  --fp-base-24: 24px;
-  --fp-base-28: 28px;
-  --fp-base-32: 32px;
-  --fp-base-40: 40px;
-  --fp-base-64: 64px;
-  --fp-base-80: 80px;
-  --fp-base-120: 120px;
-  --fp-base-160: 160px;
-  --fp-base-200: 200px;
-
-  // ── Feldpost / Base / font (Figma: Feldpost.Base.font — canonical: --fp-ref-typeface-* above)
-  --fp-base-font-heading: 'Cormorant Garamond';
-  --fp-base-font-body: 'DM Sans';
+  // Figma Base.scale (px): implement with `var(--spacing-*)` / `var(--radius-*)` — @see docs/migration/phase-7-token-migration.md § Batch 3 (numeric scale definitions removed from this bridge; no app `var()` consumers under `apps/web/src`).
 
   // ── Feldpost / Alias / spacing (Figma: Feldpost.Alias.spacing → scale/base-*)
-  --fp-alias-sp-0: var(--fp-base-0);
-  --fp-alias-sp-4: var(--fp-base-4);
-  --fp-alias-sp-8: var(--fp-base-8);
-  --fp-alias-sp-12: var(--fp-base-12);
-  --fp-alias-sp-16: var(--fp-base-16);
-  --fp-alias-sp-24: var(--fp-base-24);
-  --fp-alias-sp-32: var(--fp-base-32);
-  --fp-alias-sp-40: var(--fp-base-40);
+  --fp-alias-sp-0: 0;
+  --fp-alias-sp-4: var(--spacing-1);
+  --fp-alias-sp-8: var(--spacing-2);
+  --fp-alias-sp-12: var(--spacing-3);
+  --fp-alias-sp-16: var(--spacing-4);
+  --fp-alias-sp-24: var(--spacing-5);
+  --fp-alias-sp-32: var(--spacing-6);
+  --fp-alias-sp-40: 2.5rem;
 
   // ── Feldpost / Alias / radius (Figma: Feldpost.Alias.radius → scale/base-*; full → 9999)
-  --fp-alias-r-0: var(--fp-base-0);
-  --fp-alias-r-4: var(--fp-base-4);
-  --fp-alias-r-8: var(--fp-base-8);
-  --fp-alias-r-12: var(--fp-base-12);
-  --fp-alias-r-16: var(--fp-base-16);
-  --fp-alias-r-24: var(--fp-base-24);
-  --fp-alias-r-32: var(--fp-base-32);
-  --fp-alias-r-full: var(--fp-sys-shape-full);
+  --fp-alias-r-0: 0;
+  --fp-alias-r-4: var(--radius-sm);
+  --fp-alias-r-8: var(--radius-md);
+  --fp-alias-r-12: var(--radius-md-plus);
+  --fp-alias-r-16: var(--radius-lg);
+  --fp-alias-r-24: var(--spacing-5);
+  --fp-alias-r-32: var(--spacing-6);
+  --fp-alias-r-full: var(--radius-full);
 
   /* ═══════════════════════════════════════════════════════════════════════
      LEGACY — Feldpost v1 `--color-*` bridges (Phase 7)
@@ -637,14 +619,15 @@
 
 @mixin dark-theme-overrides {
   // ── fp-sys: System color roles — DARK ────────────────────────────────────
+  // Same tweakcn semantic refs as light :root; values follow `html[data-theme="dark"]` in styles.scss when attribute-driven dark mode is active.
   // Primary (gold-amber)
-  --fp-sys-color-primary:                #e4c36c;
-  --fp-sys-color-on-primary:             #3d2e00;
+  --fp-sys-color-primary:                var(--primary);
+  --fp-sys-color-on-primary:             var(--primary-foreground);
   --fp-sys-color-primary-container:      #584400;
   --fp-sys-color-on-primary-container:   #ffe08f;
   // Secondary (blue-indigo)
-  --fp-sys-color-secondary:              #a5c8fe;
-  --fp-sys-color-on-secondary:           #00315e;
+  --fp-sys-color-secondary:              var(--secondary);
+  --fp-sys-color-on-secondary:           var(--secondary-foreground);
   --fp-sys-color-secondary-container:    #214876;
   --fp-sys-color-on-secondary-container: #d4e3ff;
   // Tertiary (violet-purple)
@@ -653,23 +636,23 @@
   --fp-sys-color-tertiary-container:     #603768;
   --fp-sys-color-on-tertiary-container:  #fdd6ff;
   // Error
-  --fp-sys-color-error:                  #ffb4ab;
-  --fp-sys-color-on-error:               #690005;
+  --fp-sys-color-error:                  var(--destructive);
+  --fp-sys-color-on-error:               var(--destructive-foreground);
   --fp-sys-color-error-container:        #93000a;
   --fp-sys-color-on-error-container:     #ffdad6;
   // Backgrounds & surfaces
-  --fp-sys-color-background:             #16130b;
-  --fp-sys-color-on-background:          #eae1d4;
-  --fp-sys-color-surface:                #16130b;
-  --fp-sys-color-on-surface:             #eae1d4;
-  --fp-sys-color-surface-variant:        #4c4639;
-  --fp-sys-color-on-surface-variant:     #cfc5b4;
+  --fp-sys-color-background:             var(--background);
+  --fp-sys-color-on-background:          var(--foreground);
+  --fp-sys-color-surface:                var(--background);
+  --fp-sys-color-on-surface:             var(--foreground);
+  --fp-sys-color-surface-variant:        var(--muted);
+  --fp-sys-color-on-surface-variant:     var(--muted-foreground);
   // Outlines
-  --fp-sys-color-outline:                #989080;
+  --fp-sys-color-outline:                var(--border);
   --fp-sys-color-outline-variant:        #4c4639;
   // Utility
-  --fp-sys-color-shadow:                 #000000;
-  --fp-sys-color-scrim:                  #000000;
+  --fp-sys-color-shadow:                 var(--shadow-color);
+  --fp-sys-color-scrim:                  var(--shadow-color);
   --fp-sys-color-inverse-surface:        #eae1d4;
   --fp-sys-color-inverse-on-surface:     #343027;
   --fp-sys-color-inverse-primary:        #745b0c;

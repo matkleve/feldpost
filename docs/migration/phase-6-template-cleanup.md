@@ -119,7 +119,7 @@ Re-run before execution; numbers drift.
 
 **Targets:** `filter-dropdown`, `workspace-pane-footer` (zip dialog field), `search-bar`, `upload-panel`, `media-detail-*` — clear any host still carrying **`uiInputControl`** / **`uiInputControlCompact`** in templates (Gate B); **`editable-property-row`** uses **`hlmInput`** / **`hlmSelect`** only.
 
-- Ensure form controls use **`hlmInput`** / **`hlmFormField`** per registry; legacy `ui-primitives.directive.ts` **removed** (2026-05-16).
+- Ensure form controls use **`hlmInput`** / **`hlmFormField`** per the [component registry index](../specs/component/registry.md) and linked **`registry.*.supplement.md`** tables; legacy `ui-primitives.directive.ts` **removed** (2026-05-16).
 
 ### 9. `ui-spacer` → `flex-1`
 

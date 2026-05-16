@@ -129,19 +129,8 @@
     background-color: color-mix(in oklch, var(--foreground) 6%, transparent);
   }
 
-  // Keyboard focus ring for segment buttons (shadcn ring pattern).
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  [hlmToggleGroupItem]:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-
-  // Disabled segment item (Brn disabled or native :disabled).
-  // @see apps/web/src/app/shared/ui/toggle-group/
-  [hlmToggleGroupItem]:disabled {
-    pointer-events: none;
-    opacity: 0.5;
-  }
+  // Focus ring and disabled chrome live on `toggleGroupItemVariants` (CVA + Tailwind).
+  // @see apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts
 }
 
 @media (prefers-reduced-motion: reduce) {

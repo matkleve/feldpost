@@ -2,6 +2,10 @@
 
 Module index for shared component-level contracts. Specs live in **topic subfolders**; link targets use paths like `component/<topic>/<name>.md`.
 
+## Component registry (reuse gate)
+
+Check before adding net-new shared UI: **[registry.md](registry.md)** (parent index: slice map, actions) and the linked supplement bodies — **[registry.primitives-and-layout.supplement.md](registry.primitives-and-layout.supplement.md)**, **[registry.workspace-pane.supplement.md](registry.workspace-pane.supplement.md)**, **[registry.feature-local.supplement.md](registry.feature-local.supplement.md)** — for selector rows and variant axes.
+
 ## filters/
 
 Filter chips, dropdowns, grouping, sort, and related controls.
