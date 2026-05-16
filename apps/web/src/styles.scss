@@ -1,5 +1,11 @@
 // ── SCSS Module Imports ────────────────────────────────────────────────────────
 // Sass @use statements must appear before all other rules (Sass language rule).
+// Global output order for newcomers (do not reorder blindly):
+// 1) Top @use emits first: map-leaflet-host → reset → layout/app → layout/clamp → hlm-toggle-group.
+// 2) CDK prebuilt, then @import "tailwindcss" (Preflight + @source / @config).
+// 3) tweakcn :root / theme selectors / @theme inline (utilities read CSS variables).
+// 4) meta.load-css('styles/legacy-design-tokens'), then @layer base (*, body).
+// 5) meta.load-css('styles/typography-baseline') last — h1–h6 + anchors after Preflight (top @use would break that).
 @use 'sass:meta';
 @use './styles/map-leaflet-host';
 @use './styles/reset';

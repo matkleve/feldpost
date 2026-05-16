@@ -73,13 +73,15 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Keep (expected):** `reset.scss`, `map-leaflet-host.scss` (Leaflet map chrome), `layout/app.scss`, `layout/clamp.scss`, `_typography-baseline.scss` (headings + default anchors after Preflight).
 
-**Review:** any other `@use` from `styles.scss` not listed above — justify or delete.
+**Review:** any other `@use` from `styles.scss` not listed above — justify or delete. **`meta.load-css`** emits are inventoried below; order constraints (**legacy** after tweakcn **`:root`**, **typography** after **`@layer base`**) are documented in the **§7 `load-css` + reset review** progress slice.
 
-**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is **`./styles/map-leaflet-host`**, **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./app/shared/ui/toggle-group/hlm-toggle-group`** (plus Sass **`meta`** for **`load-css`**). No stray **`primitives/*`** or **`tokens`** references.
+**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is **`./styles/map-leaflet-host`**, **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./app/shared/ui/toggle-group/hlm-toggle-group`**; **`meta.load-css`** pulls **`styles/legacy-design-tokens`** and **`styles/typography-baseline`** (source **`apps/web/src/styles/_typography-baseline.scss`**). No stray **`primitives/*`** or **`tokens`** references.
 
 **Progress (2026-05-16, slice — typography baseline partial):** **`h1`–`h6`** and default **`a`** rules moved from inline **`styles.scss`** into **`apps/web/src/styles/_typography-baseline.scss`**, included **after** **`@layer base`** via **`@include meta.load-css('styles/typography-baseline')`** so output order stays **Tailwind Preflight → baseline** (same constraint as top-of-file **`@use`** would violate).
 
 **Progress (2026-05-16, slice — map host partial):** Leaflet focus / link overrides moved out of **`reset.scss`** into **`apps/web/src/styles/map-leaflet-host.scss`** (map surface chrome). **`styles.scss`** **`@use './styles/map-leaflet-host'`** before **`reset`** so output order stays Leaflet-first then document reset. **`layout/app.scss`:** removed dead **`@keyframes ui-spin`** (no `animation: ui-spin` callsites).
+
+**Progress (2026-05-16, slice — §7 `load-css` + reset review):** Documented non-`@use` global emits: **`@include meta.load-css('styles/legacy-design-tokens')`** → **`apps/web/src/styles/_legacy-design-tokens.scss`** (Phase 7 bridge; must stay **`load-css`** after tweakcn **`:root`** so `--fp-*` / legacy **`--color-*`** aliases resolve over semantic tokens). **`@include meta.load-css('styles/typography-baseline')`** → **`apps/web/src/styles/_typography-baseline.scss`** (after **`@layer base`** / Preflight). **`reset.scss`:** **`html, body`** **`font-family`** now uses **`var(--font-sans)`** with system fallbacks (removes hardcoded **Inter** drift from tweakcn **DM Sans**).
 
 ### 8. Final gates
 
