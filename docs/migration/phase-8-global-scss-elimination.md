@@ -35,7 +35,11 @@ rg "hlm-toggle-group" apps/web/src/styles.scss
 
 Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** — deleting primitives will break layout.
 
+**Progress (2026-05-16, slice — §1 Phase 6 gates):** From repo root — **`rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l'`** → **0** files (Gate A). **`rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l'`** → **0** files (Gate B). Phase 8 pre-flight: **`styles/primitives/`** absent; **no** `.ui-container|…` in `apps/web/src/styles/**/*.scss`; **`styles.scss`** has **no** `@use './styles/primitives/…'`; **`hlm-pill-toggle` / `hlm-toggle-group`** class strings appear only on the **seven** known callsites (settings, toolbars, upload, map-shell, media, view-toggle).
+
 ### 2. Remove container primitive
+
+**Status (2026-05-16):** **Superseded** — `styles/primitives/` removed with primitive teardown; `container.scss` no longer exists.
 
 1. Delete `@use './styles/primitives/container'` from `styles.scss`.
 2. Delete `apps/web/src/styles/primitives/container.scss`.
@@ -43,11 +47,15 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 ### 3. Remove row-shell primitive
 
+**Status (2026-05-16):** **Superseded** — same as §2; `row-shell.scss` gone.
+
 1. Delete `@use './styles/primitives/row-shell'`.
 2. Delete `row-shell.scss`.
 3. Gates.
 
 ### 4. Remove card-shell primitive
+
+**Status (2026-05-16):** **Superseded** — same as §2; `card-shell.scss` gone.
 
 1. Delete `@use './styles/primitives/card-shell'`.
 2. Delete `card-shell.scss`.
@@ -83,7 +91,15 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Progress (2026-05-16, slice — §7 `load-css` + reset review):** Documented non-`@use` global emits: **`@include meta.load-css('styles/legacy-design-tokens')`** → **`apps/web/src/styles/_legacy-design-tokens.scss`** (Phase 7 bridge; must stay **`load-css`** after tweakcn **`:root`** so `--fp-*` / legacy **`--color-*`** aliases resolve over semantic tokens). **`@include meta.load-css('styles/typography-baseline')`** → **`apps/web/src/styles/_typography-baseline.scss`** (after **`@layer base`** / Preflight). **`reset.scss`:** **`html, body`** **`font-family`** now uses **`var(--font-sans)`** with system fallbacks (removes hardcoded **Inter** drift from tweakcn **DM Sans**).
 
+**Progress (2026-05-16, slice — §7 inventory / dead-code):** Removed duplicate **`.content-clamp--default`** from **`styles/layout/clamp.scss`** (same **`max-width`** as base **`.content-clamp`**; no template callsites). Removed unused **`--content-clamp-max`** from **`styles/_legacy-design-tokens.scss`**. **`docs/design/design-system/layout-width-breakpoint-scale.md`:** variants / required-use text aligned with base + **`--text`** / **`--list`** only.
+
+**Progress (2026-05-16, slice — §7 layout/app):** Removed global **`.focus-ring-primary:focus-visible`** from **`styles/layout/app.scss`**; equivalent **`focus-visible:outline-2`**, **`focus-visible:outline-solid`**, **`focus-visible:outline-primary`**, **`focus-visible:outline-offset-2`** on the two callsites (**`captured-date-editor.component.html`**, **`quick-info-chips.component.html`**) so focus chrome stays token-aligned without a global helper class.
+
+**Progress (2026-05-16, slice — `.focus-ring-primary` verification):** **`rg 'focus-ring-primary' apps/web/src`** → **0** matches (no class string, no SCSS selector). **`styles/layout/app.scss`** contains **no** focus-ring helper. Remaining repo **`focus-ring`** strings are **token** names (**`--interactive-focus-ring`**, **`--shadow-focus-ring`** in **`_legacy-design-tokens.scss`** and per-component **`:focus-visible`** **box-shadow**), not the removed global utility. **No template/SCSS edits** this slice.
+
 ### 8. Final gates
+
+**Progress (2026-05-16, slice):** **`npm run design-system:check`** (registry + panel MQ audit + visual-behavior guard) and **`cd apps/web && npx ng build`** → **exit 0** (Angular build warnings only: map-shell SCSS budget, CommonJS deps).
 
 ```bash
 cd apps/web && npx ng build

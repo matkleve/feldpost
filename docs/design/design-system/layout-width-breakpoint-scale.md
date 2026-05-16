@@ -41,7 +41,6 @@ Canonical token and utility:
 Utility variants:
 
 - `.content-clamp--text`
-- `.content-clamp--default`
 - `.content-clamp--list`
 
 Definition:
@@ -52,7 +51,7 @@ Definition:
 
 Required use:
 
-- Apply the semantic clamp variant by surface type: text/form surfaces use `--text`, balanced detail surfaces use `--default`, list/grid surfaces use `--list`.
+- Apply the semantic clamp variant by surface type: text/form surfaces use `--text`, balanced detail surfaces use the base `.content-clamp` (default max-width token), list/grid surfaces use `--list`.
 
 ## Overlay Scale
 

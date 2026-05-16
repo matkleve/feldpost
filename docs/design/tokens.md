@@ -20,6 +20,12 @@ The v2 color system follows the Material Design 3 tonal architecture with the Fe
 | Reference palette (logical) | `fp/ref/…` in Figma; stops **0–100** below | Raw MD3 tonal stops. | **No** — do not use removed `--fp-ref-*` CSS vars; use tweakcn / `--fp-sys-color-*` / semantic tokens in implementation |
 | System roles | `--fp-sys-color-*` | Semantic role per surface/role pair. | Yes — bridge API until full tweakcn migration |
 
+#### Phase 7 handoff — deferred MD3 rows (tweakcn)
+
+- **tweakcn** must add **named roles** for MD3-only `--fp-sys-color-*` (container / tertiary / error-container / outline-variant / inverse ladders and their *on-* pairs) **or** **approve explicit aliases** to existing tweakcn vars; without that, the bridge stays on **literal hex** (no unapproved Batch 4b-style mapping to `--accent` / `--card` / `--muted`).
+- **Bridge (hex today):** `apps/web/src/styles/_legacy-design-tokens.scss` — light fp-sys color block **`L20–L58`**; dark mirror **`L512–L550`** (`@mixin dark-theme-overrides`).
+- **Rationale + table:** [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md) — **Batch 3 continuation — deferred MD3 roles**, **Batch 3** deferred list, **Batch 4** (4a vs 4b).
+
 #### Reference palette — primary (gold-amber, seed `#c9a84c` @ stop 70)
 
 | Stop | Hex |
