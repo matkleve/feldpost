@@ -5,6 +5,41 @@ Load this file for any task involving visual styling, sizing, or color.
 Layer ownership and alias architecture are defined in `docs/design/token-layers.md`.
 Use this file for concrete values; use `token-layers.md` for layering and override rules.
 
+## Legacy bridge inventory (`_legacy-design-tokens.scss`)
+
+**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge inventory* (keep both in lockstep). Only these **`--*`** names are **defined on `:root`** in `apps/web/src/styles/_legacy-design-tokens.scss` (light). **`@mixin dark-theme-overrides`** adjusts **`--shadow-sm`**, **`--interactive-focus-ring`**, and **`--shadow-focus`** only. **`--shadow-md|lg|xl`**, tweakcn semantic colors, and MD3 **`--fp-sys-*`** reference tables are **not** emitted from this file.
+
+**Layer A (bridge primitives)**
+
+| Token |
+| --- |
+| `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full` |
+| `--shadow-sm`, `--shadow-focus` |
+| `--z-panel`, `--z-upload-button`, `--z-dropdown`, `--z-modal` |
+| `--spacing-1` … `--spacing-8` |
+| `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
+| `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
+| `--line-height-tight`, `--line-height-solid`, `--line-height-snug`, `--line-height-cozy`, `--line-height-reading`, `--line-height-compact`, `--line-height-normal`, `--line-height-comfortable` |
+| `--container-radius-control`, `--container-radius-panel` |
+| `--motion-duration-fast`, `--motion-ease-out` |
+
+**Layer B (bridge)**
+
+| Token |
+| --- |
+| `--interactive-focus-ring` |
+| `--interactive-transition-standard` |
+
+**Layer C (bridge)**
+
+| Token |
+| --- |
+| `--action-bg-hover`, `--action-text-default`, `--action-text-active` |
+| `--menu-surface-border`, `--menu-item-bg-hover`, `--menu-item-text` |
+| `--field-bg`, `--field-border`, `--field-border-focus`, `--field-placeholder`, `--field-text` |
+
+Optional **`[data-theme='sandstone']`** overrides for the same Layer C field/menu/action names are defined in the same SCSS file (see `token-layers.md`).
+
 ## 3.1 Color Tokens
 
 Design tokens are CSS custom properties. All components use tokens — never raw hex or Tailwind arbitrary values in design-sensitive contexts.
@@ -417,7 +452,7 @@ There is **no** separate **`--font-size-3xs`** step: a deprecated **`--font-size
 | xl   | `--font-size-xl`  | 1.38rem (22.1px) | Panel headings                |
 | 2xl  | `--font-size-2xl` | 1.56rem (25.0px) | Major titles                  |
 | 3xl  | **(not on `:root` — Batch 33)** — use **`calc(var(--font-size-2xl) * 1.13)`** at callsites | ~1.76rem (28.2px) | Hero/state titles             |
-| 4xl  | `--font-size-4xl` | 1.99rem (31.9px) | Display-level emphasis        |
+| 4xl  | **(not on `:root` — Batch 40)** — use **`calc(var(--font-size-2xl) * 1.13 * 1.13)`** at callsites | ~1.99rem (31.9px) | Display-level emphasis        |
 
 Minimum rendered text size: **12px / 0.75rem** (caption only). Body text is never below 15px.
 
@@ -474,8 +509,8 @@ Use the shared primitives in `apps/web/src/styles.scss` before inventing custom 
 
 | Primitive                | Role                                                                                | Default geometry                                                                            | Rules                                                                                                                                          |
 | ------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.ui-container`          | Shared panel shell for sidebar, search surfaces, upload panel, and similar overlays | Panel radius `--container-radius-panel`, panel padding tokens, panel gap token              | Defines the outer geometry boundary. Sidebar, Search Bar, Upload Panel, Filter Panel, and future panels should all start from this same shell. |
-| `.ui-container--compact` | Compact container variant                                                           | Uses compact inline/block padding tokens                                                    | Use when the surface needs denser internal spacing without changing outer corners.                                                             |
+| `.ui-container`          | Shared panel shell for sidebar, search surfaces, upload panel, and similar overlays | Panel radius **`--container-radius-panel`**; internal padding/gap via **`var(--spacing-*)`** (Batch 40 removed **`--container-padding-*`** / **`--container-gap-*`** from the bridge) | Defines the outer geometry boundary. Sidebar, Search Bar, Upload Panel, Filter Panel, and future panels should all start from this same shell. |
+| `.ui-container--compact` | Compact container variant                                                           | Denser **`var(--spacing-*)`** padding                                                                 | Use when the surface needs denser internal spacing without changing outer corners.                                                             |
 | `.ui-item`               | Shared row/item shell for nav rows, dropdown items, search results, and menu rows   | Fixed leading media column, flexible label column, control radius, token-driven padding/gap | Row geometry is stable across states. Do not animate padding, row height, icon column width, or gap.                                           |
 | `.ui-item-media`         | Fixed leading media column                                                          | `2rem` (32px) square by default                                                             | Width stays fixed while labels, subtitles, or meta text change.                                                                                |
 | `.ui-item-label`         | Flexible label/meta column                                                          | Stacks primary text and optional secondary text                                             | Use clipping/ellipsis for overflow rather than changing the row shell.                                                                         |
@@ -486,7 +521,7 @@ Primitive invariants:
 - Sidebar is the reference implementation for `.ui-container`, `.ui-item`, and `.ui-spacer`.
 - Search Bar uses `.ui-container` with the same panel corners as the sidebar, not a rounded-pill radius change between idle/open states.
 - Sidebar, Search Bar, Upload Panel, and similar panel surfaces should share the same panel padding and gap tokens so alignment starts from a common boundary.
-- Panel shells use explicit padding tokens (`--container-padding-inline-panel`, `--container-padding-block-panel`) and a dedicated panel gap token (`--container-gap-panel`).
+- Panel shells use **`var(--spacing-*)`** for inline/block padding and gaps (**Batch 40** removed **`--container-padding-inline-panel`**, **`--container-padding-block-panel`**, **`--container-padding-inline|block-compact`**, **`--container-gap-panel`**, and **`--container-gap`** from the bridge).
 - If a pill treatment causes transition instability, keep the standard panel radius in all states.
 - Visual state changes may affect color, opacity, clipping, and outer container width or height. They must not change row geometry.
 
@@ -526,7 +561,7 @@ The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-s
 
 ### Border tokens
 
-**Phase 7 Batch 28:** metric **`--border-sm`** … **`--border-xl`** were **removed from the bridge** — there were **no** `var(--border-(sm|md|lg|xl))` consumers under `apps/web`. For neutral strokes, use tweakcn **`var(--border)`** (and explicit `width`/`style` where needed) or a local **`color-mix(in srgb, var(--border) 72%, transparent)`** when a muted stroke is required. For interaction-driven borders, use **`--border-hover`**; selected media frames use **`0.125rem solid var(--primary)`** directly (**Batch 36** removed **`--border-selected`** from the bridge).
+**Phase 7 Batch 28:** metric **`--border-sm`** … **`--border-xl`** were **removed from the bridge** — there were **no** `var(--border-(sm|md|lg|xl))` consumers under `apps/web`. For neutral strokes, use tweakcn **`var(--border)`** (and explicit `width`/`style` where needed) or a local **`color-mix(in srgb, var(--border) 72%, transparent)`** when a muted stroke is required. **Batch 39** removed **`--border-hover`** from the bridge — inline hover border mixes at callsites (for example **`media-item.component.scss`**); selected media frames use **`0.125rem solid var(--primary)`** directly (**Batch 36** removed **`--border-selected`** from the bridge).
 
 ### Z-index ladder
 
@@ -559,16 +594,15 @@ Use semantic z-index tokens only. **Phase 7 Batch 32:** the base map plane no lo
 
 **Rule:** if two elements visually sit at the same plane, they must use the same **`--shadow-*`** step so dark-mode shadow overrides stay coherent.
 
-**Photo marker drop shadow** (`--photo-marker-drop-shadow`) is a separate token: it uses `filter: drop-shadow(...)` so it traces the SVG/image shape rather than the bounding box. Light: `rgba(15,14,12,0.45)`. Dark: `rgba(0,0,0,0.65)`.
+**Photo marker drop shadow** — **`--photo-marker-drop-shadow`** was **removed from the bridge (Batch 39)**; **`_map-shell-leaflet-global.scss`** inlines **`filter: drop-shadow(...)`** so it traces the SVG/image shape. Reference values: light **`rgba(15,14,12,0.45)`**; dark **`rgba(0,0,0,0.65)`**.
 
 ## 3.6 Motion and Micro-Interactions
 
-Motion tokens are the source of truth for interaction timing and easing.
+Motion tokens are the source of truth for interaction timing and easing. **`--motion-duration-slow`** was **removed from the bridge (Batch 40)** — use literal **`300ms`** where that duration is still required.
 
 | Group          | Token                    | Value                                                     |
 | -------------- | ------------------------ | --------------------------------------------------------- |
 | Duration       | `--motion-duration-fast` | `100ms`                                                   |
-| Duration       | `--motion-duration-slow` | `300ms`                                                   |
 | Easing         | `--motion-ease-out`      | `cubic-bezier(0, 0, 0.2, 1)`                              |
 
 **Phase 7 Batch 36:** **`--motion-duration-base`** (`200ms`) and **`--motion-ease-standard`** (`cubic-bezier(0.4, 0, 0.2, 1)`) were **removed** from **`_legacy-design-tokens.scss`** — inline those literals at choreography callsites (see **`docs/migration/phase-7-token-migration.md`** §Batch 36) or use **`var(--motion-duration-fast)`** / **`var(--motion-ease-out)`** where Batch 31 already applies.
@@ -655,6 +689,6 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | **removed from bridge** — no longer defined for sync | **`--font-weight-regular`** (Batch 32) | Use **`Font/Weight/Medium`** / **`Semibold`** from the bridge where applicable, or literal **`400`** at the sole former callsite |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
 | `color-mix` — computed at render time | `--menu-surface-border`, `--menu-item-bg-hover` (Layer C mixes still on bridge) | Approximate with a manual opacity or solid value |
-| `complex` — multi-value shorthand | `--shadow-sm`, `--border-hover` | Set manually; shadows and multi-part borders are not natively representable as a single Figma Variable |
+| `complex` — multi-value shorthand | `--shadow-sm` (bridge); **`--shadow-md|lg|xl`** on tweakcn `:root` | Set manually; shadows are not natively representable as a single Figma Variable |
 
 Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.

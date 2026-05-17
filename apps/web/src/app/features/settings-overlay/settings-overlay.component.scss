@@ -21,7 +21,9 @@
   --settings-interactive-border: var(--settings-stroke-width) solid var(--settings-border-muted);
   --settings-interactive-radius: var(--container-radius-control);
   --settings-focus-ring: var(--interactive-focus-ring);
-  --settings-interactive-transition: var(--interactive-transition-standard);
+  // Former `var(--interactive-transition-standard)` — legacy row removed Batch 41 (`docs/migration/phase-7-token-migration.md` §Batch 41)
+  --settings-interactive-transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
+    box-shadow 120ms ease-out;
 }
 
 @layer components {
@@ -31,7 +33,7 @@
     position: relative;
     position: fixed;
     top: 50%;
-    left: calc(var(--spacing-3) + var(--spacing-7) + var(--spacing-3));
+    left: calc(var(--spacing-3) + (0.25rem * 12) + var(--spacing-3));
     transform: translateY(-50%);
     z-index: var(--z-modal);
     display: flex;
@@ -122,7 +124,8 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__subtitle {
     font-size: var(--font-size-sm);
-    line-height: var(--line-height-normal);
+    // Former `var(--line-height-normal)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
+    line-height: 1.45;
     color: var(--muted-foreground);
   }
 

@@ -32,7 +32,8 @@
     bottom: 3.5rem;
     left: 0;
     right: 0;
-    z-index: var(--z-panel);
+    // Matches former `var(--z-panel)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
+    z-index: 100;
     border-radius: 0;
     animation: workspace-pane-shell-clip-in-up 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }

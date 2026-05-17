@@ -54,7 +54,7 @@
 
   // Z-index stacking ladder (audit issue #2, #13); map base plane uses literal `0` at `.map-container` (Batch 32).
   // `--z-toast` removed (Batch 35) — `toast-container.component.scss` uses literal `400` between dropdown (300) and modal (500).
-  --z-panel: 100;
+  // `--z-panel` removed — Batch 41 (Tailwind `z-panel` + nav / workspace shell inlines literal `100`; proof §Batch 41).
   --z-upload-button: 200;
   --z-dropdown: 300;
   --z-modal: 500;
@@ -66,7 +66,7 @@
   --spacing-4: calc(0.25rem * 4);
   --spacing-5: calc(0.25rem * 6);
   --spacing-6: calc(0.25rem * 8);
-  --spacing-7: calc(0.25rem * 12);
+  // `--spacing-7` removed — Batch 41 (auth / nav / settings inlines `calc(0.25rem * 12)`; proof §Batch 41).
   --spacing-8: calc(0.25rem * 16);
 
   // Typography scale — unified mathematical scale (ratio 1.13) with 0.75rem minimum.
@@ -85,13 +85,8 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  --line-height-tight: 1.2;
-  --line-height-solid: 1;
-  --line-height-snug: 1.1;
-  --line-height-cozy: 1.3;
-  --line-height-reading: 1.4;
-  --line-height-compact: 1.35;
-  --line-height-normal: 1.45;
+  // Line-height ladder: `--line-height-tight|solid|reading` → `_typography-baseline.scss` `:root` (Batch 41).
+  // `--line-height-snug|cozy|compact|normal` removed — Batch 41 (numeric inlines at callsites; proof §Batch 41).
   --line-height-comfortable: 1.55;
 
   // Container geometry — containers define the alignment boundaries that
@@ -111,9 +106,7 @@
 
   // Shared interactive primitives (single source for hover/focus/motion)
   --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 15%, transparent);
-  --interactive-transition-standard:
-    border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
-    box-shadow 120ms ease-out;
+  // `--interactive-transition-standard` removed — Batch 41 (four callsites inline the same transition list; proof §Batch 41).
 
   /* ── Motion & Micro-interactions ── */
 

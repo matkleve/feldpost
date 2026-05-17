@@ -159,7 +159,8 @@ module.exports = {
       // ── Z-index ───────────────────────────────────────────────────────────
       zIndex: {
         map: 'var(--z-map)',
-        panel: 'var(--z-panel)',
+        // Panel plane literal — legacy `--z-panel` removed Batch 41 (`docs/migration/phase-7-token-migration.md` §Batch 41)
+        panel: '100',
         'upload-btn': 'var(--z-upload-button)',
         dropdown: 'var(--z-dropdown)',
         modal: 'var(--z-modal)',

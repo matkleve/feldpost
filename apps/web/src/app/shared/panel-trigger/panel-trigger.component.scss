@@ -45,7 +45,8 @@
     letter-spacing: 0.03125rem;
     cursor: pointer;
     white-space: nowrap;
-    transition: var(--interactive-transition-standard);
+    transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
+      box-shadow 120ms ease-out;
   }
 
   // icon-text-action: same symmetric inline as base (see `.panel-trigger` above).

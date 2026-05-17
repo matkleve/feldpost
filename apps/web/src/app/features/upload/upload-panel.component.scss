@@ -238,7 +238,7 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     color: var(--foreground);
-    line-height: var(--line-height-snug);
+    line-height: 1.1;
   }
 
   &__empty-text {
@@ -388,7 +388,7 @@
     white-space: nowrap;
     color: var(--foreground);
     font-weight: var(--font-weight-semibold);
-    line-height: var(--line-height-snug);
+    line-height: 1.1;
   }
 
   &__file-status {

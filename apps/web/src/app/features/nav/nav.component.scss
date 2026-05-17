@@ -18,7 +18,8 @@
 // ── LeftSidebar — trigger zone ───────────────────────────────────────────────
 
 .sidebar {
-  --sidebar-width-collapsed: var(--spacing-7);
+  // Matches former `var(--spacing-7)` — legacy row removed Batch 41 (`docs/migration/phase-7-token-migration.md` §Batch 41)
+  --sidebar-width-collapsed: calc(0.25rem * 12);
   --sidebar-width-expanded: 15rem;
   --sidebar-row-padding-inline: var(--spacing-1);
   --sidebar-row-padding-block: var(--spacing-1);
@@ -28,7 +29,8 @@
   --sidebar-icon-size: 1.25rem;
 
   position: fixed;
-  z-index: var(--z-panel);
+  // Matches former `var(--z-panel)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
+  z-index: 100;
 
   @media (min-width: 768px) {
     top: 50%;

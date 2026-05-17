@@ -67,7 +67,7 @@
 .item-state-frame__state-label {
   margin: 0;
   font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  line-height: 1.45;
   text-align: center;
 }
 
@@ -82,7 +82,8 @@
   padding-inline: var(--spacing-3);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: var(--interactive-transition-standard);
+  transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
+    box-shadow 120ms ease-out;
 }
 
 // Defines interactive hover and focus treatment for retry action.

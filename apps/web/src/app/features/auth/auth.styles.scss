@@ -47,7 +47,7 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 420px;
-  max-height: calc(100dvh - var(--spacing-7));
+  max-height: calc(100dvh - (0.25rem * 12));
   z-index: 2;
   overflow: hidden;
 }
@@ -61,7 +61,7 @@
 // Scrollable form region for long forms (register) — shadows indicate overflow
 .auth-card-scroll {
   // 8.25rem = approximate height of h1 + .auth-subtitle + top padding above scroll region
-  max-height: calc(100dvh - var(--spacing-7) - 8.25rem);
+  max-height: calc(100dvh - (0.25rem * 12) - 8.25rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-right: var(--spacing-1);

@@ -26,7 +26,8 @@
   gap: var(--spacing-2);
   align-content: start;
   position: relative;
-  transition: var(--interactive-transition-standard);
+  transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
+    box-shadow 120ms ease-out;
 
   &:hover {
     border-color: color-mix(
@@ -96,7 +97,7 @@
 .project-card__context {
   margin: 0;
   font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  line-height: 1.45;
 }
 
 .project-card__actions {
