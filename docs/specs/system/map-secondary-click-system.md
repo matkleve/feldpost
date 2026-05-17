@@ -10,7 +10,7 @@ Secondary-click / long-press orchestration for map, marker, and radius targets (
 
 ## What It Looks Like
 
-All secondary-click menus use the shared dropdown/action-sheet shell (`dd-*` rows, `--color-bg-elevated`, `--elevation-dropdown`, `--radius-lg`). Desktop menus anchor to cursor/marker/radius hit zone. Mobile uses bottom action sheets for touch reliability.
+All secondary-click menus use the shared dropdown/action-sheet shell (`dd-*` rows, `--color-bg-elevated`, `box-shadow: var(--shadow-lg)` per [`docs/design/tokens.md`](../../design/tokens.md) §3.5, `--radius-lg`). Desktop menus anchor to cursor/marker/radius hit zone. Mobile uses bottom action sheets for touch reliability.
 
 Map menu focuses creation/navigation utilities. Marker menu focuses item-level operations. Radius menu focuses project actions on in-radius result sets.
 

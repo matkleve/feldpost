@@ -78,7 +78,7 @@
   border-radius: var(--container-radius-control); // same corners as .ui-item-media (8px)
   background: var(--card);
   border: 1px solid var(--border);
-  box-shadow: var(--elevation-subtle);
+  box-shadow: var(--shadow-sm);
   opacity: 0;
   transition:
     opacity 80ms ease-out,
@@ -92,7 +92,7 @@
 :host.dragging .drag-divider__grip {
   opacity: 1;
   border-color: color-mix(in srgb, var(--border) 78%, var(--foreground));
-  box-shadow: var(--elevation-overlay);
+  box-shadow: var(--shadow-md);
 }
 
 .drag-divider__grip-icon {

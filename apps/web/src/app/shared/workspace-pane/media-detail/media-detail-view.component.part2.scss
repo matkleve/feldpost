@@ -42,13 +42,13 @@
     .detail-row__icon,
     .detail-row__label,
     .detail-row__value {
-      color: var(--menu-item-text-active);
+      color: var(--primary);
     }
 
     .detail-row-action {
       opacity: 1;
       pointer-events: auto;
-      color: var(--menu-item-text-active);
+      color: var(--primary);
     }
   }
 
@@ -437,7 +437,7 @@
   }
 
   &__option--selected {
-    color: var(--menu-item-text-active);
+    color: var(--primary);
     background: var(--menu-item-bg-active);
   }
 

@@ -12,15 +12,15 @@
 
   /* Sanfte Übergänge für alle Zustände */
   transition:
-    box-shadow var(--transition-fade-in),
-    transform var(--transition-fade-in),
-    border var(--transition-fade-in);
-  animation: media-item-enter var(--transition-fade-in) ease-out both;
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out),
+    border var(--motion-duration-fast) var(--motion-ease-out);
+  animation: media-item-enter var(--motion-duration-fast) var(--motion-ease-out) ease-out both;
 }
 
 :host([data-has-item='false']) {
   background: var(--muted);
-  animation: var(--animation-skeleton-pulse);
+  animation: media-display-pulse 200ms ease-in-out infinite;
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
 }
 
@@ -44,7 +44,7 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: 2;
-  transition: box-shadow var(--transition-fade-in);
+  transition: box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
   /* DEFAULT BORDER: 1px, fast transparent */
   border: 1px color-mix(in srgb, var(--primary) 10%, transparent);
@@ -105,8 +105,8 @@
   transform: translateY(-2px);
   pointer-events: none;
   transition:
-    opacity var(--transition-fade-out),
-    transform var(--transition-fade-out);
+    opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1),
+    transform var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
 }
 
 :host:hover .media-item__quiet-actions,
@@ -114,16 +114,16 @@
   opacity: 1;
   transform: translateY(0);
   transition:
-    opacity var(--transition-fade-in),
-    transform var(--transition-fade-in);
+    opacity var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 :host([data-state='selected']) .media-item__quiet-actions.media-item__quiet-actions--select {
   opacity: 1;
   transform: translateY(0);
   transition:
-    opacity var(--transition-fade-in),
-    transform var(--transition-fade-in);
+    opacity var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 @keyframes media-item-enter {

@@ -268,13 +268,13 @@ export const MEDIA_DISPLAY_TRANSITIONS: Record<
 | from -> to                                       | step | element                    | property     | timing token                 | delay                            |
 | ------------------------------------------------ | ---- | -------------------------- | ------------ | ---------------------------- | -------------------------------- |
 | `loading-surface-visible -> ratio-known-contain` | 1    | viewport                   | aspect-ratio | `var(--transition-geometry)` | 0                                |
-| `loading-surface-visible -> media-ready`         | 1    | staged content layer       | opacity 0->1 | `var(--transition-fade-in)`  | 0                                |
-| `media-ready -> content-fade-in`                 | 1    | content layer              | opacity 0->1 | `var(--transition-fade-in)`  | **`60ms`** (delay literal — Batch 33) |
-| `content-fade-in -> content-visible`             | 1    | staged content layer       | opacity 1->0 | `var(--transition-fade-out)` | 0                                |
-| `loading-surface-visible -> icon-only`           | 1    | icon layer                 | opacity 0->1 | `var(--transition-fade-in)`  | **`60ms`** (delay literal — Batch 33) |
-| `content-visible -> icon-only`                   | 1    | content layer              | opacity 1->0 | `var(--transition-fade-out)` | 0                                |
-| `any -> error`                                   | 1    | active content/stage layer | opacity 1->0 | `var(--transition-fade-out)` | 0                                |
-| `any -> error`                                   | 2    | error frame                | opacity 0->1 | `var(--transition-fade-in)`  | **`60ms`** (delay literal — Batch 33) |
+| `loading-surface-visible -> media-ready`         | 1    | staged content layer       | opacity 0->1 | `var(--motion-duration-fast) var(--motion-ease-out)`  | 0                                |
+| `media-ready -> content-fade-in`                 | 1    | content layer              | opacity 0->1 | `var(--motion-duration-fast) var(--motion-ease-out)`  | **`60ms`** (delay literal — Batch 33) |
+| `content-fade-in -> content-visible`             | 1    | staged content layer       | opacity 1->0 | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | 0                                |
+| `loading-surface-visible -> icon-only`           | 1    | icon layer                 | opacity 0->1 | `var(--motion-duration-fast) var(--motion-ease-out)`  | **`60ms`** (delay literal — Batch 33) |
+| `content-visible -> icon-only`                   | 1    | content layer              | opacity 1->0 | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | 0                                |
+| `any -> error`                                   | 1    | active content/stage layer | opacity 1->0 | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | 0                                |
+| `any -> error`                                   | 2    | error frame                | opacity 0->1 | `var(--motion-duration-fast) var(--motion-ease-out)`  | **`60ms`** (delay literal — Batch 33) |
 
 State rendering matrix, visual behavior / ownership triad, internal behavior, and non-ownership list: **[media-display.rendering-matrix.supplement.md](./media-display.rendering-matrix.supplement.md)**.
 

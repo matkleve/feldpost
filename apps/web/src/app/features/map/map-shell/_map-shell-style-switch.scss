@@ -3,15 +3,15 @@
 
 .map-style-switch {
   position: absolute;
-  top: var(--container-inset);
-  left: var(--container-inset);
+  top: var(--spacing-3);
+  left: var(--spacing-3);
   z-index: var(--z-upload-button);
   display: inline-flex;
   align-items: flex-start;
 
   @media (max-width: 47.9375rem) {
-    top: calc(var(--container-inset-mobile) + var(--spacing-2));
-    left: var(--container-inset-mobile);
+    top: calc(var(--spacing-3) + var(--spacing-2));
+    left: var(--spacing-3);
   }
 }
 

@@ -105,7 +105,7 @@ Set by the host component (or toolbar wrapper). Not part of `dd-*` — each drop
 background:    --color-bg-elevated
 border:        1px solid --color-border
 border-radius: --radius-lg  (8px)
-box-shadow:    --elevation-dropdown
+box-shadow:    var(--shadow-lg)
 ```
 
 Composable class table, hover token, and item geometry: **[dropdown-system.class-library.supplement.md](./dropdown-system.class-library.supplement.md)**.

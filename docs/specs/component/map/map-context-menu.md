@@ -11,7 +11,7 @@ Primary use cases are: quick media marker drafting at exact coordinates, fast ma
 
 ## What It Looks Like
 
-The menu is a compact floating surface anchored near the pointer position, using the shared elevated menu shell and `dd-*` action rows. It uses `--color-bg-elevated`, `1px` border (`--color-border`), `--elevation-dropdown`, and `--radius-lg`. Default width is `14rem` (224px) with item rows at `2.75rem` (44px) minimum touch target height. Items use leading icons (`1rem`) and labels (`0.8125rem`) with warm clay hover (`color-mix(in srgb, var(--color-clay) 8%, transparent)`). On narrow mobile viewports, the same actions render as a bottom action sheet instead of a tiny anchored popover. The app menu uses normal viewport clamping only; there is no special "mirror against browser menu" placement logic.
+The menu is a compact floating surface anchored near the pointer position, using the shared elevated menu shell and `dd-*` action rows. It uses `--color-bg-elevated`, `1px` border (`--color-border`), `box-shadow: var(--shadow-lg)` ([`docs/design/tokens.md`](../../../design/tokens.md) §3.5 — menus / popovers plane), and `--radius-lg`. Default width is `14rem` (224px) with item rows at `2.75rem` (44px) minimum touch target height. Items use leading icons (`1rem`) and labels (`0.8125rem`) with warm clay hover (`color-mix(in srgb, var(--color-clay) 8%, transparent)`). On narrow mobile viewports, the same actions render as a bottom action sheet instead of a tiny anchored popover. The app menu uses normal viewport clamping only; there is no special "mirror against browser menu" placement logic.
 
 ## Where It Lives
 

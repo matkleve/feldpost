@@ -88,7 +88,7 @@
 // @see docs/specs/component/media/media-item.md#acceptance-criteria
 .media-item-render-surface__fallback--loading {
   background: var(--muted);
-  animation: var(--animation-skeleton-pulse);
+  animation: media-display-pulse 200ms ease-in-out infinite;
 }
 
 // Stable state: error | no-media renders no-photo fallback tone.

@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--elevation-overlay);
+  box-shadow: var(--shadow-md);
   transition:
     background 120ms ease-out,
     color 120ms ease-out,
@@ -67,7 +67,7 @@
   padding: var(--spacing-2) var(--spacing-4);
   background: var(--popover);
   border-radius: var(--radius-full);
-  box-shadow: var(--elevation-overlay);
+  box-shadow: var(--shadow-md);
   color: var(--foreground);
   font-size: var(--font-size-md);
   white-space: nowrap;

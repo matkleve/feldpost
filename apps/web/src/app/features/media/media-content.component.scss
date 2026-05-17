@@ -8,7 +8,7 @@
 // Fades trailing loading placeholders out when fewer real items are returned.
 // @see docs/specs/component/item-grid/item-grid.md#pulse-placeholder-contract-mandatory
 .media-content__placeholder-item--exiting {
-  animation: media-content-placeholder-exit var(--transition-fade-out) forwards;
+  animation: media-content-placeholder-exit var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1) forwards;
   pointer-events: none;
 }
 

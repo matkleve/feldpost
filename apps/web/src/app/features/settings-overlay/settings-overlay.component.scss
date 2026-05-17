@@ -2,10 +2,10 @@
   display: contents;
   --settings-overlay-width: clamp(
     32rem,
-    calc(100vw - (var(--container-inset) * 2)),
-    var(--content-clamp-list)
+    calc(100vw - (var(--spacing-3) * 2)),
+    52rem
   );
-  --settings-overlay-height: min(44rem, calc(100vh - (var(--container-inset) * 2)));
+  --settings-overlay-height: min(44rem, calc(100vh - (var(--spacing-3) * 2)));
   --settings-overlay-left-ratio: 0.38;
   --settings-overlay-left-width: clamp(
     14rem,
@@ -31,7 +31,7 @@
     position: relative;
     position: fixed;
     top: 50%;
-    left: calc(var(--container-inset) + var(--spacing-7) + var(--spacing-3));
+    left: calc(var(--spacing-3) + var(--spacing-7) + var(--spacing-3));
     transform: translateY(-50%);
     z-index: var(--z-modal);
     display: flex;
@@ -45,7 +45,7 @@
     overflow: hidden;
     border: var(--settings-stroke-width) solid var(--settings-border-muted);
     background: color-mix(in srgb, var(--popover) 92%, transparent);
-    box-shadow: var(--elevation-dropdown);
+    box-shadow: var(--shadow-lg);
     backdrop-filter: blur(14px) saturate(1.08);
     -webkit-backdrop-filter: blur(14px) saturate(1.08);
   }
@@ -429,8 +429,8 @@
   :host {
     --settings-overlay-width: clamp(
       25rem,
-      calc(100vw - (var(--container-inset) * 2)),
-      var(--content-clamp-default)
+      calc(100vw - (var(--spacing-3) * 2)),
+      45rem
     );
     --settings-overlay-left-ratio: 0.35;
     --settings-overlay-left-width: clamp(
@@ -470,9 +470,9 @@
     // Mobile: full-bleed horizontal inset under the nav rail
     // @see docs/specs/ui/settings-overlay
     .settings-overlay {
-      left: var(--container-inset);
-      width: calc(100vw - (var(--container-inset) * 2));
-      max-height: calc(100vh - (var(--container-inset) * 2));
+      left: var(--spacing-3);
+      width: calc(100vw - (var(--spacing-3) * 2));
+      max-height: calc(100vh - (var(--spacing-3) * 2));
     }
 
     // Mobile shell remains two-column flex

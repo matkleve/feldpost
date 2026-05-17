@@ -539,23 +539,23 @@ Use semantic z-index tokens only. **Phase 7 Batch 32:** the base map plane no lo
 
 **Phase 7 Batch 35:** **`--z-toast`** was removed from the bridge — **`toast-container.component.scss`** uses literal **`z-index: 400`** (between **`--z-dropdown` (300)** and **`--z-modal` (500)**).
 
-### Elevation layers (semantic)
+### Elevation (physical shadows)
 
-Every component's `box-shadow` references a semantic `--elevation-*` token. Elements at the **same visual plane share the same layer** — this ensures the sidebar, search bar, upload FAB, GPS button, and map markers all look like they float at the same height.
+**Phase 7 Batch 37:** **`--elevation-subtle`**, **`--elevation-overlay`**, and **`--elevation-dropdown`** were **removed** from **`_legacy-design-tokens.scss`** — bind **`box-shadow`** directly to **`var(--shadow-sm)`**, **`var(--shadow-md)`**, or **`var(--shadow-lg)`** (same resolved values as the former aliases; **`@mixin dark-theme-overrides`** still redefines **`--shadow-*`**).
 
-| Layer                  | Maps to       | Elements                                                                                                                                    |
-| ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--elevation-subtle`   | `--shadow-sm` | Mobile bottom bar, drag divider (rest), location marker rings                                                                               |
-| `--elevation-overlay`  | `--shadow-md` | **All map-level overlays**: sidebar, search bar, upload FAB, GPS button, placement banner, upload panel, workspace pane, photo panel       |
-| `--elevation-dropdown` | `--shadow-lg` | Context menus, popovers, toolbar dropdowns (sort/group/filter), auth card                                                                   |
+| Visual plane        | Use                    | Typical elements                                                                                                                      |
+| ------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Subtle lift         | **`var(--shadow-sm)`** | Mobile bottom bar, drag divider (rest), location marker rings                                                                        |
+| Map chrome / panels | **`var(--shadow-md)`** | Sidebar, search bar, upload FAB, GPS button, placement banner, upload panel, workspace pane, photo panel, toast chrome (see specs)   |
+| Menus / popovers    | **`var(--shadow-lg)`** | Context menus, popovers, toolbar dropdowns (sort/group/filter), auth card                                                           |
 
-**Phase 7 Batch 35:** **`--elevation-modal`** (`var(--shadow-xl)`) was removed — use **`var(--shadow-xl)`** directly for modal-plane shadows (e.g. CDK drag preview in **`grouping-dropdown.component.scss`**).
+**Phase 7 Batch 35:** **`--elevation-modal`** was removed — use **`var(--shadow-xl)`** for modal-plane shadows (e.g. CDK drag preview in **`grouping-dropdown.component.scss`**).
 
-| Modal / top-layer shadow | Use directly | Elements |
-| -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| *(no `--elevation-modal`)* | **`var(--shadow-xl)`** | Delete confirmation dialog, image detail overlay, drag preview                                                                             |
+| Modal / top-layer shadow | Use                    | Elements                                                                                           |
+| ------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| Top-layer / modal        | **`var(--shadow-xl)`** | Delete confirmation dialog, image detail overlay, drag preview                                    |
 
-**Rule**: if two elements visually sit at the same plane, they must use the same `--elevation-*` layer. To change the shadow for an entire visual plane, update the alias in `:root` — every element on that plane updates together.
+**Rule:** if two elements visually sit at the same plane, they must use the same **`--shadow-*`** step so dark-mode shadow overrides stay coherent.
 
 **Photo marker drop shadow** (`--photo-marker-drop-shadow`) is a separate token: it uses `filter: drop-shadow(...)` so it traces the SVG/image shape rather than the bounding box. Light: `rgba(15,14,12,0.45)`. Dark: `rgba(0,0,0,0.65)`.
 
@@ -575,9 +575,9 @@ Motion tokens are the source of truth for interaction timing and easing.
 
 **Panel-level open/close choreography:** use **`200ms cubic-bezier(0.4, 0, 0.2, 1)`** (same duration/easing as the former **`--transition-panel`** shorthand removed in Phase 7 Batch 30) or Tailwind duration/easing utilities — see `docs/design/motion.md`.
 
-- `--transition-fade-in: var(--motion-duration-fast) var(--motion-ease-out)`
-- `--transition-fade-out: var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)`
-- **Batch 33:** **`--transition-reveal-delay`** removed from the bridge — media display reveal uses literal **`60ms`** as the transition delay after **`var(--transition-fade-in)`** (see `docs/design/motion.md`).
+**Phase 7 Batch 37:** **`--transition-fade-in`** and **`--transition-fade-out`** were **removed** from the bridge — use **`var(--motion-duration-fast) var(--motion-ease-out)`** and **`var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)`** respectively at callsites (same resolved values as the former aliases).
+
+- **Batch 33:** **`--transition-reveal-delay`** removed from the bridge — media display reveal uses literal **`60ms`** as the transition delay after **`var(--motion-duration-fast) var(--motion-ease-out)`** (see **`docs/design/motion.md`**).
 
 ## 3.7 Iconography
 
@@ -648,7 +648,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 
 | Reason | Examples | Action in Figma |
 |---|---|---|
-| `alias` — resolves to another token via `var()` | `--color-primary`, `--elevation-overlay` | Set manually as a Variable alias after primitives are imported |
+| `alias` — resolves to another token via `var()` | `--color-primary`, `--shadow-md` (callsite name — **Batch 37** removed **`--elevation-overlay`**) | Set manually as a Variable alias after primitives are imported |
 | **removed from bridge** — no longer defined for sync | e.g. former **`--font-size-3xs`** → **`--font-size-2xs`** (Batch 20) | Use **`Font/Size/2xs`** only; do not reintroduce a duplicate 3xs variable |
 | **removed from bridge** — no longer defined for sync | **`--font-weight-regular`** (Batch 32) | Use **`Font/Weight/Medium`** / **`Semibold`** from the bridge where applicable, or literal **`400`** at the sole former callsite |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |

@@ -1,20 +1,20 @@
 :host {
-  --search-bar-safe-inline: max(var(--container-inset), calc(5rem + var(--spacing-1)));
-  --search-bar-viewport-inset: var(--container-inset);
+  --search-bar-safe-inline: max(var(--spacing-3), calc(5rem + var(--spacing-1)));
+  --search-bar-viewport-inset: var(--spacing-3);
 
   position: absolute;
-  top: var(--container-inset);
+  top: var(--spacing-3);
   left: 50%;
   z-index: var(--z-upload-button);
   width: min(36rem, calc(100% - (2 * var(--search-bar-safe-inline))));
   transform: translateX(-50%);
 
   @media (max-width: 47.9375rem) {
-    --search-bar-safe-inline: var(--container-inset-mobile);
-    --search-bar-viewport-inset: var(--container-inset-mobile);
+    --search-bar-safe-inline: var(--spacing-3);
+    --search-bar-viewport-inset: var(--spacing-3);
 
     width: calc(100% - (2 * var(--search-bar-safe-inline)));
-    top: var(--container-inset-mobile);
+    top: var(--spacing-3);
   }
 }
 
@@ -53,7 +53,7 @@
   border: 1px solid var(--border);
   border-radius: var(--container-radius-panel);
   background: color-mix(in srgb, var(--card) 92%, transparent);
-  box-shadow: var(--elevation-subtle);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   contain: layout paint;
 }

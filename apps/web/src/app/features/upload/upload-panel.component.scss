@@ -37,7 +37,7 @@
     padding: var(--spacing-3);
     border: 1px solid var(--border);
     background: var(--card);
-    box-shadow: var(--elevation-subtle);
+    box-shadow: var(--shadow-sm);
 
     &--intake {
       gap: var(--spacing-2);
@@ -174,7 +174,7 @@
     width: 100%;
     border-radius: var(--radius-pill);
     padding: var(--spacing-1);
-    transition: background-color var(--transition-fade-in);
+    transition: background-color var(--motion-duration-fast) var(--motion-ease-out);
 
     &:hover {
       background: color-mix(in srgb, var(--primary) 10%, var(--card));

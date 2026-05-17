@@ -8,7 +8,7 @@
   border-radius: var(--radius-circle, 50%);
   background: var(--card);
   color: var(--foreground);
-  box-shadow: var(--elevation-overlay);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,7 +28,7 @@
 .ss-gps-btn:active,
 .ss-gps-btn.active {
   background: var(--accent);
-  box-shadow: var(--elevation-overlay);
+  box-shadow: var(--shadow-md);
 }
 .ss-gps-btn[disabled] {
   opacity: 0.7;

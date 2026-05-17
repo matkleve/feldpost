@@ -127,11 +127,11 @@ export const MEDIA_ITEM_UPLOAD_OVERLAY_TRANSITIONS: Record<
 
 | from -> to                     | step | element           | property    | timing token                 | delay |
 | ------------------------------ | ---- | ----------------- | ----------- | ---------------------------- | ----- |
-| `hidden -> entering`           | 1    | overlay container | opacity     | `var(--transition-fade-in)`  | `0ms` |
-| `entering -> visible`          | 1    | overlay container | opacity     | `var(--transition-fade-in)`  | `0ms` |
+| `hidden -> entering`           | 1    | overlay container | opacity     | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms` |
+| `entering -> visible`          | 1    | overlay container | opacity     | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms` |
 | `visible -> updating-progress` | 1    | progress fill     | inline-size | `var(--transition-geometry)` | `0ms` |
-| `visible -> leaving`           | 1    | overlay container | opacity     | `var(--transition-fade-out)` | `0ms` |
-| `leaving -> hidden`            | 1    | overlay container | opacity     | `var(--transition-fade-out)` | `0ms` |
+| `visible -> leaving`           | 1    | overlay container | opacity     | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | `0ms` |
+| `leaving -> hidden`            | 1    | overlay container | opacity     | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | `0ms` |
 
 ## Boolean Input Migration Required
 

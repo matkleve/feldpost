@@ -11,7 +11,7 @@ A **presentational** floating surface: background, border, corner radius, box sh
 
 ## What It Looks Like
 
-Matches the existing elevated dropdown surfaces in the app (`app-dropdown-shell`, filter/sort dropdown specs): warm white / dark-elevation surface using **`--color-bg-elevated`**, **1px** border **`--color-border`**, corner radius **`--radius-lg`**, shadow **`--elevation-dropdown`**, z-index **`--z-dropdown`**. No default padding — inner spacing belongs to slotted content components.
+Matches the existing elevated dropdown surfaces in the app (`app-dropdown-shell`, filter/sort dropdown specs): warm white / dark-elevation surface using **`--color-bg-elevated`**, **1px** border **`--color-border`**, corner radius **`--radius-lg`**, shadow **`var(--shadow-lg)`**, z-index **`--z-dropdown`**. No default padding — inner spacing belongs to slotted content components.
 
 ## Where It Lives
 
@@ -94,7 +94,7 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 | Surface background | `--color-bg-elevated` |
 | Border | `1px solid var(--color-border)` |
 | Radius | `--radius-lg` |
-| Elevation | `--elevation-dropdown` |
+| Elevation | `var(--shadow-lg)` |
 | Z-index | `--z-dropdown` |
 
 ## Visual Behavior Contract
@@ -128,7 +128,7 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 
 ## Acceptance Criteria
 
-- [ ] Host applies **`--color-bg-elevated`**, **`--elevation-dropdown`**, **`--radius-lg`**, **`--z-dropdown`**, and **`--color-border`** — no hex/rgb literals in SCSS.
+- [ ] Host applies **`--color-bg-elevated`**, **`var(--shadow-lg)`**, **`--radius-lg`**, **`--z-dropdown`**, and **`--color-border`** — no hex/rgb literals in SCSS.
 - [ ] No default padding on the host.
 - [ ] Slotted content can be any component tree; `PopoverComponent` imports no feature modules.
 - [ ] SCSS uses `@layer fp-components`; no `@layer fp-states` until a normative state is specified.

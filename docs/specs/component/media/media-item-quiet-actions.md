@@ -139,11 +139,11 @@ export const MEDIA_ITEM_QUIET_ACTIONS_TRANSITIONS: Record<
 
 | from -> to                        | step | element       | property                | timing token                 | delay |
 | --------------------------------- | ---- | ------------- | ----------------------- | ---------------------------- | ----- |
-| `hidden -> revealing`             | 1    | actions host  | opacity                 | `var(--transition-fade-in)`  | `0ms` |
-| `hidden -> revealing`             | 2    | actions host  | transform               | `var(--motion-duration-base)` | `0ms` |
-| `revealing -> visible-unselected` | 1    | actions host  | opacity                 | `var(--transition-fade-in)`  | `0ms` |
-| `revealing -> visible-selected`   | 1    | select button | border-color/background | `var(--motion-duration-base)` | `0ms` |
-| `visible-* -> leaving`            | 1    | actions host  | opacity                 | `var(--transition-fade-out)` | `0ms` |
+| `hidden -> revealing`             | 1    | actions host  | opacity                 | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms` |
+| `hidden -> revealing`             | 2    | actions host  | transform               | `200ms`                       | `0ms` |
+| `revealing -> visible-unselected` | 1    | actions host  | opacity                 | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms` |
+| `revealing -> visible-selected`   | 1    | select button | border-color/background | `200ms`                       | `0ms` |
+| `visible-* -> leaving`            | 1    | actions host  | opacity                 | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | `0ms` |
 
 ## Boolean Input Migration Required
 

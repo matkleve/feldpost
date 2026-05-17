@@ -129,11 +129,11 @@ export const ITEM_STATE_FRAME_TRANSITIONS: Record<
 
 | from -> to           | step | element       | property | timing token                 | delay |
 | -------------------- | ---- | ------------- | -------- | ---------------------------- | ----- |
-| `content -> loading` | 1    | loading layer | opacity  | `var(--transition-fade-in)`  | `0ms` |
-| `content -> error`   | 1    | error layer   | opacity  | `var(--transition-fade-in)`  | `0ms` |
-| `content -> empty`   | 1    | empty layer   | opacity  | `var(--transition-fade-in)`  | `0ms` |
-| `loading -> content` | 1    | loading layer | opacity  | `var(--transition-fade-out)` | `0ms` |
-| `* -> disabled-*`    | 1    | frame root    | opacity  | `var(--motion-duration-base)` | `0ms` |
+| `content -> loading` | 1    | loading layer | opacity  | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms` |
+| `content -> error`   | 1    | error layer   | opacity  | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms` |
+| `content -> empty`   | 1    | empty layer   | opacity  | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms` |
+| `loading -> content` | 1    | loading layer | opacity  | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | `0ms` |
+| `* -> disabled-*`    | 1    | frame root    | opacity  | `200ms`                         | `0ms` |
 
 ## Boolean Input Migration Required
 

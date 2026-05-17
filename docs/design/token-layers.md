@@ -20,15 +20,14 @@ Global design primitives that represent raw design values.
 
 - Color foundations: `--color-bg-*`, `--color-border*`, `--color-text-*`, semantic states
 - Radius: `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full`
-- Elevation: `--elevation-subtle`, `--elevation-overlay`, `--elevation-dropdown`; modal-plane shadows use **`var(--shadow-xl)`** directly (**Phase 7 Batch 35** removed **`--elevation-modal`** from the bridge)
+- Elevation / depth: bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`** on **`_legacy-design-tokens.scss`** (dark mixin overrides **`--shadow-*`**). **Phase 7 Batch 37** removed **`--elevation-subtle`**, **`--elevation-overlay`**, and **`--elevation-dropdown`** from the bridge — do not reintroduce those names (**Batch 35** already removed **`--elevation-modal`**).
 - Spacing/layout: `--spacing-*`, `--container-*`, `--ui-item-*`
 
 ### Layer B: Interaction Aliases
 
 Cross-component aliases for shared interaction behavior.
 
-- `--interactive-border-muted`
-- `--interactive-surface-hover`
+- **`--interactive-border-muted`** and **`--interactive-surface-hover`** were **removed from `:root`** in **Phase 7 Batch 36** — they are **not** bridge names to bind in new work. Equivalent mixes are **inlined** at the few Layer C / feature callsites (for example **`color-mix(in srgb, var(--border) 72%, transparent)`** on settings **`--settings-border-muted`**, **`color-mix(in srgb, var(--primary) 12%, transparent)`** on **`--settings-hover-focus`**), and internal rows such as **`--action-bg-hover`** / **`--menu-surface-border`** carry the same resolved colors without a **`var(--interactive-*)`** hop — see **`docs/migration/phase-7-token-migration.md`** §Batch 36.
 - `--interactive-focus-ring`
 - `--interactive-transition-standard`
 

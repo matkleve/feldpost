@@ -311,10 +311,10 @@ Core rule:
 Use token variables only:
 
 - --transition-geometry
-- --transition-fade-out
-- --transition-fade-in
-- **`60ms`** literal for media-display–style reveal delay after **`var(--transition-fade-in)`** (Phase 7 Batch 33 — **`--transition-reveal-delay`** removed from bridge)
-- Emphasis / longer choreography: **`var(--motion-duration-base) var(--motion-ease-out)`** (Batch 31 removed **`--transition-emphasis`** from the bridge; see **`docs/design/tokens.md`**)
+- **`var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)`** for fade-out choreography (**Phase 7 Batch 37** — former **`--transition-fade-out`**)
+- **`var(--motion-duration-fast) var(--motion-ease-out)`** for fade-in choreography (**Batch 37** — former **`--transition-fade-in`**)
+- **`60ms`** literal for media-display–style reveal delay after **`var(--motion-duration-fast) var(--motion-ease-out)`** (Phase 7 Batch 33 — **`--transition-reveal-delay`** removed from bridge)
+- Emphasis / longer choreography: **`200ms var(--motion-ease-out)`** (same **200ms** duration as the former **`--motion-duration-base`**, removed **Batch 36**; **Batch 31** removed **`--transition-emphasis`** from the bridge — see **`docs/design/tokens.md`** §3.6)
 
 ### Choreography Table (Required Before CSS)
 

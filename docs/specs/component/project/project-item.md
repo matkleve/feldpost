@@ -191,11 +191,11 @@ export const PROJECT_ITEM_TRANSITIONS: Record<
 
 | from -> to                            | step | element                    | property                    | timing token                 | delay                            |
 | ------------------------------------- | ---- | -------------------------- | --------------------------- | ---------------------------- | -------------------------------- |
-| `loading -> content-*`                | 1    | loading layer              | opacity                     | `var(--transition-fade-out)` | `0ms`                            |
-| `loading -> content-*`                | 2    | project frame              | opacity                     | `var(--transition-fade-in)`  | **`60ms`** (shared media-display delay — Batch 33) |
-| `content-* -> selected-*`             | 1    | project frame emphasis     | outline/background emphasis | `var(--motion-duration-base)` | `0ms`                            |
-| `content-active <-> content-archived` | 1    | status badge/action region | color/opacity               | `var(--transition-fade-in)`  | `0ms`                            |
-| `content-* -> disabled`               | 1    | frame root                 | opacity                     | `var(--motion-duration-base)` | `0ms`                            |
+| `loading -> content-*`                | 1    | loading layer              | opacity                     | `var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)` | `0ms`                            |
+| `loading -> content-*`                | 2    | project frame              | opacity                     | `var(--motion-duration-fast) var(--motion-ease-out)`  | **`60ms`** (shared media-display delay — Batch 33) |
+| `content-* -> selected-*`             | 1    | project frame emphasis     | outline/background emphasis | `200ms`                       | `0ms`                            |
+| `content-active <-> content-archived` | 1    | status badge/action region | color/opacity               | `var(--motion-duration-fast) var(--motion-ease-out)`  | `0ms`                            |
+| `content-* -> disabled`               | 1    | frame root                 | opacity                     | `200ms`                       | `0ms`                            |
 
 ## Boolean Input Migration Required
 
