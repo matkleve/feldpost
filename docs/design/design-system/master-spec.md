@@ -20,10 +20,12 @@ Foundational rules:
 
 - `docs/design/constitution.md`
 - `docs/design/tokens.md`
+- `docs/design/token-layers.md`
 - `docs/design/layout.md`
 - `docs/design/motion.md`
 - `docs/design/components/action-interaction-kernel.md`
 - `docs/design/components/action-interaction-standard.md`
+- `docs/specs/component/filters/dropdown-system.md` (filter/toolbar/menu dropdown wiring — complements design-system shell contracts)
 
 Inventory and migration context:
 

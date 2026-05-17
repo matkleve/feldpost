@@ -7,6 +7,10 @@
 A composable CSS class system (`dd-*`) for all floating dropdown/menu surfaces in Feldpost. Every dropdown picks the pieces it needs — search, items, drag handles, section labels, action rows — from a shared global class library in `styles.scss`. Component SCSS only contains what's truly unique to that dropdown.
 Shared project-selector and upload-row menus MUST reuse this primitive system instead of feature-local dropdown variants.
 
+## Global CSS / token emission
+
+Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:root` / theme blocks and app extensions). **`apps/web/src/styles/_legacy-design-tokens.scss`** is a **comment-only stub** with **no runtime emit** and is **not** included from `styles.scss` (no `meta.load-css` / `@use` for that path). **`meta.load-css('styles/typography-baseline')`** remains the only late-loaded global partial, after Tailwind/Preflight, per the header comment in `styles.scss`. Token bucket ownership: [`docs/design/token-layers.md`](../../design/token-layers.md). Naming checklist: [`docs/design/tokens.md`](../../design/tokens.md).
+
 ## Toolbar menu panels (anchored UI)
 
 **Canonical naming:** Prefer **toolbar menu** / **menu panel** (product vocabulary). **`app-dropdown-shell`** is the anchored floating shell (fixed `top`/`left`); informal “dropdown” and library **Popover** naming are covered in [migration README — Anchored UI](../../migration/README.md#anchored-ui-toolbar-menus) and [glossary — Toolbar menus & naming](../../../glossary.md#toolbar-menus--naming).

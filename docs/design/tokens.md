@@ -7,11 +7,11 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 ## Legacy bridge inventory (`_legacy-design-tokens.scss`)
 
-**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge inventory* (keep both in lockstep). **`_legacy-design-tokens.scss`** no longer defines **`@mixin dark-theme-overrides`** (**Phase 7 Batch 47** moved **`--interactive-focus-ring`** + dark overrides to **`_typography-baseline.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantic colors, and MD3 **`--fp-sys-*`** reference tables are **not** emitted from the legacy bridge file.
+**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge inventory* (keep both in lockstep). **`apps/web/src/styles.scss`** header comment (global output order) states the legacy bridge partial is **comment-only on disk** and **not** `load-css`'d. **Phase 7 Batch 50:** **`apps/web/src/styles/_legacy-design-tokens.scss`** is an **emission-empty stub** (**`//` comments only** — **no** **`:root`**, **no** **`--*`** declarations); there is **no** **`meta.load-css('styles/legacy-design-tokens')`** (or equivalent) in **`styles.scss`** — **removed 2026-05-18**, zero runtime emit. **Batch 47** removed **`@mixin dark-theme-overrides`** from the stub (**`--interactive-focus-ring`** + dark overrides live on **`_typography-baseline.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantic colors, and MD3 **`--fp-sys-*`** reference tables are **not** emitted from **`_legacy-design-tokens.scss`**.
 
 ### Typography baseline (`_typography-baseline.scss`)
 
-**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded **after** **`meta.load-css('styles/legacy-design-tokens')`** and **`styles.scss` `@theme inline`** in **`styles.scss`**) defines modular **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, **`--motion-duration-fast`** / **`--motion-ease-out`**, **`--spacing-1`…`--spacing-8`**, **`--radius-full`**, **`--container-radius-control|panel`**, and **`--interactive-focus-ring`** (light) — Phase 7 **Batch 41** (three line-heights) + **Batch 42** (font scale, weights, comfortable line-height, motion primitives) + **Batch 44** (spacing + pill radius + container radius aliases) + **Batch 47** (focus ring + **`typography-baseline-dark-focus-ring`** for **`[data-theme='dark']`** / system dark **`:root:not([data-theme='light'])`**).
+**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded **after** **`styles.scss` `@theme inline`** via **`meta.load-css('styles/typography-baseline')`**) defines modular **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, **`--motion-duration-fast`** / **`--motion-ease-out`**, **`--spacing-1`…`--spacing-8`**, **`--radius-full`**, **`--container-radius-control|panel`**, and **`--interactive-focus-ring`** (light) — Phase 7 **Batch 41** (three line-heights) + **Batch 42** (font scale, weights, comfortable line-height, motion primitives) + **Batch 44** (spacing + pill radius + container radius aliases) + **Batch 47** (focus ring + **`typography-baseline-dark-focus-ring`** for **`[data-theme='dark']`** / system dark **`:root:not([data-theme='light'])`**).
 
 | Token |
 | --- |
@@ -25,25 +25,26 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 ### Tailwind theme radius (`styles.scss` `@theme inline`)
 
-**Emitted after the legacy bridge** — **`--radius-sm`**, **`--radius-md`**, **`--radius-lg`**, **`--radius-xl`** (computed from tweakcn **`--radius`**). **Batch 44** removed duplicate **`--radius-sm|md|lg`** rows from **`_legacy-design-tokens.scss`** (components still use **`var(--radius-sm|md|lg)`** unchanged).
+**Emitted in `styles.scss` `@theme inline`** (after tweakcn **`:root` / `html[data-theme]`** semantic blocks in that file — **Batch 50:** **`_legacy-design-tokens.scss`** is not part of the runtime CSS order and emits nothing) — **`--radius-sm`**, **`--radius-md`**, **`--radius-lg`**, **`--radius-xl`** (computed from tweakcn **`--radius`**). **Batch 44** removed duplicate **`--radius-sm|md|lg`** rows that used to live on the bridge file (components still use **`var(--radius-sm|md|lg)`** unchanged).
 
-**Layer A (legacy bridge primitives — `_legacy-design-tokens.scss` `:root` only)**
+**Layer A (legacy bridge — Batch 50: no `:root` emission)**
 
 | Note |
 | --- |
+| **Phase 7 Batch 50:** the bridge file emits **no** CSS rules — primitives below live on tweakcn `styles.scss` and `_typography-baseline.scss`. |
 | **Phase 7 Batch 45:** no physical **`--shadow-*`** rows on the bridge — use tweakcn **`styles.scss`** `:root` / dark palette. |
 
 **Phase 7 Batch 43:** product **z-index** planes (**`200`** map chrome CTAs, **`300`** dropdown / popover shells and **`302`** filter picker flyout `+2`, **`500`** modal plane and **`501`** workspace footer drag) are **not** **`--z-*`** custom properties on the legacy bridge — use literals in SCSS / **`theme.extend.zIndex`** in **`tailwind.config.js`** (`z-upload-btn`, `z-dropdown`, `z-modal`).
 
 **Layer B (bridge):** **none on `_legacy-design-tokens.scss`** after **Batch 47** — **`--interactive-focus-ring`** lives on **`_typography-baseline.scss`** (see subsection above).
 
-**Layer C (bridge)**
+**Layer C (roles — not on `_legacy-design-tokens.scss` after Batch 48–50)**
 
 | Note |
 | --- |
 | **Phase 7 Batch 49:** **`--action-*`** rows removed from **`_legacy-design-tokens.scss`** — use **`var(--primary)`**, per-component **`:host`** vars (ex-bridge **`color-mix`** / sandstone literals), or **`--settings-action-bg-hover`** — **`docs/migration/phase-7-token-migration.md`** §Batch 49. |
 
-**Phase 7 Batch 48** removed **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** from the bridge; menu surfaces use **`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see **`docs/migration/phase-7-token-migration.md`** §Batch 48).
+**Phase 7 Batch 48** removed **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** from the bridge; menu surfaces use **`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see **`docs/migration/phase-7-token-migration.md`** §Batch 48). For dropdown shell / menu composition contracts, see [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md).
 
 ## 3.1 Color Tokens
 
@@ -550,7 +551,7 @@ The UI uses a consistent "friendly but professional" radius system:
 
 Four physical shadows define elevation only. Components should consume **`--interactive-focus-ring`** from **`_typography-baseline.scss`** and the **`--shadow-sm|md|lg|xl`** scale from **tweakcn `styles.scss`** (**Batch 37** — former **`--elevation-*`** aliases removed; **Batch 45** — former **`--shadow-focus`** bridge alias removed — compose stacks at callsites per § *Focus stacks* below; **Batch 47** — focus ring definitions moved off **`_legacy-design-tokens.scss`**) instead of hardcoding physical levels directly.
 
-**Batch 39 — which file owns which name:** **`--shadow-sm`…`--shadow-2xl`** are **tweakcn** names on **`:root`** / dark palette (**Batch 39** removed duplicate **`md|lg|xl`** rows from **`_legacy-design-tokens.scss`**; **Batch 45** removed warm **`--shadow-sm`** + **`--shadow-focus`** from the bridge). **`var(--shadow-md|lg|xl)`** in components resolves from **tweakcn** before **`meta.load-css`** loads the bridge. The table below is the **documented physical reference** for product elevation steps; tweakcn theme values should stay aligned with it at review time.
+**Batch 39 — which file owns which name:** **`--shadow-sm`…`--shadow-2xl`** are **tweakcn** names on **`:root`** / dark palette in **`apps/web/src/styles.scss`** (**Batch 39** removed duplicate **`md|lg|xl`** rows from **`_legacy-design-tokens.scss`**; **Batch 45** removed warm **`--shadow-sm`** + **`--shadow-focus`** from the bridge file when it still emitted CSS). **`var(--shadow-md|lg|xl)`** in components resolves from **tweakcn** in the main stylesheet chain; **`_legacy-design-tokens.scss`** is **not** `load-css`'d (**Batch 50**). **`meta.load-css('styles/typography-baseline')`** is **last** in **`styles.scss`** for heading order and does **not** supply **`--shadow-*`**. The table below is the **documented physical reference** for product elevation steps; tweakcn theme values should stay aligned with it at review time.
 
 | Token                 | Light mode value                                                      | Purpose                              |
 | --------------------- | --------------------------------------------------------------------- | ------------------------------------ |
@@ -697,7 +698,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | **removed from bridge** — no longer defined for sync | e.g. former **`--font-size-3xs`** → **`--font-size-2xs`** (Batch 20) | Use **`Font/Size/2xs`** only; do not reintroduce a duplicate 3xs variable |
 | **removed from bridge** — no longer defined for sync | **`--font-weight-regular`** (Batch 32) | Use **`Font/Weight/Medium`** / **`Semibold`** from the bridge where applicable, or literal **`400`** at the sole former callsite |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
-| `color-mix` — computed at render time | `--menu-surface-border`, `--menu-item-bg-hover` (Layer C mixes still on bridge) | Approximate with a manual opacity or solid value |
+| `color-mix` — computed at render time | Former menu mixes (**`--menu-surface-border`**, **`--menu-item-bg-hover`** — **removed Batch 48**; live as **`color-mix`** on component **`:host`**, not on **`_legacy-design-tokens.scss`**) | Approximate with a manual opacity or solid value; dropdown/menu wiring: [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md) |
 | `complex` — multi-value shorthand | **`--shadow-sm`…`--shadow-2xl`** on tweakcn **`styles.scss` `:root`** / dark palette (**Batch 45** — not bridge rows) | Set manually; shadows are not natively representable as a single Figma Variable |
 
 Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.

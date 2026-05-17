@@ -20,6 +20,7 @@ See `architecture.md` for technical constraints that affect layout decisions.
 - `docs/design/tokens.md` — load for styling, sizing, colors, typography, radius, shadows, and iconography.
 - `docs/design/tokens.md § Figma Bridge` — naming convention (CSS→Figma Variable path), pipeline direction (code→Figma, not reverse), and human import step. Run `npm run sync-tokens` to regenerate `docs/design/figma-tokens.json`.
 - `docs/design/token-layers.md` — canonical token layer architecture (Layer A/B/C), alias ownership, and override rules.
+- `docs/specs/component/filters/dropdown-system.md` — implementation contract for filter/toolbar/menu dropdown wiring (pairs with `docs/design/design-system/dropdown-shell-contract.md`).
 - `docs/design/map-system.md` � load for map hierarchy, marker prominence, clustering, and proximity behavior.
 - `docs/design/layout.md` � load for breakpoints, panel dimensions, and responsive behavior.
 - `docs/design/motion.md` � load for animation, timing, and transitions.

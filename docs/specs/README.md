@@ -45,6 +45,7 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 ## References
 
 - docs/glossary.md
+- **Global CSS custom properties:** live definitions and emission order in **`apps/web/src/styles.scss`** (tweakcn `:root` / `html[data-theme]` + app extensions). **`apps/web/src/styles/_legacy-design-tokens.scss`** is a **comment-only stub** (zero emitted rules; **not** `meta.load-css`’d or `@use`’d from `styles.scss`). Naming checklist: [docs/design/tokens.md](../design/tokens.md); bucket ownership: [docs/design/token-layers.md](../design/token-layers.md); floating menu / `dd-*` shell: [docs/specs/component/filters/dropdown-system.md](component/filters/dropdown-system.md). Older **`--menu-*` / `--action-*`** bridge names are **not** active product `:root` tokens — do not spec new work against them.
 - docs/audits/README.md — historical move/inventory notes (**not** normative contracts)
 - docs/agent-workflows/element-spec-format.md
 - docs/backlog/workspace-pane-layout-and-spec-priorities.md — target: Workspace Pane on any route (layout host); interim vs canonical notes.

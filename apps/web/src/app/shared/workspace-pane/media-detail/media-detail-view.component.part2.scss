@@ -1,8 +1,8 @@
 // MediaDetailViewComponent — split stylesheet (sections, rows, tags, keyframes).
 // @see docs/specs/ui/media-detail/media-detail-view.md
 
-// Ex-bridge `--menu-*` (Phase 7 Batch 48): defaults matched `_legacy-design-tokens.scss` `:root`;
-// sandstone matched `[data-theme='sandstone']` bridge overrides (same file, pre-Batch 48).
+// Ex-bridge `--menu-*` (Phase 7 Batch 48): defaults matched prior global `:root`;
+// sandstone matched `[data-theme='sandstone']` bridge overrides (pre-Batch 48).
 // @see docs/migration/phase-7-token-migration.md §Batch 48
 // Ex-bridge `--action-*` (Phase 7 Batch 49) — same bridge values on host (default + sandstone).
 // @see docs/migration/phase-7-token-migration.md §Batch 49

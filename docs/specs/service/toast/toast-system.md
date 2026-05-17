@@ -6,7 +6,7 @@ A global notification system that displays short, non-blocking feedback messages
 
 ## What It Looks Like
 
-Toasts are compact horizontal bars with rounded corners (`rounded-lg`, 8px), a leading status icon, message text in `--text-body` (15px), and an optional dismiss button. Background uses `--color-bg-elevated` with `var(--shadow-md)` for chrome elevation — semantic **`--shadow-*`** ladder on **tweakcn `:root` / theme**; see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5. A thin 2px left border indicates severity: `--color-success` for success, `--color-danger` for error, `--color-warning` for warning, `--color-text-secondary` for info. Text uses `--color-text-primary`. The dismiss icon uses `--color-text-secondary` and turns `--color-text-primary` on hover.
+Toasts are compact horizontal bars with rounded corners (`rounded-lg`, 8px), a leading status icon, message text in `--text-body` (15px), and an optional dismiss button. Background uses `--color-bg-elevated` with `var(--shadow-md)` for chrome elevation — semantic **`--shadow-*`** ladder on **tweakcn `:root` / theme**; see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 and layer buckets in [`docs/design/token-layers.md`](../../../design/token-layers.md). A thin 2px left border indicates severity: `--color-success` for success, `--color-danger` for error, `--color-warning` for warning, `--color-text-secondary` for info. Text uses `--color-text-primary`. The dismiss icon uses `--color-text-secondary` and turns `--color-text-primary` on hover.
 
 Toasts are fixed-position, anchored to the bottom-left of the viewport. They sit to the right of the sidebar: `left` is offset by the collapsed sidebar width (`3rem` / 48px) plus a gap (`0.75rem` / 12px), so they never overlap the sidebar even when it is collapsed. When the sidebar expands on hover (to `15rem` / 240px), toasts do not reposition — they remain relative to the collapsed sidebar width. The toast container has a `max-width` of `24rem` (384px) so messages stay readable without stretching too wide.
 
@@ -125,7 +125,7 @@ graph TB
 ## Component Hierarchy
 
 ```
-ToastContainerComponent                    ← fixed position, bottom-left, z-index: 400 (between dropdown plane 300 and modal plane 500 — see [`docs/design/tokens.md`](../../../design/tokens.md) and [`dropdown-system.md`](../../component/filters/dropdown-system.md))
+ToastContainerComponent                    ← fixed position, bottom-left, z-index: 400 (between dropdown plane 300 and modal plane 500 — see [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/token-layers.md`](../../../design/token-layers.md), and [`dropdown-system.md`](../../component/filters/dropdown-system.md))
 │                                             left: calc(3rem + 0.75rem), bottom: 1.5rem
 │                                             mobile: centered, bottom: 5rem
 │                                             display: flex, flex-direction: column-reverse, gap: 0.5rem
@@ -243,7 +243,7 @@ sequenceDiagram
 
 ### Z-index
 
-- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **dropdown plane `300`**, below **modal plane `500`**. Layering aligns with [`docs/design/tokens.md`](../../../design/tokens.md) and the dropdown shell in [`docs/specs/component/filters/dropdown-system.md`](../../component/filters/dropdown-system.md). Use only the documented numeric planes — do not reintroduce removed ad-hoc stacking variables.
+- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **dropdown plane `300`**, below **modal plane `500`**. Layering aligns with [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/token-layers.md`](../../../design/token-layers.md), and the dropdown shell in [`docs/specs/component/filters/dropdown-system.md`](../../component/filters/dropdown-system.md). Use only the documented numeric planes — do not reintroduce removed ad-hoc stacking variables.
 
 ### Consumer wiring (existing files to update)
 

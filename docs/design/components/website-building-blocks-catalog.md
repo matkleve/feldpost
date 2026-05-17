@@ -140,12 +140,12 @@ Deliverables:
 2. Treat `docs/design/tokens.md` as the only raw token value source.
 3. Treat `docs/design/token-layers.md` as the only layer/alias/theming architecture source.
 4. Treat `docs/design/components/action-interaction-kernel.md` as the only interaction-policy source.
-5. Keep `apps/web/src/styles.scss` as the runtime implementation of Layer A/B/C aliases.
+5. Keep `apps/web/src/styles.scss` as the runtime home for Tailwind `@theme inline` and remaining shared patterns; `_legacy-design-tokens.scss` (legacy bridge) does **not** ship global menu/action Layer C rows — use **`docs/design/token-layers.md`** with **`docs/design/tokens.md`** for binding rules.
 
 Exit criteria:
 
 1. New UI work does not add competing policy or token definitions in feature docs.
-2. New shared primitives consume Layer C aliases first.
+2. New shared primitives bind tweakcn semantics and spacing/radius/motion per **`docs/design/tokens.md`**, follow **`docs/design/token-layers.md`** for bridge vs per-component **`:host`** ownership, and align menu/dropdown shells with **`docs/specs/component/filters/dropdown-system.md`**.
 3. Feature SCSS does not define duplicate hover/focus/border systems where a base primitive exists.
 
 Done:
@@ -361,7 +361,7 @@ Definition note:
 | Slider control                                  | Shared slider primitive                            | `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.ts`, `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.scss`                                                                                                                                                                                                                                                                                                                                            | present       | medium          |
 | Color selector popover                          | Feature-specific option picker                     | `apps/web/src/app/features/projects/project-color-picker.component.ts`                                                                                                                                                                                                                                                                                                                                                                                                                          | partial       | medium          |
 | Invite management section                       | Shared settings/form primitives + semantic aliases | `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html`, `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                      | partial       | medium          |
-| Captured date inline editor                     | Shared field/menu/action aliases in inline editor  | `apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                                                                                                                                  | partial       | medium          |
+| Captured date inline editor                     | Shared field primitives + per-host menu/action colors per **token-layers**     | `apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                                                                                                                                  | partial       | medium          |
 
 Notes:
 
@@ -374,14 +374,14 @@ Canonical source: `docs/design/token-layers.md`.
 
 Catalog-level enforcement summary:
 
-1. New or refactored primitives consume Layer C aliases first.
-2. Runtime alias mapping lives in `apps/web/src/styles.scss`.
-3. Theme packs override Layer C first; Layer A overrides are reserved for global rebranding.
+1. New or refactored primitives bind **`docs/design/tokens.md`** semantics first, then **`docs/design/token-layers.md`** for what still emits from **`_legacy-design-tokens.scss`** vs per-component **`:host`** custom properties (global menu/action bridge rows on the legacy file are removed).
+2. Runtime theme and shared Tailwind keys stay centralized in `apps/web/src/styles.scss`; do not assume a global bridge alias exists when **`token-layers.md`** lists the name as removed.
+3. Theme packs override semantic tokens first; reserve raw Layer A tweaks for global rebranding only.
 
 ## Immediate Next Deliverables
 
 1. Finish button-family rollout across remaining settings/projects/dialog consumers still using local button styling.
-2. Migrate remaining low-readiness menu surfaces (map context and detail context edge cases) to strict Layer C role aliases only.
+2. Migrate remaining low-readiness menu surfaces (map context and detail context edge cases) to **`docs/specs/component/filters/dropdown-system.md`** with tweakcn + per-component **`:host`** colors per **`docs/design/token-layers.md`** (global menu bridge names are removed — bind via tweakcn + **`:host`** only).
 3. Add one shared field-row/select adoption pass in `/projects` filter surfaces to reduce composition drift.
 4. Add visual-theme verification pass (light/dark + one custom theme profile) for medium-readiness primitives.
 
@@ -408,7 +408,7 @@ Status update:
 
 ### Slice C — Menu/Popover Low-Readiness Closure
 
-1. Close map/detail context-menu edge cases still at low readiness.
+1. Close map/detail context-menu edge cases still at low readiness (implementation contract: **`docs/specs/component/filters/dropdown-system.md`**; token ownership: **`docs/design/token-layers.md`** + **`docs/design/tokens.md`**).
 2. Ensure keyboard/focus parity (`Arrow`, `Home/End`, `Escape`, focus return) across option-openers.
 3. Update `theme-regression-matrix.md` in the same slice.
 

@@ -1,8 +1,8 @@
 // CapturedDateEditorComponent — Notion-style calendar styles.
 
-// Ex-bridge `--menu-*` (Phase 7 Batch 48): standalone host + sandstone (ex `_legacy-design-tokens.scss`).
+// Ex-bridge `--menu-*` (Phase 7 Batch 48): standalone host + sandstone (ex global bridge).
 // @see docs/migration/phase-7-token-migration.md §Batch 48
-// Ex-bridge `--action-bg-hover` (Phase 7 Batch 49) — `_legacy-design-tokens.scss` `:root` + sandstone (`--action-text-active` was `var(--primary)`).
+// Ex-bridge `--action-bg-hover` (Phase 7 Batch 49) — global `:root` + sandstone (`--action-text-active` was `var(--primary)`).
 // @see docs/migration/phase-7-token-migration.md §Batch 49
 :host {
   --cde-menu-border: color-mix(in srgb, var(--border) 72%, transparent);

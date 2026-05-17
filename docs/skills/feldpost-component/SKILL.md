@@ -8,6 +8,8 @@ description: Read this skill before creating, refactoring, or styling any Angula
 This skill is the implementation reference for Angular components in Feldpost.
 Read it before writing HTML, TypeScript, or SCSS for a stateful component.
 
+**Global styles note (2026-05-18):** `apps/web/src/styles/_legacy-design-tokens.scss` is kept as a **comment-only / zero-emission** legacy-bridge stub; `apps/web/src/styles.scss` does **not** `meta.load-css` that partial (only `styles/typography-baseline` is loaded that way at the end of `styles.scss`). Prefer tweakcn variables and component-local tokens per design docs—do not grow the stub file for new product CSS.
+
 ---
 
 ## 1. Component Folder Structure

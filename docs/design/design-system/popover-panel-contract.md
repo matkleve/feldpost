@@ -70,8 +70,10 @@ Behavior rules:
 
 ## Token Binding Rules
 
-- Use design tokens for surface, border, text, and elevation.
-- Use shared interactive aliases from `apps/web/src/styles.scss`.
+- Use design tokens for surface, border, text, and elevation (`docs/design/tokens.md`).
+- Follow `docs/design/token-layers.md` for what still emits from `_legacy-design-tokens.scss` vs per-component **`:host`** custom properties (removed global menu/action bridge names).
+- Menu-like option surfaces should stay aligned with `docs/specs/component/filters/dropdown-system.md` where behavior overlaps the dropdown family.
+- Use shared interactive patterns from `apps/web/src/styles.scss` where a global alias still exists.
 - Motion timing follows `docs/design/motion.md`.
 - Width and breakpoint behavior must align with `layout-width-breakpoint-scale.md`.
 

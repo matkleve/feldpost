@@ -6,7 +6,7 @@ A Notion-inspired compound filter builder. Users add filter rules ("where [Prope
 
 ## What It Looks Like
 
-Floating dropdown anchored below the workspace **Filter** toolbar button. **Width** is owned by the parent **`app-dropdown-shell`** when `panelClass` includes **`toolbar-dropdown toolbar-dropdown--filter`** (wider **32rem** floor vs **26rem** for other toolbar menus) — see [`dropdown-system.md`](./dropdown-system.md#toolbar-menu-panels-anchored-ui). Max height for the rules band and scroll behavior follow the same spec.
+Floating dropdown anchored below the workspace **Filter** toolbar button. **Width** is owned by the parent **`app-dropdown-shell`** when `panelClass` includes **`toolbar-dropdown toolbar-dropdown--filter`** (wider **32rem** floor vs **26rem** for other toolbar menus) — see [`dropdown-system.md`](./dropdown-system.md#toolbar-menu-panels-anchored-ui). Global semantic tokens / layer ownership: [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/token-layers.md`](../../../design/token-layers.md). Max height for the rules band and scroll behavior follow the same spec.
 
 **Empty state**: "No filters applied" text with an "Add a filter" ghost button.
 

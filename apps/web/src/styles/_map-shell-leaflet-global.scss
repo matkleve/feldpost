@@ -323,14 +323,18 @@ app-map-shell {
   }
 }
 
-// Dark / system-dark photo marker shadow (Batch 39: ex `--photo-marker-drop-shadow` in `dark-theme-overrides`)
-// @see docs/migration/phase-7-token-migration.md §Batch 39
-[data-theme='dark'] app-map-shell .map-photo-marker {
+// Applies darker photo-marker drop shadow under dark palette (explicit theme or OS)
+// @see docs/migration/phase-7-token-migration.md §Batch 39 (ex `--photo-marker-drop-shadow`)
+@mixin map-shell-photo-marker-dark-drop-shadow {
   filter: drop-shadow(0 0.0625rem 0.25rem color-mix(in srgb, var(--shadow-color) 65%, transparent));
+}
+
+[data-theme='dark'] app-map-shell .map-photo-marker {
+  @include map-shell-photo-marker-dark-drop-shadow;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) app-map-shell .map-photo-marker {
-    filter: drop-shadow(0 0.0625rem 0.25rem color-mix(in srgb, var(--shadow-color) 65%, transparent));
+    @include map-shell-photo-marker-dark-drop-shadow;
   }
 }

@@ -71,7 +71,9 @@ Behavior rules:
 Use token aliases only:
 
 - Surface elevation, border, and text tokens from `docs/design/tokens.md`
-- Shared interactive aliases from `apps/web/src/styles.scss`
+- Layer / bridge vs per-component **`:host`** ownership from `docs/design/token-layers.md` (menu/action Layer C rows are **not** on `_legacy-design-tokens.scss`)
+- Filter/toolbar/menu implementation details in `docs/specs/component/filters/dropdown-system.md`
+- Shared interactive patterns from `apps/web/src/styles.scss` where a global alias still exists
 - Motion timing from `docs/design/motion.md`
 
 Geometry rules:

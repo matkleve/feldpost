@@ -209,7 +209,7 @@
 - **Variant axes**:
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
-  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}` — [`docs/design/tokens.md`](../../design/tokens.md)) | Vertical gap between children |
+  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}` — [`docs/design/tokens.md`](../../design/tokens.md); layers [`docs/design/token-layers.md`](../../design/token-layers.md)) | Vertical gap between children |
 - **Composed of**: standalone
 - **Used in**: dialogs, detail forms, settings overlay
 - **Gaps**: none
@@ -224,7 +224,7 @@
 - **Variant axes**:
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
-  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}` — [`docs/design/tokens.md`](../../design/tokens.md)) | Horizontal gap between children |
+  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}` — [`docs/design/tokens.md`](../../design/tokens.md); layers [`docs/design/token-layers.md`](../../design/token-layers.md)) | Horizontal gap between children |
 - **Composed of**: standalone
 - **Used in**: toolbar rows, chip rows, dialog actions
 - **Gaps**: none

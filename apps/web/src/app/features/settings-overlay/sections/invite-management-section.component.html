@@ -1,9 +1,9 @@
-<section
-  class="invite-section flex flex-col gap-2 rounded-lg border border-border bg-card p-6"
-  aria-labelledby="invite-section-title"
->
+<section class="invite-section" aria-labelledby="invite-section-title">
   @if (panelMode() === 'error') {
-    <div class="invite-section__state invite-section__state--error" role="alert">
+    <div
+      class="invite-section__surface invite-section__state invite-section__state--error flex flex-col gap-2 rounded-lg border border-border bg-card p-6"
+      role="alert"
+    >
       <span class="material-icons" aria-hidden="true">warning</span>
       <h3>{{ t('settings.inviteManagement.errorState.title', 'Invite unavailable') }}</h3>
       <p>{{ lastError() }}</p>
@@ -42,6 +42,7 @@
       }
     </header>
 
+    <div class="invite-section__surface flex flex-col gap-2 rounded-lg border border-border bg-card p-6">
     <div class="invite-section__stack">
       <section
         class="invite-section__role-block"
@@ -176,5 +177,6 @@
     @if (lastError()) {
       <p class="invite-section__inline-error" role="status">{{ lastError() }}</p>
     }
+    </div>
   }
 </section>

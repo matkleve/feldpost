@@ -66,7 +66,8 @@ Behavior rules:
 ## Token Binding Rules
 
 - Use text, border, and muted tokens from docs/design/tokens.md.
-- Use shared interactive aliases from apps/web/src/styles.scss.
+- Follow docs/design/token-layers.md for bridge vs per-component **`:host`** ownership (removed global menu/action bridge names).
+- Use shared interactive patterns from apps/web/src/styles.scss where a global alias still exists.
 - Use canonical spacing and radius tokens only.
 - Responsive collapse thresholds follow layout-width-breakpoint-scale.md.
 

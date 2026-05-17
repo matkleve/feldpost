@@ -108,8 +108,8 @@ h5,
 h6 {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  // Matches former `--line-height-snug` (1.1) — inlined Batch 41 (token removed from legacy bridge)
-  // @see docs/migration/phase-7-token-migration.md §Batch 41
+  // Uses same snug line-height as h3 for dense heading rhythm
+  // @see docs/migration/phase-7-token-migration.md §Batch 41 (h3 block)
   line-height: 1.1;
 }
 

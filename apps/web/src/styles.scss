@@ -4,7 +4,7 @@
 // 1) Top @use emits first: map-leaflet-host → reset (`@layer base`) → layout/app → layout/clamp → map-shell-keyframes → map-shell-leaflet-global.
 // 2) CDK prebuilt, then @import "tailwindcss" (Preflight + @source / @config).
 // 3) tweakcn :root / html[data-theme] blocks (semantic variables; @theme inline maps them in step 4).
-// 4) meta.load-css('styles/legacy-design-tokens'), @theme inline, @layer base (border/body) in this file.
+// 4) @theme inline, @layer base (border/body) in this file.
 // 5) meta.load-css('styles/typography-baseline') last — h1–h6 + anchors after Preflight (top @use would break that).
 @use 'sass:meta';
 @use './styles/map-leaflet-host';
@@ -241,10 +241,6 @@ html[data-theme="sandstone"] {
   --sidebar-border: oklch(0.8800 0.0160 69.0000);
   --map-marker-user: oklch(0.52 0.1 250);
 }
-
-// ── Legacy layout + fp tokens (ex-tokens.scss) ───────────────────────────────
-// Emitted after tweakcn :root so bridge vars can reference semantic tokens.
-@include meta.load-css('styles/legacy-design-tokens');
 
 // ── Tailwind v4 CSS-first theme mapping ───────────────────────────────────────
 // Maps tweakcn CSS custom properties to Tailwind color utilities.

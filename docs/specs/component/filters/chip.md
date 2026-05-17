@@ -181,15 +181,15 @@ export class UploadAreaComponent {
 ### Default Variant
 
 - **Background (default variant):** `color-mix(in srgb, var(--primary) 10%, var(--background))` (Figma `fp/ref/primary/95` warm cream ≈ **`#ffefce`** — see **`docs/design/tokens.md` §3.1a**; dark: `color-mix` with **`var(--card)`** per `chip.component.scss`)
-- **Text / icon label color (default variant):** `var(--foreground)` (tweakcn semantic on-surface ink — [`docs/design/tokens.md`](../../../design/tokens.md))
+- **Text / icon label color (default variant):** `var(--foreground)` (tweakcn semantic on-surface ink — [`docs/design/tokens.md`](../../../design/tokens.md); bucket ownership [`docs/design/token-layers.md`](../../../design/token-layers.md))
 - **Border**: transparent (no visible border on default chips)
 - **Dark mode**: tinted surface via `color-mix(in srgb, var(--primary) 26%, var(--card))` (hover 34%)
 
 ### Primary Variant
 
-- **Background**: `color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-surface))`
-- **Text Color**: `var(--color-primary)`
-- **Border**: `1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border))`
+- **Background**: `color-mix(in srgb, var(--chip-color) 12%, var(--card))` with **`--chip-color: var(--primary)`** on the host (`chip.component.scss` shares the file-type tint recipe)
+- **Text Color**: `var(--chip-color)`
+- **Border**: `1px solid color-mix(in srgb, var(--chip-color) 28%, var(--border))`
 
 ### Status Variants (reserved for status only)
 

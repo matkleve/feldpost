@@ -81,28 +81,25 @@ No direct Supabase calls are required for this feature; chips are derived from i
 
 ## Color Token Contract
 
-Define dedicated file-type tokens in the global token system and keep status colors (`--color-success`, `--color-warning`, `--color-danger`) exclusively for real status feedback.
+**Runtime source of truth:** Dedicated **`--filetype-*`** custom properties are defined once in **`apps/web/src/styles.scss`** on the tweakcn **`:root` / `html[data-theme]`** semantic blocks — not in feature SCSS. **`apps/web/src/styles/_legacy-design-tokens.scss`** is a **comment-only stub** (zero emitted CSS; **not** loaded from `styles.scss`). Layering: [`docs/design/token-layers.md`](../../../design/token-layers.md); naming: [`docs/design/tokens.md`](../../../design/tokens.md). **Verify** live values in `styles.scss` when authoring; the excerpt below matches the light-mode block as of the Phase 7 consolidation.
+
+Keep status colors (`--color-success`, `--color-warning`, `--color-danger`) exclusively for real status feedback.
 
 ```scss
-:root {
-  --filetype-image: var(--color-uploading);
-  --filetype-video: var(--color-accent);
-  --filetype-document: #4f5d95;
-  --filetype-spreadsheet: var(--color-success);
-  --filetype-presentation: #d97706;
-  --filetype-office: color-mix(
-    in srgb,
-    var(--color-text-secondary) 92%,
-    black 8%
-  );
-}
+// apps/web/src/styles.scss — :root semantic extension (illustrative; confirm in repo)
+  --filetype-image: var(--chart-3);
+  --filetype-video: oklch(0.52 0.16 25);
+  --filetype-document: var(--chart-1);
+  --filetype-spreadsheet: var(--success);
+  --filetype-presentation: var(--chart-5);
+  --filetype-office: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
 ```
 
-Visual recipe for all file-type chips:
+Visual recipe for all file-type chips (matches **`chip.component.scss`** `chip--filetype-*`):
 
-- Background: `color-mix(in srgb, <filetype-token> 12%, var(--color-bg-surface))`
-- Text/Icon: `<filetype-token>`
-- Border: `1px solid color-mix(in srgb, <filetype-token> 28%, var(--color-border))`
+- Background: `color-mix(in srgb, <filetype-token> 12%, var(--card))`
+- Text/Icon: `<filetype-token>` (bound as `--chip-color` on the chip host in implementation)
+- Border: `1px solid color-mix(in srgb, <filetype-token> 28%, var(--border))`
 
 ## Deduplication Logic
 

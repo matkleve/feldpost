@@ -15,6 +15,19 @@
 
 ---
 
+## 2026-05-18 post-wave: Batch 49 and docs
+
+**Context:** Phase **7 Batch 49** removed **`--action-*`** names from the legacy bridge (no longer emitted from **`_legacy-design-tokens.scss`**); **parallel** **`docs/specs/**`** and **`docs/design/**`** sweeps landed the same window—treat visuals as **token-first** at callsites, not bridge reintroductions.
+
+**Tight smoke (add to Phase 7–8 merges / pre-release if not already exercised above):**
+
+- [ ] **Dropdowns / menus:** Open a **toolbar** and a **workspace** anchored menu on **375px** height; confirm **down-first** placement, viewport clamp, and **stacking** vs map/rails per [`dropdown-system.md`](../specs/component/filters/dropdown-system.md#open-time-stacking-owner-normative); menu row **hover/active** reads correctly on **dark** and **sandstone** without relying on removed **`--action-*`** bridge rows.
+- [ ] **Settings overlay:** Rail width, outer padding, **Invite** + **Appearance** segmented rows, and hairline dividers match intent on all three themes after bridge cleanup + doc sync (no “flat” or zero-height separators).
+- [ ] **Projects — card view:** Card chrome, **muted** secondary lines, and **hover / `focus-visible`** on cards and actions stay legible on **dark** and **sandstone**; no collapsed pill tracks where full-width toggles apply.
+- [ ] **Workspace — media detail / metadata:** Metadata block typography and **captured-date** (or equivalent) editor: labels, borders, and section rhythm on **light / dark / sandstone**; no horizontal overflow at **375px** in the detail stack.
+
+---
+
 ## High-risk migration spot-check
 
 Use this list **during** Phase 7–8 merges and before release; it complements the full **Screen checklist** below. Targets: **map-shell Leaflet hoist**, **settings overlay rail / inlined overlay tokens**, **`hlmPillToggle` / `hlmToggleGroup`** (settings, projects, map style switch), and **three-theme** smoke.

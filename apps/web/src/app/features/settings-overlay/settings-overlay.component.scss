@@ -45,7 +45,10 @@
     align-items: stretch;
     width: var(--settings-overlay-width);
     max-width: var(--settings-overlay-width);
-    min-height: 26rem;
+    // Fixed band: do not grow with tall embedded bodies (e.g. app-account); scroll stays on .settings-overlay__detail
+    // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+    height: var(--settings-overlay-height);
+    min-height: min(26rem, var(--settings-overlay-height));
     max-height: var(--settings-overlay-height);
     padding: 0;
     overflow: hidden;
@@ -85,7 +88,8 @@
     align-items: stretch;
     min-width: 0;
     min-height: 0;
-    max-height: var(--settings-overlay-height);
+    height: 100%;
+    max-height: 100%;
   }
 
   // Left rail column: list + header stack
@@ -215,9 +219,18 @@
     container-name: settings-detail;
   }
 
-  // Detail card: column stack and tight vertical rhythm (settings rows are dense)
+  // Stacks section lead (title + intro) above the bordered detail card
   // @see docs/specs/ui/settings-overlay
-  .settings-overlay__detail-card {
+  .settings-overlay__detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+    min-width: 0;
+  }
+
+  // Title + intro block above the card chrome (not inside the bordered surface)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__detail-lead {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-2);
@@ -225,14 +238,14 @@
 
   // Section title color only (scale/weight from global h3 baseline)
   // @see docs/specs/ui/settings-overlay
-  .settings-overlay__detail-card h3 {
+  .settings-overlay__detail-lead h3 {
     margin: 0;
     color: var(--foreground);
   }
 
-  // Section intro: secondary “footnote” under the title (lighter than row titles)
+  // Section intro: secondary copy under the title (lighter than row titles)
   // @see docs/specs/ui/settings-overlay
-  .settings-overlay__detail-card > p {
+  .settings-overlay__detail-lead > p {
     margin: 0;
     font-size: var(--font-size-sm);
     font-weight: 400;
@@ -240,12 +253,20 @@
     color: var(--muted-foreground);
   }
 
+  // Detail card: column stack with comfortable vertical rhythm between control groups
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__detail-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
   // Two-column label + control row for settings fields (no ng-deep)
   // @see docs/MIGRATION_PLAN.md
   .settings-overlay__field-row {
     display: grid;
     grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
-    gap: var(--spacing-3);
+    gap: var(--spacing-4);
     align-items: center;
   }
 
@@ -255,7 +276,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: var(--spacing-2);
+    gap: var(--spacing-3);
   }
 
   // Control column wrapper so segmented controls can shrink correctly
@@ -488,6 +509,7 @@
 @media (max-width: 47.9375rem) {
   :host {
     --settings-overlay-left-width: 11.5rem;
+    --settings-overlay-height: calc(100vh - (var(--spacing-3) * 2));
   }
 
   @layer components {
@@ -496,7 +518,6 @@
     .settings-overlay {
       left: var(--spacing-3);
       width: calc(100vw - (var(--spacing-3) * 2));
-      max-height: calc(100vh - (var(--spacing-3) * 2));
     }
 
     // Mobile shell remains two-column flex

@@ -1,10 +1,7 @@
 // ── Leaflet host overrides ────────────────────────────────────────────────────
-// Neutralises default blue strokes / focus rings on the map surface so paths
-// and links align with app primary tokens (map chrome, not document reset).
-// @see docs/migration/phase-8-global-scss-elimination.md §7
-
-// Replaces leaflet.css blue focus outline on interactive SVG paths with primary
-// @see docs/design/map-system.md (map hierarchy / interaction)
+// Neutralises default Leaflet blue chrome (SVG focus outline + anchor colour) so
+// map interaction matches app primary tokens — distinct from document reset scope.
+// @see docs/migration/phase-8-global-scss-elimination.md §7; docs/design/map-system.md
 .leaflet-interactive:focus {
   outline: 2px solid var(--primary);
   outline-offset: 2px;

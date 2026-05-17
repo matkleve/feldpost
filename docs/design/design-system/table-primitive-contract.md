@@ -70,7 +70,8 @@ Behavior rules:
 ## Token Binding Rules
 
 - Use table surface/border/text tokens from `docs/design/tokens.md`.
-- Use shared interactive aliases from `apps/web/src/styles.scss`.
+- Follow `docs/design/token-layers.md` for bridge vs per-component **`:host`** ownership (menu/action bridge names are gone from the legacy file — not typically used for table chrome; avoid assuming orphan Layer C bridge rows exist).
+- Use shared interactive patterns from `apps/web/src/styles.scss` where a global alias still exists.
 - Use canonical spacing and radius tokens; no raw spacing values.
 - Responsive breakpoints must follow `layout-width-breakpoint-scale.md`.
 

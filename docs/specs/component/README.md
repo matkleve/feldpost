@@ -6,6 +6,13 @@ Module index for shared component-level contracts. Specs live in **topic subfold
 
 Check before adding net-new shared UI: **[registry.md](registry.md)** (parent index: slice map, actions) and the linked supplement bodies — **[registry.primitives-and-layout.supplement.md](registry.primitives-and-layout.supplement.md)**, **[registry.workspace-pane.supplement.md](registry.workspace-pane.supplement.md)**, **[registry.feature-local.supplement.md](registry.feature-local.supplement.md)** — for selector rows and variant axes.
 
+## Design tokens & floating menus
+
+- **Naming / tweakcn checklist:** [../design/tokens.md](../design/tokens.md)
+- **Which bucket owns which CSS concern:** [../design/token-layers.md](../design/token-layers.md)
+- **`dd-*` / toolbar anchored shell:** [filters/dropdown-system.md](filters/dropdown-system.md)
+- **Runtime emission:** semantic custom properties are defined in **`apps/web/src/styles.scss`**. **`apps/web/src/styles/_legacy-design-tokens.scss`** is a **comment-only stub** (not `meta.load-css`’d from `styles.scss`).
+
 ## filters/
 
 Filter chips, dropdowns, grouping, sort, and related controls.

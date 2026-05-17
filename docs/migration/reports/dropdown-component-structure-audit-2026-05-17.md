@@ -20,6 +20,8 @@ Aligned with the deep analysis and **`dropdown-system.md`**: same **three-layer*
 
 **Token waves:** Phase **7 Batch 48** removed **`--menu-*`** from the legacy bridge; new or migrated menu SCSS should follow tweakcn + **`docs/design/token-layers.md`** / **`docs/design/tokens.md`** and **`docs/specs/component/filters/dropdown-system.md`**, not **`var(--menu-*)`**. **Batch 49** (any remaining **`--action-*`** bridge shrink) is **pending** for this audit until the design token inventory and Phase **7** batch notes are re-checked—do not assume a **`--action-*`** name exists without verifying **`token-layers.md`**.
 
+**Note (2026-05-18):** `apps/web/src/styles/_legacy-design-tokens.scss` is a **zero-emission** legacy-bridge stub on disk; `apps/web/src/styles.scss` has **no** `meta.load-css` for that file (per in-file comments; remaining `meta.load-css` is for `styles/typography-baseline` only).
+
 ---
 
 ## 1. Executive summary

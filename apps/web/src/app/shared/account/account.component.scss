@@ -16,7 +16,7 @@
   margin: 0 auto;
   padding: var(--spacing-4);
   display: grid;
-  gap: var(--spacing-3);
+  gap: var(--spacing-5);
   min-width: 0;
 }
 
@@ -26,11 +26,11 @@
   max-width: none;
   margin: 0;
   padding: 0;
-  gap: var(--spacing-2);
+  gap: var(--spacing-4);
 }
 
 :host.account--embedded .account-card {
-  gap: var(--spacing-2);
+  gap: var(--spacing-4);
 }
 
 .account-page__state {
@@ -38,6 +38,32 @@
   display: grid;
   place-content: center;
   gap: var(--spacing-2);
+  color: var(--muted-foreground);
+}
+
+// Groups lead heading + intro above the bordered account card (settings overlay pattern)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+// Subsection title color only (metrics from global h2 baseline)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-detail-block__lead h2 {
+  margin: 0;
+  color: var(--foreground);
+}
+
+// Intro under subsection title (matches settings detail lead)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-detail-block__lead > p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-reading);
   color: var(--muted-foreground);
 }
 
@@ -54,22 +80,8 @@
   background: var(--card);
 }
 
-// Section title color only (metrics from global h2 baseline)
+// Identity hero keeps h1 + email inside the card (no separate lead block)
 // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
-.account-card h2 {
-  color: var(--foreground);
-}
-
-// Section intro under card title (matches settings detail card intro)
-// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
-.account-card > p {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 400;
-  line-height: var(--line-height-reading);
-  color: var(--muted-foreground);
-}
-
 .account-card--identity {
   display: grid;
   grid-template-columns: auto 1fr auto;

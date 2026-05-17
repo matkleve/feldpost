@@ -32,11 +32,13 @@ It consolidates component taxonomy, variants/states, responsive layout scale, go
 
 - `docs/design/constitution.md`
 - `docs/design/tokens.md`
+- `docs/design/token-layers.md`
 - `docs/design/layout.md`
 - `docs/design/motion.md`
 - `docs/design/components/action-interaction-kernel.md`
 - `docs/design/components/action-interaction-standard.md`
 - `docs/design/components/website-building-blocks-catalog.md`
+- `docs/specs/component/filters/dropdown-system.md`
 - `docs/specs/README.md`
 - `docs/agent-workflows/implementation-checklist.md`
 - `apps/web/src/styles.scss`
