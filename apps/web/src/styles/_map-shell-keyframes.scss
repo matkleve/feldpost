@@ -49,30 +49,6 @@
   }
 }
 
-// Desktop photo panel clip-path reveal from the right
-// @see apps/web/src/app/features/map/map-shell/_map-shell-photo-panel.scss
-@keyframes map-panel-clip-in-right {
-  from {
-    clip-path: inset(0 0 0 100%);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-// Mobile photo panel clip-path reveal from bottom
-// @see apps/web/src/app/features/map/map-shell/_map-shell-photo-panel.scss
-@keyframes map-panel-clip-in-up {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
 // Upload preview status dot ring pulse (uses semantic tokens at computed-value time)
 // @see apps/web/src/app/features/map/map-shell/_map-shell-upload.scss
 @keyframes upload-panel-dot-pulse {

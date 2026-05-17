@@ -90,7 +90,7 @@
   font-size: var(--font-size-md);
 
   .material-icons {
-    font-size: var(--font-size-base-emphasis);
+    font-size: var(--font-size-lg);
     flex-shrink: 0;
   }
 }
@@ -135,7 +135,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--font-size-base); // --text-h2
+  font-size: var(--font-size-md); // modular md — @see docs/design/tokens.md §3.1e
   font-weight: var(--font-weight-semibold);
   color: var(--foreground);
   line-height: var(--line-height-reading);
@@ -162,7 +162,7 @@
 .detail-title-input {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--foreground);
   background: var(--card);
@@ -359,7 +359,7 @@
     background 80ms ease-out;
 
   .material-icons {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-md);
   }
 
   &:hover {

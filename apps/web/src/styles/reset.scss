@@ -15,7 +15,7 @@
   html,
   body {
     height: 100%;
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-md);
     line-height: var(--line-height-normal);
     // Stack matches tweakcn `--font-sans` (DM Sans); var resolves after :root in this bundle.
     // @see apps/web/src/styles.scss (:root --font-sans); docs/migration/phase-8-global-scss-elimination.md §7

@@ -18,169 +18,168 @@
   -webkit-mask-position: center;
 }
 
-:host ::ng-deep .map-photo-marker--selected {
-  transform: scale(var(--photo-marker-selected-scale));
+:host ::ng-deep {
+  .map-photo-marker--selected {
+    transform: scale(var(--photo-marker-selected-scale));
 
-  .map-photo-marker__body {
-    border-color: transparent;
-    outline: 2px solid var(--primary);
-    outline-offset: -1px;
-    background: color-mix(in srgb, var(--primary) 22%, var(--card));
+    .map-photo-marker__body {
+      border-color: transparent;
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+      background: color-mix(in srgb, var(--primary) 22%, var(--card));
+    }
+
+    .map-photo-marker__correction-dot {
+      border-color: var(--primary);
+    }
   }
 
-  .map-photo-marker__correction-dot {
-    border-color: var(--primary);
-  }
-}
-
-:host ::ng-deep .map-photo-marker--linked-hover,
-:host ::ng-deep .map-photo-marker:hover {
-  .map-photo-marker__body {
-    outline: 2px solid color-mix(in srgb, var(--primary) 78%, var(--border));
-    outline-offset: 1px;
-  }
-}
-
-:host ::ng-deep .map-photo-marker--selected.map-photo-marker--linked-hover,
-:host ::ng-deep .map-photo-marker--selected:hover {
-  .map-photo-marker__body {
-    outline: 2px solid var(--primary);
-    outline-offset: -1px;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 32%, transparent);
-  }
-}
-
-:host ::ng-deep .map-photo-marker--selected.map-photo-marker--placeholder {
-  .map-photo-marker__placeholder-icon {
-    background: var(--primary);
-  }
-}
-
-:host ::ng-deep .map-photo-marker--zoom-far {
-  transform: scale(0.94);
-}
-
-:host ::ng-deep .map-photo-marker--zoom-near {
-  transform: scale(1.06);
-}
-
-:host ::ng-deep .map-photo-marker--selected.map-photo-marker--zoom-far {
-  transform: scale(calc(0.94 * var(--photo-marker-selected-scale)));
-}
-
-:host ::ng-deep .map-photo-marker--selected.map-photo-marker--zoom-near {
-  transform: scale(calc(1.06 * var(--photo-marker-selected-scale)));
-}
-
-:host ::ng-deep .map-photo-marker--has-bearing:hover .map-photo-marker__direction-cone,
-:host ::ng-deep .map-photo-marker--has-bearing:focus-within .map-photo-marker__direction-cone,
-:host
-  ::ng-deep
-  .map-photo-marker--has-bearing.map-photo-marker--long-pressed
-  .map-photo-marker__direction-cone {
-  opacity: 1;
-}
-
-:host ::ng-deep .map-photo-marker--single {
-  .map-photo-marker__body {
-    background: var(--card);
+  .map-photo-marker--linked-hover,
+  .map-photo-marker:hover {
+    .map-photo-marker__body {
+      outline: 2px solid color-mix(in srgb, var(--primary) 78%, var(--border));
+      outline-offset: 1px;
+    }
   }
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-}
-
-// Shared placeholder surface (single-marker img error + empty placeholder tile).
-:host ::ng-deep .map-photo-marker--single .map-photo-marker__body--error,
-:host ::ng-deep .map-photo-marker--placeholder .map-photo-marker__body {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--card) 86%, var(--muted)) 0%,
-    color-mix(in srgb, var(--background) 72%, var(--muted)) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// Fallback when img onerror fires (broken signed URL).
-:host ::ng-deep .map-photo-marker--single .map-photo-marker__body--error::after {
-  content: '';
-  @extend %map-shell-photo-marker-placeholder-mask-tile;
-}
-
-:host ::ng-deep .map-photo-marker--placeholder {
-  .map-photo-marker__placeholder-icon {
-    @extend %map-shell-photo-marker-placeholder-mask-tile;
+  .map-photo-marker--selected.map-photo-marker--linked-hover,
+  .map-photo-marker--selected:hover {
+    .map-photo-marker__body {
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 32%, transparent);
+    }
   }
 
-  .map-photo-marker__fallback-label {
-    font-size: var(--font-size-2xs);
-    line-height: var(--line-height-solid);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: 0.04em;
-    color: var(--muted-foreground);
+  .map-photo-marker--selected.map-photo-marker--placeholder {
+    .map-photo-marker__placeholder-icon {
+      background: var(--primary);
+    }
   }
 
-  &.is-loading .map-photo-marker__body {
-    animation: map-photo-marker-placeholder-pulse 1400ms ease-in-out infinite;
-  }
-}
-
-:host ::ng-deep .map-photo-marker--count {
-  .map-photo-marker__body {
-    background: var(--popover);
-    color: var(--foreground);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: var(--font-weight-bold);
-    font-size: var(--photo-marker-cluster-font-size);
-    width: auto;
-    min-width: var(--photo-marker-body-size);
-    padding-inline: var(--spacing-1, 4px);
-  }
-}
-
-:host ::ng-deep .map-photo-marker--count.map-photo-marker--selected {
-  .map-photo-marker__body {
-    background: color-mix(in srgb, var(--primary) 24%, var(--card));
+  .map-photo-marker--zoom-far {
+    transform: scale(0.94);
   }
 
-  .map-photo-marker__count-label {
-    color: var(--foreground);
+  .map-photo-marker--zoom-near {
+    transform: scale(1.06);
   }
-}
 
-:host ::ng-deep .map-photo-marker-wrapper--spotlight {
-  position: relative;
-}
+  .map-photo-marker--selected.map-photo-marker--zoom-far {
+    transform: scale(calc(0.94 * var(--photo-marker-selected-scale)));
+  }
 
-:host ::ng-deep .map-photo-marker-wrapper--spotlight::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: calc(var(--photo-marker-body-size) + 4px);
-  height: calc(var(--photo-marker-body-size) + 4px);
-  border-radius: calc(var(--radius-md) + 2px);
-  border: 2px solid color-mix(in srgb, var(--primary) 82%, transparent);
-  transform: translate(-50%, -50%) scale(1);
-  opacity: 0.92;
-  pointer-events: none;
-  animation: map-photo-marker-spotlight 900ms cubic-bezier(0.16, 0.84, 0.24, 1) 1;
-}
+  .map-photo-marker--selected.map-photo-marker--zoom-near {
+    transform: scale(calc(1.06 * var(--photo-marker-selected-scale)));
+  }
 
-@media (prefers-reduced-motion: reduce) {
-  :host ::ng-deep .map-photo-marker-wrapper--fade-prep {
+  .map-photo-marker--has-bearing:hover .map-photo-marker__direction-cone,
+  .map-photo-marker--has-bearing:focus-within .map-photo-marker__direction-cone,
+  .map-photo-marker--has-bearing.map-photo-marker--long-pressed .map-photo-marker__direction-cone {
     opacity: 1;
   }
 
-  :host ::ng-deep .map-photo-marker-wrapper--fade-in {
-    transition: none;
+  .map-photo-marker--single {
+    .map-photo-marker__body {
+      background: var(--card);
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  // Shared placeholder surface (single-marker img error + empty placeholder tile).
+  .map-photo-marker--single .map-photo-marker__body--error,
+  .map-photo-marker--placeholder .map-photo-marker__body {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--card) 86%, var(--muted)) 0%,
+      color-mix(in srgb, var(--background) 72%, var(--muted)) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Fallback when img onerror fires (broken signed URL).
+  .map-photo-marker--single .map-photo-marker__body--error::after {
+    content: '';
+    @extend %map-shell-photo-marker-placeholder-mask-tile;
+  }
+
+  .map-photo-marker--placeholder {
+    .map-photo-marker__placeholder-icon {
+      @extend %map-shell-photo-marker-placeholder-mask-tile;
+    }
+
+    .map-photo-marker__fallback-label {
+      font-size: var(--font-size-2xs);
+      line-height: var(--line-height-solid);
+      font-weight: var(--font-weight-bold);
+      letter-spacing: 0.04em;
+      color: var(--muted-foreground);
+    }
+
+    &.is-loading .map-photo-marker__body {
+      animation: map-photo-marker-placeholder-pulse 1400ms ease-in-out infinite;
+    }
+  }
+
+  .map-photo-marker--count {
+    .map-photo-marker__body {
+      background: var(--popover);
+      color: var(--foreground);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--photo-marker-cluster-font-size);
+      width: auto;
+      min-width: var(--photo-marker-body-size);
+      padding-inline: var(--spacing-1, 4px);
+    }
+  }
+
+  .map-photo-marker--count.map-photo-marker--selected {
+    .map-photo-marker__body {
+      background: color-mix(in srgb, var(--primary) 24%, var(--card));
+    }
+
+    .map-photo-marker__count-label {
+      color: var(--foreground);
+    }
+  }
+
+  .map-photo-marker-wrapper--spotlight {
+    position: relative;
+  }
+
+  .map-photo-marker-wrapper--spotlight::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(var(--photo-marker-body-size) + 4px);
+    height: calc(var(--photo-marker-body-size) + 4px);
+    border-radius: calc(var(--radius-md) + 2px);
+    border: 2px solid color-mix(in srgb, var(--primary) 82%, transparent);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.92;
+    pointer-events: none;
+    animation: map-photo-marker-spotlight 900ms cubic-bezier(0.16, 0.84, 0.24, 1) 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-photo-marker-wrapper--fade-prep {
+      opacity: 1;
+    }
+
+    .map-photo-marker-wrapper--fade-in {
+      transition: none;
+    }
   }
 }

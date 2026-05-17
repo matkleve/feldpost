@@ -59,7 +59,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-md-soft);
+  font-size: var(--font-size-md);
   color: var(--primary-foreground);
   opacity: 0.9;
   pointer-events: none;
@@ -82,7 +82,7 @@
 
 .pane-header__title {
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-base-plus);
+  font-size: var(--font-size-lg);
   line-height: var(--line-height-tight);
   color: var(--foreground);
   text-align: center;
@@ -94,7 +94,7 @@
 
 .pane-header__title-input {
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-base-plus);
+  font-size: var(--font-size-lg);
   color: var(--foreground);
   text-align: center;
   width: min(30rem, calc(100% - 6rem));

@@ -72,7 +72,7 @@
   // Icon sizing inside the status chip
   // @see docs/specs/ui/settings-overlay
   .invite-section__status-chip .material-icons {
-    font-size: var(--font-size-md-emphasis);
+    font-size: var(--font-size-md);
   }
 
   // Vertical stack for role / QR / share blocks
@@ -190,7 +190,7 @@
   // Material icon sizing inside share buttons
   // @see docs/specs/ui/settings-overlay
   .invite-section__icon-button .material-icons {
-    font-size: var(--font-size-base-emphasis);
+    font-size: var(--font-size-lg);
   }
 
   // Text buttons in the role row (regenerate / revoke)

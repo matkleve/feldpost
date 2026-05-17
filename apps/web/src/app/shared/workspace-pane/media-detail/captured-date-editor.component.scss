@@ -67,7 +67,7 @@
   }
 
   &__now-btn {
-    font-size: var(--font-size-label);
+    font-size: var(--font-size-2xs);
     color: var(--muted-foreground);
     background: none;
     border: none;
@@ -101,7 +101,7 @@
       background 80ms ease-out;
 
     .material-icons {
-      font-size: var(--font-size-base);
+      font-size: var(--font-size-md);
     }
 
     &:hover {
@@ -120,7 +120,7 @@
   }
 
   &__weekday {
-    font-size: var(--font-size-caption);
+    font-size: var(--font-size-2xs);
     font-weight: var(--font-weight-medium);
     color: var(--muted-foreground);
     padding: 0.125rem 0;
@@ -135,7 +135,7 @@
     width: 1.625rem;
     height: 1.625rem;
     margin: 0 auto;
-    font-size: var(--font-size-label);
+    font-size: var(--font-size-2xs);
     color: var(--foreground);
     background: none;
     border: none;
@@ -177,7 +177,7 @@
 
   &__clear-btn,
   &__done-btn {
-    font-size: var(--font-size-label);
+    font-size: var(--font-size-2xs);
     font-family: inherit;
     background: none;
     border: none;

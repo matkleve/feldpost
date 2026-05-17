@@ -82,7 +82,7 @@
   }
 
   &__icon {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-md);
     // Match dd-item__icon styling
     color: var(--muted-foreground);
     flex-shrink: 0;
@@ -149,7 +149,7 @@
   &__subvalue {
     display: inline-block;
     max-width: 15rem;
-    font-size: var(--font-size-label);
+    font-size: var(--font-size-2xs);
     color: var(--muted-foreground);
     text-align: right;
     white-space: normal;
@@ -200,7 +200,7 @@
   transition: opacity 80ms ease-out;
 
   .material-icons {
-    font-size: var(--font-size-md-plus);
+    font-size: var(--font-size-md);
   }
 
   &:hover {
@@ -297,7 +297,7 @@
     border-radius: var(--radius-full);
     background: color-mix(in srgb, var(--warning) 18%, transparent);
     color: var(--foreground);
-    font-size: var(--font-size-caption);
+    font-size: var(--font-size-2xs);
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-tight);
     text-transform: uppercase;
@@ -313,7 +313,7 @@
     background: transparent;
     color: var(--field-text);
     padding: var(--spacing-1) var(--spacing-2);
-    font-size: var(--font-size-md-plus);
+    font-size: var(--font-size-md);
     text-align: left;
     box-shadow: none;
     outline: none;
@@ -396,7 +396,7 @@
     cursor: pointer;
 
     .material-icons {
-      font-size: var(--font-size-base);
+      font-size: var(--font-size-md);
     }
 
     &:hover:not(:disabled) {
@@ -498,7 +498,7 @@
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--secondary) 16%, transparent);
   color: var(--secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.02em;
   text-transform: uppercase;

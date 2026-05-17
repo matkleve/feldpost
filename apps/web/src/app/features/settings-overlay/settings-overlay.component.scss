@@ -186,13 +186,13 @@
   // Section title line in the rail list (stacking + truncation utilities on host in template)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-label strong {
-    font-size: var(--font-size-md-soft);
+    font-size: var(--font-size-md);
   }
 
   // Trailing chevron affordance in rail rows
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-chevron {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-md);
     color: var(--muted-foreground);
   }
 
@@ -356,7 +356,7 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__identity strong {
     display: block;
-    font-size: var(--font-size-md-plus);
+    font-size: var(--font-size-md);
     color: var(--foreground);
   }
 
