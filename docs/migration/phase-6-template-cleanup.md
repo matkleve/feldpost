@@ -18,7 +18,7 @@
 - **No** `@use` for toggle-group — pill shell is **`hlmPillToggle`** + **`pillToggleVariants`** (see **`toggle-group-variants.ts`**, **`hlm-pill-toggle.directive.ts`**).
 - **CDK overlay:** `@import "@angular/cdk/overlay-prebuilt.css"` (inline; not via deleted `tokens.scss`).
 - **Tailwind v4** `@import "tailwindcss"` + `@config` bridge.
-- **Legacy bridge:** **`_legacy-design-tokens.scss`** is an emission-empty stub; **`meta.load-css('styles/legacy-design-tokens')`** **removed** from **`styles.scss`** (2026-05-18). Historical order: after tweakcn **`:root`** when the bridge still emitted **`:root`** rows.
+- **Legacy bridge:** **`apps/web/src/styles/_legacy-design-tokens.scss` removed**; **`meta.load-css('styles/legacy-design-tokens')`** **removed** from **`styles.scss`** (2026-05-18). Historical order: after tweakcn **`:root`** when the bridge still emitted **`:root`** rows.
 
 `styles/primitives/` **folder empty (2026-05-16)** after **`dropdown-trigger.scss`** deletion with Group D; the monolithic **`ui-primitives.directive.ts`** shim file is **removed (2026-05-16)**. Chevron / open-state rules for toolbar menu triggers live in **`media.component.scss`**, **`projects-toolbar.component.scss`**, and **`workspace-toolbar.component.scss`**.
 

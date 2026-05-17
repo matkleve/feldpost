@@ -23,7 +23,13 @@
   // Bordered card body under the page-level header (role blocks, QR, share)
   // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .invite-section__surface {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
     min-width: 0;
+    padding: var(--spacing-4);
+    border-radius: max(2px, calc(var(--radius-sm) - 2px));
+    border: 1px solid var(--border);
     background: var(--card);
   }
 
@@ -53,13 +59,13 @@
     color: var(--foreground);
   }
 
-  // Subtitle copy under the invite title (settings detail intro pairing)
+  // Subtitle under invite title (matches settings rail row small / detail lead)
   // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .invite-section__title-wrap p {
     margin: 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: 400;
-    line-height: var(--line-height-reading);
+    line-height: 1.45;
     color: var(--muted-foreground);
   }
 
@@ -68,7 +74,7 @@
   .invite-section__expires {
     grid-column: 1 / -1;
     margin-top: var(--spacing-1);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--muted-foreground);
   }
 
@@ -99,7 +105,7 @@
   .invite-section__stack {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-2);
+    gap: var(--spacing-3);
   }
 
   // Role field label (row title treatment aligned with settings field-row labels)
@@ -115,14 +121,14 @@
   .invite-section__role-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
-    gap: var(--spacing-2);
+    gap: var(--spacing-3);
   }
 
   // QR preview block vertical rhythm
   // @see docs/specs/ui/settings-overlay
   .invite-section__qr-block {
     display: grid;
-    gap: var(--spacing-2);
+    gap: var(--spacing-3);
   }
 
   // QR frame geometry and neutral surface
@@ -197,7 +203,7 @@
     display: grid;
     grid-template-columns: repeat(3, auto);
     justify-content: center;
-    gap: var(--spacing-2);
+    gap: var(--spacing-3);
   }
 
   // Fixed hit target for ghost icon share buttons

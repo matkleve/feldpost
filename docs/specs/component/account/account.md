@@ -6,7 +6,7 @@ The standalone `app-account` surface for viewing and editing the signed-in user�
 
 ## What It Looks Like
 
-Stacked `account-card` sections: identity header with avatar initial or skeleton, profile name field, login/email/password controls, MFA enrollment panel, and danger zone. Loading shows skeleton placeholders; async sections disable controls and show busy labels on primary buttons. Confirm dialogs overlay via parent-controlled `*if` blocks for logout and account deletion.
+**Identity** uses a single `.account-card.account-card--identity` hero (avatar, name, email, badges). **Subsections** (`Profil`, `Anmeldung`, `2FA`, `Sitzung`, `Konto löschen`) use `.account-detail-block`: a **top rule** + `.account-detail-block__lead` (title + intro) + `.account-detail-block__body` (flat stack of fields/buttons — no outer bordered “section card”). Loading shows skeleton placeholders; async sections disable controls and show busy labels on primary buttons. Confirm dialogs overlay via parent-controlled `*if` blocks for logout and account deletion.
 
 ## Where It Lives
 
@@ -30,11 +30,11 @@ Stacked `account-card` sections: identity header with avatar initial or skeleton
 
 ```text
 app-account
-├── identity header [loading skeleton | live]
-├── profile card
-├── login card (email/password)
-├── MFA card [optional QR panel]
-├── danger zone
+├── identity header (.account-card--identity) [loading skeleton | live]
+├── profile subsection (.account-detail-block + rule)
+├── login subsection (email/password)
+├── MFA subsection [optional QR panel in .account-enroll]
+├── session + delete subsections
 ├── app-confirm-dialog [logout]
 └── app-confirm-dialog [delete]
 ```
@@ -81,9 +81,9 @@ Visual readiness is gated primarily by `loading()` and per-section `*Busy` signa
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
 | -------- | --------------------- | ---------------------- | --------------------------- | ------------- | ---------------------- | ----------- |
-| Page stack | `.account-page` | `.account-page` | focusable controls in cards | `.account-card` | content | cards stack with token gaps |
-| Loading skeleton | `.account-skeleton` on header fields | section card | none (inert) | `.account-skeleton*` | content | skeleton only while `loading()` |
-| Primary actions | buttons with `uiButton*` | parent card | same buttons | `.ui-button` | content | disabled when `loading()` or section busy |
+| Page stack | `.account-page` | `.account-page` | focusable controls | `.account-detail-block__body`, `.account-card--identity` | content | subsections separated by rules; identity card |
+| Loading skeleton | `.account-skeleton` on header fields | identity / lists | none (inert) | `.account-skeleton*` | content | skeleton only while `loading()` |
+| Primary actions | buttons with `uiButton*` | subsection body | same buttons | `.ui-button` | content | disabled when `loading()` or section busy |
 | Confirm overlays | dialog host (shared confirm) | overlay layer from parent | dialog buttons | `app-confirm-dialog` | overlay (feature shell) | Escape/focus managed by dialog host |
 
 ### Ownership Triad Declaration

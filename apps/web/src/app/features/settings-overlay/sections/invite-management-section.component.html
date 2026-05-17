@@ -1,7 +1,7 @@
 <section class="invite-section" aria-labelledby="invite-section-title">
   @if (panelMode() === 'error') {
     <div
-      class="invite-section__surface invite-section__state invite-section__state--error flex flex-col gap-2 rounded-lg border border-border bg-card p-6"
+      class="invite-section__surface invite-section__state invite-section__state--error"
       role="alert"
     >
       <span class="material-icons" aria-hidden="true">warning</span>
@@ -42,7 +42,7 @@
       }
     </header>
 
-    <div class="invite-section__surface flex flex-col gap-2 rounded-lg border border-border bg-card p-6">
+    <div class="invite-section__surface">
     <div class="invite-section__stack">
       <section
         class="invite-section__role-block"

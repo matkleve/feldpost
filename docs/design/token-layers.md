@@ -14,9 +14,9 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 ## Layer Ownership
 
-### Legacy bridge inventory (`_legacy-design-tokens.scss`)
+### Legacy bridge (retired — `_legacy-design-tokens.scss`)
 
-**Code is canonical.** **`apps/web/src/styles.scss`** documents in its header that the legacy bridge partial is **comment-only on disk** and **not** `load-css`'d. **Phase 7 Batch 50:** **`apps/web/src/styles/_legacy-design-tokens.scss`** is an **emission-empty stub** (**`//` comments only** — **no** **`:root`**, **no** **`--*`** rows); there is **no** **`meta.load-css('styles/legacy-design-tokens')`** in **`styles.scss`** — **removed 2026-05-18**, zero runtime emit; disk stub kept for migration cross-refs. **`_legacy-design-tokens.scss`** no longer ships a **`@mixin dark-theme-overrides`** block (**Phase 7 Batch 47** moved **`--interactive-focus-ring`** + dark overrides to **`_typography-baseline.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantic colors (**`--primary`**, **`--card`**, …), and MD3 **`--fp-sys-*`** documentation tables are **not** emitted from **`_legacy-design-tokens.scss`**.
+**Code is canonical.** **Shipped tree:** **`apps/web/src/styles/_legacy-design-tokens.scss` is absent** (**`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**); **`styles.scss`** does **not** `load-css` that path (**removed 2026-05-18**). **Batch 50** ended **`--*`** emission from the bridge; the partial was later **removed from the repo** — use **`docs/migration/phase-7-token-migration.md`** for historical batch proof, not a stub file on disk. **`@mixin dark-theme-overrides`** on the bridge was removed **Batch 47** (**`--interactive-focus-ring`** → **`_typography-baseline.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantics, and MD3 **`--fp-sys-*`** doc tables are **not** emitted from any **`apps/web`** bridge file today.
 
 #### Typography baseline (`_typography-baseline.scss`)
 
@@ -36,7 +36,7 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 **In `styles.scss` `@theme inline`** (after tweakcn semantic blocks in that file — **Batch 50:** **`_legacy-design-tokens.scss`** is not in the runtime pipeline) — **`--radius-sm`**, **`--radius-md`**, **`--radius-lg`**, **`--radius-xl`** (from tweakcn **`--radius`**). **Batch 44** removed duplicate bridge rows for **`--radius-sm|md|lg`**.
 
-**Layer A (legacy bridge — Batch 50: no `:root` emission)**
+**Layer A (legacy bridge — retired; file absent from `apps/web`)**
 
 | Note |
 | --- |
@@ -45,9 +45,9 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 **Phase 7 Batch 43:** product **z-index** uses literals **`200` / `300` / `500`** (plus **`302`** / **`501`** where documented calcs apply) and Tailwind **`z-upload-btn`**, **`z-dropdown`**, **`z-modal`** — **not** **`--z-upload-button`**, **`--z-dropdown`**, or **`--z-modal`** rows on **`_legacy-design-tokens.scss`**.
 
-**Layer B (bridge):** **none on `_legacy-design-tokens.scss`** after **Batch 47** — **`--interactive-focus-ring`** lives on **`_typography-baseline.scss`** (see subsection above).
+**Layer B (bridge):** **none on the removed legacy bridge path** after **Batch 47** — **`--interactive-focus-ring`** lives on **`_typography-baseline.scss`** (see subsection above).
 
-**Layer C (roles — not on `_legacy-design-tokens.scss` after Batch 48–50)**
+**Layer C (roles — historical bridge batches 48–50; file now absent)**
 
 | Note |
 | --- |
@@ -73,7 +73,7 @@ Cross-component aliases for shared interaction behavior.
 
 ### Layer C: Component-Role Aliases
 
-Role-level aliases consumed by reusable UI primitives and feature components. **`_legacy-design-tokens.scss`** (**Batch 50** stub — **no** **`:root`**) defines **no** Layer C **action** or **menu** names after **Batch 48–49** (**`--interactive-focus-ring`** is **not** on the bridge — **Batch 47**). **Batch 49** removed **`--action-bg-hover`**, **`--action-text-default`**, **`--action-text-active`** (and the sandstone **`[data-theme='sandstone']`** mirror) from the bridge; callsites use **`var(--primary)`**, per-component **`:host`** custom properties (ex-bridge values), or **`--settings-action-bg-hover`** — **`docs/migration/phase-7-token-migration.md`** §Batch 49. **Batch 48** removed **`--menu-*`** from the bridge; menu surfaces use tweakcn **`var(--border|primary|foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see subsection above + **`docs/migration/phase-7-token-migration.md`** §Batch 48 + [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md)).
+Role-level aliases consumed by reusable UI primitives and feature components. **Historical:** **`_legacy-design-tokens.scss`** (**Batch 50** zero-emit, then **deleted**) defined **no** Layer C **action** or **menu** names after **Batch 48–49** (**`--interactive-focus-ring`** is **not** on that path — **Batch 47**). **Batch 49** removed **`--action-bg-hover`**, **`--action-text-default`**, **`--action-text-active`** (and the sandstone **`[data-theme='sandstone']`** mirror) from the bridge; callsites use **`var(--primary)`**, per-component **`:host`** custom properties (ex-bridge values), or **`--settings-action-bg-hover`** — **`docs/migration/phase-7-token-migration.md`** §Batch 49. **Batch 48** removed **`--menu-*`** from the bridge; menu surfaces use tweakcn **`var(--border|primary|foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see subsection above + **`docs/migration/phase-7-token-migration.md`** §Batch 48 + [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md).
 
 1. Action controls
 
@@ -104,7 +104,7 @@ Role-level aliases consumed by reusable UI primitives and feature components. **
 ## Consumption Rules
 
 1. New or refactored components consume Layer C **role bindings** first (per-component **`:host`** / feature-local custom properties where those names are not global).
-2. Layer C roles resolve to Layer A/B via **tweakcn + `@theme inline` in `apps/web/src/styles.scss`**, **`_typography-baseline.scss`** (via **`meta.load-css('styles/typography-baseline')`**), and **`:host`** SCSS — **not** via **`_legacy-design-tokens.scss`** (**Batch 50** stub).
+2. Layer C roles resolve to Layer A/B via **tweakcn + `@theme inline` in `apps/web/src/styles.scss`**, **`_typography-baseline.scss`** (via **`meta.load-css('styles/typography-baseline')`**), and **`:host`** SCSS — **not** via a legacy bridge partial (**Batch 50** — file **deleted**).
 3. Avoid binding feature-level styles directly to Layer A where a stable Layer C-style alias or documented **`color-mix`** pattern exists.
 4. Theme packs override Layer C first, Layer A only for global rebranding.
 

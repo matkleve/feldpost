@@ -57,7 +57,9 @@
     border-radius: var(--container-radius-panel);
     border: var(--settings-stroke-width) solid var(--settings-border-muted);
     background: color-mix(in srgb, var(--popover) 92%, transparent);
-    box-shadow: var(--shadow-lg);
+    // Global `--shadow-*` tokens are very light (~5% opacity); add a map-readable lift on this shell only
+    // @see docs/specs/ui/settings-overlay
+    box-shadow: var(--shadow-2xl), 0 12px 40px -6px color-mix(in srgb, var(--shadow-color) 18%, transparent);
     backdrop-filter: blur(14px) saturate(1.08);
     -webkit-backdrop-filter: blur(14px) saturate(1.08);
   }
@@ -155,10 +157,10 @@
     gap: var(--spacing-3);
     min-height: 3rem;
     padding-block: var(--spacing-2);
-    padding-inline: var(--spacing-2);
+    padding-inline: var(--spacing-3);
     width: 100%;
     border: 1px solid transparent;
-    border-radius: var(--container-radius-control);
+    border-radius: max(2px, calc(var(--radius-sm) - 4px));
     background: transparent;
     text-align: left;
     color: var(--foreground);
@@ -212,7 +214,7 @@
     flex: 1 1 auto;
     min-width: 0;
     min-height: 0;
-    padding: var(--spacing-4);
+    padding: var(--spacing-5);
     background: var(--card);
     overflow: auto;
     container-type: inline-size;
@@ -224,7 +226,7 @@
   .settings-overlay__detail-section {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-5);
+    gap: var(--spacing-3);
     min-width: 0;
   }
 
@@ -233,7 +235,7 @@
   .settings-overlay__detail-lead {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-2);
+    gap: var(--spacing-1);
   }
 
   // Section title color only (scale/weight from global h3 baseline)
@@ -243,22 +245,26 @@
     color: var(--foreground);
   }
 
-  // Section intro: secondary copy under the title (lighter than row titles)
+  // Section intro: matches rail row subtitle (`.settings-overlay__section-label` small / text-xs)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail-lead > p {
     margin: 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: 400;
-    line-height: var(--line-height-reading);
+    line-height: 1.45;
     color: var(--muted-foreground);
   }
 
-  // Detail card: column stack with comfortable vertical rhythm between control groups
+  // Bordered settings body: comfortable inner padding (radius stays compact)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail-card {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-4);
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+    border-radius: max(2px, calc(var(--radius-sm) - 2px));
+    border: 1px solid var(--border);
+    background: var(--card);
   }
 
   // Two-column label + control row for settings fields (no ng-deep)
@@ -266,7 +272,7 @@
   .settings-overlay__field-row {
     display: grid;
     grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
-    gap: var(--spacing-4);
+    gap: var(--spacing-3);
     align-items: center;
   }
 
@@ -276,7 +282,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: var(--spacing-3);
+    gap: var(--spacing-2);
   }
 
   // Control column wrapper so segmented controls can shrink correctly
@@ -319,7 +325,7 @@
     padding-block: var(--spacing-2);
     padding-inline: var(--spacing-3);
     border: 1px solid transparent;
-    border-radius: var(--container-radius-control);
+    border-radius: max(2px, calc(var(--radius-sm) - 2px));
     background: transparent;
     text-align: left;
     color: var(--foreground);

@@ -40,7 +40,7 @@
       <h2>{{ tr('Profil') }}</h2>
       <p>{{ tr('Aktualisiere deinen sichtbaren Namen.') }}</p>
     </header>
-    <section class="account-card">
+    <div class="account-detail-block__body">
     <hlm-form-field class="account-field">
       <label hlmLabel for="account-display-name">{{ tr('Anzeigename') }}</label>
       <input
@@ -62,7 +62,7 @@
     >
       {{ savingProfile() ? tr('Speichern...') : tr('Namen speichern') }}
     </button>
-    </section>
+    </div>
   </div>
 
   <div class="account-detail-block" data-settings-subsection="password">
@@ -70,7 +70,7 @@
       <h2>{{ tr('Anmeldung') }}</h2>
       <p>{{ tr('E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.') }}</p>
     </header>
-    <section class="account-card">
+    <div class="account-detail-block__body">
     <hlm-form-field class="account-field">
       <label hlmLabel for="account-new-email">{{ tr('Neue E-Mail') }}</label>
       <input
@@ -148,7 +148,7 @@
         {{ sendingReset() ? tr('Sende...') : tr('Passwort vergessen') }}
       </button>
     </div>
-    </section>
+    </div>
   </div>
 
   <div class="account-detail-block" data-settings-subsection="mfa">
@@ -156,7 +156,7 @@
       <h2>{{ tr('2FA') }}</h2>
       <p>{{ tr('Aktive Faktoren und TOTP-Setup.') }}</p>
     </header>
-    <section class="account-card">
+    <div class="account-detail-block__body">
     <div class="account-factor-list" role="list">
       @if (loading()) {
         <div class="account-factor account-skeleton-row"></div>
@@ -221,7 +221,7 @@
         </button>
       </div>
     }
-    </section>
+    </div>
   </div>
 
   <div class="account-detail-block" data-settings-subsection="session">
@@ -229,7 +229,7 @@
       <h2>{{ tr('Sitzung') }}</h2>
       <p>{{ tr('Beende deine aktuelle Sitzung sicher.') }}</p>
     </header>
-    <section class="account-card">
+    <div class="account-detail-block__body">
     <button
       hlmBtn
       variant="destructive"
@@ -239,7 +239,7 @@
     >
       {{ tr('Logout') }}
     </button>
-    </section>
+    </div>
   </div>
 
   <div class="account-detail-block" data-settings-subsection="delete">
@@ -247,7 +247,7 @@
       <h2>{{ tr('Konto löschen') }}</h2>
       <p>{{ tr('Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.') }}</p>
     </header>
-    <section class="account-card account-card--danger">
+    <div class="account-detail-block__body">
     <button
       hlmBtn
       variant="destructive"
@@ -257,7 +257,7 @@
     >
       {{ tr('Konto löschen') }}
     </button>
-    </section>
+    </div>
   </div>
 </section>
 

@@ -33,7 +33,7 @@ Primary width tokens and values:
 
 ## Content Clamp Primitive
 
-Canonical literals and utility (**Phase 7 Batch 38** removed **`--content-clamp-default`** and **`--content-clamp-list`** from **`_legacy-design-tokens.scss`** — values live only in **`apps/web/src/styles/layout/clamp.scss`** and any feature SCSS that mirrors the same numbers):
+Canonical literals and utility (**Phase 7 Batch 38** removed **`--content-clamp-default`** and **`--content-clamp-list`** from the then-existing **`_legacy-design-tokens.scss`** — bridge file **since removed** from **`apps/web`**; values live only in **`apps/web/src/styles/layout/clamp.scss`** and any feature SCSS that mirrors the same numbers):
 
 - base / default rail: **`max-width: 45rem`** on **`.content-clamp`**
 - list/table rail: **`max-width: 52rem`** on **`.content-clamp--list`**

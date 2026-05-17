@@ -28,7 +28,7 @@ This report, the [structure audit](./dropdown-component-structure-audit-2026-05-
 
 **Token waves (menu cluster vs this report):** Phase **7 Batch 48** removed legacy **`--menu-*`** bridge rows from **`_legacy-design-tokens.scss`**; menu-role surfaces should use tweakcn semantics (**`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`**, **`var(--popover)`**, etc.) and per-component **`:host`** custom properties per **`docs/design/token-layers.md`**, **`docs/design/tokens.md`**, and **`docs/specs/component/filters/dropdown-system.md`** — not **`var(--menu-*)`**. The **stacking** story in this document (**inline `z-index` 300 / flyout 302**, CVA **`z-50`**, Batch **43** literals) is unchanged and does not depend on those bridge names. **Batch 49** (further **`--action-*`** / adjacent bridge cleanup) may land in parallel; treat binding guidance for **`--action-*`** as **pending** here until **`docs/design/token-layers.md`** and the migration batch notes confirm what remains on the bridge.
 
-**Note (2026-05-18):** As of that date, `apps/web/src/styles/_legacy-design-tokens.scss` is an on-disk legacy-bridge stub with **no runtime CSS emission**, and `apps/web/src/styles.scss` does **not** invoke `meta.load-css` for that partial (comments in `styles.scss` reserve the slot and warn against reintroducing it; the only `meta.load-css` call at the bottom targets `styles/typography-baseline`).
+**Note (2026-05-18):** `apps/web/src/styles/_legacy-design-tokens.scss` is **absent** from the shipped tree; `apps/web/src/styles.scss` does **not** invoke `meta.load-css` for that path (the only `meta.load-css` call at the bottom targets `styles/typography-baseline` only).
 
 ---
 

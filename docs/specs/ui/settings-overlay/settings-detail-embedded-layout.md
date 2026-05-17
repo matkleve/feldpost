@@ -8,8 +8,8 @@ Normative **layout and typography contract** for any body rendered in `SettingsO
 
 - **Scroll:** `.settings-overlay__detail` is the vertical scroll owner (`overflow: auto`, `min-height: 0`); embedded content must not break the overlay `max-height` chain.
 - **Width:** Default **full width** of the detail column; no extra outer `max-width` / `content-clamp` unless the same pattern exists on standalone routes and is explicitly disabled when `embeddedInSettings` (or equivalent) is true.
-- **Card:** Section title + intro sit **above** the bordered surface (`.settings-overlay__detail-lead` / `account-detail-block__lead` / invite header). The primary bordered surface wraps controls only: `rounded-lg`, `border-border`, `bg-card`, padding matching overlay detail cards (`p-6` / token equivalent), inner vertical `gap` of **`var(--spacing-2)`** (Tailwind `gap-2`) between major blocks inside the card.
-- **Typography:** Same pairing as parent [`settings-overlay.md`](./settings-overlay.md) § *Detail typography*: `h3` / `h2` section titles (global heading metrics only on `h1`–`h6`); intro `p` in the lead block = secondary body (sm, normal, reading line-height, muted); row labels (`hlmLabel`, toggle `strong`, …) = row title (sm, medium, foreground). No “flat” intro at `md` competing with row titles.
+- **Card:** For **inline** settings `@case` sections and **Invite**, section title + intro sit **above** the bordered surface (`.settings-overlay__detail-lead` / invite header). **Account** subsections (Profil, Anmeldung, …) use the same lead pattern but **no** outer bordered card: `.account-detail-block` carries a **top rule** only; `.account-detail-block__body` is a flat flex stack. Bordered chrome for inline sections = `settings-overlay__detail-card` (tokens for radius, border, `bg-card`, padding).
+- **Typography:** Same pairing as parent [`settings-overlay.md`](./settings-overlay.md) § *Detail typography*: `h3` / `h2` section titles (global heading metrics only on `h1`–`h6`); intro `p` in the lead block uses **`var(--font-size-xs)`** and muted color so it matches the rail row subtitle (`text-xs`); row labels (`hlmLabel`, toggle `strong`, …) = row title (sm, medium, foreground). No “flat” intro at `md` competing with row titles.
 - **Controls:** Prefer overlay primitives (`settings-overlay__field-row`, `toggle-row`, `segmented`, …) or **semantically equivalent** spacing and label/control pairing. Feature blocks (QR, MFA) may extend the card; intermediate wrappers stay unstyled per `scss-ownership.mdc` unless justified.
 
 ## Where It Lives
@@ -23,7 +23,7 @@ Normative **layout and typography contract** for any body rendered in `SettingsO
 
 | # | Situation | Expected behavior |
 | --- | --- | --- |
-| 1 | User selects **Konto** | `app-account` receives `embeddedInSettings=true`; host `account--embedded` removes outer clamp/double padding; each subsection uses `.account-detail-block__lead` above the bordered `account-card` body. |
+| 1 | User selects **Konto** | `app-account` receives `embeddedInSettings=true`; host `account--embedded` removes outer clamp/double padding; identity uses `.account-card--identity`; each further subsection is `.account-detail-block` (rule + lead + flat `.account-detail-block__body`). |
 | 2 | User selects **Invite Management** | Invite header (title + subtitle + status) sits above `.invite-section__surface` card chrome; intro/label typo contract unchanged; no `max-w-*` band narrower than the detail column. |
 | 3 | Long account or invite content | Vertical scroll appears **inside** `.settings-overlay__detail` only; overlay width/height band unchanged. |
 
@@ -39,9 +39,9 @@ SettingsOverlayComponent
     ├── app-account [embeddedInSettings]
     │   └── .account-page
     │       ├── .account-card--identity (hero)
-    │       └── .account-detail-block × N
+    │       └── .account-detail-block × N (border-block-start rule)
     │           ├── .account-detail-block__lead (h2 + intro p)
-    │           └── .account-card (bordered body)
+    │           └── .account-detail-block__body (flat controls)
     └── ss-invite-management-section
         └── .invite-section
             ├── header (h3 + intro p + optional status)
