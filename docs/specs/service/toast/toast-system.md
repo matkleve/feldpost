@@ -243,7 +243,7 @@ sequenceDiagram
 
 ### Z-index
 
-- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **`--z-dropdown` (300)**, below **`--z-modal` (500)**. (**Phase 7 Batch 35:** **`--z-toast`** removed from **`_legacy-design-tokens.scss`**.)
+- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **dropdown plane `300`**, below **modal plane `500`**. (**Phase 7 Batch 35:** **`--z-toast`** removed from **`_legacy-design-tokens.scss`**. **Batch 43:** **`--z-dropdown`** / **`--z-modal`** bridge rows removed — same numeric intent.)
 
 ### Consumer wiring (existing files to update)
 

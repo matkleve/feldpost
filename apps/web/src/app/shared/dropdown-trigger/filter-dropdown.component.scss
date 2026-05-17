@@ -70,7 +70,7 @@
 // @see docs/specs/component/filters/filter-dropdown.md
 .filter-rule__picker-flyout {
   position: fixed;
-  z-index: calc(var(--z-dropdown) + 2);
+  z-index: 302;
   overflow-x: hidden;
   overflow-y: auto;
   border-radius: var(--radius-md);

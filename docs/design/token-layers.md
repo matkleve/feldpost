@@ -16,28 +16,35 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 ### Legacy bridge inventory (`_legacy-design-tokens.scss`)
 
-**Code is canonical.** The lists below are the **`--*`** names still **defined on `:root`** in `apps/web/src/styles/_legacy-design-tokens.scss` (light). **`@mixin dark-theme-overrides`** (used by **`[data-theme='dark']`** and **`prefers-color-scheme: dark`**) overrides **`--shadow-sm`**, **`--interactive-focus-ring`**, and **`--shadow-focus`** only. **`--shadow-md|lg|xl`**, tweakcn semantic colors (**`--primary`**, **`--card`**, …), and MD3 **`--fp-sys-*`** documentation tables are **not** emitted from this file.
+**Code is canonical.** **`@mixin dark-theme-overrides`** (used by **`[data-theme='dark']`** and **`prefers-color-scheme: dark`**) overrides **`--shadow-sm`**, **`--interactive-focus-ring`**, and **`--shadow-focus`** only. **`--shadow-md|lg|xl`**, tweakcn semantic colors (**`--primary`**, **`--card`**, …), and MD3 **`--fp-sys-*`** documentation tables are **not** emitted from **`_legacy-design-tokens.scss`**.
 
-**Layer A (bridge primitives)**
+#### Typography baseline (`_typography-baseline.scss`)
+
+**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded after the legacy bridge in **`styles.scss`**) defines **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, and **`--motion-duration-fast`** / **`--motion-ease-out`** — Phase 7 **Batch 41–42** (`docs/migration/phase-7-token-migration.md` §Batch 41 / §Batch 42).
+
+| Token |
+| --- |
+| `--line-height-tight`, `--line-height-solid`, `--line-height-reading`, `--line-height-comfortable` |
+| `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
+| `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
+| `--motion-duration-fast`, `--motion-ease-out` |
+
+**Layer A (legacy bridge primitives — `_legacy-design-tokens.scss` `:root` only)**
 
 | Token |
 | --- |
 | `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full` |
 | `--shadow-sm`, `--shadow-focus` |
-| `--z-panel`, `--z-upload-button`, `--z-dropdown`, `--z-modal` |
-| `--spacing-1` … `--spacing-8` |
-| `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
-| `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
-| `--line-height-tight`, `--line-height-solid`, `--line-height-snug`, `--line-height-cozy`, `--line-height-reading`, `--line-height-compact`, `--line-height-normal`, `--line-height-comfortable` |
+| `--spacing-1` … `--spacing-6`, `--spacing-8` (the former **12×4px** step is **`calc(0.25rem * 12)`** at callsites — **Batch 41** removed **`--spacing-7`**) |
 | `--container-radius-control`, `--container-radius-panel` |
-| `--motion-duration-fast`, `--motion-ease-out` |
+
+**Phase 7 Batch 43:** product **z-index** uses literals **`200` / `300` / `500`** (plus **`302`** / **`501`** where documented calcs apply) and Tailwind **`z-upload-btn`**, **`z-dropdown`**, **`z-modal`** — **not** **`--z-upload-button`**, **`--z-dropdown`**, or **`--z-modal`** rows on **`_legacy-design-tokens.scss`**.
 
 **Layer B (bridge)**
 
 | Token |
 | --- |
 | `--interactive-focus-ring` |
-| `--interactive-transition-standard` |
 
 **Layer C (bridge)**
 
@@ -56,8 +63,8 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 Global design primitives that represent raw design values.
 
 - **Color foundations** (tweakcn / theme, not the legacy bridge file): `--foreground`, `--background`, `--primary`, `--muted`, `--border`, … — see `docs/design/tokens.md` §3.1a handoff and shipped theme.
-- **Radius / spacing / typography on bridge:** only the **Layer A (bridge primitives)** table above; **Batch 40** removed **`--container-padding-*`**, **`--container-gap-*`**, and other container metric aliases — use **`var(--spacing-*)`** at callsites.
-- **Elevation / depth:** bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**. **Batch 39:** **`--shadow-sm`** and **`--shadow-focus`** are defined on **`_legacy-design-tokens.scss`**; **`--shadow-md|lg|xl`** are **tweakcn `:root`** names (bridge duplicate rows removed — dark mixin adjusts **`--shadow-sm`** / **`--shadow-focus`** only). **Batch 37** removed **`--elevation-*`** bridge aliases.
+- **Radius / spacing:** the **Layer A (legacy bridge primitives)** table above; **Batch 40** removed **`--container-padding-*`**, **`--container-gap-*`**, and other container metric aliases — use **`var(--spacing-*)`** at callsites. **Typography scale** (**`--font-size-*`**, **`--font-weight-*`**, **`--line-height-*`** shipped as vars, **`--motion-duration-fast`** / **`--motion-ease-out`**) lives on **`_typography-baseline.scss`** `:root` (see subsection above — **Batch 41–42**), not the legacy bridge file.
+- **Elevation / depth:** bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**. **Batch 39:** **`--shadow-sm`** and **`--shadow-focus`** are defined on **`_legacy-design-tokens.scss`**; **`--shadow-md|lg|xl`** are **tweakcn `:root`** names (bridge duplicate rows removed — dark mixin adjusts **`--shadow-sm`** / **`--shadow-focus`** only). **Batch 37** removed **`--elevation-*`** bridge aliases. **Batch 43:** product **z-index** is literal / Tailwind theme — not **`--z-upload-button|--z-dropdown|--z-modal`** on the bridge (see **`docs/design/tokens.md`** §3.5).
 - **Layout class shells** (`.ui-container`, `.ui-item`, …): geometry and padding are expressed with **spacing tokens** and utilities in implementation — there are **no** **`--ui-item-*`** custom properties in the repo; do not document them as CSS vars.
 
 ### Layer B: Interaction Aliases
@@ -65,7 +72,7 @@ Global design primitives that represent raw design values.
 Cross-component aliases for shared interaction behavior.
 
 - **`--interactive-border-muted`** and **`--interactive-surface-hover`** were **removed from `:root`** in **Phase 7 Batch 36** — they are **not** bridge names to bind in new work. Equivalent mixes are **inlined** at the few Layer C / feature callsites (for example **`color-mix(in srgb, var(--border) 72%, transparent)`** on settings **`--settings-border-muted`**, **`color-mix(in srgb, var(--primary) 12%, transparent)`** on **`--settings-hover-focus`**), and internal rows such as **`--action-bg-hover`** / **`--menu-surface-border`** carry the same resolved colors without a **`var(--interactive-*)`** hop — see **`docs/migration/phase-7-token-migration.md`** §Batch 36.
-- **`--interactive-focus-ring`**, **`--interactive-transition-standard`** — **only** these two ship on the bridge (see inventory table).
+- **`--interactive-focus-ring`** — the only Layer B bridge name today (see inventory table). **Batch 41** removed **`--interactive-transition-standard`** — inline the same multi-property timing (for example **`120ms ease-out`**) or use **`var(--motion-duration-fast) var(--motion-ease-out)`** per **`docs/design/motion.md`** / callsite SCSS.
 
 ### Layer C: Component-Role Aliases
 

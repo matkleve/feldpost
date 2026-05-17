@@ -92,14 +92,14 @@ export type {
 /**
  * Upload panel — dual-mode floating/embedded surface.
  *
- * MODE 1 (map floating): shown via `visible` input above the map at z-upload-button,
+ * MODE 1 (map floating): shown via `visible` input above the map at z-index 200,
  * no backdrop, anchored under the upload button zone.
  * MODE 2 (embedded in workspace pane): `embeddedInPane=true`, always visible in the
  * Upload tab, inline layout — never an overlay.
  *
  * TODO(brn-sheet): BrnSheet was evaluated for the map floating mode but deferred.
  * Reasons: (1) BrnSheet uses CDK overlay semantics that conflict with the
- * `z-upload-button` stacking and no-backdrop requirement; (2) the embedded pane
+ * z-index 200 stacking plane and no-backdrop requirement; (2) the embedded pane
  * mode cannot use an overlay; (3) migrating would require either splitting the
  * component or adding CDK `attachTo`/`positionStrategy` non-trivially.
  * Re-evaluate when the map zone overlay contract is redesigned.

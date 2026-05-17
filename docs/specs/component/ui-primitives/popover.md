@@ -11,7 +11,7 @@ A **presentational** floating surface: background, border, corner radius, box sh
 
 ## What It Looks Like
 
-Matches the existing elevated dropdown surfaces in the app (`app-dropdown-shell`, filter/sort dropdown specs): warm white / dark-elevation surface using **`--color-bg-elevated`**, **1px** border **`--color-border`**, corner radius **`--radius-lg`**, shadow **`var(--shadow-lg)`** (**tweakcn `:root`** — **Batch 39** removed duplicate bridge rows; see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5), z-index **`--z-dropdown`**. No default padding — inner spacing belongs to slotted content components.
+Matches the existing elevated dropdown surfaces in the app (`app-dropdown-shell`, filter/sort dropdown specs): warm white / dark-elevation surface using **`--color-bg-elevated`**, **1px** border **`--color-border`**, corner radius **`--radius-lg`**, shadow **`var(--shadow-lg)`** (**tweakcn `:root`** — **Batch 39** removed duplicate bridge rows; see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5), **`z-index: 300`** (dropdown plane — **Phase 7 Batch 43**). No default padding — inner spacing belongs to slotted content components.
 
 ## Where It Lives
 
@@ -95,7 +95,7 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 | Border | `1px solid var(--color-border)` |
 | Radius | `--radius-lg` |
 | Elevation | `var(--shadow-lg)` (tweakcn ladder — not a legacy-bridge row) |
-| Z-index | `--z-dropdown` |
+| Z-index | literal **`300`** (`docs/design/tokens.md` §3.5) |
 
 ## Visual Behavior Contract
 
@@ -103,7 +103,7 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 
 | Behavior | Visual geometry owner | Stacking context owner | Interaction hit-area owner | Selector(s) | Layer (z-index/token) | Test oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Shell rectangle | `:host` | `:host` | slotted interactive elements | `:host` | `--z-dropdown` | Box matches parent-given box; shadow visible |
+| Shell rectangle | `:host` | `:host` | slotted interactive elements | `:host` | **`300`** | Box matches parent-given box; shadow visible |
 | Border / radius | `:host` | `:host` | — | `:host` | — | Border radius matches `--radius-lg` |
 | Scrollable body | `:host` | `:host` | slotted | `:host.popover--scrollable` | — | Scrollbar appears only when variant enabled |
 
@@ -128,7 +128,7 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 
 ## Acceptance Criteria
 
-- [ ] Host applies **`--color-bg-elevated`**, **`var(--shadow-lg)`** (tweakcn **`--shadow-*`**), **`--radius-lg`**, **`--z-dropdown`**, and **`--color-border`** — no hex/rgb literals in SCSS.
+- [ ] Host applies **`--color-bg-elevated`**, **`var(--shadow-lg)`** (tweakcn **`--shadow-*`**), **`--radius-lg`**, **`z-index: 300`**, and **`--color-border`** — no hex/rgb literals in SCSS.
 - [ ] No default padding on the host.
 - [ ] Slotted content can be any component tree; `PopoverComponent` imports no feature modules.
 - [ ] SCSS uses `@layer fp-components`; no `@layer fp-states` until a normative state is specified.

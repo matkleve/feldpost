@@ -314,6 +314,7 @@ Use token variables only:
 - **`var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)`** for fade-out choreography (**Phase 7 Batch 37** — former **`--transition-fade-out`**)
 - **`var(--motion-duration-fast) var(--motion-ease-out)`** for fade-in choreography (**Batch 37** — former **`--transition-fade-in`**)
 - **`60ms`** literal for media-display–style reveal delay after **`var(--motion-duration-fast) var(--motion-ease-out)`** (Phase 7 Batch 33 — **`--transition-reveal-delay`** removed from bridge)
+- **Batch 41:** **`--interactive-transition-standard`** is not on the legacy bridge — repeat the same **`120ms ease-out`** (or equivalent) multi-property **`transition`** list at callsites, or **`var(--motion-duration-fast) var(--motion-ease-out)`** when one timing fits all properties (see **`docs/design/motion.md`**).
 - Emphasis / longer choreography: **`200ms var(--motion-ease-out)`** (same **200ms** duration as the former **`--motion-duration-base`**, removed **Batch 36**; **Batch 31** removed **`--transition-emphasis`** from the bridge — see **`docs/design/tokens.md`** §3.6)
 
 ### Choreography Table (Required Before CSS)
@@ -419,7 +420,7 @@ Do not create one-off component-local treatments for shared semantic states.
 - [ ] Local @layer components and @layer states blocks used
 - [ ] Geometry only in components layer
 - [ ] State visuals/transitions only in states layer
-- [ ] All timings use transition token variables
+- [ ] All timings use **`var(--motion-duration-fast|*)`** / **`var(--motion-ease-out)`** or **documented literals** (**`60ms`** reveal delay; **Batch 41** multi-property **`120ms ease-out`** lists — not removed bridge shorthands like **`--interactive-transition-standard`**)
 - [ ] No magic-number timing values
 
 ### Visual Consistency

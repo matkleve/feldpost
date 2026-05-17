@@ -6,7 +6,7 @@ A vertical resize handle between the Map Zone and Workspace Pane. Lets the user 
 
 ## What It Looks Like
 
-A thin vertical bar (2px visual width, `--color-border` at rest) occupying the full height between map and workspace. Nearly invisible at rest — follows the Quiet Actions principle (constitution §1.8, Notion-inspired). On hover or active drag, the bar subtly widens and a centered **grip indicator** fades in: three short horizontal lines stacked vertically with `--spacing-1` (4px) gap, rendered in `--color-text-disabled`. The grip area inherits its vertical padding from `--container-padding-block-compact` (matching `.ui-item` row density) and its horizontal padding from `--container-padding-inline-compact` to create a transparent hit zone that meets the 2.75rem (44px) desktop touch-target minimum. `cursor: col-resize` on the full hit zone. On drag, the bar background shifts to `--color-border-strong`.
+A thin vertical bar (2px visual width, neutral border token at rest) occupying the full height between map and workspace. Nearly invisible at rest — follows the Quiet Actions principle (constitution §1.8, Notion-inspired). On hover or active drag, the bar subtly widens and a centered **grip indicator** fades in: three short horizontal lines stacked vertically with **`var(--spacing-1)`** (4px) gap, rendered in muted foreground ink. A transparent **hit zone** (**`2.75rem`** / **44px** wide), centered on the 2px host, captures pointers so the target meets the desktop minimum without changing flex layout. `cursor: col-resize` on the full hit zone. On drag, the bar background shifts to a stronger border mix (see implementation SCSS).
 
 ## Where It Lives
 
@@ -41,8 +41,8 @@ DragDivider                                ← host element, full height, col-re
 
 The grip indicator is a pill badge centered on the divider. It uses a `drag_indicator` Material icon as the visual affordance:
 
-- **Badge dimensions**: `var(--spacing-6)` wide × `var(--spacing-7)` (48px) tall — portrait orientation (matches default UI item media column / **Phase 7 Batch 31**)
-- **Badge style**: `--color-bg-surface` background, `1px solid --color-border`, `--shadow-sm`, `--container-radius-control` (8px) corners
+- **Badge dimensions**: **`var(--spacing-5)`** wide × **`var(--spacing-6)`** tall — portrait pill (matches **`drag-divider.component.scss`**; **Batch 41** removed **`--spacing-7`** — do not prescribe **`var(--spacing-7)`**)
+- **Badge style**: **`var(--card)`** surface, **`1px solid var(--border)`**, **`var(--shadow-sm)`**, **`var(--container-radius-control)`** corners
 - **Icon**: `drag_indicator`, `1rem` (16px), `--color-text-disabled` at rest → `--color-text-secondary` on hover
 - **Vertical position**: centered in the divider’s full height
 - **Horizontal position**: centered in the hit zone

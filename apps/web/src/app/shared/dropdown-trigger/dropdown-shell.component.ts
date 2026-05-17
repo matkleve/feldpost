@@ -1,5 +1,5 @@
 /**
- * Open-time stacking: shell host only — inline `z-index: var(--z-dropdown)`; no subtree co-owner; `hlmMenu` CVA `z-50` is subordinate (cascade).
+ * Open-time stacking: shell host only — inline `z-index: 300` (dropdown plane); no subtree co-owner; `hlmMenu` CVA `z-50` is subordinate (cascade).
  * @see docs/specs/component/filters/dropdown-system.md#open-time-stacking-owner-normative
  *
  * DropdownShell — generic fixed-position floating container.
@@ -23,7 +23,7 @@
  *   TEST (non-filter, revert before ship): **18rem** width, **max-height calc(18rem * 1.6)** — **`toolbarDropdownPositionWidthPx`** uses **288**. **Filter** keeps **32rem** width floor (**512** px clamp) — rule rows need the wider shell.
  *   Do not re-declare panel width in feature SCSS. Horizontal `left` clamp: caller TS + `toolbarDropdownPositionWidthPx`.
  * - **Map / context menus:** `[minWidth]` / `[maxWidth]` / `panelClass` per callsite — not the toolbar `rem` floors.
- * - **Stacking:** host `z-index: var(--z-dropdown)` is authoritative; `HlmMenuContentDirective` CVA also applies `z-50` on the same host — inline wins; do not remove the inline binding thinking CVA is sufficient.
+ * - **Stacking:** host `z-index: 300` is authoritative; `HlmMenuContentDirective` CVA also applies `z-50` on the same host — inline wins; do not remove the inline binding thinking CVA is sufficient.
  * - **Escape + outside-close** for the mounted shell: this component only; parents that wrap `app-dropdown-shell` must not duplicate `document:keydown.escape`.
  * @see docs/specs/component/filters/dropdown-system.md — Ownership matrix, Escape, Stacking, document:click
  *
@@ -50,7 +50,7 @@ import { HlmMenuContentDirective } from '../ui/menu';
     '[style.left.px]': 'left()',
     '[style.min-width.px]': 'minWidth()',
     '[style.max-width.px]': 'maxWidth()',
-    '[style.z-index]': '"var(--z-dropdown)"',
+    '[style.z-index]': '"300"',
     '(click)': '$event.stopPropagation()',
     '(document:click)': 'onDocumentClick($event)',
     '(document:keydown.escape)': 'onEscape()',

@@ -35,7 +35,7 @@
     top: 50%;
     left: calc(var(--spacing-3) + (0.25rem * 12) + var(--spacing-3));
     transform: translateY(-50%);
-    z-index: var(--z-modal);
+    z-index: 500;
     display: flex;
     flex-direction: row;
     align-items: stretch;

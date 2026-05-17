@@ -90,10 +90,10 @@ app-panel-trigger [data-state=closed|open]
 
 | From | To | Guard | Visual change | Timing |
 | --- | --- | --- | --- | --- |
-| `closed` | `open` | parent opens panel | Chevron **0deg → 180deg** | `transform` over `--fp-sys-motion-duration-short2` (`100ms`), easing `--motion-ease-standard` |
+| `closed` | `open` | parent opens panel | Chevron **0deg → 180deg** | `transform` over **`var(--motion-duration-fast)`** (`100ms`), easing **`cubic-bezier(0.4, 0, 0.2, 1)`** (matches implementation) |
 | `open` | `closed` | parent closes panel | Chevron **180deg → 0deg** | same |
 
-Background cross-fades use **`--interactive-transition-standard`** where background changes apply.
+Background / border / color cross-fades use a **literal multi-property list** (**`120ms ease-out`** per property — **Phase 7 Batch 41** removed **`--interactive-transition-standard`** from the bridge; see **`panel-trigger.component.scss`**).
 
 ### Transition guard
 
@@ -122,8 +122,8 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 | Padding (text-only layout) | `padding-left: var(--spacing-2)`, `padding-right: var(--spacing-1)` |
 | Chevron box | `var(--spacing-3)` |
 | Leading icon box | `var(--spacing-2)` |
-| Chevron rotation transition | `--fp-sys-motion-duration-short2`, `--motion-ease-standard` |
-| Background transition | `--interactive-transition-standard` |
+| Chevron rotation transition | **`var(--motion-duration-fast)`** + **`cubic-bezier(0.4, 0, 0.2, 1)`** |
+| Background transition | **Literal** **`120ms ease-out`** on `border-color`, `background`, `color` (Batch 41 — no bridge shorthand) |
 
 ## Visual Behavior Contract
 

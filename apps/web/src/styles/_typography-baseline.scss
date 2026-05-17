@@ -2,8 +2,8 @@
 // Must run after Tailwind Preflight so heading metrics are not reset away.
 // @see apps/web/AGENTS.md (typography ownership — global baseline only)
 
-// Exposes shared line-height steps for headings + app `var()` consumers after legacy bridge load order
-// @see docs/migration/phase-7-token-migration.md §Batch 41
+// Exposes typography primitives for headings + app `var()` consumers after legacy bridge load order
+// @see docs/migration/phase-7-token-migration.md §Batch 41 / §Batch 42
 :root {
   // Sets tight line-height for h1–h2 and other dense heading contexts
   // @see docs/migration/phase-7-token-migration.md §Batch 41
@@ -14,6 +14,30 @@
   // Sets reading line-height for long-form body-adjacent labels
   // @see docs/migration/phase-7-token-migration.md §Batch 41
   --line-height-reading: 1.4;
+  // Sets comfortable line-height for dialog copy and long labels (ex-legacy bridge Batch 42)
+  // @see docs/migration/phase-7-token-migration.md §Batch 42
+  --line-height-comfortable: 1.55;
+
+  // Typography scale — unified mathematical scale (ratio 1.13) with 0.75rem minimum (moved from legacy bridge Batch 42)
+  // @see docs/design/tokens.md §3.2
+  --font-size-2xs: 0.75rem;
+  --font-size-xs: calc(var(--font-size-2xs) * 1.13);
+  --font-size-sm: calc(var(--font-size-xs) * 1.13);
+  --font-size-md: calc(var(--font-size-sm) * 1.13);
+  --font-size-lg: calc(var(--font-size-md) * 1.13);
+  --font-size-xl: calc(var(--font-size-lg) * 1.13);
+  --font-size-2xl: calc(var(--font-size-xl) * 1.13);
+
+  // Shared font-weight steps for baseline + components (moved from legacy bridge Batch 42)
+  // @see docs/design/tokens.md §3.2
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  // Motion primitives consumed by transitions outside the legacy bridge (moved Batch 42)
+  // @see docs/design/tokens.md §3.6
+  --motion-duration-fast: 100ms;
+  --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
 }
 
 h1 {

@@ -161,9 +161,10 @@ module.exports = {
         map: 'var(--z-map)',
         // Panel plane literal — legacy `--z-panel` removed Batch 41 (`docs/migration/phase-7-token-migration.md` §Batch 41)
         panel: '100',
-        'upload-btn': 'var(--z-upload-button)',
-        dropdown: 'var(--z-dropdown)',
-        modal: 'var(--z-modal)',
+        // Phase 7 Batch 43 — legacy `--z-upload-button|--z-dropdown|--z-modal` bridge rows removed (`phase-7-token-migration.md` §Batch 43)
+        'upload-btn': '200',
+        dropdown: '300',
+        modal: '500',
       },
     },
   },

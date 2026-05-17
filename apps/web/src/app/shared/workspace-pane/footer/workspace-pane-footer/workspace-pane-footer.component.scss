@@ -51,7 +51,7 @@
   margin: 0;
   padding: 0;
   background: var(--overlay-scrim-30);
-  z-index: var(--z-modal);
+  z-index: 500;
 }
 
 .workspace-action__dialog {
@@ -64,7 +64,7 @@
   background: var(--card);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-4);
-  z-index: calc(var(--z-modal) + 1);
+  z-index: 501;
 
   h3 {
     margin: 0 0 var(--spacing-3);

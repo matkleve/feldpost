@@ -55,7 +55,7 @@
     left: 0;
     right: 0;
     top: 100%;
-    z-index: var(--z-dropdown);
+    z-index: 300;
     margin-top: var(--spacing-1);
     // Symmetric horizontal inset for suggestion rows (matches StandardDropdown token).
     // @see docs/specs/component/filters/dropdown-system.md

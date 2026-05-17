@@ -14,6 +14,10 @@ Tabular audit: issue statement, file paths, contract direction, P0/P1.
 
 - **Specs:** `docs/specs/component/upload/upload-panel.feedback-triage.md`
 
+## Related audits
+
+- **Design + migration queue (2026-05-17):** [upload-panel design audit](../../../migration/reports/upload-panel-design-audit-2026-05-17.md) — i18n gaps (project dialog, intake copy), `upload-panel.md` primitive hierarchy vs shipped DOM/BEM, duplicate `upload-panel__*` SCSS across shell vs item, motion literals, `::ng-deep` on universal-media. Phase mapping: report §3 (`docs/migration/README.md` indexes this under **Migration reports**).
+
 ## Actions
 
 | # | Owner action | Result |
@@ -52,6 +56,10 @@ flowchart TD
 | Hover thumbnail preview is missing on media rows                                                       | `apps/web/src/app/features/upload/upload-panel-item.component.html`, `apps/web/src/app/features/upload/upload-panel-item.component.scss`                                                                                     | Enforce deterministic thumbnail rendering for rows with preview-capable media; hover must reveal media thumbnail reliably.                                 | P1       |
 | Segmented switch style mismatch (lane labels not shown clearly enough)                                 | `apps/web/src/app/features/upload/upload-panel.component.html`, `apps/web/src/app/shared/segmented-switch/segmented-switch.component.scss`, `apps/web/src/app/features/upload/upload-panel.component.scss`                   | Lock segmented style contract: Queue/Uploaded/Issues are all icon+label controls with clear text labels.                                                   | P1       |
 | Upload Zone text disappears intermittently                                                             | `apps/web/src/app/features/upload/upload-panel.component.html`, `apps/web/src/app/features/upload/upload-panel.component.ts`                                                                                                 | Keep Upload Zone title/subtitle/helper text mounted and stable during all panel states.                                                                    | P0       |
+| Project select dialog uses hardcoded German confirm/cancel labels                                     | `apps/web/src/app/features/upload/upload-panel.component.html` (`app-project-select-dialog`)                                                                                                                               | Replace with `t(key, fallback)`; register keys in `docs/i18n/translation-workbench.csv`; regenerate `supabase/seed_i18n.sql` per i18n workflow.             | P0       |
+| Intake zone title, subtitle, and primary buttons not in i18n pipeline                                  | `apps/web/src/app/features/upload/upload-panel.component.html`                                                                                                                                                             | Same as above for all user-visible literals (title, subtitle, Upload folder, Take photo, duplicate dialog strings where still hardcoded).                   | P0       |
+
+**Note (2026-05-17):** The “Context menu opens upward first” row should be re-verified against current `UploadPanelItemComponent` menu placement (down-first with upward fallback when clipped). Close or narrow that row once QA confirms no remaining upward-first path.
 
 ## Wiring
 

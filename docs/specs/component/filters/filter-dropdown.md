@@ -31,7 +31,7 @@ Below the rules: "+ Add a filter" ghost button.
 
 - **Row container**: **No** `hlmMenuItem` on the full row (avoids primary-tint hover washing conjunction + fields). Row hover = **neutral** `muted-foreground` **8%** surface mix only.
 - **Rhythm**: Rule stack uses **`spacing-2`** gap and row padding (quiet density).
-- **Picker flyout**: **`position: fixed`**, **`z-index`**: `calc(var(--z-dropdown) + 2)` so lists render above the rule stack and escape `.filter-rules` scroll clipping; closes on **outside click**, **rule-list scroll**, or **window resize**.
+- **Picker flyout**: **`position: fixed`**, **`z-index: 302`** (dropdown plane **`300`** + **2**) so lists render above the rule stack and escape `.filter-rules` scroll clipping; closes on **outside click**, **rule-list scroll**, or **window resize**.
 - **Chevron**: Trigger chevrons use **`data-dd-part="chevron"`** + **explicit muted** color so they **do not** pick up row-hover emphasis.
 
 Shared shell width / scroll chrome: [`dropdown-system.md`](./dropdown-system.md).

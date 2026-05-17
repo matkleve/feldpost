@@ -52,12 +52,10 @@
   // Elevation aliases (`--elevation-*`) removed — Batch 37; use `var(--shadow-sm|md|lg|xl)` directly.
   // Batch 39: bridge keeps warm `--shadow-sm` + composite `--shadow-focus`; `md|lg|xl` come from tweakcn only.
 
-  // Z-index stacking ladder (audit issue #2, #13); map base plane uses literal `0` at `.map-container` (Batch 32).
+  // Z-index stacking ladder: map base plane uses literal `0` at `.map-container` (Batch 32).
   // `--z-toast` removed (Batch 35) — `toast-container.component.scss` uses literal `400` between dropdown (300) and modal (500).
   // `--z-panel` removed — Batch 41 (Tailwind `z-panel` + nav / workspace shell inlines literal `100`; proof §Batch 41).
-  --z-upload-button: 200;
-  --z-dropdown: 300;
-  --z-modal: 500;
+  // `--z-upload-button` / `--z-dropdown` / `--z-modal` removed — Batch 43 (numeric `z-index` at callsites + Tailwind `zIndex` theme literals `200|300|500`; proof §Batch 43).
 
   // Spacing scale — single 4px unit with modular multipliers (0.25rem base inlined — Batch 31).
   --spacing-1: calc(0.25rem * 1);
@@ -69,25 +67,15 @@
   // `--spacing-7` removed — Batch 41 (auth / nav / settings inlines `calc(0.25rem * 12)`; proof §Batch 41).
   --spacing-8: calc(0.25rem * 16);
 
-  // Typography scale — unified mathematical scale (ratio 1.13) with 0.75rem minimum.
-  --font-size-2xs: 0.75rem;
-  --font-size-xs: calc(var(--font-size-2xs) * 1.13);
-  --font-size-sm: calc(var(--font-size-xs) * 1.13);
-  --font-size-md: calc(var(--font-size-sm) * 1.13);
-  --font-size-lg: calc(var(--font-size-md) * 1.13);
-  --font-size-xl: calc(var(--font-size-lg) * 1.13);
-  --font-size-2xl: calc(var(--font-size-xl) * 1.13);
+  // Modular `--font-size-2xs`…`--font-size-2xl`, font-weight ladder, `--line-height-comfortable`, and
+  // `--motion-duration-fast` / `--motion-ease-out` → `_typography-baseline.scss` `:root` (Batch 42).
+  // @see docs/migration/phase-7-token-migration.md §Batch 42
   // 3xl step removed (Batch 33) — single callsite in settings uses `calc(var(--font-size-2xl) * 1.13)`.
   // @see docs/migration/phase-7-token-migration.md § Batch 33
   // `--font-size-4xl` removed — Batch 40 (three callsites inline `calc(var(--font-size-2xl) * 1.13 * 1.13)`).
 
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-
-  // Line-height ladder: `--line-height-tight|solid|reading` → `_typography-baseline.scss` `:root` (Batch 41).
+  // Line-height ladder: `--line-height-tight|solid|reading|comfortable` → `_typography-baseline.scss` `:root` (Batch 41–42).
   // `--line-height-snug|cozy|compact|normal` removed — Batch 41 (numeric inlines at callsites; proof §Batch 41).
-  --line-height-comfortable: 1.55;
 
   // Container geometry — containers define the alignment boundaries that
   // nested content, dropdowns, and panels should inherit.
@@ -110,12 +98,9 @@
 
   /* ── Motion & Micro-interactions ── */
 
-  /* Durations */
-  --motion-duration-fast: 100ms;
+  // `--motion-duration-fast` / `--motion-ease-out` → `_typography-baseline.scss` `:root` (Batch 42).
+  // @see docs/migration/phase-7-token-migration.md §Batch 42
   // `--motion-duration-slow` removed — Batch 40 (four callsites use literal `300ms`).
-
-  /* Easings */
-  --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
 
   // `--transition-fade-in` / `--transition-fade-out` / `--animation-skeleton-pulse` removed — Batch 37 (call sites use `var(--motion-duration-fast) var(--motion-ease-out)` / same + `cubic-bezier(0.4, 0, 1, 1)` / literal `media-display-pulse 200ms ease-in-out infinite`).
 

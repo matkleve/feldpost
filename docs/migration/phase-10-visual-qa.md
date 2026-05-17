@@ -40,6 +40,14 @@ Use this list **during** Phase 7–8 merges and before release; it complements t
 - [ ] Full-width pill groups: value column fills where **`--hlm-pill-toggle-width: 100%`** (or equivalent) is applied—no collapsed tracks.
 - [ ] **A11y:** `aria-pressed` / `role="switch"` (or correct primitives) for boolean rows; no decorative-only toggles for real state.
 
+**Upload panel** (`features/upload`; [design audit](./reports/upload-panel-design-audit-2026-05-17.md))
+
+- [ ] **Three themes:** intake surface, dashed drop zone, lane `hlmPillToggle`, row cards, location-mode pill — borders and muted text on **dark** and **sandstone** (no muddy hover/focus).
+- [ ] **i18n:** project dialog confirm/cancel are locale-driven (not hardcoded German); intake title/subtitle/actions use keyed copy for non-English locales.
+- [ ] **Row hover:** thumbnail visibility vs duplicate shortcut — behavior matches reconciled spec/triage (see [upload-panel.feedback-triage.md](../specs/component/upload/upload-panel.feedback-triage.md)).
+- [ ] **Embedded mode:** selection checkboxes on hover/focus; bulk footer icon row + destructive affordance for remove.
+- [ ] **Row menu:** `more_vert` panel opens down-first with viewport clamp; no clipped menu at 375px height.
+
 **Theme smoke (`default`, `[data-theme="dark"]`, `[data-theme="sandstone"]`)**
 
 - [ ] Re-run the bullets above on each theme; **hard-refresh** between theme toggles in dev to avoid stale CSS variables.
@@ -53,6 +61,19 @@ Use this list **during** Phase 7–8 merges and before release; it complements t
 - **Three themes:** exercise `ThemeService` (or equivalent) toggles; hard-refresh between runs to avoid stale CSS variable cache during development.
 - **Viewports:** at minimum **375×812** (mobile nav), **1280×800** (desktop workspace + map), **1920×1080** (projects table).
 - **Browsers:** Chromium + one **Firefox** or **Safari** spot-check for focus rings and overlay clipping.
+
+---
+
+## Stacking sanity
+
+Cross-surface paint order is easy to regress during token or layout refactors. QA should **name the owning contract** (spec + host), not ad-hoc `z-index` tweaks on wrappers.
+
+- **Menus / anchored shells:** Treat open-time elevation per [`dropdown-system.md`](../specs/component/filters/dropdown-system.md#open-time-stacking-owner-normative) — the **dropdown shell host** owns stacking for that anchored surface; do not “fix” overlap by stacking parents or duplicate token bindings.
+- **Map canvas vs chrome:** Leaflet and related globals are hoisted under **`app-map-shell`**; confirm map tiles, controls, and in-map UI still sit in the **intended** order relative to rails, panels, and floating shells after hoist or token edits.
+- **Upload intake vs menus:** With the upload flow open, open row/toolbar menus and anchored panels; nothing should disappear under the map, under the wrong rail, or behind a sibling that should read as **deeper** in the stack.
+- **Modals / dialogs vs menus:** Where a dialog can follow a menu (or vice versa), verify the **foreground** surface receives focus and pointer hits; no half-visible menu “under” a modal unless the spec documents that choreography.
+- **Parallel surfaces:** If upload overlay, workspace chrome, and map shell are visible together, spot-check **resize**, **narrow workspace**, and **mobile nav** — stacking should remain stable without introducing new stacking contexts on layout wrappers “for insurance.”
+- **Spec-first debugging:** When ordering looks wrong, read the relevant spec sections (dropdown shell owner, map-shell hoist, dialog layer roles) before changing CSS; prefer **one owner** per surface class over scattered literals.
 
 ---
 

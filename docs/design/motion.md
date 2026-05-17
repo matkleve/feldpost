@@ -76,4 +76,5 @@ Notes:
 
 - Keep geometry stable while transitions run; animate only visual properties.
 - Prefer **`var(--motion-duration-fast) var(--motion-ease-out)`** for opacity/transform fades (**Phase 7 Batch 37** removed **`--transition-fade-in`** / **`--transition-fade-out`** from the bridge; same timing as the former aliases).
+- **Phase 7 Batch 41:** **`--interactive-transition-standard`** was removed from the legacy bridge — multi-property background/border/color cross-fades use **literal lists** at callsites (for example **`120ms ease-out`** per property) or **`var(--motion-duration-fast) var(--motion-ease-out)`** where a single shorthand matches; see **`docs/migration/phase-7-token-migration.md`** §Batch 41 and **`panel-trigger.component.scss`**.
 - For panel/container-level open-close choreography, use **`200ms cubic-bezier(0.4, 0, 0.2, 1)`** (canonical panel timing in **`docs/design/tokens.md`** §3.6; **Batch 36** removed **`--motion-duration-base`** / **`--motion-ease-standard`**) or equivalent Tailwind duration/easing utilities instead of a dedicated CSS alias.

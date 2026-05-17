@@ -51,8 +51,8 @@ Implicit ownership caused “edit the wrong layer, no visible change.” The tab
 | **Inner fill + horizontal padding** | `StandardDropdownComponent` (`width: 100%`, `padding-inline`, host CSS vars) | Shell must not duplicate body padding | Body fills shell; no double horizontal inset on shell |
 | **Max height / scroll band (toolbar body)** | `standard-dropdown.component.scss` (e.g. `.workspace-toolbar-menu-panel`, `standard-dropdown__items--filter-rules-band`) | Shell `:host` stays generic flex/overflow only | Filter rules: one scroll host owns `scrollbar-gutter` per inventory table above |
 | **Outside-close + Escape for mounted shell** | **`DropdownShellComponent` only** (`document:click` with `contains`, `document:keydown.escape` → `closeRequested`) | Parents that wrap `app-dropdown-shell` must **not** duplicate Escape — see [Escape (keyboard)](#escape-keyboard) | Escape closes menu once; no duplicate listeners on workspace toolbar |
-| **Stacking for shell host** | Inline **`z-index: var(--z-dropdown)`** on `DropdownShellComponent` host — **authoritative** — see [Stacking (z-index)](#stacking-z-index) | Do not remove inline `z-index` thinking CVA handles elevation | Shell stacks above map/workspace layers per token |
-| **Filter inline picker flyout** | `FilterDropdownComponent` (fixed geom, flyout-only `document:click`, `z-index: calc(var(--z-dropdown) + 2)`) | Shell must not branch on picker fields | Two `document:click` scopes are intentional — see [document:click (shell vs filter flyout)](#documentclick-shell-vs-filter-flyout) |
+| **Stacking for shell host** | Inline **`z-index: 300`** on `DropdownShellComponent` host — **authoritative** — see [Stacking (z-index)](#stacking-z-index) | Do not remove inline `z-index` thinking CVA handles elevation | Shell stacks above map/workspace layers per [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 |
+| **Filter inline picker flyout** | `FilterDropdownComponent` (fixed geom, flyout-only `document:click`, **`z-index: 302`**) | Shell must not branch on picker fields | Two `document:click` scopes are intentional — see [document:click (shell vs filter flyout)](#documentclick-shell-vs-filter-flyout) |
 | **CDK drag vs shell close** | Toolbar: **`[outsideCloseEnabled]="!isDragging()"`**; grouping emits drag start/end | Shell stays generic | Drag does not close shell until drag end + timeout |
 | **Domain rows / rules** | Sort, grouping, filter, projects feature components | Shared body does not own domain row markup | — |
 
@@ -68,19 +68,19 @@ Implicit ownership caused “edit the wrong layer, no visible change.” The tab
 
 #### Open-time stacking owner (normative)
 
-**Single owner:** While a toolbar (or other) menu is open, **stacking for the anchored surface** is owned **only** by the **`DropdownShellComponent` host** — [`apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts`](../../../../apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts) + **`.scss`** — via the host’s inline **`z-index: var(--z-dropdown)`** binding. No other element in the shell subtree is a co-owner of product elevation for that surface.
+**Single owner:** While a toolbar (or other) menu is open, **stacking for the anchored surface** is owned **only** by the **`DropdownShellComponent` host** — [`apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts`](../../../../apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts) + **`.scss`** — via the host’s inline **`z-index: 300`** binding. No other element in the shell subtree is a co-owner of product elevation for that surface.
 
-**`hlmMenu` / `HlmMenuContentDirective` CVA (`z-50` in [`menu-variants.ts`](../../../../apps/web/src/app/shared/ui/menu/menu-variants.ts)):** May apply on the same host; it does **not** establish a parallel stacking contract. On **`app-dropdown-shell`**, the **inline shell token wins** for `z-index`; CVA `z-50` is **subordinate** (see cascade below).
+**`hlmMenu` / `HlmMenuContentDirective` CVA (`z-50` in [`menu-variants.ts`](../../../../apps/web/src/app/shared/ui/menu/menu-variants.ts)):** May apply on the same host; it does **not** establish a parallel stacking contract. On **`app-dropdown-shell`**, the **inline `z-index: 300` wins** for `z-index`; CVA `z-50` is **subordinate** (see cascade below).
 
-**Parents must not:** Put **`z-index`**, **`isolation`**, or **`transform`** (or other properties that create a **new stacking context**) on layout wrappers around **`app-dropdown-shell`** to chase overlap bugs; do **not** duplicate **`var(--z-dropdown)`** on ancestors “for insurance.” Fix ordering in **shell** / **token** / **map–chrome** contracts — not parent duplication.
+**Parents must not:** Put **`z-index`**, **`isolation`**, or **`transform`** (or other properties that create a **new stacking context**) on layout wrappers around **`app-dropdown-shell`** to chase overlap bugs; do **not** duplicate **`300`** on ancestors “for insurance.” Fix ordering in **shell** / **map–chrome** contracts — not parent duplication.
 
-**Authoritative value:** `DropdownShellComponent` sets **`[style.z-index]="'var(--z-dropdown)'"`** on its host. This design token is the **intended** product elevation for floating shells (toolbar menus, map menus, upload, etc.).
+**Authoritative value:** `DropdownShellComponent` sets **`[style.z-index]="'300'"`** on its host. This is the **intended** product elevation for floating shells (toolbar menus, map menus, upload, etc.) — see **`docs/design/tokens.md`** §3.5.
 
 **Same host also applies `HlmMenuContentDirective`:** `menuContentVariants` in [`apps/web/src/app/shared/ui/menu/menu-variants.ts`](../../../../apps/web/src/app/shared/ui/menu/menu-variants.ts) includes Tailwind **`z-50`**. That CVA is shared with **non-shell** menu surfaces.
 
-**Cascade:** Inline **`z-index`** wins over the CVA class-based **`z`** for that property on the shell host. On **`app-dropdown-shell`**, the **token on the host is the stacking owner**; CVA `z-50` is **subordinate** and must not be treated as redundant noise safe to delete in isolation.
+**Cascade:** Inline **`z-index`** wins over the CVA class-based **`z`** for that property on the shell host. On **`app-dropdown-shell`**, the **literal `300` on the host is the stacking owner**; CVA `z-50` is **subordinate** and must not be treated as redundant noise safe to delete in isolation.
 
-**Do not remove** the inline **`var(--z-dropdown)`** binding assuming “menu CVA already sets z-index” — removal can regress ordering against map markers, workspace chrome, or other layers depending on paint order.
+**Do not remove** the inline **`300`** **`z-index`** binding assuming “menu CVA already sets z-index” — removal can regress ordering against map markers, workspace chrome, or other layers depending on paint order.
 
 **Optional code follow-up (separate PR / QA):** Strip or branch CVA `z-50` for shell-only hosts so the source matches one owner; not required if this spec + shell file comments stay current.
 

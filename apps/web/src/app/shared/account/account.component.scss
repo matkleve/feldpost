@@ -229,7 +229,7 @@
 .account-delete-overlay {
   position: fixed;
   inset: 0;
-  z-index: var(--z-modal);
+  z-index: 500;
   background: color-mix(in srgb, var(--background) 50%, transparent);
   display: grid;
   place-items: center;

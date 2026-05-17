@@ -7,28 +7,35 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 ## Legacy bridge inventory (`_legacy-design-tokens.scss`)
 
-**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge inventory* (keep both in lockstep). Only these **`--*`** names are **defined on `:root`** in `apps/web/src/styles/_legacy-design-tokens.scss` (light). **`@mixin dark-theme-overrides`** adjusts **`--shadow-sm`**, **`--interactive-focus-ring`**, and **`--shadow-focus`** only. **`--shadow-md|lg|xl`**, tweakcn semantic colors, and MD3 **`--fp-sys-*`** reference tables are **not** emitted from this file.
+**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge inventory* (keep both in lockstep). **`@mixin dark-theme-overrides`** in **`_legacy-design-tokens.scss`** adjusts **`--shadow-sm`**, **`--interactive-focus-ring`**, and **`--shadow-focus`** only. **`--shadow-md|lg|xl`**, tweakcn semantic colors, and MD3 **`--fp-sys-*`** reference tables are **not** emitted from the legacy bridge file.
 
-**Layer A (bridge primitives)**
+### Typography baseline (`_typography-baseline.scss`)
+
+**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded **after** **`meta.load-css('styles/legacy-design-tokens')`** in **`styles.scss`**) defines modular **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, and **`--motion-duration-fast`** / **`--motion-ease-out`** — Phase 7 **Batch 41** (three line-heights) + **Batch 42** (font scale, weights, comfortable line-height, motion primitives).
+
+| Token |
+| --- |
+| `--line-height-tight`, `--line-height-solid`, `--line-height-reading`, `--line-height-comfortable` |
+| `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
+| `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
+| `--motion-duration-fast`, `--motion-ease-out` |
+
+**Layer A (legacy bridge primitives — `_legacy-design-tokens.scss` `:root` only)**
 
 | Token |
 | --- |
 | `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full` |
 | `--shadow-sm`, `--shadow-focus` |
-| `--z-panel`, `--z-upload-button`, `--z-dropdown`, `--z-modal` |
-| `--spacing-1` … `--spacing-8` |
-| `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
-| `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
-| `--line-height-tight`, `--line-height-solid`, `--line-height-snug`, `--line-height-cozy`, `--line-height-reading`, `--line-height-compact`, `--line-height-normal`, `--line-height-comfortable` |
+| `--spacing-1` … `--spacing-6`, `--spacing-8` (the **48px** / **12×4px** step uses **`calc(0.25rem * 12)`** at callsites — **Batch 41** removed **`--spacing-7`**) |
 | `--container-radius-control`, `--container-radius-panel` |
-| `--motion-duration-fast`, `--motion-ease-out` |
+
+**Phase 7 Batch 43:** product **z-index** planes (**`200`** map chrome CTAs, **`300`** dropdown / popover shells and **`302`** filter picker flyout `+2`, **`500`** modal plane and **`501`** workspace footer drag) are **not** **`--z-*`** custom properties on the legacy bridge — use literals in SCSS / **`theme.extend.zIndex`** in **`tailwind.config.js`** (`z-upload-btn`, `z-dropdown`, `z-modal`).
 
 **Layer B (bridge)**
 
 | Token |
 | --- |
 | `--interactive-focus-ring` |
-| `--interactive-transition-standard` |
 
 **Layer C (bridge)**
 
@@ -289,7 +296,7 @@ The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes w
 
 #### Phase 7 — MD3 system tokens §3.1b–g (documentation only)
 
-**`--fp-sys-shape-*`**, **`--fp-sys-spacing-*`**, **`--fp-sys-elevation-*`**, **`--fp-sys-typescale-*`**, **`--fp-sys-state-*`**, and **`--fp-sys-motion-*`** in the tables below follow the same rule as **`--fp-sys-color-*`** in §3.1a: they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 17** (2026-05-17). Use **`--radius-*`**, **`--spacing-*`** (§3.3), **`--shadow-*`** (§3.5; **Batch 37** removed product **`--elevation-*`** bridge aliases — bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**; **Batch 39** removed duplicate **`--shadow-md|lg|xl`** from **`_legacy-design-tokens.scss`** so those three names resolve from **tweakcn `:root`**, while **`--shadow-sm`** / **`--shadow-focus`** stay on the bridge), the **`--font-size-*`** scale (§3.2), and **`--motion-*`** (§3.6) in implementation.
+**`--fp-sys-shape-*`**, **`--fp-sys-spacing-*`**, **`--fp-sys-elevation-*`**, **`--fp-sys-typescale-*`**, **`--fp-sys-state-*`**, and **`--fp-sys-motion-*`** in the tables below follow the same rule as **`--fp-sys-color-*`** in §3.1a: they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 17** (2026-05-17). Use **`--radius-*`**, **`--spacing-*`** (§3.3), **`--shadow-*`** (§3.5; **Batch 37** removed product **`--elevation-*`** bridge aliases — bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**; **Batch 39** removed duplicate **`--shadow-md|lg|xl`** from **`_legacy-design-tokens.scss`** so those three names resolve from **tweakcn `:root`**, while **`--shadow-sm`** / **`--shadow-focus`** stay on the bridge), the **`--font-size-*`** scale (§3.2; **`apps/web/src/styles/_typography-baseline.scss`** `:root` after **Batch 42**), and **`--motion-duration-fast`** / **`--motion-ease-out`** (§3.6; same file after **Batch 42**) in implementation.
 
 ---
 
@@ -438,7 +445,7 @@ All text is set in the system sans-serif stack unless the brand acquires a custo
 font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 ```
 
-**Type scale (rem, base 16px, ratio 1.13):** the modular steps on `:root` multiply by the literal **1.13** factor (**Phase 7 Batch 31** removed the **`--font-size-ratio`** custom property — it had no `var(--font-size-ratio)` consumers outside the bridge).
+**Type scale (rem, base 16px, ratio 1.13):** the modular steps are emitted on **`_typography-baseline.scss`** `:root` (Phase 7 **Batch 42** — moved from the legacy bridge; same **`calc(* * 1.13)`** chain). **Batch 31** removed the **`--font-size-ratio`** indirection — steps multiply by the literal **1.13** factor.
 
 There is **no** separate **`--font-size-3xs`** step: a deprecated **`--font-size-3xs`** alias (same size as **2xs**) lived only in the legacy bridge **`LEGACY MAPPING`** block and was **removed** in Phase 7 **Batch 20** (2026-05-17)—use **`--font-size-2xs`** for captions and dense meta.
 
@@ -468,8 +475,9 @@ Feldpost uses a **0.25rem (4px) base unit** with a modular scale on `:root` (**P
 | `--spacing-4` | `calc(0.25rem * 4)` |
 | `--spacing-5` | `calc(0.25rem * 6)` |
 | `--spacing-6` | `calc(0.25rem * 8)` |
-| `--spacing-7` | `calc(0.25rem * 12)` |
 | `--spacing-8` | `calc(0.25rem * 16)` |
+
+**Batch 41:** the **12×4px** step (**48px**) is **`calc(0.25rem * 12)`** at callsites — **`--spacing-7`** is not a bridge `var()` anymore.
 
 Key layout dimensions:
 
@@ -565,16 +573,19 @@ The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-s
 
 ### Z-index ladder
 
-Use semantic z-index tokens only. **Phase 7 Batch 32:** the base map plane no longer uses **`--z-map`** on **`_legacy-design-tokens.scss`** — **`apps/web/src/app/features/map/map-shell/_map-shell-layout.scss`** sets **`z-index: 0`** on **`.map-container`**.
+Use the **numeric product ladder** below (literals in SCSS or Tailwind **`z-*`** theme keys — **Phase 7 Batch 43** removed **`--z-upload-button`**, **`--z-dropdown`**, **`--z-modal`** from **`_legacy-design-tokens.scss`**). **Phase 7 Batch 32:** the base map plane no longer uses **`--z-map`** on **`_legacy-design-tokens.scss`** — **`apps/web/src/app/features/map/map-shell/_map-shell-layout.scss`** sets **`z-index: 0`** on **`.map-container`**.
 
-| Token               | Value | Layer intent                   |
-| ------------------- | ----- | ------------------------------ |
-| `--z-panel`         | `100` | Panel/rail surfaces            |
-| `--z-upload-button` | `200` | High-priority map CTA controls |
-| `--z-dropdown`      | `300` | Context/dropdown overlays      |
-| `--z-modal`         | `500` | Modal/dialog top layer         |
+| Plane / role | Value | Layer intent |
+| --------------------- | ----- | ------------------------------ |
+| Panel / rail stack | **`100`** | Literal **`z-index`** or Tailwind **`z-panel`** (**Batch 41** — **`--z-panel`** bridge row removed) |
+| Map chrome / upload CTA | **`200`** | Search bar, upload FAB, GPS, style switch, placement banner |
+| Dropdown / popover shell | **`300`** | **`DropdownShellComponent`** host, popover, inline overlays |
+| Filter picker flyout (`+2`) | **`302`** | **`filter-dropdown.component.scss`** — above rule stack |
+| Toast stack | **`400`** | **`toast-container.component.scss`** |
+| Modal / workspace modal chrome | **`500`** | Settings overlay, media detail, account, upload panel chrome |
+| Workspace footer drag (`+1`) | **`501`** | **`workspace-pane-footer.component.scss`** — above modal chrome |
 
-**Phase 7 Batch 35:** **`--z-toast`** was removed from the bridge — **`toast-container.component.scss`** uses literal **`z-index: 400`** (between **`--z-dropdown` (300)** and **`--z-modal` (500)**).
+**Phase 7 Batch 35:** **`--z-toast`** was removed from the bridge — **`toast-container.component.scss`** uses literal **`z-index: 400`** (between **dropdown plane `300`** and **modal plane `500`**).
 
 ### Elevation (physical shadows)
 
@@ -678,7 +689,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | `--font-weight-medium` | `Font/Weight/Medium` | `number` | ✓ primitive |
 | `--motion-duration-fast` | `Motion/Duration/Fast` | `duration` | ✓ primitive |
 | **removed from bridge** — **Batch 36** | **`Motion/Duration/Base`**, **`Motion/Ease/Standard`** | `duration` / `cubicBezier` | Use **`Motion/Duration/Fast`** / **`Slow`** + **`Motion/Ease/Out`** in Figma, or literals **`200ms`** / **`cubic-bezier(0.4, 0, 0.2, 1)`** at callsites |
-| `--z-modal` | `Z/Modal` | `number` | ✓ primitive |
+| **removed from bridge** — **Batch 43** | **`Z/UploadBtn`**, **`Z/Dropdown`**, **`Z/Modal`** | `number` | Use literals **`200`**, **`300`**, **`500`** (plus **`302`** / **`501`** where `+2` / `+1` calcs apply) at callsites — not emitted as **`--z-*`** on legacy bridge |
 
 ### What is skipped and why
 

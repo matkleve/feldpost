@@ -18,7 +18,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-md);
-    z-index: var(--z-dropdown);
+    z-index: 300;
   }
 
   // Optional scroll containment for tall panels

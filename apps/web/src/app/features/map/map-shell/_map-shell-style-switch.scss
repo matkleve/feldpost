@@ -5,7 +5,7 @@
   position: absolute;
   top: var(--spacing-3);
   left: var(--spacing-3);
-  z-index: var(--z-upload-button);
+  z-index: 200;
   display: inline-flex;
   align-items: flex-start;
 

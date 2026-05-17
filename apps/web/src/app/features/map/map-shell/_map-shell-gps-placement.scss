@@ -8,7 +8,7 @@
   position: absolute;
   bottom: var(--spacing-5);
   right: var(--spacing-4);
-  z-index: var(--z-upload-button);
+  z-index: 200;
   width: var(--touch-target-base);
   height: var(--touch-target-base);
   border: none;
@@ -60,7 +60,7 @@
   bottom: var(--spacing-5);
   left: 50%;
   transform: translateX(-50%);
-  z-index: var(--z-upload-button);
+  z-index: 200;
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
