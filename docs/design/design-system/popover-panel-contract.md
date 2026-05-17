@@ -6,7 +6,7 @@ Back to master: [master-spec.md](./master-spec.md)
 
 Define one canonical popover panel contract for contextual content and lightweight action groups without introducing feature-local overlay shells.
 
-**Toolbar menu panels:** Product-facing **anchored toolbar menus** (Filter / Sort / Grouping / Projects) use `app-dropdown-shell` + `app-standard-dropdown`; the **normative interaction inventory** (search, reset, footer, scrollbar gutter, shared min-width floor) lives in **[dropdown-system.md — Toolbar menu panels (anchored UI)](../../specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui)** — extend that file instead of duplicating tables here.
+**Toolbar menu panels:** Product-facing **anchored toolbar menus** (Filter / Sort / Grouping / Projects) use `app-dropdown-shell` + `app-standard-dropdown`; the **normative interaction inventory** (search, reset, footer, scrollbar gutter, shared min-width floor) lives in **[dropdown-system.md — Toolbar menu panels (anchored UI)](../../specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui)** — extend that file instead of duplicating tables here. **Ownership** (width floor vs body, `left` clamp, Escape, stacking / z-index, dual `document:click` for filter flyout, map vs toolbar shells): **[dropdown-system.md — Ownership matrix (normative)](../../specs/component/filters/dropdown-system.md#ownership-matrix-normative)**.
 
 Status: draft
 Family: Menus, Overlays, and Dialogs

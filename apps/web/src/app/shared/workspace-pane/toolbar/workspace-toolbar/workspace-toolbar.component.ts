@@ -1,5 +1,5 @@
 import type { OnInit } from '@angular/core';
-import { Component, signal, computed, HostListener, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
 import {
@@ -186,10 +186,5 @@ export class WorkspaceToolbarComponent implements OnInit {
     if (value !== 'row' && value !== 'small' && value !== 'medium' && value !== 'large') return;
     this.viewService.setThumbnailSizePreset(value as ThumbnailSizePreset);
     this.cardVariantSettings.setVariant('map', value as CardVariant);
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    this.closeDropdown();
   }
 }

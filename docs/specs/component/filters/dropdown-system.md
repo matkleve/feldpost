@@ -39,6 +39,52 @@ Keep **`rem`**, **`min(..., calc(100vw - 2rem))`**, **`toolbar-menu-panel-layout
 
 **Non-toolbar `app-dropdown-shell` callers** (map context, upload row, detail tags, etc.) pass explicit **`[minWidth]`** / **`panelClass`** as needed; they are **not** covered by the `toolbar-dropdown` width floor unless those classes are reused.
 
+### Ownership matrix (normative)
+
+Implicit ownership caused “edit the wrong layer, no visible change.” The table below is the **single contract** for the anchored stack (toolbar + shared body + feature panels + filter flyout). **Test oracles** in the last column.
+
+| Concern | Owner | Forbidden elsewhere | Test oracle |
+| --- | --- | --- | --- |
+| **Toolbar panel width floor** (26rem / 32rem, `100vw - 2rem`) | `DropdownShellComponent` SCSS (`:host.toolbar-dropdown`, `.toolbar-dropdown--filter`) + `panelClass` from **`toolbarDropdownPanelClass`** | Feature panel SCSS must not redefine the shell width floor as “the menu width” | Widen filter → change **shell SCSS** + **`toolbarDropdownPositionWidthPx`** only |
+| **Map / context shell width** | `DropdownShellComponent` **`[minWidth]`** / **`[maxWidth]`** / `panelClass` per callsite (e.g. map context menu) | Do not assume toolbar `rem` floors apply — map uses **px inputs** when needed | Map menu width → callsite bindings + map shell SCSS, not `toolbar-menu-panel-layout.ts` |
+| **Horizontal `left` clamp** | Toolbar TS: **`toolbarDropdownPositionWidthPx(activeId)`** in `toolbar-menu-panel-layout.ts` | `app-standard-dropdown` and feature panels must not compute viewport `left` | Clamp matches active panel width (416 vs 512) |
+| **Inner fill + horizontal padding** | `StandardDropdownComponent` (`width: 100%`, `padding-inline`, host CSS vars) | Shell must not duplicate body padding | Body fills shell; no double horizontal inset on shell |
+| **Max height / scroll band (toolbar body)** | `standard-dropdown.component.scss` (e.g. `.workspace-toolbar-menu-panel`, `standard-dropdown__items--filter-rules-band`) | Shell `:host` stays generic flex/overflow only | Filter rules: one scroll host owns `scrollbar-gutter` per inventory table above |
+| **Outside-close + Escape for mounted shell** | **`DropdownShellComponent` only** (`document:click` with `contains`, `document:keydown.escape` → `closeRequested`) | Parents that wrap `app-dropdown-shell` must **not** duplicate Escape — see [Escape (keyboard)](#escape-keyboard) | Escape closes menu once; no duplicate listeners on workspace toolbar |
+| **Stacking for shell host** | Inline **`z-index: var(--z-dropdown)`** on `DropdownShellComponent` host — **authoritative** — see [Stacking (z-index)](#stacking-z-index) | Do not remove inline `z-index` thinking CVA handles elevation | Shell stacks above map/workspace layers per token |
+| **Filter inline picker flyout** | `FilterDropdownComponent` (fixed geom, flyout-only `document:click`, `z-index: calc(var(--z-dropdown) + 2)`) | Shell must not branch on picker fields | Two `document:click` scopes are intentional — see [document:click (shell vs filter flyout)](#documentclick-shell-vs-filter-flyout) |
+| **CDK drag vs shell close** | Toolbar: **`[outsideCloseEnabled]="!isDragging()"`**; grouping emits drag start/end | Shell stays generic | Drag does not close shell until drag end + timeout |
+| **Domain rows / rules** | Sort, grouping, filter, projects feature components | Shared body does not own domain row markup | — |
+
+### Escape (keyboard)
+
+**Owner:** **`DropdownShellComponent`** — host listens for **`document:keydown.escape`** and emits **`closeRequested`**.
+
+**Rationale:** The shell’s lifecycle matches the **panel DOM** (`@if` mounts the shell when open). Escape means “dismiss the anchored surface currently in the tree.” Parents such as **`WorkspaceToolbarComponent`** own **which** panel id is open and trigger geometry; they must **not** also own global Escape for that surface — that couples the parent to presentation (shell vs future CDK overlay) and duplicates handlers.
+
+**Normative rule:** Do **not** register **`document:keydown.escape`** on toolbar hosts (or any parent) that wrap **`app-dropdown-shell`**. Close the menu by handling **`(closeRequested)`** from the shell only.
+
+### Stacking (z-index)
+
+**Authoritative value:** `DropdownShellComponent` sets **`[style.z-index]="'var(--z-dropdown)'"`** on its host. This design token is the **intended** product elevation for floating shells (toolbar menus, map menus, upload, etc.).
+
+**Same host also applies `HlmMenuContentDirective`:** `menuContentVariants` in [`apps/web/src/app/shared/ui/menu/menu-variants.ts`](../../../../apps/web/src/app/shared/ui/menu/menu-variants.ts) includes Tailwind **`z-50`**. That CVA is shared with **non-shell** menu surfaces.
+
+**Cascade:** Inline **`z-index`** wins over the CVA class-based **`z`** for that property on the shell host. On **`app-dropdown-shell`**, the **token on the host is the stacking owner**; CVA `z-50` is **subordinate** and must not be treated as redundant noise safe to delete in isolation.
+
+**Do not remove** the inline **`var(--z-dropdown)`** binding assuming “menu CVA already sets z-index” — removal can regress ordering against map markers, workspace chrome, or other layers depending on paint order.
+
+**Optional code follow-up (separate PR / QA):** Strip or branch CVA `z-50` for shell-only hosts so the source matches one owner; not required if this spec + shell file comments stay current.
+
+### document:click (shell vs filter flyout)
+
+Feldpost accumulated **two** document-level click paths when toolbar menus and filter pickers evolved in parallel. Both are **intentional** and **orthogonal scopes**:
+
+1. **`DropdownShellComponent`:** `document:click` → if `event.target` is not contained in the shell element → **`closeRequested`** (dismiss **entire** anchored menu).
+2. **`FilterDropdownComponent`:** when a property/operator flyout is open, `document:click` → if target is not inside **`[data-filter-picker-flyout]`** and not a **`[data-filter-picker]`** trigger → **close flyout only** (menu stays open).
+
+The filter flyout remains **inside** the shell DOM so shell **`contains()`** still treats clicks on the flyout as inside the shell (no accidental whole-menu close from flyout interaction). Filter’s listener only shrinks the **picker** state.
+
 ## What It Looks Like
 
 All dropdowns share a warm, clay-tinted hover and the same item geometry. The grouping dropdown is the reference for hover color and item height.
@@ -59,11 +105,11 @@ Composable class table, hover token, and item geometry: **[dropdown-system.class
 ## Where It Lives
 
 - **Global classes**: `apps/web/src/styles.scss` — the `dd-*` block after `.ui-spacer`
-- **Sort**: `workspace-toolbar/sort-dropdown.component.ts` + `.scss`
-- **Grouping**: `workspace-toolbar/grouping-dropdown.component.ts` + `.scss`
-- **Projects**: `workspace-toolbar/projects-dropdown.component.ts` + `.scss`
-- **Filter**: `workspace-toolbar/filter-dropdown.component.ts` + `.scss`
+- **Anchored shell + shared menu body (toolbar and other callers)**: `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts` + `.scss`, `standard-dropdown.component.ts` + `.html` + `.scss`
+- **Sort / grouping / filter (feature panels)**: `apps/web/src/app/shared/dropdown-trigger/` — `sort-dropdown`, `grouping-dropdown`, `filter-dropdown` (`.ts` + `.html` + `.scss` as applicable)
+- **Projects (workspace toolbar only)**: `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts` + `.scss` (inline template)
 - **Context menu**: `apps/web/src/app/shared/workspace-pane/media-detail-view.component.html` + `.scss`
+- **Analysis (non-normative):** [`dropdown-component-structure-audit-2026-05-17.md`](../../../migration/reports/dropdown-component-structure-audit-2026-05-17.md), [`dropdown-deep-analysis-2026-05-17.md`](../../../migration/reports/dropdown-deep-analysis-2026-05-17.md) — DOM/stacking notes reconciled with this spec (2026-05-17).
 
 ## Actions
 
@@ -94,19 +140,19 @@ Every floating menu surface in Feldpost and which `dd-*` pieces it uses:
 
 ### Surface details
 
-**Sort Dropdown** — `sort-dropdown.component.ts`
+**Sort Dropdown** — `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts`
 Uses: `dd-search`, `dd-search__input`, `dd-search__action`, `dd-items`, `dd-item`, `dd-item--active`, `dd-item__icon`, `dd-item__label`, `dd-section-label`, `dd-divider`, `dd-empty`.
 Component-specific: `.sort-direction` toggle (tri-state asc/desc/none).
 
-**Grouping Dropdown** — `grouping-dropdown.component.ts`
+**Grouping Dropdown** — `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts`
 Uses: `dd-item`, `dd-item--active`, `dd-item--muted`, `dd-item__icon`, `dd-item__label`, `dd-drag-handle`, `dd-section-label`, `dd-divider`.
 Component-specific: CDK drop zones, selected state (multi-select), clear button, empty drop slot.
 
-**Projects Dropdown** — `projects-dropdown.component.ts`
+**Projects Dropdown** — `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts`
 Uses: `dd-search`, `dd-search__input`, `dd-search__action`, `dd-items`, `dd-item`, `dd-item__label`, `dd-item__trailing`, `dd-action-row`.
 Component-specific: Checkbox column, count badge, "All projects" separator row.
 
-**Filter Dropdown** — `filter-dropdown.component.ts`
+**Filter Dropdown** — `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts`
 Uses: `dd-empty`, `dd-action-row`.
 Component-specific: Notion-style compound filter rules (form rows with **`hlmBtn` + fixed flyout lists** + inputs — justified exception; **no** native `<select>` in-panel).
 
@@ -144,8 +190,13 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `docs/specs/component/filters/dropdown-system.md`                                                         | Shared dropdown visual + **toolbar menu panel** contract |
 | `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
-| `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.scss`                              | Toolbar shell `min-width` floor (`.toolbar-dropdown`)     |
+| `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts` / `.scss`                      | Anchored shell: fixed position, outside click, Escape, `HlmMenuContentDirective`; toolbar `min-width` floors (`.toolbar-dropdown`) |
+| `apps/web/src/app/shared/dropdown-trigger/standard-dropdown.component.ts` / `.html` / `.scss`         | Shared toolbar menu body (search row, `[dropdown-items]` projection, footer, `itemsScroll`) |
 | `apps/web/src/app/shared/dropdown-trigger/toolbar-menu-panel-layout.ts`                               | **`TOOLBAR_MENU_PANEL_MIN_PX` (416)**, **`TOOLBAR_MENU_FILTER_PANEL_MIN_PX` (512)**, **`toolbarDropdownPanelClass`**, **`toolbarDropdownPositionWidthPx`** |
+| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts` / `.html`                       | Sort panel feature wiring |
+| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts` / `.html`                   | Grouping panel + CDK drag |
+| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts` / `.html`                     | Filter rules + picker flyout |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts`     | Projects checklist panel |
 | `apps/web/src/app/shared/dropdown-trigger/dropdown-search-action-anchor.directive.ts`                  | Attribute hook for `[dropdown-search-action]` (search-row slot detection) |
 | `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
 | `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |

@@ -2,7 +2,21 @@
 
 **Date:** 2026-05-17  
 **Scope:** Workspace and projects toolbars (`app-workspace-toolbar`, `projects-toolbar`), shared `apps/web/src/app/shared/dropdown-trigger/*`, and normative docs.  
-**Related specs:** [dropdown-system.md](../../specs/component/filters/dropdown-system.md), [popover-panel-contract.md](../../design/design-system/popover-panel-contract.md)
+**Related specs:** [dropdown-system.md](../../specs/component/filters/dropdown-system.md), [popover-panel-contract.md](../../design/design-system/popover-panel-contract.md)  
+**Companion report:** [dropdown-deep-analysis-2026-05-17.md](./dropdown-deep-analysis-2026-05-17.md) (CD cost, layout jump inventory, duplicate Escape, broken-link fixes, **Reconciliation** + follow-up table).
+
+---
+
+## Reconciliation (2026-05-17)
+
+Aligned with the deep analysis and **`dropdown-system.md`**: same **three-layer** toolbar stack (`shell` → feature → **`app-standard-dropdown`**), same **C-first** recommendation (DRY toolbar orchestration before flattening). **Spec paths** for sort/grouping/filter now point at **`apps/web/src/app/shared/dropdown-trigger/`** (see spec **Where It Lives** / **File Map** — replaces legacy `workspace-toolbar/` file rows).
+
+| Follow-up | Owner |
+| --- | --- |
+| Refresh **`DropdownShellComponent`** callsite comment; optional **Escape** dedupe on workspace toolbar | code |
+| **Toolbar orchestrator** + shared clamp helper (Approach C) | code |
+| **Stacking** contract (inline shell `z-index` vs menu CVA) — one normative story | docs and/or code |
+| Optional **DOM diagram / test oracle** in `dropdown-system.md` | docs |
 
 ---
 
@@ -61,8 +75,8 @@ flowchart TB
   app-dropdown-shell          ← overlay host: fixed geom, z-index, outside close, Escape; hlmMenuContent on host
     app-grouping-dropdown     ← CDK + grouping UX + service wiring boundary
       app-standard-dropdown   ← shared search / items host / footer chrome
+        (grouping: showSearch false + reserveProjectedSearchActionSlot true — no visible search row; header reset / spacer contract per dropdown-system.md)
         div.standard-dropdown
-          (no search row — showSearch false)
           div.standard-dropdown__items
             div[dropdown-items][cdkDropListGroup]
               div.grouping-section … cdkDropList … cdkDrag …

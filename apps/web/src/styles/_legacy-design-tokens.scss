@@ -11,51 +11,12 @@
 // ── Light-mode tokens (default) ──────────────────────────────────────────────
 :root {
   /* ═══════════════════════════════════════════════════════════════════════
-     Feldpost v2 — --fp- token system (bridge)
-     MD3 reference tonal ladders (primary seed #c9a84c @ stop 70) live in
-     docs/design/tokens.md §3.1a — not emitted as --fp-ref-* on :root (Batch 5b).
-     @see docs/migration/phase-7-token-migration.md § Batch 5b
+     Feldpost v2 — MD3 reference tonal ladders (primary seed #c9a84c @ stop 70)
+     live in docs/design/tokens.md §3.1a — not emitted as --fp-ref-* on :root
+     (Batch 5b). MD3 --fp-sys-color-* rows removed — no SCSS/TS/HTML
+     `var()` consumers for that prefix under apps/web (Phase 7 Batch 16).
+     @see docs/migration/phase-7-token-migration.md § Batch 16
      ═══════════════════════════════════════════════════════════════════════ */
-
-  // ── fp-sys: System color roles — LIGHT ────────────────────────────────────
-  // Phase 7: core roles bridge to tweakcn :root (loaded before this file in styles.scss).
-  // Container / tertiary / inverse / outline-variant / error-container: no 1:1 tweakcn token — hex deferred (see phase-7 doc).
-  // Primary (gold-amber)
-  --fp-sys-color-primary:                var(--primary);
-  --fp-sys-color-on-primary:             var(--primary-foreground);
-  --fp-sys-color-primary-container:      #ffe08f;
-  --fp-sys-color-on-primary-container:   #584400;
-  // Secondary (blue-indigo)
-  --fp-sys-color-secondary:              var(--secondary);
-  --fp-sys-color-on-secondary:           var(--secondary-foreground);
-  --fp-sys-color-secondary-container:    #d4e3ff;
-  --fp-sys-color-on-secondary-container: #214876;
-  // Tertiary (violet-purple)
-  --fp-sys-color-tertiary:               #794f81;
-  --fp-sys-color-on-tertiary:            #ffffff;
-  --fp-sys-color-tertiary-container:     #fdd6ff;
-  --fp-sys-color-on-tertiary-container:  #603768;
-  // Error
-  --fp-sys-color-error:                  var(--destructive);
-  --fp-sys-color-on-error:               var(--destructive-foreground);
-  --fp-sys-color-error-container:        #ffdad6;
-  --fp-sys-color-on-error-container:     #93000a;
-  // Backgrounds & surfaces
-  --fp-sys-color-background:             var(--background);
-  --fp-sys-color-on-background:          var(--foreground);
-  --fp-sys-color-surface:                var(--background);
-  --fp-sys-color-on-surface:             var(--foreground);
-  --fp-sys-color-surface-variant:        var(--muted);
-  --fp-sys-color-on-surface-variant:     var(--muted-foreground);
-  // Outlines
-  --fp-sys-color-outline:                var(--border);
-  --fp-sys-color-outline-variant:        #cfc5b4;
-  // Utility
-  --fp-sys-color-shadow:                 var(--shadow-color);
-  --fp-sys-color-scrim:                  var(--shadow-color);
-  --fp-sys-color-inverse-surface:        #343027;
-  --fp-sys-color-inverse-on-surface:     #f9f0e2;
-  --fp-sys-color-inverse-primary:        #e4c36c;
 
   // ── fp-sys: Shape (border-radius scale) ───────────────────────────────────
   // Resolves to same px as prior literals via `--radius-*` / `--spacing-5` (24px) in this :root block.
@@ -215,59 +176,7 @@
   --fp-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
 
   // Figma Base.scale (px): implement with `var(--spacing-*)` / `var(--radius-*)` — @see docs/migration/phase-7-token-migration.md § Batch 3 (numeric scale definitions removed from this bridge; no app `var()` consumers under `apps/web/src`).
-
-  // ── Feldpost / Alias / spacing (Figma: Feldpost.Alias.spacing → scale/base-*)
-  --fp-alias-sp-0: 0;
-  --fp-alias-sp-4: var(--spacing-1);
-  --fp-alias-sp-8: var(--spacing-2);
-  --fp-alias-sp-12: var(--spacing-3);
-  --fp-alias-sp-16: var(--spacing-4);
-  --fp-alias-sp-24: var(--spacing-5);
-  --fp-alias-sp-32: var(--spacing-6);
-  --fp-alias-sp-40: 2.5rem;
-
-  // ── Feldpost / Alias / radius (Figma: Feldpost.Alias.radius → scale/base-*; full → 9999)
-  --fp-alias-r-0: 0;
-  --fp-alias-r-4: var(--radius-sm);
-  --fp-alias-r-8: var(--radius-md);
-  --fp-alias-r-12: var(--radius-md-plus);
-  --fp-alias-r-16: var(--radius-lg);
-  --fp-alias-r-24: var(--spacing-5);
-  --fp-alias-r-32: var(--spacing-6);
-  --fp-alias-r-full: var(--radius-full);
-
-  /* ═══════════════════════════════════════════════════════════════════════
-     LEGACY — Feldpost v1 `--color-*` bridges (Phase 7)
-     Maps legacy names to tweakcn :root semantics in styles.scss.
-     @see docs/design/tokens.md §3.1
-     ═══════════════════════════════════════════════════════════════════════ */
-
-  // Backgrounds — bridge to tweakcn semantic :root (Phase 7)
-  --color-bg-base: var(--background);
-  --color-bg-surface: var(--card);
-  --color-bg-elevated: var(--popover);
-
-  // Borders
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-
-  // Text
-  --color-text-primary: var(--foreground);
-  --color-text-secondary: var(--muted-foreground);
-  --color-text-disabled: var(--text-disabled);
-
-  // Brand / semantic — Tailwind extend + legacy SCSS still reference --color-*
-  --color-accent-brand: var(--primary);
-  --color-accent-brand-hover: var(--primary-hover);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--destructive);
-  --color-uploading: var(--primary);
-  --color-accent: var(--app-violet-accent);
-  --color-map-user-marker: var(--map-marker-user);
-  --color-map-search-marker: var(--map-marker-search);
+  // Phase 7 Batch 15: removed unused Figma Alias spacing/radius custom properties (no `apps/web/src` consumers; Base scale → `docs/design/tokens.md`).
 
   // Border radius
   --radius-sm: 0.25rem;
@@ -479,8 +388,8 @@
   --transition-reveal-delay: 60ms;
   --transition-emphasis: var(--motion-duration-base);
 
-  // Shared loading skeleton tokens.
-  --color-skeleton-surface: color-mix(in srgb, var(--background) 12%, transparent);
+  // Shared loading skeleton animation token (surface color unused — components use bg-muted / local mixes)
+  // @see docs/migration/phase-7-token-migration.md § Batch 14
   --animation-skeleton-pulse: media-display-pulse var(--transition-emphasis) ease-in-out infinite;
 
   // Component-role aliases (Theme Contract layer C)
@@ -522,69 +431,6 @@
 }
 
 @mixin dark-theme-overrides {
-  // ── fp-sys: System color roles — DARK ────────────────────────────────────
-  // Same tweakcn semantic refs as light :root; values follow `html[data-theme="dark"]` in styles.scss when attribute-driven dark mode is active.
-  // Primary (gold-amber)
-  --fp-sys-color-primary:                var(--primary);
-  --fp-sys-color-on-primary:             var(--primary-foreground);
-  --fp-sys-color-primary-container:      #584400;
-  --fp-sys-color-on-primary-container:   #ffe08f;
-  // Secondary (blue-indigo)
-  --fp-sys-color-secondary:              var(--secondary);
-  --fp-sys-color-on-secondary:           var(--secondary-foreground);
-  --fp-sys-color-secondary-container:    #214876;
-  --fp-sys-color-on-secondary-container: #d4e3ff;
-  // Tertiary (violet-purple)
-  --fp-sys-color-tertiary:               #e9b5ef;
-  --fp-sys-color-on-tertiary:            #472150;
-  --fp-sys-color-tertiary-container:     #603768;
-  --fp-sys-color-on-tertiary-container:  #fdd6ff;
-  // Error
-  --fp-sys-color-error:                  var(--destructive);
-  --fp-sys-color-on-error:               var(--destructive-foreground);
-  --fp-sys-color-error-container:        #93000a;
-  --fp-sys-color-on-error-container:     #ffdad6;
-  // Backgrounds & surfaces
-  --fp-sys-color-background:             var(--background);
-  --fp-sys-color-on-background:          var(--foreground);
-  --fp-sys-color-surface:                var(--background);
-  --fp-sys-color-on-surface:             var(--foreground);
-  --fp-sys-color-surface-variant:        var(--muted);
-  --fp-sys-color-on-surface-variant:     var(--muted-foreground);
-  // Outlines
-  --fp-sys-color-outline:                var(--border);
-  --fp-sys-color-outline-variant:        #4c4639;
-  // Utility
-  --fp-sys-color-shadow:                 var(--shadow-color);
-  --fp-sys-color-scrim:                  var(--shadow-color);
-  --fp-sys-color-inverse-surface:        #eae1d4;
-  --fp-sys-color-inverse-on-surface:     #343027;
-  --fp-sys-color-inverse-primary:        #745b0c;
-
-  // ── LEGACY v1 dark overrides — bridge to html[data-theme="dark"] tweakcn ───
-  --color-bg-base: var(--background);
-  --color-bg-surface: var(--card);
-  --color-bg-elevated: var(--popover);
-
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-
-  --color-text-primary: var(--foreground);
-  --color-text-secondary: var(--muted-foreground);
-  --color-text-disabled: var(--text-disabled);
-
-  --color-accent-brand: var(--primary);
-  --color-accent-brand-hover: var(--primary-hover);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--destructive);
-  --color-accent: var(--app-violet-accent);
-  --color-uploading: var(--primary);
-  --color-map-user-marker: var(--map-marker-user);
-  --color-map-search-marker: var(--map-marker-search);
-
   // Shadows — higher opacity so they punch through dark surfaces (ink from `--shadow-color`; Batch 10).
   // @see docs/migration/phase-7-token-migration.md § Batch 10
   --shadow-sm:
@@ -632,21 +478,6 @@
 // Optional custom profile to validate themeability of semantic aliases.
 // Activate manually via: document.documentElement.setAttribute('data-theme', 'sandstone')
 [data-theme='sandstone'] {
-  --color-bg-base: var(--background);
-  --color-bg-surface: var(--card);
-  --color-bg-elevated: var(--popover);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-text-primary: var(--foreground);
-  --color-text-secondary: var(--muted-foreground);
-  --color-text-disabled: var(--text-disabled);
-  --color-accent-brand: var(--primary);
-  --color-accent-brand-hover: var(--primary-hover);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-map-user-marker: var(--map-marker-user);
-  --color-map-search-marker: var(--map-marker-search);
-
   --action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
   --action-bg-active: color-mix(in srgb, var(--primary) 22%, transparent);
   --action-border-default: color-mix(in srgb, var(--primary) 36%, var(--border));
@@ -690,8 +521,6 @@
 /* ── LEGACY MAPPING (DEPRECATED) ── */
 /* WARNING: TEMPORARY BACKWARD-COMPATIBILITY ALIASES ONLY. REMOVE THIS SECTION AFTER DOWNSTREAM TOKEN REFACTOR COMPLETION. */
 :root {
-  --color-clay: var(--primary);
-
   --font-size-3xs: var(--font-size-2xs);
   --font-size-caption: var(--font-size-2xs);
   --font-size-label: var(--font-size-2xs);

@@ -83,10 +83,10 @@ module.exports = {
       //      Tailwind's dark: prefix is only needed when the utility logic
       //      needs to differ structurally (e.g., dark:hidden vs just color switch).
       //
-      // Usage examples:
-      //   bg-surface          → background: var(--color-bg-surface)
-      //   text-text-primary   → color: var(--color-text-primary)
-      //   border-border       → border-color: var(--color-border)
+      // Usage examples (Phase 7 — bridge `var(--color-*)` removed; utilities point at tweakcn vars):
+      //   bg-surface          → background: var(--card)
+      //   text-text-primary   → color: var(--foreground)
+      //   border-border       → border-color: var(--border)
       colors: {
         // Backgrounds — map legacy utility names to tweakcn semantics (Phase 7)
         'bg-base': 'var(--background)',

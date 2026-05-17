@@ -1,4 +1,6 @@
 @layer components {
+  // OWNERSHIP: Toolbar menu width floors (26rem / 32rem + viewport clamp) live ONLY on `:host.toolbar-dropdown` below — not on `app-standard-dropdown` or feature panels.
+  // @see docs/specs/component/filters/dropdown-system.md — Ownership matrix
   // Flex column + scroll; panel chrome comes from `[hlmMenuContent]` (Tailwind + tweakcn tokens).
   // @see docs/specs/component/filters/dropdown-system.md
   :host {

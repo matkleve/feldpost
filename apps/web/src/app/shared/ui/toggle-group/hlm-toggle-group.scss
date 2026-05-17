@@ -1,6 +1,7 @@
 // Shadcn-style ToggleGroup chrome (muted track, card-like active segment).
 // Loaded once from `styles.scss` via `@use` (global emission); source lives with the module.
-// @see apps/web/src/app/shared/ui/toggle-group/
+// Phase 7 — no legacy color vars here: state/hover/focus/attention ink → `toggle-group-variants.ts` (CVA).
+// @see docs/migration/phase-7-token-migration.md § Special cases — item 4 (Batch 13)
 
 @layer components {
   // Host row: optional inactive strip, width token, spacing from adjacent UI.

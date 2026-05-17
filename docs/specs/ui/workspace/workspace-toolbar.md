@@ -80,6 +80,7 @@ flowchart LR
 - Child of `WorkspacePaneComponent`, placed above the content area
 - Each button opens a separate dropdown component (see individual specs)
 - Dropdown components are standalone and receive state via the `WorkspaceViewService`
+- **Escape** closes the open menu via **`app-dropdown-shell`** (`document:keydown.escape` → `closeRequested`); the toolbar wires **`(closeRequested)`** to clear `activeDropdown` only — do not register a second Escape listener on `WorkspaceToolbarComponent` ([`dropdown-system.md`](../../component/filters/dropdown-system.md#escape-keyboard)).
 
 ## Acceptance Criteria
 

@@ -6,9 +6,9 @@ A compact, inline label element that displays a single piece of information with
 
 ## What It Looks Like
 
-**Pill-shaped** container (`border-radius: full`). **Layouts:** `text-only`, **icon + text** (composed from `icon` + `text` — same shell as Figma spacing), `icon-only`, **`avatar-text`** (`avatarSrc` + `text`). Trailing dismiss is optional. Default label color uses **`--fp-sys-color-on-surface`** (Figma).
+**Pill-shaped** container (`border-radius: full`). **Layouts:** `text-only`, **icon + text** (composed from `icon` + `text` — same shell as Figma spacing), `icon-only`, **`avatar-text`** (`avatarSrc` + `text`). Trailing dismiss is optional. Default label color uses **`var(--foreground)`** (Figma on-surface role).
 
-**Geometry (Figma):** Chip body height **`var(--spacing-4)` (16px)**. Horizontal padding **`8px`** (`--spacing-2` / `--fp-alias-sp-8`). **Hover** on default: stronger primary tint via **`color-mix`** (see **Styling Details**). There is **no** `size` input — one geometry for `app-chip`.
+**Geometry (Figma):** Chip body height **`var(--spacing-4)` (16px)**. Horizontal padding **`8px`** (`var(--spacing-2)`). **Hover** on default: stronger primary tint via **`color-mix`** (see **Styling Details**). There is **no** `size` input — one geometry for `app-chip`.
 
 **Icon + text (product):** Not a separate Figma layout name; use `icon` + `text` with the same 16px row and **`--spacing-1`** gap between glyph and label.
 

@@ -8,9 +8,9 @@ A compact toolbar control that opens or closes an anchored panel (popover). It o
 
 **Figma (Dev Mode):** https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev
 
-Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal control, **1rem** total height (`var(--spacing-4)`), **0.25rem** corner radius (`var(--radius-sm)`; Figma `scale/base-4`), internal row gap **0.25rem** (`var(--spacing-1)`). Default/rest surface matches **neutral-variant ladder stop 95** (`fp/ref/neutral-variant/95` in Figma). Hover (and pressed pointer while interactive) matches **primary ladder stop 95** (`fp/ref/primary/95`). **Canonical hex and Figma-path ↔ ladder mapping:** `docs/design/tokens.md` §3.1a (do not use removed `--fp-ref-*` CSS variables in implementation). Label uses **label small** typescale (`--fp-sys-typescale-label-small-*`) and **`--fp-sys-color-on-surface`** — typescale contract: §3.1e in the same file. Trailing **expand_more** chevron is **12px** (`var(--spacing-3)`); when **`data-state="open"`**, the chevron rotates **180deg** (points up). Optional leading icon slot is **8px** (`var(--spacing-2)`) — content is projected; Figma uses a placeholder square. **text-action** layout: padding-left **`var(--spacing-2)`**, padding-right **`var(--spacing-1)`**. **icon-text-action** layout: horizontal padding **`var(--spacing-1)`** on both sides (4px; Figma `scale/base-4`). No separate visible border in the reference; edge is read from fill vs parent surface.
+Per Figma component **PanelTrigger** (node `164:2177`): a compact horizontal control, **1rem** total height (`var(--spacing-4)`), **0.25rem** corner radius (`var(--radius-sm)`; Figma `scale/base-4`), internal row gap **0.25rem** (`var(--spacing-1)`). Default/rest surface matches **neutral-variant ladder stop 95** (`fp/ref/neutral-variant/95` in Figma). Hover (and pressed pointer while interactive) matches **primary ladder stop 95** (`fp/ref/primary/95`). **Canonical hex and Figma-path ↔ ladder mapping:** `docs/design/tokens.md` §3.1a (do not use removed `--fp-ref-*` CSS variables in implementation). Label uses **label small** typescale (`--fp-sys-typescale-label-small-*`) and **`var(--foreground)`** (Figma on-surface role) — typescale contract: §3.1e in the same file. Trailing **expand_more** chevron is **12px** (`var(--spacing-3)`); when **`data-state="open"`**, the chevron rotates **180deg** (points up). Optional leading icon slot is **8px** (`var(--spacing-2)`) — content is projected; Figma uses a placeholder square. **text-action** layout: padding-left **`var(--spacing-2)`**, padding-right **`var(--spacing-1)`**. **icon-text-action** layout: horizontal padding **`var(--spacing-1)`** on both sides (4px; Figma `scale/base-4`). No separate visible border in the reference; edge is read from fill vs parent surface.
 
-**Token verification:** Figma scale `base-*` px values map to **`var(--spacing-*)`** / **`var(--radius-*)`** per `docs/migration/phase-7-token-migration.md`. Reference-palette parity names (`fp/ref/…`) and ladder stops are centralized in **`docs/design/tokens.md` §3.1a**; **`--fp/sys/color/on-surface`** → **`--fp-sys-color-on-surface`** (bridged to tweakcn `--foreground` in the legacy token file). Label small metrics: **`docs/design/tokens.md` §3.1e** (`--fp-sys-typescale-label-small-*`).
+**Token verification:** Figma scale `base-*` px values map to **`var(--spacing-*)`** / **`var(--radius-*)`** per `docs/migration/phase-7-token-migration.md`. Reference-palette parity names (`fp/ref/…`) and ladder stops are centralized in **`docs/design/tokens.md` §3.1a**. Figma **on-surface** label ink → **`var(--foreground)`** in implementation. Label small metrics: **`docs/design/tokens.md` §3.1e** (`--fp-sys-typescale-label-small-*`).
 
 ## Where It Lives
 
@@ -113,12 +113,12 @@ Only **`closed` ↔ `open`** are valid `data-state` values; invalid values are a
 | --- | --- |
 | Default fill | Neutral-variant ladder stop 95 — `docs/design/tokens.md` §3.1a |
 | Hover / pressed fill | Primary ladder stop 95 — §3.1a |
-| Label color | `--fp-sys-color-on-surface` |
+| Label color | `var(--foreground)` (tweakcn; former `--fp-sys-color-on-surface` bridge) |
 | Label typography | `--fp-sys-typescale-label-small-size`, `-line-height`, `-weight`, `-tracking` — §3.1e |
 | Height | `var(--spacing-4)` |
 | Gap (icon, label, chevron) | `var(--spacing-1)` |
-| Radius | `--fp-alias-r-4` |
-| Padding (icon layout) | `--fp-alias-sp-4` inline |
+| Radius | `var(--radius-sm)` |
+| Padding (icon layout) | `var(--spacing-1)` inline |
 | Padding (text-only layout) | `padding-left: var(--spacing-2)`, `padding-right: var(--spacing-1)` |
 | Chevron box | `var(--spacing-3)` |
 | Leading icon box | `var(--spacing-2)` |

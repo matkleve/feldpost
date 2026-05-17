@@ -6,7 +6,7 @@ A Notion-inspired compound filter builder. Users add filter rules ("where [Prope
 
 ## What It Looks Like
 
-Floating dropdown anchored below the "Filter" toolbar button. Width: **26rem** (**416px** at 16px root), max-height 24rem (scrollable). `--color-bg-elevated` background, `shadow-xl`, `rounded-lg` corners.
+Floating dropdown anchored below the workspace **Filter** toolbar button. **Width** is owned by the parent **`app-dropdown-shell`** when `panelClass` includes **`toolbar-dropdown toolbar-dropdown--filter`** (wider **32rem** floor vs **26rem** for other toolbar menus) — see [`dropdown-system.md`](./dropdown-system.md#toolbar-menu-panels-anchored-ui). Max height for the rules band and scroll behavior follow the same spec.
 
 **Empty state**: "No filters applied" text with an "Add a filter" ghost button.
 
@@ -20,6 +20,13 @@ Floating dropdown anchored below the "Filter" toolbar button. Width: **26rem** (
 
 Below the rules: "+ Add a filter" ghost button.
 
+## Where It Lives
+
+- **Anchored shell + shared menu chrome (normative):** [`dropdown-system.md`](./dropdown-system.md) — toolbar width floors (`toolbar-dropdown--filter`), scroll bands, stacking, and shell vs filter flyout `document:click` scopes.
+- **This component:** `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts`, `.html`, `.scss` (detail: **File Map** below).
+- **Callsite:** opened from `WorkspaceToolbarComponent` when the Filter toolbar panel is active (see **Wiring**).
+- **Filter predicates / query integration:** `apps/web/src/app/core/filter.service.ts` (see **Data** / **Wiring**).
+
 ## Visual behavior contract (toolbar-aligned)
 
 - **Row container**: **No** `hlmMenuItem` on the full row (avoids primary-tint hover washing conjunction + fields). Row hover = **neutral** `muted-foreground` **8%** surface mix only.
@@ -28,6 +35,15 @@ Below the rules: "+ Add a filter" ghost button.
 - **Chevron**: Trigger chevrons use **`data-dd-part="chevron"`** + **explicit muted** color so they **do not** pick up row-hover emphasis.
 
 Shared shell width / scroll chrome: [`dropdown-system.md`](./dropdown-system.md).
+
+### Interaction ownership (`document:click`)
+
+Two document-level click handlers can be active while the filter menu is open; they are **orthogonal** (not duplicate tech debt):
+
+- **`DropdownShellComponent`:** outside-click closes the **entire** anchored menu when the target is outside the shell element.
+- **`FilterDropdownComponent`:** when a property/operator flyout is open, outside-click closes the **flyout only** (picker markers: `[data-filter-picker-flyout]`, `[data-filter-picker]`).
+
+Normative table and rationale: [`dropdown-system.md` — document:click (shell vs filter flyout)](./dropdown-system.md#documentclick-shell-vs-filter-flyout).
 
 - **Parent**: `WorkspaceToolbarComponent`
 - **Appears when**: User clicks the "Filter" toolbar button
@@ -47,7 +63,7 @@ Shared shell width / scroll chrome: [`dropdown-system.md`](./dropdown-system.md)
 ## Component Hierarchy
 
 ```
-FilterDropdown                             ← floating dropdown, --color-bg-elevated, shadow-xl, rounded-lg, w-[26rem] (toolbar shell floor; see dropdown-system)
+FilterDropdown                             ← floating dropdown under shell; width floor **32rem** when shell has `toolbar-dropdown--filter` (see dropdown-system)
 ├── [no rules] EmptyState                  ← "No filters applied"
 ├── FilterRuleList                         ← vertical stack, gap-1
 │   └── FilterRuleRow × N                  ← horizontal flex row, gap-1, items-center

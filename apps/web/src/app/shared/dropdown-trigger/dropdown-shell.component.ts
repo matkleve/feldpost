@@ -15,7 +15,15 @@
  * TODO(brn-menu): `@spartan-ng/brain` has no `BrnMenu` / `./menu` export (alpha.691). Panel chrome uses
  * local `hlmMenuContent`; positioning stays manual until brain ships a menu/popover trigger pair.
  *
- * Callsite count: 9 instances in 7 templates (18 HTML tag matches; 19 total rg matches including this file's selector).
+ * OWNERSHIP (anchored shell — normative detail in spec):
+ * - **Toolbar width floors:** `dropdown-shell.component.scss` only (`:host.toolbar-dropdown`, `.toolbar-dropdown--filter`).
+ *   Do not re-declare panel width in feature SCSS. Horizontal `left` clamp: caller TS + `toolbarDropdownPositionWidthPx`.
+ * - **Map / context menus:** `[minWidth]` / `[maxWidth]` / `panelClass` per callsite — not the toolbar `rem` floors.
+ * - **Stacking:** host `z-index: var(--z-dropdown)` is authoritative; `HlmMenuContentDirective` CVA also applies `z-50` on the same host — inline wins; do not remove the inline binding thinking CVA is sufficient.
+ * - **Escape + outside-close** for the mounted shell: this component only; parents that wrap `app-dropdown-shell` must not duplicate `document:keydown.escape`.
+ * @see docs/specs/component/filters/dropdown-system.md — Ownership matrix, Escape, Stacking, document:click
+ *
+ * Callsite count: multiple templates (map, toolbar, media, upload, …); do not rely on a stale numeric count here.
  */
 import { Component, ElementRef, inject, input, output } from '@angular/core';
 import { HlmMenuContentDirective } from '../ui/menu';

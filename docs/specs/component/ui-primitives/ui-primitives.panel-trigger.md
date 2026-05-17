@@ -78,11 +78,11 @@ Reference-palette fills: **neutral-variant stop 95** (rest), **primary stop 95**
 | --- | --- |
 | Default fill | Neutral-variant stop 95 — §3.1a |
 | Hover / pressed fill | Primary stop 95 — §3.1a |
-| Label color | `--fp-sys-color-on-surface` |
+| Label color | `var(--foreground)` |
 | Height | `var(--spacing-4)` |
 | Gap | `var(--spacing-1)` |
-| Radius | `--fp-alias-r-4` |
-| Padding (icon layout) | `--fp-alias-sp-4` inline |
+| Radius | `var(--radius-sm)` |
+| Padding (icon layout) | `var(--spacing-1)` inline |
 | Padding (text layout) | `var(--spacing-2)` left, `var(--spacing-1)` right |
 | Chevron box | `var(--spacing-3)` |
 | Leading icon box | `var(--spacing-2)` |

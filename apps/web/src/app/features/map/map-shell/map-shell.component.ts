@@ -15,6 +15,8 @@
  *  - `map` is protected (not private) so unit tests can inject a mock instance.
  *  - Signals for all local UI state; no RxJS subjects.
  *  - Nominatim results are fetched with debounce (300 ms) via native fetch().
+ *  - Map / radius / marker floating menus use `app-dropdown-shell` (`DropdownShellComponent`); dismiss
+ *    (outside click, Escape) is owned by the shell — templates bind `(closeRequested)` to `onMapMenuCloseRequested()`.
  */
 
 /* eslint-disable max-lines, max-lines-per-function, no-magic-numbers, @typescript-eslint/explicit-function-return-type, @typescript-eslint/consistent-type-imports */
@@ -197,7 +199,6 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
   styleUrl: './map-shell.component.scss',
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
-    '(document:keydown.escape)': 'onMapMenuCloseRequested()',
   },
 })
 export class MapShellComponent implements OnDestroy {

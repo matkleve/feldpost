@@ -11,20 +11,26 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 
 ### §3.1a — Feldpost v2 `--fp-*` Color System
 
-The v2 color system follows the Material Design 3 tonal architecture with the Feldpost `--fp-` prefix. **`--fp-sys-color-*`** roles are still bridged from **`apps/web/src/styles/_legacy-design-tokens.scss`**; **reference tonal ladders are not emitted as `--fp-ref-*` custom properties on `:root`** (Phase 7 Batch 5b, 2026-05-16) — canonical hex for every stop lives in the tables below. Figma paths such as `fp/ref/primary/95` correspond to **stop 95** in the primary ladder.
+The v2 color system follows the Material Design 3 tonal architecture with the Feldpost `--fp-` prefix. **`--fp-sys-color-*` names in the tables below are a design reference only** — they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 16** (2026-05-17); use **tweakcn** semantics (`--primary`, `--background`, `--muted`, …) in implementation. **Reference tonal ladders are not emitted as `--fp-ref-*` on `:root`** (Batch 5b) — canonical hex for every stop lives in the tables below. Figma paths such as `fp/ref/primary/95` correspond to **stop 95** in the primary ladder.
 
 #### Two-layer structure
 
 | Layer | Prefix | Purpose | Use in components? |
 |-------|--------|---------|-------------------|
-| Reference palette (logical) | `fp/ref/…` in Figma; stops **0–100** below | Raw MD3 tonal stops. | **No** — do not use removed `--fp-ref-*` CSS vars; use tweakcn / `--fp-sys-color-*` / semantic tokens in implementation |
-| System roles | `--fp-sys-color-*` | Semantic role per surface/role pair. | Yes — bridge API until full tweakcn migration |
+| Reference palette (logical) | `fp/ref/…` in Figma; stops **0–100** below | Raw MD3 tonal stops. | **No** — do not use removed `--fp-ref-*` CSS vars; use tweakcn / semantic tokens in implementation |
+| System roles (logical) | `--fp-sys-color-*` (tables only) | Semantic role per surface/role pair. | **No** — not on `:root` after Batch 16; map to tweakcn or add named roles in `styles.scss` when needed |
 
 #### Phase 7 handoff — deferred MD3 rows (tweakcn)
 
-- **tweakcn** must add **named roles** for MD3-only `--fp-sys-color-*` (container / tertiary / error-container / outline-variant / inverse ladders and their *on-* pairs) **or** **approve explicit aliases** to existing tweakcn vars; without that, the bridge stays on **literal hex** (no unapproved Batch 4b-style mapping to `--accent` / `--card` / `--muted`).
-- **Bridge (hex today):** `apps/web/src/styles/_legacy-design-tokens.scss` — light fp-sys color block **`L20–L58`**; dark mirror **`L512–L550`** (`@mixin dark-theme-overrides`).
-- **Rationale + table:** [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md) — **Batch 3 continuation — deferred MD3 roles**, **Batch 3** deferred list, **Batch 4** (4a vs 4b).
+- **tweakcn** must add **named roles** for MD3-only semantics (container / tertiary / error-container / outline-variant / inverse ladders and their *on-* pairs) **or** **approve explicit aliases** to existing tweakcn vars; without that, use the **hex tables below** as the authority (no unapproved Batch 4b-style mapping to `--accent` / `--card` / `--muted`).
+- **Batch 16 (2026-05-17):** **`--fp-sys-color-*` custom property definitions** were **removed** from **`apps/web/src/styles/_legacy-design-tokens.scss`** (light `:root` + **`@mixin dark-theme-overrides`**) — `rg -l 'var\\(--fp-sys-color' apps/web` → **0** before edit; no runtime consumers.
+- **Rationale + history:** [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md) — **Batch 16**, **Batch 3 continuation — deferred MD3 roles**, **Batch 4** (4a vs 4b).
+
+#### Phase 7 handoff — Tailwind `dark:` vs semantic CSS variables
+
+- **Semantic CSS custom properties** (`--foreground`, `--background`, `--primary`, …): Under **`html[data-theme="dark"]`** and under **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`**, the app applies **`@mixin tweakcn-dark-semantic-palette`**, so **values read via `var(--…)`** track **ThemeService “system”** when the OS prefers dark (no `data-theme` on `<html>`).
+- **Tailwind `dark:` utilities** (for example `dark:bg-muted`): **`@custom-variant dark`** in **`apps/web/src/styles.scss`** is **`&:is([data-theme="dark"] *)`** only, so **`dark:`** classes **do not** activate for **system + OS dark** unless **`data-theme="dark"`** is present.
+- **Why `dark:` is not extended in `styles.scss`:** A long-form variant that also matches system dark would use Tailwind **`@slot`** in a way Angular’s Sass pass rejects (`Top-level selectors may not contain the parent selector "&"`). Inline comment above **`@custom-variant dark`** in **`styles.scss`**; mitigations and manual QA matrix in [`phase-7-token-migration.md`](../migration/phase-7-token-migration.md) § **Risks / QA**.
 
 #### Reference palette — primary (gold-amber, seed `#c9a84c` @ stop 70)
 
