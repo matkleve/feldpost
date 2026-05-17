@@ -317,6 +317,11 @@ Use token variables only:
 - **Batch 41:** **`--interactive-transition-standard`** is not on the legacy bridge — repeat the same **`120ms ease-out`** (or equivalent) multi-property **`transition`** list at callsites, or **`var(--motion-duration-fast) var(--motion-ease-out)`** when one timing fits all properties (see **`docs/design/motion.md`**).
 - Emphasis / longer choreography: **`200ms var(--motion-ease-out)`** (same **200ms** duration as the former **`--motion-duration-base`**, removed **Batch 36**; **Batch 31** removed **`--transition-emphasis`** from the bridge — see **`docs/design/tokens.md`** §3.6)
 
+### Menu and action surfaces (tweakcn first)
+
+- **Do not** add **`var(--menu-*)`** — **Phase 7 Batch 48** removed **`--menu-*`** from **`apps/web/src/styles/_legacy-design-tokens.scss`**. Menu surfaces use tweakcn primitives (**`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`**, **`var(--popover)`**, **`var(--card)`**, etc.) and documented **`color-mix(in srgb, …)`** on the owning **`:host`** when a component needs a local alias. Authoritative layering: **`docs/design/tokens.md`**, **`docs/design/token-layers.md`**, and the element spec for the surface (for anchored toolbar menus, **`docs/specs/component/filters/dropdown-system.md`**).
+- **Do not** bind **removed** **`--action-*`** bridge names (several batches retired individual **`--action-*`** rows — see **`docs/migration/phase-7-token-migration.md`** batch sections). Prefer tweakcn semantics and explicit mixes at the geometry/visual owner. If a spec or **`docs/design/token-layers.md`** Layer **C** table still lists a **retained** **`--action-*`** name for a narrow callsite, that single exception is allowed only when the inventory explicitly documents it; otherwise assume **legacy bridge shrink is ongoing**. **Batch 49** (further **`--action-*`** / adjacent bridge work) is **pending** until migration docs confirm landing — verify **`token-layers.md`** before introducing new **`var(--action-*)`** consumers.
+
 ### Choreography Table (Required Before CSS)
 
 Each stateful component spec must include:

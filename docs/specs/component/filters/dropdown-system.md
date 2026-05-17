@@ -13,7 +13,7 @@ Shared project-selector and upload-row menus MUST reuse this primitive system in
 
 **Width policy (toolbar shell):** Workspace/media/projects toolbars bind **`[panelClass]="toolbarDropdownPanelClass(activeDropdown())"`** (`toolbar-menu-panel-layout.ts`) so the shell always includes **`toolbar-dropdown option-menu-surface`**, and **appends `toolbar-dropdown--filter`** when the open panel is **Filter**. **`DropdownShellComponent`** SCSS mirrors the floors below; **horizontal `left` clamping** in toolbar TS must use **`toolbarDropdownPositionWidthPx(activeId)`** so the reserved width matches the active panel.
 
-| Panel group | CSS `min-width` (viewport clamp) | TS / positioning px (16px/rem bridge) |
+| Panel group | CSS `min-width` (viewport clamp) | TS / positioning px (aligned to **16px** rem grid per [`docs/design/tokens.md`](../../../design/tokens.md)) |
 | --- | --- | --- |
 | Sort, grouping, projects | `min(26rem, calc(100vw - 2rem))` on `:host.toolbar-dropdown` | **`TOOLBAR_MENU_PANEL_MIN_PX`** / **`TOOLBAR_MENU_SHELL_MIN_PX`** = **416** |
 | Filter | `min(32rem, calc(100vw - 2rem))` on `:host.toolbar-dropdown.toolbar-dropdown--filter` | **`TOOLBAR_MENU_FILTER_PANEL_MIN_PX`** = **512**; **`TOOLBAR_MENU_FILTER_CLAMP_PX`** aliases **512** (legacy name) |
@@ -108,7 +108,7 @@ border-radius: --radius-lg  (8px)
 box-shadow:    var(--shadow-lg)
 ```
 
-**Shadow ladder:** **`--shadow-*`** (including **`var(--shadow-lg)`** on this shell) are defined on **tweakcn `:root` / theme** — see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 (*Focus stacks* and shadow ladder). **Authors:** do not reintroduce removed bridge shadows or invent parallel `--shadow-*` names; follow that doc and this spec’s shell table above.
+**Shadow ladder:** **`--shadow-*`** (including **`var(--shadow-lg)`** on this shell) are defined on **tweakcn `:root` / theme** — see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 (*Focus stacks* and shadow ladder). **Authors:** follow that ladder only; do not invent parallel `--shadow-*` names or reintroduce deprecated shadow shortcuts; combine with this spec’s shell table above.
 
 Composable class table, hover token, and item geometry: **[dropdown-system.class-library.supplement.md](./dropdown-system.class-library.supplement.md)**.
 

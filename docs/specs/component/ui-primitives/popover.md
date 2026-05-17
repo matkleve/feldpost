@@ -94,7 +94,7 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 | Surface background | `--color-bg-elevated` |
 | Border | `1px solid var(--color-border)` |
 | Radius | `--radius-lg` |
-| Elevation | `var(--shadow-lg)` (tweakcn ladder — not a legacy-bridge row) |
+| Elevation | `var(--shadow-lg)` — tweakcn shadow ladder in [`docs/design/tokens.md`](../../../design/tokens.md) §3.5; elevated menu shells also align with [`dropdown-system.md`](../filters/dropdown-system.md) |
 | Z-index | literal **`300`** (`docs/design/tokens.md` §3.5) |
 
 ## Visual Behavior Contract

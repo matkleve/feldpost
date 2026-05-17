@@ -39,11 +39,11 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 **Layer C (bridge)**
 
-| Token |
+| Note |
 | --- |
-| `--action-bg-hover`, `--action-text-default`, `--action-text-active` |
+| **Phase 7 Batch 49:** **`--action-*`** rows removed from **`_legacy-design-tokens.scss`** — use **`var(--primary)`**, per-component **`:host`** vars (ex-bridge **`color-mix`** / sandstone literals), or **`--settings-action-bg-hover`** — **`docs/migration/phase-7-token-migration.md`** §Batch 49. |
 
-Optional **`[data-theme='sandstone']`** overrides for the same Layer C **action** names are defined in **`_legacy-design-tokens.scss`** (see **Layer C** in `token-layers.md`). **Phase 7 Batch 48** removed **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** from the bridge; menu surfaces use **`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see **`docs/migration/phase-7-token-migration.md`** §Batch 48).
+**Phase 7 Batch 48** removed **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** from the bridge; menu surfaces use **`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see **`docs/migration/phase-7-token-migration.md`** §Batch 48).
 
 ## 3.1 Color Tokens
 

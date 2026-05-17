@@ -1,14 +1,20 @@
 // Ex-bridge `--menu-item-text` (Phase 7 Batch 48) — defaults + sandstone (ex `_legacy-design-tokens.scss`).
 // @see docs/migration/phase-7-token-migration.md §Batch 48
+// Ex-bridge `--action-*` (Phase 7 Batch 49) — same values as pre-removal `_legacy-design-tokens.scss` `:root` + sandstone.
+// @see docs/migration/phase-7-token-migration.md §Batch 49
 :host {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
   --mds-menu-item-text: var(--foreground);
+  --mds-action-text-default: var(--muted-foreground);
+  --mds-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 :host-context([data-theme='sandstone']) {
   --mds-menu-item-text: #2f271f;
+  --mds-action-text-default: #6b5a47;
+  --mds-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
 .metadata-row-wrap {
@@ -53,7 +59,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--action-text-default);
+  color: var(--mds-action-text-default);
   cursor: pointer;
   transition:
     background 80ms ease-out,
@@ -64,7 +70,7 @@
   }
 
   &:hover {
-    background: var(--action-bg-hover);
+    background: var(--mds-action-bg-hover);
     color: var(--mds-menu-item-text);
   }
 }

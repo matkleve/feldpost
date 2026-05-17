@@ -1,6 +1,6 @@
 # Phase 8 — Global SCSS Elimination
 
-**Status:** In progress (2026-05-17) — **§6 shipped:** global **`hlm-toggle-group.scss`** retired (**`pillToggleVariants`** + **`[hlmPillToggle]`** / **`HlmPillToggleDirective`**; no toggle-group **`@use`** in **`styles.scss`**). **§7 Path A shipped:** pierced Leaflet map rules in **`_map-shell-leaflet-global.scss`** (**`app-map-shell`** scope). **§8 gates** green on last doc slice (`ng build`, `design-system:check`; no map-shell **`anyComponentStyle`** warning). **Still open:** **`styles`** chunk monitoring + dead-selector hygiene (§7); **Phase 7** owns **`legacy-design-tokens`** **`load-css`** teardown before “zero bridge” globals.
+**Status:** In progress (2026-05-17) — **§6 shipped:** global **`hlm-toggle-group.scss`** retired (**`pillToggleVariants`** + **`[hlmPillToggle]`** / **`HlmPillToggleDirective`**; no toggle-group **`@use`** in **`styles.scss`**). **§7 Path A shipped:** pierced Leaflet map rules in **`_map-shell-leaflet-global.scss`** (**`app-map-shell`** scope). **§8 gates** green on last doc slice (`ng build`, `design-system:check`; no map-shell **`anyComponentStyle`** warning). **Still open:** **`styles`** chunk monitoring + dead-selector hygiene (§7); Phase 7 bridge file **`_legacy-design-tokens.scss`** is **~120 lines** (order-of-magnitude; mostly comments + a thin **`--action-*`** / theme tail) and remains emitted only via **`@include meta.load-css('styles/legacy-design-tokens')`** — **not** swappable for a mid-file **`@use`** after **`@import "tailwindcss"`** (documented Sass/order constraint; see Phase 7 unblocker) until the bridge can be deleted or relocated safely.
 
 **Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. **No** global **`hlm-toggle-group.scss`** — segmented pill **row/column shell**, **`--hlm-toggle-item-*`** density, and reduced-motion clamps for the shell live in **`toggle-group-variants.ts`** (`pillToggleVariants`, `toggleGroupVariants`) and **`HlmPillToggleDirective`** (`hlmPillToggle` on caller wrappers); map-shell vertical chrome that pierces **`[hlmToggleGroup*]`** stays in **`_map-shell-style-switch.scss`**.
 
@@ -168,13 +168,20 @@ npm run design-system:check
 - [x] Acceptance table + checklist above green.
 - [x] §6 toggle-group global SCSS retired (**CVA** + **`[hlmPillToggle]`**; no global sheet).
 - [x] §7 Path A: Leaflet pierced rules hoisted to **`_map-shell-leaflet-global.scss`** (**`app-map-shell`** scope).
-- [ ] **`styles.scss`** without **`meta.load-css('styles/legacy-design-tokens')`** — **Phase 7** bridge removal (not a blocker for rows above). **2026-05-17:** **`@use`** at the bridge line is **invalid** (Sass: no **`@use`** after **`@import "tailwindcss"`** / tweakcn blocks); top **`@use`** would reorder CSS vs tweakcn/dark selectors — **not** shipped; unblocker in **`phase-7-token-migration.md`** § *Unblocker — replace `meta.load-css`…*.
+- [ ] **`styles.scss`** without **`@include meta.load-css('styles/legacy-design-tokens')`** — **Phase 7** owns shrinking then removing the bridge (**`_legacy-design-tokens.scss`** ~**O(120)** lines today — thin remainder, not a blocker for rows above). **Constraint (2026-05-17):** a **`@use`** at the same emission slot is **invalid** Sass after **`@import "tailwindcss"`** / tweakcn blocks; hoisting the bridge to the top **`@use`** block would **reorder** CSS vs tweakcn / dark selectors — **not** shipped; unblocker in **`phase-7-token-migration.md`** § *Unblocker — replace `meta.load-css`…*.
 - [x] Phase 9 may **plan** in parallel; package upgrade execution still blocked per Phase 9 upstream note.
 - [ ] Phase 10 checklist: “global SCSS risk” sign-off (Phase 10).
 
 ## Open (remaining weight)
 
 - **`styles`** initial-chunk monitoring (Path A trade-off) — §7 runbook + occasional **`ng build`** row scrape; dead-selector **`rg`** on **`map-shell*.scss`**.
-- **Phase 7** — shrink **`_legacy-design-tokens.scss`** until **`meta.load-css`** can be dropped (**`@use`** at the same slot is invalid Sass; top **`@use`** reorders CSS — see **Phase 7** § *Unblocker — replace `meta.load-css`…* (2026-05-17)); Phase 8 tracks **`@use`** / **`load-css`** inventory only.
+- **Phase 7 legacy bridge** — **`_legacy-design-tokens.scss`** ~**O(120)** lines; still loaded with **`@include meta.load-css('styles/legacy-design-tokens')`** after tweakcn **`:root`** (required global order). Shrink remaining custom-property rows (e.g. **`--action-*`**) until the include can be removed; **do not** “fix” with mid-file **`@use`** after Tailwind — invalid Sass; top **`@use`** reorders output — see **Phase 7** § *Unblocker — replace `meta.load-css`…* (2026-05-17). Phase 8 tracks **`@use`** / **`load-css`** inventory only.
 - **Phase 10** — unchecked DoD sign-off line above.
+
+### Next levers (suggested sequencing)
+
+- Drain remaining **`--action-*`** (and any other) bridge variables from **`_legacy-design-tokens.scss`** / callsites, or confirm already complete if a parallel Phase 7 batch lands first.
+- Drop **`@include meta.load-css('styles/legacy-design-tokens')`** only once Phase 7 clears the last bridge rows **and** a safe emission strategy exists (same **`load-css`** / **`@use`** ordering constraints as above).
+- Keep **`styles`** initial-chunk size + dead-selector hygiene under review after hoists (§7 runbook).
+- Close Phase 10 “global SCSS risk” sign-off when the team is ready.
 

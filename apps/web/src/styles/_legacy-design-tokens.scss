@@ -85,12 +85,11 @@
   // `--transition-fade-in` / `--transition-fade-out` / `--animation-skeleton-pulse` removed — Batch 37 (call sites use `var(--motion-duration-fast) var(--motion-ease-out)` / same + `cubic-bezier(0.4, 0, 1, 1)` / literal `media-display-pulse 200ms ease-in-out infinite`).
 
   // Component-role aliases (Theme Contract layer C)
-  // Action controls
   // `--action-bg-default` removed — Batch 40 (`transparent` at three callsites).
-  --action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
   // `--action-border-active` removed — Batch 39 (`project-card.component.scss` inlines mix + sandstone branch).
-  --action-text-default: var(--muted-foreground);
-  --action-text-active: var(--primary);
+  // `--action-bg-hover`, `--action-text-default`, `--action-text-active` + sandstone `[data-theme='sandstone']`
+  // mirror removed — Batch 49; callsites use `var(--primary)`, per-component `:host` / `:host-context` vars, or
+  // `--settings-action-bg-hover` on settings — proof §Batch 49.
 
   // Menu and option surfaces — `--menu-*` bridge rows removed Batch 48; callsites use per-host
   // custom properties + tweakcn (`var(--border)`, `var(--primary)`, `var(--foreground)`) — proof §Batch 48.
@@ -107,13 +106,4 @@
   // Feedback states
   // `--state-warning-bg` removed — Batch 39 (`media-detail-view.component.part2.scss` inlines mix).
   // `--state-danger-bg` removed — Batch 39 (`auth.styles.scss` inlines mix).
-}
-
-// Optional custom profile to validate themeability of semantic aliases.
-// Activate manually via: document.documentElement.setAttribute('data-theme', 'sandstone')
-[data-theme='sandstone'] {
-  --action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
-  --action-text-default: #6b5a47;
-  --action-text-active: var(--primary);
-
 }

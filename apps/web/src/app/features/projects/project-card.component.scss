@@ -1,10 +1,13 @@
 :host {
   display: block;
+  --project-card-action-hover-mix: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 // Sandstone used stronger primary/border mix for hover border (ex bridge `--action-border-active`)
 // @see docs/migration/phase-7-token-migration.md §Batch 39
 :host-context(html[data-theme='sandstone']) {
+  --project-card-action-hover-mix: color-mix(in srgb, #c59f63 18%, transparent);
+
   .project-card:hover {
     border-color: color-mix(
       in srgb,
@@ -35,7 +38,7 @@
       color-mix(in srgb, var(--primary) 45%, var(--border)) 58%,
       var(--project-item-color, var(--border))
     );
-    background: color-mix(in srgb, var(--action-bg-hover) 18%, var(--card));
+    background: color-mix(in srgb, var(--project-card-action-hover-mix) 18%, var(--card));
   }
 
   &:focus-within {

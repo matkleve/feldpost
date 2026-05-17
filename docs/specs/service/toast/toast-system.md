@@ -125,7 +125,7 @@ graph TB
 ## Component Hierarchy
 
 ```
-ToastContainerComponent                    ← fixed position, bottom-left, z-index: 400 (between dropdown 300 and modal 500; former `--z-toast` inlined Batch 35)
+ToastContainerComponent                    ← fixed position, bottom-left, z-index: 400 (between dropdown plane 300 and modal plane 500 — see [`docs/design/tokens.md`](../../../design/tokens.md) and [`dropdown-system.md`](../../component/filters/dropdown-system.md))
 │                                             left: calc(3rem + 0.75rem), bottom: 1.5rem
 │                                             mobile: centered, bottom: 5rem
 │                                             display: flex, flex-direction: column-reverse, gap: 0.5rem
@@ -243,7 +243,7 @@ sequenceDiagram
 
 ### Z-index
 
-- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **dropdown plane `300`**, below **modal plane `500`**. Layering aligns with [`docs/design/tokens.md`](../../../design/tokens.md) and the dropdown shell in [`docs/specs/component/filters/dropdown-system.md`](../../component/filters/dropdown-system.md). **`--z-toast`** / **`--z-dropdown`** / **`--z-modal`** bridge variables were removed in Phase 7 — do not reintroduce them.
+- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **dropdown plane `300`**, below **modal plane `500`**. Layering aligns with [`docs/design/tokens.md`](../../../design/tokens.md) and the dropdown shell in [`docs/specs/component/filters/dropdown-system.md`](../../component/filters/dropdown-system.md). Use only the documented numeric planes — do not reintroduce removed ad-hoc stacking variables.
 
 ### Consumer wiring (existing files to update)
 

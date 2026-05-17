@@ -155,8 +155,8 @@
     position: absolute;
     width: 2rem;
     height: 2rem;
-    border: 2px solid color-mix(in srgb, var(--action-text-active) 20%, var(--border));
-    border-top-color: var(--action-text-active);
+    border: 2px solid color-mix(in srgb, var(--primary) 20%, var(--border));
+    border-top-color: var(--primary);
     border-radius: var(--radius-full);
     animation: invite-qr-spin 800ms linear infinite;
   }

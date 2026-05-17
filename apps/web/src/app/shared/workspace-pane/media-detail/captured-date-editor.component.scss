@@ -2,16 +2,20 @@
 
 // Ex-bridge `--menu-*` (Phase 7 Batch 48): standalone host + sandstone (ex `_legacy-design-tokens.scss`).
 // @see docs/migration/phase-7-token-migration.md §Batch 48
+// Ex-bridge `--action-bg-hover` (Phase 7 Batch 49) — `_legacy-design-tokens.scss` `:root` + sandstone (`--action-text-active` was `var(--primary)`).
+// @see docs/migration/phase-7-token-migration.md §Batch 49
 :host {
   --cde-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
   --cde-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
   --cde-menu-item-text: var(--foreground);
+  --cde-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 :host-context([data-theme='sandstone']) {
   --cde-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
   --cde-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
   --cde-menu-item-text: #2f271f;
+  --cde-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
 .captured-date-editor {
@@ -94,8 +98,8 @@
       background 80ms ease-out;
 
     &:hover {
-      color: var(--action-text-active);
-      background: var(--action-bg-hover);
+      color: var(--primary);
+      background: var(--cde-action-bg-hover);
     }
   }
 
@@ -120,7 +124,7 @@
 
     &:hover {
       color: var(--cde-menu-item-text);
-      background: var(--action-bg-hover);
+      background: var(--cde-action-bg-hover);
     }
   }
 
@@ -173,7 +177,7 @@
     }
 
     &--selected {
-      background: var(--action-text-active);
+      background: var(--primary);
       color: var(--primary-foreground);
       font-weight: var(--font-weight-semibold);
     }
@@ -213,11 +217,11 @@
   }
 
   &__done-btn {
-    color: var(--action-text-active);
+    color: var(--primary);
     font-weight: var(--font-weight-medium);
 
     &:hover {
-      background: var(--action-bg-hover);
+      background: var(--cde-action-bg-hover);
     }
   }
 }

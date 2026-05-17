@@ -18,12 +18,17 @@
   --settings-stroke-width: 1.5px;
   --settings-border-muted: color-mix(in srgb, var(--border) 72%, transparent);
   --settings-hover-focus: color-mix(in srgb, var(--primary) 12%, transparent);
+  --settings-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
   --settings-interactive-border: var(--settings-stroke-width) solid var(--settings-border-muted);
   --settings-interactive-radius: var(--container-radius-control);
   --settings-focus-ring: var(--interactive-focus-ring);
   // Former `var(--interactive-transition-standard)` — legacy row removed Batch 41 (`docs/migration/phase-7-token-migration.md` §Batch 41)
   --settings-interactive-transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
     box-shadow 120ms ease-out;
+}
+
+:host-context([data-theme='sandstone']) {
+  --settings-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
 @layer components {
@@ -304,7 +309,7 @@
   // Hover surface for toggle rows (replaces legacy ui-item hover)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__toggle-row:hover {
-    background: color-mix(in srgb, var(--action-bg-hover) 65%, transparent);
+    background: color-mix(in srgb, var(--settings-action-bg-hover) 65%, transparent);
   }
 
   // Focus ring for keyboard use on toggle rows

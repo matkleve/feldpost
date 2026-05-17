@@ -4,16 +4,22 @@
 // Ex-bridge `--menu-*` (Phase 7 Batch 48): defaults matched `_legacy-design-tokens.scss` `:root`;
 // sandstone matched `[data-theme='sandstone']` bridge overrides (same file, pre-Batch 48).
 // @see docs/migration/phase-7-token-migration.md §Batch 48
+// Ex-bridge `--action-*` (Phase 7 Batch 49) — same bridge values on host (default + sandstone).
+// @see docs/migration/phase-7-token-migration.md §Batch 49
 :host {
   --mdv-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
   --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
   --mdv-menu-item-text: var(--foreground);
+  --mdv-action-text-default: var(--muted-foreground);
+  --mdv-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 :host-context([data-theme='sandstone']) {
   --mdv-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
   --mdv-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
   --mdv-menu-item-text: #2f271f;
+  --mdv-action-text-default: #6b5a47;
+  --mdv-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
 .detail-section {
@@ -134,7 +140,7 @@
     transition: color 80ms ease-out;
 
     &:hover:not(:disabled) {
-      color: var(--action-text-active);
+      color: var(--primary);
     }
 
     &--static {
@@ -209,7 +215,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--action-text-default);
+  color: var(--mdv-action-text-default);
   opacity: 0;
   pointer-events: none;
   transition: opacity 80ms ease-out;
@@ -220,7 +226,7 @@
 
   &:hover {
     color: var(--mdv-menu-item-text);
-    background: var(--action-bg-hover);
+    background: var(--mdv-action-bg-hover);
   }
 
   &:focus-visible {
@@ -407,7 +413,7 @@
     border: none;
     border-radius: 0.375rem;
     background: transparent;
-    color: var(--action-text-default);
+    color: var(--mdv-action-text-default);
     cursor: pointer;
 
     .material-icons {
@@ -415,7 +421,7 @@
     }
 
     &:hover:not(:disabled) {
-      background: var(--action-bg-hover);
+      background: var(--mdv-action-bg-hover);
       color: var(--mdv-menu-item-text);
     }
 
@@ -435,7 +441,7 @@
     align-items: center;
     justify-content: center;
     width: 1.125rem;
-    color: var(--action-text-active);
+    color: var(--primary);
 
     .material-icons {
       font-size: var(--font-size-md);

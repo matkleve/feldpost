@@ -26,6 +26,8 @@ This report, the [structure audit](./dropdown-component-structure-audit-2026-05-
 
 **Map-shell `anyComponentStyle` budget:** Multiple anchored shells on the map surface (for example the four `<app-dropdown-shell>` blocks called out in §1) sit alongside heavy Leaflet `::ng-deep` and marker/panel SCSS; **emitted component-style size** and **co-located partial splits / dedupe** toward the Angular budget are tracked under [Phase 8 §7 — inventory (`styles/` tree)](../phase-8-global-scss-elimination.md#7-inventory-remaining-styles-tree) and summarized as open build weight in [Phase 8 — Open (remaining weight)](../phase-8-global-scss-elimination.md#open-remaining-weight), not duplicated here.
 
+**Token waves (menu cluster vs this report):** Phase **7 Batch 48** removed legacy **`--menu-*`** bridge rows from **`_legacy-design-tokens.scss`**; menu-role surfaces should use tweakcn semantics (**`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`**, **`var(--popover)`**, etc.) and per-component **`:host`** custom properties per **`docs/design/token-layers.md`**, **`docs/design/tokens.md`**, and **`docs/specs/component/filters/dropdown-system.md`** — not **`var(--menu-*)`**. The **stacking** story in this document (**inline `z-index` 300 / flyout 302**, CVA **`z-50`**, Batch **43** literals) is unchanged and does not depend on those bridge names. **Batch 49** (further **`--action-*`** / adjacent bridge cleanup) may land in parallel; treat binding guidance for **`--action-*`** as **pending** here until **`docs/design/token-layers.md`** and the migration batch notes confirm what remains on the bridge.
+
 ---
 
 ## 1. Executive findings

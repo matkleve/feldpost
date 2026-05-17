@@ -18,6 +18,8 @@ Aligned with the deep analysis and **`dropdown-system.md`**: same **three-layer*
 | **Stacking** contract (inline shell `z-index` vs menu CVA) — one normative story | docs and/or code |
 | Optional **DOM diagram / test oracle** in `dropdown-system.md` | docs |
 
+**Token waves:** Phase **7 Batch 48** removed **`--menu-*`** from the legacy bridge; new or migrated menu SCSS should follow tweakcn + **`docs/design/token-layers.md`** / **`docs/design/tokens.md`** and **`docs/specs/component/filters/dropdown-system.md`**, not **`var(--menu-*)`**. **Batch 49** (any remaining **`--action-*`** bridge shrink) is **pending** for this audit until the design token inventory and Phase **7** batch notes are re-checked—do not assume a **`--action-*`** name exists without verifying **`token-layers.md`**.
+
 ---
 
 ## 1. Executive summary
