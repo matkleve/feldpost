@@ -2,6 +2,7 @@
 // All colours use design-system tokens. No raw hex values.
 
 @use './map-shell-context-menu';
+@use './map-shell-style-switch';
 
 // ── Host — horizontal flex row ────────────────────────────────────────────────
 
@@ -11,45 +12,6 @@
   width: 100%;
   overflow: hidden;
   background: var(--background);
-}
-
-// ── Map style switch (street/photo) — top-left of map zone ─────────
-
-.map-style-switch {
-  position: absolute;
-  top: var(--container-inset);
-  left: var(--container-inset);
-  z-index: var(--z-upload-button);
-  display: inline-flex;
-  align-items: flex-start;
-
-  @media (max-width: 47.9375rem) {
-    top: calc(var(--container-inset-mobile) + var(--spacing-2));
-    left: var(--container-inset-mobile);
-  }
-}
-
-:host .map-style-switch [hlmToggleGroup] {
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--spacing-1);
-  border-radius: var(--radius-full);
-  padding: var(--spacing-1);
-  background: var(--muted);
-  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
-}
-
-:host .map-style-switch [hlmToggleGroupItem] {
-  border-radius: calc(var(--radius-full) - var(--spacing-1));
-  justify-content: center;
-  width: 2.75rem;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  padding: 0;
-}
-
-:host .map-style-switch .map-style-switch__option-label {
-  display: none;
 }
 
 // ── Upload button zone — fixed top-right, expands into panel ─────────────────
