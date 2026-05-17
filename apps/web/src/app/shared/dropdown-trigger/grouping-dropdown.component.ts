@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import type { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
   CdkDropList,
@@ -6,7 +6,6 @@ import {
   CdkDrag,
   CdkDragHandle,
   moveItemInArray,
-  transferArrayItem,
 } from '@angular/cdk/drag-drop';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -55,6 +54,17 @@ export class GroupingDropdownComponent {
   readonly selectedRows = signal<Set<string>>(new Set());
   readonly isDragging = signal(false);
   readonly searchTerm = signal('');
+
+  /** True when the search field narrows the available pool (CDK indices are filter-relative). */
+  readonly hasGroupingSearch = computed(() => this.searchTerm().trim().length > 0);
+
+  /** Drop list + list UI: full available when no search; label filter when searching (active list stays unfiltered). */
+  readonly availableDropListData = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    const all = this.availableProperties();
+    if (!term) return all;
+    return all.filter((p) => p.label.toLowerCase().includes(term));
+  });
 
   onDragStart(): void {
     this.isDragging.set(true);
@@ -106,19 +116,28 @@ export class GroupingDropdownComponent {
   private dropSingle(event: CdkDragDrop<GroupingProperty[]>): void {
     const active = [...this.activeGroupings()];
     const available = [...this.availableProperties()];
+    const item = event.item.data as GroupingProperty;
+    const term = this.searchTerm().trim().toLowerCase();
+    const visibleAvail = term
+      ? available.filter((p) => p.label.toLowerCase().includes(term))
+      : available;
 
     if (event.previousContainer === event.container) {
-      // Reorder within same section
-      const isActive = active.some((p) => p.id === event.item.data.id);
+      const isActive = active.some((p) => p.id === item.id);
+      if (!isActive && term) {
+        return;
+      }
       const list = isActive ? active : available;
       moveItemInArray(list, event.previousIndex, event.currentIndex);
     } else {
-      // Cross-section transfer
-      const isFromActive = active.some((p) => p.id === event.item.data.id);
-      if (isFromActive) {
-        transferArrayItem(active, available, event.previousIndex, event.currentIndex);
+      const fromActive = active.some((p) => p.id === item.id);
+      if (fromActive) {
+        removeGroupingPropertyById(active, item.id);
+        insertAvailableAtVisibleIndex(available, visibleAvail, event.currentIndex, item);
       } else {
-        transferArrayItem(available, active, event.previousIndex, event.currentIndex);
+        removeGroupingPropertyById(available, item.id);
+        const insertAt = Math.min(event.currentIndex, active.length);
+        active.splice(insertAt, 0, item);
       }
     }
 
@@ -126,6 +145,11 @@ export class GroupingDropdownComponent {
   }
 
   private dropMultiSelect(event: CdkDragDrop<GroupingProperty[]>, selected: Set<string>): void {
+    if (this.searchTerm().trim()) {
+      this.dropSingle(event);
+      return;
+    }
+
     const active = [...this.activeGroupings()];
     const available = [...this.availableProperties()];
 
@@ -178,6 +202,34 @@ export class GroupingDropdownComponent {
   clearGroupings(): void {
     const available = [...this.availableProperties(), ...this.activeGroupings()];
     this.selectedRows.set(new Set());
+    this.searchTerm.set('');
     this.groupingsChanged.emit({ active: [], available });
+  }
+}
+
+function removeGroupingPropertyById(list: GroupingProperty[], id: string): void {
+  const i = list.findIndex((p) => p.id === id);
+  if (i !== -1) {
+    list.splice(i, 1);
+  }
+}
+
+/** Inserts `item` into `fullAvailable` at drop index `insertIndex` relative to `visibleAvailable` (pre-mutation snapshot). */
+function insertAvailableAtVisibleIndex(
+  fullAvailable: GroupingProperty[],
+  visibleAvailable: GroupingProperty[],
+  insertIndex: number,
+  item: GroupingProperty,
+): void {
+  if (insertIndex >= visibleAvailable.length) {
+    fullAvailable.push(item);
+    return;
+  }
+  const pivotId = visibleAvailable[insertIndex]?.id;
+  const j = fullAvailable.findIndex((p) => p.id === pivotId);
+  if (j === -1) {
+    fullAvailable.push(item);
+  } else {
+    fullAvailable.splice(j, 0, item);
   }
 }

@@ -20,10 +20,15 @@
               size="icon"
               class="standard-dropdown__search-icon-btn text-muted-foreground"
               type="button"
+              data-fp-dropdown-search-clear="true"
               [attr.aria-label]="clearSearchAriaLabel()"
               (click)="clearRequested.emit()"
             >
-              <span class="material-icons text-current" aria-hidden="true">close</span>
+              <span
+                class="material-icons text-current"
+                data-fp-dropdown-search-clear-icon="true"
+                aria-hidden="true"
+                >close</span>
             </button>
           } @else {
             <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>

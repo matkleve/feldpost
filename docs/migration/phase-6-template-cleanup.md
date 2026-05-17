@@ -1,6 +1,6 @@
 # Phase 6 — Template BEM Sweep & Toggle Unification
 
-**Status:** In Progress (2026-05-16 snapshot). *Verified 2026-05-17 — §Pre-flight + Gates A/B rg clean (same 2-file `\bui-` comment-only baseline).*
+**Status:** **Done (2026-05-17).** Template BEM sweep + toggle/toolbar acceptance met; residual `\bui-` in HTML is **comment-only** (`@see …/ui-primitives/…` spec paths — intentional; do not strip).
 
 **Goal:** Zero legacy **`ui-*` hyphenated class tokens** in any Angular template (Gate A). Every toggle cluster uses `hlmToggleGroup` / `hlmToggleGroupItem` (no hand-rolled BEM for group chrome). Toolbar actions use `hlmBtn` with explicit variants. **`apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts` — deleted (2026-05-16).** **Gate B:** zero residual **`uiCamelCase`** attribute directives in HTML templates (**2026-05-16** — was `uiDropdownTrigger`; replaced by **`hlmBtn`** + per-toolbar menu-trigger classes in Phase 5 Group D).
 
@@ -55,6 +55,23 @@ Re-run before execution; numbers drift.
 | SCSS `var(--color…)` in `apps/web/src/app` (`*.scss`) | `rg 'var\(--color' apps/web/src/app --glob "*.scss" -l` → **0** files (Phase 7 may still cover other legacy `var(--*` tokens) |
 | `hlm-toggle-group__*` / `hlm-pill-toggle__*` in HTML | `rg 'hlm-toggle-group__\|hlm-pill-toggle__' apps/web/src/app --glob "*.html"` → **0** hits |
 | Gate B — `uiCamelCase` directives in HTML | `rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l` → **0** files (**2026-05-16**, post–Group D) |
+
+### Closure verification (2026-05-17)
+
+Re-ran §Pre-flight scans, Gate A/B, §10 import grep, `npx ng build` (apps/web), and `npm run design-system:check` from repo root. Summary:
+
+| Check | Command / action | Result |
+|-------|------------------|--------|
+| `class="…"` contains `ui-` | `rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l` | **0** files |
+| `hlm-toggle-group` literal in HTML | `rg 'hlm-toggle-group\b' apps/web/src/app --glob "*.html" -l` | **0** files |
+| Legacy `ui-button--*` strings | `rg 'ui-button--active\|ui-button--ghost\|ui-button--secondary' apps/web/src/app --glob "*.html"` | **0** hits |
+| `\bui-` (hyphenated token scan) | `rg '\bui-' apps/web/src/app --glob "*.html" -l` | **2** files — `panel-trigger.component.html`, `popover.component.html`; matches only **`@see docs/specs/component/ui-primitives/…`** (no markup). `rg … -c` → 5 + 1 lines. |
+| Helm toggle `__` BEM in HTML | `rg 'hlm-toggle-group__\|hlm-pill-toggle__' apps/web/src/app --glob "*.html"` | **0** hits |
+| **Gate A** | `rg 'ui-item\|ui-container\|ui-row-shell\|ui-card-shell\|ui-chip\|ui-button\|ui-spacer\|ui-badge\|ui-input-control' apps/web/src/app --glob "*.html"` | **0** hits |
+| **Gate B** | `rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l \| wc -l` | **0** |
+| Shim import (§10) | `rg "from ['\"].*ui-primitives/ui-primitives\.directive" apps/web/src -l` | **0** files |
+| Build | `cd apps/web && npx ng build` | **exit 0** |
+| Design system | `npm run design-system:check` | **exit 0** |
 
 **`styles/primitives/` inventory (2026-05-16):** **empty directory** — `dropdown-trigger.scss` **deleted** with **`UiDropdownTriggerDirective`** (Group D). No remaining global primitive SCSS under `styles/primitives/`.
 
@@ -185,7 +202,7 @@ These use CVA + `host: { '[class]' }` — no action needed:
 | Build | `cd apps/web && npx ng build` → exit **0** |
 | Design system | `npm run design-system:check` → exit **0** |
 
-**Closure:** **Gate A** + helm-toggle BEM + **Gate B** + build + design-system = Phase 6 **template BEM sweep** acceptance rows. **`ui-primitives.directive.ts`** deletion (**§10**) **complete (2026-05-16)**. **`uiDropdownTrigger` / `UiDropdownTriggerDirective`** removed **2026-05-16** (Group D).
+**Closure:** **Gate A** + helm-toggle BEM + **Gate B** + build + design-system = Phase 6 **template BEM sweep** acceptance rows (**Phase 6 doc status: Done 2026-05-17** — §Closure verification). **`ui-primitives.directive.ts`** deletion (**§10**) **complete (2026-05-16)**. **`uiDropdownTrigger` / `UiDropdownTriggerDirective`** removed **2026-05-16** (Group D).
 
 ---
 
@@ -193,7 +210,7 @@ These use CVA + `host: { '[class]' }` — no action needed:
 
 - Gate A, helm-toggle BEM leakage, build, and design-system rows above are green.
 - **`ui-primitives.directive.ts`** removed (**§10**, **2026-05-16**).
-- **Gate B** → **zero** residual **`uiCamelCase`** in templates (**2026-05-16**, Group D). Flip Phase 6 **Done** in `docs/migration/README.md` when remaining narrative checklist (post-patches, optional QA) is intentionally closed.
+- **Gate B** → **zero** residual **`uiCamelCase`** in templates (**2026-05-16**, Group D). **`docs/migration/README.md`** Phase 6 row flipped **Done** (**2026-05-17**); open items in §Phase 6 Post-patches roll forward to Phases 7 / 10 as documented there.
 - Phase 7 pre-flight token scan re-run and attached to `phase-7-token-migration.md` §Baseline.
 
 ## Phase 6 Post-patches

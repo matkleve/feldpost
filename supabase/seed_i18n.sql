@@ -11070,6 +11070,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0419b.workspace_grouping_search_placeholder', 'Search properties…', 'en', 'apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.html bound-attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search properties…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0419b.workspace_grouping_search_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Eigenschaften suchen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0419b.workspace_grouping_search_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca proprietà…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0419b.workspace_grouping_search_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0420.workspace_imagedetail_action_copycoordinates', 'workspace.imageDetail.action.copyCoordinates', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

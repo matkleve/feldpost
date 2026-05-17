@@ -60,9 +60,9 @@
 }
 
 @layer components {
-  // Rotates only the reset glyph when this button is hovered/active — no Tailwind `group` (avoids sibling clear `close` picking up motion).
+  // Reset glyph motion — `data-fp-*` only (never descendant selectors that could hit sibling clear `close`).
   // @see docs/specs/component/filters/dropdown-system.md
-  .sort-toolbar-search-reset__icon {
+  [data-fp-dropdown-search-reset-icon='true'] {
     transition-property: transform;
     transition-duration: var(--motion-duration-fast);
     transition-timing-function: var(--motion-ease-out);
@@ -71,20 +71,20 @@
   // Motion-reduced: skip spin affordance on reset control.
   // @see docs/design/motion.md
   @media (prefers-reduced-motion: reduce) {
-    .sort-toolbar-search-reset__icon {
+    [data-fp-dropdown-search-reset-icon='true'] {
       transition-duration: 0s;
     }
   }
 
-  // Hover tilt for sort search reset (scoped to `.sort-toolbar-search-reset` only).
+  // Hover tilt for sort search reset.
   // @see docs/specs/component/filters/dropdown-system.md
-  .sort-toolbar-search-reset:hover .sort-toolbar-search-reset__icon {
+  [data-fp-dropdown-search-reset='true']:hover [data-fp-dropdown-search-reset-icon='true'] {
     transform: rotate(-12deg);
   }
 
-  // Active “spin” for sort search reset — longer duration on press.
+  // Active spin for sort search reset.
   // @see docs/specs/component/filters/dropdown-system.md
-  .sort-toolbar-search-reset:active .sort-toolbar-search-reset__icon {
+  [data-fp-dropdown-search-reset='true']:active [data-fp-dropdown-search-reset-icon='true'] {
     transform: rotate(-180deg);
     transition-duration: var(--motion-duration-slow);
   }
@@ -92,8 +92,8 @@
   // Reduced-motion users: no rotation on reset.
   // @see docs/design/motion.md
   @media (prefers-reduced-motion: reduce) {
-    .sort-toolbar-search-reset:hover .sort-toolbar-search-reset__icon,
-    .sort-toolbar-search-reset:active .sort-toolbar-search-reset__icon {
+    [data-fp-dropdown-search-reset='true']:hover [data-fp-dropdown-search-reset-icon='true'],
+    [data-fp-dropdown-search-reset='true']:active [data-fp-dropdown-search-reset-icon='true'] {
       transform: none;
     }
   }

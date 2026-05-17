@@ -15,11 +15,13 @@
       size="icon"
       class="sort-toolbar-search-reset shrink-0 text-muted-foreground"
       type="button"
+      data-fp-dropdown-search-reset="true"
       (click)="onSearchActionClick()"
       [attr.aria-label]="searchActionAriaLabel()"
     >
       <span
         class="sort-toolbar-search-reset__icon material-icons inline-block"
+        data-fp-dropdown-search-reset-icon="true"
         aria-hidden="true"
         >{{ searchActionIcon() }}</span>
     </button>

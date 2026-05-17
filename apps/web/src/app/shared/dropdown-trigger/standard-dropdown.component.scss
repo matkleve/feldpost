@@ -87,10 +87,19 @@
   flex-shrink: 0;
 }
 
-// Clear glyph: never inherit `transform` from sibling projected controls in the same trailing cluster.
+// Search clear: never `transform` (hlmBtn `[class]` can drop template hooks; `data-*` + `!important` wins over stray utilities).
 // @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__search-icon-btn .material-icons {
-  transform: none;
+:host [data-fp-dropdown-search-clear='true'],
+:host [data-fp-dropdown-search-clear-icon='true'] {
+  transform: none !important;
+}
+
+// Clear icon: do not animate `transform` from unrelated row utilities.
+// @see docs/specs/component/filters/dropdown-system.md
+:host [data-fp-dropdown-search-clear='true']:hover [data-fp-dropdown-search-clear-icon='true'],
+:host [data-fp-dropdown-search-clear='true']:active [data-fp-dropdown-search-clear-icon='true'],
+:host [data-fp-dropdown-search-clear='true']:focus-visible [data-fp-dropdown-search-clear-icon='true'] {
+  transform: none !important;
 }
 
 // Shared toolbar menu chrome for sort + grouping (same shell floor; identical body width contract).

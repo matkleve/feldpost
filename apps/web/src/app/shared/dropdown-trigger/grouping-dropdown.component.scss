@@ -120,9 +120,9 @@
 }
 
 @layer components {
-  // Rotates only the grouping reset glyph when this button is hovered/active — SCSS-scoped (no Tailwind `group` leakage).
+  // Grouping reset motion — `data-fp-*` only (no broad class chains).
   // @see docs/specs/component/filters/dropdown-system.md
-  .grouping-toolbar-reset__icon {
+  [data-fp-dropdown-grouping-reset-icon='true'] {
     transition-property: transform;
     transition-duration: var(--motion-duration-fast);
     transition-timing-function: var(--motion-ease-out);
@@ -131,20 +131,20 @@
   // Motion-reduced: skip spin on grouping reset.
   // @see docs/design/motion.md
   @media (prefers-reduced-motion: reduce) {
-    .grouping-toolbar-reset__icon {
+    [data-fp-dropdown-grouping-reset-icon='true'] {
       transition-duration: 0s;
     }
   }
 
   // Hover tilt for grouping header reset.
   // @see docs/specs/component/filters/dropdown-system.md
-  .grouping-toolbar-reset:hover .grouping-toolbar-reset__icon {
+  [data-fp-dropdown-grouping-reset='true']:hover [data-fp-dropdown-grouping-reset-icon='true'] {
     transform: rotate(-12deg);
   }
 
   // Active spin for grouping header reset.
   // @see docs/specs/component/filters/dropdown-system.md
-  .grouping-toolbar-reset:active .grouping-toolbar-reset__icon {
+  [data-fp-dropdown-grouping-reset='true']:active [data-fp-dropdown-grouping-reset-icon='true'] {
     transform: rotate(-180deg);
     transition-duration: var(--motion-duration-slow);
   }
@@ -152,8 +152,8 @@
   // Reduced-motion: no rotation on grouping reset.
   // @see docs/design/motion.md
   @media (prefers-reduced-motion: reduce) {
-    .grouping-toolbar-reset:hover .grouping-toolbar-reset__icon,
-    .grouping-toolbar-reset:active .grouping-toolbar-reset__icon {
+    [data-fp-dropdown-grouping-reset='true']:hover [data-fp-dropdown-grouping-reset-icon='true'],
+    [data-fp-dropdown-grouping-reset='true']:active [data-fp-dropdown-grouping-reset-icon='true'] {
       transform: none;
     }
   }
