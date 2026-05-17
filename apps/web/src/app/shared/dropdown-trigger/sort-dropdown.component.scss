@@ -11,6 +11,14 @@
   max-width: 100%;
 }
 
+// Section label + trailing reset (same row rhythm as grouping dropdown header).
+// @see docs/specs/component/filters/dropdown-system.md
+.sort-dropdown__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 // ── Direction toggle (sort-specific) ────────────────────────────────────────
 .sort-direction {
   display: inline-flex;
@@ -60,40 +68,40 @@
 }
 
 @layer components {
-  // Reset glyph motion — `data-fp-*` only (never descendant selectors that could hit sibling clear `close`).
+  // Reset glyph motion — `data-fp-dropdown-sort-reset*` only (matches grouping header reset pattern).
   // @see docs/specs/component/filters/dropdown-system.md
-  [data-fp-dropdown-search-reset-icon='true'] {
+  [data-fp-dropdown-sort-reset-icon='true'] {
     transition-property: transform;
     transition-duration: var(--motion-duration-fast);
     transition-timing-function: var(--motion-ease-out);
   }
 
-  // Motion-reduced: skip spin affordance on reset control.
+  // Motion-reduced: skip spin affordance on sort reset control.
   // @see docs/design/motion.md
   @media (prefers-reduced-motion: reduce) {
-    [data-fp-dropdown-search-reset-icon='true'] {
+    [data-fp-dropdown-sort-reset-icon='true'] {
       transition-duration: 0s;
     }
   }
 
-  // Hover tilt for sort search reset.
+  // Hover tilt for sort header reset.
   // @see docs/specs/component/filters/dropdown-system.md
-  [data-fp-dropdown-search-reset='true']:hover [data-fp-dropdown-search-reset-icon='true'] {
+  [data-fp-dropdown-sort-reset='true']:hover [data-fp-dropdown-sort-reset-icon='true'] {
     transform: rotate(-12deg);
   }
 
-  // Active spin for sort search reset.
+  // Active spin for sort header reset.
   // @see docs/specs/component/filters/dropdown-system.md
-  [data-fp-dropdown-search-reset='true']:active [data-fp-dropdown-search-reset-icon='true'] {
+  [data-fp-dropdown-sort-reset='true']:active [data-fp-dropdown-sort-reset-icon='true'] {
     transform: rotate(-180deg);
     transition-duration: var(--motion-duration-slow);
   }
 
-  // Reduced-motion users: no rotation on reset.
+  // Reduced-motion users: no rotation on sort reset.
   // @see docs/design/motion.md
   @media (prefers-reduced-motion: reduce) {
-    [data-fp-dropdown-search-reset='true']:hover [data-fp-dropdown-search-reset-icon='true'],
-    [data-fp-dropdown-search-reset='true']:active [data-fp-dropdown-search-reset-icon='true'] {
+    [data-fp-dropdown-sort-reset='true']:hover [data-fp-dropdown-sort-reset-icon='true'],
+    [data-fp-dropdown-sort-reset='true']:active [data-fp-dropdown-sort-reset-icon='true'] {
       transform: none;
     }
   }

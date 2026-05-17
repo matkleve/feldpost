@@ -3,7 +3,7 @@
 // @see docs/migration/phase-8-global-scss-elimination.md §7
 
 // Photo marker placeholder loading pulse (opacity only)
-// @see apps/web/src/app/features/map/map-shell/_map-shell-photo-marker-states.scss
+// @see apps/web/src/styles/_map-shell-leaflet-global.scss
 @keyframes map-photo-marker-placeholder-pulse {
   0%,
   100% {
@@ -16,7 +16,7 @@
 }
 
 // Photo marker pending ring pulse (opacity + scale)
-// @see apps/web/src/app/features/map/map-shell/_map-shell-photo-markers.scss (.map-photo-marker__pending-ring)
+// @see apps/web/src/styles/_map-shell-leaflet-global.scss (.map-photo-marker__pending-ring)
 @keyframes map-photo-marker-pulse {
   0%,
   100% {
@@ -31,7 +31,7 @@
 }
 
 // One-shot spotlight ring expansion on map marker wrapper
-// @see apps/web/src/app/features/map/map-shell/_map-shell-photo-marker-states.scss
+// @see apps/web/src/styles/_map-shell-leaflet-global.scss
 @keyframes map-photo-marker-spotlight {
   0% {
     transform: translate(-50%, -50%) scale(1);

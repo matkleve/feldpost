@@ -12527,6 +12527,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0459b.workspace_sort_section_primary', 'Sort', 'en', 'apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0459b.workspace_sort_section_primary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Sortierung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0459b.workspace_sort_section_primary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ordinamento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0459b.workspace_sort_section_primary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0460.z_b_radius_auswahl_nord', 'z. B. Radius Auswahl Nord', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

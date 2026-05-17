@@ -5,7 +5,6 @@ import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
-import { DropdownSearchActionAnchorDirective } from './dropdown-search-action-anchor.directive';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 
 export type SortDropdownOption = {
@@ -21,7 +20,6 @@ export type SortDropdownOption = {
   styleUrl: './sort-dropdown.component.scss',
   imports: [
     ...HLM_BUTTON_IMPORTS,
-    DropdownSearchActionAnchorDirective,
     StandardDropdownComponent,
     HlmMenuItemDirective,
     HlmMenuLabelDirective,
@@ -90,13 +88,6 @@ export class SortDropdownComponent {
     return !this.areSortsEqual(sorts, defaults);
   });
 
-  readonly searchActionIcon = computed(() => (this.searchTerm() ? 'close' : 'restart_alt'));
-  readonly searchActionAriaLabel = computed(() =>
-    this.searchTerm()
-      ? this.t('workspace.sort.search.clear', 'Clear search')
-      : this.t('workspace.sort.search.resetDefault', 'Reset to default'),
-  );
-
   constructor() {
     effect(() => {
       const provided = this.activeSortsInput();
@@ -162,19 +153,9 @@ export class SortDropdownComponent {
 
   resetSort(): void {
     const defaultSorts = [...this.defaultSorts()];
+    this.searchTerm.set('');
     this.activeSorts.set(defaultSorts);
     this.sortChanged.emit(defaultSorts);
-  }
-
-  onSearchActionClick(): void {
-    if (this.searchTerm()) {
-      this.searchTerm.set('');
-      return;
-    }
-
-    if (this.hasCustomSort()) {
-      this.resetSort();
-    }
   }
 
   setHoveredSort(id: string): void {

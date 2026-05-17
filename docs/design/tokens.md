@@ -507,7 +507,7 @@ The UI uses a consistent "friendly but professional" radius system:
 
 ### Physical shadow scale
 
-Four physical shadows define elevation only. Components should consume semantic aliases (state shadows and elevation layers) instead of hardcoding physical levels directly.
+Four physical shadows define elevation only. Components should consume **`--shadow-focus`** (focus emphasis), **`--interactive-focus-ring`**, and semantic **`--elevation-*`** layers instead of hardcoding physical levels directly.
 
 | Token                 | Light mode value                                                      | Purpose                              |
 | --------------------- | --------------------------------------------------------------------- | ------------------------------------ |
@@ -519,24 +519,13 @@ Four physical shadows define elevation only. Components should consume semantic 
 
 In dark mode, `sm` through `xl` are overridden with `rgba(0,0,0,...)` at higher opacity so shadows remain visible against dark surfaces. `--shadow-focus-ring` adapts automatically via `--color-primary`.
 
-### State shadow aliases (semantic interaction)
+### Focus shadow alias
 
-State shadows compose from physical elevation plus optional semantic rings.
+The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-sm)`; dark: `var(--shadow-sm), var(--shadow-focus-ring)`). Components that need a visible focus ring also use **`--interactive-focus-ring`** (maps to **`--shadow-focus-ring`**) or compose with **`--shadow-focus-ring`** directly.
 
-| Token               | Composition                                             | Purpose                              |
-| ------------------- | ------------------------------------------------------- | ------------------------------------ |
-| `--shadow-hover`    | `var(--shadow-sm)`                                      | Hover lift without changing geometry |
-| `--shadow-focus`    | `var(--shadow-sm), var(--shadow-focus-ring)`            | Keyboard/mouse focus treatment       |
-| `--shadow-selected` | `var(--shadow-sm), 0 0 0 2px var(--color-accent-brand)` | Selected-state emphasis              |
-| `--shadow-error`    | `var(--shadow-sm), 0 0 0 2px var(--color-danger)`       | Error-state emphasis                 |
+### Border tokens
 
-Rule: interactive components should prefer semantic state shadows (`--shadow-hover`, `--shadow-focus`, `--shadow-selected`, `--shadow-error`) over raw physical tokens when rendering state changes.
-
-### Default border token
-
-Use `--border-default` as the baseline neutral border (`1px` equivalent) for low-emphasis outlines and resting control borders. State borders (`--border-focus`, `--border-hover`, `--border-selected`, `--border-error`) stay available when a real border is required instead of a state shadow.
-
-Current emphasis ordering: `--border-focus` > `--border-hover` > `--border-selected`.
+Use **`--border-sm`** … **`--border-xl`** for neutral metric borders. For interaction-driven borders, use **`--border-hover`** and **`--border-selected`** (no separate resting **`--border-default`** / outline aliases on `:root` after Phase 7 Batch 27).
 
 Border scale tokens are available for consistent sizing semantics:
 
@@ -546,8 +535,6 @@ Border scale tokens are available for consistent sizing semantics:
 | `--border-md` | medium neutral border (`1.5px` equivalent)   |
 | `--border-lg` | emphasized neutral border (`2px` equivalent) |
 | `--border-xl` | strong neutral border (`3px` equivalent)     |
-
-`--border-default` maps to `--border-sm`.
 
 ### Z-index ladder
 
@@ -568,7 +555,6 @@ Every component's `box-shadow` references a semantic `--elevation-*` token. Elem
 
 | Layer                  | Maps to       | Elements                                                                                                                                    |
 | ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--elevation-base`     | `none`        | Page background, flush surfaces                                                                                                             |
 | `--elevation-subtle`   | `--shadow-sm` | Mobile bottom bar, drag divider (rest), location marker rings                                                                               |
 | `--elevation-overlay`  | `--shadow-md` | **All map-level overlays**: sidebar, search bar, upload FAB, GPS button, placement banner, toast, upload panel, workspace pane, photo panel |
 | `--elevation-dropdown` | `--shadow-lg` | Context menus, popovers, toolbar dropdowns (sort/group/filter), auth card                                                                   |
