@@ -50,13 +50,7 @@
   // State shadow alias for focus emphasis (used by `--interactive-focus-ring` consumers).
   --shadow-focus: var(--shadow-sm);
 
-  // Border scale (mirrors shadow scale naming for consistent token ergonomics)
-  --border-sm: 0.0625rem solid var(--interactive-border-muted);
-  --border-md: 0.09375rem solid var(--interactive-border-muted);
-  --border-lg: 0.125rem solid var(--interactive-border-muted);
-  --border-xl: 0.1875rem solid var(--interactive-border-muted);
-
-  // Border variables
+  // Border variables (metric `--border-sm`…`--border-xl` removed — zero `var()` consumers; Batch 28)
   --border-hover: 0.1875rem solid
     color-mix(in srgb, var(--primary) 55%, var(--border));
   --border-selected: 0.125rem solid var(--primary);
@@ -261,11 +255,6 @@
 
   --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
   --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
-
-  --border-sm: 0.0625rem solid var(--interactive-border-muted);
-  --border-md: 0.09375rem solid var(--interactive-border-muted);
-  --border-lg: 0.125rem solid var(--interactive-border-muted);
-  --border-xl: 0.1875rem solid var(--interactive-border-muted);
 
   --border-hover: 0.1875rem solid
     color-mix(in srgb, var(--primary) 30%, var(--border));

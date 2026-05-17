@@ -33,7 +33,7 @@
     justify-content: space-between;
     // Adds symmetric horizontal inset on the closed trigger (popover list uses `.standard-dropdown` padding separately).
     // @see docs/specs/ui/workspace/workspace-view-system.md
-    padding-inline: var(--spacing-2);
+    padding-inline: var(--spacing-3);
   }
 
   // Chevron rotation target for open dropdown shell.

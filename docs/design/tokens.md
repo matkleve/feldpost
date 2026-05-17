@@ -525,16 +525,7 @@ The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-s
 
 ### Border tokens
 
-Use **`--border-sm`** … **`--border-xl`** for neutral metric borders. For interaction-driven borders, use **`--border-hover`** and **`--border-selected`** (no separate resting **`--border-default`** / outline aliases on `:root` after Phase 7 Batch 27).
-
-Border scale tokens are available for consistent sizing semantics:
-
-| Token         | Meaning                                      |
-| ------------- | -------------------------------------------- |
-| `--border-sm` | thin neutral border (`1px` equivalent)       |
-| `--border-md` | medium neutral border (`1.5px` equivalent)   |
-| `--border-lg` | emphasized neutral border (`2px` equivalent) |
-| `--border-xl` | strong neutral border (`3px` equivalent)     |
+**Phase 7 Batch 28:** metric **`--border-sm`** … **`--border-xl`** were **removed from the bridge** — there were **no** `var(--border-(sm|md|lg|xl))` consumers under `apps/web`. For neutral strokes, use tweakcn **`var(--border)`** (and explicit `width`/`style` where needed) or **`var(--interactive-border-muted)`** via existing interaction aliases. For interaction-driven borders, use **`--border-hover`** and **`--border-selected`** (no separate resting **`--border-default`** / outline aliases on `:root` after Phase 7 Batch 27).
 
 ### Z-index ladder
 
@@ -659,6 +650,6 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | **removed from bridge** — no longer defined for sync | e.g. former **`--font-size-3xs`** → **`--font-size-2xs`** (Batch 20) | Use **`Font/Size/2xs`** only; do not reintroduce a duplicate 3xs variable |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
 | `color-mix` — computed at render time | `--interactive-border-muted`, `--state-success-bg` | Approximate with a manual opacity or solid value |
-| `complex` — multi-value shorthand | `--shadow-sm`, `--border-sm` | Set manually; shadows are not natively representable as a single Figma Variable |
+| `complex` — multi-value shorthand | `--shadow-sm`, `--border-hover` | Set manually; shadows and multi-part borders are not natively representable as a single Figma Variable |
 
 Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.
