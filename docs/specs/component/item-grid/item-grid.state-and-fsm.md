@@ -181,7 +181,7 @@ export const ITEM_VISUAL_STATE_TRANSITIONS: Record<
 | `content -> error`    | 1    | error layer           | opacity          | `var(--transition-fade-in)`  | `0ms` |
 | `content -> empty`    | 1    | empty layer           | opacity          | `var(--transition-fade-in)`  | `0ms` |
 | `loading -> content`  | 1    | loading layer         | opacity          | `var(--transition-fade-out)` | `0ms` |
-| `content -> selected` | 1    | selected visual owner | emphasis visuals | `var(--transition-emphasis)` | `0ms` |
+| `content -> selected` | 1    | selected visual owner | emphasis visuals | `var(--motion-duration-base) var(--motion-ease-out)` | `0ms` |
 
 ## Boolean Input Migration Required
 

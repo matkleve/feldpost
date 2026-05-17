@@ -193,9 +193,9 @@ export const PROJECT_ITEM_TRANSITIONS: Record<
 | ------------------------------------- | ---- | -------------------------- | --------------------------- | ---------------------------- | -------------------------------- |
 | `loading -> content-*`                | 1    | loading layer              | opacity                     | `var(--transition-fade-out)` | `0ms`                            |
 | `loading -> content-*`                | 2    | project frame              | opacity                     | `var(--transition-fade-in)`  | `var(--transition-reveal-delay)` |
-| `content-* -> selected-*`             | 1    | project frame emphasis     | outline/background emphasis | `var(--transition-emphasis)` | `0ms`                            |
+| `content-* -> selected-*`             | 1    | project frame emphasis     | outline/background emphasis | `var(--motion-duration-base)` | `0ms`                            |
 | `content-active <-> content-archived` | 1    | status badge/action region | color/opacity               | `var(--transition-fade-in)`  | `0ms`                            |
-| `content-* -> disabled`               | 1    | frame root                 | opacity                     | `var(--transition-emphasis)` | `0ms`                            |
+| `content-* -> disabled`               | 1    | frame root                 | opacity                     | `var(--motion-duration-base)` | `0ms`                            |
 
 ## Boolean Input Migration Required
 

@@ -140,9 +140,9 @@ export const MEDIA_ITEM_QUIET_ACTIONS_TRANSITIONS: Record<
 | from -> to                        | step | element       | property                | timing token                 | delay |
 | --------------------------------- | ---- | ------------- | ----------------------- | ---------------------------- | ----- |
 | `hidden -> revealing`             | 1    | actions host  | opacity                 | `var(--transition-fade-in)`  | `0ms` |
-| `hidden -> revealing`             | 2    | actions host  | transform               | `var(--transition-emphasis)` | `0ms` |
+| `hidden -> revealing`             | 2    | actions host  | transform               | `var(--motion-duration-base)` | `0ms` |
 | `revealing -> visible-unselected` | 1    | actions host  | opacity                 | `var(--transition-fade-in)`  | `0ms` |
-| `revealing -> visible-selected`   | 1    | select button | border-color/background | `var(--transition-emphasis)` | `0ms` |
+| `revealing -> visible-selected`   | 1    | select button | border-color/background | `var(--motion-duration-base)` | `0ms` |
 | `visible-* -> leaving`            | 1    | actions host  | opacity                 | `var(--transition-fade-out)` | `0ms` |
 
 ## Boolean Input Migration Required

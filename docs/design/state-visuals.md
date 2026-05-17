@@ -48,7 +48,7 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 ## Focus-visible (shared reminder)
 
-- Keyboard focus on **enabled** triggers: use **`--interactive-focus-ring`** / **`--shadow-focus-ring`** (see `tokens.scss`); do not rely on browser default only where product chrome is custom-shaped.
+- Keyboard focus on **enabled** triggers: use **`--interactive-focus-ring`** (defined in `_legacy-design-tokens.scss` / `styles.scss` bridge); do not rely on browser default only where product chrome is custom-shaped.
 - **Disabled** triggers: no focus ring (non-focusable or `aria-disabled` with documented focus policy).
 
 ---

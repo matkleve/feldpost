@@ -2,7 +2,7 @@
 
 ## Migration status (2026-05-16)
 
-The **`UiDropdownTriggerDirective`** and **`apps/web/src/styles/primitives/dropdown-trigger.scss`** were **removed** (Phase 5 Group D). Toolbar anchors use **`hlmBtn`** (`variant="outline"`, `size="sm"`) plus per-component classes **`media-toolbar__menu-trigger`**, **`projects-toolbar__menu-trigger`**, **`workspace-toolbar__menu-trigger`** with **`--open`** for chevron rotation; **`[data-dd-part]`** on inner spans is unchanged. **`DropdownShellComponent`** / **`StandardDropdownComponent`** remain the floating shell and list chrome.
+The **`UiDropdownTriggerDirective`** and **`apps/web/src/styles/primitives/dropdown-trigger.scss`** were **removed** (Phase 5 Group D). Toolbar anchors use **`hlmBtn`** (`variant="outline"`, `size="sm"`) plus per-component classes **`media-toolbar__menu-trigger`**, **`projects-toolbar__menu-trigger`**, **`workspace-toolbar__menu-trigger`** with **`--open`** for chevron rotation; **`[data-dd-part]`** on inner spans is unchanged. **Shared trigger chrome** (horizontal inset overriding CVA `ps-2`/`pe-2`, chevron flex + transition, **`[data-state='on']`** tint, open chevron rotation) lives in **`apps/web/src/app/shared/dropdown-trigger/_toolbar-menu-trigger.scss`** and is **`@include`d** from each toolbar’s `*.component.scss` inside `@layer components` / `@layer states`. **`DropdownShellComponent`** / **`StandardDropdownComponent`** remain the floating shell and list chrome.
 
 The remainder of this file documents the **removed** directive contract for archive comparison until **`BrnMenu` / `BrnMenuTrigger`** replace **`DropdownShellComponent`**.
 
@@ -23,7 +23,7 @@ The remainder of this file documents the **removed** directive contract for arch
 
 ## Toolbar reference callsites (inner DOM + Tailwind)
 
-Patterns match across toolbars; label/chevron use **`data-dd-part`** and **Tailwind** on the inner spans (e.g. truncate, `material-icons` sizing); rotation/transform rules live in **per-toolbar component SCSS** (`*__menu-trigger--open`).
+Patterns match across toolbars; label/chevron use **`data-dd-part`** and **Tailwind** on the inner spans (e.g. truncate, `material-icons` sizing). **Closed-trigger layout and open/active chevron behavior** are defined once in **`_toolbar-menu-trigger.scss`** (mixins parameterized by BEM block name); each toolbar pulls them in with Sass **`@include`** from its `*.component.scss` (`*__menu-trigger--open` remains bound in each template).
 
 - `apps/web/src/app/features/media/media.component.html` — media pane toolbar dropdown triggers
 - `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.html` — workspace toolbar
@@ -39,10 +39,10 @@ Patterns match across toolbars; label/chevron use **`data-dd-part`** and **Tailw
 ## Component hierarchy
 
 ```text
-button [hlmBtn] + toolbar menu-trigger BEM class   ← hlmBtn outline + component SCSS
+button [hlmBtn] + toolbar menu-trigger BEM class   ← hlmBtn outline + _toolbar-menu-trigger.scss (@include)
 ├── span [data-dd-part="label"]
 ├── (optional) leading icon / [data-dd-part="icon"]
-└── span [data-dd-part="chevron"]   ← per-toolbar SCSS: --open rotates chevron
+└── span [data-dd-part="chevron"]   ← shared SCSS: --open rotates chevron; transition uses motion tokens
 ```
 
 **Stacking / hit area:** the **host** is the single interactive control; inner spans are presentational (`aria-hidden` on chevron where used).

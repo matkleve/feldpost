@@ -41,7 +41,7 @@ DragDivider                                ← host element, full height, col-re
 
 The grip indicator is a pill badge centered on the divider. It uses a `drag_indicator` Material icon as the visual affordance:
 
-- **Badge dimensions**: `var(--ui-item-media-size-default)` wide × `var(--spacing-7)` (48px) tall — portrait orientation
+- **Badge dimensions**: `var(--spacing-6)` wide × `var(--spacing-7)` (48px) tall — portrait orientation (matches default UI item media column / **Phase 7 Batch 31**)
 - **Badge style**: `--color-bg-surface` background, `1px solid --color-border`, `--shadow-sm`, `--container-radius-control` (8px) corners
 - **Icon**: `drag_indicator`, `1rem` (16px), `--color-text-disabled` at rest → `--color-text-secondary` on hover
 - **Vertical position**: centered in the divider’s full height

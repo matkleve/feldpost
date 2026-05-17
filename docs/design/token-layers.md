@@ -66,7 +66,6 @@ Role-level aliases consumed by reusable UI primitives and feature components.
 4. Settings sections and cards
 
 - `--section-bg`
-- `--section-border`
 - `--section-text`
 
 5. Feedback states

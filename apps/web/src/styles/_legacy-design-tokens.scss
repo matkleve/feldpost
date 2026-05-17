@@ -43,9 +43,8 @@
   --shadow-md: 0 0.25rem 0.75rem rgba(15, 14, 12, 0.15), 0 0.125rem 0.25rem rgba(15, 14, 12, 0.1);
   --shadow-lg: 0 0.5rem 1.5rem rgba(15, 14, 12, 0.18), 0 0.25rem 0.5rem rgba(15, 14, 12, 0.12);
   --shadow-xl: 0 1rem 3rem rgba(15, 14, 12, 0.22), 0 0.375rem 1rem rgba(15, 14, 12, 0.14);
-  --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 15%, transparent);
 
-  // State shadow alias for focus emphasis (used by `--interactive-focus-ring` consumers).
+  // State shadow alias for focus emphasis (light: ring lives on `--interactive-focus-ring` only).
   --shadow-focus: var(--shadow-sm);
 
   // Border variables (metric `--border-sm`…`--border-xl` removed — zero `var()` consumers; Batch 28)
@@ -62,38 +61,34 @@
   --elevation-dropdown: var(--shadow-lg); // dropdowns, context menus, popovers
   --elevation-modal: var(--shadow-xl); // modals, dialogs, image detail overlay
 
-  // Z-index stacking ladder (audit issue #2, #13)
-  --z-map: 0;
+  // Z-index stacking ladder (audit issue #2, #13); map base plane uses literal `0` at `.map-container` (Batch 32).
   --z-panel: 100;
   --z-upload-button: 200;
   --z-dropdown: 300;
   --z-toast: 400;
   --z-modal: 500;
 
-  // Spacing scale — single 4px unit with modular multipliers.
-  --spacing-unit: 0.25rem;
-  --spacing-1: calc(var(--spacing-unit) * 1);
-  --spacing-2: calc(var(--spacing-unit) * 2);
-  --spacing-3: calc(var(--spacing-unit) * 3);
-  --spacing-4: calc(var(--spacing-unit) * 4);
-  --spacing-5: calc(var(--spacing-unit) * 6);
-  --spacing-6: calc(var(--spacing-unit) * 8);
-  --spacing-7: calc(var(--spacing-unit) * 12);
-  --spacing-8: calc(var(--spacing-unit) * 16);
+  // Spacing scale — single 4px unit with modular multipliers (0.25rem base inlined — Batch 31).
+  --spacing-1: calc(0.25rem * 1);
+  --spacing-2: calc(0.25rem * 2);
+  --spacing-3: calc(0.25rem * 3);
+  --spacing-4: calc(0.25rem * 4);
+  --spacing-5: calc(0.25rem * 6);
+  --spacing-6: calc(0.25rem * 8);
+  --spacing-7: calc(0.25rem * 12);
+  --spacing-8: calc(0.25rem * 16);
 
   // Typography scale — unified mathematical scale (ratio 1.13) with 0.75rem minimum.
-  --font-size-ratio: 1.13;
   --font-size-2xs: 0.75rem;
-  --font-size-xs: calc(var(--font-size-2xs) * var(--font-size-ratio));
-  --font-size-sm: calc(var(--font-size-xs) * var(--font-size-ratio));
-  --font-size-md: calc(var(--font-size-sm) * var(--font-size-ratio));
-  --font-size-lg: calc(var(--font-size-md) * var(--font-size-ratio));
-  --font-size-xl: calc(var(--font-size-lg) * var(--font-size-ratio));
-  --font-size-2xl: calc(var(--font-size-xl) * var(--font-size-ratio));
-  --font-size-3xl: calc(var(--font-size-2xl) * var(--font-size-ratio));
-  --font-size-4xl: calc(var(--font-size-3xl) * var(--font-size-ratio));
+  --font-size-xs: calc(var(--font-size-2xs) * 1.13);
+  --font-size-sm: calc(var(--font-size-xs) * 1.13);
+  --font-size-md: calc(var(--font-size-sm) * 1.13);
+  --font-size-lg: calc(var(--font-size-md) * 1.13);
+  --font-size-xl: calc(var(--font-size-lg) * 1.13);
+  --font-size-2xl: calc(var(--font-size-xl) * 1.13);
+  --font-size-3xl: calc(var(--font-size-2xl) * 1.13);
+  --font-size-4xl: calc(var(--font-size-3xl) * 1.13);
 
-  --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
@@ -107,7 +102,6 @@
   --line-height-normal: 1.45;
   --line-height-open: 1.5;
   --line-height-comfortable: 1.55;
-  --line-height-relaxed: 1.6;
 
   // Container geometry — containers define the alignment boundaries that
   // nested content, dropdowns, and panels should inherit.
@@ -122,16 +116,12 @@
   --container-radius-control: var(--radius-md);
   --container-radius-panel: var(--radius-lg);
 
-  // Shared media sizing primitives
-  --ui-item-media-size-default: var(--spacing-6);
-
-  // Photo marker geometry derives from the shared media token system.
-  --photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25);
+  // Photo marker geometry (shared media thumb ≈ `--spacing-6`; body = ×1.25 — Batch 31).
+  --photo-marker-body-size: calc(var(--spacing-6) * 1.25);
   --photo-marker-hit-size: 2.5rem;
   --photo-marker-correction-dot-size: 0.5rem;
   --photo-marker-drop-shadow: 0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.45);
   --photo-marker-selected-scale: 1.05;
-  --photo-marker-cluster-font-size: var(--font-size-md);
 
   // Sidebar layout dimensions — standardized from docs/design/tokens.md.
   --layout-sidebar-width-collapsed: var(--spacing-7);
@@ -143,10 +133,8 @@
   --layout-sidebar-row-height: calc(
     var(--layout-sidebar-media-size) + (var(--layout-sidebar-row-padding-block) * 2)
   );
-  --layout-sidebar-icon-size: 1.25rem;
 
   // Content width clamps and overlay width hints (settings overlay consumes medium/large mins).
-  --content-clamp-text: 38rem;
   --content-clamp-default: 45rem;
   --content-clamp-list: 52rem;
 
@@ -164,7 +152,7 @@
   // Shared interactive primitives (single source for hover/focus/motion)
   --interactive-border-muted: color-mix(in srgb, var(--border) 72%, transparent);
   --interactive-surface-hover: color-mix(in srgb, var(--primary) 12%, transparent);
-  --interactive-focus-ring: var(--shadow-focus-ring);
+  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 15%, transparent);
   --interactive-transition-standard:
     border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
     box-shadow 120ms ease-out;
@@ -178,21 +166,16 @@
 
   /* Easings */
   --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
 
-  /* Semantic Aliases (Das ist das, was du im Code nutzt) */
-  --transition-interactive: var(--motion-duration-fast) var(--motion-ease-out);
-
   // Compatibility aliases for existing transition tokens in feature styles.
-  --transition-fade-in: var(--transition-interactive);
-  --transition-fade-out: var(--motion-duration-fast) var(--motion-ease-in);
+  --transition-fade-in: var(--motion-duration-fast) var(--motion-ease-out);
+  --transition-fade-out: var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
   --transition-reveal-delay: 60ms;
-  --transition-emphasis: var(--motion-duration-base);
 
   // Shared loading skeleton animation token (surface color unused — components use bg-muted / local mixes)
   // @see docs/migration/phase-7-token-migration.md § Batch 14
-  --animation-skeleton-pulse: media-display-pulse var(--transition-emphasis) ease-in-out infinite;
+  --animation-skeleton-pulse: media-display-pulse var(--motion-duration-base) ease-in-out infinite;
 
   // Component-role aliases (Theme Contract layer C)
   // Action controls
@@ -219,7 +202,6 @@
 
   // Settings sections and cards
   --section-bg: var(--card);
-  --section-border: var(--interactive-border-muted);
   --section-text: var(--muted-foreground);
 
   // Feedback states
@@ -243,8 +225,9 @@
     0 1rem 3rem color-mix(in srgb, var(--shadow-color) 56%, transparent),
     0 0.375rem 1rem color-mix(in srgb, var(--shadow-color) 32%, transparent);
 
-  --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
-  --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
+  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
+  --shadow-focus: var(--shadow-sm),
+    0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
 
   --border-hover: 0.1875rem solid
     color-mix(in srgb, var(--primary) 30%, var(--border));
@@ -280,7 +263,6 @@
   --field-text: #2f271f;
 
   --section-bg: #fdf8ef;
-  --section-border: color-mix(in srgb, #a38d73 42%, transparent);
   --section-text: #66594a;
 
   --state-warning-bg: color-mix(in srgb, #d08b36 24%, transparent);

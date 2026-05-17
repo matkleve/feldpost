@@ -113,6 +113,25 @@
 
 ---
 
+### `[hlmPillToggle]` + `[hlmToggleGroup]` + `[hlmToggleGroupItem]` — Spartan toggle-group shims
+
+- **File**: `apps/web/src/app/shared/ui/toggle-group/` (`HlmPillToggleDirective`, `HlmToggleGroupDirective`, `HlmToggleGroupItemDirective`, `toggle-group-variants.ts`, `HLM_TOGGLE_GROUP_IMPORTS`)
+- **Purpose**: Segmented pill rows/columns: **brain** `BrnToggleGroup` / `BrnToggleGroupItem` plus local **helm** CVA for items and a **pill shell** wrapper (`[hlmPillToggle]`) that replaces the removed global `hlm-toggle-group.scss` (track, density vars, motion-safe transitions via `pillToggleVariants` / `toggleGroupVariants`).
+- **Spec**: [`docs/migration/phase-8-global-scss-elimination.md`](../../migration/phase-8-global-scss-elimination.md) §6; Phase 3 notes in [`docs/migration/README.md`](../../migration/README.md)
+- **Wiring**: `imports: [...BrnToggleGroupImports, ...HLM_TOGGLE_GROUP_IMPORTS]` on the standalone host; outer host or inner `div` carries `hlmPillToggle`; child `hlmToggleGroup` + `hlmToggleGroupItem` per spartan brain API.
+- **Variant axes (`[hlmPillToggle]` inputs)**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `size` | `PillToggleSize` | `sm`, `md`, `lg` | Shell padding / density CSS vars |
+  | `fill` | `boolean` | `false`, `true` | Full-width track |
+  | `hasInactive` | `boolean` | `false`, `true` | Inactive segment affordance |
+  | `vertical` | `boolean` | `false`, `true` | Column shell (map-style switch uses feature SCSS for pierced items where needed) |
+- **Composed of**: `@spartan-ng/brain/toggle-group` + local helm directives (no `@spartan-ng/ui-toggle-group-helm` until Phase 9 peers allow)
+- **Used in**: `map-shell`, `projects-view-toggle`, `projects-toolbar`, `media`, `upload-panel`, `settings-overlay`, `workspace-toolbar` templates
+- **Gaps**: published `@spartan-ng/ui-toggle-group-helm` swap (Phase 9)
+
+---
+
 ### `<app-card-variant-switch>` — Card Variant Switch
 
 - **File**: `apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts`

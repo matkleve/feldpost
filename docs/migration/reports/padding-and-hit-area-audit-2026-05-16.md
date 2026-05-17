@@ -3,10 +3,10 @@
 ## 1. Executive summary
 
 - **Verified:** Shared `hlmBtn` / `hlmInput` directives apply **default horizontal padding via Tailwind utilities** in CVA: labeled `hlmBtn` sizes use **logical** `ps-2` / `pe-2` (maps to **`spacing-2` / 8px** each side in `tailwind.config.js`); `input[hlmInput]` still uses **`px-3`**. No evidence that splitting component SCSS with Sass `@use` (e.g. map-shell pulling in `_map-shell-context-menu.scss`) **changes emitted padding** — `@use` only affects **authoring structure** and compile-time order of rules, not a separate “padding layer.”
-- **Trigger vs panel:** Toolbar **dropdown triggers** (`*__menu-trigger` + `hlmBtn` + `justify-content: space-between`) document a **component-owned** symmetric inset: companion SCSS sets **`padding-inline: var(--spacing-2)`** on `.workspace-toolbar__menu-trigger`, `.media-toolbar__menu-trigger`, and `.projects-toolbar__menu-trigger` (see §3 table), aligned with the **action-interaction kernel** horizontal lock on the button CVA (`ps-2`/`pe-2`). **Panel / menu content** still uses separate tokens (e.g. `.map-context-menu__items` `padding-inline`, standard dropdown `--std-dropdown-padding-inline`) — fixing the **panel** does not fix a **trigger** that still lacks its companion rule.
+- **Trigger vs panel:** Toolbar **dropdown triggers** (`*__menu-trigger` + `hlmBtn` + `justify-content: space-between`) use a **shared Sass partial** that sets **`padding-inline: var(--spacing-3)`** (and chevron / active / open states): `apps/web/src/app/shared/dropdown-trigger/_toolbar-menu-trigger.scss`, `@include`d from **`workspace-toolbar`**, **`media`**, and **`projects`** component SCSS (see §3.5). That **overrides** the **action-interaction kernel** horizontal lock on **`hlmBtn`** (`ps-2`/`pe-2` → `spacing-2`) **only** for this trigger pattern. **Panel / menu content** still uses separate tokens (e.g. `.map-context-menu__items` `padding-inline`, standard dropdown `--std-dropdown-padding-inline`) — fixing the **panel** does not fix a **trigger** that still lacks its companion rule.
 - **Still at risk:** (a) **Component SCSS** that sets `padding: 0`, `padding-block: 0`, or `padding-inline: 0` on the **same element** that carries Tailwind padding from `hlmBtn` / `hlmInput`, depending on **source order and specificity**; (b) **`min-w-0 shrink` + `justify-content: space-between`** on triggers — correct for truncation but **reduces perceived** horizontal breathing room if companion `padding-inline` is missing; (c) **`size="icon"`** — CVA uses `h-10 w-10` with **no explicit `px-*`** (square hit box by design); (d) **custom primitives** (e.g. `.panel-trigger`) that use **`padding: 0` base** and only add horizontal padding per `data-layout` variant — easy to regress.
-- **Grep snapshot** (2026-05-17 refresh, `apps/web/src/app`): **34** template files contain `hlmBtn` (33 `*.html` + `sorting-controls.component.ts` inline template); **17** `*.html` files reference `hlmInput`. No same-line `hlmBtn` + `px-0` / `p-0` / `px-1` matches; **`min-w-0` near `hlmBtn`** appears in **3** toolbar templates (paired with **explicit** `padding-inline` in SCSS).
-- **Heuristic `outline` + `size="sm"` + `hlmBtn`:** Automated scan found **exactly three** `<button>` instances (workspace, media, projects toolbars); each component’s `.scss` **does** contain `padding-inline` (for the menu trigger). No orphan outline/sm triggers lacking a companion rule were found by that heuristic.
+- **Grep snapshot** (2026-05-17 refresh, `apps/web/src/app`): **34** template files contain `hlmBtn` (33 `*.html` + `sorting-controls.component.ts` inline template); **17** `*.html` files reference `hlmInput`. No same-line `hlmBtn` + `px-0` / `p-0` / `px-1` matches; **`min-w-0` near `hlmBtn`** appears in **3** toolbar templates (paired with **`toolbar-menu-trigger-components`** via **`@include`** in sibling SCSS).
+- **Heuristic `outline` + `size="sm"` + `hlmBtn`:** Automated scan found **exactly three** `<button>` instances (workspace, media, projects toolbars); each sibling `*.scss` **includes `toolbar-menu-trigger-components`** via Sass **`@include`** (shared partial supplies `padding-inline` for the menu trigger). No orphan outline/sm triggers lacking a companion rule were found by that heuristic.
 - **Inputs:** `hlmInput` defaults include **`px-3`**; composite layouts (e.g. map search) add **layout SCSS** on a second class (`.search-bar__input`) that may alter **vertical** padding (`padding-block: 0`) while leaving horizontal padding to utilities — **worth visual QA** when utilities and SCSS both target the same node.
 - **Recommendation shape:** Prefer **one owner** for horizontal inset on composed controls (either tokenized utility merge or **explicit `padding-inline` + documented exception**), plus **manual QA** on narrow viewports, keyboard focus rings, and **scrollbar-gutter** for overflowing panels.
 
@@ -134,13 +134,13 @@ rg --only-matching 'hlmInput' apps/web/src/app --glob '*.html' | sed 's/:.*//' |
 
 ### 3.3 Heuristic: `variant="outline"` + `size="sm"` on same `<button hlmBtn…>` vs companion `.scss` containing `padding-inline`
 
-**Automated rule:** Parse `*.html` / `*.component.ts` for `<button…hlmBtn…>` tags containing both `variant="outline"` and `size="sm"`; check sibling `*.scss` for substring `padding-inline`.
+**Automated rule:** Parse `*.html` / `*.component.ts` for `<button…hlmBtn…>` tags containing both `variant="outline"` and `size="sm"`; check sibling `*.scss` for substring `padding-inline` **or** `@include` of `toolbar-menu-trigger-components` (shared partial owns `padding-inline` for this pattern).
 
-| Rows (cap 25) | Component | Companion `.scss` includes `padding-inline`? |
+| Rows (cap 25) | Component | Companion `*.scss` wires menu-trigger padding? |
 | --- | --- | --- |
-| 1 | `workspace-toolbar.component.html` | **Yes** — `.workspace-toolbar__menu-trigger` |
-| 2 | `media.component.html` | **Yes** — `.media-toolbar__menu-trigger` |
-| 3 | `projects-toolbar.component.html` | **Yes** — `.projects-toolbar__menu-trigger` |
+| 1 | `workspace-toolbar.component.html` | **Yes** — `_toolbar-menu-trigger.scss` (`@include` in `workspace-toolbar.component.scss`) |
+| 2 | `media.component.html` | **Yes** — same partial (`@include` in `media.component.scss`) |
+| 3 | `projects-toolbar.component.html` | **Yes** — same partial (`@include` in `projects-toolbar.component.scss`) |
 
 **Result:** **3 / 3** pass. No additional rows to list under this exact heuristic.
 
@@ -165,12 +165,10 @@ rg --only-matching 'hlmInput' apps/web/src/app --glob '*.html' | sed 's/:.*//' |
 
 | Selector / file | Sets `padding-inline`? | Notes |
 | --- | --- | --- |
-| `.workspace-toolbar__menu-trigger` — `workspace-toolbar.component.scss` | **Yes** (`var(--spacing-2)`) | Also `justify-content: space-between` |
-| `.media-toolbar__menu-trigger` — `media.component.scss` | **Yes** (`var(--spacing-2)`) | Same pattern |
-| `.projects-toolbar__menu-trigger` — `projects-toolbar.component.scss` | **Yes** (`var(--spacing-2)`) | Same pattern |
+| `.workspace-toolbar__menu-trigger` / `.media-toolbar__menu-trigger` / `.projects-toolbar__menu-trigger` | **Yes** (`var(--spacing-3)`) | **Single authoring source:** `_toolbar-menu-trigger.scss` (`toolbar-menu-trigger-components` / `toolbar-menu-trigger-states`); each toolbar `*.component.scss` calls those mixins with its BEM block name; also `justify-content: space-between`; chevron `transition` uses **`--motion-duration-fast`** / **`--motion-ease-out`** |
 | `.panel-trigger` — `panel-trigger.component.scss` | **Yes (base)** | `.panel-trigger`: **`padding-block: 0`**, **`padding-inline: var(--spacing-2)`**, responsive **`min-height`** (`3rem` default, `2.75rem` from `md`); **`data-layout='text-action'`** overrides to asymmetric `pl`/`pr` (`spacing-2` / `spacing-1`) |
 
-**`menu-trigger` substring:** other matches are the **toolbar** classes above; no additional generic `menu-trigger` SCSS hits beyond those toolbars and panel-trigger naming.
+**`menu-trigger` substring:** toolbar selectors are emitted via the **shared partial** above (not duplicated per-file rules). No additional generic `menu-trigger` SCSS hits beyond that partial and panel-trigger naming.
 
 ### 3.6 Related: `padding-inline: 0` / `padding: 0` hot spots (secondary signal)
 
@@ -192,7 +190,7 @@ Examples useful for §4 hypotheses (not exhaustive): `grouping-dropdown.componen
 | --- | --- | --- |
 | **P0** | **Visual QA matrix** for: toolbar dropdown triggers, map search input, panel-trigger each `data-layout`, upload intake `hlmBtn` rows | Confirms real vs perceived padding issues before token churn |
 | **P0** | Where SCSS targets **`button[hlmBtn]`** or **`input[hlmInput]`**, assert **either** (a) no `padding` reset on that node, **or** (b) explicit `padding-inline` / `padding-block` contract in the same spec slice | Stops specificity roulette |
-| **P1** | Consider a **shared trigger modifier** (utility or SCSS mixin) for **`justify-content: space-between` + chevron** pattern: `padding-inline` + `min-w-0` documented once | DRY across workspace/media/projects toolbars |
+| **P1** | **Done (2026-05-17):** Shared Sass partial **`_toolbar-menu-trigger.scss`** + `@include` from workspace / media / projects toolbars — documents `padding-inline`, chevron, active, open states once (`ui-primitives.dropdown-trigger.md`) | Former “Consider … mixin” row |
 | **P1** | Optional design token **`--hlm-btn-padding-inline`** (or per-size tokens) consumed from CVA **if** product wants **wider** labeled buttons than the current **`ps-2`/`pe-2` (`spacing-2`)** kernel | Avoids one-off SCSS on every page |
 | **P2** | **Lint / guard idea:** warn when `hlmBtn` shares a host with `padding: 0` / `padding-inline: 0` in the same component SCSS without a compensating `padding-inline` on a documented child | No implementation in this audit |
 | **P2** | Storybook or **Playwright** screenshot diffs for toolbar + search bar at **320–390px** width | Catches scrollbar + truncation interactions |
@@ -221,6 +219,10 @@ Examples useful for §4 hypotheses (not exhaustive): `grouping-dropdown.componen
 - **`styles/reset.scss`:** Wrapped the universal reset in **`@layer base`**. Previously **`*, *::before, *::after { padding: 0 }`** was **unlayered** (emitted before `@import "tailwindcss"`), so it **beat `@layer utilities`** (e.g. `.ps-2`, `.px-3`) in the cascade — utilities looked “dead” in DevTools. Layered reset restores **utilities > base**.
 - **`button-variants.ts`:** Labeled sizes use **only** **`ps-2`/`pe-2`** (Tailwind **`spacing-2`**) for horizontal inset; **`iconPlacement`** CVA axis is wired from **`hlmBtn`** for **`balanced` / `iconStart` / `iconEnd`** with **no extra classes yet** (padding lock documented in CVA comments + `action-interaction-kernel.md`). **No** `compoundVariants` for `outline`+`sm` and **no** special `px-4` merge.
 - **`panel-trigger.component.scss`:** Base `.panel-trigger` uses **`padding-block: 0`**, **`padding-inline: var(--spacing-2)`**, and responsive **`min-height`** (mobile **48px** / desktop **44px**), replacing a flush **`padding: 0`** baseline; **`text-action`** overrides with asymmetric `padding-left` / `padding-right`.
+
+## Appendix: Implemented follow-ups (2026-05-17)
+
+- **`_toolbar-menu-trigger.scss`:** Toolbar **`*__menu-trigger`** closed-trigger + state chrome consolidated here; **`padding-inline: var(--spacing-3)`** overrides **`hlmBtn`** kernel for this pattern only; chevron **`transition`** uses **`--motion-duration-fast`** / **`--motion-ease-out`**. Consumed via **`@use` / `@include`** from **`workspace-toolbar`**, **`media`**, and **`projects`** `*.component.scss` (see §3.5).
 
 ## Appendix: `lint-specs.mjs` scope
 

@@ -403,7 +403,7 @@ All text is set in the system sans-serif stack unless the brand acquires a custo
 font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 ```
 
-**Type scale (rem, base 16px, ratio 1.13):**
+**Type scale (rem, base 16px, ratio 1.13):** the modular steps on `:root` multiply by the literal **1.13** factor (**Phase 7 Batch 31** removed the **`--font-size-ratio`** custom property — it had no `var(--font-size-ratio)` consumers outside the bridge).
 
 There is **no** separate **`--font-size-3xs`** step: a deprecated **`--font-size-3xs`** alias (same size as **2xs**) lived only in the legacy bridge **`LEGACY MAPPING`** block and was **removed** in Phase 7 **Batch 20** (2026-05-17)—use **`--font-size-2xs`** for captions and dense meta.
 
@@ -423,18 +423,18 @@ Minimum rendered text size: **12px / 0.75rem** (caption only). Body text is neve
 
 ## 3.3 Spacing and Grid
 
-Feldpost uses a **0.25rem (4px) base unit** with a DRY modular scale driven by `--spacing-unit` and token multipliers.
+Feldpost uses a **0.25rem (4px) base unit** with a modular scale on `:root` (**Phase 7 Batch 31** inlined the former **`--spacing-unit`** indirection — spacing rows use **`calc(0.25rem * N)`** directly in `_legacy-design-tokens.scss`).
 
-| Token         | Value                            |
-| ------------- | -------------------------------- |
-| `--spacing-1` | `calc(var(--spacing-unit) * 1)`  |
-| `--spacing-2` | `calc(var(--spacing-unit) * 2)`  |
-| `--spacing-3` | `calc(var(--spacing-unit) * 3)`  |
-| `--spacing-4` | `calc(var(--spacing-unit) * 4)`  |
-| `--spacing-5` | `calc(var(--spacing-unit) * 6)`  |
-| `--spacing-6` | `calc(var(--spacing-unit) * 8)`  |
-| `--spacing-7` | `calc(var(--spacing-unit) * 12)` |
-| `--spacing-8` | `calc(var(--spacing-unit) * 16)` |
+| Token         | Value               |
+| ------------- | ------------------- |
+| `--spacing-1` | `calc(0.25rem * 1)` |
+| `--spacing-2` | `calc(0.25rem * 2)` |
+| `--spacing-3` | `calc(0.25rem * 3)` |
+| `--spacing-4` | `calc(0.25rem * 4)` |
+| `--spacing-5` | `calc(0.25rem * 6)` |
+| `--spacing-6` | `calc(0.25rem * 8)` |
+| `--spacing-7` | `calc(0.25rem * 12)` |
+| `--spacing-8` | `calc(0.25rem * 16)` |
 
 Key layout dimensions:
 
@@ -515,13 +515,12 @@ Four physical shadows define elevation only. Components should consume **`--shad
 | `--shadow-md`         | `0 4px 12px rgba(15,14,12,.15), 0 2px 4px rgba(15,14,12,.10)`         | Standard overlay                     |
 | `--shadow-lg`         | `0 8px 24px rgba(15,14,12,.18), 0 4px 8px rgba(15,14,12,.12)`         | Dropdown/popover                     |
 | `--shadow-xl`         | `0 16px 48px rgba(15,14,12,.22), 0 6px 16px rgba(15,14,12,.14)`       | Modal-level                          |
-| `--shadow-focus-ring` | `0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent)` | Ring primitive for focus composition |
 
-In dark mode, `sm` through `xl` are overridden with `rgba(0,0,0,...)` at higher opacity so shadows remain visible against dark surfaces. `--shadow-focus-ring` adapts automatically via `--color-primary`.
+**Phase 7 Batch 31:** the separate **`--shadow-focus-ring`** primitive was **removed** — **`--interactive-focus-ring`** is emitted directly on `:root` (light) and overridden in **`@mixin dark-theme-overrides`** (dark) with the correct **`color-mix`** against **`var(--primary)`**.
 
 ### Focus shadow alias
 
-The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-sm)`; dark: `var(--shadow-sm), var(--shadow-focus-ring)`). Components that need a visible focus ring also use **`--interactive-focus-ring`** (maps to **`--shadow-focus-ring`**) or compose with **`--shadow-focus-ring`** directly.
+The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-sm)`; dark: `var(--shadow-sm)` plus the same ring geometry as **`--interactive-focus-ring`**). Components that need a visible focus ring use **`--interactive-focus-ring`**.
 
 ### Border tokens
 
@@ -529,11 +528,10 @@ The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-s
 
 ### Z-index ladder
 
-Use semantic z-index tokens only:
+Use semantic z-index tokens only. **Phase 7 Batch 32:** the base map plane no longer uses **`--z-map`** on **`_legacy-design-tokens.scss`** — **`apps/web/src/app/features/map/map-shell/_map-shell-layout.scss`** sets **`z-index: 0`** on **`.map-container`**.
 
 | Token               | Value | Layer intent                   |
 | ------------------- | ----- | ------------------------------ |
-| `--z-map`           | `0`   | Base map plane                 |
 | `--z-panel`         | `100` | Panel/rail surfaces            |
 | `--z-upload-button` | `200` | High-priority map CTA controls |
 | `--z-dropdown`      | `300` | Context/dropdown overlays      |
@@ -559,20 +557,20 @@ Every component's `box-shadow` references a semantic `--elevation-*` token. Elem
 
 Motion tokens are the source of truth for interaction timing and easing.
 
-| Group          | Token                      | Value                                                     |
-| -------------- | -------------------------- | --------------------------------------------------------- |
-| Duration       | `--motion-duration-fast`   | `100ms`                                                   |
-| Duration       | `--motion-duration-base`   | `200ms`                                                   |
-| Duration       | `--motion-duration-slow`   | `300ms`                                                   |
-| Easing         | `--motion-ease-standard`   | `cubic-bezier(0.4, 0, 0.2, 1)`                            |
-| Easing         | `--motion-ease-in`         | `cubic-bezier(0.4, 0, 1, 1)`                              |
-| Easing         | `--motion-ease-out`        | `cubic-bezier(0, 0, 0.2, 1)`                              |
-| Semantic alias | `--transition-interactive` | `var(--motion-duration-fast) var(--motion-ease-out)`      |
+| Group          | Token                    | Value                                                     |
+| -------------- | ------------------------ | --------------------------------------------------------- |
+| Duration       | `--motion-duration-fast` | `100ms`                                                   |
+| Duration       | `--motion-duration-base` | `200ms`                                                   |
+| Duration       | `--motion-duration-slow` | `300ms`                                                   |
+| Easing         | `--motion-ease-standard` | `cubic-bezier(0.4, 0, 0.2, 1)`                            |
+| Easing         | `--motion-ease-out`      | `cubic-bezier(0, 0, 0.2, 1)`                              |
+
+**Phase 7 Batch 31:** **`--motion-ease-in`**, **`--transition-interactive`**, and **`--transition-emphasis`** were **removed from the bridge** — use **`var(--motion-duration-fast) var(--motion-ease-out)`** (interactive fades), **`var(--motion-duration-base)`** (skeleton / emphasis duration), and **`cubic-bezier(0.4, 0, 1, 1)`** inline for fade-out where needed.
 
 **Panel-level open/close choreography:** use `var(--motion-duration-base) var(--motion-ease-standard)` (same duration/easing as the former `--transition-panel` shorthand removed in Phase 7 Batch 30) or Tailwind duration/easing utilities — see `docs/design/motion.md`.
 
-- `--transition-fade-in: var(--transition-interactive)`
-- `--transition-fade-out: var(--motion-duration-fast) var(--motion-ease-in)`
+- `--transition-fade-in: var(--motion-duration-fast) var(--motion-ease-out)`
+- `--transition-fade-out: var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)`
 - `--transition-reveal-delay: 60ms`
 
 ## 3.7 Iconography
@@ -632,11 +630,10 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | `--color-accent-brand` | `Color/Accent/Brand` | `color` | ✓ primitive |
 | `--color-primary` | `Color/Primary` | — | ✗ alias (`var()`) |
 | `--radius-md` | `Radius/Md` | `dimension` | ✓ primitive |
-| `--spacing-unit` | `Spacing/Unit` | `dimension` | ✓ primitive |
 | `--spacing-1` | `Spacing/1` | — | ✗ `calc()` |
 | `--font-size-2xs` | `Font/Size/2xs` | `dimension` | ✓ primitive |
 | `--font-size-md` | `Font/Size/Md` | — | ✗ `calc()` |
-| `--font-weight-regular` | `Font/Weight/Regular` | `number` | ✓ primitive |
+| `--font-weight-medium` | `Font/Weight/Medium` | `number` | ✓ primitive |
 | `--motion-duration-fast` | `Motion/Duration/Fast` | `duration` | ✓ primitive |
 | `--motion-ease-standard` | `Motion/Ease/Standard` | `cubicBezier` | ✓ array `[P1x,P1y,P2x,P2y]` |
 | `--z-modal` | `Z/Modal` | `number` | ✓ primitive |
@@ -647,6 +644,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 |---|---|---|
 | `alias` — resolves to another token via `var()` | `--color-primary`, `--elevation-overlay` | Set manually as a Variable alias after primitives are imported |
 | **removed from bridge** — no longer defined for sync | e.g. former **`--font-size-3xs`** → **`--font-size-2xs`** (Batch 20) | Use **`Font/Size/2xs`** only; do not reintroduce a duplicate 3xs variable |
+| **removed from bridge** — no longer defined for sync | **`--font-weight-regular`** (Batch 32) | Use **`Font/Weight/Medium`** / **`Semibold`** from the bridge where applicable, or literal **`400`** at the sole former callsite |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
 | `color-mix` — computed at render time | `--interactive-border-muted`, `--state-warning-bg` | Approximate with a manual opacity or solid value |
 | `complex` — multi-value shorthand | `--shadow-sm`, `--border-hover` | Set manually; shadows and multi-part borders are not natively representable as a single Figma Variable |

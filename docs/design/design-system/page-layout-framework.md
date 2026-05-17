@@ -188,7 +188,7 @@
 
 ### Clamp Widths (Already Defined)
 
-- `--content-clamp-text` 38rem (~608px) — Narrow text/form content
+- **`.content-clamp--text`** — **`max-width: 38rem`** in **`apps/web/src/styles/layout/clamp.scss`** (~608px) — narrow text/form content (**Phase 7 Batch 32:** no **`--content-clamp-text`** on `:root`).
 - `--content-clamp-default` 45rem (~720px) — General pages
 - `--content-clamp-list` 52rem (~832px) — List/table pages (Projects, Media)
 

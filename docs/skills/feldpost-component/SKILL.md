@@ -314,7 +314,7 @@ Use token variables only:
 - --transition-fade-out
 - --transition-fade-in
 - --transition-reveal-delay
-- --transition-emphasis
+- Emphasis / longer choreography: **`var(--motion-duration-base) var(--motion-ease-out)`** (Batch 31 removed **`--transition-emphasis`** from the bridge; see **`docs/design/tokens.md`**)
 
 ### Choreography Table (Required Before CSS)
 

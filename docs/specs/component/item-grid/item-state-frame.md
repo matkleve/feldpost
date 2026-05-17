@@ -133,7 +133,7 @@ export const ITEM_STATE_FRAME_TRANSITIONS: Record<
 | `content -> error`   | 1    | error layer   | opacity  | `var(--transition-fade-in)`  | `0ms` |
 | `content -> empty`   | 1    | empty layer   | opacity  | `var(--transition-fade-in)`  | `0ms` |
 | `loading -> content` | 1    | loading layer | opacity  | `var(--transition-fade-out)` | `0ms` |
-| `* -> disabled-*`    | 1    | frame root    | opacity  | `var(--transition-emphasis)` | `0ms` |
+| `* -> disabled-*`    | 1    | frame root    | opacity  | `var(--motion-duration-base)` | `0ms` |
 
 ## Boolean Input Migration Required
 
