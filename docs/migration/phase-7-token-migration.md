@@ -1,6 +1,6 @@
 # Phase 7 — Token System Unification
 
-**Status:** In progress (2026-05-17) — **Batch 18:** **`_legacy-design-tokens.scss` — dead deprecated typography aliases removed** (`--font-size-xs-soft`, `--font-size-sm-tight`, `--font-size-lg-emphasis`) — `rg --glob '*.{scss,css,ts,html}' 'var\(--font-size-(xs-soft|sm-tight|lg-emphasis)\)' apps/web` → **0** files before edit; doc audit: no **`--fp-*`** property rows remain (only header comments mention **`--fp-ref-*` / `--fp-sys-*`**); **LEGACY MAPPING** block otherwise **in use** (many `var(--font-size-*-*)` callsites). **Batch 17:** **`_legacy-design-tokens.scss` — all remaining non-color `--fp-sys-*` custom properties removed** (`--fp-sys-shape-*`, `--fp-sys-spacing-*`, `--fp-sys-elevation-*`, `--fp-sys-typescale-*`, `--fp-sys-state-*`, `--fp-sys-motion-*`) — per-prefix `rg` under `apps/web` → **0** `var(--fp-sys-<prefix>)` files before edit; MD3 typescale / motion names remain **documentation-only** in **`docs/design/tokens.md`** §3.1e (specs may cite `--fp-sys-typescale-*` as labels — not emitted on `:root`). **Batch 16:** **`_legacy-design-tokens.scss` — all `--fp-sys-color-*` custom properties removed** (light **`:root`** + **`@mixin dark-theme-overrides`**) — pre-edit `rg -l --glob '*.{scss,css,ts,html}' 'var\(--fp-sys-' apps/web` → **0** files; **`docs/design/tokens.md`** §3.1a updated (MD3 role names + hex tables are documentation only). **Batch 15:** **`_legacy-design-tokens.scss` — dead Figma Alias spacing/radius rows removed** — `rg -e '--fp-alias-' apps/web/src` → **0**; `node scripts/sync-tokens.mjs` refreshed **`docs/design/figma-tokens.json`** (no Alias spacing/radius re-exports — use Base **`spacing`** / **`radius`**). Spec tables: **`panel-trigger`**, **`ui-primitives.panel-trigger`**, **`chip`** cite **`var(--radius-sm)`** / **`var(--spacing-*)`** / **`var(--foreground)`**. **Batch 14:** **`_legacy-design-tokens.scss` — Feldpost v1 `--color-*` bridge removed** — `rg 'var\\(--color-' apps/web/src` → **0** before edit; `tailwind.config.js` `extend.colors` already used **`var(--background)`** / **`var(--primary)`** etc. (not `var(--color-bg-*)`); Tailwind v4 **`@theme inline`** in **`styles.scss`** continues to emit shadcn-style **`--color-primary`** keys for utilities. Removed duplicate **`--color-bg-*`**, text, brand, map, **`--color-clay`**, and unused **`--color-skeleton-surface`** from **`:root`**, **`@mixin dark-theme-overrides`**, **`[data-theme='sandstone']`**, and the deprecated mapping block; kept **`--animation-skeleton-pulse`**. **Batch 13:** **Special case §4 — `hlm-toggle-group`** — `apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss` emits **geometry / spacing / radius only** (no **`var(--color-*|--fp-*|--fp-sys-*|--fp-ref-*)`**); hover, focus, on/off, and **`data-attention`** ink live in **`toggle-group-variants.ts`** (CVA + Tailwind + **`var(--warning)`** for attention-off, aligned with Batch 9). **Batch 12:** **`dark:` vs semantic variables** — canonical write-up in **`docs/design/tokens.md`** § **Phase 7 handoff — Tailwind `dark:` vs semantic CSS variables** (points to **`styles.scss`** `@custom-variant` + § **Risks / QA** below). **Batch 11:** **`--media-chrome-{foreground,control-bg,control-bg-hover}`** (fixed light-on-image) + **`--auth-scroll-radial-sheen`** + **`--auth-map-veil-{stop-a|stop-b|stop-c|flat}`** on **`:root`** and **`tweakcn-dark-semantic-palette`** (dark sheen / veil stops use **`--foreground`** / **`--background`**); **`photo-lightbox`** close control, **upload** skeleton shimmer, **auth** scroll fades + map shell + map overlay drop hardcoded **`rgba`/`#fff`** (see §Batch 11). **Batch 10:** semantic **`--overlay-scrim-{30|55|80}`** on **`:root`** + **`tweakcn-dark-semantic-palette`** (`color-mix` from **`var(--shadow-color)`**); legacy **`--fp-sys-elevation-1..5`**, dark **`--shadow-sm|md|lg|xl`**, and **`--photo-marker-drop-shadow`** in **`_legacy-design-tokens.scss`** no longer use raw **`rgba(0,0,0,…)`**; app SCSS (media overlays, footer dimmer, nav/detail primary-press mix, spinners on primary) consume scrims / **`var(--shadow-color)`** / **`var(--primary-foreground)`**. **Batch 9:** remaining **`var(--chart-1|2)`** in **`apps/web/src/app`** (upload/projects/map chrome, project color formatters, toggle attention) → **`var(--success)`** / **`var(--warning)`** / **`var(--map-marker-user)`**; legacy **`--color-uploading`** now **`var(--primary)`** (bridge only, no app consumers). **Batch 8:** app SCSS — success/warning UI no longer proxies through **`var(--chart-1|2)`**; uses tweakcn **`var(--success)`** / **`var(--warning)`** (`styles.scss` `:root` + dark mixin). **Batch 7:** `_legacy-design-tokens.scss` — derivative tokens (shadows, borders, interaction, action/menu/field/section/state aliases) now use **tweakcn `var(--primary|destructive|border|…)`** directly instead of **`var(--color-*)` hops**; **`--color-*` bridge definitions** retained for Tailwind `@theme` / downstream until alias removal gate. **Batch 1 (2026-05-16):** cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale). **Batch 2:** rewired **`_legacy-design-tokens.scss`** internal chains (**`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`**) to existing **`--spacing-*`** / **`--radius-*`** (literals kept for 20px + 40px steps with no spacing-N match). **Batch 3:** removed duplicate **`--fp-base-*`** scale from the legacy bridge (no `var(--fp-base-*)` in `apps/web/src`); bridged unambiguous **`--fp-sys-color-*`** roles to tweakcn **`--primary`**, **`--background`**, **`--muted`**, **`--border`**, **`--destructive`**, **`--shadow-color`**, etc.; specs now cite **`var(--spacing-*)`** for former base px. **Batch 3 continuation (same date):** doc-only grep evidence table for deferred MD3 **`--fp-sys-color-*`** rows (no new SCSS mappings — no tweakcn namesake tokens). **Batch 4:** tweakcn dark palette shared mixin + **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`** (system theme) mirrors **`html[data-theme="dark"]`** — see § Batch 4. **Batch 5:** full-tree grep inventory for **`var(--fp-*)`**, **`--fp-ref-*`**, **`--fp-sys-color`** under **`apps/web/src`** — see § Batch 5. **Batch 5b:** removed **`--fp-ref-*`** `:root` definitions; canonical hex → **`docs/design/tokens.md`** §3.1a — see § Batch 5b. **Batch 6 (2026-05-17):** doc sync — **`docs/migration/phase-0-discovery.md`** token summary (post–5b); **`docs/specs/component/ui-primitives/panel-trigger.md`** Figma metrics cite **`var(--radius-sm)`** / **`var(--spacing-1)`** instead of legacy **`--fp-alias-*`** in prose — see § Batch 6.
+**Status:** In progress (2026-05-17) — **Batch 22:** **`--font-size-sm-compact`** alias removed — **`apps/web/src/app/features/upload/upload-panel.component.scss`** → **`var(--font-size-sm)`** (canonical **sm** per **`docs/design/tokens.md`** §3.1e); **`--font-size-sm-compact`** row dropped from **`_legacy-design-tokens.scss`** **LEGACY MAPPING** (sole consumer outside **`map/map-shell/**`**). **Batch 21:** **`--font-size-5xl`** alias removed — **`apps/web/src/app/features/upload/upload-panel.component.scss`** → **`var(--font-size-4xl)`** (canonical **4xl** per **`docs/design/tokens.md`** § typography scale); **`--font-size-5xl`** row dropped from **`_legacy-design-tokens.scss`** **LEGACY MAPPING** (consumer outside **`map/map-shell/**`**). **Batch 20:** **`--font-size-3xs`** alias removed — **`apps/web/src/app/features/map/map-shell/_map-shell-photo-marker-states.scss`** → **`var(--font-size-2xs)`** (canonical **2xs** / dense meta per **`docs/design/tokens.md`** § typography scale); **`--font-size-3xs`** row dropped from **`_legacy-design-tokens.scss`** **LEGACY MAPPING**. **Batch 19:** **doc-only — remaining deprecated `LEGACY MAPPING` `--font-size-*` inventory** (per-alias `var(--…)` line counts under `apps/web`; **no** zero-consumer rows at Batch 19 — **(A)** opened by Batch 20 for **`3xs`** only). **Batch 18:** **`_legacy-design-tokens.scss` — dead deprecated typography aliases removed** (`--font-size-xs-soft`, `--font-size-sm-tight`, `--font-size-lg-emphasis`) — `rg --glob '*.{scss,css,ts,html}' 'var\(--font-size-(xs-soft|sm-tight|lg-emphasis)\)' apps/web` → **0** files before edit; doc audit: no **`--fp-*`** property rows remain (only header comments mention **`--fp-ref-*` / `--fp-sys-*`**); **LEGACY MAPPING** block otherwise **in use** (many `var(--font-size-*-*)` callsites). **Batch 17:** **`_legacy-design-tokens.scss` — all remaining non-color `--fp-sys-*` custom properties removed** (`--fp-sys-shape-*`, `--fp-sys-spacing-*`, `--fp-sys-elevation-*`, `--fp-sys-typescale-*`, `--fp-sys-state-*`, `--fp-sys-motion-*`) — per-prefix `rg` under `apps/web` → **0** `var(--fp-sys-<prefix>)` files before edit; MD3 typescale / motion names remain **documentation-only** in **`docs/design/tokens.md`** §3.1e (specs may cite `--fp-sys-typescale-*` as labels — not emitted on `:root`). **Batch 16:** **`_legacy-design-tokens.scss` — all `--fp-sys-color-*` custom properties removed** (light **`:root`** + **`@mixin dark-theme-overrides`**) — pre-edit `rg -l --glob '*.{scss,css,ts,html}' 'var\(--fp-sys-' apps/web` → **0** files; **`docs/design/tokens.md`** §3.1a updated (MD3 role names + hex tables are documentation only). **Batch 15:** **`_legacy-design-tokens.scss` — dead Figma Alias spacing/radius rows removed** — `rg -e '--fp-alias-' apps/web/src` → **0**; `node scripts/sync-tokens.mjs` refreshed **`docs/design/figma-tokens.json`** (no Alias spacing/radius re-exports — use Base **`spacing`** / **`radius`**). Spec tables: **`panel-trigger`**, **`ui-primitives.panel-trigger`**, **`chip`** cite **`var(--radius-sm)`** / **`var(--spacing-*)`** / **`var(--foreground)`**. **Batch 14:** **`_legacy-design-tokens.scss` — Feldpost v1 `--color-*` bridge removed** — `rg 'var\\(--color-' apps/web/src` → **0** before edit; `tailwind.config.js` `extend.colors` already used **`var(--background)`** / **`var(--primary)`** etc. (not `var(--color-bg-*)`); Tailwind v4 **`@theme inline`** in **`styles.scss`** continues to emit shadcn-style **`--color-primary`** keys for utilities. Removed duplicate **`--color-bg-*`**, text, brand, map, **`--color-clay`**, and unused **`--color-skeleton-surface`** from **`:root`**, **`@mixin dark-theme-overrides`**, **`[data-theme='sandstone']`**, and the deprecated mapping block; kept **`--animation-skeleton-pulse`**. **Batch 13:** **Special case §4 — `hlm-toggle-group`** — `apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss` emits **geometry / spacing / radius only** (no **`var(--color-*|--fp-*|--fp-sys-*|--fp-ref-*)`**); hover, focus, on/off, and **`data-attention`** ink live in **`toggle-group-variants.ts`** (CVA + Tailwind + **`var(--warning)`** for attention-off, aligned with Batch 9). **Batch 12:** **`dark:` vs semantic variables** — canonical write-up in **`docs/design/tokens.md`** § **Phase 7 handoff — Tailwind `dark:` vs semantic CSS variables** (points to **`styles.scss`** `@custom-variant` + § **Risks / QA** below). **Batch 11:** **`--media-chrome-{foreground,control-bg,control-bg-hover}`** (fixed light-on-image) + **`--auth-scroll-radial-sheen`** + **`--auth-map-veil-{stop-a|stop-b|stop-c|flat}`** on **`:root`** and **`tweakcn-dark-semantic-palette`** (dark sheen / veil stops use **`--foreground`** / **`--background`**); **`photo-lightbox`** close control, **upload** skeleton shimmer, **auth** scroll fades + map shell + map overlay drop hardcoded **`rgba`/`#fff`** (see §Batch 11). **Batch 10:** semantic **`--overlay-scrim-{30|55|80}`** on **`:root`** + **`tweakcn-dark-semantic-palette`** (`color-mix` from **`var(--shadow-color)`**); legacy **`--fp-sys-elevation-1..5`**, dark **`--shadow-sm|md|lg|xl`**, and **`--photo-marker-drop-shadow`** in **`_legacy-design-tokens.scss`** no longer use raw **`rgba(0,0,0,…)`**; app SCSS (media overlays, footer dimmer, nav/detail primary-press mix, spinners on primary) consume scrims / **`var(--shadow-color)`** / **`var(--primary-foreground)`**. **Batch 9:** remaining **`var(--chart-1|2)`** in **`apps/web/src/app`** (upload/projects/map chrome, project color formatters, toggle attention) → **`var(--success)`** / **`var(--warning)`** / **`var(--map-marker-user)`**; legacy **`--color-uploading`** now **`var(--primary)`** (bridge only, no app consumers). **Batch 8:** app SCSS — success/warning UI no longer proxies through **`var(--chart-1|2)`**; uses tweakcn **`var(--success)`** / **`var(--warning)`** (`styles.scss` `:root` + dark mixin). **Batch 7:** `_legacy-design-tokens.scss` — derivative tokens (shadows, borders, interaction, action/menu/field/section/state aliases) now use **tweakcn `var(--primary|destructive|border|…)`** directly instead of **`var(--color-*)` hops**; **`--color-*` bridge definitions** retained for Tailwind `@theme` / downstream until alias removal gate. **Batch 1 (2026-05-16):** cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale). **Batch 2:** rewired **`_legacy-design-tokens.scss`** internal chains (**`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`**) to existing **`--spacing-*`** / **`--radius-*`** (literals kept for 20px + 40px steps with no spacing-N match). **Batch 3:** removed duplicate **`--fp-base-*`** scale from the legacy bridge (no `var(--fp-base-*)` in `apps/web/src`); bridged unambiguous **`--fp-sys-color-*`** roles to tweakcn **`--primary`**, **`--background`**, **`--muted`**, **`--border`**, **`--destructive`**, **`--shadow-color`**, etc.; specs now cite **`var(--spacing-*)`** for former base px. **Batch 3 continuation (same date):** doc-only grep evidence table for deferred MD3 **`--fp-sys-color-*`** rows (no new SCSS mappings — no tweakcn namesake tokens). **Batch 4:** tweakcn dark palette shared mixin + **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`** (system theme) mirrors **`html[data-theme="dark"]`** — see § Batch 4. **Batch 5:** full-tree grep inventory for **`var(--fp-*)`**, **`--fp-ref-*`**, **`--fp-sys-color`** under **`apps/web/src`** — see § Batch 5. **Batch 5b:** removed **`--fp-ref-*`** `:root` definitions; canonical hex → **`docs/design/tokens.md`** §3.1a — see § Batch 5b. **Batch 6 (2026-05-17):** doc sync — **`docs/migration/phase-0-discovery.md`** token summary (post–5b); **`docs/specs/component/ui-primitives/panel-trigger.md`** Figma metrics cite **`var(--radius-sm)`** / **`var(--spacing-1)`** instead of legacy **`--fp-alias-*`** in prose — see § Batch 6.
 
 **Goal:** Shrink or retire **`apps/web/src/styles/_legacy-design-tokens.scss`** (successor to the removed monolithic `tokens.scss`) so **component** SCSS uses **tweakcn** semantics (`--primary`, `--background`, `--muted`, `--foreground`, `--border`, `--destructive`, **`--spacing-*`**, etc.) — not legacy **`--color-*`**, **`--fp-sys-*`**, or **`--fp-ref-*`** hand-offs where avoidable. **Reference tonal hex** after Batch 5b: **`docs/design/tokens.md`** §3.1a (no **`--fp-ref-*`** on `:root`).
 
@@ -388,6 +388,117 @@ rg 'var\(--fp-ref-' docs/migration docs/specs --glob '*.md'
 | `--font-size-lg-emphasis` | `var(--font-size-lg)` | **0** |
 
 **Deferred (ambiguous / in use):** all other **`--font-size-*`** rows in the same `:root` block — grep shows active SCSS consumers (upload, map, media detail, settings, toast, reset, etc.).
+
+**Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
+
+### Batch 19 — deprecated **`LEGACY MAPPING`** alias inventory (doc-only, 2026-05-17)
+
+**Goal:** After Batch 18, confirm whether another **single-row** removal under **`/* LEGACY MAPPING (DEPRECATED) */`** is safe (zero **`var(--alias)`** under **`apps/web`**). **Result:** no **zero-line** alias at table time — **every** row in the inventory had **≥ 1** `var(--font-size-<alias>)` **line** match; **Batch 20** then completed **(A)** for **`--font-size-3xs`** (**1** line / **1** file → **`var(--font-size-2xs)`**, bridge row removed).
+
+**Scope:** `apps/web` only, globs `*.{scss,css,ts,html}` — count **lines** matching **`var(--font-size-<alias>)`** (not unique files). Canonical “maps to” column matches property RHS in **`_legacy-design-tokens.scss`** at Batch 19.
+
+| Deprecated alias (`:root`) | Maps to (canonical) | `var(--…)` line matches |
+|----------------------------|---------------------|-------------------------|
+| `--font-size-caption` | `var(--font-size-2xs)` | **2** |
+| `--font-size-label` | `var(--font-size-2xs)` | **8** |
+| `--font-size-label-soft` | `var(--font-size-2xs)` | **1** |
+| `--font-size-sm-soft` | `var(--font-size-sm)` | **6** |
+| `--font-size-sm-strong` | `var(--font-size-sm)` | **3** |
+| ~~`--font-size-sm-compact`~~ | ~~`var(--font-size-sm)`~~ | **0** — **removed Batch 22** |
+| `--font-size-md-compact` | `var(--font-size-md)` | **1** |
+| `--font-size-md-soft` | `var(--font-size-md)` | **2** |
+| `--font-size-md-emphasis` | `var(--font-size-md)` | **4** |
+| `--font-size-md-plus` | `var(--font-size-md)` | **7** |
+| `--font-size-base` | `var(--font-size-md)` | **16** |
+| `--font-size-base-strong` | `var(--font-size-lg)` | **2** |
+| `--font-size-base-plus` | `var(--font-size-lg)` | **2** |
+| `--font-size-base-emphasis` | `var(--font-size-lg)` | **3** |
+| ~~`--font-size-5xl`~~ | ~~`var(--font-size-4xl)`~~ | **0** — **removed Batch 21** |
+
+**Per-alias proof (repository root)** — replace `<alias>` with the kebab segment after **`--font-size-`** (e.g. `md-plus`):
+
+```bash
+rg --glob '*.{scss,css,ts,html}' 'var\(--font-size-<alias>\)' apps/web
+```
+
+**Batch-count one-liner** (reproduce table totals):
+
+```bash
+for name in caption label label-soft sm-soft sm-strong md-compact md-soft md-emphasis md-plus base base-strong base-plus base-emphasis; do printf '%s\t' "$name"; rg --glob '*.{scss,css,ts,html}' "var\\(--font-size-${name}\\)" apps/web | wc -l; done
+```
+
+**Zero-consumer sweep (none found):** if any alias printed **`0`**, it would be a Batch-18-style removal candidate; this loop printed **≥ 1** for all rows above.
+
+**Verify:** doc-only — `npm run design-system:check` / `ng build` optional (unchanged SCSS).
+
+### Batch 20 — **`--font-size-3xs`** → canonical **`--font-size-2xs`** (2026-05-17)
+
+**Slice:** one deprecated alias whose **`LEGACY MAPPING`** RHS was already **`var(--font-size-2xs)`** — replace callsites with the primitive and delete the alias row. **Canonical mapping:** [`docs/design/tokens.md`](../design/tokens.md) § typography scale — **`--font-size-2xs`** (caption / dense meta).
+
+| Step | Detail |
+|------|--------|
+| Consumer | `apps/web/src/app/features/map/map-shell/_map-shell-photo-marker-states.scss` — **`var(--font-size-3xs)`** → **`var(--font-size-2xs)`** |
+| Bridge | `apps/web/src/styles/_legacy-design-tokens.scss` — remove **`--font-size-3xs: var(--font-size-2xs);`** from **`/* LEGACY MAPPING (DEPRECATED) */`** |
+
+**Proof (zero residual):**
+
+```bash
+rg --glob '*.{scss,css,ts,html}' 'var\(--font-size-3xs\)' apps/web
+rg -n '--font-size-3xs' apps/web/src/styles/_legacy-design-tokens.scss
+```
+
+→ **0** matches.
+
+**Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
+
+### Batch 21 — **`--font-size-5xl`** → canonical **`--font-size-4xl`** (2026-05-17)
+
+**Slice:** one deprecated **`LEGACY MAPPING`** alias whose RHS was already **`var(--font-size-4xl)`** — replace the sole callsite with the primitive and delete the alias row. **Excluded `map/map-shell/**`** from batch scope (parallel stream); alias **`--font-size-5xl`** had **no** consumers under that path.
+
+| Step | Detail |
+|------|--------|
+| Consumer | `apps/web/src/app/features/upload/upload-panel.component.scss` — **`var(--font-size-5xl)`** → **`var(--font-size-4xl)`** (dropzone icon scale) |
+| Bridge | `apps/web/src/styles/_legacy-design-tokens.scss` — remove **`--font-size-5xl: var(--font-size-4xl);`** from **`/* LEGACY MAPPING (DEPRECATED) */`** |
+
+**Proof (zero residual):**
+
+```bash
+rg --glob '*.{scss,css,ts,html}' 'var\(--font-size-5xl\)' apps/web
+rg -n '--font-size-5xl' apps/web/src/styles/_legacy-design-tokens.scss
+```
+
+→ **0** matches.
+
+### Batch 22 — **`--font-size-sm-compact`** → canonical **`--font-size-sm`** (2026-05-17)
+
+**Slice:** one deprecated **`LEGACY MAPPING`** alias whose RHS was already **`var(--font-size-sm)`** — replace the sole callsite with the primitive and delete the alias row. **Excluded `map/map-shell/**`** from batch scope (parallel stream); alias **`--font-size-sm-compact`** had **no** consumers under that path.
+
+| Step | Detail |
+|------|--------|
+| Consumer | `apps/web/src/app/features/upload/upload-panel.component.scss` — **`&__file-status`** **`var(--font-size-sm-compact)`** → **`var(--font-size-sm)`** |
+| Bridge | `apps/web/src/styles/_legacy-design-tokens.scss` — remove **`--font-size-sm-compact: var(--font-size-sm);`** from **`/* LEGACY MAPPING (DEPRECATED) */`** |
+
+**Proof (zero residual):**
+
+```bash
+rg --glob '*.{scss,css,ts,html}' 'var\(--font-size-sm-compact\)' apps/web
+rg -n '--font-size-sm-compact' apps/web/src/styles/_legacy-design-tokens.scss
+```
+
+→ **0** matches.
+
+**Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
+
+**Ordered migration plan (remaining `LEGACY MAPPING` font-size aliases)** — prefer **low unique-file count** first (cap **≤ 15** touched files per batch including `_legacy-design-tokens.scss`). **Exclude** `apps/web/src/app/features/map/map-shell/**` when a parallel agent owns that tree. Re-count files from repo root (example: consumers outside map-shell only):
+
+```bash
+for a in caption label label-soft sm-soft sm-strong md-compact md-soft md-emphasis md-plus base base-strong base-plus base-emphasis; do
+  n=$(rg -l --glob '*.{scss,css,ts,html}' "var\\(--font-size-${a}\\)" apps/web 2>/dev/null | grep -v 'features/map/map-shell/' | wc -l)
+  printf '%s\t%s\n' "$n" "--font-size-$a"
+done | sort -n
+```
+
+**Per-alias grep recipe:** `rg --glob '*.{scss,css,ts,html}' 'var\(--font-size-<alias>\)' apps/web` (kebab segment after **`--font-size-`**). **Canonical targets** for each alias remain the Batch 19 “Maps to” column in **`_legacy-design-tokens.scss`** until the row is deleted.
 
 **Verify:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0**.
 

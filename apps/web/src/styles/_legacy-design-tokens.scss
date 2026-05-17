@@ -372,13 +372,11 @@
 /* ── LEGACY MAPPING (DEPRECATED) ── */
 /* WARNING: TEMPORARY BACKWARD-COMPATIBILITY ALIASES ONLY. REMOVE THIS SECTION AFTER DOWNSTREAM TOKEN REFACTOR COMPLETION. */
 :root {
-  --font-size-3xs: var(--font-size-2xs);
   --font-size-caption: var(--font-size-2xs);
   --font-size-label: var(--font-size-2xs);
   --font-size-label-soft: var(--font-size-2xs);
   --font-size-sm-soft: var(--font-size-sm);
   --font-size-sm-strong: var(--font-size-sm);
-  --font-size-sm-compact: var(--font-size-sm);
   --font-size-md-compact: var(--font-size-md);
   --font-size-md-soft: var(--font-size-md);
   --font-size-md-emphasis: var(--font-size-md);
@@ -387,5 +385,4 @@
   --font-size-base-strong: var(--font-size-lg);
   --font-size-base-plus: var(--font-size-lg);
   --font-size-base-emphasis: var(--font-size-lg);
-  --font-size-5xl: var(--font-size-4xl);
 }

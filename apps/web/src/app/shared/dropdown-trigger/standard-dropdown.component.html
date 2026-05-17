@@ -18,12 +18,12 @@
               hlmBtn
               variant="ghost"
               size="icon"
-              class="standard-dropdown__search-icon-btn"
+              class="standard-dropdown__search-icon-btn text-muted-foreground"
               type="button"
               [attr.aria-label]="clearSearchAriaLabel()"
               (click)="clearRequested.emit()"
             >
-              <span class="material-icons" aria-hidden="true">close</span>
+              <span class="material-icons text-current" aria-hidden="true">close</span>
             </button>
           } @else {
             <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>

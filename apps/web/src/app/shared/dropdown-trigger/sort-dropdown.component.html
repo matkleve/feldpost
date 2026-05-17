@@ -13,13 +13,13 @@
       hlmBtn
       variant="ghost"
       size="icon"
-      class="group shrink-0"
+      class="sort-toolbar-search-reset shrink-0 text-muted-foreground"
       type="button"
       (click)="onSearchActionClick()"
       [attr.aria-label]="searchActionAriaLabel()"
     >
       <span
-        class="material-icons inline-block transition-transform duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)] motion-reduce:transition-none motion-reduce:duration-0 group-hover:-rotate-12 group-active:-rotate-180 group-active:duration-[var(--motion-duration-slow)] motion-reduce:group-hover:rotate-0 motion-reduce:group-active:rotate-0"
+        class="sort-toolbar-search-reset__icon material-icons inline-block"
         aria-hidden="true"
         >{{ searchActionIcon() }}</span>
     </button>
@@ -33,7 +33,7 @@
       @for (opt of groupedOptions(); track opt.id) {
         <button
           hlmMenuItem
-          class="sort-dropdown__option text-primary"
+          class="sort-dropdown__option"
           type="button"
           [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
           (mouseenter)="setHoveredSort(opt.id)"

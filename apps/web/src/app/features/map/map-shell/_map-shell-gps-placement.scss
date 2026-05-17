@@ -55,12 +55,6 @@
   }
 }
 
-@keyframes gps-btn-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .map-placement-banner {
   position: absolute;
   bottom: var(--spacing-5);

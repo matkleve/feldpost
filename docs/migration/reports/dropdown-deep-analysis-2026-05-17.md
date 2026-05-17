@@ -24,6 +24,8 @@ This report, the [structure audit](./dropdown-component-structure-audit-2026-05-
 | Single-owner **stacking story** for shell host (inline `z-index` vs menu CVA `z-50` / token) — document in spec once behavior is chosen | docs (contract note) **or** code (remove dead semantics) |
 | Optional **Mermaid / test-oracle** DOM snapshot in `dropdown-system.md` linking these reports | docs |
 
+**Map-shell `anyComponentStyle` budget:** Multiple anchored shells on the map surface (for example the four `<app-dropdown-shell>` blocks called out in §1) sit alongside heavy Leaflet `::ng-deep` and marker/panel SCSS; **emitted component-style size** and **co-located partial splits / dedupe** toward the Angular budget are tracked under [Phase 8 §7 — inventory (`styles/` tree)](../phase-8-global-scss-elimination.md#7-inventory-remaining-styles-tree) and summarized as open build weight in [Phase 8 — Open (remaining weight)](../phase-8-global-scss-elimination.md#open-remaining-weight), not duplicated here.
+
 ---
 
 ## 1. Executive findings

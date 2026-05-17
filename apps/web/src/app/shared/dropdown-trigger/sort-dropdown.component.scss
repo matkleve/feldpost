@@ -58,3 +58,43 @@
     color: var(--primary);
   }
 }
+
+@layer components {
+  // Rotates only the reset glyph when this button is hovered/active — no Tailwind `group` (avoids sibling clear `close` picking up motion).
+  // @see docs/specs/component/filters/dropdown-system.md
+  .sort-toolbar-search-reset__icon {
+    transition-property: transform;
+    transition-duration: var(--motion-duration-fast);
+    transition-timing-function: var(--motion-ease-out);
+  }
+
+  // Motion-reduced: skip spin affordance on reset control.
+  // @see docs/design/motion.md
+  @media (prefers-reduced-motion: reduce) {
+    .sort-toolbar-search-reset__icon {
+      transition-duration: 0s;
+    }
+  }
+
+  // Hover tilt for sort search reset (scoped to `.sort-toolbar-search-reset` only).
+  // @see docs/specs/component/filters/dropdown-system.md
+  .sort-toolbar-search-reset:hover .sort-toolbar-search-reset__icon {
+    transform: rotate(-12deg);
+  }
+
+  // Active “spin” for sort search reset — longer duration on press.
+  // @see docs/specs/component/filters/dropdown-system.md
+  .sort-toolbar-search-reset:active .sort-toolbar-search-reset__icon {
+    transform: rotate(-180deg);
+    transition-duration: var(--motion-duration-slow);
+  }
+
+  // Reduced-motion users: no rotation on reset.
+  // @see docs/design/motion.md
+  @media (prefers-reduced-motion: reduce) {
+    .sort-toolbar-search-reset:hover .sort-toolbar-search-reset__icon,
+    .sort-toolbar-search-reset:active .sort-toolbar-search-reset__icon {
+      transform: none;
+    }
+  }
+}

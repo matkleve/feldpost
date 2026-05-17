@@ -17,6 +17,7 @@ interface Project {
     <app-standard-dropdown
       class="projects-dropdown"
       [style.--std-dropdown-min-height]="'calc(18rem + 3rem + 3.5rem)'"
+      [itemsClass]="'standard-dropdown__items--scrollbar-gutter-delegate'"
       [searchTerm]="searchTerm()"
       [searchPlaceholder]="t('workspace.projects.search.placeholder', 'Search projects…')"
       [actionLabel]="t('workspace.projects.action.new', 'New project')"

@@ -9,10 +9,6 @@
   min-height: calc(18rem + 3rem + 3.5rem);
 }
 
-.projects-dropdown {
-  padding-block: 0;
-}
-
 .projects-list {
   // Locks the checklist scroll viewport so async load and search filtering do not change panel height (empty tail is OK).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
@@ -23,9 +19,8 @@
   height: 18rem;
   max-height: min(18rem, 50vh);
   overflow-y: auto;
-  // Inner scroll: stable gutter + inline-end so counts stay clear of the scrollbar.
+  // Scrollbar track reserved by gutter only — no extra `padding-inline-end` (avoids asymmetric gap vs host padding).
   // @see docs/specs/component/filters/dropdown-system.md
-  padding-inline-end: var(--spacing-1);
   scrollbar-gutter: stable;
 }
 

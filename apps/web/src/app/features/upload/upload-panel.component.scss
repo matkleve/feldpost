@@ -103,7 +103,7 @@
   &__dropzone-icon {
     display: block;
     opacity: 1;
-    font-size: var(--font-size-5xl);
+    font-size: var(--font-size-4xl);
     line-height: var(--line-height-solid);
     color: var(--muted-foreground);
   }
@@ -394,7 +394,7 @@
   &__file-status {
     margin: 0;
     color: var(--muted-foreground);
-    font-size: var(--font-size-sm-compact);
+    font-size: var(--font-size-sm);
     line-height: var(--line-height-tight);
     overflow: hidden;
     text-overflow: ellipsis;

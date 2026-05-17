@@ -19,13 +19,13 @@
             hlmBtn
             variant="ghost"
             size="icon"
-            class="group shrink-0"
+            class="grouping-toolbar-reset shrink-0 text-muted-foreground"
             type="button"
             (click)="clearGroupings()"
             [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
           >
             <span
-              class="material-icons inline-block transition-transform duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)] motion-reduce:transition-none motion-reduce:duration-0 group-hover:-rotate-12 group-active:-rotate-180 group-active:duration-[var(--motion-duration-slow)] motion-reduce:group-hover:rotate-0 motion-reduce:group-active:rotate-0"
+              class="grouping-toolbar-reset__icon material-icons inline-block"
               aria-hidden="true"
               >restart_alt</span>
           </button>
@@ -57,7 +57,7 @@
             (cdkDragStarted)="onDragStart()"
             (cdkDragEnded)="onDragEnd()"
             hlmMenuItem
-            class="grouping-dropdown__row text-primary"
+            class="grouping-dropdown__row"
             [class.grouping-row--selected]="selectedRows().has(prop.id)"
             tabindex="0"
             (click)="onRowClick(prop.id, $event)"
@@ -91,7 +91,7 @@
             (cdkDragStarted)="onDragStart()"
             (cdkDragEnded)="onDragEnd()"
             hlmMenuItem
-            class="grouping-dropdown__row text-muted-foreground"
+            class="grouping-dropdown__row"
             [class.grouping-row--selected]="selectedRows().has(prop.id)"
             tabindex="0"
             (click)="onRowClick(prop.id, $event)"

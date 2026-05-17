@@ -84,11 +84,11 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 ### 7. Inventory remaining `styles/` tree
 
-**Keep (expected):** `reset.scss`, `map-leaflet-host.scss` (Leaflet map chrome), `layout/app.scss`, `layout/clamp.scss`, `_typography-baseline.scss` (headings + default anchors after Preflight).
+**Keep (expected):** `reset.scss`, `map-leaflet-host.scss` (Leaflet map chrome), `_map-shell-keyframes.scss` (hoisted map-shell marker/panel/upload/GPS **`@keyframes`**), `layout/app.scss`, `layout/clamp.scss`, `_typography-baseline.scss` (headings + default anchors after Preflight).
 
 **Review:** any other `@use` from `styles.scss` not listed above — justify or delete. **`meta.load-css`** emits are inventoried below; order constraints (**legacy** after tweakcn **`:root`**, **typography** after **`@layer base`**) are documented in the **§7 `load-css` + reset review** progress slice.
 
-**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is **`./styles/map-leaflet-host`**, **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./app/shared/ui/toggle-group/hlm-toggle-group`**; **`meta.load-css`** pulls **`styles/legacy-design-tokens`** and **`styles/typography-baseline`** (source **`apps/web/src/styles/_typography-baseline.scss`**). No stray **`primitives/*`** or **`tokens`** references.
+**Inventory (2026-05-16):** `apps/web/src/styles.scss` **`@use`** set is **`./styles/map-leaflet-host`**, **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./styles/map-shell-keyframes`** (Phase 8 map-shell **`@keyframes`** hoist), **`./app/shared/ui/toggle-group/hlm-toggle-group`**; **`meta.load-css`** pulls **`styles/legacy-design-tokens`** and **`styles/typography-baseline`** (source **`apps/web/src/styles/_typography-baseline.scss`**). No stray **`primitives/*`** or **`tokens`** references.
 
 **Progress (2026-05-16, slice — typography baseline partial):** **`h1`–`h6`** and default **`a`** rules moved from inline **`styles.scss`** into **`apps/web/src/styles/_typography-baseline.scss`**, included **after** **`@layer base`** via **`@include meta.load-css('styles/typography-baseline')`** so output order stays **Tailwind Preflight → baseline** (same constraint as top-of-file **`@use`** would violate).
 
@@ -110,6 +110,12 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Progress (2026-05-17, slice — map-shell layout partial):** Extracted **`:host`**, **`.map-zone`**, and **`.map-container`** (incl. **`&--placing`**) from **`map-shell.component.scss`** into **`apps/web/src/app/features/map/map-shell/_map-shell-layout.scss`**; main sheet **`@use './map-shell-layout'`** last in the **`@use`** list so emitted CSS order matches the pre-split sheet (feature partials → shell layout).
 
+**Progress (2026-05-17, slice — map-shell photo-marker states partial):** Extracted **`:host ::ng-deep` marker state/variant blocks** (selected / hover / zoom / bearing / single / placeholder / count / spotlight) and **`prefers-reduced-motion`** wrapper overrides from **`_map-shell-photo-markers.scss`** into **`apps/web/src/app/features/map/map-shell/_map-shell-photo-marker-states.scss`**; related **`@keyframes`** (**`map-photo-marker-placeholder-pulse`**, **`map-photo-marker-pulse`**, **`map-photo-marker-spotlight`**) live in **`apps/web/src/styles/_map-shell-keyframes.scss`** (global **`@use`** from **`styles.scss`** — not in the component partial). Entry **`map-shell.component.scss`** **`@use './map-shell-photo-marker-states'`** immediately after **`@use './map-shell-photo-markers'`** (base wrapper + **`.map-photo-marker`** geometry unchanged first; selectors 1:1).
+
+**Progress (2026-05-17, slice — map-shell keyframes hoist verify + mask dedupe):** **`@keyframes`** for map-shell (photo markers, photo panel clip, upload dot pulse, GPS spin) are **global** in **`apps/web/src/styles/_map-shell-keyframes.scss`**, pulled in by **`@use './styles/map-shell-keyframes'`** near the top of **`apps/web/src/styles.scss`** (not re-emitted inside **`map-shell` partials**). **`rg '@keyframes' apps/web/src/app/features/map/map-shell --glob '*.scss'`** → **0** matches. **`_map-shell-photo-marker-states.scss`** only references **`animation-name`** values defined in that global partial. Next-byte trim applied: **`%map-shell-photo-marker-placeholder-mask-tile`** + **`@extend`** merges duplicate **mask / muted icon surface** rules for **`.map-photo-marker__body--error::after`** and **`.map-photo-marker__placeholder-icon`**. **`_map-shell-keyframes.scss`:** **`@see`** for **`map-photo-marker-pulse`** corrected to **`_map-shell-photo-markers.scss`** (pending ring). **Gates:** **`npm run design-system:check`** → **exit 0**; **`cd apps/web && npx ng build`** → **exit 0**. **`anyComponentStyle` budget warning** (same budget line): **before** total **18.14 kB** (shortfall **6.14 kB** vs **12.00 kB**); **after** total **17.89 kB** (shortfall **5.89 kB**).
+
+**Budget options (doc-only, `angular.json`):** Until further partial splits / selector trims, raising **`MapShellComponent` → `anyComponentStyle.maximumWarning`** (or **`maximumError`**) is the mechanical escape hatch; prefer **co-located partials** and **hoisted `@keyframes`** (this slice) before widening budgets.
+
 ### 8. Final gates
 
 **Progress (2026-05-16, slice):** **`npm run design-system:check`** (registry + panel MQ audit + visual-behavior guard) and **`cd apps/web && npx ng build`** → **exit 0** (Angular build warnings only: map-shell SCSS budget, CommonJS deps).
@@ -128,7 +134,7 @@ npm run design-system:check
 | Gate | Condition |
 |------|-----------|
 | `styles/primitives/` | **Empty** or directory **deleted** |
-| `styles.scss` `@use` block | **`map-leaflet-host`** (Leaflet map chrome), **`reset`**, **`layout/app`**, **`layout/clamp`** (+ **`hlm-toggle-group`** until deleted), **`meta`** for **`load-css`** ( **`legacy-design-tokens`**, **`typography-baseline`** ) — **no** `primitives/*`, **no** `tokens` |
+| `styles.scss` `@use` block | **`map-leaflet-host`** (Leaflet map chrome), **`reset`**, **`layout/app`**, **`layout/clamp`**, **`map-shell-keyframes`** (hoisted map-shell animations), **`hlm-toggle-group`** until deleted, **`meta`** for **`load-css`** ( **`legacy-design-tokens`**, **`typography-baseline`** ) — **no** `primitives/*`, **no** `tokens` |
 | `hlm-toggle-group.scss` | **Deleted**, or file exists with **no** `@layer states` / selector-driven segment states (**hover**, **data-attention**, focus, disabled) — those live in **CVA**; **OK** if **`@layer components`** (pill shell) + **`prefers-reduced-motion`** clamp remain |
 | Build / DS | `ng build` and `npm run design-system:check` → **0** |
 

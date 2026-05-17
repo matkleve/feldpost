@@ -183,8 +183,7 @@ The v2 color system follows the Material Design 3 tonal architecture with the Fe
 
 #### Migration rule
 
-New components: use `--fp-sys-color-*` directly.
-Existing components: continue using `--color-*` until the migration sprint. Do not mix both in the same component.
+**New work:** use **tweakcn** semantics (`--primary`, `--background`, `--foreground`, `--muted`, `--border`, …) and shipped layout/typography/motion primitives (`--radius-*`, `--spacing-*`, `--font-size-*`, `--motion-*`, `--shadow-*` / `--elevation-*`)—not **`--fp-sys-color-*`** or other **`--fp-sys-*`** names (those exist in §3.1a–g tables as **MD3 design reference only**; see Phase 7 **Batches 16–17** in [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md)). **Legacy:** the v1 **`--color-*`** story below is historical palette documentation; do not add new `var(--color-*)` in component SCSS (Phase 7 consumer gate).
 
 ---
 
@@ -253,9 +252,15 @@ The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes w
 
 ---
 
+#### Phase 7 — MD3 system tokens §3.1b–g (documentation only)
+
+**`--fp-sys-shape-*`**, **`--fp-sys-spacing-*`**, **`--fp-sys-elevation-*`**, **`--fp-sys-typescale-*`**, **`--fp-sys-state-*`**, and **`--fp-sys-motion-*`** in the tables below follow the same rule as **`--fp-sys-color-*`** in §3.1a: they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 17** (2026-05-17). Use **`--radius-*`**, **`--spacing-*`** (§3.3), **`--shadow-*` / `--elevation-*`** (§3.5), the **`--font-size-*`** scale (§3.2), and **`--motion-*`** (§3.6) in implementation.
+
+---
+
 ### §3.1b — Shape (`--fp-sys-shape-*`)
 
-Border-radius scale. Use `var(--fp-sys-shape-*)` in components — never raw `px` or `rem` radius values.
+Border-radius reference scale (logical MD3 names; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** immediately above). In code prefer **`var(--radius-*)`** and Tailwind radius utilities; avoid ad hoc `px` / `rem` for radii.
 
 | Token | Value | Pixels | Usage |
 |-------|-------|--------|-------|
@@ -271,7 +276,7 @@ Border-radius scale. Use `var(--fp-sys-shape-*)` in components — never raw `px
 
 ### §3.1c — Spacing (`--fp-sys-spacing-*`)
 
-4px base grid. All values are in `rem` (1rem = 16px). Use these instead of arbitrary `rem`/`px` spacing in new components.
+4px base grid (reference table; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Shipped spacing: **`--spacing-*`** (§3.3) and the Tailwind spacing scale.
 
 | Token | Value | Pixels |
 |-------|-------|--------|
@@ -291,7 +296,7 @@ Border-radius scale. Use `var(--fp-sys-shape-*)` in components — never raw `px
 
 ### §3.1d — Elevation (`--fp-sys-elevation-*`)
 
-MD3 box-shadow elevation levels 0–5. Shadow offsets and blur use `px` (project convention: `px` only for sub-pixel and shadow geometry values).
+MD3 box-shadow elevation levels 0–5 (reference; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Shadow offsets and blur use `px` (project convention: `px` only for sub-pixel and shadow geometry values). Product code uses **`--shadow-*`** and **`--elevation-*`** (§3.5).
 
 | Token | Level | Usage |
 |-------|-------|-------|
@@ -306,7 +311,7 @@ Note: elevation tokens are skipped by `sync-tokens.mjs` (complex multi-value sho
 
 ---
 
-### §3.1e — Typeface & Typescale (canonical names + `--fp-sys-typescale-*`)
+### §3.1e — Typeface & Typescale (canonical names + MD3 `--fp-sys-typescale-*` labels)
 
 #### Typefaces
 
@@ -322,7 +327,7 @@ Google Fonts load from **`apps/web/src/styles.scss`** (global). **These are cano
 
 #### Type scale
 
-Token name format: `--fp-sys-typescale-{role}-{size|line-height|weight|tracking}`
+Token name format (documentation labels only — **not** on `:root` after Batch 17): `--fp-sys-typescale-{role}-{size|line-height|weight|tracking}`. Map roles to **`--font-size-*`** and global heading rules in **`apps/web/src/styles.scss`** for shipped UI.
 
 | Role | Size | Line-height | Weight | Tracking |
 |------|------|-------------|--------|---------|
@@ -346,7 +351,7 @@ Token name format: `--fp-sys-typescale-{role}-{size|line-height|weight|tracking}
 
 ### §3.1f — State Layers (`--fp-sys-state-*`)
 
-Opacity multipliers for interactive state surfaces. Apply as the `opacity` of a filled overlay on the component's surface color.
+Opacity multipliers for interactive state surfaces (reference; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Apply overlay opacity in components using the design-system patterns and tokens in use for that surface—do not assume a **`var(--fp-sys-state-*)`** custom property exists.
 
 | Token | Value | State |
 |-------|-------|-------|
@@ -359,6 +364,8 @@ Opacity multipliers for interactive state surfaces. Apply as the `opacity` of a 
 ---
 
 ### §3.1g — Motion (`--fp-sys-motion-*`)
+
+MD3 motion reference (logical names; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Shipped timing and easing: **`--motion-*`** (§3.6).
 
 #### Durations
 
@@ -397,6 +404,8 @@ font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 ```
 
 **Type scale (rem, base 16px, ratio 1.13):**
+
+There is **no** separate **`--font-size-3xs`** step: a deprecated **`--font-size-3xs`** alias (same size as **2xs**) lived only in the legacy bridge **`LEGACY MAPPING`** block and was **removed** in Phase 7 **Batch 20** (2026-05-17)—use **`--font-size-2xs`** for captions and dense meta.
 
 | Step | Token             | Approx size      | Usage guideline               |
 | ---- | ----------------- | ---------------- | ----------------------------- |
@@ -661,6 +670,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | Reason | Examples | Action in Figma |
 |---|---|---|
 | `alias` — resolves to another token via `var()` | `--color-primary`, `--elevation-overlay` | Set manually as a Variable alias after primitives are imported |
+| **removed from bridge** — no longer defined for sync | e.g. former **`--font-size-3xs`** → **`--font-size-2xs`** (Batch 20) | Use **`Font/Size/2xs`** only; do not reintroduce a duplicate 3xs variable |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
 | `color-mix` — computed at render time | `--interactive-border-muted`, `--state-success-bg` | Approximate with a manual opacity or solid value |
 | `complex` — multi-value shorthand | `--shadow-sm`, `--border-sm` | Set manually; shadows are not natively representable as a single Figma Variable |

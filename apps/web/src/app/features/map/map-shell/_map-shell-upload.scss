@@ -110,12 +110,6 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: 2;
-
-    .material-icons {
-      font-size: var(--font-size-xl);
-      position: relative;
-      z-index: 2;
-    }
   }
 
   &__progress {
@@ -158,20 +152,6 @@
     font-weight: var(--font-weight-semibold);
     z-index: 3;
     white-space: nowrap;
-  }
-}
-
-@keyframes upload-panel-dot-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent);
-  }
-
-  70% {
-    box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--primary) 0%, transparent);
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
   }
 }
 

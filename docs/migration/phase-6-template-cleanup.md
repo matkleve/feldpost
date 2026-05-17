@@ -1,6 +1,6 @@
 # Phase 6 — Template BEM Sweep & Toggle Unification
 
-**Status:** In Progress (2026-05-16 snapshot)
+**Status:** In Progress (2026-05-16 snapshot). *Verified 2026-05-17 — §Pre-flight + Gates A/B rg clean (same 2-file `\bui-` comment-only baseline).*
 
 **Goal:** Zero legacy **`ui-*` hyphenated class tokens** in any Angular template (Gate A). Every toggle cluster uses `hlmToggleGroup` / `hlmToggleGroupItem` (no hand-rolled BEM for group chrome). Toolbar actions use `hlmBtn` with explicit variants. **`apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts` — deleted (2026-05-16).** **Gate B:** zero residual **`uiCamelCase`** attribute directives in HTML templates (**2026-05-16** — was `uiDropdownTrigger`; replaced by **`hlmBtn`** + per-toolbar menu-trigger classes in Phase 5 Group D).
 

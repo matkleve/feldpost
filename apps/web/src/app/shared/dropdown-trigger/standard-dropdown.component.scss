@@ -3,20 +3,19 @@
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   max-height: inherit;
   box-sizing: border-box;
-  padding-inline: var(--std-dropdown-padding-inline);
-  // Bottom inset between last row (items or footer) and shell chrome — single owner; avoids `pb-0` hacks on the scroll list.
-  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-  padding-bottom: var(--spacing-2, 0.5rem);
-  width: 100%;
   // Default vertical floor for toolbar menus; filter overrides via `[style.--std-dropdown-min-height]` (see dropdown-system.md).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   --std-dropdown-min-height: 8rem;
-  // Default horizontal inset for search row, scroll list, and footer action (callers may override).
-  // @see docs/specs/component/filters/dropdown-system.md
+  // Token for symmetric body inset (shell menu CVA uses `p-0` — inset lives on this host, not on feature `padding-block: 0`).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   --std-dropdown-padding-inline: var(--spacing-2, 0.5rem);
   // Matches `hlmBtn` `size="icon"` (`h-10` / `w-10`) so reserved search-row slots do not jump layout.
   // @see docs/specs/component/filters/dropdown-system.md
   --std-dropdown-search-icon-slot-size: 2.5rem;
+  // Symmetric inset on all sides (same token as former horizontal-only — avoids flush edges when shell has `p-0`).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  padding: var(--std-dropdown-padding-inline);
+  width: 100%;
   min-height: var(--std-dropdown-min-height);
 }
 
@@ -24,6 +23,12 @@
 // @see docs/specs/component/filters/dropdown-system.md
 .standard-dropdown__items {
   scrollbar-gutter: stable;
+}
+
+// Inner band (e.g. `.projects-list`) owns scroll + `scrollbar-gutter: stable` — this wrapper must not stack a second gutter.
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+.standard-dropdown__items.standard-dropdown__items--scrollbar-gutter-delegate {
+  scrollbar-gutter: auto;
 }
 
 // Filter toolbar: cap rules band here so one scroll host owns `scrollbar-gutter: stable` (see `.standard-dropdown__items`).
@@ -82,11 +87,16 @@
   flex-shrink: 0;
 }
 
+// Clear glyph: never inherit `transform` from sibling projected controls in the same trailing cluster.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__search-icon-btn .material-icons {
+  transform: none;
+}
+
 // Shared toolbar menu chrome for sort + grouping (same shell floor; identical body width contract).
 // TEST: max body height matches shell `max-height: calc(18rem * 1.6)` so scroll stays inside shell.
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host.workspace-toolbar-menu-panel {
-  padding-block: 0;
   max-height: calc(18rem * 1.6);
 }
 

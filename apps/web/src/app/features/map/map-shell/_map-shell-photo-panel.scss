@@ -152,26 +152,3 @@
     display: block;
   }
 }
-
-// clip-path reveal: panel stays in its flex position but is clipped from the
-// left edge inward, so it appears to slide in from the right with no layout gap.
-@keyframes map-panel-clip-in-right {
-  from {
-    clip-path: inset(0 0 0 100%);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-// clip-path reveal from bottom: same technique for mobile bottom sheet.
-@keyframes map-panel-clip-in-up {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
