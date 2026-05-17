@@ -2,8 +2,8 @@
 // Must run after Tailwind Preflight so heading metrics are not reset away.
 // @see apps/web/AGENTS.md (typography ownership — global baseline only)
 
-// Exposes typography + spacing/radius primitives for headings and app `var()` consumers after legacy bridge and `@theme inline` load order
-// @see docs/migration/phase-7-token-migration.md §Batch 41 / §Batch 42 / §Batch 44
+// Exposes typography + spacing/radius primitives + interactive focus ring for headings and app `var()` consumers after legacy bridge and `@theme inline` load order
+// @see docs/migration/phase-7-token-migration.md §Batch 41 / §Batch 42 / §Batch 44 / §Batch 47
 :root {
   // Defines modular spacing scale (4px base unit) for layout gaps and component insets
   // @see docs/migration/phase-7-token-migration.md §Batch 44
@@ -57,6 +57,30 @@
   // @see docs/design/tokens.md §3.6
   --motion-duration-fast: 100ms;
   --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  // Defines keyboard focus-visible ring shadow (moved from legacy bridge Batch 47)
+  // @see docs/migration/phase-7-token-migration.md §Batch 47
+  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+// Overrides focus ring mix strength when dark palette is active (ex legacy dark mixin Batch 47)
+// @see docs/migration/phase-7-token-migration.md §Batch 47
+@mixin typography-baseline-dark-focus-ring {
+  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+// Applies dark focus ring token when app theme is explicitly dark
+// @see docs/migration/phase-7-token-migration.md §Batch 47
+[data-theme='dark'] {
+  @include typography-baseline-dark-focus-ring;
+}
+
+// Applies dark focus ring when OS prefers dark and user has not forced light theme
+// @see docs/migration/phase-7-token-migration.md §Batch 47
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include typography-baseline-dark-focus-ring;
+  }
 }
 
 h1 {

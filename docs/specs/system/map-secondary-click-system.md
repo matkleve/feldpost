@@ -10,7 +10,7 @@ Secondary-click / long-press orchestration for map, marker, and radius targets (
 
 ## What It Looks Like
 
-All secondary-click menus use the shared dropdown/action-sheet shell (`dd-*` rows, `--color-bg-elevated`, `box-shadow: var(--shadow-lg)` (**tweakcn `:root`** — **Batch 39** removed duplicate **`--shadow-*`** **`_legacy-design-tokens.scss`** rows; [`docs/design/tokens.md`](../../design/tokens.md) §3.5), **`--radius-lg`** (**`styles.scss` `@theme inline`** — **Batch 44**)). Desktop menus anchor to cursor/marker/radius hit zone. Mobile uses bottom action sheets for touch reliability.
+All secondary-click menus use the shared dropdown/action-sheet shell (`dd-*` rows) with the same elevated surface vocabulary as other floating menus: **`--color-bg-elevated`**, **`--color-border`**, **`box-shadow: var(--shadow-lg)`**, **`--radius-lg`**. **Authors:** semantic names, shadow ladder, and stacking live in [`docs/design/tokens.md`](../../design/tokens.md); shell, `dd-*`, and plane rules are normative in [`docs/specs/component/filters/dropdown-system.md`](../component/filters/dropdown-system.md). Historical bridge-token removal is documented only in [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md) — not an implementation checklist. Desktop menus anchor to cursor/marker/radius hit zone. Mobile uses bottom action sheets for touch reliability.
 
 Map menu focuses creation/navigation utilities. Marker menu focuses item-level operations. Radius menu focuses project actions on in-radius result sets.
 

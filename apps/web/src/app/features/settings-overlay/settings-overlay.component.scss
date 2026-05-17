@@ -13,7 +13,7 @@
     17rem
   );
   --settings-overlay-right-width: calc(
-    var(--settings-overlay-width) - var(--settings-overlay-left-width) - 1px
+    var(--settings-overlay-width) - var(--settings-overlay-left-width)
   );
   --settings-stroke-width: 1.5px;
   --settings-border-muted: color-mix(in srgb, var(--border) 72%, transparent);
@@ -30,7 +30,6 @@
   // Fixed settings pane shell geometry and elevation (map-adjacent overlay)
   // @see docs/specs/ui/settings-overlay (iOS-style rail)
   .settings-overlay {
-    position: relative;
     position: fixed;
     top: 50%;
     left: calc(var(--spacing-3) + (0.25rem * 12) + var(--spacing-3));
@@ -45,6 +44,9 @@
     max-height: var(--settings-overlay-height);
     padding: 0;
     overflow: hidden;
+    // Rounds the fixed overlay shell to match panel / modal radius tokens
+    // @see docs/specs/ui/settings-overlay
+    border-radius: var(--container-radius-panel);
     border: var(--settings-stroke-width) solid var(--settings-border-muted);
     background: color-mix(in srgb, var(--popover) 92%, transparent);
     box-shadow: var(--shadow-lg);
@@ -52,37 +54,32 @@
     -webkit-backdrop-filter: blur(14px) saturate(1.08);
   }
 
-  // Positions the dismiss control in the overlay chrome
+  // In-flow dismiss control on the rail toolbar (same surface as section list)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__close {
     --icon-btn-size: 2.25rem;
     --icon-btn-radius: var(--radius-full);
     --icon-btn-icon-size: 1.05rem;
-
-    position: absolute;
-    top: var(--spacing-2);
-    right: var(--spacing-2);
-    z-index: 2;
   }
 
-  // Vertical hairline between chrome and two-column shell (flex row child; stretches with overlay height)
+  // Top row on the rail hosting the close control (geometry owner for toolbar alignment)
   // @see docs/specs/ui/settings-overlay
-  .settings-overlay__lead-divider {
-    flex: 0 0 1px;
-    align-self: stretch;
-    width: 1px;
-    min-height: 0;
-    background: color-mix(in srgb, color-mix(in srgb, var(--border) 78%, var(--foreground)) 55%, transparent);
+  .settings-overlay__sections-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    margin-block-end: var(--spacing-1);
   }
 
-  // Two-column flex shell: section rail + detail column
+  // Two-column flex shell: section rail + detail column (min-height 0 avoids flex min-content blow-through)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__shell {
     flex: 1 1 auto;
     display: flex;
     align-items: stretch;
     min-width: 0;
-    min-height: 26rem;
+    min-height: 0;
     max-height: var(--settings-overlay-height);
   }
 
@@ -94,7 +91,8 @@
     flex-direction: column;
     gap: var(--spacing-2);
     min-height: 0;
-    padding: var(--spacing-4) var(--spacing-3) var(--spacing-3) var(--spacing-3);
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-3) var(--spacing-3);
+    border-inline-end: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
     background: color-mix(in srgb, var(--card) 80%, transparent);
   }
 
@@ -189,43 +187,51 @@
   // Section title line in the rail list (stacking + truncation utilities on host in template)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-label strong {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
   }
 
   // Trailing chevron affordance in rail rows
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-chevron {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     color: var(--muted-foreground);
   }
 
-  // Hairline between rail and detail column
-  // @see docs/specs/ui/settings-overlay
-  .settings-overlay__column-divider {
-    flex: 0 0 1px;
-    background: color-mix(in srgb, var(--border) 88%, transparent);
-  }
-
-  // Right-hand detail column with scroll
+  // Right-hand detail column with scroll; min-height 0 lets long embedded views scroll inside max-height shell
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail {
     flex: 1 1 auto;
     min-width: 0;
+    min-height: 0;
     padding: var(--spacing-4);
     background: var(--card);
     overflow: auto;
+    container-type: inline-size;
+    container-name: settings-detail;
   }
 
-  // Detail card surface: section heading + body (Tailwind handles gap/padding on host)
+  // Detail card: column stack and tight vertical rhythm (settings rows are dense)
+  // @see docs/specs/ui/settings-overlay
+  .settings-overlay__detail-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  // Section title color only (scale/weight from global h3 baseline)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail-card h3 {
+    margin: 0;
     color: var(--foreground);
   }
 
-  // Intro copy under section headings in the detail column
+  // Section intro: secondary “footnote” under the title (lighter than row titles)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail-card > p {
-    font-size: var(--font-size-md);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: var(--line-height-reading);
     color: var(--muted-foreground);
   }
 
@@ -253,11 +259,12 @@
     min-width: 0;
   }
 
-  // Field row label sizing in the detail column
+  // Field row primary label (aligned with toggle row titles; pairs with control)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__field-row label {
-    font-size: var(--font-size-md);
-    color: var(--muted-foreground);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--foreground);
   }
 
   // Full-width pill toggle tokens in the settings value column
@@ -315,10 +322,11 @@
     min-width: 0;
   }
 
-  // Toggle row primary line
+  // Toggle row primary line (body emphasis; lighter than section h3 semibold)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__toggle-label strong {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
   }
 
   // Toggle row helper line
@@ -408,6 +416,14 @@
   }
 }
 
+// Collapse label/control grid when the detail column is narrow (locale-safe; avoids pill overflow)
+// @see docs/specs/ui/settings-overlay
+@container settings-detail (max-width: 34rem) {
+  .settings-overlay__field-row:not(.settings-overlay__field-row--stacked) {
+    grid-template-columns: 1fr;
+  }
+}
+
 @layer states {
   // Transient highlight when deep-linking to an account subsection
   // @see docs/specs/ui/settings-overlay
@@ -482,13 +498,6 @@
     // @see docs/specs/ui/settings-overlay
     .settings-overlay__shell {
       display: flex;
-    }
-
-    // Divider spans full column height on narrow viewports
-    // @see docs/specs/ui/settings-overlay
-    .settings-overlay__column-divider {
-      width: 1px;
-      height: auto;
     }
 
     // Mobile rail width token

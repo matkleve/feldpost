@@ -73,8 +73,7 @@
   // Content width max (`45rem` / `52rem`) inlined in `clamp.scss` + `settings-overlay.component.scss` (Batch 38); settings min widths inlined Batch 35.
   // Sidebar row/column metrics live on `NavComponent` (Phase 7 Batch 33 — removed `--layout-sidebar-*` bridge rows).
 
-  // Shared interactive primitives (single source for hover/focus/motion)
-  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 15%, transparent);
+  // `--interactive-focus-ring` → `_typography-baseline.scss` `:root` + dark selectors (Batch 47).
   // `--interactive-transition-standard` removed — Batch 41 (four callsites inline the same transition list; proof §Batch 41).
 
   /* ── Motion & Micro-interactions ── */
@@ -93,12 +92,10 @@
   --action-text-default: var(--muted-foreground);
   --action-text-active: var(--primary);
 
-  // Menu and option surfaces
+  // Menu and option surfaces — `--menu-*` bridge rows removed Batch 48; callsites use per-host
+  // custom properties + tweakcn (`var(--border)`, `var(--primary)`, `var(--foreground)`) — proof §Batch 48.
   // `--menu-surface-bg` removed — Batch 39 (`captured-date-editor.component.scss` → `var(--popover)`).
-  --menu-surface-border: color-mix(in srgb, var(--border) 72%, transparent);
-  --menu-item-bg-hover: color-mix(in srgb, var(--primary) 8%, transparent);
   // `--menu-item-bg-active` removed — Batch 39 (`media-detail-view.component.part2.scss` inlines mix).
-  --menu-item-text: var(--foreground);
   // `--menu-item-text-active` removed — Batch 38 (alias of `var(--primary)`; single callsite in `media-detail-view.component.part2.scss`).
 
   // Form controls — `--field-*` removed Batch 46; callsites use `var(--card)`, `var(--border-strong)`, `var(--primary)`, `var(--text-disabled)`, `var(--foreground)` (tweakcn / `styles.scss`).
@@ -112,20 +109,6 @@
   // `--state-danger-bg` removed — Batch 39 (`auth.styles.scss` inlines mix).
 }
 
-@mixin dark-theme-overrides {
-  // Batch 45: warm `--shadow-sm` / composite `--shadow-focus` removed — tweakcn dark palette owns `--shadow-*`.
-  // @see docs/migration/phase-7-token-migration.md §Batch 45
-
-  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
-
-  // Batch 39: `--border-hover` / `--photo-marker-drop-shadow` removed (inlined at callsites).
-}
-
-// ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
-[data-theme='dark'] {
-  @include dark-theme-overrides;
-}
-
 // Optional custom profile to validate themeability of semantic aliases.
 // Activate manually via: document.documentElement.setAttribute('data-theme', 'sandstone')
 [data-theme='sandstone'] {
@@ -133,17 +116,4 @@
   --action-text-default: #6b5a47;
   --action-text-active: var(--primary);
 
-  --menu-surface-border: color-mix(in srgb, #a38d73 44%, transparent);
-  --menu-item-bg-hover: color-mix(in srgb, #c59f63 14%, transparent);
-  --menu-item-text: #2f271f;
-
-}
-
-// ── Dark-mode tokens — system preference fallback (audit issue #10) ───────────
-// Applies dark tokens when the user's OS is in dark mode and they haven't
-// explicitly set a preference in the app.
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    @include dark-theme-overrides;
-  }
 }

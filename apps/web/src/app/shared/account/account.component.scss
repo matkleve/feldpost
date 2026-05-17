@@ -3,6 +3,13 @@
   height: 100%;
 }
 
+// Settings overlay embed: drop percent height chain; detail column owns scroll
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+:host.account--embedded {
+  height: auto;
+  min-height: 0;
+}
+
 .account-page {
   width: 100%;
   max-width: 40rem;
@@ -11,6 +18,19 @@
   display: grid;
   gap: var(--spacing-3);
   min-width: 0;
+}
+
+// Full-width stack inside overlay detail (no outer clamp / double padding)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+:host.account--embedded .account-page {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: var(--spacing-2);
+}
+
+:host.account--embedded .account-card {
+  gap: var(--spacing-2);
 }
 
 .account-page__state {
@@ -34,13 +54,19 @@
   background: var(--card);
 }
 
+// Section title color only (metrics from global h2 baseline)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-card h2 {
-  font-size: var(--font-size-lg);
   color: var(--foreground);
 }
 
+// Section intro under card title (matches settings detail card intro)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-card > p {
-  font-size: var(--font-size-md);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-reading);
   color: var(--muted-foreground);
 }
 
@@ -62,14 +88,20 @@
   color: var(--primary);
 }
 
+// Display name color only (metrics from global h1 baseline)
+// @see apps/web/AGENTS.md (typography ownership)
 .account-card__identity-copy h1 {
   min-width: 0;
-  font-size: var(--font-size-lg);
   color: var(--foreground);
 }
 
+// Email line under display name (secondary body)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-card__identity-copy p {
-  font-size: var(--font-size-md);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-reading);
   color: var(--muted-foreground);
 }
 
@@ -154,7 +186,8 @@
 
 .account-field label {
   font-size: var(--font-size-sm);
-  color: var(--muted-foreground);
+  font-weight: var(--font-weight-medium);
+  color: var(--foreground);
 }
 
 .account-field input {

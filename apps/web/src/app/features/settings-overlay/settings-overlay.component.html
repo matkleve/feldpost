@@ -6,25 +6,24 @@
     aria-modal="true"
     [attr.aria-label]="t('settings.overlay.aria.dialog', 'Settings')"
   >
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      type="button"
-      class="settings-overlay__close"
-      [attr.aria-label]="t('settings.overlay.aria.close', 'Close settings overlay')"
-      (click)="requestClose()"
-    >
-      <span class="material-icons" aria-hidden="true">close</span>
-    </button>
-
-    <div class="settings-overlay__lead-divider" aria-hidden="true"></div>
-
     <div class="settings-overlay__shell">
       <aside
         class="settings-overlay__sections"
         [attr.aria-label]="t('settings.overlay.aria.sections', 'Settings sections')"
       >
+        <div class="settings-overlay__sections-toolbar">
+          <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            type="button"
+            class="settings-overlay__close"
+            [attr.aria-label]="t('settings.overlay.aria.close', 'Close settings overlay')"
+            (click)="requestClose()"
+          >
+            <span class="material-icons" aria-hidden="true">close</span>
+          </button>
+        </div>
         <header class="settings-overlay__sections-header">
           <p class="settings-overlay__kicker">{{ t('settings.overlay.kicker', 'Settings') }}</p>
           <h2 class="settings-overlay__title">
@@ -65,13 +64,11 @@
         </div>
       </aside>
 
-      <div class="settings-overlay__column-divider" aria-hidden="true"></div>
-
       <div class="settings-overlay__detail content-clamp content-clamp--text" aria-live="polite">
         @switch (selectedSectionId()) {
           @case ('general') {
             <section
-              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
+              class="settings-overlay__detail-card rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.general.title', 'General') }}</h3>
               <p>
@@ -163,7 +160,7 @@
 
           @case ('appearance') {
             <section
-              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
+              class="settings-overlay__detail-card rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.appearance.title', 'Appearance') }}</h3>
               <p>
@@ -223,7 +220,7 @@
 
           @case ('notifications') {
             <section
-              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
+              class="settings-overlay__detail-card rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.notifications.title', 'Notifications') }}</h3>
               <p>
@@ -300,7 +297,7 @@
 
           @case ('map') {
             <section
-              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
+              class="settings-overlay__detail-card rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.map.title', 'Map Preferences') }}</h3>
               <p>
@@ -412,7 +409,7 @@
 
           @case ('search') {
             <section
-              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
+              class="settings-overlay__detail-card rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.search.title', 'Search Tuning') }}</h3>
               <p>
@@ -470,7 +467,7 @@
 
           @case ('data') {
             <section
-              class="settings-overlay__detail-card flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
+              class="settings-overlay__detail-card rounded-lg border border-border bg-card p-6"
             >
               <h3>{{ t('settings.overlay.data.title', 'Data and Privacy') }}</h3>
               <p>
@@ -530,7 +527,7 @@
           }
 
           @case ('account') {
-            <app-account />
+            <app-account [embeddedInSettings]="true" />
           }
 
           @case ('invite-management') {

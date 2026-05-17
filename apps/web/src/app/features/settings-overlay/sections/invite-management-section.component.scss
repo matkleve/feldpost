@@ -1,14 +1,20 @@
+// Ex-bridge `--menu-surface-border` (Phase 7 Batch 48) — defaults + sandstone (ex `_legacy-design-tokens.scss`).
+// @see docs/migration/phase-7-token-migration.md §Batch 48
 :host {
   display: block;
   --invite-stroke-width: 1.5px;
-  --invite-border-muted: var(--menu-surface-border);
+  --invite-border-muted: color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+:host-context([data-theme='sandstone']) {
+  --invite-border-muted: color-mix(in srgb, #a38d73 44%, transparent);
 }
 
 @layer components {
-  // Invite section root: Tailwind handles card chrome; keep elevated surface token
-  // @see docs/specs/ui/settings-overlay
+  // Invite section root: card chrome matches settings detail pane surface
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .invite-section {
-    background: var(--popover);
+    background: var(--card);
   }
 
   // Header row: title stack + status chip + expiry line spanning full width
@@ -37,10 +43,13 @@
     color: var(--foreground);
   }
 
-  // Subtitle copy under the invite title
-  // @see docs/specs/ui/settings-overlay
+  // Subtitle copy under the invite title (settings detail intro pairing)
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .invite-section__title-wrap p {
-    font-size: var(--font-size-md);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: var(--line-height-reading);
     color: var(--muted-foreground);
   }
 
@@ -76,18 +85,19 @@
   }
 
   // Vertical stack for role / QR / share blocks
-  // @see docs/specs/ui/settings-overlay
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .invite-section__stack {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-4);
+    gap: var(--spacing-2);
   }
 
-  // Role field label sizing inside hlm-form-field
-  // @see docs/specs/ui/settings-overlay
+  // Role field label (row title treatment aligned with settings field-row labels)
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .invite-section__role-field label {
-    font-size: var(--font-size-md);
-    color: var(--muted-foreground);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--foreground);
   }
 
   // Action row next to the role select

@@ -8,7 +8,7 @@ The remainder of this file documents the **removed** directive contract for arch
 
 ## What It Is (archived)
 
-`UiDropdownTriggerDirective` styled **`button[uiDropdownTrigger]`** and **`a[uiDropdownTrigger]`** hosts that open a floating shell (popover/menu). The directive merged **menu-item surface tokens** (`menuItemVariants()`), **`ui-button`** size classes, and **dropdown modifiers** (`ui-dropdown-trigger`, `--open`, `--compact`, `--icon-only`). It did **not** render inner chrome — **callsites** supplied label/chevron (and optional leading icon) using **`data-dd-part`** so global SCSS could target geometry and open/collapse behavior without BEM `__chevron` / `__label` wrappers.
+`UiDropdownTriggerDirective` styled **`button[uiDropdownTrigger]`** and **`a[uiDropdownTrigger]`** hosts that open a floating shell (popover/menu). The directive merged **Spartan menu / trigger CVA classes** (same family as **`hlmMenuItem`** and `menu-variants.ts` — see [`dropdown-system.md`](../filters/dropdown-system.md)), **`ui-button`** size classes, and **dropdown modifiers** (`ui-dropdown-trigger`, `--open`, `--compact`, `--icon-only`). It did **not** render inner chrome — **callsites** supplied label/chevron (and optional leading icon) using **`data-dd-part`** so global SCSS could target geometry and open/collapse behavior without BEM `__chevron` / `__label` wrappers.
 
 ## What It Looks Like (archived)
 

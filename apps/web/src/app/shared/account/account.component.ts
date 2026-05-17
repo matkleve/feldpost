@@ -5,6 +5,7 @@ import {
   Component,
   computed,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import type { MfaFactorViewModel } from '../../core/auth/auth.service';
@@ -33,6 +34,9 @@ import { HLM_LABEL_IMPORTS } from '../ui/label';
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.account--embedded]': 'embeddedInSettings()',
+  },
 })
 export class AccountComponent implements OnInit {
   private static cachedSnapshot: {
@@ -43,6 +47,9 @@ export class AccountComponent implements OnInit {
     mfaFactors: MfaFactorViewModel[];
     assuranceLevel: 'aal1' | 'aal2' | null;
   } | null = null;
+
+  /** When true, account is shown inside settings overlay detail column (shared layout contract). */
+  readonly embeddedInSettings = input(false, { alias: 'embeddedInSettings' });
 
   private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);

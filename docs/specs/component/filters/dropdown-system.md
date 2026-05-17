@@ -108,7 +108,7 @@ border-radius: --radius-lg  (8px)
 box-shadow:    var(--shadow-lg)
 ```
 
-**Shadow ladder:** **`var(--shadow-lg)`** resolves from **tweakcn `:root`** / dark palette. Phase 7 **Batch 39** removed duplicate **`--shadow-md|lg|xl`** rows from **`_legacy-design-tokens.scss`**; **Batch 45** removed the last **`--shadow-sm`** and **`--shadow-focus`** bridge rows there — physical **`--shadow-*`** (including **`--shadow-sm`**) are **tweakcn-only**; where a surface needs the lightest lift **and** a focus ring in dark theme, callsites compose an explicit stack (**`var(--shadow-sm), var(--interactive-focus-ring)`**) per [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 (*Focus stacks*).
+**Shadow ladder:** **`--shadow-*`** (including **`var(--shadow-lg)`** on this shell) are defined on **tweakcn `:root` / theme** — see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 (*Focus stacks* and shadow ladder). **Authors:** do not reintroduce removed bridge shadows or invent parallel `--shadow-*` names; follow that doc and this spec’s shell table above.
 
 Composable class table, hover token, and item geometry: **[dropdown-system.class-library.supplement.md](./dropdown-system.class-library.supplement.md)**.
 

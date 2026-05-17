@@ -1,6 +1,21 @@
 // MediaDetailViewComponent — split stylesheet (sections, rows, tags, keyframes).
 // @see docs/specs/ui/media-detail/media-detail-view.md
 
+// Ex-bridge `--menu-*` (Phase 7 Batch 48): defaults matched `_legacy-design-tokens.scss` `:root`;
+// sandstone matched `[data-theme='sandstone']` bridge overrides (same file, pre-Batch 48).
+// @see docs/migration/phase-7-token-migration.md §Batch 48
+:host {
+  --mdv-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
+  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --mdv-menu-item-text: var(--foreground);
+}
+
+:host-context([data-theme='sandstone']) {
+  --mdv-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
+  --mdv-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
+  --mdv-menu-item-text: #2f271f;
+}
+
 .detail-section {
   padding: 0 var(--spacing-1);
   display: flex;
@@ -37,7 +52,7 @@
   }
 
   &:hover:not(.detail-row--editing) {
-    background: var(--menu-item-bg-hover);
+    background: var(--mdv-menu-item-hover-bg);
 
     .detail-row__icon,
     .detail-row__label,
@@ -204,7 +219,7 @@
   }
 
   &:hover {
-    color: var(--menu-item-text);
+    color: var(--mdv-menu-item-text);
     background: var(--action-bg-hover);
   }
 
@@ -263,10 +278,10 @@
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-1);
-    border: 1px solid var(--menu-surface-border);
+    border: 1px solid var(--mdv-menu-border);
     border-radius: var(--radius-full);
     background: color-mix(in srgb, var(--card) 88%, transparent);
-    color: var(--menu-item-text);
+    color: var(--mdv-menu-item-text);
     min-height: 2rem;
     padding: 0 var(--spacing-2);
     font-size: var(--font-size-sm);
@@ -279,7 +294,7 @@
     }
 
     &:hover {
-      background: var(--menu-item-bg-hover);
+      background: var(--mdv-menu-item-hover-bg);
     }
   }
 
@@ -345,7 +360,7 @@
 
   &__divider {
     height: 1px;
-    background: var(--menu-surface-border);
+    background: var(--mdv-menu-border);
     margin: var(--spacing-1) var(--spacing-2);
   }
 
@@ -358,7 +373,7 @@
     border: none;
     border-radius: var(--radius-sm);
     background: transparent;
-    color: var(--menu-item-text);
+    color: var(--mdv-menu-item-text);
     text-align: left;
     min-height: 2rem;
     padding: var(--spacing-1) var(--spacing-2);
@@ -367,7 +382,7 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--menu-item-bg-hover);
+      background: var(--mdv-menu-item-hover-bg);
     }
 
     &:disabled {
@@ -401,7 +416,7 @@
 
     &:hover:not(:disabled) {
       background: var(--action-bg-hover);
-      color: var(--menu-item-text);
+      color: var(--mdv-menu-item-text);
     }
 
     &:disabled {
@@ -451,7 +466,7 @@
 
   &__create-value {
     margin-left: auto;
-    color: var(--menu-item-text);
+    color: var(--mdv-menu-item-text);
     max-width: 10rem;
     overflow: hidden;
     text-overflow: ellipsis;

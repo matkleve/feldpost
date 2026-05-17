@@ -16,11 +16,11 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 ### Legacy bridge inventory (`_legacy-design-tokens.scss`)
 
-**Code is canonical.** **`@mixin dark-theme-overrides`** (used by **`[data-theme='dark']`** and **`prefers-color-scheme: dark`**) overrides **`--interactive-focus-ring`** only (**Phase 7 Batch 45** removed bridge **`--shadow-sm` / `--shadow-focus`** — physical **`--shadow-*`** are tweakcn **`styles.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantic colors (**`--primary`**, **`--card`**, …), and MD3 **`--fp-sys-*`** documentation tables are **not** emitted from **`_legacy-design-tokens.scss`**.
+**Code is canonical.** **`_legacy-design-tokens.scss`** no longer ships a **`@mixin dark-theme-overrides`** block (**Phase 7 Batch 47** moved **`--interactive-focus-ring`** + dark overrides to **`_typography-baseline.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantic colors (**`--primary`**, **`--card`**, …), and MD3 **`--fp-sys-*`** documentation tables are **not** emitted from **`_legacy-design-tokens.scss`**.
 
 #### Typography baseline (`_typography-baseline.scss`)
 
-**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded after the legacy bridge and **`styles.scss` `@theme inline`** in **`styles.scss`**) defines **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, **`--motion-duration-fast`** / **`--motion-ease-out`**, **`--spacing-1`…`--spacing-8`**, **`--radius-full`**, and **`--container-radius-control|panel`** — Phase 7 **Batch 41–44** (`docs/migration/phase-7-token-migration.md` §Batch 41 / §Batch 42 / §Batch 44).
+**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded after the legacy bridge and **`styles.scss` `@theme inline`** in **`styles.scss`**) defines **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, **`--motion-duration-fast`** / **`--motion-ease-out`**, **`--spacing-1`…`--spacing-8`**, **`--radius-full`**, **`--container-radius-control|panel`**, and **`--interactive-focus-ring`** (light) — Phase 7 **Batch 41–44** + **Batch 47** (`docs/migration/phase-7-token-migration.md` §Batch 41 / §Batch 42 / §Batch 44 / §Batch 47). **`[data-theme='dark']`** and **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme='light'])`** apply **`@mixin typography-baseline-dark-focus-ring`** so the ring **`color-mix`** tracks dark primary (**Batch 47**).
 
 | Token |
 | --- |
@@ -30,6 +30,7 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 | `--motion-duration-fast`, `--motion-ease-out` |
 | `--spacing-1` … `--spacing-6`, `--spacing-8` (the former **12×4px** step is **`calc(0.25rem * 12)`** at callsites — **Batch 41** removed **`--spacing-7`**) |
 | `--radius-full`, `--container-radius-control`, `--container-radius-panel` |
+| **`--interactive-focus-ring`** (light on **`:root`**; dark via **`typography-baseline-dark-focus-ring`**) |
 
 #### Tailwind theme radius (`styles.scss` `@theme inline`)
 
@@ -43,22 +44,15 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 **Phase 7 Batch 43:** product **z-index** uses literals **`200` / `300` / `500`** (plus **`302`** / **`501`** where documented calcs apply) and Tailwind **`z-upload-btn`**, **`z-dropdown`**, **`z-modal`** — **not** **`--z-upload-button`**, **`--z-dropdown`**, or **`--z-modal`** rows on **`_legacy-design-tokens.scss`**.
 
-**Layer B (bridge)**
-
-| Token |
-| --- |
-| `--interactive-focus-ring` |
+**Layer B (bridge):** **none on `_legacy-design-tokens.scss`** after **Batch 47** — **`--interactive-focus-ring`** lives on **`_typography-baseline.scss`** (see subsection above).
 
 **Layer C (bridge)**
 
 | Token |
 | --- |
 | `--action-bg-hover`, `--action-text-default`, `--action-text-active` |
-| `--menu-surface-border`, `--menu-item-bg-hover`, `--menu-item-text` |
 
-**Optional `[data-theme='sandstone']` overrides** (same file): `--action-bg-hover`, `--action-text-default`, `--action-text-active`, `--menu-surface-border`, `--menu-item-bg-hover`, `--menu-item-text` (literal or mix values — not an expanded `:root` contract).
-
----
+Optional **`[data-theme='sandstone']`** overrides for the same Layer C **action** names are defined in the same SCSS file. **Phase 7 Batch 48** removed **`--menu-*`** bridge rows; menu surfaces bind **`color-mix(in srgb, var(--border) …)`**, **`color-mix(in srgb, var(--primary) …)`**, and **`var(--foreground)`** on component **`:host`** (sandstone literals preserved via **`:host-context([data-theme='sandstone'])`** — see **`docs/migration/phase-7-token-migration.md`** §Batch 48).
 
 ### Layer A: Foundation Tokens
 
@@ -73,12 +67,12 @@ Global design primitives that represent raw design values.
 
 Cross-component aliases for shared interaction behavior.
 
-- **`--interactive-border-muted`** and **`--interactive-surface-hover`** were **removed from `:root`** in **Phase 7 Batch 36** — they are **not** bridge names to bind in new work. Equivalent mixes are **inlined** at the few Layer C / feature callsites (for example **`color-mix(in srgb, var(--border) 72%, transparent)`** on settings **`--settings-border-muted`**, **`color-mix(in srgb, var(--primary) 12%, transparent)`** on **`--settings-hover-focus`**), and internal rows such as **`--action-bg-hover`** / **`--menu-surface-border`** carry the same resolved colors without a **`var(--interactive-*)`** hop — see **`docs/migration/phase-7-token-migration.md`** §Batch 36.
-- **`--interactive-focus-ring`** — the only Layer B bridge name today (see inventory table). **Batch 41** removed **`--interactive-transition-standard`** — inline the same multi-property timing (for example **`120ms ease-out`**) or use **`var(--motion-duration-fast) var(--motion-ease-out)`** per **`docs/design/motion.md`** / callsite SCSS.
+- **`--interactive-border-muted`** and **`--interactive-surface-hover`** were **removed from `:root`** in **Phase 7 Batch 36** — they are **not** bridge names to bind in new work. Equivalent mixes are **inlined** at the few Layer C / feature callsites (for example **`color-mix(in srgb, var(--border) 72%, transparent)`** on settings **`--settings-border-muted`**, **`color-mix(in srgb, var(--primary) 12%, transparent)`** on **`--settings-hover-focus`**), and **`--action-bg-hover`** carries the primary-hover mix without a **`var(--interactive-*)`** hop — see **`docs/migration/phase-7-token-migration.md`** §Batch 36.
+- **`--interactive-focus-ring`** — **Batch 47** moved this name to **`_typography-baseline.scss`** (not the legacy bridge file). **Batch 41** removed **`--interactive-transition-standard`** — inline the same multi-property timing (for example **`120ms ease-out`**) or use **`var(--motion-duration-fast) var(--motion-ease-out)`** per **`docs/design/motion.md`** / callsite SCSS.
 
 ### Layer C: Component-Role Aliases
 
-Role-level aliases consumed by reusable UI primitives and feature components. **Only** the names in the **Layer C (bridge)** inventory table above are defined on **`:root`** today.
+Role-level aliases consumed by reusable UI primitives and feature components. **`_legacy-design-tokens.scss` `:root`** defines **only** the **action** names in the **Layer C (bridge)** inventory table above (**`--interactive-focus-ring`** is **not** on the bridge — **Batch 47**). **Batch 48** removed **`--menu-*`** from the bridge; menu surfaces use tweakcn **`var(--border|primary|foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see subsection above + **`docs/migration/phase-7-token-migration.md`** §Batch 48).
 
 1. Action controls
 
@@ -89,7 +83,7 @@ Role-level aliases consumed by reusable UI primitives and feature components. **
 2. Menu and option surfaces
 
 - **`--menu-surface-bg`** — **removed Batch 39** — use **`var(--popover)`** (or **`var(--card)`**) at callsites.
-- **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`**
+- **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** — **removed from bridge Batch 48** — use **`color-mix(in srgb, var(--border) 72%, transparent)`**, **`color-mix(in srgb, var(--primary) 8%, transparent)`**, **`var(--foreground)`** (and per-component **`:host`** + sandstone **`:host-context`** where the old **`[data-theme='sandstone']`** bridge differed) — **`docs/migration/phase-7-token-migration.md`** §Batch 48.
 - **`--menu-item-bg-active`** — **removed Batch 39** — inline **`color-mix(in srgb, var(--primary) 12%, transparent)`** ([**`docs/migration/phase-7-token-migration.md`**](../migration/phase-7-token-migration.md) §Batch 39).
 - **Active menu item label ink:** **`var(--primary)`** at callsites (**Batch 38** removed **`--menu-item-text-active`**).
 

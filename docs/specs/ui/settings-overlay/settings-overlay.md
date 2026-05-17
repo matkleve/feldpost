@@ -6,7 +6,13 @@ A floating, sidenav-anchored settings panel that opens from the bottom avatar ro
 
 ## What It Looks Like
 
-A two-column, iPad-Settings-style surface appears to the right of the sidebar with a token-based gap. The panel has no entrance animation and opens instantly. A vertical divider separates the sidebar from the panel, and another internal divider separates the section list (left) from the active section detail area (right). The panel stays vertically centered to the sidebar host and repositions fluidly when the sidebar rail expands or collapses.
+A two-column, iPad-Settings-style surface appears to the right of the sidebar with a token-based gap. The panel has no entrance animation and opens instantly. A vertical hairline on the **rail** (`border-inline-end`) separates the section list from the detail column (no separate flex “lead” strip). The panel stays vertically centered to the sidebar host and repositions fluidly when the sidebar rail expands or collapses.
+
+**Code reality:** The shell is a fixed pane next to the nav (see `app.component.html`), not a CDK `OverlayRef`. The dismiss control lives in-flow on the rail toolbar. The detail column is an inline-size **container**: below a width threshold, label/control rows stack to a single column so segmented controls do not overflow when copy widens (e.g. after locale change).
+
+**Detail typography:** Section titles stay on the global `h3` baseline (no per-component heading metric overrides). Intro copy under each `h3` is secondary body (sm, normal weight, reading line-height, muted). Toggle row titles and `hlmLabel` field labels share one **row title** treatment (sm, medium weight, foreground) so list-style switches and segmented fields match—mirroring grouped settings / list-detail guidance (Apple HIG *Lists and tables*, Material settings / preference patterns).
+
+**Embedded panes:** Account and Invite Management (and any future embedded body) must follow [settings-detail-embedded-layout.md](./settings-detail-embedded-layout.md) so rail switches do not change card chrome or hierarchy.
 
 ## Where It Lives
 

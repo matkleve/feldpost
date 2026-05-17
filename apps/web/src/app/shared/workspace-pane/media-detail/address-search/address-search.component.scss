@@ -1,6 +1,13 @@
+// Ex-bridge `--menu-item-text` (Phase 7 Batch 48) — defaults + sandstone (ex `_legacy-design-tokens.scss`).
+// @see docs/migration/phase-7-token-migration.md §Batch 48
 :host {
   display: block;
   position: relative;
+  --ads-menu-item-text: var(--foreground);
+}
+
+:host-context([data-theme='sandstone']) {
+  --ads-menu-item-text: #2f271f;
 }
 
 .address-search {
@@ -46,7 +53,7 @@
 
   &__clear {
     &:hover {
-      color: var(--menu-item-text);
+      color: var(--ads-menu-item-text);
     }
   }
 

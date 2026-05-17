@@ -1,5 +1,8 @@
 <section
-  class="account-page content-clamp content-clamp--text"
+  class="account-page"
+  [class.account-page--embedded]="embeddedInSettings()"
+  [class.content-clamp]="!embeddedInSettings()"
+  [class.content-clamp--text]="!embeddedInSettings()"
   [attr.aria-label]="tr('Account page')"
 >
   <header class="account-card account-card--identity">

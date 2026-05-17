@@ -11,7 +11,7 @@ It prevents drift between map, media detail, workspace, and upload menus by givi
 
 The matrix is read column-first by context ID. Each row is one action, and each cell records whether the action is available, guarded, or blocked in that context.
 Context-specific guards are written directly in the table so the contract stays testable: upload-only gates, count guards, batch policies, target-resolution rules, and device capability checks are visible in one place.
-The visual shell is still the shared dropdown/action-sheet shell, but section order is driven by this matrix rather than local menu code.
+The visual shell is still the shared dropdown/action-sheet shell ([`docs/specs/component/filters/dropdown-system.md`](../component/filters/dropdown-system.md); token names in [`docs/design/tokens.md`](../../design/tokens.md)), but section order is driven by this matrix rather than local menu code.
 
 ## Where It Lives
 

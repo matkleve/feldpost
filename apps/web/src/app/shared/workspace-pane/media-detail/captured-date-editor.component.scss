@@ -1,8 +1,22 @@
 // CapturedDateEditorComponent — Notion-style calendar styles.
 
+// Ex-bridge `--menu-*` (Phase 7 Batch 48): standalone host + sandstone (ex `_legacy-design-tokens.scss`).
+// @see docs/migration/phase-7-token-migration.md §Batch 48
+:host {
+  --cde-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
+  --cde-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --cde-menu-item-text: var(--foreground);
+}
+
+:host-context([data-theme='sandstone']) {
+  --cde-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
+  --cde-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
+  --cde-menu-item-text: #2f271f;
+}
+
 .captured-date-editor {
   background: var(--popover);
-  border: 1px solid var(--menu-surface-border);
+  border: 1px solid var(--cde-menu-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-2);
@@ -18,7 +32,7 @@
     align-items: center;
     gap: var(--spacing-1);
     padding-bottom: var(--spacing-1);
-    border-bottom: 1px solid var(--menu-surface-border);
+    border-bottom: 1px solid var(--cde-menu-border);
   }
 
   &__date-input,
@@ -105,7 +119,7 @@
     }
 
     &:hover {
-      color: var(--menu-item-text);
+      color: var(--cde-menu-item-text);
       background: var(--action-bg-hover);
     }
   }
@@ -147,7 +161,7 @@
       color 80ms ease-out;
 
     &:hover:not(&--selected) {
-      background: var(--menu-item-bg-hover);
+      background: var(--cde-menu-item-hover-bg);
     }
 
     &--other-month {
@@ -172,7 +186,7 @@
     justify-content: space-between;
     align-items: center;
     padding-top: var(--spacing-1);
-    border-top: 1px solid var(--menu-surface-border);
+    border-top: 1px solid var(--cde-menu-border);
   }
 
   &__clear-btn,

@@ -1,7 +1,14 @@
+// Ex-bridge `--menu-item-text` (Phase 7 Batch 48) — defaults + sandstone (ex `_legacy-design-tokens.scss`).
+// @see docs/migration/phase-7-token-migration.md §Batch 48
 :host {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
+  --mds-menu-item-text: var(--foreground);
+}
+
+:host-context([data-theme='sandstone']) {
+  --mds-menu-item-text: #2f271f;
 }
 
 .metadata-row-wrap {
@@ -58,7 +65,7 @@
 
   &:hover {
     background: var(--action-bg-hover);
-    color: var(--menu-item-text);
+    color: var(--mds-menu-item-text);
   }
 }
 
