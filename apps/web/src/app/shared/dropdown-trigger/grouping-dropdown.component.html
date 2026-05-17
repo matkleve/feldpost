@@ -1,4 +1,13 @@
-<app-standard-dropdown class="grouping-dropdown" [showSearch]="false">
+<app-standard-dropdown
+  class="workspace-toolbar-menu-panel"
+  [showSearch]="false"
+  [searchTerm]="searchTerm()"
+  [searchPlaceholder]="t('workspace.sort.search.placeholder', 'Search properties...')"
+  [showDefaultClearAction]="false"
+  [reserveProjectedSearchActionSlot]="true"
+  (searchTermChange)="searchTerm.set($event)"
+  (clearRequested)="searchTerm.set('')"
+>
   <div dropdown-items cdkDropListGroup>
     <div class="grouping-section">
       <div class="grouping-section__header">
@@ -16,7 +25,7 @@
             [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
           >
             <span
-              class="material-icons inline-block transition-transform duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)] motion-reduce:transition-none motion-reduce:duration-0 group-hover:-rotate-12 group-active:rotate-360 group-active:duration-[var(--motion-duration-base)] motion-reduce:group-hover:rotate-0 motion-reduce:group-active:rotate-0"
+              class="material-icons inline-block transition-transform duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)] motion-reduce:transition-none motion-reduce:duration-0 group-hover:-rotate-12 group-active:-rotate-180 group-active:duration-[var(--motion-duration-slow)] motion-reduce:group-hover:rotate-0 motion-reduce:group-active:rotate-0"
               aria-hidden="true"
               >restart_alt</span>
           </button>
@@ -82,7 +91,7 @@
             (cdkDragStarted)="onDragStart()"
             (cdkDragEnded)="onDragEnd()"
             hlmMenuItem
-            class="grouping-dropdown__row text-muted-foreground hover:text-foreground"
+            class="grouping-dropdown__row text-muted-foreground"
             [class.grouping-row--selected]="selectedRows().has(prop.id)"
             tabindex="0"
             (click)="onRowClick(prop.id, $event)"

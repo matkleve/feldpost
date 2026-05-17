@@ -98,17 +98,6 @@
     gap: var(--spacing-2);
   }
 
-  // Native select chrome for invite role
-  // @see docs/specs/ui/settings-overlay
-  .invite-section__select {
-    min-height: 2.75rem;
-    border: var(--invite-stroke-width) solid var(--invite-border-muted);
-    border-radius: var(--radius-md);
-    background: var(--field-bg);
-    color: var(--field-text);
-    padding: 0.6rem 0.75rem;
-  }
-
   // QR preview block vertical rhythm
   // @see docs/specs/ui/settings-overlay
   .invite-section__qr-block {

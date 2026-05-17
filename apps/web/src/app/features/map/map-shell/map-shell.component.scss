@@ -6,6 +6,7 @@
 @use './map-shell-upload';
 @use './map-shell-photo-markers';
 @use './map-shell-photo-panel';
+@use './map-shell-radius-location-markers';
 
 // ── Host — horizontal flex row ────────────────────────────────────────────────
 
@@ -43,63 +44,6 @@
       cursor: crosshair !important;
     }
   }
-}
-
-:host ::ng-deep .map-radius-label {
-  pointer-events: none;
-}
-
-:host ::ng-deep .map-radius-label__value {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 1.5rem;
-  padding: 0 var(--spacing-2);
-  border-radius: var(--radius-pill);
-  border: 1px solid color-mix(in srgb, var(--primary) 42%, var(--border));
-  background: color-mix(in srgb, var(--primary) 22%, var(--card));
-  color: var(--foreground);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-solid);
-  box-shadow: var(--elevation-overlay);
-  transform: translate(-50%, -50%) rotate(var(--radius-label-rotation, 0deg));
-  transform-origin: center;
-  white-space: nowrap;
-}
-
-:host ::ng-deep .map-user-location-marker {
-  width: 18px !important;
-  height: 18px !important;
-  margin: 0 !important;
-  border-radius: var(--radius-full);
-  background: var(--map-marker-user);
-  border: 3px solid var(--card);
-  transition:
-    background-color 200ms ease,
-    box-shadow 200ms ease;
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--map-marker-user) 28%, transparent),
-    var(--elevation-subtle);
-}
-
-:host ::ng-deep .map-user-location-marker.map-user-location-marker--fresh {
-  background: var(--primary);
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--primary) 30%, transparent),
-    var(--elevation-subtle);
-}
-
-:host ::ng-deep .map-search-location-marker {
-  width: 20px !important;
-  height: 20px !important;
-  margin: 0 !important;
-  border-radius: var(--radius-full);
-  background: var(--primary);
-  border: 3px solid var(--card);
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--primary) 30%, transparent),
-    var(--elevation-subtle);
 }
 
 // ── GPS button — bottom-right of map zone ─────────────────────────────────────

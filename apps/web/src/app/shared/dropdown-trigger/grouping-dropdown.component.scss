@@ -1,12 +1,13 @@
 // Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button.
 // @see docs/specs/component/filters/dropdown-system.md
+// Fills toolbar shell width; matches sort-dropdown host flex / width contract.
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host {
   display: block;
-}
-
-.grouping-dropdown {
-  padding-block: 0;
-  max-height: 24rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 // --- Sections (grouping-specific layout) ---

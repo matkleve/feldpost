@@ -203,7 +203,7 @@ These structural fixes were identified after Phase 6 acceptance gates passed.
 ### Settings overlay nav item layout (2026-05-14)
 - **Problem:** Section nav items (General, Appearance, etc.) show icon + title + subtitle mixed horizontally instead of stacking label area vertically.
 - **Fix:** Added `flex flex-col min-w-0 flex-1` to label wrapper in `settings-overlay.component.html`; `.settings-overlay__section-item` SCSS confirmed `flex items-center gap-3`.
-- **Status:** [ ] Fixed
+- **Status:** [x] Fixed (2026-05-17)
 
 ### Settings overlay toggle groups (tracked in Phase 7)
 - **Problem:** Language/density/theme toggles look broken — `--muted` token resolves incorrectly until Phase 7 token migration completes.
@@ -219,17 +219,17 @@ These structural fixes were identified after Phase 6 acceptance gates passed.
 
 | Area | Issue | Fix | Phase |
 |------|--------|-----|-------|
-| Shell | `settings-overlay__lead-divider` has no stretch height and sits outside the flex shell — hairline does not render | Restructure overlay layout or remove the node | 6-patch / 10 |
+| Shell | `settings-overlay__lead-divider` has no stretch height and sits outside the flex shell — hairline does not render | **6-patch (2026-05-17):** `.settings-overlay` is a horizontal flex row; lead divider `flex: 0 0 1px; align-self: stretch`; shell `flex: 1 1 auto`. | 10 (visual QA) |
 | Shell | Overlay root uses `padding: 0` while migration called out inconsistent inner padding | Define uniform inset or document column-only padding | 10 |
 | Shell | `app-account` has no `settings-overlay__detail-card` wrapper unlike other sections | Match other sections or document exception | 6-patch / 10 |
 | Rail | Active state uses legacy `var(--color-clay)` mixes | Phase 7 token migration + Phase 10 theme QA | 7 / 10 |
 | Toggle groups | Directive wiring OK; visual issues are token-related (`--muted` not resolving) | Phase 7 then Phase 10 matrix | 7 / 10 |
-| Toggle groups | `data-i18n-skip` only on language segmented wrapper, not density/theme/marker | Align across all clusters | 6-patch |
+| Toggle groups | `data-i18n-skip` only on language segmented wrapper, not density/theme/marker | **6-patch (2026-05-17):** `data-i18n-skip` on all four segmented wrappers (language, density, theme, marker motion). | done |
 | Form rows | Search radius + cache retention use `<input type="range" hlmInput>` (`UiRangeControlDirective` removed). | Any remaining work is track/thumb sizing and token alignment — Phase 7 tokens + Phase 10 visual QA. | 7 / 10 |
 | Switch rows | Row `<button>` lacks explicit `aria-pressed` / `role="switch"` while `hlmSwitch` is decorative | Add ARIA semantics on row | 10 |
 | Tokens | `var(--color-*)` throughout `settings-overlay.component.scss` and `invite-management-section.component.scss` | Phase 7 mapping to tweakcn | 7 |
 | Invite | `bg-card` utility overridden by SCSS `var(--color-bg-elevated)` — mixed token eras | Single surface owner after token migration | 7 / 10 |
-| Invite | `invite-section__select` may double-style `hlmSelect` (local chrome + directive) | Consolidate to one owner | 6-patch / 10 |
+| Invite | `invite-section__select` may double-style `hlmSelect` (local chrome + directive) | **6-patch (2026-05-17):** Removed `.invite-section__select` SCSS; role `<select hlmSelect>` uses `class="min-w-0"` + directive CVA only. | 10 (token QA) |
 | Invite | Spinner `800ms` hardcoded animation duration | Map to motion token or document waiver | 10 |
 
 **Phase 10 Visual QA (settings overlay):** lead divider visibility; pane/close padding; account card parity; three-theme check for rail, segmented controls, switches, invite QR/link; mobile field + invite layouts; a11y for switch rows; range sliders (`hlmInput` + `type="range"`) track/thumb and value readout across themes.

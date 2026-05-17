@@ -5,6 +5,7 @@ import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
+import { DropdownSearchActionAnchorDirective } from './dropdown-search-action-anchor.directive';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 
 export type SortDropdownOption = {
@@ -20,6 +21,7 @@ export type SortDropdownOption = {
   styleUrl: './sort-dropdown.component.scss',
   imports: [
     ...HLM_BUTTON_IMPORTS,
+    DropdownSearchActionAnchorDirective,
     StandardDropdownComponent,
     HlmMenuItemDirective,
     HlmMenuLabelDirective,

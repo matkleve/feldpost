@@ -7,6 +7,38 @@
 A composable CSS class system (`dd-*`) for all floating dropdown/menu surfaces in Feldpost. Every dropdown picks the pieces it needs — search, items, drag handles, section labels, action rows — from a shared global class library in `styles.scss`. Component SCSS only contains what's truly unique to that dropdown.
 Shared project-selector and upload-row menus MUST reuse this primitive system instead of feature-local dropdown variants.
 
+## Toolbar menu panels (anchored UI)
+
+**Canonical naming:** Prefer **toolbar menu** / **menu panel** (product vocabulary). **`app-dropdown-shell`** is the anchored floating shell (fixed `top`/`left`); informal “dropdown” and library **Popover** naming are covered in [migration README — Anchored UI](../../migration/README.md#anchored-ui-toolbar-menus) and [glossary — Toolbar menus & naming](../../../glossary.md#toolbar-menus--naming).
+
+**Width policy (toolbar shell):** Workspace/media/projects toolbars bind **`[panelClass]="toolbarDropdownPanelClass(activeDropdown())"`** (`toolbar-menu-panel-layout.ts`) so the shell always includes **`toolbar-dropdown option-menu-surface`**, and **appends `toolbar-dropdown--filter`** when the open panel is **Filter**. **`DropdownShellComponent`** SCSS mirrors the floors below; **horizontal `left` clamping** in toolbar TS must use **`toolbarDropdownPositionWidthPx(activeId)`** so the reserved width matches the active panel.
+
+| Panel group | CSS `min-width` (viewport clamp) | TS / positioning px (16px/rem bridge) |
+| --- | --- | --- |
+| Sort, grouping, projects | `min(26rem, calc(100vw - 2rem))` on `:host.toolbar-dropdown` | **`TOOLBAR_MENU_PANEL_MIN_PX`** / **`TOOLBAR_MENU_SHELL_MIN_PX`** = **416** |
+| Filter | `min(32rem, calc(100vw - 2rem))` on `:host.toolbar-dropdown.toolbar-dropdown--filter` | **`TOOLBAR_MENU_FILTER_PANEL_MIN_PX`** = **512**; **`TOOLBAR_MENU_FILTER_CLAMP_PX`** aliases **512** (legacy name) |
+
+Keep **`rem`**, **`min(..., calc(100vw - 2rem))`**, **`toolbar-menu-panel-layout.ts`**, and this section aligned. Px constants are for **JS layout math** only; CSS **`rem`** is authoritative for rendering.
+
+**Height / open stability (predetermined size):** Toolbar **`app-standard-dropdown`** uses **`min-height: var(--std-dropdown-min-height)`** with **`:host { --std-dropdown-min-height: 8rem }`** in `standard-dropdown.component.scss` so short lists do not collapse the panel. **Filter** sets **`[style.--std-dropdown-min-height]="'7rem'"`** on its `app-standard-dropdown` host so the empty filter surface stays **wider-than-tall** at open beside the **32rem** width floor. **Projects:** `.projects-list` uses a **fixed `height: 18rem`** capped by **`max-height: min(18rem, 50vh)`** with **`overflow-y: auto`** so the checklist band stays one size at open through load and search (**short filters keep empty space below rows**). **Filter rules:** **`standard-dropdown__items--filter-rules-band`** caps the items host with **`max-height: min(18rem, 50vh)`** so scroll + **`scrollbar-gutter: stable`** live on **one** element (avoids nested gutter with `.filter-rules`). **`max-height`** for the overall shell remains owned by menu chrome / inner scroll regions unless a spec calls for a shell-level cap.
+
+**Search row (toolbar `app-standard-dropdown`):** The search row uses a **CSS grid** (`field` + trailing cluster). Optional controls (**default clear** and **`[dropdown-search-action]`**) sit in **fixed icon slots** matching `hlmBtn` **`size="icon"`** geometry (`2.5rem`); when a control is absent, an **`aria-hidden`** spacer preserves width so the text field does not jump. Callers with a **conditionally projected** search action (e.g. sort reset) set **`[reserveProjectedSearchActionSlot]="true"`** and mark projected controls with **`dropdown-search-action`** (via `DropdownSearchActionAnchorDirective` on the consumer template).
+
+**Row chrome:** List rows use **`hlmMenuItem`** (+ `hlmMenuLabel` / `hlmMenuSeparator` where applicable) with variants from `menu-variants.ts` until brain `BrnMenu` ships.
+
+**Menu body (toolbar `app-standard-dropdown`):** `.standard-dropdown` sets **`width: 100%`** (fills the shell floor) and **`min-height: var(--std-dropdown-min-height)`** (default **8rem**, filter **7rem**); **`max-height`** remains owned by menu chrome / scroll regions.
+
+### Toolbar menu interaction inventory
+
+| Panel | `app-standard-dropdown` | Search row | Reset / clear affordance | Footer action (`actionLabel`) | Scroll gutter on scroll list | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Sort** | Yes | Yes | Search slot: clear term **or** reset sort defaults (restart icon); motion uses token **`--motion-duration-slow`** for active icon tilt | No | `scrollbar-gutter: stable` on `.standard-dropdown__items` | Grouped-by block toggles with grouping state |
+| **Grouping** | Yes | No | Header **restart_alt** clears active groupings when any exist; same slow active motion | No | `scrollbar-gutter: stable` | CDK drag rows |
+| **Filter** | Yes | No | No “reset all” control in-panel | Yes (`filter-dropdown` wires add-rule) | **`scrollbar-gutter: stable`** on **`.standard-dropdown__items`** via **`standard-dropdown__items--filter-rules-band`** (`max-height` cap only; no nested rule-stack gutter) | **32rem** shell floor (`toolbar-dropdown--filter`); **`7rem`** content min-height; rules band **`max-height: min(18rem, 50vh)`** on items host |
+| **Projects** | Yes | Yes | **No** sort/grouping-style reset — search row only clears text (`showDefaultClearAction`); selection via checkboxes + “All” | Yes (**New project**) | `scrollbar-gutter: stable` | **26rem** floor; `.projects-list` **`height: 18rem`** + **`max-height: min(18rem, 50vh)`** stable band (load + search) |
+
+**Non-toolbar `app-dropdown-shell` callers** (map context, upload row, detail tags, etc.) pass explicit **`[minWidth]`** / **`panelClass`** as needed; they are **not** covered by the `toolbar-dropdown` width floor unless those classes are reused.
+
 ## What It Looks Like
 
 All dropdowns share a warm, clay-tinted hover and the same item geometry. The grouping dropdown is the reference for hover color and item height.
@@ -46,6 +78,8 @@ Composable class table, hover token, and item geometry: **[dropdown-system.class
 
 ## Dropdown Inventory
 
+Toolbar **behavior** (search, reset, footer, gutter, width policy) is normative in [Toolbar menu panels (anchored UI)](#toolbar-menu-panels-anchored-ui). The table below remains the **`dd-*` primitive composition** index.
+
 Every floating menu surface in Feldpost and which `dd-*` pieces it uses:
 
 | #   | Surface                       | Search | Items | Section labels | Dividers | Drag | Action row | Empty | Component-specific                                 |
@@ -74,7 +108,7 @@ Component-specific: Checkbox column, count badge, "All projects" separator row.
 
 **Filter Dropdown** — `filter-dropdown.component.ts`
 Uses: `dd-empty`, `dd-action-row`.
-Component-specific: Notion-style compound filter rules (form rows with selects/inputs — justified exception).
+Component-specific: Notion-style compound filter rules (form rows with **`hlmBtn` + fixed flyout lists** + inputs — justified exception; **no** native `<select>` in-panel).
 
 **Media Detail Context Menu** — `media-detail-view.component.html`
 Uses: `dd-items`, `dd-item`, `dd-item--danger`, `dd-item__icon`, `dd-item__label`.
@@ -108,11 +142,14 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 
 | File                                                                                              | Purpose                                                   |
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `docs/specs/component/filters/dropdown-system.md`                                                         | Shared dropdown visual contract                           |
+| `docs/specs/component/filters/dropdown-system.md`                                                         | Shared dropdown visual + **toolbar menu panel** contract |
 | `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
+| `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.scss`                              | Toolbar shell `min-width` floor (`.toolbar-dropdown`)     |
+| `apps/web/src/app/shared/dropdown-trigger/toolbar-menu-panel-layout.ts`                               | **`TOOLBAR_MENU_PANEL_MIN_PX` (416)**, **`TOOLBAR_MENU_FILTER_PANEL_MIN_PX` (512)**, **`toolbarDropdownPanelClass`**, **`toolbarDropdownPositionWidthPx`** |
+| `apps/web/src/app/shared/dropdown-trigger/dropdown-search-action-anchor.directive.ts`                  | Attribute hook for `[dropdown-search-action]` (search-row slot detection) |
 | `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
 | `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.scss` | Project-specific checkbox/count exceptions                |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.scss` | Project-specific checkbox/count exceptions                |
 | `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.scss`   | Filter-rule form-specific exceptions                      |
 | `apps/web/src/app/shared/workspace-pane/media-detail-view.component.scss`                   | Media detail context-menu positioning/ownership           |
 

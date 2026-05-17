@@ -1,72 +1,152 @@
-<app-standard-dropdown
-  class="filter-dropdown"
-  [showSearch]="false"
-  [itemsClass]="'standard-dropdown__items--scrollbar-gutter-auto'"
-  [actionLabel]="t('workspace.filter.action.add', 'Add a filter')"
-  (actionRequested)="filterService.addRule()"
->
-  <div dropdown-items>
-    @if (filterService.rules().length === 0) {
-      <div class="w-full min-w-0 py-3 text-center text-sm text-muted-foreground">
-        {{ t('workspace.filter.empty', 'No filters applied') }}
-      </div>
-    } @else {
-      <div class="filter-rules">
-        @for (rule of filterService.rules(); track rule.id; let i = $index) {
-          <div hlmMenuItem class="filter-rule select-text min-w-0">
-            <button class="filter-rule__conj" type="button" (click)="toggleConjunction(rule.id)">
-              {{ conjunctionLabel(i, rule.conjunction) }}
-            </button>
-            <select
-              hlmSelect
-              size="sm"
-              class="filter-rule__select"
-              [value]="rule.property"
-              (change)="updateProperty(rule.id, $any($event.target).value)"
-            >
-              <option value="" disabled>
-                {{ t('workspace.filter.property', 'Property') }}
-              </option>
-              @for (prop of propertyOptions(); track prop.id) {
-                <option [value]="prop.id">{{ prop.label }}</option>
-              }
-            </select>
-            <select
-              hlmSelect
-              size="sm"
-              class="filter-rule__select"
-              [value]="rule.operator"
-              (change)="updateOperator(rule.id, $any($event.target).value)"
-            >
-              <option value="" disabled>
-                {{ t('workspace.filter.operator', 'Operator') }}
-              </option>
-              @for (op of getOperatorsForRule(rule.property); track op) {
-                <option [value]="op">{{ operatorLabel(op) }}</option>
-              }
-            </select>
-            <input
-              hlmInput
-              class="filter-rule__value"
-              [type]="getInputType(rule.property)"
-              [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
-              [value]="rule.value"
-              (input)="updateValue(rule.id, $any($event.target).value)"
-            />
+<div class="filter-dropdown-host block w-full min-w-0">
+  <app-standard-dropdown
+    class="filter-dropdown"
+    [style.--std-dropdown-min-height]="'7rem'"
+    [showSearch]="false"
+    [itemsClass]="'standard-dropdown__items--filter-rules-band'"
+    [actionLabel]="t('workspace.filter.action.add', 'Add a filter')"
+    (actionRequested)="filterService.addRule()"
+    (itemsScroll)="onRulesScroll()"
+  >
+    <div class="min-w-0 w-full" dropdown-items>
+      @if (filterService.rules().length === 0) {
+        <div class="w-full min-w-0 py-3 text-center text-sm text-muted-foreground">
+          {{ t('workspace.filter.empty', 'No filters applied') }}
+        </div>
+      } @else {
+        <div class="filter-rules">
+          @for (rule of filterService.rules(); track rule.id; let i = $index) {
+            <div class="filter-rule select-text min-w-0">
+              <button
+                hlmBtn
+                variant="outline"
+                size="sm"
+                class="filter-rule__conj shrink-0 font-normal text-muted-foreground"
+                type="button"
+                (click)="toggleConjunction(rule.id)"
+              >
+                {{ conjunctionLabel(i, rule.conjunction) }}
+              </button>
+
+              <div
+                class="filter-rule__picker min-w-0 shrink"
+                [attr.data-filter-picker]="rule.id + '-property'"
+              >
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  iconPlacement="end"
+                  class="filter-rule__picker-trigger min-w-0 max-w-full font-normal"
+                  type="button"
+                  [attr.aria-expanded]="isPickerOpen(rule.id, 'property')"
+                  aria-haspopup="listbox"
+                  (click)="togglePicker($event, rule.id, 'property')"
+                >
+                  <span class="min-w-0 flex-1 truncate text-left text-foreground">{{
+                    propertyTriggerLabel(rule.property)
+                  }}</span>
+                  <span
+                    data-dd-part="chevron"
+                    class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
+                    aria-hidden="true"
+                    >expand_more</span
+                  >
+                </button>
+              </div>
+
+              <div
+                class="filter-rule__picker min-w-0 shrink"
+                [attr.data-filter-picker]="rule.id + '-operator'"
+              >
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  iconPlacement="end"
+                  class="filter-rule__picker-trigger min-w-0 max-w-full font-normal"
+                  type="button"
+                  [attr.aria-expanded]="isPickerOpen(rule.id, 'operator')"
+                  aria-haspopup="listbox"
+                  (click)="togglePicker($event, rule.id, 'operator')"
+                >
+                  <span class="min-w-0 flex-1 truncate text-left text-foreground">{{
+                    operatorTriggerLabel(rule.operator)
+                  }}</span>
+                  <span
+                    data-dd-part="chevron"
+                    class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
+                    aria-hidden="true"
+                    >expand_more</span
+                  >
+                </button>
+              </div>
+
+              <input
+                hlmInput
+                class="filter-rule__value"
+                [type]="getInputType(rule.property)"
+                [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
+                [value]="rule.value"
+                (input)="updateValue(rule.id, $any($event.target).value)"
+              />
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                class="filter-rule__remove shrink-0"
+                type="button"
+                (click)="removeRule(rule.id)"
+                [attr.aria-label]="t('workspace.filter.remove.aria', 'Remove filter')"
+              >
+                <span class="material-icons" aria-hidden="true">close</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </app-standard-dropdown>
+
+  @if (openRulePicker(); as pk) {
+    @let fly = pickerFlyoutGeom();
+    @let activeRule = ruleById(pk.ruleId);
+    @if (fly && activeRule) {
+      <div
+        data-filter-picker-flyout
+        class="filter-rule__picker-flyout"
+        role="listbox"
+        [style.top.px]="fly.top"
+        [style.left.px]="fly.left"
+        [style.width.px]="fly.width"
+        [style.maxHeight.px]="fly.maxHeight"
+      >
+        @if (pk.field === 'property') {
+          @for (prop of propertyOptions(); track prop.id) {
             <button
-              hlmBtn
-              variant="destructive"
-              size="icon"
-              class="filter-rule__remove"
+              hlmMenuItem
               type="button"
-              (click)="removeRule(rule.id)"
-              [attr.aria-label]="t('workspace.filter.remove.aria', 'Remove filter')"
+              class="filter-rule__picker-option w-full justify-start font-normal"
+              [attr.data-selected]="prop.id === activeRule.property ? 'true' : null"
+              (click)="pickProperty($event, pk.ruleId, prop.id)"
             >
-              <span class="material-icons">close</span>
+              {{ prop.label }}
             </button>
-          </div>
+          }
+        } @else {
+          @for (op of getOperatorsForRule(activeRule.property); track op) {
+            <button
+              hlmMenuItem
+              type="button"
+              class="filter-rule__picker-option w-full justify-start font-normal"
+              [attr.data-selected]="op === activeRule.operator ? 'true' : null"
+              (click)="pickOperator($event, pk.ruleId, op)"
+            >
+              {{ operatorLabel(op) }}
+            </button>
+          }
         }
       </div>
     }
-  </div>
-</app-standard-dropdown>
+  }
+</div>

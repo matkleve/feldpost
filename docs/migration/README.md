@@ -2,7 +2,7 @@
 
 Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tailwind migration. Per-phase checklists and decisions live in the linked files below — do not duplicate long status blocks here and in phase docs.
 
-**Agents — parallel waves:** [AGENTS.md — Multi-agent coordination (migration) → "Next wave"](../../AGENTS.md#next-wave).
+**Agents — parallel streams:** [AGENTS.md — Multi-agent coordination (migration)](../../AGENTS.md#multi-agent-coordination-migration) (how to split independent migration work across agents; **no duplicate “next” list**—use this README’s Status + phase docs as the queue).
 
 ## Status (summary)
 
@@ -66,6 +66,8 @@ Workspace and feature toolbars expose **Projects**, **Filter**, **Sort**, and **
 - Panel: `--std-dropdown-padding-inline` (or equivalent content inset).
 - Panel: `scrollbar-gutter` stable when lists scroll.
 - Rows: `px-*` alignment between empty-state rows and list rows.
+
+**Interaction inventory (single source):** [dropdown-system.md — Toolbar menu panels (anchored UI)](../specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui) (search / reset / footer / scrollbar gutter / min-width policy / `hlmMenuItem`).
 
 ---
 

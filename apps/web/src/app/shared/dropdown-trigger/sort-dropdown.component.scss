@@ -1,13 +1,14 @@
 // Sort dropdown — component-specific styles.
 // @see docs/specs/component/filters/dropdown-system.md
 
+// Fills toolbar shell width; min-width 0 avoids flex intrinsic min widening the shell vs grouping.
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host {
   display: block;
-}
-
-.sort-dropdown {
-  padding-block: 0;
-  max-height: 24rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 // ── Direction toggle (sort-specific) ────────────────────────────────────────
@@ -56,9 +57,4 @@
     background: color-mix(in srgb, var(--primary) 12%, transparent);
     color: var(--primary);
   }
-}
-
-.sort-dropdown__option--hovered .material-icons:first-of-type,
-.sort-dropdown__option:hover .material-icons:first-of-type {
-  color: var(--primary);
 }

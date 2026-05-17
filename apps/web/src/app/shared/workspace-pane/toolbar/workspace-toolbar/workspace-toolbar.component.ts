@@ -19,6 +19,10 @@ import type {
   ThumbnailSizePreset,
 } from '../../../../core/workspace-view/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import {
+  toolbarDropdownPanelClass,
+  toolbarDropdownPositionWidthPx,
+} from '../../../../shared/dropdown-trigger/toolbar-menu-panel-layout';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { buildCardVariantToggleOptions } from '../../../../shared/ui-primitives/card-variant-toggle.helpers';
 import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
@@ -46,6 +50,9 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
   ],
 })
 export class WorkspaceToolbarComponent implements OnInit {
+  /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
+  protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
+
   private readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);
@@ -156,7 +163,7 @@ export class WorkspaceToolbarComponent implements OnInit {
     // Position dropdown below the clicked button, clamped to viewport
     const btn = event.currentTarget as HTMLElement;
     const rect = btn.getBoundingClientRect();
-    const dropdownWidth = id === 'filter' ? 352 : 240; // min-width per spec
+    const dropdownWidth = toolbarDropdownPositionWidthPx(id);
     const viewportWidth = window.innerWidth;
     const padding = 16; // keep 16px from viewport edge
 

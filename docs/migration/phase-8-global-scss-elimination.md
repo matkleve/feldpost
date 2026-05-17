@@ -104,6 +104,8 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Progress (2026-05-16, slice — map-shell SCSS dedup):** Merged duplicate **`:host .map-style-switch [hlmToggleGroupItem]`** blocks in **`map-shell.component.scss`** into one rule (same computed styles; trims bytes toward **`anyComponentStyle`** budget). **Files:** **`apps/web/src/app/features/map/map-shell/map-shell.component.scss`**.
 
+**Progress (2026-05-17, slice — map-shell partial):** Extracted **radius label + user/search location marker** **`::ng-deep`** rules from **`map-shell.component.scss`** into **`apps/web/src/app/features/map/map-shell/_map-shell-radius-location-markers.scss`**; main sheet **`@use './map-shell-radius-location-markers'`** (co-located partial; selectors unchanged).
+
 ### 8. Final gates
 
 **Progress (2026-05-16, slice):** **`npm run design-system:check`** (registry + panel MQ audit + visual-behavior guard) and **`cd apps/web && npx ng build`** → **exit 0** (Angular build warnings only: map-shell SCSS budget, CommonJS deps).

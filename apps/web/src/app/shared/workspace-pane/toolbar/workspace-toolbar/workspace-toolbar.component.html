@@ -57,7 +57,7 @@
 
 @if (activeDropdown()) {
   <app-dropdown-shell
-    panelClass="toolbar-dropdown option-menu-surface"
+    [panelClass]="toolbarDropdownPanelClass(activeDropdown())"
     [top]="dropdownTop()"
     [left]="dropdownLeft()"
     [outsideCloseEnabled]="!isDragging()"

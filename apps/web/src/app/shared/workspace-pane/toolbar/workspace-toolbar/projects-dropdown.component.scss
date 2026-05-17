@@ -1,8 +1,12 @@
 // Projects dropdown — project-specific: checkbox, count, "All" separator
 // Generic search/items/item/action-row styles come from global dd-* classes.
 
+// Reserves loaded chrome height (search floor + list viewport + footer) so the shell does not step taller after fetch.
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host {
   display: block;
+  box-sizing: border-box;
+  min-height: calc(18rem + 3rem + 3.5rem);
 }
 
 .projects-dropdown {
@@ -10,7 +14,14 @@
 }
 
 .projects-list {
-  max-height: 18rem;
+  // Locks the checklist scroll viewport so async load and search filtering do not change panel height (empty tail is OK).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 18rem;
+  max-height: min(18rem, 50vh);
   overflow-y: auto;
   // Inner scroll: stable gutter + inline-end so counts stay clear of the scrollbar.
   // @see docs/specs/component/filters/dropdown-system.md

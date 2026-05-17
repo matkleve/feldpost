@@ -4,6 +4,10 @@ import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import {
+  toolbarDropdownPanelClass,
+  toolbarDropdownPositionWidthPx,
+} from '../../shared/dropdown-trigger/toolbar-menu-panel-layout';
+import {
   GroupingDropdownComponent,
   type GroupingProperty,
 } from '../../shared/dropdown-trigger/grouping-dropdown.component';
@@ -46,6 +50,9 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
   styleUrl: './projects-toolbar.component.scss',
 })
 export class ProjectsToolbarComponent {
+  /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
+  protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
+
   /** Template helper: icon/text layout for status pill options. */
   readonly optLayout = toggleOptionLayout;
 
@@ -141,7 +148,7 @@ export class ProjectsToolbarComponent {
 
     const trigger = event.currentTarget as HTMLElement;
     const rect = trigger.getBoundingClientRect();
-    const dropdownWidth = id === 'filter' ? 352 : 240;
+    const dropdownWidth = toolbarDropdownPositionWidthPx(id);
     const viewportWidth = window.innerWidth;
     const padding = 16;
 

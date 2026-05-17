@@ -19,8 +19,8 @@
   height: 2.5rem;
   border: none;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--media-chrome-control-bg);
+  color: var(--media-chrome-foreground);
   cursor: pointer;
   z-index: 1;
   transition: background 80ms ease-out;
@@ -30,7 +30,7 @@
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--media-chrome-control-bg-hover);
   }
 }
 

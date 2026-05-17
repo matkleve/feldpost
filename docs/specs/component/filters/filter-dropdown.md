@@ -6,21 +6,28 @@ A Notion-inspired compound filter builder. Users add filter rules ("where [Prope
 
 ## What It Looks Like
 
-Floating dropdown anchored below the "Filter" toolbar button. Width: 22rem (352px), max-height 24rem (scrollable). `--color-bg-elevated` background, `shadow-xl`, `rounded-lg` corners.
+Floating dropdown anchored below the "Filter" toolbar button. Width: **26rem** (**416px** at 16px root), max-height 24rem (scrollable). `--color-bg-elevated` background, `shadow-xl`, `rounded-lg` corners.
 
 **Empty state**: "No filters applied" text with an "Add a filter" ghost button.
 
 **With rules**: Each filter rule is a horizontal row:
 
-- **Conjunction chip** (left): "Where" for the first rule, "And" / "Or" for subsequent rules (clickable to toggle And/Or)
-- **Property selector**: dropdown (compact) showing property name — click opens a mini-dropdown of properties
-- **Operator selector**: dropdown showing operator (contains, equals, is, before, after, etc.) — operators change based on property type
-- **Value input**: text input, date picker, or multi-select depending on property type
-- **Remove button** (×): trailing, visible on hover
+- **Conjunction chip** (left): "Where" for the first rule, "And" / "Or" for subsequent rules (clickable to toggle And/Or) — **quiet** `hlmBtn` **outline** chip, **muted** label (neutral surface; not primary-tint row chrome).
+- **Property selector**: **compact `hlmBtn` outline** trigger with **trailing `expand_more` chevron** (chevron stays **muted** on row hover). Opens a **fixed-position flyout list** of `hlmMenuItem` options (same vocabulary as toolbar menu rows), **not** a native `<select>`.
+- **Operator selector**: same pattern as property — **styled flyout**; operators depend on property type.
+- **Value input**: text input, date picker, or multi-select depending on property type (`hlmInput` where applicable).
+- **Remove** (×): **`hlmBtn` ghost `size="icon"`** — **muted** close icon; **destructive** color **only** on hover / focus-visible (quiet destructive).
 
 Below the rules: "+ Add a filter" ghost button.
 
-## Where It Lives
+## Visual behavior contract (toolbar-aligned)
+
+- **Row container**: **No** `hlmMenuItem` on the full row (avoids primary-tint hover washing conjunction + fields). Row hover = **neutral** `muted-foreground` **8%** surface mix only.
+- **Rhythm**: Rule stack uses **`spacing-2`** gap and row padding (quiet density).
+- **Picker flyout**: **`position: fixed`**, **`z-index`**: `calc(var(--z-dropdown) + 2)` so lists render above the rule stack and escape `.filter-rules` scroll clipping; closes on **outside click**, **rule-list scroll**, or **window resize**.
+- **Chevron**: Trigger chevrons use **`data-dd-part="chevron"`** + **explicit muted** color so they **do not** pick up row-hover emphasis.
+
+Shared shell width / scroll chrome: [`dropdown-system.md`](./dropdown-system.md).
 
 - **Parent**: `WorkspaceToolbarComponent`
 - **Appears when**: User clicks the "Filter" toolbar button
@@ -40,21 +47,21 @@ Below the rules: "+ Add a filter" ghost button.
 ## Component Hierarchy
 
 ```
-FilterDropdown                             ← floating dropdown, --color-bg-elevated, shadow-xl, rounded-lg, w-[22rem]
+FilterDropdown                             ← floating dropdown, --color-bg-elevated, shadow-xl, rounded-lg, w-[26rem] (toolbar shell floor; see dropdown-system)
 ├── [no rules] EmptyState                  ← "No filters applied"
 ├── FilterRuleList                         ← vertical stack, gap-1
 │   └── FilterRuleRow × N                  ← horizontal flex row, gap-1, items-center
 │       ├── ConjunctionChip                ← "Where" | "And" | "Or", click to toggle
-│       ├── PropertySelect                 ← compact dropdown, shows property name
-│       │   └── [open] PropertyPicker      ← mini-dropdown: search + list of properties
-│       ├── OperatorSelect                 ← compact dropdown, shows operator name
-│       │   └── [open] OperatorPicker      ← mini-dropdown: list of valid operators
+│       ├── PropertySelect                 ← compact **`hlmBtn` outline** + chevron; fixed flyout of `hlmMenuItem` rows
+│       │   └── [open] PropertyPicker      ← flyout: search optional (future); list uses menu row chrome
+│       ├── OperatorSelect                 ← same as property; options from `operatorsForPropertyType`
+│       │   └── [open] OperatorPicker      ← flyout list (`hlmMenuItem`)
 │       ├── ValueInput                     ← type varies by property
 │       │   ├── [text] TextInput           ← for string properties
 │       │   ├── [date] DateInput           ← for date properties (from/to)
 │       │   ├── [select] MultiSelect       ← for enum-like properties (project, custom key values)
 │       │   └── [number] NumberInput       ← for distance
-│       └── [hover] RemoveButton (×)       ← ghost, removes this rule
+│       └── [hover] RemoveButton (×)       ← ghost icon; destructive tint **only** on hover/focus
 └── AddFilterButton                        ← ghost button "+ Add a filter"
 ```
 
@@ -81,7 +88,7 @@ For number-type properties (built-in `distance` and custom number properties), t
 
 ### Dropdown Max-Height
 
-The filter dropdown's rule list has `max-height: 20rem` with `overflow-y: auto`. The property `<select>` uses native browser dropdowns which handle long lists natively.
+The filter dropdown's rule list uses **`max-height: min(18rem, 50vh)`** with **`overflow-y: auto`** (see `filter-dropdown.component.scss`). Property and operator lists render in a **fixed flyout** with its own **`max-height`** (computed from viewport space) and internal scroll when needed.
 
 ## Data
 

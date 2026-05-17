@@ -1,4 +1,4 @@
-import { Component, inject, input, signal, output } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import type { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
   CdkDropList,
@@ -54,6 +54,7 @@ export class GroupingDropdownComponent {
   // Local UI state
   readonly selectedRows = signal<Set<string>>(new Set());
   readonly isDragging = signal(false);
+  readonly searchTerm = signal('');
 
   onDragStart(): void {
     this.isDragging.set(true);

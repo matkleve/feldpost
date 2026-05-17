@@ -45,6 +45,10 @@ import { FilterDropdownComponent } from '../../shared/dropdown-trigger/filter-dr
 import { SortDropdownComponent } from '../../shared/dropdown-trigger/sort-dropdown.component';
 import { ProjectsDropdownComponent } from '../../shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
+import {
+  toolbarDropdownPanelClass,
+  toolbarDropdownPositionWidthPx,
+} from '../../shared/dropdown-trigger/toolbar-menu-panel-layout';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 
@@ -73,6 +77,9 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
 })
 export class MediaComponent implements OnDestroy {
   private static readonly MIN_RESET_LOADING_MS = 220;
+
+  /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
+  protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
 
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   protected readonly workspaceSelectionService = inject(WorkspaceSelectionService);
@@ -319,7 +326,7 @@ export class MediaComponent implements OnDestroy {
 
     const btn = event.currentTarget as HTMLElement;
     const rect = btn.getBoundingClientRect();
-    const dropdownWidth = id === 'filter' ? 352 : 240;
+    const dropdownWidth = toolbarDropdownPositionWidthPx(id);
     const viewportWidth = window.innerWidth;
     const padding = 16;
 

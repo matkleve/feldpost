@@ -47,21 +47,9 @@
   background:
     linear-gradient(
       160deg,
-      rgba(249, 247, 244, 0.75),
-      rgba(249, 247, 244, 0.35) 46%,
-      rgba(249, 247, 244, 0.72)
+      var(--auth-map-veil-stop-a),
+      var(--auth-map-veil-stop-b) 46%,
+      var(--auth-map-veil-stop-c)
     ),
-    linear-gradient(0deg, rgba(249, 247, 244, 0.22), rgba(249, 247, 244, 0.22));
-}
-
-:root.dark .auth-map-overlay,
-[data-theme='dark'] .auth-map-overlay {
-  background:
-    linear-gradient(
-      160deg,
-      rgba(15, 14, 12, 0.74),
-      rgba(15, 14, 12, 0.4) 46%,
-      rgba(15, 14, 12, 0.78)
-    ),
-    linear-gradient(0deg, rgba(15, 14, 12, 0.26), rgba(15, 14, 12, 0.26));
+    linear-gradient(0deg, var(--auth-map-veil-flat), var(--auth-map-veil-flat));
 }

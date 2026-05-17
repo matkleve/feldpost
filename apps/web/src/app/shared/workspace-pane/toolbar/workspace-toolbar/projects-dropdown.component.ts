@@ -16,6 +16,7 @@ interface Project {
   template: `
     <app-standard-dropdown
       class="projects-dropdown"
+      [style.--std-dropdown-min-height]="'calc(18rem + 3rem + 3.5rem)'"
       [searchTerm]="searchTerm()"
       [searchPlaceholder]="t('workspace.projects.search.placeholder', 'Search projects…')"
       [actionLabel]="t('workspace.projects.action.new', 'New project')"
@@ -23,7 +24,7 @@ interface Project {
       (clearRequested)="searchTerm.set('')"
       (actionRequested)="isCreating.set(true)"
     >
-      <div dropdown-items class="projects-list">
+      <div dropdown-items class="projects-list w-full min-w-0">
         <label hlmMenuItem class="projects-row--all ui-choice-row gap-2">
           <input
             type="checkbox"
@@ -42,7 +43,7 @@ interface Project {
               [checked]="selectedIds().has(project.id)"
               (change)="toggleProject(project.id)"
             />
-            <span class="min-w-0 flex-1">{{ project.name }}</span>
+            <span class="min-w-0 flex-1 break-words">{{ project.name }}</span>
             <span class="ml-auto shrink-0 projects-count">{{ project.imageCount }}</span>
           </label>
         }

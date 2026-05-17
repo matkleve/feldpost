@@ -138,9 +138,9 @@ Per-component specs carry the full matrix and examples; column contract is fixed
 
 Canonical migration index: `docs/migration/README.md`.
 
-### "Next wave"
+### Parallel migration streams
 
-When the user asks for the **next wave** (or an equivalent slice such as the next batch) **in migration context**, assume the slice often spans **several independent workstreams** (for example token migration, template callsite fixes, and design-doc or spec sync). The coordinator should **decompose** the request into **sibling tasks** runnable in parallel when dependencies do not force a single serial chain. **Do not** collapse everything into one default subagent or one undifferentiated mega-change unless the user explicitly narrows scope or a true blocking dependency requires it.
+When migration work spans **several independent streams** (see the **phase index** in `docs/migration/README.md`—not a separate “wave” checklist here), the coordinator should **decompose** into **sibling tasks** runnable in parallel when dependencies do not force a single serial chain. **Do not** collapse everything into one default subagent or one undifferentiated mega-change unless scope is explicitly narrowed or a true blocking dependency requires it. **Do not** maintain a second, free-floating “what to do next” list in this file; the migration index and phase docs are the single queue—update those when status changes so work is not duplicated.
 
 ## Component Spec Coverage (Mandatory)
 

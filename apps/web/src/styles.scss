@@ -105,6 +105,18 @@
   --overlay-scrim-30: color-mix(in srgb, var(--shadow-color) 30%, transparent);
   --overlay-scrim-55: color-mix(in srgb, var(--shadow-color) 55%, transparent);
   --overlay-scrim-80: color-mix(in srgb, var(--shadow-color) 80%, transparent);
+  // Fixed light ink on arbitrary photo/map imagery (not app theme text; Phase 7 Batch 11)
+  // @see docs/migration/phase-7-token-migration.md
+  --media-chrome-foreground: oklch(1 0 0);
+  --media-chrome-control-bg: color-mix(in srgb, var(--media-chrome-foreground) 10%, transparent);
+  --media-chrome-control-bg-hover: color-mix(in srgb, var(--media-chrome-foreground) 20%, transparent);
+  // Auth card scroll-edge + map shell veils — dark ink surfaces (Phase 7 Batch 11)
+  // @see docs/migration/phase-7-token-migration.md
+  --auth-scroll-radial-sheen: color-mix(in srgb, var(--foreground) 16%, transparent);
+  --auth-map-veil-stop-a: color-mix(in srgb, var(--background) 74%, transparent);
+  --auth-map-veil-stop-b: color-mix(in srgb, var(--background) 40%, transparent);
+  --auth-map-veil-stop-c: color-mix(in srgb, var(--background) 78%, transparent);
+  --auth-map-veil-flat: color-mix(in srgb, var(--background) 26%, transparent);
 }
 
 // ── tweakcn design token foundation — light mode ───────────────────────────────
@@ -187,6 +199,16 @@
   --overlay-scrim-30: color-mix(in srgb, var(--shadow-color) 30%, transparent);
   --overlay-scrim-55: color-mix(in srgb, var(--shadow-color) 55%, transparent);
   --overlay-scrim-80: color-mix(in srgb, var(--shadow-color) 80%, transparent);
+  // Light-on-media controls + auth/map veils (theme where noted; Phase 7 Batch 11)
+  // @see docs/migration/phase-7-token-migration.md
+  --media-chrome-foreground: oklch(1 0 0);
+  --media-chrome-control-bg: color-mix(in srgb, var(--media-chrome-foreground) 10%, transparent);
+  --media-chrome-control-bg-hover: color-mix(in srgb, var(--media-chrome-foreground) 20%, transparent);
+  --auth-scroll-radial-sheen: color-mix(in srgb, var(--media-chrome-foreground) 75%, transparent);
+  --auth-map-veil-stop-a: color-mix(in srgb, var(--card) 75%, transparent);
+  --auth-map-veil-stop-b: color-mix(in srgb, var(--card) 35%, transparent);
+  --auth-map-veil-stop-c: color-mix(in srgb, var(--card) 72%, transparent);
+  --auth-map-veil-flat: color-mix(in srgb, var(--card) 22%, transparent);
 }
 
 // ── Dark mode token overrides ──────────────────────────────────────────────────

@@ -34,6 +34,9 @@
     left: calc(var(--container-inset) + var(--layout-sidebar-width-collapsed) + var(--spacing-3));
     transform: translateY(-50%);
     z-index: var(--z-modal);
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
     width: var(--settings-overlay-width);
     max-width: var(--settings-overlay-width);
     min-height: 26rem;
@@ -60,16 +63,20 @@
     z-index: 2;
   }
 
-  // Vertical hairline between chrome and two-column shell
+  // Vertical hairline between chrome and two-column shell (flex row child; stretches with overlay height)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__lead-divider {
+    flex: 0 0 1px;
+    align-self: stretch;
     width: 1px;
+    min-height: 0;
     background: color-mix(in srgb, color-mix(in srgb, var(--border) 78%, var(--foreground)) 55%, transparent);
   }
 
   // Two-column flex shell: section rail + detail column
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__shell {
+    flex: 1 1 auto;
     display: flex;
     align-items: stretch;
     min-width: 0;

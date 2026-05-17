@@ -7,4 +7,21 @@
     overflow: auto;
     overscroll-behavior: contain;
   }
+
+  // Locks toolbar menu width to the viewport clamp so long rows cannot widen the shell after load/search.
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  :host.toolbar-dropdown {
+    box-sizing: border-box;
+    width: min(26rem, calc(100vw - 2rem));
+    max-width: min(26rem, calc(100vw - 2rem));
+    min-width: min(26rem, calc(100vw - 2rem));
+  }
+
+  // Filter: same width lock at the wider rule-row floor (`TOOLBAR_MENU_FILTER_PANEL_MIN_PX` / 32rem at 16px root).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  :host.toolbar-dropdown.toolbar-dropdown--filter {
+    width: min(32rem, calc(100vw - 2rem));
+    max-width: min(32rem, calc(100vw - 2rem));
+    min-width: min(32rem, calc(100vw - 2rem));
+  }
 }

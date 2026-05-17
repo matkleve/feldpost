@@ -26,7 +26,11 @@
       color-mix(in srgb, var(--primary) 20%, transparent),
       transparent 46%
     ),
-    radial-gradient(circle at 84% 84%, rgba(37, 99, 235, 0.2), transparent 40%),
+    radial-gradient(
+      circle at 84% 84%,
+      color-mix(in srgb, var(--primary) 20%, transparent),
+      transparent 40%
+    ),
     var(--background);
 }
 
@@ -65,11 +69,10 @@
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--border) 78%, var(--foreground)) transparent; /* TODO(phase8): no tweakcn equiv yet */
   background:
-    linear-gradient(var(--card) 45%, rgba(255, 255, 255, 0)) center top,
-    linear-gradient(rgba(255, 255, 255, 0), var(--card) 55%) center bottom,
-    radial-gradient(farthest-side at 50% 0, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0))
-      center top,
-    radial-gradient(farthest-side at 50% 100%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0))
+    linear-gradient(var(--card) 45%, transparent) center top,
+    linear-gradient(transparent, var(--card) 55%) center bottom,
+    radial-gradient(farthest-side at 50% 0, var(--auth-scroll-radial-sheen), transparent) center top,
+    radial-gradient(farthest-side at 50% 100%, var(--auth-scroll-radial-sheen), transparent)
       center bottom;
   background-repeat: no-repeat;
   background-size:
@@ -95,17 +98,6 @@
 
 .auth-card-scroll::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--border) 78%, var(--foreground)); /* TODO(phase8): no tweakcn equiv yet */
-}
-
-:root.dark .auth-card-scroll,
-[data-theme='dark'] .auth-card-scroll {
-  background:
-    linear-gradient(var(--card) 45%, rgba(15, 14, 12, 0)) center top,
-    linear-gradient(rgba(15, 14, 12, 0), var(--card) 55%) center bottom,
-    radial-gradient(farthest-side at 50% 0, rgba(237, 235, 231, 0.16), rgba(237, 235, 231, 0))
-      center top,
-    radial-gradient(farthest-side at 50% 100%, rgba(237, 235, 231, 0.16), rgba(237, 235, 231, 0))
-      center bottom;
 }
 
 // Stacked field wrapper: label above, control below, error below that

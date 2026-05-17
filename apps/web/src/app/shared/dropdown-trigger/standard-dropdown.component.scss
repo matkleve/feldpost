@@ -1,9 +1,15 @@
 :host {
   display: block;
   min-height: 0;
+  // Default vertical floor for toolbar menus; filter overrides via `[style.--std-dropdown-min-height]` (see dropdown-system.md).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  --std-dropdown-min-height: 8rem;
   // Default horizontal inset for search row, scroll list, and footer action (callers may override).
   // @see docs/specs/component/filters/dropdown-system.md
   --std-dropdown-padding-inline: var(--spacing-2, 0.5rem);
+  // Matches `hlmBtn` `size="icon"` (`h-10` / `w-10`) so reserved search-row slots do not jump layout.
+  // @see docs/specs/component/filters/dropdown-system.md
+  --std-dropdown-search-icon-slot-size: 2.5rem;
 }
 
 .standard-dropdown {
@@ -15,6 +21,12 @@
   // @see docs/specs/component/filters/dropdown-system.md
   box-sizing: border-box;
   padding-inline: var(--std-dropdown-padding-inline);
+  // Spans the shell width so short lists do not read visually narrower than the toolbar min-width floor.
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  width: 100%;
+  // Stable vertical floor when row counts / empty states change; max-height still comes from menu chrome + shell.
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  min-height: var(--std-dropdown-min-height);
 }
 
 // Reserves the scrollbar track via layout (no extra pe-* on this host); rows stay full width inside shell padding-inline.
@@ -23,9 +35,66 @@
   scrollbar-gutter: stable;
 }
 
-// Opt-in: nested scroll regions own stable gutter (e.g. filter rules); this list does not reserve a track when non-overflowing.
+// Filter toolbar: cap rules band here so one scroll host owns `scrollbar-gutter: stable` (see `.standard-dropdown__items`).
 // @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__items.standard-dropdown__items--scrollbar-gutter-auto {
-  scrollbar-gutter: auto;
+.standard-dropdown__items.standard-dropdown__items--filter-rules-band {
+  max-height: min(18rem, 50vh);
+}
+
+// Search row: field fills remaining width; trailing cluster uses fixed icon slots (clear + projected actions).
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--spacing-2, 0.5rem);
+  align-items: center;
+}
+
+// Search text field spans the fluid column only; geometry owned here (not on a flex wrapper).
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__search-field {
+  min-width: 0;
+}
+
+// Hosts optional clear + projected `[dropdown-search-action]` controls with stable total width.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__search-trailing {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  align-items: center;
+  column-gap: var(--spacing-2, 0.5rem);
+}
+
+// Fixed square footprint for one icon control or spacer (prevents input width jumping).
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__search-action-slot {
+  display: flex;
+  box-sizing: border-box;
+  width: var(--std-dropdown-search-icon-slot-size);
+  min-width: var(--std-dropdown-search-icon-slot-size);
+  align-items: center;
+  justify-content: center;
+}
+
+// Invisible block matching the icon button hit box when the real control is not shown.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__search-slot-spacer {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--std-dropdown-search-icon-slot-size);
+}
+
+// Icon control fills the fixed slot without changing outer slot geometry.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__search-icon-btn {
+  flex-shrink: 0;
+}
+
+// Shared toolbar menu chrome for sort + grouping (same shell floor; identical body width contract).
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+.workspace-toolbar-menu-panel {
+  padding-block: 0;
+  max-height: 24rem;
 }
 

@@ -1,6 +1,7 @@
-import { Component, input, output } from '@angular/core';
+import { Component, contentChildren, input, output } from '@angular/core';
 import { HlmMenuItemDirective } from '../ui/menu';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
+import { DropdownSearchActionAnchorDirective } from './dropdown-search-action-anchor.directive';
 
 @Component({
   selector: 'app-standard-dropdown',
@@ -10,6 +11,12 @@ import { HLM_BUTTON_IMPORTS } from '../ui/button';
   styleUrl: './standard-dropdown.component.scss',
 })
 export class StandardDropdownComponent {
+  /** When true, keeps a trailing icon slot when no `[dropdown-search-action]` is projected (e.g. sort reset). */
+  readonly reserveProjectedSearchActionSlot = input(false);
+
+  /** Projected `[dropdown-search-action]` anchors — exposed for template slot layout. */
+  readonly projectedSearchActions = contentChildren(DropdownSearchActionAnchorDirective);
+
   readonly showSearch = input(true);
   readonly searchPlaceholder = input('Search...');
   readonly searchTerm = input('');
@@ -23,6 +30,8 @@ export class StandardDropdownComponent {
   readonly searchTermChange = output<string>();
   readonly clearRequested = output<void>();
   readonly actionRequested = output<void>();
+  /** Emits when the items host scrolls (toolbar filter uses this to dismiss inline pickers). */
+  readonly itemsScroll = output<void>();
 
   itemsHostClass(): string {
     const extra = this.itemsClass().trim();

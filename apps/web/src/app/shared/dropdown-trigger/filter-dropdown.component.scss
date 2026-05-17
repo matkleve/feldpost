@@ -2,55 +2,67 @@
   display: block;
 }
 
+// Constrains host width when nested under toolbar menu shell.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-dropdown-host {
+  width: 100%;
+  min-width: 0;
+}
+
 .filter-dropdown {
   padding-block: 0;
-  min-width: 22rem; // wider per spec — Notion filter rows need space
 }
 
 .filter-rules {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
   // Vertical-only inset; horizontal padding owned by app-standard-dropdown.
   // @see docs/specs/component/filters/dropdown-system.md
   padding-block: var(--spacing-1);
-  max-height: 20rem;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
+  // Scroll + `scrollbar-gutter` owned by `.standard-dropdown__items--filter-rules-band` (single host).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 }
 
+// Stable state: rule row idle / hover — neutral surface tint (quiet toolbar vocabulary).
+// @see docs/specs/component/filters/filter-dropdown.md
 .filter-rule {
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
-  padding: var(--spacing-1);
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
+  }
 
   &:hover .filter-rule__remove {
     opacity: 1;
   }
 }
 
+// Stable state: conjunction control — outline chip, muted label (not primary-tint row chrome).
+// @see docs/specs/component/filters/filter-dropdown.md
 .filter-rule__conj {
   flex: 0 0 auto;
-  min-width: 3rem;
-  padding: var(--spacing-1) var(--spacing-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-size: var(--font-size-xs);
-  color: var(--muted-foreground);
-  cursor: pointer;
-  text-align: center;
-
-  &:hover {
-    background: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
-  }
+  min-width: 3.25rem;
 }
 
-.filter-rule__select {
+.filter-rule__picker {
   flex: 1 1 0;
   min-width: 0;
-  cursor: pointer;
+}
+
+// Stable state: compact picker trigger — matches outline control row; chevron stays muted on row hover.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-trigger {
+  width: 100%;
+  min-width: 0;
+}
+
+.filter-rule__picker-chevron {
+  color: var(--muted-foreground);
 }
 
 .filter-rule__value {
@@ -58,8 +70,41 @@
   min-width: 0;
 }
 
+// Stable state: fixed flyout list for property/operator (escapes rule stack overflow).
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-flyout {
+  position: fixed;
+  z-index: calc(var(--z-dropdown) + 2);
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: var(--shadow-md, 0 10px 15px -3px rgb(0 0 0 / 0.08));
+  padding-block: var(--spacing-1);
+}
+
+// Stable state: highlighted option in flyout list.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-option[data-selected='true'] {
+  background-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
 .filter-rule__remove {
   flex-shrink: 0;
   opacity: 0;
   transition: opacity 80ms ease-out;
+}
+
+// Stable state: quiet destructive remove — muted icon, destructive color on hover/focus only.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__remove .material-icons {
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+}
+
+.filter-rule__remove:hover .material-icons,
+.filter-rule__remove:focus-visible .material-icons {
+  color: var(--destructive);
 }

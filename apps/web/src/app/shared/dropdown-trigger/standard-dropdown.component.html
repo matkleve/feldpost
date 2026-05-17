@@ -1,35 +1,50 @@
-<div class="standard-dropdown flex min-h-0 flex-1 flex-col">
+<div class="standard-dropdown flex flex-1 flex-col">
   @if (showSearch()) {
     <div
-      class="standard-dropdown__search flex min-h-tap-lg min-w-0 shrink-0 items-center gap-2 border-b border-border px-0 py-2 md:min-h-tap"
+      class="standard-dropdown__search min-h-tap-lg min-w-0 shrink-0 border-b border-border px-0 py-2 md:min-h-tap"
     >
       <input
-        class="min-w-0 flex-1 border-0 bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+        class="standard-dropdown__search-field min-w-0 border-0 bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
         type="text"
         [placeholder]="searchPlaceholder()"
         [value]="searchTerm()"
         (input)="searchTermChange.emit($any($event.target).value)"
       />
 
-      @if (showDefaultClearAction() && searchTerm()) {
-        <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="shrink-0"
-          type="button"
-          [attr.aria-label]="clearSearchAriaLabel()"
-          (click)="clearRequested.emit()"
-        >
-          <span class="material-icons" aria-hidden="true">close</span>
-        </button>
-      }
+      <div class="standard-dropdown__search-trailing">
+        @if (showDefaultClearAction()) {
+          <div class="standard-dropdown__search-action-slot">
+            @if (searchTerm()) {
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                class="standard-dropdown__search-icon-btn"
+                type="button"
+                [attr.aria-label]="clearSearchAriaLabel()"
+                (click)="clearRequested.emit()"
+              >
+                <span class="material-icons" aria-hidden="true">close</span>
+              </button>
+            } @else {
+              <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>
+            }
+          </div>
+        }
 
-      <ng-content select="[dropdown-search-action]" />
+        @if (reserveProjectedSearchActionSlot() || projectedSearchActions().length > 0) {
+          <div class="standard-dropdown__search-action-slot">
+            <ng-content select="[dropdown-search-action]" />
+            @if (reserveProjectedSearchActionSlot() && projectedSearchActions().length === 0) {
+              <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>
+            }
+          </div>
+        }
+      </div>
     </div>
   }
 
-  <div [class]="itemsHostClass()">
+  <div [class]="itemsHostClass()" (scroll)="itemsScroll.emit()">
     <ng-content select="[dropdown-items]" />
   </div>
   @if (actionLabel()) {
@@ -38,11 +53,11 @@
     >
       <button
         hlmMenuItem
-        class="flex min-w-0 shrink-0 items-center justify-start gap-2 text-muted-foreground hover:text-foreground"
+        class="flex min-w-0 shrink-0 items-center justify-start gap-2 text-muted-foreground"
         type="button"
         (click)="actionRequested.emit()"
       >
-        <span class="material-icons" aria-hidden="true">{{ actionIcon() }}</span>
+        <span class="material-icons text-muted-foreground" aria-hidden="true">{{ actionIcon() }}</span>
         {{ actionLabel() }}
       </button>
     </div>
