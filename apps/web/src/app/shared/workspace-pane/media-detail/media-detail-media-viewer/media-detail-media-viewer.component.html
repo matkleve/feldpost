@@ -67,6 +67,7 @@
       variant="default"
       class="detail-upload-prompt__button"
       type="button"
+      [iconPlacement]="replacing() ? 'start' : undefined"
       [disabled]="replacing()"
       (click)="triggerFileInput()"
     >

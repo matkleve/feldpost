@@ -22,7 +22,12 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-1);
-    height: var(--spacing-4);
+    // Touch target: visible + hit area meets constitution (48px mobile, 44px from md up); replaces fixed height that was below desktop minimum.
+    // @see docs/design/constitution.md (Sizes and Touch)
+    min-height: 3rem;
+    @media (min-width: 48rem) {
+      min-height: 2.75rem;
+    }
     // Minimum horizontal inset on all layouts; `text-action` / `icon-text-action` override below.
     // Replaces `padding: 0` so no host layout ships flush-to-border by default.
     // @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md

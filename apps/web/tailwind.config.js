@@ -137,17 +137,17 @@ module.exports = {
       },
 
       // ── Minimum height for interactive tap targets ─────────────────────────
-      // All interactive elements must meet ~38px minimum hit area (design rule).
-      // Use min-h-tap or min-h-tap-lg on buttons, chips, icon buttons, etc.
+      // `docs/design/constitution.md` (Sizes and Touch): desktop floor 2.75rem (44px), mobile 3rem (48px).
+      // Use `min-h-tap` / `min-w-tap` for desktop-aligned controls; pair with `min-h-tap-lg md:min-h-tap` when a row is touch-first on small viewports.
       minHeight: {
-        tap: '2.375rem', // 38px — minimum interactive target
-        'tap-lg': '2.75rem', // 44px — preferred desktop touch target
+        tap: '2.75rem', // 44px — desktop minimum touch target
+        'tap-lg': '3rem', // 48px — mobile / touch-first minimum
       },
 
       // ── Min width counterpart ─────────────────────────────────────────────
       minWidth: {
-        tap: '2.375rem',
-        'tap-lg': '2.75rem',
+        tap: '2.75rem',
+        'tap-lg': '3rem',
       },
 
       // ── Box shadows ───────────────────────────────────────────────────────

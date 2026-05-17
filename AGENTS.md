@@ -134,6 +134,14 @@ Per-component specs carry the full matrix and examples; column contract is fixed
 
    *Figma-assisted flows (screenshots, Code Connect, strict No-Figma new-component gate from the archived rule): **(deferred — Figma work paused)**.*
 
+## Multi-agent coordination (migration)
+
+Canonical migration index: `docs/migration/README.md`.
+
+### "Next wave"
+
+When the user asks for the **next wave** (or an equivalent slice such as the next batch) **in migration context**, assume the slice often spans **several independent workstreams** (for example token migration, template callsite fixes, and design-doc or spec sync). The coordinator should **decompose** the request into **sibling tasks** runnable in parallel when dependencies do not force a single serial chain. **Do not** collapse everything into one default subagent or one undifferentiated mega-change unless the user explicitly narrows scope or a true blocking dependency requires it.
+
 ## Component Spec Coverage (Mandatory)
 
 - Every production component must have its own dedicated element spec in `docs/specs/component/` or `docs/specs/ui/`.

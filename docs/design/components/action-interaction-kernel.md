@@ -112,6 +112,7 @@ Avoid accent for:
 - Secondary actions: ghost.
 - Toolbar baseline: ghost + thin border on hover/active.
 - Danger actions: semantic danger styling, never ambiguous.
+- Icon + label on `hlmBtn`: horizontal padding locks to spacing-2 (`ps-2` / `pe-2`) on both edges for every size and `iconPlacement` (`start` / `end`); set `iconPlacement` for composition semantics; `size="icon"` stays square (`w-10 h-10`).
 
 ## Reactive Integration Contract
 

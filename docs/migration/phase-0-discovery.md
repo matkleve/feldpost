@@ -19,7 +19,7 @@
 - **Global style notes:**
   - `src/styles.scss` loads: tokens → reset → layout → 8 primitive sheets → 3 pattern sheets → Tailwind directives
   - `@angular/cdk/overlay-prebuilt.css` is imported at the top of `tokens.scss` — this must be kept or replaced when spartan's CDK-backed overlay CSS takes over
-  - Feldpost runs a **dual token naming system**: legacy `--color-*` / `--radius-*` / `--spacing-*` (v1, still used by most components) AND a new `--fp-sys-color-*` / `--fp-ref-*` / `--fp-alias-*` tree (MD3-inspired, v2, partially adopted). Legacy `:root` tokens remain in `tokens.scss`; tweakcn/spartan foundation lives in `styles.scss` with backward-compat aliases.
+  - Feldpost runs **tweakcn + Tailwind v4** in `apps/web/src/styles.scss` alongside a **legacy bridge** `apps/web/src/styles/_legacy-design-tokens.scss` (successor to the removed monolithic `tokens.scss`). MD3-inspired **`--fp-sys-color-*`** rows remain in that bridge where no tweakcn 1:1 exists (Phase 7). **Figma `fp/ref/…` tonal stops are not emitted as `--fp-ref-*` CSS variables on `:root`** (Phase 7 Batch 5b) — canonical hex and ladder mapping live in **`docs/design/tokens.md`** §3.1a; implementation uses tweakcn / semantic tokens (not `var(--fp-ref-*)`).
   - Dark-mode is controlled by `[data-theme="dark"]` on `<html>`, with a `@media (prefers-color-scheme: dark)` system-preference fallback. Tailwind `darkMode: ['class', '[data-theme="dark"]']` is already wired.
   - Three theme profiles exist: `light` (default), `dark`, `sandstone`. spartan theming must not break these.
   - A "sandstone" custom theme profile exists as a test. spartan variable overrides need to remain under `[data-theme]` wrappers.
