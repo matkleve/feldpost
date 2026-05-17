@@ -146,7 +146,7 @@
   // @see docs/specs/component/filters/dropdown-system.md
   [data-fp-dropdown-grouping-reset='true']:active [data-fp-dropdown-grouping-reset-icon='true'] {
     transform: rotate(-180deg);
-    transition-duration: var(--motion-duration-slow);
+    transition-duration: 300ms;
   }
 
   // Reduced-motion: no rotation on grouping reset.

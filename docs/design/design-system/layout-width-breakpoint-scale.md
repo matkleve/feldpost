@@ -33,9 +33,11 @@ Primary width tokens and values:
 
 ## Content Clamp Primitive
 
-Canonical token and utility:
+Canonical literals and utility (**Phase 7 Batch 38** removed **`--content-clamp-default`** and **`--content-clamp-list`** from **`_legacy-design-tokens.scss`** — values live only in **`apps/web/src/styles/layout/clamp.scss`** and any feature SCSS that mirrors the same numbers):
 
-- tokens: **`--content-clamp-default`**, **`--content-clamp-list`** on **`_legacy-design-tokens.scss`** `:root`; narrow text width is the **`.content-clamp--text`** literal (**`38rem`**) in **`clamp.scss`**
+- base / default rail: **`max-width: 45rem`** on **`.content-clamp`**
+- list/table rail: **`max-width: 52rem`** on **`.content-clamp--list`**
+- narrow text width: **`max-width: 38rem`** on **`.content-clamp--text`** (Batch 32 — never a `:root` token)
 - utility: `.content-clamp`
 
 Utility variants:
@@ -45,14 +47,15 @@ Utility variants:
 
 Definition:
 
-- `.content-clamp`: `max-width: var(--content-clamp-default)`
+- `.content-clamp`: `max-width: 45rem` (literal in **`clamp.scss`**)
 - `.content-clamp--text`: `max-width: 38rem` (literal in **`clamp.scss`** — Batch 32)
+- `.content-clamp--list`: `max-width: 52rem` (literal in **`clamp.scss`**)
 - `width: 100%`
 - `margin-inline: auto`
 
 Required use:
 
-- Apply the semantic clamp variant by surface type: text/form surfaces use **`.content-clamp--text`** (narrow **`38rem`**), balanced detail surfaces use the base `.content-clamp` (default max-width token), list/grid surfaces use **`--list`**.
+- Apply the semantic clamp variant by surface type: text/form surfaces use **`.content-clamp--text`** (narrow **`38rem`**), balanced detail surfaces use the base **`.content-clamp`** (**`45rem`**), list/grid surfaces use **`.content-clamp--list`** (**`52rem`**).
 
 ## Overlay Scale
 

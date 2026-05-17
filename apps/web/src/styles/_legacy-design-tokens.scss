@@ -36,21 +36,21 @@
   --radius-full: 9999px;
 
   // Shadows — warm-tinted black (not cold blue)
-  // Physical shadow scale: sm → md → lg → xl
+  // Physical shadow scale: `sm` stays warm-tinted here; `md|lg|xl` live on tweakcn `:root` (Batch 39).
+  // Phase 7 Batch 39: removed duplicate `--shadow-md|lg|xl` rows — tweakcn `:root` + dark palette
+  // already define the same names before this bridge; legacy only differed in warm rgba vs hsl.
+  // @see docs/migration/phase-7-token-migration.md §Batch 39
   --shadow-sm:
     0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.12), 0 0.0625rem 0.125rem rgba(15, 14, 12, 0.08);
-  --shadow-md: 0 0.25rem 0.75rem rgba(15, 14, 12, 0.15), 0 0.125rem 0.25rem rgba(15, 14, 12, 0.1);
-  --shadow-lg: 0 0.5rem 1.5rem rgba(15, 14, 12, 0.18), 0 0.25rem 0.5rem rgba(15, 14, 12, 0.12);
-  --shadow-xl: 0 1rem 3rem rgba(15, 14, 12, 0.22), 0 0.375rem 1rem rgba(15, 14, 12, 0.14);
 
   // State shadow alias for focus emphasis (light: ring lives on `--interactive-focus-ring` only).
   --shadow-focus: var(--shadow-sm);
 
   // Border variables (metric `--border-sm`…`--border-xl` removed — zero `var()` consumers; Batch 28)
-  --border-hover: 0.1875rem solid
-    color-mix(in srgb, var(--primary) 55%, var(--border));
+  // `--border-hover` removed — Batch 39 (single callsite `media-item.component.scss` inlines border).
 
-  // Elevation aliases (`--elevation-*`) removed — Batch 37; use `var(--shadow-sm|md|lg|xl)` directly (dark mixin still owns `--shadow-*`).
+  // Elevation aliases (`--elevation-*`) removed — Batch 37; use `var(--shadow-sm|md|lg|xl)` directly.
+  // Batch 39: bridge keeps warm `--shadow-sm` + composite `--shadow-focus`; `md|lg|xl` come from tweakcn only.
 
   // Z-index stacking ladder (audit issue #2, #13); map base plane uses literal `0` at `.map-container` (Batch 32).
   // `--z-toast` removed (Batch 35) — `toast-container.component.scss` uses literal `400` between dropdown (300) and modal (500).
@@ -77,9 +77,9 @@
   --font-size-lg: calc(var(--font-size-md) * 1.13);
   --font-size-xl: calc(var(--font-size-lg) * 1.13);
   --font-size-2xl: calc(var(--font-size-xl) * 1.13);
-  // 3xl step removed (Batch 33) — single callsite in settings uses `calc(var(--font-size-2xl) * 1.13)`; 4xl chains from 2xl.
+  // 3xl step removed (Batch 33) — single callsite in settings uses `calc(var(--font-size-2xl) * 1.13)`.
   // @see docs/migration/phase-7-token-migration.md § Batch 33
-  --font-size-4xl: calc(var(--font-size-2xl) * 1.13 * 1.13);
+  // `--font-size-4xl` removed — Batch 40 (three callsites inline `calc(var(--font-size-2xl) * 1.13 * 1.13)`).
 
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -97,18 +97,14 @@
   // Container geometry — containers define the alignment boundaries that
   // nested content, dropdowns, and panels should inherit.
   // `--container-inset` / `--container-inset-mobile` removed — Batch 38 (both were `var(--spacing-3)`; callsites use `var(--spacing-3)`).
-  --container-padding-inline-panel: var(--spacing-1);
-  --container-padding-block-panel: var(--spacing-1);
-  --container-padding-inline-compact: var(--spacing-3);
-  --container-padding-block-compact: var(--spacing-2);
-  --container-gap-panel: var(--spacing-1);
-  --container-gap: var(--spacing-2);
+  // Batch 40: removed `--container-padding-inline-panel|block-panel`, `--container-padding-inline|block-compact`,
+  // `--container-gap-panel`, `--container-gap` — alias-only rows; callsites use `var(--spacing-1|2|3)` directly.
+  // @see docs/migration/phase-7-token-migration.md §Batch 40
   --container-radius-control: var(--radius-md);
   --container-radius-panel: var(--radius-lg);
 
-  // Photo marker — body square uses `calc(var(--spacing-6) * 1.25)` inlined in `_map-shell-leaflet-global.scss` (Batch 38); drop shadow stays theme-aware here + dark mixin.
+  // Photo marker — body square uses `calc(var(--spacing-6) * 1.25)` inlined in `_map-shell-leaflet-global.scss` (Batch 38); drop shadow inlined same file (Batch 39).
   // Hit ring, correction dot, and selected scale literals inlined in `_map-shell-leaflet-global.scss` (Batch 35).
-  --photo-marker-drop-shadow: 0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.45);
 
   // Content width max (`45rem` / `52rem`) inlined in `clamp.scss` + `settings-overlay.component.scss` (Batch 38); settings min widths inlined Batch 35.
   // Sidebar row/column metrics live on `NavComponent` (Phase 7 Batch 33 — removed `--layout-sidebar-*` bridge rows).
@@ -123,7 +119,7 @@
 
   /* Durations */
   --motion-duration-fast: 100ms;
-  --motion-duration-slow: 300ms;
+  // `--motion-duration-slow` removed — Batch 40 (four callsites use literal `300ms`).
 
   /* Easings */
   --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
@@ -132,17 +128,17 @@
 
   // Component-role aliases (Theme Contract layer C)
   // Action controls
-  --action-bg-default: transparent;
+  // `--action-bg-default` removed — Batch 40 (`transparent` at three callsites).
   --action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
-  --action-border-active: color-mix(in srgb, var(--primary) 45%, var(--border));
+  // `--action-border-active` removed — Batch 39 (`project-card.component.scss` inlines mix + sandstone branch).
   --action-text-default: var(--muted-foreground);
   --action-text-active: var(--primary);
 
   // Menu and option surfaces
-  --menu-surface-bg: var(--popover);
+  // `--menu-surface-bg` removed — Batch 39 (`captured-date-editor.component.scss` → `var(--popover)`).
   --menu-surface-border: color-mix(in srgb, var(--border) 72%, transparent);
   --menu-item-bg-hover: color-mix(in srgb, var(--primary) 8%, transparent);
-  --menu-item-bg-active: color-mix(in srgb, var(--primary) 12%, transparent);
+  // `--menu-item-bg-active` removed — Batch 39 (`media-detail-view.component.part2.scss` inlines mix).
   --menu-item-text: var(--foreground);
   // `--menu-item-text-active` removed — Batch 38 (alias of `var(--primary)`; single callsite in `media-detail-view.component.part2.scss`).
 
@@ -154,12 +150,12 @@
   --field-text: var(--foreground);
 
   // Settings sections and cards
-  --section-bg: var(--card);
-  --section-text: var(--muted-foreground);
+  // `--section-bg` removed — Batch 39 (call sites use `var(--card)` in media-detail SCSS).
+  // `--section-text` removed — Batch 40 (`var(--muted-foreground)` + sandstone `#66594a` in `media-detail-view.component.part2.scss`).
 
   // Feedback states
-  --state-warning-bg: color-mix(in srgb, var(--warning) 12%, transparent);
-  --state-danger-bg: color-mix(in srgb, var(--destructive) 12%, transparent);
+  // `--state-warning-bg` removed — Batch 39 (`media-detail-view.component.part2.scss` inlines mix).
+  // `--state-danger-bg` removed — Batch 39 (`auth.styles.scss` inlines mix).
 }
 
 @mixin dark-theme-overrides {
@@ -168,23 +164,13 @@
   --shadow-sm:
     0 0.0625rem 0.1875rem color-mix(in srgb, var(--shadow-color) 28%, transparent),
     0 0.0625rem 0.125rem color-mix(in srgb, var(--shadow-color) 18%, transparent);
-  --shadow-md:
-    0 0.25rem 0.75rem color-mix(in srgb, var(--shadow-color) 38%, transparent),
-    0 0.125rem 0.25rem color-mix(in srgb, var(--shadow-color) 22%, transparent);
-  --shadow-lg:
-    0 0.5rem 1.5rem color-mix(in srgb, var(--shadow-color) 48%, transparent),
-    0 0.25rem 0.5rem color-mix(in srgb, var(--shadow-color) 28%, transparent);
-  --shadow-xl:
-    0 1rem 3rem color-mix(in srgb, var(--shadow-color) 56%, transparent),
-    0 0.375rem 1rem color-mix(in srgb, var(--shadow-color) 32%, transparent);
+  // Batch 39: `md|lg|xl` shadow overrides removed — tweakcn dark palette supplies the same names.
 
   --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
   --shadow-focus: var(--shadow-sm),
     0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
 
-  --border-hover: 0.1875rem solid
-    color-mix(in srgb, var(--primary) 30%, var(--border));
-  --photo-marker-drop-shadow: 0 0.0625rem 0.25rem color-mix(in srgb, var(--shadow-color) 65%, transparent);
+  // Batch 39: `--border-hover` / `--photo-marker-drop-shadow` removed (inlined at callsites).
 }
 
 // ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
@@ -196,14 +182,11 @@
 // Activate manually via: document.documentElement.setAttribute('data-theme', 'sandstone')
 [data-theme='sandstone'] {
   --action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
-  --action-border-active: color-mix(in srgb, var(--primary) 52%, var(--border));
   --action-text-default: #6b5a47;
   --action-text-active: var(--primary);
 
-  --menu-surface-bg: #fffaf2;
   --menu-surface-border: color-mix(in srgb, #a38d73 44%, transparent);
   --menu-item-bg-hover: color-mix(in srgb, #c59f63 14%, transparent);
-  --menu-item-bg-active: color-mix(in srgb, var(--primary) 18%, transparent);
   --menu-item-text: #2f271f;
 
   --field-bg: #fffdf8;
@@ -212,11 +195,6 @@
   --field-placeholder: #9f8d78;
   --field-text: #2f271f;
 
-  --section-bg: #fdf8ef;
-  --section-text: #66594a;
-
-  --state-warning-bg: color-mix(in srgb, #d08b36 24%, transparent);
-  --state-danger-bg: color-mix(in srgb, #ba4b44 18%, transparent);
 }
 
 // ── Dark-mode tokens — system preference fallback (audit issue #10) ───────────

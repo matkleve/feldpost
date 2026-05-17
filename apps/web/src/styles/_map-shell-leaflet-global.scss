@@ -43,7 +43,9 @@ app-map-shell {
     justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
-    filter: drop-shadow(var(--photo-marker-drop-shadow));
+    // Light default drop shadow (Batch 39: ex `--photo-marker-drop-shadow` bridge)
+    // @see docs/migration/phase-7-token-migration.md §Batch 39
+    filter: drop-shadow(0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.45));
     transform-origin: center center;
     transition: transform 200ms ease-in-out;
 
@@ -318,5 +320,17 @@ app-map-shell {
     box-shadow:
       0 0 0 4px color-mix(in srgb, var(--primary) 30%, transparent),
       var(--shadow-sm);
+  }
+}
+
+// Dark / system-dark photo marker shadow (Batch 39: ex `--photo-marker-drop-shadow` in `dark-theme-overrides`)
+// @see docs/migration/phase-7-token-migration.md §Batch 39
+[data-theme='dark'] app-map-shell .map-photo-marker {
+  filter: drop-shadow(0 0.0625rem 0.25rem color-mix(in srgb, var(--shadow-color) 65%, transparent));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) app-map-shell .map-photo-marker {
+    filter: drop-shadow(0 0.0625rem 0.25rem color-mix(in srgb, var(--shadow-color) 65%, transparent));
   }
 }

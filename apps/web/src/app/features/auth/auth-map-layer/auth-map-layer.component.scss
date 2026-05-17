@@ -9,7 +9,7 @@
   z-index: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--motion-duration-slow) var(--motion-ease-out);
+  transition: opacity 300ms var(--motion-ease-out);
 }
 
 .auth-map-layer--ready {

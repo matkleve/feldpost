@@ -67,7 +67,9 @@
 :host(:hover) .media-item__frame {
   box-shadow: var(--shadow-md);
 
-  border: var(--border-hover);
+  // Hover border — Batch 39: inlined ex `--border-hover` (single compromise mix vs light 55% / dark 30% split)
+  // @see docs/migration/phase-7-token-migration.md §Batch 39
+  border: 0.1875rem solid color-mix(in srgb, var(--primary) 45%, var(--border));
 }
 
 /* --- RESTLICHE ELEMENTE --- */

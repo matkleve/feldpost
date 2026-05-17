@@ -183,7 +183,7 @@
   padding: 0 var(--spacing-2);
   border-radius: var(--radius-pill);
   border: 1px solid var(--menu-surface-border);
-  background: color-mix(in srgb, var(--section-bg) 78%, var(--field-bg));
+  background: color-mix(in srgb, var(--card) 78%, var(--field-bg));
   color: var(--muted-foreground);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-bold);

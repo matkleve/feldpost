@@ -2,6 +2,18 @@
   display: block;
 }
 
+// Sandstone used stronger primary/border mix for hover border (ex bridge `--action-border-active`)
+// @see docs/migration/phase-7-token-migration.md §Batch 39
+:host-context(html[data-theme='sandstone']) {
+  .project-card:hover {
+    border-color: color-mix(
+      in srgb,
+      color-mix(in srgb, var(--primary) 52%, var(--border)) 58%,
+      var(--project-item-color, var(--border))
+    );
+  }
+}
+
 // Card container: grid layout, themed border from project color
 // @see project-card.md
 .project-card {
@@ -17,7 +29,11 @@
   transition: var(--interactive-transition-standard);
 
   &:hover {
-    border-color: color-mix(in srgb, var(--action-border-active) 58%, var(--project-item-color, var(--border)));
+    border-color: color-mix(
+      in srgb,
+      color-mix(in srgb, var(--primary) 45%, var(--border)) 58%,
+      var(--project-item-color, var(--border))
+    );
     background: color-mix(in srgb, var(--action-bg-hover) 18%, var(--card));
   }
 

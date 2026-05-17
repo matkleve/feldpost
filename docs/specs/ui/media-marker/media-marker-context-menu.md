@@ -11,7 +11,7 @@ Primary use cases are: quick inspection (`Details oeffnen` / `Auswahl oeffnen`),
 
 ## What It Looks Like
 
-Desktop uses a compact popover anchored to the marker hit zone. Mobile uses a bottom action sheet with the same action order. The surface follows the shared dropdown shell: `--color-bg-elevated`, `1px` border (`--color-border`), `box-shadow: var(--shadow-lg)` (physical stack in [`docs/design/tokens.md`](../../../design/tokens.md) §3.5), `--radius-lg`. Action rows use `.dd-item` primitives with `2.75rem` (44px) minimum row height and `0.8125rem` labels. Destructive rows use `.dd-item--danger`.
+Desktop uses a compact popover anchored to the marker hit zone. Mobile uses a bottom action sheet with the same action order. The surface follows the shared dropdown shell: `--color-bg-elevated`, `1px` border (`--color-border`), `box-shadow: var(--shadow-lg)` (**tweakcn `:root`** — **Batch 39** deduped legacy bridge; reference [`docs/design/tokens.md`](../../../design/tokens.md) §3.5), `--radius-lg`. Action rows use `.dd-item` primitives with `2.75rem` (44px) minimum row height and `0.8125rem` labels. Destructive rows use `.dd-item--danger`.
 
 For cluster markers, the menu header shows a compact summary (for example: `12 media items here`) and hides single-item-only actions. For single markers, the header can include thumbnail + capture time preview when available.
 

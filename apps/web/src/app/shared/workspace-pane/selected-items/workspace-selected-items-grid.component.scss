@@ -74,7 +74,7 @@
 }
 
 .thumbnail-grid__empty-icon {
-  font-size: var(--font-size-4xl);
+  font-size: calc(var(--font-size-2xl) * 1.13 * 1.13);
   opacity: 0.5;
 }
 

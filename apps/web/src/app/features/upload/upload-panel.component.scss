@@ -103,7 +103,7 @@
   &__dropzone-icon {
     display: block;
     opacity: 1;
-    font-size: var(--font-size-4xl);
+    font-size: calc(var(--font-size-2xl) * 1.13 * 1.13);
     line-height: var(--line-height-solid);
     color: var(--muted-foreground);
   }

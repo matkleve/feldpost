@@ -28,12 +28,12 @@
 }
 
 .search-bar {
-  --search-bar-padding-inline: var(--container-padding-inline-panel);
-  --search-bar-padding-block: var(--container-padding-block-panel);
-  --search-bar-gap: var(--container-gap-panel);
-  --search-bar-dropdown-padding-inline: var(--container-padding-inline-panel);
-  --search-bar-dropdown-padding-block: var(--container-padding-block-panel);
-  --search-bar-dropdown-gap: var(--container-gap-panel);
+  --search-bar-padding-inline: var(--spacing-1);
+  --search-bar-padding-block: var(--spacing-1);
+  --search-bar-gap: var(--spacing-1);
+  --search-bar-dropdown-padding-inline: var(--spacing-1);
+  --search-bar-dropdown-padding-block: var(--spacing-1);
+  --search-bar-dropdown-gap: var(--spacing-1);
   --search-bar-media-size: var(--spacing-6);
   --search-bar-row-height: 3rem;
   --search-bar-results-max-block-size: calc(
@@ -41,7 +41,7 @@
   );
   --search-bar-reveal-duration: 180ms;
   --search-dropdown-item-padding-inline: var(--search-bar-padding-inline);
-  --search-dropdown-item-padding-block: var(--container-padding-block-compact);
+  --search-dropdown-item-padding-block: var(--spacing-2);
   --search-dropdown-item-gap: var(--search-bar-gap);
   --search-dropdown-item-radius: var(--container-radius-control);
   --search-dropdown-item-row-min-height: 3rem;

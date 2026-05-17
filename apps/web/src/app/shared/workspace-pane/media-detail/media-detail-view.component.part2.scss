@@ -61,7 +61,7 @@
 
   &--editing {
     position: relative;
-    background: var(--menu-item-bg-active);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
 
     app-captured-date-editor {
       position: absolute;
@@ -265,7 +265,7 @@
     gap: var(--spacing-1);
     border: 1px solid var(--menu-surface-border);
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--section-bg) 88%, transparent);
+    background: color-mix(in srgb, var(--card) 88%, transparent);
     color: var(--menu-item-text);
     min-height: 2rem;
     padding: 0 var(--spacing-2);
@@ -391,7 +391,7 @@
     height: 2rem;
     border: none;
     border-radius: 0.375rem;
-    background: var(--action-bg-default);
+    background: transparent;
     color: var(--action-text-default);
     cursor: pointer;
 
@@ -411,7 +411,7 @@
 
     &--active {
       color: var(--warning);
-      background: var(--state-warning-bg);
+      background: color-mix(in srgb, var(--warning) 12%, transparent);
     }
   }
 
@@ -438,7 +438,7 @@
 
   &__option--selected {
     color: var(--primary);
-    background: var(--menu-item-bg-active);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
   }
 
   &__create {
@@ -446,7 +446,7 @@
   }
 
   &__create-label {
-    color: var(--section-text);
+    color: var(--muted-foreground);
   }
 
   &__create-value {
@@ -462,10 +462,18 @@
   &__note {
     padding: var(--spacing-1) var(--spacing-2);
     border-radius: var(--radius-sm);
-    background: var(--state-warning-bg);
+    background: color-mix(in srgb, var(--warning) 12%, transparent);
     color: var(--muted-foreground);
     font-size: var(--font-size-sm);
     line-height: var(--line-height-compact);
+  }
+}
+
+// Sandstone: former `--section-text` bridge (#66594a) for tag editor create-row label
+// @see docs/migration/phase-7-token-migration.md §Batch 40
+:host-context([data-theme='sandstone']) {
+  .detail-tags__create-label {
+    color: #66594a;
   }
 }
 

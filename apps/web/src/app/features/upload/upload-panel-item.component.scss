@@ -19,11 +19,11 @@
   display: grid;
   grid-template-columns: 2.75rem minmax(0, 1fr);
   align-items: center;
-  column-gap: var(--container-gap);
+  column-gap: var(--spacing-2);
   min-height: 2.5rem;
-  padding-block: var(--container-padding-block-compact);
-  padding-inline-start: var(--container-padding-inline-compact);
-  padding-inline-end: calc(var(--container-padding-inline-compact) + 2rem + var(--spacing-2));
+  padding-block: var(--spacing-2);
+  padding-inline-start: var(--spacing-3);
+  padding-inline-end: calc(var(--spacing-3) + 2rem + var(--spacing-2));
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 62%, transparent);
   box-shadow: var(--shadow-sm);
@@ -185,7 +185,7 @@
 .upload-panel__row-action {
   position: absolute;
   top: 50%;
-  right: var(--container-padding-inline-compact);
+  right: var(--spacing-3);
   transform: translateY(-50%);
   z-index: 2;
 }

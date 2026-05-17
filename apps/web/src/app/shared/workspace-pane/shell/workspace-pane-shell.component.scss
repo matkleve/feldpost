@@ -34,7 +34,7 @@
     right: 0;
     z-index: var(--z-panel);
     border-radius: 0;
-    animation: workspace-pane-shell-clip-in-up var(--motion-duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
+    animation: workspace-pane-shell-clip-in-up 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 

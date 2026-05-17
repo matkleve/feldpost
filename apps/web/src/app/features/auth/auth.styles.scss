@@ -139,7 +139,7 @@ hlm-form-field.field .field-error {
   padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-md);
   margin-bottom: var(--spacing-4);
-  background: var(--state-danger-bg);
+  background: color-mix(in srgb, var(--destructive) 12%, transparent);
   color: var(--destructive);
   border: 1px solid color-mix(in srgb, var(--destructive) 40%, var(--border));
 }

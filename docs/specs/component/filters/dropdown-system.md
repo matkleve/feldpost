@@ -108,6 +108,8 @@ border-radius: --radius-lg  (8px)
 box-shadow:    var(--shadow-lg)
 ```
 
+**Shadow ladder:** **`var(--shadow-lg)`** resolves from **tweakcn `:root`** (Phase 7 **Batch 39** removed duplicate **`--shadow-*`** rows from **`_legacy-design-tokens.scss`** — see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5).
+
 Composable class table, hover token, and item geometry: **[dropdown-system.class-library.supplement.md](./dropdown-system.class-library.supplement.md)**.
 
 ## Where It Lives

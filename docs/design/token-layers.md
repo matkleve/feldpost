@@ -20,8 +20,8 @@ Global design primitives that represent raw design values.
 
 - Color foundations: `--color-bg-*`, `--color-border*`, `--color-text-*`, semantic states
 - Radius: `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full`
-- Elevation / depth: bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`** on **`_legacy-design-tokens.scss`** (dark mixin overrides **`--shadow-*`**). **Phase 7 Batch 37** removed **`--elevation-subtle`**, **`--elevation-overlay`**, and **`--elevation-dropdown`** from the bridge — do not reintroduce those names (**Batch 35** already removed **`--elevation-modal`**).
-- Spacing/layout: `--spacing-*`, `--container-*`, `--ui-item-*`
+- Elevation / depth: bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**. **Phase 7 Batch 39:** **`--shadow-sm`** (and **`--shadow-focus`**) are defined on **`_legacy-design-tokens.scss`**; **`--shadow-md|lg|xl`** are **tweakcn `:root`** names (legacy bridge duplicate rows removed — dark mixin adjusts **`sm`/`focus` only**). **Batch 37** removed **`--elevation-subtle`**, **`--elevation-overlay`**, and **`--elevation-dropdown`** — do not reintroduce those names (**Batch 35** already removed **`--elevation-modal`**).
+- Spacing/layout: `--spacing-*`, **`--container-padding-*` / `--container-gap-*` / `--container-radius-*`** (and other remaining **`--container-*`** rows), **`--ui-item-*`**. **Phase 7 Batch 38** removed **`--container-inset`** / **`--container-inset-mobile`** — use **`var(--spacing-3)`** (or the spacing step your callsite already chose) instead of those names.
 
 ### Layer B: Interaction Aliases
 
@@ -39,20 +39,18 @@ Role-level aliases consumed by reusable UI primitives and feature components.
 
 - `--action-bg-default`
 - `--action-bg-hover`
-- `--action-bg-active`
-- `--action-border-default`
-- `--action-border-active`
 - `--action-text-default`
 - `--action-text-active`
+- **`--action-border-active`** — **removed Batch 39** — inlined at **`project-card.component.scss`** (default + Sandstone branch); do not document as a bridge **`:root`** row.
 
 2. Menu and option surfaces
 
-- `--menu-surface-bg`
+- **`--menu-surface-bg`** — **removed from bridge Batch 39** — use **`var(--popover)`** (or **`var(--card)`**) at callsites; do not document as a Layer C bridge row.
 - `--menu-surface-border`
 - `--menu-item-bg-hover`
-- `--menu-item-bg-active`
+- **`--menu-item-bg-active`** — **removed Batch 39** — inline **`color-mix(in srgb, var(--primary) 12%, transparent)`** ([**`docs/migration/phase-7-token-migration.md`**](../migration/phase-7-token-migration.md) §Batch 39).
 - `--menu-item-text`
-- `--menu-item-text-active`
+- **Active menu item label ink:** **`var(--primary)`** at callsites (**Phase 7 Batch 38** removed **`--menu-item-text-active`** from the bridge — it duplicated **`var(--primary)`**).
 
 3. Form controls
 
@@ -64,13 +62,12 @@ Role-level aliases consumed by reusable UI primitives and feature components.
 
 4. Settings sections and cards
 
-- `--section-bg`
-- `--section-text`
+- **`--section-bg`** — **removed from bridge Batch 39** — use **`var(--card)`** (often inside **`color-mix`**) instead of a Layer C **`--section-bg`** name.
+- **`--section-text`** — **still on the bridge** (Feldpost-only section-label ink; Sandstone theme block overrides it). Prefer **`var(--muted-foreground)`** for new work when this alias is not required.
 
 5. Feedback states
 
-- `--state-warning-bg`
-- `--state-danger-bg`
+- **`--state-warning-bg`** / **`--state-danger-bg`** — **removed Batch 39** — use **`color-mix(in srgb, var(--warning|destructive) 12%, transparent)`** at callsites ([**`docs/migration/phase-7-token-migration.md`**](../migration/phase-7-token-migration.md) §Batch 39); do not prescribe these names as **`:root`** bridge tokens.
 
 ## Consumption Rules
 
