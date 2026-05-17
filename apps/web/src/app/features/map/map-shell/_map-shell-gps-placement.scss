@@ -1,0 +1,100 @@
+// GPS locate control and placement-mode banner anchored to the map zone.
+// @see docs/migration/phase-8-global-scss-elimination.md (map-shell partial split)
+
+.map-gps-btn {
+  --touch-target-base: 2.75rem; // ≈44px desktop
+  --touch-target-mobile: 3rem; // ≈48px mobile
+
+  position: absolute;
+  bottom: var(--spacing-5);
+  right: var(--spacing-4);
+  z-index: var(--z-upload-button);
+  width: var(--touch-target-base);
+  height: var(--touch-target-base);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--elevation-overlay);
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out,
+    transform 120ms ease-out;
+
+  .material-icons {
+    font-size: var(--font-size-xl);
+  }
+
+  &:hover {
+    background: var(--popover);
+    color: var(--foreground);
+    transform: scale(1.04);
+  }
+
+  &__spinner {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: var(--radius-full);
+    border: 2px solid color-mix(in srgb, currentcolor 24%, transparent);
+    border-top-color: currentcolor;
+    animation: gps-btn-spin 700ms linear infinite;
+  }
+
+  &--active,
+  &--locating {
+    color: var(--primary);
+  }
+
+  @media (max-width: 47.9375rem) {
+    width: var(--touch-target-mobile);
+    height: var(--touch-target-mobile);
+  }
+}
+
+@keyframes gps-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.map-placement-banner {
+  position: absolute;
+  bottom: var(--spacing-5);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-upload-button);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--popover);
+  border-radius: var(--radius-full);
+  box-shadow: var(--elevation-overlay);
+  color: var(--foreground);
+  font-size: var(--font-size-md);
+  white-space: nowrap;
+
+  .material-icons {
+    font-size: var(--font-size-base);
+    color: var(--primary);
+  }
+
+  &__cancel {
+    padding: 0.125rem var(--spacing-3); // 2px top/bottom
+    border: 1px solid color-mix(in srgb, var(--border) 78%, var(--foreground));
+    border-radius: var(--radius-full);
+    background: none;
+    color: var(--muted-foreground);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    transition: background 80ms ease-out;
+
+    &:hover {
+      background: var(--background);
+    }
+  }
+}

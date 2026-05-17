@@ -1,12 +1,12 @@
 /**
- * Default toolbar menu min-width — keep in sync with `dropdown-shell.component.scss`
- * `:host.toolbar-dropdown` (`min(26rem, calc(100vw - 2rem))`; **26rem === 416px** at 16px root).
+ * Toolbar menu width for `left` clamp — keep in sync with `dropdown-shell.component.scss` `:host.toolbar-dropdown`.
+ * TEST: **18rem === 288px** at 16px root (revert with shell SCSS to 416 / 512 when done experimenting).
  * @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
  */
-export const TOOLBAR_MENU_PANEL_MIN_PX = 416;
+export const TOOLBAR_MENU_PANEL_MIN_PX = 288;
 
-/** Wider filter panel floor — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--filter` (**32rem === 512px** at 16px root). */
-export const TOOLBAR_MENU_FILTER_PANEL_MIN_PX = 512;
+/** TEST: same width as other toolbar panels (18rem); restore 512 when filter shell is wider again. */
+export const TOOLBAR_MENU_FILTER_PANEL_MIN_PX = 288;
 
 /** Viewport clamp width for toolbar shell positioning (sort, grouping, projects, and non-filter panels). */
 export const TOOLBAR_MENU_SHELL_MIN_PX = TOOLBAR_MENU_PANEL_MIN_PX;

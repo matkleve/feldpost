@@ -15,165 +15,16 @@
      live in docs/design/tokens.md §3.1a — not emitted as --fp-ref-* on :root
      (Batch 5b). MD3 --fp-sys-color-* rows removed — no SCSS/TS/HTML
      `var()` consumers for that prefix under apps/web (Phase 7 Batch 16).
-     @see docs/migration/phase-7-token-migration.md § Batch 16
+     Remaining non-color `--fp-sys-*` bridge rows removed in Batch 17 — see same doc.
+     @see docs/migration/phase-7-token-migration.md § Batch 16 / § Batch 17
      ═══════════════════════════════════════════════════════════════════════ */
 
-  // ── fp-sys: Shape (border-radius scale) ───────────────────────────────────
-  // Resolves to same px as prior literals via `--radius-*` / `--spacing-5` (24px) in this :root block.
-  --fp-sys-shape-none:         0;
-  --fp-sys-shape-extra-small:  var(--radius-sm);
-  --fp-sys-shape-small:        var(--radius-md);
-  --fp-sys-shape-medium:       var(--radius-md-plus);
-  --fp-sys-shape-large:        var(--radius-lg);
-  // Distinct names avoid sync-tokens nesting collision with --fp-sys-shape-large
-  // Figma var(--radius-lg-plus) → 20px
-  --fp-sys-shape-radius-20:    var(--radius-lg-plus);
-  // Figma radius/r-24 → 24px (= --spacing-5)
-  --fp-sys-shape-radius-24:    var(--spacing-5);
-  --fp-sys-shape-extra-large:  var(--radius-xl);
-  --fp-sys-shape-full:         var(--radius-full);
-
-  // ── fp-sys: Spacing (4px base grid) ───────────────────────────────────────
-  // Aligns with `--spacing-*` / tailwind.config.js; 20px + 40px keep literals (no spacing-N match).
-  --fp-sys-spacing-0:   0;
-  --fp-sys-spacing-1:   var(--spacing-1);
-  --fp-sys-spacing-2:   var(--spacing-2);
-  --fp-sys-spacing-3:   var(--spacing-3);
-  --fp-sys-spacing-4:   var(--spacing-4);
-  --fp-sys-spacing-5:   1.25rem; // 20px
-  --fp-sys-spacing-6:   var(--spacing-5);
-  --fp-sys-spacing-8:   var(--spacing-6);
-  --fp-sys-spacing-10:  2.5rem; // 40px
-  --fp-sys-spacing-12:  var(--spacing-7);
-  --fp-sys-spacing-16:  var(--spacing-8);
-
-  // ── fp-sys: Elevation (box-shadow levels 0–5) ──────────────────────────────
-  // Derives shadow ink from tweakcn `--shadow-color` (tracks theme; Phase 7 Batch 10).
-  // @see docs/migration/phase-7-token-migration.md § Batch 10
-  --fp-sys-elevation-0: none;
-  --fp-sys-elevation-1:
-    0px 1px 2px color-mix(in srgb, var(--shadow-color) 30%, transparent),
-    0px 1px 3px 1px color-mix(in srgb, var(--shadow-color) 15%, transparent);
-  --fp-sys-elevation-2:
-    0px 1px 2px color-mix(in srgb, var(--shadow-color) 30%, transparent),
-    0px 2px 6px 2px color-mix(in srgb, var(--shadow-color) 15%, transparent);
-  --fp-sys-elevation-3:
-    0px 1px 3px color-mix(in srgb, var(--shadow-color) 30%, transparent),
-    0px 4px 8px 3px color-mix(in srgb, var(--shadow-color) 15%, transparent);
-  --fp-sys-elevation-4:
-    0px 2px 3px color-mix(in srgb, var(--shadow-color) 30%, transparent),
-    0px 6px 10px 4px color-mix(in srgb, var(--shadow-color) 15%, transparent);
-  --fp-sys-elevation-5:
-    0px 4px 4px color-mix(in srgb, var(--shadow-color) 30%, transparent),
-    0px 8px 12px 6px color-mix(in srgb, var(--shadow-color) 15%, transparent);
-
-  // ── fp-sys: Typescale (15 roles × size / line-height / weight / tracking) ──
-  // Display
-  --fp-sys-typescale-display-large-size:         3.5625rem;
-  --fp-sys-typescale-display-large-line-height:  4rem;
-  --fp-sys-typescale-display-large-weight:       400;
-  --fp-sys-typescale-display-large-tracking:     -0.015625rem;
-
-  --fp-sys-typescale-display-medium-size:        2.8125rem;
-  --fp-sys-typescale-display-medium-line-height: 3.25rem;
-  --fp-sys-typescale-display-medium-weight:      400;
-  --fp-sys-typescale-display-medium-tracking:    0rem;
-
-  --fp-sys-typescale-display-small-size:         2.25rem;
-  --fp-sys-typescale-display-small-line-height:  2.75rem;
-  --fp-sys-typescale-display-small-weight:       400;
-  --fp-sys-typescale-display-small-tracking:     0rem;
-
-  // Headline
-  --fp-sys-typescale-headline-large-size:         2rem;
-  --fp-sys-typescale-headline-large-line-height:  2.5rem;
-  --fp-sys-typescale-headline-large-weight:       400;
-  --fp-sys-typescale-headline-large-tracking:     0rem;
-
-  --fp-sys-typescale-headline-medium-size:        1.75rem;
-  --fp-sys-typescale-headline-medium-line-height: 2.25rem;
-  --fp-sys-typescale-headline-medium-weight:      400;
-  --fp-sys-typescale-headline-medium-tracking:    0rem;
-
-  --fp-sys-typescale-headline-small-size:         1.5rem;
-  --fp-sys-typescale-headline-small-line-height:  2rem;
-  --fp-sys-typescale-headline-small-weight:       400;
-  --fp-sys-typescale-headline-small-tracking:     0rem;
-
-  // Title
-  --fp-sys-typescale-title-large-size:         1.375rem;
-  --fp-sys-typescale-title-large-line-height:  1.75rem;
-  --fp-sys-typescale-title-large-weight:       400;
-  --fp-sys-typescale-title-large-tracking:     0rem;
-
-  --fp-sys-typescale-title-medium-size:        1rem;
-  --fp-sys-typescale-title-medium-line-height: 1.5rem;
-  --fp-sys-typescale-title-medium-weight:      500;
-  --fp-sys-typescale-title-medium-tracking:    0.009375rem;
-
-  --fp-sys-typescale-title-small-size:         0.875rem;
-  --fp-sys-typescale-title-small-line-height:  1.25rem;
-  --fp-sys-typescale-title-small-weight:       500;
-  --fp-sys-typescale-title-small-tracking:     0.00625rem;
-
-  // Body
-  --fp-sys-typescale-body-large-size:         1rem;
-  --fp-sys-typescale-body-large-line-height:  1.5rem;
-  --fp-sys-typescale-body-large-weight:       400;
-  --fp-sys-typescale-body-large-tracking:     0.03125rem;
-
-  --fp-sys-typescale-body-medium-size:        0.875rem;
-  --fp-sys-typescale-body-medium-line-height: 1.25rem;
-  --fp-sys-typescale-body-medium-weight:      400;
-  --fp-sys-typescale-body-medium-tracking:    0.015625rem;
-
-  --fp-sys-typescale-body-small-size:         0.75rem;
-  --fp-sys-typescale-body-small-line-height:  1rem;
-  --fp-sys-typescale-body-small-weight:       400;
-  --fp-sys-typescale-body-small-tracking:     0.025rem;
-
-  // Label
-  --fp-sys-typescale-label-large-size:         0.875rem;
-  --fp-sys-typescale-label-large-line-height:  1.25rem;
-  --fp-sys-typescale-label-large-weight:       500;
-  --fp-sys-typescale-label-large-tracking:     0.00625rem;
-
-  --fp-sys-typescale-label-medium-size:        0.75rem;
-  --fp-sys-typescale-label-medium-line-height: 1rem;
-  --fp-sys-typescale-label-medium-weight:      500;
-  --fp-sys-typescale-label-medium-tracking:    0.03125rem;
-
-  --fp-sys-typescale-label-small-size:         0.6875rem;
-  --fp-sys-typescale-label-small-line-height:  0.75rem;
-  --fp-sys-typescale-label-small-weight:       500;
-  --fp-sys-typescale-label-small-tracking:     0.03125rem;
-
-  // ── fp-sys: State layers (interaction surface opacities) ──────────────────
-  --fp-sys-state-hover:    0.08;
-  --fp-sys-state-focus:    0.12;
-  --fp-sys-state-pressed:  0.12;
-  --fp-sys-state-dragged:  0.16;
-  --fp-sys-state-disabled: 0.38;
-
-  // ── fp-sys: Motion ─────────────────────────────────────────────────────────
-  // Durations
-  --fp-sys-motion-duration-short1:  50ms;
-  --fp-sys-motion-duration-short2:  100ms;
-  --fp-sys-motion-duration-short3:  150ms;
-  --fp-sys-motion-duration-short4:  200ms;
-  --fp-sys-motion-duration-medium1: 250ms;
-  --fp-sys-motion-duration-medium2: 300ms;
-  --fp-sys-motion-duration-medium3: 350ms;
-  --fp-sys-motion-duration-medium4: 400ms;
-  --fp-sys-motion-duration-long1:   450ms;
-  --fp-sys-motion-duration-long2:   500ms;
-  // Easings
-  --fp-sys-motion-easing-standard:              cubic-bezier(0.2, 0, 0, 1);
-  --fp-sys-motion-easing-standard-decelerate:   cubic-bezier(0, 0, 0, 1);
-  --fp-sys-motion-easing-standard-accelerate:   cubic-bezier(0.3, 0, 1, 1);
-  --fp-sys-motion-easing-emphasized:            cubic-bezier(0.2, 0, 0, 1);
-  --fp-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
-  --fp-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  // Phase 7 Batch 17: removed dead `--fp-sys-shape-*`, `--fp-sys-spacing-*`,
+  // `--fp-sys-elevation-*`, `--fp-sys-typescale-*`, `--fp-sys-state-*`,
+  // `--fp-sys-motion-*` (zero var() call sites for any `--fp-sys-*` name under
+  // apps/web before edit — per-prefix rg table in docs/migration/phase-7-token-migration.md
+  // § Batch 17). Use `--radius-*`, `--spacing-*`, `--shadow-*` / `--elevation-*`,
+  // `--font-size-*` / `tokens.md` §3.1e, `--motion-*`, and tweakcn semantics in implementation.
 
   // Figma Base.scale (px): implement with `var(--spacing-*)` / `var(--radius-*)` — @see docs/migration/phase-7-token-migration.md § Batch 3 (numeric scale definitions removed from this bridge; no app `var()` consumers under `apps/web/src`).
   // Phase 7 Batch 15: removed unused Figma Alias spacing/radius custom properties (no `apps/web/src` consumers; Base scale → `docs/design/tokens.md`).
@@ -525,11 +376,9 @@
   --font-size-caption: var(--font-size-2xs);
   --font-size-label: var(--font-size-2xs);
   --font-size-label-soft: var(--font-size-2xs);
-  --font-size-xs-soft: var(--font-size-xs);
   --font-size-sm-soft: var(--font-size-sm);
   --font-size-sm-strong: var(--font-size-sm);
   --font-size-sm-compact: var(--font-size-sm);
-  --font-size-sm-tight: var(--font-size-sm);
   --font-size-md-compact: var(--font-size-md);
   --font-size-md-soft: var(--font-size-md);
   --font-size-md-emphasis: var(--font-size-md);
@@ -538,6 +387,5 @@
   --font-size-base-strong: var(--font-size-lg);
   --font-size-base-plus: var(--font-size-lg);
   --font-size-base-emphasis: var(--font-size-lg);
-  --font-size-lg-emphasis: var(--font-size-lg);
   --font-size-5xl: var(--font-size-4xl);
 }

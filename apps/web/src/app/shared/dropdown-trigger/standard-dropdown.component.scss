@@ -1,6 +1,13 @@
 :host {
-  display: block;
-  min-height: 0;
+  // Menu body geometry (single owner — no inner `.standard-dropdown` wrapper; flex from `host.class` Tailwind).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  max-height: inherit;
+  box-sizing: border-box;
+  padding-inline: var(--std-dropdown-padding-inline);
+  // Bottom inset between last row (items or footer) and shell chrome — single owner; avoids `pb-0` hacks on the scroll list.
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  padding-bottom: var(--spacing-2, 0.5rem);
+  width: 100%;
   // Default vertical floor for toolbar menus; filter overrides via `[style.--std-dropdown-min-height]` (see dropdown-system.md).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   --std-dropdown-min-height: 8rem;
@@ -10,22 +17,6 @@
   // Matches `hlmBtn` `size="icon"` (`h-10` / `w-10`) so reserved search-row slots do not jump layout.
   // @see docs/specs/component/filters/dropdown-system.md
   --std-dropdown-search-icon-slot-size: 2.5rem;
-}
-
-.standard-dropdown {
-  display: flex;
-  flex-direction: column;
-  max-height: inherit;
-  min-height: 0;
-  // Owns symmetric horizontal padding for all sections; avoids shell + list double-counting.
-  // @see docs/specs/component/filters/dropdown-system.md
-  box-sizing: border-box;
-  padding-inline: var(--std-dropdown-padding-inline);
-  // Spans the shell width so short lists do not read visually narrower than the toolbar min-width floor.
-  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-  width: 100%;
-  // Stable vertical floor when row counts / empty states change; max-height still comes from menu chrome + shell.
-  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   min-height: var(--std-dropdown-min-height);
 }
 
@@ -92,9 +83,10 @@
 }
 
 // Shared toolbar menu chrome for sort + grouping (same shell floor; identical body width contract).
+// TEST: max body height matches shell `max-height: calc(18rem * 1.6)` so scroll stays inside shell.
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-.workspace-toolbar-menu-panel {
+:host.workspace-toolbar-menu-panel {
   padding-block: 0;
-  max-height: 24rem;
+  max-height: calc(18rem * 1.6);
 }
 

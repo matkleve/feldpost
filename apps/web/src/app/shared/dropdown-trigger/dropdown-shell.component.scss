@@ -1,5 +1,6 @@
 @layer components {
-  // OWNERSHIP: Toolbar menu width floors (26rem / 32rem + viewport clamp) live ONLY on `:host.toolbar-dropdown` below — not on `app-standard-dropdown` or feature panels.
+  // OWNERSHIP: Toolbar menu width / height floors live ONLY on `:host.toolbar-dropdown` below — not on `app-standard-dropdown` or feature panels.
+  // TEST GEOMETRY (revert before ship): 18rem wide, max height 18rem×1.6 — keep `toolbar-menu-panel-layout.ts` px in sync.
   // @see docs/specs/component/filters/dropdown-system.md — Ownership matrix
   // Flex column + scroll; panel chrome comes from `[hlmMenuContent]` (Tailwind + tweakcn tokens).
   // @see docs/specs/component/filters/dropdown-system.md
@@ -10,20 +11,22 @@
     overscroll-behavior: contain;
   }
 
-  // Locks toolbar menu width to the viewport clamp so long rows cannot widen the shell after load/search.
+  // Locks toolbar menu width (test: 18rem) and max height (test: 18rem×1.6) to the viewport clamp.
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   :host.toolbar-dropdown {
     box-sizing: border-box;
-    width: min(26rem, calc(100vw - 2rem));
-    max-width: min(26rem, calc(100vw - 2rem));
-    min-width: min(26rem, calc(100vw - 2rem));
+    width: min(18rem, calc(100vw - 2rem));
+    max-width: min(18rem, calc(100vw - 2rem));
+    min-width: min(18rem, calc(100vw - 2rem));
+    max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
   }
 
-  // Filter: same width lock at the wider rule-row floor (`TOOLBAR_MENU_FILTER_PANEL_MIN_PX` / 32rem at 16px root).
+  // Filter: test geometry matches default toolbar floor (18rem); modifier kept for `toolbarDropdownPanelClass` / future wider floor.
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   :host.toolbar-dropdown.toolbar-dropdown--filter {
-    width: min(32rem, calc(100vw - 2rem));
-    max-width: min(32rem, calc(100vw - 2rem));
-    min-width: min(32rem, calc(100vw - 2rem));
+    width: min(18rem, calc(100vw - 2rem));
+    max-width: min(18rem, calc(100vw - 2rem));
+    min-width: min(18rem, calc(100vw - 2rem));
+    max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
   }
 }

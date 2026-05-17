@@ -9,6 +9,9 @@ import { DropdownSearchActionAnchorDirective } from './dropdown-search-action-an
   imports: [...HLM_BUTTON_IMPORTS, HlmMenuItemDirective],
   templateUrl: './standard-dropdown.component.html',
   styleUrl: './standard-dropdown.component.scss',
+  host: {
+    class: 'standard-dropdown flex min-h-0 flex-1 flex-col gap-y-2',
+  },
 })
 export class StandardDropdownComponent {
   /** When true, keeps a trailing icon slot when no `[dropdown-search-action]` is projected (e.g. sort reset). */
@@ -35,10 +38,10 @@ export class StandardDropdownComponent {
 
   itemsHostClass(): string {
     const extra = this.itemsClass().trim();
-    // When a footer action exists, bottom padding moves to the footer row so the scroll list does not double-stack vertical inset.
-    // @see docs/specs/component/filters/dropdown-system.md
-    const verticalPad = this.actionLabel() ? 'pt-2 pb-0' : 'py-2';
-    const base = `standard-dropdown__items flex flex-1 flex-col gap-0 ${verticalPad} min-h-0 overflow-y-auto overflow-x-hidden`;
+    // Scroll list: no vertical padding — `gap-y-2` on `:host` separates this band from search/footer; avoids asymmetric `pt`/`pb` splits.
+    // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+    const base =
+      'standard-dropdown__items flex flex-1 flex-col gap-0 py-0 min-h-0 overflow-y-auto overflow-x-hidden';
     return extra ? `${base} ${extra}` : base;
   }
 }

@@ -26,7 +26,7 @@ Keep **`rem`**, **`min(..., calc(100vw - 2rem))`**, **`toolbar-menu-panel-layout
 
 **Row chrome:** List rows use **`hlmMenuItem`** (+ `hlmMenuLabel` / `hlmMenuSeparator` where applicable) with variants from `menu-variants.ts` until brain `BrnMenu` ships.
 
-**Menu body (toolbar `app-standard-dropdown`):** `.standard-dropdown` sets **`width: 100%`** (fills the shell floor) and **`min-height: var(--std-dropdown-min-height)`** (default **8rem**, filter **7rem**); **`max-height`** remains owned by menu chrome / scroll regions.
+**Menu body (toolbar `app-standard-dropdown`):** The **component host** sets **`width: 100%`**, **`padding-inline`**, **`padding-bottom: var(--spacing-2)`** (single inset below the last flex child vs shell chrome), and **`min-height: var(--std-dropdown-min-height)`** (default **8rem**, filter **7rem** via host style override); **`max-height`** remains owned by menu chrome / scroll regions. Layout uses **`host.class`** flex utilities (`flex flex-1 flex-col min-h-0 gap-y-2`) — **no** inner `.standard-dropdown` wrapper. **Vertical rhythm:** **`gap-y-2`** on the host separates search row, scroll list, and footer (no asymmetric **`pt-2` / `pb-0`** on `.standard-dropdown__items`). The **search row** keeps **`py-2`** for tap-row internal rhythm only. **`.standard-dropdown__items`** uses **`py-0`**; spacing to neighbors is entirely **`gap-y-2`**.
 
 ### Toolbar menu interaction inventory
 
@@ -65,6 +65,14 @@ Implicit ownership caused “edit the wrong layer, no visible change.” The tab
 **Normative rule:** Do **not** register **`document:keydown.escape`** on toolbar hosts (or any parent) that wrap **`app-dropdown-shell`**. Close the menu by handling **`(closeRequested)`** from the shell only.
 
 ### Stacking (z-index)
+
+#### Open-time stacking owner (normative)
+
+**Single owner:** While a toolbar (or other) menu is open, **stacking for the anchored surface** is owned **only** by the **`DropdownShellComponent` host** — [`apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts`](../../../../apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts) + **`.scss`** — via the host’s inline **`z-index: var(--z-dropdown)`** binding. No other element in the shell subtree is a co-owner of product elevation for that surface.
+
+**`hlmMenu` / `HlmMenuContentDirective` CVA (`z-50` in [`menu-variants.ts`](../../../../apps/web/src/app/shared/ui/menu/menu-variants.ts)):** May apply on the same host; it does **not** establish a parallel stacking contract. On **`app-dropdown-shell`**, the **inline shell token wins** for `z-index`; CVA `z-50` is **subordinate** (see cascade below).
+
+**Parents must not:** Put **`z-index`**, **`isolation`**, or **`transform`** (or other properties that create a **new stacking context**) on layout wrappers around **`app-dropdown-shell`** to chase overlap bugs; do **not** duplicate **`var(--z-dropdown)`** on ancestors “for insurance.” Fix ordering in **shell** / **token** / **map–chrome** contracts — not parent duplication.
 
 **Authoritative value:** `DropdownShellComponent` sets **`[style.z-index]="'var(--z-dropdown)'"`** on its host. This design token is the **intended** product elevation for floating shells (toolbar menus, map menus, upload, etc.).
 

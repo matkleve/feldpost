@@ -16,7 +16,8 @@
  * local `hlmMenuContent`; positioning stays manual until brain ships a menu/popover trigger pair.
  *
  * OWNERSHIP (anchored shell — normative detail in spec):
- * - **Toolbar width floors:** `dropdown-shell.component.scss` only (`:host.toolbar-dropdown`, `.toolbar-dropdown--filter`).
+ * - **Toolbar width / height floors:** `dropdown-shell.component.scss` only (`:host.toolbar-dropdown`, `.toolbar-dropdown--filter`).
+ *   TEST (revert before ship): **18rem** width, **max-height calc(18rem * 1.6)** — keep `toolbarDropdownPositionWidthPx` in sync.
  *   Do not re-declare panel width in feature SCSS. Horizontal `left` clamp: caller TS + `toolbarDropdownPositionWidthPx`.
  * - **Map / context menus:** `[minWidth]` / `[maxWidth]` / `panelClass` per callsite — not the toolbar `rem` floors.
  * - **Stacking:** host `z-index: var(--z-dropdown)` is authoritative; `HlmMenuContentDirective` CVA also applies `z-50` on the same host — inline wins; do not remove the inline binding thinking CVA is sufficient.
