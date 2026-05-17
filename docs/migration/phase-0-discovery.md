@@ -246,7 +246,7 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 | `features/auth/auth-map-layer/auth-map-layer.component.scss` | gradient frosted glass | `rgba(249,247,244,…)`, `rgba(15,14,12,…)` | → `var(--color-bg-base)` with opacity |
 | `features/nav/nav.component.scss` | avatar text / hover | `#fff`, `color-mix(…, #000)` | → `var(--fp-sys-color-on-primary)` |
 | `features/upload/upload-panel.component.scss` | shimmer animation | `rgba(255,255,255,0/0.2/0.5/0)` | → named shimmer token |
-| `features/map/gps-button/gps-button.component.scss` | active bg fallback | `#e0e0e0` | → `var(--color-border)` fallback; GPS active blue `rgba(0,153,255,0.15)` → `var(--state-info-bg)` |
+| `features/map/gps-button/gps-button.component.scss` | active bg fallback | `#e0e0e0` | → `var(--color-border)` fallback; GPS active blue `rgba(0,153,255,0.15)` → semantic `color-mix` on tweakcn roles (no dedicated `--state-info-bg` after Phase 7 Batch 30) |
 | `features/projects/projects-confirm-dialog.component.scss` | (check inline) | `rgba(…)` | Audit when migrating to BrnDialog |
 | `features/settings-overlay/settings-overlay.component.scss` | (check inline) | various | Audit during settings migration |
 

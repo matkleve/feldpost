@@ -1,8 +1,10 @@
 <app-pane-toolbar class="projects-toolbar">
   <div
     slot="left"
-    class="projects-toolbar__status hlm-pill-toggle hlm-pill-toggle--sm"
-    [class.hlm-pill-toggle--has-inactive]="statusInactiveOptions().length > 0"
+    class="projects-toolbar__status"
+    hlmPillToggle
+    size="sm"
+    [hasInactive]="statusInactiveOptions().length > 0"
   >
     <div
       hlmToggleGroup
@@ -84,7 +86,7 @@
     }
   </div>
 
-  <div slot="right" class="projects-toolbar__card-variant hlm-pill-toggle hlm-pill-toggle--sm">
+  <div slot="right" class="projects-toolbar__card-variant" hlmPillToggle size="sm">
     <div
       hlmToggleGroup
       brnToggleGroup

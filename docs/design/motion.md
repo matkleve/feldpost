@@ -76,4 +76,4 @@ Notes:
 
 - Keep geometry stable while transitions run; animate only visual properties.
 - Prefer `--transition-interactive` for direct user-driven state changes.
-- Use `--transition-panel` only for panel/container-level open-close choreography.
+- For panel/container-level open-close choreography, use `var(--motion-duration-base) var(--motion-ease-standard)` (or equivalent Tailwind duration/easing tokens) instead of a dedicated CSS alias.

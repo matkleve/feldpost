@@ -1,3 +1,5 @@
+@use '../../shared/dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+
 // Declares host block container for the /media route shell.
 // @see docs/specs/component/item-grid/item-grid.md#wiring
 :host {
@@ -7,21 +9,7 @@
 }
 
 @layer components {
-  // Toolbar dropdown trigger: label + trailing chevron (hlmBtn supplies base control chrome).
-  // @see docs/specs/component/item-grid/item-grid.md#actions
-  .media-toolbar__menu-trigger {
-    justify-content: space-between;
-    // Adds symmetric horizontal inset on the closed trigger (popover list uses `.standard-dropdown` padding separately).
-    // @see docs/specs/component/item-grid/item-grid.md#actions
-    padding-inline: var(--spacing-3);
-  }
-
-  // Chevron rotation target for open dropdown shell.
-  // @see docs/specs/component/item-grid/item-grid.md#actions
-  .media-toolbar__menu-trigger [data-dd-part='chevron'] {
-    flex-shrink: 0;
-    transition: transform 150ms ease-out;
-  }
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('media-toolbar');
 
   // Defines full-width toolbar host area for variant switch controls.
   // @see docs/specs/component/item-grid/item-grid.md#actions
@@ -50,16 +38,5 @@
 }
 
 @layer states {
-  // Active state indicator for toolbar trigger buttons when a filter/grouping is applied.
-  // @see docs/specs/component/item-grid/item-grid.md#actions
-  button.media-toolbar__menu-trigger[data-state='on'] {
-    background-color: var(--accent);
-    color: var(--accent-foreground);
-  }
-
-  // Open shell: rotate trailing chevron.
-  // @see docs/specs/component/item-grid/item-grid.md#actions
-  .media-toolbar__menu-trigger--open [data-dd-part='chevron'] {
-    transform: rotate(180deg);
-  }
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('media-toolbar');
 }

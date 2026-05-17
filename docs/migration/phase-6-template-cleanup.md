@@ -12,10 +12,10 @@
 
 ## Current global load order (context)
 
-`apps/web/src/styles.scss` (top of file, before Tailwind) — **2026-05-16:**
+`apps/web/src/styles.scss` (top of file, before Tailwind) — **2026-05-17:**
 
-- `@use './styles/reset'`, `./styles/layout/app`, `./styles/layout/clamp`.
-- `@use './app/shared/ui/toggle-group/hlm-toggle-group'` — toggle group shell until CVA + directives own visuals.
+- `@use './styles/map-leaflet-host'`, `./styles/reset`, `./styles/layout/app`, `./styles/layout/clamp`, `./styles/map-shell-keyframes`, `./styles/map-shell-leaflet-global`.
+- **No** `@use` for toggle-group — pill shell is **`hlmPillToggle`** + **`pillToggleVariants`** (see **`toggle-group-variants.ts`**, **`hlm-pill-toggle.directive.ts`**).
 - **CDK overlay:** `@import "@angular/cdk/overlay-prebuilt.css"` (inline; not via deleted `tokens.scss`).
 - **Tailwind v4** `@import "tailwindcss"` + `@config` bridge.
 - **Legacy bridge:** `@include meta.load-css('styles/legacy-design-tokens')` after tweakcn `:root` (Phase 7 replaces this body).
@@ -30,7 +30,7 @@ Run from repository root. On Windows PowerShell, prefer **single-quoted** patter
 
 ```bash
 rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l
-rg 'hlm-toggle-group\b' apps/web/src/app --glob "*.html" -l
+rg 'hlmPillToggle\b' apps/web/src/app --glob "*.html" -l
 rg 'ui-button--active|ui-button--ghost|ui-button--secondary' apps/web/src/app --glob "*.html"
 rg '\bui-' apps/web/src/app --glob "*.html" -l
 rg 'hlm-toggle-group__|hlm-pill-toggle__' apps/web/src/app --glob "*.html"
@@ -51,7 +51,7 @@ Re-run before execution; numbers drift.
 | Templates whose `class="…"` value contains substring `ui-` | `rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l` → **0** files |
 | Templates with `\bui-` (hyphenated `ui-…`) | `rg '\bui-' apps/web/src/app --glob "*.html" -l` → **2** files: `panel-trigger.component.html`, `popover.component.html` — matches only **`@see docs/specs/component/ui-primitives/...`** comment paths (**no** `class="…ui-…"` markup). |
 | `ui-button--active\|ghost\|secondary` in HTML | `rg 'ui-button--active\|ui-button--ghost\|ui-button--secondary' apps/web/src/app --glob "*.html"` → **0** hits |
-| Kebab `hlm-toggle-group` token in HTML (class strings) | `rg 'hlm-toggle-group\b' apps/web/src/app --glob "*.html" -l` → **0** files (toggle markup uses **`hlmToggleGroup`** / **`hlmToggleGroupItem`** directives, not `hlm-toggle-group` literals) |
+| Kebab `hlm-toggle-group` token in HTML (class strings) | `rg 'hlmPillToggle\b' apps/web/src/app --glob "*.html" -l` → **0** files (toggle markup uses **`hlmToggleGroup`** / **`hlmToggleGroupItem`** directives, not `hlm-toggle-group` literals) |
 | SCSS `var(--color…)` in `apps/web/src/app` (`*.scss`) | `rg 'var\(--color' apps/web/src/app --glob "*.scss" -l` → **0** files (Phase 7 may still cover other legacy `var(--*` tokens) |
 | `hlm-toggle-group__*` / `hlm-pill-toggle__*` in HTML | `rg 'hlm-toggle-group__\|hlm-pill-toggle__' apps/web/src/app --glob "*.html"` → **0** hits |
 | Gate B — `uiCamelCase` directives in HTML | `rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l` → **0** files (**2026-05-16**, post–Group D) |
@@ -63,7 +63,7 @@ Re-ran §Pre-flight scans, Gate A/B, §10 import grep, `npx ng build` (apps/web)
 | Check | Command / action | Result |
 |-------|------------------|--------|
 | `class="…"` contains `ui-` | `rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l` | **0** files |
-| `hlm-toggle-group` literal in HTML | `rg 'hlm-toggle-group\b' apps/web/src/app --glob "*.html" -l` | **0** files |
+| `hlm-toggle-group` literal in HTML | `rg 'hlmPillToggle\b' apps/web/src/app --glob "*.html" -l` | **0** files |
 | Legacy `ui-button--*` strings | `rg 'ui-button--active\|ui-button--ghost\|ui-button--secondary' apps/web/src/app --glob "*.html"` | **0** hits |
 | `\bui-` (hyphenated token scan) | `rg '\bui-' apps/web/src/app --glob "*.html" -l` | **2** files — `panel-trigger.component.html`, `popover.component.html`; matches only **`@see docs/specs/component/ui-primitives/…`** (no markup). `rg … -c` → 5 + 1 lines. |
 | Helm toggle `__` BEM in HTML | `rg 'hlm-toggle-group__\|hlm-pill-toggle__' apps/web/src/app --glob "*.html"` | **0** hits |

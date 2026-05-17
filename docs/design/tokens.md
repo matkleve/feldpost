@@ -568,9 +568,8 @@ Motion tokens are the source of truth for interaction timing and easing.
 | Easing         | `--motion-ease-in`         | `cubic-bezier(0.4, 0, 1, 1)`                              |
 | Easing         | `--motion-ease-out`        | `cubic-bezier(0, 0, 0.2, 1)`                              |
 | Semantic alias | `--transition-interactive` | `var(--motion-duration-fast) var(--motion-ease-out)`      |
-| Semantic alias | `--transition-panel`       | `var(--motion-duration-base) var(--motion-ease-standard)` |
 
-Compatibility aliases for existing component code:
+**Panel-level open/close choreography:** use `var(--motion-duration-base) var(--motion-ease-standard)` (same duration/easing as the former `--transition-panel` shorthand removed in Phase 7 Batch 30) or Tailwind duration/easing utilities — see `docs/design/motion.md`.
 
 - `--transition-fade-in: var(--transition-interactive)`
 - `--transition-fade-out: var(--motion-duration-fast) var(--motion-ease-in)`
@@ -649,7 +648,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | `alias` — resolves to another token via `var()` | `--color-primary`, `--elevation-overlay` | Set manually as a Variable alias after primitives are imported |
 | **removed from bridge** — no longer defined for sync | e.g. former **`--font-size-3xs`** → **`--font-size-2xs`** (Batch 20) | Use **`Font/Size/2xs`** only; do not reintroduce a duplicate 3xs variable |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
-| `color-mix` — computed at render time | `--interactive-border-muted`, `--state-success-bg` | Approximate with a manual opacity or solid value |
+| `color-mix` — computed at render time | `--interactive-border-muted`, `--state-warning-bg` | Approximate with a manual opacity or solid value |
 | `complex` — multi-value shorthand | `--shadow-sm`, `--border-hover` | Set manually; shadows and multi-part borders are not natively representable as a single Figma Variable |
 
 Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.

@@ -1,0 +1,42 @@
+// Defines shared closed-trigger layout for `hlmBtn` + `*__menu-trigger` toolbar anchors (label + trailing chevron).
+// @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+// @see docs/specs/ui/workspace/workspace-view-system.md
+//
+// @param $block BEM block prefix without leading dot (e.g. `workspace-toolbar`, `media-toolbar`, `projects-toolbar`).
+
+// Applies default trigger flex distribution and horizontal inset (overrides hlmBtn kernel `ps-2`/`pe-2` for this pattern).
+// @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+@mixin toolbar-menu-trigger-components($block) {
+  // Toolbar dropdown trigger: label + trailing chevron (hlmBtn supplies base control chrome).
+  // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+  .#{$block}__menu-trigger {
+    justify-content: space-between;
+    // Adds symmetric horizontal inset on the closed trigger (popover list uses `.standard-dropdown` padding separately).
+    // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+    padding-inline: var(--spacing-3);
+  }
+
+  // Chevron rotation target for open dropdown shell.
+  // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+  .#{$block}__menu-trigger [data-dd-part='chevron'] {
+    flex-shrink: 0;
+    transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+  }
+}
+
+// Applies accent fill when filter/grouping is active and rotates chevron when shell is open.
+// @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+@mixin toolbar-menu-trigger-states($block) {
+  // Active state indicator for toolbar trigger buttons when a filter/grouping is applied.
+  // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+  button.#{$block}__menu-trigger[data-state='on'] {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  // Open shell: rotate trailing chevron.
+  // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+  .#{$block}__menu-trigger--open [data-dd-part='chevron'] {
+    transform: rotate(180deg);
+  }
+}

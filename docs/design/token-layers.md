@@ -67,15 +67,12 @@ Role-level aliases consumed by reusable UI primitives and feature components.
 
 - `--section-bg`
 - `--section-border`
-- `--section-title`
 - `--section-text`
 
 5. Feedback states
 
-- `--state-success-bg`
 - `--state-warning-bg`
 - `--state-danger-bg`
-- `--state-info-bg`
 
 ## Consumption Rules
 

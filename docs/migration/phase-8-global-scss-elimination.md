@@ -1,8 +1,8 @@
 # Phase 8 — Global SCSS Elimination
 
-**Status:** In progress (2026-05-17) — Phase **6** done. **Full** Phase 8 “elimination” DoD still depends on **Phase 7** bridge removal / token call-site migration and **§6** toggle-group global teardown; **§7 Path A** (map-shell Leaflet hoist) is **shipped** (see **`_map-shell-leaflet-global.scss`** + **`app-map-shell`** scope below).
+**Status:** In progress (2026-05-17) — Phase **6** done. **§6** toggle-group global sheet **deleted** (pill shell + density vars + reduced-motion → **`pillToggleVariants`** + **`HlmPillToggleDirective`**; **`hlm-toggle-group.scss`** removed, **`styles.scss`** no longer `@use`s it). **Full** Phase 8 “elimination” DoD still depends on **Phase 7** bridge removal / token call-site migration; **§7 Path A** (map-shell Leaflet hoist) is **shipped** (see **`_map-shell-leaflet-global.scss`** + **`app-map-shell`** scope below).
 
-**Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. Toggle-group global sheet (`hlm-toggle-group.scss`) **co-located** under `app/shared/ui/toggle-group/` and **`@use`’d** from `styles.scss` until **deleted** or reduced to **zero** `@layer states` rules (segment hover / attention / focus / disabled live in **CVA**; global file keeps pill shell geometry, density tokens, and reduced-motion shell overrides).
+**Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. **No** global **`hlm-toggle-group.scss`** — segmented pill **row/column shell**, **`--hlm-toggle-item-*`** density, and reduced-motion clamps for the shell live in **`toggle-group-variants.ts`** (`pillToggleVariants`, `toggleGroupVariants`) and **`HlmPillToggleDirective`** (`hlmPillToggle` on caller wrappers); map-shell vertical chrome that pierces **`[hlmToggleGroup*]`** stays in **`_map-shell-style-switch.scss`**.
 
 ---
 
@@ -22,7 +22,7 @@
 
 ```bash
 rg '\.ui-container|\.ui-item|\.ui-row-shell|\.ui-card-shell' apps/web/src/styles --glob "*.scss"
-rg 'hlm-toggle-group|hlm-pill-toggle' apps/web/src/app --glob "*.html" -l
+rg 'hlmPillToggle|hlmToggleGroup' apps/web/src/app --glob "*.html" -l
 test ! -d apps/web/src/styles/primitives && echo "primitives: absent (OK)" || ls apps/web/src/styles/primitives/
 rg "@use '\./styles/primitives/" apps/web/src/styles.scss
 rg "hlm-toggle-group" apps/web/src/styles.scss
@@ -40,7 +40,7 @@ rg "hlm-toggle-group" apps/web/src/styles.scss
 
 Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** — deleting primitives will break layout.
 
-**Progress (2026-05-16, slice — §1 Phase 6 gates):** From repo root — **`rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l'`** → **0** files (Gate A). **`rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l'`** → **0** files (Gate B). Phase 8 pre-flight: **`styles/primitives/`** absent; **no** `.ui-container|…` in `apps/web/src/styles/**/*.scss`; **`styles.scss`** has **no** `@use './styles/primitives/…'`; **`hlm-pill-toggle` / `hlm-toggle-group`** class strings appear only on the **seven** known callsites (settings, toolbars, upload, map-shell, media, view-toggle).
+**Progress (2026-05-16, slice — §1 Phase 6 gates):** From repo root — **`rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l'`** → **0** files (Gate A). **`rg '\bui[A-Z][a-zA-Z]*\b' apps/web/src/app --glob "*.html" -l'`** → **0** files (Gate B). Phase 8 pre-flight: **`styles/primitives/`** absent; **no** `.ui-container|…` in `apps/web/src/styles/**/*.scss`; **`styles.scss`** has **no** `@use './styles/primitives/…'`; segmented toggles use **`hlmPillToggle`** + **`hlmToggleGroup`** on the **seven** known callsites (settings, toolbars, upload, map-shell, media, view-toggle).
 
 ### 2. Remove container primitive
 
@@ -82,13 +82,15 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Progress (2026-05-16, slice — co-location):** **`hlm-toggle-group.scss`** source file moved from **`apps/web/src/styles/`** to **`apps/web/src/app/shared/ui/toggle-group/`** (same `@use` from `styles.scss`, new path **`./app/shared/ui/toggle-group/hlm-toggle-group`**). **`styles/hlm-toggle-group.scss`** removed.
 
+**Progress (2026-05-17, slice — §6 shipped):** **Deleted** **`apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.scss`**. Removed **`@use './app/shared/ui/toggle-group/hlm-toggle-group'`** from **`apps/web/src/styles.scss`**. Added **`pillToggleVariants`** + **`pillToggleSizeStyle`** and **`HlmPillToggleDirective`** (`selector: '[hlmPillToggle]'`); **`HLM_TOGGLE_GROUP_IMPORTS`** includes the pill directive. Templates migrated off **`hlm-pill-toggle*`** classes. Proof: **`rg "hlm-toggle-group" apps/web/src/styles.scss`** → **0**; **`rg "hlm-pill-toggle" apps/web/src/app --glob "*.html"`** → **0**. Map-shell style switch keeps **`_map-shell-style-switch.scss`** pierced rules (no **`[vertical]`** on **`hlmPillToggle`** there — avoids duplicate item-radius utilities).
+
 ### 7. Inventory remaining `styles/` tree
 
 **Keep (expected):** `reset.scss`, `map-leaflet-host.scss` (Leaflet map chrome), `_map-shell-keyframes.scss` (hoisted map-shell marker/upload/GPS **`@keyframes`**), **`_map-shell-leaflet-global.scss`** (Leaflet-injected marker / overlay DOM for MapShell — **`app-map-shell { … }`** scope, Path A), `layout/app.scss`, `layout/clamp.scss`, `_typography-baseline.scss` (headings + default anchors after Preflight).
 
 **Review:** any other `@use` from `styles.scss` not listed above — justify or delete. **`meta.load-css`** emits are inventoried below; order constraints (**legacy** after tweakcn **`:root`**, **typography** after **`@layer base`**) are documented in the **§7 `load-css` + reset review** progress slice.
 
-**Inventory (2026-05-17):** `apps/web/src/styles.scss` top **`@use`** set is **`./styles/map-leaflet-host`**, **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./styles/map-shell-keyframes`**, **`./styles/map-shell-leaflet-global`** (Path A — pierced Leaflet rules; **`app-map-shell`** scope), **`./app/shared/ui/toggle-group/hlm-toggle-group`**; **`meta.load-css`** pulls **`styles/legacy-design-tokens`** and **`styles/typography-baseline`** (source **`apps/web/src/styles/_typography-baseline.scss`**). No stray **`primitives/*`** or **`tokens`** references.
+**Inventory (2026-05-17):** `apps/web/src/styles.scss` top **`@use`** set is **`./styles/map-leaflet-host`**, **`./styles/reset`**, **`./styles/layout/app`**, **`./styles/layout/clamp`**, **`./styles/map-shell-keyframes`**, **`./styles/map-shell-leaflet-global`** (Path A — pierced Leaflet rules; **`app-map-shell`** scope); **`meta.load-css`** pulls **`styles/legacy-design-tokens`** and **`styles/typography-baseline`** (source **`apps/web/src/styles/_typography-baseline.scss`**). No stray **`primitives/*`**, **`tokens`**, or **`hlm-toggle-group`** `@use`.
 
 **Progress (2026-05-16, slice — typography baseline partial):** **`h1`–`h6`** and default **`a`** rules moved from inline **`styles.scss`** into **`apps/web/src/styles/_typography-baseline.scss`**, included **after** **`@layer base`** via **`@include meta.load-css('styles/typography-baseline')`** so output order stays **Tailwind Preflight → baseline** (same constraint as top-of-file **`@use`** would violate).
 
@@ -110,6 +112,20 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 
 **Budget / bundle (2026-05-17, `cd apps/web && npx ng build`, production):** **`anyComponentStyle`** — **no** Angular budget warning (thresholds in **`angular.json`**: **12 kB** warning / **20 kB** error per component stylesheet). Earlier slices in this doc logged MapShell-heavy emitted CSS **~15–18 kB** over the **12 kB** warning before hoists. **Trade-off:** weight moved into the global **`styles`** CSS artifact — build output **`styles-*.css` | styles | 93.01 kB** raw (**~13.14 kB** estimated transfer). *(Not a pure Path A delta:* an archived snapshot lists **`styles-*.css` 54.22 kB** (`docs/archive/audits/route-chunk-audit-2026-03-24.md`, 2026-03-24); many **`styles.scss`** changes landed between snapshots.)
 
+**Global bundle monitoring — `styles` initial chunk (2026-05-17, doc slice):** Production **`ng build`** prints an **Initial chunk files** table; the row whose **Names** column is **`styles`** is the combined global stylesheet emitted from **`angular.json` → `build.options.styles`** (currently **`leaflet.css`** + **`src/styles.scss`**, so Leaflet base + app globals including **`_map-shell-leaflet-global.scss`**). **Path A** specifically grows this row when pierced map rules leave component encapsulation — **`anyComponentStyle`** stays quiet, so this row is the primary regression signal for “hoist absorbed too much / duplicated selectors”.
+
+- **Local / CI — capture the line (raw + estimated transfer):**
+  ```bash
+  cd apps/web && npx ng build 2>&1 | rg 'styles-[A-Z0-9]+\.css \| styles'
+  ```
+  Example shape: `styles-XXXXXXXX.css | styles | 92.29 kB | 13.14 kB` (hash and sizes drift with content).
+
+- **Wider context (optional):** `npx ng build 2>&1 | rg -n 'Initial chunk files|styles-[A-Z0-9]+\.css \| styles'` prints the table header line number plus the **`styles`** row.
+
+- **`angular.json` budgets today:** Production **`budgets`** only define **`initial`** (entire initial JS/CSS bundle budget) and **`anyComponentStyle`** (per-component extracted CSS). There is **no** dedicated budget entry that isolates the **`styles`** CSS file alone; until one exists, **log scraping** (command above), occasional manual comparison to this doc’s baseline note, or a small custom CI parser on **`ng build`** stdout are the practical monitors.
+
+- **Repo CI note:** `.github/workflows/design-system-check.yml` runs **`npm run design-system:check`** only — it does **not** run **`ng build`**. Any future workflow that adds **`ng build`** can append the **`rg`** line as a non-gating log artifact or gate on a max **raw** size if the team wants an automated ceiling.
+
 **Budget options (doc-only, `angular.json`):** With Path A clearing **`anyComponentStyle`** pressure for map-shell, prefer **dead-selector audits** and further **hoists** before raising **`maximumWarning`** / **`maximumError`** on **`anyComponentStyle`**.
 
 ### 8. Final gates
@@ -117,6 +133,8 @@ Run Phase 6 acceptance `rg` gates. If any `ui-*` remains in templates, **stop** 
 **Progress (2026-05-16, slice):** **`npm run design-system:check`** (registry + panel MQ audit + visual-behavior guard) and **`cd apps/web && npx ng build`** → **exit 0** (Angular build warnings included **`anyComponentStyle`** on map-shell and CommonJS deps — pre–Path A).
 
 **Progress (2026-05-17, post–Path A gates):** **`npm run design-system:check`** and **`cd apps/web && npx ng build`** → **exit 0**; **`anyComponentStyle`** budget warning **not** emitted (CommonJS-only warnings remain).
+
+**Progress (2026-05-17, slice — §7 global `styles` chunk monitoring doc):** Shipped runbook for reading the **`styles`** initial-chunk row from **`ng build`**, Path A vs **`anyComponentStyle`** regression split, **`angular.json`** budget limits, and CI gap (**`design-system-check`** vs **`ng build`**). **Files:** **`docs/migration/phase-8-global-scss-elimination.md`**.
 
 ```bash
 cd apps/web && npx ng build
@@ -130,8 +148,8 @@ npm run design-system:check
 | Gate | Condition |
 |------|-----------|
 | `styles/primitives/` | **Empty** or directory **deleted** |
-| `styles.scss` `@use` block | **`map-leaflet-host`** (Leaflet map chrome), **`reset`**, **`layout/app`**, **`layout/clamp`**, **`map-shell-keyframes`** (hoisted map-shell animations), **`map-shell-leaflet-global`** (Path A — pierced Leaflet marker/overlay rules, **`app-map-shell`** scope), **`hlm-toggle-group`** until deleted, **`meta`** for **`load-css`** ( **`legacy-design-tokens`**, **`typography-baseline`** ) — **no** `primitives/*`, **no** `tokens` |
-| `hlm-toggle-group.scss` | **Deleted**, or file exists with **no** `@layer states` / selector-driven segment states (**hover**, **data-attention**, focus, disabled) — those live in **CVA**; **OK** if **`@layer components`** (pill shell) + **`prefers-reduced-motion`** clamp remain |
+| `styles.scss` `@use` block | **`map-leaflet-host`** (Leaflet map chrome), **`reset`**, **`layout/app`**, **`layout/clamp`**, **`map-shell-keyframes`** (hoisted map-shell animations), **`map-shell-leaflet-global`** (Path A — pierced Leaflet marker/overlay rules, **`app-map-shell`** scope), **`meta`** for **`load-css`** ( **`legacy-design-tokens`**, **`typography-baseline`** ) — **no** `primitives/*`, **no** `tokens`, **no** `hlm-toggle-group` |
+| `hlm-toggle-group.scss` | **Deleted** — pill shell + density + reduced-motion live in **`toggle-group-variants.ts`** + **`HlmPillToggleDirective`**; segment states remain **CVA** on **`hlmToggleGroup`** / **`hlmToggleGroupItem`** |
 | Build / DS | `ng build` and `npm run design-system:check` → **0** |
 
 ---
@@ -144,7 +162,7 @@ npm run design-system:check
 
 ## Open (remaining weight)
 
-**Build — map-shell stylesheet budget:** **Path A (2026-05-17)** hoisted pierced Leaflet marker/overlay CSS to **`_map-shell-leaflet-global.scss`**; production **`ng build`** no longer reports **`anyComponentStyle`** overage for the prior MapShell hotspot. **Trade-off** is global **`styles`** weight — see **§7 Path A** slice for **`styles-*.css`** size line. **Ongoing:** **dead-selector audits** (`rg` proof) on remaining **`map-shell*.scss`**; **`§6`** toggle-group global sheet teardown.
+**Build — map-shell stylesheet budget:** **Path A (2026-05-17)** hoisted pierced Leaflet marker/overlay CSS to **`_map-shell-leaflet-global.scss`**; production **`ng build`** no longer reports **`anyComponentStyle`** overage for the prior MapShell hotspot. **Trade-off** is global **`styles`** weight — see **§7 Path A** slice for **`styles-*.css`** size line and **§7 — Global bundle monitoring** for how to re-read that row from **`ng build`** / CI logs. **Ongoing:** **dead-selector audits** (`rg` proof) on remaining **`map-shell*.scss`**.
 
-**§6:** Removing global **`hlm-toggle-group.scss`** stays blocked until **`@layer components`** pill shell + **`prefers-reduced-motion`** clamp are fully replaceable by CVA / callers; then drop **`@use`** from **`styles.scss`** and delete the file.
+~~**§6:** Removing global **`hlm-toggle-group.scss`** stays blocked until **`@layer components`** pill shell + **`prefers-reduced-motion`** clamp are fully replaceable by CVA / callers; then drop **`@use`** from **`styles.scss`** and delete the file.~~ **Shipped 2026-05-17** — see **§6** progress slices above.
 
