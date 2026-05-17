@@ -125,7 +125,7 @@ graph TB
 ## Component Hierarchy
 
 ```
-ToastContainerComponent                    ← fixed position, bottom-left, z-index: var(--z-toast)
+ToastContainerComponent                    ← fixed position, bottom-left, z-index: 400 (between dropdown 300 and modal 500; former `--z-toast` inlined Batch 35)
 │                                             left: calc(3rem + 0.75rem), bottom: 1.5rem
 │                                             mobile: centered, bottom: 5rem
 │                                             display: flex, flex-direction: column-reverse, gap: 0.5rem
@@ -243,8 +243,7 @@ sequenceDiagram
 
 ### Z-index
 
-- Add `--z-toast: 400;` to token ladder (between `--z-dropdown: 300` and `--z-modal: 500`)
-- Toast container uses `z-index: var(--z-toast)` — above dropdowns, below modals
+- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **`--z-dropdown` (300)**, below **`--z-modal` (500)**. (**Phase 7 Batch 35:** **`--z-toast`** removed from **`_legacy-design-tokens.scss`**.)
 
 ### Consumer wiring (existing files to update)
 
@@ -285,7 +284,7 @@ The existing `ToastService.show(msg, duration)` signature must be replaced with 
 - [ ] Success toasts use `--color-success` left border
 - [ ] Warning toasts use `--color-warning` left border
 - [ ] Info toasts use `--color-text-secondary` left border
-- [ ] `z-index: var(--z-toast)` (400) — above dropdowns, below modals
+- [ ] `z-index: 400` on container — above dropdowns (300), below modals (500)
 - [ ] `MapShellComponent` subscribes to `uploadFailed$` and shows error toast
 - [ ] `MediaDetailViewComponent` subscribes to `uploadFailed$` and shows error toast
 - [ ] `MediaDetailViewComponent` shows success toast on replace/attach complete

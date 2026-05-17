@@ -20,7 +20,7 @@ Global design primitives that represent raw design values.
 
 - Color foundations: `--color-bg-*`, `--color-border*`, `--color-text-*`, semantic states
 - Radius: `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full`
-- Elevation: `--elevation-subtle`, `--elevation-overlay`, `--elevation-dropdown`, `--elevation-modal`
+- Elevation: `--elevation-subtle`, `--elevation-overlay`, `--elevation-dropdown`; modal-plane shadows use **`var(--shadow-xl)`** directly (**Phase 7 Batch 35** removed **`--elevation-modal`** from the bridge)
 - Spacing/layout: `--spacing-*`, `--container-*`, `--ui-item-*`
 
 ### Layer B: Interaction Aliases

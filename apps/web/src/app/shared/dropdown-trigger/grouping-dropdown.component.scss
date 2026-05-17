@@ -105,7 +105,7 @@
 .cdk-drag-preview {
   border-radius: var(--radius-sm);
   background: var(--popover);
-  box-shadow: var(--elevation-modal);
+  box-shadow: var(--shadow-xl);
   opacity: 0.9;
 
   .grouping-dropdown__drag-handle {

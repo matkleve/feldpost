@@ -33,7 +33,6 @@
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
-  --radius-xl: 1.75rem;
   --radius-full: 9999px;
 
   // Shadows — warm-tinted black (not cold blue)
@@ -50,7 +49,6 @@
   // Border variables (metric `--border-sm`…`--border-xl` removed — zero `var()` consumers; Batch 28)
   --border-hover: 0.1875rem solid
     color-mix(in srgb, var(--primary) 55%, var(--border));
-  --border-selected: 0.125rem solid var(--primary);
 
   // Elevation layers — semantic aliases; every element uses a layer, not a raw shadow.
   // All elements at the same visual plane share the same layer → same shadow.
@@ -59,13 +57,13 @@
     --shadow-md
   ); // map overlays: sidebar, search bar, FAB, GPS, markers, banners
   --elevation-dropdown: var(--shadow-lg); // dropdowns, context menus, popovers
-  --elevation-modal: var(--shadow-xl); // modals, dialogs, image detail overlay
+  // `--elevation-modal` removed (Batch 35) — single consumer in `grouping-dropdown.component.scss` uses `var(--shadow-xl)` directly.
 
   // Z-index stacking ladder (audit issue #2, #13); map base plane uses literal `0` at `.map-container` (Batch 32).
+  // `--z-toast` removed (Batch 35) — `toast-container.component.scss` uses literal `400` between dropdown (300) and modal (500).
   --z-panel: 100;
   --z-upload-button: 200;
   --z-dropdown: 300;
-  --z-toast: 400;
   --z-modal: 500;
 
   // Spacing scale — single 4px unit with modular multipliers (0.25rem base inlined — Batch 31).
@@ -86,8 +84,9 @@
   --font-size-lg: calc(var(--font-size-md) * 1.13);
   --font-size-xl: calc(var(--font-size-lg) * 1.13);
   --font-size-2xl: calc(var(--font-size-xl) * 1.13);
-  --font-size-3xl: calc(var(--font-size-2xl) * 1.13);
-  --font-size-4xl: calc(var(--font-size-3xl) * 1.13);
+  // 3xl step removed (Batch 33) — single callsite in settings uses `calc(var(--font-size-2xl) * 1.13)`; 4xl chains from 2xl.
+  // @see docs/migration/phase-7-token-migration.md § Batch 33
+  --font-size-4xl: calc(var(--font-size-2xl) * 1.13 * 1.13);
 
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -100,7 +99,6 @@
   --line-height-reading: 1.4;
   --line-height-compact: 1.35;
   --line-height-normal: 1.45;
-  --line-height-open: 1.5;
   --line-height-comfortable: 1.55;
 
   // Container geometry — containers define the alignment boundaries that
@@ -117,41 +115,16 @@
   --container-radius-panel: var(--radius-lg);
 
   // Photo marker geometry (shared media thumb ≈ `--spacing-6`; body = ×1.25 — Batch 31).
+  // Hit ring, correction dot, and selected scale literals inlined in `_map-shell-leaflet-global.scss` (Batch 35).
   --photo-marker-body-size: calc(var(--spacing-6) * 1.25);
-  --photo-marker-hit-size: 2.5rem;
-  --photo-marker-correction-dot-size: 0.5rem;
   --photo-marker-drop-shadow: 0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.45);
-  --photo-marker-selected-scale: 1.05;
 
-  // Sidebar layout dimensions — standardized from docs/design/tokens.md.
-  --layout-sidebar-width-collapsed: var(--spacing-7);
-  --layout-sidebar-width-expanded: 15rem;
-  --layout-sidebar-row-padding-inline: var(--spacing-1);
-  --layout-sidebar-row-padding-block: var(--spacing-1);
-  --layout-sidebar-row-gap: var(--spacing-3);
-  --layout-sidebar-media-size: var(--spacing-6);
-  --layout-sidebar-row-height: calc(
-    var(--layout-sidebar-media-size) + (var(--layout-sidebar-row-padding-block) * 2)
-  );
-
-  // Content width clamps and overlay width hints (settings overlay consumes medium/large mins).
+  // Content width clamps; settings overlay min widths inlined (`25rem` / `32rem` — Batch 35); left-rail geometry (Batch 34).
+  // Sidebar row/column metrics live on `NavComponent` (Phase 7 Batch 33 — removed `--layout-sidebar-*` bridge rows).
   --content-clamp-default: 45rem;
   --content-clamp-list: 52rem;
 
-  --overlay-width-medium-min: 25rem;
-  --overlay-width-large-min: 32rem;
-
-  --overlay-rail-left-ratio-default: 0.38;
-  --overlay-rail-left-ratio-tablet: 0.35;
-  --overlay-rail-left-min: 14rem;
-  --overlay-rail-left-max: 17rem;
-  --overlay-rail-left-tablet-min: 12rem;
-  --overlay-rail-left-tablet-max: 15rem;
-  --overlay-rail-mobile-left-width: 11.5rem;
-
   // Shared interactive primitives (single source for hover/focus/motion)
-  --interactive-border-muted: color-mix(in srgb, var(--border) 72%, transparent);
-  --interactive-surface-hover: color-mix(in srgb, var(--primary) 12%, transparent);
   --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 15%, transparent);
   --interactive-transition-standard:
     border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
@@ -161,33 +134,30 @@
 
   /* Durations */
   --motion-duration-fast: 100ms;
-  --motion-duration-base: 200ms;
   --motion-duration-slow: 300ms;
 
   /* Easings */
-  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
 
   // Compatibility aliases for existing transition tokens in feature styles.
   --transition-fade-in: var(--motion-duration-fast) var(--motion-ease-out);
   --transition-fade-out: var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
-  --transition-reveal-delay: 60ms;
 
   // Shared loading skeleton animation token (surface color unused — components use bg-muted / local mixes)
   // @see docs/migration/phase-7-token-migration.md § Batch 14
-  --animation-skeleton-pulse: media-display-pulse var(--motion-duration-base) ease-in-out infinite;
+  --animation-skeleton-pulse: media-display-pulse 200ms ease-in-out infinite;
 
   // Component-role aliases (Theme Contract layer C)
   // Action controls
   --action-bg-default: transparent;
-  --action-bg-hover: var(--interactive-surface-hover);
+  --action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
   --action-border-active: color-mix(in srgb, var(--primary) 45%, var(--border));
   --action-text-default: var(--muted-foreground);
   --action-text-active: var(--primary);
 
   // Menu and option surfaces
   --menu-surface-bg: var(--popover);
-  --menu-surface-border: var(--interactive-border-muted);
+  --menu-surface-border: color-mix(in srgb, var(--border) 72%, transparent);
   --menu-item-bg-hover: color-mix(in srgb, var(--primary) 8%, transparent);
   --menu-item-bg-active: color-mix(in srgb, var(--primary) 12%, transparent);
   --menu-item-text: var(--foreground);
@@ -231,8 +201,6 @@
 
   --border-hover: 0.1875rem solid
     color-mix(in srgb, var(--primary) 30%, var(--border));
-  --border-selected: 0.125rem solid var(--primary);
-
   --photo-marker-drop-shadow: 0 0.0625rem 0.25rem color-mix(in srgb, var(--shadow-color) 65%, transparent);
 }
 

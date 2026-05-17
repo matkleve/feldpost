@@ -313,7 +313,7 @@ Use token variables only:
 - --transition-geometry
 - --transition-fade-out
 - --transition-fade-in
-- --transition-reveal-delay
+- **`60ms`** literal for media-display–style reveal delay after **`var(--transition-fade-in)`** (Phase 7 Batch 33 — **`--transition-reveal-delay`** removed from bridge)
 - Emphasis / longer choreography: **`var(--motion-duration-base) var(--motion-ease-out)`** (Batch 31 removed **`--transition-emphasis`** from the bridge; see **`docs/design/tokens.md`**)
 
 ### Choreography Table (Required Before CSS)

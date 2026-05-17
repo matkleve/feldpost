@@ -39,8 +39,8 @@ app-map-shell {
     position: relative;
     display: flex;
     justify-content: center;
-    width: var(--photo-marker-hit-size);
-    height: var(--photo-marker-hit-size);
+    width: 2.5rem;
+    height: 2.5rem;
     filter: drop-shadow(var(--photo-marker-drop-shadow));
     transform-origin: center center;
     transition: transform 200ms ease-in-out;
@@ -49,9 +49,9 @@ app-map-shell {
       position: relative;
       display: flex;
       justify-content: center;
-      width: var(--photo-marker-hit-size);
+      width: 2.5rem;
       height: 100%;
-      padding-top: calc((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2);
+      padding-top: calc((2.5rem - var(--photo-marker-body-size)) / 2);
     }
 
     .map-photo-marker__body {
@@ -64,10 +64,10 @@ app-map-shell {
 
     .map-photo-marker__correction-dot {
       position: absolute;
-      top: calc(((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2) - 1px);
-      right: calc((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2);
-      width: var(--photo-marker-correction-dot-size);
-      height: var(--photo-marker-correction-dot-size);
+      top: calc(((2.5rem - var(--photo-marker-body-size)) / 2) - 1px);
+      right: calc((2.5rem - var(--photo-marker-body-size)) / 2);
+      width: 0.5rem;
+      height: 0.5rem;
       border-radius: var(--radius-full);
       border: 2px solid var(--card);
       background: var(--ring);
@@ -75,7 +75,7 @@ app-map-shell {
 
     .map-photo-marker__pending-ring {
       position: absolute;
-      inset: calc((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2);
+      inset: calc((2.5rem - var(--photo-marker-body-size)) / 2);
       width: var(--photo-marker-body-size);
       height: var(--photo-marker-body-size);
       border-radius: calc(var(--radius-md) + 2px);
@@ -98,7 +98,7 @@ app-map-shell {
   }
 
   .map-photo-marker--selected {
-    transform: scale(var(--photo-marker-selected-scale));
+    transform: scale(1.05);
 
     .map-photo-marker__body {
       border-color: transparent;
@@ -144,11 +144,11 @@ app-map-shell {
   }
 
   .map-photo-marker--selected.map-photo-marker--zoom-far {
-    transform: scale(calc(0.94 * var(--photo-marker-selected-scale)));
+    transform: scale(calc(0.94 * 1.05));
   }
 
   .map-photo-marker--selected.map-photo-marker--zoom-near {
-    transform: scale(calc(1.06 * var(--photo-marker-selected-scale)));
+    transform: scale(calc(1.06 * 1.05));
   }
 
   .map-photo-marker--has-bearing:hover .map-photo-marker__direction-cone,

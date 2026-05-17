@@ -116,7 +116,7 @@
     visibility: visible;
     font-size: var(--font-size-md);
     color: var(--foreground);
-    line-height: var(--line-height-open);
+    line-height: 1.5;
   }
 
   &__dropzone--dragging {

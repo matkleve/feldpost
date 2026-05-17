@@ -416,7 +416,7 @@ There is **no** separate **`--font-size-3xs`** step: a deprecated **`--font-size
 | lg   | `--font-size-lg`  | 1.22rem (19.6px) | Section headings              |
 | xl   | `--font-size-xl`  | 1.38rem (22.1px) | Panel headings                |
 | 2xl  | `--font-size-2xl` | 1.56rem (25.0px) | Major titles                  |
-| 3xl  | `--font-size-3xl` | 1.76rem (28.2px) | Hero/state titles             |
+| 3xl  | **(not on `:root` — Batch 33)** — use **`calc(var(--font-size-2xl) * 1.13)`** at callsites | ~1.76rem (28.2px) | Hero/state titles             |
 | 4xl  | `--font-size-4xl` | 1.99rem (31.9px) | Display-level emphasis        |
 
 Minimum rendered text size: **12px / 0.75rem** (caption only). Body text is never below 15px.
@@ -524,7 +524,7 @@ The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-s
 
 ### Border tokens
 
-**Phase 7 Batch 28:** metric **`--border-sm`** … **`--border-xl`** were **removed from the bridge** — there were **no** `var(--border-(sm|md|lg|xl))` consumers under `apps/web`. For neutral strokes, use tweakcn **`var(--border)`** (and explicit `width`/`style` where needed) or **`var(--interactive-border-muted)`** via existing interaction aliases. For interaction-driven borders, use **`--border-hover`** and **`--border-selected`** (no separate resting **`--border-default`** / outline aliases on `:root` after Phase 7 Batch 27).
+**Phase 7 Batch 28:** metric **`--border-sm`** … **`--border-xl`** were **removed from the bridge** — there were **no** `var(--border-(sm|md|lg|xl))` consumers under `apps/web`. For neutral strokes, use tweakcn **`var(--border)`** (and explicit `width`/`style` where needed) or a local **`color-mix(in srgb, var(--border) 72%, transparent)`** when a muted stroke is required. For interaction-driven borders, use **`--border-hover`**; selected media frames use **`0.125rem solid var(--primary)`** directly (**Batch 36** removed **`--border-selected`** from the bridge).
 
 ### Z-index ladder
 
@@ -535,8 +535,9 @@ Use semantic z-index tokens only. **Phase 7 Batch 32:** the base map plane no lo
 | `--z-panel`         | `100` | Panel/rail surfaces            |
 | `--z-upload-button` | `200` | High-priority map CTA controls |
 | `--z-dropdown`      | `300` | Context/dropdown overlays      |
-| `--z-toast`         | `400` | Notifications above dropdowns  |
 | `--z-modal`         | `500` | Modal/dialog top layer         |
+
+**Phase 7 Batch 35:** **`--z-toast`** was removed from the bridge — **`toast-container.component.scss`** uses literal **`z-index: 400`** (between **`--z-dropdown` (300)** and **`--z-modal` (500)**).
 
 ### Elevation layers (semantic)
 
@@ -545,9 +546,14 @@ Every component's `box-shadow` references a semantic `--elevation-*` token. Elem
 | Layer                  | Maps to       | Elements                                                                                                                                    |
 | ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--elevation-subtle`   | `--shadow-sm` | Mobile bottom bar, drag divider (rest), location marker rings                                                                               |
-| `--elevation-overlay`  | `--shadow-md` | **All map-level overlays**: sidebar, search bar, upload FAB, GPS button, placement banner, toast, upload panel, workspace pane, photo panel |
+| `--elevation-overlay`  | `--shadow-md` | **All map-level overlays**: sidebar, search bar, upload FAB, GPS button, placement banner, upload panel, workspace pane, photo panel       |
 | `--elevation-dropdown` | `--shadow-lg` | Context menus, popovers, toolbar dropdowns (sort/group/filter), auth card                                                                   |
-| `--elevation-modal`    | `--shadow-xl` | Delete confirmation dialog, image detail overlay, drag preview                                                                              |
+
+**Phase 7 Batch 35:** **`--elevation-modal`** (`var(--shadow-xl)`) was removed — use **`var(--shadow-xl)`** directly for modal-plane shadows (e.g. CDK drag preview in **`grouping-dropdown.component.scss`**).
+
+| Modal / top-layer shadow | Use directly | Elements |
+| -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| *(no `--elevation-modal`)* | **`var(--shadow-xl)`** | Delete confirmation dialog, image detail overlay, drag preview                                                                             |
 
 **Rule**: if two elements visually sit at the same plane, they must use the same `--elevation-*` layer. To change the shadow for an entire visual plane, update the alias in `:root` — every element on that plane updates together.
 
@@ -560,18 +566,18 @@ Motion tokens are the source of truth for interaction timing and easing.
 | Group          | Token                    | Value                                                     |
 | -------------- | ------------------------ | --------------------------------------------------------- |
 | Duration       | `--motion-duration-fast` | `100ms`                                                   |
-| Duration       | `--motion-duration-base` | `200ms`                                                   |
 | Duration       | `--motion-duration-slow` | `300ms`                                                   |
-| Easing         | `--motion-ease-standard` | `cubic-bezier(0.4, 0, 0.2, 1)`                            |
 | Easing         | `--motion-ease-out`      | `cubic-bezier(0, 0, 0.2, 1)`                              |
 
-**Phase 7 Batch 31:** **`--motion-ease-in`**, **`--transition-interactive`**, and **`--transition-emphasis`** were **removed from the bridge** — use **`var(--motion-duration-fast) var(--motion-ease-out)`** (interactive fades), **`var(--motion-duration-base)`** (skeleton / emphasis duration), and **`cubic-bezier(0.4, 0, 1, 1)`** inline for fade-out where needed.
+**Phase 7 Batch 36:** **`--motion-duration-base`** (`200ms`) and **`--motion-ease-standard`** (`cubic-bezier(0.4, 0, 0.2, 1)`) were **removed** from **`_legacy-design-tokens.scss`** — inline those literals at choreography callsites (see **`docs/migration/phase-7-token-migration.md`** §Batch 36) or use **`var(--motion-duration-fast)`** / **`var(--motion-ease-out)`** where Batch 31 already applies.
 
-**Panel-level open/close choreography:** use `var(--motion-duration-base) var(--motion-ease-standard)` (same duration/easing as the former `--transition-panel` shorthand removed in Phase 7 Batch 30) or Tailwind duration/easing utilities — see `docs/design/motion.md`.
+**Phase 7 Batch 31:** **`--motion-ease-in`**, **`--transition-interactive`**, and **`--transition-emphasis`** were **removed from the bridge** — use **`var(--motion-duration-fast) var(--motion-ease-out)`** (interactive fades), literal **`200ms`** for skeleton / emphasis duration (same value as the former **`--motion-duration-base`**), and **`cubic-bezier(0.4, 0, 1, 1)`** inline for fade-out where needed.
+
+**Panel-level open/close choreography:** use **`200ms cubic-bezier(0.4, 0, 0.2, 1)`** (same duration/easing as the former **`--transition-panel`** shorthand removed in Phase 7 Batch 30) or Tailwind duration/easing utilities — see `docs/design/motion.md`.
 
 - `--transition-fade-in: var(--motion-duration-fast) var(--motion-ease-out)`
 - `--transition-fade-out: var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1)`
-- `--transition-reveal-delay: 60ms`
+- **Batch 33:** **`--transition-reveal-delay`** removed from the bridge — media display reveal uses literal **`60ms`** as the transition delay after **`var(--transition-fade-in)`** (see `docs/design/motion.md`).
 
 ## 3.7 Iconography
 
@@ -635,7 +641,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | `--font-size-md` | `Font/Size/Md` | — | ✗ `calc()` |
 | `--font-weight-medium` | `Font/Weight/Medium` | `number` | ✓ primitive |
 | `--motion-duration-fast` | `Motion/Duration/Fast` | `duration` | ✓ primitive |
-| `--motion-ease-standard` | `Motion/Ease/Standard` | `cubicBezier` | ✓ array `[P1x,P1y,P2x,P2y]` |
+| **removed from bridge** — **Batch 36** | **`Motion/Duration/Base`**, **`Motion/Ease/Standard`** | `duration` / `cubicBezier` | Use **`Motion/Duration/Fast`** / **`Slow`** + **`Motion/Ease/Out`** in Figma, or literals **`200ms`** / **`cubic-bezier(0.4, 0, 0.2, 1)`** at callsites |
 | `--z-modal` | `Z/Modal` | `number` | ✓ primitive |
 
 ### What is skipped and why
@@ -646,7 +652,7 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | **removed from bridge** — no longer defined for sync | e.g. former **`--font-size-3xs`** → **`--font-size-2xs`** (Batch 20) | Use **`Font/Size/2xs`** only; do not reintroduce a duplicate 3xs variable |
 | **removed from bridge** — no longer defined for sync | **`--font-weight-regular`** (Batch 32) | Use **`Font/Weight/Medium`** / **`Semibold`** from the bridge where applicable, or literal **`400`** at the sole former callsite |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
-| `color-mix` — computed at render time | `--interactive-border-muted`, `--state-warning-bg` | Approximate with a manual opacity or solid value |
+| `color-mix` — computed at render time | `--menu-surface-border`, `--state-warning-bg` | Approximate with a manual opacity or solid value |
 | `complex` — multi-value shorthand | `--shadow-sm`, `--border-hover` | Set manually; shadows and multi-part borders are not natively representable as a single Figma Variable |
 
 Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.

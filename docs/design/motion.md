@@ -70,7 +70,7 @@ Use this table as the implementation reference for transition usage on the media
 | Quiet action button state changes        | `apps/web/src/app/features/media/media-item-quiet-actions.component.scss` / `.media-item-quiet-actions__button`                                        | `background-color`, `border-color`, `color`, `box-shadow` | `var(--motion-duration-fast) var(--motion-ease-out)`           |
 | Render-surface selected emphasis         | `apps/web/src/app/features/media/media-item-render-surface.component.scss` / `[data-state='content-selected'] .media-item-render-surface__media-frame` | `outline-color`, `filter`                                 | `var(--motion-duration-fast) var(--motion-ease-out)`           |
 | Header breadcrumb hover                  | `apps/web/src/app/features/media/media-page-header.component.scss` / `.media-page-header__breadcrumb a`                                                | `color`                                                   | `var(--motion-duration-fast) var(--motion-ease-out)`           |
-| Shared media display reveal              | `apps/web/src/app/shared/media-display/media-display.component.scss` / media reveal states                                                             | `opacity`                                                 | `var(--transition-fade-in)` + `var(--transition-reveal-delay)` |
+| Shared media display reveal              | `apps/web/src/app/shared/media-display/media-display.component.scss` / media reveal states                                                             | `opacity`                                                 | `var(--transition-fade-in)` + **`60ms`** delay literal (Phase 7 Batch 33 — **`--transition-reveal-delay`** removed from bridge) |
 
 Notes:
 

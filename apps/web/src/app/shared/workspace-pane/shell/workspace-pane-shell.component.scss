@@ -18,7 +18,7 @@
   .workspace-pane-shell {
     height: 100%;
     overflow: hidden;
-    animation: workspace-pane-shell-clip-in-right var(--motion-duration-base) ease-out;
+    animation: workspace-pane-shell-clip-in-right 200ms ease-out;
   }
 }
 

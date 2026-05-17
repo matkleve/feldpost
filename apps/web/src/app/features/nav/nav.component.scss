@@ -18,13 +18,13 @@
 // ── LeftSidebar — trigger zone ───────────────────────────────────────────────
 
 .sidebar {
-  --sidebar-width-collapsed: var(--layout-sidebar-width-collapsed);
-  --sidebar-width-expanded: var(--layout-sidebar-width-expanded);
-  --sidebar-row-padding-inline: var(--layout-sidebar-row-padding-inline);
-  --sidebar-row-padding-block: var(--layout-sidebar-row-padding-block);
-  --sidebar-row-gap: var(--layout-sidebar-row-gap);
-  --sidebar-row-height: var(--layout-sidebar-row-height);
-  --sidebar-media-size: var(--layout-sidebar-media-size);
+  --sidebar-width-collapsed: var(--spacing-7);
+  --sidebar-width-expanded: 15rem;
+  --sidebar-row-padding-inline: var(--spacing-1);
+  --sidebar-row-padding-block: var(--spacing-1);
+  --sidebar-row-gap: var(--spacing-3);
+  --sidebar-row-height: calc(var(--spacing-6) + (var(--spacing-1) * 2));
+  --sidebar-media-size: var(--spacing-6);
   --sidebar-icon-size: 1.25rem;
 
   position: fixed;

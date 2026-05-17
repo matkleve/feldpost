@@ -1,7 +1,15 @@
 # Phase 11 — Specification sync (post-migration drift)
 
-**Status:** Planned  
+**Status:** In progress (2026-05-17) — checklist below  
 **Depends on:** Phases 6–7 materially complete (templates + tokens). Phase 10 visual QA is optional but recommended as ground truth before large batch spec edits.
+
+## Recent shipped / doc drift (specs must reflect)
+
+- [ ] **Map-shell / Leaflet** — Leaflet globals hoisted to **`_map-shell-leaflet-global.scss`** scoped under **`app-map-shell`** (Phase 8 Path A); update any spec paths or “global map CSS” language that still imply pre-hoist **`styles.scss`** placement.
+- [ ] **`hlmPillToggle` / toggle-group retirement** — global **`hlm-toggle-group.scss`** removed; **`hlmPillToggle`** + CVA; registry **`registry.primitives-and-layout.supplement.md`**; purge normative **`hlm-toggle-group`** / old toggle-group shim wiring from specs.
+- [ ] **Legacy bridge — Batches 33–35** — removed `:root` rows + call-site inlining across **`nav`**, **`settings-overlay`**, **`media-display`**, **`grouping-dropdown`**, **`toast-container`**, **`_map-shell-leaflet-global`**; **`tokens.md`**, **`token-layers.md`**, **`motion.md`**, phase-7 batch proofs — specs must not resurrect deleted **`--*`** as the active build contract.
+- [ ] **Toast z-index** — **`--z-toast`** dropped (Batch 35); **`toast-container`** uses inline **`z-index: 400`** — **`toast-system.md`** / layer tables must match shipped stacking.
+- [ ] **Settings overlay rail** — **`--overlay-rail-left-*`** bridge removed (Batch 34); rail ratios/clamps inlined in **`settings-overlay.component.scss`** — **`settings-overlay.md`** (and dependents) must describe inlined behavior, not removed variables.
 
 ## Goal
 

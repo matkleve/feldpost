@@ -15,6 +15,39 @@
 
 ---
 
+## High-risk migration spot-check
+
+Use this list **during** Phase 7–8 merges and before release; it complements the full **Screen checklist** below. Targets: **map-shell Leaflet hoist**, **settings overlay rail / inlined overlay tokens**, **`hlmPillToggle` / `hlmToggleGroup`** (settings, projects, map style switch), and **three-theme** smoke.
+
+**Map shell & Leaflet global hoist (`app-map-shell`, `_map-shell-leaflet-global.scss`)**
+
+- [ ] Leaflet map, zoom, and attribution render; control chrome matches pre-hoist baseline (no double styles / missing icons).
+- [ ] Marker states (default, selected, hover, cluster badge) stay legible on **light**, **dark**, and **sandstone**; no token regression on map canvas vs UI chrome.
+- [ ] Radius / distance UI tied to the map (search radius, rings, or similar) keeps **hit targets**, labels, and focus rings aligned after layout/token changes.
+- [ ] Workspace split / resize: map reflows without clipped overlays; z-order vs rails, settings, and dialogs matches spec intent.
+
+**Settings overlay rail & inlined overlay tokens**
+
+- [ ] Fixed rail width, outer padding, and close control alignment match spec after **`--overlay-rail-left-*`** (and related) bridge removal / SCSS inlining.
+- [ ] Lead / section dividers read as intentional hairlines or borders (no zero-height or “disappeared” separators).
+- [ ] Scrolled tab content: no accidental horizontal overflow at **375px**; field rows and invite/QR blocks stack as expected.
+
+**`hlmPillToggle` / `hlmToggleGroup` (settings, projects, map style switch)**
+
+- [ ] Settings (e.g. Appearance, segmented rows): **single** selection within each group; `focus-visible` ring not clipped by overflow.
+- [ ] Projects view mode (table vs card or equivalent): selected segment and idle track match token intent on all themes.
+- [ ] **Map style switch** (`_map-shell-style-switch` / pill group): every option reachable; selected vs idle contrast matches **Token theme checklist** below.
+- [ ] Full-width pill groups: value column fills where **`--hlm-pill-toggle-width: 100%`** (or equivalent) is applied—no collapsed tracks.
+- [ ] **A11y:** `aria-pressed` / `role="switch"` (or correct primitives) for boolean rows; no decorative-only toggles for real state.
+
+**Theme smoke (`default`, `[data-theme="dark"]`, `[data-theme="sandstone"]`)**
+
+- [ ] Re-run the bullets above on each theme; **hard-refresh** between theme toggles in dev to avoid stale CSS variables.
+- [ ] **Dark:** text on `muted` surfaces; map markers and pill tracks remain distinguishable from the map background.
+- [ ] **Sandstone:** borders, muted fills, and focus rings stay crisp (not muddy); pill selected segment still reads clearly.
+
+---
+
 ## Environment setup
 
 - **Three themes:** exercise `ThemeService` (or equivalent) toggles; hard-refresh between runs to avoid stale CSS variable cache during development.

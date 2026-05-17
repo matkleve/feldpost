@@ -99,7 +99,7 @@
 [data-state='content-visible'] .media-display__layer--content {
   opacity: 1;
   pointer-events: auto;
-  transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  transition: opacity var(--transition-fade-in) 60ms;
 }
 
 [data-state='content-visible'] .media-display__layer--staged-content {
@@ -111,21 +111,21 @@
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='icon-only'] .media-display__layer--icon-only {
   opacity: 1;
-  transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  transition: opacity var(--transition-fade-in) 60ms;
 }
 
 /* Stable state: error */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='error'] .media-display__layer--error {
   opacity: 1;
-  transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  transition: opacity var(--transition-fade-in) 60ms;
 }
 
 /* Stable state: no-media */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='no-media'] .media-display__layer--no-media {
   opacity: 1;
-  transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  transition: opacity var(--transition-fade-in) 60ms;
 }
 
 @keyframes media-display-pulse {

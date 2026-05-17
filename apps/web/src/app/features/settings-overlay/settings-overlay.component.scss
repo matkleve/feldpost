@@ -1,23 +1,23 @@
 :host {
   display: contents;
   --settings-overlay-width: clamp(
-    var(--overlay-width-large-min),
+    32rem,
     calc(100vw - (var(--container-inset) * 2)),
     var(--content-clamp-list)
   );
   --settings-overlay-height: min(44rem, calc(100vh - (var(--container-inset) * 2)));
-  --settings-overlay-left-ratio: var(--overlay-rail-left-ratio-default);
+  --settings-overlay-left-ratio: 0.38;
   --settings-overlay-left-width: clamp(
-    var(--overlay-rail-left-min),
+    14rem,
     calc(var(--settings-overlay-width) * var(--settings-overlay-left-ratio)),
-    var(--overlay-rail-left-max)
+    17rem
   );
   --settings-overlay-right-width: calc(
     var(--settings-overlay-width) - var(--settings-overlay-left-width) - 1px
   );
   --settings-stroke-width: 1.5px;
-  --settings-border-muted: var(--interactive-border-muted);
-  --settings-hover-focus: var(--interactive-surface-hover);
+  --settings-border-muted: color-mix(in srgb, var(--border) 72%, transparent);
+  --settings-hover-focus: color-mix(in srgb, var(--primary) 12%, transparent);
   --settings-interactive-border: var(--settings-stroke-width) solid var(--settings-border-muted);
   --settings-interactive-radius: var(--container-radius-control);
   --settings-focus-ring: var(--interactive-focus-ring);
@@ -31,7 +31,7 @@
     position: relative;
     position: fixed;
     top: 50%;
-    left: calc(var(--container-inset) + var(--layout-sidebar-width-collapsed) + var(--spacing-3));
+    left: calc(var(--container-inset) + var(--spacing-7) + var(--spacing-3));
     transform: translateY(-50%);
     z-index: var(--z-modal);
     display: flex;
@@ -379,7 +379,7 @@
   // State block icon sizing
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__state .material-icons {
-    font-size: var(--font-size-3xl);
+    font-size: calc(var(--font-size-2xl) * 1.13);
     color: var(--primary);
     justify-self: center;
   }
@@ -428,15 +428,15 @@
 @media (max-width: 63.9375rem) {
   :host {
     --settings-overlay-width: clamp(
-      var(--overlay-width-medium-min),
+      25rem,
       calc(100vw - (var(--container-inset) * 2)),
       var(--content-clamp-default)
     );
-    --settings-overlay-left-ratio: var(--overlay-rail-left-ratio-tablet);
+    --settings-overlay-left-ratio: 0.35;
     --settings-overlay-left-width: clamp(
-      var(--overlay-rail-left-tablet-min),
+      12rem,
       calc(var(--settings-overlay-width) * var(--settings-overlay-left-ratio)),
-      var(--overlay-rail-left-tablet-max)
+      15rem
     );
   }
 
@@ -463,7 +463,7 @@
 
 @media (max-width: 47.9375rem) {
   :host {
-    --settings-overlay-left-width: var(--overlay-rail-mobile-left-width);
+    --settings-overlay-left-width: 11.5rem;
   }
 
   @layer components {
