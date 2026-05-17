@@ -29,43 +29,25 @@
   // Figma Base.scale (px): implement with `var(--spacing-*)` / `var(--radius-*)` — @see docs/migration/phase-7-token-migration.md § Batch 3 (numeric scale definitions removed from this bridge; no app `var()` consumers under `apps/web/src`).
   // Phase 7 Batch 15: removed unused Figma Alias spacing/radius custom properties (no `apps/web/src` consumers; Base scale → `docs/design/tokens.md`).
 
-  // Border radius
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-full: 9999px;
+  // Border radius: `--radius-sm|md|lg` are defined in `styles.scss` `@theme inline` (after this bridge).
+  // `--radius-full`, modular `--spacing-*`, and `--container-radius-*` → `_typography-baseline.scss` `:root` (Batch 44).
+  // @see docs/migration/phase-7-token-migration.md §Batch 44
 
-  // Shadows — warm-tinted black (not cold blue)
-  // Physical shadow scale: `sm` stays warm-tinted here; `md|lg|xl` live on tweakcn `:root` (Batch 39).
-  // Phase 7 Batch 39: removed duplicate `--shadow-md|lg|xl` rows — tweakcn `:root` + dark palette
-  // already define the same names before this bridge; legacy only differed in warm rgba vs hsl.
-  // @see docs/migration/phase-7-token-migration.md §Batch 39
-  --shadow-sm:
-    0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.12), 0 0.0625rem 0.125rem rgba(15, 14, 12, 0.08);
-
-  // State shadow alias for focus emphasis (light: ring lives on `--interactive-focus-ring` only).
-  --shadow-focus: var(--shadow-sm);
+  // Shadows — `sm` + `md|lg|xl` ladder: tweakcn `:root` / dark palette only (Batch 45 removed warm bridge `--shadow-sm|--shadow-focus`).
+  // @see docs/migration/phase-7-token-migration.md §Batch 45
 
   // Border variables (metric `--border-sm`…`--border-xl` removed — zero `var()` consumers; Batch 28)
   // `--border-hover` removed — Batch 39 (single callsite `media-item.component.scss` inlines border).
 
   // Elevation aliases (`--elevation-*`) removed — Batch 37; use `var(--shadow-sm|md|lg|xl)` directly.
-  // Batch 39: bridge keeps warm `--shadow-sm` + composite `--shadow-focus`; `md|lg|xl` come from tweakcn only.
 
   // Z-index stacking ladder: map base plane uses literal `0` at `.map-container` (Batch 32).
   // `--z-toast` removed (Batch 35) — `toast-container.component.scss` uses literal `400` between dropdown (300) and modal (500).
   // `--z-panel` removed — Batch 41 (Tailwind `z-panel` + nav / workspace shell inlines literal `100`; proof §Batch 41).
   // `--z-upload-button` / `--z-dropdown` / `--z-modal` removed — Batch 43 (numeric `z-index` at callsites + Tailwind `zIndex` theme literals `200|300|500`; proof §Batch 43).
 
-  // Spacing scale — single 4px unit with modular multipliers (0.25rem base inlined — Batch 31).
-  --spacing-1: calc(0.25rem * 1);
-  --spacing-2: calc(0.25rem * 2);
-  --spacing-3: calc(0.25rem * 3);
-  --spacing-4: calc(0.25rem * 4);
-  --spacing-5: calc(0.25rem * 6);
-  --spacing-6: calc(0.25rem * 8);
-  // `--spacing-7` removed — Batch 41 (auth / nav / settings inlines `calc(0.25rem * 12)`; proof §Batch 41).
-  --spacing-8: calc(0.25rem * 16);
+  // Spacing scale (`--spacing-1`…`--spacing-8`) → `_typography-baseline.scss` `:root` (Batch 44; `--spacing-7` never re-added).
+  // @see docs/migration/phase-7-token-migration.md §Batch 44
 
   // Modular `--font-size-2xs`…`--font-size-2xl`, font-weight ladder, `--line-height-comfortable`, and
   // `--motion-duration-fast` / `--motion-ease-out` → `_typography-baseline.scss` `:root` (Batch 42).
@@ -83,8 +65,7 @@
   // Batch 40: removed `--container-padding-inline-panel|block-panel`, `--container-padding-inline|block-compact`,
   // `--container-gap-panel`, `--container-gap` — alias-only rows; callsites use `var(--spacing-1|2|3)` directly.
   // @see docs/migration/phase-7-token-migration.md §Batch 40
-  --container-radius-control: var(--radius-md);
-  --container-radius-panel: var(--radius-lg);
+  // `--container-radius-control|panel` → `_typography-baseline.scss` `:root` (Batch 44 — same `var(--radius-md|lg)`; @theme supplies those names).
 
   // Photo marker — body square uses `calc(var(--spacing-6) * 1.25)` inlined in `_map-shell-leaflet-global.scss` (Batch 38); drop shadow inlined same file (Batch 39).
   // Hit ring, correction dot, and selected scale literals inlined in `_map-shell-leaflet-global.scss` (Batch 35).
@@ -120,12 +101,7 @@
   --menu-item-text: var(--foreground);
   // `--menu-item-text-active` removed — Batch 38 (alias of `var(--primary)`; single callsite in `media-detail-view.component.part2.scss`).
 
-  // Form controls
-  --field-bg: var(--card);
-  --field-border: var(--border-strong);
-  --field-border-focus: var(--primary);
-  --field-placeholder: var(--text-disabled);
-  --field-text: var(--foreground);
+  // Form controls — `--field-*` removed Batch 46; callsites use `var(--card)`, `var(--border-strong)`, `var(--primary)`, `var(--text-disabled)`, `var(--foreground)` (tweakcn / `styles.scss`).
 
   // Settings sections and cards
   // `--section-bg` removed — Batch 39 (call sites use `var(--card)` in media-detail SCSS).
@@ -137,16 +113,10 @@
 }
 
 @mixin dark-theme-overrides {
-  // Shadows — higher opacity so they punch through dark surfaces (ink from `--shadow-color`; Batch 10).
-  // @see docs/migration/phase-7-token-migration.md § Batch 10
-  --shadow-sm:
-    0 0.0625rem 0.1875rem color-mix(in srgb, var(--shadow-color) 28%, transparent),
-    0 0.0625rem 0.125rem color-mix(in srgb, var(--shadow-color) 18%, transparent);
-  // Batch 39: `md|lg|xl` shadow overrides removed — tweakcn dark palette supplies the same names.
+  // Batch 45: warm `--shadow-sm` / composite `--shadow-focus` removed — tweakcn dark palette owns `--shadow-*`.
+  // @see docs/migration/phase-7-token-migration.md §Batch 45
 
   --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
-  --shadow-focus: var(--shadow-sm),
-    0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
 
   // Batch 39: `--border-hover` / `--photo-marker-drop-shadow` removed (inlined at callsites).
 }
@@ -166,12 +136,6 @@
   --menu-surface-border: color-mix(in srgb, #a38d73 44%, transparent);
   --menu-item-bg-hover: color-mix(in srgb, #c59f63 14%, transparent);
   --menu-item-text: #2f271f;
-
-  --field-bg: #fffdf8;
-  --field-border: #b7a48e;
-  --field-border-focus: #8f522d;
-  --field-placeholder: #9f8d78;
-  --field-text: #2f271f;
 
 }
 

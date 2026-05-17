@@ -36,7 +36,7 @@ This report, the [structure audit](./dropdown-component-structure-audit-2026-05-
 
 3. **`::ng-deep`:** Grep over `apps/web/src/app/shared/dropdown-trigger/**` found **no** `::ng-deep` / `:host ::ng-deep` usage in this subtree.
 
-4. **Stacking:** `DropdownShellComponent` applies **`[style.z-index]="'var(--z-dropdown)'"`** on the same host that receives **`HlmMenuContentDirective`** (via `hostDirectives`), whose CVA includes Tailwind **`z-50`** (`menuContentVariants` in `menu-variants.ts`). **Inline `z-index` wins** over class-based stacking; the `z-50` is effectively dead for the shell host but still **confusing for future refactors**.
+4. **Stacking:** `DropdownShellComponent` applies **inline `z-index: 300`** (`[style.z-index]: '"300"'` on the host — dropdown plane per **Phase 7 Batch 43**) on the same host that receives **`HlmMenuContentDirective`** (via `hostDirectives`), whose CVA includes Tailwind **`z-50`** (`menuContentVariants` in `menu-variants.ts`). **Inline `z-index` wins** over class-based stacking; the `z-50` is effectively dead for the shell host but still **confusing for future refactors**.
 
 5. **Escape handling duplication:** `WorkspaceToolbarComponent` registers **`@HostListener('document:keydown.escape')`** *and* each open `app-dropdown-shell` listens for **`(document:keydown.escape)`**. Both paths call close logic; behavior is redundant but **projects toolbar does not** duplicate the host listener (only the shell). Inconsistent pattern.
 
@@ -83,7 +83,7 @@ Legend: **Trigger** = native `button` in toolbar template (not an `app-*` host).
 | 4 | `app-standard-dropdown` | Rules band: **`[itemsClass]="'standard-dropdown__items--filter-rules-band'"`**, **`[style.--std-dropdown-min-height]="'7rem'"`**, footer **`[actionLabel]`** → `filterService.addRule()`. |
 | 5 | `div.standard-dropdown__items` | Scroll + **`max-height: min(18rem, 50vh)`** when `--filter-rules-band` modifier present (single scroll owner + gutter per spec). |
 | 6 | **`div[dropdown-items]`** → **`div.filter-rules`** | **Innermost “list”** is the vertical stack of **`div.filter-rule`** form rows (not a classic menu list). |
-| 7 | **`div.filter-rule__picker-flyout`** (sibling under `app-filter-dropdown`, `@if (openRulePicker())`) | **Secondary surface:** `position: fixed`, `z-index: calc(var(--z-dropdown) + 2)`, `role="listbox"`; **not** a separate Angular component — avoids nesting a second scroll list inside the rules stack. |
+| 7 | **`div.filter-rule__picker-flyout`** (sibling under `app-filter-dropdown`, `@if (openRulePicker())`) | **Secondary surface:** `position: fixed`, `z-index: 302` (above dropdown plane **`300`**; **Batch 43** literal), `role="listbox"`; **not** a separate Angular component — avoids nesting a second scroll list inside the rules stack. |
 
 ### 2.4 Projects (`app-projects-dropdown`)
 
@@ -168,8 +168,8 @@ Each row ties **source of geometry change** → **file + mechanism**.
 
 ### 5.2 Stacking
 
-- Shell: **`z-index: var(--z-dropdown)`** (inline).
-- Flyout: **`z-index: calc(var(--z-dropdown) + 2)`** (`filter-dropdown.component.scss`).
+- Shell: **`z-index: 300`** (inline host binding — `dropdown-shell.component.ts`).
+- Flyout: **`z-index: 302`** (`filter-dropdown.component.scss`).
 - **CVA `z-50`** on same shell host (§1) — maintainers may think Tailwind controls stacking; **inline wins**.
 
 ### 5.3 Drag vs close

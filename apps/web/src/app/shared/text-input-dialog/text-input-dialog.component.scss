@@ -28,7 +28,23 @@
     &:focus-visible {
       outline: none;
       border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
-      box-shadow: var(--shadow-focus);
+      // Focus stack: tweakcn `--shadow-sm`; dark adds `--interactive-focus-ring` (ex `--shadow-focus`).
+      // @see docs/migration/phase-7-token-migration.md §Batch 45
+      box-shadow: var(--shadow-sm);
+    }
+
+    // Dark theme: focus stack adds `--interactive-focus-ring` (replaces removed `--shadow-focus`).
+    // @see docs/migration/phase-7-token-migration.md §Batch 45
+    html[data-theme='dark'] &:focus-visible {
+      box-shadow: var(--shadow-sm), var(--interactive-focus-ring);
+    }
+
+    // System dark when app is not forced light (matches legacy bridge dark mixin scope).
+    // @see docs/migration/phase-7-token-migration.md §Batch 45
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']) &:focus-visible {
+        box-shadow: var(--shadow-sm), var(--interactive-focus-ring);
+      }
     }
   }
 

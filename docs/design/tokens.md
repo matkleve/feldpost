@@ -7,11 +7,11 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 ## Legacy bridge inventory (`_legacy-design-tokens.scss`)
 
-**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge inventory* (keep both in lockstep). **`@mixin dark-theme-overrides`** in **`_legacy-design-tokens.scss`** adjusts **`--shadow-sm`**, **`--interactive-focus-ring`**, and **`--shadow-focus`** only. **`--shadow-md|lg|xl`**, tweakcn semantic colors, and MD3 **`--fp-sys-*`** reference tables are **not** emitted from the legacy bridge file.
+**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge inventory* (keep both in lockstep). **`@mixin dark-theme-overrides`** in **`_legacy-design-tokens.scss`** adjusts **`--interactive-focus-ring`** only (**Phase 7 Batch 45** removed bridge **`--shadow-sm` / `--shadow-focus`** — physical **`--shadow-*`** live on tweakcn **`styles.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantic colors, and MD3 **`--fp-sys-*`** reference tables are **not** emitted from the legacy bridge file.
 
 ### Typography baseline (`_typography-baseline.scss`)
 
-**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded **after** **`meta.load-css('styles/legacy-design-tokens')`** in **`styles.scss`**) defines modular **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, and **`--motion-duration-fast`** / **`--motion-ease-out`** — Phase 7 **Batch 41** (three line-heights) + **Batch 42** (font scale, weights, comfortable line-height, motion primitives).
+**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded **after** **`meta.load-css('styles/legacy-design-tokens')`** and **`styles.scss` `@theme inline`** in **`styles.scss`**) defines modular **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, **`--motion-duration-fast`** / **`--motion-ease-out`**, **`--spacing-1`…`--spacing-8`**, **`--radius-full`**, and **`--container-radius-control|panel`** — Phase 7 **Batch 41** (three line-heights) + **Batch 42** (font scale, weights, comfortable line-height, motion primitives) + **Batch 44** (spacing + pill radius + container radius aliases).
 
 | Token |
 | --- |
@@ -19,15 +19,18 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 | `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
 | `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
 | `--motion-duration-fast`, `--motion-ease-out` |
+| `--spacing-1` … `--spacing-6`, `--spacing-8` (the **48px** / **12×4px** step uses **`calc(0.25rem * 12)`** at callsites — **Batch 41** removed **`--spacing-7`**) |
+| `--radius-full`, `--container-radius-control`, `--container-radius-panel` |
+
+### Tailwind theme radius (`styles.scss` `@theme inline`)
+
+**Emitted after the legacy bridge** — **`--radius-sm`**, **`--radius-md`**, **`--radius-lg`**, **`--radius-xl`** (computed from tweakcn **`--radius`**). **Batch 44** removed duplicate **`--radius-sm|md|lg`** rows from **`_legacy-design-tokens.scss`** (components still use **`var(--radius-sm|md|lg)`** unchanged).
 
 **Layer A (legacy bridge primitives — `_legacy-design-tokens.scss` `:root` only)**
 
-| Token |
+| Note |
 | --- |
-| `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full` |
-| `--shadow-sm`, `--shadow-focus` |
-| `--spacing-1` … `--spacing-6`, `--spacing-8` (the **48px** / **12×4px** step uses **`calc(0.25rem * 12)`** at callsites — **Batch 41** removed **`--spacing-7`**) |
-| `--container-radius-control`, `--container-radius-panel` |
+| **Phase 7 Batch 45:** no physical **`--shadow-*`** rows on the bridge — use tweakcn **`styles.scss`** `:root` / dark palette. |
 
 **Phase 7 Batch 43:** product **z-index** planes (**`200`** map chrome CTAs, **`300`** dropdown / popover shells and **`302`** filter picker flyout `+2`, **`500`** modal plane and **`501`** workspace footer drag) are **not** **`--z-*`** custom properties on the legacy bridge — use literals in SCSS / **`theme.extend.zIndex`** in **`tailwind.config.js`** (`z-upload-btn`, `z-dropdown`, `z-modal`).
 
@@ -43,9 +46,8 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 | --- |
 | `--action-bg-hover`, `--action-text-default`, `--action-text-active` |
 | `--menu-surface-border`, `--menu-item-bg-hover`, `--menu-item-text` |
-| `--field-bg`, `--field-border`, `--field-border-focus`, `--field-placeholder`, `--field-text` |
 
-Optional **`[data-theme='sandstone']`** overrides for the same Layer C field/menu/action names are defined in the same SCSS file (see `token-layers.md`).
+Optional **`[data-theme='sandstone']`** overrides for the same Layer C menu/action names are defined in the same SCSS file (see `token-layers.md`).
 
 ## 3.1 Color Tokens
 
@@ -225,7 +227,7 @@ The v2 color system follows the Material Design 3 tonal architecture with the Fe
 
 #### Migration rule
 
-**New work:** use **tweakcn** semantics (`--primary`, `--background`, `--foreground`, `--muted`, `--border`, …) and shipped layout/typography/motion primitives (`--radius-*`, `--spacing-*`, `--font-size-*`, `--motion-*`, and the **`--shadow-*`** ladder for elevation / depth). **`--shadow-md|lg|xl`** are **tweakcn-owned** on **`:root`** after Phase 7 **Batch 39** (legacy bridge no longer redefines them); **`--shadow-sm`** and **`--shadow-focus`** remain on **`_legacy-design-tokens.scss`**. Do not treat **`--fp-sys-color-*`** or other **`--fp-sys-*`** names as runtime CSS (those exist in §3.1a–g tables as **MD3 design reference only**; see Phase 7 **Batches 16–17** in [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md)). **Legacy:** the v1 **`--color-*`** story below is historical palette documentation; do not add new `var(--color-*)` in component SCSS (Phase 7 consumer gate).
+**New work:** use **tweakcn** semantics (`--primary`, `--background`, `--foreground`, `--muted`, `--border`, …) and shipped layout/typography/motion primitives (`--radius-*`, `--spacing-*`, `--font-size-*`, `--motion-*`, and the **`--shadow-*`** ladder for elevation / depth). **`--shadow-sm`…`--shadow-2xl`** are **tweakcn-owned** on **`:root`** / dark palette (**Phase 7 Batch 45** removed warm bridge **`--shadow-sm` / `--shadow-focus`** from **`_legacy-design-tokens.scss`**). Do not treat **`--fp-sys-color-*`** or other **`--fp-sys-*`** names as runtime CSS (those exist in §3.1a–g tables as **MD3 design reference only**; see Phase 7 **Batches 16–17** in [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md)). **Legacy:** the v1 **`--color-*`** story below is historical palette documentation; do not add new `var(--color-*)` in component SCSS (Phase 7 consumer gate).
 
 ---
 
@@ -296,7 +298,7 @@ The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes w
 
 #### Phase 7 — MD3 system tokens §3.1b–g (documentation only)
 
-**`--fp-sys-shape-*`**, **`--fp-sys-spacing-*`**, **`--fp-sys-elevation-*`**, **`--fp-sys-typescale-*`**, **`--fp-sys-state-*`**, and **`--fp-sys-motion-*`** in the tables below follow the same rule as **`--fp-sys-color-*`** in §3.1a: they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 17** (2026-05-17). Use **`--radius-*`**, **`--spacing-*`** (§3.3), **`--shadow-*`** (§3.5; **Batch 37** removed product **`--elevation-*`** bridge aliases — bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**; **Batch 39** removed duplicate **`--shadow-md|lg|xl`** from **`_legacy-design-tokens.scss`** so those three names resolve from **tweakcn `:root`**, while **`--shadow-sm`** / **`--shadow-focus`** stay on the bridge), the **`--font-size-*`** scale (§3.2; **`apps/web/src/styles/_typography-baseline.scss`** `:root` after **Batch 42**), and **`--motion-duration-fast`** / **`--motion-ease-out`** (§3.6; same file after **Batch 42**) in implementation.
+**`--fp-sys-shape-*`**, **`--fp-sys-spacing-*`**, **`--fp-sys-elevation-*`**, **`--fp-sys-typescale-*`**, **`--fp-sys-state-*`**, and **`--fp-sys-motion-*`** in the tables below follow the same rule as **`--fp-sys-color-*`** in §3.1a: they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 17** (2026-05-17). Use **`--radius-*`**, **`--spacing-*`** (§3.3), **`--shadow-*`** (§3.5; **Batch 37** removed product **`--elevation-*`** bridge aliases — bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**; **Batch 39** removed duplicate **`--shadow-md|lg|xl`** from **`_legacy-design-tokens.scss`**; **Batch 45** removed bridge **`--shadow-sm` / `--shadow-focus`** — all physical shadow names resolve from **tweakcn `styles.scss`**), the **`--font-size-*`** scale (§3.2; **`apps/web/src/styles/_typography-baseline.scss`** `:root` after **Batch 42**), and **`--motion-duration-fast`** / **`--motion-ease-out`** (§3.6; same file after **Batch 42**) in implementation.
 
 ---
 
@@ -465,7 +467,7 @@ Minimum rendered text size: **12px / 0.75rem** (caption only). Body text is neve
 
 ## 3.3 Spacing and Grid
 
-Feldpost uses a **0.25rem (4px) base unit** with a modular scale on `:root` (**Phase 7 Batch 31** inlined the former **`--spacing-unit`** indirection — spacing rows use **`calc(0.25rem * N)`** directly in `_legacy-design-tokens.scss`).
+Feldpost uses a **0.25rem (4px) base unit** with a modular scale on `:root` (**Phase 7 Batch 31** inlined the former **`--spacing-unit`** indirection — spacing rows use **`calc(0.25rem * N)`** directly on **`apps/web/src/styles/_typography-baseline.scss` `:root`** after **Batch 44**; the legacy bridge no longer emits **`--spacing-*`**).
 
 | Token         | Value               |
 | ------------- | ------------------- |
@@ -550,22 +552,22 @@ The UI uses a consistent "friendly but professional" radius system:
 
 ### Physical shadow scale
 
-Four physical shadows define elevation only. Components should consume **`--shadow-focus`** (focus emphasis), **`--interactive-focus-ring`**, and the **`--shadow-sm|md|lg|xl`** scale (**Batch 37** — former **`--elevation-*`** aliases removed) instead of hardcoding physical levels directly.
+Four physical shadows define elevation only. Components should consume **`--interactive-focus-ring`** and the **`--shadow-sm|md|lg|xl`** scale from **tweakcn `styles.scss`** (**Batch 37** — former **`--elevation-*`** aliases removed; **Batch 45** — former **`--shadow-focus`** bridge alias removed — compose stacks at callsites per § *Focus stacks* below) instead of hardcoding physical levels directly.
 
-**Batch 39 — which file owns which name:** **`--shadow-sm`** and **`--shadow-focus`** are emitted from **`apps/web/src/styles/_legacy-design-tokens.scss`** (warm rgba stack; dark mixin adjusts **`sm`** / **`focus`** only). **`--shadow-md`**, **`--shadow-lg`**, and **`--shadow-xl`** are **not** bridge rows anymore — tweakcn defines those three names on **`:root`** before **`meta.load-css`** loads the bridge, so **`var(--shadow-md|lg|xl)`** in components still resolves, but agents must not describe them as “legacy-bridge `:root` tokens.” The table below is the **documented physical reference** for product elevation steps; tweakcn theme values should stay aligned with it at review time.
+**Batch 39 — which file owns which name:** **`--shadow-sm`…`--shadow-2xl`** are **tweakcn** names on **`:root`** / dark palette (**Batch 39** removed duplicate **`md|lg|xl`** rows from **`_legacy-design-tokens.scss`**; **Batch 45** removed warm **`--shadow-sm`** + **`--shadow-focus`** from the bridge). **`var(--shadow-md|lg|xl)`** in components resolves from **tweakcn** before **`meta.load-css`** loads the bridge. The table below is the **documented physical reference** for product elevation steps; tweakcn theme values should stay aligned with it at review time.
 
 | Token                 | Light mode value                                                      | Purpose                              |
 | --------------------- | --------------------------------------------------------------------- | ------------------------------------ |
-| `--shadow-sm`         | `0 1px 3px rgba(15,14,12,.12), 0 1px 2px rgba(15,14,12,.08)`          | Lightest lift                        |
+| `--shadow-sm`         | `0 1px 3px rgba(15,14,12,.12), 0 1px 2px rgba(15,14,12,.08)` (reference — shipped tweakcn uses its own stack) | Lightest lift                        |
 | `--shadow-md`         | `0 4px 12px rgba(15,14,12,.15), 0 2px 4px rgba(15,14,12,.10)`         | Standard overlay                     |
 | `--shadow-lg`         | `0 8px 24px rgba(15,14,12,.18), 0 4px 8px rgba(15,14,12,.12)`         | Dropdown/popover                     |
 | `--shadow-xl`         | `0 16px 48px rgba(15,14,12,.22), 0 6px 16px rgba(15,14,12,.14)`       | Modal-level                          |
 
 **Phase 7 Batch 31:** the separate **`--shadow-focus-ring`** primitive was **removed** — **`--interactive-focus-ring`** is emitted directly on `:root` (light) and overridden in **`@mixin dark-theme-overrides`** (dark) with the correct **`color-mix`** against **`var(--primary)`**.
 
-### Focus shadow alias
+### Focus stacks (elevation + ring)
 
-The bridge emits **`--shadow-focus`** for focus emphasis (light: `var(--shadow-sm)`; dark: `var(--shadow-sm)` plus the same ring geometry as **`--interactive-focus-ring`**). Components that need a visible focus ring use **`--interactive-focus-ring`**.
+**Phase 7 Batch 45:** **`--shadow-focus`** was removed from **`_legacy-design-tokens.scss`**. Use **`box-shadow: var(--shadow-sm)`** for the lightest lift alone, and **`box-shadow: var(--shadow-sm), var(--interactive-focus-ring)`** when dark theme needs the former composite (**`html[data-theme='dark']`** + **`@media (prefers-color-scheme: dark)`** with **`:root:not([data-theme='light'])`** — see **`media-detail-view.component.scss`**, **`metadata-property-row.component.scss`**, **`text-input-dialog.component.scss`**, **`project-select-dialog.component.scss`**). Components that need only a focus ring without changing elevation continue to use **`outline` / `border-color`** plus **`--interactive-focus-ring`** as appropriate.
 
 ### Border tokens
 
@@ -589,7 +591,7 @@ Use the **numeric product ladder** below (literals in SCSS or Tailwind **`z-*`**
 
 ### Elevation (physical shadows)
 
-**Phase 7 Batch 37:** **`--elevation-subtle`**, **`--elevation-overlay`**, and **`--elevation-dropdown`** were **removed** from **`_legacy-design-tokens.scss`** — bind **`box-shadow`** directly to **`var(--shadow-sm)`**, **`var(--shadow-md)`**, or **`var(--shadow-lg)`** (same intent as the former aliases). **Batch 39:** **`@mixin dark-theme-overrides`** no longer overrides **`--shadow-md|lg|xl`** — those names track **tweakcn** dark palette; the mixin still overrides **`--shadow-sm`** / **`--shadow-focus`** only.
+**Phase 7 Batch 37:** **`--elevation-subtle`**, **`--elevation-overlay`**, and **`--elevation-dropdown`** were **removed** from **`_legacy-design-tokens.scss`** — bind **`box-shadow`** directly to **`var(--shadow-sm)`**, **`var(--shadow-md)`**, or **`var(--shadow-lg)`** (same intent as the former aliases). **Batch 39:** **`@mixin dark-theme-overrides`** no longer overrides **`--shadow-md|lg|xl`** — those names track **tweakcn** dark palette. **Batch 45:** the mixin no longer overrides **`--shadow-sm`** / **`--shadow-focus`** (bridge rows removed).
 
 | Visual plane        | Use                    | Typical elements                                                                                                                      |
 | ------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -603,7 +605,7 @@ Use the **numeric product ladder** below (literals in SCSS or Tailwind **`z-*`**
 | ------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
 | Top-layer / modal        | **`var(--shadow-xl)`** | Delete confirmation dialog, image detail overlay, drag preview                                    |
 
-**Rule:** if two elements visually sit at the same plane, they must use the same **`--shadow-*`** step so dark-mode shadow overrides stay coherent.
+**Rule:** if two elements visually sit at the same plane, they must use the same **`--shadow-*`** step so light/dark theme stacks stay coherent (**tweakcn `styles.scss` `:root` / dark palette** — **Batch 45** removed legacy bridge shadow overrides).
 
 **Photo marker drop shadow** — **`--photo-marker-drop-shadow`** was **removed from the bridge (Batch 39)**; **`_map-shell-leaflet-global.scss`** inlines **`filter: drop-shadow(...)`** so it traces the SVG/image shape. Reference values: light **`rgba(15,14,12,0.45)`**; dark **`rgba(0,0,0,0.65)`**.
 
@@ -700,6 +702,6 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | **removed from bridge** — no longer defined for sync | **`--font-weight-regular`** (Batch 32) | Use **`Font/Weight/Medium`** / **`Semibold`** from the bridge where applicable, or literal **`400`** at the sole former callsite |
 | `calc` — computed from another token | `--spacing-1`, `--font-size-md` | Set manually or derive from the base token |
 | `color-mix` — computed at render time | `--menu-surface-border`, `--menu-item-bg-hover` (Layer C mixes still on bridge) | Approximate with a manual opacity or solid value |
-| `complex` — multi-value shorthand | `--shadow-sm` (bridge); **`--shadow-md|lg|xl`** on tweakcn `:root` | Set manually; shadows are not natively representable as a single Figma Variable |
+| `complex` — multi-value shorthand | **`--shadow-sm`…`--shadow-2xl`** on tweakcn **`styles.scss` `:root`** / dark palette (**Batch 45** — not bridge rows) | Set manually; shadows are not natively representable as a single Figma Variable |
 
 Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.

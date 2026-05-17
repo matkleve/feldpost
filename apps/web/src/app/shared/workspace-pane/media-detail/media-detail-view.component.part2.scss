@@ -160,9 +160,9 @@
     flex: 1 1 auto;
     min-width: 0;
     font-size: var(--font-size-sm);
-    color: var(--field-text);
-    background: var(--field-bg);
-    border: 1px solid var(--field-border-focus);
+    color: var(--foreground);
+    background: var(--card);
+    border: 1px solid var(--primary);
     border-radius: var(--radius-sm);
     padding: 0.125rem var(--spacing-2);
     font-family: inherit;
@@ -209,7 +209,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--field-border-focus);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 
@@ -249,9 +249,9 @@
     gap: var(--spacing-1);
     align-items: center;
     width: 100%;
-    border: 1px solid var(--field-border);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
-    background: var(--field-bg);
+    background: var(--card);
     padding: var(--spacing-1);
 
     &:focus-within {
@@ -311,7 +311,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    color: var(--field-text);
+    color: var(--foreground);
     padding: var(--spacing-1) var(--spacing-2);
     font-size: var(--font-size-md);
     text-align: left;

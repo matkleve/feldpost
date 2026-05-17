@@ -11,7 +11,7 @@ A **presentational** floating surface: background, border, corner radius, box sh
 
 ## What It Looks Like
 
-Matches the existing elevated dropdown surfaces in the app (`app-dropdown-shell`, filter/sort dropdown specs): warm white / dark-elevation surface using **`--color-bg-elevated`**, **1px** border **`--color-border`**, corner radius **`--radius-lg`**, shadow **`var(--shadow-lg)`** (**tweakcn `:root`** — **Batch 39** removed duplicate bridge rows; see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5), **`z-index: 300`** (dropdown plane — **Phase 7 Batch 43**). No default padding — inner spacing belongs to slotted content components.
+Matches the existing elevated dropdown surfaces in the app (`app-dropdown-shell`, filter/sort dropdown specs): warm white / dark-elevation surface using **`--color-bg-elevated`**, **1px** border **`--color-border`**, corner radius **`--radius-lg`** (**`styles.scss` `@theme inline`** — **Batch 44**), shadow **`var(--shadow-lg)`** (**tweakcn `:root`** — **Batch 39** removed duplicate **`--shadow-*`** rows from **`_legacy-design-tokens.scss`**; see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5), **`z-index: 300`** (dropdown plane — **Phase 7 Batch 43**). No default padding — inner spacing belongs to slotted content components.
 
 ## Where It Lives
 

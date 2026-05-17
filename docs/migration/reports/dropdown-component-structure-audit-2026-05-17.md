@@ -133,7 +133,7 @@ flowchart TB
 
 ### 3.6 z-index / stacking
 
-- Shell uses **`var(--z-dropdown)`**; `menuContentVariants` also includes **`z-50`** on menu content styling — **two layers of “elevation” semantics** (positioned shell + inner Tailwind z) can confuse future overlays.
+- Shell uses **inline `z-index: 300`** (dropdown plane; **Batch 43**); `menuContentVariants` also includes **`z-50`** on menu content styling — **two layers of “elevation” semantics** (positioned shell + inner Tailwind z) can confuse future overlays.
 - Filter **flyout** must stay **above** rule rows but **below** or **alongside** future global overlays; any flattening must **preserve stacking contracts**.
 
 ### 3.7 Duplicate shells / drift risk

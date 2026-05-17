@@ -2,9 +2,28 @@
 // Must run after Tailwind Preflight so heading metrics are not reset away.
 // @see apps/web/AGENTS.md (typography ownership — global baseline only)
 
-// Exposes typography primitives for headings + app `var()` consumers after legacy bridge load order
-// @see docs/migration/phase-7-token-migration.md §Batch 41 / §Batch 42
+// Exposes typography + spacing/radius primitives for headings and app `var()` consumers after legacy bridge and `@theme inline` load order
+// @see docs/migration/phase-7-token-migration.md §Batch 41 / §Batch 42 / §Batch 44
 :root {
+  // Defines modular spacing scale (4px base unit) for layout gaps and component insets
+  // @see docs/migration/phase-7-token-migration.md §Batch 44
+  --spacing-1: calc(0.25rem * 1);
+  --spacing-2: calc(0.25rem * 2);
+  --spacing-3: calc(0.25rem * 3);
+  --spacing-4: calc(0.25rem * 4);
+  --spacing-5: calc(0.25rem * 6);
+  --spacing-6: calc(0.25rem * 8);
+  --spacing-8: calc(0.25rem * 16);
+
+  // Defines full pill radius for chips and circular controls (not in Tailwind @theme radius ladder)
+  // @see docs/design/tokens.md §3.3
+  --radius-full: 9999px;
+
+  // Maps semantic container corners to theme radius steps (`--radius-md|lg` from `styles.scss` @theme inline)
+  // @see docs/migration/phase-7-token-migration.md §Batch 44
+  --container-radius-control: var(--radius-md);
+  --container-radius-panel: var(--radius-lg);
+
   // Sets tight line-height for h1–h2 and other dense heading contexts
   // @see docs/migration/phase-7-token-migration.md §Batch 41
   --line-height-tight: 1.2;

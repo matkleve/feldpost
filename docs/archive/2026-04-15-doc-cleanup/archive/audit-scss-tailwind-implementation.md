@@ -179,7 +179,7 @@ The largest issues are:
 **What was found:**
 
 - Global z-index ladder exists.
-- Multiple overlays share `--z-upload-button` where semantically distinct layers (search/dropdown/panel) would benefit from their own levels.
+- **Historical (pre–Phase 7 Batch 43):** multiple overlays shared the removed bridge token **`--z-upload-button`** where semantically distinct layers (search/dropdown/panel) would benefit from their own levels. **Current:** product z uses literals **`200` / `300` / `500`** (offsets **`302`**, **`501`** where documented) and Tailwind **`z-upload-btn`**, **`z-dropdown`**, **`z-modal`** — see **`docs/design/tokens.md`** §3.5.
 
 **Impact:**
 
@@ -187,7 +187,7 @@ The largest issues are:
 
 **Recommendation:**
 
-- Map each overlay role to its semantic z-token (`map`, `panel`, `dropdown`, `modal`, etc.) and avoid role reuse.
+- Map each overlay role to a **distinct plane** on the product z ladder (see **`docs/design/tokens.md`** §3.5 — literals **`200` / `300` / `500`**, Tailwind **`z-*`** theme keys) and avoid reusing the same numeric plane for unrelated surfaces.
 
 ---
 

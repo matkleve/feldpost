@@ -209,7 +209,7 @@
 - **Variant axes**:
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
-  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}`) | Vertical gap between children |
+  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}` on **`_typography-baseline.scss` `:root`** — **Batch 44**) | Vertical gap between children |
 - **Composed of**: standalone
 - **Used in**: dialogs, detail forms, settings overlay
 - **Gaps**: none
@@ -224,7 +224,7 @@
 - **Variant axes**:
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
-  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}`) | Horizontal gap between children |
+  | `spacing` | `number` | `1–8` (maps to `--spacing-{n}` on **`_typography-baseline.scss` `:root`** — **Batch 44**) | Horizontal gap between children |
 - **Composed of**: standalone
 - **Used in**: toolbar rows, chip rows, dialog actions
 - **Gaps**: none

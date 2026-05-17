@@ -16,9 +16,9 @@
     align-items: center;
     gap: var(--spacing-1);
     padding: var(--spacing-1) var(--spacing-2);
-    border: 1px solid var(--field-border-focus);
+    border: 1px solid var(--primary);
     border-radius: var(--radius-sm);
-    background: var(--field-bg);
+    background: var(--card);
     box-shadow: var(--interactive-focus-ring);
   }
 
@@ -35,12 +35,12 @@
     outline: none;
     background: transparent;
     font-size: var(--font-size-sm);
-    color: var(--field-text);
+    color: var(--foreground);
     font-family: inherit;
     padding: 0;
 
     &::placeholder {
-      color: var(--field-placeholder);
+      color: var(--text-disabled);
     }
   }
 

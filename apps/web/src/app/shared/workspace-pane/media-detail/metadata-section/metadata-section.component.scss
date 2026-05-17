@@ -23,16 +23,16 @@
 
 .add-metadata-input {
   font-size: var(--font-size-md);
-  color: var(--field-text);
-  background: var(--field-bg);
-  border: 1px solid var(--field-border);
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   padding: 0.25rem var(--spacing-2);
   font-family: inherit;
   outline: none;
 
   &:focus {
-    border-color: var(--field-border-focus);
+    border-color: var(--primary);
     box-shadow: var(--interactive-focus-ring);
   }
 }
