@@ -1,0 +1,194 @@
+// ── Upload button zone — fixed top-right, expands into panel ─────────────────
+// @see docs/migration/phase-8-global-scss-elimination.md (map-shell partial split)
+
+.upload-btn-zone {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  z-index: var(--z-upload-button);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-2);
+
+  &__preview-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    width: min(14rem, calc(100vw - var(--spacing-8)));
+  }
+
+  &__preview-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-height: 1.8rem;
+    border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--card) 90%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.1rem var(--spacing-2);
+  }
+
+  &__preview-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: var(--radius-full);
+    background: var(--primary);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent);
+    animation: upload-panel-dot-pulse 1.2s ease-out infinite;
+    flex-shrink: 0;
+  }
+
+  &__preview-name {
+    min-width: 0;
+    font-size: var(--font-size-xs);
+    color: var(--foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.map-upload-btn {
+  --upload-progress: 0%;
+
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  box-shadow: var(--elevation-overlay);
+  transition:
+    background 120ms ease-out,
+    transform 120ms ease-out,
+    width 180ms var(--motion-standard);
+  flex-shrink: 0;
+  position: relative;
+  isolation: isolate;
+
+  .material-icons {
+    font-size: var(--font-size-xl);
+    position: relative;
+    z-index: 2;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 80%, var(--foreground));
+    transform: scale(1.04);
+  }
+
+  &--active {
+    background: color-mix(in srgb, var(--primary) 80%, var(--foreground));
+  }
+
+  &--busy {
+    width: min(13.5rem, calc(100vw - var(--spacing-8)));
+    justify-content: flex-start;
+    padding: 0 var(--spacing-2);
+  }
+
+  &--issues {
+    border: 2px solid color-mix(in srgb, var(--destructive) 72%, var(--card));
+  }
+
+  &__icon-shell {
+    position: relative;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 2;
+
+    .material-icons {
+      font-size: var(--font-size-xl);
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  &__progress {
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--radius-full);
+    background: conic-gradient(
+      var(--primary) 0 var(--upload-progress),
+      color-mix(in srgb, var(--card) 50%, transparent) var(--upload-progress) 100%
+    );
+    z-index: 1;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+    }
+  }
+
+  &__summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-2);
+    min-width: 0;
+    flex: 1;
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-solid);
+  }
+
+  &__summary-label {
+    color: color-mix(in srgb, var(--primary-foreground) 78%, var(--border));
+    white-space: nowrap;
+  }
+
+  &__summary-count {
+    color: var(--primary-foreground);
+    font-weight: var(--font-weight-semibold);
+    z-index: 3;
+    white-space: nowrap;
+  }
+}
+
+@keyframes upload-panel-dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent);
+  }
+
+  70% {
+    box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+}
+
+// Expanded panel slides down from upload button.
+.upload-expand {
+  display: none;
+  flex-direction: column;
+  width: min(420px, calc(100vw - var(--spacing-6)));
+  max-height: min(82vh, 48rem);
+  overflow: visible;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+
+  &--visible {
+    display: flex;
+  }
+}

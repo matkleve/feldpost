@@ -1,9 +1,9 @@
 // Defines error-state card surface for media loading failures.
 // @see docs/specs/component/item-grid/item-grid.md#state
 :host {
-  border: 1px solid color-mix(in srgb, var(--chart-2) 45%, var(--border)); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+  border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border));
   border-radius: var(--container-radius-panel);
-  background: color-mix(in srgb, var(--card) 88%, var(--chart-2)); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+  background: color-mix(in srgb, var(--card) 88%, var(--warning));
   padding: var(--spacing-4);
   display: grid;
   gap: var(--spacing-2);

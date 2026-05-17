@@ -295,7 +295,7 @@
     align-items: center;
     padding: 0.0625rem 0.25rem;
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--chart-2) 18%, transparent); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+    background: color-mix(in srgb, var(--warning) 18%, transparent);
     color: var(--foreground);
     font-size: var(--font-size-caption);
     font-weight: var(--font-weight-semibold);
@@ -410,7 +410,7 @@
     }
 
     &--active {
-      color: var(--chart-2); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+      color: var(--warning);
       background: var(--state-warning-bg);
     }
   }
@@ -431,7 +431,7 @@
     width: 0.25rem;
     align-self: stretch;
     border-radius: 0.125rem;
-    background: color-mix(in srgb, var(--primary) 72%, var(--chart-1)); /* TODO(phase8): --color-success has no tweakcn equiv yet */
+    background: color-mix(in srgb, var(--primary) 72%, var(--success));
     margin-right: 0.125rem;
     flex-shrink: 0;
   }

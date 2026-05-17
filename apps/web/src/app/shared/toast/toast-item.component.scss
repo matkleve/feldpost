@@ -83,10 +83,10 @@
 }
 
 :host(.success) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--chart-1) 14%, transparent); /* TODO(phase8): --color-success has no tweakcn equiv yet */
+  background: color-mix(in srgb, var(--success) 14%, transparent);
 }
 :host(.success) .toast-icon {
-  color: var(--chart-1); /* TODO(phase8): --color-success has no tweakcn equiv yet */
+  color: var(--success);
 }
 :host(.error) .toast-icon-wrap {
   background: color-mix(in srgb, var(--destructive) 14%, transparent);
@@ -95,10 +95,10 @@
   color: var(--destructive);
 }
 :host(.warning) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--chart-2) 14%, transparent); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
 }
 :host(.warning) .toast-icon {
-  color: var(--chart-2); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+  color: var(--warning);
 }
 :host(.info) .toast-icon {
   color: var(--muted-foreground);

@@ -52,22 +52,22 @@
   }
 
   &--success {
-    background: color-mix(in srgb, var(--chart-1) 10%, transparent); /* TODO(phase8): --color-success has no tweakcn equiv yet */
-    border-color: color-mix(in srgb, var(--chart-1) 25%, transparent); /* TODO(phase8): --color-success has no tweakcn equiv yet */
-    color: var(--chart-1); /* TODO(phase8): --color-success has no tweakcn equiv yet */
+    background: color-mix(in srgb, var(--success) 10%, transparent);
+    border-color: color-mix(in srgb, var(--success) 25%, transparent);
+    color: var(--success);
 
     &:hover {
-      background: color-mix(in srgb, var(--chart-1) 16%, transparent); /* TODO(phase8): --color-success has no tweakcn equiv yet */
+      background: color-mix(in srgb, var(--success) 16%, transparent);
     }
   }
 
   &--warning {
-    background: color-mix(in srgb, var(--chart-2) 10%, transparent); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
-    border-color: color-mix(in srgb, var(--chart-2) 25%, transparent); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
-    color: var(--chart-2); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+    background: color-mix(in srgb, var(--warning) 10%, transparent);
+    border-color: color-mix(in srgb, var(--warning) 25%, transparent);
+    color: var(--warning);
 
     &:hover {
-      background: color-mix(in srgb, var(--chart-2) 16%, transparent); /* TODO(phase8): --color-warning has no tweakcn equiv yet */
+      background: color-mix(in srgb, var(--warning) 16%, transparent);
     }
   }
 }
