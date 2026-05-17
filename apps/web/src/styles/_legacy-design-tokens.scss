@@ -87,13 +87,24 @@
   --fp-sys-spacing-16:  var(--spacing-8);
 
   // ── fp-sys: Elevation (box-shadow levels 0–5) ──────────────────────────────
-  // px used for shadow offsets/blur per project convention (see tokens.md §3.1c)
+  // Derives shadow ink from tweakcn `--shadow-color` (tracks theme; Phase 7 Batch 10).
+  // @see docs/migration/phase-7-token-migration.md § Batch 10
   --fp-sys-elevation-0: none;
-  --fp-sys-elevation-1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
-  --fp-sys-elevation-2: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
-  --fp-sys-elevation-3: 0px 1px 3px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
-  --fp-sys-elevation-4: 0px 2px 3px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
-  --fp-sys-elevation-5: 0px 4px 4px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
+  --fp-sys-elevation-1:
+    0px 1px 2px color-mix(in srgb, var(--shadow-color) 30%, transparent),
+    0px 1px 3px 1px color-mix(in srgb, var(--shadow-color) 15%, transparent);
+  --fp-sys-elevation-2:
+    0px 1px 2px color-mix(in srgb, var(--shadow-color) 30%, transparent),
+    0px 2px 6px 2px color-mix(in srgb, var(--shadow-color) 15%, transparent);
+  --fp-sys-elevation-3:
+    0px 1px 3px color-mix(in srgb, var(--shadow-color) 30%, transparent),
+    0px 4px 8px 3px color-mix(in srgb, var(--shadow-color) 15%, transparent);
+  --fp-sys-elevation-4:
+    0px 2px 3px color-mix(in srgb, var(--shadow-color) 30%, transparent),
+    0px 6px 10px 4px color-mix(in srgb, var(--shadow-color) 15%, transparent);
+  --fp-sys-elevation-5:
+    0px 4px 4px color-mix(in srgb, var(--shadow-color) 30%, transparent),
+    0px 8px 12px 6px color-mix(in srgb, var(--shadow-color) 15%, transparent);
 
   // ── fp-sys: Typescale (15 roles × size / line-height / weight / tracking) ──
   // Display
@@ -253,7 +264,7 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--destructive);
-  --color-uploading: var(--chart-1);
+  --color-uploading: var(--primary);
   --color-accent: var(--app-violet-accent);
   --color-map-user-marker: var(--map-marker-user);
   --color-map-search-marker: var(--map-marker-search);
@@ -402,7 +413,8 @@
     var(--layout-sidebar-media-size) + (var(--layout-sidebar-row-padding-block) * 2)
   );
   --layout-sidebar-icon-size: 1.25rem;
-  --layout-sidebar-label-size: 0.8125rem;
+  // Matches Tailwind `text-sm` / `hlmMenuItem` menu rows (sidebar labels use the same utilities).
+  --layout-sidebar-label-size: 0.875rem;
 
   // Workspace and overlay geometry scale
   --pane-width-default: 61.8%;
@@ -569,15 +581,24 @@
   --color-warning: var(--warning);
   --color-danger: var(--destructive);
   --color-accent: var(--app-violet-accent);
-  --color-uploading: var(--chart-1);
+  --color-uploading: var(--primary);
   --color-map-user-marker: var(--map-marker-user);
   --color-map-search-marker: var(--map-marker-search);
 
-  // Shadows — higher opacity so they punch through dark surfaces
-  --shadow-sm: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.28), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.18);
-  --shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.38), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.22);
-  --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
-  --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
+  // Shadows — higher opacity so they punch through dark surfaces (ink from `--shadow-color`; Batch 10).
+  // @see docs/migration/phase-7-token-migration.md § Batch 10
+  --shadow-sm:
+    0 0.0625rem 0.1875rem color-mix(in srgb, var(--shadow-color) 28%, transparent),
+    0 0.0625rem 0.125rem color-mix(in srgb, var(--shadow-color) 18%, transparent);
+  --shadow-md:
+    0 0.25rem 0.75rem color-mix(in srgb, var(--shadow-color) 38%, transparent),
+    0 0.125rem 0.25rem color-mix(in srgb, var(--shadow-color) 22%, transparent);
+  --shadow-lg:
+    0 0.5rem 1.5rem color-mix(in srgb, var(--shadow-color) 48%, transparent),
+    0 0.25rem 0.5rem color-mix(in srgb, var(--shadow-color) 28%, transparent);
+  --shadow-xl:
+    0 1rem 3rem color-mix(in srgb, var(--shadow-color) 56%, transparent),
+    0 0.375rem 1rem color-mix(in srgb, var(--shadow-color) 32%, transparent);
 
   --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
   --shadow-hover: var(--shadow-sm);
@@ -600,7 +621,7 @@
   --outline-hover: 0.0625rem solid color-mix(in srgb, var(--primary) 35%, transparent);
   --outline-focus: 0.125rem solid color-mix(in srgb, var(--primary) 35%, transparent);
 
-  --photo-marker-drop-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.65);
+  --photo-marker-drop-shadow: 0 0.0625rem 0.25rem color-mix(in srgb, var(--shadow-color) 65%, transparent);
 }
 
 // ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────

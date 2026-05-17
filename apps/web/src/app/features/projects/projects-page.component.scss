@@ -43,9 +43,9 @@
 }
 
 .projects-error {
-  border: 1px solid color-mix(in srgb, var(--chart-2) 45%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border));
   border-radius: var(--container-radius-panel);
-  background: color-mix(in srgb, var(--card) 88%, var(--chart-2));
+  background: color-mix(in srgb, var(--card) 88%, var(--warning));
   padding: var(--spacing-4);
   display: grid;
   gap: var(--spacing-2);

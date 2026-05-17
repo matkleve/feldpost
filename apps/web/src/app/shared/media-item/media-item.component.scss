@@ -47,7 +47,7 @@
   transition: box-shadow var(--transition-fade-in);
 
   /* DEFAULT BORDER: 1px, fast transparent */
-  border: 1px color-mix(in srgb, var(--primary, #000) 10%, transparent);
+  border: 1px color-mix(in srgb, var(--primary) 10%, transparent);
 
   /* DEFAULT SCHATTEN (ganz dezent) */
   box-shadow: var(--shadow-sm);

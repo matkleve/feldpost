@@ -65,8 +65,8 @@ export function colorTokenFor(key: ProjectColorKey): string {
     }
   }
   if (key === 'accent') return 'var(--secondary)';
-  if (key === 'success') return 'var(--chart-1)';
-  if (key === 'warning') return 'var(--chart-2)';
+  if (key === 'success') return 'var(--success)';
+  if (key === 'warning') return 'var(--warning)';
   return 'var(--primary)';
 }
 

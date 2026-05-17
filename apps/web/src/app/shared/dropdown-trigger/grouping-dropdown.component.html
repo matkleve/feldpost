@@ -10,12 +10,15 @@
             hlmBtn
             variant="ghost"
             size="icon"
-            class="shrink-0"
+            class="group shrink-0"
             type="button"
             (click)="clearGroupings()"
             [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
           >
-            <span class="material-icons">restart_alt</span>
+            <span
+              class="material-icons inline-block transition-transform duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)] motion-reduce:transition-none motion-reduce:duration-0 group-hover:-rotate-12 group-active:rotate-360 group-active:duration-[var(--motion-duration-base)] motion-reduce:group-hover:rotate-0 motion-reduce:group-active:rotate-0"
+              aria-hidden="true"
+              >restart_alt</span>
           </button>
         }
       </div>

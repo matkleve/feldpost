@@ -5,7 +5,7 @@
 - **Verified:** Shared `hlmBtn` / `hlmInput` directives apply **default horizontal padding via Tailwind utilities** in CVA: labeled `hlmBtn` sizes use **logical** `ps-2` / `pe-2` (maps to **`spacing-2` / 8px** each side in `tailwind.config.js`); `input[hlmInput]` still uses **`px-3`**. No evidence that splitting component SCSS with Sass `@use` (e.g. map-shell pulling in `_map-shell-context-menu.scss`) **changes emitted padding** — `@use` only affects **authoring structure** and compile-time order of rules, not a separate “padding layer.”
 - **Trigger vs panel:** Toolbar **dropdown triggers** (`*__menu-trigger` + `hlmBtn` + `justify-content: space-between`) document a **component-owned** symmetric inset: companion SCSS sets **`padding-inline: var(--spacing-2)`** on `.workspace-toolbar__menu-trigger`, `.media-toolbar__menu-trigger`, and `.projects-toolbar__menu-trigger` (see §3 table), aligned with the **action-interaction kernel** horizontal lock on the button CVA (`ps-2`/`pe-2`). **Panel / menu content** still uses separate tokens (e.g. `.map-context-menu__items` `padding-inline`, standard dropdown `--std-dropdown-padding-inline`) — fixing the **panel** does not fix a **trigger** that still lacks its companion rule.
 - **Still at risk:** (a) **Component SCSS** that sets `padding: 0`, `padding-block: 0`, or `padding-inline: 0` on the **same element** that carries Tailwind padding from `hlmBtn` / `hlmInput`, depending on **source order and specificity**; (b) **`min-w-0 shrink` + `justify-content: space-between`** on triggers — correct for truncation but **reduces perceived** horizontal breathing room if companion `padding-inline` is missing; (c) **`size="icon"`** — CVA uses `h-10 w-10` with **no explicit `px-*`** (square hit box by design); (d) **custom primitives** (e.g. `.panel-trigger`) that use **`padding: 0` base** and only add horizontal padding per `data-layout` variant — easy to regress.
-- **Grep snapshot** (this repo revision): **34** template files contain `hlmBtn` (33 `*.html` + `sorting-controls.component.ts` inline template); **~18** `*.html` files reference `hlmInput`. No same-line `hlmBtn` + `px-0` / `p-0` / `px-1` matches; **`min-w-0` near `hlmBtn`** appears in **3** toolbar templates (paired with **explicit** `padding-inline` in SCSS).
+- **Grep snapshot** (2026-05-17 refresh, `apps/web/src/app`): **34** template files contain `hlmBtn` (33 `*.html` + `sorting-controls.component.ts` inline template); **17** `*.html` files reference `hlmInput`. No same-line `hlmBtn` + `px-0` / `p-0` / `px-1` matches; **`min-w-0` near `hlmBtn`** appears in **3** toolbar templates (paired with **explicit** `padding-inline` in SCSS).
 - **Heuristic `outline` + `size="sm"` + `hlmBtn`:** Automated scan found **exactly three** `<button>` instances (workspace, media, projects toolbars); each component’s `.scss` **does** contain `padding-inline` (for the menu trigger). No orphan outline/sm triggers lacking a companion rule were found by that heuristic.
 - **Inputs:** `hlmInput` defaults include **`px-3`**; composite layouts (e.g. map search) add **layout SCSS** on a second class (`.search-bar__input`) that may alter **vertical** padding (`padding-block: 0`) while leaving horizontal padding to utilities — **worth visual QA** when utilities and SCSS both target the same node.
 - **Recommendation shape:** Prefer **one owner** for horizontal inset on composed controls (either tokenized utility merge or **explicit `padding-inline` + documented exception**), plus **manual QA** on narrow viewports, keyboard focus rings, and **scrollbar-gutter** for overflowing panels.
@@ -83,7 +83,23 @@ export const inputVariants = cva(
 
 ## 3. Grep inventory (counts & top paths)
 
-**Method:** `rg` from repo root on `apps/web/src/app`; counts are **occurrence totals** (`-c` sums) or **file counts** (`rg -l`) as stated per table. **Metric freshness (TBD):** Re-run the same `rg` commands before using §3.1–3.4 counts as release gates — templates drift after this narrative was refreshed for padding semantics.
+**Method:** `rg` from repo root on `apps/web/src/app`; counts are **occurrence totals** (`rg -o … | wc -l` or summed `-c` where noted) or **file counts** (`rg -l`) as stated per table. **Metric freshness:** Counts in §3.1–3.4 were regenerated **2026-05-17**; re-run the listed commands after large template refactors if you use them as release gates.
+
+**Sample refresh commands (repo root):**
+
+```bash
+rg -l 'hlmBtn' apps/web/src/app --glob '*.html' | wc -l
+{ rg -l 'hlmBtn' apps/web/src/app --glob '*.html'; rg -l 'hlmBtn' apps/web/src/app --glob '*.component.ts'; } | sort -u | wc -l
+rg -o 'hlmBtn' apps/web/src/app --glob '*.html' | wc -l
+rg --only-matching 'hlmBtn' apps/web/src/app --glob '*.html' | sed 's/:.*//' | sort | uniq -c | sort -rn | head
+rg 'hlmBtn.*(px-0|p-0|px-1)|(px-0|p-0|px-1).*hlmBtn' apps/web/src/app --glob '*.{html,ts}' | wc -l
+rg --multiline --glob '*.{html,ts}' '(?s)hlmBtn.{0,200}(px-0|p-0|px-1)|(?s)(px-0|p-0|px-1).{0,200}hlmBtn' apps/web/src/app | wc -l
+rg --multiline --glob '*.{html,ts}' '(?s)hlmBtn.{0,200}min-w-0|(?s)min-w-0.{0,200}hlmBtn' apps/web/src/app -l
+rg --pcre2 --multiline --glob '*.{html,ts}' '(?s)<button(?:(?!</button>).)*?hlmBtn(?:(?!</button>).)*?variant="outline"(?:(?!</button>).)*?size="sm"(?:(?!</button>).)*?>' apps/web/src/app
+rg -l 'hlmInput' apps/web/src/app --glob '*.html' | wc -l
+rg 'hlmInput.*(px-0|pl-0|pr-0)|(px-0|pl-0|pr-0).*hlmInput' apps/web/src/app --glob '*.html' | wc -l
+rg --only-matching 'hlmInput' apps/web/src/app --glob '*.html' | sed 's/:.*//' | sort | uniq -c | sort -rn | head
+```
 
 ### 3.1 `hlmBtn` in `*.html` and inline templates in `*.component.ts`
 
@@ -92,7 +108,7 @@ export const inputVariants = cva(
 | Files with `hlmBtn` (`*.html`) | **33** |
 | Files with `hlmBtn` (`*.component.ts` only; includes inline `template:`) | **1** (`sorting-controls.component.ts`; directive file excluded from “template” count) |
 | Combined unique template paths (html + ts inline) | **34** |
-| Total `hlmBtn` matches in `*.html` (sum of per-file counts) | **90** |
+| Total `hlmBtn` occurrences in `*.html` (`rg -o 'hlmBtn' … \| wc -l`) | **90** |
 | Matches in `*.component.ts` templates | **1** |
 
 **Top `*.html` files by `hlmBtn` count (descending):**
@@ -114,7 +130,7 @@ export const inputVariants = cva(
 | --- | --- |
 | Same-line `hlmBtn` + `px-0` / `p-0` / `px-1` | **0** |
 | Multiline (≤200 chars between) `hlmBtn` + `px-0` / `p-0` / `px-1` | **0** |
-| Multiline `hlmBtn` + `min-w-0` | **12** matching lines across **3** files: `workspace-toolbar`, `media`, `projects-toolbar` component templates (toolbar menu triggers) |
+| Multiline `hlmBtn` + `min-w-0` (≤200 chars, either order) | **3** files (`workspace-toolbar`, `media`, `projects-toolbar` templates); **`rg --multiline` prints ~15 lines total** (~5 lines per file — one match region per toolbar, spanning the full `<button …>` opening block) |
 
 ### 3.3 Heuristic: `variant="outline"` + `size="sm"` on same `<button hlmBtn…>` vs companion `.scss` containing `padding-inline`
 
@@ -132,7 +148,7 @@ export const inputVariants = cva(
 
 | Metric | Value |
 | --- | ---: |
-| `*.html` files with at least one `hlmInput` | **18** |
+| `*.html` files with at least one `hlmInput` | **17** |
 | Same-line `hlmInput` + (`px-0` / `pl-0` / `pr-0`) | **0** |
 
 **Top `*.html` files by `hlmInput` count:**
@@ -141,7 +157,7 @@ export const inputVariants = cva(
 | ---: | --- |
 | 7 | `apps/web/src/app/shared/account/account.component.html` |
 | 5 | `apps/web/src/app/features/auth/register/register.component.html` |
-| 2 | *(several)* — inline section, editable rows, captured date, settings overlay, auth flows |
+| 2 | `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html`, `apps/web/src/app/shared/workspace-pane/media-detail/editable-property-row.component.html`, `apps/web/src/app/shared/workspace-pane/media-detail/captured-date-editor.component.html`, `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`, `apps/web/src/app/features/auth/update-password/update-password.component.html`, `apps/web/src/app/features/auth/login/login.component.html` |
 
 **`w-full` without explicit `px-*` on the same tag (manual spot-check, not exhaustive):** `search-bar.component.html` uses `hlmInput` + `class="search-bar__input"` (no `px-*` in template). Horizontal padding then depends on **`inputVariants` utilities** vs `.search-bar__input` SCSS (see §4 — `padding-block: 0` only; no `padding-inline: 0`).
 

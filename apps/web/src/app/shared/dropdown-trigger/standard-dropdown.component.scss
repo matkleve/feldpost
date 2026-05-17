@@ -17,9 +17,15 @@
   padding-inline: var(--std-dropdown-padding-inline);
 }
 
-// Reserves space for vertical scrollbar so list content stays aligned with search/action edges.
+// Reserves the scrollbar track via layout (no extra pe-* on this host); rows stay full width inside shell padding-inline.
 // @see docs/specs/component/filters/dropdown-system.md
 .standard-dropdown__items {
   scrollbar-gutter: stable;
+}
+
+// Opt-in: nested scroll regions own stable gutter (e.g. filter rules); this list does not reserve a track when non-overflowing.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__items.standard-dropdown__items--scrollbar-gutter-auto {
+  scrollbar-gutter: auto;
 }
 

@@ -4,6 +4,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 
 export type SortDropdownOption = {
@@ -18,6 +19,7 @@ export type SortDropdownOption = {
   templateUrl: './sort-dropdown.component.html',
   styleUrl: './sort-dropdown.component.scss',
   imports: [
+    ...HLM_BUTTON_IMPORTS,
     StandardDropdownComponent,
     HlmMenuItemDirective,
     HlmMenuLabelDirective,

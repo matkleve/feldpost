@@ -229,13 +229,29 @@ from `styles.scss`. **Never use raw values; always use tokens.**
 | `rounded-card`  | `var(--radius-lg)`   | 16px — floating panels, cards          |
 | `rounded-input` | `var(--radius-md)`   | 8px — form inputs, dropdowns           |
 
-**Minimum interactive hit area (~38px rule):**
+**Minimum interactive hit area (`docs/design/constitution.md` — Sizes & Touch):**
 
-All buttons, chips, icon buttons, filters, and tags must meet the 38px minimum.
+Touch targets scale with root font size. Floors: **at least `3rem × 3rem` (48×48px)** for mobile / touch-first UI, and **at least `2.75rem × 2.75rem` (44×44px)** for desktop-aligned controls. Compact visuals are fine when the **actual** hit area still meets the floor (padding, negative margin compensation, or transparent hit zones).
+
+`apps/web/tailwind.config.js` maps these to utilities (see `theme.extend.minHeight` / `minWidth`):
+
+| Utility | Floor | Typical use |
+| --- | --- | --- |
+| `min-h-tap` / `min-w-tap` | `2.75rem` (44px) | Desktop-aligned control rows |
+| `min-h-tap-lg` / `min-w-tap-lg` | `3rem` (48px) | Mobile / touch-first rows |
+
+When a control is touch-first on small viewports but tightens on larger breakpoints, pair the large floor with the desktop floor — e.g. `min-h-tap-lg md:min-h-tap` (and the same pattern for `min-w-*`), matching the guidance in `tailwind.config.js`.
 
 ```html
-<!-- ✅ button with min-h-tap class -->
+<!-- ✅ control at desktop floor (44×44) -->
 <button class="min-h-tap min-w-tap flex items-center justify-center ...">
+  <span class="material-icons">close</span>
+</button>
+
+<!-- ✅ touch-first on small screens, desktop floor from md up -->
+<button
+  class="min-h-tap-lg min-w-tap-lg md:min-h-tap md:min-w-tap flex items-center justify-center ..."
+>
   <span class="material-icons">close</span>
 </button>
 

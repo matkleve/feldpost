@@ -11,20 +11,22 @@ export const toggleGroupVariants = cva(
 // @see docs/MIGRATION_PLAN.md
 export const toggleGroupItemVariants = cva(
   [
-    'inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all',
+    // Horizontal padding lives on size variants only (`ps-*` / `pe-*`): icon+label rows need slightly larger inline-start than end for optical balance (matches action-interaction kernel intent; `icon` uses `p-0`).
+    // @see docs/design/components/action-interaction-kernel.md#button-policy
+    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm py-1.5 text-sm font-medium ring-offset-background transition-all',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
     'data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm',
     'data-[state=off]:hover:text-foreground data-[state=off]:hover:bg-foreground/6',
-    'data-[attention=true]:data-[state=off]:text-[color:var(--chart-2)] data-[attention=true]:data-[state=off]:shadow-[0_0_0_1px_color-mix(in_srgb,var(--chart-2)_38%,transparent)]',
+    'data-[attention=true]:data-[state=off]:text-[color:var(--warning)] data-[attention=true]:data-[state=off]:shadow-[0_0_0_1px_color-mix(in_srgb,var(--warning)_38%,transparent)]',
     'motion-reduce:transition-none motion-reduce:duration-0',
   ].join(' '),
   {
     variants: {
       size: {
-        sm: 'h-7 px-2 text-xs',
-        md: 'h-9 px-3 text-sm',
-        lg: 'h-10 px-4',
+        sm: 'h-7 ps-2.5 pe-2 text-xs',
+        md: 'h-9 ps-2.5 pe-2 text-sm',
+        lg: 'h-10 ps-4 pe-3',
         icon: 'h-9 w-9 p-0',
       },
     },

@@ -24,7 +24,7 @@
               <span class="nav__media" aria-hidden="true">
                 <span class="nav__icon material-icons">{{ item.icon }}</span>
               </span>
-              <span class="nav__label">{{ item.label }}</span>
+              <span class="nav__label text-sm">{{ item.label }}</span>
             </span>
           } @else {
             <a
@@ -38,7 +38,7 @@
               <span class="nav__media" aria-hidden="true">
                 <span class="nav__icon material-icons">{{ item.icon }}</span>
               </span>
-              <span class="nav__label">{{ item.label }}</span>
+              <span class="nav__label text-sm">{{ item.label }}</span>
             </a>
           }
         </li>
@@ -58,7 +58,7 @@
           (click)="toggleSettingsOverlay()"
         >
           <span class="nav__media" aria-hidden="true">
-            <span class="nav__avatar-badge">
+            <span class="nav__avatar-badge text-sm font-semibold">
               @if (avatarUrl(); as avatarImage) {
                 <img class="nav__avatar-image" [src]="avatarImage" alt="" />
               } @else {
@@ -66,7 +66,7 @@
               }
             </span>
           </span>
-          <span class="nav__label nav__account-name">{{
+          <span class="nav__label nav__account-name text-sm">{{
             t('nav.settings.label', 'Settings')
           }}</span>
         </button>

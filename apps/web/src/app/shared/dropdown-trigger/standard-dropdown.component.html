@@ -31,16 +31,20 @@
 
   <div [class]="itemsHostClass()">
     <ng-content select="[dropdown-items]" />
-    @if (actionLabel()) {
+  </div>
+  @if (actionLabel()) {
+    <div
+      class="flex w-full min-w-0 shrink-0 flex-col items-stretch justify-stretch pb-2 [&>button]:w-full"
+    >
       <button
         hlmMenuItem
-        class="inline-flex w-full shrink-0 items-center justify-start gap-2 text-muted-foreground hover:text-foreground"
+        class="flex min-w-0 shrink-0 items-center justify-start gap-2 text-muted-foreground hover:text-foreground"
         type="button"
         (click)="actionRequested.emit()"
       >
         <span class="material-icons" aria-hidden="true">{{ actionIcon() }}</span>
         {{ actionLabel() }}
       </button>
-    }
-  </div>
+    </div>
+  }
 </div>

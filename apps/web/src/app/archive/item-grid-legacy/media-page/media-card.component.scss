@@ -62,8 +62,8 @@
   left: 0;
   right: 0;
   padding: var(--spacing-2);
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  color: white;
+  background: linear-gradient(to top, var(--overlay-scrim-80), transparent);
+  color: var(--primary-foreground);
 }
 
 .media-card__title {

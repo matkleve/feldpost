@@ -51,8 +51,8 @@
 }
 
 .upload-panel__file-item--missing_data .upload-panel__file-main {
-  background: color-mix(in srgb, var(--chart-2) 5%, var(--card));
-  border-color: color-mix(in srgb, var(--chart-2) 24%, var(--border));
+  background: color-mix(in srgb, var(--warning) 5%, var(--card));
+  border-color: color-mix(in srgb, var(--warning) 24%, var(--border));
 }
 
 .upload-panel__selection {
@@ -247,7 +247,7 @@
 }
 
 .upload-panel__file-status--awaiting_placement {
-  color: var(--chart-2);
+  color: var(--warning);
 }
 
 .upload-panel__file-status .material-icons {
@@ -256,7 +256,7 @@
 }
 
 .upload-panel__file-status--complete {
-  color: var(--chart-1);
+  color: var(--success);
 }
 
 .upload-panel__file-status--error {

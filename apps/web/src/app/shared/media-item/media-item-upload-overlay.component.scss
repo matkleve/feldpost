@@ -24,7 +24,7 @@
   inset-inline-start: 0;
   inset-block-end: 0;
   block-size: 0.2rem;
-  background: color-mix(in srgb, var(--primary) 82%, white);
+  background: color-mix(in srgb, var(--primary) 82%, var(--primary-foreground));
 }
 
 // Defines upload status content strip above progress bar.
@@ -37,8 +37,8 @@
   gap: 0.25rem;
   width: 100%;
   padding: 0.25rem;
-  color: white;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+  color: var(--primary-foreground);
+  background: linear-gradient(to top, var(--overlay-scrim-55), transparent);
 }
 
 // Defines upload icon sizing for overlay status content.

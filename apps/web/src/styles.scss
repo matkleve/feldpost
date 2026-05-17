@@ -100,6 +100,11 @@
   --app-violet-accent: oklch(0.72 0.14 290);
   --map-marker-user: var(--chart-1);
   --map-marker-search: var(--primary);
+  // Media/map ink scrims (derive from shadow source; Phase 7 Batch 10)
+  // @see docs/migration/phase-7-token-migration.md
+  --overlay-scrim-30: color-mix(in srgb, var(--shadow-color) 30%, transparent);
+  --overlay-scrim-55: color-mix(in srgb, var(--shadow-color) 55%, transparent);
+  --overlay-scrim-80: color-mix(in srgb, var(--shadow-color) 80%, transparent);
 }
 
 // ── tweakcn design token foundation — light mode ───────────────────────────────
@@ -177,6 +182,11 @@
   --app-violet-accent: oklch(0.52 0.19 290);
   --map-marker-user: var(--chart-1);
   --map-marker-search: var(--primary);
+  // Media/map ink scrims (derive from shadow source; Phase 7 Batch 10)
+  // @see docs/migration/phase-7-token-migration.md
+  --overlay-scrim-30: color-mix(in srgb, var(--shadow-color) 30%, transparent);
+  --overlay-scrim-55: color-mix(in srgb, var(--shadow-color) 55%, transparent);
+  --overlay-scrim-80: color-mix(in srgb, var(--shadow-color) 80%, transparent);
 }
 
 // ── Dark mode token overrides ──────────────────────────────────────────────────

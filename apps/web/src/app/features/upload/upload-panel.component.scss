@@ -401,7 +401,7 @@
     white-space: nowrap;
 
     &--complete {
-      color: var(--chart-1);
+      color: var(--success);
     }
 
     &--error {
@@ -409,7 +409,7 @@
     }
 
     &--awaiting_placement {
-      color: var(--chart-2);
+      color: var(--warning);
     }
   }
 

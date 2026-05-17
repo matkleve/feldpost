@@ -26,7 +26,6 @@
   --sidebar-row-height: var(--layout-sidebar-row-height);
   --sidebar-media-size: var(--layout-sidebar-media-size);
   --sidebar-icon-size: var(--layout-sidebar-icon-size);
-  --sidebar-label-size: var(--layout-sidebar-label-size);
 
   position: fixed;
   z-index: var(--z-panel);
@@ -240,14 +239,14 @@
 }
 
 // ── Label text ────────────────────────────────────────────────────────────────
+// Label row type scale is Tailwind `text-sm` in the template (matches `hlmMenuItem` rows).
+// @see docs/specs/component/workspace/sidebar.md
 
 .nav__label {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-width: 0;
-  font-size: var(--sidebar-label-size);
-  font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   line-height: var(--line-height-solid);
   color: inherit;
@@ -272,6 +271,9 @@
   color: var(--foreground);
 }
 
+// Avatar badge carries Tailwind `text-sm font-semibold` in the template for initials at row scale.
+// @see docs/specs/component/workspace/sidebar.md
+
 .nav__avatar-badge {
   display: flex;
   align-items: center;
@@ -282,15 +284,13 @@
   border-radius: var(--radius-full);
   background: var(--primary);
   color: var(--primary-foreground);
-  font-size: var(--sidebar-label-size);
-  font-weight: var(--font-weight-semibold);
   transition:
     background 80ms ease-out,
     transform 80ms ease-out;
   user-select: none;
 
   .nav__account-link:hover & {
-    background: color-mix(in srgb, var(--primary) 85%, #000);
+    background: color-mix(in srgb, var(--primary) 85%, var(--shadow-color));
     transform: scale(1.03);
   }
 }

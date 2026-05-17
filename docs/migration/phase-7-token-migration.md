@@ -1,6 +1,6 @@
 # Phase 7 — Token System Unification
 
-**Status:** In progress (2026-05-17) — **Batch 8:** app SCSS — success/warning UI no longer proxies through **`var(--chart-1|2)`**; uses tweakcn **`var(--success)`** / **`var(--warning)`** (`styles.scss` `:root` + dark mixin). **Batch 7:** `_legacy-design-tokens.scss` — derivative tokens (shadows, borders, interaction, action/menu/field/section/state aliases) now use **tweakcn `var(--primary|destructive|border|…)`** directly instead of **`var(--color-*)` hops**; **`--color-*` bridge definitions** retained for Tailwind `@theme` / downstream until alias removal gate. **Batch 1 (2026-05-16):** cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale). **Batch 2:** rewired **`_legacy-design-tokens.scss`** internal chains (**`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`**) to existing **`--spacing-*`** / **`--radius-*`** (literals kept for 20px + 40px steps with no spacing-N match). **Batch 3:** removed duplicate **`--fp-base-*`** scale from the legacy bridge (no `var(--fp-base-*)` in `apps/web/src`); bridged unambiguous **`--fp-sys-color-*`** roles to tweakcn **`--primary`**, **`--background`**, **`--muted`**, **`--border`**, **`--destructive`**, **`--shadow-color`**, etc.; specs now cite **`var(--spacing-*)`** for former base px. **Batch 3 continuation (same date):** doc-only grep evidence table for deferred MD3 **`--fp-sys-color-*`** rows (no new SCSS mappings — no tweakcn namesake tokens). **Batch 4:** tweakcn dark palette shared mixin + **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`** (system theme) mirrors **`html[data-theme="dark"]`** — see § Batch 4. **Batch 5:** full-tree grep inventory for **`var(--fp-*)`**, **`--fp-ref-*`**, **`--fp-sys-color`** under **`apps/web/src`** — see § Batch 5. **Batch 5b:** removed **`--fp-ref-*`** `:root` definitions; canonical hex → **`docs/design/tokens.md`** §3.1a — see § Batch 5b. **Batch 6 (2026-05-17):** doc sync — **`docs/migration/phase-0-discovery.md`** token summary (post–5b); **`docs/specs/component/ui-primitives/panel-trigger.md`** Figma metrics cite **`var(--radius-sm)`** / **`var(--spacing-1)`** instead of legacy **`--fp-alias-*`** in prose — see § Batch 6.
+**Status:** In progress (2026-05-17) — **Batch 10:** semantic **`--overlay-scrim-{30|55|80}`** on **`:root`** + **`tweakcn-dark-semantic-palette`** (`color-mix` from **`var(--shadow-color)`**); legacy **`--fp-sys-elevation-1..5`**, dark **`--shadow-sm|md|lg|xl`**, and **`--photo-marker-drop-shadow`** in **`_legacy-design-tokens.scss`** no longer use raw **`rgba(0,0,0,…)`**; app SCSS (media overlays, footer dimmer, nav/detail primary-press mix, spinners on primary) consume scrims / **`var(--shadow-color)`** / **`var(--primary-foreground)`**; **`photo-lightbox`** white chrome deferred (doc §Batch 10). **Batch 9:** remaining **`var(--chart-1|2)`** in **`apps/web/src/app`** (upload/projects/map chrome, project color formatters, toggle attention) → **`var(--success)`** / **`var(--warning)`** / **`var(--map-marker-user)`**; legacy **`--color-uploading`** now **`var(--primary)`** (bridge only, no app consumers). **Batch 8:** app SCSS — success/warning UI no longer proxies through **`var(--chart-1|2)`**; uses tweakcn **`var(--success)`** / **`var(--warning)`** (`styles.scss` `:root` + dark mixin). **Batch 7:** `_legacy-design-tokens.scss` — derivative tokens (shadows, borders, interaction, action/menu/field/section/state aliases) now use **tweakcn `var(--primary|destructive|border|…)`** directly instead of **`var(--color-*)` hops**; **`--color-*` bridge definitions** retained for Tailwind `@theme` / downstream until alias removal gate. **Batch 1 (2026-05-16):** cleared **`var(--fp-*)`** from **`panel-trigger`** + **`chip`** → **`var(--spacing-*)`** (`apps/web/tailwind.config.js` spacing scale). **Batch 2:** rewired **`_legacy-design-tokens.scss`** internal chains (**`--fp-sys-spacing-*`**, **`--fp-sys-shape-*`**, **`--fp-alias-sp-*`**, **`--fp-alias-r-*`**) to existing **`--spacing-*`** / **`--radius-*`** (literals kept for 20px + 40px steps with no spacing-N match). **Batch 3:** removed duplicate **`--fp-base-*`** scale from the legacy bridge (no `var(--fp-base-*)` in `apps/web/src`); bridged unambiguous **`--fp-sys-color-*`** roles to tweakcn **`--primary`**, **`--background`**, **`--muted`**, **`--border`**, **`--destructive`**, **`--shadow-color`**, etc.; specs now cite **`var(--spacing-*)`** for former base px. **Batch 3 continuation (same date):** doc-only grep evidence table for deferred MD3 **`--fp-sys-color-*`** rows (no new SCSS mappings — no tweakcn namesake tokens). **Batch 4:** tweakcn dark palette shared mixin + **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme])`** (system theme) mirrors **`html[data-theme="dark"]`** — see § Batch 4. **Batch 5:** full-tree grep inventory for **`var(--fp-*)`**, **`--fp-ref-*`**, **`--fp-sys-color`** under **`apps/web/src`** — see § Batch 5. **Batch 5b:** removed **`--fp-ref-*`** `:root` definitions; canonical hex → **`docs/design/tokens.md`** §3.1a — see § Batch 5b. **Batch 6 (2026-05-17):** doc sync — **`docs/migration/phase-0-discovery.md`** token summary (post–5b); **`docs/specs/component/ui-primitives/panel-trigger.md`** Figma metrics cite **`var(--radius-sm)`** / **`var(--spacing-1)`** instead of legacy **`--fp-alias-*`** in prose — see § Batch 6.
 
 **Goal:** Shrink or retire **`apps/web/src/styles/_legacy-design-tokens.scss`** (successor to the removed monolithic `tokens.scss`) so **component** SCSS uses **tweakcn** semantics (`--primary`, `--background`, `--muted`, `--foreground`, `--border`, `--destructive`, **`--spacing-*`**, etc.) — not legacy **`--color-*`**, **`--fp-sys-*`**, or **`--fp-ref-*`** hand-offs where avoidable. **Reference tonal hex** after Batch 5b: **`docs/design/tokens.md`** §3.1a (no **`--fp-ref-*`** on `:root`).
 
@@ -211,6 +211,51 @@ rg 'var\(--fp-ref-' docs/migration docs/specs --glob '*.md'
 
 **Verify:** `cd apps/web && npx ng build` → exit **0**; `npm run design-system:check` → exit **0**.
 
+### Batch 9 — Chart-token stragglers → semantics + map alias (2026-05-17)
+
+**Slice:** No new tweakcn roles — wire remaining **success/warning/map** semantics already defined in **`styles.scss`** (`--success`, `--warning`, `--map-marker-user`). **`chart-*`** remain on **`styles.scss`** for palette roles (file-type accents, `@theme` chart aliases, **`--map-marker-user: var(--chart-1)`** indirection).
+
+| File | Change |
+|------|--------|
+| `apps/web/src/app/features/map/map-shell/map-shell.component.scss` | User-location marker + halo → **`var(--map-marker-user)`** (single map token; still resolves to chart-1 at `:root`). |
+| `apps/web/src/app/features/upload/upload-panel-item.component.scss` | `missing_data` / `awaiting_placement` / `complete` row + status → **`--warning`** / **`--success`**. |
+| `apps/web/src/app/features/upload/upload-panel.component.scss` | Inline list status variants → **`--success`** / **`--warning`**. |
+| `apps/web/src/app/features/projects/projects-page.component.scss` | `.projects-error` chrome → **`--warning`**. |
+| `apps/web/src/app/features/projects/projects-formatters.logic.ts` | `colorTokenFor` success/warning keys → **`var(--success)`** / **`var(--warning)`**. |
+| `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts` | Attention-off chrome → **`var(--warning)`**. |
+| `apps/web/src/styles/_legacy-design-tokens.scss` | **`--color-uploading`** → **`var(--primary)`** (aligns with upload in-progress ink elsewhere). |
+
+| Grep (repo root) | After |
+|------------------|--------|
+| `rg 'var\\(--chart-' apps/web/src/app` | **0** files |
+
+**Verify:** `cd apps/web && npx ng build` → exit **0**; `npm run design-system:check` → exit **0**.
+
+### Batch 10 — Ink scrims + elevation shadows → `--shadow-color` (2026-05-17)
+
+**Slice:** No new Tailwind `dark:` behavior — centralize photo/map **black ink** in tweakcn **`--shadow-color`**-derived scrims; align legacy **MD3 elevation** and dark **legacy shadow** stack with the same ink model; remove **`#fff` / `#000` / `white` / `black`** in touched component SCSS where semantics exist. **Photo lightbox** close control: deferred (still hardcoded light-on-image chrome).
+
+| File | Change |
+|------|--------|
+| `apps/web/src/styles.scss` | **`--overlay-scrim-30`**, **`--overlay-scrim-55`**, **`--overlay-scrim-80`** on **`:root`** and in **`@mixin tweakcn-dark-semantic-palette`**. |
+| `apps/web/src/styles/_legacy-design-tokens.scss` | **`--fp-sys-elevation-1..5`**, dark-block **`--shadow-sm|md|lg|xl`**, **`--photo-marker-drop-shadow`** use **`color-mix(in srgb, var(--shadow-color) …%)`**. |
+| `apps/web/src/app/shared/media/universal-media.component.scss` | Upload strip: **`var(--overlay-scrim-55)`**, **`var(--primary-foreground)`**, primary fill mix → **`primary-foreground`**. |
+| `apps/web/src/app/shared/media-item/media-item-upload-overlay.component.scss` | Same as universal-media overlay strip. |
+| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.scss` | Footer dimmer → **`var(--overlay-scrim-30)`**. |
+| `apps/web/src/app/archive/item-grid-legacy/media-page/media-card.component.scss` | Info gradient → **`var(--overlay-scrim-80)`**; label → **`var(--primary-foreground)`**. |
+| `apps/web/src/app/archive/item-grid-legacy/media-page/media-grid.component.scss` | Card hover shadow → **`color-mix`** + **`var(--shadow-color)`**. |
+| `apps/web/src/app/features/nav/nav.component.scss` | Active nav pill darken → **`var(--shadow-color)`** instead of **`#000`**. |
+| `apps/web/src/app/shared/media-item/media-item.component.scss` | Border mix uses **`var(--primary)`** only (drop unused hex fallback). |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.scss` | Primary spinners + button hover darken → **`primary-foreground`** / **`shadow-color`**. |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-media-viewer/media-detail-media-viewer.component.scss` | Same spinner / hover treatment. |
+| `apps/web/src/app/shared/photo-lightbox/photo-lightbox.component.scss` | **Deferred** — light-on-image close chrome still **`rgba(255,255,255,…)`** / **`#fff`** (no cross-theme semantic that stays **light-on-media** without QA). |
+
+| Grep (repo root) | Note |
+|------------------|------|
+| `rg 'rgba\(0,\s*0,\s*0' apps/web/src/app --glob '*.scss'` | **0** matches (**2026-05-17**); auth / upload non-black `rgba(...)` unchanged. |
+
+**Verify:** `cd apps/web && npx ng build` → exit **0**; `npm run design-system:check` → exit **0**.
+
 ## Risks / QA
 
 **Theming — `dark:` vs semantic dark**
@@ -236,8 +281,7 @@ rg 'var\(--fp-ref-' docs/migration docs/specs --glob '*.md'
 | `--color-clay` / brand emphasis | **`--primary`** | Warm orange brand alignment per Phase 1 decision |
 | `--fp-sys-color-primary` (and other `--fp-sys-*`) | Respective tweakcn semantic | Prefer **deleting** fp indirection in app SCSS entirely |
 | `--fp-ref-*` | **Never in components** — if encountered, replace with semantic or remove dead code | |
-
-**Tailwind `@theme inline` note:** Utilities like `bg-primary` map through `--color-primary` in `styles.scss` — that is **not** the same as `var(--color-*)` in component SCSS. Phase 7 targets **hand-written `var(--color-…)`** in SCSS files; keep `@theme inline` mapping coherent when adding `--warning` / `--success`.
+| Photo/map bottom scrims, raw **`rgba(0,0,0,…)`** on media chrome | **`--overlay-scrim-30`**, **`--overlay-scrim-55`**, **`--overlay-scrim-80`** (`color-mix` + **`var(--shadow-color)`**) | **Batch 10** | Utilities like `bg-primary` map through `--color-primary` in `styles.scss` — that is **not** the same as `var(--color-*)` in component SCSS. Phase 7 targets **hand-written `var(--color-…)`** in SCSS files; keep `@theme inline` mapping coherent when adding `--warning` / `--success`.
 
 ---
 

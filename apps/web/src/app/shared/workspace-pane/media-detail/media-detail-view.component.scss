@@ -382,8 +382,8 @@
     width: 0.875rem;
     height: 0.875rem;
     border-radius: var(--radius-full);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
+    border: 2px solid color-mix(in srgb, var(--primary-foreground) 30%, transparent);
+    border-top-color: var(--primary-foreground);
     animation: detail-spin 700ms linear infinite;
   }
 
@@ -454,7 +454,7 @@
       opacity 80ms ease-out;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--primary) 85%, black);
+      background: color-mix(in srgb, var(--primary) 85%, var(--shadow-color));
     }
 
     &:focus-visible {
@@ -472,8 +472,8 @@
     width: 0.875rem;
     height: 0.875rem;
     border-radius: var(--radius-full);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
+    border: 2px solid color-mix(in srgb, var(--primary-foreground) 30%, transparent);
+    border-top-color: var(--primary-foreground);
     animation: detail-spin 700ms linear infinite;
   }
 }
