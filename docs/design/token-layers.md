@@ -16,11 +16,11 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 ### Legacy bridge (retired — `_legacy-design-tokens.scss`)
 
-**Code is canonical.** **Shipped tree:** **`apps/web/src/styles/_legacy-design-tokens.scss` is absent** (**`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**); **`styles.scss`** does **not** `load-css` that path (**removed 2026-05-18**). **Batch 50** ended **`--*`** emission from the bridge; the partial was later **removed from the repo** — use **`docs/migration/phase-7-token-migration.md`** for historical batch proof, not a stub file on disk. **`@mixin dark-theme-overrides`** on the bridge was removed **Batch 47** (**`--interactive-focus-ring`** → **`_typography-baseline.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantics, and MD3 **`--fp-sys-*`** doc tables are **not** emitted from any **`apps/web`** bridge file today.
+**Code is canonical.** **Shipped tree:** **`apps/web/src/styles/_legacy-design-tokens.scss` is absent** (**`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**); **`styles.scss`** does **not** **`@include meta.load-css('styles/legacy-design-tokens')`** (**removed 2026-05-18**). **Batch 50** ended **`--*`** emission from the bridge; the partial was later **removed from the repo** — use **`docs/migration/phase-7-token-migration.md`** for historical batch proof, not a stub file on disk. **`@mixin dark-theme-overrides`** on the bridge was removed **Batch 47** (**`--interactive-focus-ring`** → **`_typography-baseline.scss`**). **`--shadow-md|lg|xl`**, tweakcn semantics, and MD3 **`--fp-sys-*`** doc tables are **not** emitted from any **`apps/web`** bridge file today.
 
 #### Typography baseline (`_typography-baseline.scss`)
 
-**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded after **`styles.scss` `@theme inline`** via **`meta.load-css('styles/typography-baseline')`**) defines **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, **`--motion-duration-fast`** / **`--motion-ease-out`**, **`--spacing-1`…`--spacing-8`**, **`--radius-full`**, **`--container-radius-control|panel`**, and **`--interactive-focus-ring`** (light) — Phase 7 **Batch 41–44** + **Batch 47** (`docs/migration/phase-7-token-migration.md` §Batch 41 / §Batch 42 / §Batch 44 / §Batch 47). **`[data-theme='dark']`** and **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme='light'])`** apply **`@mixin typography-baseline-dark-focus-ring`** so the ring **`color-mix`** tracks dark primary (**Batch 47**).
+**`:root`** in **`apps/web/src/styles/_typography-baseline.scss`** (loaded after **`styles.scss` `@theme inline`** via **`@include meta.load-css('styles/typography-baseline')`**) defines **`--font-size-*`**, **`--font-weight-*`**, **`--line-height-{tight,solid,reading,comfortable}`**, **`--motion-duration-fast`** / **`--motion-ease-out`**, **`--spacing-1`…`--spacing-8`**, **`--radius-full`**, **`--container-radius-control|panel`**, and **`--interactive-focus-ring`** (light) — Phase 7 **Batch 41–44** + **Batch 47** (`docs/migration/phase-7-token-migration.md` §Batch 41 / §Batch 42 / §Batch 44 / §Batch 47). **`[data-theme='dark']`** and **`@media (prefers-color-scheme: dark)`** on **`:root:not([data-theme='light'])`** apply **`@mixin typography-baseline-dark-focus-ring`** so the ring **`color-mix`** tracks dark primary (**Batch 47**).
 
 | Token |
 | --- |
@@ -40,7 +40,7 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 | Note |
 | --- |
-| **Phase 7 Batch 50:** bridge file emits **no** CSS — use tweakcn `styles.scss` + `_typography-baseline.scss` for primitives. |
+| **Phase 7 Batch 50:** legacy bridge **removed from `apps/web`** (was zero-**`--*`** emit before **`load-css` removal**) — use tweakcn `styles.scss` + `_typography-baseline.scss` for primitives. |
 | **Phase 7 Batch 45:** no physical **`--shadow-*`** rows on the bridge — tweakcn **`styles.scss`** owns the ladder. |
 
 **Phase 7 Batch 43:** product **z-index** uses literals **`200` / `300` / `400` / `500`** (**`400`** = toast stack in **`toast-container.component.scss`**) plus **`302`** / **`501`** where documented calcs apply, and Tailwind **`z-upload-btn`**, **`z-dropdown`**, **`z-modal`** — **not** **`--z-upload-button`**, **`--z-dropdown`**, **`--z-modal`**, or removed **`--z-toast`** rows on the legacy bridge.
@@ -105,7 +105,7 @@ Role-level aliases consumed by reusable UI primitives and feature components. **
 ## Consumption Rules
 
 1. New or refactored components consume Layer C **role bindings** first (per-component **`:host`** / feature-local custom properties where those names are not global).
-2. Layer C roles resolve to Layer A/B via **tweakcn + `@theme inline` in `apps/web/src/styles.scss`**, **`_typography-baseline.scss`** (via **`meta.load-css('styles/typography-baseline')`**), and **`:host`** SCSS — **not** via a legacy bridge partial (**Batch 50** — file **deleted**).
+2. Layer C roles resolve to Layer A/B via **tweakcn + `@theme inline` in `apps/web/src/styles.scss`**, **`_typography-baseline.scss`** (via **`@include meta.load-css('styles/typography-baseline')`**), and **`:host`** SCSS — **not** via a legacy bridge partial (**Batch 50** — file **deleted**).
 3. Avoid binding feature-level styles directly to Layer A where a stable Layer C-style alias or documented **`color-mix`** pattern exists.
 4. Theme packs override Layer C first, Layer A only for global rebranding.
 

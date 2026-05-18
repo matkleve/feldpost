@@ -142,7 +142,9 @@
   }
 }
 
-:host ::ng-deep .map-context-menu .map-context-menu__items {
+// Projected menu list stays in this template — parent encapsulation applies (no pierce).
+// @see docs/migration/phase-8-global-scss-elimination.md §Open
+:host .map-context-menu .map-context-menu__items {
   max-height: min(20rem, calc(100vh - 10rem));
   overflow-y: auto;
   // Anchored shell list inset (matches StandardDropdown `--std-dropdown-padding-inline` rhythm).

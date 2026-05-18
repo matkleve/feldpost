@@ -52,14 +52,16 @@
   --universal-media-asset-max-height: 33vh;
 }
 
-.detail-image-wrap--thumb-preview ::ng-deep .universal-media__asset {
-  filter: blur(2px);
-  transform: scale(1.02);
+// Thumb-preview blur / scale via inherited custom properties (no pierce).
+// @see docs/migration/phase-8-global-scss-elimination.md §Open
+.detail-image-wrap--thumb-preview {
+  --universal-media-asset-filter: blur(2px);
+  --universal-media-asset-transform: scale(1.02);
 }
 
-.detail-image-wrap--static ::ng-deep .universal-media__asset {
-  filter: none;
-  transform: none;
+.detail-image-wrap--static {
+  --universal-media-asset-filter: none;
+  --universal-media-asset-transform: none;
 }
 
 .detail-image-placeholder {

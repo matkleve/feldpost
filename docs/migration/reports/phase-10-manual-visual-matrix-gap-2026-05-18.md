@@ -2,6 +2,8 @@
 
 **Context:** [Phase 10 — Visual QA & polish](../phase-10-visual-qa.md) **Wave P4** expects a human **Screen checklist** and **High-risk migration spot-check** pass (three themes × viewports × key surfaces).
 
+**Revision (same date, doc follow-up):** extended this file with a **row-level unverified inventory**, **matrix additions** synced to the app route table (read-only route survey for gap honesty — not a browser run), and explicit separation between **desk audits** and **visual sign-off**. Still **no** interactive browser session in this lane.
+
 **What ran in this agent slice**
 
 - **Automated / doc-only:** cross-links from `phase-10-visual-qa.md`; no headless or manual UI session.
@@ -12,8 +14,71 @@
 - **Screen checklist** table in `phase-10-visual-qa.md` — all rows still **unchecked**; no **Pass / Fail** recorded here.
 - **Tight smoke** bullets (dropdowns, settings overlay, projects card view, workspace media detail, map shell, pill toggles, upload panel) — **not** exercised in a browser this slice.
 - **High-risk spot-check** sections — **not** exercised.
+- **Stacking sanity**, **Token theme checklist**, **Interactive state matrix**, and **Acceptance criteria** table in the phase doc — **not** evidenced by a human run; treat as **open** until checklist rows are filled.
 
-**Next human run**
+**Desk research / code-adjacent reports (do *not* count as Phase 10 Pass)**
+
+These inform risk and copy/layout intent; they are **not** three-theme browser verification:
+
+- [`settings-overlay-notion-adjacent-ux-2026-05-18.md`](./settings-overlay-notion-adjacent-ux-2026-05-18.md) — product-pattern notes, not pixels.
+- [`settings-overlay-sections-layout-audit-2026-05-17.md`](./settings-overlay-sections-layout-audit-2026-05-17.md), [`upload-panel-design-audit-2026-05-17.md`](./upload-panel-design-audit-2026-05-17.md), [`dropdown-deep-analysis-2026-05-17.md`](./dropdown-deep-analysis-2026-05-17.md) — structure / audit angles.
+- [`phase-10-migration-smoke-gates-2026-05-18.md`](./phase-10-migration-smoke-gates-2026-05-18.md) — **automated** gates only (`design-system:check`, `ng build`, `styles` row, grep-style guards where logged).
+
+---
+
+## Screen checklist — row status (honest)
+
+**Rule:** Until a human records **Pass** (or **Fail** + ticket) in `phase-10-visual-qa.md`, every row below is **Unverified** — not “pending pass,” not implied green from CI.
+
+| Phase 10 screen checklist row | Light | Dark | Sandstone | Evidence this lane |
+| ----------------------------- | ----- | ---- | --------- | ------------------- |
+| Login | — | — | — | None (no browser) |
+| Register | — | — | — | None |
+| Reset password | — | — | — | None |
+| Update password | — | — | — | None |
+| Map view (primary) | — | — | — | None |
+| Projects — table view | — | — | — | None |
+| Projects — card view | — | — | — | None |
+| Projects — project-scoped URL (`/projects/:projectId`) | — | — | — | None — **added to parent matrix 2026-05-18**; same page component, selection/deep-link state still needs theme × viewport pass |
+| Media — list layout | — | — | — | None |
+| Media — grid layout | — | — | — | None |
+| Media — toolbar (sort/filter/group/view toggles) | — | — | — | None |
+| Anchored toolbar menus — Filter / Sort / Grouping (375px + desktop) | — | — | — | None |
+| Toast / inline error surfaces (stacking + themes) | — | — | — | None |
+| Map shell — clustering, markers, style switch | — | — | — | None |
+| Settings overlay — General | — | — | — | None |
+| Settings overlay — Appearance | — | — | — | None |
+| Settings overlay — Notifications | — | — | — | None |
+| Settings overlay — Map | — | — | — | None |
+| Settings overlay — Search | — | — | — | None |
+| Settings overlay — Data | — | — | — | None |
+| Settings overlay — Account | — | — | — | None |
+| Settings overlay — Invite | — | — | — | None |
+| Settings — deep URL (`/settings/:section/:subsection`) | — | — | — | None — **added to parent matrix 2026-05-18**; rail + subsection sync + refresh/deep-link |
+| Upload panel — location mode + lane switch | — | — | — | None |
+| Workspace pane — media detail | — | — | — | None |
+| Workspace pane — groupings | — | — | — | None |
+| Workspace pane — collapsed / narrow | — | — | — | None |
+| Dialog — confirm | — | — | — | None |
+| Dialog — text input | — | — | — | None |
+| Dialog — project select | — | — | — | None |
+| Dialog — share link audience | — | — | — | None |
+| Photo lightbox | — | — | — | None |
+| Nav — desktop | — | — | — | None |
+| Nav — mobile | — | — | — | None |
+
+**Optional parity (same shell, still needs explicit pass if treated as a release surface):** authenticated **`/`** default map vs explicit **`/map`** — if QA policy is “one row covers both,” document that in the pass report; otherwise exercise both URLs once.
+
+---
+
+## High-risk spot-check — status (honest)
+
+All bullet groups in **High-risk migration spot-check** and **Tight smoke** in `phase-10-visual-qa.md` remain **Unverified** here (map shell, settings rail/tokens, pill toggles, upload panel, theme smoke, dropdowns/menus).
+
+---
+
+## Next human run
 
 - Use **ThemeService** (or equivalent) for **`default`**, **`[data-theme="dark"]`**, **`[data-theme="sandstone"]`**; hard-refresh between theme switches per phase doc.
 - Minimum viewports: **375×812**, **1280×800**, **1920×1080**; then update the checklist in `phase-10-visual-qa.md` or append a dated pass report under `docs/migration/reports/`.
+- When signing a row, record **Pass** or **Fail + issue link** in the parent checklist only after **browser** verification — automated gates and desk audits are supplementary, not substitutes.

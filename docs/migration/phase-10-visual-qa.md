@@ -96,7 +96,7 @@ Cross-surface paint order is easy to regress during token or layout refactors. Q
 
 ## Screen checklist
 
-Mark each row **Pass / Fail** with ticket link on fail.
+Mark each row **Pass / Fail** with ticket link on fail. **Do not** mark Pass from CI or doc review alone — browser + three themes required per [Acceptance criteria](#acceptance-criteria). Row-level **unverified** inventory (honest gap log, no fake Pass): [`reports/phase-10-manual-visual-matrix-gap-2026-05-18.md`](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md).
 
 | Screen / flow | Light | Dark | Sandstone |
 |-----------------|-------|------|-----------|
@@ -107,6 +107,7 @@ Mark each row **Pass / Fail** with ticket link on fail.
 | Map view (primary) | [ ] | [ ] | [ ] |
 | Projects — table view | [ ] | [ ] | [ ] |
 | Projects — card view | [ ] | [ ] | [ ] |
+| Projects — project-scoped URL (`/projects/:projectId`) | [ ] | [ ] | [ ] |
 | Media — list layout | [ ] | [ ] | [ ] |
 | Media — grid layout | [ ] | [ ] | [ ] |
 | Media — toolbar (sort/filter/group/view toggles) | [ ] | [ ] | [ ] |
@@ -121,6 +122,7 @@ Mark each row **Pass / Fail** with ticket link on fail.
 | Settings overlay — Data | [ ] | [ ] | [ ] |
 | Settings overlay — Account | [ ] | [ ] | [ ] |
 | Settings overlay — Invite | [ ] | [ ] | [ ] |
+| Settings — deep URL (`/settings/:section/:subsection`, rail + pane sync) | [ ] | [ ] | [ ] |
 | Upload panel — location mode + lane switch | [ ] | [ ] | [ ] |
 | Workspace pane — media detail | [ ] | [ ] | [ ] |
 | Workspace pane — groupings | [ ] | [ ] | [ ] |
