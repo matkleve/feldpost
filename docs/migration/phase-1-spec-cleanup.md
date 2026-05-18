@@ -1,6 +1,6 @@
 # Phase 1 — Spec Cleanup
 
-**Status:** In progress — superseded in part by Phase **7**/**8** (2026-05-17); checklist below stays open for traceability; **four** historical bullets **closed with proof (2026-05-18)** — see `[x]` rows. **Index %:** migration [README](./README.md) Phase **1** row (**22**) is a coarse rollup (umbrella + brand-primary + primitive-contract audit still open).
+**Status:** In progress — superseded in part by Phase **7**/**8** (2026-05-17); checklist below stays open for traceability; **five** historical bullets **closed with proof (2026-05-18)** — see `[x]` rows (includes **Wave P5** primitive-contract audit). **Index %:** migration [README](./README.md) Phase **1** row (**22**) is a coarse rollup (umbrella + brand-primary still open; tab spec drift is Phase 11 on edit).
 
 ### 2026-05-17 — Shipped reality / supersession
 
@@ -12,7 +12,7 @@ Phase **7** and **8** have already collapsed much of the old **dual-token** stor
   - [x] Update `docs/design/tokens.md` with spartan variable mapping section — **superseded (provable 2026-05-18):** **`tokens.md`** carries tweakcn / MD3-doc / Figma-bridge sections; legacy bridge file removed from **`apps/web`** (Batch **50**).
   - [x] Decide: migrate `--fp-sys-color-*` tokens fully OR keep dual system with spartan as an overlay — **superseded (provable 2026-05-18):** **`rg 'var\(--fp-sys-color' apps/web/src`** → **0** files; MD3 roles documented-only per **`tokens.md`** §3.1a — [phase-7-token-migration.md](./phase-7-token-migration.md) §Batch 16.
   - [x] Decide: CDK overlay CSS stays or is replaced by spartan's CDK usage — **superseded (provable 2026-05-18):** **`@import "@angular/cdk/overlay-prebuilt.css"`** remains in **`apps/web/src/styles.scss`** (see [phase-8-global-scss-elimination.md](./phase-8-global-scss-elimination.md) preconditions / Phase 7 special cases).
-  - [ ] Identify if any component specs need the spartan primitive contract (dialog FSM, popover, tabs) before migration — **Wave P5** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)): explicit **`docs/specs/component/**`** inventory vs template migration waves — **open** audit (not implied complete); schedule after **P1–P4**; no product veto.
+  - [x] Identify if any component specs need the spartan primitive contract (dialog FSM, popover, tabs) before migration — **provable (2026-05-18, Wave P5 audit):** **no net-new** primitive-contract specs required for **dialogs**, **popover chrome**, or **anchored toolbar menus** before template migration — shipped **`BrnDialog` + `hlmDialog*`** on all four dialog components; **`app-popover`** + **`dropdown-system.md`** own stacking (**`z-index: 300`**); parent-owned open/close is normative (no dialog FSM enum). **Follow-up (not a migration blocker):** sync **`ui-primitives.tab.md`** + **`group-tab-bar.md`** to **`BrnTabs` / `hlmTabs`** (legacy **`tab.scss` / `ui-tab*`** paths absent from tree). Umbrella + **brand-primary** unchanged — **skipped** this wave.
 
 ### Wave P5 — Primitive contract inventory (2026-05-18, audit-only)
 
@@ -29,4 +29,27 @@ Phase **7** and **8** have already collapsed much of the old **dual-token** stor
 | **Anchored menus (related shell)** | `docs/specs/component/filters/dropdown-system.md` | Cross-cutting **toolbar menu** / stacking; often edited with popover/menu work. |
 
 **Proof command (inventory refresh):** `find docs/specs/component \( -iname '*dialog*' -o -iname '*popover*' \) | sort` — dialog/popover hits match the table above; tab specs picked from `ui-primitives.tab.md` + `group-tab-bar.md` by naming.
+
+#### Wave P5 — Audit verdicts (2026-05-18)
+
+**Gate:** `node scripts/lint-specs.mjs` → exit **0** (151 specs).
+
+| Spec | Pre-migration primitive contract needed? | Verdict | Proof (repo) |
+|------|------------------------------------------|---------|--------------|
+| `confirm-dialog/confirm-dialog.md` | No | **Provable** | `rg 'BrnDialog' apps/web/src/app/shared/confirm-dialog` → hits; parent-owned lifecycle + ownership matrix in spec; no `data-state` FSM required |
+| `text-input-dialog/text-input-dialog.md` | No | **Provable** | `rg 'BrnDialog' apps/web/src/app/shared/text-input-dialog` → hits |
+| `project-select-dialog/project-select-dialog.md` | No | **Provable** | `rg 'BrnDialog' apps/web/src/app/shared/project-select-dialog` → hits |
+| `workspace/share-link-audience-dialog.md` | No | **Provable** | `rg 'BrnDialog' apps/web/src/app/shared/share-link-audience-dialog` → hits; local signals only (spec §State) |
+| `ui-primitives/popover.md` | No | **Provable** | Spec §State: no programmatic FSM; `rg 'z-index:\s*300' apps/web/src/app/shared/popover/popover.component.scss` → match |
+| `filters/dropdown-system.md` | No | **Provable** | Stacking + ownership matrix normative; `app-dropdown-shell` + `z-index: 300` contract (see spec §Stacking) |
+| `ui-primitives/ui-primitives.tab.md` | **Spec sync on edit** (Phase 11) | **Drift** | Spec cites removed `apps/web/src/styles/primitives/tab.scss` and `ui-tab-list` / `ui-tab`; shipped shim: `apps/web/src/app/shared/ui/tabs/` (`hlmTabs` / `BrnTabs`) |
+| `workspace/group-tab-bar.md` | **Spec sync on edit** (Phase 11) | **Drift** | `group-tab-bar.component.ts` uses `BrnTabs` + `hlmTabs*`; spec still describes legacy pill/`--color-clay` chrome |
+
+**Wave P5 sub-checklist (this wave only):**
+
+- [x] Inventory refresh (`find` + table above).
+- [x] Dialog / popover / anchored-menu — **no new** spartan primitive-contract spec before migration.
+- [ ] Tab primitive specs — **edit-time** parity (`ui-primitives.tab.md`, `group-tab-bar.md`); **not** blocking migration (composition already on spartan tabs).
+- [ ] Umbrella Phase 1 parent — **unchanged** (brand-primary + sign-off still open).
+- [ ] Brand primary (`--color-accent-brand` vs tweakcn `--primary`) — **skipped** (product-blocked).
 

@@ -51,57 +51,8 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./layout/authenticated-app-layout.component').then(
-        (m) => m.AuthenticatedAppLayoutComponent,
-      ),
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
-        pathMatch: 'full',
-      },
-      {
-        path: 'map',
-        loadComponent: () =>
-          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
-      },
-      {
-        path: 'media',
-        loadComponent: () =>
-          import('./features/media/media.component').then((m) => m.MediaComponent),
-      },
-      {
-        path: 'projects',
-        loadComponent: () =>
-          import('./features/projects/projects-page.component').then(
-            (m) => m.ProjectsPageComponent,
-          ),
-      },
-      {
-        path: 'projects/:projectId',
-        loadComponent: () =>
-          import('./features/projects/projects-page.component').then(
-            (m) => m.ProjectsPageComponent,
-          ),
-      },
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
-      },
-      {
-        path: 'settings/:section',
-        loadComponent: () =>
-          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
-      },
-      {
-        path: 'settings/:section/:subsection',
-        loadComponent: () =>
-          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
-      },
-    ],
+    loadChildren: () =>
+      import('./layout/authenticated-app.routes').then((m) => m.AUTHENTICATED_APP_ROUTES),
   },
 
   // ── Fallback ──────────────────────────────────────────────────────────────

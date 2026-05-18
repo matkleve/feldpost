@@ -15,10 +15,9 @@ export const toastVariants = cva(
     variants: {
       variant: {
         default: 'border bg-background text-foreground',
-        success:
-          'border-green-500/20 bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-100',
+        success: 'border-success/20 bg-success/10 text-success',
         error: 'border-destructive/20 bg-destructive/10 text-destructive',
-        warning: 'border-yellow-500/20 bg-yellow-50 text-yellow-900',
+        warning: 'border-warning/20 bg-warning/10 text-warning',
       },
     },
     defaultVariants: { variant: 'default' },

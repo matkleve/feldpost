@@ -3,11 +3,10 @@ import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
-import { NavComponent } from './features/nav/nav.component';
+import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';
 import { ToastContainerComponent } from './shared/toast/toast-container.component';
 import { LocationResolverService } from './core/location-resolver/location-resolver.service';
 import { AuthService } from './core/auth/auth.service';
-import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';
 import { SettingsPaneService } from './core/settings-pane/settings-pane.service';
 import { UploadNotificationService } from './core/upload/upload-notification.service';
 import { DbTranslationService } from './core/i18n/db-translation.service';
@@ -44,7 +43,7 @@ declare global {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavComponent, SettingsOverlayComponent, ToastContainerComponent],
+  imports: [RouterOutlet, SettingsOverlayComponent, ToastContainerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -80,6 +79,10 @@ export class AppComponent implements OnInit {
         return;
       }
 
+      if (this.settingsPaneService.open()) {
+        this.settingsPaneService.close();
+      }
+
       if (!url.startsWith('/auth')) {
         this.lastNonSettingsUrl = url;
       }
@@ -87,7 +90,7 @@ export class AppComponent implements OnInit {
 
     effect(() => {
       const onSettingsRoute = this.parseSettingsUrl(this.currentUrl()) !== null;
-      const overlayOpen = this.settingsOverlayOpen();
+      const overlayOpen = this.settingsPaneService.open();
 
       if (onSettingsRoute && !overlayOpen) {
         void this.router.navigateByUrl(this.lastNonSettingsUrl || '/');

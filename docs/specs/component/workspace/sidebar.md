@@ -21,7 +21,7 @@ Source of truth for standardized sizing/tokens:
 
 ## Where It Lives
 
-- **Parent**: `MapShellComponent` template (desktop) / `AppComponent` template (mobile bottom bar)
+- **Parent**: `AuthenticatedAppLayoutComponent` template (shell for all `authGuard` routes)
 - **Component**: `NavComponent` at `features/nav/`
 
 ## NavLink States

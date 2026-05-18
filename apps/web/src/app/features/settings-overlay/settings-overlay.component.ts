@@ -2,12 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Injector,
   afterNextRender,
   computed,
   effect,
   inject,
   input,
   output,
+  runInInjectionContext,
   signal,
   viewChild,
 } from '@angular/core';
@@ -103,7 +105,7 @@ export class SettingsOverlayComponent {
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
-  private readonly runAfterNextRender = inject(afterNextRender);
+  private readonly injector = inject(Injector);
   private highlightedSubsectionToken = 0;
   private tocHighlightToken = 0;
   /** Service-driven subsection scroll: only set after `findSubsectionElement` succeeds for this token. */
@@ -218,16 +220,18 @@ export class SettingsOverlayComponent {
       const enableRafRetry =
         selectedSectionId === 'account' || selectedSectionId === 'invite-management';
 
-      this.runAfterNextRender(() => {
-        this.tryScrollSubsectionWithOptionalRafRetry(
-          selectedSectionId,
-          subsectionId,
-          requestToken,
-          enableRafRetry,
-          () => {
-            this.lastSuccessfulSubsectionRequestToken = requestToken;
-          },
-        );
+      runInInjectionContext(this.injector, () => {
+        afterNextRender(() => {
+          this.tryScrollSubsectionWithOptionalRafRetry(
+            selectedSectionId,
+            subsectionId,
+            requestToken,
+            enableRafRetry,
+            () => {
+              this.lastSuccessfulSubsectionRequestToken = requestToken;
+            },
+          );
+        });
       });
     });
   }
@@ -246,8 +250,10 @@ export class SettingsOverlayComponent {
 
     const enableRafRetry = sectionId === 'account' || sectionId === 'invite-management';
 
-    this.runAfterNextRender(() => {
-      this.tryScrollSubsectionWithOptionalRafRetry(sectionId, subsectionSlug, token, enableRafRetry);
+    runInInjectionContext(this.injector, () => {
+      afterNextRender(() => {
+        this.tryScrollSubsectionWithOptionalRafRetry(sectionId, subsectionSlug, token, enableRafRetry);
+      });
     });
   }
 

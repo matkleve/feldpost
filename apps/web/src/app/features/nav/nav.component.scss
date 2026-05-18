@@ -12,7 +12,14 @@
 // ── Host ──────────────────────────────────────────────────────────────────────
 
 :host {
-  display: contents;
+  // Avoid `display: contents` — it breaks `position: fixed` on `.sidebar`; the map route
+  // paints after this host in DOM order and fully covers a non-fixed sidebar.
+  display: block;
+  position: relative;
+  // Above map chrome plane (200); rail must stay visible over the map canvas.
+  // @see docs/design/tokens.md § Z-index — panel vs map chrome
+  z-index: 201;
+  pointer-events: none;
 }
 
 // ── LeftSidebar — trigger zone ───────────────────────────────────────────────
@@ -29,8 +36,8 @@
   --sidebar-icon-size: 1.25rem;
 
   position: fixed;
-  // Matches former `var(--z-panel)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
-  z-index: 100;
+  z-index: 201;
+  pointer-events: auto;
 
   @media (min-width: 768px) {
     top: 50%;
