@@ -1298,6 +1298,35 @@ rg 'legacy-design-tokens|_legacy-design-tokens' apps/web
 - **Manual QA:** (1) Set theme **Dark** — confirm **`dark:`** utilities and variables match. (2) Set theme **Light** on OS dark — confirm light **`dark:`** + light variables. (3) Set theme **System** with OS **dark** — confirm **variables** look dark while noting **`dark:`** utilities may stay on light-class output until variant split or ThemeService change. (4) **Sandstone** + OS dark — confirm **`data-theme="sandstone"`** does not pick up **`@media (prefers-color-scheme: dark)`** variable override on **`:root:not([data-theme])`** (attribute present).
 - **Doc / tooling parity (2026-05-18):** Normative copy must not describe **`_legacy-design-tokens.scss`** as a **stub on disk** — the file is **removed** from **`apps/web`**. **`npm run sync-tokens`** fails fast until **`scripts/sync-tokens.mjs`** targets a live SCSS source (see **`tokens.md`** § *Figma Bridge*).
 
+### Desk audit (P2) — 2026-05-18
+
+Static verification only; **§ Risks / QA** remains **not closed** for browser sign-off. **`cd apps/web && npx ng build`** → exit **0** (2026-05-18).
+
+| Step | Scenario | Desk | Notes |
+|------|----------|------|-------|
+| **(1)** | Theme **Dark** | **Pass (code)** | `settings-overlay.component.ts` `applyThemeMode` sets `data-theme="dark"`; `html[data-theme="dark"]` includes `tweakcn-dark-semantic-palette`; `@custom-variant dark` is `&:is([data-theme="dark"] *)` — **`dark:`** and **`var(--*)`** paths align. **Cannot verify** contrast / legibility without browser. |
+| **(2)** | Theme **Light**, OS **dark** | **Pass (code)** | `data-theme="light"` present → `styles.scss` system block `:root:not([data-theme])` **does not** apply dark palette; `@custom-variant dark` **inactive**. **Cannot verify** no stray OS-only leaks in components that use `:root:not([data-theme='light'])` for local overrides (focus ring, inputs) — those **intentionally** skip only forced light. |
+| **(3)** | Theme **System**, OS **dark** | **Known gap (by design)** + **Cannot verify (visual)** | **System** removes `data-theme` → `:root:not([data-theme])` applies dark **semantic** vars; **`dark:`** utilities **stay off** (variant is explicit-dark only). **Proven mismatch:** `toast-variants.ts` success row uses `dark:bg-green-900/20` — under system+OS dark, success toast likely keeps **light** Tailwind greens while surrounding UI uses dark semantics. **Human:** settings overlay theme toggle, map chrome, any surface using token utilities vs `dark:` |
+| **(4)** | **Sandstone**, OS **dark** | **Pass (narrow)** / **Cannot verify (broad)** | **Narrow (doc criterion):** `data-theme="sandstone"` → `:root:not([data-theme])` in `styles.scss` **does not** apply `tweakcn-dark-semantic-palette` — desk **pass**. **Broad:** `_typography-baseline.scss` and several component SCSS files use `@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) … }` — **sandstone + OS dark** still gets dark focus-ring / input-shadow branches; **human** check sandstone warmth vs accidental dark chrome. |
+
+**Code findings (desk)**
+
+- **Theme application:** No `ThemeService` / `core/theme.service.ts` in tree; **`SettingsOverlayComponent.applyThemeMode`** (`feldpost.settings.themeMode` in `localStorage`) sets `document.documentElement` — **system** → `removeAttribute('data-theme')`; **light | dark | sandstone** → `setAttribute('data-theme', themeMode)`.
+- **System + OS dark:** Does **not** set `data-theme="dark"`; dark semantics come from **`@media (prefers-color-scheme: dark) { :root:not([data-theme]) { @include tweakcn-dark-semantic-palette } }`** only.
+- **`dark:` footprint:** **`rg 'dark:' apps/web/src`** (excluding `node_modules`, build artifacts) → **one** product callsite: `apps/web/src/app/shared/ui/toast/toast-variants.ts` (success variant). Comment-only hits in `styles.scss` / `tailwind.config.js`.
+- **`@custom-variant` blocker:** Still accurate — single-line variant in `styles.scss` L32; comments L29–31 match **`tokens.md`** § *Phase 7 handoff — Tailwind `dark:` vs semantic CSS variables* and reverted long-form **`@slot`** fix (Sass top-level `&`); **not re-tested** by attempting the broken variant in this audit.
+- **Doc drift:** `docs/specs/ui/settings-overlay/theme-toggle.md` still describes **`ThemeService`** / `feldpost-theme` / three-state cycle — implementation is **settings overlay** four-mode toggle (`light` \| `dark` \| `system` \| `sandstone`); does not block theming code but confuses QA assignees.
+- **`tailwind.config.js` `darkMode`:** `['class', '[data-theme="dark"]']` — v4 runtime follows **`@custom-variant`** in `styles.scss`; config comment implying OS drives **`dark:`** is **stale** relative to v4 entry.
+
+**Recommended human checks (browser)**
+
+1. **(1)** Dark mode: success toast + primary surfaces — confirm no light-green toast on dark chrome.
+2. **(3)** System + OS dark: same toast; toggle **Dark** vs **System** — toast success colors should **change** if `dark:` path matters.
+3. **(4)** Sandstone + OS dark: settings overlay, media detail title input focus ring, map markers — confirm sandstone surfaces stay warm; note any OS-dark-only focus/marker shifts from `:root:not([data-theme='light'])` rules.
+4. Hard-refresh between theme switches ([`phase-10-visual-qa.md`](./phase-10-visual-qa.md)).
+
+**§ Risks / QA closure:** Do **not** mark closed until steps **(1)–(4)** are exercised in a browser (minimum: **(3)** toast + one semantic-token surface; **(4)** sandstone regression).
+
 ### Wave P2 closeout (2026-05-18)
 
 **Automated gates (repo root, this slice)**
