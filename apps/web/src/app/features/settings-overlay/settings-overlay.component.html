@@ -67,6 +67,7 @@
       <div class="settings-overlay__detail content-clamp content-clamp--text" aria-live="polite">
         @switch (selectedSectionId()) {
           @case ('general') {
+            @let tocAnchors = anchorsForSection('general');
             <div class="settings-overlay__detail-section">
               <div class="settings-overlay__detail-lead">
                 <h3>{{ t('settings.overlay.general.title', 'General') }}</h3>
@@ -79,89 +80,112 @@
                   }}
                 </p>
               </div>
-              <section
-                class="settings-overlay__detail-card"
-              >
-              <div class="settings-overlay__field-row">
-                <label hlmLabel>{{ t('settings.overlay.general.language.label', 'Language') }}</label>
-                <div class="settings-overlay__field-value">
-                  <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('general', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
                   <div
-                    hlmToggleGroup
-                    brnToggleGroup
-                    type="single"
-                    [nullable]="false"
-                    [value]="settingsModel().language"
-                    (valueChange)="onLanguageValueChange($event)"
-                    [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('general', 'language')"
                   >
-                    @for (option of languageOptions; track option.id) {
-                      <button
-                        hlmToggleGroupItem
-                        type="button"
-                        brnToggleGroupItem
-                        [value]="option.id"
-                        [disabled]="!!option.disabled"
-                        [attr.aria-label]="option.ariaLabel || option.label"
-                        [attr.title]="option.title || option.label"
-                      >
-                        @if (option.icon && optLayout(option) !== 'text-only') {
-                          <span class="material-icons" aria-hidden="true">{{
-                            option.icon
-                          }}</span>
-                        }
-                        @if (optLayout(option) !== 'icon-only') {
-                          <span>{{ option.label }}</span>
-                        }
-                      </button>
-                    }
+                    <label hlmLabel>{{ t('settings.overlay.general.language.label', 'Language') }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().language"
+                          (valueChange)="onLanguageValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
+                        >
+                          @for (option of languageOptions; track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                </div>
-              </div>
 
-              <div class="settings-overlay__field-row">
-                <label hlmLabel>{{ t('settings.overlay.general.density.label', 'Density') }}</label>
-                <div class="settings-overlay__field-value">
-                  <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
                   <div
-                    hlmToggleGroup
-                    brnToggleGroup
-                    type="single"
-                    [nullable]="false"
-                    [value]="settingsModel().density"
-                    (valueChange)="onDensityValueChange($event)"
-                    [attr.aria-label]="t('settings.overlay.general.density.label', 'Density')"
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('general', 'density')"
                   >
-                    @for (option of densityOptions(); track option.id) {
-                      <button
-                        hlmToggleGroupItem
-                        type="button"
-                        brnToggleGroupItem
-                        [value]="option.id"
-                        [disabled]="!!option.disabled"
-                        [attr.aria-label]="option.ariaLabel || option.label"
-                        [attr.title]="option.title || option.label"
-                      >
-                        @if (option.icon && optLayout(option) !== 'text-only') {
-                          <span class="material-icons" aria-hidden="true">{{
-                            option.icon
-                          }}</span>
-                        }
-                        @if (optLayout(option) !== 'icon-only') {
-                          <span>{{ option.label }}</span>
-                        }
-                      </button>
-                    }
+                    <label hlmLabel>{{ t('settings.overlay.general.density.label', 'Density') }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().density"
+                          (valueChange)="onDensityValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.general.density.label', 'Density')"
+                        >
+                          @for (option of densityOptions(); track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                </div>
               </div>
-              </section>
             </div>
           }
 
           @case ('appearance') {
+            @let tocAnchors = anchorsForSection('appearance');
             <div class="settings-overlay__detail-section">
               <div class="settings-overlay__detail-lead">
                 <h3>{{ t('settings.overlay.appearance.title', 'Appearance') }}</h3>
@@ -174,58 +198,78 @@
                   }}
                 </p>
               </div>
-              <section
-                class="settings-overlay__detail-card"
-              >
-              <div class="settings-overlay__field-row">
-                <label hlmLabel>{{
-                  t('settings.overlay.appearance.themeMode.label', 'Theme mode')
-                }}</label>
-                <div class="settings-overlay__field-value">
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('appearance', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
                   <div
-                    class="settings-overlay__segmented settings-overlay__segmented--theme"
-                    hlmPillToggle
-                    size="md"
-                    data-i18n-skip
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('appearance', 'theme')"
                   >
-                  <div
-                    hlmToggleGroup
-                    brnToggleGroup
-                    type="single"
-                    [nullable]="false"
-                    [value]="settingsModel().themeMode"
-                    (valueChange)="onThemeModeValueChange($event)"
-                    [attr.aria-label]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
-                  >
-                    @for (option of themeModeOptions(); track option.id) {
-                      <button
-                        hlmToggleGroupItem
-                        type="button"
-                        brnToggleGroupItem
-                        [value]="option.id"
-                        [disabled]="!!option.disabled"
-                        [attr.aria-label]="option.ariaLabel || option.label"
-                        [attr.title]="option.title || option.label"
+                    <label hlmLabel>{{
+                      t('settings.overlay.appearance.themeMode.label', 'Theme mode')
+                    }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div
+                        class="settings-overlay__segmented settings-overlay__segmented--theme"
+                        hlmPillToggle
+                        size="md"
+                        data-i18n-skip
                       >
-                        @if (option.icon && optLayout(option) !== 'text-only') {
-                          <span class="material-icons" aria-hidden="true">{{
-                            option.icon
-                          }}</span>
-                        }
-                        @if (optLayout(option) !== 'icon-only') {
-                          <span>{{ option.label }}</span>
-                        }
-                      </button>
-                    }
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().themeMode"
+                          (valueChange)="onThemeModeValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
+                        >
+                          @for (option of themeModeOptions(); track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                </div>
               </div>
-              </section>
             </div>
           }
 
           @case ('notifications') {
+            @let tocAnchors = anchorsForSection('notifications');
             <div class="settings-overlay__detail-section">
               <div class="settings-overlay__detail-lead">
                 <h3>{{ t('settings.overlay.notifications.title', 'Notifications') }}</h3>
@@ -238,74 +282,101 @@
                   }}
                 </p>
               </div>
-              <section
-                class="settings-overlay__detail-card"
-              >
-              <button
-                type="button"
-                class="settings-overlay__toggle-row"
-                (click)="toggleSetting('notificationsEnabled')"
-              >
-                <span class="settings-overlay__toggle-label">
-                  <strong>{{
-                    t('settings.overlay.notifications.inApp.title', 'In-app notifications')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.notifications.inApp.description',
-                        'Show success and warning notices for actions.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  hlmSwitch
-                  class="settings-overlay__switch"
-                  aria-hidden="true"
-                  [checked]="settingsModel().notificationsEnabled"
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
                 >
-                  <span hlmSwitchThumb [checked]="settingsModel().notificationsEnabled"></span>
-                </span>
-              </button>
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('notifications', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('notifications', 'in-app')"
+                  >
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('notificationsEnabled')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.notifications.inApp.title', 'In-app notifications')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.notifications.inApp.description',
+                              'Show success and warning notices for actions.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().notificationsEnabled"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().notificationsEnabled"></span>
+                      </span>
+                    </button>
+                  </div>
 
-              <button
-                type="button"
-                class="settings-overlay__toggle-row"
-                (click)="toggleSetting('uploadFailureAlerts')"
-              >
-                <span class="settings-overlay__toggle-label">
-                  <strong>
-                    {{
-                      t(
-                        'settings.overlay.notifications.uploadFailure.title',
-                        'Upload failure alerts'
-                      )
-                    }}
-                  </strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.notifications.uploadFailure.description',
-                        'Raise immediate warning toasts for failed uploads.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  hlmSwitch
-                  class="settings-overlay__switch"
-                  aria-hidden="true"
-                  [checked]="settingsModel().uploadFailureAlerts"
-                >
-                  <span hlmSwitchThumb [checked]="settingsModel().uploadFailureAlerts"></span>
-                </span>
-              </button>
-              </section>
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('notifications', 'upload-failures')"
+                  >
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('uploadFailureAlerts')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>
+                          {{
+                            t(
+                              'settings.overlay.notifications.uploadFailure.title',
+                              'Upload failure alerts'
+                            )
+                          }}
+                        </strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.notifications.uploadFailure.description',
+                              'Raise immediate warning toasts for failed uploads.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().uploadFailureAlerts"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().uploadFailureAlerts"></span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           }
 
           @case ('map') {
+            @let tocAnchors = anchorsForSection('map');
             <div class="settings-overlay__detail-section">
               <div class="settings-overlay__detail-lead">
                 <h3>{{ t('settings.overlay.map.title', 'Map Preferences') }}</h3>
@@ -318,109 +389,141 @@
                   }}
                 </p>
               </div>
-              <section
-                class="settings-overlay__detail-card"
-              >
-              <button
-                type="button"
-                class="settings-overlay__toggle-row"
-                (click)="toggleSetting('mapAutoLocate')"
-              >
-                <span class="settings-overlay__toggle-label">
-                  <strong>{{
-                    t('settings.overlay.map.autoLocate.title', 'Auto-locate after login')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.map.autoLocate.description',
-                        'Center map to your current position when entering map shell.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  hlmSwitch
-                  class="settings-overlay__switch"
-                  aria-hidden="true"
-                  [checked]="settingsModel().mapAutoLocate"
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
                 >
-                  <span hlmSwitchThumb [checked]="settingsModel().mapAutoLocate"></span>
-                </span>
-              </button>
-
-              <button
-                type="button"
-                class="settings-overlay__toggle-row"
-                (click)="toggleSetting('mapGridOverlay')"
-              >
-                <span class="settings-overlay__toggle-label">
-                  <strong>{{
-                    t('settings.overlay.map.gridOverlay.title', 'Grid helper overlay')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.map.gridOverlay.description',
-                        'Show subtle grid alignment lines on high zoom levels.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  hlmSwitch
-                  class="settings-overlay__switch"
-                  aria-hidden="true"
-                  [checked]="settingsModel().mapGridOverlay"
-                >
-                  <span hlmSwitchThumb [checked]="settingsModel().mapGridOverlay"></span>
-                </span>
-              </button>
-
-              <div class="settings-overlay__field-row">
-                <label hlmLabel>{{
-                  t('settings.overlay.map.markerMotion.label', 'Marker motion')
-                }}</label>
-                <div class="settings-overlay__field-value">
-                  <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('map', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
                   <div
-                    hlmToggleGroup
-                    brnToggleGroup
-                    type="single"
-                    [nullable]="false"
-                    [value]="settingsModel().markerMotion"
-                    (valueChange)="onMarkerMotionValueChange($event)"
-                    [attr.aria-label]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('map', 'auto-locate')"
                   >
-                    @for (option of markerMotionOptions(); track option.id) {
-                      <button
-                        hlmToggleGroupItem
-                        type="button"
-                        brnToggleGroupItem
-                        [value]="option.id"
-                        [disabled]="!!option.disabled"
-                        [attr.aria-label]="option.ariaLabel || option.label"
-                        [attr.title]="option.title || option.label"
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('mapAutoLocate')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.map.autoLocate.title', 'Auto-locate after login')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.map.autoLocate.description',
+                              'Center map to your current position when entering map shell.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().mapAutoLocate"
                       >
-                        @if (option.icon && optLayout(option) !== 'text-only') {
-                          <span class="material-icons" aria-hidden="true">{{
-                            option.icon
-                          }}</span>
-                        }
-                        @if (optLayout(option) !== 'icon-only') {
-                          <span>{{ option.label }}</span>
-                        }
-                      </button>
-                    }
+                        <span hlmSwitchThumb [checked]="settingsModel().mapAutoLocate"></span>
+                      </span>
+                    </button>
+                  </div>
+
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('map', 'grid-overlay')"
+                  >
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('mapGridOverlay')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.map.gridOverlay.title', 'Grid helper overlay')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.map.gridOverlay.description',
+                              'Show subtle grid alignment lines on high zoom levels.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().mapGridOverlay"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().mapGridOverlay"></span>
+                      </span>
+                    </button>
                   </div>
                 </div>
+
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('map', 'marker-motion')"
+                  >
+                    <label hlmLabel>{{
+                      t('settings.overlay.map.markerMotion.label', 'Marker motion')
+                    }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().markerMotion"
+                          (valueChange)="onMarkerMotionValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
+                        >
+                          @for (option of markerMotionOptions(); track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              </section>
             </div>
           }
 
           @case ('search') {
+            @let tocAnchors = anchorsForSection('search');
             <div class="settings-overlay__detail-section">
               <div class="settings-overlay__detail-lead">
                 <h3>{{ t('settings.overlay.search.title', 'Search Tuning') }}</h3>
@@ -433,55 +536,78 @@
                   }}
                 </p>
               </div>
-              <section
-                class="settings-overlay__detail-card"
-              >
-              <div class="settings-overlay__field-row">
-                <label hlmLabel for="settings-search-bias">{{
-                  t('settings.overlay.search.bias.label', 'Search bias')
-                }}</label>
-                <div class="settings-overlay__field-value">
-                  <select
-                    hlmSelect
-                    id="settings-search-bias"
-                    class="settings-overlay__select"
-                    [value]="settingsModel().searchBias"
-                    (change)="setSearchBias($any($event.target).value)"
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('search', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('search', 'bias')"
                   >
-                    <option value="balanced">
-                      {{ t('settings.overlay.search.bias.option.balanced', 'Balanced') }}
-                    </option>
-                    <option value="address-first">
-                      {{ t('settings.overlay.search.bias.option.addressFirst', 'Address first') }}
-                    </option>
-                    <option value="place-first">
-                      {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
-                    </option>
-                  </select>
+                    <label hlmLabel for="settings-search-bias">{{
+                      t('settings.overlay.search.bias.label', 'Search bias')
+                    }}</label>
+                    <div class="settings-overlay__field-value">
+                      <select
+                        hlmSelect
+                        id="settings-search-bias"
+                        class="settings-overlay__select"
+                        [value]="settingsModel().searchBias"
+                        (change)="setSearchBias($any($event.target).value)"
+                      >
+                        <option value="balanced">
+                          {{ t('settings.overlay.search.bias.option.balanced', 'Balanced') }}
+                        </option>
+                        <option value="address-first">
+                          {{ t('settings.overlay.search.bias.option.addressFirst', 'Address first') }}
+                        </option>
+                        <option value="place-first">
+                          {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div
+                    class="settings-overlay__field-row settings-overlay__field-row--stacked settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('search', 'radius')"
+                  >
+                    <label hlmLabel for="settings-search-radius">{{
+                      t('settings.overlay.search.radius.label', 'Default radius (km)')
+                    }}</label>
+                    <input
+                      hlmInput
+                      id="settings-search-radius"
+                      class="settings-overlay__range"
+                      type="range"
+                      min="1"
+                      max="10"
+                      [value]="settingsModel().searchRadiusKm"
+                      (input)="setSearchRadius(+$any($event.target).value)"
+                    />
+                    <strong>{{ settingsModel().searchRadiusKm }} km</strong>
+                  </div>
                 </div>
               </div>
-
-              <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
-                <label hlmLabel for="settings-search-radius">{{
-                  t('settings.overlay.search.radius.label', 'Default radius (km)')
-                }}</label>
-                <input
-                  hlmInput
-                  id="settings-search-radius"
-                  class="settings-overlay__range"
-                  type="range"
-                  min="1"
-                  max="10"
-                  [value]="settingsModel().searchRadiusKm"
-                  (input)="setSearchRadius(+$any($event.target).value)"
-                />
-                <strong>{{ settingsModel().searchRadiusKm }} km</strong>
-              </div>
-              </section>
             </div>
           }
 
           @case ('data') {
+            @let tocAnchors = anchorsForSection('data');
             <div class="settings-overlay__detail-section">
               <div class="settings-overlay__detail-lead">
                 <h3>{{ t('settings.overlay.data.title', 'Data and Privacy') }}</h3>
@@ -494,67 +620,131 @@
                   }}
                 </p>
               </div>
-              <section
-                class="settings-overlay__detail-card"
-              >
-              <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
-                <label hlmLabel for="settings-cache-retention">{{
-                  t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
-                }}</label>
-                <input
-                  hlmInput
-                  id="settings-cache-retention"
-                  class="settings-overlay__range"
-                  type="range"
-                  min="7"
-                  max="90"
-                  [value]="settingsModel().cacheRetentionDays"
-                  (input)="setCacheRetentionDays(+$any($event.target).value)"
-                />
-                <strong>{{ settingsModel().cacheRetentionDays }} days</strong>
-              </div>
-
-              <button
-                type="button"
-                class="settings-overlay__toggle-row"
-                (click)="toggleSetting('telemetryEnabled')"
-              >
-                <span class="settings-overlay__toggle-label">
-                  <strong>{{
-                    t('settings.overlay.data.telemetry.title', 'Diagnostics telemetry')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.data.telemetry.description',
-                        'Send anonymous performance and crash diagnostics.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  hlmSwitch
-                  class="settings-overlay__switch"
-                  aria-hidden="true"
-                  [checked]="settingsModel().telemetryEnabled"
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
                 >
-                  <span hlmSwitchThumb [checked]="settingsModel().telemetryEnabled"></span>
-                </span>
-              </button>
-              </section>
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('data', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__field-row settings-overlay__field-row--stacked settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('data', 'cache')"
+                  >
+                    <label hlmLabel for="settings-cache-retention">{{
+                      t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
+                    }}</label>
+                    <input
+                      hlmInput
+                      id="settings-cache-retention"
+                      class="settings-overlay__range"
+                      type="range"
+                      min="7"
+                      max="90"
+                      [value]="settingsModel().cacheRetentionDays"
+                      (input)="setCacheRetentionDays(+$any($event.target).value)"
+                    />
+                    <strong>{{ settingsModel().cacheRetentionDays }} days</strong>
+                  </div>
+                </div>
+
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('data', 'telemetry')"
+                  >
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('telemetryEnabled')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.data.telemetry.title', 'Diagnostics telemetry')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.data.telemetry.description',
+                              'Send anonymous performance and crash diagnostics.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().telemetryEnabled"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().telemetryEnabled"></span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           }
 
           @case ('account') {
-            <app-account [embeddedInSettings]="true" />
+            @let tocAnchors = anchorsForSection('account');
+            <div class="settings-overlay__detail-section settings-overlay__detail-section--embedded">
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('account', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <app-account [embeddedInSettings]="true" />
+            </div>
           }
 
           @case ('invite-management') {
-            <ss-invite-management-section
-              [openContext]="inviteSectionRequest().openContext"
-              [preselectedRole]="inviteSectionRequest().preselectedRole"
-              [requestToken]="inviteSectionRequest().requestToken"
-            />
+            @let tocAnchors = anchorsForSection('invite-management');
+            <div class="settings-overlay__detail-section settings-overlay__detail-section--embedded">
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('invite-management', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <ss-invite-management-section
+                [openContext]="inviteSectionRequest().openContext"
+                [preselectedRole]="inviteSectionRequest().preselectedRole"
+                [requestToken]="inviteSectionRequest().requestToken"
+              />
+            </div>
           }
         }
       </div>

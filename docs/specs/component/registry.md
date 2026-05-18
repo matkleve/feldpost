@@ -13,7 +13,7 @@ One parent index plus three split-out bodies (markdown tables and bullet entries
 
 | Slice | Body |
 | --- | --- |
-| Shared primitives, containers, dropdowns, grid, media, dialogs, toasts, account, view toggle | [`registry.primitives-and-layout.supplement.md`](registry.primitives-and-layout.supplement.md) (segmented pill shell: **`[hlmPillToggle]`** + toggle-group shims — same file, toggle-group section) |
+| Shared primitives, containers, dropdowns, grid, media, dialogs, toasts, account, view toggle | [`registry.primitives-and-layout.supplement.md`](registry.primitives-and-layout.supplement.md) (**`[hlmPillToggle]`** pill shell + **`hlmToggleGroup`** / **`hlmToggleGroupItem`** local helm — **no** global `hlm-toggle-group.scss`) |
 | Workspace pane (shell, chrome, footer, toolbar, media detail) | [`registry.workspace-pane.supplement.md`](registry.workspace-pane.supplement.md) |
 | Feature-local components, extraction candidates, Figma gaps | [`registry.feature-local.supplement.md`](registry.feature-local.supplement.md) |
 

@@ -11,11 +11,11 @@
 
 **Remaining work (handoff, tree-verified):**
 
-- **Queue:** **Wave P2** — run **after** [Phase 11 P1 drift checklist](./phase-11-spec-sync.md#priority-stack-post-recovery--2026-05-18) ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)).
+- **Wave P2 (2026-05-18):** **Shipped (doc + gates)** — consumer **`rg`** snapshot + § **Risks / QA** closeout paragraph (**§ Wave P2 closeout (2026-05-18)**); **`docs/design/motion.md`** scrubbed so **`--interactive-transition-standard`** is not described as living on an on-disk legacy bridge file. **Manual** three-path theme QA stays in [Phase 10](./phase-10-visual-qa.md) (not executed in this agent slice).
 
-- **§ Risks / QA** — Tailwind **`dark:`** vs semantic **CSS variables** under **System + OS dark** (see **`styles.scss`** `@custom-variant` comment + § **Risks / QA** below).
+- **§ Risks / QA (manual)** — Tailwind **`dark:`** vs semantic **CSS variables** under **System + OS dark** (see **`styles.scss`** `@custom-variant` comment + § **Risks / QA** below); automated gate table in § **Wave P2 closeout (2026-05-18)**.
 - **Batch 13 §4 — `hlm-toggle-group`** — **Closed (2026-05-18 doc sync):** global **`hlm-toggle-group.scss`** retired (**[phase-8 §6](./phase-8-global-scss-elimination.md#6-toggle-group-global-scss)**); pill shell + density in **`pillToggleVariants`** / **`pillToggleSizeStyle`** + **`[hlmPillToggle]`**; segment colors in **`toggle-group-variants.ts`** CVA — no further Phase 7 token blocker.
-- **Token / consumer + doc parity** — sweep specs and design docs so normative tables do not imply **`_legacy-design-tokens.scss`** still exists on disk; **`tailwind.config.js`** bridge until full v4 token migration is tracked separately in phase docs.
+- **Token / consumer + doc parity** — ongoing spot-check when editing specs so normative tables do not imply **`_legacy-design-tokens.scss`** on disk; **`tailwind.config.js`** bridge until full v4 token migration is tracked separately in phase docs.
 - **Deferred motion / literal choreography** (from batch notes) — optional consolidation; not blocked on the removed bridge file.
 
 ---
@@ -1298,6 +1298,20 @@ rg 'legacy-design-tokens|_legacy-design-tokens' apps/web
 - **Attempted fix (2026-05-16):** long-form **`@custom-variant dark { … @slot … }`** with a second branch for **`html:not([data-theme])`** + **`prefers-color-scheme: dark`**. **Reverted:** Angular **`ng build`** fails because Sass compiles **`styles.scss`** first and rejects **top-level `&`** inside that block (`Top-level selectors may not contain the parent selector "&"`). A short comment above **`@custom-variant`** in **`styles.scss`** points here.
 - **Manual QA:** (1) Set theme **Dark** — confirm **`dark:`** utilities and variables match. (2) Set theme **Light** on OS dark — confirm light **`dark:`** + light variables. (3) Set theme **System** with OS **dark** — confirm **variables** look dark while noting **`dark:`** utilities may stay on light-class output until variant split or ThemeService change. (4) **Sandstone** + OS dark — confirm **`data-theme="sandstone"`** does not pick up **`@media (prefers-color-scheme: dark)`** variable override on **`:root:not([data-theme])`** (attribute present).
 - **Doc / tooling parity (2026-05-18):** Normative copy must not describe **`_legacy-design-tokens.scss`** as a **stub on disk** — the file is **removed** from **`apps/web`**. **`npm run sync-tokens`** fails fast until **`scripts/sync-tokens.mjs`** targets a live SCSS source (see **`tokens.md`** § *Figma Bridge*).
+
+### Wave P2 closeout (2026-05-18)
+
+**Automated gates (repo root, this slice)**
+
+| Check | Command | Result |
+|-------|---------|--------|
+| Legacy bridge path in shipped web tree | `rg 'legacy-design-tokens|_legacy-design-tokens' apps/web` | **0** matches (empty **`rg`** output; exit **1**) |
+| `var(--fp-*)` in app SCSS | `rg 'var\(--fp-' apps/web/src/app --glob '*.scss'` | **0** lines |
+| Legacy **`--color-*` / `--fp-sys-*` / `--fp-ref-*`** handoffs in app SCSS | `rg 'var\(--color-|var\(--fp-sys-|var\(--fp-ref-' apps/web/src/app --glob '*.scss'` | **0** lines |
+
+**`dark:` vs semantic (unchanged contract):** **`@custom-variant dark`** remains **`&:is([data-theme="dark"] *)`** only; **`tweakcn-dark-semantic-palette`** applies to **`html[data-theme="dark"]`** and **`@media (prefers-color-scheme: dark) { :root:not([data-theme]) { … } }`** — see bullets above and **`docs/design/tokens.md`** § *Phase 7 handoff — Tailwind `dark:` vs semantic CSS variables*. **No** `styles.scss` change this slice (Sass still rejects long-form **`@custom-variant`** with top-level **`&`** per attempted fix note).
+
+**Doc↔tree hygiene (this slice):** **`docs/design/motion.md`** — **`--interactive-transition-standard`** note now references **historical** bridge removal (**Batch 41** / **Batch 50**) without implying the file exists on disk.
 
 ## Token mapping table (extend as you discover variants)
 

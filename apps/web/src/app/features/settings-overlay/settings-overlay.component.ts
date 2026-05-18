@@ -28,6 +28,11 @@ import { InviteManagementSectionComponent } from './sections/invite-management-s
 import { AccountComponent } from '../../shared/account/account.component';
 import { buildSettingsSectionList } from './settings-sections.const';
 import {
+  SETTINGS_SECTION_ANCHORS,
+  settingsDetailAnchorDomId,
+  type SettingsSectionAnchorDef,
+} from './settings-section-anchors.const';
+import {
   buildLanguageOptions,
   buildDensityOptions,
   buildThemeModeOptions,
@@ -97,6 +102,7 @@ export class SettingsOverlayComponent {
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
   private highlightedSubsectionToken = 0;
+  private tocHighlightToken = 0;
 
   readonly open = input(false);
   readonly openChange = output<boolean>();
@@ -105,6 +111,11 @@ export class SettingsOverlayComponent {
   readonly sectionList = computed<ReadonlyArray<SettingsSection>>(() =>
     buildSettingsSectionList(this.t),
   );
+
+  /** Anchors for the detail-column TOC; keyed separately from rail `SettingsSection` list. */
+  anchorsForSection(sectionId: string): readonly SettingsSectionAnchorDef[] {
+    return SETTINGS_SECTION_ANCHORS[sectionId] ?? [];
+  }
 
   readonly languageOptions: ReadonlyArray<ToggleGroupOption> = buildLanguageOptions();
 
@@ -158,15 +169,30 @@ export class SettingsOverlayComponent {
       const open = this.open();
       const subsectionId = subsectionRequest.id;
 
-      if (!open || !subsectionId || selectedSectionId !== 'account') {
+      if (!open || !subsectionId) {
         return;
       }
 
       queueMicrotask(() => {
-        this.scrollToSubsection(subsectionId, subsectionRequest.requestToken);
+        this.scrollToSubsection(
+          selectedSectionId,
+          subsectionId,
+          subsectionRequest.requestToken,
+        );
       });
     });
   }
+
+  /** Scroll + highlight from TOC buttons (same visual treatment as URL-driven subsection). */
+  scrollToDetailAnchor(sectionId: string, subsectionSlug: string): void {
+    const token = ++this.tocHighlightToken;
+    queueMicrotask(() => {
+      this.scrollToSubsection(sectionId, subsectionSlug, token);
+    });
+  }
+
+  /** @internal Template helper for stable anchor ids. */
+  readonly settingsAnchorDomId = settingsDetailAnchorDomId;
 
   onOverlayAttach(): void {
     // No-op: section content renders immediately; async loading is section-local.
@@ -330,8 +356,12 @@ export class SettingsOverlayComponent {
     root.setAttribute('data-theme', themeMode);
   }
 
-  private scrollToSubsection(subsectionId: string, requestToken: number): void {
-    const target = this.findSubsectionElement(subsectionId);
+  private scrollToSubsection(
+    sectionId: string,
+    subsectionSlug: string,
+    requestToken: number,
+  ): void {
+    const target = this.findSubsectionElement(sectionId, subsectionSlug);
     if (!target) {
       return;
     }
@@ -340,15 +370,21 @@ export class SettingsOverlayComponent {
     this.highlightSubsection(target, requestToken);
   }
 
-  private findSubsectionElement(subsectionId: string): HTMLElement | null {
+  private findSubsectionElement(sectionId: string, subsectionSlug: string): HTMLElement | null {
     const host = this.hostRef.nativeElement;
+    const domId = settingsDetailAnchorDomId(sectionId, subsectionSlug);
+    const byId = host.querySelector(`#${CSS.escape(domId)}`) as HTMLElement | null;
+    if (byId) {
+      return byId;
+    }
+
     const candidates = host.querySelectorAll(
       '[data-settings-subsection]',
     ) as NodeListOf<HTMLElement>;
 
     for (const candidate of candidates) {
       const value = candidate.dataset['settingsSubsection'];
-      if (value && value.toLowerCase() === subsectionId.toLowerCase()) {
+      if (value && value.toLowerCase() === subsectionSlug.toLowerCase()) {
         return candidate;
       }
     }

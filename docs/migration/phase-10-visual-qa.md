@@ -21,6 +21,8 @@
 
 **Automated smoke log (same wave):** [`reports/phase-10-migration-smoke-gates-2026-05-18.md`](./reports/phase-10-migration-smoke-gates-2026-05-18.md).
 
+**Manual screen matrix / tight smoke (agent gap log, 2026-05-18):** no interactive browser pass in this slice — documented honestly in [`reports/phase-10-manual-visual-matrix-gap-2026-05-18.md`](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md) (checkboxes below unchanged until a human run).
+
 **Tight smoke (add to Phase 7–8 merges / pre-release if not already exercised above):**
 
 - [ ] **Dropdowns / menus:** Open a **toolbar** and a **workspace** anchored menu on **375px** height; confirm **down-first** placement, viewport clamp, and **stacking** vs map/rails per [`dropdown-system.md`](../specs/component/filters/dropdown-system.md#open-time-stacking-owner-normative); menu row **hover/active** reads correctly on **dark** and **sandstone** without relying on removed **`--action-*`** bridge rows.

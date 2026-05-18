@@ -6,7 +6,7 @@ A floating, sidenav-anchored settings panel that opens from the bottom avatar ro
 
 ## What It Looks Like
 
-A two-column, iPad-Settings-style surface appears to the right of the sidebar with a token-based gap. The panel has no entrance animation and opens instantly. A vertical hairline on the **rail** (`border-inline-end`) separates the section list from the detail column (no separate flex “lead” strip). The panel stays vertically centered to the sidebar host and repositions fluidly when the sidebar rail expands or collapses.
+A two-column, iPad-Settings-style surface appears to the right of the sidebar with a token-based gap. The panel has no entrance animation and opens instantly. A vertical hairline on the **rail** (`border-inline-end`) separates the section list from the detail column (no separate flex “lead” strip). **Rail width:** Phase 7 **Batch 34** removed global **`--overlay-rail-left-*`** bridge rows; shipped **`settings-overlay.component.scss`** defines **`:host`** custom properties (**`--settings-overlay-left-ratio`** `0.38`, **`--settings-overlay-left-width`** as **`clamp(14rem, calc(var(--settings-overlay-width) * var(--settings-overlay-left-ratio)), 17rem)`**, **`--settings-overlay-right-width`** as the remainder). Do **not** spec new work against removed **`--overlay-rail-*`** names. The panel stays vertically centered to the sidebar host and repositions fluidly when the sidebar rail expands or collapses.
 
 **Code reality:** The shell is a fixed pane next to the nav (see `app.component.html`), not a CDK `OverlayRef`. The dismiss control lives in-flow on the rail toolbar. The detail column is an inline-size **container**: below a width threshold, label/control rows stack to a single column so segmented controls do not overflow when copy widens (e.g. after locale change).
 
@@ -14,11 +14,13 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 
 **Embedded panes:** Account and Invite Management (and any future embedded body) must follow [settings-detail-embedded-layout.md](./settings-detail-embedded-layout.md) so rail switches do not change card chrome or hierarchy.
 
+**Detail surface (inline + TOC):** Inline preference sections use **one** flat body on the detail column surface (`.settings-overlay__detail-body` / `.settings-overlay__detail-group`) with **top rules between groups** — not a per-section bordered inner card. A **table-of-contents** row (`.settings-overlay__detail-toc`) may appear under the section lead when **`SETTINGS_SECTION_ANCHORS`** defines anchors for that section; TOC entries are `type="button"` and scroll to stable element ids `settings-{sectionId}-{subsectionSlug}`. Deep links use the same slugs via `SettingsPaneService.subsectionRequest` / `/settings/:section/:subsection` (see [settings-routes.md](../../page/settings-routes.md)). Anchor metadata lives only in [`settings-section-anchors.const.ts`](../../../../apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts), **not** on the rail `SettingsSection` model.
+
 ## Where It Lives
 
-- **Route**: Global overlay on map shell; no route segment and no router state.
-- **Parent**: `NavComponent` (`apps/web/src/app/features/nav/nav.component.ts`).
-- **Appears when**: User activates the bottom avatar settings row in the sidenav.
+- **Route / URL:** Optional `/settings` and `/settings/:section/:subsection` paths (see [settings-routes.md](../../page/settings-routes.md)) sync **`SettingsPaneService`** (`openFromRoute`) with the same overlay shell rendered from **`AppComponent`** (`ss-settings-overlay` sibling of **`app-nav`**). **Open** is also toggled from the nav avatar row without requiring a URL change.
+- **Parent**: `AppComponent` template (`apps/web/src/app/app.component.html`) — **`ss-settings-overlay`** is a sibling of **`app-nav`** when the nav chrome is shown. **Open state** is driven by **`SettingsPaneService`** (Nav’s Settings row toggles the same signal the app binds to **`[open]`**).
+- **Appears when**: User activates the bottom avatar settings row in the sidenav (or equivalent open action on the service).
 
 ## Actions
 
@@ -29,7 +31,9 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 | 3   | Selects any local-only section             | Section content appears immediately                                                             | `selectedSectionId` signal update  |
 | 4   | Selects data-backed section (`Konto`)      | Section frame renders immediately; inner controls show placeholders/spinner until data resolves | section-local data request         |
 | 5   | Section-local fetch fails                  | Shows error/retry only inside that section, not for whole overlay                               | section component error state      |
-| 6   | Selects section in left list               | Right detail area switches to selected section component                                        | `selectedSectionId` signal update  |
+| 6   | Selects section in left list               | Right detail area switches to selected section component; subsection deep-link target is cleared when changing section via `setSelectedSection` | `selectedSectionId` signal update  |
+| 6a  | Clicks a TOC chip in the detail column     | Scrolls the matching anchor into view and replays the subsection highlight                                    | `scrollToDetailAnchor`             |
+| 6b  | Opens `/settings/:section/:subsection`     | Overlay opens on **section**; **subsection** scroll/highlight runs when the overlay is visible                 | `AppComponent` → `openFromRoute`   |
 | 7   | Selects `Konto` section                    | Renders identity, email/password management, password-recovery action, 2FA, and session actions | account section selection          |
 | 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status                         | shortcuts section selection        |
 | 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                                     | Backdrop click / Escape key        |
@@ -38,7 +42,7 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 ```mermaid
 flowchart TD
     A[User activates avatar Settings row] --> B{Overlay open?}
-    B -- No --> C[Create/open CDK overlay]
+    B -- No --> C[SettingsPaneService open = true]
     C --> D[Render shell immediately]
     D --> E{Section selected?}
     E -- Local-only --> F[Render section content instantly]
@@ -59,23 +63,24 @@ flowchart TD
 ## Component Hierarchy
 
 ```text
-SettingsOverlayHost (CDK OverlayRef; anchored to Nav host)
-├── SettingsOverlaySurface (.ui-container)
-│   ├── NavToPanelDivider (visual divider between sidenav and panel)
-│   ├── SettingsOverlayLayout
-│   │   ├── SettingsSectionListColumn (left)
-│   │   │   ├── SectionListHeader
-│   │   │   └── SettingsSectionList
-│   │   │       └── SettingsSectionListItem × N (.ui-item)
-│   │   ├── InternalDivider
-│   │   └── SettingsSectionDetailColumn (right)
-│   │       └── SettingsSectionOutlet
-│   │           └── RegisteredSectionComponent (selected section)
-│   │               ├── [optional] SectionLoadingState (local)
-│   │               ├── [optional] SectionErrorState (local retry)
-│   │               └── SectionContent
-└── Backdrop (outside click dismiss)
+ss-settings-overlay (@if open)
+└── section.settings-overlay (fixed pane; z-index 500 per component SCSS)
+    └── div.settings-overlay__shell
+        ├── aside.settings-overlay__sections (rail)
+        │   ├── div.settings-overlay__sections-toolbar (in-flow close)
+        │   ├── header.settings-overlay__sections-header
+        │   └── div.settings-overlay__section-list → button.settings-overlay__section-item × N
+        └── div.settings-overlay__detail
+            └── @switch(selectedSectionId) bodies
+                ├── Inline: .settings-overlay__detail-section
+                │   ├── .settings-overlay__detail-lead
+                │   ├── .settings-overlay__detail-toc (optional)
+                │   └── .settings-overlay__detail-body → .settings-overlay__detail-group …
+                ├── app-account (embedded) — optional TOC above
+                └── ss-invite-management-section — optional TOC above
 ```
+
+**Dismiss:** backdrop / Escape handling is owned by the overlay + app shell wiring (not a CDK **`OverlayRef`** — the shipped template is an **`@if (open())`** block with fixed positioning; see `settings-overlay.component.ts` / `app.component.html`).
 
 ## Data
 
@@ -118,12 +123,7 @@ stateDiagram-v2
 
 | File                                                                                                | Purpose                                                           |
 | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`                          | Overlay shell with CDK overlay open/close and state orchestration |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`                        | Overlay template with section list and detail host                |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`                        | Overlay styling, dividers, and two-column layout                  |
-| `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`                           | Registry token and section registration contract                  |
-| `apps/web/src/app/features/settings-overlay/settings-section-outlet.component.ts`                   | Dynamic section host component                                    |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`                          | Overlay shell including account/session section logout flow       |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`                          | Overlay shell: **`open` input**, **`openChange`**, section selection, settings model, dismiss handling |
 | `apps/web/src/app/features/settings-overlay/sections/theme-settings-section.component.ts`           | Theme section implementation                                      |
 | `apps/web/src/app/features/settings-overlay/sections/language-locale-settings-section.component.ts` | Language/locale section implementation                            |
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.spec.ts`                     | Overlay behavior tests (open/load/error/retry/dismiss/reposition) |
@@ -134,18 +134,18 @@ stateDiagram-v2
 
 - `AuthService`: resolves authenticated user context for profile fetches.
 - `UserProfileService`: loads and persists profile and preference payloads.
-- `Overlay` / `OverlayPositionBuilder` (Angular CDK): creates connected overlay and recalculates position from sidenav host geometry.
-- None beyond `AuthService` and `UserProfileService` for feature-domain data services.
+- `SettingsPaneService`: global open/close signal shared with **`AppComponent`** and **`NavComponent`** (no CDK **`Overlay`** for this surface — positioning is fixed CSS in **`settings-overlay.component.scss`**).
+- None beyond the above for feature-domain data services unless a section registers its own.
 
 ### Inputs / Outputs
 
-- **Inputs**: None.
-- **Outputs**: None. Overlay lifecycle is controlled by local signals/actions in `NavComponent` + overlay shell.
+- **Inputs**: `open` (boolean; bound from **`AppComponent`** ← **`SettingsPaneService`**).
+- **Outputs**: `openChange` — closes or syncs dismiss with **`SettingsPaneService`**.
 
 ### Subscriptions
 
-- Subscribe to sidenav collapsed/expanded signal to call `overlayRef.updatePosition()` during width transition.
-- Subscribe to backdrop click and Escape key events to trigger immediate dismiss.
+- On width transitions that affect the fixed **`left`** offset, the shell should stay aligned with nav geometry (implementation uses layout tokens + **`transform`** on **`.settings-overlay`** — verify after nav changes).
+- Subscribe to backdrop click and Escape key events to trigger immediate dismiss (see component implementation).
 - Subscribe to profile load Observable per open cycle; canceled/disposed on dismiss.
 
 ### Supabase Calls
@@ -157,12 +157,14 @@ stateDiagram-v2
 sequenceDiagram
     actor U as User
     participant N as NavComponent
+    participant SP as SettingsPaneService
     participant O as SettingsOverlayComponent
     participant P as UserProfileService
     participant S as Supabase
 
     U->>N: Click avatar Settings row
-    N->>O: open(anchorEl)
+    N->>SP: toggle / set open true
+    SP-->>O: `[open]` becomes true (`AppComponent` binding)
     O-->>U: Render section list + current section immediately
     U->>O: Select data-backed section (e.g. Konto)
     O-->>U: Render local placeholders in section
@@ -185,12 +187,12 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] Overlay opens from the avatar Settings row without route navigation.
-- [ ] Overlay uses Angular CDK `FlexibleConnectedPositionStrategy` anchored to sidenav host right edge.
-- [ ] Overlay uses token spacing `md` between sidenav and panel (12px equivalent).
-- [ ] Overlay is vertically centered relative to sidenav host element, not viewport.
+- [ ] Overlay opens from the avatar Settings row without route navigation ( **`SettingsPaneService`** toggles **`[open]`** on **`ss-settings-overlay`** in **`app.component.html`** ).
+- [ ] Overlay uses **fixed** positioning and token-driven **`left` / `transform`** from **`settings-overlay.component.scss`** — **not** Angular CDK **`FlexibleConnectedPositionStrategy`** (historical spec text; do not reintroduce CDK positioning for this shell).
+- [ ] Overlay uses token spacing between sidenav rail and panel (see **`calc(var(--spacing-3) + …)`** in component SCSS).
+- [ ] Overlay is vertically centered (**`top: 50%`** + **`translateY(-50%)`**) relative to the viewport while **`left`** tracks nav width assumptions.
 - [ ] Overlay has no entrance animation and appears instantly.
-- [ ] Overlay repositions while sidenav transitions between collapsed and expanded width.
+- [ ] When sidenav width changes, the fixed **`left`** offset still reads correctly against nav geometry (spot-check collapsed vs expanded).
 - [ ] Overlay detail area renders immediately on open without global blocking loading screen.
 - [ ] Data-backed sections use section-local loading/error/retry UI (no full-overlay lock).
 - [ ] Click-outside/Escape dismiss closes immediately and discards unsaved changes.
@@ -198,7 +200,8 @@ sequenceDiagram
 - [ ] Language/Locale section integration is present and wired; detailed language behavior is defined in `language-locale-settings.md`.
 - [ ] Language switch button labels in Settings always remain native (`English`, `Deutsch`, `Italiano`) and do not change with active UI language.
 - [ ] `Konto` section exposes profile identity, email/password management, password recovery, 2FA management, and logout, and does not render a local `Close settings` action.
-- [ ] Profile/preference reads/writes are delegated through `UserProfileService` (Supabase-backed).
+- [ ] **Detail TOC** appears when **`SETTINGS_SECTION_ANCHORS`** lists anchors for the active section; buttons scroll + highlight without nesting interactive elements.
+- [ ] **Subsection slugs** in URLs match anchor `subsectionSlug` values in `SETTINGS_SECTION_ANCHORS` / stable DOM ids (`settings-{section}-{slug}`).
 
 ## Settings
 

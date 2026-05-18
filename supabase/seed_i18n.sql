@@ -22818,4 +22818,655 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.aria', 'On this page', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html attr:aria-label for detail TOC nav')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'On this page', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auf dieser Seite', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In questa pagina', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.general.language', 'Language', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for general/language anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Language', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.general.language'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Sprache', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.general.language'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Lingua', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.general.language'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.general.density', 'Density', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for general/density anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Density', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.general.density'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dichte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.general.density'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Densita', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.general.density'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.appearance.theme', 'Theme mode', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for appearance/theme anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Theme mode', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.appearance.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Designmodus', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.appearance.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modalita tema', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.appearance.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.notifications.inApp', 'In-app notifications', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for notifications/in-app anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'In-app notifications', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.notifications.inApp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'In-App-Benachrichtigungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.notifications.inApp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Notifiche in-app', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.notifications.inApp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.notifications.uploadFailures', 'Upload failure alerts', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for notifications/upload-failures anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload failure alerts', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.notifications.uploadFailures'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Warnungen bei Upload-Fehlern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.notifications.uploadFailures'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Avvisi su errori di caricamento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.notifications.uploadFailures'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.map.autoLocate', 'Auto-locate after login', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for map/auto-locate anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Auto-locate after login', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.autoLocate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Automatische Ortung nach Anmeldung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.autoLocate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione automatica dopo accesso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.autoLocate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.map.gridOverlay', 'Grid helper overlay', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for map/grid-overlay anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Grid helper overlay', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.gridOverlay'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Raster-Hilfslinien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.gridOverlay'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Griglia di riferimento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.gridOverlay'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.map.markerMotion', 'Marker motion', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for map/marker-motion anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Marker motion', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.markerMotion'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Marker-Bewegung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.markerMotion'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Movimento marker', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.map.markerMotion'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.search.bias', 'Search bias', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for search/bias anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search bias', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.search.bias'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Suchgewichtung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.search.bias'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Bias di ricerca', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.search.bias'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.search.radius', 'Default radius', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for search/radius anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Default radius', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.search.radius'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standardradius', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.search.radius'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Raggio predefinito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.search.radius'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.data.cache', 'Local cache retention', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for data/cache anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Local cache retention', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.data.cache'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Lokaler Cache', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.data.cache'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conservazione cache locale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.data.cache'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.data.telemetry', 'Diagnostics telemetry', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for data/telemetry anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Diagnostics telemetry', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.data.telemetry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Diagnose-Telemetrie', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.data.telemetry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Telemetria diagnostica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.data.telemetry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.account.profile', 'Profile', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for account/profile anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Profile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.profile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Profil', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.profile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Profilo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.profile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.account.password', 'Password', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for account/password anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.password'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.password'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.password'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.account.mfa', 'Two-factor authentication', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for account/mfa anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Two-factor authentication', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.mfa'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zwei-Faktor-Authentifizierung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.mfa'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Autenticazione a due fattori', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.mfa'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.account.session', 'Sessions', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for account/session anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sessions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.session'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Sitzungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.session'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Sessioni', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.session'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.account.delete', 'Delete account', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for account/delete anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete account', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Konto loeschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina account', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.account.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.invites.role', 'Target role', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for invite-management/role anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Target role', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.role'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zielrolle', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.role'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ruolo di destinazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.role'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.invites.qr', 'QR code and link', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for invite-management/qr anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'QR code and link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.qr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'QR-Code und Link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.qr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Codice QR e link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.qr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.overlay.toc.invites.share', 'Share actions', 'en', 'apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for invite-management/share anchor')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share actions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.share'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Teilen-Aktionen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.share'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Azioni di condivisione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.overlay.toc.invites.share'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

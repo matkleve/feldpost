@@ -43,7 +43,7 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 | **Phase 7 Batch 50:** bridge file emits **no** CSS — use tweakcn `styles.scss` + `_typography-baseline.scss` for primitives. |
 | **Phase 7 Batch 45:** no physical **`--shadow-*`** rows on the bridge — tweakcn **`styles.scss`** owns the ladder. |
 
-**Phase 7 Batch 43:** product **z-index** uses literals **`200` / `300` / `500`** (plus **`302`** / **`501`** where documented calcs apply) and Tailwind **`z-upload-btn`**, **`z-dropdown`**, **`z-modal`** — **not** **`--z-upload-button`**, **`--z-dropdown`**, or **`--z-modal`** rows on **`_legacy-design-tokens.scss`**.
+**Phase 7 Batch 43:** product **z-index** uses literals **`200` / `300` / `400` / `500`** (**`400`** = toast stack in **`toast-container.component.scss`**) plus **`302`** / **`501`** where documented calcs apply, and Tailwind **`z-upload-btn`**, **`z-dropdown`**, **`z-modal`** — **not** **`--z-upload-button`**, **`--z-dropdown`**, **`--z-modal`**, or removed **`--z-toast`** rows on the legacy bridge.
 
 **Layer B (bridge):** **none on the removed legacy bridge path** after **Batch 47** — **`--interactive-focus-ring`** lives on **`_typography-baseline.scss`** (see subsection above).
 
@@ -94,6 +94,7 @@ Role-level aliases consumed by reusable UI primitives and feature components. **
 
 4. Settings sections and cards
 
+- **`--overlay-rail-left-*`** — **removed Batch 34** — settings overlay rail width/ratio is **`:host`** custom properties on **`settings-overlay.component.scss`** (`--settings-overlay-left-ratio`, `--settings-overlay-left-width`, …) — see **`docs/migration/phase-7-token-migration.md`** §Batch 34 and [`settings-overlay.md`](../specs/ui/settings-overlay/settings-overlay.md).
 - **`--section-bg`** — **removed Batch 39** — use **`var(--card)`** (often inside **`color-mix`**) at callsites.
 - **`--section-text`** — **removed Batch 40** — use **`var(--muted-foreground)`** (or theme-specific literals where Sandstone required) at callsites.
 

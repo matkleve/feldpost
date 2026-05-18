@@ -174,7 +174,7 @@ npm run design-system:check
 
 ## Open (remaining weight)
 
-- **`styles`** initial-chunk monitoring (Path A trade-off) — §7 runbook + occasional **`ng build`** row scrape; dead-selector **`rg`** on **`map-shell*.scss`**.
+- **Wave P3 hygiene slice (2026-05-18, doc + `rg` proof):** **`::ng-deep`** in **`apps/web/src/app/**/*.scss`** — **`rg '::ng-deep' apps/web/src/app --glob '*.scss'`** → **4** matches in **3** files: **`features/upload/upload-panel-item.component.scss`** (1), **`shared/workspace-pane/selected-items/workspace-selected-items-grid.component.scss`** (1), **`shared/workspace-pane/media-detail/media-detail-media-viewer/media-detail-media-viewer.component.scss`** (2). No new pierces this slice (Phase 10 contract: **no new** **`::ng-deep`**). **`styles`** initial-chunk row (production **`ng build`**, same session): **`styles-U46CN7B5.css | styles | 81.44 kB | 11.83 kB`** (hash + sizes drift with content). **Dead selectors:** none removed this slice (needs template cross-ref per selector). **Ongoing:** §7 runbook + occasional row scrape; dead-selector **`rg`** on **`map-shell*.scss`** when touching map SCSS.
 - **Phase 7 legacy bridge file** — **`apps/web/src/styles/_legacy-design-tokens.scss`** **removed from tree**; inventory + proof live in **`docs/migration/phase-7-token-migration.md`**, **`tokens.md`**, **`token-layers.md`**. **`typography-baseline`** **`load-css`** ordering constraints unchanged (**`phase-7-token-migration.md`** § **Legacy bridge `meta.load-css` — historical constraints**; **`apps/web/src/styles.scss`** header).
 - **Phase 10** — unchecked DoD sign-off line above.
 

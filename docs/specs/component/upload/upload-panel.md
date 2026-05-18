@@ -76,33 +76,17 @@ The panel is a **fixed-width section shell** of **three stacked blocks** (intake
 
 ## Component Hierarchy
 
-**STRICT PRIMITIVE REQUIREMENT:** This component and all its children must explicitly use the standardized layout primitives from `src/styles/primitives/container.scss`. Do not introduce custom wrapper `div`s for basic flex or grid layouts. Use flatter DOM structures. The lane list items MUST use `.ui-item` without modifying its base geometry. The root `UploadPanel` section MUST remain unstyled and must not be rendered as a `.ui-container` surface.
+**Active DOM contract (shipped):** The panel uses feature-local **BEM** **`upload-panel__*`** classes on **`upload-panel.component.html`** and **`upload-panel__file-*`** on **`UploadPanelItem`** (`upload-panel-item.component.html`). Segmented lanes use **`hlmPillToggle`** + **`hlmToggleGroup`** / **`hlmToggleGroupItem`** (see [`registry.primitives-and-layout.supplement.md`](../registry.primitives-and-layout.supplement.md)). **Historical:** earlier drafts required **`src/styles/primitives/container.scss`** and **`.ui-item`** list geometry — that primitive path is **gone** from the tree; do **not** treat those names as the active build contract.
 
 ```text
-UploadPanel                                              ← compact fixed-width unstyled wrapper from button morph
-├── UploadArea                                            ← full width block
-│   ├── PanelHeader                                      ← title + subtitle
-│   └── DropZone                                         ← dashed drag target + file type chips
-├── FolderUploadButton                                    ← full width block under UploadArea
-├── SegmentedSwitchBlock                                  ← full width block under FolderUploadButton
-│   └── LaneSwitch                                       ← Uploading / Uploaded / Issues
-├── [scanning] ScanStatus                                ← "Scanning folder..." feedback row
-├── [queue or active exists] SegmentedSwitchBlock        ← lane switch under folder button
-├── [selected lane has items] FileItemStack              ← full width block under segmented switch
-│   ├── LaneOverflowWrapper                               ← fully transparent, no padding, overflow-only scroll helper
-│   │   └── LaneList
-│   │       └── UploadPanelItem × N                      ← full width items stacked with gap between items
-│       ├── [compact overlay only] No selection checkbox
-│       └── [embedded mode only] HoverSelectionCheckbox
-├── [embedded mode AND selection > 0] UploadSelectionFooter (`app-pane-footer`)
-│   ├── SelectedCount
-│   ├── RetrySelectionAction
-│   ├── DownloadSelectionAction
-│   ├── RemoveSelectionAction
-│   └── ClearSelectionAction
-├── [duplicate issue selected] DuplicateResolutionModal  ← standardized modal primitive
-│   └── ApplyToBatchCheckbox
-└── [selected lane empty] No list rows
+section.upload-panel
+├── div.upload-panel__area.upload-panel__area--intake (title, subtitle, dropzone, folder/capture, location mode pill group)
+├── [progress] div.upload-panel__area--switch (hlmPillToggle + lane BrnToggleGroup)
+├── [jobs] div.upload-panel__lane-overflow
+│   └── ul.upload-panel__file-list
+│       └── app-upload-panel-item × N  →  li.upload-panel__file-item …
+├── [embedded selection] app-pane-footer (bulk actions)
+└── modals (duplicate resolution, project picker, address search) per Wiring
 ```
 
 ## Data

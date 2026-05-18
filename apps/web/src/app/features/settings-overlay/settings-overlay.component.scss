@@ -221,8 +221,8 @@
     container-name: settings-detail;
   }
 
-  // Stacks section lead (title + intro) above the bordered detail card
-  // @see docs/specs/ui/settings-overlay
+  // Stacks section lead (title + intro), optional TOC, then flat detail body (unified surface)
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .settings-overlay__detail-section {
     display: flex;
     flex-direction: column;
@@ -230,12 +230,92 @@
     min-width: 0;
   }
 
-  // Title + intro block above the card chrome (not inside the bordered surface)
+  // Embedded bodies (account, invites): TOC precedes child root; keep rhythm with inline sections
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+  .settings-overlay__detail-section--embedded {
+    gap: var(--spacing-3);
+  }
+
+  // Title + intro block above the flat body (not inside bordered card chrome)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__detail-lead {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-1);
+  }
+
+  // Inline TOC: compact wrap row under the lead (detail column scroll owner handles overflow)
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .settings-overlay__detail-toc {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-2);
+    row-gap: var(--spacing-1);
+  }
+
+  // TOC chip-style control (type="button"; not nested interactive links)
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .settings-overlay__detail-toc-item {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding-block: var(--spacing-1);
+    padding-inline: var(--spacing-3);
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    border-radius: max(2px, calc(var(--radius-sm) - 4px));
+    background: color-mix(in srgb, var(--card) 70%, transparent);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--foreground);
+    cursor: pointer;
+    transition: var(--settings-interactive-transition);
+  }
+
+  // Hover affordance for TOC jumps
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .settings-overlay__detail-toc-item:hover {
+    background: var(--settings-hover-focus);
+  }
+
+  // Focus ring for keyboard users on TOC jumps
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .settings-overlay__detail-toc-item:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  // Flat settings body stack on the detail column surface (no inner card box)
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+  .settings-overlay__detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+  }
+
+  // Logical group inside the detail body; top rule separates groups (Notion-adjacent rhythm)
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+  .settings-overlay__detail-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    min-width: 0;
+    padding-block-start: var(--spacing-4);
+    border-block-start: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  }
+
+  // First group sits flush under lead/TOC without double rule
+  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+  .settings-overlay__detail-group:first-child {
+    padding-block-start: 0;
+    border-block-start: none;
+  }
+
+  // Scroll target for TOC / deep-link; keeps headings from sticking under overlay chrome
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .settings-overlay__anchor-target {
+    scroll-margin-block-start: var(--spacing-4);
   }
 
   // Section title color only (scale/weight from global h3 baseline)
@@ -255,19 +335,7 @@
     color: var(--muted-foreground);
   }
 
-  // Bordered settings body: comfortable inner padding (radius stays compact)
-  // @see docs/specs/ui/settings-overlay
-  .settings-overlay__detail-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-3);
-    padding: var(--spacing-4);
-    border-radius: max(2px, calc(var(--radius-sm) - 2px));
-    border: 1px solid var(--border);
-    background: var(--card);
-  }
-
-  // Two-column label + control row for settings fields (no ng-deep)
+  // (Removed per-column bordered `detail-card`; body uses `.settings-overlay__detail-group` rules.)
   // @see docs/MIGRATION_PLAN.md
   .settings-overlay__field-row {
     display: grid;

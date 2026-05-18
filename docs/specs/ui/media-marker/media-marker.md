@@ -207,8 +207,8 @@ Viewport lifecycle, clustering, upload-driven updates, and performance rules: **
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
 | `apps/web/src/app/core/map/marker-factory.ts`                      | Generates marker HTML and marker class variants for single and cluster markers |
 | `apps/web/src/app/features/map/map-shell/map-shell.component.ts`   | Applies marker state, click behavior, and Leaflet marker updates               |
-| `apps/web/src/app/features/map/map-shell/map-shell.component.scss` | Defines token-driven marker geometry and state styles                          |
-| `apps/web/src/styles.scss`                                         | Defines shared marker sizing variables derived from the UI media token system  |
+| `apps/web/src/styles/_map-shell-leaflet-global.scss`               | Pierced Leaflet marker / overlay CSS scoped under **`app-map-shell`** (`@use` from `styles.scss`; Phase 8 Path A — see [`phase-8-global-scss-elimination.md`](../../../migration/phase-8-global-scss-elimination.md) §7) |
+| `apps/web/src/styles.scss`                                         | **`@use`** chain includes **`map-shell-leaflet-global`**; marker geometry uses spacing/radius tokens (e.g. **`calc(var(--spacing-6) * 1.25)`** on `.map-photo-marker__body`), not a separate global “marker sizing” `:root` block |
 
 ## Wiring
 
@@ -241,7 +241,7 @@ sequenceDiagram
 ```
 
 - The Map Shell creates Leaflet markers and delegates DivIcon HTML generation to `marker-factory.ts`.
-- Marker sizing variables are declared in `styles.scss` so marker geometry derives from shared design tokens instead of hardcoded body sizes.
+- Marker geometry and pierced DivIcon chrome are authored in **`_map-shell-leaflet-global.scss`** under the **`app-map-shell { … }`** scope (emits after tweakcn / baseline globals via **`styles.scss`** `@use` — not legacy unstructured “dump everything in `styles.scss`” placement). Stacking QA: [`phase-10-visual-qa.md`](../../../migration/phase-10-visual-qa.md#stacking-sanity).
 - The Map Shell listens to `moveend`, debounces **350 ms**, then issues a viewport query. On response, it reconciles the marker set (add/remove/update) rather than rebuilding all markers.
 - Freshly uploaded markers (**`ImageUploadedEvent`** in code; payload describes **media**) are placed optimistically and reconciled on the next viewport query.
 - **Marker preview URLs** come from **`MediaDownloadService`**: `getSignedUrl(path, 'marker')`, `preload(url)`, and `invalidateStale(...)` for staleness — the shell does **not** call `supabase.client.storage...createSignedUrl` directly. Caching and tier policy are centralized in that service (see [media-download-service](../../service/media-download-service/media-download-service.md)).
@@ -265,7 +265,7 @@ sequenceDiagram
 - [x] Single markers show thumbnail — `marker-factory.ts` renders `<img>` for `count === 1` with thumbnail URL
 - [x] Cluster markers show count badge — white auto-width body, `0.875rem` bold black text; counts > 999 display as "999+"; text turns `--color-clay` (orange) when `--selected`
 - [x] Cluster markers reuse the same base geometry as single markers — both share `.map-photo-marker__body` sizing
-- [x] All markers have 2px white outline + drop shadow — `map-shell.component.scss` applies `border: 2px solid var(--color-bg-surface)` + `box-shadow`
+- [x] Marker chrome matches shipped pierced sheet — **`_map-shell-leaflet-global.scss`**: `.map-photo-marker__body` uses **`border: 2px solid var(--card)`**; marker root uses **`filter: drop-shadow(…)`** (no default Leaflet pin); selected / hover outlines per `.map-photo-marker--selected` and hover rules in the same file
 - [x] Marker body center is the GPS coordinate — no tail; `iconAnchor: [20, 20]` centers the `[40, 40]` hit zone on the location point; cluster markers are anchored at grid cell centroid
 - [x] Readable on both light and dark map tiles — semantic colors per [`docs/design/tokens.md`](../../../design/tokens.md)
 

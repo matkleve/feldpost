@@ -50,6 +50,7 @@
 
 - **File**: `apps/web/src/app/features/map/map-shell/map-shell.component.ts`
 - **Purpose**: Root orchestrator for the map view; manages Leaflet map, markers, workspace pane, upload panel, and all map-layer interactions.
+- **Map pierced CSS (Leaflet DivIcon / overlays):** `apps/web/src/styles/_map-shell-leaflet-global.scss` — selectors scoped under **`app-map-shell`**; **`@use`** from `apps/web/src/styles.scss` (Phase 8 Path A). See [`phase-8-global-scss-elimination.md`](../../migration/phase-8-global-scss-elimination.md) §7 and [`phase-10-visual-qa.md`](../../migration/phase-10-visual-qa.md#stacking-sanity).
 - **Spec**: @no-spec (UI system spec: `docs/specs/ui/`)
 - **Variant axes**: none
 - **Composed of**: `ss-search-bar`, `ss-gps-button`, `app-workspace-pane-shell`, `app-upload-panel`, `app-workspace-toolbar`

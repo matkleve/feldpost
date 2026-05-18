@@ -60,6 +60,7 @@ Section bodies (account, appearance, etc.) are specified under [settings-overlay
 ## Wiring
 
 - `SettingsPaneService.openFromRoute(section, subsection)` centralizes open + selection.
+- **Subsection slugs** must match `SETTINGS_SECTION_ANCHORS` in `apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts` (examples: `/settings/general/language`, `/settings/map/marker-motion`, `/settings/invite-management/qr`). Legacy **Account** blocks also accept `data-settings-subsection` values (`profile`, `password`, …) aligned with the same slugs.
 - Invalid section slug: `normalizeSettingsSection` returns `null`; service still receives normalized input from `openFromRoute` implementation (see code).
 
 ## Acceptance Criteria

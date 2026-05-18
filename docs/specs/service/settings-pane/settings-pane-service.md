@@ -39,7 +39,7 @@ None (UI routing state only).
 | --- | --- | --- |
 | open | `ReadonlySignal<boolean>` | Overlay visibility |
 | selectedSectionId | `ReadonlySignal<SectionId \| null>` | Active tab |
-| subsectionRequest | signal | `{ id, requestToken }` |
+| subsectionRequest | signal | `{ id, requestToken }` — **`id`** is the URL subsection slug (lowercase) or `null`; must match **`SETTINGS_SECTION_ANCHORS`** / DOM ids `settings-{section}-{slug}` consumed by `SettingsOverlayComponent` for scroll + highlight |
 | inviteSectionRequest | signal | Invite flow context |
 
 ## File Map

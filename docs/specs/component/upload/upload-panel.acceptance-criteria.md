@@ -139,5 +139,5 @@ sequenceDiagram
 - [ ] Document uploads without preview show deterministic type fallback badge (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`)
 - [x] Upload Zone instructional text remains visible and stable across drag states, lane switches, and queue updates while panel is open
 - [x] Panel root section is layout-only (no padding, border, background, or shadow); inner blocks carry container styling.
-- [ ] Panel rigidly adheres to `.ui-item` class primitives for list rendering geometry.
+- [ ] Panel list rows use shipped **`upload-panel__file-item`** geometry and states (see **`upload-panel-item`** templates + SCSS) — **not** legacy **`.ui-item`** primitives (removed from tree).
 - [ ] Visual state changes (hover, active, selected) do NOT impact layout geometry or spacing.

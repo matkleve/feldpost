@@ -116,9 +116,12 @@ box-shadow:    var(--shadow-lg)
 
 Composable class table, hover token, and item geometry: **[dropdown-system.class-library.supplement.md](./dropdown-system.class-library.supplement.md)**.
 
+**Map / Leaflet pierced DOM:** CSS for Leaflet-injected marker and overlay nodes is **not** part of the **`dd-*`** class library in `styles.scss`. It ships from **`apps/web/src/styles/_map-shell-leaflet-global.scss`** under **`app-map-shell { … }`** (`@use` from `styles.scss`, Phase 8 Path A). See [`phase-10-visual-qa.md`](../../../migration/phase-10-visual-qa.md#stacking-sanity) and [`media-marker.md`](../../ui/media-marker/media-marker.md) file map.
+
 ## Where It Lives
 
 - **Global classes**: `apps/web/src/styles.scss` — the `dd-*` block after `.ui-spacer`
+- **Map / Leaflet pierced marker + overlay CSS:** `apps/web/src/styles/_map-shell-leaflet-global.scss` — **`app-map-shell`** scope (same `styles.scss` `@use` chain; not the `dd-*` block)
 - **Anchored shell + shared menu body (toolbar and other callers)**: `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts` + `.scss`, `standard-dropdown.component.ts` + `.html` + `.scss`
 - **Sort / grouping / filter (feature panels)**: `apps/web/src/app/shared/dropdown-trigger/` — `sort-dropdown`, `grouping-dropdown`, `filter-dropdown` (`.ts` + `.html` + `.scss` as applicable)
 - **Projects (workspace toolbar only)**: `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts` + `.scss` (inline template)
