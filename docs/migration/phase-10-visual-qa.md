@@ -21,7 +21,7 @@
 
 **Automated smoke log (same wave):** [`reports/phase-10-migration-smoke-gates-2026-05-18.md`](./reports/phase-10-migration-smoke-gates-2026-05-18.md).
 
-**Manual screen matrix / tight smoke (agent gap log, 2026-05-18):** no interactive browser pass in this slice — documented honestly in [`reports/phase-10-manual-visual-matrix-gap-2026-05-18.md`](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md) (checkboxes below unchanged until a human run).
+**Manual screen matrix / tight smoke (agent gap log, 2026-05-18):** no interactive browser pass in this slice — documented honestly in [`reports/phase-10-manual-visual-matrix-gap-2026-05-18.md`](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md) (checkboxes below unchanged until a human run). **Related doc-only audits:** settings overlay [sections/layout](./reports/settings-overlay-sections-layout-audit-2026-05-17.md), [Notion-adjacent UX](./reports/settings-overlay-notion-adjacent-ux-2026-05-18.md) — indexed from [migration README](./README.md#where-detail-lives).
 
 **Tight smoke (add to Phase 7–8 merges / pre-release if not already exercised above):**
 

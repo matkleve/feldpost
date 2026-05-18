@@ -1,11 +1,11 @@
 # Phase 11 — Specification sync (post-migration drift)
 
-**Status:** **Wave P1 — highest** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — **P1 drift checklist closed (2026-05-18)** — see **Recent shipped / doc drift** below  
+**Status:** **Wave P1 — closed (2026-05-18)** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — drift checklist satisfied; see **Recent shipped / doc drift** below; ongoing normative spec edits still run **`node scripts/lint-specs.mjs`** per **Acceptance**.  
 **Depends on:** Phases 6–7 materially complete (templates + tokens). Phase 10 visual QA is optional but recommended as ground truth before large batch spec edits.
 
 ## Priority stack (post-recovery — 2026-05-18)
 
-**P1 (this wave, highest):** Close every **`[ ]`** row below in **Recent shipped / doc drift** in top-to-bottom order unless a PR only touches a subtree — then complete adjacent bullets in the same PR. **Merge gate:** `node scripts/lint-specs.mjs` → **0**. **Index:** [migration README — Next wave](./README.md#next-wave-post-recovery-queue--2026-05-18).
+**P1 (closed 2026-05-18):** Every **`[x]`** row in **Recent shipped / doc drift** below was satisfied in wave order unless a PR only touched a subtree. **Merge gate** on future spec drift: `node scripts/lint-specs.mjs` → **0**. **Index:** [migration README — Next wave](./README.md#next-wave-post-recovery-queue--2026-05-18) (**P2–P5** open tail).
 
 ## Recent shipped / doc drift (specs must reflect)
 
