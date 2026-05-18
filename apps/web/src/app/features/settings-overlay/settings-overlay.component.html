@@ -723,7 +723,7 @@
           @case ('invite-management') {
             @let tocAnchors = anchorsForSection('invite-management');
             <div class="settings-overlay__detail-section settings-overlay__detail-section--embedded">
-              @if (tocAnchors.length > 0) {
+              @if (tocAnchors.length > 0 && inviteManagementTocVisible()) {
                 <nav
                   class="settings-overlay__detail-toc"
                   [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"

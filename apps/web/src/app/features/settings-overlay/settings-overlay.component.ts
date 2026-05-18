@@ -2,12 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  afterNextRender,
   computed,
   effect,
   inject,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -101,8 +103,14 @@ export class SettingsOverlayComponent {
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
+  private readonly runAfterNextRender = inject(afterNextRender);
   private highlightedSubsectionToken = 0;
   private tocHighlightToken = 0;
+  /** Service-driven subsection scroll: only set after `findSubsectionElement` succeeds for this token. */
+  private lastSuccessfulSubsectionRequestToken: number | null = null;
+
+  readonly accountSection = viewChild(AccountComponent);
+  readonly inviteSection = viewChild(InviteManagementSectionComponent);
 
   readonly open = input(false);
   readonly openChange = output<boolean>();
@@ -116,6 +124,15 @@ export class SettingsOverlayComponent {
   anchorsForSection(sectionId: string): readonly SettingsSectionAnchorDef[] {
     return SETTINGS_SECTION_ANCHORS[sectionId] ?? [];
   }
+
+  /** Invite TOC: hide while child is missing or in error panel (anchors not in DOM). */
+  readonly inviteManagementTocVisible = computed(() => {
+    const invite = this.inviteSection();
+    if (!invite) {
+      return false;
+    }
+    return invite.panelMode() !== 'error';
+  });
 
   readonly languageOptions: ReadonlyArray<ToggleGroupOption> = buildLanguageOptions();
 
@@ -168,16 +185,48 @@ export class SettingsOverlayComponent {
       const selectedSectionId = this.selectedSectionId();
       const open = this.open();
       const subsectionId = subsectionRequest.id;
+      const requestToken = subsectionRequest.requestToken;
+
+      const accountRef = this.accountSection();
+      const inviteRef = this.inviteSection();
+      const accountLoading = accountRef?.loading() ?? false;
+      const invitePanelMode = inviteRef?.panelMode();
+      void accountLoading;
+      void invitePanelMode;
 
       if (!open || !subsectionId) {
+        this.lastSuccessfulSubsectionRequestToken = null;
         return;
       }
 
-      queueMicrotask(() => {
-        this.scrollToSubsection(
+      if (this.lastSuccessfulSubsectionRequestToken === requestToken) {
+        return;
+      }
+
+      if (selectedSectionId === 'account') {
+        if (!accountRef || accountLoading) {
+          return;
+        }
+      }
+
+      if (selectedSectionId === 'invite-management') {
+        if (!inviteRef || inviteRef.panelMode() === 'error') {
+          return;
+        }
+      }
+
+      const enableRafRetry =
+        selectedSectionId === 'account' || selectedSectionId === 'invite-management';
+
+      this.runAfterNextRender(() => {
+        this.tryScrollSubsectionWithOptionalRafRetry(
           selectedSectionId,
           subsectionId,
-          subsectionRequest.requestToken,
+          requestToken,
+          enableRafRetry,
+          () => {
+            this.lastSuccessfulSubsectionRequestToken = requestToken;
+          },
         );
       });
     });
@@ -186,8 +235,19 @@ export class SettingsOverlayComponent {
   /** Scroll + highlight from TOC buttons (same visual treatment as URL-driven subsection). */
   scrollToDetailAnchor(sectionId: string, subsectionSlug: string): void {
     const token = ++this.tocHighlightToken;
-    queueMicrotask(() => {
-      this.scrollToSubsection(sectionId, subsectionSlug, token);
+    const invite = this.inviteSection();
+    void invite?.panelMode();
+
+    if (sectionId === 'invite-management') {
+      if (!invite || invite.panelMode() === 'error') {
+        return;
+      }
+    }
+
+    const enableRafRetry = sectionId === 'account' || sectionId === 'invite-management';
+
+    this.runAfterNextRender(() => {
+      this.tryScrollSubsectionWithOptionalRafRetry(sectionId, subsectionSlug, token, enableRafRetry);
     });
   }
 
@@ -356,18 +416,43 @@ export class SettingsOverlayComponent {
     root.setAttribute('data-theme', themeMode);
   }
 
-  private scrollToSubsection(
+  /**
+   * Scroll + highlight; optional rAF chain for first-paint races (not a substitute for signal deps).
+   * Invokes `onScrollSuccess` whenever a target is found and scrolled (sync or inside rAF).
+   */
+  private tryScrollSubsectionWithOptionalRafRetry(
     sectionId: string,
     subsectionSlug: string,
-    requestToken: number,
+    highlightToken: number,
+    enableRafRetry: boolean,
+    onScrollSuccess?: () => void,
   ): void {
-    const target = this.findSubsectionElement(sectionId, subsectionSlug);
-    if (!target) {
+    const run = (): boolean => {
+      const target = this.findSubsectionElement(sectionId, subsectionSlug);
+      if (!target) {
+        return false;
+      }
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.highlightSubsection(target, highlightToken);
+      onScrollSuccess?.();
+      return true;
+    };
+
+    if (run()) {
+      return;
+    }
+    if (!enableRafRetry || typeof requestAnimationFrame === 'undefined') {
       return;
     }
 
-    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    this.highlightSubsection(target, requestToken);
+    requestAnimationFrame(() => {
+      if (run()) {
+        return;
+      }
+      requestAnimationFrame(() => {
+        run();
+      });
+    });
   }
 
   private findSubsectionElement(sectionId: string, subsectionSlug: string): HTMLElement | null {
