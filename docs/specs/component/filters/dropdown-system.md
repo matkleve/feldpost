@@ -9,7 +9,7 @@ Shared project-selector and upload-row menus MUST reuse this primitive system in
 
 ## Global CSS / token emission
 
-Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:root` / theme blocks and app extensions). **`apps/web/src/styles/_legacy-design-tokens.scss`** is a **comment-only stub** with **no runtime emit** and is **not** included from `styles.scss` (no `meta.load-css` / `@use` for that path). **`meta.load-css('styles/typography-baseline')`** remains the only late-loaded global partial, after Tailwind/Preflight, per the header comment in `styles.scss`. Token bucket ownership: [`docs/design/token-layers.md`](../../design/token-layers.md). Naming checklist: [`docs/design/tokens.md`](../../design/tokens.md).
+Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:root` / theme blocks and app extensions). The legacy bridge path **`apps/web/src/styles/_legacy-design-tokens.scss`** is **not on disk** (Phase 7 Batch 50; verify **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**). **`meta.load-css('styles/typography-baseline')`** remains the only late-loaded global partial, after Tailwind/Preflight, per the header comment in `styles.scss`. Token bucket ownership: [`docs/design/token-layers.md`](../../design/token-layers.md). Naming checklist: [`docs/design/tokens.md`](../../design/tokens.md). Bridge history: [`docs/migration/phase-7-token-migration.md`](../../../migration/phase-7-token-migration.md).
 
 ## Toolbar menu panels (anchored UI)
 

@@ -18,7 +18,7 @@ See `architecture.md` for technical constraints that affect layout decisions.
 - `docs/design/constitution.md` — non-negotiable design rules; always load for visual and product implementation tasks.
 - `docs/design/state-visuals.md` — canonical shared visuals for **disabled**, focus reminders, and future cross-cutting states.
 - `docs/design/tokens.md` — load for styling, sizing, colors, typography, radius, shadows, and iconography.
-- `docs/design/tokens.md § Figma Bridge` — naming convention (CSS→Figma Variable path), pipeline direction (code→Figma, not reverse), and human import step. Run `npm run sync-tokens` to regenerate `docs/design/figma-tokens.json`.
+- `docs/design/tokens.md § Figma Bridge` — naming convention (CSS→Figma Variable path), pipeline direction (code→Figma, not reverse), and human import step. **`npm run sync-tokens`** is **blocked** until `scripts/sync-tokens.mjs` is rewired (legacy bridge SCSS removed — Phase 7 Batch 50); maintain `docs/design/figma-tokens.json` manually or extend the script to read **`apps/web/src/styles.scss`** / **`_typography-baseline.scss`**.
 - `docs/design/token-layers.md` — canonical token layer architecture (Layer A/B/C), alias ownership, and override rules.
 - `docs/specs/component/filters/dropdown-system.md` — implementation contract for filter/toolbar/menu dropdown wiring (pairs with `docs/design/design-system/dropdown-shell-contract.md`).
 - `docs/design/map-system.md` � load for map hierarchy, marker prominence, clustering, and proximity behavior.

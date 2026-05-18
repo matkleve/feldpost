@@ -647,10 +647,12 @@ All interactive icons must have a visible label or a `title` / `aria-label` attr
 **Code is the source of truth. The direction is one-way:**
 
 ```
-apps/web/src/styles/tokens.scss  →  docs/design/figma-tokens.json  →  Figma Variables
+apps/web/src/styles.scss (+ _typography-baseline.scss)  →  docs/design/figma-tokens.json  →  Figma Variables
 ```
 
-Figma represents code values; it does not define them. Token changes always flow through a code PR first, then a re-export. Figma changes do not flow back to code without a PR that updates `tokens.scss`.
+Figma represents code values; it does not define them. Token changes always flow through a code PR first, then a re-export. Figma changes do not flow back to code without a PR that updates `apps/web/src/styles.scss` (and related partials).
+
+**Legacy note:** `scripts/sync-tokens.mjs` previously parsed **`apps/web/src/styles/_legacy-design-tokens.scss`** (removed Phase 7 Batch 50). **`npm run sync-tokens`** now **exits with an error** until the script is rewired to a supported source file — use manual JSON maintenance or a new exporter keyed off tweakcn **`styles.scss`** / **`_typography-baseline.scss`**.
 
 ### Generating the export
 
@@ -658,9 +660,9 @@ Figma represents code values; it does not define them. Token changes always flow
 npm run sync-tokens
 ```
 
-This runs `scripts/sync-tokens.mjs`, which parses `tokens.scss` and overwrites `docs/design/figma-tokens.json` with a W3C Design Token Community Group (DTCG) format file containing `light` and `dark` token sets.
+When rewired, this script should parse the chosen canonical SCSS and overwrite `docs/design/figma-tokens.json` with a W3C Design Token Community Group (DTCG) format file containing `light` and `dark` token sets. **Today:** the command prints a remediation message and exits **non-zero** if the legacy bridge path is missing.
 
-Re-run whenever `tokens.scss` changes. Commit `figma-tokens.json` together with the SCSS change.
+Re-run whenever the canonical token SCSS changes. Commit `figma-tokens.json` together with the SCSS change.
 
 ### Human import step (the agent stops here)
 
@@ -701,4 +703,4 @@ CSS kebab-case → Figma Variable path: each hyphen-separated segment is capital
 | `color-mix` — computed at render time | Former menu mixes (**`--menu-surface-border`**, **`--menu-item-bg-hover`** — **removed Batch 48**; live as **`color-mix`** on component **`:host`**, not on **`_legacy-design-tokens.scss`**) | Approximate with a manual opacity or solid value; dropdown/menu wiring: [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md) |
 | `complex` — multi-value shorthand | **`--shadow-sm`…`--shadow-2xl`** on tweakcn **`styles.scss` `:root`** / dark palette (**Batch 45** — not bridge rows) | Set manually; shadows are not natively representable as a single Figma Variable |
 
-Run `npm run sync-tokens` to see the full skip list with reasons printed to stdout.
+Run `npm run sync-tokens` after rewiring `scripts/sync-tokens.mjs` to see the full skip list with reasons printed to stdout. Until then, the command fails fast when the legacy bridge file is absent.

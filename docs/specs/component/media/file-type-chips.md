@@ -81,7 +81,7 @@ No direct Supabase calls are required for this feature; chips are derived from i
 
 ## Color Token Contract
 
-**Runtime source of truth:** Dedicated **`--filetype-*`** custom properties are defined once in **`apps/web/src/styles.scss`** on the tweakcn **`:root` / `html[data-theme]`** semantic blocks — not in feature SCSS. **`apps/web/src/styles/_legacy-design-tokens.scss`** is a **comment-only stub** (zero emitted CSS; **not** loaded from `styles.scss`). Layering: [`docs/design/token-layers.md`](../../../design/token-layers.md); naming: [`docs/design/tokens.md`](../../../design/tokens.md). **Verify** live values in `styles.scss` when authoring; the excerpt below matches the light-mode block as of the Phase 7 consolidation.
+**Runtime source of truth:** Dedicated **`--filetype-*`** custom properties are defined once in **`apps/web/src/styles.scss`** on the tweakcn **`:root` / `html[data-theme]`** semantic blocks — not in feature SCSS. The legacy bridge file **`apps/web/src/styles/_legacy-design-tokens.scss`** is **absent** from **`apps/web`** (Phase 7 Batch 50). Layering: [`docs/design/token-layers.md`](../../../design/token-layers.md); naming: [`docs/design/tokens.md`](../../../design/tokens.md). **Verify** live values in `styles.scss` when authoring; the excerpt below matches the light-mode block as of the Phase 7 consolidation.
 
 Keep status colors (`--color-success`, `--color-warning`, `--color-danger`) exclusively for real status feedback.
 

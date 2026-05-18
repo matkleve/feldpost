@@ -2,9 +2,11 @@
 /**
  * sync-tokens.mjs
  *
- * Parses apps/web/src/styles/_legacy-design-tokens.scss and exports literal CSS custom
- * properties to docs/design/figma-tokens.json in W3C Design Token Community
- * Group (DTCG) format, with `light` and `dark` as separate token sets.
+ * Historically parsed apps/web/src/styles/_legacy-design-tokens.scss (removed Phase 7 Batch 50).
+ * When that file is missing, exits with an error — rewire to styles.scss / _typography-baseline.scss
+ * or maintain docs/design/figma-tokens.json manually. Otherwise exports literal CSS custom properties
+ * to docs/design/figma-tokens.json in W3C Design Token Community Group (DTCG) format, with `light`
+ * and `dark` as separate token sets.
  *
  * Run:  node scripts/sync-tokens.mjs
  *       npm run sync-tokens
@@ -20,7 +22,7 @@
  * @see docs/design/tokens.md § Figma Bridge
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +31,20 @@ const repoRoot = resolve(__dirname, '..');
 
 const SCSS_PATH = resolve(repoRoot, 'apps/web/src/styles/_legacy-design-tokens.scss');
 const OUTPUT_PATH = resolve(repoRoot, 'docs/design/figma-tokens.json');
+
+if (!existsSync(SCSS_PATH)) {
+  const rel = relative(repoRoot, SCSS_PATH);
+  console.error(
+    [
+      'sync-tokens: LEGACY INPUT REMOVED (Phase 7 Batch 50).',
+      `Missing file: ${rel}`,
+      'The legacy bridge SCSS is no longer in apps/web. Rewire this script to apps/web/src/styles.scss',
+      'and/or apps/web/src/styles/_typography-baseline.scss, or maintain docs/design/figma-tokens.json manually.',
+      '@see docs/design/tokens.md § Figma Bridge — docs/migration/phase-7-token-migration.md § Batch 50',
+    ].join('\n'),
+  );
+  process.exit(1);
+}
 
 // ── Type inference ────────────────────────────────────────────────────────────
 

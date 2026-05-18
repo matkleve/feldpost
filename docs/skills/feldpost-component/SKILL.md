@@ -8,7 +8,7 @@ description: Read this skill before creating, refactoring, or styling any Angula
 This skill is the implementation reference for Angular components in Feldpost.
 Read it before writing HTML, TypeScript, or SCSS for a stateful component.
 
-**Global styles note (2026-05-18):** `apps/web/src/styles/_legacy-design-tokens.scss` is kept as a **comment-only / zero-emission** legacy-bridge stub; `apps/web/src/styles.scss` does **not** `meta.load-css` that partial (only `styles/typography-baseline` is loaded that way at the end of `styles.scss`). Prefer tweakcn variables and component-local tokens per design docs—do not grow the stub file for new product CSS.
+**Global styles note (2026-05-18):** `apps/web/src/styles/_legacy-design-tokens.scss` is **removed from the tree** (Phase 7 Batch 50). `apps/web/src/styles.scss` loads **`meta.load-css('styles/typography-baseline')`** only for late global typography — not a legacy bridge path. Prefer tweakcn variables and component-local tokens per `docs/design/tokens.md` / `token-layers.md`; bridge history lives in `docs/migration/phase-7-token-migration.md`.
 
 ---
 
@@ -321,7 +321,7 @@ Use token variables only:
 
 ### Menu and action surfaces (tweakcn first)
 
-- **Do not** add **`var(--menu-*)`** — **Phase 7 Batch 48** removed **`--menu-*`** from **`apps/web/src/styles/_legacy-design-tokens.scss`**. Menu surfaces use tweakcn primitives (**`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`**, **`var(--popover)`**, **`var(--card)`**, etc.) and documented **`color-mix(in srgb, …)`** on the owning **`:host`** when a component needs a local alias. Authoritative layering: **`docs/design/tokens.md`**, **`docs/design/token-layers.md`**, and the element spec for the surface (for anchored toolbar menus, **`docs/specs/component/filters/dropdown-system.md`**).
+- **Do not** add **`var(--menu-*)`** — **Phase 7 Batch 48** removed **`--menu-*`** from the legacy bridge (that SCSS file is **no longer in `apps/web`**). Menu surfaces use tweakcn primitives (**`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`**, **`var(--popover)`**, **`var(--card)`**, etc.) and documented **`color-mix(in srgb, …)`** on the owning **`:host`** when a component needs a local alias. Authoritative layering: **`docs/design/tokens.md`**, **`docs/design/token-layers.md`**, and the element spec for the surface (for anchored toolbar menus, **`docs/specs/component/filters/dropdown-system.md`**).
 - **Do not** bind **removed** **`--action-*`** bridge names (several batches retired individual **`--action-*`** rows — see **`docs/migration/phase-7-token-migration.md`** batch sections). Prefer tweakcn semantics and explicit mixes at the geometry/visual owner. If a spec or **`docs/design/token-layers.md`** Layer **C** table still lists a **retained** **`--action-*`** name for a narrow callsite, that single exception is allowed only when the inventory explicitly documents it; otherwise assume **legacy bridge shrink is ongoing**. **Batch 49** (further **`--action-*`** / adjacent bridge work) is **pending** until migration docs confirm landing — verify **`token-layers.md`** before introducing new **`var(--action-*)`** consumers.
 
 ### Choreography Table (Required Before CSS)

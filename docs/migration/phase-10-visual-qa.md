@@ -1,6 +1,6 @@
 # Phase 10 — Visual QA & Polish
 
-**Status:** Planned (**after** Phase 8 global SCSS elimination; run **during / after** Phase 9 if helm swap lands in the same release train)
+**Status:** **Wave P4** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — **In progress (doc smoke, 2026-05-18)** — automated gates + global **`styles`** row baseline: [`reports/phase-10-migration-smoke-gates-2026-05-18.md`](./reports/phase-10-migration-smoke-gates-2026-05-18.md). Manual tight smoke + screen matrix remain **open** (run **during / after** Phase **11**/**7** spec-token touches and **Phase 9** if helm swap lands in the same release train).
 
 **Goal:** Every primary **screen** and **overlay** looks correct on **all three themes** (`default` / light, `[data-theme="dark"]`, `[data-theme="sandstone"]`). **No new** `::ng-deep` escapes. **No** visual regressions against spec intent (field-first, map-primary, calm confidence).
 
@@ -17,7 +17,9 @@
 
 ## 2026-05-18 post-wave: Batch 49 and docs
 
-**Context:** Phase **7 Batch 49** removed **`--action-*`** names from the legacy bridge (no longer emitted from **`_legacy-design-tokens.scss`**); **parallel** **`docs/specs/**`** and **`docs/design/**`** sweeps landed the same window—treat visuals as **token-first** at callsites, not bridge reintroductions.
+**Context:** Phase **7 Batch 49** removed **`--action-*`** names from the legacy bridge file **before** Batch **50** retired it; **`apps/web/src/styles/_legacy-design-tokens.scss`** is **absent** from the tree after Batch **50** (verify with **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**). **Parallel** **`docs/specs/**`** and **`docs/design/**`** sweeps landed the same window — treat visuals as **token-first** at callsites, not bridge reintroductions.
+
+**Automated smoke log (same wave):** [`reports/phase-10-migration-smoke-gates-2026-05-18.md`](./reports/phase-10-migration-smoke-gates-2026-05-18.md).
 
 **Tight smoke (add to Phase 7–8 merges / pre-release if not already exercised above):**
 
@@ -106,6 +108,9 @@ Mark each row **Pass / Fail** with ticket link on fail.
 | Media — list layout | [ ] | [ ] | [ ] |
 | Media — grid layout | [ ] | [ ] | [ ] |
 | Media — toolbar (sort/filter/group/view toggles) | [ ] | [ ] | [ ] |
+| Anchored toolbar menus — Filter / Sort / Grouping (375px + desktop) | [ ] | [ ] | [ ] |
+| Toast / inline error surfaces (stacking + themes) | [ ] | [ ] | [ ] |
+| Map shell — clustering, markers, style switch | [ ] | [ ] | [ ] |
 | Settings overlay — General | [ ] | [ ] | [ ] |
 | Settings overlay — Appearance | [ ] | [ ] | [ ] |
 | Settings overlay — Notifications | [ ] | [ ] | [ ] |

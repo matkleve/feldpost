@@ -140,7 +140,7 @@ Deliverables:
 2. Treat `docs/design/tokens.md` as the only raw token value source.
 3. Treat `docs/design/token-layers.md` as the only layer/alias/theming architecture source.
 4. Treat `docs/design/components/action-interaction-kernel.md` as the only interaction-policy source.
-5. Keep `apps/web/src/styles.scss` as the runtime home for Tailwind `@theme inline` and remaining shared patterns; `_legacy-design-tokens.scss` (legacy bridge) does **not** ship global menu/action Layer C rows — use **`docs/design/token-layers.md`** with **`docs/design/tokens.md`** for binding rules.
+5. Keep `apps/web/src/styles.scss` as the runtime home for Tailwind `@theme inline` and remaining shared patterns; **no** legacy bridge partial under `apps/web/src/styles/` (Phase 7 Batch 50 — see `docs/migration/phase-7-token-migration.md`). Layer C menu/action names are **not** emitted from a global bridge file — use **`docs/design/token-layers.md`** with **`docs/design/tokens.md`** for binding rules.
 
 Exit criteria:
 
@@ -374,7 +374,7 @@ Canonical source: `docs/design/token-layers.md`.
 
 Catalog-level enforcement summary:
 
-1. New or refactored primitives bind **`docs/design/tokens.md`** semantics first, then **`docs/design/token-layers.md`** for what still emits from **`_legacy-design-tokens.scss`** vs per-component **`:host`** custom properties (global menu/action bridge rows on the legacy file are removed).
+1. New or refactored primitives bind **`docs/design/tokens.md`** semantics first, then **`docs/design/token-layers.md`** for tweakcn **`styles.scss`** vs per-component **`:host`** custom properties (the removed legacy bridge file does **not** emit Layer C — global menu/action bridge rows are gone).
 2. Runtime theme and shared Tailwind keys stay centralized in `apps/web/src/styles.scss`; do not assume a global bridge alias exists when **`token-layers.md`** lists the name as removed.
 3. Theme packs override semantic tokens first; reserve raw Layer A tweaks for global rebranding only.
 
