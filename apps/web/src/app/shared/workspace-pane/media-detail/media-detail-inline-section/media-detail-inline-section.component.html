@@ -13,13 +13,48 @@
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
+  @if (isImageLike()) {
+    <div class="detail-row detail-row--readonly">
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">photo_camera</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.exifCoordinates', 'EXIF coordinates')
+        }}</span>
+        @if (hasExifCoordinates()) {
+          <span class="detail-row__value detail-row__value--static detail-row__value--mono">
+            {{ formatCoord(image().exif_latitude) }}°, {{ formatCoord(image().exif_longitude) }}°
+          </span>
+        } @else {
+          <span class="detail-row__value detail-row__value--static">{{
+            t('workspace.imageDetail.value.empty', '—')
+          }}</span>
+        }
+      </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    </div>
+  }
+
   <div
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'captured_at'"
     [attr.data-detail-active-editor]="editingField() === 'captured_at' ? 'captured_at' : null"
   >
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--l1"
+      type="button"
+      [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
+      [attr.title]="t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')"
+      (click)="capturedAtEditRequested.emit()"
+    >
+      <span class="material-icons" aria-hidden="true">edit</span>
+    </button>
     <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
       <span class="detail-row__label">{{
@@ -38,18 +73,7 @@
         </button>
       }
     </div>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--r1"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
-      [attr.title]="t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')"
-      (click)="capturedAtEditRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">edit</span>
-    </button>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
@@ -59,7 +83,22 @@
     [attr.data-detail-active-editor]="editingField() === 'project_ids' ? 'project_ids' : null"
   >
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    @if (editingField() !== 'project_ids') {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--l1"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.projects.edit.aria', 'Edit projects')"
+        [attr.title]="t('workspace.imageDetail.projects.edit.title', 'Edit projects')"
+        (click)="fieldEditRequested.emit('project_ids')"
+      >
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+    } @else {
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    }
     <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
       <span class="detail-row__label">{{
@@ -185,22 +224,7 @@
         </button>
       }
     </div>
-    @if (editingField() !== 'project_ids') {
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--r1"
-        type="button"
-        [attr.aria-label]="t('workspace.imageDetail.projects.edit.aria', 'Edit projects')"
-        [attr.title]="t('workspace.imageDetail.projects.edit.title', 'Edit projects')"
-        (click)="fieldEditRequested.emit('project_ids')"
-      >
-        <span class="material-icons" aria-hidden="true">edit</span>
-      </button>
-    } @else {
-      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-    }
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
@@ -216,18 +240,7 @@
         uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
       }}</span>
     </div>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--r1 detail-row-action--danger"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.delete', 'Delete media')"
-      [attr.title]="t('workspace.imageDetail.action.delete', 'Delete media')"
-      (click)="deleteRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">delete</span>
-    </button>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 </div>

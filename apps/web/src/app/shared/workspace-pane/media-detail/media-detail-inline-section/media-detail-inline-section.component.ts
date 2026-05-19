@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   ElementRef,
   HostListener,
   effect,
@@ -13,6 +14,7 @@ import type { DateSaveEvent } from '../captured-date-editor.component';
 import { CapturedDateEditorComponent } from '../captured-date-editor.component';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
+import { formatCoordinate } from '../media-detail-view.utils';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
@@ -63,6 +65,13 @@ export class MediaDetailInlineSectionComponent {
   readonly projectCanCreate = input(false);
   readonly canAssignMultipleProjects = input(false);
   readonly isGpsAssignmentLocked = input(false);
+  readonly isImageLike = input(false);
+
+  readonly hasExifCoordinates = computed(
+    () =>
+      this.image().exif_latitude != null &&
+      this.image().exif_longitude != null,
+  );
 
   readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();
   readonly fieldSaveRequested = output<{ field: string; value: string }>();
@@ -72,7 +81,9 @@ export class MediaDetailInlineSectionComponent {
   readonly projectSearchChanged = output<string>();
   readonly projectCreateRequested = output<void>();
   readonly projectMembershipToggled = output<string>();
-  readonly deleteRequested = output<void>();
+  formatCoord(value: number | null | undefined): string {
+    return formatCoordinate(value ?? null);
+  }
 
   constructor() {
     effect(() => {

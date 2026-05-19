@@ -10,10 +10,6 @@ import type {
   SearchResultSet,
 } from '../../../../core/search/search.models';
 import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
-import {
-  clampDropdownPanelToViewport,
-  DROPDOWN_ANCHOR_GAP_PX,
-} from '../../../../shared/dropdown-trigger/dropdown-viewport-clamp';
 
 @Component({
   selector: 'app-address-search',
@@ -26,8 +22,6 @@ import {
   },
 })
 export class AddressSearchComponent implements OnDestroy {
-  private static readonly CENTER_WIDTH_INSET_PX = 4;
-
   private readonly elementRef = inject(ElementRef);
   private readonly searchBarService = inject(SearchBarService);
   private readonly searchOrchestrator = inject(SearchOrchestratorService);
@@ -56,16 +50,10 @@ export class AddressSearchComponent implements OnDestroy {
   readonly loadingSaved = signal(false);
   readonly loadingPlaces = signal(false);
   readonly applyingSuggestion = signal(false);
-  readonly dropdownTop = signal(0);
-  readonly dropdownLeft = signal(0);
-  readonly dropdownWidth = signal(0);
-  readonly dropdownOpensAbove = signal(false);
 
   // Template reference to the text input — used for auto-focus when search opens
   // @see docs/specs/ui/workspace/workspace-pane.md
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('addressSearchInput');
-  private readonly anchorRowRef = viewChild<ElementRef<HTMLElement>>('dropdownAnchorRow');
-  private readonly dropdownRef = viewChild<ElementRef<HTMLElement>>('addressSearchDropdown');
 
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
@@ -99,22 +87,6 @@ export class AddressSearchComponent implements OnDestroy {
       }
     });
 
-    effect(() => {
-      if (!this.active() || !this.isDropdownVisible()) return;
-      this.savedSuggestions();
-      this.placeSuggestions();
-      this.loadingSaved();
-      this.loadingPlaces();
-      this.scheduleDropdownPosition();
-    });
-  }
-
-  @HostListener('window:resize')
-  @HostListener('window:scroll')
-  onViewportChanged(): void {
-    if (this.active() && this.isDropdownVisible()) {
-      this.scheduleDropdownPosition();
-    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -220,6 +192,25 @@ export class AddressSearchComponent implements OnDestroy {
     this.searchSubscription?.unsubscribe();
   }
 
+  /** Narrow saved/geocoder lists to tokens the user typed (e.g. house number). */
+  private filterSuggestionsByQuery(
+    candidates: SearchCandidate[],
+    query: string,
+  ): SearchCandidate[] {
+    const tokens = query
+      .trim()
+      .toLowerCase()
+      .split(/[\s,]+/)
+      .filter((token) => token.length >= 2 || /^\d$/.test(token));
+    if (tokens.length === 0) {
+      return candidates;
+    }
+    return candidates.filter((candidate) => {
+      const label = candidate.label.toLowerCase();
+      return tokens.every((token) => label.includes(token));
+    });
+  }
+
   /** Saved-location ilike works best on the street segment, not the full comma-separated label. */
   private dbSearchTerm(displayQuery: string): string {
     const trimmed = displayQuery.trim();
@@ -228,56 +219,10 @@ export class AddressSearchComponent implements OnDestroy {
     return head.length >= 3 ? head : trimmed;
   }
 
-  private isDropdownVisible(): boolean {
-    return (
-      this.savedSuggestions().length > 0 ||
-      this.placeSuggestions().length > 0 ||
-      this.loadingSaved() ||
-      this.loadingPlaces()
-    );
-  }
-
-  private scheduleDropdownPosition(): void {
-    if (typeof window === 'undefined') return;
-    requestAnimationFrame(() => this.positionDropdown());
-  }
-
-  private positionDropdown(): void {
-    const row = this.anchorRowRef()?.nativeElement;
-    const panel = this.dropdownRef()?.nativeElement;
-    if (!row || !panel) return;
-
-    const center = row.querySelector<HTMLElement>('.address-search__center');
-    const centerRect = center?.getBoundingClientRect() ?? row.getBoundingClientRect();
-    const rowRect = row.getBoundingClientRect();
-    const panelWidth = Math.max(0, Math.round(centerRect.width - AddressSearchComponent.CENTER_WIDTH_INSET_PX));
-    const desiredLeft = Math.round(centerRect.right - panelWidth);
-    const desiredTop = Math.round(rowRect.bottom + DROPDOWN_ANCHOR_GAP_PX);
-
-    this.dropdownWidth.set(panelWidth);
-
-    const panelRect = panel.getBoundingClientRect();
-    if (panelRect.height <= 0) {
-      requestAnimationFrame(() => this.positionDropdown());
-      return;
-    }
-
-    const { left, top } = clampDropdownPanelToViewport({
-      desiredLeft,
-      desiredTop,
-      panelWidth: panelRect.width > 0 ? panelRect.width : panelWidth,
-      panelHeight: panelRect.height,
-      anchorGapPx: DROPDOWN_ANCHOR_GAP_PX,
-    });
-
-    this.dropdownLeft.set(Math.round(left));
-    this.dropdownTop.set(Math.round(top));
-    this.dropdownOpensAbove.set(top < desiredTop - 1);
-  }
-
   private applySearchResult(result: SearchResultSet): void {
     const dbAddressSection = result.sections.find((s) => s.family === 'db-address');
-    this.savedSuggestions.set(dbAddressSection?.items ?? []);
+    const items = dbAddressSection?.items ?? [];
+    this.savedSuggestions.set(this.filterSuggestionsByQuery(items, this.query()));
     // DB address results arrive with the partial result — loading is false by the time items appear
     this.loadingSaved.set(false);
     // placeSuggestions and loadingPlaces are managed by runGeocoderDebounced (direct geocoder path)
@@ -309,6 +254,7 @@ export class AddressSearchComponent implements OnDestroy {
         )
         .subscribe({
           next: (candidates) => {
+            // Geocoder labels may omit the query token (e.g. "Stephansplatz, Vienna"); ranking is server-side.
             this.placeSuggestions.set(candidates);
             this.loadingPlaces.set(false);
           },

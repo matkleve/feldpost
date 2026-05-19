@@ -534,4 +534,44 @@ describe('fetchGeocoderCandidates', () => {
     expect(results.length).toBe(1);
     expect(results[0].label).toBe('Wilhelmine-Moik-Platz');
   });
+
+  it('keeps POI hits when the query is a substring of displayName (e.g. stephansdom)', async () => {
+    const hits: GeocoderSearchResult[] = [
+      {
+        lat: 48.2085,
+        lng: 16.3731,
+        displayName: "Stephansdom, Stephansplatz, Innere Stadt, Wien, 1010, Österreich",
+        name: 'Stephansdom',
+        importance: 0.72,
+        address: {
+          road: 'Stephansplatz',
+          city: 'Wien',
+          country_code: 'at',
+          country: 'Österreich',
+        },
+      },
+    ];
+
+    const geocodingService = {
+      search: async () => hits,
+    };
+
+    const results = await fetchGeocoderCandidates(
+      geocodingService as never,
+      'stephansdom',
+      { countryCodes: ['at'] },
+      3,
+      (result, query, index): SearchAddressCandidate => ({
+        id: `geo-${query}-${index}`,
+        family: 'geocoder',
+        label: result.name ?? result.displayName,
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].label).toContain('Stephansdom');
+  });
 });

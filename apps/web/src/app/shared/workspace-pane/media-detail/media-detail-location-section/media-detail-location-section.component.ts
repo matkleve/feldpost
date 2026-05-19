@@ -47,7 +47,7 @@ export class MediaDetailLocationSectionComponent {
   readonly addressSuggestionApplied = output<ForwardGeocodeResult>();
   readonly addressClearRequested = output<void>();
   readonly copyCoordinatesRequested = output<void>();
-  readonly zoomToLocationRequested = output<void>();
+  readonly mapLocationPickRequested = output<void>();
   readonly revertCoordinatesRequested = output<void>();
 
   readonly addressSearchContext = computed<SearchQueryContext>(() => {

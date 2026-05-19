@@ -293,6 +293,22 @@ function meetsLexicalMatchThreshold(
   result: GeocoderSearchResult,
   normalizedQuery: string,
 ): boolean {
+  const queryNorm = normalizeForLexicalMatch(normalizedQuery);
+  if (queryNorm.length >= 3) {
+    const normalizedFields = [
+      result.displayName ?? '',
+      result.name ?? '',
+      result.address?.road ?? '',
+      result.address?.city ?? '',
+      result.address?.town ?? '',
+      result.address?.village ?? '',
+      result.address?.municipality ?? '',
+    ].map((value) => normalizeForLexicalMatch(value));
+    if (normalizedFields.some((field) => field.includes(queryNorm))) {
+      return true;
+    }
+  }
+
   const displayNameScore = computeTextMatchScore(result.displayName ?? '', normalizedQuery);
   const roadScore = computeTextMatchScore(result.address?.road ?? '', normalizedQuery);
   const nameScore = computeTextMatchScore(result.name ?? '', normalizedQuery);

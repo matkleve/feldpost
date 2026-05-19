@@ -89,6 +89,7 @@
           [projectCanCreate]="projectCanCreate()"
           [canAssignMultipleProjects]="canAssignMultipleProjects()"
           [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
+          [isImageLike]="isImageLike()"
           (fieldEditRequested)="onDetailFieldEditRequested($event)"
           (fieldSaveRequested)="saveImageField($event.field, $event.value)"
           (editingCancelled)="editingField.set(null)"
@@ -97,7 +98,6 @@
           (projectSearchChanged)="setProjectSearch($event)"
           (projectCreateRequested)="createProjectFromSearch()"
           (projectMembershipToggled)="toggleProjectMembership($event)"
-          (deleteRequested)="confirmDelete()"
         />
 
         <app-media-detail-location-section
@@ -113,7 +113,7 @@
           (addressSuggestionApplied)="applyAddressSuggestion($event)"
           (addressClearRequested)="confirmClearAddress()"
           (copyCoordinatesRequested)="copyCoordinates()"
-          (zoomToLocationRequested)="zoomToLocation()"
+          (mapLocationPickRequested)="requestMapLocationPick()"
           (revertCoordinatesRequested)="confirmRevertCoordinates()"
         />
 

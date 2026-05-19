@@ -24492,4 +24492,159 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.field.exifCoordinates', 'EXIF coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'EXIF coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.exifCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'EXIF-Koordinaten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.exifCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Coordinate EXIF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.exifCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.field.resolvedCoordinates', 'Resolved coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolved coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.resolvedCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aufgeloeste Koordinaten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.resolvedCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Coordinate risolte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.resolvedCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.field.correctedCoordinates', 'Corrected coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Corrected coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.correctedCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Korrigierte Koordinaten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.correctedCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Coordinate corrette', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.correctedCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.changeLocationMap.aria', 'Change location on map', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change location on map', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort auf der Karte aendern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia posizione sulla mappa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.changeLocationMap.title', 'Change location on map', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change location on map', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort auf der Karte aendern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia posizione sulla mappa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

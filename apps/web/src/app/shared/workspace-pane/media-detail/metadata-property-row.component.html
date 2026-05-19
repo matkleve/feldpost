@@ -4,7 +4,22 @@
   [attr.data-detail-active-editor]="editing() ? 'metadata' : null"
 >
   <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-  <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+  @if (!editing()) {
+    <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--l1"
+      type="button"
+      [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+      [attr.title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+      (click)="startEdit()"
+    >
+      <span class="material-icons" aria-hidden="true">edit</span>
+    </button>
+  } @else {
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+  }
 
   <div class="detail-row__center">
     <span class="material-icons detail-row__icon" aria-hidden="true">label</span>
@@ -43,22 +58,7 @@
     }
   </div>
 
-  @if (!editing()) {
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--r1"
-      type="button"
-      [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-      [attr.title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-      (click)="startEdit()"
-    >
-      <span class="material-icons" aria-hidden="true">edit</span>
-    </button>
-  } @else {
-    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-  }
+  <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
 
   <button
     hlmBtn

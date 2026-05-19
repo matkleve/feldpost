@@ -10,6 +10,7 @@
   align-items: start;
   position: relative;
   min-width: 0;
+  overflow: visible;
 }
 
 :host .address-search__row.detail-row {
@@ -129,22 +130,27 @@
   pointer-events: auto;
 }
 
-// Active stack spans host subgrid; dropdown floats over rows below.
+// Active stack spans host subgrid; dropdown anchors to the address row (scrolls with detail panel).
 // @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__stack {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: subgrid;
   position: relative;
+  overflow: visible;
 }
 
-// Fixed panel — natural height; viewport position from clampDropdownPanelToViewport.
+// Anchored below the address row, aligned to the center value column.
 // @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__dropdown {
-  position: fixed;
+  @include detail-row-slots.detail-row-center-width;
+  position: absolute;
   z-index: 300;
-  pointer-events: auto;
+  top: calc(100% + 4px);
   box-sizing: border-box;
+  max-height: min(40vh, 16rem);
+  overflow-y: auto;
+  pointer-events: auto;
   background: var(--popover);
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   border-radius: var(--radius-md);

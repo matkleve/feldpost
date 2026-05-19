@@ -18,7 +18,22 @@
       [attr.data-detail-active-editor]="editingField() === fieldDef.name ? fieldDef.name : null"
     >
       <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      @if (editingField() !== fieldDef.name) {
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--l1"
+          type="button"
+          [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
+          [attr.title]="t(fieldDef.editTitleKey, fieldDef.editTitleFallback)"
+          (click)="fieldEditRequested.emit(fieldDef.name)"
+        >
+          <span class="material-icons" aria-hidden="true">edit</span>
+        </button>
+      } @else {
+        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      }
       <div class="detail-row__center">
         <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
         <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
@@ -60,22 +75,7 @@
           </button>
         }
       </div>
-      @if (editingField() !== fieldDef.name) {
-        <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="detail-row-action detail-row-action--r1"
-          type="button"
-          [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
-          [attr.title]="t(fieldDef.editTitleKey, fieldDef.editTitleFallback)"
-          (click)="fieldEditRequested.emit(fieldDef.name)"
-        >
-          <span class="material-icons" aria-hidden="true">edit</span>
-        </button>
-      } @else {
-        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-      }
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
       <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
   }
@@ -88,13 +88,11 @@
         size="icon"
         class="detail-row-action detail-row-action--l2"
         type="button"
-        [attr.aria-label]="
-          t('workspace.imageDetail.action.zoomToLocation.aria', 'Zoom to location')
-        "
-        [attr.title]="t('workspace.imageDetail.action.zoomToLocation.title', 'Zoom to location')"
-        (click)="zoomToLocationRequested.emit()"
+        [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+        [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+        (click)="copyCoordinatesRequested.emit()"
       >
-        <span class="material-icons" aria-hidden="true">zoom_in_map</span>
+        <span class="material-icons" aria-hidden="true">content_copy</span>
       </button>
       <button
         hlmBtn
@@ -102,60 +100,50 @@
         size="icon"
         class="detail-row-action detail-row-action--l1"
         type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-        [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-        (click)="copyCoordinatesRequested.emit()"
+        [attr.aria-label]="
+          t('workspace.imageDetail.action.changeLocationMap.aria', 'Change location on map')
+        "
+        [attr.title]="
+          t('workspace.imageDetail.action.changeLocationMap.title', 'Change location on map')
+        "
+        [disabled]="isGpsAssignmentLocked()"
+        (click)="mapLocationPickRequested.emit()"
       >
-        <span class="material-icons" aria-hidden="true">content_copy</span>
+        <span class="material-icons" aria-hidden="true">edit</span>
       </button>
       <div class="detail-row__center">
         <span class="material-icons detail-row__icon" aria-hidden="true">gps_fixed</span>
         <span class="detail-row__label">{{
-          t('workspace.imageDetail.field.coordinates', 'Coordinates')
+          isCorrected()
+            ? t('workspace.imageDetail.field.correctedCoordinates', 'Corrected coordinates')
+            : t('workspace.imageDetail.field.resolvedCoordinates', 'Resolved coordinates')
         }}</span>
         <span class="detail-row__value detail-row__value--static detail-row__value--mono">
           {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
         </span>
       </div>
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--r1 detail-row-action--danger"
-        type="button"
-        [attr.aria-label]="
-          t('workspace.imageDetail.action.revertCoordinates.aria', 'Revert corrected coordinates')
-        "
-        [attr.title]="
-          t('workspace.imageDetail.action.revertCoordinates.title', 'Revert corrected coordinates')
-        "
-        [disabled]="!isCorrected() || saving()"
-        (click)="revertCoordinatesRequested.emit()"
-      >
-        <span class="material-icons" aria-hidden="true">close</span>
-      </button>
+      @if (isCorrected()) {
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--r1 detail-row-action--danger"
+          type="button"
+          [attr.aria-label]="
+            t('workspace.imageDetail.action.revertCoordinates.aria', 'Revert corrected coordinates')
+          "
+          [attr.title]="
+            t('workspace.imageDetail.action.revertCoordinates.title', 'Revert corrected coordinates')
+          "
+          [disabled]="saving()"
+          (click)="revertCoordinatesRequested.emit()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+      } @else {
+        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      }
       <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
-    </div>
-  }
-
-  @if (isCorrected()) {
-    <div class="detail-correction-history">
-      <div class="detail-correction-history__row">
-        <span class="detail-correction-history__key">{{
-          t('workspace.imageDetail.correction.originalExif', 'Original EXIF')
-        }}</span>
-        <span class="detail-correction-history__value">
-          {{ formatCoord(image().exif_latitude) }}°, {{ formatCoord(image().exif_longitude) }}°
-        </span>
-      </div>
-      <div class="detail-correction-history__row">
-        <span class="detail-correction-history__key">{{
-          t('workspace.imageDetail.badge.corrected', 'Corrected')
-        }}</span>
-        <span class="detail-correction-history__value">
-          {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
-        </span>
-      </div>
     </div>
   }
 
@@ -166,7 +154,7 @@
       <div class="detail-row__center">
         <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
         <span class="detail-row__label">{{
-          t('workspace.imageDetail.field.coordinates', 'Coordinates')
+          t('workspace.imageDetail.field.resolvedCoordinates', 'Resolved coordinates')
         }}</span>
         <div class="detail-row__value-wrap">
           <span class="detail-row__value detail-row__value--static">{{

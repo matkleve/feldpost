@@ -299,13 +299,17 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly imageReady = computed(() => this.mediaReady());
 
-  readonly canOpenLightbox = computed(() => {
-    if (!(this.fullResUrl() || this.thumbnailUrl())) return false;
-    return isImageLikeMedia(
+  readonly isImageLike = computed(() =>
+    isImageLikeMedia(
       this.mediaType(),
       this.mediaMimeType(),
       this.media()?.storage_path ?? null,
-    );
+    ),
+  );
+
+  readonly canOpenLightbox = computed(() => {
+    if (!(this.fullResUrl() || this.thumbnailUrl())) return false;
+    return this.isImageLike();
   });
 
   readonly requestedDetailTier = computed<MediaTier>(() => 'full');
@@ -1001,7 +1005,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.router.navigate(['/media']);
   }
 
-  private requestMapLocationPick(): void {
+  requestMapLocationPick(): void {
     const media = this.media();
     if (!media) {
       return;
