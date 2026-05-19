@@ -1,12 +1,33 @@
 // Flex child of detail scroll column — action list at bottom
 // @see docs/specs/ui/workspace/workspace-pane.md
 :host {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  row-gap: var(--spacing-1);
   min-height: 0;
   min-width: 0;
   padding-top: var(--spacing-1);
-  border-top: 1px solid var(--border);
   margin-top: var(--spacing-2);
+}
+
+:host > * {
+  grid-column: 3;
+  min-width: 0;
+}
+
+:host > .detail-section__label {
+  border-top: 1px solid var(--border);
+  padding-top: var(--spacing-1);
+}
+
+// Section heading — replaces hlmMenuLabel which is a dropdown directive
+// @see docs/specs/ui/workspace/workspace-pane.md
+.detail-section__label {
+  padding: var(--spacing-3) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }

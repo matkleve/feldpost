@@ -1,11 +1,14 @@
 import { Component, input, output } from '@angular/core';
 import { HLM_BADGE_IMPORTS } from '../ui/badge';
 
+export type ChipAction = 'project' | 'captured_at' | 'coordinates';
+
 export interface ChipDef {
   icon: string;
   text: string;
   variant?: 'default' | 'filled' | 'success' | 'warning';
   title?: string;
+  action?: ChipAction;
 }
 
 @Component({

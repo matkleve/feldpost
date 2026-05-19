@@ -1,59 +1,36 @@
 <div class="detail-section">
-  <div hlmMenuLabel class="uppercase tracking-wide">{{ detailViewLabel() }}</div>
+  <p class="detail-section__label">{{ detailViewLabel() }}</p>
 
-  <div
-    class="detail-row detail-row--readonly"
-  >
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--left"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyType', 'Copy type')"
-      [attr.title]="t('workspace.imageDetail.action.copyType', 'Copy type')"
-      (click)="copyCoordinatesRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">content_copy</span>
-    </button>
-    <span class="material-icons detail-row__icon" aria-hidden="true">description</span>
-    <span class="detail-row__label">{{ t('workspace.imageDetail.field.type', 'Type') }}</span>
-    <span class="detail-row__value detail-row__value--static">{{ mediaTypeLabel() }}</span>
-    <span class="detail-row-action detail-row-action--right" aria-hidden="true"></span>
+  <div class="detail-row detail-row--readonly">
+    <div class="detail-row__body">
+      <span class="material-icons detail-row__icon" aria-hidden="true">description</span>
+      <span class="detail-row__label">{{ t('workspace.imageDetail.field.type', 'Type') }}</span>
+      <span class="detail-row__value detail-row__value--static">{{ fileFormatLabel() }}</span>
+    </div>
   </div>
 
   <div
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'captured_at'"
   >
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--left"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyCapturedDate', 'Copy captured date')"
-      [attr.title]="t('workspace.imageDetail.action.copyCapturedDate', 'Copy captured date')"
-      (click)="copyCoordinatesRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">content_copy</span>
-    </button>
-    <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
-    <span class="detail-row__label">{{
-      t('workspace.imageDetail.field.captured', 'Captured')
-    }}</span>
-    @if (editingField() === 'captured_at') {
-      <app-captured-date-editor
-        [initialDate]="editDate()"
-        [initialTime]="editTime()"
-        (save)="capturedAtSaved.emit($event)"
-        (cancel)="editingCancelled.emit()"
-      />
-    } @else {
-      <button class="detail-row__value" type="button" (click)="capturedAtEditRequested.emit()">
-        {{ captureDate() ?? t('workspace.imageDetail.value.empty', '—') }}
-      </button>
-    }
+    <div class="detail-row__body">
+      <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.captured', 'Captured')
+      }}</span>
+      @if (editingField() === 'captured_at') {
+        <app-captured-date-editor
+          [initialDate]="editDate()"
+          [initialTime]="editTime()"
+          (save)="capturedAtSaved.emit($event)"
+          (cancel)="editingCancelled.emit()"
+        />
+      } @else {
+        <button class="detail-row__value" type="button" (click)="capturedAtEditRequested.emit()">
+          {{ captureDate() ?? t('workspace.imageDetail.value.empty', '—') }}
+        </button>
+      }
+    </div>
     <button
       hlmBtn
       variant="ghost"
@@ -72,23 +49,12 @@
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'project_ids'"
   >
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--left"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyProject', 'Copy project')"
-      [attr.title]="t('workspace.imageDetail.action.copyProject', 'Copy project')"
-      (click)="copyCoordinatesRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">content_copy</span>
-    </button>
-    <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
-    <span class="detail-row__label">{{
-      t('workspace.imageDetail.field.projects', 'Projects')
-    }}</span>
-    @if (editingField() === 'project_ids') {
+    <div class="detail-row__body">
+      <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.projects', 'Projects')
+      }}</span>
+      @if (editingField() === 'project_ids') {
       <div
         #projectEditor
         class="detail-tags"
@@ -198,14 +164,17 @@
           </div>
         </app-dropdown-shell>
       </div>
-    } @else {
-      <button
-        class="detail-row__value"
-        type="button"
-        (click)="fieldEditRequested.emit('project_ids')"
-      >
-        {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
-      </button>
+      } @else {
+        <button
+          class="detail-row__value"
+          type="button"
+          (click)="fieldEditRequested.emit('project_ids')"
+        >
+          {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
+        </button>
+      }
+    </div>
+    @if (editingField() !== 'project_ids') {
       <button
         hlmBtn
         variant="ghost"
@@ -224,28 +193,18 @@
   <div
     class="detail-row detail-row--readonly"
   >
+    <div class="detail-row__body">
+      <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.uploaded', 'Uploaded')
+      }}</span>
+      <span class="detail-row__value detail-row__value--static">{{
+        uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
+      }}</span>
+    </div>
     <button
       hlmBtn
       variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--left"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyUploadDate', 'Copy upload date')"
-      [attr.title]="t('workspace.imageDetail.action.copyUploadDate', 'Copy upload date')"
-      (click)="copyCoordinatesRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">content_copy</span>
-    </button>
-    <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
-    <span class="detail-row__label">{{
-      t('workspace.imageDetail.field.uploaded', 'Uploaded')
-    }}</span>
-    <span class="detail-row__value detail-row__value--static">{{
-      uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
-    }}</span>
-    <button
-      hlmBtn
-      variant="destructive"
       size="icon"
       class="detail-row-action detail-row-action--right detail-row-action--danger"
       type="button"
@@ -259,9 +218,7 @@
 </div>
 
 <div class="detail-section">
-  <div hlmMenuLabel class="uppercase tracking-wide">
-    {{ t('workspace.imageDetail.section.location', 'Location') }}
-  </div>
+  <p class="detail-section__label">{{ t('workspace.imageDetail.section.location', 'Location') }}</p>
 
   <app-address-search
     [currentAddress]="fullAddress()"
@@ -273,34 +230,24 @@
       class="detail-row"
       [class.detail-row--editing]="editingField() === fieldDef.name"
     >
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--left"
-        type="button"
-        [attr.aria-label]="t(fieldDef.copyAriaKey, fieldDef.copyAriaFallback)"
-        [attr.title]="t(fieldDef.copyAriaKey, fieldDef.copyAriaFallback)"
-        (click)="copyCoordinatesRequested.emit()"
-      >
-        <span class="material-icons" aria-hidden="true">content_copy</span>
-      </button>
-      <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
-      <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
       @if (editingField() === fieldDef.name) {
-        <input
-          #fieldInput
-          hlmInput
-          class="detail-row__input"
-          type="text"
-          [value]="fieldValue(fieldDef.name)"
-          [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
-          (keydown.enter)="
-            fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
-          "
-          (keydown.escape)="editingCancelled.emit()"
-          (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
-        />
+        <div class="detail-row__body">
+          <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
+          <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
+          <input
+            #fieldInput
+            hlmInput
+            class="detail-row__input"
+            type="text"
+            [value]="fieldValue(fieldDef.name)"
+            [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
+            (keydown.enter)="
+              fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
+            "
+            (keydown.escape)="editingCancelled.emit()"
+            (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+          />
+        </div>
         <button
           hlmBtn
           variant="ghost"
@@ -314,13 +261,17 @@
           <span class="material-icons" aria-hidden="true">check</span>
         </button>
       } @else {
-        <button
-          class="detail-row__value"
-          type="button"
-          (click)="fieldEditRequested.emit(fieldDef.name)"
-        >
-          {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
-        </button>
+        <div class="detail-row__body">
+          <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
+          <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
+          <button
+            class="detail-row__value"
+            type="button"
+            (click)="fieldEditRequested.emit(fieldDef.name)"
+          >
+            {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
+          </button>
+        </div>
         <button
           hlmBtn
           variant="ghost"
@@ -367,21 +318,16 @@
       >
         <span class="material-icons" aria-hidden="true">content_copy</span>
       </button>
-      <span class="material-icons detail-row__icon" aria-hidden="true">gps_fixed</span>
-      <span class="detail-row__label">
-        {{ t('workspace.imageDetail.field.coordinates', 'Coordinates') }}
-        @if (isCorrected()) {
-          <span hlmBadge variant="info" class="detail-correction-badge">{{
-            t('workspace.imageDetail.badge.corrected', 'Corrected')
-          }}</span>
-        }
-      </span>
-      <span class="detail-row__value detail-row__value--static detail-row__value--mono">
-        {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
-      </span>
+      <div class="detail-row__body">
+        <span class="material-icons detail-row__icon" aria-hidden="true">gps_fixed</span>
+        <span class="detail-row__label">{{ t('workspace.imageDetail.field.coordinates', 'Coordinates') }}</span>
+        <span class="detail-row__value detail-row__value--static detail-row__value--mono">
+          {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
+        </span>
+      </div>
       <button
         hlmBtn
-        variant="destructive"
+        variant="ghost"
         size="icon"
         class="detail-row-action detail-row-action--right detail-row-action--danger"
         type="button"
@@ -424,12 +370,12 @@
     <div
       class="detail-row detail-row--readonly"
     >
-      <span class="detail-row-action detail-row-action--left" aria-hidden="true"></span>
-      <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
-      <span class="detail-row__label">{{
-        t('workspace.imageDetail.field.coordinates', 'Coordinates')
-      }}</span>
-      <div class="detail-row__value-wrap">
+      <div class="detail-row__body">
+        <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.coordinates', 'Coordinates')
+        }}</span>
+        <div class="detail-row__value-wrap">
         <span class="detail-row__value detail-row__value--static">{{
           t('workspace.imageDetail.value.noGps', 'No GPS')
         }}</span>
@@ -441,6 +387,7 @@
             )
           }}</span>
         }
+        </div>
       </div>
     </div>
   }

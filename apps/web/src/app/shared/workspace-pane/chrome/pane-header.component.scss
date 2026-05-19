@@ -1,17 +1,24 @@
-// Flex child of .workspace-pane — header row, shrinks to zero
+// Flex child of .workspace-pane — header row; :host spans full width so background fills edge-to-edge
 // @see docs/specs/ui/workspace/workspace-pane.md
 :host {
   display: block;
+  flex-shrink: 0;
+  width: 100%;
   min-height: 0;
   min-width: 0;
 }
 
+// Inner layout container — capped at 56rem and centered so title/close align with content below
+// @see docs/specs/ui/workspace/workspace-pane.md
 .pane-header {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   position: relative;
   width: 100%;
+  max-width: 56rem;
+  margin-inline: auto;
+  box-sizing: border-box;
   padding: var(--spacing-2) var(--spacing-4);
   background: transparent;
 }

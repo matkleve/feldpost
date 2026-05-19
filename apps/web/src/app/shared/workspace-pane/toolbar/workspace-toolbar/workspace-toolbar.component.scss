@@ -21,7 +21,8 @@ $workspace-toolbar-compact-max: 42.5rem; // 680px — four labeled triggers + vi
   align-items: center;
   justify-content: flex-start;
   gap: var(--spacing-2);
-  height: 2.5rem;
+  // Min height aligns menu triggers; no fixed height — toggle track needs p-1 inset (≈2.75rem total).
+  // @see docs/specs/ui/workspace/workspace-pane.md
   min-height: 2.5rem;
   width: 100%;
   margin: 0;

@@ -54,27 +54,38 @@
         (zoomToLocationRequested)="onZoomToLocation($event)"
         (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       />
-    } @else if (activeTab() === 'selected-items') {
-      <app-workspace-toolbar />
-      <app-workspace-selected-items-grid
-        [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
-        (thumbnailClicked)="onThumbnailClick($event)"
-        (zoomToLocationRequested)="onZoomToLocation($event)"
-        (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
-        (hoverStarted)="onWorkspaceItemHoverStarted($event)"
-        (hoverEnded)="onWorkspaceItemHoverEnded($event)"
-      />
-
-      @if (selectionService.selectedCount() > 0) {
-        <app-workspace-pane-footer
-          [scopeIds]="exportScopeIds()"
-          [images]="exportScopeImages()"
-        ></app-workspace-pane-footer>
-      }
     } @else {
+      <!-- Selected items tab panel — always in DOM so grid state is preserved across tab switches -->
+      <div
+        class="workspace-pane__tab-panel"
+        [class.workspace-pane__tab-panel--active]="activeTab() === 'selected-items'"
+        role="tabpanel"
+        [attr.aria-label]="t('workspace.pane.tab.selectedItems', 'Selected Items')"
+      >
+        <app-workspace-toolbar />
+        <app-workspace-selected-items-grid
+          [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
+          (thumbnailClicked)="onThumbnailClick($event)"
+          (zoomToLocationRequested)="onZoomToLocation($event)"
+          (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+          (hoverStarted)="onWorkspaceItemHoverStarted($event)"
+          (hoverEnded)="onWorkspaceItemHoverEnded($event)"
+        />
+
+        @if (selectionService.selectedCount() > 0) {
+          <app-workspace-pane-footer
+            [scopeIds]="exportScopeIds()"
+            [images]="exportScopeImages()"
+          ></app-workspace-pane-footer>
+        }
+      </div>
+
+      <!-- Upload tab panel — always in DOM so ng-content projection slot is stable -->
       <section
         class="workspace-pane__upload-tab"
+        [class.workspace-pane__upload-tab--active]="activeTab() === 'upload'"
         [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
+        role="tabpanel"
       >
         <ng-content select="[data-workspace-upload-tab]" />
       </section>

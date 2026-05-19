@@ -17,8 +17,6 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../media-detail-view.utils';
 import type { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
-import { HlmBadgeDirective } from '../../../../shared/ui/badge';
-import { HlmMenuLabelDirective } from '../../../../shared/ui/menu';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 
@@ -48,8 +46,6 @@ interface AddressFieldDefinition {
     DropdownShellComponent,
     ...HLM_BUTTON_IMPORTS,
     ...HLM_INPUT_IMPORTS,
-    HlmMenuLabelDirective,
-    HlmBadgeDirective,
   ],
   templateUrl: './media-detail-inline-section.component.html',
   styleUrl: './media-detail-inline-section.component.scss',
@@ -60,6 +56,7 @@ export class MediaDetailInlineSectionComponent {
   private static readonly PROJECT_DROPDOWN_MAX_WIDTH_PX = 320;
 
   private readonly i18nService = inject(I18nService);
+  private readonly elementRef = inject(ElementRef);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   private readonly projectEditorRef = viewChild<ElementRef<HTMLElement>>('projectEditor');
   private readonly projectDropdownRef = viewChild('projectDropdown', {
@@ -73,7 +70,7 @@ export class MediaDetailInlineSectionComponent {
 
   readonly image = input<ImageRecord>({} as ImageRecord);
   readonly detailViewLabel = input('');
-  readonly mediaTypeLabel = input('');
+  readonly fileFormatLabel = input('');
   readonly editingField = input<DetailEditingField>(null);
   readonly editDate = input('');
   readonly editTime = input('');
@@ -233,6 +230,15 @@ export class MediaDetailInlineSectionComponent {
     }
 
     this.focusAdjacentProjectDropdownItem(event.key, focusableItems);
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
+    if (this.editingField() !== 'captured_at') return;
+    const target = event.target as Node | null;
+    if (!this.elementRef.nativeElement.contains(target)) {
+      this.editingCancelled.emit();
+    }
   }
 
   @HostListener('window:resize')

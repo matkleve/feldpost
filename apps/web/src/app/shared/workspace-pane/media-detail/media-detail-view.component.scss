@@ -1,8 +1,10 @@
 // MediaDetailViewComponent styles.
 
 :host {
-  --detail-row-rail-size: 2.25rem;
+  --detail-row-height: 2rem;
+  --detail-row-rail-size: var(--detail-row-height);
   --detail-row-rail-gap: var(--spacing-1);
+  --detail-content-main-max-width: 40rem;
   --detail-media-panel-width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
 
   display: flex;
@@ -133,12 +135,41 @@
   min-width: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding-top: var(--spacing-2);
+
+  // Thin, subtle scrollbar — replaces the bulky OS default
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 0.3125rem; // 5px
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-full);
+
+    &:hover {
+      background: var(--muted-foreground);
+    }
+  }
 }
 
 // ─── Content area ───
 
 .detail-content {
-  width: min(100%, calc(var(--detail-row-rail-size) * 4 + var(--detail-row-rail-gap) * 4 + 40rem));
+  width: min(
+    100%,
+    calc(
+      var(--detail-row-rail-size) * 4 + var(--detail-row-rail-gap) * 4 +
+        var(--detail-content-main-max-width)
+    )
+  );
   margin: 0 auto;
   box-sizing: border-box;
   padding: 0 var(--spacing-2) var(--spacing-6);
@@ -147,12 +178,22 @@
   grid-template-columns:
     minmax(0, var(--detail-row-rail-size))
     minmax(0, var(--detail-row-rail-size))
-    minmax(0, 1fr)
+    minmax(0, min(100%, var(--detail-content-main-max-width)))
     minmax(0, var(--detail-row-rail-size))
     minmax(0, var(--detail-row-rail-size));
   gap: 0 var(--detail-row-rail-gap);
 
-  > * {
+  > app-quick-info-chips {
     grid-column: 3;
+    min-width: 0;
+  }
+
+  > app-media-detail-inline-section,
+  > app-metadata-section,
+  > app-detail-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    min-width: 0;
   }
 }

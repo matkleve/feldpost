@@ -53,7 +53,7 @@
   overflow: hidden;
 }
 
-// Content area below header+tabs; max-width caps layout only when the pane is very wide
+// Content area below header+tabs; max-width caps layout and margin-inline centers when pane is wide
 // @see docs/specs/ui/workspace/workspace-pane.md
 .workspace-pane__content {
   flex: 1;
@@ -62,20 +62,52 @@
   flex-direction: column;
   width: 100%;
   max-width: 56rem;
+  margin-inline: auto;
   overflow: hidden;
 }
 
+// Tab bar row — same max-width + centering as content area so tabs align with detail/selected-items rows below
+// @see docs/specs/ui/workspace/workspace-pane.md
 .workspace-pane__tabs {
   flex-shrink: 0;
   padding: var(--spacing-3) var(--spacing-3) 0;
+  max-width: 56rem;
+  width: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
-.workspace-pane__upload-tab {
+// Selected-items tab panel wrapper — hidden by default, shown when active
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane__tab-panel {
+  display: none;
   flex: 1;
   min-height: 0;
-  display: flex;
+  flex-direction: column;
+
+  // Active state: participates in flex layout
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  &--active {
+    display: flex;
+  }
 }
 
+// Upload tab panel — hidden by default, shown when active; always in DOM for stable ng-content
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane__upload-tab {
+  display: none;
+  flex: 1;
+  min-height: 0;
+
+  // Active state: participates in flex layout
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  &--active {
+    display: flex;
+  }
+}
+
+// Stretch the projected upload panel to fill the tab panel
+// @see docs/specs/ui/workspace/workspace-pane.md
 .workspace-pane__upload-tab > app-upload-panel {
   flex: 1;
   min-height: 0;

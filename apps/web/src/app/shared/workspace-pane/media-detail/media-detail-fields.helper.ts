@@ -32,7 +32,10 @@ export class ImageDetailFieldsHelper {
     if (!img) return;
 
     const oldValue = (img as unknown as Record<string, unknown>)[field] as string | null;
-    if (newValue === (oldValue ?? '')) return;
+    if (newValue === (oldValue ?? '')) {
+      this.deps.signals.editingField.set(null);
+      return;
+    }
 
     const updateValue = newValue || null;
     this.deps.signals.image.update((prev) => (prev ? { ...prev, [field]: updateValue } : prev));

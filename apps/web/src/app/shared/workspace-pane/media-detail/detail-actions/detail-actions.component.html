@@ -1,35 +1,37 @@
-<div hlmMenuLabel class="uppercase tracking-wide">{{ t('workspace.detailActions.section.title', 'Actions') }}</div>
+@if (actions().length > 0) {
+  <p class="detail-section__label">{{ t('workspace.detailActions.section.title', 'Actions') }}</p>
 
-@for (action of actions(); track action.id) {
-  @if (action.section === 'primary' || action.section === 'secondary') {
-    <button
-      hlmMenuItem
-      class="w-full"
-      type="button"
-      [disabled]="action.disabled"
-      (click)="actionSelected.emit(action.id)"
-    >
-      <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
-      <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
-    </button>
+  @for (action of actions(); track action.id) {
+    @if (action.section === 'primary' || action.section === 'secondary') {
+      <button
+        hlmMenuItem
+        class="w-full"
+        type="button"
+        [disabled]="action.disabled"
+        (click)="actionSelected.emit(action.id)"
+      >
+        <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+        <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
+      </button>
+    }
   }
-}
 
-@if (hasDestructiveActions()) {
-  <div hlmMenuSeparator></div>
-}
+  @if (hasDestructiveActions()) {
+    <div hlmMenuSeparator></div>
+  }
 
-@for (action of actions(); track action.id + '-danger') {
-  @if (action.section === 'destructive') {
-    <button
-      hlmMenuItem
-      class="w-full text-destructive"
-      type="button"
-      [disabled]="action.disabled"
-      (click)="actionSelected.emit(action.id)"
-    >
-      <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
-      <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
-    </button>
+  @for (action of actions(); track action.id + '-danger') {
+    @if (action.section === 'destructive') {
+      <button
+        hlmMenuItem
+        class="w-full text-destructive"
+        type="button"
+        [disabled]="action.disabled"
+        (click)="actionSelected.emit(action.id)"
+      >
+        <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{ action.icon }}</span>
+        <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
+      </button>
+    }
   }
 }

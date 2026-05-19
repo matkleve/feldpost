@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
-import { HLM_BADGE_IMPORTS } from '../../../../shared/ui/badge';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
@@ -27,7 +26,6 @@ import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-acti
     ...HLM_INPUT_IMPORTS,
     HlmMenuItemDirective,
     HlmMenuSeparatorDirective,
-    ...HLM_BADGE_IMPORTS,
   ],
   templateUrl: './media-detail-header.component.html',
   styleUrl: './media-detail-header.component.scss',
@@ -49,7 +47,6 @@ export class MediaDetailHeaderComponent {
 
   readonly displayTitle = input<string>('');
   readonly titleValue = input<string>('');
-  readonly mediaTypeLabel = input<string>('');
   readonly editingTitle = input(false);
   readonly showContextMenu = input(false);
   readonly contextActions = input<ReadonlyArray<ResolvedAction<WorkspaceSingleActionId>>>([]);

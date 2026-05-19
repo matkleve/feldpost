@@ -1,83 +1,233 @@
-// Ex-bridge `--menu-item-text` (Phase 7 Batch 48) — defaults + sandstone (ex global bridge).
-// @see docs/migration/phase-7-token-migration.md §Batch 48
-// Grid row in detail-content — geocode trigger + results overlay
+// Stable state: idle — row chrome matches .detail-row__body geometry exactly
 // @see docs/specs/ui/workspace/workspace-pane.md
 :host {
   display: block;
   position: relative;
-  min-height: 0;
+  // inherit --mdv-* tokens from parent (media-detail-inline-section)
+}
+
+// Row container — matches .detail-row geometry exactly
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0 var(--spacing-2);
+  border-radius: var(--radius-sm);
+  min-height: var(--detail-row-height);
+  transition: background 80ms ease-out;
+
+  &:not(.address-search__row--active):hover {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+
+    .address-search__row-icon,
+    .address-search__trigger-text {
+      color: var(--primary);
+    }
+
+    .address-search__edit-btn,
+    .address-search__clear-btn--visible {
+      opacity: 1;
+      pointer-events: auto;
+      color: var(--primary);
+    }
+  }
+
+  // Stable state: active — primary-tinted background, input visible
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  &--active {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+}
+
+// Left-side icon (resolve-location or search)
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__row-icon {
+  font-size: var(--font-size-md);
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+  width: 1.25rem;
+  text-align: center;
+}
+
+// Address text button — fills available space, right-aligned like detail-row values
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__trigger-text {
+  flex: 1 1 auto;
   min-width: 0;
-  --ads-menu-item-text: var(--foreground);
+  font-size: var(--font-size-xs);
+  color: var(--foreground);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 80ms ease-out;
 }
 
-:host-context([data-theme='sandstone']) {
-  --ads-menu-item-text: #2f271f;
-}
+// Inline text input — no borders, blends into row
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  color: var(--foreground);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-family: inherit;
+  caret-color: var(--primary);
+  text-align: right;
 
-.address-search {
-  &__trigger {
-    width: 100%;
-    // Closed trigger horizontal inset (outline-sm rhythm; avoids flush label edge).
-    // @see docs/migration/README.md (anchored UI padding)
-    padding-inline: var(--spacing-2);
-  }
-
-  &__input-wrap {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-1);
-    padding: var(--spacing-1) var(--spacing-2);
-    border: 1px solid var(--primary);
-    border-radius: var(--radius-sm);
-    background: var(--card);
-    box-shadow: var(--interactive-focus-ring);
-  }
-
-  &__icon {
-    font-size: var(--font-size-md);
+  &::placeholder {
     color: var(--muted-foreground);
-    flex-shrink: 0;
+  }
+}
+
+// Edit pen button — hidden until row hover (left side)
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease-out;
+
+  .material-icons {
+    font-size: var(--font-size-md);
+  }
+}
+
+// Close/cancel button — hidden unless --visible modifier
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 80ms ease-out,
+    color 80ms ease-out;
+
+  .material-icons {
+    font-size: var(--font-size-md);
   }
 
-  &__input {
-    flex: 1 1 auto;
-    min-width: 0;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: var(--font-size-sm);
+  &--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &:hover {
     color: var(--foreground);
-    font-family: inherit;
-    padding: 0;
-
-    &::placeholder {
-      color: var(--text-disabled);
-    }
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
   }
+}
 
-  &__clear {
-    &:hover {
-      color: var(--ads-menu-item-text);
-    }
-  }
+// Results dropdown — floats below the row
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 300;
+  margin-top: var(--spacing-1);
+  background: var(--popover);
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 14rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
 
-  &__results {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    z-index: 300;
-    margin-top: var(--spacing-1);
-    // Symmetric horizontal inset for suggestion rows (matches StandardDropdown token).
-    // @see docs/specs/component/filters/dropdown-system.md
-    --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
-    padding-inline: var(--std-dropdown-padding-inline);
-  }
+// Section heading inside dropdown
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__section-label {
+  padding: var(--spacing-1) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
 
-  &__loading {
-    padding: var(--spacing-2);
-    font-size: var(--font-size-xs);
-    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
-    text-align: center;
+// Individual result row
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__result-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--foreground);
+  text-align: left;
+  min-height: 2rem;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: normal;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
   }
+}
+
+// Icon in result row
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__result-icon {
+  font-size: var(--font-size-md);
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+// Result label text
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__result-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+}
+
+// Loading indicator
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__loading {
+  padding: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+  text-align: center;
 }

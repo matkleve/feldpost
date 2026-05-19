@@ -55,7 +55,8 @@ import {
   isImageLikeMedia,
   resolveDisplayTitle,
   resolveFullAddress,
-  resolveMediaTypeLabel,
+  resolveFileFormatLabel,
+  resolveMediaTypeChipLabel,
   resolveProjectName,
 } from './media-detail-view.utils';
 import { MediaDetailHeaderComponent } from './media-detail-header/media-detail-header.component';
@@ -203,12 +204,16 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly displayTitle = computed(() => resolveDisplayTitle(this.media(), this.t));
 
-  readonly mediaTypeLabel = computed(() =>
-    resolveMediaTypeLabel(this.media(), this.mediaType(), this.mediaMimeType(), this.t),
+  readonly mediaTypeChipLabel = computed(() =>
+    resolveMediaTypeChipLabel(this.media(), this.mediaType(), this.mediaMimeType(), this.t),
   );
 
-  readonly detailViewLabel = computed(
-    () => `${this.mediaTypeLabel()} ${this.t('workspace.mediaDetail.detailsSuffix', 'details')}`,
+  readonly fileFormatLabel = computed(() =>
+    resolveFileFormatLabel(this.media()?.storage_path ?? null, this.mediaMimeType(), this.t),
+  );
+
+  readonly detailViewLabel = computed(() =>
+    this.t('workspace.imageDetail.section.details', 'Details'),
   );
 
   readonly captureDate = computed(() => formatCaptureDate(this.media(), this.i18nService.locale()));
@@ -294,6 +299,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly infoChips = computed(() =>
     buildInfoChips({
       image: this.media(),
+      mediaTypeChipLabel: this.mediaTypeChipLabel(),
       projectName: this.projectName(),
       selectedProjectCount: this.selectedProjectIds().size,
       captureDate: this.captureDate(),
@@ -712,15 +718,15 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   onChipClicked(index: number): void {
-    switch (index) {
-      case 0:
+    switch (this.infoChips()[index]?.action) {
+      case 'project':
         this.editingField.set('project_ids');
         this.projectSearch.set('');
         break;
-      case 1:
+      case 'captured_at':
         this.openCapturedAtEditor();
         break;
-      case 2:
+      case 'coordinates':
         this.copyCoordinates();
         break;
     }

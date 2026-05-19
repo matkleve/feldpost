@@ -2,12 +2,12 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { MetadataPropertyRowComponent } from '../metadata-property-row.component';
 import type { MetadataEntry } from '../media-detail-view.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { HlmMenuItemDirective, HlmMenuLabelDirective } from '../../../../shared/ui/menu';
+import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
 
 @Component({
   selector: 'app-metadata-section',
   standalone: true,
-  imports: [MetadataPropertyRowComponent, HlmMenuItemDirective, HlmMenuLabelDirective],
+  imports: [MetadataPropertyRowComponent, HlmMenuItemDirective],
   templateUrl: './metadata-section.component.html',
   styleUrl: './metadata-section.component.scss',
 })

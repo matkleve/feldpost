@@ -2,13 +2,13 @@
 // @see docs/migration/phase-7-token-migration.md §Batch 48
 // Ex-bridge `--action-*` (Phase 7 Batch 49) — same values as pre-removal global `:root` + sandstone.
 // @see docs/migration/phase-7-token-migration.md §Batch 49
-// Grid cell of detail-content — metadata list; padding matches former div.detail-section wrapper
+// Subgrid participant of detail-content — main column for labels/rows, rails for quiet actions.
 // @see docs/specs/ui/workspace/workspace-pane.md
 :host {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-  padding: 0 var(--spacing-1);
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  row-gap: 0;
   min-height: 0;
   min-width: 0;
   --mds-menu-item-text: var(--foreground);
@@ -22,15 +22,35 @@
   --mds-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
+:host > .detail-section__label {
+  grid-column: 3;
+  padding: var(--spacing-3) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
 .metadata-row-wrap {
-  display: block;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   overflow: visible;
 
   app-metadata-property-row {
-    display: block;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     min-width: 0;
     overflow: visible;
   }
+}
+
+.add-metadata-row,
+.add-metadata-btn {
+  grid-column: 3;
+  min-width: 0;
 }
 
 .add-metadata-row {

@@ -79,6 +79,59 @@ export function resolveMediaTypeLabel(
   return t('workspace.imageDetail.mediaType.media', 'Media');
 }
 
+/** Plain-language type for quick-info chips (Image, PDF, Document — not JPG/DOCX). */
+export function resolveMediaTypeChipLabel(
+  image: ImageRecord | null,
+  mediaType: string | null,
+  mimeType: string | null,
+  t: DetailTranslateFn,
+): string {
+  if (mimeType?.startsWith('image/')) {
+    return t('workspace.imageDetail.mediaType.image', 'Image');
+  }
+
+  if (mimeType?.startsWith('video/')) {
+    return t('workspace.imageDetail.mediaType.video', 'Video');
+  }
+
+  if (mimeType === 'application/pdf') {
+    return 'PDF';
+  }
+
+  if (mimeType && isOfficeMimeType(mimeType)) {
+    return t('workspace.imageDetail.mediaType.document', 'Document');
+  }
+
+  const fromMediaType = resolveLabelFromMediaType(mediaType, t);
+  if (fromMediaType) return fromMediaType;
+
+  const extension = image?.storage_path?.split('.').pop()?.toUpperCase();
+  if (extension && isImageExtension(extension)) {
+    return t('workspace.imageDetail.mediaType.image', 'Image');
+  }
+
+  if (extension === 'PDF') {
+    return 'PDF';
+  }
+
+  return t('workspace.imageDetail.mediaType.media', 'Media');
+}
+
+/** Technical file format for the details row (JPG, PNG, PDF, DOCX, …). */
+export function resolveFileFormatLabel(
+  storagePath: string | null,
+  mimeType: string | null,
+  t: DetailTranslateFn,
+): string {
+  const fromPath = resolveFormatFromPath(storagePath);
+  if (fromPath) return fromPath;
+
+  const fromMime = resolveFormatFromMime(mimeType);
+  if (fromMime) return fromMime;
+
+  return t('workspace.imageDetail.value.empty', '—');
+}
+
 export function formatCoordinate(value: number | null): string {
   if (value == null) return '-';
   return value.toFixed(6);
@@ -172,27 +225,44 @@ export function resolveFullAddress(image: ImageRecord | null): string {
 
 export function buildInfoChips(args: {
   image: ImageRecord | null;
+  mediaTypeChipLabel: string;
   projectName: string;
   selectedProjectCount: number;
   captureDate: string | null;
   isCorrected: boolean;
   t: DetailTranslateFn;
 }): ChipDef[] {
-  const { image, projectName, selectedProjectCount, captureDate, isCorrected, t } = args;
+  const {
+    image,
+    mediaTypeChipLabel,
+    projectName,
+    selectedProjectCount,
+    captureDate,
+    isCorrected,
+    t,
+  } = args;
   if (!image) return [];
 
   const hasGps = image.latitude != null;
   return [
     {
+      icon: 'description',
+      text: mediaTypeChipLabel,
+      variant: 'filled',
+      title: t('workspace.imageDetail.field.type', 'Type'),
+    },
+    {
       icon: 'folder',
       text: projectName || t('workspace.imageDetail.value.noProject', 'No project'),
       variant: selectedProjectCount > 0 ? ('filled' as const) : ('default' as const),
       title: t('workspace.imageDetail.field.projects', 'Projects'),
+      action: 'project',
     },
     {
       icon: 'schedule',
       text: captureDate ?? t('workspace.imageDetail.value.noDate', 'No date'),
       title: t('workspace.imageDetail.chip.captureDate', 'Capture date'),
+      action: 'captured_at',
     },
     {
       icon: 'my_location',
@@ -205,6 +275,7 @@ export function buildInfoChips(args: {
       title: hasGps
         ? t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
         : t('workspace.imageDetail.value.noGpsData', 'No GPS data'),
+      action: 'coordinates',
     },
   ];
 }
@@ -262,3 +333,71 @@ function resolveLabelFromPath(path: string | null, t: DetailTranslateFn): string
 
   return extension;
 }
+
+function resolveFormatFromPath(path: string | null): string | null {
+  const extension = path?.split('.').pop()?.toUpperCase();
+  if (!extension || extension.length > 12 || extension.includes('/')) {
+    return null;
+  }
+
+  return extension;
+}
+
+function resolveFormatFromMime(mimeType: string | null): string | null {
+  if (!mimeType) return null;
+
+  const exact = MIME_FORMAT_LABELS[mimeType];
+  if (exact) return exact;
+
+  if (
+    mimeType.startsWith('image/') ||
+    mimeType.startsWith('video/') ||
+    mimeType.startsWith('audio/')
+  ) {
+    const subtype = mimeType.slice(mimeType.indexOf('/') + 1);
+    if (subtype && /^[a-z0-9.-]+$/i.test(subtype) && !subtype.startsWith('vnd')) {
+      return subtype.toUpperCase();
+    }
+  }
+
+  return null;
+}
+
+function isOfficeMimeType(mimeType: string): boolean {
+  return (
+    mimeType === 'application/msword' ||
+    mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+    mimeType === 'application/vnd.ms-excel' ||
+    mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+    mimeType === 'application/vnd.ms-powerpoint' ||
+    mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  );
+}
+
+function isImageExtension(extension: string): boolean {
+  return /^(AVIF|BMP|GIF|HEIC|HEIF|JPE?G|PNG|SVG|TIF{1,2}|WEBP)$/i.test(extension);
+}
+
+const MIME_FORMAT_LABELS: Record<string, string> = {
+  'application/pdf': 'PDF',
+  'application/msword': 'DOC',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
+  'application/vnd.ms-excel': 'XLS',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'XLSX',
+  'application/vnd.ms-powerpoint': 'PPT',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PPTX',
+  'image/jpeg': 'JPEG',
+  'image/jpg': 'JPG',
+  'image/png': 'PNG',
+  'image/webp': 'WEBP',
+  'image/gif': 'GIF',
+  'image/heic': 'HEIC',
+  'image/heif': 'HEIF',
+  'image/tiff': 'TIFF',
+  'image/avif': 'AVIF',
+  'image/bmp': 'BMP',
+  'image/svg+xml': 'SVG',
+  'video/mp4': 'MP4',
+  'video/quicktime': 'MOV',
+  'video/webm': 'WEBM',
+};
