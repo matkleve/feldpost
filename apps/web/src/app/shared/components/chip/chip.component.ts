@@ -98,7 +98,7 @@ export class ChipComponent {
       case 'neutral':
         return '--muted-foreground';
       case 'info':
-        return '--info';
+        return '--primary';
       case 'status-success':
         return '--success';
       case 'status-warning':

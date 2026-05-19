@@ -1,0 +1,25 @@
+// Thin, subtle scrollbar — workspace detail scroll and matching route scroll hosts.
+// @see apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.scss
+// @see docs/specs/ui/workspace/workspace-pane.md
+
+@mixin subtle {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 0.3125rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-full);
+
+    &:hover {
+      background: var(--muted-foreground);
+    }
+  }
+}

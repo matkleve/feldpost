@@ -82,7 +82,6 @@
           [captureDate]="captureDate()"
           [uploadDate]="uploadDate()"
           [projectName]="projectName()"
-          [fullAddress]="fullAddress()"
           [projectOptions]="projectOptions()"
           [selectedProjectIds]="selectedProjectIds()"
           [projectSearch]="projectSearch()"
@@ -90,8 +89,6 @@
           [projectCanCreate]="projectCanCreate()"
           [canAssignMultipleProjects]="canAssignMultipleProjects()"
           [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
-          [isCorrected]="isCorrected()"
-          [saving]="saving()"
           (fieldEditRequested)="editingField.set($event)"
           (fieldSaveRequested)="saveImageField($event.field, $event.value)"
           (editingCancelled)="editingField.set(null)"
@@ -100,11 +97,23 @@
           (projectSearchChanged)="setProjectSearch($event)"
           (projectCreateRequested)="createProjectFromSearch()"
           (projectMembershipToggled)="toggleProjectMembership($event)"
+          (deleteRequested)="confirmDelete()"
+        />
+
+        <app-media-detail-location-section
+          [image]="image()!"
+          [fullAddress]="fullAddress()"
+          [editingField]="editingField()"
+          [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
+          [isCorrected]="isCorrected()"
+          [saving]="saving()"
+          (fieldEditRequested)="editingField.set($event)"
+          (fieldSaveRequested)="saveImageField($event.field, $event.value)"
+          (editingCancelled)="editingField.set(null)"
           (addressSuggestionApplied)="applyAddressSuggestion($event)"
           (copyCoordinatesRequested)="copyCoordinates()"
           (zoomToLocationRequested)="zoomToLocation()"
           (revertCoordinatesRequested)="revertCoordinatesToExif()"
-          (deleteRequested)="confirmDelete()"
         />
 
         <app-metadata-section

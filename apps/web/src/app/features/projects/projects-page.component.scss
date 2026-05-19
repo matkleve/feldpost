@@ -1,3 +1,5 @@
+@use '../../../styles/subtle-scrollbar';
+
 // Scroll owner for /projects (parent chain uses height: 100% + overflow: clip on app-root)
 // @see apps/web/src/styles/layout/app.scss
 :host {
@@ -9,6 +11,7 @@
   overscroll-behavior: contain;
   padding: var(--spacing-4);
   padding-bottom: var(--spacing-6);
+  @include subtle-scrollbar.subtle;
 }
 
 .projects-page {

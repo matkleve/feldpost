@@ -106,7 +106,8 @@ export const WORKSPACE_SINGLE_ACTION_DEFINITIONS: ReadonlyArray<
     section: 'destructive',
     priority: 0,
     icon: 'remove_circle_outline',
-    fallbackLabel: 'Remove from project',
+    labelKey: 'workspace.imageDetail.action.removeFromAllProjects',
+    fallbackLabel: 'Remove from all projects',
     visibleWhen: () => true,
   },
   {

@@ -10,7 +10,7 @@
 // @see docs/specs/page/projects-page.md § Grid density
 .projects-grid {
   display: grid;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   grid-template-columns: 1fr;
 
   @media (min-width: 640px) {

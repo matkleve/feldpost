@@ -62,6 +62,7 @@ import {
 import { MediaDetailHeaderComponent } from './media-detail-header/media-detail-header.component';
 import { MediaDetailMediaViewerComponent } from './media-detail-media-viewer/media-detail-media-viewer.component';
 import { MediaDetailInlineSectionComponent } from './media-detail-inline-section/media-detail-inline-section.component';
+import { MediaDetailLocationSectionComponent } from './media-detail-location-section/media-detail-location-section.component';
 import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import { MediaDetailDataFacade } from '../../../core/media-detail-data/media-detail-data.facade';
 import { ImageDetailMetadataHelper } from './media-detail-metadata.helper';
@@ -93,6 +94,7 @@ export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
     MediaDetailHeaderComponent,
     MediaDetailMediaViewerComponent,
     MediaDetailInlineSectionComponent,
+    MediaDetailLocationSectionComponent,
   ],
   templateUrl: './media-detail-view.component.html',
   styleUrls: ['./media-detail-view.component.scss', './media-detail-view.component.part2.scss'],

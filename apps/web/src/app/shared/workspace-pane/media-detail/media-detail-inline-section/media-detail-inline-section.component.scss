@@ -11,6 +11,7 @@
 :host {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   --mdv-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
   --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
   --mdv-menu-item-text: var(--foreground);
@@ -26,14 +27,13 @@
   --mdv-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
-// Section container — flex column for label + rows
+// Section block — label + rows (Details, Location, …)
 // @see docs/specs/ui/workspace/workspace-pane.md
 .detail-section {
-  display: contents;
-}
-
-.detail-section__rows {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
 }
 
 // Section heading — replaces hlmMenuLabel which is a dropdown directive
@@ -46,18 +46,6 @@
   color: var(--muted-foreground);
   letter-spacing: 0.07em;
   text-transform: uppercase;
-}
-
-app-address-search {
-  min-width: 0;
-  margin-bottom: var(--spacing-1);
-}
-
-// Space between stacked sections (e.g. Details → Location)
-// @see docs/specs/ui/workspace/workspace-pane.md
-.detail-section + .detail-section .detail-section__label {
-  margin-top: var(--spacing-4);
-  padding-top: 0;
 }
 
 // ─── Property rows (slot layout in ../_detail-row-slots.scss) ───
@@ -321,33 +309,4 @@ app-address-search {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   line-height: 1.3;
-}
-
-// ─── Correction history ───
-
-.detail-correction-history {
-  @include detail-row-slots.detail-row-center-width;
-  margin: 0 0 var(--spacing-1);
-  padding: var(--spacing-2);
-  background: color-mix(in srgb, var(--secondary) 6%, transparent);
-  border-radius: var(--radius-sm);
-
-  &__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-block: var(--spacing-1);
-    gap: var(--spacing-2);
-  }
-
-  &__key {
-    font-size: var(--font-size-xs);
-    color: var(--muted-foreground);
-  }
-
-  &__value {
-    font-size: var(--font-size-xs);
-    color: var(--foreground);
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  }
 }

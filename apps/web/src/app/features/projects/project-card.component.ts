@@ -17,10 +17,16 @@ import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../shared/ui/menu';
 import { I18nService } from '../../core/i18n/i18n.service';
+import {
+  CONTEXT_MENU_ACTIONS_CHROME_PX,
+  CONTEXT_MENU_COLOR_PANEL_HEIGHT_PX,
+  CONTEXT_MENU_PANEL_OFFSET_Y_PX,
+  CONTEXT_MENU_PANEL_WIDTH_PX,
+  CONTEXT_MENU_ROW_ESTIMATE_PX,
+  CONTEXT_MENU_VIEWPORT_MARGIN_PX,
+} from '../../shared/ui/menu/context-menu-layout.constants';
 
 // @see docs/specs/component/project/project-card.md
-const PROJECT_CARD_MENU_WIDTH = 224;
-const PROJECT_CARD_MENU_OFFSET_Y = 4;
 
 type ProjectCardMenuAction = 'change_color' | 'archive' | 'restore' | 'delete';
 type ProjectCardMenuPanel = 'actions' | 'colors';
@@ -51,6 +57,9 @@ export class ProjectCardComponent implements OnDestroy {
 
   readonly colorSelected = output<{ projectId: string; colorKey: ProjectColorKey }>();
   readonly dangerAction = output<{ projectId: string; action: 'archive' | 'restore' | 'delete' }>();
+
+  /** Anchored menu width — `14rem` @ 16px root. */
+  readonly contextMenuMinWidthPx = CONTEXT_MENU_PANEL_WIDTH_PX;
 
   // Stable state: menu closed
   readonly menuOpen = signal(false);
@@ -127,10 +136,13 @@ export class ProjectCardComponent implements OnDestroy {
     if (target instanceof HTMLElement) {
       const rect = target.getBoundingClientRect();
       const menuHeight = this.estimateMenuHeight('actions');
-      const downwardY = rect.bottom + PROJECT_CARD_MENU_OFFSET_Y;
-      const hasSpaceBelow = downwardY + menuHeight <= window.innerHeight - 8;
-      const menuY = hasSpaceBelow ? downwardY : rect.top - menuHeight - PROJECT_CARD_MENU_OFFSET_Y;
-      this.openMenuAt(rect.right - PROJECT_CARD_MENU_WIDTH, menuY, menuHeight);
+      const downwardY = rect.bottom + CONTEXT_MENU_PANEL_OFFSET_Y_PX;
+      const hasSpaceBelow =
+        downwardY + menuHeight <= window.innerHeight - CONTEXT_MENU_VIEWPORT_MARGIN_PX;
+      const menuY = hasSpaceBelow
+        ? downwardY
+        : rect.top - menuHeight - CONTEXT_MENU_PANEL_OFFSET_Y_PX;
+      this.openMenuAt(rect.right - CONTEXT_MENU_PANEL_WIDTH_PX, menuY, menuHeight);
       return;
     }
 
@@ -204,8 +216,13 @@ export class ProjectCardComponent implements OnDestroy {
   }
 
   private estimateMenuHeight(panel: ProjectCardMenuPanel): number {
-    if (panel === 'colors') return 120;
-    return this.availableMenuActions().length * 44 + 24;
+    if (panel === 'colors') {
+      return CONTEXT_MENU_COLOR_PANEL_HEIGHT_PX;
+    }
+    return (
+      this.availableMenuActions().length * CONTEXT_MENU_ROW_ESTIMATE_PX +
+      CONTEXT_MENU_ACTIONS_CHROME_PX
+    );
   }
 
   private closeMenu(): void {
@@ -219,9 +236,12 @@ export class ProjectCardComponent implements OnDestroy {
 
   private clampMenuPosition(x: number, y: number, menuHeight: number): { x: number; y: number } {
     if (typeof window === 'undefined') return { x, y };
-    const margin = 8;
+    const margin = CONTEXT_MENU_VIEWPORT_MARGIN_PX;
     return {
-      x: Math.min(Math.max(x, margin), window.innerWidth - PROJECT_CARD_MENU_WIDTH - margin),
+      x: Math.min(
+        Math.max(x, margin),
+        window.innerWidth - CONTEXT_MENU_PANEL_WIDTH_PX - margin,
+      ),
       y: Math.min(Math.max(y, margin), window.innerHeight - menuHeight - margin),
     };
   }

@@ -22,7 +22,6 @@
   align-items: stretch;
   column-gap: var(--spacing-1);
   position: relative;
-  margin-bottom: var(--spacing-1);
   padding: 0;
   min-height: var(--detail-row-action-size);
   min-width: 0;
@@ -46,6 +45,7 @@
       opacity: 1;
       pointer-events: auto;
       color: var(--primary);
+      background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent));
     }
   }
 
@@ -153,10 +153,6 @@
 
   &--static {
     cursor: default;
-
-    &:hover {
-      color: var(--muted-foreground);
-    }
   }
 
   &--mono {

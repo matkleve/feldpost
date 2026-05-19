@@ -55,15 +55,15 @@
             (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
           />
         </div>
-        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
         <button
-          class="detail-row-action detail-row-action--r2 add-metadata-confirm"
+          class="detail-row-action detail-row-action--r1 add-metadata-confirm"
           type="button"
           [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
           (click)="addMetadata(newKeyInput.value, newValueInput.value)"
         >
           <span class="material-icons" aria-hidden="true">check</span>
         </button>
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
       </div>
     }
 

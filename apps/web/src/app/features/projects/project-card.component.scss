@@ -14,27 +14,43 @@
   padding-block: var(--spacing-1);
 }
 
-// Card surface — geometry and tint owner
-// @see docs/specs/component/project/project-card.md § Ownership Matrix
+// Project-tint mix strengths — aligned to chip surface mixes (10% / 12% / 16% / 18%)
+// @see apps/web/src/app/shared/components/chip/chip.component.scss
 .project-card {
+  --project-card-tint-surface: 10%;
+  --project-card-tint-surface-hover: 16%;
+  --project-card-tint-surface-sandstone-hover: 18%;
+  --project-card-tint-thumbnail: 12%;
+  --project-card-tint-map-stub: 20%;
+  --project-card-tint-pin: 60%;
+  --project-card-tint-initials: 80%;
+  --project-card-border-muted: 72%;
+  --project-card-tint-menu-hover: 40%;
+
   box-sizing: border-box;
   height: 100%;
-  padding: var(--spacing-3);
-  border: none;
+  padding: var(--spacing-2);
   border-radius: var(--container-radius-panel);
-  background: color-mix(in srgb, var(--project-item-color, var(--muted)) 5%, var(--card));
+  // Chrome matches nav `.sidebar__panel` — @see styles/_frosted-chrome.scss
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   box-shadow: var(--shadow-md);
+  background: color-mix(
+    in srgb,
+    var(--project-item-color, var(--muted)) var(--project-card-tint-surface),
+    var(--card)
+  );
   display: grid;
   gap: var(--spacing-2);
   align-content: start;
   position: relative;
-  transition:
-    background var(--motion-duration-fast) var(--motion-ease-out),
-    box-shadow var(--motion-duration-fast) var(--motion-ease-out);
+  transition: background var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover {
-    background: color-mix(in srgb, var(--project-item-color, var(--muted)) 8%, var(--card));
-    box-shadow: var(--shadow-lg);
+    background: color-mix(
+      in srgb,
+      var(--project-item-color, var(--muted)) var(--project-card-tint-surface-hover),
+      var(--card)
+    );
   }
 
   &:focus-within {
@@ -45,7 +61,11 @@
 
 :host-context(html[data-theme='sandstone']) {
   .project-card:hover {
-    background: color-mix(in srgb, var(--project-item-color, var(--muted)) 10%, var(--card));
+    background: color-mix(
+      in srgb,
+      var(--project-item-color, var(--muted)) var(--project-card-tint-surface-sandstone-hover),
+      var(--card)
+    );
   }
 }
 
@@ -56,7 +76,11 @@
   aspect-ratio: 16 / 9;
   border-radius: calc(var(--container-radius-panel) - var(--spacing-1));
   overflow: hidden;
-  background: color-mix(in srgb, var(--project-item-color, var(--muted)) 12%, var(--muted));
+  background: color-mix(
+    in srgb,
+    var(--project-item-color, var(--muted)) var(--project-card-tint-thumbnail),
+    var(--muted)
+  );
 }
 
 // 2×2 photo mosaic — content fills thumbnail zone
@@ -87,15 +111,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--project-item-color, var(--muted)) 20%, var(--muted));
+  background: color-mix(
+    in srgb,
+    var(--project-item-color, var(--muted)) var(--project-card-tint-map-stub),
+    var(--muted)
+  );
 }
 
 // Map pin icon inside map stub
 // @see docs/specs/component/project/project-card.md § Thumbnail — map stub
 .project-card__map-pin {
-  font-size: 2rem;
-  color: color-mix(in srgb, var(--project-item-color, var(--primary)) 60%, var(--foreground));
-  opacity: 0.7;
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-solid);
+  color: color-mix(
+    in srgb,
+    var(--project-item-color, var(--primary)) var(--project-card-tint-pin),
+    var(--foreground)
+  );
+  opacity: 0.72;
 }
 
 // Initials placeholder — centered text, project-tinted surface
@@ -107,9 +140,13 @@
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-xl);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: color-mix(in srgb, var(--project-item-color, var(--primary)) 80%, var(--foreground));
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  color: color-mix(
+    in srgb,
+    var(--project-item-color, var(--primary)) var(--project-card-tint-initials),
+    var(--foreground)
+  );
 }
 
 // Card header — column layout for name + trigger row
@@ -131,12 +168,12 @@
   min-height: var(--spacing-6);
 }
 
-// Project name — 2-line clamp
-// @see apps/web/src/styles/_typography-baseline.scss (font-size/weight/line-height owned globally)
+// Project name — 2-line clamp (line box uses global h3 line-height)
+// @see apps/web/src/styles/_typography-baseline.scss
 .project-card__name {
   margin: 0;
   min-width: 0;
-  min-height: calc(2 * 1.1 * var(--font-size-sm));
+  min-height: 2lh;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -171,16 +208,20 @@
   padding: 0;
   color: var(--foreground);
   background: var(--card);
-  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+  border-color: color-mix(in srgb, var(--border) var(--project-card-border-muted), transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--accent) 40%, var(--card));
+    background: color-mix(
+      in srgb,
+      var(--accent) var(--project-card-tint-menu-hover),
+      var(--card)
+    );
     color: var(--foreground);
   }
 
   .material-icons {
-    font-size: 1.125rem;
-    line-height: 1;
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-solid);
   }
 }
 

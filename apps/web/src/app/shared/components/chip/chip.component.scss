@@ -22,17 +22,17 @@
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--primary) 10%, var(--background));
   color: var(--foreground);
-  font-size: 0.6875rem;
+  font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
-  line-height: 1;
+  line-height: var(--line-height-solid);
   letter-spacing: 0.03125rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition:
-    background 120ms ease-out,
-    border-color 120ms ease-out,
-    color 120ms ease-out;
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .chip:focus-visible {
@@ -77,8 +77,8 @@
   cursor: pointer;
   opacity: 0.72;
   transition:
-    background 120ms ease-out,
-    opacity 120ms ease-out;
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .chip__dismiss .material-icons {
@@ -137,6 +137,10 @@
 }
 
 .chip--primary,
+.chip--success,
+.chip--warning,
+.chip--neutral,
+.chip--info,
 .chip--status-success,
 .chip--status-warning,
 .chip--status-danger,
@@ -152,6 +156,10 @@
 }
 
 .chip--primary:hover,
+.chip--success:hover,
+.chip--warning:hover,
+.chip--neutral:hover,
+.chip--info:hover,
 .chip--status-success:hover,
 .chip--status-warning:hover,
 .chip--status-danger:hover,
