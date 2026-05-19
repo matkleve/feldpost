@@ -25,14 +25,28 @@
       (blur)="titleSaveRequested.emit(titleInput.value)"
     />
   } @else {
-    <button
-      class="detail-title detail-title--editable"
-      type="button"
-      [attr.title]="t('workspace.imageDetail.title.edit.title', 'Click to edit title')"
-      (click)="titleEditRequested.emit()"
-    >
-      {{ displayTitle() }}
-    </button>
+    <div class="detail-header__title-group">
+      <button
+        class="detail-title detail-title--editable"
+        type="button"
+        [attr.title]="t('workspace.imageDetail.title.edit.title', 'Click to edit title')"
+        (click)="titleEditRequested.emit()"
+      >
+        {{ displayTitle() }}
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-header__title-edit"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.title.edit.aria', 'Edit image title')"
+        [attr.title]="t('workspace.imageDetail.title.edit.title', 'Click to edit title')"
+        (click)="titleEditRequested.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+    </div>
   }
 
   <span

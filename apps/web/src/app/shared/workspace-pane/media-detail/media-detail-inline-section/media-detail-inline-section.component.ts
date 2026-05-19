@@ -50,11 +50,15 @@ interface AddressFieldDefinition {
     HlmBadgeDirective,
   ],
   templateUrl: './media-detail-inline-section.component.html',
-  styleUrl: '../media-detail-view.component.scss',
+  styleUrls: [
+    '../media-detail-view.component.scss',
+    '../media-detail-view.component.part2.scss',
+  ],
 })
 export class ImageDetailInlineSectionComponent {
   private static readonly PROJECT_DROPDOWN_GAP_PX = 8;
   private static readonly PROJECT_DROPDOWN_MARGIN_PX = 8;
+  private static readonly PROJECT_DROPDOWN_MAX_WIDTH_PX = 320;
 
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
@@ -267,7 +271,11 @@ export class ImageDetailInlineSectionComponent {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const availableWidth = Math.max(240, viewportWidth - margin * 2);
-    const preferredWidth = Math.min(editorRect.width, availableWidth);
+    const preferredWidth = Math.min(
+      editorRect.width,
+      availableWidth,
+      ImageDetailInlineSectionComponent.PROJECT_DROPDOWN_MAX_WIDTH_PX,
+    );
     const dropdownHeight = panelRect?.height ?? 0;
     const preferredLeft = editorRect.left;
     const maxLeft = Math.max(margin, viewportWidth - preferredWidth - margin);

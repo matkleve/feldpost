@@ -181,6 +181,51 @@ export class FilterDropdownComponent {
     return filterDropdownOperatorLabel(this.t, operator);
   }
 
+  /** Longest property label for picker ghost sizing (locale-aware via `propertyOptions`). */
+  protected longestPropertySizingLabel(): string {
+    const placeholder = this.t('workspace.filter.property', 'Property');
+    let longest = placeholder;
+    for (const option of this.propertyOptions()) {
+      if (option.label.length > longest.length) {
+        longest = option.label;
+      }
+    }
+    return longest;
+  }
+
+  /** Longest operator label for the active property type (picker ghost sizing). */
+  protected longestOperatorSizingLabel(propertyId: string): string {
+    const placeholder = this.t('workspace.filter.operator', 'Operator');
+    let longest = placeholder;
+    for (const operator of this.getOperatorsForRule(propertyId)) {
+      const label = this.operatorLabel(operator);
+      if (label.length > longest.length) {
+        longest = label;
+      }
+    }
+    return longest;
+  }
+
+  /** Longest operator label across all property types (empty-state shell ghost sizing). */
+  protected longestOperatorSizingLabelAll(): string {
+    const placeholder = this.t('workspace.filter.operator', 'Operator');
+    let longest = placeholder;
+    const seen = new Set<string>();
+    for (const option of this.propertyOptions()) {
+      for (const operator of operatorsForPropertyType(option.type)) {
+        if (seen.has(operator)) {
+          continue;
+        }
+        seen.add(operator);
+        const label = this.operatorLabel(operator);
+        if (label.length > longest.length) {
+          longest = label;
+        }
+      }
+    }
+    return longest;
+  }
+
   toggleConjunction(id: string): void {
     const rules = this.filterService.rules();
     const rule = rules.find((r) => r.id === id);

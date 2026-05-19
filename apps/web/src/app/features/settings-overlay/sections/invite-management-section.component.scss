@@ -145,6 +145,20 @@
     background: color-mix(in srgb, var(--card) 92%, transparent);
   }
 
+  // Dark theme: QR frame matches inverted module colors (light-on-dark for scan contrast)
+  // @see docs/specs/ui/settings-overlay
+  :host-context(html[data-theme='dark']) .invite-section__qr-frame {
+    background: var(--background);
+  }
+
+  // System dark when no explicit data-theme on html
+  // @see docs/specs/ui/settings-overlay
+  @media (prefers-color-scheme: dark) {
+    :host-context(html:not([data-theme])) .invite-section__qr-frame {
+      background: var(--background);
+    }
+  }
+
   // Canvas fills the QR frame
   // @see docs/specs/ui/settings-overlay
   .invite-section__qr-frame canvas {

@@ -48,6 +48,10 @@
   border-block-start: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
 }
 
+.account-detail-block + .account-detail-block {
+  margin-block-start: var(--spacing-2);
+}
+
 // Primary fields/actions under the subsection lead (flex column only; no border fill)
 // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-detail-block__body {

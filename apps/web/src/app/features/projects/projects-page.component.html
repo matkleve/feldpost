@@ -112,5 +112,17 @@
       (cancel)="cancelPendingAction()"
       (confirm)="confirmPendingAction()"
     />
+
+    @if (projectNameDialogOpen()) {
+      <app-text-input-dialog
+        [title]="t('projects.page.action.newProject', 'New project')"
+        [message]="t('map.shell.dialog.projectName.message', 'Enter a project name.')"
+        [placeholder]="t('map.shell.dialog.projectName.placeholder', 'e.g. Radius Selection North')"
+        [confirmLabel]="t('map.shell.dialog.projectName.confirm', 'Create project')"
+        [cancelLabel]="t('map.shell.dialog.cancel', 'Cancel')"
+        (cancelled)="onProjectNameDialogCancelled()"
+        (confirmed)="onProjectNameDialogConfirmed($event)"
+      />
+    }
   </section>
 </main>

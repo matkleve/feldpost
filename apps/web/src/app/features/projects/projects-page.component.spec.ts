@@ -34,6 +34,7 @@ describe('ProjectsPageComponent', () => {
   const projectsServiceMock = {
     loadProjects: vi.fn().mockResolvedValue([]),
     createDraftProject: vi.fn().mockResolvedValue(null),
+    renameProject: vi.fn().mockResolvedValue(true),
     setProjectColor: vi.fn().mockResolvedValue(true),
     archiveProject: vi.fn().mockResolvedValue(true),
     restoreProject: vi.fn().mockResolvedValue(true),
@@ -41,6 +42,7 @@ describe('ProjectsPageComponent', () => {
   };
 
   beforeEach(async () => {
+    vi.clearAllMocks();
     TestBed.overrideComponent(ProjectsPageComponent, {
       remove: {
         imports: [ProjectsToolbarComponent],
@@ -178,5 +180,36 @@ describe('ProjectsPageComponent', () => {
     const current = host.querySelector('.projects-breadcrumbs__item--current');
     expect(breadcrumb).not.toBeNull();
     expect(current?.textContent).toContain('Site 42');
+  });
+
+  it('opens project-name dialog without creating a project immediately', async () => {
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.onNewProject();
+
+    expect(component.projectNameDialogOpen()).toBe(true);
+    expect(projectsServiceMock.createDraftProject).not.toHaveBeenCalled();
+  });
+
+  it('creates and renames a project after project-name confirmation', async () => {
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const created = createProject({ id: 'project-created', name: 'Draft Project' });
+    projectsServiceMock.createDraftProject.mockResolvedValueOnce(created);
+    projectsServiceMock.renameProject.mockResolvedValueOnce(true);
+
+    const component = fixture.componentInstance;
+    component.onNewProject();
+    await component.onProjectNameDialogConfirmed('Bridge Alpha');
+
+    expect(component.projectNameDialogOpen()).toBe(false);
+    expect(projectsServiceMock.createDraftProject).toHaveBeenCalledTimes(1);
+    expect(projectsServiceMock.renameProject).toHaveBeenCalledWith('project-created', 'Bridge Alpha');
+    expect(component.projects()[0]?.name).toBe('Bridge Alpha');
   });
 });

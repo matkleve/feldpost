@@ -259,7 +259,7 @@
   .settings-overlay__detail-section {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-3);
+    gap: var(--spacing-4);
     min-width: 0;
   }
 
@@ -308,7 +308,8 @@
   // Hover affordance for TOC jumps
   // @see docs/specs/ui/settings-overlay/settings-overlay.md
   .settings-overlay__detail-toc-item:hover {
-    background: var(--settings-hover-focus);
+    background: var(--accent);
+    color: var(--accent-foreground);
   }
 
   // Focus ring for keyboard users on TOC jumps
@@ -332,9 +333,9 @@
   .settings-overlay__detail-group {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-3);
+    gap: var(--spacing-4);
     min-width: 0;
-    padding-block-start: var(--spacing-4);
+    padding-block-start: var(--spacing-5);
     border-block-start: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
   }
 

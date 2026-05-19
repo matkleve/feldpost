@@ -715,6 +715,10 @@
           @case ('account') {
             @let tocAnchors = anchorsForSection('account');
             <div class="settings-overlay__detail-section settings-overlay__detail-section--embedded">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.section.account.title', 'Account') }}</h3>
+                <p>{{ t('settings.overlay.section.account.subtitle', 'Identity and sign-in context') }}</p>
+              </div>
               @if (tocAnchors.length > 0) {
                 <nav
                   class="settings-overlay__detail-toc"
@@ -738,6 +742,10 @@
           @case ('invite-management') {
             @let tocAnchors = anchorsForSection('invite-management');
             <div class="settings-overlay__detail-section settings-overlay__detail-section--embedded">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.section.invites.title', 'Invite Management') }}</h3>
+                <p>{{ t('settings.overlay.section.invites.subtitle', 'Role-scoped QR and share links') }}</p>
+              </div>
               @if (tocAnchors.length > 0 && inviteManagementTocVisible()) {
                 <nav
                   class="settings-overlay__detail-toc"

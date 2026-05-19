@@ -46,7 +46,7 @@
 }
 
 .filter-rule__picker {
-  flex: 1 1 0;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
@@ -55,6 +55,44 @@
 .filter-rule__picker-trigger {
   width: 100%;
   min-width: 0;
+  max-width: 100%;
+}
+
+// Invisible longest-label copy sizes the trigger; visible label stacks in the same grid cell.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-label-stack {
+  display: inline-grid;
+  min-width: 0;
+  flex: 1 1 auto;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
+
+// Ghost sizing span — hidden but sets column width from longest option label (per locale).
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-sizer {
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+// Visible picker label — truncates when the row is narrower than the ghost width.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Hidden full rule row establishes shell width when the filter list is empty.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-dropdown__size-anchor {
+  visibility: hidden;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
 }
 
 .filter-rule__picker-chevron {
@@ -103,4 +141,9 @@
 .filter-rule__remove:hover .material-icons,
 .filter-rule__remove:focus-visible .material-icons {
   color: var(--destructive);
+}
+
+.filter-rule__remove:hover,
+.filter-rule__remove:focus-visible {
+  background-color: color-mix(in srgb, var(--destructive) 12%, transparent);
 }

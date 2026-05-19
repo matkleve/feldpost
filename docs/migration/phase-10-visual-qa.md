@@ -1,6 +1,6 @@
 # Phase 10 — Visual QA & Polish
 
-**Status:** **Wave P4** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — **In progress (partial manual QA, 2026-05-19)** — 42 findings logged across two live browser passes (nav/search, upload panel, workspace pane, media page, projects page, settings overlay, nav sidebar); geolocation P1 + workspace pane P1 + media render P1 confirmed. Automated gates pass. Three-theme matrix + remaining screens still **open**. Revised estimate: **~20 % complete**. See [§ Manual QA pass (2026-05-19) — partial](#manual-qa-pass-2026-05-19--partial) and [§ Part 2](#manual-qa-pass-2026-05-19--part-2) for full finding tables.
+**Status:** **Wave P4** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — **In progress (partial manual QA, 2026-05-19)** — 58 findings logged across three live browser passes (nav/search, upload panel, workspace pane, media page, projects page, settings overlay, nav sidebar, login, share link dialog); geolocation P1 + workspace pane P1 + media render P1 confirmed. Automated gates pass. Three-theme matrix + remaining screens still **open**. Revised estimate: **~25 % complete**. See [§ Manual QA pass (2026-05-19) — partial](#manual-qa-pass-2026-05-19--partial), [§ Part 2](#manual-qa-pass-2026-05-19--part-2), and [§ Part 3](#manual-qa-pass-2026-05-19--part-3) for full finding tables.
 
 **Goal:** Every primary **screen** and **overlay** looks correct on **all three themes** (`default` / light, `[data-theme="dark"]`, `[data-theme="sandstone"]`). **No new** `::ng-deep` escapes. **No** visual regressions against spec intent (field-first, map-primary, calm confidence).
 
@@ -87,6 +87,40 @@
 - **Project cards** — user has requested full rebuild; existing spec (if any) should be archived, not patched. Confirm before any agent attempts card work.
 - **Persistent upload FAB** — FAB placement spec for media page context is absent or incomplete; needs clarification on whether FAB is a global shell element or per-page.
 - **Project detail in workspace pane** — workspace pane spec does not cover project detail view; needs new spec slice before implementation.
+
+---
+
+## Manual QA pass (2026-05-19) — Part 3
+
+**Context:** Third live human browser session on Phase 10. Two voice QA passes covering Sandstone + Dark themes for filter/sort/group rows, project cards, dropdowns, map basemap, search bar, login page, share link dialog, and settings pages. 16 actionable findings logged; 1 finding subsumed by existing redesign issue (#76); 1 finding duplicate of existing issue (#50). % estimate revised upward slightly from Part 2: **~25 % complete** (Sandstone generally acceptable; Dark mode has specific localized issues; login and share link dialog need dark-mode polish).
+
+**GitHub issues created from this pass:** see Notes column for issue links.
+
+| # | Area | Finding | Severity | Notes |
+|---|------|---------|----------|-------|
+| F1 | Filter/Sort/Group rows | X-button hover: X turns red but background turns grey — contrast too weak | P3 | #84 |
+| F2 | Filter/Sort/Group containers | Inner element border-radius equals outer container radius — should follow inner = outer minus padding | P3 | #85 |
+| F3 | Filter dropdown | Fixed width truncates long labels like "Primärer Block" — width should be calculated from longest label | P2 | #86 |
+| F4 | Dropdowns (dark mode) | No box-shadow on floating panels in dark mode — shadow should be light/inverted to indicate elevation | P2 | #87 |
+| F5 | Project cards (dark mode) | Cards use pure black + orange border — looks harsh; should use anthracite/dark grey | P3 | Subsumed by #76 (full redesign — DO NOT PATCH) |
+| F6 | Map basemap (dark mode) | Leaflet tile layer stays in light mode when dark theme is active | P2 | #88 |
+| F7 | Search bar (dark mode) | Placeholder text colour too dark — almost invisible on dark background | P2 | #89 |
+| F8 | Search bar | Placeholder text does not update with locale (stays "Search Address or Project") | P2 | Duplicate of #50 — skipped |
+| L1 | Login page | ~~Does not auto-adapt to OS dark/light system preference (prefers-color-scheme)~~ — **confirmed working**: login page does respond to system color scheme correctly | P2 | ~~#90~~ closed — confirmed working, not a bug |
+| L2 | Login page (dark mode) | Input fields turn white when text is entered — should stay dark with white text | P2 | #91 |
+| L3 | Login page | Container border-radius too small — increase slightly | P3 | #92 |
+| L4 | Login page | "Forgotten Password" link text is too large | P3 | #93 |
+| SL1 | Share link dialog (dark mode) | QR code block needs dark-mode treatment: dark bg + light/white foreground | P3 | #94 |
+| SL2 | Share link dialog (dark mode) | "Revoke" button is light green instead of destructive red | P2 | #95 |
+| SL3 | Share link dialog | Target / QR-Code / Links buttons do not highlight on hover | P3 | #96 |
+| S1 | Settings pages | Multiple pages missing a visible page heading (e.g. Account page has no "Account" title) | P3 | #97 |
+| S2 | Settings pages | Divider line below "Password ändern" has no spacing gap above — sits directly under button | P3 | #98 |
+| S3 | Settings pages | Insufficient vertical spacing/padding between sections across all settings pages | P3 | #99 |
+
+**Overall verdict from this pass:**
+- Sandstone: generally acceptable — no blocking theme issue
+- Dark: acceptable overall with specific exceptions logged above (basemap, inputs, cards, dropdowns, share link)
+- Most screens look acceptable appearance-wise — main gaps are the specific issues listed
 
 ---
 

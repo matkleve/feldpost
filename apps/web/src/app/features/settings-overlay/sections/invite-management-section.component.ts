@@ -314,15 +314,34 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Matches `html[data-theme]` and system dark palette when theme is unset. */
+  private isDarkThemeActive(): boolean {
+    if (typeof document === 'undefined') {
+      return false;
+    }
+    const theme = document.documentElement.getAttribute('data-theme');
+    if (theme === 'dark') {
+      return true;
+    }
+    if (theme === 'light' || theme === 'sandstone') {
+      return false;
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
   private async renderQrCanvas(canvas: HTMLCanvasElement, payload: string): Promise<void> {
     const currentSequence = ++this.qrRenderSequence;
     this.qrVisible.set(false);
     this.qrLoading.set(true);
 
     try {
+      const darkTheme = this.isDarkThemeActive();
       await toCanvas(canvas, payload, {
         width: 192,
         margin: 1,
+        color: darkTheme
+          ? { dark: '#ffffff', light: '#000000' }
+          : { dark: '#000000', light: '#ffffff' },
       });
 
       if (currentSequence !== this.qrRenderSequence) {

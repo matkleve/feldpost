@@ -8,6 +8,7 @@
   border-radius: var(--radius-sm);
   transition: background 120ms ease-out;
   position: relative;
+  overflow: visible;
 }
 
 .meta-row:hover,

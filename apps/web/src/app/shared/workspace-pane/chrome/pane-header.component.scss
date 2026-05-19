@@ -66,13 +66,32 @@
 }
 
 .pane-header__title-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
   max-width: calc(100% - 6rem);
+  min-width: 0;
   min-height: 2rem;
   border: 0;
   border-radius: var(--radius-sm);
   padding: 0;
   background: transparent;
   cursor: pointer;
+}
+
+.pane-header__title-edit {
+  flex-shrink: 0;
+  font-size: var(--font-size-md);
+  color: var(--primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+
+.pane-header__title-btn:hover .pane-header__title-edit,
+.pane-header__title-btn:focus-visible .pane-header__title-edit {
+  opacity: 1;
 }
 
 .pane-header__title-btn:hover .pane-header__title,
@@ -86,7 +105,7 @@
   line-height: var(--line-height-tight);
   color: var(--foreground);
   text-align: center;
-  max-width: calc(100% - 6rem);
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

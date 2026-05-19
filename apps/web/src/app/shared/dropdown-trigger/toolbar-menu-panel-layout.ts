@@ -1,12 +1,14 @@
 /**
  * Toolbar menu width for `left` clamp — keep in sync with `dropdown-shell.component.scss` `:host.toolbar-dropdown`.
- * TEST (non-filter): **18rem === 288px** at 16px root. **Filter** uses **32rem === 512px** (wider floor for rule rows).
+ * TEST (non-filter): **18rem === 288px** at 16px root. **Filter** uses **32rem === 512px** floor, **40rem === 640px** cap.
  * @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
  */
 export const TOOLBAR_MENU_PANEL_MIN_PX = 288;
 
 /** Wider filter panel floor — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--filter` (**32rem === 512px** at 16px root). */
 export const TOOLBAR_MENU_FILTER_PANEL_MIN_PX = 512;
+/** Filter panel viewport cap — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--filter` (**40rem === 640px** at 16px root). */
+export const TOOLBAR_MENU_FILTER_PANEL_MAX_PX = 640;
 
 /** Viewport clamp width for toolbar shell positioning (sort, grouping, projects, and non-filter panels). */
 export const TOOLBAR_MENU_SHELL_MIN_PX = TOOLBAR_MENU_PANEL_MIN_PX;
@@ -24,7 +26,7 @@ export function toolbarDropdownPanelClass(activePanelId: string | null): string 
   return activePanelId === 'filter' ? `${TOOLBAR_DROPDOWN_PANEL_BASE} toolbar-dropdown--filter` : TOOLBAR_DROPDOWN_PANEL_BASE;
 }
 
-/** Horizontal width used to clamp `left` when opening a toolbar menu (must match the active panel’s CSS min-width). */
+/** Horizontal width used to clamp `left` when opening a toolbar menu (match shell width for fixed menus, cap width for filter). */
 export function toolbarDropdownPositionWidthPx(activePanelId: string | null): number {
-  return activePanelId === 'filter' ? TOOLBAR_MENU_FILTER_PANEL_MIN_PX : TOOLBAR_MENU_SHELL_MIN_PX;
+  return activePanelId === 'filter' ? TOOLBAR_MENU_FILTER_PANEL_MAX_PX : TOOLBAR_MENU_SHELL_MIN_PX;
 }

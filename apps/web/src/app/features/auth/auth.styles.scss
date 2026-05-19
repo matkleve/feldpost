@@ -42,7 +42,7 @@
   gap: var(--spacing-2);
   padding-block: var(--spacing-6);
   padding-inline: var(--spacing-6);
-  border-radius: var(--container-radius-panel);
+  border-radius: var(--radius-xl);
   background: var(--card);
   box-shadow: var(--shadow-lg);
   width: 100%;
@@ -113,6 +113,30 @@
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-medium);
     margin-bottom: var(--spacing-1);
+  }
+
+  // Secondary helper link — smaller than the field label row
+  // @see docs/migration/phase-10-visual-qa.md Part 3 login L4
+  label a {
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+  }
+}
+
+// Dark-surface inputs: override browser autofill / native fill to theme tokens
+// @see docs/migration/phase-10-visual-qa.md Part 3 login L2
+.auth-card input[hlmInput] {
+  background-color: var(--background);
+  color: var(--foreground);
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--background) inset;
+    -webkit-text-fill-color: var(--foreground);
+    caret-color: var(--foreground);
+    transition: background-color 50000s ease-in-out 0s;
   }
 }
 

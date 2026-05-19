@@ -41,6 +41,7 @@ import { ProjectsToolbarComponent } from './projects-toolbar.component';
 import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
+import { TextInputDialogComponent } from '../../shared/text-input-dialog/text-input-dialog.component';
 
 import {
   FILTER_OPTIONS,
@@ -61,6 +62,7 @@ import {
     ProjectsPageHeaderComponent,
     ProjectsTableViewComponent,
     ProjectsToolbarComponent,
+    TextInputDialogComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-page.component.html',
@@ -107,6 +109,7 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly activeGroupings = signal<GroupingProperty[]>([]);
   readonly activeSorts = signal<SortConfig[]>([]);
   readonly creatingProject = signal(false);
+  readonly projectNameDialogOpen = signal(false);
   readonly coloringProjectId = signal<string | null>(null);
   readonly pendingProjectAction = signal<PendingProjectAction>(null);
   readonly pendingProjectId = signal<string | null>(null);
@@ -256,12 +259,27 @@ export class ProjectsPageComponent implements OnDestroy {
     this.statusFilter.set(value);
   }
 
-  async onNewProject(): Promise<void> {
+  onNewProject(): void {
+    if (this.creatingProject() || this.projectNameDialogOpen()) {
+      return;
+    }
+    this.projectNameDialogOpen.set(true);
+  }
+
+  onProjectNameDialogCancelled(): void {
+    if (this.creatingProject()) {
+      return;
+    }
+    this.projectNameDialogOpen.set(false);
+  }
+
+  async onProjectNameDialogConfirmed(projectName: string): Promise<void> {
     if (this.creatingProject()) {
       return;
     }
 
     this.creatingProject.set(true);
+    this.projectNameDialogOpen.set(false);
 
     try {
       const draft = await this.projectsService.createDraftProject();
@@ -277,7 +295,21 @@ export class ProjectsPageComponent implements OnDestroy {
         return;
       }
 
-      this.projects.update((all) => [draft, ...all]);
+      const renamed = await this.projectsService.renameProject(draft.id, projectName);
+      if (!renamed) {
+        this.toastService.show({
+          message: this.t(
+            'projects.page.toast.createError',
+            'Could not create project. Please try again.',
+          ),
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      }
+
+      const createdProject = { ...draft, name: projectName.trim() };
+      this.projects.update((all) => [createdProject, ...all]);
       this.viewMode.set('cards');
     } finally {
       this.creatingProject.set(false);

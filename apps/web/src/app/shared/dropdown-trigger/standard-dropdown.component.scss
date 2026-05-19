@@ -15,6 +15,7 @@
   // Symmetric inset on all sides (same token as former horizontal-only — avoids flush edges when shell has `p-0`).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   padding: var(--std-dropdown-padding-inline);
+  border-radius: calc(var(--radius) - 4px);
   width: 100%;
   min-height: var(--std-dropdown-min-height);
 }

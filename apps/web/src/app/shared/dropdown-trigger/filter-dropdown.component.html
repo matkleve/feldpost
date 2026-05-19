@@ -1,4 +1,4 @@
-<div class="filter-dropdown-host block w-full min-w-0">
+<div class="filter-dropdown-host block w-max max-w-full min-w-0">
   <app-standard-dropdown
     class="filter-dropdown"
     [style.--std-dropdown-min-height]="'7rem'"
@@ -8,8 +8,19 @@
     (actionRequested)="filterService.addRule()"
     (itemsScroll)="onRulesScroll()"
   >
-    <div class="min-w-0 w-full" dropdown-items>
+    <div class="min-w-0 w-max max-w-full" dropdown-items>
       @if (filterService.rules().length === 0) {
+        <div class="filter-dropdown__size-anchor" aria-hidden="true">
+          <div class="filter-rule">
+            <span class="filter-rule__conj font-normal">{{ t('workspace.filter.conjunction.where', 'Where') }}</span>
+            <span class="filter-rule__picker-sizer">{{ longestPropertySizingLabel() }}</span>
+            <span class="filter-rule__picker-sizer">{{ longestOperatorSizingLabelAll() }}</span>
+            <span class="filter-rule__value filter-rule__picker-sizer">{{
+              t('workspace.filter.value.placeholder', 'Value…')
+            }}</span>
+            <span class="material-icons filter-rule__remove" aria-hidden="true">close</span>
+          </div>
+        </div>
         <div class="w-full min-w-0 py-3 text-center text-sm text-muted-foreground">
           {{ t('workspace.filter.empty', 'No filters applied') }}
         </div>
@@ -29,7 +40,7 @@
               </button>
 
               <div
-                class="filter-rule__picker min-w-0 shrink"
+                class="filter-rule__picker"
                 [attr.data-filter-picker]="rule.id + '-property'"
               >
                 <button
@@ -37,15 +48,20 @@
                   variant="outline"
                   size="sm"
                   iconPlacement="end"
-                  class="filter-rule__picker-trigger min-w-0 max-w-full font-normal"
+                  class="filter-rule__picker-trigger font-normal"
                   type="button"
                   [attr.aria-expanded]="isPickerOpen(rule.id, 'property')"
                   aria-haspopup="listbox"
                   (click)="togglePicker($event, rule.id, 'property')"
                 >
-                  <span class="min-w-0 flex-1 truncate text-left text-foreground">{{
-                    propertyTriggerLabel(rule.property)
-                  }}</span>
+                  <span class="filter-rule__picker-label-stack">
+                    <span class="filter-rule__picker-sizer" aria-hidden="true">{{
+                      longestPropertySizingLabel()
+                    }}</span>
+                    <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                      propertyTriggerLabel(rule.property)
+                    }}</span>
+                  </span>
                   <span
                     data-dd-part="chevron"
                     class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
@@ -56,7 +72,7 @@
               </div>
 
               <div
-                class="filter-rule__picker min-w-0 shrink"
+                class="filter-rule__picker"
                 [attr.data-filter-picker]="rule.id + '-operator'"
               >
                 <button
@@ -64,15 +80,20 @@
                   variant="outline"
                   size="sm"
                   iconPlacement="end"
-                  class="filter-rule__picker-trigger min-w-0 max-w-full font-normal"
+                  class="filter-rule__picker-trigger font-normal"
                   type="button"
                   [attr.aria-expanded]="isPickerOpen(rule.id, 'operator')"
                   aria-haspopup="listbox"
                   (click)="togglePicker($event, rule.id, 'operator')"
                 >
-                  <span class="min-w-0 flex-1 truncate text-left text-foreground">{{
-                    operatorTriggerLabel(rule.operator)
-                  }}</span>
+                  <span class="filter-rule__picker-label-stack">
+                    <span class="filter-rule__picker-sizer" aria-hidden="true">{{
+                      longestOperatorSizingLabel(rule.property)
+                    }}</span>
+                    <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                      operatorTriggerLabel(rule.operator)
+                    }}</span>
+                  </span>
                   <span
                     data-dd-part="chevron"
                     class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"

@@ -6,7 +6,10 @@
   --detail-media-panel-width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
 
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
+  min-height: 0;
+  min-width: 0;
   overflow: hidden;
   background: var(--card);
 
@@ -18,10 +21,11 @@
 }
 
 .detail-main-column {
+  flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  height: 100%;
 
   &--loading {
     overflow: hidden;
@@ -105,6 +109,7 @@
   padding: var(--spacing-2) var(--spacing-3);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  min-width: 0;
   width: 100%;
   max-width: 40rem;
   margin: 0 auto;
@@ -112,6 +117,47 @@
 
   &--loading {
     pointer-events: none;
+  }
+}
+
+// Groups title + hover edit control so the chip/menu cluster keeps a stable flex lane.
+// @see docs/specs/ui/media-detail/media-detail-header.md
+.detail-header__title-group {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+// Reveals inline edit affordance on title hover without overlapping the type chip.
+// @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+.detail-header__title-edit {
+  --icon-btn-size: 2rem;
+  --icon-btn-radius: var(--radius-sm);
+  --icon-btn-icon-size: 0.9375rem;
+
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease-out;
+
+  .material-icons {
+    font-size: var(--font-size-md);
+  }
+}
+
+.detail-header__title-group:hover .detail-header__title-edit,
+.detail-header__title-group:focus-within .detail-header__title-edit {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .detail-header__title-edit {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
@@ -129,9 +175,12 @@
   }
 }
 
-.detail-title {
+.detail-header__title-group .detail-title {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.detail-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -224,6 +273,8 @@ html[data-theme='dark'] .detail-title-input {
 
 .detail-scroll {
   flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -515,6 +566,7 @@ html[data-theme='dark'] .detail-title-input {
   margin: 0 auto;
   box-sizing: border-box;
   padding: 0 var(--spacing-2) var(--spacing-6);
+  overflow: visible;
   display: grid;
   grid-template-columns:
     minmax(0, var(--detail-row-rail-size))

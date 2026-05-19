@@ -19,10 +19,12 @@
 
 .metadata-row-wrap {
   display: block;
+  overflow: visible;
 
   app-metadata-property-row {
     display: block;
     min-width: 0;
+    overflow: visible;
   }
 }
 
