@@ -104,6 +104,23 @@ Workspace and feature toolbars expose **Projects**, **Filter**, **Sort**, and **
 
 ---
 
+## Definition of Done
+
+Migration complete = (1) no legacy token bridge, (2) no `ui-*` BEM in HTML templates, (3) Tailwind v4 as primitive layer via `styles.scss`, (4) component SCSS retained by design per [`agent-css-variable-contract.md`](../design/agent-css-variable-contract.md). "Zero custom CSS" is explicitly **not** a goal.
+
+**Evidence gates (automated):**
+
+| Criterion | Verify |
+| --------- | ------ |
+| (1) No legacy token bridge | `rg 'legacy-design-tokens\|_legacy-design-tokens' apps/web` → **0**; `apps/web/src/styles/_legacy-design-tokens.scss` **absent** |
+| (2) No `ui-*` in templates | Phase 6 gates in [phase-6-template-cleanup.md](./phase-6-template-cleanup.md) § Acceptance criteria |
+| (3) Tailwind v4 primitive layer | `apps/web/src/styles.scss` — `@import "tailwindcss"`, tweakcn `:root`, `@theme inline`; [phase-2-foundation.md](./phase-2-foundation.md) |
+| (4) Component SCSS by design | Per-component `*.component.scss` + spec-owned geometry; token rules in [agent-css-variable-contract.md](../design/agent-css-variable-contract.md) |
+
+**Human sign-off (not implied by the four criteria above):** [Phase 10](./phase-10-visual-qa.md) screen checklist Pass on **light**, **dark**, and **sandstone** — see [phase-10-manual-matrix.md](./phase-10-manual-matrix.md) for high-risk mixed-surface steps.
+
+---
+
 ## Legacy entry path
 
 [`docs/MIGRATION_PLAN.md`](../MIGRATION_PLAN.md) is a **short stub** only; it exists so older bookmarks and `@see docs/MIGRATION_PLAN.md` comments still resolve. **Update status in this file (`docs/migration/README.md`)** when the migration snapshot changes.

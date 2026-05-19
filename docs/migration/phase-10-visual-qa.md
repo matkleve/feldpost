@@ -21,7 +21,13 @@
 
 **Automated smoke log (same wave):** [`reports/phase-10-migration-smoke-gates-2026-05-18.md`](./reports/phase-10-migration-smoke-gates-2026-05-18.md).
 
-**Manual screen matrix / tight smoke (agent gap log, 2026-05-18):** no interactive browser pass in this slice — documented honestly in [`reports/phase-10-manual-visual-matrix-gap-2026-05-18.md`](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md) (checkboxes below unchanged until a human run). **Related doc-only audits:** settings overlay [sections/layout](./reports/settings-overlay-sections-layout-audit-2026-05-17.md), [Notion-adjacent UX](./reports/settings-overlay-notion-adjacent-ux-2026-05-18.md) — indexed from [migration README](./README.md#where-detail-lives).
+**Manual screen matrix / tight smoke (agent gap log, 2026-05-18):** no interactive browser pass in this slice — documented honestly in [`reports/phase-10-manual-visual-matrix-gap-2026-05-18.md`](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md) (checkboxes below unchanged until a human run).
+
+**Manual matrix execution (2026-05-19 — close-out attempt):** [`phase-10-manual-matrix.md`](./phase-10-manual-matrix.md) was **not** executed in a browser in this session. A coding agent **cannot** satisfy § [Acceptance criteria](#acceptance-criteria) (“browser + three themes required”) or record **Pass** on the screen checklist without an authenticated visual run. **Automated preflight only:** `npm run design-system:check` → exit **0**; `cd apps/web && npx ng build` → exit **0** (CommonJS warnings only). **Formal migration close-out remains blocked** until a human completes the matrix sign-off table in `phase-10-manual-matrix.md` and marks the relevant **Screen checklist** rows below **Pass** (or **Fail** + ticket). Dev server for manual run: `cd apps/web && npx ng serve` (default `http://localhost:4200/`).
+
+**Playwright matrix (2026-05-19):** `apps/web/e2e/phase-10-matrix.spec.ts` — structural checks + screenshots for **map-shell**, **upload-panel**, **settings-overlay** × **light / dark / sandstone** × desktop + mobile viewports. Run: `cd apps/web && npx playwright install chromium` (once), then `export FELDPOST_E2E_EMAIL=… FELDPOST_E2E_PASSWORD=… && npm run e2e:phase10` (see [`apps/web/e2e/README.md`](../../apps/web/e2e/README.md)). Agent runs without credentials → **18 skipped** (not Pass). After a green run, review `e2e/results/*.png`, then mark checklist rows **Pass** (Playwright does not replace judgment on subtle theme polish).
+
+**Related doc-only audits:** settings overlay [sections/layout](./reports/settings-overlay-sections-layout-audit-2026-05-17.md), [Notion-adjacent UX](./reports/settings-overlay-notion-adjacent-ux-2026-05-18.md) — indexed from [migration README](./README.md#where-detail-lives).
 
 **Tight smoke (add to Phase 7–8 merges / pre-release if not already exercised above):**
 

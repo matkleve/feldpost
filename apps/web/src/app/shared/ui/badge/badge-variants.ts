@@ -27,9 +27,9 @@ export const badgeVariants = cva(
         /** Semantic info (primary-tinted). */
         info: 'border-transparent bg-primary/10 text-primary',
         /** Semantic success — uses `success` color token from `tailwind.config.js`. */
-        success: 'border-transparent bg-success/12 text-text-primary',
+        success: 'border-transparent bg-success/12 text-foreground',
         /** Semantic warning — uses `warning` color token. */
-        warning: 'border-transparent bg-warning/16 text-text-primary',
+        warning: 'border-transparent bg-warning/16 text-foreground',
       },
     },
     defaultVariants: { variant: 'default' },
