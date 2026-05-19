@@ -1,75 +1,90 @@
-<p class="detail-section__label">{{ t('workspace.metadata.section.title', 'Metadata') }}</p>
+<div class="detail-section">
+  <p class="detail-section__label">{{ t('workspace.metadata.section.title', 'Metadata') }}</p>
 
-@for (entry of entries(); track entry.metadataKeyId) {
-  <div class="metadata-row-wrap">
-    <app-metadata-property-row
-      [key]="entry.key"
-      [value]="entry.value"
-      (valueChanged)="valueChanged.emit({ entry, newValue: $event })"
-      (deleteRequested)="entryRemoved.emit(entry)"
-    />
-  </div>
-}
-
-@if (showAddForm()) {
-  <div class="add-metadata-row">
-    <div class="add-metadata-key-wrap">
-      <input
-        #newKeyInput
-        class="add-metadata-input"
-        type="text"
-        [placeholder]="t('workspace.metadata.input.key.placeholder', 'Key')"
-        [attr.aria-label]="t('workspace.metadata.input.key.aria', 'New metadata key')"
-        (input)="onMetadataKeyInput(newKeyInput.value)"
-        (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
-        (keydown.enter)="newValueInput.focus()"
+  <div class="detail-section__rows">
+    @for (entry of entries(); track entry.metadataKeyId) {
+      <app-metadata-property-row
+        [key]="entry.key"
+        [value]="entry.value"
+        (valueChanged)="valueChanged.emit({ entry, newValue: $event })"
+        (entryRemoved)="entryRemoved.emit(entry)"
       />
-      @if (keySuggestions().length > 0) {
-        <div class="add-metadata-suggestions option-menu-surface flex flex-col">
-          @for (suggestion of keySuggestions(); track suggestion) {
-            <button
-              hlmMenuItem
-              class="w-full"
-              type="button"
-              (click)="
-                newKeyInput.value = suggestion; keySuggestions.set([]); newValueInput.focus()
-              "
-            >
-              <span class="material-icons shrink-0 text-base text-muted-foreground" aria-hidden="true">label</span>
-              <span class="min-w-0 flex-1 text-left" data-i18n-skip>{{ suggestion }}</span>
-            </button>
-          }
-        </div>
-      }
-    </div>
-    <input
-      #newValueInput
-      class="add-metadata-input"
-      type="text"
-      [placeholder]="t('workspace.metadata.input.value.placeholder', 'Value')"
-      [attr.aria-label]="t('workspace.metadata.input.value.aria', 'New metadata value')"
-      (keydown.enter)="addMetadata(newKeyInput.value, newValueInput.value)"
-      (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
-    />
-    <button
-      class="add-metadata-confirm"
-      type="button"
-      [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
-      (click)="addMetadata(newKeyInput.value, newValueInput.value)"
-    >
-      <span class="material-icons" aria-hidden="true">check</span>
-    </button>
-  </div>
-}
+    }
 
-@if (!showAddForm()) {
-  <button
-    hlmMenuItem
-    class="add-metadata-btn inline-flex w-full items-center justify-start gap-2 text-muted-foreground"
-    type="button"
-    (click)="showAddForm.set(true)"
-  >
-    <span class="material-icons text-muted-foreground" aria-hidden="true">add</span>
-    {{ t('workspace.metadata.action.add', 'Add metadata') }}
-  </button>
-}
+    @if (showAddForm()) {
+      <div class="detail-row add-metadata-row detail-row--editing">
+        <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+        <div class="detail-row__center add-metadata-row__center">
+          <div class="add-metadata-key-wrap">
+            <input
+              #newKeyInput
+              class="add-metadata-input"
+              type="text"
+              [placeholder]="t('workspace.metadata.input.key.placeholder', 'Key')"
+              [attr.aria-label]="t('workspace.metadata.input.key.aria', 'New metadata key')"
+              (input)="onMetadataKeyInput(newKeyInput.value)"
+              (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
+              (keydown.enter)="newValueInput.focus()"
+            />
+            @if (keySuggestions().length > 0) {
+              <div class="add-metadata-suggestions option-menu-surface flex flex-col">
+                @for (suggestion of keySuggestions(); track suggestion) {
+                  <button
+                    hlmMenuItem
+                    class="w-full"
+                    type="button"
+                    (click)="
+                      newKeyInput.value = suggestion; keySuggestions.set([]); newValueInput.focus()
+                    "
+                  >
+                    <span class="material-icons shrink-0 text-base text-muted-foreground" aria-hidden="true">label</span>
+                    <span class="min-w-0 flex-1 text-left" data-i18n-skip>{{ suggestion }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <input
+            #newValueInput
+            class="add-metadata-input"
+            type="text"
+            [placeholder]="t('workspace.metadata.input.value.placeholder', 'Value')"
+            [attr.aria-label]="t('workspace.metadata.input.value.aria', 'New metadata value')"
+            (keydown.enter)="addMetadata(newKeyInput.value, newValueInput.value)"
+            (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
+          />
+        </div>
+        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+        <button
+          class="detail-row-action detail-row-action--r2 add-metadata-confirm"
+          type="button"
+          [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
+          (click)="addMetadata(newKeyInput.value, newValueInput.value)"
+        >
+          <span class="material-icons" aria-hidden="true">check</span>
+        </button>
+      </div>
+    }
+
+    @if (!showAddForm()) {
+      <div class="detail-row add-metadata-row">
+        <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+        <div class="detail-row__center">
+          <button
+            hlmMenuItem
+            class="add-metadata-btn inline-flex w-full items-center justify-start gap-2 text-muted-foreground"
+            type="button"
+            (click)="showAddForm.set(true)"
+          >
+            <span class="material-icons text-muted-foreground" aria-hidden="true">add</span>
+            {{ t('workspace.metadata.action.add', 'Add metadata') }}
+          </button>
+        </div>
+        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+      </div>
+    }
+  </div>
+</div>

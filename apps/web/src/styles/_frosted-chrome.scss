@@ -1,0 +1,20 @@
+// Shared frosted floating chrome — canonical recipe from nav `.sidebar__panel` (desktop).
+// Map/search/upload toggles and other map-overlay shells must @use this mixin, not local %/blur values.
+// @see docs/design/tokens.md § Frosted chrome
+// @see apps/web/src/app/features/nav/nav.component.scss
+
+// Frosted fill + blur only (when border/shadow are owned elsewhere)
+// @see docs/design/tokens.md § Frosted chrome
+@mixin fill {
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
+
+// Full floating chrome surface (sidebar, map style switch, search bar shell)
+// @see docs/design/tokens.md § Frosted chrome
+@mixin surface {
+  @include fill;
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  box-shadow: var(--shadow-md);
+}

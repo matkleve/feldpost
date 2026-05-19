@@ -46,6 +46,17 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 **Phase 7 Batch 48** removed **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** from the bridge; menu surfaces use **`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see **`docs/migration/phase-7-token-migration.md`** §Batch 48). For dropdown shell / menu composition contracts, see [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md).
 
+## Frosted chrome (map / floating shells)
+
+Canonical **frosted floating chrome** (nav sidebar panel, map style switch, search bar, upload preview chips, settings overlay shell fill) is defined once in **`apps/web/src/styles/_frosted-chrome.scss`**:
+
+| Mixin | Use |
+| --- | --- |
+| `frosted-chrome.fill` | `var(--card)` at **85%** + `backdrop-filter: blur(16px) saturate(1.2)` |
+| `frosted-chrome.surface` | `fill` + border `color-mix(var(--border) 50%)` + `var(--shadow-md)` |
+
+Component SCSS must `@use '../../../styles/frosted-chrome'` (adjust depth) and `@include` — do not duplicate `%` / blur literals on map-overlay surfaces.
+
 ## 3.1 Color Tokens
 
 Design tokens are CSS custom properties. All components use tokens — never raw hex or Tailwind arbitrary values in design-sensitive contexts.

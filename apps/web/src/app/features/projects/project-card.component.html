@@ -1,4 +1,3 @@
- 
 <article
   class="project-card"
   [class.project-card--row]="variant() === 'row'"
@@ -7,84 +6,105 @@
   [class.project-card--large]="variant() === 'large'"
   [style.--project-item-color]="colorTokenFor()(project().colorKey)"
 >
-  <div class="project-card__header">
-    <span class="project-card__dot" [style.background]="colorTokenFor()(project().colorKey)"></span>
-    <h3 class="project-card__name">{{ project().name }}</h3>
-    @if (variant() === 'large') {
-      <span class="project-card__status">{{
-        t('projects.status.' + project().status, project().status)
-      }}</span>
-    }
-  </div>
+  <header class="project-card__header">
+    <div class="project-card__header-top">
+      <app-chip
+        class="project-card__status"
+        [variant]="project().status === 'active' ? 'status-success' : 'status-warning'"
+        [icon]="project().status === 'active' ? 'check_circle' : 'archive'"
+        [text]="t('projects.status.' + project().status, project().status)"
+      />
+      @if (hasMenuActions()) {
+        <button
+          hlmBtn
+          variant="outline"
+          size="icon"
+          class="project-card__menu-trigger"
+          type="button"
+          [attr.aria-label]="t('projects.page.card.menu.aria', 'Project actions')"
+          [attr.aria-expanded]="menuOpen()"
+          aria-haspopup="menu"
+          (click)="onMenuTriggerClick($event)"
+        >
+          <span class="material-icons" aria-hidden="true">more_vert</span>
+        </button>
+      }
+    </div>
+    <h3 class="project-card__name" [attr.title]="project().name">{{ project().name }}</h3>
+  </header>
 
-  <p class="project-card__badge">
+  <p class="project-card__metric">
     {{ project().totalImageCount }}
-    {{ t('projects.page.metric.photos', 'photos') }}
+    {{ t('projects.page.metric.media', 'media') }}
   </p>
+
+  @if (project().fileTypeCounts.length > 0) {
+    <div class="project-card__filetypes" role="list">
+      @for (fileType of project().fileTypeCounts; track fileType.category) {
+        <app-chip
+          class="project-card__filetype-chip"
+          role="listitem"
+          [variant]="fileTypeChipVariant(fileType.category)"
+          [icon]="fileTypeChipIcon(fileType.category)"
+          [text]="fileType.count.toString()"
+          [attr.aria-label]="fileTypeChipAriaLabel(fileType)"
+        />
+      }
+    </div>
+  }
 
   @if (variant() !== 'small') {
     <p class="project-card__meta">{{ formatRelativeDate()(project().lastActivity) }}</p>
   }
 
   @if (variant() === 'large') {
-    <p class="project-card__context">
+    <p class="project-card__meta project-card__context">
       {{
         project().district || project().city || t('projects.page.meta.noLocation', 'No location')
       }}
     </p>
   }
 
-  <div class="project-card__actions">
-    @if (project().status === 'active') {
-      <button
-        hlmBtn
-        variant="outline"
-        size="icon"
-        type="button"
-        (click)="onToggleColorPicker(project().id)"
-      >
-        <span class="material-icons" aria-hidden="true">palette</span>
-      </button>
-
-      @if (coloringProjectId() === project().id) {
-        <div class="project-card__picker">
-          <app-project-color-picker
-            [selectedColor]="project().colorKey"
-            (colorSelected)="onColorSelected(project().id, $event)"
-          />
-        </div>
-      }
-
-      @if (variant() !== 'small') {
-        <button
-          hlmBtn
-          variant="outline"
-          iconPlacement="start"
-          type="button"
-          (click)="onDangerAction(project().id, 'archive')"
+  @if (menuOpen() && menuPosition(); as menuPos) {
+    <app-dropdown-shell
+      class="map-context-menu"
+      [top]="menuPos.y"
+      [left]="menuPos.x"
+      [minWidth]="224"
+      [panelClass]="menuPanelClass()"
+      (closeRequested)="onMenuCloseRequested()"
+    >
+      @if (menuPanel() === 'actions') {
+        <div
+          class="map-context-menu__items flex flex-col"
+          role="menu"
+          [attr.aria-label]="t('projects.page.card.menu.aria', 'Project actions')"
         >
-          <span class="material-icons" aria-hidden="true">archive</span>
-          <span>{{ t('projects.page.action.archiveProject', 'Archive') }}</span>
-        </button>
+          @for (action of availableMenuActions(); track action) {
+            @if (shouldShowSeparatorBefore(action)) {
+              <div hlmMenuSeparator aria-hidden="true"></div>
+            }
+            <button
+              hlmMenuItem
+              class="w-full"
+              [class.text-destructive]="isDestructiveAction(action)"
+              type="button"
+              role="menuitem"
+              (click)="onMenuAction(action)"
+            >
+              <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{
+                actionIcon(action)
+              }}</span>
+              <span class="min-w-0 flex-1 text-left">{{ actionLabel(action) }}</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <app-project-color-picker
+          [selectedColor]="project().colorKey"
+          (colorSelected)="onColorSelectedFromMenu($event)"
+        />
       }
-    } @else {
-      <button
-        hlmBtn
-        variant="outline"
-        type="button"
-        (click)="onDangerAction(project().id, 'restore')"
-      >
-        <span>{{ t('projects.page.action.restoreProject', 'Restore') }}</span>
-      </button>
-
-      <button
-        hlmBtn
-        variant="destructive"
-        type="button"
-        (click)="onDangerAction(project().id, 'delete')"
-      >
-        <span>{{ t('projects.page.action.deleteProject', 'Delete') }}</span>
-      </button>
-    }
-  </div>
+    </app-dropdown-shell>
+  }
 </article>

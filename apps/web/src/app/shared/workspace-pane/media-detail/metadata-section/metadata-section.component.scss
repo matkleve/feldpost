@@ -1,29 +1,46 @@
+// Metadata section — flex column with heading and row stack (matches inline detail sections).
+// @see docs/specs/ui/media-detail/metadata-section.md
+
+@use '../detail-row-slots';
+
 // Ex-bridge `--menu-item-text` (Phase 7 Batch 48) — defaults + sandstone (ex global bridge).
 // @see docs/migration/phase-7-token-migration.md §Batch 48
 // Ex-bridge `--action-*` (Phase 7 Batch 49) — same values as pre-removal global `:root` + sandstone.
 // @see docs/migration/phase-7-token-migration.md §Batch 49
-// Subgrid participant of detail-content — main column for labels/rows, rails for quiet actions.
-// @see docs/specs/ui/workspace/workspace-pane.md
 :host {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
-  row-gap: 0;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   min-width: 0;
+  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --mdv-menu-item-text: var(--foreground);
+  --mdv-action-text-default: var(--muted-foreground);
+  --mdv-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
   --mds-menu-item-text: var(--foreground);
   --mds-action-text-default: var(--muted-foreground);
   --mds-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 :host-context([data-theme='sandstone']) {
+  --mdv-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
+  --mdv-menu-item-text: #2f271f;
+  --mdv-action-text-default: #6b5a47;
+  --mdv-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
   --mds-menu-item-text: #2f271f;
   --mds-action-text-default: #6b5a47;
   --mds-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
-:host > .detail-section__label {
-  grid-column: 3;
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.detail-section__label {
+  border-top: 1px solid var(--border);
+  margin-top: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-2) 0;
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
@@ -32,33 +49,28 @@
   text-transform: uppercase;
 }
 
-.metadata-row-wrap {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
-  overflow: visible;
-
-  app-metadata-property-row {
-    display: grid;
-    grid-column: 1 / -1;
-    grid-template-columns: subgrid;
-    min-width: 0;
-    overflow: visible;
-  }
-}
-
-.add-metadata-row,
-.add-metadata-btn {
-  grid-column: 3;
+.detail-section__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   min-width: 0;
 }
 
-.add-metadata-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  align-items: center;
+.add-metadata-row__center {
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-1);
+}
+
+.add-metadata-row:not(.detail-row--editing) .detail-row__center {
+  grid-template-columns: 1fr;
+}
+
+.add-metadata-btn {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
 }
 
 .add-metadata-input {
@@ -70,6 +82,7 @@
   padding: 0.25rem var(--spacing-2);
   font-family: inherit;
   outline: none;
+  min-width: 0;
 
   &:focus {
     border-color: var(--primary);
@@ -78,36 +91,13 @@
 }
 
 .add-metadata-confirm {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--mds-action-text-default);
-  cursor: pointer;
-  transition:
-    background 80ms ease-out,
-    color 80ms ease-out;
-
-  .material-icons {
-    font-size: var(--font-size-md);
-  }
-
-  &:hover {
-    background: var(--mds-action-bg-hover);
-    color: var(--mds-menu-item-text);
-  }
-}
-
-.add-metadata-btn {
-  margin: var(--spacing-1) 0;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .add-metadata-key-wrap {
   position: relative;
+  min-width: 0;
 }
 
 .add-metadata-suggestions {

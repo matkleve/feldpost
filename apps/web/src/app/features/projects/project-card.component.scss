@@ -1,118 +1,147 @@
 :host {
   display: block;
-  --project-card-action-hover-mix: color-mix(in srgb, var(--primary) 12%, transparent);
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
-// Sandstone used stronger primary/border mix for hover border (ex bridge `--action-border-active`)
-// @see docs/migration/phase-7-token-migration.md §Batch 39
-:host-context(html[data-theme='sandstone']) {
-  --project-card-action-hover-mix: color-mix(in srgb, #c59f63 18%, transparent);
-
-  .project-card:hover {
-    border-color: color-mix(
-      in srgb,
-      color-mix(in srgb, var(--primary) 52%, var(--border)) 58%,
-      var(--project-item-color, var(--border))
-    );
-  }
+// Menu list inset matches upload row / map context menus
+// @see docs/specs/component/filters/dropdown-system.md
+.map-context-menu__items {
+  padding-inline: var(--spacing-2);
+  padding-block: var(--spacing-2);
 }
 
-// Card container: grid layout, themed border from project color
-// @see project-card.md
+// Subtle project-tinted card surface; elevation from shadow tokens
+// @see docs/specs/component/project/project-item.md
 .project-card {
-  min-height: 12rem;
+  box-sizing: border-box;
+  height: 100%;
   padding: var(--spacing-3);
-  border: 1px solid var(--project-item-color, var(--border));
+  border: none;
   border-radius: var(--container-radius-panel);
-  background: color-mix(in srgb, var(--card) 92%, var(--background));
+  background: color-mix(in srgb, var(--project-item-color, var(--muted)) 5%, var(--card));
+  box-shadow: var(--shadow-md);
   display: grid;
   gap: var(--spacing-2);
   align-content: start;
   position: relative;
-  transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
-    box-shadow 120ms ease-out;
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover {
-    border-color: color-mix(
-      in srgb,
-      color-mix(in srgb, var(--primary) 45%, var(--border)) 58%,
-      var(--project-item-color, var(--border))
-    );
-    background: color-mix(in srgb, var(--project-card-action-hover-mix) 18%, var(--card));
+    background: color-mix(in srgb, var(--project-item-color, var(--muted)) 8%, var(--card));
+    box-shadow: var(--shadow-lg);
   }
 
   &:focus-within {
-    box-shadow: var(--interactive-focus-ring);
+    box-shadow: var(--shadow-md), var(--interactive-focus-ring);
     outline: none;
+  }
+}
+
+:host-context(html[data-theme='sandstone']) {
+  .project-card:hover {
+    background: color-mix(in srgb, var(--project-item-color, var(--muted)) 10%, var(--card));
   }
 }
 
 .project-card--row {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  min-height: 4.5rem;
-}
-
-.project-card--small {
-  min-height: 10rem;
-}
-
-.project-card--large {
-  min-height: 14rem;
 }
 
 .project-card__header {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.project-card__header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: var(--spacing-2);
   min-width: 0;
+  min-height: var(--spacing-6);
 }
 
-.project-card__dot {
-  inline-size: 0.625rem;
-  block-size: 0.625rem;
-  border-radius: 999px;
-  flex: 0 0 auto;
-}
-
+// Reserves two h3 lines (global h3: font-size-sm × line-height 1.1) so card headers align
+// @see apps/web/src/styles/_typography-baseline.scss
 .project-card__name {
   margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
   min-width: 0;
+  min-height: calc(2 * 1.1 * var(--font-size-sm));
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .project-card__status {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+// Compact outline icon control (visible on tinted card surfaces; smaller than default icon size)
+// @see apps/web/src/app/shared/ui/button/button-variants.ts
+.project-card__menu-trigger {
+  flex: 0 0 auto;
   margin-left: auto;
-  font-size: var(--font-size-xs);
-  color: var(--muted-foreground);
-  text-transform: capitalize;
+  width: var(--spacing-6);
+  height: var(--spacing-6);
+  min-width: var(--spacing-6);
+  min-height: var(--spacing-6);
+  padding: 0;
+  color: var(--foreground);
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent) 40%, var(--card));
+    color: var(--foreground);
+  }
+
+  .material-icons {
+    font-size: 1.125rem;
+    line-height: 1;
+  }
 }
 
-.project-card__badge {
-  margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
+.project-card__filetypes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
 }
 
-.project-card__meta,
-.project-card__context {
+// Larger filetype chips than default chip scale (16px) for card legibility
+// @see docs/specs/component/filters/chip.md
+.project-card__filetype-chip {
+  flex: 0 0 auto;
+
+  ::ng-deep .chip {
+    --chip-height: var(--spacing-6);
+    --chip-padding-inline: var(--spacing-3);
+    --chip-icon-size: 1.125rem;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-xs);
+  }
+}
+
+.project-card__metric,
+.project-card__meta {
   margin: 0;
   font-size: var(--font-size-sm);
-  line-height: 1.45;
+  line-height: var(--line-height-reading);
+  color: var(--muted-foreground);
 }
 
-.project-card__actions {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spacing-2);
-  flex-wrap: wrap;
-}
-
-.project-card__picker {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  z-index: 300;
+@media (prefers-reduced-motion: reduce) {
+  .project-card {
+    transition-duration: 1ms;
+  }
 }

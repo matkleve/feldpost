@@ -2,18 +2,24 @@
   <p class="detail-section__label">{{ detailViewLabel() }}</p>
 
   <div class="detail-row detail-row--readonly">
-    <div class="detail-row__body">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">description</span>
       <span class="detail-row__label">{{ t('workspace.imageDetail.field.type', 'Type') }}</span>
       <span class="detail-row__value detail-row__value--static">{{ fileFormatLabel() }}</span>
     </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
   <div
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'captured_at'"
   >
-    <div class="detail-row__body">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
       <span class="detail-row__label">{{
         t('workspace.imageDetail.field.captured', 'Captured')
@@ -35,7 +41,7 @@
       hlmBtn
       variant="ghost"
       size="icon"
-      class="detail-row-action detail-row-action--right"
+      class="detail-row-action detail-row-action--r1"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
       [attr.title]="t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')"
@@ -43,127 +49,130 @@
     >
       <span class="material-icons" aria-hidden="true">edit</span>
     </button>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
   <div
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'project_ids'"
   >
-    <div class="detail-row__body">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
       <span class="detail-row__label">{{
         t('workspace.imageDetail.field.projects', 'Projects')
       }}</span>
       @if (editingField() === 'project_ids') {
-      <div
-        #projectEditor
-        class="detail-tags"
-        role="group"
-        [attr.aria-label]="t('workspace.imageDetail.projects.manage.aria', 'Manage projects')"
-      >
-        <div class="detail-tags__editor">
-          @for (opt of projectOptions(); track opt.id) {
-            @if (selectedProjectIds().has(opt.id)) {
-              <button
-                type="button"
-                class="detail-tags__chip"
-                (click)="projectMembershipToggled.emit(opt.id)"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.projects.removePrefix', 'Remove project') +
-                  ' ' +
-                  opt.label
-                "
-                [attr.title]="t('workspace.imageDetail.projects.remove', 'Remove')"
-              >
-                <span class="detail-tags__chip-label">{{ opt.label }}</span>
-                <span class="material-icons" aria-hidden="true">close</span>
-              </button>
-            }
-          }
-
-          <input
-            #projectSearchInput
-            hlmInput
-            class="detail-tags__input"
-            type="text"
-            [value]="projectSearch()"
-            [placeholder]="
-              t('workspace.imageDetail.projects.search.placeholder', 'Select project or create one')
-            "
-            [attr.aria-label]="t('workspace.imageDetail.projects.search.aria', 'Search projects')"
-            (input)="projectSearchChanged.emit(projectSearchInput.value)"
-            (keydown)="onProjectSearchKeydown($event)"
-            (keydown.enter)="projectCreateRequested.emit()"
-          />
-        </div>
-
-        <app-dropdown-shell
-          #projectDropdown
-          class="detail-tags__dropdown"
-          [top]="projectDropdownTop()"
-          [left]="projectDropdownLeft()"
-          [minWidth]="projectDropdownWidth()"
-          [maxWidth]="projectDropdownWidth()"
-          panelClass="detail-tags__dropdown option-menu-surface"
-          (closeRequested)="onProjectDropdownCloseRequested()"
+        <div
+          #projectEditor
+          class="detail-tags"
+          role="group"
+          [attr.aria-label]="t('workspace.imageDetail.projects.manage.aria', 'Manage projects')"
         >
-          <div
-            role="listbox"
-            [attr.aria-label]="t('workspace.imageDetail.projects.options.aria', 'Project options')"
-          >
-            <div class="detail-tags__hint">
-              {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
-            </div>
-
-            @if (isGpsAssignmentLocked()) {
-              <div class="detail-tags__note" role="status">
-                {{
-                  t(
-                    'workspace.imageDetail.projects.gpsDisabled',
-                    'GPS assignment is disabled for this file type.'
-                  )
-                }}
-              </div>
-            }
-
-            @if (projectCanCreate()) {
-              <button
-                type="button"
-                class="detail-tags__create"
-                (keydown)="onProjectDropdownKeydown($event)"
-                (click)="projectCreateRequested.emit()"
-              >
-                <span class="detail-tags__create-label">{{
-                  t('workspace.imageDetail.projects.create', 'Create')
-                }}</span>
-                <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
-              </button>
-            }
-
-            <div class="detail-tags__divider" aria-hidden="true"></div>
-
-            @for (opt of filteredProjectOptions(); track opt.id) {
-              <div class="detail-tags__option-row">
+          <div class="detail-tags__editor">
+            @for (opt of projectOptions(); track opt.id) {
+              @if (selectedProjectIds().has(opt.id)) {
                 <button
                   type="button"
-                  class="detail-tags__option"
-                  [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
-                  (keydown)="onProjectDropdownKeydown($event)"
+                  class="detail-tags__chip"
                   (click)="projectMembershipToggled.emit(opt.id)"
+                  [attr.aria-label]="
+                    t('workspace.imageDetail.projects.removePrefix', 'Remove project') +
+                    ' ' +
+                    opt.label
+                  "
+                  [attr.title]="t('workspace.imageDetail.projects.remove', 'Remove')"
                 >
-                  <span class="detail-tags__option-color" aria-hidden="true"></span>
-                  <span class="detail-tags__option-check" aria-hidden="true">
-                    @if (selectedProjectIds().has(opt.id)) {
-                      <span class="material-icons">check</span>
-                    }
-                  </span>
-                  <span>{{ opt.label }}</span>
+                  <span class="detail-tags__chip-label">{{ opt.label }}</span>
+                  <span class="material-icons" aria-hidden="true">close</span>
                 </button>
-              </div>
+              }
             }
+
+            <input
+              #projectSearchInput
+              hlmInput
+              class="detail-tags__input"
+              type="text"
+              [value]="projectSearch()"
+              [placeholder]="
+                t('workspace.imageDetail.projects.search.placeholder', 'Select project or create one')
+              "
+              [attr.aria-label]="t('workspace.imageDetail.projects.search.aria', 'Search projects')"
+              (input)="projectSearchChanged.emit(projectSearchInput.value)"
+              (keydown)="onProjectSearchKeydown($event)"
+              (keydown.enter)="projectCreateRequested.emit()"
+            />
           </div>
-        </app-dropdown-shell>
-      </div>
+
+          <app-dropdown-shell
+            #projectDropdown
+            class="detail-tags__dropdown"
+            [top]="projectDropdownTop()"
+            [left]="projectDropdownLeft()"
+            [minWidth]="projectDropdownWidth()"
+            [maxWidth]="projectDropdownWidth()"
+            panelClass="detail-tags__dropdown option-menu-surface"
+            (closeRequested)="onProjectDropdownCloseRequested()"
+          >
+            <div
+              role="listbox"
+              [attr.aria-label]="t('workspace.imageDetail.projects.options.aria', 'Project options')"
+            >
+              <div class="detail-tags__hint">
+                {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
+              </div>
+
+              @if (isGpsAssignmentLocked()) {
+                <div class="detail-tags__note" role="status">
+                  {{
+                    t(
+                      'workspace.imageDetail.projects.gpsDisabled',
+                      'GPS assignment is disabled for this file type.'
+                    )
+                  }}
+                </div>
+              }
+
+              @if (projectCanCreate()) {
+                <button
+                  type="button"
+                  class="detail-tags__create"
+                  (keydown)="onProjectDropdownKeydown($event)"
+                  (click)="projectCreateRequested.emit()"
+                >
+                  <span class="detail-tags__create-label">{{
+                    t('workspace.imageDetail.projects.create', 'Create')
+                  }}</span>
+                  <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
+                </button>
+              }
+
+              <div class="detail-tags__divider" aria-hidden="true"></div>
+
+              @for (opt of filteredProjectOptions(); track opt.id) {
+                <div class="detail-tags__option-row">
+                  <button
+                    type="button"
+                    class="detail-tags__option"
+                    [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
+                    (keydown)="onProjectDropdownKeydown($event)"
+                    (click)="projectMembershipToggled.emit(opt.id)"
+                  >
+                    <span class="detail-tags__option-color" aria-hidden="true"></span>
+                    <span class="detail-tags__option-check" aria-hidden="true">
+                      @if (selectedProjectIds().has(opt.id)) {
+                        <span class="material-icons">check</span>
+                      }
+                    </span>
+                    <span>{{ opt.label }}</span>
+                  </button>
+                </div>
+              }
+            </div>
+          </app-dropdown-shell>
+        </div>
       } @else {
         <button
           class="detail-row__value"
@@ -179,7 +188,7 @@
         hlmBtn
         variant="ghost"
         size="icon"
-        class="detail-row-action detail-row-action--right"
+        class="detail-row-action detail-row-action--r1"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.projects.edit.aria', 'Edit projects')"
         [attr.title]="t('workspace.imageDetail.projects.edit.title', 'Edit projects')"
@@ -187,13 +196,16 @@
       >
         <span class="material-icons" aria-hidden="true">edit</span>
       </button>
+    } @else {
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     }
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
-  <div
-    class="detail-row detail-row--readonly"
-  >
-    <div class="detail-row__body">
+  <div class="detail-row detail-row--readonly">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
       <span class="detail-row__label">{{
         t('workspace.imageDetail.field.uploaded', 'Uploaded')
@@ -202,11 +214,12 @@
         uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
       }}</span>
     </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     <button
       hlmBtn
       variant="ghost"
       size="icon"
-      class="detail-row-action detail-row-action--right detail-row-action--danger"
+      class="detail-row-action detail-row-action--r2 detail-row-action--danger"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.delete', 'Delete media')"
       [attr.title]="t('workspace.imageDetail.action.delete', 'Delete media')"
@@ -230,40 +243,40 @@
       class="detail-row"
       [class.detail-row--editing]="editingField() === fieldDef.name"
     >
-      @if (editingField() === fieldDef.name) {
-        <div class="detail-row__body">
-          <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
-          <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
-          <input
-            #fieldInput
-            hlmInput
-            class="detail-row__input"
-            type="text"
-            [value]="fieldValue(fieldDef.name)"
-            [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
-            (keydown.enter)="
-              fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
-            "
-            (keydown.escape)="editingCancelled.emit()"
-            (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
-          />
-        </div>
-        <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="detail-row-action detail-row-action--right"
-          type="button"
-          [attr.aria-label]="t(fieldDef.saveAriaKey, fieldDef.saveAriaFallback)"
-          [attr.title]="t(fieldDef.saveTitleKey, fieldDef.saveTitleFallback)"
-          (click)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
-        >
-          <span class="material-icons" aria-hidden="true">check</span>
-        </button>
-      } @else {
-        <div class="detail-row__body">
-          <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
-          <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
+        <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
+        @if (editingField() === fieldDef.name) {
+          <div class="detail-row__value-edit">
+            <input
+              #fieldInput
+              hlmInput
+              class="detail-row__input"
+              type="text"
+              [value]="fieldValue(fieldDef.name)"
+              [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
+              (keydown.enter)="
+                fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
+              "
+              (keydown.escape)="editingCancelled.emit()"
+              (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+            />
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              class="detail-row-action detail-row-action--save"
+              type="button"
+              [attr.aria-label]="t(fieldDef.saveAriaKey, fieldDef.saveAriaFallback)"
+              [attr.title]="t(fieldDef.saveTitleKey, fieldDef.saveTitleFallback)"
+              (click)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+            >
+              <span class="material-icons" aria-hidden="true">check</span>
+            </button>
+          </div>
+        } @else {
           <button
             class="detail-row__value"
             type="button"
@@ -271,12 +284,14 @@
           >
             {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
           </button>
-        </div>
+        }
+      </div>
+      @if (editingField() !== fieldDef.name) {
         <button
           hlmBtn
           variant="ghost"
           size="icon"
-          class="detail-row-action detail-row-action--right"
+          class="detail-row-action detail-row-action--r1"
           type="button"
           [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
           [attr.title]="t(fieldDef.editTitleKey, fieldDef.editTitleFallback)"
@@ -284,19 +299,20 @@
         >
           <span class="material-icons" aria-hidden="true">edit</span>
         </button>
+      } @else {
+        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
       }
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
   }
 
   @if (image().latitude != null) {
-    <div
-      class="detail-row detail-row--readonly"
-    >
+    <div class="detail-row detail-row--readonly">
       <button
         hlmBtn
         variant="ghost"
         size="icon"
-        class="detail-row-action detail-row-action--left-outer"
+        class="detail-row-action detail-row-action--l2"
         type="button"
         [attr.aria-label]="
           t('workspace.imageDetail.action.zoomToLocation.aria', 'Zoom to location')
@@ -310,7 +326,7 @@
         hlmBtn
         variant="ghost"
         size="icon"
-        class="detail-row-action detail-row-action--left"
+        class="detail-row-action detail-row-action--l1"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
         [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -318,18 +334,21 @@
       >
         <span class="material-icons" aria-hidden="true">content_copy</span>
       </button>
-      <div class="detail-row__body">
+      <div class="detail-row__center">
         <span class="material-icons detail-row__icon" aria-hidden="true">gps_fixed</span>
-        <span class="detail-row__label">{{ t('workspace.imageDetail.field.coordinates', 'Coordinates') }}</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.coordinates', 'Coordinates')
+        }}</span>
         <span class="detail-row__value detail-row__value--static detail-row__value--mono">
           {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
         </span>
       </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
       <button
         hlmBtn
         variant="ghost"
         size="icon"
-        class="detail-row-action detail-row-action--right detail-row-action--danger"
+        class="detail-row-action detail-row-action--r2 detail-row-action--danger"
         type="button"
         [attr.aria-label]="
           t('workspace.imageDetail.action.revertCoordinates.aria', 'Revert corrected coordinates')
@@ -367,28 +386,30 @@
   }
 
   @if (image().latitude == null || image().longitude == null) {
-    <div
-      class="detail-row detail-row--readonly"
-    >
-      <div class="detail-row__body">
+    <div class="detail-row detail-row--readonly">
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center">
         <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
         <span class="detail-row__label">{{
           t('workspace.imageDetail.field.coordinates', 'Coordinates')
         }}</span>
         <div class="detail-row__value-wrap">
-        <span class="detail-row__value detail-row__value--static">{{
-          t('workspace.imageDetail.value.noGps', 'No GPS')
-        }}</span>
-        @if (isGpsAssignmentLocked()) {
-          <span class="detail-row__subvalue">{{
-            t(
-              'workspace.imageDetail.projects.gpsDisabled',
-              'GPS assignment disabled for this file type.'
-            )
+          <span class="detail-row__value detail-row__value--static">{{
+            t('workspace.imageDetail.value.noGps', 'No GPS')
           }}</span>
-        }
+          @if (isGpsAssignmentLocked()) {
+            <span class="detail-row__subvalue">{{
+              t(
+                'workspace.imageDetail.projects.gpsDisabled',
+                'GPS assignment disabled for this file type.'
+              )
+            }}</span>
+          }
         </div>
       </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
   }
 </div>

@@ -9985,14 +9985,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0385.workspace_addresssearch_loading', 'workspace.addressSearch.loading', 'en', 'apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0385.workspace_addresssearch_loading', 'Searching...', 'en', 'apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.addressSearch.loading', 'published'
+select t.id, 'en', 'Searching...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0385.workspace_addresssearch_loading'
 on conflict (app_text_id, lang) do update set
@@ -10000,7 +10000,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.addressSearch.loading', 'published'
+select t.id, 'de', 'Suche...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0385.workspace_addresssearch_loading'
 on conflict (app_text_id, lang) do update set
@@ -10008,9 +10008,71 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.addressSearch.loading', 'published'
+select t.id, 'it', 'Ricerca...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0385.workspace_addresssearch_loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressSearch.section.saved', 'Saved locations', 'en', 'Address search dropdown section heading for saved DB addresses')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Saved locations', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.section.saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gespeicherte Orte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.section.saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Luoghi salvati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.section.saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressSearch.section.places', 'Places', 'en', 'Address search dropdown section heading for geocoded place results')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Places', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.section.places'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Orte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.section.places'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Luoghi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.section.places'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -18970,6 +19032,130 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'foto', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.metric.photos'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.metric.media', 'media', 'en', 'apps/web/src/app/features/projects/project-card.component.html html:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.media'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.media'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.media'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.card.menu.aria', 'Project actions', 'en', 'apps/web/src/app/features/projects/project-card.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project actions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.card.menu.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projektaktionen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.card.menu.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Azioni progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.card.menu.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.menu.changeColor', 'Change color', 'en', 'apps/web/src/app/features/projects/project-card.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change color', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.menu.changeColor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Farbe ändern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.menu.changeColor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia colore', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.menu.changeColor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.fileType.countAria', 'File type count aria label on project card chips.', 'en', 'apps/web/src/app/features/projects/project-card.component.ts ts-method:fileTypeChipAriaLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'File type count aria label on project card chips.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.fileType.countAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} {type}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.fileType.countAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} {type}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.fileType.countAria'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

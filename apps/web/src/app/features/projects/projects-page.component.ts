@@ -110,7 +110,6 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly activeSorts = signal<SortConfig[]>([]);
   readonly creatingProject = signal(false);
   readonly projectNameDialogOpen = signal(false);
-  readonly coloringProjectId = signal<string | null>(null);
   readonly pendingProjectAction = signal<PendingProjectAction>(null);
   readonly pendingProjectId = signal<string | null>(null);
   readonly pendingActionBusy = signal(false);
@@ -316,10 +315,6 @@ export class ProjectsPageComponent implements OnDestroy {
     }
   }
 
-  toggleColorPicker(projectId: string): void {
-    this.coloringProjectId.update((current) => (current === projectId ? null : projectId));
-  }
-
   async onColorSelected(projectId: string, colorKey: ProjectColorKey): Promise<void> {
     const persisted = await this.projectsService.setProjectColor(projectId, colorKey);
     if (!persisted) {
@@ -329,13 +324,11 @@ export class ProjectsPageComponent implements OnDestroy {
     this.projects.update((all) =>
       all.map((project) => (project.id === projectId ? { ...project, colorKey } : project)),
     );
-    this.coloringProjectId.set(null);
   }
 
   requestDangerAction(projectId: string, action: Exclude<PendingProjectAction, null>): void {
     this.pendingProjectId.set(projectId);
     this.pendingProjectAction.set(action);
-    this.coloringProjectId.set(null);
   }
 
   cancelPendingAction(): void {

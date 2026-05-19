@@ -3,11 +3,8 @@
     <app-project-card
       [project]="project"
       [variant]="cardVariant()"
-      [coloringProjectId]="coloringProjectId()"
       [colorTokenFor]="colorTokenFor()"
       [formatRelativeDate]="formatRelativeDate()"
-
-      (toggleColorPicker)="onToggleColorPicker($event)"
       (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
       (dangerAction)="onDangerAction($event.projectId, $event.action)"
     />

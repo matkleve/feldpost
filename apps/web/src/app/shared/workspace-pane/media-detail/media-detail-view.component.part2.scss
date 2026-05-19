@@ -14,25 +14,6 @@
   }
 }
 
-@media (max-width: 47.9375rem) {
-  .detail-content {
-    width: 100%;
-    max-width: var(--detail-content-main-max-width);
-    grid-template-columns: minmax(0, 1fr);
-
-    > app-quick-info-chips {
-      grid-column: 1;
-    }
-
-    > app-media-detail-inline-section,
-    > app-metadata-section,
-    > app-detail-actions {
-      grid-column: 1;
-      display: block;
-    }
-  }
-}
-
 // ─── Keyframes ───
 
 @keyframes detail-placeholder-pulse {

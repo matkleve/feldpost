@@ -1,3 +1,5 @@
+@use '../../../styles/frosted-chrome';
+
 :host {
   display: contents;
   --settings-overlay-width: clamp(
@@ -58,12 +60,10 @@
     // @see docs/specs/ui/settings-overlay
     border-radius: var(--container-radius-panel);
     border: var(--settings-stroke-width) solid var(--settings-border-muted);
-    background: color-mix(in srgb, var(--popover) 92%, transparent);
+    @include frosted-chrome.fill;
     // Global `--shadow-*` tokens are very light (~5% opacity); add a map-readable lift on this shell only
     // @see docs/specs/ui/settings-overlay
     box-shadow: var(--shadow-2xl), 0 12px 40px -6px color-mix(in srgb, var(--shadow-color) 18%, transparent);
-    backdrop-filter: blur(14px) saturate(1.08);
-    -webkit-backdrop-filter: blur(14px) saturate(1.08);
   }
 
   // In-flow dismiss control on the rail toolbar (same surface as section list)

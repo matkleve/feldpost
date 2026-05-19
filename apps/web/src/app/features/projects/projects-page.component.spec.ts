@@ -26,6 +26,7 @@ function createProject(overrides: Partial<ProjectListItem> = {}): ProjectListIte
     district: 'Leopoldstadt',
     street: 'Praterstrasse 1',
     country: 'AT',
+    fileTypeCounts: [],
     ...overrides,
   };
 }

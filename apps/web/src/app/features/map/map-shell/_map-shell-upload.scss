@@ -1,3 +1,5 @@
+@use '../../../../styles/frosted-chrome';
+
 // ── Upload button zone — fixed top-right, expands into panel ─────────────────
 // @see docs/migration/phase-8-global-scss-elimination.md (map-shell partial split)
 
@@ -23,13 +25,9 @@
     align-items: center;
     gap: var(--spacing-2);
     min-height: 1.8rem;
-    border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
     border-radius: var(--radius-pill);
-    background: color-mix(in srgb, var(--card) 90%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    @include frosted-chrome.surface;
     padding: 0.1rem var(--spacing-2);
-    box-shadow: var(--shadow-md);
   }
 
   &__preview-dot {

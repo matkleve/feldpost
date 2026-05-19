@@ -1,11 +1,18 @@
+// Scroll owner for /projects (parent chain uses height: 100% + overflow: clip on app-root)
+// @see apps/web/src/styles/layout/app.scss
 :host {
   display: block;
-  min-height: 100%;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--spacing-4);
+  padding-bottom: var(--spacing-6);
 }
 
 .projects-page {
-  min-height: 100%;
-  padding: var(--spacing-4);
+  min-height: 0;
 }
 
 .projects-rail {

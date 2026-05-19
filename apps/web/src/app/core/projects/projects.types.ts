@@ -1,4 +1,10 @@
+import type { FileTypeCategory } from '../media/media-renderer.types';
 import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
+
+export interface ProjectFileTypeCount {
+  category: FileTypeCategory;
+  count: number;
+}
 
 export type ProjectStatusFilter = 'all' | 'active' | 'archived';
 export type ProjectsViewMode = 'list' | 'cards';
@@ -24,6 +30,7 @@ export interface ProjectListItem extends ProjectRecord {
   district: string | null;
   street: string | null;
   country: string | null;
+  fileTypeCounts: ProjectFileTypeCount[];
 }
 
 export interface ProjectSelectOption {

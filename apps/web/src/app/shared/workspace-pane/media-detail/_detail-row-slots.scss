@@ -1,0 +1,284 @@
+// Shared five-slot detail row: action, action, center (icon/label/value), action, action.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+
+.detail-row {
+  --detail-row-action-size: var(--detail-row-height, 2rem);
+
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  grid-template-areas: 'action-l2 action-l1 center action-r1 action-r2';
+  align-items: stretch;
+  column-gap: var(--spacing-1);
+  position: relative;
+  margin-bottom: var(--spacing-1);
+  padding: 0;
+  min-height: var(--detail-row-action-size);
+  min-width: 0;
+  overflow: visible;
+
+  &:hover:not(.detail-row--editing) .detail-row__center,
+  &:focus-within:not(.detail-row--editing) .detail-row__center {
+    background: var(--mdv-menu-item-hover-bg, color-mix(in srgb, var(--primary) 8%, transparent));
+
+    .detail-row__icon,
+    .detail-row__label,
+    .detail-row__value,
+    .detail-row__value--static {
+      color: var(--primary);
+    }
+  }
+
+  &:hover:not(.detail-row--editing),
+  &:focus-within {
+    .detail-row-action:is(button) {
+      opacity: 1;
+      pointer-events: auto;
+      color: var(--primary);
+    }
+  }
+
+  &--editing .detail-row__center {
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+
+  &--readonly {
+    cursor: default;
+
+    .detail-row__value--static {
+      cursor: default;
+      color: var(--muted-foreground);
+    }
+  }
+}
+
+.detail-row__center {
+  grid-area: center;
+  display: grid;
+  grid-template-columns: 1.25rem minmax(4rem, auto) 1fr;
+  align-items: center;
+  align-self: stretch;
+  column-gap: var(--spacing-1);
+  min-width: 0;
+  min-height: var(--detail-row-action-size);
+  padding-inline: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+}
+
+// Action slots fill from the center outward: L1/R1 inner, L2/R2 outer.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.detail-row-action--l2 {
+  grid-area: action-l2;
+}
+
+.detail-row-action--l1 {
+  grid-area: action-l1;
+}
+
+.detail-row-action--r1 {
+  grid-area: action-r1;
+}
+
+.detail-row-action--r2 {
+  grid-area: action-r2;
+}
+
+.detail-row--editing .detail-row__center {
+  position: relative;
+
+  app-captured-date-editor {
+    position: absolute;
+    top: 100%;
+    left: auto;
+    right: 0;
+    z-index: 300;
+    margin-top: var(--spacing-1);
+  }
+}
+
+.detail-row__icon {
+  font-size: var(--font-size-md);
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+  width: 1.25rem;
+  text-align: center;
+  transition: color 80ms ease-out;
+}
+
+.detail-row__label {
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  transition: color 80ms ease-out;
+}
+
+.detail-row__value {
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  color: var(--foreground);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: var(--line-height-comfortable);
+  transition: color 80ms ease-out;
+
+  &:hover:not(:disabled) {
+    color: var(--primary);
+  }
+
+  &--static {
+    cursor: default;
+
+    &:hover {
+      color: var(--muted-foreground);
+    }
+  }
+
+  &--mono {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: var(--font-size-xs);
+    letter-spacing: -0.02em;
+  }
+}
+
+.detail-row__value-wrap {
+  min-width: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+}
+
+.detail-row__subvalue {
+  display: inline-block;
+  max-width: 15rem;
+  font-size: var(--font-size-2xs);
+  color: var(--muted-foreground);
+  text-align: right;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.detail-row__value-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.detail-row__value-edit .detail-row-action--save {
+  opacity: 1;
+  pointer-events: auto;
+  flex-shrink: 0;
+  height: var(--detail-row-action-size);
+  width: var(--detail-row-action-size);
+  min-height: var(--detail-row-action-size);
+  min-width: var(--detail-row-action-size);
+  align-self: center;
+}
+
+.detail-row__value-edit .detail-row__input {
+  flex: 1 1 auto;
+}
+
+.detail-row__input {
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: 0.125rem var(--spacing-2);
+  font-family: inherit;
+  text-align: right;
+  outline: none;
+  box-shadow: var(--interactive-focus-ring);
+
+  &--select {
+    text-align: right;
+    appearance: auto;
+  }
+}
+
+// Square action rail cells — height follows row (center), width matches height.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.detail-row-action:not(button) {
+  display: block;
+  box-sizing: border-box;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1;
+  min-width: var(--detail-row-action-size);
+  min-height: var(--detail-row-action-size);
+  justify-self: center;
+  align-self: stretch;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.detail-row-action:is(button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1;
+  min-width: var(--detail-row-action-size);
+  min-height: var(--detail-row-action-size);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  color: var(--mdv-action-text-default, var(--muted-foreground));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 80ms ease-out,
+    background 80ms ease-out,
+    color 80ms ease-out;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  justify-self: center;
+  align-self: stretch;
+
+  .material-icons {
+    font-size: var(--font-size-md);
+  }
+
+  &:hover {
+    color: var(--mdv-menu-item-text, var(--foreground));
+    background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 8%, transparent));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  &.detail-row-action--danger:hover {
+    color: var(--destructive);
+    background: color-mix(in srgb, var(--destructive) 10%, transparent);
+  }
+}
+
+@media (hover: none) {
+  .detail-row-action:is(button) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

@@ -25,16 +25,10 @@ export class ProjectsGridViewComponent {
   };
   readonly colorTokenFor = input.required<(key: ProjectColorKey) => string>();
   readonly formatRelativeDate = input.required<(value: string | null) => string>();
-  readonly coloringProjectId = input<string | null>(null);
   readonly cardVariant = input<CardVariant>('medium');
 
-  readonly toggleColorPicker = output<string>();
   readonly colorSelected = output<{ projectId: string; colorKey: ProjectColorKey }>();
   readonly dangerAction = output<{ projectId: string; action: 'archive' | 'restore' | 'delete' }>();
-
-  onToggleColorPicker(projectId: string): void {
-    this.toggleColorPicker.emit(projectId);
-  }
 
   onColorSelected(projectId: string, colorKey: ProjectColorKey): void {
     this.colorSelected.emit({ projectId, colorKey });

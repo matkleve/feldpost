@@ -613,6 +613,10 @@ projects.page.action.restoreProject,Restore project,apps/web/src/app/features/pr
 projects.page.action.deleteProject,Delete project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Delete project,Projekt l�schen,Elimina progetto
 projects.page.metric.results,results,apps/web/src/app/features/projects/projects-page.component.html interpolation-literal,results,Ergebnisse,risultati
 projects.page.metric.photos,photos,apps/web/src/app/features/projects/projects-page.component.html interpolation-literal,photos,Fotos,foto
+projects.page.metric.media,media,apps/web/src/app/features/projects/project-card.component.html html:content,media,Medien,media
+projects.page.card.menu.aria,Project actions,apps/web/src/app/features/projects/project-card.component.html attr:aria-label,Project actions,Projektaktionen,Azioni progetto
+projects.page.menu.changeColor,Change color,apps/web/src/app/features/projects/project-card.component.html text-node,Change color,Farbe ändern,Cambia colore
+projects.page.fileType.countAria,{count} {type},apps/web/src/app/features/projects/project-card.component.ts ts-method:fileTypeChipAriaLabel,File type count aria label on project card chips.,{count} {type},{count} {type},{count} {type}
 projects.page.modal.aria,Project action modal,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project action modal,Projektaktionsdialog,Dialogo azione progetto
 projects.page.modal.cancel,Cancel,apps/web/src/app/features/projects/projects-page.component.html text-node,Cancel,Abbrechen,Annulla
 projects.page.toast.createError,Could not create project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not create project. Please try again.,Projekt konnte nicht erstellt werden. Bitte erneut versuchen.,Impossibile creare il progetto. Riprova.

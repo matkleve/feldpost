@@ -1,5 +1,10 @@
 import { Injectable, inject } from '@angular/core';
+import type { FileTypeCategory } from '../media/media-renderer.types';
 import { SupabaseService } from '../supabase/supabase.service';
+import {
+  bumpProjectFileTypeCount,
+  fileTypeCountsForProject,
+} from './projects-file-type-chips.helpers';
 import type {
   ProjectColorKey,
   ProjectListItem,
@@ -24,6 +29,7 @@ interface ProjectActivityRow {
   project_id: string | null;
   captured_at: string | null;
   created_at: string | null;
+  mime_type: string | null;
   city: string | null;
   district: string | null;
   street: string | null;
@@ -36,10 +42,12 @@ interface MediaActivityJoinRow {
     | {
         captured_at: string | null;
         created_at: string | null;
+        mime_type: string | null;
       }
     | Array<{
         captured_at: string | null;
         created_at: string | null;
+        mime_type: string | null;
       }>
     | null;
 }
@@ -160,10 +168,12 @@ export class ProjectsService {
     const districtCounts = new Map<string, Map<string, number>>();
     const streetCounts = new Map<string, Map<string, number>>();
     const countryCounts = new Map<string, Map<string, number>>();
+    const fileTypeCounts = new Map<string, Map<FileTypeCategory, number>>();
 
     for (const row of activityRows) {
       if (!row.project_id) continue;
       counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+      bumpProjectFileTypeCount(fileTypeCounts, row.project_id, row.mime_type);
       this.bumpValueCount(cityCounts, row.project_id, row.city);
       this.bumpValueCount(districtCounts, row.project_id, row.district);
       this.bumpValueCount(streetCounts, row.project_id, row.street);
@@ -198,6 +208,7 @@ export class ProjectsService {
         district: this.pickMostFrequent(districtCounts, row.id),
         street: this.pickMostFrequent(streetCounts, row.id),
         country: this.pickMostFrequent(countryCounts, row.id),
+        fileTypeCounts: fileTypeCountsForProject(fileTypeCounts, row.id),
       };
     });
 
@@ -572,6 +583,7 @@ export class ProjectsService {
       district: null,
       street: null,
       country: null,
+      fileTypeCounts: [],
     };
   }
 
@@ -780,7 +792,7 @@ export class ProjectsService {
   private async loadProjectActivityRows(): Promise<ProjectActivityRow[]> {
     const preferred = await this.supabase.client
       .from('media_projects')
-      .select('project_id,media_items!inner(captured_at,created_at)');
+      .select('project_id,media_items!inner(captured_at,created_at,mime_type)');
 
     if (!preferred.error && Array.isArray(preferred.data)) {
       const rows: ProjectActivityRow[] = [];
@@ -792,6 +804,7 @@ export class ProjectsService {
           project_id: row.project_id,
           captured_at: media.captured_at,
           created_at: media.created_at,
+          mime_type: media.mime_type,
           city: null,
           district: null,
           street: null,

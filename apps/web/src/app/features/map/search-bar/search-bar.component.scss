@@ -1,3 +1,5 @@
+@use '../../../../styles/frosted-chrome';
+
 :host {
   --search-bar-safe-inline: max(var(--spacing-3), calc(5rem + var(--spacing-1)));
   --search-bar-viewport-inset: var(--spacing-3);
@@ -50,10 +52,8 @@
   grid-template-rows: var(--search-bar-row-height) minmax(0, 0fr);
   row-gap: 0;
   width: 100%;
-  border: 1px solid var(--border);
   border-radius: var(--container-radius-panel);
-  background: color-mix(in srgb, var(--card) 92%, transparent);
-  box-shadow: var(--shadow-md);
+  @include frosted-chrome.surface;
   overflow: hidden;
   contain: layout paint;
 }
@@ -71,9 +71,6 @@
   min-height: var(--search-bar-row-height);
   align-items: center;
   column-gap: var(--search-bar-gap);
-  background: color-mix(in srgb, var(--card) 92%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 .search-bar__slot-wrapper {

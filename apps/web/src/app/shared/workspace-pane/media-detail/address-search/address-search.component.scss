@@ -1,60 +1,35 @@
-// Stable state: idle — row chrome matches .detail-row__body geometry exactly
+// Address search row — five-slot detail row (actions middle-out, padded center).
 // @see docs/specs/ui/workspace/workspace-pane.md
+
+@use '../detail-row-slots';
+
 :host {
-  display: block;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  column-gap: var(--spacing-1);
+  align-items: start;
   position: relative;
-  // inherit --mdv-* tokens from parent (media-detail-inline-section)
-}
-
-// Row container — matches .detail-row geometry exactly
-// @see docs/specs/ui/workspace/workspace-pane.md
-.address-search__row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: 0 var(--spacing-2);
-  border-radius: var(--radius-sm);
-  min-height: var(--detail-row-height);
-  transition: background 80ms ease-out;
-
-  &:not(.address-search__row--active):hover {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
-
-    .address-search__row-icon,
-    .address-search__trigger-text {
-      color: var(--primary);
-    }
-
-    .address-search__edit-btn,
-    .address-search__clear-btn--visible {
-      opacity: 1;
-      pointer-events: auto;
-      color: var(--primary);
-    }
-  }
-
-  // Stable state: active — primary-tinted background, input visible
-  // @see docs/specs/ui/workspace/workspace-pane.md
-  &--active {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
-  }
-}
-
-// Left-side icon (resolve-location or search)
-// @see docs/specs/ui/workspace/workspace-pane.md
-.address-search__row-icon {
-  font-size: var(--font-size-md);
-  color: var(--muted-foreground);
-  flex-shrink: 0;
-  width: 1.25rem;
-  text-align: center;
-}
-
-// Address text button — fills available space, right-aligned like detail-row values
-// @see docs/specs/ui/workspace/workspace-pane.md
-.address-search__trigger-text {
-  flex: 1 1 auto;
   min-width: 0;
+}
+
+:host .address-search__row.detail-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  width: 100%;
+}
+
+.address-search__center {
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+}
+
+.address-search__trigger-text,
+.address-search__input {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.address-search__trigger-text {
   font-size: var(--font-size-xs);
   color: var(--foreground);
   text-align: right;
@@ -69,11 +44,11 @@
   transition: color 80ms ease-out;
 }
 
-// Inline text input — no borders, blends into row
-// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__placeholder {
+  color: var(--muted-foreground);
+}
+
 .address-search__input {
-  flex: 1 1 auto;
-  min-width: 0;
   font-size: var(--font-size-xs);
   color: var(--foreground);
   background: transparent;
@@ -89,73 +64,21 @@
   }
 }
 
-// Edit pen button — hidden until row hover (left side)
-// @see docs/specs/ui/workspace/workspace-pane.md
-.address-search__edit-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--muted-foreground);
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 80ms ease-out;
-
-  .material-icons {
-    font-size: var(--font-size-md);
-  }
+.address-search__clear-btn--visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-// Close/cancel button — hidden unless --visible modifier
-// @see docs/specs/ui/workspace/workspace-pane.md
-.address-search__clear-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--muted-foreground);
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 80ms ease-out,
-    color 80ms ease-out;
-
-  .material-icons {
-    font-size: var(--font-size-md);
-  }
-
-  &--visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  &:hover {
-    color: var(--foreground);
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
-  }
-}
-
-// Results dropdown — floats below the row
-// @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__dropdown {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
+  grid-column: 3;
+  grid-row: 2;
+  position: relative;
   z-index: 300;
+  width: calc(100% - var(--spacing-1));
+  max-width: 100%;
+  justify-self: end;
   margin-top: var(--spacing-1);
+  box-sizing: border-box;
   background: var(--popover);
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   border-radius: var(--radius-md);
@@ -164,14 +87,12 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-height: 14rem;
+  max-height: 10rem;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
 
-// Section heading inside dropdown
-// @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__section-label {
   padding: var(--spacing-1) var(--spacing-2) 0;
   font-size: var(--font-size-2xs);
@@ -181,8 +102,6 @@
   text-transform: uppercase;
 }
 
-// Individual result row
-// @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__result-item {
   display: flex;
   align-items: flex-start;
@@ -206,8 +125,6 @@
   }
 }
 
-// Icon in result row
-// @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__result-icon {
   font-size: var(--font-size-md);
   color: var(--muted-foreground);
@@ -215,16 +132,12 @@
   margin-top: 1px;
 }
 
-// Result label text
-// @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__result-label {
   flex: 1 1 auto;
   min-width: 0;
   word-break: break-word;
 }
 
-// Loading indicator
-// @see docs/specs/ui/workspace/workspace-pane.md
 .address-search__loading {
   padding: var(--spacing-2);
   font-size: var(--font-size-xs);

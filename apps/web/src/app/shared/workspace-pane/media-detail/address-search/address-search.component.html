@@ -1,30 +1,34 @@
 @if (active()) {
-  <div class="address-search__row address-search__row--active">
-    <span class="material-icons address-search__row-icon" aria-hidden="true">search</span>
-    <input
-      #addressSearchInput
-      class="address-search__input"
-      type="text"
-      [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
-      [attr.aria-label]="t('workspace.addressSearch.aria.search', 'Search for an address')"
-      [value]="query()"
-      (input)="onInput(addressSearchInput.value)"
-      (keydown.escape)="cancel()"
-      (keydown.enter)="selectFirst()"
-    />
+  <div class="detail-row address-search__row detail-row--editing">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center address-search__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
+      <input
+        #addressSearchInput
+        class="address-search__input"
+        type="text"
+        [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
+        [attr.aria-label]="t('workspace.addressSearch.aria.search', 'Search for an address')"
+        [value]="query()"
+        (input)="onInput(addressSearchInput.value)"
+        (keydown.escape)="cancel()"
+        (keydown.enter)="selectFirst()"
+      />
+    </div>
     <button
-      class="address-search__clear-btn address-search__clear-btn--visible"
+      class="detail-row-action detail-row-action--r1 address-search__clear-btn address-search__clear-btn--visible"
       type="button"
       (click)="cancel()"
       [attr.aria-label]="t('workspace.addressSearch.aria.cancel', 'Cancel search')"
     >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
   @if (savedSuggestions().length > 0 || placeSuggestions().length > 0 || loadingSaved() || loadingPlaces()) {
     <div class="address-search__dropdown">
-
       @if (savedSuggestions().length > 0 || loadingSaved()) {
         <div class="address-search__section-label">
           {{ t('workspace.addressSearch.section.saved', 'Saved locations') }}
@@ -54,29 +58,33 @@
           </button>
         }
       }
-
     </div>
   }
 } @else {
-  <div class="address-search__row">
+  <div class="detail-row address-search__row">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <button
-      class="address-search__edit-btn"
+      class="detail-row-action detail-row-action--l1 address-search__edit-btn"
       type="button"
       (click)="open()"
       [attr.aria-label]="t('workspace.addressSearch.aria.edit', 'Edit address')"
     >
       <span class="material-icons" aria-hidden="true">edit</span>
     </button>
-    <span class="material-icons address-search__row-icon" aria-hidden="true">my_location</span>
-    <button class="address-search__trigger-text" type="button" (click)="open()">
-      @if (currentAddress()) {
-        {{ currentAddress() }}
-      } @else {
-        <span style="color: var(--muted-foreground)">{{ t('workspace.addressSearch.placeholder', 'Search address...') }}</span>
-      }
-    </button>
+    <div class="detail-row__center address-search__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">my_location</span>
+      <button class="address-search__trigger-text" type="button" (click)="open()">
+        @if (currentAddress()) {
+          {{ currentAddress() }}
+        } @else {
+          <span class="address-search__placeholder">{{
+            t('workspace.addressSearch.placeholder', 'Search address...')
+          }}</span>
+        }
+      </button>
+    </div>
     <button
-      class="address-search__clear-btn"
+      class="detail-row-action detail-row-action--r1 address-search__clear-btn"
       type="button"
       [class.address-search__clear-btn--visible]="!!currentAddress()"
       [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear address')"
@@ -84,5 +92,6 @@
     >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 }

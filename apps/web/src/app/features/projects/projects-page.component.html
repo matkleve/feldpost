@@ -90,8 +90,6 @@
                 [cardVariant]="cardVariant()"
                 [colorTokenFor]="colorTokenForFn"
                 [formatRelativeDate]="formatRelativeDateFn"
-                [coloringProjectId]="coloringProjectId()"
-                (toggleColorPicker)="toggleColorPicker($event)"
                 (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
                 (dangerAction)="requestDangerAction($event.projectId, $event.action)"
               />

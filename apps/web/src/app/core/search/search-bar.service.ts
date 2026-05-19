@@ -51,7 +51,7 @@ export type { GhostTrieEntry } from './ghost-trie';
 const RECENT_SEARCHES_STORAGE_KEY = 'feldpost-recent-searches';
 const MAX_RECENT_SEARCHES = 20;
 const MAX_DB_ADDRESS_ROWS = 24;
-const MAX_DB_ADDRESS_RESULTS = 5;
+const MAX_DB_ADDRESS_RESULTS = 3;
 const MAX_DB_CONTENT_RESULTS = 6;
 const MAX_GEOCODER_RESULTS = 3;
 const CONTEXT_CITY_CACHE_TTL_MS = 10 * 60 * 1000;

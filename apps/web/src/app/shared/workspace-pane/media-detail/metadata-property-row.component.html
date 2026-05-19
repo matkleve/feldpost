@@ -1,28 +1,19 @@
 <div
-  class="meta-row"
-  [class.meta-row--editing]="editing()"
+  class="detail-row"
+  [class.detail-row--editing]="editing()"
 >
-  <button
-    hlmBtn
-    variant="ghost"
-    size="icon"
-    class="detail-row-action detail-row-action--left"
-    type="button"
-    [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-    [title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-    (click)="startEdit()"
-  >
-    <span class="material-icons" aria-hidden="true">edit</span>
-  </button>
+  <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+  <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
 
-  <div class="meta-row__body">
-    <span class="meta-row__label" data-i18n-skip [title]="metaKey()">{{ metaKey() }}</span>
+  <div class="detail-row__center">
+    <span class="material-icons detail-row__icon" aria-hidden="true">label</span>
+    <span class="detail-row__label" data-i18n-skip [title]="metaKey()">{{ metaKey() }}</span>
 
     @if (editing()) {
       <input
         #editInput
         hlmInput
-        class="meta-row__input"
+        class="detail-row__input"
         type="text"
         [value]="metaValue()"
         [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
@@ -32,7 +23,7 @@
       />
     } @else {
       <span
-        class="meta-row__value"
+        class="detail-row__value detail-row__value--static"
         data-i18n-skip
         [title]="metaValue() || t('workspace.metadata.row.value.empty', '-')"
       >
@@ -45,7 +36,20 @@
     hlmBtn
     variant="ghost"
     size="icon"
-    class="detail-row-action detail-row-action--right detail-row-action--danger"
+    class="detail-row-action detail-row-action--r1"
+    type="button"
+    [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+    [title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+    (click)="startEdit()"
+  >
+    <span class="material-icons" aria-hidden="true">edit</span>
+  </button>
+
+  <button
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-row-action detail-row-action--r2 detail-row-action--danger"
     type="button"
     [attr.aria-label]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"
     [attr.title]="t('workspace.metadata.row.removeTitle', 'Remove metadata')"
