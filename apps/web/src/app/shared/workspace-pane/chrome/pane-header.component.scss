@@ -9,10 +9,9 @@
 .pane-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
-  width: min(60rem, 100%);
-  margin-inline: auto;
+  width: 100%;
   padding: var(--spacing-2) var(--spacing-4);
   background: transparent;
 }
@@ -72,7 +71,7 @@
 .pane-header__title-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--spacing-1);
   max-width: calc(100% - 6rem);
   min-width: 0;
@@ -103,12 +102,23 @@
   color: var(--primary);
 }
 
+.pane-header:has(.pane-header__color-btn) .pane-header__title-btn,
+.pane-header:has(.pane-header__color-btn) .pane-header__title-input,
+.pane-header:has(.pane-header__color-btn) > .pane-header__title {
+  margin-inline-start: calc(2rem + var(--spacing-2));
+}
+
+.pane-header__spacer {
+  flex: 1;
+  min-width: 0;
+}
+
 .pane-header__title {
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-lg);
   line-height: var(--line-height-tight);
   color: var(--foreground);
-  text-align: center;
+  text-align: start;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -119,7 +129,7 @@
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-lg);
   color: var(--foreground);
-  text-align: center;
+  text-align: start;
   width: min(30rem, calc(100% - 6rem));
   min-height: 2.25rem;
   padding: var(--spacing-1) var(--spacing-3);
@@ -140,10 +150,8 @@
 }
 
 .pane-header__close-btn {
-  position: absolute;
-  inset-inline-end: var(--spacing-4);
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
+  margin-inline-start: auto;
   display: flex;
   align-items: center;
   justify-content: center;

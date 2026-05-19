@@ -27,6 +27,8 @@ interface AddressFieldDefinition {
   icon: string;
   labelKey: string;
   labelFallback: string;
+  copyAriaKey: string;
+  copyAriaFallback: string;
   editAriaKey: string;
   editAriaFallback: string;
   editTitleKey: string;
@@ -38,7 +40,7 @@ interface AddressFieldDefinition {
 }
 
 @Component({
-  selector: 'app-image-detail-inline-section',
+  selector: 'app-media-detail-inline-section',
   standalone: true,
   imports: [
     CapturedDateEditorComponent,
@@ -50,12 +52,9 @@ interface AddressFieldDefinition {
     HlmBadgeDirective,
   ],
   templateUrl: './media-detail-inline-section.component.html',
-  styleUrls: [
-    '../media-detail-view.component.scss',
-    '../media-detail-view.component.part2.scss',
-  ],
+  styleUrl: './media-detail-inline-section.component.scss',
 })
-export class ImageDetailInlineSectionComponent {
+export class MediaDetailInlineSectionComponent {
   private static readonly PROJECT_DROPDOWN_GAP_PX = 8;
   private static readonly PROJECT_DROPDOWN_MARGIN_PX = 8;
   private static readonly PROJECT_DROPDOWN_MAX_WIDTH_PX = 320;
@@ -112,6 +111,8 @@ export class ImageDetailInlineSectionComponent {
       icon: 'signpost',
       labelKey: 'workspace.imageDetail.field.street',
       labelFallback: 'Street',
+      copyAriaKey: 'workspace.imageDetail.action.copyStreet',
+      copyAriaFallback: 'Copy street',
       editAriaKey: 'workspace.imageDetail.action.editStreet.aria',
       editAriaFallback: 'Edit street',
       editTitleKey: 'workspace.imageDetail.action.editStreet.title',
@@ -126,6 +127,8 @@ export class ImageDetailInlineSectionComponent {
       icon: 'location_city',
       labelKey: 'workspace.imageDetail.field.city',
       labelFallback: 'City',
+      copyAriaKey: 'workspace.imageDetail.action.copyCity',
+      copyAriaFallback: 'Copy city',
       editAriaKey: 'workspace.imageDetail.action.editCity.aria',
       editAriaFallback: 'Edit city',
       editTitleKey: 'workspace.imageDetail.action.editCity.title',
@@ -140,6 +143,8 @@ export class ImageDetailInlineSectionComponent {
       icon: 'map',
       labelKey: 'workspace.imageDetail.field.district',
       labelFallback: 'District',
+      copyAriaKey: 'workspace.imageDetail.action.copyDistrict',
+      copyAriaFallback: 'Copy district',
       editAriaKey: 'workspace.imageDetail.action.editDistrict.aria',
       editAriaFallback: 'Edit district',
       editTitleKey: 'workspace.imageDetail.action.editDistrict.title',
@@ -154,6 +159,8 @@ export class ImageDetailInlineSectionComponent {
       icon: 'public',
       labelKey: 'workspace.imageDetail.field.country',
       labelFallback: 'Country',
+      copyAriaKey: 'workspace.imageDetail.action.copyCountry',
+      copyAriaFallback: 'Copy country',
       editAriaKey: 'workspace.imageDetail.action.editCountry.aria',
       editAriaFallback: 'Edit country',
       editTitleKey: 'workspace.imageDetail.action.editCountry.title',
@@ -266,15 +273,15 @@ export class ImageDetailInlineSectionComponent {
 
     const editorRect = editor.getBoundingClientRect();
     const panelRect = this.projectDropdownRef()?.nativeElement.getBoundingClientRect();
-    const margin = ImageDetailInlineSectionComponent.PROJECT_DROPDOWN_MARGIN_PX;
-    const gap = ImageDetailInlineSectionComponent.PROJECT_DROPDOWN_GAP_PX;
+    const margin = MediaDetailInlineSectionComponent.PROJECT_DROPDOWN_MARGIN_PX;
+    const gap = MediaDetailInlineSectionComponent.PROJECT_DROPDOWN_GAP_PX;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const availableWidth = Math.max(240, viewportWidth - margin * 2);
     const preferredWidth = Math.min(
       editorRect.width,
       availableWidth,
-      ImageDetailInlineSectionComponent.PROJECT_DROPDOWN_MAX_WIDTH_PX,
+      MediaDetailInlineSectionComponent.PROJECT_DROPDOWN_MAX_WIDTH_PX,
     );
     const dropdownHeight = panelRect?.height ?? 0;
     const preferredLeft = editorRect.left;

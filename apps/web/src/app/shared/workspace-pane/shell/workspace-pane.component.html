@@ -4,48 +4,45 @@
   role="region"
   [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
 >
-    <app-pane-header
-      [title]="resolvedTitle()"
-      [editable]="titleEditable()"
-      [editEnabled]="titleEditEnabled()"
-      [editValue]="titleEditValue()"
-      [colorToken]="projectColorToken()"
-      [colorPickerEnabled]="colorPickerEnabled()"
-      [colorPickerOpen]="colorPickerOpen()"
-      (editValueChange)="onTitleEditValueChange($event)"
-      (editSubmitted)="onTitleSubmit($event)"
-      (editRequested)="onTitleEditRequest()"
-      (colorPickerRequested)="onColorPickerRequest()"
-      (close)="close()"
-    ></app-pane-header>
+  <app-pane-header
+    [title]="resolvedTitle()"
+    [editable]="titleEditable()"
+    [editEnabled]="titleEditEnabled()"
+    [editValue]="titleEditValue()"
+    [colorToken]="projectColorToken()"
+    [colorPickerEnabled]="colorPickerEnabled()"
+    [colorPickerOpen]="colorPickerOpen()"
+    (editValueChange)="onTitleEditValueChange($event)"
+    (editSubmitted)="onTitleSubmit($event)"
+    (editRequested)="onTitleEditRequest()"
+    (colorPickerRequested)="onColorPickerRequest()"
+    (close)="close()"
+  ></app-pane-header>
 
+  <div
+    class="workspace-pane__tabs"
+    hlmTabs
+    brnTabs
+    [brnTabs]="activeTab()"
+    (brnTabsChange)="onBrnTabsChange($event)"
+  >
     <div
-      class="workspace-pane__tabs"
-      role="tablist"
+      hlmTabsList
+      brnTabsList
+      variant="line"
+      class="w-full justify-start"
       [attr.aria-label]="t('workspace.pane.tabs.aria', 'Workspace tabs')"
     >
-      <button
-        type="button"
-        role="tab"
-        class="workspace-pane__tab"
-        [class.workspace-pane__tab--active]="activeTab() === 'selected-items'"
-        [attr.aria-selected]="activeTab() === 'selected-items'"
-        (click)="setActiveTab('selected-items')"
-      >
+      <button brnTabsTrigger="selected-items" hlmTabsTrigger>
         {{ t('workspace.pane.tab.selectedItems', 'Selected Items') }}
       </button>
-      <button
-        type="button"
-        role="tab"
-        class="workspace-pane__tab"
-        [class.workspace-pane__tab--active]="activeTab() === 'upload'"
-        [attr.aria-selected]="activeTab() === 'upload'"
-        (click)="setActiveTab('upload')"
-      >
+      <button brnTabsTrigger="upload" hlmTabsTrigger>
         {{ t('workspace.pane.tab.upload', 'Upload') }}
       </button>
     </div>
+  </div>
 
+  <div class="workspace-pane__content">
     @if (detailMediaId()) {
       <!-- Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> detail actions route map-pick through pane output wiring. -->
       <app-media-detail-view
@@ -82,4 +79,5 @@
         <ng-content select="[data-workspace-upload-tab]" />
       </section>
     }
+  </div>
 </div>

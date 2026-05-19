@@ -7,15 +7,14 @@ import { DragDividerComponent } from './drag-divider/drag-divider.component';
   imports: [DragDividerComponent],
   template: `
     @if (open()) {
-      <app-drag-divider
-        [currentWidth]="currentWidth()"
-        [minWidth]="minWidth()"
-        [maxWidth]="maxWidth()"
-        [defaultWidth]="defaultWidth()"
-        (widthChange)="widthChange.emit($event)"
-      />
-
       <section class="workspace-pane-shell" [style.width.px]="currentWidth()">
+        <app-drag-divider
+          [currentWidth]="currentWidth()"
+          [minWidth]="minWidth()"
+          [maxWidth]="maxWidth()"
+          [defaultWidth]="defaultWidth()"
+          (widthChange)="widthChange.emit($event)"
+        />
         <ng-content />
       </section>
     }

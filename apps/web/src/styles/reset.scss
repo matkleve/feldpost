@@ -14,7 +14,12 @@
 
   html,
   body {
+    width: 100%;
+    max-width: 100%;
     height: 100%;
+    // `scrollbar-gutter: stable` + `100vw` sizing elsewhere can exceed the layout box; clip page-level x overflow.
+    // @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
+    overflow-x: clip;
     font-size: var(--font-size-md);
     line-height: 1.45;
     // Stack matches tweakcn `--font-sans` (DM Sans); var resolves after :root in this bundle.
@@ -30,6 +35,9 @@
 
   app-root {
     display: block;
+    width: 100%;
+    max-width: 100%;
     height: 100%;
+    overflow-x: clip;
   }
 }

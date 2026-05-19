@@ -19,7 +19,7 @@ import type { ResolvedAction } from '../../../../core/action/action-types';
 import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-actions.types';
 
 @Component({
-  selector: 'app-image-detail-header',
+  selector: 'app-media-detail-header',
   standalone: true,
   imports: [
     DropdownShellComponent,
@@ -30,9 +30,9 @@ import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-acti
     ...HLM_BADGE_IMPORTS,
   ],
   templateUrl: './media-detail-header.component.html',
-  styleUrl: '../media-detail-view.component.scss',
+  styleUrl: './media-detail-header.component.scss',
 })
-export class ImageDetailHeaderComponent {
+export class MediaDetailHeaderComponent {
   private static readonly MENU_GAP_PX = 8;
   private static readonly MENU_MARGIN_PX = 8;
   private static readonly MENU_MIN_WIDTH_PX = 176;
@@ -142,14 +142,14 @@ export class ImageDetailHeaderComponent {
     const panel = this.contextMenuPanelRef()?.nativeElement;
     const panelRect = panel?.getBoundingClientRect();
     const menuWidth = Math.max(
-      ImageDetailHeaderComponent.MENU_MIN_WIDTH_PX,
-      panelRect?.width ?? ImageDetailHeaderComponent.MENU_MIN_WIDTH_PX,
+      MediaDetailHeaderComponent.MENU_MIN_WIDTH_PX,
+      panelRect?.width ?? MediaDetailHeaderComponent.MENU_MIN_WIDTH_PX,
     );
     const menuHeight = panelRect?.height ?? 0;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const margin = ImageDetailHeaderComponent.MENU_MARGIN_PX;
-    const gap = ImageDetailHeaderComponent.MENU_GAP_PX;
+    const margin = MediaDetailHeaderComponent.MENU_MARGIN_PX;
+    const gap = MediaDetailHeaderComponent.MENU_GAP_PX;
 
     const preferredLeft = triggerRect.right - menuWidth;
     const maxLeft = Math.max(margin, viewportWidth - menuWidth - margin);

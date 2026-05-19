@@ -4,17 +4,45 @@
 // Local CVA mirrors the spartan hlm API so the swap is a drop-in.
 // @see docs/MIGRATION_PLAN.md
 
-import { cva } from 'class-variance-authority';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-/** Tab list chrome (muted rail + triggers). */
+export type TabsListVariantProps = VariantProps<typeof tabsListVariants>;
+
+/** Tab list chrome (muted rail or line underline row). */
 export const tabsListVariants = cva(
-  'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+  'group/tabs-list inline-flex items-center text-muted-foreground',
+  {
+    variants: {
+      variant: {
+        default: 'h-10 justify-center rounded-md bg-muted p-1',
+        line: 'h-10 w-full justify-start gap-1 rounded-none bg-transparent p-0',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  },
 );
 
-/** Individual tab trigger surface; active state uses `data-[state=active]`. */
+/** Individual tab trigger surface; active state uses `data-[state=active]` from BrnTabs. */
 export const tabsTriggerVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+  'inline-flex cursor-pointer items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default:
+          'rounded-sm px-3 py-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+        line:
+          'relative rounded-none border border-transparent px-4 pb-3 pt-2 text-foreground/60 hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  },
 );
+
+export type TabsTriggerVariantProps = VariantProps<typeof tabsTriggerVariants>;
 
 /** Tab panel chrome below triggers. */
 export const tabsContentVariants = cva(

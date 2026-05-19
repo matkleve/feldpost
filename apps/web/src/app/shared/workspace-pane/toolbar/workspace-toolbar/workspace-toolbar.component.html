@@ -9,26 +9,34 @@
       hlmBtn
       variant="outline"
       size="sm"
-      iconPlacement="end"
-      class="workspace-toolbar__menu-trigger min-w-0 shrink"
+      class="workspace-toolbar__menu-trigger"
       [class.workspace-toolbar__menu-trigger--open]="activeDropdown() === btn.id"
-      [attr.data-state]="btn.active() ? 'on' : null"
+      [attr.data-active]="btn.active() ? 'true' : null"
+      [attr.aria-label]="btn.label"
+      [attr.title]="btn.label"
       [attr.aria-expanded]="activeDropdown() === btn.id"
       [attr.aria-haspopup]="true"
       (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
     >
-      <span data-dd-part="label" class="min-w-0 flex-1 truncate text-left">{{ btn.label }}</span>
+      <span
+        data-dd-part="icon"
+        class="material-icons workspace-toolbar__menu-trigger-icon"
+        aria-hidden="true"
+        >{{ btn.icon }}</span
+      >
+      <span data-dd-part="label" class="workspace-toolbar__menu-trigger-label">{{ btn.label }}</span>
       <span
         data-dd-part="chevron"
-        class="material-icons shrink-0 text-base leading-none transition-transform duration-150 ease-out"
+        class="material-icons workspace-toolbar__menu-trigger-chevron"
         aria-hidden="true"
-        >expand_more</span>
+        >expand_more</span
+      >
     </button>
   }
 
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
-  <div class="workspace-toolbar__size-control" hlmPillToggle size="sm">
+  <div class="workspace-toolbar__size-control workspace-toolbar__size-control--full" hlmPillToggle size="sm">
     <div
       hlmToggleGroup
       brnToggleGroup
@@ -53,6 +61,19 @@
       }
     </div>
   </div>
+
+  <button
+    type="button"
+    hlmBtn
+    variant="default"
+    size="sm"
+    class="workspace-toolbar__size-control workspace-toolbar__size-control--compact"
+    [attr.aria-label]="compactCardVariantToggleTitle()"
+    [attr.title]="compactCardVariantToggleTitle()"
+    (click)="cycleThumbnailSizePreset()"
+  >
+    <span class="material-icons" aria-hidden="true">{{ currentCardVariantToggleOption()?.icon }}</span>
+  </button>
 </div>
 
 @if (activeDropdown()) {

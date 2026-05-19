@@ -1,5 +1,7 @@
 import { Component, computed, inject, input, output } from '@angular/core';
+import { BrnTabsImports } from '@spartan-ng/brain/tabs';
 import { PaneHeaderComponent } from '../chrome/pane-header.component';
+import { HLM_TABS_IMPORTS } from '../../ui/tabs';
 import { WorkspaceToolbarComponent } from '../toolbar/workspace-toolbar/workspace-toolbar.component';
 import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from '../media-detail/media-detail-view.component';
@@ -18,6 +20,8 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
 @Component({
   selector: 'app-workspace-pane',
   imports: [
+    ...BrnTabsImports,
+    ...HLM_TABS_IMPORTS,
     PaneHeaderComponent,
     WorkspaceToolbarComponent,
     WorkspaceSelectedItemsGridComponent,
@@ -129,6 +133,12 @@ export class WorkspacePaneComponent {
 
   setActiveTab(tab: WorkspacePaneTab): void {
     this.activeTabChange.emit(tab);
+  }
+
+  onBrnTabsChange(tab: string | undefined): void {
+    if (tab === 'selected-items' || tab === 'upload') {
+      this.setActiveTab(tab);
+    }
   }
 
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {

@@ -319,6 +319,13 @@ html[data-theme="sandstone"] {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+
+  // Sets a slightly smaller global Material Icons baseline for calmer icon prominence
+  // @see docs/migration/phase-10-visual-qa.md
+  .material-icons {
+    font-size: 1.375rem; // 22px (was 24px from Google Material Icons baseline)
+    line-height: 1;
+  }
 }
 
 // Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).

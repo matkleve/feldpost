@@ -5,11 +5,23 @@
 // Establishes workspace pane column shell geometry and surface appearance for the map-adjacent panel
 // @see docs/specs/ui/workspace/workspace-pane-shell.md
 .workspace-pane-shell {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
   background: var(--card);
   box-shadow: var(--shadow-md);
+}
+
+// Pane content fills the shell column
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+.workspace-pane-shell > app-workspace-pane {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
 }
 
 // Desktop: clip-in width animation using tokenized duration
@@ -18,7 +30,7 @@
   .workspace-pane-shell {
     height: 100%;
     overflow: hidden;
-    animation: workspace-pane-shell-clip-in-right 200ms ease-out;
+    animation: workspace-pane-shell-clip-in-right 200ms ease-out 16ms backwards;
   }
 }
 
@@ -35,7 +47,7 @@
     // Matches former `var(--z-panel)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
     z-index: 100;
     border-radius: 0;
-    animation: workspace-pane-shell-clip-in-up 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    animation: workspace-pane-shell-clip-in-up 300ms cubic-bezier(0.4, 0, 0.2, 1) 16ms backwards;
   }
 }
 

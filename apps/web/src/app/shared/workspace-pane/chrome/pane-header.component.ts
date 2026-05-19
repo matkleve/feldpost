@@ -52,6 +52,8 @@ import { I18nService } from '../../../core/i18n/i18n.service';
         }
       }
 
+      <div class="pane-header__spacer" aria-hidden="true"></div>
+
       <button
         class="pane-header__close-btn"
         type="button"

@@ -10,8 +10,8 @@
       size="icon"
       class="detail-row-action detail-row-action--left"
       type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-      [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+      [attr.aria-label]="t('workspace.imageDetail.action.copyType', 'Copy type')"
+      [attr.title]="t('workspace.imageDetail.action.copyType', 'Copy type')"
       (click)="copyCoordinatesRequested.emit()"
     >
       <span class="material-icons" aria-hidden="true">content_copy</span>
@@ -32,8 +32,8 @@
       size="icon"
       class="detail-row-action detail-row-action--left"
       type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-      [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+      [attr.aria-label]="t('workspace.imageDetail.action.copyCapturedDate', 'Copy captured date')"
+      [attr.title]="t('workspace.imageDetail.action.copyCapturedDate', 'Copy captured date')"
       (click)="copyCoordinatesRequested.emit()"
     >
       <span class="material-icons" aria-hidden="true">content_copy</span>
@@ -78,8 +78,8 @@
       size="icon"
       class="detail-row-action detail-row-action--left"
       type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-      [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+      [attr.aria-label]="t('workspace.imageDetail.action.copyProject', 'Copy project')"
+      [attr.title]="t('workspace.imageDetail.action.copyProject', 'Copy project')"
       (click)="copyCoordinatesRequested.emit()"
     >
       <span class="material-icons" aria-hidden="true">content_copy</span>
@@ -230,8 +230,8 @@
       size="icon"
       class="detail-row-action detail-row-action--left"
       type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-      [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+      [attr.aria-label]="t('workspace.imageDetail.action.copyUploadDate', 'Copy upload date')"
+      [attr.title]="t('workspace.imageDetail.action.copyUploadDate', 'Copy upload date')"
       (click)="copyCoordinatesRequested.emit()"
     >
       <span class="material-icons" aria-hidden="true">content_copy</span>
@@ -279,8 +279,8 @@
         size="icon"
         class="detail-row-action detail-row-action--left"
         type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-        [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+        [attr.aria-label]="t(fieldDef.copyAriaKey, fieldDef.copyAriaFallback)"
+        [attr.title]="t(fieldDef.copyAriaKey, fieldDef.copyAriaFallback)"
         (click)="copyCoordinatesRequested.emit()"
       >
         <span class="material-icons" aria-hidden="true">content_copy</span>
@@ -424,18 +424,7 @@
     <div
       class="detail-row detail-row--readonly"
     >
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--left"
-        type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-        [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-        (click)="copyCoordinatesRequested.emit()"
-      >
-        <span class="material-icons" aria-hidden="true">content_copy</span>
-      </button>
+      <span class="detail-row-action detail-row-action--left" aria-hidden="true"></span>
       <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
       <span class="detail-row__label">{{
         t('workspace.imageDetail.field.coordinates', 'Coordinates')

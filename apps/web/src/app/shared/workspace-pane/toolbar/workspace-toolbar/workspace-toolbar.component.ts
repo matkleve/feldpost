@@ -75,6 +75,26 @@ export class WorkspaceToolbarComponent implements OnInit {
   readonly cardVariantToggleOptions = computed(() =>
     buildCardVariantToggleOptions(this.t, this.allowedCardVariants, true),
   );
+  readonly currentCardVariantToggleOption = computed(() => {
+    const options = this.cardVariantToggleOptions();
+    if (options.length === 0) return null;
+    const current = this.thumbnailSizePreset();
+    return options.find((opt) => opt.id === current) ?? options[0];
+  });
+  readonly nextCardVariantToggleOption = computed(() => {
+    const options = this.cardVariantToggleOptions();
+    if (options.length === 0) return null;
+    const current = this.thumbnailSizePreset();
+    const currentIndex = options.findIndex((opt) => opt.id === current);
+    const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % options.length;
+    return options[nextIndex] ?? options[0];
+  });
+  readonly compactCardVariantToggleTitle = computed(() => {
+    const next = this.nextCardVariantToggleOption();
+    if (!next) return this.t('workspace.toolbar.size.compact.switchTo.fallback', 'Switch view');
+    const template = this.t('workspace.toolbar.size.compact.switchTo', 'Switch to {{view}}');
+    return template.replace('{{view}}', next.label);
+  });
 
   // Dropdown position (fixed, computed from button rect)
   readonly dropdownTop = signal(0);
@@ -104,21 +124,25 @@ export class WorkspaceToolbarComponent implements OnInit {
     return [
       {
         id: 'grouping' as const,
-        label: this.t('workspace.toolbar.button.grouping', 'Grouping'),
+        icon: 'group_work',
+        label: this.t('workspace.toolbar.button.grouping', 'Group'),
         active: this.hasGrouping,
       },
       {
         id: 'filter' as const,
+        icon: 'filter_list',
         label: this.t('workspace.toolbar.button.filter', 'Filter'),
         active: this.hasFilters,
       },
       {
         id: 'sort' as const,
+        icon: 'sort',
         label: this.t('workspace.toolbar.button.sort', 'Sort'),
         active: this.hasCustomSort,
       },
       {
         id: 'projects' as const,
+        icon: 'folder',
         label: this.t('workspace.toolbar.button.projects', 'Projects'),
         active: this.hasProject,
       },
@@ -184,7 +208,19 @@ export class WorkspaceToolbarComponent implements OnInit {
   onThumbnailSizeToggleChange(raw: ToggleValue<string>): void {
     const value = toggleSingleStringValue(raw);
     if (value !== 'row' && value !== 'small' && value !== 'medium' && value !== 'large') return;
-    this.viewService.setThumbnailSizePreset(value as ThumbnailSizePreset);
+    this.applyThumbnailPreset(value);
+  }
+
+  cycleThumbnailSizePreset(): void {
+    const next = this.nextCardVariantToggleOption();
+    if (!next) return;
+    const value = next.id;
+    if (value !== 'row' && value !== 'small' && value !== 'medium' && value !== 'large') return;
+    this.applyThumbnailPreset(value);
+  }
+
+  private applyThumbnailPreset(value: ThumbnailSizePreset): void {
+    this.viewService.setThumbnailSizePreset(value);
     this.cardVariantSettings.setVariant('map', value as CardVariant);
   }
 }

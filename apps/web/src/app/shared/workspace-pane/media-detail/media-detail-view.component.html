@@ -20,9 +20,7 @@
 
     <div class="detail-scroll">
       <div class="detail-content">
-        <div class="detail-image-placeholder detail-image-placeholder--loading">
-          <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
-        </div>
+        <span class="detail-loading-placeholder detail-loading-placeholder--media" aria-hidden="true"></span>
 
         <div class="detail-section detail-section--loading">
           <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
@@ -37,7 +35,7 @@
 
 @if (image() && !loading()) {
   <div class="detail-main-column">
-    <app-image-detail-header
+    <app-media-detail-header
       [displayTitle]="displayTitle()"
       [titleValue]="image()!.address_label ?? ''"
       [mediaTypeLabel]="mediaTypeLabel()"
@@ -76,7 +74,7 @@
       <div class="detail-content">
         <app-quick-info-chips [chips]="infoChips()" (chipClicked)="onChipClicked($event)" />
 
-        <app-image-detail-inline-section
+        <app-media-detail-inline-section
           [image]="image()!"
           [detailViewLabel]="detailViewLabel()"
           [mediaTypeLabel]="mediaTypeLabel()"
@@ -111,15 +109,13 @@
           (deleteRequested)="confirmDelete()"
         />
 
-        <div class="detail-section">
-          <app-metadata-section
-            [entries]="metadata()"
-            [allKeyNames]="allMetadataKeyNames()"
-            (valueChanged)="saveMetadata($event.entry, $event.newValue)"
-            (entryRemoved)="removeMetadata($event)"
-            (entryAdded)="addMetadata($event.key, $event.value)"
-          />
-        </div>
+        <app-metadata-section
+          [entries]="metadata()"
+          [allKeyNames]="allMetadataKeyNames()"
+          (valueChanged)="saveMetadata($event.entry, $event.newValue)"
+          (entryRemoved)="removeMetadata($event)"
+          (entryAdded)="addMetadata($event.key, $event.value)"
+        />
 
         <app-detail-actions
           [actions]="workspaceSingleActions()"

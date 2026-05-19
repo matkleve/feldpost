@@ -5,19 +5,21 @@
 
 import { computed, Directive, input } from '@angular/core';
 import { twMerge } from 'tailwind-merge';
-import { tabsListVariants } from './tabs-variants';
+import { tabsListVariants, type TabsListVariantProps } from './tabs-variants';
 
 @Directive({
   selector: '[hlmTabsList][brnTabsList]',
   standalone: true,
   host: {
     '[class]': 'hostClass()',
+    '[attr.data-variant]': 'variant()',
   },
 })
 export class HlmTabsListDirective {
+  readonly variant = input<NonNullable<TabsListVariantProps['variant']>>('default');
   readonly userClass = input<string>('', { alias: 'class' });
 
   protected readonly hostClass = computed(() =>
-    twMerge(tabsListVariants(), this.userClass()),
+    twMerge(tabsListVariants({ variant: this.variant() }), this.userClass()),
   );
 }

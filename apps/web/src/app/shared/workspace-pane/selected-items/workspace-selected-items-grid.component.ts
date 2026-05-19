@@ -19,13 +19,8 @@ import { WorkspaceSelectionService } from '../../../core/workspace-selection/wor
 import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
-import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
-import { ShareSetService } from '../../../core/share-set/share-set.service';
-import type { ShareAudienceDialogResult } from '../../../core/share-set/share-set.types';
 import { MediaDownloadService } from '../../../core/media-download/media-download.service';
-import { MediaQueryService } from '../../../core/media-query/media-query.service';
-import { MediaDeleteUndoService } from '../../../core/media-delete/media-delete-undo.service';
-import { ProjectsService } from '../../../core/projects/projects.service';
+import type { ShareAudienceDialogResult } from '../../../core/share-set/share-set.types';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import type {
   GroupedSection,
@@ -51,6 +46,7 @@ import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component
 import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
+import { WorkspaceBulkActionService } from '../workspace-bulk-action.service';
 
 /** Flat renderable item â€” either a group header or a grid of images. */
 type RenderItem =
@@ -265,13 +261,9 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
   private readonly geocodingService = inject(GeocodingService);
-  private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly locationResolverService = inject(LocationResolverService);
-  private readonly shareSetService = inject(ShareSetService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
-  private readonly mediaQueryService = inject(MediaQueryService);
-  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
-  private readonly projectsService = inject(ProjectsService);
+  private readonly bulkActions = inject(WorkspaceBulkActionService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
 
@@ -622,112 +614,21 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   }
 
   async confirmAddressDialog(addressQuery: string): Promise<void> {
-    const addressText = addressQuery.trim();
-    if (!addressText) {
-      return;
-    }
-
-    const suggestion = await this.geocodingService.forward(addressText);
-    if (!suggestion) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.addressNotFound', 'Address could not be resolved.'),
-        type: 'warning',
-      });
-      return;
-    }
-
-    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
-    if (selectedMediaItemIds.length === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
-        type: 'warning',
-      });
+    const result = await this.bulkActions.confirmAddressForSelection(addressQuery);
+    if (
+      result.status === 'success' ||
+      result.status === 'empty_selection' ||
+      result.status === 'noop'
+    ) {
       this.closeAddressDialog();
-      return;
     }
-
-    let updatedCount = 0;
-    for (const mediaItemId of selectedMediaItemIds) {
-      const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
-        mediaItemId,
-        {
-          lat: suggestion.lat,
-          lng: suggestion.lng,
-          addressLabel: suggestion.addressLabel,
-          city: suggestion.city,
-          district: suggestion.district,
-          street: suggestion.street,
-          streetNumber: suggestion.streetNumber,
-          zip: suggestion.zip,
-          country: suggestion.country,
-        },
-      );
-      if (result.ok) {
-        updatedCount += 1;
-      }
-    }
-
-    if (updatedCount === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.addressUpdateFailed', 'Address update failed.'),
-        type: 'error',
-      });
-      return;
-    }
-
-    const selectedImageIds = this.selectionService.selectedMediaIds();
-    this.viewService.updateRawImages((images) =>
-      images.map((image) =>
-        selectedImageIds.has(image.id)
-          ? {
-              ...image,
-              latitude: suggestion.lat,
-              longitude: suggestion.lng,
-              addressLabel: suggestion.addressLabel,
-              city: suggestion.city,
-              district: suggestion.district,
-              street: suggestion.street,
-              streetNumber: suggestion.streetNumber,
-              zip: suggestion.zip,
-              country: suggestion.country,
-            }
-          : image,
-      ),
-    );
-
-    this.toastService.show({
-      message: this.t('workspace.export.success.addressUpdated', 'Address updated.'),
-      type: 'success',
-    });
-    this.closeAddressDialog();
   }
 
   async confirmProjectDialog(projectId: string): Promise<void> {
-    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
-    if (selectedMediaItemIds.length === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
-        type: 'warning',
-      });
+    const result = await this.bulkActions.assignSelectedToProject(projectId);
+    if (result.status === 'ok' || result.status === 'empty_selection') {
       this.closeProjectDialog();
-      return;
     }
-
-    const result = await this.projectsService.assignMediaItemsToProject(
-      selectedMediaItemIds,
-      projectId,
-    );
-
-    if (!result.ok) {
-      this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
-      return;
-    }
-
-    this.toastService.show({
-      message: this.t('workspace.export.success.projectAssigned', 'Assigned to project.'),
-      type: 'success',
-    });
-    this.closeProjectDialog();
   }
 
   private scheduleThumbnailSigning(): void {
@@ -952,11 +853,8 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   }
 
   openShareAudienceDialog(kind: 'clipboard' | 'silent' | 'native'): void {
-    if (this.targetMediaIds().length === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
-        type: 'error',
-      });
+    if (!this.bulkActions.hasSelection()) {
+      this.bulkActions.showNoSelectionError('error');
       return;
     }
     this.shareAudienceDialogKind.set(kind);
@@ -971,7 +869,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     this.shareAudienceDialogOpen.set(false);
     const kind = this.shareAudienceDialogKind();
     const copyToClipboard = kind === 'clipboard';
-    const url = await this.createShareLinkWithAudience(copyToClipboard, audience);
+    const url = await this.bulkActions.createShareLinkWithAudience(copyToClipboard, audience);
     if (!url) {
       return;
     }
@@ -992,141 +890,28 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     }
   }
 
-  private async createShareLinkWithAudience(
-    copyToClipboard: boolean,
-    audience: ShareAudienceDialogResult,
-  ): Promise<string | null> {
-    const selectedIds = this.targetMediaIds();
-    if (selectedIds.length === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
-        type: 'error',
-      });
-      return null;
-    }
-
-    try {
-      const result = await this.shareSetService.createOrReuseShareSet(selectedIds, {
-        audience: audience.audience,
-        shareGrant: audience.shareGrant,
-        recipientUserIds:
-          audience.audience === 'named' ? audience.recipientUserIds : undefined,
-      });
-      const url = `${window.location.origin}/?share=${result.token}`;
-
-      if (copyToClipboard) {
-        if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-          this.toastService.show({
-            message: this.t(
-              'workspace.export.error.clipboardUnavailable',
-              'Clipboard is not available.',
-            ),
-            type: 'error',
-          });
-          return url;
-        }
-
-        await navigator.clipboard.writeText(url);
-        this.toastService.show({
-          message: this.t('workspace.export.success.linkCopied', 'Share link copied.'),
-          type: 'success',
-          dedupe: true,
-        });
-      }
-
-      return url;
-    } catch (error) {
-      this.toastService.show({
-        message:
-          error instanceof Error
-            ? error.message
-            : this.t(
-                'workspace.export.error.linkCreateFailed',
-                'Freigabelink konnte nicht erstellt werden.',
-              ),
-        type: 'error',
-      });
-      return null;
-    }
-  }
-
   private async openProjectDialog(): Promise<void> {
-    const projectOptions = await this.projectsService.loadProjectSelectOptions();
-
-    if (projectOptions.length === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.noProjectsAvailable', 'No projects available.'),
-        type: 'warning',
-      });
+    const loadResult = await this.bulkActions.loadProjectSelectOptions();
+    if (loadResult.status !== 'ok') {
       return;
     }
 
-    this.projectOptions.set(projectOptions);
-    this.projectDialogSelectedId.set(this.projectOptions()[0]?.id ?? null);
+    this.projectOptions.set(loadResult.options);
+    this.projectDialogSelectedId.set(loadResult.options[0]?.id ?? null);
     this.projectDialogOpen.set(true);
   }
 
-  private async resolveSelectedMediaItemIds(): Promise<string[]> {
-    const selectedIds = Array.from(this.selectionService.selectedMediaIds());
-    return this.mediaQueryService.resolveMediaItemIdsByLookupIds(selectedIds);
-  }
-
   private async removeSelectedFromProject(): Promise<void> {
-    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
-    if (selectedMediaItemIds.length === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
-        type: 'warning',
-      });
-      return;
-    }
-
-    const result = await this.projectsService.removeMediaItemsFromProjects(selectedMediaItemIds);
-
-    if (!result.ok) {
-      this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
-      return;
-    }
-
-    const selectedImageIds = this.selectionService.selectedMediaIds();
-    this.viewService.updateRawImages((images) =>
-      images.map((image) =>
-        selectedImageIds.has(image.id)
-          ? {
-              ...image,
-              projectId: null,
-              projectName: null,
-            }
-          : image,
-      ),
-    );
-
-    this.toastService.show({
-      message: this.t(
-        'upload.item.menu.project.remove.success',
-        'Removed from project successfully.',
-      ),
-      type: 'success',
-    });
+    await this.bulkActions.removeSelectedFromProject();
   }
 
   private async deleteSelectedMedia(): Promise<void> {
-    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
-    if (selectedMediaItemIds.length === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
-        type: 'warning',
-      });
-      return;
-    }
-
     const selectedIds = this.selectionService.selectedMediaIds();
     const removedImages = this.viewService
       .rawImages()
       .filter((image) => selectedIds.has(image.id));
 
-    const result = await this.mediaDeleteUndo.deleteWithUndo({
-      mediaItemIds: selectedMediaItemIds,
+    await this.bulkActions.deleteSelectedWithUndo({
       onAfterDelete: () => {
         this.viewService.updateRawImages((images) =>
           images.filter((image) => !selectedIds.has(image.id)),
@@ -1141,9 +926,5 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
         });
       },
     });
-
-    if (!result.ok) {
-      this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
-    }
   }
 }

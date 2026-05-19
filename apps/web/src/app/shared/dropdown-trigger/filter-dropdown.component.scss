@@ -86,13 +86,27 @@
   text-overflow: ellipsis;
 }
 
-// Hidden full rule row establishes shell width when the filter list is empty.
+// Grid stacks ghost row + visible content in one cell so width is always rule-sized.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-dropdown__body {
+  display: grid;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
+
+// Hidden full rule row establishes shell width (normal flow; no height collapse).
 // @see docs/specs/component/filters/filter-dropdown.md
 .filter-dropdown__size-anchor {
   visibility: hidden;
   pointer-events: none;
-  height: 0;
-  overflow: hidden;
+  white-space: nowrap;
+}
+
+.filter-dropdown__empty,
+.filter-rules {
+  align-self: start;
 }
 
 .filter-rule__picker-chevron {
