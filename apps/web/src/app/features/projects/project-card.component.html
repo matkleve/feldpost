@@ -1,19 +1,31 @@
 <article
   class="project-card"
-  [class.project-card--row]="variant() === 'row'"
-  [class.project-card--small]="variant() === 'small'"
-  [class.project-card--medium]="variant() === 'medium'"
-  [class.project-card--large]="variant() === 'large'"
-  [style.--project-item-color]="colorTokenFor()(project().colorKey)"
+  role="article"
+  [attr.aria-label]="project().name"
+  [style.--project-item-color]="projectColorToken()"
 >
+  <!-- Stable state: thumbnail zone — mosaic / map stub / initials -->
+  <!-- @see docs/specs/component/project/project-card.md § Visual Zones -->
+  <div class="project-card__thumbnail" aria-hidden="true">
+    @if (hasThumbnails()) {
+      <div class="project-card__mosaic">
+        @for (url of project().thumbnailUrls!.slice(0, 4); track url) {
+          <img class="project-card__mosaic-img" [src]="url" alt="" loading="lazy" />
+        }
+      </div>
+    } @else if (hasLocation()) {
+      <div class="project-card__map-stub">
+        <span class="material-icons project-card__map-pin" aria-hidden="true">place</span>
+      </div>
+    } @else {
+      <div class="project-card__initials">
+        {{ initials() }}
+      </div>
+    }
+  </div>
+
   <header class="project-card__header">
     <div class="project-card__header-top">
-      <app-chip
-        class="project-card__status"
-        [variant]="project().status === 'active' ? 'status-success' : 'status-warning'"
-        [icon]="project().status === 'active' ? 'check_circle' : 'archive'"
-        [text]="t('projects.status.' + project().status, project().status)"
-      />
       @if (hasMenuActions()) {
         <button
           hlmBtn
@@ -33,36 +45,39 @@
     <h3 class="project-card__name" [attr.title]="project().name">{{ project().name }}</h3>
   </header>
 
-  <p class="project-card__metric">
-    {{ project().totalImageCount }}
-    {{ t('projects.page.metric.media', 'media') }}
-  </p>
+  <!-- Stable state: chip row — status always present; location and count conditional -->
+  <!-- @see docs/specs/component/project/project-card.md § Chip Language -->
+  <div class="project-card__chips" role="list">
+    <app-chip
+      class="project-card__chip"
+      role="listitem"
+      [variant]="statusChipVariant()"
+      [icon]="statusChipIcon()"
+      [text]="statusChipLabel()"
+    />
+    @if (project().location) {
+      <app-chip
+        class="project-card__chip"
+        role="listitem"
+        variant="success"
+        icon="place"
+        [text]="project().location!.label"
+      />
+    }
+    <app-chip
+      class="project-card__chip"
+      role="listitem"
+      variant="neutral"
+      icon="photo"
+      [text]="project().mediaCount.toString()"
+      [attr.aria-label]="t('projects.page.chip.mediaCount.aria', '{count} media').replace('{count}', project().mediaCount.toString())"
+    />
+  </div>
 
-  @if (project().fileTypeCounts.length > 0) {
-    <div class="project-card__filetypes" role="list">
-      @for (fileType of project().fileTypeCounts; track fileType.category) {
-        <app-chip
-          class="project-card__filetype-chip"
-          role="listitem"
-          [variant]="fileTypeChipVariant(fileType.category)"
-          [icon]="fileTypeChipIcon(fileType.category)"
-          [text]="fileType.count.toString()"
-          [attr.aria-label]="fileTypeChipAriaLabel(fileType)"
-        />
-      }
-    </div>
-  }
-
-  @if (variant() !== 'small') {
-    <p class="project-card__meta">{{ formatRelativeDate()(project().lastActivity) }}</p>
-  }
-
-  @if (variant() === 'large') {
-    <p class="project-card__meta project-card__context">
-      {{
-        project().district || project().city || t('projects.page.meta.noLocation', 'No location')
-      }}
-    </p>
+  <!-- Stable state: activity line — hidden when no activity (never "No activity") -->
+  <!-- @see docs/specs/component/project/project-card.md § Activity line -->
+  @if (relativeActivity()) {
+    <p class="project-card__meta">{{ relativeActivity() }}</p>
   }
 
   @if (menuOpen() && menuPosition(); as menuPos) {
@@ -92,7 +107,7 @@
               role="menuitem"
               (click)="onMenuAction(action)"
             >
-              <span class="material-icons shrink-0 text-base text-current" aria-hidden="true">{{
+              <span class="material-icons option-menu-list__item-icon" aria-hidden="true">{{
                 actionIcon(action)
               }}</span>
               <span class="min-w-0 flex-1 text-left">{{ actionLabel(action) }}</span>

@@ -5,6 +5,15 @@
 
 import { cva } from 'class-variance-authority';
 
+/** Host class for global menu-row styles (`styles/_option-menu-list.scss`). */
+export const MENU_ITEM_HOST_CLASS = 'fp-menu-item';
+
+/** Host class for section labels in menu lists. */
+export const MENU_LABEL_HOST_CLASS = 'fp-menu-label';
+
+/** Leading icon class on menu rows (token size + alignment). */
+export const MENU_ITEM_ICON_CLASS = 'option-menu-list__item-icon';
+
 /** Menu panel surface (positioning remains caller-owned, e.g. DropdownShell). */
 export const menuContentVariants = cva(
   'z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-0 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -13,11 +22,11 @@ export const menuContentVariants = cva(
 /** Single selectable row inside a menu / dropdown list. */
 export const menuItemVariants = cva(
   [
-    'relative flex w-full min-w-0 cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none',
+    `${MENU_ITEM_HOST_CLASS} relative flex w-full min-w-0 cursor-pointer select-none items-center gap-2 rounded-sm min-h-8 px-2 py-1 text-xs leading-[1.4] outline-none`,
     // Row chrome: primary-tinted hover / pressed / keyboard highlight (token timing — @see docs/design/motion.md)
     'transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)]',
-    'hover:bg-primary/10 active:bg-primary/15',
-    'focus-visible:bg-primary/10 data-[highlighted]:bg-primary/10',
+    'hover:bg-primary/[0.08] active:bg-primary/[0.12]',
+    'focus-visible:bg-primary/[0.08] data-[highlighted]:bg-primary/[0.08]',
     // Disabled: no hover/press fill (canonical — @see docs/design/state-visuals.md#disabled-canonical)
     'data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
     'data-[disabled]:hover:bg-transparent data-[disabled]:active:bg-transparent',
@@ -28,4 +37,6 @@ export const menuItemVariants = cva(
 
 export const menuSeparatorVariants = cva('my-1 h-px bg-muted');
 
-export const menuLabelVariants = cva('px-2 py-1.5 text-xs font-semibold text-muted-foreground');
+export const menuLabelVariants = cva(
+  `${MENU_LABEL_HOST_CLASS} px-2 pt-1 pb-0 text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground`,
+);

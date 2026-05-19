@@ -6,7 +6,15 @@ import { HlmMenuItemDirective } from './hlm-menu-item.directive';
 import { HlmMenuLabelDirective } from './hlm-menu-label.directive';
 import { HlmMenuSeparatorDirective } from './hlm-menu-separator.directive';
 
-export { menuContentVariants, menuItemVariants, menuLabelVariants, menuSeparatorVariants } from './menu-variants';
+export {
+  MENU_ITEM_HOST_CLASS,
+  MENU_ITEM_ICON_CLASS,
+  MENU_LABEL_HOST_CLASS,
+  menuContentVariants,
+  menuItemVariants,
+  menuLabelVariants,
+  menuSeparatorVariants,
+} from './menu-variants';
 export { HlmMenuContentDirective } from './hlm-menu-content.directive';
 export { HlmMenuItemDirective } from './hlm-menu-item.directive';
 export { HlmMenuLabelDirective } from './hlm-menu-label.directive';

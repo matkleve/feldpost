@@ -328,6 +328,27 @@ html[data-theme="sandstone"] {
   }
 }
 
+// ── Shared floating panel surface ─────────────────────────────────────────────
+// Used on bare <div> / <section> overlay panels that lack HlmMenuContentDirective
+// (e.g. .add-metadata-suggestions, upload-panel modals, project-color-picker).
+// app-dropdown-shell panels already get these tokens from HlmMenuContentDirective
+// (bg-popover / border-border / rounded-md / shadow-md in @layer utilities), so
+// utilities still win there — this class only fills the gap for un-wired elements.
+// All values resolve through semantic CSS variables so every theme (light, dark,
+// sandstone) cascades automatically from html[data-theme].
+// @see docs/design/tokens.md § option-menu-surface
+@layer components {
+  .option-menu-surface {
+    background: var(--popover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    color: var(--popover-foreground);
+  }
+}
+
+@include meta.load-css('styles/option-menu-list');
+
 // Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).
 // @see docs/migration/phase-8-global-scss-elimination.md §7
 @include meta.load-css('styles/typography-baseline');

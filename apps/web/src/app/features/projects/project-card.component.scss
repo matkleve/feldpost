@@ -1,3 +1,5 @@
+// @see docs/specs/component/project/project-card.md
+
 :host {
   display: block;
   height: 100%;
@@ -9,11 +11,11 @@
 // @see docs/specs/component/filters/dropdown-system.md
 .map-context-menu__items {
   padding-inline: var(--spacing-2);
-  padding-block: var(--spacing-2);
+  padding-block: var(--spacing-1);
 }
 
-// Subtle project-tinted card surface; elevation from shadow tokens
-// @see docs/specs/component/project/project-item.md
+// Card surface — geometry and tint owner
+// @see docs/specs/component/project/project-card.md § Ownership Matrix
 .project-card {
   box-sizing: border-box;
   height: 100%;
@@ -47,11 +49,71 @@
   }
 }
 
-.project-card--row {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+// Thumbnail zone — geometry and visual owner
+// @see docs/specs/component/project/project-card.md § Visual Zones — Thumbnail
+.project-card__thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--container-radius-panel) - var(--spacing-1));
+  overflow: hidden;
+  background: color-mix(in srgb, var(--project-item-color, var(--muted)) 12%, var(--muted));
 }
 
+// 2×2 photo mosaic — content fills thumbnail zone
+// @see docs/specs/component/project/project-card.md § Thumbnail
+.project-card__mosaic {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+// Individual mosaic image — fills its grid cell
+// @see docs/specs/component/project/project-card.md § Thumbnail
+.project-card__mosaic-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+// Map stub placeholder — tinted bg with centered pin icon
+// @see docs/specs/component/project/project-card.md § Thumbnail — map stub
+.project-card__map-stub {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--project-item-color, var(--muted)) 20%, var(--muted));
+}
+
+// Map pin icon inside map stub
+// @see docs/specs/component/project/project-card.md § Thumbnail — map stub
+.project-card__map-pin {
+  font-size: 2rem;
+  color: color-mix(in srgb, var(--project-item-color, var(--primary)) 60%, var(--foreground));
+  opacity: 0.7;
+}
+
+// Initials placeholder — centered text, project-tinted surface
+// @see docs/specs/component/project/project-card.md § Thumbnail — initials
+.project-card__initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: color-mix(in srgb, var(--project-item-color, var(--primary)) 80%, var(--foreground));
+}
+
+// Card header — column layout for name + trigger row
+// @see docs/specs/component/project/project-card.md § Name zone
 .project-card__header {
   display: flex;
   flex-direction: column;
@@ -59,17 +121,18 @@
   min-width: 0;
 }
 
+// Header top row — menu trigger aligned to end
+// @see docs/specs/component/project/project-card.md § Context menu
 .project-card__header-top {
   display: flex;
   align-items: flex-start;
-  justify-content: flex-start;
-  gap: var(--spacing-2);
+  justify-content: flex-end;
   min-width: 0;
   min-height: var(--spacing-6);
 }
 
-// Reserves two h3 lines (global h3: font-size-sm × line-height 1.1) so card headers align
-// @see apps/web/src/styles/_typography-baseline.scss
+// Project name — 2-line clamp
+// @see apps/web/src/styles/_typography-baseline.scss (font-size/weight/line-height owned globally)
 .project-card__name {
   margin: 0;
   min-width: 0;
@@ -82,16 +145,25 @@
   overflow-wrap: anywhere;
 }
 
-.project-card__status {
-  flex: 0 1 auto;
-  min-width: 0;
+// Chip row — flex wrapping row of app-chip elements
+// @see docs/specs/component/project/project-card.md § Chip row
+.project-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+  align-items: center;
 }
 
-// Compact outline icon control (visible on tinted card surfaces; smaller than default icon size)
+// Individual chip wrapper — no extra geometry
+// @see docs/specs/component/project/project-card.md § Chip Language
+.project-card__chip {
+  flex: 0 0 auto;
+}
+
+// Compact outline icon control (visible on tinted card surfaces)
 // @see apps/web/src/app/shared/ui/button/button-variants.ts
 .project-card__menu-trigger {
   flex: 0 0 auto;
-  margin-left: auto;
   width: var(--spacing-6);
   height: var(--spacing-6);
   min-width: var(--spacing-6);
@@ -112,27 +184,8 @@
   }
 }
 
-.project-card__filetypes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-2);
-}
-
-// Larger filetype chips than default chip scale (16px) for card legibility
-// @see docs/specs/component/filters/chip.md
-.project-card__filetype-chip {
-  flex: 0 0 auto;
-
-  ::ng-deep .chip {
-    --chip-height: var(--spacing-6);
-    --chip-padding-inline: var(--spacing-3);
-    --chip-icon-size: 1.125rem;
-    gap: var(--spacing-2);
-    font-size: var(--font-size-xs);
-  }
-}
-
-.project-card__metric,
+// Activity relative-date line
+// @see docs/specs/component/project/project-card.md § Activity line
 .project-card__meta {
   margin: 0;
   font-size: var(--font-size-sm);

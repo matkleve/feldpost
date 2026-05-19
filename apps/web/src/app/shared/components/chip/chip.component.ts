@@ -3,6 +3,10 @@ import { Component, computed, input, output } from '@angular/core';
 export type ChipVariant =
   | 'default'
   | 'primary'
+  | 'success'
+  | 'warning'
+  | 'neutral'
+  | 'info'
   | 'status-success'
   | 'status-warning'
   | 'status-danger'
@@ -87,6 +91,14 @@ export class ChipComponent {
     switch (variant) {
       case 'primary':
         return '--primary';
+      case 'success':
+        return '--success';
+      case 'warning':
+        return '--warning';
+      case 'neutral':
+        return '--muted-foreground';
+      case 'info':
+        return '--info';
       case 'status-success':
         return '--success';
       case 'status-warning':

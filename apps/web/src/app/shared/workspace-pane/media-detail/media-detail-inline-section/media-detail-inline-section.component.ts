@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  computed,
   effect,
   inject,
   input,
@@ -15,6 +16,7 @@ import { AddressSearchComponent } from '../address-search/address-search.compone
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../media-detail-view.utils';
+import type { SearchQueryContext } from '../../../../core/search/search.models';
 import type { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
@@ -97,6 +99,14 @@ export class MediaDetailInlineSectionComponent {
   readonly projectCreateRequested = output<void>();
   readonly projectMembershipToggled = output<string>();
   readonly addressSuggestionApplied = output<ForwardGeocodeResult>();
+
+  readonly addressSearchContext = computed<SearchQueryContext>(() => {
+    const img = this.image();
+    const lat = img.latitude ?? img.exif_latitude;
+    const lng = img.longitude ?? img.exif_longitude;
+    if (lat == null || lng == null) return {};
+    return { activeMarkerCentroid: { lat, lng } };
+  });
   readonly copyCoordinatesRequested = output<void>();
   readonly zoomToLocationRequested = output<void>();
   readonly revertCoordinatesRequested = output<void>();

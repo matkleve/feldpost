@@ -7,7 +7,7 @@ export interface ProjectFileTypeCount {
 }
 
 export type ProjectStatusFilter = 'all' | 'active' | 'archived';
-export type ProjectsViewMode = 'list' | 'cards';
+export type ProjectsViewMode = 'grid' | 'list' | 'map' | 'board';
 export type ProjectsSortMode = 'name' | 'updated' | 'image-count';
 export type ProjectColorKey = 'clay' | 'accent' | 'success' | 'warning' | `brand-hue-${number}`;
 
@@ -30,6 +30,20 @@ export interface ProjectListItem extends ProjectRecord {
   district: string | null;
   street: string | null;
   country: string | null;
+  fileTypeCounts: ProjectFileTypeCount[];
+}
+
+// Card view model — @see docs/specs/component/project/project-card.md
+export interface ProjectSummary {
+  id: string;
+  name: string;
+  colorKey: ProjectColorKey;
+  status: 'active' | 'archived' | 'draft';
+  mediaCount: number;
+  location?: { label: string; lat: number; lng: number } | null;
+  thumbnailUrls?: string[];
+  lastActivityAt?: string | null;
+  // Preserved from ProjectListItem for context menu actions
   fileTypeCounts: ProjectFileTypeCount[];
 }
 

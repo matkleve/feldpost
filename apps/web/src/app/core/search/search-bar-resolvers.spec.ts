@@ -189,6 +189,47 @@ describe('fetchGeocoderCandidates', () => {
     expect(results).toEqual([]);
   });
 
+  it('returns street-level geocoder hits when search context has no geographic anchor', async () => {
+    const hits: GeocoderSearchResult[] = [
+      {
+        lat: 48.2412,
+        lng: 16.4102,
+        displayName: 'Handelskai 265, 1020 Wien, Austria',
+        name: null,
+        importance: 0.5,
+        address: {
+          road: 'Handelskai',
+          house_number: '265',
+          city: 'Wien',
+          country: 'Austria',
+          country_code: 'at',
+        },
+      },
+    ];
+
+    const geocodingService = {
+      search: async () => hits,
+    };
+
+    const results = await fetchGeocoderCandidates(
+      geocodingService as never,
+      'handelskai 2',
+      {},
+      3,
+      (result, query, index): SearchAddressCandidate => ({
+        id: `geo-${query}-${index}`,
+        family: 'geocoder',
+        label: result.displayName,
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(results.length).toBe(1);
+    expect(results[0].label).toContain('Handelskai');
+  });
+
   it('retries unconstrained for short ambiguous prefix when constrained top hit is remote', async () => {
     const calls: string[] = [];
     const constrainedHits: GeocoderSearchResult[] = [

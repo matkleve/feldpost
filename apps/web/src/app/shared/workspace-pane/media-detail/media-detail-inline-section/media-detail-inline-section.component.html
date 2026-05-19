@@ -235,6 +235,7 @@
 
   <app-address-search
     [currentAddress]="fullAddress()"
+    [searchContext]="addressSearchContext()"
     (suggestionApplied)="addressSuggestionApplied.emit($event)"
   />
 

@@ -1,4 +1,4 @@
-import type { ProjectColorKey, ProjectListItem } from '../../core/projects/projects.types';
+import type { ProjectColorKey, ProjectListItem, ProjectSummary } from '../../core/projects/projects.types';
 import type { PendingProjectAction } from './projects-page.config';
 
 export function pendingActionTitle(
@@ -110,6 +110,22 @@ export function projectStatusLabel(
   return status === 'archived'
     ? t('projects.toolbar.status.archived', 'Archived')
     : t('projects.toolbar.status.active', 'Active');
+}
+
+// Maps ProjectListItem to the card view model — @see docs/specs/component/project/project-card.md
+export function toProjectSummary(project: ProjectListItem): ProjectSummary {
+  const locationLabel = project.district ?? project.city ?? null;
+  return {
+    id: project.id,
+    name: project.name,
+    colorKey: project.colorKey,
+    status: project.status,
+    mediaCount: project.totalImageCount,
+    lastActivityAt: project.lastActivity,
+    // location requires lat/lng from service layer; derived label only for now
+    location: locationLabel ? null : null,
+    fileTypeCounts: project.fileTypeCounts,
+  };
 }
 
 export function projectLabel(

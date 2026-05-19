@@ -8,7 +8,11 @@ import type {
   SearchQueryContext,
   SearchResultSet,
 } from '../../../../core/search/search.models';
-import { BehaviorSubject, Subscription, take } from 'rxjs';
+import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
+import {
+  clampDropdownPanelToViewport,
+  DROPDOWN_ANCHOR_GAP_PX,
+} from '../../../../shared/dropdown-trigger/dropdown-viewport-clamp';
 
 @Component({
   selector: 'app-address-search',
@@ -18,6 +22,8 @@ import { BehaviorSubject, Subscription, take } from 'rxjs';
   styleUrl: './address-search.component.scss',
 })
 export class AddressSearchComponent implements OnDestroy {
+  private static readonly CENTER_WIDTH_INSET_PX = 4;
+
   private readonly elementRef = inject(ElementRef);
   private readonly searchBarService = inject(SearchBarService);
   private readonly searchOrchestrator = inject(SearchOrchestratorService);
@@ -25,6 +31,7 @@ export class AddressSearchComponent implements OnDestroy {
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly currentAddress = input('');
+  readonly searchContext = input<SearchQueryContext>({});
   readonly suggestionApplied = output<ForwardGeocodeResult>();
 
   // Stable state: idle — trigger button visible, input and dropdown hidden
@@ -38,18 +45,29 @@ export class AddressSearchComponent implements OnDestroy {
   readonly placeSuggestions = signal<SearchCandidate[]>([]);
   readonly loadingSaved = signal(false);
   readonly loadingPlaces = signal(false);
+  readonly dropdownTop = signal(0);
+  readonly dropdownLeft = signal(0);
+  readonly dropdownWidth = signal(0);
+  readonly dropdownOpensAbove = signal(false);
 
   // Template reference to the text input — used for auto-focus when search opens
   // @see docs/specs/ui/workspace/workspace-pane.md
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('addressSearchInput');
+  private readonly anchorRowRef = viewChild<ElementRef<HTMLElement>>('dropdownAnchorRow');
+  private readonly dropdownRef = viewChild<ElementRef<HTMLElement>>('addressSearchDropdown');
 
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
   private searchSubscription: Subscription | null = null;
   private geocoderDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private geocoderSubscription: Subscription | null = null;
+  private ignoreOutsideCloseUntil = 0;
 
   constructor() {
+    effect(() => {
+      this.contextChanges.next(this.searchContext());
+    });
+
     // Auto-focus the input whenever the search activates
     // @see docs/specs/ui/workspace/workspace-pane.md
     effect(() => {
@@ -63,29 +81,48 @@ export class AddressSearchComponent implements OnDestroy {
         }
       }, 0);
     });
+
+    effect(() => {
+      if (!this.active() || !this.isDropdownVisible()) return;
+      this.savedSuggestions();
+      this.placeSuggestions();
+      this.loadingSaved();
+      this.loadingPlaces();
+      this.scheduleDropdownPosition();
+    });
   }
 
-  @HostListener('document:pointerdown', ['$event'])
-  onDocumentPointerDown(event: PointerEvent): void {
-    if (!this.active()) return;
+  @HostListener('window:resize')
+  @HostListener('window:scroll')
+  onViewportChanged(): void {
+    if (this.active() && this.isDropdownVisible()) {
+      this.scheduleDropdownPosition();
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.active() || Date.now() < this.ignoreOutsideCloseUntil) return;
     const target = event.target as Node | null;
-    if (!this.elementRef.nativeElement.contains(target)) {
+    if (!target || !this.elementRef.nativeElement.contains(target)) {
       this.cancel();
     }
   }
 
-  open(): void {
+  open(event?: Event): void {
+    event?.stopPropagation();
+    this.ignoreOutsideCloseUntil = Date.now() + 250;
+
     const current = this.currentAddress();
     this.query.set(current);
     this.active.set(true);
-    // Reset before subscribing to avoid carrying over stale query
-    this.queryChanges.next('');
 
     // Geocoder is bypassed here to avoid shared-singleton adapter conflicts with the map search bar.
     // resolveGeocoderCandidates is called directly in runGeocoderDebounced instead.
     // @see docs/specs/ui/workspace/workspace-pane.md
     this.searchOrchestrator.configureSources({
-      dbAddressResolver: (q, ctx) => this.searchBarService.resolveDbAddressCandidates(q, ctx),
+      dbAddressResolver: (q, ctx) =>
+        this.searchBarService.resolveDbAddressCandidates(this.dbSearchTerm(q), ctx),
     });
 
     this.searchSubscription?.unsubscribe();
@@ -96,6 +133,8 @@ export class AddressSearchComponent implements OnDestroy {
     if (current.trim()) {
       this.queryChanges.next(current);
       this.runGeocoderDebounced(current);
+    } else {
+      this.queryChanges.next('');
     }
   }
 
@@ -169,6 +208,61 @@ export class AddressSearchComponent implements OnDestroy {
     this.searchSubscription?.unsubscribe();
   }
 
+  /** Saved-location ilike works best on the street segment, not the full comma-separated label. */
+  private dbSearchTerm(displayQuery: string): string {
+    const trimmed = displayQuery.trim();
+    if (!trimmed) return '';
+    const head = trimmed.split(',')[0]?.trim() ?? trimmed;
+    return head.length >= 3 ? head : trimmed;
+  }
+
+  private isDropdownVisible(): boolean {
+    return (
+      this.savedSuggestions().length > 0 ||
+      this.placeSuggestions().length > 0 ||
+      this.loadingSaved() ||
+      this.loadingPlaces()
+    );
+  }
+
+  private scheduleDropdownPosition(): void {
+    if (typeof window === 'undefined') return;
+    requestAnimationFrame(() => this.positionDropdown());
+  }
+
+  private positionDropdown(): void {
+    const row = this.anchorRowRef()?.nativeElement;
+    const panel = this.dropdownRef()?.nativeElement;
+    if (!row || !panel) return;
+
+    const center = row.querySelector<HTMLElement>('.address-search__center');
+    const centerRect = center?.getBoundingClientRect() ?? row.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
+    const panelWidth = Math.max(0, Math.round(centerRect.width - AddressSearchComponent.CENTER_WIDTH_INSET_PX));
+    const desiredLeft = Math.round(centerRect.right - panelWidth);
+    const desiredTop = Math.round(rowRect.bottom + DROPDOWN_ANCHOR_GAP_PX);
+
+    this.dropdownWidth.set(panelWidth);
+
+    const panelRect = panel.getBoundingClientRect();
+    if (panelRect.height <= 0) {
+      requestAnimationFrame(() => this.positionDropdown());
+      return;
+    }
+
+    const { left, top } = clampDropdownPanelToViewport({
+      desiredLeft,
+      desiredTop,
+      panelWidth: panelRect.width > 0 ? panelRect.width : panelWidth,
+      panelHeight: panelRect.height,
+      anchorGapPx: DROPDOWN_ANCHOR_GAP_PX,
+    });
+
+    this.dropdownLeft.set(Math.round(left));
+    this.dropdownTop.set(Math.round(top));
+    this.dropdownOpensAbove.set(top < desiredTop - 1);
+  }
+
   private applySearchResult(result: SearchResultSet): void {
     const dbAddressSection = result.sections.find((s) => s.family === 'db-address');
     this.savedSuggestions.set(dbAddressSection?.items ?? []);
@@ -189,13 +283,18 @@ export class AddressSearchComponent implements OnDestroy {
       this.loadingPlaces.set(false);
       return;
     }
+
+    this.placeSuggestions.set([]);
     this.loadingPlaces.set(true);
     this.geocoderDebounceTimer = setTimeout(() => {
       this.geocoderDebounceTimer = null;
       this.geocoderSubscription?.unsubscribe();
       this.geocoderSubscription = this.searchBarService
-        .resolveGeocoderCandidates(q.trim(), {})
-        .pipe(take(1))
+        .resolveGeocoderCandidates(q.trim(), this.searchContext())
+        .pipe(
+          take(1),
+          finalize(() => this.loadingPlaces.set(false)),
+        )
         .subscribe({
           next: (candidates) => {
             this.placeSuggestions.set(candidates);
@@ -216,5 +315,6 @@ export class AddressSearchComponent implements OnDestroy {
     }
     this.geocoderSubscription?.unsubscribe();
     this.geocoderSubscription = null;
+    this.loadingPlaces.set(false);
   }
 }

@@ -104,7 +104,7 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly loadError = signal<string | null>(null);
   readonly projects = signal<ProjectListItem[]>([]);
   readonly statusFilter = signal<ProjectStatusFilter>('all');
-  readonly viewMode = signal<ProjectsViewMode>('cards');
+  readonly viewMode = signal<ProjectsViewMode>(this.restoreViewMode());
   readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('projects'));
   readonly activeGroupings = signal<GroupingProperty[]>([]);
   readonly activeSorts = signal<SortConfig[]>([]);
@@ -203,6 +203,15 @@ export class ProjectsPageComponent implements OnDestroy {
   constructor() {
     effect(() => {
       this.cardVariantSettings.setVariant('projects', this.cardVariant());
+    });
+
+    // Persist view mode — @see docs/specs/page/projects-page.md § View Mode State
+    effect(() => {
+      try {
+        localStorage.setItem('feldpost.projects.viewMode', this.viewMode());
+      } catch {
+        // localStorage unavailable in some environments; ignore silently
+      }
     });
 
     effect(() => {
@@ -309,7 +318,7 @@ export class ProjectsPageComponent implements OnDestroy {
 
       const createdProject = { ...draft, name: projectName.trim() };
       this.projects.update((all) => [createdProject, ...all]);
-      this.viewMode.set('cards');
+      this.viewMode.set('grid');
     } finally {
       this.creatingProject.set(false);
     }
@@ -432,5 +441,17 @@ export class ProjectsPageComponent implements OnDestroy {
       type: 'error',
       dedupe: true,
     });
+  }
+
+  // Restores persisted view mode from localStorage — @see docs/specs/page/projects-page.md § View Mode State
+  private restoreViewMode(): ProjectsViewMode {
+    const VALID: ReadonlySet<ProjectsViewMode> = new Set(['grid', 'list', 'map', 'board']);
+    try {
+      const stored = localStorage.getItem('feldpost.projects.viewMode') as ProjectsViewMode | null;
+      if (stored && VALID.has(stored)) return stored;
+    } catch {
+      // localStorage unavailable; use default
+    }
+    return 'grid';
   }
 }

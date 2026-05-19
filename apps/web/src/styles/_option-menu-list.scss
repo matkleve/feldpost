@@ -1,0 +1,80 @@
+// Shared option-menu list rhythm (address-search dropdown, context menus, toolbar panels).
+// Row chrome targets `.fp-menu-item` from `HlmMenuItemDirective` / `menuItemVariants` (not `[hlmMenuItem]` — that is not a DOM attribute).
+// @see apps/web/src/app/shared/workspace-pane/media-detail/address-search/address-search.component.scss
+
+@layer components {
+  .option-menu-list,
+  .option-menu-surface .map-context-menu__items,
+  .option-menu-surface .detail-context-menu__items,
+  .option-menu-surface .standard-dropdown__items,
+  .option-menu-surface.add-metadata-suggestions {
+    box-sizing: border-box;
+    padding: var(--spacing-1);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .option-menu-list__section-label,
+  .fp-menu-label {
+    padding: var(--spacing-1) var(--spacing-2) 0;
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--muted-foreground);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .option-menu-list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-height: 2rem;
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    border-radius: var(--radius-sm);
+  }
+
+  .option-menu-list__item:hover {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+
+  // Row layout — all `hlmMenuItem` hosts (class `fp-menu-item`).
+  .fp-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-height: 2rem;
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    border-radius: var(--radius-sm);
+  }
+
+  .fp-menu-item:hover:not(:disabled):not([disabled]) {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+
+  // Leading icon — matches address-search size; inline-flex centers glyph in the row.
+  .option-menu-list__item-icon.material-icons,
+  .fp-menu-item > .option-menu-list__item-icon.material-icons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-md);
+    line-height: 1;
+    flex-shrink: 0;
+    color: var(--muted-foreground);
+  }
+
+  .fp-menu-item.text-destructive > .option-menu-list__item-icon.material-icons {
+    color: currentcolor;
+  }
+
+  .option-menu-surface app-standard-dropdown,
+  .option-menu-surface.standard-dropdown {
+    --std-dropdown-padding-inline: var(--spacing-1);
+    padding: var(--spacing-1);
+  }
+}

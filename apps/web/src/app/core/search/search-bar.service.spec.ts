@@ -348,6 +348,93 @@ describe('SearchBarService', () => {
       expect(results).toEqual([]);
     });
 
+    it('prefers full formatted street labels over road-only duplicates', async () => {
+      geocodingMock.search.mockResolvedValue([
+        {
+          lat: 48.2412,
+          lng: 16.4102,
+          displayName: 'Handelskai 265, 1020 Wien, Austria',
+          name: null,
+          importance: 0.5,
+          address: {
+            road: 'Handelskai',
+            house_number: '265',
+            postcode: '1020',
+            city: 'Wien',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.242,
+          lng: 16.411,
+          displayName: 'Handelskai 120, 1020 Wien, Austria',
+          name: null,
+          importance: 0.48,
+          address: {
+            road: 'Handelskai',
+            house_number: '120',
+            postcode: '1020',
+            city: 'Wien',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.243,
+          lng: 16.412,
+          displayName: 'Handelskai 1, 1020 Wien, Austria',
+          name: null,
+          importance: 0.47,
+          address: {
+            road: 'Handelskai',
+            house_number: '1',
+            postcode: '1020',
+            city: 'Wien',
+            country_code: 'at',
+          },
+        },
+      ]);
+
+      const results = await firstValueFrom(service.resolveGeocoder('handelskai', {}));
+      expect(results.map((item) => item.label)).toEqual([
+        'Handelskai 265, 1020 Wien',
+        'Handelskai 120, 1020 Wien',
+        'Handelskai 1, 1020 Wien',
+      ]);
+    });
+
+    it('collapses identical geocoder labels to a single place result', async () => {
+      geocodingMock.search.mockResolvedValue([
+        {
+          lat: 48.2412,
+          lng: 16.4102,
+          displayName: 'Handelskai, Wien, Austria',
+          name: null,
+          importance: 0.5,
+          address: { road: 'Handelskai', city: 'Wien', country_code: 'at' },
+        },
+        {
+          lat: 48.242,
+          lng: 16.411,
+          displayName: 'Handelskai, Wien, Austria',
+          name: null,
+          importance: 0.48,
+          address: { road: 'Handelskai', city: 'Wien', country_code: 'at' },
+        },
+        {
+          lat: 48.243,
+          lng: 16.412,
+          displayName: 'Handelskai, Wien, Austria',
+          name: null,
+          importance: 0.47,
+          address: { road: 'Handelskai', city: 'Wien', country_code: 'at' },
+        },
+      ]);
+
+      const results = await firstValueFrom(service.resolveGeocoder('handelskai', {}));
+      expect(results).toHaveLength(1);
+      expect(results[0].label).toBe('Handelskai, Wien');
+    });
+
     it('handles POI results with secondary label', async () => {
       geocodingMock.search.mockResolvedValue([
         {
@@ -525,7 +612,7 @@ describe('SearchBarService', () => {
       );
 
       expect(results.length).toBe(1);
-      expect(results[0].label).toBe('Wilhelminenstrasse');
+      expect(results[0].label).toBe('Wilhelminenstrasse, Vienna');
       expect(
         geocodingMock.search.mock.calls.some(
           ([query]) =>

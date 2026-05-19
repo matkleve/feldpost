@@ -6,6 +6,10 @@ import type { ProjectsViewMode } from '../../core/projects/projects.types';
 import type { ToggleGroupOption } from '../ui/toggle-group/toggle-group-option.types';
 import { toggleSingleStringValue } from '../ui/toggle-group/toggle-group-option.helpers';
 
+// @see docs/specs/component/project/projects-view-toggle.md
+// @see docs/specs/page/projects-page.md § View Mode State
+const VALID_VIEW_MODES = new Set<ProjectsViewMode>(['list', 'grid', 'map', 'board']);
+
 @Component({
   selector: 'app-projects-view-toggle',
   standalone: true,
@@ -19,6 +23,8 @@ export class ProjectsViewToggleComponent {
   readonly viewMode = input.required<ProjectsViewMode>();
   readonly viewModeChange = output<ProjectsViewMode>();
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
+  // Icon order: list, grid, map, board — @see docs/specs/page/projects-page.md § View Mode State
   readonly viewOptions = computed<ReadonlyArray<ToggleGroupOption>>(() => [
     {
       id: 'list',
@@ -29,19 +35,35 @@ export class ProjectsViewToggleComponent {
       ariaLabel: this.t('projects.viewToggle.list.aria', 'List view'),
     },
     {
-      id: 'cards',
+      id: 'grid',
       type: 'icon-only',
-      label: this.t('projects.viewToggle.cards.aria', 'Card view'),
+      label: this.t('projects.viewToggle.grid.aria', 'Grid view'),
       icon: 'grid_view',
-      title: this.t('projects.viewToggle.cards.title', 'Card view'),
-      ariaLabel: this.t('projects.viewToggle.cards.aria', 'Card view'),
+      title: this.t('projects.viewToggle.grid.title', 'Grid view'),
+      ariaLabel: this.t('projects.viewToggle.grid.aria', 'Grid view'),
+    },
+    {
+      id: 'map',
+      type: 'icon-only',
+      label: this.t('projects.viewToggle.map.aria', 'Map view'),
+      icon: 'map',
+      title: this.t('projects.viewToggle.map.title', 'Map view'),
+      ariaLabel: this.t('projects.viewToggle.map.aria', 'Map view'),
+    },
+    {
+      id: 'board',
+      type: 'icon-only',
+      label: this.t('projects.viewToggle.board.aria', 'Board view'),
+      icon: 'view_kanban',
+      title: this.t('projects.viewToggle.board.title', 'Board view'),
+      ariaLabel: this.t('projects.viewToggle.board.aria', 'Board view'),
     },
   ]);
 
   onViewModeToggleChange(raw: ToggleValue<string>): void {
     const value = toggleSingleStringValue(raw);
-    if (value === 'list' || value === 'cards') {
-      this.viewModeChange.emit(value);
+    if (value && VALID_VIEW_MODES.has(value as ProjectsViewMode)) {
+      this.viewModeChange.emit(value as ProjectsViewMode);
     }
   }
 }

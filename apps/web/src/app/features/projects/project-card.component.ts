@@ -8,19 +8,9 @@ import {
   output,
   signal,
 } from '@angular/core';
-import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
-import {
-  fileTypeCategoryLabel,
-  fileTypeChipIcon as resolveFileTypeChipIcon,
-  fileTypeChipVariant as resolveFileTypeChipVariant,
-} from '../../core/projects/projects-file-type-chips.helpers';
-import type {
-  ProjectColorKey,
-  ProjectFileTypeCount,
-  ProjectListItem,
-} from '../../core/projects/projects.types';
-import type { FileTypeCategory } from '../../core/media/media-renderer.types';
+import type { ProjectColorKey, ProjectSummary } from '../../core/projects/projects.types';
 import type { ChipVariant } from '../../shared/components/chip/chip.component';
+import { colorTokenFor, formatRelativeDate } from './projects-formatters.logic';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import { ChipComponent } from '../../shared/components/chip/chip.component';
@@ -28,6 +18,7 @@ import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../shared/ui/menu';
 import { I18nService } from '../../core/i18n/i18n.service';
 
+// @see docs/specs/component/project/project-card.md
 const PROJECT_CARD_MENU_WIDTH = 224;
 const PROJECT_CARD_MENU_OFFSET_Y = 4;
 
@@ -52,10 +43,8 @@ type ProjectCardMenuPanel = 'actions' | 'colors';
 export class ProjectCardComponent implements OnDestroy {
   private static activeMenuOwner: ProjectCardComponent | null = null;
 
-  readonly project = input.required<ProjectListItem>();
-  readonly variant = input<CardVariant>('medium');
-  readonly colorTokenFor = input.required<(key: ProjectColorKey) => string>();
-  readonly formatRelativeDate = input.required<(value: string | null) => string>();
+  // Single required input — @see docs/specs/component/project/project-card.md § Inputs
+  readonly project = input.required<ProjectSummary>();
 
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
@@ -63,29 +52,67 @@ export class ProjectCardComponent implements OnDestroy {
   readonly colorSelected = output<{ projectId: string; colorKey: ProjectColorKey }>();
   readonly dangerAction = output<{ projectId: string; action: 'archive' | 'restore' | 'delete' }>();
 
+  // Stable state: menu closed
   readonly menuOpen = signal(false);
   readonly menuPanel = signal<ProjectCardMenuPanel>('actions');
   readonly menuPosition = signal<{ x: number; y: number } | null>(null);
+
+  // Derived accent color token applied to CSS custom property on host
+  // @see docs/specs/component/project/project-card.md § Internalized Logic
+  readonly projectColorToken = computed(() => colorTokenFor(this.project().colorKey));
+
+  // Relative-time label — computed so Date.now() is never called in the template
+  // @see docs/specs/component/project/project-card.md § Activity line
+  readonly relativeActivity = computed(() => {
+    const at = this.project().lastActivityAt;
+    if (!at) return null;
+    return formatRelativeDate(at, this.t);
+  });
+
+  // Thumbnail zone: mosaic > map stub > initials
+  readonly hasThumbnails = computed(() => (this.project().thumbnailUrls?.length ?? 0) > 0);
+  readonly hasLocation = computed(() => !!this.project().location);
+
+  // Initials from project name (first two words, one letter each)
+  readonly initials = computed(() => {
+    const words = this.project().name.trim().split(/\s+/);
+    return words
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? '')
+      .join('');
+  });
+
+  // Status chip variant and icon mapping — @see project-card.md § Chip Language
+  readonly statusChipVariant = computed<ChipVariant>(() => {
+    const s = this.project().status;
+    if (s === 'active') return 'success';
+    if (s === 'archived') return 'warning';
+    return 'neutral';
+  });
+
+  readonly statusChipIcon = computed(() => {
+    const s = this.project().status;
+    if (s === 'active') return 'lens';
+    if (s === 'archived') return 'archive';
+    return 'edit';
+  });
+
+  readonly statusChipLabel = computed(() =>
+    this.t('projects.status.' + this.project().status, this.project().status),
+  );
 
   readonly availableMenuActions = computed<ProjectCardMenuAction[]>(() => {
     const project = this.project();
     if (project.status === 'archived') {
       return ['restore', 'delete'];
     }
-
-    const actions: ProjectCardMenuAction[] = ['change_color'];
-    if (this.variant() !== 'small') {
-      actions.push('archive');
-    }
-    return actions;
+    return ['change_color', 'archive'];
   });
 
   readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
 
   onMenuTriggerClick(event: MouseEvent): void {
-    if (!this.hasMenuActions()) {
-      return;
-    }
+    if (!this.hasMenuActions()) return;
 
     event.preventDefault();
     event.stopPropagation();
@@ -102,9 +129,7 @@ export class ProjectCardComponent implements OnDestroy {
       const menuHeight = this.estimateMenuHeight('actions');
       const downwardY = rect.bottom + PROJECT_CARD_MENU_OFFSET_Y;
       const hasSpaceBelow = downwardY + menuHeight <= window.innerHeight - 8;
-      const menuY = hasSpaceBelow
-        ? downwardY
-        : rect.top - menuHeight - PROJECT_CARD_MENU_OFFSET_Y;
+      const menuY = hasSpaceBelow ? downwardY : rect.top - menuHeight - PROJECT_CARD_MENU_OFFSET_Y;
       this.openMenuAt(rect.right - PROJECT_CARD_MENU_WIDTH, menuY, menuHeight);
       return;
     }
@@ -159,20 +184,6 @@ export class ProjectCardComponent implements OnDestroy {
     }
   }
 
-  fileTypeChipVariant(category: FileTypeCategory): ChipVariant {
-    return resolveFileTypeChipVariant(category);
-  }
-
-  fileTypeChipIcon(category: FileTypeCategory): string {
-    return resolveFileTypeChipIcon(category);
-  }
-
-  fileTypeChipAriaLabel(fileType: ProjectFileTypeCount): string {
-    return this.t('projects.page.fileType.countAria', '{count} {type}')
-      .replace('{count}', String(fileType.count))
-      .replace('{type}', fileTypeCategoryLabel(fileType.category));
-  }
-
   actionLabel(action: ProjectCardMenuAction): string {
     switch (action) {
       case 'change_color':
@@ -193,9 +204,7 @@ export class ProjectCardComponent implements OnDestroy {
   }
 
   private estimateMenuHeight(panel: ProjectCardMenuPanel): number {
-    if (panel === 'colors') {
-      return 120;
-    }
+    if (panel === 'colors') return 120;
     return this.availableMenuActions().length * 44 + 24;
   }
 
@@ -209,10 +218,7 @@ export class ProjectCardComponent implements OnDestroy {
   }
 
   private clampMenuPosition(x: number, y: number, menuHeight: number): { x: number; y: number } {
-    if (typeof window === 'undefined') {
-      return { x, y };
-    }
-
+    if (typeof window === 'undefined') return { x, y };
     const margin = 8;
     return {
       x: Math.min(Math.max(x, margin), window.innerWidth - PROJECT_CARD_MENU_WIDTH - margin),
@@ -225,7 +231,6 @@ export class ProjectCardComponent implements OnDestroy {
     if (previousOwner && previousOwner !== this) {
       previousOwner.closeMenu();
     }
-
     this.menuPosition.set(this.clampMenuPosition(x, y, menuHeight));
     this.menuOpen.set(true);
     ProjectCardComponent.activeMenuOwner = this;

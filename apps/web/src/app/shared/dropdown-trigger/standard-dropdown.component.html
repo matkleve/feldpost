@@ -57,11 +57,11 @@
   >
     <button
       hlmMenuItem
-      class="flex min-w-0 shrink-0 items-center justify-start gap-2 text-muted-foreground"
+      class="flex min-w-0 shrink-0 items-center justify-start text-muted-foreground"
       type="button"
       (click)="actionRequested.emit()"
     >
-      <span class="material-icons text-muted-foreground" aria-hidden="true">{{ actionIcon() }}</span>
+      <span class="material-icons option-menu-list__item-icon" aria-hidden="true">{{ actionIcon() }}</span>
       {{ actionLabel() }}
     </button>
   </div>

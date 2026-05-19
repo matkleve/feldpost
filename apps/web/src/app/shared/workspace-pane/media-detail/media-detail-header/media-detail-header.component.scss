@@ -155,7 +155,3 @@ html[data-theme='dark'] .detail-title-input {
 
 // Anchored shell list inset (no StandardDropdown); matches `--std-dropdown-padding-inline` rhythm.
 // @see docs/specs/component/filters/dropdown-system.md
-.detail-context-menu__items {
-  padding-inline: var(--spacing-2);
-  padding-block: var(--spacing-2);
-}

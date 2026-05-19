@@ -1,6 +1,18 @@
 // Shared five-slot detail row: action, action, center (icon/label/value), action, action.
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 
+// Match block content width/inset to grid column 3 (between the four action rails).
+@mixin detail-row-center-width {
+  --_detail-row-action-size: var(--detail-row-action-size, var(--detail-row-height, 2rem));
+  --_detail-row-center-gap: var(--spacing-1);
+  width: calc(100% - 4 * var(--_detail-row-action-size) - 4 * var(--_detail-row-center-gap));
+  max-width: 100%;
+  margin-inline-start: calc(2 * var(--_detail-row-action-size) + 2 * var(--_detail-row-center-gap));
+  margin-inline-end: auto;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
 .detail-row {
   --detail-row-action-size: var(--detail-row-height, 2rem);
 

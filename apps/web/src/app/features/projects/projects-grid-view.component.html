@@ -1,12 +1,9 @@
-<app-card-grid class="projects-grid" minColumnWidth="16rem" [variant]="cardVariant()">
-  @for (project of section().projects; track project.id) {
+<div class="projects-grid">
+  @for (summary of summaries(); track summary.id) {
     <app-project-card
-      [project]="project"
-      [variant]="cardVariant()"
-      [colorTokenFor]="colorTokenFor()"
-      [formatRelativeDate]="formatRelativeDate()"
+      [project]="summary"
       (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
       (dangerAction)="onDangerAction($event.projectId, $event.action)"
     />
   }
-</app-card-grid>
+</div>

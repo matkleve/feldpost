@@ -28,7 +28,7 @@
               (keydown.enter)="newValueInput.focus()"
             />
             @if (keySuggestions().length > 0) {
-              <div class="add-metadata-suggestions option-menu-surface flex flex-col">
+              <div class="add-metadata-suggestions option-menu-surface option-menu-list flex flex-col">
                 @for (suggestion of keySuggestions(); track suggestion) {
                   <button
                     hlmMenuItem
@@ -38,7 +38,7 @@
                       newKeyInput.value = suggestion; keySuggestions.set([]); newValueInput.focus()
                     "
                   >
-                    <span class="material-icons shrink-0 text-base text-muted-foreground" aria-hidden="true">label</span>
+                    <span class="material-icons option-menu-list__item-icon" aria-hidden="true">label</span>
                     <span class="min-w-0 flex-1 text-left" data-i18n-skip>{{ suggestion }}</span>
                   </button>
                 }
@@ -74,11 +74,11 @@
         <div class="detail-row__center">
           <button
             hlmMenuItem
-            class="add-metadata-btn inline-flex w-full items-center justify-start gap-2 text-muted-foreground"
+            class="add-metadata-btn inline-flex w-full items-center justify-start text-muted-foreground"
             type="button"
             (click)="showAddForm.set(true)"
           >
-            <span class="material-icons text-muted-foreground" aria-hidden="true">add</span>
+            <span class="material-icons option-menu-list__item-icon" aria-hidden="true">add</span>
             {{ t('workspace.metadata.action.add', 'Add metadata') }}
           </button>
         </div>

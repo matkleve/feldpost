@@ -165,7 +165,7 @@
 // Content area — simple flex column; rows manage their own internal layout
 // @see docs/specs/ui/workspace/workspace-pane.md
 .detail-content {
-  max-width: 40rem;
+  max-width: var(--detail-content-main-max-width);
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;

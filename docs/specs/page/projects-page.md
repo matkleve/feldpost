@@ -64,23 +64,43 @@ flowchart TD
 
 ### View Mode State
 
+Four modes; default `grid`. Last selection persisted to `localStorage` under key `feldpost.projects.viewMode`.
+
+| Mode | Description |
+|------|-------------|
+| `grid` | 4-column card grid (desktop ≥1024px), 2-column (tablet ≥640px), 1-column (mobile). Renders `ProjectsGridViewComponent`. |
+| `list` | Single-row list items: name, status chip, location chip, media count, last activity. Renders `ProjectsTableViewComponent`. |
+| `map` | Leaflet map via `MapAdapter`. Project pins at `location.lat/lng`. Click → popover with mini card. Renders `ProjectsMapViewComponent` or placeholder stub if `MapAdapter` not yet injectable. |
+| `board` | Three columns: draft / active / archived. Compact card variant. Renders `ProjectsBoardViewComponent` or placeholder stub. |
+
+Switcher icon order (left → right): `list`, `grid`, `map`, `board`.
+
 ```mermaid
 stateDiagram-v2
-	[*] --> ListView
+	[*] --> GridView
 
 	ListView: viewMode = list
-	CardsView: viewMode = cards
+	GridView: viewMode = grid
+	MapView: viewMode = map
+	BoardView: viewMode = board
 
-	ListView --> CardsView: Toggle view mode
-	CardsView --> ListView: Toggle view mode
+	ListView --> GridView: Toggle
+	ListView --> MapView: Toggle
+	ListView --> BoardView: Toggle
+	GridView --> ListView: Toggle
+	GridView --> MapView: Toggle
+	GridView --> BoardView: Toggle
+	MapView --> GridView: Toggle
+	MapView --> ListView: Toggle
+	MapView --> BoardView: Toggle
+	BoardView --> GridView: Toggle
+	BoardView --> ListView: Toggle
+	BoardView --> MapView: Toggle
 
 	state SharedState {
 		[*] --> Preserved
-		Preserved: searchTerm/statusFilter/sort stay intact
+		Preserved: statusFilter/sort/grouping stay intact
 	}
-
-	ListView --> SharedState
-	CardsView --> SharedState
 ```
 
 ## Component Hierarchy
@@ -155,7 +175,7 @@ flowchart LR
 | Project-scoped workspace media | `ProjectsService.loadProjectWorkspaceImages(projectId)`                                                           | `ProjectScopedWorkspaceImage[]` |
 | Primary city                   | Derived in `ProjectsService` from the most frequent `media_items.city` per project (tie-break: lexicographic)     | `string \| null`                |
 | Primary district               | Derived in `ProjectsService` from the most frequent `media_items.district` per project (tie-break: lexicographic) | `string \| null`                |
-| View preference                | `localStorage['feldpost-projects-view-mode']` via component persistence helper                                    | `'list' \| 'cards'`             |
+| View preference                | `localStorage['feldpost.projects.viewMode']` via component persistence helper                                     | `'grid' \| 'list' \| 'map' \| 'board'` |
 | Route-scoped project open      | `ActivatedRoute.snapshot.paramMap.get('projectId')`                                                               | `string \| null`                |
 | Filter rules                   | `FilterService.rules()` restricted to the projects operator profile                                               | `FilterRule[]`                  |
 
@@ -186,7 +206,7 @@ Media-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 | `projects`                    | `ProjectListItem[]`                          | `[]`                     | Rendered project rows/cards                                   |
 | `loading`                     | `boolean`                                    | `false`                  | Loading skeleton visibility                                   |
 | `statusFilter`                | `'all' \| 'active' \| 'archived'`            | `'all'`                  | Status scoping                                                |
-| `viewMode`                    | `'list' \| 'cards'`                          | stored value or `'list'` | Active layout mode                                            |
+| `viewMode`                    | `'grid' \| 'list' \| 'map' \| 'board'`       | stored value or `'grid'` | Active layout mode (persisted to `localStorage['feldpost.projects.viewMode']`) |
 | `sortMode`                    | `'name' \| 'updated' \| 'image-count'`       | `'updated'`              | Fallback/base project ordering                                |
 | `selectedProjectId`           | `string \| null`                             | `null`                   | Active project opened in project-scoped workspace surface — see [workspace-pane](../ui/workspace/workspace-pane.md), [project-details-view](../component/project/project-details-view.md) |
 | `workspacePaneOpen`           | `boolean`                                    | `false`                  | **Projects route:** visibility of project-scoped workspace UI (naming TBD if collides with layout-host signal) |
@@ -299,9 +319,14 @@ sequenceDiagram
 - [x] The page has no standalone search bar above the toolbar.
 - [x] The second row is a toolbar containing status scope, grouping, filter, sort, and view-mode controls.
 - [x] Status control filters Active vs Archived rows.
-- [x] View toggle switches between List and Cards without resetting search/filter/sort state.
-- [x] List view is default and optimized for scan/compare.
-- [x] Cards view keeps card internals structurally consistent for fast comparison.
+- [x] View toggle switches between modes without resetting search/filter/sort state.
+- [ ] View mode switcher shows 4 icons: list, grid, map, board (left-to-right).
+- [ ] Grid view is default; last selected mode persists to `localStorage['feldpost.projects.viewMode']`.
+- [ ] Grid view renders 4 columns at ≥1024px, 2 columns at ≥640px, 1 column below.
+- [x] List view is optimized for scan/compare.
+- [x] Grid view keeps card internals structurally consistent for fast comparison.
+- [ ] Map view renders project pins via `MapAdapter` or a "Map view — coming soon" placeholder stub.
+- [ ] Board view renders three columns (draft/active/archived) or a placeholder stub.
 - [x] "New project" creates a draft row, opens workspace pane, and focuses the workspace title input.
 - [x] Pressing Enter in the workspace title input persists the name and updates the project label in list/cards.
 - [x] Each active card shows a color-change action and an `Archive` button.

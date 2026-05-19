@@ -10,7 +10,12 @@ import type {
   SearchQueryContext,
 } from './search.models';
 import { computeTextMatchScore } from './search-query';
-import { distanceToSearchContextMeters, isInViewport, toSizeSignal } from './search-bar-helpers';
+import {
+  deduplicateGeocoderCandidatesByLabel,
+  distanceToSearchContextMeters,
+  isInViewport,
+  toSizeSignal,
+} from './search-bar-helpers';
 import { logGeocoderResolverStage } from './search-debug';
 
 interface DbContentRow {
@@ -165,11 +170,13 @@ export async function fetchGeocoderCandidates(
     maxGeocoderResults * 3,
   );
 
-  const merged = mergeAndRankCandidates(
-    constrainedCandidates,
-    unconstrainedCandidates,
-    context,
-    normalizedQuery,
+  const merged = deduplicateGeocoderCandidatesByLabel(
+    mergeAndRankCandidates(
+      constrainedCandidates,
+      unconstrainedCandidates,
+      context,
+      normalizedQuery,
+    ),
   ).slice(0, maxGeocoderResults);
 
   logGeocoderResolverStage('final-ranked', {
@@ -237,11 +244,23 @@ function rankGeocoderCandidates(
 
   if (lexicalResults.length === 0) return [];
 
-  return lexicalResults
+  const ranked = lexicalResults
     .map((result, index) => toCandidate(result, normalizedQuery, index, context))
     .filter((candidate) => (candidate.score ?? 0) > 0.01)
-    .sort((left, right) => compareCandidateRank(left, right, context, normalizedQuery))
-    .slice(0, limit);
+    .sort((left, right) => compareCandidateRank(left, right, context, normalizedQuery));
+
+  return deduplicateGeocoderCandidatesByLabel(ranked).slice(0, limit);
+}
+
+function hasGeographicSearchAnchor(context: SearchQueryContext): boolean {
+  return !!(
+    context.viewportBounds ||
+    context.activeMarkerCentroid ||
+    context.activeProjectCentroid ||
+    context.currentLocation ||
+    context.dataCentroid ||
+    (context.countryCodes?.length ?? 0) > 0
+  );
 }
 
 function matchesCountryConstraint(
@@ -250,6 +269,10 @@ function matchesCountryConstraint(
 ): boolean {
   const allowedCountryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
   if (allowedCountryCodes.length === 0) {
+    if (!hasGeographicSearchAnchor(context)) {
+      return true;
+    }
+
     if (isCoordinateInViewport(result.lat, result.lng, context.viewportBounds)) {
       return true;
     }

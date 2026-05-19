@@ -39,6 +39,7 @@
 }
 
 .detail-section__label {
+  @include detail-row-slots.detail-row-center-width;
   border-top: 1px solid var(--border);
   margin-top: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-2) 0;

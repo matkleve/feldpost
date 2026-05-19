@@ -1,79 +1,89 @@
 @if (active()) {
-  <div class="detail-row address-search__row detail-row--editing">
-    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-    <div class="detail-row__center address-search__center">
-      <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
-      <input
-        #addressSearchInput
-        class="address-search__input"
-        type="text"
-        [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
-        [attr.aria-label]="t('workspace.addressSearch.aria.search', 'Search for an address')"
-        [value]="query()"
-        (input)="onInput(addressSearchInput.value)"
-        (keydown.escape)="cancel()"
-        (keydown.enter)="selectFirst()"
-      />
+  <div class="address-search__stack">
+    <div class="detail-row address-search__row detail-row--editing" #dropdownAnchorRow>
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center address-search__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
+        <input
+          #addressSearchInput
+          class="address-search__input"
+          type="text"
+          [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
+          [attr.aria-label]="t('workspace.addressSearch.aria.search', 'Search for an address')"
+          [value]="query()"
+          (input)="onInput(addressSearchInput.value)"
+          (keydown.escape)="cancel()"
+          (keydown.enter)="selectFirst()"
+          (click)="$event.stopPropagation()"
+        />
+      </div>
+      <button
+        class="detail-row-action detail-row-action--r1 address-search__clear-btn address-search__clear-btn--visible"
+        type="button"
+        (click)="cancel(); $event.stopPropagation()"
+        [attr.aria-label]="t('workspace.addressSearch.aria.cancel', 'Cancel search')"
+      >
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
-    <button
-      class="detail-row-action detail-row-action--r1 address-search__clear-btn address-search__clear-btn--visible"
-      type="button"
-      (click)="cancel()"
-      [attr.aria-label]="t('workspace.addressSearch.aria.cancel', 'Cancel search')"
-    >
-      <span class="material-icons" aria-hidden="true">close</span>
-    </button>
-    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+
+    @if (savedSuggestions().length > 0 || placeSuggestions().length > 0 || loadingSaved() || loadingPlaces()) {
+      <div
+        #addressSearchDropdown
+        class="address-search__dropdown"
+        [class.address-search__dropdown--above]="dropdownOpensAbove()"
+        [style.top.px]="dropdownTop()"
+        [style.left.px]="dropdownLeft()"
+        [style.width.px]="dropdownWidth()"
+      >
+        @if (savedSuggestions().length > 0 || loadingSaved()) {
+          <div class="address-search__section-label">
+            {{ t('workspace.addressSearch.section.saved', 'Saved locations') }}
+          </div>
+          @if (loadingSaved() && savedSuggestions().length === 0) {
+            <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+          }
+          @for (candidate of savedSuggestions(); track candidate.id) {
+            <button class="address-search__result-item" type="button" (click)="apply(candidate)">
+              <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
+              <span class="address-search__result-label">{{ candidate.label }}</span>
+            </button>
+          }
+        }
+
+        @if (placeSuggestions().length > 0 || loadingPlaces()) {
+          <div class="address-search__section-label">
+            {{ t('workspace.addressSearch.section.places', 'Places') }}
+          </div>
+          @if (loadingPlaces() && placeSuggestions().length === 0) {
+            <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+          }
+          @for (candidate of placeSuggestions(); track candidate.id) {
+            <button class="address-search__result-item" type="button" (click)="apply(candidate)">
+              <span class="material-icons address-search__result-icon" aria-hidden="true">place</span>
+              <span class="address-search__result-label">{{ candidate.label }}</span>
+            </button>
+          }
+        }
+      </div>
+    }
   </div>
-
-  @if (savedSuggestions().length > 0 || placeSuggestions().length > 0 || loadingSaved() || loadingPlaces()) {
-    <div class="address-search__dropdown">
-      @if (savedSuggestions().length > 0 || loadingSaved()) {
-        <div class="address-search__section-label">
-          {{ t('workspace.addressSearch.section.saved', 'Saved locations') }}
-        </div>
-        @if (loadingSaved()) {
-          <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
-        }
-        @for (candidate of savedSuggestions(); track candidate.id) {
-          <button class="address-search__result-item" type="button" (click)="apply(candidate)">
-            <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
-            <span class="address-search__result-label">{{ candidate.label }}</span>
-          </button>
-        }
-      }
-
-      @if (placeSuggestions().length > 0 || loadingPlaces()) {
-        <div class="address-search__section-label">
-          {{ t('workspace.addressSearch.section.places', 'Places') }}
-        </div>
-        @if (loadingPlaces()) {
-          <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
-        }
-        @for (candidate of placeSuggestions(); track candidate.id) {
-          <button class="address-search__result-item" type="button" (click)="apply(candidate)">
-            <span class="material-icons address-search__result-icon" aria-hidden="true">place</span>
-            <span class="address-search__result-label">{{ candidate.label }}</span>
-          </button>
-        }
-      }
-    </div>
-  }
 } @else {
   <div class="detail-row address-search__row">
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <button
       class="detail-row-action detail-row-action--l1 address-search__edit-btn"
       type="button"
-      (click)="open()"
+      (click)="open($event)"
       [attr.aria-label]="t('workspace.addressSearch.aria.edit', 'Edit address')"
     >
       <span class="material-icons" aria-hidden="true">edit</span>
     </button>
     <div class="detail-row__center address-search__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">my_location</span>
-      <button class="address-search__trigger-text" type="button" (click)="open()">
+      <button class="address-search__trigger-text" type="button" (click)="open($event)">
         @if (currentAddress()) {
           {{ currentAddress() }}
         } @else {
@@ -88,7 +98,7 @@
       type="button"
       [class.address-search__clear-btn--visible]="!!currentAddress()"
       [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear address')"
-      (click)="clearAddress()"
+      (click)="clearAddress(); $event.stopPropagation()"
     >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>

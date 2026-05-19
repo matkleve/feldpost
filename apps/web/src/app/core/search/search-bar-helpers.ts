@@ -19,6 +19,24 @@ export interface StoredRecentSearch {
   usageCount: number;
 }
 
+export function deduplicateGeocoderCandidatesByLabel(
+  candidates: SearchAddressCandidate[],
+): SearchAddressCandidate[] {
+  const bestByLabel = new Map<string, SearchAddressCandidate>();
+
+  for (const candidate of candidates) {
+    const key = candidate.label.trim().toLowerCase();
+    if (!key) continue;
+
+    const existing = bestByLabel.get(key);
+    if (!existing || (candidate.score ?? 0) > (existing.score ?? 0)) {
+      bestByLabel.set(key, candidate);
+    }
+  }
+
+  return [...bestByLabel.values()];
+}
+
 export function sanitizeRecentLabel(label: string): string {
   const parts = label
     .split(',')

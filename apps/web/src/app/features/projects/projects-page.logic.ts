@@ -13,4 +13,5 @@ export {
   formatRelativeDate,
   projectStatusLabel,
   projectLabel,
+  toProjectSummary,
 } from './projects-formatters.logic';

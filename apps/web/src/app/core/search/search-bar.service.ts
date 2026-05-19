@@ -588,20 +588,26 @@ export class SearchBarService {
     formatted: string,
     query: string,
   ): string {
-    const candidates = [result.address?.road, result.name, formatted]
-      .map((value) => value?.trim() ?? '')
-      .filter((value, idx, all) => value.length > 0 && all.indexOf(value) === idx);
+    const name = result.name?.trim() ?? '';
+    const road = result.address?.road?.trim() ?? '';
 
-    if (candidates.length === 0) return formatted;
+    if (name.length > 0) {
+      const nameScore = computeGeocoderTextScore(name, formatted, query);
+      const formattedScore = computeGeocoderTextScore(formatted, formatted, query);
+      if (nameScore > formattedScore + 0.05) {
+        return name;
+      }
+    }
 
-    const best = candidates
-      .map((label) => ({
-        label,
-        score: computeGeocoderTextScore(label, formatted, query),
-      }))
-      .sort((left, right) => right.score - left.score || left.label.length - right.label.length)[0];
+    if (
+      road.length > 0 &&
+      formatted.length > road.length &&
+      formatted.toLowerCase().includes(road.toLowerCase())
+    ) {
+      return formatted;
+    }
 
-    return best?.label ?? formatted;
+    return road || formatted || name;
   }
 
   private persistRecentSearches(recents: SearchRecentCandidate[]): void {
