@@ -1,6 +1,6 @@
 # Phase 5 — Callsite Migration & Legacy Removal
 
-**Status:** In Progress (callsite groups **A–G + D** complete **2026-05-16**; legacy alias / `tokens.scss` removal still open)
+**Status:** In Progress (callsite groups **A–G + D** complete **2026-05-16**; **`tokens.scss` / `_legacy-design-tokens.scss` bridge removed under [Phase 7](./phase-7-token-migration.md) Batch 50 — 2026-05-18**; **`tailwind.config.js` legacy utility-name aliases** remain — see [legacy-token-deletion-status (2026-05-19)](./reports/legacy-token-deletion-status-2026-05-19.md))
 
 - [~] **Phase 5** — Callsite Migration & Legacy Removal — **SCSS cleanup + `UI_PRIMITIVE_DIRECTIVES` barrel removed (2026-05-14);** **Group D done (2026-05-16);** shim file deletion done; legacy alias removal remains open; **`npm run design-system:check` green (2026-05-15)** — root `AGENTS.md` includes required Ownership Matrix column header (`scripts/guard-visual-behavior.mjs`)
   - [x] **Pre-flight** (do before ANY callsite changes)
@@ -42,8 +42,8 @@
   - [~] **Barrel removal**
     - [x] Remove `UI_PRIMITIVE_DIRECTIVES` export from `ui-primitives.directive.ts` — **done (2026-05-14)** (last callsite was `filter-dropdown`; Group D unchanged)
     - [x] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **done (2026-05-16):** `rg "from ['\"].*ui-primitives\\.directive" apps/web/src -l` → **0**; file removed after `projects-dropdown` dropped `UiChoice*`. **`UiDropdownTriggerDirective`** removed **2026-05-16** with Group D (toolbar templates + deleted `ui-dropdown-trigger.directive.ts`).
-    - [ ] Remove legacy alias block from `apps/web/src/styles.scss` (verify no remaining `--color-*` / `--fp-sys-*` references) — **deferred:** `rg "var\\(--color-" apps/web/src` still matches widespread component SCSS + `styles.scss` link baseline (`var(--color-primary)` on `a`)
-    - [ ] Delete `apps/web/src/styles/tokens.scss` (after alias block removed and CDK overlay import moved)
+    - [x] Remove legacy bridge / monolithic token emit from runtime — **done under Phase 7:** `_legacy-design-tokens.scss` **deleted**, `meta.load-css('styles/legacy-design-tokens')` **removed**, `tokens.scss` **never reintroduced** (`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web` → **0**; `var(--color-` in `apps/web/src/app/**/*.scss` → **0**). CDK overlay import lives in `styles.scss` header (Phase 7). **Remaining:** `tailwind.config.js` **utility-name** aliases (`bg-surface`, `text-text-primary`, …) → tweakcn vars — **not** a `styles.scss` alias block; track per [legacy-token-deletion-status (2026-05-19)](./reports/legacy-token-deletion-status-2026-05-19.md).
+    - [x] Delete `apps/web/src/styles/tokens.scss` — **N/A / superseded:** monolith successor was `_legacy-design-tokens.scss` (Phase 7); file absent from tree (**2026-05-18**).
   - [~] **Final verification**
     - [x] `ng build` — **green (2026-05-14)** — zero errors; pre-existing map-shell style budget + CommonJS warnings unchanged
     - [x] `npm run design-system:check` — **green (2026-05-15):** registry + panel audit + `guard-visual-behavior.mjs` (root `AGENTS.md` matrix column row present)

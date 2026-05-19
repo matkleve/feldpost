@@ -23,6 +23,7 @@
   padding: var(--spacing-1);
   background: var(--muted);
   border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  box-shadow: var(--shadow-md);
 }
 
 :host .map-style-switch [hlmToggleGroupItem] {

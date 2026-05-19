@@ -21,6 +21,9 @@ DevTools snapshot (reference): `app-root` → `app-authenticated-app-layout` →
 
 | Source | Use for |
 |--------|---------|
+| `docs/design/agent-css-variable-contract.md` | **Global `var(--*)` contract** — all layers; read before any SCSS token edit |
+| `docs/design/shell-layout-tokens.md` | **Shell geometry only** — forbidden `--shell-*`, overlay vs nav owners, cross-sibling positioning |
+| `docs/migration/reports/agent-token-decision-closure.md` | Phase 7 bridge **done**; layout/shell token rules **effective 2026-05-19** |
 | Repository root `AGENTS.md` | Component structure, max depth, no duplicate geometry |
 | `.cursor/rules/scss-ownership.mdc` | Who may set `width`/`height`/`flex`/`overflow`; intermediate wrapper rule |
 | `.cursor/rules/visual-behavior.mdc` | Ownership triad / matrix (migration cleanup exemption does **not** apply if you introduce **new** layout geometry decisions) |
@@ -72,10 +75,11 @@ When `photoPanelOpen()` is true, workspace shell is a **sibling** of `__main` in
 
 | Idea | Risk | Benefit |
 |------|------|---------|
-| Collapse `.authenticated-app-layout` into `:host` flex on `AuthenticatedAppLayoutComponent` | Touches height/overflow contract for whole shell | One less div; clearer owner |
 | Move `app-nav` inside the flex row as first flex child (still `position: fixed` on inner `.sidebar`) | May affect clipping, tab order, or `overflow: hidden` on row | DOM order matches visual “rail + main” mental model |
-| Document-only: explicit “geometry owner” table in `workspace-pane.md` or layout child spec | Low | Stops future duplicate `height: 100%` |
-| Align `app-root` / `AppComponent` `:host` with shell so `height: 100%` on layout host is never orphan | Low if root already minimal | Fixes subtle “stacked” collapse |
+
+**Shipped (2026-05-19):** geometry owner table in `workspace-pane.md` § Authenticated shell geometry ownership; `AppComponent` `:host` `height: 100%`.
+
+**Forbidden (not backlog):** collapse `.authenticated-app-layout` into `:host` flex — gated on Storybook nav-clipping harness; see `workspace-pane.md` § Blocked refactor.
 
 For each merge: cite **which selector becomes sole owner** for column width, main flex growth, and map fill.
 
@@ -86,6 +90,7 @@ For each merge: cite **which selector becomes sole owner** for column width, mai
 - Reverting “nav on `app-root`” vs “nav on layout” **without** a written decision in spec + migration note.
 - Routing table changes (`app.routes.ts`, `authenticated-app.routes.ts`) without a separate routing review.
 - Net-new visual design (new breakpoints, animations) — ownership matrix required first per `visual-behavior.mdc`.
+- **Wrapper collapse** (merge `.authenticated-app-layout` into layout `:host` flex): **forbidden** until a Storybook (or equivalent) nav-clipping harness exists — **not scheduled**; normative gate in `docs/specs/ui/workspace/workspace-pane.md` § Blocked refactor.
 
 ---
 
@@ -142,7 +147,32 @@ Constraints: No new feature scope; report only facts from the inputs and repo. I
 | Nav | `apps/web/src/app/features/nav/nav.component.{html,scss,ts}` |
 | Map shell entry | `apps/web/src/app/features/map/map-shell/map-shell.component.{html,scss}` (partial `_map-shell-layout.scss`) |
 | Routes | `apps/web/src/app/app.routes.ts`, `apps/web/src/app/layout/authenticated-app.routes.ts` |
+| Agent CSS variable contract (global) | `docs/design/agent-css-variable-contract.md` |
+| Shell/layout token subsection | `docs/design/shell-layout-tokens.md` |
 
 ---
 
-*Created for cross-agent handoff — layout ownership and “stacked divs” diagnosis (2026-05-18).*
+## 10. Token decision rules (agents)
+
+**MUST-read before any shell/layout/nav/settings-overlay SCSS token edit:** [`docs/design/agent-css-variable-contract.md`](../../design/agent-css-variable-contract.md) (global layers) + [`docs/design/shell-layout-tokens.md`](../../design/shell-layout-tokens.md) (shell matrix). Closure: [`agent-token-decision-closure.md`](./agent-token-decision-closure.md).
+
+**Forbidden:** new `--shell-*` on `:root` or layout hosts; restored `--overlay-rail-*` or `--layout-sidebar-*` (Phase 7 removed). No `--shell-settings-overlay-left` — never shipped.
+
+**Allowed layers:** tweakcn / typography-baseline globals (`--spacing-*`, `--primary`, …); component `:host` vars per spec (`--settings-overlay-*` on `ss-settings-overlay`, `--sidebar-width-*` on `app-nav`); authenticated column geometry per `workspace-pane.md` § Authenticated shell geometry ownership.
+
+**Decision tree (≤15 lines — same order as shell-layout-tokens.md):**
+
+```text
+1. Global color/spacing/radius/shadow/motion? → tweakcn / _typography-baseline.scss (--spacing-3, --primary, …). No --shell-*.
+2. Settings overlay panel position or in-panel rail width? → settings-overlay.component.scss (:host --settings-overlay-*; .settings-overlay left/transform). No --shell-*.
+3. Nav collapsed/expanded rail? → nav.component.scss :host (--sidebar-width-collapsed, …). No --layout-sidebar-*.
+4. Main column / map fill / workspace pane split? → workspace-pane.md geometry owners only. No global bridge.
+5. Nav + overlay must share horizontal offset? → DOM siblings: duplicate collapsed-rail literal calc(0.25rem * 12) in overlay left (matches nav --sidebar-width-collapsed). Optional future: AppComponent :host row in spec + matrix — not scheduled.
+6. None of the above? → STOP; add spec row (owner element + property) before coding.
+```
+
+**Settings overlay horizontal position** is owned by **`.settings-overlay`** `left` in `settings-overlay.component.scss`, **not** a global `--shell-*` unless this handoff’s ownership matrix gains an explicit `AppComponent` `:host` row (future).
+
+---
+
+*Created for cross-agent handoff — layout ownership and “stacked divs” diagnosis (2026-05-18). §10 token rules normative 2026-05-19.*

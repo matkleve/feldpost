@@ -4,6 +4,8 @@
 
 **Revision (same date, doc follow-up):** extended this file with a **row-level unverified inventory**, **matrix additions** synced to the app route table (read-only route survey for gap honesty — not a browser run), and explicit separation between **desk audits** and **visual sign-off**. Still **no** interactive browser session in this lane.
 
+**Revision (2026-05-19):** § **Legacy token verification (desk)** — grep gates + Token theme checklist rows linked to [legacy-token-deletion-status-2026-05-19.md](./legacy-token-deletion-status-2026-05-19.md).
+
 **What ran in this agent slice**
 
 - **Automated / doc-only:** cross-links from `phase-10-visual-qa.md`; no headless or manual UI session.
@@ -74,6 +76,38 @@ These inform risk and copy/layout intent; they are **not** three-theme browser v
 ## High-risk spot-check — status (honest)
 
 All bullet groups in **High-risk migration spot-check** and **Tight smoke** in `phase-10-visual-qa.md` remain **Unverified** here (map shell, settings rail/tokens, pill toggles, upload panel, theme smoke, dropdowns/menus).
+
+---
+
+## Legacy token verification (desk)
+
+**Context:** Phase 7 is **Done** — the on-disk bridge is **removed**. Phase 10 must still **visually** sign off that tweakcn themes did not regress. Full deletion inventory: [legacy-token-deletion-status-2026-05-19.md](./legacy-token-deletion-status-2026-05-19.md).
+
+**Rule:** **Desk grep green** does **not** replace **Token theme checklist** browser rows in [phase-10-visual-qa.md](../phase-10-visual-qa.md#token-theme-checklist).
+
+### Automated / desk gates (2026-05-19)
+
+| Gate | Command / check | Expected | This lane (2026-05-19) |
+| ---- | ----------------- | -------- | ---------------------- |
+| Legacy bridge file absent | `rg 'legacy-design-tokens\|_legacy-design-tokens' apps/web` | 0 matches | **Pass** (desk) |
+| `tokens.scss` absent | `test ! -f apps/web/src/styles/tokens.scss` | absent | **Pass** (desk) |
+| No legacy `load-css` | `rg 'load-css.*legacy' apps/web` | 0 matches | **Pass** (desk) |
+| No Feldpost v1 `var(--color-*)` in app SCSS | `rg 'var\(--color-' apps/web/src/app --glob '*.scss'` | 0 matches | **Pass** (desk) |
+| No `var(--fp-*)` in runtime | `rg 'var\(--fp-' apps/web/src` | 0 matches | **Pass** (desk) |
+| `styles/` partial count | `ls apps/web/src/styles/` | 7 files, no `_legacy-design-tokens.scss` | **Pass** (desk) |
+| Tailwind legacy **utility names** still wired | `rg 'bg-bg-base\|bg-surface\|text-text-primary' apps/web/src -g '*.{html,ts,scss}'` | small CVA set → `tailwind.config.js` | **Known remainder** — not a bridge file; Phase 5/8 v4 tail |
+
+### Token theme checklist — browser (still open)
+
+Maps to [phase-10-visual-qa.md § Token theme checklist](../phase-10-visual-qa.md#token-theme-checklist). Record **Pass / Fail** in the **parent** phase doc after a real browser run.
+
+| Theme | Surfaces to spot-check (minimum) | Light | Dark | Sandstone | Evidence this lane |
+| ----- | -------------------------------- | ----- | ---- | --------- | ------------------- |
+| Default (light) | Map shell, settings overlay rail, toolbar menu panel, upload panel thumb row | — | — | — | None (no browser) |
+| `[data-theme="dark"]` | Muted surfaces + map markers + toast stack | — | — | — | None |
+| `[data-theme="sandstone"]` | Borders, focus rings, settings action hover wash | — | — | — | None |
+
+**Human sign-off prompt:** After theme toggles, confirm **no** washed-out `muted` panels, **no** invisible map markers, and **no** focus rings that disappear on sandstone — failures may indicate per-component `:host` mixes, not a missing global bridge (grep gates above would still pass).
 
 ---
 

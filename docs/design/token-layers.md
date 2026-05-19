@@ -102,6 +102,10 @@ Role-level aliases consumed by reusable UI primitives and feature components. **
 
 - **`--state-warning-bg`** / **`--state-danger-bg`** — **removed Batch 39** — use **`color-mix(in srgb, var(--warning|destructive) 12%, transparent)`** at callsites ([**`docs/migration/phase-7-token-migration.md`**](../migration/phase-7-token-migration.md) §Batch 39); do not prescribe these names as **`:root`** bridge tokens.
 
+## Shell / layout component vars (nav + settings overlay)
+
+Agents: [`agent-css-variable-contract.md`](./agent-css-variable-contract.md) (global) → [`shell-layout-tokens.md`](./shell-layout-tokens.md) (shell geometry). **`--settings-overlay-*`**, **`--sidebar-width-*`** are component `:host` only — **no ad-hoc `--shell-*`**. Cross-sibling positioning does not inherit `:host` vars; see shell doc.
+
 ## Consumption Rules
 
 1. New or refactored components consume Layer C **role bindings** first (per-component **`:host`** / feature-local custom properties where those names are not global).

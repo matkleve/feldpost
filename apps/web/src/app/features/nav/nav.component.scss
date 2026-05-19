@@ -51,8 +51,11 @@
     left: var(--spacing-3);
     transform: translateY(-50%);
     width: var(--sidebar-width-collapsed);
+    min-width: var(--sidebar-width-collapsed);
+    max-width: var(--sidebar-width-collapsed);
     height: auto; // fit content
     max-height: 80vh;
+    overflow: visible;
     border-radius: var(--container-radius-panel);
     display: flex;
     align-items: stretch;
@@ -60,49 +63,13 @@
 
     &:hover {
       width: var(--sidebar-width-expanded);
+      min-width: var(--sidebar-width-expanded);
+      max-width: var(--sidebar-width-expanded);
 
       .nav__label {
         opacity: 1;
         visibility: visible;
         transition-delay: 0s;
-      }
-    }
-
-    // Settings open: keep the reserved collapsed lane (overlay starts after collapsed rail + spacing-3 gap).
-    // Account label stays visible inside the lane; hover expands over the overlay (host z 501 via :has above).
-    // @see docs/specs/component/workspace/sidebar.md § What It Looks Like
-    &.sidebar--settings-open:not(:hover) {
-      width: var(--sidebar-width-collapsed);
-      min-width: var(--sidebar-width-collapsed);
-      max-width: var(--sidebar-width-collapsed);
-      overflow: hidden;
-
-      .nav__account-link.nav__link--active {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        gap: var(--spacing-1);
-        min-height: auto;
-        padding-block: var(--spacing-2);
-        overflow: hidden;
-        text-align: center;
-
-        .nav__label {
-          opacity: 1;
-          visibility: visible;
-          width: 100%;
-          min-width: 0;
-          max-width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-size: var(--font-size-xs);
-          line-height: var(--line-height-solid);
-          transition-delay: 0s;
-        }
       }
     }
   }
@@ -139,6 +106,7 @@
     padding-block: var(--spacing-1);
     padding-inline: var(--spacing-1);
     border-radius: var(--container-radius-panel);
+    overflow: hidden;
 
     // Frosted glass
     background: color-mix(in srgb, var(--card) 85%, transparent);

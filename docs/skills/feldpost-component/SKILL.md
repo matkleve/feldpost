@@ -8,7 +8,7 @@ description: Read this skill before creating, refactoring, or styling any Angula
 This skill is the implementation reference for Angular components in Feldpost.
 Read it before writing HTML, TypeScript, or SCSS for a stateful component.
 
-**Global styles note (2026-05-18):** `apps/web/src/styles/_legacy-design-tokens.scss` is **removed from the tree** (Phase 7 Batch 50). `apps/web/src/styles.scss` loads **`meta.load-css('styles/typography-baseline')`** only for late global typography — not a legacy bridge path. Prefer tweakcn variables and component-local tokens per `docs/design/tokens.md` / `token-layers.md`; bridge history lives in `docs/migration/phase-7-token-migration.md`.
+**Global styles note (2026-05-19):** Before any `var(--*)` or SCSS token change, read **`docs/design/agent-css-variable-contract.md`** (decision tree — no invented names). Legacy bridge `_legacy-design-tokens.scss` is **removed** (Phase 7); `styles.scss` loads **`meta.load-css('styles/typography-baseline')`** only. Values: `docs/design/tokens.md` / `token-layers.md`; shell geometry: `docs/design/shell-layout-tokens.md`.
 
 ---
 

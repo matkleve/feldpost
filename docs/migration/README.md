@@ -4,6 +4,8 @@ Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tai
 
 **Agents — parallel streams:** [AGENTS.md — Multi-agent coordination (migration)](../../AGENTS.md#multi-agent-coordination-migration) (how to split independent migration work across agents; **no duplicate “next” list**—use this README’s Status + phase docs as the queue).
 
+**CSS custom properties (`apps/web`):** Before any SCSS/token edit, read [`docs/design/agent-css-variable-contract.md`](../design/agent-css-variable-contract.md) ([closure status](./reports/agent-token-decision-closure.md)). Shell geometry: also [`docs/design/shell-layout-tokens.md`](../design/shell-layout-tokens.md).
+
 ## Status (summary)
 
 **Phase 6 — Done (2026-05-17)** per [phase-6-template-cleanup.md](./phase-6-template-cleanup.md): template BEM sweep + toggle/toolbar acceptance met; remaining `\bui-` in HTML is **comment-only** (`@see …/ui-primitives/…` paths). Closure verification (gates, build, design-system check) is in that doc §Closure verification; follow-ups stay in Phases 7–8 and 10 as scoped there.
@@ -49,7 +51,7 @@ Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tai
 | Decisions (dated table) | [decisions-log.md](./decisions-log.md) |
 | Open questions / blockers | [open-questions.md](./open-questions.md) |
 | Phase 5 wiring risks | [wiring-risks.md](./wiring-risks.md) |
-| Migration reports (audits) | [`reports/`](./reports/) — [Phase 10 automated smoke gates (2026-05-18)](./reports/phase-10-migration-smoke-gates-2026-05-18.md), [Phase 10 manual matrix gap (2026-05-18)](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md), [upload panel design (2026-05-17)](./reports/upload-panel-design-audit-2026-05-17.md), [settings overlay sections / layout (2026-05-17)](./reports/settings-overlay-sections-layout-audit-2026-05-17.md), [settings overlay Notion-adjacent UX (2026-05-18)](./reports/settings-overlay-notion-adjacent-ux-2026-05-18.md), [dropdown deep analysis](./reports/dropdown-deep-analysis-2026-05-17.md), [dropdown structure](./reports/dropdown-component-structure-audit-2026-05-17.md), [padding / hit-area](./reports/padding-and-hit-area-audit-2026-05-16.md) |
+| Migration reports (audits) | [`reports/`](./reports/) — **[Agent CSS variable contract](../design/agent-css-variable-contract.md)** (normative), [Agent token decision closure (2026-05-19)](./reports/agent-token-decision-closure.md), [Authenticated shell layout handoff](./reports/agent-handoff-authenticated-shell-layout-ownership.md), [Legacy token deletion status (2026-05-19)](./reports/legacy-token-deletion-status-2026-05-19.md), [Phase 10 automated smoke gates (2026-05-18)](./reports/phase-10-migration-smoke-gates-2026-05-18.md), [Phase 10 manual matrix gap (2026-05-18)](./reports/phase-10-manual-visual-matrix-gap-2026-05-18.md), [upload panel design (2026-05-17)](./reports/upload-panel-design-audit-2026-05-17.md), [settings overlay sections / layout (2026-05-17)](./reports/settings-overlay-sections-layout-audit-2026-05-17.md), [settings overlay Notion-adjacent UX (2026-05-18)](./reports/settings-overlay-notion-adjacent-ux-2026-05-18.md), [dropdown deep analysis](./reports/dropdown-deep-analysis-2026-05-17.md), [dropdown structure](./reports/dropdown-component-structure-audit-2026-05-17.md), [padding / hit-area](./reports/padding-and-hit-area-audit-2026-05-16.md) |
 
 ---
 

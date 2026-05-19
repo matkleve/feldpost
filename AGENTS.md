@@ -107,6 +107,7 @@ Reference workflow and checklist:
 - No interactive element inside interactive element. No button inside button.
 - No aria-hidden on nodes with interactive descendants.
 - Every CSS property defined exactly once per purpose. Duplicate ownership is a blocker.
+- **Flex/grid child hosts:** Every component `:host` that participates as a **flex or grid child** must declare **`min-height: 0`** and **`min-width: 0`** (in component SCSS). Omission is a **spec violation**. Example: `app-map-shell` `:host` must comply when touched.
 - **Styling stack (default):** Tailwind utility classes in templates **and** component SCSS are both standard. The "no mixing" rule means **do not solve the same visual concern twice** (e.g. duplicating spacing in Tailwind and SCSS) without an explicit plan—not "never use both languages."
 - Loading/Error/Empty are mutually exclusive. Each has exactly one visual owner.
 
@@ -137,6 +138,8 @@ Per-component specs carry the full matrix and examples; column contract is fixed
 ## Multi-agent coordination (migration)
 
 Canonical migration index: `docs/migration/README.md`.
+
+- **CSS custom properties (`var(--*)`) in `apps/web`:** **MUST** read [`docs/design/agent-css-variable-contract.md`](docs/design/agent-css-variable-contract.md) before any SCSS or token edit — decision tree, forbidden legacy names, verification gates; **no invented variable names**. Shell geometry: also [`docs/design/shell-layout-tokens.md`](docs/design/shell-layout-tokens.md) and [`docs/migration/reports/agent-handoff-authenticated-shell-layout-ownership.md`](docs/migration/reports/agent-handoff-authenticated-shell-layout-ownership.md) §10. Closure status: [`docs/migration/reports/agent-token-decision-closure.md`](docs/migration/reports/agent-token-decision-closure.md).
 
 ### Parallel migration streams
 

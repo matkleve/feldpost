@@ -6,6 +6,46 @@ The **Workspace Pane** is hosted by a **layout-level shell** that owns the horiz
 
 **See:** [workspace-pane layout backlog](../../../backlog/workspace-pane-layout-and-spec-priorities.md).
 
+## Authenticated shell geometry ownership
+
+Normative geometry for the authenticated shell (layout host + main column + map fill). Historical analysis: [agent-handoff-authenticated-shell-layout-ownership.md](../../../migration/reports/agent-handoff-authenticated-shell-layout-ownership.md).
+
+| Shell region | Geometry owner (file + selector) | Stacking owner | Notes |
+| --- | --- | --- | --- |
+| Viewport chain | `apps/web/src/styles/reset.scss` → `html`, `body`, `app-root` | — | `height: 100%` on root here + `AppComponent` `:host` |
+| Authenticated shell fill | `authenticated-app-layout.component.scss` → `:host` | Same `:host` (`position: relative`) | Sole shell `height: 100%` owner; `overflow: visible` so fixed nav is not clipped |
+| Horizontal split row | `authenticated-app-layout.component.scss` → `.authenticated-app-layout` | Flex row (no z-index) | `display: flex; flex-direction: row`; **do not** add a second `height: 100%` on this wrapper without spec change |
+| Main column | `.authenticated-app-layout__main` | — | `flex: 1 1 0; min-width: 0; min-height: 0; height: 100%` — **only** flex-grow owner for route content |
+| Nav rail | `nav.component.scss` → `.sidebar` | `nav.component.scss` → `app-nav` `:host` (`z-index: 201`) | **Outside** flex row; `position: fixed`; sibling of `.authenticated-app-layout` in template |
+| Workspace pane (desktop) | `workspace-pane-shell.component.scss` → `.workspace-pane-shell` | Shell / mobile fixed rules | `app-workspace-pane-shell` `:host` uses `display: contents` — no geometry on host |
+| Map viewport (map routes) | `map-shell/_map-shell-layout.scss` → `.map-zone` | `.map-zone` | Route host `app-map-shell` `:host` is block fill; **map fill geometry** lives on `.map-zone` |
+
+### Height chain (viewport → map)
+
+```text
+html, body (height: 100%)
+  → app-root (height: 100%)
+  → AppComponent :host (height: 100%)
+  → app-authenticated-app-layout :host (height: 100%; min-height: 0)
+  → .authenticated-app-layout (flex row; height: 100% — inherits shell; not a second viewport owner)
+  → .authenticated-app-layout__main (flex: 1 1 0; min-height: 0)
+  → router-outlet + activated route host (global apps/web/src/styles/layout/app.scss: router-outlet + *)
+  → app-map-shell :host (height: 100%)
+  → .map-zone (height: 100%; min-height: 0)
+```
+
+**Non-map routes** (`/media`, `/projects`): route `:host` may use `min-height: 100%` plus padding — scrollable pages, not viewport-locked map fill.
+
+### Duplicate-geometry rules
+
+- **MUST NOT** add `height: 100%` on layout `:host`, `.authenticated-app-layout`, and `__main` together when fixing a single broken link — repair the **weakest link** in the height chain above.
+- **MUST NOT** duplicate routed-host `height: 100%` on `map-shell` `:host` when `router-outlet + *` already applies.
+- **MUST** declare `min-height: 0` and `min-width: 0` on any `:host` that is a **flex or grid child** (root `AGENTS.md`).
+
+### Blocked refactor (wrapper collapse)
+
+**Do not** collapse `.authenticated-app-layout` into `AuthenticatedAppLayoutComponent` `:host` flex until a **Storybook (or equivalent) nav-clipping harness** exists that asserts fixed sidebar visibility under `overflow: hidden` on the flex host. This refactor is **not backlog** — it is **forbidden** until that gate ships.
+
 ## Terminology (symbols and product language)
 
 Product copy and this spec say **Workspace Pane**, **media item**, **media**. Implementation symbols may still use legacy names until the [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md) ships.

@@ -63,4 +63,5 @@ app-root
 ## Optional follow-up (not done here)
 
 - Split `AuthenticatedChromeComponent` (nav + settings only) from map/pane flex layout to shrink module and clarify ownership.
-- Collapse `.authenticated-app-layout` wrapper into `:host` flex (one less div).
+
+**Wrapper collapse blocked:** merging `.authenticated-app-layout` into layout `:host` flex is **forbidden** until a Storybook nav-clipping harness exists — see `docs/specs/ui/workspace/workspace-pane.md` § Authenticated shell geometry ownership (Blocked refactor).

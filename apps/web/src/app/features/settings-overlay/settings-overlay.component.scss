@@ -37,6 +37,8 @@
   .settings-overlay {
     position: fixed;
     top: 50%;
+    // Fixed pane offset: spacing + collapsed nav rail (0.25rem * 12 matches app-nav --sidebar-width-collapsed; siblings — no --shell-* bridge)
+    // @see docs/design/shell-layout-tokens.md; docs/specs/ui/settings-overlay/settings-overlay.md
     left: calc(var(--spacing-3) + (0.25rem * 12) + var(--spacing-3));
     transform: translateY(-50%);
     z-index: 500;

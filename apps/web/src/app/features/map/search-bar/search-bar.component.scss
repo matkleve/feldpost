@@ -53,7 +53,7 @@
   border: 1px solid var(--border);
   border-radius: var(--container-radius-panel);
   background: color-mix(in srgb, var(--card) 92%, transparent);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   contain: layout paint;
 }
