@@ -1,0 +1,132 @@
+[
+  {
+    "title": "[P1] Workspace pane only opens halfway",
+    "body": "## Finding\nDragging to open the workspace pane stops at ~50% width and refuses to go full width.\n\n## Steps to reproduce\n1. Click an item to open the workspace pane\n2. Drag the resize handle toward full width\n\n## Expected\nWorkspace pane can be dragged to any width including full-width.\n\n## Actual\nDrag stops at approximately 50% — full width is unreachable.\n\n## Source\nPhase 10 Visual QA — Part 2 (Workspace pane)",
+    "labels": ["bug", "P1", "workspace-pane"]
+  },
+  {
+    "title": "[P1] Workspace pane close gesture broken",
+    "body": "## Finding\nDragging the workspace pane handle to close it does nothing.\n\n## Steps to reproduce\n1. Open the workspace pane\n2. Drag the resize handle toward the closed position\n\n## Expected\nPane closes (collapses) on drag.\n\n## Actual\nNo response — pane stays open.\n\n## Source\nPhase 10 Visual QA — Part 2 (Workspace pane)",
+    "labels": ["bug", "P1", "workspace-pane"]
+  },
+  {
+    "title": "[P2] View toggle group options invisible",
+    "body": "## Finding\nThe toolbar view toggle group (grid / list / etc.) renders its container but shows no options — appears empty.\n\n## Steps to reproduce\n1. Navigate to any page with the view toggle (e.g. Media page)\n2. Inspect the toggle group in the toolbar\n\n## Expected\nGrid, list, and other view options are visible and selectable.\n\n## Actual\nToggle group container renders but has no visible items.\n\n## Source\nPhase 10 Visual QA — Part 2 (Workspace pane)",
+    "labels": ["bug", "P2", "toolbar", "view-toggle"]
+  },
+  {
+    "title": "[P2] Toolbar view toggle group gets clipped when space is tight",
+    "body": "## Finding\nWhen horizontal space is limited, the toolbar shows Filter / Sort / Grouping but the view toggle group after them is cut off rather than adapting.\n\n## Expected\nView toggle should stack, collapse to a cycle-button, or otherwise remain accessible at any viewport width.\n\n## Actual\nView toggle is clipped/hidden when other toolbar items consume available space.\n\n## Source\nPhase 10 Visual QA — Part 2 (Workspace pane)",
+    "labels": ["bug", "P2", "toolbar", "responsive", "view-toggle"]
+  },
+  {
+    "title": "[P3] View toggle: consider cycling-button UX when space is limited",
+    "body": "## Suggestion\nInstead of clipping the view toggle group on smaller screens, replace it with a single button showing the current active view that cycles through views on click.\n\nThis avoids overflow issues while keeping view switching accessible.\n\n## Source\nPhase 10 Visual QA — Part 2 (Workspace pane)",
+    "labels": ["enhancement", "P3", "toolbar", "view-toggle", "ux"]
+  },
+  {
+    "title": "[P3] Upload panel inside workspace reuses map-sidebar components inappropriately",
+    "body": "## Finding\nThe upload panel inside the workspace pane reuses components designed for the narrower map sidebar. The workspace context offers significantly more horizontal space and needs its own layout thinking.\n\n## Expected\nUpload panel in workspace pane has a layout optimized for its wider context.\n\n## Actual\nLayout is constrained as if in the map sidebar.\n\n## Source\nPhase 10 Visual QA — Part 2 (Workspace pane)",
+    "labels": ["enhancement", "P3", "upload-panel", "workspace-pane", "layout"]
+  },
+  {
+    "title": "[P2] Account name missing in sidebar bottom section",
+    "body": "## Finding\nThe account / avatar area at the bottom of the navigation sidebar shows no user name.\n\n## Expected\nUser name (or display name) is visible alongside the avatar.\n\n## Actual\nNo user name rendered — area appears incomplete.\n\n## Source\nPhase 10 Visual QA — Part 2 (Navigation sidebar)",
+    "labels": ["bug", "P2", "navigation", "sidebar"]
+  },
+  {
+    "title": "[P2] Active nav item hover state inconsistent — icon color changes on hover",
+    "body": "## Finding\nActive nav item state: icon + text both orange with light-orange background.\nHovering over the active item: only the text stays orange; the icon treatment changes (loses orange color).\n\nIcon and text should have the same color treatment in all states including active+hover.\n\n## Source\nPhase 10 Visual QA — Part 2 (Navigation sidebar)",
+    "labels": ["bug", "P2", "navigation", "sidebar", "visual"]
+  },
+  {
+    "title": "[P2] i18n: \"Media\" nav label wrong German translation — should be \"Medien\" not \"Medium\"",
+    "body": "## Finding\nThe German translation for the \"Media\" navigation item is \"Medium\" (singular/material). It should be \"Medien\" (plural/collection).\n\n## Correct translations\n- English: `Media` (unchanged)\n- German: `Medien` (currently wrong: `Medium`)\n- Italian: `Media` (unchanged)\n\n## Source\nPhase 10 Visual QA — Part 2 (Navigation sidebar)",
+    "labels": ["bug", "P2", "i18n", "navigation"]
+  },
+  {
+    "title": "[P3] Media nav item uses camera icon — should use content/elements icon",
+    "body": "## Finding\nThe \"Medien\" (Media) nav item uses a camera icon. This represents a photo-capture action rather than a media collection/library.\n\n## Expected\nUse an icon that represents a content collection or media library (e.g. images/grid/elements icon).\n\n## Source\nPhase 10 Visual QA — Part 2 (Navigation sidebar)",
+    "labels": ["enhancement", "P3", "navigation", "icons"]
+  },
+  {
+    "title": "[P2] Media toolbar wraps unexpectedly — \"Kopieren\" drops to row 2",
+    "body": "## Finding\nOn the Media page toolbar, Filter + Sort + Projects render on row 1, but \"Kopieren\" (Copy) wraps to a second row despite sufficient horizontal space.\n\n## Expected\nAll toolbar items fit on a single row.\n\n## Actual\nLayout breaks — \"Kopieren\" wraps to row 2.\n\n## Source\nPhase 10 Visual QA — Part 2 (Media page)",
+    "labels": ["bug", "P2", "media-page", "toolbar", "layout"]
+  },
+  {
+    "title": "[P1] Media items not rendering in main view",
+    "body": "## Finding\nMedia items in the main media grid/list view do not display correctly.\n\n## Steps to reproduce\n1. Navigate to the Media page\n2. Observe the main content area\n\n## Expected\nMedia items (photos, files) render in the grid or list.\n\n## Actual\nItems do not display correctly — content area appears broken.\n\n## Source\nPhase 10 Visual QA — Part 2 (Media page)",
+    "labels": ["bug", "P1", "media-page"]
+  },
+  {
+    "title": "[P1] \"Zeilen\" (rows/list) view not implemented — shows single large image instead of list",
+    "body": "## Finding\nSelecting the \"Zeilen\" (list/rows) view on the Media page shows a single large image instead of a list layout.\n\n## Expected\nList view renders items as rows with metadata.\n\n## Actual\nA single oversized image is displayed — list layout is unimplemented.\n\n## Source\nPhase 10 Visual QA — Part 2 (Media page)",
+    "labels": ["bug", "P1", "media-page", "view-toggle", "list-view"]
+  },
+  {
+    "title": "[P1] Clicking media item doesn't open workspace pane",
+    "body": "## Finding\nClicking a media item (image or file) on the Media page does nothing — the workspace detail pane does not open.\n\n## Expected\nClicking a media item opens the workspace pane with item details.\n\n## Actual\nNo response — workspace pane is not triggered.\n\n## Source\nPhase 10 Visual QA — Part 2 (Media page)",
+    "labels": ["bug", "P1", "media-page", "workspace-pane"]
+  },
+  {
+    "title": "[P2] Upload FAB should be persistent in top-right of content area",
+    "body": "## Finding\nThe upload button should be a persistent FAB (floating action button) anchored to the top-right of the content area, always visible regardless of navigation state or whether the workspace pane is open.\n\nCurrently it is placed inside the workspace pane or otherwise not persistent.\n\n## Expected\nUpload FAB: always visible, top-right of content area, present across navigation like the side menu.\n\n## Source\nPhase 10 Visual QA — Part 2 (Media page)",
+    "labels": ["enhancement", "P2", "media-page", "upload", "layout"]
+  },
+  {
+    "title": "[P3] Projects page missing structural breakdown / hierarchy view",
+    "body": "## Finding\nThe Projects page lacks a structural breakdown or hierarchy view. There is no way to see project nesting, grouping, or organizational hierarchy.\n\n## Source\nPhase 10 Visual QA — Part 2 (Projects page)",
+    "labels": ["enhancement", "P3", "projects-page"]
+  },
+  {
+    "title": "[P3] Toggle group \"Alle / Archiviert\" on Projects page poorly styled",
+    "body": "## Finding\nThe \"Alle / Archiviert\" (All / Archived) toggle group in the top-left of the Projects page looks aesthetically poor — inconsistent with the design system.\n\n## Source\nPhase 10 Visual QA — Part 2 (Projects page)",
+    "labels": ["visual", "P3", "projects-page", "toggle-group"]
+  },
+  {
+    "title": "[P3] \"Neues Projekt\" button incorrectly formatted / styled",
+    "body": "## Finding\nThe \"Neues Projekt\" (New Project) button on the Projects page is incorrectly formatted or styled — does not match design system conventions.\n\n## Source\nPhase 10 Visual QA — Part 2 (Projects page)",
+    "labels": ["visual", "P3", "projects-page"]
+  },
+  {
+    "title": "[P1] Project cards need complete redesign — DO NOT PATCH",
+    "body": "## Finding\nProject cards have multiple visual and interaction problems. The user explicitly does **not** want individual patches applied.\n\n## Decision\n**Delete and rebuild from scratch.** Do not fix individual styling issues — the component needs a full redesign.\n\n## ⚠️ Do not patch individual issues on project cards\nAny PR that patches a subset of project card issues will be rejected. Only a complete redesign commit is acceptable.\n\n## Source\nPhase 10 Visual QA — Part 2 (Projects page)",
+    "labels": ["bug", "P1", "projects-page", "redesign", "do-not-patch"]
+  },
+  {
+    "title": "[P2] Filter dropdown has excess right padding (scrollbar-placeholder duplication)",
+    "body": "## Finding\nThe Projects page filter dropdown has unexplained excess right padding — same scrollbar-placeholder duplication issue as the search results dropdown (see #49).\n\n## Expected\nFilter dropdown right edge aligns without extra padding.\n\n## Actual\nExtra right padding creates visual imbalance.\n\n## Source\nPhase 10 Visual QA — Part 2 (Projects page)",
+    "labels": ["bug", "P2", "projects-page", "filter", "layout"]
+  },
+  {
+    "title": "[P2] Project color picker button does not work",
+    "body": "## Finding\nClicking the color swatch / color picker button on a project card has no effect.\n\n## Expected\nColor picker opens and allows changing the project color.\n\n## Actual\nNo response — button does nothing.\n\n## Source\nPhase 10 Visual QA — Part 2 (Projects page)",
+    "labels": ["bug", "P2", "projects-page", "color-picker"]
+  },
+  {
+    "title": "[P2] Clicking project card should open workspace panel with project detail view",
+    "body": "## Finding\nClicking a project card does not open the workspace panel. A project detail view needs to be wired to the project card click.\n\n## Expected\nClicking a project card opens the workspace panel showing project details.\n\n## Actual\nNo workspace panel opens — click has no effect.\n\n## Source\nPhase 10 Visual QA — Part 2 (Projects page)",
+    "labels": ["bug", "P2", "projects-page", "workspace-pane"]
+  },
+  {
+    "title": "[P3] Settings section highlight has square corners",
+    "body": "## Finding\nThe color indicator / active highlight on selected settings items (Language, Density, etc.) has square corners. It should use rounded corners consistent with the design system.\n\n## Source\nPhase 10 Visual QA — Part 2 (Settings overlay)",
+    "labels": ["visual", "P3", "settings"]
+  },
+  {
+    "title": "[P3] Settings section highlight bleeds over white section background",
+    "body": "## Finding\nThe orange active highlight on settings items overlays the white section background, creating an ugly visible boundary.\n\n## Expected\nHighlight respects the section background boundary, or the approach is changed to avoid the bleed entirely.\n\n## Actual\nOrange highlight bleeds over white section background — visually broken.\n\n## Source\nPhase 10 Visual QA — Part 2 (Settings overlay)",
+    "labels": ["visual", "P3", "settings"]
+  },
+  {
+    "title": "[P3] Settings language options missing flag icons",
+    "body": "## Finding\nThe language selection options (English, Deutsch, Italiano) in the settings overlay have no flag or country icons.\n\n## Expected\nEach language option shows a small flag icon next to the language name.\n\n## Source\nPhase 10 Visual QA — Part 2 (Settings overlay)",
+    "labels": ["enhancement", "P3", "settings", "i18n"]
+  },
+  {
+    "title": "[P2] Settings overlay opens with current route context instead of standalone /settings",
+    "body": "## Finding\nOpening Account / Settings while on the map page navigates to a settings route that is nested under the current page (e.g. `/map/settings`). Settings should be an independent route.\n\n## Steps to reproduce\n1. Navigate to `/map`\n2. Open settings overlay via Account menu\n3. Observe URL\n\n## Expected\nSettings opens at `/settings` regardless of the current page route.\n\n## Actual\nSettings opens nested under the current route (e.g. `/map`), creating context-dependent behavior.\n\n## Source\nPhase 10 Visual QA — Part 2 (Settings route)",
+    "labels": ["bug", "P2", "settings", "routing"]
+  }
+]

@@ -1,6 +1,6 @@
 # Phase 10 — Visual QA & Polish
 
-**Status:** **Wave P4** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — **In progress (doc smoke, 2026-05-18)** — automated gates + global **`styles`** row baseline: [`reports/phase-10-migration-smoke-gates-2026-05-18.md`](./reports/phase-10-migration-smoke-gates-2026-05-18.md). Manual tight smoke + screen matrix remain **open** (run **during / after** Phase **11**/**7** spec-token touches and **Phase 9** if helm swap lands in the same release train).
+**Status:** **Wave P4** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — **In progress (partial manual QA, 2026-05-19)** — 42 findings logged across two live browser passes (nav/search, upload panel, workspace pane, media page, projects page, settings overlay, nav sidebar); geolocation P1 + workspace pane P1 + media render P1 confirmed. Automated gates pass. Three-theme matrix + remaining screens still **open**. Revised estimate: **~20 % complete**. See [§ Manual QA pass (2026-05-19) — partial](#manual-qa-pass-2026-05-19--partial) and [§ Part 2](#manual-qa-pass-2026-05-19--part-2) for full finding tables.
 
 **Goal:** Every primary **screen** and **overlay** looks correct on **all three themes** (`default` / light, `[data-theme="dark"]`, `[data-theme="sandstone"]`). **No new** `::ng-deep` escapes. **No** visual regressions against spec intent (field-first, map-primary, calm confidence).
 
@@ -12,6 +12,81 @@
 
 - `npm run design-system:check` and `ng build` green on the branch under test.
 - Phase 7 token work complete (otherwise false positives from legacy colors).
+
+---
+
+## Manual QA pass (2026-05-19) — partial
+
+**Context:** First live human browser session on Phase 10. User performed a spoken-German voice QA pass (transcribed) covering the map-shell nav/search area and the upload panel. Three-theme matrix and remaining screen rows are **not yet covered** — this pass addresses only the surfaces exercised.
+
+**% estimate revision:** 16 confirmed actionable findings across search bar, nav toggle group, upload panel, and geolocation. Prior automated-gates-only estimate was optimistic. Revised estimate: **~35 % complete** toward Phase 10 close-out (automated gates pass; manual visual polish and i18n gaps remain). *Further revised to ~20 % after Part 2 pass — see [Part 2 section](#manual-qa-pass-2026-05-19--part-2).*
+
+| # | Area | Finding | Severity | Phase / Owner |
+|---|------|---------|----------|---------------|
+| 1 | Nav — toggle group | Container has grayish background; doesn't match white/light navbar + sidebar. Active icons should be primary dark orange; inactive icons light-orange variant. | P2 | Phase 10 — migration polish |
+| 2 | Nav — search bar | Browser-default focus outline on search input. Should use design-system focus ring; remove browser ring. | P2 | Phase 10 — a11y / design system |
+| 3 | Nav — search bar | Placeholder text "Search Address or Project" stays in English regardless of locale (i18n missing). | P2 | Phase 10 — i18n |
+| 4 | Nav — search bar | Placeholder text is flush-left but the dropdown/search indicator is positioned further right — misalignment. | P3 | Phase 10 — search bar layout |
+| 5 | Nav — search bar | Search results dropdown has excess right padding (scrollbar placeholder from another context). No scrolling needed on mobile. | P3 | Phase 10 — search bar layout |
+| 6 | Nav — search bar | Clear (✕) button inside search input has no hover state / highlight. | P3 | Phase 10 — search bar UX |
+| 7 | Nav — GPS / geolocation | "Use my location" always centers map at wrong location ("Gleisbergteich" and vicinity). Consistent offset regression present since 2026-05-18. | P1 | Phase 10 — geolocation service |
+| 8 | Upload FAB | Upload floating-action-button icon is not visually centered. | P3 | Phase 10 — upload FAB |
+| 9 | Upload FAB | Upload FAB has no box-shadow / elevation. | P3 | Phase 10 — upload FAB |
+| 10 | Upload — toggle group | Location-required / not-required toggle group at the bottom clips / overflows its container. | P2 | Phase 10 — upload panel |
+| 11 | Upload — toggle group | Three visible visual layers: toggle options → gray toggle container → outer container. Gray layer is undesirable; should match sidebar light background. | P2 | Phase 10 — upload panel / migration polish |
+| 12 | Upload — toggle group | Outer container around toggle group lights up light-orange on hover — unexpected; not in spec. | P3 | Phase 10 — upload panel |
+| 13 | Upload — i18n mixing | Multiple strings in the upload panel are English in DE locale: "Upload File", "Upload Follow", "Location required / Location not required", "Queue hochgeladen issues" (mixed). | P2 | Phase 10 — i18n |
+| 14 | Upload — row | Non-image file upload rows (PDF, PowerPoint, etc.) show no file-type icon in the thumbnail slot; currently empty. | P2 | Phase 10 — upload panel |
+| 15 | Upload — row | Tag label appears **below** the upload row item instead of overlaid or inline. | P2 | Phase 10 — upload panel |
+| 16 | Upload — panel background | Upload panel background color doesn't match the sidebar / shell background. | P3 | Phase 10 — migration polish |
+
+**Surfaces not covered in this pass:** Login/Register/Reset, Projects views, Media list/grid, Settings overlay sections, Workspace pane, Dialogs, Photo lightbox, three-theme variants (dark / sandstone), 375 px mobile viewport.
+
+---
+
+## Manual QA pass (2026-05-19) — Part 2
+
+**Context:** Second live human browser session on Phase 10. User continued spoken-German voice QA (transcribed) covering workspace pane open/close, media page, projects page, settings overlay, and navigation sidebar. 26 additional findings logged across five surfaces. % estimate revised further downward: **~20 % complete** (core interaction regressions on workspace pane and media page dominate; projects page and nav sidebar have structural gaps beyond polish).
+
+**GitHub issues created from this pass:** see Notes column for issue links.
+
+| # | Area | Finding | Severity | Notes |
+|---|------|---------|----------|-------|
+| W1 | Workspace pane | Pane only opens to ~50% width when dragging; won't open fully | P1 | Core drag/resize gesture broken — see GH issue |
+| W2 | Workspace pane | Drag-to-close gesture broken | P1 | Groups with W1 |
+| W3 | Workspace — toolbar | View toggle group (grid/list/etc.) options invisible / not rendering | P2 | Rendering issue; options exist but are not visible |
+| W4 | Workspace — toolbar | View toggle group clipped/hidden after Filter/Sort/Grouping dropdowns in toolbar overflow | P2 | Toolbar overflow — toggle group cut off |
+| W5 | Workspace — toolbar | UX suggestion: on tight toolbar, replace clipped toggle group with single cycling button (current → next view) | P3 | Enhancement only; not a bug |
+| W6 | Workspace — upload panel | Upload panel reuses map sidebar components; needs workspace-specific redesign (more horizontal space available) | P3 | Design gap — no workspace upload panel spec |
+| N1 | Nav sidebar | Stale i18n: after switching from Italian to German, sidebar shows "Karte Medium" (Italian) mixed with German "Projekte" | P2 | i18n state not reset on language switch |
+| N2 | Nav sidebar | Account name missing in sidebar bottom section | P2 | Missing user data binding |
+| N3 | Nav sidebar | Active nav item hover treatment inconsistent: hover on active item → only text stays orange, icon loses consistent treatment; icon + text should always share same color state | P3 | CSS state specificity or missing hover rule |
+| M1 | Media page — toolbar | Toolbar wraps unexpectedly: "Kopieren" (Copy) moves to second row despite available space | P2 | Flex/overflow issue in toolbar layout |
+| M2 | Media page | Media items fail to render correctly in main view | P1 | Primary content view broken |
+| M3 | Media page | "Zeilen" (rows/list) view shows single large image; feature not fully implemented | P2 | Incomplete view implementation |
+| M4 | Media page | Clicking an image does not open workspace pane | P1 | Core click-to-detail interaction broken |
+| M5 | Media page | Upload FAB not persistent — should always be visible in top-right of content area (not inside workspace pane) | P2 | Same persistent FAB pattern as side menu |
+| P1 | Projects page | Page missing expected layout / structural breakdown | P3 | Incomplete page |
+| P2 | Projects page | "Alle / Archiviert" toggle group in top-left is poorly styled | P3 | Toggle group styling |
+| P3 | Projects page | "Neues Projekt" button incorrectly formatted | P3 | Button style regression |
+| P4 | Projects page | Project cards need complete redesign; user explicitly requests full rebuild, not incremental patch | P2 | **Do not patch current cards** — mark for full rebuild |
+| P5 | Projects page | Filter dropdown has excess right padding (scrollbar placeholder duplication) | P3 | Same pattern as finding #5 in Part 1 — see existing issue #49 if applicable |
+| P6 | Projects page | Project color picker button does not work | P2 | Interaction broken |
+| P7 | Projects page | Clicking a project card should open workspace panel (project detail view missing) | P2 | Workspace panel missing project detail view |
+| S1 | Settings overlay | Section highlight has square corners; should be rounded | P3 | Corner-radius token not applied |
+| S2 | Settings overlay | Section highlight bleeds over white section background, making boundary visible incorrectly | P3 | Paint-order / z-index overlap with section bg |
+| S3 | Settings overlay | Language option flag icons missing (English 🇬🇧, Deutsch 🇩🇪, Italiano 🇮🇹) | P3 | Missing icon assets or wiring |
+| L1 | Nav sidebar | "Media" incorrectly translated to "Medium" (Italian-form); should always be "Inhalte" in German | P2 | i18n key error — "Media" ≠ "Medium" |
+| L2 | Nav sidebar | Media nav icon should be an elements/content icon, not camera icon | P3 | Wrong icon asset |
+| L3 | Settings / routing | Opening Settings from sidebar while on map route opens Settings at `/map/settings`; should be route-independent (`/settings`) | P2 | Routing issue — settings route should not inherit parent route context |
+
+**Spec gaps identified in this pass:**
+
+- **Workspace pane open/close gesture** — no spec for the drag-resize interaction contract (open percentage, min/max width, close threshold). Needs spec before fix.
+- **Workspace upload panel** — no workspace-specific upload panel spec; current implementation reuses map-sidebar components without adaptation.
+- **Project cards** — user has requested full rebuild; existing spec (if any) should be archived, not patched. Confirm before any agent attempts card work.
+- **Persistent upload FAB** — FAB placement spec for media page context is absent or incomplete; needs clarification on whether FAB is a global shell element or per-page.
+- **Project detail in workspace pane** — workspace pane spec does not cover project detail view; needs new spec slice before implementation.
 
 ---
 

@@ -658,6 +658,7 @@ media.page.header.item,item,apps/web/src/app/features/media/media-page-header.co
 media.page.header.items,items,apps/web/src/app/features/media/media-page-header.component.ts ts:content,items,Elemente,elementi
 media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/app/features/media/media-page-header.component.ts inline-template text-node,{loaded} of {total} items loaded,{loaded} von {total} Elementen geladen,{loaded} di {total} elementi caricati
 media.page.loading.more,Loading more media...,apps/web/src/app/features/media/media.component.html text-node,Loading more media...,Weitere Medien werden geladen...,Caricamento di altri contenuti multimediali...
+nav.item.media,Media,apps/web/src/app/features/nav/nav.component.ts computed navItems label,Media,Medien,Media
 nav.home,Home,apps/web/src/app/features/media/media-page-header.component.ts ts:content,Home,Startseite,Home
 upload.item.menu.section.location,Change location,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Change location,Standort aendern,Cambia posizione
 upload.item.menu.location.clickMap,Click on map,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Click on map,Auf Karte klicken,Clicca sulla mappa

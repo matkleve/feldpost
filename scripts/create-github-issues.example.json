@@ -1,0 +1,18 @@
+[
+  {
+    "title": "[Example] Fix missing alt text on media thumbnails",
+    "body": "## Problem\nMedia thumbnail `<img>` elements are rendered without `alt` attributes, failing WCAG 1.1.1.\n\n## Acceptance Criteria\n- [ ] Every thumbnail carries a meaningful `alt` (filename or description)\n- [ ] Empty decorative images use `alt=\"\"`",
+    "labels": ["bug", "accessibility"]
+  },
+  {
+    "title": "[Example] Add keyboard shortcut to open upload panel",
+    "body": "## Goal\nPower users should be able to open the upload panel without reaching for the mouse.\n\n## Proposed shortcut\n`U` while focus is on the map view.\n\n## Acceptance Criteria\n- [ ] Pressing `U` opens the upload panel\n- [ ] Shortcut is listed in the keyboard shortcuts help overlay",
+    "labels": ["enhancement", "ux"],
+    "milestone": 3
+  },
+  {
+    "title": "[Example] Migrate legacy var(--color-*) tokens in sidebar SCSS",
+    "body": "## Context\nThe sidebar SCSS still uses a handful of legacy `var(--color-*)` custom properties that should be replaced with tweakcn equivalents per `docs/design/agent-css-variable-contract.md`.\n\n## Files to update\n- `apps/web/src/app/shell/sidebar/sidebar.component.scss`\n\n## Acceptance Criteria\n- [ ] No `var(--color-*)` references remain in sidebar SCSS\n- [ ] `ng build` passes without warnings",
+    "labels": ["chore", "migration"]
+  }
+]

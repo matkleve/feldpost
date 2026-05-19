@@ -20432,6 +20432,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'nav.item.media', 'Media', 'en', 'apps/web/src/app/features/nav/nav.component.ts computed navItems label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'nav.item.media'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'nav.item.media'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'nav.item.media'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'nav.home', 'Home', 'en', 'apps/web/src/app/features/media/media-page-header.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

@@ -50,6 +50,16 @@ cd apps/web && ng build
 cd apps/web && ng test
 ```
 
+### Creating GitHub Issues (Required)
+
+Use the batch script — never call `gh issue create` one-by-one in a loop (it requires an interactive permission prompt per call):
+
+```bash
+node scripts/create-github-issues.mjs path/to/issues.json
+```
+
+Build a JSON file first (see `scripts/create-github-issues.example.json` for the schema: `{ title, body, labels?, milestone? }`), then run the script once. Auth resolves automatically from `GITHUB_TOKEN` env var or `gh auth token`.
+
 ### Design System Gates (Required)
 
 Run from repository root when changes touch design-system docs, panel SCSS, or geometry logic:

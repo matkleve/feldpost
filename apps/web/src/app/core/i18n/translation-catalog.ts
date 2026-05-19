@@ -484,6 +484,14 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Foto',
   },
   {
+    key: 'nav.item.media',
+    original: 'Media',
+    context: 'Main navigation label for media route.',
+    en: 'Media',
+    de: 'Medien',
+    it: 'Media',
+  },
+  {
     key: 'nav.item.projects',
     original: 'Projects',
     context: 'Main navigation label for projects route.',
