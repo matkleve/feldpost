@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavComponent } from '../features/nav/nav.component';
+import { DragDividerComponent } from '../shared/workspace-pane/shell/drag-divider/drag-divider.component';
 import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace-pane.component';
 import { UploadPanelComponent } from '../features/upload/upload-panel.component';
 import { MapShellState } from '../features/map/map-shell/map-shell.state';
@@ -39,6 +40,7 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
   imports: [
     RouterOutlet,
     NavComponent,
+    DragDividerComponent,
     WorkspacePaneComponent,
     UploadPanelComponent,
   ],

@@ -231,6 +231,11 @@
 
   &--active:hover {
     background: color-mix(in srgb, var(--primary) 14%, transparent);
+    color: var(--foreground);
+
+    .nav__icon {
+      color: var(--foreground);
+    }
   }
 
   &--disabled {

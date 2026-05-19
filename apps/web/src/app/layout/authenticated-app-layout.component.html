@@ -6,12 +6,15 @@
 </div>
 
 @if (photoPanelOpen()) {
-  <app-workspace-pane
+  <app-drag-divider
     [currentWidth]="workspacePaneWidth()"
     [minWidth]="workspacePaneMinWidth()"
     [maxWidth]="workspacePaneMaxWidth()"
     [defaultWidth]="workspacePaneDefaultWidth()"
     (widthChange)="onWorkspaceWidthChange($event)"
+  />
+  <app-workspace-pane
+    [currentWidth]="workspacePaneWidth()"
     [activeTab]="workspacePaneActiveTab()"
     [detailMediaId]="detailMediaId()"
     [detailAddressSearchRequestMediaId]="detailAddressSearchRequest()?.mediaId ?? null"

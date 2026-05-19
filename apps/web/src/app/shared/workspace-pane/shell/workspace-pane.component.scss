@@ -1,5 +1,4 @@
-// Host IS the workspace pane shell box — flex-row sibling of the map area, owns width/clip/background.
-// Drag-divider is the first child; div.workspace-pane is the column flex region beside it.
+// Host IS the workspace pane shell box — flex sibling of drag-divider in authenticated layout.
 // @see docs/specs/ui/workspace/workspace-pane-shell.md
 
 // Shell geometry, surface, and stacking context
@@ -10,7 +9,7 @@
   flex-shrink: 0;
   align-self: stretch;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   box-sizing: border-box;
   min-width: 0;
   min-height: 0;
@@ -19,12 +18,11 @@
   box-shadow: var(--shadow-md);
 }
 
-// Desktop: clip boundary and entrance animation
-// @see docs/design/motion.md
+// Desktop: clip content to shell boundary
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
 @media (min-width: 48rem) {
   :host {
     overflow: hidden;
-    animation: workspace-pane-clip-in-right 200ms ease-out 16ms backwards;
   }
 }
 
@@ -41,37 +39,6 @@
     // Matches former `var(--z-panel)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
     z-index: 100;
     border-radius: 0;
-    animation: workspace-pane-clip-in-up 300ms cubic-bezier(0.4, 0, 0.2, 1) 16ms backwards;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :host {
-    animation: none;
-  }
-}
-
-// Desktop clip-path entrance (duration set on element)
-// @see docs/specs/ui/workspace/workspace-pane-shell.md
-@keyframes workspace-pane-clip-in-right {
-  from {
-    clip-path: inset(0 0 0 100%);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-// Mobile sheet clip-path entrance
-// @see docs/specs/ui/workspace/workspace-pane-shell.md
-@keyframes workspace-pane-clip-in-up {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
   }
 }
 

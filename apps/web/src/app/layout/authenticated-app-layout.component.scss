@@ -35,3 +35,18 @@ app-nav {
   // Clip map tiles in .map-container only — not chrome shadows on .upload-btn-zone etc.
   overflow: visible;
 }
+
+// Split seam: 2px divider flex item + pane width (divider hit zone overflows into map only).
+// @see docs/specs/component/workspace/drag-divider.md
+app-drag-divider {
+  flex: 0 0 2px;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+}
+
+app-workspace-pane {
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 0;
+}

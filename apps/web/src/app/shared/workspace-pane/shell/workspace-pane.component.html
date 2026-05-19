@@ -1,11 +1,4 @@
-<!-- Workspace Pane — host IS the shell box; drag divider is a flex-row sibling at layout level -->
-<app-drag-divider
-  [currentWidth]="currentWidth()"
-  [minWidth]="minWidth()"
-  [maxWidth]="maxWidth()"
-  [defaultWidth]="defaultWidth()"
-  (widthChange)="widthChange.emit($event)"
-/>
+<!-- Workspace Pane — host IS the shell box; drag divider is a layout-level flex sibling -->
 <div
   class="workspace-pane"
   role="region"

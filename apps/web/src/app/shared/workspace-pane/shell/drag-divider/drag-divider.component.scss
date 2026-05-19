@@ -8,14 +8,16 @@
 
 :host {
   position: relative;
-  display: flex;
-  align-items: stretch;
+  display: block;
+  flex: 0 0 2px;
   flex-shrink: 0;
   width: 2px;
+  min-width: 0;
+  min-height: 0;
   height: 100%;
   cursor: col-resize;
   outline: none;
-  z-index: 1; // sit above adjacent panes for pointer capture
+  z-index: 2; // above workspace-pane (z-index: 1) so grip paints at the seam
 
   // Focus ring (Accessibility spec)
   &:focus-visible {
@@ -25,32 +27,31 @@
 }
 
 // ── Hit zone — transparent target, min 2.75rem (44px) wide ───────────────────
-// Absolutely positioned and centered on the 2px host so it straddles both
-// adjacent panes without pushing them apart.
+// Anchored to the map-facing edge of the 2px host so the target extends into the
+// map column only — never over workspace pane content (avoids open/flash overlay).
 
 .drag-divider__hit-zone {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem; // 44px desktop touch-target
+  right: 100%;
+  left: auto;
+  width: 2.75rem; // 44px desktop touch-target — extends into map column only
   cursor: col-resize;
 }
 
-// ── Bar — 2px visual line centered in hit zone ───────────────────────────────
+// ── Bar — 2px visual line on the seam (host right edge) ──────────────────────
 
 .drag-divider__bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
   width: 2px;
   height: 100%;
   background: var(--border);
   border-radius: 1px;
-  transition:
-    width 80ms ease-out,
-    background 80ms ease-out;
+  pointer-events: none;
 }
 
 // ── Hover / focus / dragging states ──────────────────────────────────────────
@@ -67,8 +68,9 @@
 .drag-divider__grip {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  right: 0;
+  left: auto;
+  transform: translate(50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,10 +111,6 @@
 // ── Reduced motion ───────────────────────────────────────────────────────────
 
 @media (prefers-reduced-motion: reduce) {
-  .drag-divider__bar {
-    transition: none;
-  }
-
   .drag-divider__grip,
   .drag-divider__grip-icon {
     transition: none;

@@ -80,10 +80,11 @@ export const toggleGroupItemVariants = cva(
   [
     // Horizontal padding lives on size variants only (`ps-*` / `pe-*`): icon+label rows need slightly larger inline-start than end for optical balance (matches action-interaction kernel intent; `icon` uses `p-0`).
     // @see docs/design/components/action-interaction-kernel.md#button-policy
-    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm py-1.5 text-sm font-medium ring-offset-background transition-all',
+    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm py-1.5 text-sm font-medium text-muted-foreground ring-offset-background transition-all',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
-    'data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm',
+    'data-[state=on]:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=on]:text-[color:var(--primary)] data-[state=on]:shadow-none',
+    'data-[state=on]:hover:bg-[color:color-mix(in_srgb,var(--primary)_14%,transparent)] data-[state=on]:hover:text-foreground',
     'data-[state=off]:hover:text-foreground data-[state=off]:hover:bg-foreground/6',
     'data-[attention=true]:data-[state=off]:text-[color:var(--warning)] data-[attention=true]:data-[state=off]:shadow-[0_0_0_1px_color-mix(in_srgb,var(--warning)_38%,transparent)]',
     'motion-reduce:transition-none motion-reduce:duration-0',
