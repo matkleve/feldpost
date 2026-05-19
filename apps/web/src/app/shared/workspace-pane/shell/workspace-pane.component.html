@@ -1,10 +1,9 @@
 <!-- Workspace Pane — right panel (desktop), bottom sheet (mobile, future) -->
-<app-max-width-container>
-  <div
-    class="workspace-pane"
-    role="region"
-    [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
-  >
+<div
+  class="workspace-pane"
+  role="region"
+  [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
+>
     <app-workspace-pane-header
       [title]="resolvedTitle()"
       [editable]="titleEditable()"
@@ -83,5 +82,4 @@
         <ng-content select="[data-workspace-upload-tab]" />
       </section>
     }
-  </div>
-</app-max-width-container>
+</div>

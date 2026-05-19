@@ -28,6 +28,7 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
     role: 'article',
     '[attr.data-state]': 'state()',
     '[attr.data-has-item]': "item() ? 'true' : 'false'",
+    '[attr.data-mode]': 'mode()',
     '[class.media-item]': 'true',
     '[class.media-item--selected]': 'selected()',
     '(contextmenu)': 'onContextMenu($event)',

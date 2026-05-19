@@ -127,6 +127,16 @@ Per-component specs carry the full matrix and examples; column contract is fixed
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
 
+## Dead code (`apps/web/src/app/archive/`)
+
+The folder **`apps/web/src/app/archive/`** holds **dead code**: it is **excluded from the Angular app build** (`apps/web/tsconfig.app.json` → `exclude` includes `src/app/archive/**/*.ts`). Treat it as **historical reference only**.
+
+- **Do not** import, extend, or wire these files into production routes or libraries.
+- **Do not** cite them in specs, service contracts, or active implementation as a pattern source.
+- **Do not** copy SCSS, token names, or component structure from here — the tree is intentionally frozen and may reference removed paths or legacy conventions.
+
+**Current contents (avoid by name):** `item-grid-legacy/media-page/` — legacy **`MediaGridComponent`**, **`MediaCardComponent`**, **`MediaLoadingComponent`** (`.ts` / `.html` / `.scss` snapshots).
+
 ## Document Authority
 
 - **Project rules and invariants**: `AGENTS.md`

@@ -13,7 +13,7 @@
 | **On-disk bridge** (`_legacy-design-tokens.scss`, `tokens.scss`, `load-css('styles/legacy-design-tokens')`) | **Deleted** | **Already done** (Phase 7 Batch 50, 2026-05-18) |
 | **Runtime `var(--color-*)` Feldpost v1** in `apps/web/src/app/**/*.scss` | **0** call sites | **Already done** (Phase 7) |
 | **Runtime `var(--fp-sys-*)` / `var(--fp-ref-*)`** in `apps/web/src` | **0** | **Already done** (Phase 7) |
-| **Tailwind `tailwind.config.js` legacy utility names** (`bg-surface`, `text-text-primary`, …) | **Still present** — map to **tweakcn** `var(--card)`, `var(--foreground)`, … | After **Phase 10** theme pass + **Phase 5/8** “full v4 token migration” (deferred from Phase 7 DoD) |
+| **Tailwind `tailwind.config.js` legacy utility names** (`bg-surface`, `text-text-primary`, …) | **Deleted (2026-05-19, commit 97a454f)** — 11 zero-callsite color/spacing/radius/font/shadow/z aliases removed; 4 active retained (`border`, `success`, `warning`, `accent`) | **Done — Phase 5 tail complete** |
 | **`styles.scss` `@theme inline` `--color-*`** (shadcn/Tailwind v4) | **Still present** — **not** Feldpost v1; required for utilities | **Phase 9** upstream / Tailwind v4 peer work — do not delete as “legacy” |
 | **Docs/specs** mentioning bridge path or `--fp-*` tables | **Historical strings remain** in `tokens.md`, phase-7 batch history, some specs | **Phase 11** hygiene on edit; **Phase 1 Wave P5** inventory audit |
 | **Archive** (`docs/archive/figma-tokens.json` → `tokens.scss`) | Stale export metadata | Optional archive cleanup — **no product impact** |
@@ -64,9 +64,9 @@ ls apps/web/src/styles/
 | `var(--color-bg-base)`, `var(--color-clay)`, … in component SCSS | Yes (Phase 7 batches) | No in `src/app` | Phase 7 **Done** | — |
 | `var(--fp-sys-*)` / `var(--fp-ref-*)` in runtime SCSS | Yes | No in `apps/web/src` | Phase 7 **Done** | — |
 | `--fp-*` / bridge path in **docs** (`tokens.md`, phase-7, specs) | N/A (documentation) | Yes (historical tables + `@see`) | Phase 11 / Phase 1 P5 | **4** — scrub when touching specs |
-| `tailwind.config.js` `extend.colors` legacy **names** (`bg-surface`, `text-text-primary`, …) | No — **intentional bridge to tweakcn** | Yes | Phase 5 / 8 (v4 tail); Phase 7 noted **out of DoD** | **2** — after Phase 10 pass |
+| `tailwind.config.js` `extend.colors` legacy **names** (`bg-surface`, `text-text-primary`, …) | **Yes — deleted 2026-05-19 (commit 97a454f)** — 11 zero-callsite aliases removed; `border`/`success`/`warning`/`accent` retained (active callsites) | No | Phase 5 **Done** | — |
 | `styles.scss` `@theme inline` `--color-primary`, … | N/A (shadcn/Tailwind v4) | Yes | Phase 2 foundation + Phase 9 | **Do not delete** as legacy |
-| `text-text-primary`, `bg-success`, … in CVA variant TS | Uses config aliases | Yes (~8 files) | Phase 5 / 10 | **2** — rename utilities when config migrates |
+| `text-text-primary`, `bg-success`, … in CVA variant TS | N/A — `bg-surface`/`text-text-primary` never in CVA; retained `bg-success`/`bg-warning`/`bg-accent`/`border-border` have live config backing | Yes (~8 files with retained aliases) | Phase 5 retained-alias owners | — (retained intentionally) |
 | Phase 5 checkbox “Delete `tokens.scss`” | Work completed under Phase 7 | Stale open checkbox in phase-5 doc | Phase 5 doc sync | **3** — close checkbox (this report) |
 | `docs/archive/figma-tokens.json` `exportedFrom: tokens.scss` | N/A | Yes (archive) | Optional | **5** — archive only |
 
@@ -83,8 +83,8 @@ ls apps/web/src/styles/
 ## Recommended order to “zero” (remaining work)
 
 1. **Phase 10 (P4)** — Browser **Token theme checklist** + screen matrix ([phase-10-visual-qa.md](../phase-10-visual-qa.md)); sign rows in parent checklist or a dated pass report. **Proves** tweakcn themes; does not delete files.
-2. **Phase 5 / 8** — Migrate or collapse **`tailwind.config.js`** legacy **utility name** aliases once callsites use v4-native semantic utilities; track as “full v4 token migration” (Phase 7 § remaining work table).
-3. **Phase 5 doc** — Mark **`tokens.scss` / bridge deletion** checkboxes **closed** (superseded by Phase 7).
+2. ~~**Phase 5 / 8** — Migrate or collapse `tailwind.config.js` legacy **utility name** aliases once callsites use v4-native semantic utilities; track as "full v4 token migration" (Phase 7 § remaining work table).~~ **Done (2026-05-19)** — 11 zero-callsite aliases removed; 4 retained (`border`, `success`, `warning`, `accent`) are actively used in CVA strings and remain canonical.
+3. **Phase 5 doc** — Mark **`tokens.scss` / bridge deletion** checkboxes **closed** (superseded by Phase 7). **Done (2026-05-19)** — updated in this pass.
 4. **Phase 11 / Phase 1 P5** — Spec + `tokens.md` parity: no normative text implying `_legacy-design-tokens.scss` on disk.
 5. **Optional** — Archive JSON metadata; remove `item-grid-legacy` archive tree when product drops it (unrelated to global token bridge).
 

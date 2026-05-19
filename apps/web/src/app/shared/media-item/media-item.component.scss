@@ -24,6 +24,14 @@
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
 }
 
+// Overrides square aspect-ratio for row mode; item fills full container width at fixed row height.
+// @see docs/specs/component/item-grid/item-grid.md#row-mode
+:host([data-mode='row']) {
+  aspect-ratio: auto;
+  height: 6.5rem;
+  border-radius: var(--radius-md);
+}
+
 /* 2. INNERER WRAPPER: Hier schneiden wir den Inhalt (Bild) ab.
 */
 .media-item {

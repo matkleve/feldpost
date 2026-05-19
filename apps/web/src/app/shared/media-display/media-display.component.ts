@@ -39,6 +39,12 @@ export class MediaDisplayComponent implements AfterViewInit {
   private lastRequestIdentity = '';
 
   readonly mediaId: InputSignal<string> = input.required<string>();
+  /** Storage path for the full-resolution asset. When provided, the display component registers
+   * the media record with MediaDownloadService so getState() can initiate the signed-URL fetch.
+   * @see docs/specs/component/media/media-display.md#rendering-pipeline */
+  readonly storagePath = input<string | null>(null);
+  /** Thumbnail storage path used for small/grid-tier requests. */
+  readonly thumbnailPath = input<string | null>(null);
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
@@ -69,6 +75,8 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     effect((onCleanup) => {
       const id = this.mediaId().trim();
+      const storagePath = this.storagePath();
+      const thumbnailPath = this.thumbnailPath();
       const requestIdentity = id;
 
       if (!id) {
@@ -85,6 +93,13 @@ export class MediaDisplayComponent implements AfterViewInit {
         this.stagedContentUrl.set('');
         this.resetAspectRatio();
         this.lastRequestIdentity = requestIdentity;
+      }
+
+      // Register storage paths before getState() subscription so that
+      // requestPreviewIfKnown() inside getState() can initiate the signed-URL fetch.
+      // @see docs/specs/component/media/media-display.md#rendering-pipeline
+      if (storagePath) {
+        this.mediaDownloadService.registerPreviewPaths(id, storagePath, thumbnailPath);
       }
 
       this.goTo('loading-surface-visible');

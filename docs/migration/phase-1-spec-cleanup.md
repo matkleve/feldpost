@@ -42,14 +42,14 @@ Phase **7** and **8** have already collapsed much of the old **dual-token** stor
 | `workspace/share-link-audience-dialog.md` | No | **Provable** | `rg 'BrnDialog' apps/web/src/app/shared/share-link-audience-dialog` → hits; local signals only (spec §State) |
 | `ui-primitives/popover.md` | No | **Provable** | Spec §State: no programmatic FSM; `rg 'z-index:\s*300' apps/web/src/app/shared/popover/popover.component.scss` → match |
 | `filters/dropdown-system.md` | No | **Provable** | Stacking + ownership matrix normative; `app-dropdown-shell` + `z-index: 300` contract (see spec §Stacking) |
-| `ui-primitives/ui-primitives.tab.md` | **Spec sync on edit** (Phase 11) | **Drift** | Spec cites removed `apps/web/src/styles/primitives/tab.scss` and `ui-tab-list` / `ui-tab`; shipped shim: `apps/web/src/app/shared/ui/tabs/` (`hlmTabs` / `BrnTabs`) |
-| `workspace/group-tab-bar.md` | **Spec sync on edit** (Phase 11) | **Drift** | `group-tab-bar.component.ts` uses `BrnTabs` + `hlmTabs*`; spec still describes legacy pill/`--color-clay` chrome |
+| `ui-primitives/ui-primitives.tab.md` | **Spec sync on edit** (Phase 11) | **Closed (2026-05-19)** | Spec updated: dead `tab.scss` / `[uiTabList]` / `[uiTab]` paths removed; `BrnTabs` + `hlmTabs*` shim wiring + CVA ownership table added. |
+| `workspace/group-tab-bar.md` | **Spec sync on edit** (Phase 11) | **Closed (2026-05-19)** | Spec updated: `--color-clay` / `--color-bg-elevated` replaced by `var(--primary)` / `var(--foreground)`; component hierarchy aligned to `[brnTabsTrigger]` pattern; current implementation state noted. |
 
 **Wave P5 sub-checklist (this wave only):**
 
 - [x] Inventory refresh (`find` + table above).
 - [x] Dialog / popover / anchored-menu — **no new** spartan primitive-contract spec before migration.
-- [ ] Tab primitive specs — **edit-time** parity (`ui-primitives.tab.md`, `group-tab-bar.md`); **not** blocking migration (composition already on spartan tabs).
+- [x] Tab primitive specs — **edit-time parity closed (2026-05-19):** `ui-primitives.tab.md` updated (removed dead `tab.scss` / `[uiTabList]` / `[uiTab]` paths; added `BrnTabs` / `hlmTabs*` shim contract, CVA table, ownership triad); `group-tab-bar.md` updated (removed `--color-clay` / `--color-bg-elevated`; aligned to `var(--primary)` / `var(--foreground)` per `group-tab-bar.component.scss`; hierarchy updated to `[brnTabsTrigger][hlmTabsTrigger]` pattern; current implementation state documented). `node scripts/lint-specs.mjs` → **0 errors** (1 pre-existing warn on unrelated `workspace-pane.md`).
 - [ ] Umbrella Phase 1 parent — **unchanged** (brand-primary + sign-off still open).
 - [ ] Brand primary (`--color-accent-brand` vs tweakcn `--primary`) — **skipped** (product-blocked).
 

@@ -127,7 +127,8 @@ export class DragDividerComponent implements OnDestroy {
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   private clamp(value: number): number {
-    // We do not clamp by maxWidth here so the user can drag into the snap-zone.
-    return Math.max(this.minWidth(), value);
+    // Neither minWidth nor maxWidth are enforced here — the parent handles snap-close
+    // (below minWidth) and snap-fullscreen (above maxWidth) in its widthChange handler.
+    return Math.max(0, value);
   }
 }

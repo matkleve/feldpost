@@ -82,6 +82,14 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
       if (this.shellState.detailMediaId() !== id) {
         this.shellState.setDetailMediaId(id);
       }
+      // Open the workspace pane when a detail view is requested from any page context
+      // (e.g. media page) that calls workspacePaneObserver.setDetailImageId() directly
+      // rather than going through openDetailView().
+      // @see docs/specs/ui/workspace/workspace-view-system.md
+      if (id != null && !this.shellState.photoPanelOpen()) {
+        this.shellState.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
+        this.shellState.setPhotoPanelOpen(true);
+      }
     });
 
     afterNextRender(() => {
@@ -120,6 +128,12 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   }
 
   onWorkspaceWidthChange(newWidth: number): void {
+    // Snap-close: dragging the divider below half of minWidth closes the pane.
+    // @see docs/specs/ui/workspace/workspace-pane.md §Actions #2
+    if (newWidth < this.workspacePaneMinWidth() * 0.5) {
+      this.closeWorkspacePane();
+      return;
+    }
     const clampedWidth = this.clampWorkspacePaneWidth(newWidth);
     this.shellState.setWorkspacePaneWidth(clampedWidth);
     this.persistWorkspacePaneWidthPreference(clampedWidth);

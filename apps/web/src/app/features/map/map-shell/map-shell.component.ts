@@ -2000,8 +2000,8 @@ export class MapShellComponent implements OnDestroy {
   // ── GPS button ────────────────────────────────────────────────────────────
 
   /**
-   * Recenters on the user's position once.
-   * If a recent position is already known, recenters immediately.
+   * Activates GPS tracking and recenters only after a fresh browser fix resolves.
+   * @see docs/specs/component/map/gps-button.md
    */
   goToUserPosition(): void {
     if (this.gpsTrackingActive()) {
@@ -2012,31 +2012,30 @@ export class MapShellComponent implements OnDestroy {
     this.gpsTrackingActive.set(true);
     this.gpsLocating.set(true);
 
-    // Known coordinates provide immediate recentering, but activation still
-    // requests a fresh high-accuracy fix before tracking continues.
-    this.recenterOnKnownUserPosition();
+    this.mapGeolocationService.requestCurrentPosition(
+      {
+        onSuccess: (coords) => {
+          if (!this.gpsTrackingActive()) {
+            this.gpsLocating.set(false);
+            return;
+          }
 
-    this.mapGeolocationService.requestCurrentPosition({
-      onSuccess: (coords) => {
-        if (!this.gpsTrackingActive()) {
+          this.userPosition.set(coords);
+          void this.refreshSearchCountryCode(coords[0], coords[1]);
+          const zoom = Math.max(this.map?.getZoom() ?? 0, MapShellComponent.GPS_RECENTER_MIN_ZOOM);
+          this.map?.setView(coords, zoom);
+          this.renderOrUpdateUserLocationMarker(coords);
+          this.triggerUserLocationFoundState();
+          this.startGpsTracking();
           this.gpsLocating.set(false);
-          return;
-        }
-
-        this.userPosition.set(coords);
-        void this.refreshSearchCountryCode(coords[0], coords[1]);
-        const zoom = Math.max(this.map?.getZoom() ?? 0, MapShellComponent.GPS_RECENTER_MIN_ZOOM);
-        this.map?.setView(coords, zoom);
-        this.renderOrUpdateUserLocationMarker(coords);
-        this.triggerUserLocationFoundState();
-        this.startGpsTracking();
-        this.gpsLocating.set(false);
+        },
+        onError: () => {
+          this.stopGpsTracking();
+          this.gpsLocating.set(false);
+        },
       },
-      onError: () => {
-        this.stopGpsTracking();
-        this.gpsLocating.set(false);
-      },
-    });
+      { maximumAge: 0 },
+    );
   }
 
   toggleMapBasemap(): void {
@@ -2328,15 +2327,6 @@ export class MapShellComponent implements OnDestroy {
         replaceUrl: true,
       });
     }
-  }
-
-  private recenterOnKnownUserPosition(): boolean {
-    const coords = this.userPosition();
-    if (!coords) return false;
-    void this.refreshSearchCountryCode(coords[0], coords[1]);
-    const zoom = Math.max(this.map?.getZoom() ?? 0, MapShellComponent.GPS_RECENTER_MIN_ZOOM);
-    this.map?.setView(coords, zoom);
-    return true;
   }
 
   private handleMapClick(e: MapMouseEvent): void {

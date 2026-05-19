@@ -539,7 +539,7 @@ describe('MapShellComponent', () => {
     clearIntervalSpy.mockRestore();
   });
 
-  it('goToUserPosition() recenters immediately when userPosition is already known', () => {
+  it('goToUserPosition() recenters only after a fresh fix when userPosition is already known', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
@@ -555,7 +555,17 @@ describe('MapShellComponent', () => {
     fixture.componentInstance.userPosition.set([51.5, -0.12]);
 
     const originalGeolocation = navigator.geolocation;
-    const getCurrentPosition = vi.fn();
+    const getCurrentPosition = vi.fn(
+      (success: PositionCallback, _error: PositionErrorCallback | null, options?: PositionOptions) => {
+        expect(options?.maximumAge).toBe(0);
+        success({
+          coords: {
+            latitude: 48.2,
+            longitude: 16.37,
+          },
+        } as GeolocationPosition);
+      },
+    );
 
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
@@ -566,10 +576,11 @@ describe('MapShellComponent', () => {
 
     fixture.componentInstance.goToUserPosition();
 
-    expect(mapStub.setView).toHaveBeenCalledWith([51.5, -0.12], 16);
-    expect(fixture.componentInstance.gpsLocating()).toBe(true);
+    expect(mapStub.setView).not.toHaveBeenCalledWith([51.5, -0.12], expect.anything());
+    expect(mapStub.setView).toHaveBeenCalledWith([48.2, 16.37], 16);
+    expect(fixture.componentInstance.gpsLocating()).toBe(false);
     expect(fixture.componentInstance.gpsTrackingActive()).toBe(true);
-    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(setIntervalSpy).toHaveBeenCalled();
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
 
     fixture.componentInstance.goToUserPosition();

@@ -5,7 +5,6 @@ import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace
 import { MediaDetailViewComponent } from '../media-detail/media-detail-view.component';
 import { WorkspacePaneFooterComponent } from '../footer/workspace-pane-footer/workspace-pane-footer.component';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
-import { MaxWidthContainerComponent } from '../../../shared/containers';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
@@ -19,7 +18,6 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
 @Component({
   selector: 'app-workspace-pane',
   imports: [
-    MaxWidthContainerComponent,
     WorkspacePaneHeaderComponent,
     WorkspacePaneToolbarComponent,
     WorkspaceSelectedItemsGridComponent,

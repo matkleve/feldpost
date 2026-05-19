@@ -4,6 +4,8 @@
 
 **Scope:** All layers (global theme, typography baseline, Tailwind `@theme`, component `:host`, shell layout). Shell geometry is a **subsection** — see [shell-layout-tokens.md](./shell-layout-tokens.md).
 
+**App archive:** `apps/web/src/app/archive/` is dead code (excluded from the app build); never use it as a source for `var(--*)` or SCSS patterns — see root [`AGENTS.md`](../../AGENTS.md) § Dead code.
+
 **Related:** [token-layers.md](./token-layers.md) (layer architecture), [tokens.md](./tokens.md) (values), [agent-token-decision-closure.md](../migration/reports/agent-token-decision-closure.md) (closure status), [legacy-token-deletion-status-2026-05-19.md](../migration/reports/legacy-token-deletion-status-2026-05-19.md) (bridge deletion truth), [phase-7-token-migration.md](../migration/phase-7-token-migration.md) § Closure verification (grep gates — history only).
 
 ---

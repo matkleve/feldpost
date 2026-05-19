@@ -1,7 +1,12 @@
 @if (item()) {
   <!-- Delegates media rendering lifecycle to shared media display. -->
   <!-- @see docs/specs/component/media/media-item.md#component-hierarchy -->
-  <app-media-display class="media-item__preview" [mediaId]="mediaIdentity()" />
+  <app-media-display
+    class="media-item__preview"
+    [mediaId]="mediaIdentity()"
+    [storagePath]="item()?.storage_path ?? null"
+    [thumbnailPath]="item()?.thumbnail_path ?? null"
+  />
 
   <!-- Renders selected emphasis around media frame only, above media content. -->
   <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->

@@ -5,6 +5,12 @@ interface PositionHandlers {
   onError?: () => void;
 }
 
+/** Optional Geolocation API tuning; defaults suit background/startup reads. */
+export interface GeolocationRequestOptions {
+  /** Max cached position age in ms. Use `0` when the user explicitly requests location. */
+  maximumAge?: number;
+}
+
 interface TrackingParams extends PositionHandlers {
   intervalMs: number;
   isTrackingActive: () => boolean;
@@ -13,7 +19,7 @@ interface TrackingParams extends PositionHandlers {
 
 @Injectable({ providedIn: 'root' })
 export class MapGeolocationService {
-  requestCurrentPosition(handlers: PositionHandlers): void {
+  requestCurrentPosition(handlers: PositionHandlers, options?: GeolocationRequestOptions): void {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       handlers.onError?.();
       return;
@@ -26,7 +32,11 @@ export class MapGeolocationService {
       () => {
         handlers.onError?.();
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: options?.maximumAge ?? 2000,
+      },
     );
   }
 
@@ -38,10 +48,13 @@ export class MapGeolocationService {
 
       params.onTickStart?.();
 
-      this.requestCurrentPosition({
-        onSuccess: params.onSuccess,
-        onError: params.onError,
-      });
+      this.requestCurrentPosition(
+        {
+          onSuccess: params.onSuccess,
+          onError: params.onError,
+        },
+        { maximumAge: 0 },
+      );
     }, params.intervalMs);
   }
 

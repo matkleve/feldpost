@@ -108,6 +108,26 @@ export class MediaDownloadService {
     );
   }
 
+  /**
+   * Registers storage path metadata without initiating a fetch.
+   * Callers that own the full media record (e.g. MediaDisplayComponent) use this so that
+   * the subsequent getState() subscription can initiate the download via requestPreviewIfKnown.
+   * @see docs/specs/component/media/media-display.md#rendering-pipeline
+   */
+  registerPreviewPaths(
+    mediaId: string,
+    storagePath: string,
+    thumbnailPath: string | null | undefined,
+  ): void {
+    this.knownPreviewRequests.set(mediaId, {
+      mediaId,
+      storagePath,
+      thumbnailPath,
+      context: 'grid',
+      desiredSize: 'thumb',
+    });
+  }
+
   async resolvePreview(request: MediaPreviewRequest): Promise<MediaPreviewResult> {
     this.knownPreviewRequests.set(request.mediaId, { ...request });
 

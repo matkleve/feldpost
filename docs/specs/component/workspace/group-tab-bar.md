@@ -7,7 +7,9 @@ A horizontal row of tabs inside the Workspace Pane. Each tab represents a group 
 
 ## What It Looks Like
 
-Scrollable horizontal row, compact tab height (28px). Tabs are pills: `--color-bg-elevated` background, text label, active tab gets `--color-clay` bottom border or background tint. Active Selection tab is pinned leftmost and cannot be closed/renamed. Named Group tabs have a context menu on long-press. Overflow scrolls horizontally.
+Scrollable horizontal row; `border-bottom: 1px solid var(--border)` underlines the row. Tab triggers use `[brnTabsTrigger][hlmTabsTrigger]`: muted foreground text by default; active trigger receives `color: var(--foreground)` + `border-bottom: 2px solid var(--primary)` (tweakcn primary token — was legacy `--color-clay`; background transparent — was legacy `--color-bg-elevated`). Overflow scrolls horizontally (scrollbar hidden). Active Selection tab is pinned leftmost and cannot be closed/renamed. Named Group tabs have a context menu on long-press.
+
+**Spec sync (2026-05-19, Phase 1 Wave P5):** Legacy `--color-clay` / `--color-bg-elevated` references replaced by tweakcn `var(--primary)` / `var(--foreground)` per `group-tab-bar.component.scss`.
 
 ## Where It Lives
 
@@ -28,12 +30,14 @@ Scrollable horizontal row, compact tab height (28px). Tabs are pills: `--color-b
 ## Component Hierarchy
 
 ```
-GroupTabBar                                ← scrollable horizontal row, h-8, overflow-x-auto
-├── ActiveSelectionTab                     ← pinned first, "(N) Selection", cannot close/rename
-├── NamedGroupTab × N                      ← group name, closable, context menu on long-press
-│   └── [editing] InlineNameInput          ← replaces label text during rename
-└── NewGroupButton (+)                     ← compact button at end of row
+app-group-tab-bar                          ← [hlmTabs][brnTabs] root (display: contents wrapper)
+└── .group-tab-bar                         ← [brnTabsList][hlmTabsList], scrollable row, border-bottom
+    └── button.group-tab-bar__tab × N      ← [brnTabsTrigger][hlmTabsTrigger] per tab
+        (Active Selection tab always first — cannot close/rename)
+        (Named Group tabs planned: closable, context menu on long-press, inline rename)
 ```
+
+**Current state (2026-05-19):** Component renders a static `Selection` tab only; named groups, "+" button, inline rename, and long-press context menu are not yet implemented. See Data / Acceptance Criteria for full contract.
 
 ## Data
 
@@ -90,6 +94,6 @@ sequenceDiagram
 - [ ] Named group tabs show group name, support rename and delete
 - [ ] "+" button creates new group with name prompt
 - [ ] Horizontal scroll when tabs overflow
-- [ ] Active tab visually distinct (`--color-clay` accent)
+- [ ] Active tab visually distinct (`var(--primary)` 2 px bottom border, `var(--foreground)` text)
 - [ ] Long-press context menu works on named tabs
 - [ ] Tab switches update the content area below
