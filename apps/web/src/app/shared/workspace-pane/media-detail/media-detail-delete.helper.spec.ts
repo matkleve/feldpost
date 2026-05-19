@@ -6,17 +6,11 @@ function createHelper() {
   const showDeleteConfirm = signal(false);
   const showContextMenu = signal(true);
   const onDeleted = vi.fn();
-  const deleteOr = vi.fn(async () => ({ error: null }));
+  const deleteWithUndo = vi.fn(async () => ({ ok: true, errorMessage: null, snapshot: null }));
   const helper = new ImageDetailDeleteHelper({
     services: {
-      supabase: {
-        client: {
-          from: vi.fn(() => ({
-            delete: vi.fn(() => ({
-              or: deleteOr,
-            })),
-          })),
-        },
+      mediaDeleteUndo: {
+        deleteWithUndo,
       } as any,
     },
     signals: {
@@ -29,7 +23,7 @@ function createHelper() {
     },
   });
 
-  return { helper, signals: { showDeleteConfirm, showContextMenu }, onDeleted, deleteOr };
+  return { helper, signals: { showDeleteConfirm, showContextMenu }, onDeleted, deleteWithUndo };
 }
 
 describe('ImageDetailDeleteHelper', () => {
@@ -43,12 +37,16 @@ describe('ImageDetailDeleteHelper', () => {
   });
 
   it('deletes the image and calls the close callback', async () => {
-    const { helper, signals, onDeleted, deleteOr } = createHelper();
+    const { helper, signals, onDeleted, deleteWithUndo } = createHelper();
     signals.showDeleteConfirm.set(true);
 
     await helper.executeDelete();
 
-    expect(deleteOr).toHaveBeenCalledWith('id.eq.img-1,source_image_id.eq.img-1');
+    expect(deleteWithUndo).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mediaItemIds: ['img-1'],
+      }),
+    );
     expect(signals.showDeleteConfirm()).toBe(false);
     expect(onDeleted).toHaveBeenCalled();
   });

@@ -1,9 +1,9 @@
 import type { WritableSignal } from '@angular/core';
-import type { SupabaseService } from '../../../core/supabase/supabase.service';
+import type { MediaDeleteUndoService } from '../../../core/media-delete/media-delete-undo.service';
 
 interface ImageDetailDeleteHelperDeps {
   services: {
-    supabase: SupabaseService;
+    mediaDeleteUndo: MediaDeleteUndoService;
   };
   signals: {
     imageId: () => string | null;
@@ -12,6 +12,7 @@ interface ImageDetailDeleteHelperDeps {
   };
   callbacks: {
     onDeleted: () => void;
+    onRestored?: () => void;
   };
 }
 
@@ -31,13 +32,19 @@ export class ImageDetailDeleteHelper {
     const id = this.deps.signals.imageId();
     if (!id) return;
 
-    const { error } = await this.deps.services.supabase.client
-      .from('media_items')
-      .delete()
-      .or(`id.eq.${id},source_image_id.eq.${id}`);
-    if (error) return;
+    const result = await this.deps.services.mediaDeleteUndo.deleteWithUndo({
+      mediaItemIds: [id],
+      onAfterDelete: () => {
+        this.deps.signals.showDeleteConfirm.set(false);
+        this.deps.callbacks.onDeleted();
+      },
+      onAfterUndo: () => {
+        this.deps.callbacks.onRestored?.();
+      },
+    });
 
-    this.deps.signals.showDeleteConfirm.set(false);
-    this.deps.callbacks.onDeleted();
+    if (!result.ok) {
+      return;
+    }
   }
 }

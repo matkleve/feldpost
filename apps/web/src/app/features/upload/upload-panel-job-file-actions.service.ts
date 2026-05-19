@@ -8,6 +8,7 @@ import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspac
 import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
+import { MediaDeleteUndoService } from '../../core/media-delete/media-delete-undo.service';
 import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';
 import { MapProjectDialogService } from '../map/map-shell/map-project-dialog.service';
 import { UploadPanelDialogSignals } from './upload-panel-dialog-signals.service';
@@ -28,6 +29,7 @@ export class UploadPanelJobFileActionsService {
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
   private readonly supabase = inject(SupabaseService);
+  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly i18nService = inject(I18nService);
   private readonly mapProjectActionsService = inject(MapProjectActionsService);
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
@@ -201,12 +203,11 @@ export class UploadPanelJobFileActionsService {
       return false;
     }
 
-    const { error } = await this.supabase.client
-      .from('media_items')
-      .delete()
-      .or(`id.eq.${job.imageId},source_image_id.eq.${job.imageId}`);
+    const result = await this.mediaDeleteUndo.deleteWithUndo({
+      mediaItemIds: [job.imageId],
+    });
 
-    if (error) {
+    if (!result.ok) {
       this.toastService.show({
         message: this.t('upload.item.menu.media.delete.failed', 'Could not delete media.'),
         type: 'error',
@@ -215,11 +216,6 @@ export class UploadPanelJobFileActionsService {
       return false;
     }
 
-    this.toastService.show({
-      message: this.t('upload.item.menu.media.delete.success', 'Media deleted.'),
-      type: 'success',
-      dedupe: true,
-    });
     return true;
   }
 

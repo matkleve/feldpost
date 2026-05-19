@@ -68,6 +68,7 @@ import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
 import { MediaDetailMediaEventsHelper } from './media-detail-media-events.helper';
 import { ImageDetailUploadHelper } from './media-detail-upload.helper';
 import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
+import { MediaDeleteUndoService } from '../../../core/media-delete/media-delete-undo.service';
 import { ActionEngineService } from '../../../core/action/action-engine.service';
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
 import type { ResolvedAction } from '../../../core/action/action-types';
@@ -111,6 +112,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly uploadService = inject(UploadService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
+  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly mediaOrchestrator = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
@@ -420,7 +422,7 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   private readonly deleteHelper = new ImageDetailDeleteHelper({
     services: {
-      supabase: this.supabaseService,
+      mediaDeleteUndo: this.mediaDeleteUndo,
     },
     signals: {
       imageId: () => this.mediaId(),
@@ -429,6 +431,22 @@ export class MediaDetailViewComponent implements OnDestroy {
     },
     callbacks: {
       onDeleted: () => this.closed.emit(),
+      onRestored: () => {
+        const mediaId = this.mediaId();
+        if (!mediaId) {
+          return;
+        }
+        void this.workspaceView.loadImagesByIdsOrdered([mediaId]).then((images) => {
+          if (images.length === 0) {
+            return;
+          }
+          this.workspaceView.updateRawImages((existing) => {
+            const existingIds = new Set(existing.map((image) => image.id));
+            const restored = images.filter((image) => !existingIds.has(image.id));
+            return restored.length > 0 ? [...existing, ...restored] : existing;
+          });
+        });
+      },
     },
   });
 

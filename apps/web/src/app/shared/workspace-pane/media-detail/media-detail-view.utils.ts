@@ -45,7 +45,8 @@ export function isImageLikeMedia(
   storagePath: string | null,
 ): boolean {
   if (mediaType) {
-    return mediaType === 'image';
+    // Canonical DB value is `photo`; legacy rows and RPCs may still use `image`.
+    return mediaType === 'photo' || mediaType === 'image';
   }
 
   if (mimeType) {
@@ -243,7 +244,9 @@ function resolveLabelFromMime(mimeType: string | null, t: DetailTranslateFn): st
 }
 
 function resolveLabelFromMediaType(mediaType: string | null, t: DetailTranslateFn): string | null {
-  if (mediaType === 'image') return t('workspace.imageDetail.mediaType.image', 'Image');
+  if (mediaType === 'image' || mediaType === 'photo') {
+    return t('workspace.imageDetail.mediaType.image', 'Image');
+  }
   if (mediaType === 'video') return t('workspace.imageDetail.mediaType.video', 'Video');
   if (mediaType === 'document') return t('workspace.imageDetail.mediaType.document', 'Document');
   return null;

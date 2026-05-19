@@ -39,6 +39,7 @@ export class ToastService {
       state: 'entering',
       createdAt: Date.now(),
       startedAt: Date.now(),
+      action: options.action,
     };
 
     this._items.update((list) => [...list, item]);

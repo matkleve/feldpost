@@ -1,14 +1,24 @@
-<div hlmToast [variant]="toastVariant()" data-toast-surface>
-  <span class="toast-icon-wrap" aria-hidden="true">
-    <span class="toast-icon material-symbols-outlined">{{ icon }}</span>
-  </span>
+<div class="toast-surface" data-toast-surface>
+  <span class="toast-indicator" aria-hidden="true"></span>
   <span class="toast-message">{{ item().message }}</span>
+  @if (item().action; as action) {
+    <button
+      type="button"
+      class="toast-action"
+      hlmBtn
+      variant="ghost"
+      size="sm"
+      (click)="onAction()"
+    >
+      {{ action.label }}
+    </button>
+  }
   <button
     type="button"
     class="toast-dismiss"
     aria-label="Dismiss notification"
     (click)="onDismiss()"
   >
-    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    <span class="toast-dismiss__glyph" aria-hidden="true">×</span>
   </button>
 </div>

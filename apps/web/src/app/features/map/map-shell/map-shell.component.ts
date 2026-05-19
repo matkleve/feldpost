@@ -54,6 +54,7 @@ import {
   MEDIA_PLACEHOLDER_ICON,
 } from '../../../core/media-download/media-download.service';
 import { ToastService } from '../../../core/toast/toast.service';
+import { MediaDeleteUndoService } from '../../../core/media-delete/media-delete-undo.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
@@ -241,6 +242,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
+  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -1225,34 +1227,24 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    let deletedCount = 0;
-    let failedCount = 0;
-    for (const mediaId of uniqueImageIds) {
-      const deleted = await this.markerContextPhotoDeleteService.deleteImageById(mediaId);
-      if (!deleted.ok) {
-        failedCount += 1;
-        continue;
-      }
-      deletedCount += 1;
-    }
+    const result = await this.mediaDeleteUndo.deleteWithUndo({
+      mediaItemIds: uniqueImageIds,
+      onAfterDelete: async () => {
+        this.patchDetailMediaId(null);
+        this.setSelectedMarker(null);
+        this.setSelectedMarkerKeys(new Set());
+        this.workspaceSelectionService.clearSelection();
+        this.workspaceViewService.clearActiveSelection();
+        await this.queryViewportMarkers();
+      },
+      onAfterUndo: async () => {
+        await this.queryViewportMarkers();
+      },
+    });
 
-    if (deletedCount > 0) {
-      this.patchDetailMediaId(null);
-      this.setSelectedMarker(null);
-      this.setSelectedMarkerKeys(new Set());
-      this.workspaceSelectionService.clearSelection();
-      this.workspaceViewService.clearActiveSelection();
-      await this.queryViewportMarkers();
+    if (!result.ok) {
       this.toastService.show({
-        message: `${deletedCount} Medien geloescht.`,
-        type: 'success',
-        dedupe: true,
-      });
-    }
-
-    if (failedCount > 0) {
-      this.toastService.show({
-        message: `${failedCount} Medien konnten nicht geloescht werden.`,
+        message: result.errorMessage ?? this.t('map.shell.toast.deleteFailed', 'Delete failed.'),
         type: 'error',
         dedupe: true,
       });
@@ -1673,34 +1665,24 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
-      let deletedCount = 0;
-      let failedCount = 0;
-      for (const mediaId of uniqueImageIds) {
-        const deleted = await this.markerContextPhotoDeleteService.deleteImageById(mediaId);
-        if (!deleted.ok) {
-          failedCount += 1;
-          continue;
-        }
-        deletedCount += 1;
-      }
+      const result = await this.mediaDeleteUndo.deleteWithUndo({
+        mediaItemIds: uniqueImageIds,
+        onAfterDelete: async () => {
+          this.patchDetailMediaId(null);
+          this.setSelectedMarker(null);
+          this.setSelectedMarkerKeys(new Set());
+          this.workspaceSelectionService.clearSelection();
+          this.workspaceViewService.clearActiveSelection();
+          await this.queryViewportMarkers();
+        },
+        onAfterUndo: async () => {
+          await this.queryViewportMarkers();
+        },
+      });
 
-      if (deletedCount > 0) {
-        this.patchDetailMediaId(null);
-        this.setSelectedMarker(null);
-        this.setSelectedMarkerKeys(new Set());
-        this.workspaceSelectionService.clearSelection();
-        this.workspaceViewService.clearActiveSelection();
-        await this.queryViewportMarkers();
+      if (!result.ok) {
         this.toastService.show({
-          message: `${deletedCount} Medien geloescht.`,
-          type: 'success',
-          dedupe: true,
-        });
-      }
-
-      if (failedCount > 0) {
-        this.toastService.show({
-          message: `${failedCount} Medien konnten nicht geloescht werden.`,
+          message: result.errorMessage ?? this.t('map.shell.toast.deleteFailed', 'Delete failed.'),
           type: 'error',
           dedupe: true,
         });
@@ -1713,32 +1695,38 @@ export class MapShellComponent implements OnDestroy {
     const target = this.markerContextPhotoDeleteService.getSingleImageTarget(payload);
     if (!target || !this.markerContextPhotoDeleteService.confirmPhotoDelete()) return;
 
-    const deleted = await this.markerContextPhotoDeleteService.deleteImageById(target.mediaId);
-    if (!deleted.ok) {
+    const result = await this.mediaDeleteUndo.deleteWithUndo({
+      mediaItemIds: [target.mediaId],
+      onAfterDelete: () => {
+        this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
+          markerKey: target.markerKey,
+          mediaId: target.mediaId,
+          uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+          photoMarkerLayer: this.photoMarkerLayer,
+          markersByMediaId: this.markersByMediaId,
+          selectedMarkerKey: this.selectedMarkerKey(),
+          selectedMarkerKeys: this.selectedMarkerKeys(),
+          detailMediaId: this.detailMediaId(),
+          cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+          setSelectedMarker: (markerKey) => this.setSelectedMarker(markerKey),
+          setSelectedMarkerKeys: (markerKeys) => this.setSelectedMarkerKeys(markerKeys),
+          setDetailImageId: (mediaId) => this.patchDetailMediaId(mediaId),
+        });
+      },
+      onAfterUndo: async () => {
+        await this.queryViewportMarkers();
+      },
+    });
+
+    if (!result.ok) {
       this.toastService.show({
-        message: deleted.errorMessage ?? 'Loeschen fehlgeschlagen.',
+        message: result.errorMessage ?? this.t('map.shell.toast.deleteFailed', 'Delete failed.'),
         type: 'error',
         dedupe: true,
       });
       return;
     }
 
-    this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
-      markerKey: target.markerKey,
-      mediaId: target.mediaId,
-      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-      photoMarkerLayer: this.photoMarkerLayer,
-      markersByMediaId: this.markersByMediaId,
-      selectedMarkerKey: this.selectedMarkerKey(),
-      selectedMarkerKeys: this.selectedMarkerKeys(),
-      detailMediaId: this.detailMediaId(),
-      cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
-      setSelectedMarker: (markerKey) => this.setSelectedMarker(markerKey),
-      setSelectedMarkerKeys: (markerKeys) => this.setSelectedMarkerKeys(markerKeys),
-      setDetailImageId: (mediaId) => this.patchDetailMediaId(mediaId),
-    });
-
-    this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
     this.onMapMenuCloseRequested();
   }
 

@@ -757,3 +757,11 @@ settings.overlay.toc.account.delete,Delete account,apps/web/src/app/features/set
 settings.overlay.toc.invites.role,Target role,apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for invite-management/role anchor,Target role,Zielrolle,Ruolo di destinazione
 settings.overlay.toc.invites.qr,QR code and link,apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for invite-management/qr anchor,QR code and link,QR-Code und Link,Codice QR e link
 settings.overlay.toc.invites.share,Share actions,apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts TOC label for invite-management/share anchor,Share actions,Teilen-Aktionen,Azioni di condivisione
+media.delete.toast.photoDeleted,Photo deleted,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message,Photo deleted,Foto geloescht,Foto eliminata
+media.delete.toast.fileDeleted,File deleted,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message,File deleted,Datei geloescht,File eliminato
+media.delete.toast.mediaDeleted,Media deleted,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message,Media deleted,Medium geloescht,Media eliminato
+media.delete.toast.photosDeleted,{count} photos deleted,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message,{count} photos deleted,{count} Fotos geloescht,{count} foto eliminate
+media.delete.toast.filesDeleted,{count} files deleted,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message,{count} files deleted,{count} Dateien geloescht,{count} file eliminati
+media.delete.toast.mediaItemsDeleted,{count} media deleted,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message,{count} media deleted,{count} Medien geloescht,{count} media eliminati
+media.delete.toast.undo,Undo,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:action.label,Undo,Rueckgaengig,Annulla
+media.delete.toast.restoreFailed,Could not restore deleted media. Please refresh.,apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message,Could not restore deleted media. Please refresh.,Geloeschte Medien konnten nicht wiederhergestellt werden. Bitte Seite aktualisieren.,Impossibile ripristinare i media eliminati. Aggiorna la pagina.

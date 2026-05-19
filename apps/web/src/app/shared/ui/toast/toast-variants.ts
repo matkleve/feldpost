@@ -6,18 +6,18 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
 /**
- * Toast row surface; colors resolve via tweakcn / shadcn token names.
- * @see docs/MIGRATION_PLAN.md
+ * Neutral toast surface baseline; severity is expressed via item SCSS (indicator dot).
+ * @see docs/specs/service/toast/toast-system.md
  */
 export const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border border-border p-6 pr-8 shadow-lg transition-all',
+  'group pointer-events-auto relative flex w-full items-center gap-3 overflow-hidden rounded-[length:var(--radius-lg)] border border-border bg-card p-3 text-foreground shadow-md transition-all',
   {
     variants: {
       variant: {
-        default: 'border bg-background text-foreground',
-        success: 'border-success/20 bg-success/10 text-success',
-        error: 'border-destructive/20 bg-destructive/10 text-destructive',
-        warning: 'border-warning/20 bg-warning/10 text-warning',
+        default: '',
+        success: '',
+        error: '',
+        warning: '',
       },
     },
     defaultVariants: { variant: 'default' },
@@ -25,3 +25,14 @@ export const toastVariants = cva(
 );
 
 export type ToastVariants = VariantProps<typeof toastVariants>;
+
+/** Semantic accent tokens for toast severity indicators (SCSS / templates). */
+export const toastAccentByVariant: Record<
+  NonNullable<ToastVariants['variant']>,
+  string
+> = {
+  default: 'var(--primary)',
+  success: 'var(--success)',
+  error: 'var(--destructive)',
+  warning: 'var(--warning)',
+};

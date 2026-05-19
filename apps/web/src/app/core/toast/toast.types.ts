@@ -1,5 +1,10 @@
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface ToastItem {
   id: string;
   message: string;
@@ -9,6 +14,7 @@ export interface ToastItem {
   createdAt: number;
   startedAt: number;
   remainingMs?: number;
+  action?: ToastAction;
 }
 
 export interface ToastOptions {
@@ -16,4 +22,5 @@ export interface ToastOptions {
   type?: ToastType;
   duration?: number;
   dedupe?: boolean;
+  action?: ToastAction;
 }

@@ -1,8 +1,110 @@
-// Toast item layout host; surface chrome comes from `[hlmToast]` + `toastVariants`.
-// @see docs/MIGRATION_PLAN.md
-
+// Block host for one toast row; re-enables pointer events inside the stack container.
+// @see docs/specs/service/toast/toast-system.md
 :host {
   display: block;
+  pointer-events: auto;
+}
+
+// Pill surface: card background, border, flex row for indicator, message, and controls.
+// @see docs/specs/service/toast/toast-system.md
+.toast-surface {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.625rem 0.375rem 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow-md);
+}
+
+// Severity dot; default muted, overridden per toast type on :host.
+// @see docs/specs/service/toast/toast-system.md
+.toast-indicator {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+}
+
+:host(.success) .toast-indicator {
+  background: var(--success);
+}
+
+:host(.error) .toast-indicator {
+  background: var(--destructive);
+}
+
+:host(.warning) .toast-indicator {
+  background: var(--warning);
+}
+
+:host(.info) .toast-indicator {
+  background: var(--primary);
+}
+
+// Message text: sm body, clamped to three lines.
+// @see docs/specs/service/toast/toast-system.md
+.toast-message {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--foreground);
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Optional action (e.g. Undo); ghost button from hlmBtn.
+// @see docs/specs/service/toast/toast-system.md
+.toast-action {
+  flex-shrink: 0;
+}
+
+// Dismiss control: compact ghost X at the trailing edge.
+// @see docs/specs/service/toast/toast-system.md
+.toast-dismiss {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-inline-start: 0.125rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+
+  &:hover {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--muted) 55%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+// Unicode close glyph sized to match sm controls.
+// @see docs/specs/service/toast/toast-system.md
+.toast-dismiss__glyph {
+  font-size: 1.125rem;
+  line-height: 1;
 }
 
 :host(.entering) [data-toast-surface] {
@@ -21,11 +123,11 @@
 @keyframes toast-enter {
   from {
     opacity: 0;
-    transform: translateY(0.5rem) scale(0.98);
+    transform: translateY(0.5rem);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -36,7 +138,7 @@
   }
   to {
     opacity: 0;
-    transform: translateY(-0.5rem);
+    transform: translateY(0.5rem);
   }
 }
 
@@ -44,6 +146,7 @@
   :host(.entering) [data-toast-surface] {
     animation: toast-enter-reduced 1ms forwards;
   }
+
   :host(.exiting) [data-toast-surface] {
     animation: toast-exit-reduced 1ms forwards;
   }
@@ -56,6 +159,7 @@
       opacity: 1;
     }
   }
+
   @keyframes toast-exit-reduced {
     from {
       opacity: 1;
@@ -63,81 +167,5 @@
     to {
       opacity: 0;
     }
-  }
-}
-
-.toast-icon-wrap {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--muted-foreground) 12%, transparent);
-}
-
-.toast-icon {
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-solid);
-}
-
-:host(.success) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--success) 14%, transparent);
-}
-:host(.success) .toast-icon {
-  color: var(--success);
-}
-:host(.error) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--destructive) 14%, transparent);
-}
-:host(.error) .toast-icon {
-  color: var(--destructive);
-}
-:host(.warning) .toast-icon-wrap {
-  background: color-mix(in srgb, var(--warning) 14%, transparent);
-}
-:host(.warning) .toast-icon {
-  color: var(--warning);
-}
-:host(.info) .toast-icon {
-  color: var(--muted-foreground);
-}
-
-.toast-message {
-  flex: 1;
-  margin-top: 0.08rem;
-  font-size: var(--font-size-md);
-  line-height: 1.35;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.toast-dismiss {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  padding: 0;
-  transition: color 120ms;
-
-  .material-symbols-outlined {
-    font-size: var(--font-size-md);
-  }
-
-  &:hover {
-    color: var(--foreground);
-    background: color-mix(in srgb, var(--card) 65%, transparent);
   }
 }

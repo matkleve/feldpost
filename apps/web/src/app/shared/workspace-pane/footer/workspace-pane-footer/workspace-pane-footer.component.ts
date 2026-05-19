@@ -9,6 +9,7 @@ import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../../../core/media-location-update/media-location-update.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { MediaQueryService } from '../../../../core/media-query/media-query.service';
+import { MediaDeleteUndoService } from '../../../../core/media-delete/media-delete-undo.service';
 import { ProjectsService } from '../../../../core/projects/projects.service';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ACTION_CONTEXT_IDS } from '../../../../core/action/action-context-ids';
@@ -58,6 +59,7 @@ export class WorkspacePaneFooterComponent {
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly mediaQueryService = inject(MediaQueryService);
+  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly projectsService = inject(ProjectsService);
   private readonly shareSetService = inject(ShareSetService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
@@ -279,22 +281,31 @@ export class WorkspacePaneFooterComponent {
 
     this.pending.set(true);
     try {
-      const result = await this.mediaQueryService.deleteMediaItems(selectedMediaItemIds);
+      const selectedIds = this.selectionService.selectedMediaIds();
+      const removedImages = this.images().filter((image) => selectedIds.has(image.id));
+
+      const result = await this.mediaDeleteUndo.deleteWithUndo({
+        mediaItemIds: selectedMediaItemIds,
+        onAfterDelete: () => {
+          this.workspaceViewService.updateRawImages((images) =>
+            images.filter((image) => !selectedIds.has(image.id)),
+          );
+          this.selectionService.clearSelection();
+        },
+        onAfterUndo: () => {
+          this.workspaceViewService.updateRawImages((images) => {
+            const existingIds = new Set(images.map((image) => image.id));
+            const restored = removedImages.filter((image) => !existingIds.has(image.id));
+            return restored.length > 0 ? [...images, ...restored] : images;
+          });
+        },
+      });
 
       if (!result.ok) {
         this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
         return;
       }
 
-      const selectedIds = this.selectionService.selectedMediaIds();
-      this.workspaceViewService.updateRawImages((images) =>
-        images.filter((image) => !selectedIds.has(image.id)),
-      );
-      this.selectionService.clearSelection();
-      this.toastService.show({
-        message: this.t('workspace.export.success.deleted', 'Selected media deleted.'),
-        type: 'success',
-      });
       this.closeDeleteDialog();
     } finally {
       this.pending.set(false);

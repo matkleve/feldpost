@@ -23500,4 +23500,252 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.photoDeleted', 'Photo deleted', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Photo deleted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.photoDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Foto geloescht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.photoDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Foto eliminata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.photoDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.fileDeleted', 'File deleted', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'File deleted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.fileDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Datei geloescht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.fileDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File eliminato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.fileDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.mediaDeleted', 'Media deleted', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media deleted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.mediaDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium geloescht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.mediaDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media eliminato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.mediaDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.photosDeleted', '{count} photos deleted', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} photos deleted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.photosDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Fotos geloescht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.photosDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} foto eliminate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.photosDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.filesDeleted', '{count} files deleted', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} files deleted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.filesDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Dateien geloescht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.filesDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} file eliminati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.filesDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.mediaItemsDeleted', '{count} media deleted', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} media deleted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.mediaItemsDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Medien geloescht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.mediaItemsDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} media eliminati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.mediaItemsDeleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.undo', 'Undo', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:action.label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Undo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rueckgaengig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.restoreFailed', 'Could not restore deleted media. Please refresh.', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not restore deleted media. Please refresh.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.restoreFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Geloeschte Medien konnten nicht wiederhergestellt werden. Bitte Seite aktualisieren.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.restoreFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile ripristinare i media eliminati. Aggiorna la pagina.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.restoreFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;
