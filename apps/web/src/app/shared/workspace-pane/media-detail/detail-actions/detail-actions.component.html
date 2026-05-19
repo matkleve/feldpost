@@ -12,8 +12,8 @@
             [disabled]="action.disabled"
             (click)="actionSelected.emit(action.id)"
           >
-            <span class="material-icons option-menu-list__item-icon" aria-hidden="true">{{ action.icon }}</span>
-            <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
+            <span class="material-icons detail-actions__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="detail-actions__label min-w-0 flex-1 text-left">{{ action.label }}</span>
           </button>
         }
       }
@@ -26,13 +26,13 @@
         @if (action.section === 'destructive') {
           <button
             hlmMenuItem
-            class="detail-actions__item w-full text-destructive"
+            class="detail-actions__item detail-actions__item--destructive w-full"
             type="button"
             [disabled]="action.disabled"
             (click)="actionSelected.emit(action.id)"
           >
-            <span class="material-icons option-menu-list__item-icon" aria-hidden="true">{{ action.icon }}</span>
-            <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
+            <span class="material-icons detail-actions__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="detail-actions__label min-w-0 flex-1 text-left">{{ action.label }}</span>
           </button>
         }
       }

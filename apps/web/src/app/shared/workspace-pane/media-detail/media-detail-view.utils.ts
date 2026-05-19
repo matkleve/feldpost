@@ -218,9 +218,16 @@ export function canCreateProjectOption(
 }
 
 export function resolveFullAddress(image: ImageRecord | null): string {
-  return image
-    ? [image.street, image.city, image.district, image.country].filter(Boolean).join(', ')
-    : '';
+  if (!image) {
+    return '';
+  }
+
+  const parts = [image.street, image.city, image.district, image.country].filter(Boolean);
+  if (parts.length > 0) {
+    return parts.join(', ');
+  }
+
+  return image.address_label?.trim() ?? '';
 }
 
 export function buildInfoChips(args: {

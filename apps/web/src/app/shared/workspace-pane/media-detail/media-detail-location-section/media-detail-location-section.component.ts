@@ -45,6 +45,7 @@ export class MediaDetailLocationSectionComponent {
   readonly fieldSaveRequested = output<{ field: string; value: string }>();
   readonly editingCancelled = output<void>();
   readonly addressSuggestionApplied = output<ForwardGeocodeResult>();
+  readonly addressClearRequested = output<void>();
   readonly copyCoordinatesRequested = output<void>();
   readonly zoomToLocationRequested = output<void>();
   readonly revertCoordinatesRequested = output<void>();

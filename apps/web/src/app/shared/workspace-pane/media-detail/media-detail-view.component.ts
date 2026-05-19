@@ -4,6 +4,8 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
+  HostListener,
   inject,
   input,
   output,
@@ -66,7 +68,16 @@ import { MediaDetailLocationSectionComponent } from './media-detail-location-sec
 import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import { MediaDetailDataFacade } from '../../../core/media-detail-data/media-detail-data.facade';
 import { ImageDetailMetadataHelper } from './media-detail-metadata.helper';
-import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
+import {
+  addressSnapshotToSuggestion,
+  EMPTY_ADDRESS_SUGGESTION,
+  ImageDetailFieldsHelper,
+  snapshotAddressFields,
+} from './media-detail-fields.helper';
+import {
+  getDetailDestructiveConfirmCopy,
+  type DetailDestructiveConfirmState,
+} from './media-detail-destructive-confirm';
 import { MediaDetailMediaEventsHelper } from './media-detail-media-events.helper';
 import { ImageDetailUploadHelper } from './media-detail-upload.helper';
 import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
@@ -125,6 +136,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly locationResolverService = inject(LocationResolverService);
   private readonly router = inject(Router);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly mediaId = input<string | null>(null);
   readonly addressSearchRequestImageId = input<string | null>(null);
@@ -144,7 +156,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly showContextMenu = signal(false);
-  readonly showDeleteConfirm = signal(false);
+  readonly destructiveConfirm = signal<DetailDestructiveConfirmState | null>(null);
   readonly saving = signal(false);
   readonly projectOptions = signal<SelectOption[]>([]);
   readonly selectedProjectIds = signal<Set<string>>(new Set());
@@ -169,6 +181,15 @@ export class MediaDetailViewComponent implements OnDestroy {
   private abortController: AbortController | null = null;
   private lastAddressSearchRequestId = 0;
   private readonly pendingLocationRetryAttempted = new Set<string>();
+  private ignoreOutsideDismissUntil = 0;
+
+  private static readonly TEXT_EDITING_FIELDS = new Set<DetailEditingField>([
+    'address_label',
+    'street',
+    'city',
+    'district',
+    'country',
+  ]);
 
   readonly thumbState = computed<MediaLoadState>(() => {
     const id = this.mediaId();
@@ -323,6 +344,14 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly workspaceHeaderActions = computed(() => this.workspaceSingleActions());
 
+  readonly destructiveConfirmCopy = computed(() => {
+    const state = this.destructiveConfirm();
+    if (!state) {
+      return null;
+    }
+    return getDetailDestructiveConfirmCopy(state, this.t);
+  });
+
   private readonly projectMembershipHelper = new ImageDetailProjectMembershipHelper({
     supabase: this.supabaseService,
     projectsService: this.projectsService,
@@ -434,7 +463,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     },
     signals: {
       imageId: () => this.mediaId(),
-      showDeleteConfirm: this.showDeleteConfirm,
+      destructiveConfirm: this.destructiveConfirm,
       showContextMenu: this.showContextMenu,
     },
     callbacks: {
@@ -534,7 +563,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.loading.set(false);
     this.saving.set(false);
     this.showContextMenu.set(false);
-    this.showDeleteConfirm.set(false);
+    this.destructiveConfirm.set(null);
     this.editingField.set(null);
     this.activeJobId.set(null);
     this.replaceError.set(null);
@@ -584,6 +613,61 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.fieldsHelper.saveImageField(field, newValue);
   }
 
+  onDetailFieldEditRequested(field: Exclude<DetailEditingField, null>): void {
+    this.markIgnoreOutsideDismiss();
+    this.editingField.set(field);
+  }
+
+  onTitleEditRequested(): void {
+    this.markIgnoreOutsideDismiss();
+    this.editingField.set('address_label');
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
+    if (Date.now() < this.ignoreOutsideDismissUntil) {
+      return;
+    }
+
+    const field = this.editingField();
+    if (!field || field === 'captured_at') {
+      return;
+    }
+
+    const target = event.target as Node | null;
+    if (!target || this.isTargetInsideActiveEditor(target, field)) {
+      return;
+    }
+
+    this.dismissEditingField(field);
+  }
+
+  private markIgnoreOutsideDismiss(): void {
+    this.ignoreOutsideDismissUntil = Date.now() + 250;
+  }
+
+  private isTargetInsideActiveEditor(target: Node, field: DetailEditingField): boolean {
+    const root = this.elementRef.nativeElement;
+    const editor = root.querySelector(`[data-detail-active-editor="${field}"]`);
+    return !!editor?.contains(target);
+  }
+
+  private dismissEditingField(field: NonNullable<DetailEditingField>): void {
+    const root = this.elementRef.nativeElement;
+
+    if (MediaDetailViewComponent.TEXT_EDITING_FIELDS.has(field)) {
+      const input = root.querySelector(
+        `[data-detail-active-editor="${field}"] input`,
+      ) as HTMLInputElement | null;
+      if (input) {
+        input.blur();
+        return;
+      }
+    }
+
+    this.editingField.set(null);
+  }
+
   async saveMetadata(entry: MetadataEntry, newValue: string): Promise<void> {
     await this.metadataHelper.saveMetadata(entry, newValue);
   }
@@ -592,8 +676,12 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.metadataHelper.addMetadata(keyName, value);
   }
 
+  confirmRemoveMetadata(entry: MetadataEntry): void {
+    this.destructiveConfirm.set({ kind: 'remove_metadata', metadataEntry: entry });
+  }
+
   async removeMetadata(entry: MetadataEntry): Promise<void> {
-    await this.metadataHelper.removeMetadata(entry);
+    await this.executeRemoveMetadata(entry);
   }
 
   zoomToLocation(zoomMode: 'house' | 'street' = 'street'): void {
@@ -608,8 +696,16 @@ export class MediaDetailViewComponent implements OnDestroy {
     });
   }
 
+  confirmRevertCoordinates(): void {
+    this.destructiveConfirm.set({ kind: 'revert_coordinates' });
+  }
+
   async revertCoordinatesToExif(): Promise<void> {
-    await this.fieldsHelper.revertCoordinatesToExif();
+    await this.executeRevertCoordinates();
+  }
+
+  confirmClearAddress(): void {
+    this.destructiveConfirm.set({ kind: 'clear_address' });
   }
 
   confirmDelete(): void {
@@ -622,6 +718,39 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   cancelDelete(): void {
     this.deleteHelper.cancelDelete();
+  }
+
+  cancelDestructiveConfirm(): void {
+    this.destructiveConfirm.set(null);
+  }
+
+  onDestructiveConfirmed(): void {
+    const state = this.destructiveConfirm();
+    if (!state) {
+      return;
+    }
+
+    this.destructiveConfirm.set(null);
+
+    switch (state.kind) {
+      case 'delete_media':
+        void this.executeDelete();
+        return;
+      case 'clear_address':
+        void this.executeClearAddress();
+        return;
+      case 'revert_coordinates':
+        void this.executeRevertCoordinates();
+        return;
+      case 'remove_metadata':
+        if (state.metadataEntry) {
+          void this.executeRemoveMetadata(state.metadataEntry);
+        }
+        return;
+      case 'remove_from_projects':
+        void this.executeRemoveFromAllProjects();
+        return;
+    }
   }
 
   toggleContextMenu(): void {
@@ -684,7 +813,7 @@ export class MediaDetailViewComponent implements OnDestroy {
         this.openInGoogleMaps();
         return;
       case 'remove_from_project':
-        void this.removeFromAllProjects();
+        this.confirmRemoveFromAllProjects();
         return;
       case 'delete_media':
         this.confirmDelete();
@@ -700,6 +829,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   openCapturedAtEditor(): void {
+    this.markIgnoreOutsideDismiss();
     this.fieldsHelper.openCapturedAtEditor();
   }
 
@@ -712,6 +842,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   openAddressSearch(): void {
+    this.markIgnoreOutsideDismiss();
     this.editingField.set('address_search');
   }
 
@@ -722,7 +853,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   onChipClicked(index: number): void {
     switch (this.infoChips()[index]?.action) {
       case 'project':
-        this.editingField.set('project_ids');
+        this.onDetailFieldEditRequested('project_ids');
         this.projectSearch.set('');
         break;
       case 'captured_at':
@@ -735,7 +866,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   openProjectPicker(): void {
-    this.editingField.set('project_ids');
+    this.onDetailFieldEditRequested('project_ids');
     this.projectSearch.set('');
   }
 
@@ -743,29 +874,110 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.uploadHelper.onFileSelected(event);
   }
 
-  private async removeFromAllProjects(): Promise<void> {
+  confirmRemoveFromAllProjects(): void {
+    this.closeContextMenu();
     const memberships = Array.from(this.selectedProjectIds());
     if (memberships.length === 0) {
       this.toastService.show({
         message: this.t('workspace.imageDetail.toast.noProjectMembership', 'No project assigned.'),
         type: 'info',
       });
-      this.showContextMenu.set(false);
+      return;
+    }
+    this.destructiveConfirm.set({ kind: 'remove_from_projects' });
+  }
+
+  private async executeClearAddress(): Promise<void> {
+    const img = this.media();
+    if (!img) {
       return;
     }
 
-    for (const projectId of memberships) {
+    const snapshot = snapshotAddressFields(img);
+    await this.fieldsHelper.applyAddressSuggestion(EMPTY_ADDRESS_SUGGESTION);
+    this.showUndoToast(
+      this.t('workspace.imageDetail.toast.addressCleared', 'Address removed'),
+      async () => {
+        await this.fieldsHelper.applyAddressSuggestion(addressSnapshotToSuggestion(snapshot));
+      },
+    );
+  }
+
+  private async executeRevertCoordinates(): Promise<void> {
+    const img = this.media();
+    if (!img) {
+      return;
+    }
+
+    const undoSnapshot = {
+      latitude: img.latitude,
+      longitude: img.longitude,
+    };
+    const reverted = await this.fieldsHelper.revertCoordinatesToExif({ suppressToast: true });
+    if (!reverted) {
+      return;
+    }
+
+    this.showUndoToast(
+      this.t('workspace.imageDetail.toast.coordinatesReverted', 'Coordinates reverted to EXIF'),
+      async () => {
+        await this.fieldsHelper.restoreCoordinates(
+          undoSnapshot.latitude,
+          undoSnapshot.longitude,
+        );
+      },
+    );
+  }
+
+  private async executeRemoveMetadata(entry: MetadataEntry): Promise<void> {
+    await this.metadataHelper.removeMetadata(entry);
+    this.showUndoToast(
+      this.t('workspace.imageDetail.toast.metadataRemoved', 'Metadata removed'),
+      async () => {
+        await this.metadataHelper.addMetadata(entry.key, entry.value);
+      },
+    );
+  }
+
+  private async executeRemoveFromAllProjects(): Promise<void> {
+    const memberships = Array.from(this.selectedProjectIds());
+    if (memberships.length === 0) {
+      return;
+    }
+
+    const snapshot = [...memberships];
+    for (const projectId of snapshot) {
       await this.projectMembershipHelper.toggleProjectMembership(projectId);
     }
 
-    this.toastService.show({
-      message: this.t(
-        'upload.item.menu.project.remove.success',
-        'Removed from project successfully.',
+    this.showUndoToast(
+      this.t(
+        'workspace.imageDetail.toast.removedFromProjects',
+        'Removed from all projects',
       ),
+      async () => {
+        for (const projectId of snapshot) {
+          if (!this.selectedProjectIds().has(projectId)) {
+            await this.projectMembershipHelper.toggleProjectMembership(projectId);
+          }
+        }
+      },
+    );
+  }
+
+  private showUndoToast(message: string, onUndo: () => void | Promise<void>): void {
+    this.toastService.show({
+      message,
       type: 'success',
+      duration: 5000,
+      dedupe: false,
+      action: {
+        label: this.t('media.delete.toast.undo', 'Undo'),
+        onClick: () => {
+          void onUndo();
+        },
+      },
     });
-    this.showContextMenu.set(false);
   }
 
   private async handleImageReplaced(event: ImageReplacedEvent): Promise<void> {

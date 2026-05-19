@@ -1,18 +1,20 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
 import { MetadataPropertyRowComponent } from '../metadata-property-row.component';
 import type { MetadataEntry } from '../media-detail-view.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
+import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 
 @Component({
   selector: 'app-metadata-section',
   standalone: true,
-  imports: [MetadataPropertyRowComponent, HlmMenuItemDirective],
+  imports: [MetadataPropertyRowComponent, HlmMenuItemDirective, ...HLM_INPUT_IMPORTS],
   templateUrl: './metadata-section.component.html',
-  styleUrl: './metadata-section.component.scss',
+  styleUrls: ['./metadata-section.component.scss', '../_detail-row-slots.scss'],
 })
 export class MetadataSectionComponent {
   private readonly i18nService = inject(I18nService);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly entries = input<MetadataEntry[]>([]);
@@ -43,6 +45,28 @@ export class MetadataSectionComponent {
   addMetadata(key: string, value: string): void {
     if (!key.trim() || !value.trim()) return;
     this.entryAdded.emit({ key: key.trim(), value: value.trim() });
+    this.showAddForm.set(false);
+    this.keySuggestions.set([]);
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
+    if (!this.showAddForm()) {
+      return;
+    }
+
+    const target = event.target as Node | null;
+    if (!target) {
+      return;
+    }
+
+    const addRow = this.elementRef.nativeElement.querySelector(
+      '[data-detail-active-editor="metadata-add"]',
+    );
+    if (addRow?.contains(target)) {
+      return;
+    }
+
     this.showAddForm.set(false);
     this.keySuggestions.set([]);
   }

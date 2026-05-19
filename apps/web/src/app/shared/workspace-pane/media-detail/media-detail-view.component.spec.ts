@@ -629,17 +629,17 @@ describe('MediaDetailViewComponent', () => {
 
       component.confirmDelete();
 
-      expect(component.showDeleteConfirm()).toBe(true);
+      expect(component.destructiveConfirm()).toEqual({ kind: 'delete_media' });
       expect(component.showContextMenu()).toBe(false);
     });
 
     it('cancelDelete hides the dialog', () => {
       const { component } = setup();
-      component.showDeleteConfirm.set(true);
+      component.destructiveConfirm.set({ kind: 'delete_media' });
 
       component.cancelDelete();
 
-      expect(component.showDeleteConfirm()).toBe(false);
+      expect(component.destructiveConfirm()).toBeNull();
     });
 
     it('executeDelete calls Supabase delete and emits closed', async () => {

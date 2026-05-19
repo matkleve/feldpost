@@ -4,6 +4,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
 import { SearchOrchestratorService } from '../../../../core/search/search-orchestrator.service';
 import type {
+  SearchAddressCandidate,
   SearchCandidate,
   SearchQueryContext,
   SearchResultSet,
@@ -20,6 +21,9 @@ import {
   imports: [],
   templateUrl: './address-search.component.html',
   styleUrl: './address-search.component.scss',
+  host: {
+    '[attr.data-detail-active-editor]': 'active() ? "address_search" : null',
+  },
 })
 export class AddressSearchComponent implements OnDestroy {
   private static readonly CENTER_WIDTH_INSET_PX = 4;
@@ -32,7 +36,13 @@ export class AddressSearchComponent implements OnDestroy {
 
   readonly currentAddress = input('');
   readonly searchContext = input<SearchQueryContext>({});
+  /** When parent clears `editingField`, close the active search surface. */
+  readonly editingActive = input(false);
   readonly suggestionApplied = output<ForwardGeocodeResult>();
+  /** Parent must set `editingField` to `address_search` before the search surface activates. */
+  readonly searchOpened = output<void>();
+  readonly addressClearRequested = output<void>();
+  readonly deactivated = output<void>();
 
   // Stable state: idle — trigger button visible, input and dropdown hidden
   // @see docs/specs/ui/workspace/workspace-pane.md
@@ -45,6 +55,7 @@ export class AddressSearchComponent implements OnDestroy {
   readonly placeSuggestions = signal<SearchCandidate[]>([]);
   readonly loadingSaved = signal(false);
   readonly loadingPlaces = signal(false);
+  readonly applyingSuggestion = signal(false);
   readonly dropdownTop = signal(0);
   readonly dropdownLeft = signal(0);
   readonly dropdownWidth = signal(0);
@@ -83,6 +94,12 @@ export class AddressSearchComponent implements OnDestroy {
     });
 
     effect(() => {
+      if (!this.editingActive() && this.active() && !this.applyingSuggestion()) {
+        this.cancel();
+      }
+    });
+
+    effect(() => {
       if (!this.active() || !this.isDropdownVisible()) return;
       this.savedSuggestions();
       this.placeSuggestions();
@@ -112,6 +129,7 @@ export class AddressSearchComponent implements OnDestroy {
   open(event?: Event): void {
     event?.stopPropagation();
     this.ignoreOutsideCloseUntil = Date.now() + 250;
+    this.searchOpened.emit();
 
     const current = this.currentAddress();
     this.query.set(current);
@@ -148,6 +166,7 @@ export class AddressSearchComponent implements OnDestroy {
     this.clearGeocoderDebounce();
     this.searchSubscription?.unsubscribe();
     this.searchSubscription = null;
+    this.deactivated.emit();
   }
 
   onInput(q: string): void {
@@ -164,43 +183,36 @@ export class AddressSearchComponent implements OnDestroy {
     const saved = this.savedSuggestions();
     const places = this.placeSuggestions();
     const first = saved[0] ?? places[0];
-    if (first) this.apply(first);
+    if (first) {
+      void this.apply(first);
+    }
   }
 
-  apply(candidate: SearchCandidate): void {
-    const lat =
-      candidate.family === 'db-address' || candidate.family === 'geocoder' ? candidate.lat : 0;
-    const lng =
-      candidate.family === 'db-address' || candidate.family === 'geocoder' ? candidate.lng : 0;
-    const mapped: ForwardGeocodeResult = {
-      lat,
-      lng,
-      addressLabel: candidate.label,
-      city: null,
-      district: null,
-      street: null,
-      streetNumber: null,
-      zip: null,
-      country: null,
-    };
-    this.suggestionApplied.emit(mapped);
-    this.active.set(false);
-    this.query.set('');
-    this.savedSuggestions.set([]);
-    this.placeSuggestions.set([]);
-    this.loadingSaved.set(false);
-    this.loadingPlaces.set(false);
-    this.clearGeocoderDebounce();
-    this.searchSubscription?.unsubscribe();
-    this.searchSubscription = null;
+  onResultSelect(candidate: SearchCandidate, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    void this.apply(candidate);
+  }
+
+  async apply(candidate: SearchCandidate): Promise<void> {
+    if (candidate.family !== 'db-address' && candidate.family !== 'geocoder') {
+      return;
+    }
+
+    this.applyingSuggestion.set(true);
+    try {
+      const mapped = await this.searchBarService.resolveForwardGeocodeFromAddressCandidate(
+        candidate as SearchAddressCandidate,
+      );
+      this.suggestionApplied.emit(mapped);
+      this.cancel();
+    } finally {
+      this.applyingSuggestion.set(false);
+    }
   }
 
   clearAddress(): void {
-    // Emit empty suggestion to clear stored address on parent
-    this.suggestionApplied.emit({
-      lat: 0, lng: 0, addressLabel: '', city: null,
-      district: null, street: null, streetNumber: null, zip: null, country: null,
-    });
+    this.addressClearRequested.emit();
   }
 
   ngOnDestroy(): void {

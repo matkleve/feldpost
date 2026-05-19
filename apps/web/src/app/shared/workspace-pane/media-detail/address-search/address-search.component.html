@@ -5,6 +5,9 @@
       <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
       <div class="detail-row__center address-search__center">
         <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.address', 'Address')
+        }}</span>
         <input
           #addressSearchInput
           class="address-search__input"
@@ -19,7 +22,7 @@
         />
       </div>
       <button
-        class="detail-row-action detail-row-action--r1 address-search__clear-btn address-search__clear-btn--visible"
+        class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn address-search__clear-btn--visible"
         type="button"
         (click)="cancel(); $event.stopPropagation()"
         [attr.aria-label]="t('workspace.addressSearch.aria.cancel', 'Cancel search')"
@@ -46,7 +49,11 @@
             <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
           }
           @for (candidate of savedSuggestions(); track candidate.id) {
-            <button class="address-search__result-item" type="button" (click)="apply(candidate)">
+            <button
+              class="address-search__result-item"
+              type="button"
+              (click)="onResultSelect(candidate, $event)"
+            >
               <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
               <span class="address-search__result-label">{{ candidate.label }}</span>
             </button>
@@ -61,7 +68,11 @@
             <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
           }
           @for (candidate of placeSuggestions(); track candidate.id) {
-            <button class="address-search__result-item" type="button" (click)="apply(candidate)">
+            <button
+              class="address-search__result-item"
+              type="button"
+              (click)="onResultSelect(candidate, $event)"
+            >
               <span class="material-icons address-search__result-icon" aria-hidden="true">place</span>
               <span class="address-search__result-label">{{ candidate.label }}</span>
             </button>
@@ -83,6 +94,9 @@
     </button>
     <div class="detail-row__center address-search__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">my_location</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.address', 'Address')
+      }}</span>
       <button class="address-search__trigger-text" type="button" (click)="open($event)">
         @if (currentAddress()) {
           {{ currentAddress() }}
@@ -94,7 +108,7 @@
       </button>
     </div>
     <button
-      class="detail-row-action detail-row-action--r1 address-search__clear-btn"
+      class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn"
       type="button"
       [class.address-search__clear-btn--visible]="!!currentAddress()"
       [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear address')"

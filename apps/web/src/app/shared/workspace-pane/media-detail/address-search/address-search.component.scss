@@ -19,18 +19,18 @@
   width: 100%;
 }
 
-.address-search__center {
-  grid-template-columns: 1.25rem minmax(0, 1fr);
-}
-
 .address-search__trigger-text,
 .address-search__input {
-  grid-column: 2;
+  grid-column: 3;
   min-width: 0;
 }
 
 .address-search__trigger-text {
+  width: 100%;
+  min-width: 0;
+  align-self: center;
   font-size: var(--font-size-xs);
+  line-height: 1.4;
   color: var(--foreground);
   text-align: right;
   white-space: nowrap;
@@ -39,6 +39,7 @@
   background: none;
   border: none;
   padding: 0;
+  margin: 0;
   cursor: pointer;
   font-family: inherit;
   transition: color 80ms ease-out;
@@ -46,22 +47,81 @@
 
 .address-search__placeholder {
   color: var(--muted-foreground);
+  transition: color 80ms ease-out;
+}
+
+// Inactive row hover — address value follows detail-row center (icon, label, value → primary).
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__row.detail-row:hover:not(.detail-row--editing) .address-search__trigger-text,
+.address-search__row.detail-row:focus-within:not(.detail-row--editing) .address-search__trigger-text {
+  color: var(--primary);
+
+  .address-search__placeholder {
+    color: var(--primary);
+  }
+}
+
+// Active search field — card surface in the value column (theme-aware via --card).
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__row.detail-row--editing .address-search__center {
+  --address-search-field-inset: 0.125rem;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  align-items: stretch;
+  padding-block: var(--address-search-field-inset);
+  padding-inline-end: var(--address-search-field-inset);
+
+  .detail-row__icon,
+  .detail-row__label {
+    align-self: center;
+  }
+
+  &:focus-within {
+    .detail-row__icon,
+    .detail-row__label {
+      color: var(--primary);
+    }
+  }
 }
 
 .address-search__input {
+  width: 100%;
+  min-width: 0;
+  align-self: center;
+  box-sizing: border-box;
   font-size: var(--font-size-xs);
+  line-height: 1.4;
   color: var(--foreground);
-  background: transparent;
+  background: var(--card);
   border: none;
+  border-radius: var(--radius-sm);
   outline: none;
+  margin: 0;
   padding: 0;
   font-family: inherit;
   caret-color: var(--primary);
   text-align: right;
+  // Inset ring keeps the text box aligned with the trigger (no border/padding shift).
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 36%, var(--border));
+  transition:
+    background 80ms ease-out,
+    box-shadow 80ms ease-out;
 
   &::placeholder {
     color: var(--muted-foreground);
   }
+
+  &:focus {
+    box-shadow: inset 0 0 0 1px var(--primary);
+  }
+}
+
+.address-search__row.detail-row--editing .address-search__input {
+  align-self: stretch;
+  height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--address-search-field-inset, 0.125rem));
+  line-height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--address-search-field-inset, 0.125rem));
+  // Inner end padding restores text position when center padding-inline-end is tighter (0.125rem).
+  padding-inline-start: var(--spacing-2);
+  padding-inline-end: calc(var(--spacing-2) - var(--address-search-field-inset, 0.125rem));
 }
 
 .address-search__clear-btn--visible {
@@ -106,38 +166,53 @@
 
 .address-search__result-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-2);
   width: 100%;
+  box-sizing: border-box;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--foreground);
   text-align: left;
   min-height: 2rem;
-  padding: var(--spacing-1) var(--spacing-2);
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-2);
   font-size: var(--font-size-xs);
   font-family: inherit;
   line-height: 1.4;
   cursor: pointer;
   white-space: normal;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
 
   &:hover {
     background: color-mix(in srgb, var(--primary) 8%, transparent);
+
+    .address-search__result-icon,
+    .address-search__result-label {
+      color: var(--primary);
+    }
   }
 }
 
 .address-search__result-icon {
-  font-size: var(--font-size-md);
-  color: var(--muted-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  margin-top: 1px;
+  font-size: var(--font-size-md);
+  line-height: 1;
+  color: var(--muted-foreground);
+  transition: color 80ms ease-out;
 }
 
 .address-search__result-label {
   flex: 1 1 auto;
   min-width: 0;
   word-break: break-word;
+  transition: color 80ms ease-out;
 }
 
 .address-search__loading {

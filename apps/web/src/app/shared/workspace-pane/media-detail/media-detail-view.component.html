@@ -41,7 +41,7 @@
       [showContextMenu]="showContextMenu()"
       [contextActions]="workspaceHeaderActions()"
       (closed)="close()"
-      (titleEditRequested)="editingField.set('address_label')"
+      (titleEditRequested)="onTitleEditRequested()"
       (titleSaveRequested)="saveImageField('address_label', $event)"
       (titleEditCancelled)="editingField.set(null)"
       (contextMenuToggled)="toggleContextMenu()"
@@ -89,7 +89,7 @@
           [projectCanCreate]="projectCanCreate()"
           [canAssignMultipleProjects]="canAssignMultipleProjects()"
           [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
-          (fieldEditRequested)="editingField.set($event)"
+          (fieldEditRequested)="onDetailFieldEditRequested($event)"
           (fieldSaveRequested)="saveImageField($event.field, $event.value)"
           (editingCancelled)="editingField.set(null)"
           (capturedAtEditRequested)="openCapturedAtEditor()"
@@ -107,20 +107,21 @@
           [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
           [isCorrected]="isCorrected()"
           [saving]="saving()"
-          (fieldEditRequested)="editingField.set($event)"
+          (fieldEditRequested)="onDetailFieldEditRequested($event)"
           (fieldSaveRequested)="saveImageField($event.field, $event.value)"
           (editingCancelled)="editingField.set(null)"
           (addressSuggestionApplied)="applyAddressSuggestion($event)"
+          (addressClearRequested)="confirmClearAddress()"
           (copyCoordinatesRequested)="copyCoordinates()"
           (zoomToLocationRequested)="zoomToLocation()"
-          (revertCoordinatesRequested)="revertCoordinatesToExif()"
+          (revertCoordinatesRequested)="confirmRevertCoordinates()"
         />
 
         <app-metadata-section
           [entries]="metadata()"
           [allKeyNames]="allMetadataKeyNames()"
           (valueChanged)="saveMetadata($event.entry, $event.newValue)"
-          (entryRemoved)="removeMetadata($event)"
+          (entryRemoved)="confirmRemoveMetadata($event)"
           (entryAdded)="addMetadata($event.key, $event.value)"
         />
 
@@ -133,18 +134,14 @@
   </div>
 }
 
-@if (showDeleteConfirm()) {
+@if (destructiveConfirmCopy(); as confirmCopy) {
   <app-confirm-dialog
-    [title]="t('workspace.imageDetail.deleteDialog.title', 'Delete this media?')"
-    [message]="
-      t(
-        'workspace.imageDetail.deleteDialog.message',
-        'This will permanently remove the media item and all its metadata. This cannot be undone.'
-      )
-    "
-    [confirmLabel]="t('workspace.imageDetail.deleteDialog.confirm', 'Delete')"
+    [title]="confirmCopy.title"
+    [message]="confirmCopy.message"
+    [confirmLabel]="confirmCopy.confirmLabel"
+    [cancelLabel]="t('workspace.imageDetail.confirm.cancel', 'Cancel')"
     [danger]="true"
-    (confirmed)="executeDelete()"
-    (cancelled)="cancelDelete()"
+    (confirmed)="onDestructiveConfirmed()"
+    (cancelled)="cancelDestructiveConfirm()"
   />
 }

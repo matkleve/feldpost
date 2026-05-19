@@ -137,15 +137,6 @@ export class MediaDetailInlineSectionComponent {
     this.focusAdjacentProjectDropdownItem(event.key, focusableItems);
   }
 
-  @HostListener('document:pointerdown', ['$event'])
-  onDocumentPointerDown(event: PointerEvent): void {
-    if (this.editingField() !== 'captured_at') return;
-    const target = event.target as Node | null;
-    if (!this.elementRef.nativeElement.contains(target)) {
-      this.editingCancelled.emit();
-    }
-  }
-
   @HostListener('window:resize')
   @HostListener('window:scroll')
   onViewportChanged(): void {

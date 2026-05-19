@@ -1,4 +1,7 @@
-<div class="detail-header">
+<div
+  class="detail-header"
+  [attr.data-detail-active-editor]="editingTitle() ? 'address_label' : null"
+>
   <button
     hlmBtn
     variant="ghost"
@@ -90,7 +93,7 @@
             (keydown)="onContextMenuKeydown($event)"
             (click)="actionSelected.emit(action.id)"
           >
-            <span class="material-icons option-menu-list__item-icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
             <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
           </button>
         }

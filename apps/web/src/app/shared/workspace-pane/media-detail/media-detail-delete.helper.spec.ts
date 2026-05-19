@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
 
 function createHelper() {
-  const showDeleteConfirm = signal(false);
+  const destructiveConfirm = signal<{ kind: 'delete_media' } | null>(null);
   const showContextMenu = signal(true);
   const onDeleted = vi.fn();
   const deleteWithUndo = vi.fn(async () => ({ ok: true, errorMessage: null, snapshot: null }));
@@ -15,7 +15,7 @@ function createHelper() {
     },
     signals: {
       imageId: () => 'img-1',
-      showDeleteConfirm,
+      destructiveConfirm,
       showContextMenu,
     },
     callbacks: {
@@ -23,7 +23,7 @@ function createHelper() {
     },
   });
 
-  return { helper, signals: { showDeleteConfirm, showContextMenu }, onDeleted, deleteWithUndo };
+  return { helper, signals: { destructiveConfirm, showContextMenu }, onDeleted, deleteWithUndo };
 }
 
 describe('ImageDetailDeleteHelper', () => {
@@ -32,13 +32,13 @@ describe('ImageDetailDeleteHelper', () => {
 
     helper.confirmDelete();
 
-    expect(signals.showDeleteConfirm()).toBe(true);
+    expect(signals.destructiveConfirm()).toEqual({ kind: 'delete_media' });
     expect(signals.showContextMenu()).toBe(false);
   });
 
   it('deletes the image and calls the close callback', async () => {
     const { helper, signals, onDeleted, deleteWithUndo } = createHelper();
-    signals.showDeleteConfirm.set(true);
+    signals.destructiveConfirm.set({ kind: 'delete_media' });
 
     await helper.executeDelete();
 
@@ -47,7 +47,7 @@ describe('ImageDetailDeleteHelper', () => {
         mediaItemIds: ['img-1'],
       }),
     );
-    expect(signals.showDeleteConfirm()).toBe(false);
+    expect(signals.destructiveConfirm()).toBeNull();
     expect(onDeleted).toHaveBeenCalled();
   });
 });

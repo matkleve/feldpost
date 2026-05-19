@@ -27,8 +27,8 @@
   min-width: 0;
   overflow: visible;
 
-  &:hover:not(.detail-row--editing) .detail-row__center,
-  &:focus-within:not(.detail-row--editing) .detail-row__center {
+  &:hover:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__center,
+  &:focus-within:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__center {
     background: var(--mdv-menu-item-hover-bg, color-mix(in srgb, var(--primary) 8%, transparent));
 
     .detail-row__icon,
@@ -39,13 +39,15 @@
     }
   }
 
-  &:hover:not(.detail-row--editing),
+  &:hover,
   &:focus-within {
     .detail-row-action:is(button) {
       opacity: 1;
       pointer-events: auto;
-      color: var(--primary);
-      background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent));
+    }
+
+    .detail-row-action--danger:is(button) {
+      color: var(--destructive);
     }
   }
 
@@ -55,6 +57,13 @@
 
   &--readonly {
     cursor: default;
+
+    // Hover tint only — icon/label/value stay muted (no primary text shift).
+    // @see docs/specs/ui/media-detail/media-detail-inline-section.md
+    &:hover:not(.detail-row--editing) .detail-row__center,
+    &:focus-within:not(.detail-row--editing) .detail-row__center {
+      background: var(--mdv-menu-item-hover-bg, color-mix(in srgb, var(--primary) 8%, transparent));
+    }
 
     .detail-row__value--static {
       cursor: default;
@@ -147,12 +156,15 @@
   line-height: var(--line-height-comfortable);
   transition: color 80ms ease-out;
 
-  &:hover:not(:disabled) {
+  // Direct value hover only for editable buttons — static spans stay muted on readonly rows.
+  // @see docs/specs/ui/media-detail/media-detail-inline-section.md
+  &:is(button):hover:not(:disabled) {
     color: var(--primary);
   }
 
   &--static {
     cursor: default;
+    color: var(--muted-foreground);
   }
 
   &--mono {
@@ -268,9 +280,9 @@
     font-size: var(--font-size-md);
   }
 
-  &:hover {
-    color: var(--mdv-menu-item-text, var(--foreground));
-    background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 8%, transparent));
+  &:hover:not(.detail-row-action--danger) {
+    color: var(--primary);
+    background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent));
   }
 
   &:focus-visible {
@@ -278,9 +290,15 @@
     outline-offset: 2px;
   }
 
-  &.detail-row-action--danger:hover {
+  &.detail-row-action--danger {
+    color: var(--destructive);
+  }
+
+  &.detail-row-action--danger:hover,
+  &.detail-row-action--danger:focus-visible {
     color: var(--destructive);
     background: color-mix(in srgb, var(--destructive) 10%, transparent);
+    outline-color: var(--destructive);
   }
 }
 

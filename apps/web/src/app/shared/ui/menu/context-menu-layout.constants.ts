@@ -26,7 +26,7 @@ export const CONTEXT_MENU_PANEL_OFFSET_Y_PX = SPACING_1_PX;
 /** Viewport edge margin when clamping menu position — `var(--spacing-2)`. */
 export const CONTEXT_MENU_VIEWPORT_MARGIN_PX = SPACING_2_PX;
 
-/** Estimated menu row height (`2.75rem`, above `fp-menu-item` 2rem floor). */
+/** Estimated menu row height (`2.75rem`, above `option-menu-item` 2rem floor). */
 export const CONTEXT_MENU_ROW_ESTIMATE_PX = 2.75 * ROOT_FONT_SIZE_PX;
 
 /** Menu shell chrome (padding + gap) for action lists — `var(--spacing-5)`. */

@@ -3,7 +3,9 @@ import type { Observable} from 'rxjs';
 import { catchError, from, of, tap } from 'rxjs';
 import { SupabaseService } from '../supabase/supabase.service';
 import type {
-  GeocoderSearchResult} from '../geocoding/geocoding.service';
+  ForwardGeocodeResult,
+  GeocoderSearchResult,
+} from '../geocoding/geocoding.service';
 import {
   GeocodingService
 } from '../geocoding/geocoding.service';
@@ -66,6 +68,16 @@ interface DbAddressRow {
   latitude: number | string | null;
   longitude: number | string | null;
   created_at: string | null;
+}
+
+interface MediaItemAddressRow {
+  address_label: string | null;
+  street: string | null;
+  city: string | null;
+  district: string | null;
+  country: string | null;
+  latitude: number | string | null;
+  longitude: number | string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -206,6 +218,15 @@ export class SearchBarService {
     context: SearchQueryContext,
   ): Observable<SearchAddressCandidate[]> {
     return this.resolveGeocoderCandidates(query, context);
+  }
+
+  async resolveForwardGeocodeFromAddressCandidate(
+    candidate: SearchAddressCandidate,
+  ): Promise<ForwardGeocodeResult> {
+    if (candidate.family === 'db-address') {
+      return this.resolveDbAddressForwardGeocode(candidate);
+    }
+    return this.resolveGeocoderForwardGeocode(candidate);
   }
 
   resolveGeocoderCandidates(
@@ -628,6 +649,70 @@ export class SearchBarService {
 
   private getStorage(): Storage | null {
     return typeof window === 'undefined' ? null : window.localStorage;
+  }
+
+  private fallbackForwardGeocodeFromCandidate(
+    candidate: SearchAddressCandidate,
+  ): ForwardGeocodeResult {
+    return {
+      lat: candidate.lat,
+      lng: candidate.lng,
+      addressLabel: candidate.label,
+      city: null,
+      district: null,
+      street: null,
+      streetNumber: null,
+      zip: null,
+      country: null,
+    };
+  }
+
+  private async resolveDbAddressForwardGeocode(
+    candidate: SearchAddressCandidate,
+  ): Promise<ForwardGeocodeResult> {
+    const { data, error } = await this.supabaseService.client
+      .from('media_items')
+      .select('address_label,street,city,district,country,latitude,longitude')
+      .eq('id', candidate.id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return this.fallbackForwardGeocodeFromCandidate(candidate);
+    }
+
+    const row = data as MediaItemAddressRow;
+    return {
+      lat: toNumber(row.latitude) ?? candidate.lat,
+      lng: toNumber(row.longitude) ?? candidate.lng,
+      addressLabel: row.address_label?.trim() || candidate.label,
+      street: row.street,
+      city: row.city,
+      district: row.district,
+      country: row.country,
+      streetNumber: null,
+      zip: null,
+    };
+  }
+
+  private async resolveGeocoderForwardGeocode(
+    candidate: SearchAddressCandidate,
+  ): Promise<ForwardGeocodeResult> {
+    const reverse = await this.geocodingService.reverse(candidate.lat, candidate.lng);
+    if (!reverse) {
+      return this.fallbackForwardGeocodeFromCandidate(candidate);
+    }
+
+    return {
+      lat: candidate.lat,
+      lng: candidate.lng,
+      addressLabel: reverse.addressLabel || candidate.label,
+      street: reverse.street,
+      city: reverse.city,
+      district: reverse.district,
+      country: reverse.country,
+      streetNumber: reverse.streetNumber,
+      zip: reverse.zip,
+    };
   }
 
   private describeDbAddressError(error: unknown): {

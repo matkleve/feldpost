@@ -4,13 +4,18 @@
   <app-address-search
     [currentAddress]="fullAddress()"
     [searchContext]="addressSearchContext()"
+    [editingActive]="editingField() === 'address_search'"
+    (searchOpened)="fieldEditRequested.emit('address_search')"
     (suggestionApplied)="addressSuggestionApplied.emit($event)"
+    (addressClearRequested)="addressClearRequested.emit()"
+    (deactivated)="editingCancelled.emit()"
   />
 
   @for (fieldDef of addressFields; track fieldDef.name) {
     <div
       class="detail-row"
       [class.detail-row--editing]="editingField() === fieldDef.name"
+      [attr.data-detail-active-editor]="editingField() === fieldDef.name ? fieldDef.name : null"
     >
       <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
       <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>

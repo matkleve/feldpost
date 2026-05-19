@@ -7,9 +7,9 @@ import { HlmMenuLabelDirective } from './hlm-menu-label.directive';
 import { HlmMenuSeparatorDirective } from './hlm-menu-separator.directive';
 
 export {
-  MENU_ITEM_HOST_CLASS,
-  MENU_ITEM_ICON_CLASS,
-  MENU_LABEL_HOST_CLASS,
+  OPTION_MENU_ITEM_CLASS,
+  OPTION_MENU_ITEM_ICON_CLASS,
+  OPTION_MENU_LABEL_CLASS,
   menuContentVariants,
   menuItemVariants,
   menuLabelVariants,

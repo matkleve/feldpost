@@ -11659,6 +11659,533 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.field.address', 'Address', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-search/address-search.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.cancel', 'Cancel', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.html bound-attr:cancelLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abbrechen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.clearAddress.title', 'Remove address?', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove address?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse entfernen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovere l''indirizzo?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.clearAddress.message', 'This removes the saved address for this media item. You can undo this action.', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This removes the saved address for this media item. You can undo this action.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dies entfernt die gespeicherte Adresse fuer dieses Medium. Sie koennen die Aktion rueckgaengig machen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questa operazione rimuove l''indirizzo salvato per questo media. Puoi annullare l''azione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.clearAddress.confirm', 'Remove', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.revertCoordinates.title', 'Revert coordinates?', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Revert coordinates?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Koordinaten zuruecksetzen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristinare le coordinate?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.revertCoordinates.message', 'This restores the original EXIF coordinates and replaces the corrected position.', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This restores the original EXIF coordinates and replaces the corrected position.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dies stellt die urspruenglichen EXIF-Koordinaten wieder her und ersetzt die korrigierte Position.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questa operazione ripristina le coordinate EXIF originali e sostituisce la posizione corretta.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.revertCoordinates.confirm', 'Revert', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Revert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zuruecksetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristina', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.removeMetadata.title', 'Remove metadata?', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove metadata?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Metadaten entfernen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovere metadati?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.removeMetadata.message', 'Remove "{key}" from this media item? You can undo this action.', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove "{key}" from this media item? You can undo this action.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '"{key}" von diesem Medium entfernen? Sie koennen die Aktion rueckgaengig machen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovere «{key}» da questo media? Puoi annullare l''azione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.removeMetadata.confirm', 'Remove', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.removeFromProjects.title', 'Remove from all projects?', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove from all projects?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus allen Projekten entfernen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovere da tutti i progetti?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.removeFromProjects.message', 'This media item will be unlinked from every project it belongs to.', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This media item will be unlinked from every project it belongs to.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieses Medium wird aus allen Projekten getrennt in denen es enthalten ist.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo media verra scollegato da tutti i progetti a cui appartiene.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.confirm.removeFromProjects.confirm', 'Remove', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-destructive-confirm.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.addressCleared', 'Address removed', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address removed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressCleared'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse entfernt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressCleared'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Indirizzo rimosso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressCleared'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.metadataRemoved', 'Metadata removed', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Metadata removed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.metadataRemoved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Metadaten entfernt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.metadataRemoved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Metadati rimossi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.metadataRemoved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.removedFromProjects', 'Removed from all projects', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Removed from all projects', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.removedFromProjects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus allen Projekten entfernt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.removedFromProjects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimosso da tutti i progetti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.removedFromProjects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0435.workspace_imagedetail_field_type', 'workspace.imageDetail.field.type', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

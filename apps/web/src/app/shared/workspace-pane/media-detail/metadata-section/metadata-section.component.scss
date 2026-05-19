@@ -1,12 +1,8 @@
-// Metadata section — flex column with heading and row stack (matches inline detail sections).
+// Metadata section — same detail-row chrome as Details/Location.
 // @see docs/specs/ui/media-detail/metadata-section.md
 
 @use '../detail-row-slots';
 
-// Ex-bridge `--menu-item-text` (Phase 7 Batch 48) — defaults + sandstone (ex global bridge).
-// @see docs/migration/phase-7-token-migration.md §Batch 48
-// Ex-bridge `--action-*` (Phase 7 Batch 49) — same values as pre-removal global `:root` + sandstone.
-// @see docs/migration/phase-7-token-migration.md §Batch 49
 :host {
   display: flex;
   flex-direction: column;
@@ -15,9 +11,6 @@
   --mdv-menu-item-text: var(--foreground);
   --mdv-action-text-default: var(--muted-foreground);
   --mdv-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
-  --mds-menu-item-text: var(--foreground);
-  --mds-action-text-default: var(--muted-foreground);
-  --mds-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 :host-context([data-theme='sandstone']) {
@@ -25,9 +18,6 @@
   --mdv-menu-item-text: #2f271f;
   --mdv-action-text-default: #6b5a47;
   --mdv-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
-  --mds-menu-item-text: #2f271f;
-  --mds-action-text-default: #6b5a47;
-  --mds-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
 .detail-section {
@@ -54,48 +44,27 @@
   min-width: 0;
 }
 
+// Add-metadata row: key + value fields share the value column (third grid cell).
+// @see docs/specs/ui/media-detail/metadata-section.md
 .add-metadata-row__center {
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-2);
+  grid-template-columns: 1.25rem minmax(4rem, auto) minmax(0, 1fr);
 }
 
-.add-metadata-row:not(.detail-row--editing) .detail-row__center {
-  grid-template-columns: 1fr;
-}
-
-.add-metadata-btn {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding: 0;
-  background: none;
-  border: none;
-}
-
-.add-metadata-input {
-  font-size: var(--font-size-md);
-  color: var(--foreground);
-  background: var(--card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.25rem var(--spacing-2);
-  font-family: inherit;
-  outline: none;
+.add-metadata-row__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
   min-width: 0;
-
-  &:focus {
-    border-color: var(--primary);
-    box-shadow: var(--interactive-focus-ring);
-  }
-}
-
-.add-metadata-confirm {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .add-metadata-key-wrap {
   position: relative;
   min-width: 0;
+}
+
+.add-metadata-confirm {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .add-metadata-suggestions {
@@ -105,8 +74,6 @@
   top: 100%;
   z-index: 300;
   margin-top: var(--spacing-1);
-  // Key-suggestion list horizontal inset (anchored surface rhythm).
-  // @see docs/specs/component/filters/dropdown-system.md
   --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
   padding-inline: var(--std-dropdown-padding-inline);
 }

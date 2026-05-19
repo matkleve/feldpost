@@ -1,0 +1,49 @@
+// Menu row interactive colors — unlayered so icon + label hover beat Tailwind utilities on the host.
+// Layout stays in `_option-menu-list.scss` (@layer components).
+// @see apps/web/src/app/shared/ui/menu/menu-variants.ts
+
+.option-menu-item > .option-menu-item__icon,
+.option-menu-item > .detail-actions__icon {
+  color: var(--muted-foreground);
+}
+
+.option-menu-item.text-destructive > .option-menu-item__icon,
+.option-menu-item.text-destructive > .detail-actions__icon,
+.option-menu-item.detail-actions__item--destructive > .detail-actions__icon {
+  color: var(--destructive);
+}
+
+.option-menu-item:hover:not(:disabled):not([disabled]),
+.option-menu-item:focus-visible:not(:disabled):not([disabled]),
+.option-menu-item[data-highlighted]:not(:disabled):not([disabled]) {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+
+  > .option-menu-item__icon,
+  > .detail-actions__icon {
+    color: var(--primary);
+  }
+}
+
+.option-menu-item.text-destructive:hover:not(:disabled):not([disabled]),
+.option-menu-item.text-destructive:focus-visible:not(:disabled):not([disabled]),
+.option-menu-item.text-destructive[data-highlighted]:not(:disabled):not([disabled]),
+.option-menu-item.detail-actions__item--destructive:hover:not(:disabled):not([disabled]),
+.option-menu-item.detail-actions__item--destructive:focus-visible:not(:disabled):not([disabled]) {
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+
+  > .option-menu-item__icon,
+  > .detail-actions__icon {
+    color: var(--destructive);
+  }
+}
+
+.option-menu-item:active:not(:disabled):not([disabled]) {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+.option-menu-item.text-destructive:active:not(:disabled):not([disabled]),
+.option-menu-item.detail-actions__item--destructive:active:not(:disabled):not([disabled]) {
+  background: color-mix(in srgb, var(--destructive) 15%, transparent);
+}

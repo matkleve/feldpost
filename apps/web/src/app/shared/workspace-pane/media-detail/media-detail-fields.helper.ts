@@ -7,6 +7,47 @@ import type { DetailEditingField, ImageRecord } from './media-detail-view.types'
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 
+export interface AddressFieldSnapshot {
+  street: string | null;
+  city: string | null;
+  district: string | null;
+  country: string | null;
+  address_label: string | null;
+}
+
+export const EMPTY_ADDRESS_SUGGESTION: ForwardGeocodeResult = {
+  lat: 0,
+  lng: 0,
+  addressLabel: '',
+  city: null,
+  district: null,
+  street: null,
+  streetNumber: null,
+  zip: null,
+  country: null,
+};
+
+export function snapshotAddressFields(img: ImageRecord): AddressFieldSnapshot {
+  return {
+    street: img.street,
+    city: img.city,
+    district: img.district,
+    country: img.country,
+    address_label: img.address_label,
+  };
+}
+
+export function addressSnapshotToSuggestion(snapshot: AddressFieldSnapshot): ForwardGeocodeResult {
+  return {
+    ...EMPTY_ADDRESS_SUGGESTION,
+    addressLabel: snapshot.address_label ?? '',
+    street: snapshot.street,
+    city: snapshot.city,
+    district: snapshot.district,
+    country: snapshot.country,
+  };
+}
+
 interface ImageDetailFieldsHelperDeps {
   services: {
     supabase: SupabaseService;
@@ -129,6 +170,8 @@ export class ImageDetailFieldsHelper {
     const img = this.deps.signals.image();
     if (!img) return;
 
+    const hasCoordinates = Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng);
+
     this.deps.signals.image.update((prev) =>
       prev
         ? {
@@ -138,6 +181,13 @@ export class ImageDetailFieldsHelper {
             district: suggestion.district,
             country: suggestion.country,
             address_label: suggestion.addressLabel,
+            ...(hasCoordinates
+              ? {
+                  latitude: suggestion.lat,
+                  longitude: suggestion.lng,
+                  location_unresolved: false,
+                }
+              : {}),
           }
         : prev,
     );
@@ -152,6 +202,13 @@ export class ImageDetailFieldsHelper {
         district: suggestion.district,
         country: suggestion.country,
         address_label: suggestion.addressLabel,
+        ...(hasCoordinates
+          ? {
+              latitude: suggestion.lat,
+              longitude: suggestion.lng,
+              location_status: 'resolved',
+            }
+          : {}),
       })
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
@@ -165,15 +222,18 @@ export class ImageDetailFieldsHelper {
               district: img.district,
               country: img.country,
               address_label: img.address_label,
+              latitude: img.latitude,
+              longitude: img.longitude,
+              location_unresolved: img.location_unresolved,
             }
           : prev,
       );
     }
   }
 
-  async revertCoordinatesToExif(): Promise<void> {
+  async revertCoordinatesToExif(options?: { suppressToast?: boolean }): Promise<boolean> {
     const img = this.deps.signals.image();
-    if (!img || img.exif_latitude == null || img.exif_longitude == null) return;
+    if (!img || img.exif_latitude == null || img.exif_longitude == null) return false;
 
     const oldLatitude = img.latitude;
     const oldLongitude = img.longitude;
@@ -215,7 +275,11 @@ export class ImageDetailFieldsHelper {
         ),
         type: 'error',
       });
-    } else {
+      this.deps.signals.saving.set(false);
+      return false;
+    }
+
+    if (!options?.suppressToast) {
       this.deps.services.toastService.show({
         message: this.deps.helpers.t(
           'workspace.imageDetail.toast.coordinatesReverted',
@@ -226,5 +290,50 @@ export class ImageDetailFieldsHelper {
     }
 
     this.deps.signals.saving.set(false);
+    return true;
+  }
+
+  async restoreCoordinates(latitude: number | null, longitude: number | null): Promise<boolean> {
+    const img = this.deps.signals.image();
+    if (!img) return false;
+
+    const previousLatitude = img.latitude;
+    const previousLongitude = img.longitude;
+
+    this.deps.signals.image.update((prev) =>
+      prev
+        ? {
+            ...prev,
+            latitude,
+            longitude,
+          }
+        : prev,
+    );
+
+    this.deps.signals.saving.set(true);
+    const { error } = await this.deps.services.supabase.client
+      .from('media_items')
+      .update({
+        latitude,
+        longitude,
+      })
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+
+    if (error) {
+      this.deps.signals.image.update((prev) =>
+        prev
+          ? {
+              ...prev,
+              latitude: previousLatitude,
+              longitude: previousLongitude,
+            }
+          : prev,
+      );
+      this.deps.signals.saving.set(false);
+      return false;
+    }
+
+    this.deps.signals.saving.set(false);
+    return true;
   }
 }

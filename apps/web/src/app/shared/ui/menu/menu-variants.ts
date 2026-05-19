@@ -6,13 +6,13 @@
 import { cva } from 'class-variance-authority';
 
 /** Host class for global menu-row styles (`styles/_option-menu-list.scss`). */
-export const MENU_ITEM_HOST_CLASS = 'fp-menu-item';
+export const OPTION_MENU_ITEM_CLASS = 'option-menu-item';
 
 /** Host class for section labels in menu lists. */
-export const MENU_LABEL_HOST_CLASS = 'fp-menu-label';
+export const OPTION_MENU_LABEL_CLASS = 'option-menu-label';
 
 /** Leading icon class on menu rows (token size + alignment). */
-export const MENU_ITEM_ICON_CLASS = 'option-menu-list__item-icon';
+export const OPTION_MENU_ITEM_ICON_CLASS = 'option-menu-item__icon';
 
 /** Menu panel surface (positioning remains caller-owned, e.g. DropdownShell). */
 export const menuContentVariants = cva(
@@ -22,21 +22,20 @@ export const menuContentVariants = cva(
 /** Single selectable row inside a menu / dropdown list. */
 export const menuItemVariants = cva(
   [
-    `${MENU_ITEM_HOST_CLASS} relative flex w-full min-w-0 cursor-pointer select-none items-center gap-2 rounded-sm min-h-8 px-2 py-1 text-xs leading-[1.4] outline-none`,
-    // Row chrome: primary-tinted hover / pressed / keyboard highlight (token timing — @see docs/design/motion.md)
+    `${OPTION_MENU_ITEM_CLASS} relative flex w-full min-w-0 cursor-pointer select-none items-center gap-2 rounded-sm min-h-8 px-2 py-1 text-xs leading-[1.4] outline-none`,
+    // Row hover/focus/active colors: `styles/_option-menu-item-states.scss` (unlayered).
+    // @see docs/design/motion.md
     'transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-ease-out)]',
-    'hover:bg-primary/[0.08] active:bg-primary/[0.12]',
-    'focus-visible:bg-primary/[0.08] data-[highlighted]:bg-primary/[0.08]',
     // Disabled: no hover/press fill (canonical — @see docs/design/state-visuals.md#disabled-canonical)
     'data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
-    'data-[disabled]:hover:bg-transparent data-[disabled]:active:bg-transparent',
+    'data-[disabled]:hover:bg-transparent data-[disabled]:hover:text-inherit data-[disabled]:active:bg-transparent',
     'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-    'disabled:hover:bg-transparent disabled:active:bg-transparent',
+    'disabled:hover:bg-transparent disabled:hover:text-inherit disabled:active:bg-transparent',
   ].join(' '),
 );
 
 export const menuSeparatorVariants = cva('my-1 h-px bg-muted');
 
 export const menuLabelVariants = cva(
-  `${MENU_LABEL_HOST_CLASS} px-2 pt-1 pb-0 text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground`,
+  `${OPTION_MENU_LABEL_CLASS} px-2 pt-1 pb-0 text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground`,
 );

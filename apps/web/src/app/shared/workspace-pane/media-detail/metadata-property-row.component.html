@@ -1,6 +1,7 @@
 <div
   class="detail-row"
   [class.detail-row--editing]="editing()"
+  [attr.data-detail-active-editor]="editing() ? 'metadata' : null"
 >
   <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
   <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
@@ -10,40 +11,54 @@
     <span class="detail-row__label" data-i18n-skip [title]="metaKey()">{{ metaKey() }}</span>
 
     @if (editing()) {
-      <input
-        #editInput
-        hlmInput
-        class="detail-row__input"
-        type="text"
-        [value]="metaValue()"
-        [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-        (keydown.enter)="commitEdit($event)"
-        (keydown.escape)="cancelEdit()"
-        (blur)="commitEdit($event)"
-      />
+      <div class="detail-row__value-edit">
+        <input
+          #editInput
+          hlmInput
+          class="detail-row__input"
+          type="text"
+          [value]="metaValue()"
+          [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+          (keydown.enter)="commitEdit($event)"
+          (keydown.escape)="cancelEdit()"
+          (blur)="commitEdit($event)"
+        />
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--save"
+          type="button"
+          [attr.aria-label]="t('workspace.metadata.row.save.aria', 'Save') + ' ' + metaKey()"
+          [attr.title]="t('workspace.metadata.row.save.title', 'Save')"
+          (click)="commitEditFromSave()"
+        >
+          <span class="material-icons" aria-hidden="true">check</span>
+        </button>
+      </div>
     } @else {
-      <span
-        class="detail-row__value detail-row__value--static"
-        data-i18n-skip
-        [title]="metaValue() || t('workspace.metadata.row.value.empty', '-')"
-      >
+      <button class="detail-row__value" type="button" (click)="startEdit()">
         {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}
-      </span>
+      </button>
     }
   </div>
 
-  <button
-    hlmBtn
-    variant="ghost"
-    size="icon"
-    class="detail-row-action detail-row-action--r1"
-    type="button"
-    [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-    [title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-    (click)="startEdit()"
-  >
-    <span class="material-icons" aria-hidden="true">edit</span>
-  </button>
+  @if (!editing()) {
+    <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--r1"
+      type="button"
+      [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+      [attr.title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+      (click)="startEdit()"
+    >
+      <span class="material-icons" aria-hidden="true">edit</span>
+    </button>
+  } @else {
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+  }
 
   <button
     hlmBtn

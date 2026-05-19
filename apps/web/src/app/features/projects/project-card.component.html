@@ -2,9 +2,8 @@
   class="project-card"
   role="article"
   [attr.aria-label]="project().name"
-  [style.--project-item-color]="projectColorToken()"
 >
-  <!-- Stable state: thumbnail zone — mosaic / map stub / initials -->
+  <!-- Stable state: thumbnail zone — mosaic / map stub / building placeholder -->
   <!-- @see docs/specs/component/project/project-card.md § Visual Zones -->
   <div class="project-card__thumbnail" aria-hidden="true">
     @if (hasThumbnails()) {
@@ -18,8 +17,31 @@
         <span class="material-icons project-card__map-pin" aria-hidden="true">place</span>
       </div>
     } @else {
-      <div class="project-card__initials">
-        {{ initials() }}
+      <div class="project-card__placeholder">
+        <!-- Tabler building-estate (inline SVG — app uses Material Icons elsewhere) -->
+        <svg
+          class="project-card__placeholder-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 21h18" />
+          <path d="M19 21v-4" />
+          <path d="M9 8h1" />
+          <path d="M9 12h1" />
+          <path d="M9 16h1" />
+          <path d="M14 8h1" />
+          <path d="M14 12h1" />
+          <path d="M14 16h1" />
+          <path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14" />
+        </svg>
       </div>
     }
   </div>
@@ -107,7 +129,7 @@
               role="menuitem"
               (click)="onMenuAction(action)"
             >
-              <span class="material-icons option-menu-list__item-icon" aria-hidden="true">{{
+              <span class="material-icons option-menu-item__icon" aria-hidden="true">{{
                 actionIcon(action)
               }}</span>
               <span class="min-w-0 flex-1 text-left">{{ actionLabel(action) }}</span>

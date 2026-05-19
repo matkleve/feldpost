@@ -16,6 +16,7 @@
   <div
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'captured_at'"
+    [attr.data-detail-active-editor]="editingField() === 'captured_at' ? 'captured_at' : null"
   >
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
@@ -55,6 +56,7 @@
   <div
     class="detail-row"
     [class.detail-row--editing]="editingField() === 'project_ids'"
+    [attr.data-detail-active-editor]="editingField() === 'project_ids' ? 'project_ids' : null"
   >
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>

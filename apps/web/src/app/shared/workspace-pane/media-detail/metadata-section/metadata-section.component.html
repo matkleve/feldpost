@@ -7,53 +7,71 @@
         [key]="entry.key"
         [value]="entry.value"
         (valueChanged)="valueChanged.emit({ entry, newValue: $event })"
-        (entryRemoved)="entryRemoved.emit(entry)"
+        (deleteRequested)="entryRemoved.emit(entry)"
       />
     }
 
     @if (showAddForm()) {
-      <div class="detail-row add-metadata-row detail-row--editing">
+      <div
+        class="detail-row add-metadata-row detail-row--editing"
+        data-detail-active-editor="metadata-add"
+      >
         <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
         <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
         <div class="detail-row__center add-metadata-row__center">
-          <div class="add-metadata-key-wrap">
+          <span class="material-icons detail-row__icon" aria-hidden="true">add</span>
+          <span class="detail-row__label">{{
+            t('workspace.metadata.action.add', 'Add metadata')
+          }}</span>
+          <div class="add-metadata-row__fields">
+            <div class="add-metadata-key-wrap">
+              <input
+                #newKeyInput
+                hlmInput
+                class="detail-row__input"
+                type="text"
+                [placeholder]="t('workspace.metadata.input.key.placeholder', 'Key')"
+                [attr.aria-label]="t('workspace.metadata.input.key.aria', 'New metadata key')"
+                (input)="onMetadataKeyInput(newKeyInput.value)"
+                (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
+                (keydown.enter)="newValueInput.focus()"
+              />
+              @if (keySuggestions().length > 0) {
+                <div
+                  class="add-metadata-suggestions option-menu-surface option-menu-list flex flex-col"
+                >
+                  @for (suggestion of keySuggestions(); track suggestion) {
+                    <button
+                      hlmMenuItem
+                      class="w-full"
+                      type="button"
+                      (click)="
+                        newKeyInput.value = suggestion;
+                        keySuggestions.set([]);
+                        newValueInput.focus()
+                      "
+                    >
+                      <span
+                        class="material-icons option-menu-item__icon"
+                        aria-hidden="true"
+                        >label</span>
+                      <span class="min-w-0 flex-1 text-left" data-i18n-skip>{{ suggestion }}</span>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
             <input
-              #newKeyInput
-              class="add-metadata-input"
+              #newValueInput
+              hlmInput
+              class="detail-row__input"
               type="text"
-              [placeholder]="t('workspace.metadata.input.key.placeholder', 'Key')"
-              [attr.aria-label]="t('workspace.metadata.input.key.aria', 'New metadata key')"
-              (input)="onMetadataKeyInput(newKeyInput.value)"
+              [placeholder]="t('workspace.metadata.input.value.placeholder', 'Value')"
+              [attr.aria-label]="t('workspace.metadata.input.value.aria', 'New metadata value')"
+              (keydown.enter)="addMetadata(newKeyInput.value, newValueInput.value)"
               (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
-              (keydown.enter)="newValueInput.focus()"
             />
-            @if (keySuggestions().length > 0) {
-              <div class="add-metadata-suggestions option-menu-surface option-menu-list flex flex-col">
-                @for (suggestion of keySuggestions(); track suggestion) {
-                  <button
-                    hlmMenuItem
-                    class="w-full"
-                    type="button"
-                    (click)="
-                      newKeyInput.value = suggestion; keySuggestions.set([]); newValueInput.focus()
-                    "
-                  >
-                    <span class="material-icons option-menu-list__item-icon" aria-hidden="true">label</span>
-                    <span class="min-w-0 flex-1 text-left" data-i18n-skip>{{ suggestion }}</span>
-                  </button>
-                }
-              </div>
-            }
           </div>
-          <input
-            #newValueInput
-            class="add-metadata-input"
-            type="text"
-            [placeholder]="t('workspace.metadata.input.value.placeholder', 'Value')"
-            [attr.aria-label]="t('workspace.metadata.input.value.aria', 'New metadata value')"
-            (keydown.enter)="addMetadata(newKeyInput.value, newValueInput.value)"
-            (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
-          />
         </div>
         <button
           class="detail-row-action detail-row-action--r1 add-metadata-confirm"
@@ -72,14 +90,12 @@
         <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
         <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
         <div class="detail-row__center">
-          <button
-            hlmMenuItem
-            class="add-metadata-btn inline-flex w-full items-center justify-start text-muted-foreground"
-            type="button"
-            (click)="showAddForm.set(true)"
-          >
-            <span class="material-icons option-menu-list__item-icon" aria-hidden="true">add</span>
-            {{ t('workspace.metadata.action.add', 'Add metadata') }}
+          <span class="material-icons detail-row__icon" aria-hidden="true">add</span>
+          <span class="detail-row__label">{{
+            t('workspace.metadata.action.add', 'Add metadata')
+          }}</span>
+          <button class="detail-row__value" type="button" (click)="showAddForm.set(true)">
+            {{ t('workspace.imageDetail.value.empty', '—') }}
           </button>
         </div>
         <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>

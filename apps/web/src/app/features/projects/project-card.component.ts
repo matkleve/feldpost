@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import type { ProjectColorKey, ProjectSummary } from '../../core/projects/projects.types';
 import type { ChipVariant } from '../../shared/components/chip/chip.component';
-import { colorTokenFor, formatRelativeDate } from './projects-formatters.logic';
+import { formatRelativeDate } from './projects-formatters.logic';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import { ChipComponent } from '../../shared/components/chip/chip.component';
@@ -66,10 +66,6 @@ export class ProjectCardComponent implements OnDestroy {
   readonly menuPanel = signal<ProjectCardMenuPanel>('actions');
   readonly menuPosition = signal<{ x: number; y: number } | null>(null);
 
-  // Derived accent color token applied to CSS custom property on host
-  // @see docs/specs/component/project/project-card.md § Internalized Logic
-  readonly projectColorToken = computed(() => colorTokenFor(this.project().colorKey));
-
   // Relative-time label — computed so Date.now() is never called in the template
   // @see docs/specs/component/project/project-card.md § Activity line
   readonly relativeActivity = computed(() => {
@@ -78,18 +74,9 @@ export class ProjectCardComponent implements OnDestroy {
     return formatRelativeDate(at, this.t);
   });
 
-  // Thumbnail zone: mosaic > map stub > initials
+  // Thumbnail zone: mosaic > map stub > building placeholder
   readonly hasThumbnails = computed(() => (this.project().thumbnailUrls?.length ?? 0) > 0);
   readonly hasLocation = computed(() => !!this.project().location);
-
-  // Initials from project name (first two words, one letter each)
-  readonly initials = computed(() => {
-    const words = this.project().name.trim().split(/\s+/);
-    return words
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() ?? '')
-      .join('');
-  });
 
   // Status chip variant and icon mapping — @see project-card.md § Chip Language
   readonly statusChipVariant = computed<ChipVariant>(() => {

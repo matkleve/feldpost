@@ -348,6 +348,7 @@ html[data-theme="sandstone"] {
 }
 
 @include meta.load-css('styles/option-menu-list');
+@include meta.load-css('styles/option-menu-item-states');
 
 // Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).
 // @see docs/migration/phase-8-global-scss-elimination.md §7
