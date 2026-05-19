@@ -52,7 +52,8 @@
   }
 }
 
-.map-upload-btn {
+// :host + element raises specificity over hlmBtn Tailwind utilities on the same node.
+:host button.map-upload-btn {
   --upload-progress: 0%;
 
   width: 2.75rem;
@@ -74,7 +75,6 @@
     width 180ms var(--motion-standard);
   flex-shrink: 0;
   position: relative;
-  isolation: isolate;
 
   .material-icons {
     font-size: var(--font-size-xl);
