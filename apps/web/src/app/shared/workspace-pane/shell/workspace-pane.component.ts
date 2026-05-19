@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
-import { WorkspacePaneHeaderComponent } from '../chrome/workspace-pane-header/workspace-pane-header.component';
-import { WorkspacePaneToolbarComponent } from '../chrome/workspace-pane-toolbar/workspace-pane-toolbar.component';
+import { PaneHeaderComponent } from '../chrome/pane-header.component';
+import { WorkspaceToolbarComponent } from '../toolbar/workspace-toolbar/workspace-toolbar.component';
 import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from '../media-detail/media-detail-view.component';
 import { WorkspacePaneFooterComponent } from '../footer/workspace-pane-footer/workspace-pane-footer.component';
@@ -18,8 +18,8 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
 @Component({
   selector: 'app-workspace-pane',
   imports: [
-    WorkspacePaneHeaderComponent,
-    WorkspacePaneToolbarComponent,
+    PaneHeaderComponent,
+    WorkspaceToolbarComponent,
     WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
     WorkspacePaneFooterComponent,

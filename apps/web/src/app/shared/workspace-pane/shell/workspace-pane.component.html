@@ -4,7 +4,7 @@
   role="region"
   [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
 >
-    <app-workspace-pane-header
+    <app-pane-header
       [title]="resolvedTitle()"
       [editable]="titleEditable()"
       [editEnabled]="titleEditEnabled()"
@@ -17,7 +17,7 @@
       (editRequested)="onTitleEditRequest()"
       (colorPickerRequested)="onColorPickerRequest()"
       (close)="close()"
-    ></app-workspace-pane-header>
+    ></app-pane-header>
 
     <div
       class="workspace-pane__tabs"
@@ -58,7 +58,7 @@
         (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       />
     } @else if (activeTab() === 'selected-items') {
-      <app-workspace-pane-toolbar />
+      <app-workspace-toolbar />
       <app-workspace-selected-items-grid
         [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
         (thumbnailClicked)="onThumbnailClick($event)"

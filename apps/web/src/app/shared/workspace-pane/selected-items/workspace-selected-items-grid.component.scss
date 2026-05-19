@@ -1,5 +1,8 @@
+// Flex child of .workspace-pane — scroll owner for selected-items tab
+// @see docs/specs/ui/workspace/workspace-pane.md
 :host {
   min-height: 0;
+  min-width: 0;
   overflow-y: scroll;
 }
 

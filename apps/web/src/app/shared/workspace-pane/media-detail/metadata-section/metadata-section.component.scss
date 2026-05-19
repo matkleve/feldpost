@@ -2,10 +2,14 @@
 // @see docs/migration/phase-7-token-migration.md §Batch 48
 // Ex-bridge `--action-*` (Phase 7 Batch 49) — same values as pre-removal global `:root` + sandstone.
 // @see docs/migration/phase-7-token-migration.md §Batch 49
+// Grid cell of detail-content — metadata list
+// @see docs/specs/ui/workspace/workspace-pane.md
 :host {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
+  min-height: 0;
+  min-width: 0;
   --mds-menu-item-text: var(--foreground);
   --mds-action-text-default: var(--muted-foreground);
   --mds-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);

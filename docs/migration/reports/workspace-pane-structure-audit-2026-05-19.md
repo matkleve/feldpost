@@ -250,3 +250,74 @@ app-workspace-pane-shell
 | Layout host | `layout/authenticated-app-layout.component.html|scss` |
 
 *Report only — no code changes.*
+
+---
+
+## Refactor execution — 2026-05-19
+
+All 4 steps executed in order. Each step was followed by a passing `ng build` before proceeding.
+
+### Step 1 — Deleted orphan/pass-through components ✅
+
+- **Deleted** `chrome/workspace-pane-header/` (both `.ts` + `.scss`) — pure pass-through with no added logic.
+- **Replaced** `<app-workspace-pane-header>` in `workspace-pane.component.html` with `<app-pane-header>` directly (identical inputs/outputs).
+- **Updated** `workspace-pane.component.ts` import: `WorkspacePaneHeaderComponent` → `PaneHeaderComponent`.
+- **Deleted** `chrome/group-tab-bar.component.ts` + `.scss` (orphan — no references outside its own file).
+- **Deleted** `toolbar/sorting-controls.component.ts` + `.scss` (orphan — same).
+- **Deleted** `media-detail/editable-property-row.component.ts` + `.html` + `.scss` (orphan — same).
+
+**Component count before:** 22 (20 live, 2 orphaned per audit). After step 1: 17 (16 live, 1 dead folder removed).
+
+### Step 2 — Flattened toolbar stack ✅
+
+- **Deleted** `chrome/workspace-pane-toolbar/workspace-pane-toolbar.component.ts` + `.scss`.
+- **Replaced** `<app-workspace-pane-toolbar />` in `workspace-pane.component.html` with `<app-workspace-toolbar />` directly.
+- **Updated** `workspace-pane.component.ts` import: `WorkspacePaneToolbarComponent` → `WorkspaceToolbarComponent`.
+- **Transferred** `.workspace-pane-toolbar` padding/sizing (`width: min(60rem, 100%); margin-inline: auto; padding: var(--spacing-2) var(--spacing-4); flex-shrink: 0`) to `workspace-toolbar.component.scss` `:host`, changing it from `display: contents` to `display: block`.
+- **Kept** `shared/pane-toolbar/` unchanged — `app-pane-toolbar` is used by `projects-toolbar` and `media` components outside workspace-pane.
+
+Toolbar depth reduced from 4 layers (workspace-pane-toolbar → pane-toolbar → 3 slot divs → workspace-toolbar) to 1 (workspace-toolbar directly).
+
+### Step 3 — Fixed overflow/scroll ownership ✅
+
+In `workspace-pane.component.scss`:
+- `:host { overflow: hidden }` → `overflow: visible`
+- `.workspace-pane { overflow: hidden }` → `overflow: visible`
+
+Triple clipping reduced to single clip on `workspace-pane-shell` (intentional, for mobile sheet animation). Each tab's content component remains its own scroll owner (`overflow-y: scroll` on `app-workspace-selected-items-grid` `:host`; `.detail-scroll` inside `app-media-detail-view`).
+
+### Step 4 — Added missing `min-width: 0` / `min-height: 0` ✅
+
+Added to `:host` in 8 flex/grid child components that were missing them per the audit:
+
+| Component | Added |
+| --- | --- |
+| `app-workspace-selected-items-grid` | `min-width: 0` |
+| `app-pane-header` | `min-height: 0; min-width: 0` |
+| `app-pane-footer` | `min-height: 0; min-width: 0` |
+| `app-media-detail-media-viewer` | `min-height: 0; min-width: 0` |
+| `app-metadata-section` | `min-height: 0; min-width: 0` |
+| `app-detail-actions` | `min-height: 0; min-width: 0` |
+| `app-address-search` | `min-height: 0; min-width: 0` |
+| `app-captured-date-editor` | `display: block; min-height: 0; min-width: 0` |
+
+### Final build result
+
+`ng build` passed after every step, and passed clean at the end. Only pre-existing CommonJS ESM warnings present (leaflet, jszip, qrcode, heic2any) — no new warnings or errors.
+
+### Component count summary
+
+| | Before | After |
+| --- | ---: | ---: |
+| Components defined under `workspace-pane/` | 22 | **15** |
+| Pass-through / redundant wrapper boundaries live in tree | ≥4 | **0** |
+| Layers from `.workspace-pane` root to `app-workspace-toolbar` | 4 | **1** |
+| `overflow: hidden` clip layers (shell + pane) | 3 | **1** |
+
+### Not touched (deferred per plan)
+
+- Media-detail SCSS split / deduplication
+- Dialog deduplication (footer vs grid)
+- Z-index layer map
+- 5-column grid detail rows
+- `shared/pane-toolbar/` (kept — used externally)

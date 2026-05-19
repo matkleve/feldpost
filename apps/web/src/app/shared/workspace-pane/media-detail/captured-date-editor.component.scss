@@ -4,7 +4,12 @@
 // @see docs/migration/phase-7-token-migration.md §Batch 48
 // Ex-bridge `--action-bg-hover` (Phase 7 Batch 49) — global `:root` + sandstone (`--action-text-active` was `var(--primary)`).
 // @see docs/migration/phase-7-token-migration.md §Batch 49
+// Flex child in detail row — calendar popover host
+// @see docs/specs/ui/workspace/workspace-pane.md
 :host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
   --cde-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
   --cde-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
   --cde-menu-item-text: var(--foreground);

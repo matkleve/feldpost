@@ -1,5 +1,9 @@
+// Flex child of .workspace-pane — header row, shrinks to zero
+// @see docs/specs/ui/workspace/workspace-pane.md
 :host {
   display: block;
+  min-height: 0;
+  min-width: 0;
 }
 
 .pane-header {
@@ -28,16 +32,16 @@
   block-size: 2rem;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--border) 82%, var(--foreground));
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: color-mix(in srgb, var(--card) 94%, var(--background));
   cursor: pointer;
   transition:
-    border-color 140ms ease,
-    transform 140ms ease,
-    box-shadow 140ms ease;
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .pane-header__color-btn:hover,
@@ -50,7 +54,7 @@
 .pane-header__color-swatch {
   inline-size: 100%;
   block-size: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .pane-header__color-icon {
@@ -86,7 +90,7 @@
   color: var(--primary);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 120ms ease-out;
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .pane-header__title-btn:hover .pane-header__title-edit,
@@ -118,15 +122,15 @@
   text-align: center;
   width: min(30rem, calc(100% - 6rem));
   min-height: 2.25rem;
-  padding: 0.25rem 0.75rem;
+  padding: var(--spacing-1) var(--spacing-3);
   border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--primary) 12%, var(--card));
   outline: none;
   transition:
-    border-color 120ms ease-out,
-    box-shadow 120ms ease-out,
-    background 120ms ease-out;
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    background var(--motion-duration-fast) var(--motion-ease-out);
 
   &:focus-visible {
     border-color: var(--primary);
@@ -150,7 +154,7 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--muted-foreground);
-  transition: background 120ms ease-out;
+  transition: background var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover {
     background: color-mix(in srgb, var(--muted-foreground) 12%, transparent);

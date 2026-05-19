@@ -1,5 +1,9 @@
+// Grid child of detail-content — media viewer region
+// @see docs/specs/ui/workspace/workspace-pane.md
 :host {
   display: block;
+  min-height: 0;
+  min-width: 0;
 }
 
 .detail-image-wrap {

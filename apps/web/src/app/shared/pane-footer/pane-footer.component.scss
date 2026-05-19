@@ -1,5 +1,9 @@
+// Flex child in pane column — sticky footer, must not collapse text
+// @see docs/specs/component/workspace/pane-footer.md
 :host {
   display: block;
+  min-height: 0;
+  min-width: 0;
 }
 
 .pane-footer {

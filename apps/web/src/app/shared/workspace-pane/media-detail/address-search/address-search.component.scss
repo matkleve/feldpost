@@ -1,8 +1,12 @@
 // Ex-bridge `--menu-item-text` (Phase 7 Batch 48) — defaults + sandstone (ex global bridge).
 // @see docs/migration/phase-7-token-migration.md §Batch 48
+// Grid row in detail-content — geocode trigger + results overlay
+// @see docs/specs/ui/workspace/workspace-pane.md
 :host {
   display: block;
   position: relative;
+  min-height: 0;
+  min-width: 0;
   --ads-menu-item-text: var(--foreground);
 }
 
