@@ -1,4 +1,11 @@
-<!-- Workspace Pane — right panel (desktop), bottom sheet (mobile, future) -->
+<!-- Workspace Pane — host IS the shell box; drag divider is a flex-row sibling at layout level -->
+<app-drag-divider
+  [currentWidth]="currentWidth()"
+  [minWidth]="minWidth()"
+  [maxWidth]="maxWidth()"
+  [defaultWidth]="defaultWidth()"
+  (widthChange)="widthChange.emit($event)"
+/>
 <div
   class="workspace-pane"
   role="region"

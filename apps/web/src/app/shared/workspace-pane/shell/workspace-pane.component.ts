@@ -6,6 +6,7 @@ import { WorkspaceToolbarComponent } from '../toolbar/workspace-toolbar/workspac
 import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from '../media-detail/media-detail-view.component';
 import { WorkspacePaneFooterComponent } from '../footer/workspace-pane-footer/workspace-pane-footer.component';
+import { DragDividerComponent } from './drag-divider/drag-divider.component';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
@@ -15,7 +16,9 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
 
 /**
  * Stable state: `activeTab` switches the primary region (selected-items grid vs media detail) while the shell layout stays fixed.
+ * Host IS the shell box — owns width, clip animation, background, and drag-divider.
  * @see docs/specs/ui/workspace/workspace-pane.md
+ * @see docs/specs/ui/workspace/workspace-pane-shell.md
  */
 @Component({
   selector: 'app-workspace-pane',
@@ -27,9 +30,13 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
     WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
     WorkspacePaneFooterComponent,
+    DragDividerComponent,
   ],
   templateUrl: './workspace-pane.component.html',
   styleUrl: './workspace-pane.component.scss',
+  host: {
+    '[style.width.px]': 'currentWidth()',
+  },
 })
 export class WorkspacePaneComponent {
   private readonly i18nService = inject(I18nService);
@@ -37,7 +44,16 @@ export class WorkspacePaneComponent {
   protected readonly selectionService = inject(WorkspaceSelectionService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
-  // ── Inputs from MapShell ──────────────────────────────────────────────────
+  // ── Shell geometry inputs (formerly WorkspacePaneShellComponent) ──────────
+  readonly currentWidth = input(360);
+  readonly minWidth = input(280);
+  readonly maxWidth = input(640);
+  readonly defaultWidth = input(360);
+
+  // ── Shell outputs ─────────────────────────────────────────────────────────
+  readonly widthChange = output<number>();
+
+  // ── Inputs from layout ────────────────────────────────────────────────────
   readonly detailMediaId = input<string | null>(null);
   readonly detailAddressSearchRequestMediaId = input<string | null>(null);
   readonly detailAddressSearchRequestId = input(0);

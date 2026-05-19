@@ -6,41 +6,37 @@
 </div>
 
 @if (photoPanelOpen()) {
-  <app-workspace-pane-shell
-    [open]="true"
+  <app-workspace-pane
     [currentWidth]="workspacePaneWidth()"
     [minWidth]="workspacePaneMinWidth()"
     [maxWidth]="workspacePaneMaxWidth()"
     [defaultWidth]="workspacePaneDefaultWidth()"
     (widthChange)="onWorkspaceWidthChange($event)"
+    [activeTab]="workspacePaneActiveTab()"
+    [detailMediaId]="detailMediaId()"
+    [detailAddressSearchRequestMediaId]="detailAddressSearchRequest()?.mediaId ?? null"
+    [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
+    [linkedHoveredMediaIds]="linkedHoveredWorkspaceMediaIds()"
+    (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
+    (closed)="closeWorkspacePane()"
+    (detailClosed)="closeDetailView()"
+    (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
+    (detailRequested)="openDetailView($event)"
+    (zoomToLocationRequested)="onZoomToLocationRequested($event)"
+    (uploadLocationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
+    (workspaceItemHoverStarted)="onWorkspaceItemHoverStartedFromPane($event)"
+    (workspaceItemHoverEnded)="onWorkspaceItemHoverEndedFromPane($event)"
   >
-    <app-workspace-pane
-      [activeTab]="workspacePaneActiveTab()"
-      [detailMediaId]="detailMediaId()"
-      [detailAddressSearchRequestMediaId]="detailAddressSearchRequest()?.mediaId ?? null"
-      [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
-      [linkedHoveredMediaIds]="linkedHoveredWorkspaceMediaIds()"
-      (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
-      (closed)="closeWorkspacePane()"
-      (detailClosed)="closeDetailView()"
-      (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
-      (detailRequested)="openDetailView($event)"
+    <app-upload-panel
+      data-workspace-upload-tab
+      [visible]="true"
+      [embeddedInPane]="true"
+      (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
       (zoomToLocationRequested)="onZoomToLocationRequested($event)"
-      (uploadLocationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
-      (workspaceItemHoverStarted)="onWorkspaceItemHoverStartedFromPane($event)"
-      (workspaceItemHoverEnded)="onWorkspaceItemHoverEndedFromPane($event)"
-    >
-      <app-upload-panel
-        data-workspace-upload-tab
-        [visible]="true"
-        [embeddedInPane]="true"
-        (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
-        (zoomToLocationRequested)="onZoomToLocationRequested($event)"
-        (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
-        (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
-        (locationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
-        (locationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
-      />
-    </app-workspace-pane>
-  </app-workspace-pane-shell>
+      (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
+      (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
+      (locationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
+      (locationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
+    />
+  </app-workspace-pane>
 }

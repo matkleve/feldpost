@@ -17,9 +17,10 @@
     width: 100%;
     max-width: 100%;
     height: 100%;
-    // `scrollbar-gutter: stable` + `100vw` sizing elsewhere can exceed the layout box; clip page-level x overflow.
+    // Full-screen app — clip both axes so no root scrollbar ever steals layout width.
+    // All 100vw usages subtract a margin; fixed overlays are not clipped by clip on ancestor.
     // @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
-    overflow-x: clip;
+    overflow: clip;
     font-size: var(--font-size-md);
     line-height: 1.45;
     // Stack matches tweakcn `--font-sans` (DM Sans); var resolves after :root in this bundle.
@@ -29,15 +30,11 @@
     color: var(--foreground);
   }
 
-  html {
-    scrollbar-gutter: stable;
-  }
-
   app-root {
     display: block;
     width: 100%;
     max-width: 100%;
     height: 100%;
-    overflow-x: clip;
+    overflow: clip;
   }
 }

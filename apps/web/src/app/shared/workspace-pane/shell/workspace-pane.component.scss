@@ -1,15 +1,78 @@
-// Workspace Pane — flex child of MapShell row layout.
-// NOT position: fixed — the parent flex container handles positioning.
-// Single clip boundary is workspace-pane-shell (for animation); each tab content owns scroll.
+// Host IS the workspace pane shell box — flex-row sibling of the map area, owns width/clip/background.
+// Drag-divider is the first child; div.workspace-pane is the column flex region beside it.
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
 
+// Shell geometry, surface, and stacking context
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
 :host {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  align-self: stretch;
   display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
+  flex-direction: row;
+  box-sizing: border-box;
   min-width: 0;
+  min-height: 0;
   height: 100%;
-  overflow: visible;
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+}
+
+// Desktop: clip boundary and entrance animation
+// @see docs/design/motion.md
+@media (min-width: 48rem) {
+  :host {
+    overflow: hidden;
+    animation: workspace-pane-clip-in-right 200ms ease-out 16ms backwards;
+  }
+}
+
+// Mobile sheet: bottom-anchored panel
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+@media (max-width: 47.9375rem) {
+  :host {
+    width: 100% !important;
+    height: 40vh;
+    position: fixed;
+    bottom: 3.5rem;
+    left: 0;
+    right: 0;
+    // Matches former `var(--z-panel)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
+    z-index: 100;
+    border-radius: 0;
+    animation: workspace-pane-clip-in-up 300ms cubic-bezier(0.4, 0, 0.2, 1) 16ms backwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    animation: none;
+  }
+}
+
+// Desktop clip-path entrance (duration set on element)
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+@keyframes workspace-pane-clip-in-right {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+// Mobile sheet clip-path entrance
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+@keyframes workspace-pane-clip-in-up {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
 // Flex column container — fills shell height, clips content to shell boundary
