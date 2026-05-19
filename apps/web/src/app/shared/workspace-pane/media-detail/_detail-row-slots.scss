@@ -1,6 +1,8 @@
 // Shared five-slot detail row: action, action, center (icon/label/value), action, action.
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 
+@use './detail-row-field';
+
 // Match block content width/inset to grid column 3 (between the four action rails).
 @mixin detail-row-center-width {
   --_detail-row-action-size: var(--detail-row-action-size, var(--detail-row-height, 2rem));
@@ -49,10 +51,6 @@
     .detail-row-action--danger:is(button) {
       color: var(--destructive);
     }
-  }
-
-  &--editing .detail-row__center {
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
   }
 
   &--readonly {
@@ -108,6 +106,7 @@
 }
 
 .detail-row--editing .detail-row__center {
+  @include detail-row-field.detail-row-editing-center;
   position: relative;
 
   app-captured-date-editor {
@@ -191,48 +190,6 @@
   text-align: right;
   white-space: normal;
   line-height: 1.35;
-}
-
-.detail-row__value-edit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--spacing-1);
-  min-width: 0;
-}
-
-.detail-row__value-edit .detail-row-action--save {
-  opacity: 1;
-  pointer-events: auto;
-  flex-shrink: 0;
-  height: var(--detail-row-action-size);
-  width: var(--detail-row-action-size);
-  min-height: var(--detail-row-action-size);
-  min-width: var(--detail-row-action-size);
-  align-self: center;
-}
-
-.detail-row__value-edit .detail-row__input {
-  flex: 1 1 auto;
-}
-
-.detail-row__input {
-  min-width: 0;
-  font-size: var(--font-size-xs);
-  color: var(--foreground);
-  background: var(--card);
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-sm);
-  padding: 0.125rem var(--spacing-2);
-  font-family: inherit;
-  text-align: right;
-  outline: none;
-  box-shadow: var(--interactive-focus-ring);
-
-  &--select {
-    text-align: right;
-    appearance: auto;
-  }
 }
 
 // Square action rail cells — height follows row (center), width matches height.

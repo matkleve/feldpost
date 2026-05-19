@@ -43,38 +43,66 @@
     [attr.data-detail-active-editor]="editingField() === 'captured_at' ? 'captured_at' : null"
   >
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-row-action detail-row-action--l1"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
-      [attr.title]="t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')"
-      (click)="capturedAtEditRequested.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">edit</span>
-    </button>
-    <div class="detail-row__center">
-      <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
-      <span class="detail-row__label">{{
-        t('workspace.imageDetail.field.captured', 'Captured')
-      }}</span>
-      @if (editingField() === 'captured_at') {
+    @if (editingField() === 'captured_at') {
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.captured', 'Captured')
+        }}</span>
+        <input
+          class="detail-row__field-input detail-row__field-slot detail-row__field-input--trigger"
+          type="text"
+          readonly
+          tabindex="0"
+          [value]="captureDate() ?? ''"
+          [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
+        />
         <app-captured-date-editor
           [initialDate]="editDate()"
           [initialTime]="editTime()"
           (save)="capturedAtSaved.emit($event)"
           (cancel)="editingCancelled.emit()"
         />
-      } @else {
-        <button class="detail-row__value" type="button" (click)="capturedAtEditRequested.emit()">
+      </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
+        [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
+        (click)="editingCancelled.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+    } @else {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--l1"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
+        [attr.title]="t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')"
+        (click)="capturedAtEditRequested.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.captured', 'Captured')
+        }}</span>
+        <button class="detail-row__field-trigger" type="button" (click)="capturedAtEditRequested.emit()">
           {{ captureDate() ?? t('workspace.imageDetail.value.empty', '—') }}
         </button>
-      }
-    </div>
-    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+      </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    }
   </div>
 
   <div
@@ -107,7 +135,7 @@
       @if (editingField() === 'project_ids') {
         <div
           #projectEditor
-          class="detail-tags"
+          class="detail-tags detail-row__field-slot"
           role="group"
           [attr.aria-label]="t('workspace.imageDetail.projects.manage.aria', 'Manage projects')"
         >
@@ -133,7 +161,6 @@
 
             <input
               #projectSearchInput
-              hlmInput
               class="detail-tags__input"
               type="text"
               [value]="projectSearch()"
@@ -216,7 +243,7 @@
         </div>
       } @else {
         <button
-          class="detail-row__value"
+          class="detail-row__field-trigger"
           type="button"
           (click)="fieldEditRequested.emit('project_ids')"
         >
@@ -224,8 +251,24 @@
         </button>
       }
     </div>
-    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    @if (editingField() === 'project_ids') {
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
+        [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
+        (click)="editingCancelled.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+    } @else {
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    }
   </div>
 
   <div class="detail-row detail-row--readonly">

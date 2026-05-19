@@ -24647,4 +24647,66 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail detail-row cancel button bound-attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancel edit', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.cancelEdit.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bearbeitung abbrechen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.cancelEdit.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla modifica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.cancelEdit.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.cancelEdit.title', 'Cancel edit', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail detail-row cancel button bound-attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancel edit', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.cancelEdit.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bearbeitung abbrechen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.cancelEdit.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla modifica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.cancelEdit.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

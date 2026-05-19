@@ -6,8 +6,6 @@ import { formatCoordinate } from '../media-detail-view.utils';
 import type { SearchQueryContext } from '../../../../core/search/search.models';
 import type { DetailEditingField, ImageRecord } from '../media-detail-view.types';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
-import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
-
 interface AddressFieldDefinition {
   name: 'street' | 'city' | 'district' | 'country';
   icon: string;
@@ -26,7 +24,7 @@ interface AddressFieldDefinition {
 @Component({
   selector: 'app-media-detail-location-section',
   standalone: true,
-  imports: [AddressSearchComponent, ...HLM_BUTTON_IMPORTS, ...HLM_INPUT_IMPORTS],
+  imports: [AddressSearchComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './media-detail-location-section.component.html',
   styleUrl: './media-detail-location-section.component.scss',
 })

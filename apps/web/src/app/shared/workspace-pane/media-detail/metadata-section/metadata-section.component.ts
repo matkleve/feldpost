@@ -3,12 +3,11 @@ import { MetadataPropertyRowComponent } from '../metadata-property-row.component
 import type { MetadataEntry } from '../media-detail-view.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
-import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 
 @Component({
   selector: 'app-metadata-section',
   standalone: true,
-  imports: [MetadataPropertyRowComponent, HlmMenuItemDirective, ...HLM_INPUT_IMPORTS],
+  imports: [MetadataPropertyRowComponent, HlmMenuItemDirective],
   templateUrl: './metadata-section.component.html',
   styleUrls: ['./metadata-section.component.scss', '../_detail-row-slots.scss'],
 })

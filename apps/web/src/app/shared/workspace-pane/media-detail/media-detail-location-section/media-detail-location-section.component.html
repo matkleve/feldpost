@@ -18,7 +18,50 @@
       [attr.data-detail-active-editor]="editingField() === fieldDef.name ? fieldDef.name : null"
     >
       <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-      @if (editingField() !== fieldDef.name) {
+      @if (editingField() === fieldDef.name) {
+        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+        <div class="detail-row__center">
+          <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
+          <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
+          <input
+            #fieldInput
+            class="detail-row__field-input detail-row__field-slot"
+            type="text"
+            [value]="fieldValue(fieldDef.name)"
+            [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
+            (keydown.enter)="
+              fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
+            "
+            (keydown.escape)="editingCancelled.emit()"
+            (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+          />
+        </div>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--r1 detail-row-action--save"
+          type="button"
+          [attr.aria-label]="t(fieldDef.saveAriaKey, fieldDef.saveAriaFallback)"
+          [attr.title]="t(fieldDef.saveTitleKey, fieldDef.saveTitleFallback)"
+          (mousedown)="$event.preventDefault()"
+          (click)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+        >
+          <span class="material-icons" aria-hidden="true">check</span>
+        </button>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+          type="button"
+          [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
+          [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
+          (click)="editingCancelled.emit()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+      } @else {
         <button
           hlmBtn
           variant="ghost"
@@ -31,52 +74,20 @@
         >
           <span class="material-icons" aria-hidden="true">edit</span>
         </button>
-      } @else {
-        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-      }
-      <div class="detail-row__center">
-        <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
-        <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
-        @if (editingField() === fieldDef.name) {
-          <div class="detail-row__value-edit">
-            <input
-              #fieldInput
-              hlmInput
-              class="detail-row__input"
-              type="text"
-              [value]="fieldValue(fieldDef.name)"
-              [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
-              (keydown.enter)="
-                fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
-              "
-              (keydown.escape)="editingCancelled.emit()"
-              (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
-            />
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              class="detail-row-action detail-row-action--save"
-              type="button"
-              [attr.aria-label]="t(fieldDef.saveAriaKey, fieldDef.saveAriaFallback)"
-              [attr.title]="t(fieldDef.saveTitleKey, fieldDef.saveTitleFallback)"
-              (click)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
-            >
-              <span class="material-icons" aria-hidden="true">check</span>
-            </button>
-          </div>
-        } @else {
+        <div class="detail-row__center">
+          <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
+          <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
           <button
-            class="detail-row__value"
+            class="detail-row__field-trigger"
             type="button"
             (click)="fieldEditRequested.emit(fieldDef.name)"
           >
             {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
           </button>
-        }
-      </div>
-      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+        </div>
+        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+      }
     </div>
   }
 

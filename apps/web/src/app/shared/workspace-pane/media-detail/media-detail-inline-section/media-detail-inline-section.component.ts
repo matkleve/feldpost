@@ -17,8 +17,6 @@ import type { DetailEditingField, ImageRecord, SelectOption } from '../media-det
 import { formatCoordinate } from '../media-detail-view.utils';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
-import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
-
 @Component({
   selector: 'app-media-detail-inline-section',
   standalone: true,
@@ -26,7 +24,6 @@ import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
     CapturedDateEditorComponent,
     DropdownShellComponent,
     ...HLM_BUTTON_IMPORTS,
-    ...HLM_INPUT_IMPORTS,
   ],
   templateUrl: './media-detail-inline-section.component.html',
   styleUrl: './media-detail-inline-section.component.scss',

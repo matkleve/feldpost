@@ -23,12 +23,11 @@
           <span class="detail-row__label">{{
             t('workspace.metadata.action.add', 'Add metadata')
           }}</span>
-          <div class="add-metadata-row__fields">
-            <div class="add-metadata-key-wrap">
+          <div class="detail-row__field-dual detail-row__field-slot">
+            <div class="detail-row__field-key-wrap">
               <input
                 #newKeyInput
-                hlmInput
-                class="detail-row__input"
+                class="detail-row__field-input"
                 type="text"
                 [placeholder]="t('workspace.metadata.input.key.placeholder', 'Key')"
                 [attr.aria-label]="t('workspace.metadata.input.key.aria', 'New metadata key')"
@@ -63,8 +62,7 @@
             </div>
             <input
               #newValueInput
-              hlmInput
-              class="detail-row__input"
+              class="detail-row__field-input detail-row__field-input--value"
               type="text"
               [placeholder]="t('workspace.metadata.input.value.placeholder', 'Value')"
               [attr.aria-label]="t('workspace.metadata.input.value.aria', 'New metadata value')"
@@ -74,7 +72,7 @@
           </div>
         </div>
         <button
-          class="detail-row-action detail-row-action--r1 add-metadata-confirm"
+          class="detail-row-action detail-row-action--r1 add-metadata-confirm detail-row-action--confirm"
           type="button"
           [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
           (click)="addMetadata(newKeyInput.value, newValueInput.value)"

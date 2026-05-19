@@ -14,15 +14,10 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
-import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
-
 @Component({
   selector: 'app-metadata-property-row',
   standalone: true,
-  imports: [
-    ...HLM_BUTTON_IMPORTS,
-    ...HLM_INPUT_IMPORTS,
-  ],
+  imports: [...HLM_BUTTON_IMPORTS],
   templateUrl: './metadata-property-row.component.html',
   styleUrls: ['./metadata-property-row.component.scss', './_detail-row-slots.scss'],
 })

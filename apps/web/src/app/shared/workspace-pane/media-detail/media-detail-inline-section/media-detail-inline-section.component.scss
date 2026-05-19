@@ -287,6 +287,32 @@
   }
 }
 
+// Projects row editing — inset field chrome matches address search (no border width jump).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.detail-row--editing .detail-tags {
+  margin-left: 0;
+  max-width: none;
+  align-self: stretch;
+
+  .detail-tags__editor {
+    border: none;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 36%, var(--border));
+    min-height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--detail-row-field-inset, 0.125rem));
+    align-self: stretch;
+    padding: var(--spacing-1);
+    box-sizing: border-box;
+
+    &:focus-within {
+      box-shadow: inset 0 0 0 1px var(--primary);
+    }
+  }
+
+  .detail-tags__input {
+    min-width: 6rem;
+    padding-block: 0;
+  }
+}
+
 // Sandstone: former `--section-text` bridge (#66594a) for tag editor create-row label
 // @see docs/migration/phase-7-token-migration.md §Batch 40
 :host-context([data-theme='sandstone']) {

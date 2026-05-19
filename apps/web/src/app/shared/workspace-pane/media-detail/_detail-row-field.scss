@@ -1,0 +1,140 @@
+// Stable inline field in detail rows — same geometry as address search (width/height do not jump).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+
+@mixin detail-row-editing-center {
+  --detail-row-field-inset: 0.125rem;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  align-items: stretch;
+  padding-block: var(--detail-row-field-inset);
+  padding-inline-end: var(--detail-row-field-inset);
+
+  .detail-row__icon,
+  .detail-row__label {
+    align-self: center;
+  }
+
+  &:focus-within {
+    .detail-row__icon,
+    .detail-row__label {
+      color: var(--primary);
+    }
+  }
+}
+
+// Value column trigger (idle) — matches field-input footprint.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.detail-row:hover:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__field-trigger,
+.detail-row:focus-within:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__field-trigger {
+  color: var(--primary);
+}
+
+.detail-row__field-trigger {
+  width: 100%;
+  min-width: 0;
+  align-self: center;
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--foreground);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 80ms ease-out;
+}
+
+// Inline field — inset ring (no border box growth), fixed row height when editing.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.detail-row__field-input {
+  width: 100%;
+  min-width: 0;
+  align-self: center;
+  box-sizing: border-box;
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--foreground);
+  background: var(--card);
+  border: none;
+  border-radius: var(--radius-sm);
+  outline: none;
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  caret-color: var(--primary);
+  text-align: right;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 36%, var(--border));
+  transition:
+    background 80ms ease-out,
+    box-shadow 80ms ease-out;
+
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  &:focus {
+    box-shadow: inset 0 0 0 1px var(--primary);
+  }
+
+  &.ng-invalid.ng-touched {
+    box-shadow: inset 0 0 0 1px var(--destructive);
+  }
+}
+
+.detail-row__field-slot {
+  min-width: 0;
+  width: 100%;
+}
+
+.detail-row--editing .detail-row__center .detail-row__field-input {
+  align-self: stretch;
+  height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--detail-row-field-inset, 0.125rem));
+  line-height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--detail-row-field-inset, 0.125rem));
+  padding-inline-start: var(--spacing-2);
+  padding-inline-end: calc(var(--spacing-2) - var(--detail-row-field-inset, 0.125rem));
+}
+
+.detail-row__field-input--trigger {
+  cursor: pointer;
+}
+
+// Metadata / add row: key (search) + value in the value column.
+// @see docs/specs/ui/media-detail/metadata-section.md
+.detail-row__field-dual {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.45fr) minmax(0, 1fr);
+  gap: var(--spacing-1);
+  min-width: 0;
+  width: 100%;
+  align-items: stretch;
+}
+
+.detail-row__field-dual .detail-row__field-input {
+  text-align: left;
+  padding-inline: var(--spacing-2);
+}
+
+.detail-row__field-dual .detail-row__field-input--value {
+  text-align: right;
+}
+
+.detail-row__field-key-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.detail-row--editing .detail-row-action--save,
+.detail-row--editing .detail-row-action--confirm {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// Back-compat alias for templates not yet migrated to detail-row__field-input.
+// @see detail-row-field.scss
+.detail-row__input {
+  @extend .detail-row__field-input;
+}
