@@ -1,6 +1,6 @@
 ## Open Questions / Blockers
 
-**Phase 6 / `tokens.scss`:** `tokens.scss` migration is blocked until all `var(--color-*)` usage in component SCSS is replaced with tweakcn equivalents (`var(--primary)`, `var(--muted)`, etc.).
+**Phase 6 / `tokens.scss`:** **N/A for Phase 7 closure (2026-05-19)** — monolithic **`tokens.scss`** successor **`_legacy-design-tokens.scss`** is **removed from `apps/web`**; component SCSS has **no** `var(--color-*)` / `var(--fp-*)` consumer hand-offs per [phase-7 § Closure verification](./phase-7-token-migration.md#closure-verification-2026-05-19). Any future **`tokens.scss`** work is Phase 8 global-SCSS scope, not a Phase 7 blocker.
 
 1. ~~**Primary color decision (Phase 1 blocker):**~~ **RESOLVED (2026-05-13)**: `--primary = oklch(0.6716 0.1368 48.5130)` ≈ warm orange `#cc7a4a`. MD3 gold `#745b0c` kept only as `--fp-sys-color-primary` alias.
 
@@ -24,6 +24,6 @@
 
 11. **Workspace pane resizable divider:** `shared/workspace-pane/shell/drag-divider/drag-divider.component.ts` uses raw pointer events and CSS custom properties for resizing. spartan has no `ResizablePanels` primitive. Keep as custom.
 
-12. **`@angular/cdk/overlay-prebuilt.css` import:** Currently imported at the top of `tokens.scss`. Once spartan's CDK overlay is the system overlay, verify whether this import is still needed or is now provided by spartan.
+12. **`@angular/cdk/overlay-prebuilt.css` import:** **Resolved for Phase 7 (2026-05-19)** — import lives in **`apps/web/src/styles.scss`** (relocated when **`tokens.scss`** graph was retired); re-verify only when changing global load order ([phase-7 Special cases §1](./phase-7-token-migration.md#special-cases), [phase-8 Preconditions](./phase-8-global-scss-elimination.md#preconditions)).
 
 13. **Molecules (Card, Dialog, Popover, Select):** Published `@spartan-ng/ui-*-helm` packages remain Tailwind **^3**–peered — continue **local CVA + `@spartan-ng/brain`** until spartan ships v4-compatible helm. **Select:** confirm `BrnSelect` + overlay stacking with map/workspace panes. **Popover / Menu:** `DropdownShell` pixel positioning vs CDK `FlexibleConnectedPositionStrategy` (see Q7) blocks drop-in. **Dialog:** five custom dialogs need `BrnDialog` contract + focus trap parity audit before swap.

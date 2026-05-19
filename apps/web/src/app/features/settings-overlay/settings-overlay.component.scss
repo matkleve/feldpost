@@ -1,16 +1,16 @@
 :host {
   display: contents;
   --settings-overlay-width: clamp(
-    32rem,
+    34rem,
     calc(100vw - (var(--spacing-3) * 2)),
-    52rem
+    56rem
   );
   --settings-overlay-height: min(44rem, calc(100vh - (var(--spacing-3) * 2)));
-  --settings-overlay-left-ratio: 0.38;
+  --settings-overlay-left-ratio: 0.42;
   --settings-overlay-left-width: clamp(
-    14rem,
+    16rem,
     calc(var(--settings-overlay-width) * var(--settings-overlay-left-ratio)),
-    17rem
+    22rem
   );
   --settings-overlay-right-width: calc(
     var(--settings-overlay-width) - var(--settings-overlay-left-width)
@@ -94,14 +94,18 @@
     max-height: 100%;
   }
 
-  // Left rail column: list + header stack
+  // Left rail column: list + header stack (min-width 0 prevents locale copy from expanding flex basis)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__sections {
     flex: 0 0 var(--settings-overlay-left-width);
+    width: var(--settings-overlay-left-width);
+    max-width: var(--settings-overlay-left-width);
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-2);
     min-height: 0;
+    overflow: hidden;
     padding: var(--spacing-3) var(--spacing-3) var(--spacing-3) var(--spacing-3);
     border-inline-end: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
     background: color-mix(in srgb, var(--card) 80%, transparent);
@@ -112,6 +116,7 @@
   .settings-overlay__sections-header {
     display: grid;
     gap: var(--spacing-1);
+    min-width: 0;
   }
 
   // Small uppercase kicker line above the rail title
@@ -127,6 +132,11 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__title {
     color: var(--foreground);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   // Subtitle body under the rail title
@@ -136,6 +146,11 @@
     // Former `var(--line-height-normal)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
     line-height: 1.45;
     color: var(--muted-foreground);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
   // Scrollable vertical list of section entries
@@ -153,9 +168,10 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--spacing-3);
-    min-height: 3rem;
+    min-width: 0;
+    min-height: 3.25rem;
     padding-block: var(--spacing-2);
     padding-inline: var(--spacing-3);
     width: 100%;
@@ -193,10 +209,24 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__section-media {
     color: var(--primary);
+    align-self: center;
   }
 
-  // Section title line in the rail list (stacking + truncation utilities on host in template)
+  // Section title line in the rail list (two-line clamp for long locale strings)
   // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-label {
+    min-width: 0;
+  }
+
+  .settings-overlay__section-label strong,
+  .settings-overlay__section-label small {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
   .settings-overlay__section-label strong {
     font-size: var(--font-size-sm);
   }
@@ -206,6 +236,7 @@
   .settings-overlay__section-chevron {
     font-size: var(--font-size-sm);
     color: var(--muted-foreground);
+    align-self: center;
   }
 
   // Right-hand detail column with scroll; min-height 0 lets long embedded views scroll inside max-height shell
@@ -551,11 +582,11 @@
       calc(100vw - (var(--spacing-3) * 2)),
       45rem
     );
-    --settings-overlay-left-ratio: 0.35;
+    --settings-overlay-left-ratio: 0.4;
     --settings-overlay-left-width: clamp(
-      12rem,
+      14rem,
       calc(var(--settings-overlay-width) * var(--settings-overlay-left-ratio)),
-      15rem
+      18rem
     );
   }
 
@@ -582,7 +613,7 @@
 
 @media (max-width: 47.9375rem) {
   :host {
-    --settings-overlay-left-width: 11.5rem;
+    --settings-overlay-left-width: 13.5rem;
     --settings-overlay-height: calc(100vh - (var(--spacing-3) * 2));
   }
 

@@ -26,10 +26,18 @@
         </div>
         <header class="settings-overlay__sections-header">
           <p class="settings-overlay__kicker">{{ t('settings.overlay.kicker', 'Settings') }}</p>
-          <h2 class="settings-overlay__title">
+          <h2
+            class="settings-overlay__title"
+            [attr.title]="t('settings.overlay.title', 'Workspace Preferences')"
+          >
             {{ t('settings.overlay.title', 'Workspace Preferences') }}
           </h2>
-          <p class="settings-overlay__subtitle">
+          <p
+            class="settings-overlay__subtitle"
+            [attr.title]="
+              t('settings.overlay.subtitle', 'iOS-style section navigation with Feldpost controls.')
+            "
+          >
             {{
               t('settings.overlay.subtitle', 'iOS-style section navigation with Feldpost controls.')
             }}
@@ -52,8 +60,15 @@
                 <span class="material-icons text-base leading-none">{{ section.icon }}</span>
               </span>
               <span class="settings-overlay__section-label flex min-w-0 flex-1 flex-col gap-0.5">
-                <strong class="min-w-0 truncate font-semibold">{{ section.title }}</strong>
-                <small class="min-w-0 truncate text-xs text-muted-foreground">{{ section.subtitle }}</small>
+                <strong class="min-w-0 font-semibold" [attr.title]="section.title">{{
+                  section.title
+                }}</strong>
+                <small
+                  class="min-w-0 text-xs text-muted-foreground"
+                  [attr.title]="section.subtitle"
+                >
+                  {{ section.subtitle }}
+                </small>
               </span>
               <span
                 class="settings-overlay__section-chevron material-icons ml-auto shrink-0"

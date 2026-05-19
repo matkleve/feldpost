@@ -6,7 +6,7 @@ The main navigation rail. Desktop: a frosted-glass floating panel on the left th
 
 ## What It Looks Like
 
-**Desktop (≥ 48rem / 768px):** Collapsed = `3rem` wide compact rail, left edge, vertically centered. The outer sidebar surface uses the shared container geometry system (`.ui-container`) with panel radius, light inset, and frosted-glass background. At rest, nav items render as centered square icon buttons inside the rail. On hover or keyboard focus, the rail expands to `15rem`; rows stay the same height, align from a shared leading column, and reveal labels without the icons or account badge jumping sideways.
+**Desktop (≥ 48rem / 768px):** Collapsed = `3rem` wide compact rail, left edge, vertically centered. The outer sidebar surface uses the shared container geometry system (`.ui-container`) with panel radius, light inset, and frosted-glass background. At rest, nav items render as centered square icon buttons inside the rail. On hover or keyboard focus, the rail expands to `15rem`; rows stay the same height, align from a shared leading column, and reveal labels without the icons or account badge jumping sideways. When the settings overlay is open from the account row (`nav__link--active` on that row), the account row label stays visible even if the pointer is over the overlay (so the rail is no longer `:hover`).
 
 **Mobile (< 48rem / 768px):** Fixed bottom bar spanning full width, `3.5rem` tall. Icons only, evenly spaced. No avatar (avatar moves to account page).
 

@@ -55,6 +55,15 @@ export class NavComponent {
 
   readonly settingsOverlayOpen = this.settingsPaneService.open;
 
+  /** Sidebar account row: prefer display name; fall back to Settings label. */
+  readonly accountSidebarLabel = computed(() => {
+    const name = this.avatarName().trim();
+    if (name.length > 0) {
+      return name;
+    }
+    return this.t('nav.settings.label', 'Settings');
+  });
+
   readonly avatarName = computed<string>(() => {
     const user = this.authService.user();
     const fullName = user?.user_metadata?.['full_name'];

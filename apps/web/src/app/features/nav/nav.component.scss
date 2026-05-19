@@ -22,10 +22,17 @@
   pointer-events: none;
 }
 
+// Settings open + rail hover: expanded width overlaps the overlay — lift above modal plane (500).
+// @see docs/specs/ui/settings-overlay/settings-overlay.md
+@media (min-width: 768px) {
+  :host:has(.sidebar.sidebar--settings-open:hover) {
+    z-index: 501;
+  }
+}
+
 // ── LeftSidebar — trigger zone ───────────────────────────────────────────────
 
 .sidebar {
-  // Matches former `var(--spacing-7)` — legacy row removed Batch 41 (`docs/migration/phase-7-token-migration.md` §Batch 41)
   --sidebar-width-collapsed: calc(0.25rem * 12);
   --sidebar-width-expanded: 15rem;
   --sidebar-row-padding-inline: var(--spacing-1);
@@ -58,6 +65,44 @@
         opacity: 1;
         visibility: visible;
         transition-delay: 0s;
+      }
+    }
+
+    // Settings open: keep the reserved collapsed lane (overlay starts after collapsed rail + spacing-3 gap).
+    // Account label stays visible inside the lane; hover expands over the overlay (host z 501 via :has above).
+    // @see docs/specs/component/workspace/sidebar.md § What It Looks Like
+    &.sidebar--settings-open:not(:hover) {
+      width: var(--sidebar-width-collapsed);
+      min-width: var(--sidebar-width-collapsed);
+      max-width: var(--sidebar-width-collapsed);
+      overflow: hidden;
+
+      .nav__account-link.nav__link--active {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        gap: var(--spacing-1);
+        min-height: auto;
+        padding-block: var(--spacing-2);
+        overflow: hidden;
+        text-align: center;
+
+        .nav__label {
+          opacity: 1;
+          visibility: visible;
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: var(--font-size-xs);
+          line-height: var(--line-height-solid);
+          transition-delay: 0s;
+        }
       }
     }
   }

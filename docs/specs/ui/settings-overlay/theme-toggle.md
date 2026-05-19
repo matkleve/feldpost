@@ -1,5 +1,7 @@
 # Theme Toggle
 
+> **Implementation note (2026-05-19):** Product theme control is the **settings overlay** four-mode toggle (`light` \| `dark` \| `system` \| `sandstone`) via **`SettingsOverlayComponent.applyThemeMode`** and **`localStorage`** key **`feldpost.settings.themeMode`** — not a standalone **`ThemeService`** / three-state sidebar cycle. Full spec rewrite → [Phase 11 hygiene](../../../migration/phase-11-spec-sync.md); sections below are **historical** until updated.
+
 ## What It Is
 
 A small control that cycles the app's color theme between **light**, **dark**, and **system** (follows OS preference). Located in the Sidebar on desktop, in Settings page, and potentially in a floating control cluster.

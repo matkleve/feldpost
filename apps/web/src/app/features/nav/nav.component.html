@@ -6,7 +6,11 @@
            expands right on hover to show icon + label (150 ms ease-out).
   Mobile:  full-width bottom tab bar (unchanged behaviour).
 -->
-<nav class="sidebar" [attr.aria-label]="t('nav.aria.main', 'Main navigation')">
+<nav
+  class="sidebar"
+  [class.sidebar--settings-open]="settingsOverlayOpen()"
+  [attr.aria-label]="t('nav.aria.main', 'Main navigation')"
+>
   <!-- Desktop sidebar panel -->
   <div class="sidebar__panel">
     <ul class="nav__list" role="list">
@@ -51,7 +55,7 @@
           type="button"
           class="nav__link nav__account-link"
           [class.nav__link--active]="settingsOverlayOpen()"
-          [title]="t('nav.settings.title', 'Settings')"
+          [title]="accountSidebarLabel()"
           [attr.aria-label]="t('nav.settings.openAria', 'Open settings overlay')"
           aria-haspopup="dialog"
           [attr.aria-expanded]="settingsOverlayOpen()"
@@ -66,9 +70,7 @@
               }
             </span>
           </span>
-          <span class="nav__label nav__account-name text-sm">{{
-            t('nav.settings.label', 'Settings')
-          }}</span>
+          <span class="nav__label nav__account-name text-sm">{{ accountSidebarLabel() }}</span>
         </button>
       </li>
     </ul>

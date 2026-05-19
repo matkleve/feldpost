@@ -212,7 +212,7 @@ describe('NavComponent', () => {
     fixture.detectChanges();
 
     const accountName = fixture.nativeElement.querySelector('.nav__account-name') as HTMLElement;
-    expect(accountName?.textContent?.trim()).toBe('Settings');
+    expect(accountName?.textContent?.trim()).toBe('John Doe');
   });
 
   it('uses the full name for the avatar initial when available', async () => {

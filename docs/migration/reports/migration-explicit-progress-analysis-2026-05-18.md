@@ -2,12 +2,12 @@
 
 ## Executive truth
 
-The heavy **code** migration tracks (template BEM, legacy token bridge, `::ng-deep` in app SCSS, Phase 11 spec drift checklist) are largely **shipped** or **closed** with grep/build-level proof in phase docs. What remains is disproportionately **human-in-the-loop** and **policy**: three-path theme QA, interactive visual matrix sign-off, `styles` bundle monitoring, dead-selector hygiene on touch, product decisions on brand primary, and a **Wave P5** spec inventory audit. README **%** rows are **doc-derived rollups** (ambiguous ⇒ round down); finishing large doc or automation slices can leave **78% / 76% / 18%** unchanged until a phase author updates the integer after explicit checklist movement. Phase **9** is **blocked upstream** (Spartan helm + Tailwind v4 peers), not “forgotten work.”
+The heavy **code** migration tracks (template BEM, legacy token bridge, Phase 7 token unification, `::ng-deep` in app SCSS, Phase 11 spec drift checklist) are largely **shipped** or **closed** with grep/build-level proof in phase docs. What remains is disproportionately **human-in-the-loop** and **policy**: **Phase 10** interactive visual matrix, `styles` bundle monitoring, dead-selector hygiene on touch, product decisions on brand primary, and a **Wave P5** spec inventory audit. README **%** rows are **doc-derived rollups** (ambiguous ⇒ round down). **Phase 7 → 100% (2026-05-19)** per [phase-7 § Closure verification](../phase-7-token-migration.md#closure-verification-2026-05-19). Phase **9** is **blocked upstream** (Spartan helm + Tailwind v4 peers), not “forgotten work.”
 
 ## README % vs reality
 
 - **Rule (from migration index):** Integers come from each phase doc’s **Status**, checklists, acceptance rows, and called-out blockers; **ambiguous ⇒ round down** (`docs/migration/README.md` — **% (progress)** paragraph).
-- **Not effort-weighted:** A day of careful manual QA or a product workshop does **not** automatically change **%**; only **documented** checklist/state updates in the owning phase file do. Conversely, **hours** of token batch work can **stop moving** the headline **%** once the bridge is gone and remaining work is **manual QA + parity on edit** (Phase 7) or **browser matrix** (Phase 10), which the README already calls schedule risk, not unknown debt.
+- **Not effort-weighted:** A day of careful manual QA or a product workshop does **not** automatically change **%**; only **documented** checklist/state updates in the owning phase file do. Conversely, **hours** of token batch work can **stop moving** the headline **%** once the bridge is gone and remaining work is **parity on edit** (Phase 7) or **browser matrix** (Phase 10); Phase 7 §Risks theme QA is **closed (2026-05-19)** — schedule risk is Phase **10**, not unknown token debt.
 
 ## Per-phase explicit matrix
 
@@ -21,10 +21,11 @@ The heavy **code** migration tracks (template BEM, legacy token bridge, `::ng-de
 | 4 | 88 | Cleanup & Build Verification | Done | `docs/migration/phase-4-cleanup.md` — **Status:** Done; deferred folder rows explicitly **deferred** |
 | 5 | 88 | Callsite Migration & Legacy Removal | Open | `docs/migration/phase-5-callsite-migration.md` — **Status:** In Progress; **legacy alias / `tokens.scss` removal still open** |
 | 6 | 100 | Template BEM sweep & toggles | Done | `docs/migration/phase-6-template-cleanup.md` — **Done (2026-05-17)** |
-| 7 | 78 | Token system — legacy bridge retired | Done | `rg 'legacy-design-tokens\|_legacy-design-tokens' apps/web` → **no matches** (exit **1** = zero hits); `docs/migration/phase-7-token-migration.md` opening **Status** |
-| 7 | 78 | Token system — Wave P2 (doc + automated gate table) | Done | `docs/migration/phase-7-token-migration.md` — **Wave P2 (2026-05-18): Shipped** + §**Wave P2 closeout** |
-| 7 | 78 | Token system — §Risks / three-path manual theme QA | Open | `docs/migration/phase-7-token-migration.md` §**Risks / QA** — manual; routed to Phase 10 in phase-7 **Status** |
-| 7 | 78 | Token system — edit-time spec / `tokens.md` parity | Open | `docs/migration/phase-7-token-migration.md` — **Token / consumer + doc parity** — ongoing when editing |
+| 7 | 100 | Token system — phase closure | Done | `docs/migration/phase-7-token-migration.md` — **Status: Done (2026-05-19)** + §**Closure verification** |
+| 7 | 100 | Token system — legacy bridge retired | Done | `rg 'legacy-design-tokens\|_legacy-design-tokens' apps/web` → **no matches** (exit **1** = zero hits) |
+| 7 | 100 | Token system — Wave P2 (doc + automated gate table) | Done | §**Wave P2 closeout** + §**Closure verification (2026-05-19)** |
+| 7 | 100 | Token system — §Risks / four-path manual theme QA | Done | §**Risks / QA** — **Browser sign-off (2026-05-19)** |
+| 7 | 100 | Token system — edit-time spec / `tokens.md` parity | Deferred (Phase 11) | §**Remaining work (post-closure)** — hygiene on edit, not Phase 7 blocker |
 | 8 | 76 | Global SCSS — §7 `styles/` tree inventory | Done | `docs/migration/phase-8-global-scss-elimination.md` §**7. Inventory** — **seven** partials; `find apps/web/src/styles -name '*.scss' \| wc -l` → **7** |
 | 8 | 76 | Global SCSS — `::ng-deep` hygiene (`apps/web/src/app/**/*.scss`) | Done | `rg '::ng-deep' apps/web/src/app --glob '*.scss'` → **0** matches (matching file count **0**) |
 | 8 | 76 | Global SCSS — `styles` initial-chunk monitoring | Open | `docs/migration/phase-8-global-scss-elimination.md` §**Open (remaining weight)** — `ng build` scrape runbook + logged row |
@@ -39,8 +40,8 @@ The heavy **code** migration tracks (template BEM, legacy token bridge, `::ng-de
 
 ## Next three moves
 
-1. **Run Phase 7 §Risks three-path theme QA** when a human has a browser block — canonical anchor: [`docs/migration/phase-7-token-migration.md` § Risks / QA](../phase-7-token-migration.md#risks--qa).
+1. **Phase 10 interactive pass** — tight smoke + screen matrix (not satisfied by smoke docs alone) — canonical anchor: [`docs/migration/phase-10-visual-qa.md` § Screen checklist](../phase-10-visual-qa.md#screen-checklist) (browser Pass required per acceptance).
 2. **Phase 8 tail** — `styles` row monitoring + dead-selector hygiene on touched map-shell SCSS; unblock Phase 8 DoD’s Phase 10 hook when ready — canonical anchor: [`docs/migration/phase-8-global-scss-elimination.md` § Open (remaining weight)](../phase-8-global-scss-elimination.md#open-remaining-weight).
-3. **Phase 10 interactive pass** — tight smoke + screen matrix (not satisfied by smoke docs alone) — canonical anchor: [`docs/migration/phase-10-visual-qa.md` § Screen checklist](../phase-10-visual-qa.md#screen-checklist) (browser Pass required per acceptance).
+3. **Phase 11 spec hygiene on edit** — when touching specs, keep **`tokens.md`** / normative tables aligned (no on-disk bridge) — [`docs/migration/phase-7-token-migration.md`](../phase-7-token-migration.md) § **Remaining work (post-closure)**.
 
 *(Fourth in queue, not in the three moves: **P5** — Phase 1 Wave P5 inventory audit only — [`docs/migration/README.md` § Next wave](../README.md#next-wave-post-recovery-queue--2026-05-18).)*
