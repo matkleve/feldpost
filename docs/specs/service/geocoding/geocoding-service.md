@@ -65,9 +65,16 @@ Supabase Edge Function `geocode` (proxy + rate limit)
 - `SupabaseService` — invokes Edge Function
 - `UploadLocationConfigService` — cache and search limits
 
+### Consumers
+
+- `SearchBarService` / `AddressSearchComponent` — whole-address search
+- `LocationResolverService` — GPS ↔ address batch resolution
+- `AddressFieldSuggestService` — per-field hierarchical suggestions (see [address-field-suggest](../address-field-suggest/address-field-suggest.md))
+- `AddressReconciliationService` — confidence-scored forward geocode for reconciliation prompts (see [address-reconciliation](../location-resolver/address-reconciliation.md))
+
 ### Supabase / Edge
 
-- Edge Function: `geocode` with `action`: `reverse` | `forward` (search uses forward-shaped body with limit/viewbox).
+- Edge Function: `geocode` with `action`: `reverse` | `forward` (search uses forward-shaped body with limit/viewbox/countrycodes).
 
 ### Forbidden
 

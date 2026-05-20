@@ -6,6 +6,12 @@ Types contract: apps/web/src/app/core/location-resolver/location-resolver.types.
 Helpers: apps/web/src/app/core/location-resolver/location-resolver.helpers.ts
 Adapters: apps/web/src/app/core/location-resolver/adapters/
 
+## Child Specs
+
+- [address-resolver.md](address-resolver.md) — DB-first ranking algorithm for map search bar, upload, folder import
+- [address-reconciliation.md](address-reconciliation.md) — detail-open prompt, confidence scoring, suppress flag for unverified address fields
+- [search-algorithm-addresses-and-places.md](search-algorithm-addresses-and-places.md) — extended algorithm documentation
+
 ## Contract Scope
 
 - Owns background and on-demand location resolution attempts.

@@ -152,3 +152,70 @@
   flex-direction: column;
   gap: var(--spacing-4);
 }
+
+// ─── Reconciliation banner ───
+
+// Inline address suggestion offer strip; appears below the location section.
+// @see docs/specs/service/location-resolver/address-reconciliation.md#prompt-ui-contract
+.detail-reconciliation-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: color-mix(in srgb, var(--color-clay, var(--primary)) 6%, transparent);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-clay, var(--primary)) 18%, transparent);
+}
+
+// Banner body: icon + text block side by side.
+// @see docs/specs/service/location-resolver/address-reconciliation.md
+.detail-reconciliation-banner__body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+// Suggest icon.
+.detail-reconciliation-banner__icon {
+  font-size: 1.125rem;
+  color: var(--color-clay, var(--primary));
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+// Text column: title + candidate address.
+.detail-reconciliation-banner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+// Banner title label.
+.detail-reconciliation-banner__title {
+  font-size: var(--text-small, 0.8125rem);
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+// Suggested address candidate line.
+.detail-reconciliation-banner__candidate {
+  font-size: var(--text-small, 0.8125rem);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Action row: apply / suppress / retry / close.
+.detail-reconciliation-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+// Close button — right-aligned.
+.detail-reconciliation-banner__close {
+  margin-left: auto;
+}

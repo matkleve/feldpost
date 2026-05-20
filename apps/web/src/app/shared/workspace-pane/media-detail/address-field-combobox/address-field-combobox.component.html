@@ -1,0 +1,79 @@
+<!-- Stable state: closed — input visible, panel hidden -->
+<!-- Stable state: open — input + suggestion panel below row -->
+<!-- @see docs/specs/component/address-field-combobox/address-field-combobox.md -->
+<input
+  #comboboxInput
+  class="detail-row__field-input detail-row__field-slot address-field-combobox__input"
+  type="text"
+  autocomplete="off"
+  [value]="inputValue()"
+  (input)="onInput(comboboxInput.value)"
+  (keydown)="onKeydown($event)"
+  (blur)="onBlur()"
+/>
+
+@if (panelOpen()) {
+  <app-dropdown-shell [anchor]="hostElement" [outsideCloseEnabled]="false">
+    @if (loading()) {
+      <div class="address-field-combobox__loading" role="status">
+        {{ t('workspace.addressField.suggest.loading', 'Searching...') }}
+      </div>
+    }
+
+    @if (!loading()) {
+      @if (orgDbSuggestions().length > 0) {
+        <div class="address-field-combobox__section-label">
+          {{ t('workspace.addressField.suggest.sectionOrgDb', 'Your locations') }}
+        </div>
+        @for (s of orgDbSuggestions(); track s.value; let i = $index) {
+          <button
+            class="address-field-combobox__suggestion"
+            [class.address-field-combobox__suggestion--focused]="focusedIndex() === suggestionIndex('org-db', i)"
+            type="button"
+            [attr.aria-label]="t('workspace.addressField.suggest.suggestionAria', 'Select {value}').replace('{value}', s.value)"
+            (mousedown)="$event.preventDefault()"
+            (click)="pickSuggestion(s)"
+          >
+            <span class="address-field-combobox__suggestion-value">{{ s.value }}</span>
+            @if (s.subtitle) {
+              <span class="address-field-combobox__suggestion-subtitle">{{ s.subtitle }}</span>
+            }
+          </button>
+        }
+      }
+
+      @if (orgDbSuggestions().length > 0 && geocoderSuggestions().length > 0) {
+        <div class="address-field-combobox__divider" role="separator" aria-hidden="true"></div>
+      }
+
+      @if (geocoderSuggestions().length > 0) {
+        @if (orgDbSuggestions().length > 0) {
+          <div class="address-field-combobox__section-label">
+            {{ t('workspace.addressField.suggest.sectionGeocoder', 'Suggestions') }}
+          </div>
+        }
+        @for (s of geocoderSuggestions(); track s.value; let i = $index) {
+          <button
+            class="address-field-combobox__suggestion"
+            [class.address-field-combobox__suggestion--focused]="focusedIndex() === suggestionIndex('geocoder', i)"
+            type="button"
+            [attr.aria-label]="t('workspace.addressField.suggest.suggestionAria', 'Select {value}').replace('{value}', s.value)"
+            (mousedown)="$event.preventDefault()"
+            (click)="pickSuggestion(s)"
+          >
+            <span class="address-field-combobox__suggestion-value">{{ s.value }}</span>
+            @if (s.subtitle) {
+              <span class="address-field-combobox__suggestion-subtitle">{{ s.subtitle }}</span>
+            }
+          </button>
+        }
+      }
+
+      @if (orgDbSuggestions().length === 0 && geocoderSuggestions().length === 0) {
+        <div class="address-field-combobox__empty">
+          {{ t('workspace.addressField.suggest.empty', 'No results') }}
+        </div>
+      }
+    }
+  </app-dropdown-shell>
+}

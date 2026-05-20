@@ -278,6 +278,19 @@
 
 ---
 
+### `<app-address-field-combobox>` — Address Field Combobox
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox/address-field-combobox.component.ts`
+- **Purpose**: Per-field combobox that provides hierarchically-constrained address suggestions (country/city/district/street) when editing individual address rows in the media detail location section. Assistive — free-text always allowed.
+- **Spec**: [`docs/specs/component/address-field-combobox/address-field-combobox.md`](../address-field-combobox/address-field-combobox.md)
+- **Variant axes**: `field` (`country` | `city` | `district` | `street`), `verificationState` (`verified` | `unverified` | `unknown`)
+- **Outputs**: `valueChange`, `suggestionSelected`, `resolveRequested`
+- **Composed of**: `app-dropdown-shell`
+- **Used in**: `app-media-detail-location-section`
+- **Gaps**: none
+
+---
+
 ### `<app-media-detail-media-viewer>` — Media Detail Media Viewer
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-media-viewer/media-detail-media-viewer.component.ts`

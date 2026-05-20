@@ -3,7 +3,7 @@
     <div class="detail-row address-search__row detail-row--editing" #dropdownAnchorRow>
       <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
       <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-      <div class="detail-row__center address-search__center">
+      <div class="detail-row__center address-search__center" #addressCenter>
         <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
         <span class="detail-row__label">{{
           t('workspace.imageDetail.field.address', 'Address')
@@ -32,46 +32,55 @@
       <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
 
-    @if (savedSuggestions().length > 0 || placeSuggestions().length > 0 || loadingSaved() || loadingPlaces()) {
-      <div class="address-search__dropdown" role="listbox">
-        @if (savedSuggestions().length > 0 || loadingSaved()) {
-          <div class="address-search__section-label">
-            {{ t('workspace.addressSearch.section.saved', 'Saved locations') }}
-          </div>
-          @if (loadingSaved() && savedSuggestions().length === 0) {
-            <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+    @if (showResultsPanel()) {
+      <app-dropdown-shell
+        class="address-search-shell"
+        panelClass="option-menu-surface address-search-panel"
+        [anchor]="addressAnchorEl()"
+        [minWidth]="addressCenterWidth()"
+        [outsideCloseEnabled]="false"
+        (closeRequested)="cancel()"
+      >
+        <div class="address-search__dropdown option-menu-list" role="listbox">
+          @if (savedSuggestions().length > 0 || loadingSaved()) {
+            <div class="address-search__section-label">
+              {{ t('workspace.addressSearch.section.saved', 'Saved locations') }}
+            </div>
+            @if (loadingSaved() && savedSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (candidate of savedSuggestions(); track candidate.id) {
+              <button
+                class="address-search__result-item"
+                type="button"
+                (click)="onResultSelect(candidate, $event)"
+              >
+                <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
+                <span class="address-search__result-label">{{ candidate.label }}</span>
+              </button>
+            }
           }
-          @for (candidate of savedSuggestions(); track candidate.id) {
-            <button
-              class="address-search__result-item"
-              type="button"
-              (click)="onResultSelect(candidate, $event)"
-            >
-              <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
-              <span class="address-search__result-label">{{ candidate.label }}</span>
-            </button>
-          }
-        }
 
-        @if (placeSuggestions().length > 0 || loadingPlaces()) {
-          <div class="address-search__section-label">
-            {{ t('workspace.addressSearch.section.places', 'Places') }}
-          </div>
-          @if (loadingPlaces() && placeSuggestions().length === 0) {
-            <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+          @if (placeSuggestions().length > 0 || loadingPlaces()) {
+            <div class="address-search__section-label">
+              {{ t('workspace.addressSearch.section.places', 'Places') }}
+            </div>
+            @if (loadingPlaces() && placeSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (candidate of placeSuggestions(); track candidate.id) {
+              <button
+                class="address-search__result-item"
+                type="button"
+                (click)="onResultSelect(candidate, $event)"
+              >
+                <span class="material-icons address-search__result-icon" aria-hidden="true">place</span>
+                <span class="address-search__result-label">{{ candidate.label }}</span>
+              </button>
+            }
           }
-          @for (candidate of placeSuggestions(); track candidate.id) {
-            <button
-              class="address-search__result-item"
-              type="button"
-              (click)="onResultSelect(candidate, $event)"
-            >
-              <span class="material-icons address-search__result-icon" aria-hidden="true">place</span>
-              <span class="address-search__result-label">{{ candidate.label }}</span>
-            </button>
-          }
-        }
-      </div>
+        </div>
+      </app-dropdown-shell>
     }
   </div>
 } @else {

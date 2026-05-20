@@ -7,6 +7,8 @@
 
 The inline editing system for media-item properties in the Media Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup, read-only location evidence breakdown (active coordinates, address-derived coordinates, EXIF coordinates), and parser notes for unresolved address fragments so no location information is lost.
 
+Address component fields (street/city/district/country) use `app-address-field-combobox` when editing — see [address-field-editing.md](address-field-editing.md) for the full combobox + hierarchical suggestion + verification + reconciliation contract.
+
 ## What It Looks Like
 
 Each property row has a **leading Material icon** (1rem, `--color-text-secondary`), a label (`--text-small`, 13px), and a value (`--text-body`, 15px, `--color-text-primary`). On hover, a warm clay tint background appears (`color-mix(in srgb, var(--color-clay) 8%, transparent)`) and an edit pencil icon fades in on the right (hidden → visible on parent hover, like `dd-drag-handle`). Clicking the value replaces it with an inline input. Row geometry follows `dd-item` pattern: `gap: --spacing-2`, `padding: --spacing-1 --spacing-2`, `--radius-sm`.
@@ -28,8 +30,12 @@ Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-t
 | 4   | Picks new date/time, blurs                         | Saves updated captured_at to `media_items` table                                             | Supabase update                  |
 | 5   | Clicks project value                               | Value becomes a multi-select checklist with org projects                                     | `editingField` → `project_ids`   |
 | 6   | Checks/unchecks projects                           | Upserts/deletes memberships in `media_projects`                                              | Supabase write batch             |
-| 7   | Clicks street/city/district/country value          | Value becomes an inline text input                                                           | `editingField` → field name      |
+| 7   | Clicks street/city/district/country value          | Value becomes `app-address-field-combobox` with hierarchical suggestions | `editingField` → field name |
+| 7a  | Picks a suggestion from combobox dropdown          | Field saved with `source: 'geocoder', verified: true` in `address_field_meta`               | `fieldSaveRequested` + meta write |
+| 7b  | Blurs / Enter without picking suggestion           | Field saved with `source: 'user', verified: false` in `address_field_meta`                  | `fieldSaveRequested` + meta write |
 | 8   | Presses Enter or blurs address input               | Saves updated address component to `media_items` table                                       | Supabase update                  |
+| 8a  | Clicks resolve button on unverified field row      | Runs field-scoped reconciliation; prompt shown if confident candidate found                  | `AddressReconciliationService.reconcileField()` |
+| 8b  | Detail view opens with unverified address fields   | Runs reconciliation; prompt shown if confidence ≥ threshold                                  | `AddressReconciliationService.reconcileOnDetailOpen()` |
 | 9   | Presses Escape during any edit                     | Cancels edit, restores original value, no DB write                                           | `editingField` → null            |
 | 10  | Opens location section for mixed-source media      | Sees separate rows for active coordinates, address-derived coordinates, and EXIF coordinates | location evidence model          |
 | 11  | EXIF and address-derived coordinates differ (>15m) | Shows mismatch badge with distance and keeps both sources visible                            | reconciliation metadata          |
@@ -52,10 +58,12 @@ All editable fields follow the same interaction pattern:
 | Address label | `text`           | `media_items`    | `address_label`               | Max 500 chars     |
 | Captured date | `datetime-local` | `media_items`    | `captured_at`                 | Valid ISO date    |
 | Projects      | `multi-select`   | `media_projects` | `(media_item_id, project_id)` | Valid project IDs |
-| Street        | `text`           | `media_items`    | `street`                      | Max 200 chars     |
-| City          | `text`           | `media_items`    | `city`                        | Max 200 chars     |
-| District      | `text`           | `media_items`    | `district`                    | Max 200 chars     |
-| Country       | `text`           | `media_items`    | `country`                     | Max 200 chars     |
+| Street        | combobox (`app-address-field-combobox`) | `media_items` | `street`   | Max 200 chars |
+| City          | combobox (`app-address-field-combobox`) | `media_items` | `city`     | Max 200 chars |
+| District      | combobox (`app-address-field-combobox`) | `media_items` | `district` | Max 200 chars |
+| Country       | combobox (`app-address-field-combobox`) | `media_items` | `country`  | Max 200 chars |
+
+Verification metadata is persisted in `media_items.address_field_meta` (JSONB). See [address-field-editing.md](address-field-editing.md) for full row-slot choreography and cascade rules.
 
 ### Property Row Icon Mapping
 

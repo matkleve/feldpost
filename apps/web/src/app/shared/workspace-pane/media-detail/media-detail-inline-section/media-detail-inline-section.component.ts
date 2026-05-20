@@ -2,6 +2,7 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   input,
   output,
@@ -35,6 +36,9 @@ export class MediaDetailInlineSectionComponent {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   private readonly projectsDropdownRef = viewChild(ProjectsDropdownComponent);
+  private readonly projectsCenterRef = viewChild<ElementRef<HTMLElement>>('projectsCenter');
+  readonly projectsAnchorEl = computed(() => this.projectsCenterRef()?.nativeElement ?? null);
+  readonly projectsCenterWidth = computed(() => this.projectsCenterRef()?.nativeElement.offsetWidth ?? null);
 
   readonly image = input<ImageRecord>({} as ImageRecord);
   readonly detailViewLabel = input('');

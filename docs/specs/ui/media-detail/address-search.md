@@ -4,7 +4,13 @@
 
 ## What It Is
 
-Autocomplete address search control embedded in media detail for picking and applying location/address fields (geocoding-backed).
+Autocomplete address search control embedded in media detail for picking and applying **all** location/address fields at once (geocoding-backed). This is the **whole-address** search — a single query fills street, city, district, country, and coordinates in one action.
+
+**Scope distinction:**
+- `app-address-search` (this component): whole-address geocode lookup → fills all fields at once. Triggered via "Address" trigger row or `change_location_address` action.
+- `app-address-field-combobox`: per-field hierarchical suggestions when editing individual rows (street/city/district/country). See [address-field-editing.md](address-field-editing.md).
+
+Use `app-address-search` when the user wants to set the full address from scratch. Use `app-address-field-combobox` (automatic, via inline edit) when the user edits a single field.
 
 ## What It Looks Like
 

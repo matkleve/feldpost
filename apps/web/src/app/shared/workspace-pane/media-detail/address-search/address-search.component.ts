@@ -1,4 +1,17 @@
-import { Component, effect, ElementRef, HostListener, inject, input, output, signal, viewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+  OnDestroy,
+} from '@angular/core';
+import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
@@ -14,7 +27,7 @@ import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
 @Component({
   selector: 'app-address-search',
   standalone: true,
-  imports: [],
+  imports: [DropdownShellComponent],
   templateUrl: './address-search.component.html',
   styleUrl: './address-search.component.scss',
   host: {
@@ -54,6 +67,19 @@ export class AddressSearchComponent implements OnDestroy {
   // Template reference to the text input — used for auto-focus when search opens
   // @see docs/specs/ui/workspace/workspace-pane.md
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('addressSearchInput');
+  private readonly addressCenterRef = viewChild<ElementRef<HTMLElement>>('addressCenter');
+  readonly addressAnchorEl = computed(() => this.addressCenterRef()?.nativeElement ?? null);
+  readonly addressCenterWidth = computed(
+    () => this.addressCenterRef()?.nativeElement.offsetWidth ?? null,
+  );
+  readonly showResultsPanel = computed(
+    () =>
+      this.active() &&
+      (this.savedSuggestions().length > 0 ||
+        this.placeSuggestions().length > 0 ||
+        this.loadingSaved() ||
+        this.loadingPlaces()),
+  );
 
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});

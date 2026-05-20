@@ -1,0 +1,99 @@
+// AddressFieldCombobox — inline combobox for per-field address suggestions.
+// @see docs/specs/component/address-field-combobox/address-field-combobox.md
+
+@layer components {
+  // Host is an inline block within the detail-row center slot.
+  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#ownership-matrix
+  :host {
+    display: contents;
+    position: relative;
+  }
+
+  // Input: fills the detail-row__field-slot, inherits parent input styles.
+  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#component-hierarchy
+  .address-field-combobox__input {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@layer states {
+  // Loading state: spinner row in panel.
+  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#fsm
+  .address-field-combobox__loading {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--text-small);
+    color: var(--muted-foreground);
+  }
+
+  // Empty state: no results message.
+  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#fsm
+  .address-field-combobox__empty {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--text-small);
+    color: var(--muted-foreground);
+  }
+
+  // Section label for org-db and geocoder tiers.
+  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#component-hierarchy
+  .address-field-combobox__section-label {
+    padding: var(--spacing-1) var(--spacing-3) 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+  }
+
+  // Divider between org-db and geocoder tiers.
+  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#component-hierarchy
+  .address-field-combobox__divider {
+    height: 1px;
+    margin: var(--spacing-1) 0;
+    background: var(--border);
+  }
+
+  // Suggestion row.
+  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#ownership-matrix
+  .address-field-combobox__suggestion {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: var(--spacing-1) var(--spacing-3);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    gap: 0.125rem;
+    border-radius: var(--radius-sm);
+    transition: background-color 80ms ease-out;
+
+    &:hover,
+    &:focus-visible,
+    &.address-field-combobox__suggestion--focused {
+      background: color-mix(in srgb, var(--color-clay, var(--primary)) 8%, transparent);
+      outline: none;
+    }
+  }
+
+  // Primary value text.
+  .address-field-combobox__suggestion-value {
+    font-size: var(--text-body, 0.9375rem);
+    color: var(--foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  // Subtitle (e.g. city, country).
+  .address-field-combobox__suggestion-subtitle {
+    font-size: var(--text-small, 0.8125rem);
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}

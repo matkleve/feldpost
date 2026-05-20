@@ -123,7 +123,7 @@
         >
           <span class="material-icons" aria-hidden="true">edit</span>
         </button>
-        <div class="detail-row__center">
+        <div class="detail-row__center" #projectsCenter>
           <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
           <span class="detail-row__label">{{
             t('workspace.imageDetail.field.projects', 'Projects')
@@ -171,8 +171,9 @@
       </div>
       <app-dropdown-shell
         class="media-detail-projects-shell"
-        positionMode="absolute"
         panelClass="option-menu-surface"
+        [anchor]="projectsAnchorEl()"
+        [minWidth]="projectsCenterWidth()"
         (closeRequested)="editingCancelled.emit()"
       >
         <app-projects-dropdown

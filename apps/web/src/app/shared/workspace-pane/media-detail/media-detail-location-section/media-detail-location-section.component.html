@@ -19,21 +19,20 @@
     >
       <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
       @if (editingField() === fieldDef.name) {
+        <!-- Stable state: editing — combobox visible, check/close replace resolve button -->
+        <!-- @see docs/specs/ui/media-detail/address-field-editing.md#row-slot-table -->
         <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
         <div class="detail-row__center">
           <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
           <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
-          <input
-            #fieldInput
-            class="detail-row__field-input detail-row__field-slot"
-            type="text"
+          <app-address-field-combobox
+            [field]="fieldDef.name"
             [value]="fieldValue(fieldDef.name)"
-            [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
-            (keydown.enter)="
-              fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
-            "
-            (keydown.escape)="editingCancelled.emit()"
-            (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+            [context]="addressFieldContext()"
+            [verificationState]="fieldVerification(fieldDef.name)"
+            (suggestionSelected)="onSuggestionSelected(fieldDef.name, $event)"
+            (valueChange)="onFreeTextSave(fieldDef.name, $event)"
+            (resolveRequested)="onResolveRequested(fieldDef.name)"
           />
         </div>
         <button
@@ -45,7 +44,7 @@
           [attr.aria-label]="t(fieldDef.saveAriaKey, fieldDef.saveAriaFallback)"
           [attr.title]="t(fieldDef.saveTitleKey, fieldDef.saveTitleFallback)"
           (mousedown)="$event.preventDefault()"
-          (click)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+          (click)="editingCancelled.emit()"
         >
           <span class="material-icons" aria-hidden="true">check</span>
         </button>
@@ -62,6 +61,8 @@
           <span class="material-icons" aria-hidden="true">close</span>
         </button>
       } @else {
+        <!-- Stable state: read — edit button left, resolve button right (if unverified) -->
+        <!-- @see docs/specs/ui/media-detail/address-field-editing.md#row-slot-table -->
         <button
           hlmBtn
           variant="ghost"
@@ -83,9 +84,31 @@
             (click)="fieldEditRequested.emit(fieldDef.name)"
           >
             {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
+            @if (fieldValue(fieldDef.name) && fieldVerification(fieldDef.name) !== 'verified') {
+              <span
+                class="detail-row__unverified-hint"
+                [attr.aria-label]="t('workspace.addressField.unverified.hint', 'Unverified')"
+                aria-hidden="true"
+              >?</span>
+            }
           </button>
         </div>
-        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+        @if (fieldValue(fieldDef.name) && fieldVerification(fieldDef.name) !== 'verified') {
+          <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            class="detail-row-action detail-row-action--r1"
+            type="button"
+            [attr.aria-label]="t('workspace.addressField.action.resolve.aria', 'Resolve address field')"
+            [attr.title]="t('workspace.addressField.action.resolve.title', 'Resolve address field')"
+            (click)="onResolveRequested(fieldDef.name)"
+          >
+            <span class="material-icons" aria-hidden="true">travel_explore</span>
+          </button>
+        } @else {
+          <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+        }
         <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
       }
     </div>

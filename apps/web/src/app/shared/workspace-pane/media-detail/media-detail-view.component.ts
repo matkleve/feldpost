@@ -14,6 +14,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { HLM_BUTTON_IMPORTS } from '../../ui/button';
 import type { DateSaveEvent } from './captured-date-editor.component';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { MetadataService } from '../../../core/metadata/metadata.service';
@@ -91,6 +92,9 @@ import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
+import { AddressReconciliationService } from '../../../core/address-reconciliation/address-reconciliation.service';
+import type { AddressFieldSaveEvent } from './media-detail-location-section/media-detail-location-section.component';
+import type { AddressFieldKind } from '../../../core/address-field-suggest/address-field-suggest.types';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
@@ -106,6 +110,7 @@ export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
     MediaDetailMediaViewerComponent,
     MediaDetailInlineSectionComponent,
     MediaDetailLocationSectionComponent,
+    ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './media-detail-view.component.html',
   styleUrls: ['./media-detail-view.component.scss', './media-detail-view.component.part2.scss'],
@@ -135,6 +140,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly locationResolverService = inject(LocationResolverService);
+  private readonly addressReconciliationService = inject(AddressReconciliationService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
@@ -175,12 +181,14 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly replaceError = signal<string | null>(null);
   readonly editDate = signal('');
   readonly editTime = signal('');
+  readonly reconciliationOffer = signal<import('../../../core/address-reconciliation/address-reconciliation.types').ReconciliationOffer | null>(null);
   readonly acceptTypes = Array.from(ALLOWED_MIME_TYPES).join(',');
   private readonly activeJobId = signal<string | null>(null);
 
   private abortController: AbortController | null = null;
   private lastAddressSearchRequestId = 0;
   private readonly pendingLocationRetryAttempted = new Set<string>();
+  private readonly reconciliationAttempted = new Set<string>();
   private ignoreOutsideDismissUntil = 0;
 
   private static readonly TEXT_EDITING_FIELDS = new Set<DetailEditingField>([
@@ -572,6 +580,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.activeJobId.set(null);
     this.replaceError.set(null);
     this.pendingLocationRetryAttempted.clear();
+    // reconciliationAttempted is intentionally NOT cleared on reset to persist
+    // per-session suppression across detail panel open/close cycles.
   }
 
   private async loadMedia(id: string): Promise<void> {
@@ -583,6 +593,65 @@ export class MediaDetailViewComponent implements OnDestroy {
     }
 
     await this.retryPendingLocationOnceOnOpen(id, this.abortController.signal);
+
+    if (!this.abortController.signal.aborted) {
+      void this.runReconciliationOnOpen(id);
+    }
+  }
+
+  /**
+   * Run address reconciliation once per session per media item on detail open.
+   * @see docs/specs/service/location-resolver/address-reconciliation.md#detail-open-flow
+   */
+  private async runReconciliationOnOpen(id: string): Promise<void> {
+    if (this.reconciliationAttempted.has(id)) return;
+    this.reconciliationAttempted.add(id);
+
+    const mediaItem = this.media();
+    if (!mediaItem) return;
+
+    const offer = await this.addressReconciliationService.reconcileOnDetailOpen(mediaItem);
+    if (!offer) return;
+
+    await this.showReconciliationPrompt(offer);
+  }
+
+  /**
+   * Show a reconciliation prompt inline in the detail view for the given offer.
+   * This is shared between detail-open and per-row resolve flows.
+   * @see docs/specs/service/location-resolver/address-reconciliation.md#prompt-ui-contract
+   */
+  private showReconciliationPrompt(
+    offer: import('../../../core/address-reconciliation/address-reconciliation.types').ReconciliationOffer,
+  ): void {
+    this.reconciliationOffer.set(offer);
+  }
+
+  async onReconciliationApply(): Promise<void> {
+    const offer = this.reconciliationOffer();
+    if (!offer) return;
+    this.reconciliationOffer.set(null);
+    await this.addressReconciliationService.applyOffer(offer.mediaItemId, offer, 'apply');
+    void this.loadMedia(offer.mediaItemId);
+  }
+
+  async onReconciliationSuppress(): Promise<void> {
+    const offer = this.reconciliationOffer();
+    if (!offer) return;
+    this.reconciliationOffer.set(null);
+    await this.addressReconciliationService.applyOffer(offer.mediaItemId, offer, 'suppress');
+  }
+
+  async onReconciliationRetry(): Promise<void> {
+    const offer = this.reconciliationOffer();
+    if (!offer) return;
+    this.reconciliationOffer.set(null);
+    this.reconciliationAttempted.delete(offer.mediaItemId);
+    void this.runReconciliationOnOpen(offer.mediaItemId);
+  }
+
+  onReconciliationDismiss(): void {
+    this.reconciliationOffer.set(null);
   }
 
   private async reloadSignedUrlsForCurrentMedia(): Promise<void> {
@@ -629,6 +698,62 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   async saveImageField(field: string, newValue: string): Promise<void> {
     await this.fieldsHelper.saveImageField(field, newValue);
+  }
+
+  /**
+   * Save an address field with optional verification metadata.
+   * Called from MediaDetailLocationSectionComponent.fieldSaveRequested.
+   * @see docs/specs/ui/media-detail/address-field-editing.md
+   */
+  async saveAddressField(event: AddressFieldSaveEvent): Promise<void> {
+    await this.fieldsHelper.saveImageField(event.field, event.value);
+
+    // Write verification metadata when field is a known address component
+    const addressFields: readonly string[] = ['street', 'city', 'district', 'country'];
+    if (!addressFields.includes(event.field)) return;
+
+    const mediaItem = this.media();
+    if (!mediaItem) return;
+
+    const field = event.field as AddressFieldKind;
+    const existingMeta = mediaItem.address_field_meta ?? {};
+    const newFieldMeta = event.suggestion
+      ? { source: 'geocoder' as const, verified: true }
+      : { source: 'user' as const, verified: false };
+
+    const updatedMeta = { ...existingMeta, [field]: newFieldMeta };
+    await this.supabaseService.client
+      .from('media_items')
+      .update({ address_field_meta: updatedMeta })
+      .or(`id.eq.${mediaItem.id},source_image_id.eq.${mediaItem.id}`);
+
+    this.media.set({ ...mediaItem, address_field_meta: updatedMeta });
+  }
+
+  /**
+   * Handle per-row "Resolve address field" button click.
+   * Runs field-scoped reconciliation and shows offer if confident.
+   * @see docs/specs/service/location-resolver/address-reconciliation.md
+   */
+  async onAddressFieldResolveRequested(field: string): Promise<void> {
+    const mediaItem = this.media();
+    if (!mediaItem) return;
+
+    const offer = await this.addressReconciliationService.reconcileField(
+      mediaItem,
+      field as AddressFieldKind,
+    );
+
+    if (!offer) {
+      this.toastService.show({
+        message: this.t('workspace.reconciliation.toast.notFound', 'No suggestion found'),
+        type: 'info',
+        dedupe: true,
+      });
+      return;
+    }
+
+    await this.showReconciliationPrompt(offer);
   }
 
   onDetailFieldEditRequested(field: Exclude<DetailEditingField, null>): void {

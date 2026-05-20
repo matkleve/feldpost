@@ -353,12 +353,9 @@
   white-space: nowrap;
 }
 
-// Absolute-positioned shell aligned to center value column (positionMode="absolute", CSS owns top/width).
-// Visual chrome (bg, border, shadow) comes from `option-menu-surface` on the shell host.
+// Shell is position:fixed via anchor; max-height constraint only.
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
-.media-detail-projects-stack .media-detail-projects-shell {
-  @include detail-row-slots.detail-row-center-width;
-  top: calc(100% + 4px);
+.media-detail-projects-shell {
   max-height: min(40vh, 16rem);
   overflow-y: auto;
 }

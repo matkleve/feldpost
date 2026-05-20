@@ -57,25 +57,20 @@
   overflow: visible;
 }
 
-// Anchored below the address row, aligned to the center value column.
+// Shell is position:fixed via anchor (flip above/below, scroll reposition).
 // @see docs/specs/ui/workspace/workspace-pane.md
-.address-search__dropdown {
-  @include detail-row-slots.detail-row-center-width;
-  position: absolute;
-  z-index: 300;
-  top: calc(100% + 4px);
-  box-sizing: border-box;
+.address-search-shell {
   max-height: min(40vh, 16rem);
   overflow-y: auto;
-  pointer-events: auto;
-  background: var(--popover);
-  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  padding: var(--spacing-1);
+}
+
+// List body inside shell — layout only; chrome from option-menu-surface on shell.
+// @see docs/specs/ui/workspace/workspace-pane.md
+.address-search__dropdown {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .address-search__section-label {

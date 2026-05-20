@@ -2,35 +2,14 @@
  * Open-time stacking: shell host only — inline `z-index: 300` (dropdown plane); no subtree co-owner; `hlmMenu` CVA `z-50` is subordinate (cascade).
  * @see docs/specs/component/filters/dropdown-system.md#open-time-stacking-owner-normative
  *
- * DropdownShell — generic floating container. Supports two position modes:
- * - `fixed` (default): viewport-anchored. When `[anchor]` is provided the shell measures the
- *   anchor element and positions itself with smart below/above and start/end flip logic, updating
- *   on scroll and resize. When `[anchor]` is null the caller supplies raw `[top]`/`[left]` px
- *   coordinates (used for map context menus that originate from Leaflet lat/lng, not DOM elements).
- * - `absolute`: in-flow anchor; caller CSS (not top/left inputs) controls positioning. Used for
- *   detail-row inline panels (e.g. projects picker) that must scroll with their parent container.
+ * DropdownShell — floating menu/popover container (`position: fixed`).
+ * Anchor path: `computeAnchorPlacementForElement` (scroll-parent bounds, below/above flip) — host stays in
+ * the template DOM (no CDK DomPortal) so toolbar/grid layout does not shift.
+ * Legacy path: raw `[top]` / `[left]` for map/context menus without a DOM anchor.
  *
- * NAMING NOTE: This component is semantically a *popover shell*, not a dropdown.
- * A dropdown implies a list of options; this shell hosts arbitrary content anchored
- * at caller-supplied coordinates or an anchor element.
- *
- * TODO(rename): Rename to `PopoverShellComponent` / `app-popover-shell` when the
- * full CDK Overlay migration is done. That migration will replace the manual
- * anchor/top/left inputs with `@angular/cdk/overlay` FlexibleConnectedPositionStrategy,
- * enabling proper collision detection, scroll strategies, and flip behavior.
- * @see apps/web/src/app/shared/ui/popover/ for the hlm visual layer.
- * @see https://github.com/goetzrobin/spartan — BrnPopover for the future brn layer.
- *
- * TODO(brn-menu): `@spartan-ng/brain` has no `BrnMenu` / `./menu` export (alpha.691). Panel chrome uses
- * local `hlmMenuContent`; positioning stays manual until brain ships a menu/popover trigger pair.
- *
- * OWNERSHIP (anchored shell — normative detail in spec):
- * - **Toolbar panel width floor:** `dropdown-shell.component.scss` only (`:host.toolbar-dropdown`, `.toolbar-dropdown--filter`).
- * - **Anchor-based placement:** this component only (`positionFromAnchor`); callers must not reimplement flip logic.
- * - **Map / context menus (no anchor element):** `[top]` / `[left]` per callsite — not the toolbar floors.
- * - **Stacking:** host `z-index: 300` is authoritative; `HlmMenuContentDirective` CVA also applies `z-50` on the same host — inline wins.
- * - **Escape + outside-close** for the mounted shell: this component only; parents must not duplicate `document:keydown.escape`.
- * @see docs/specs/component/filters/dropdown-system.md — Ownership matrix, Escape, Stacking, document:click
+ * TODO: CDK Overlay (`FlexibleConnectedPositionStrategy`) when we can attach without DomPortal
+ * (e.g. `CdkConnectedOverlay` at callsites or BrnPopover migration).
+ * @see docs/specs/component/filters/dropdown-system.md
  */
 import {
   afterNextRender,
@@ -45,6 +24,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { computeAnchorPlacementForElement } from './dropdown-anchor-placement';
 import { clampDropdownPanelToViewport } from './dropdown-viewport-clamp';
 import { HlmMenuContentDirective } from '../ui/menu';
 
@@ -64,7 +44,7 @@ const PLACEMENT_MARGIN_PX = 8;
   template: ` <ng-content /> `,
   styleUrl: './dropdown-shell.component.scss',
   host: {
-    '[style.position]': 'positionMode()',
+    '[style.position]': '"fixed"',
     '[style.top.px]': 'inlineTop()',
     '[style.left.px]': 'inlineLeft()',
     '[style.min-width.px]': 'minWidth()',
@@ -79,30 +59,13 @@ export class DropdownShellComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
 
-  /**
-   * `fixed` (default): viewport-anchored via anchor element or raw `[top]`/`[left]` px.
-   * `absolute`: caller CSS owns positioning; `top`/`left`/`anchor` inputs are ignored.
-   */
-  readonly positionMode = input<'fixed' | 'absolute'>('fixed');
+  private resizeObserver: ResizeObserver | null = null;
+  private repositionFrame: number | null = null;
 
-  /**
-   * Anchor element. When provided, the shell positions itself relative to this element,
-   * flipping above/below and start/end as needed to stay within the viewport.
-   * Mutually exclusive with raw `[top]`/`[left]` — if `anchor` is set, top/left are ignored.
-   */
   readonly anchor = input<HTMLElement | null>(null);
-
-  /**
-   * Preferred horizontal alignment relative to anchor.
-   * `start` (default): left-aligned to anchor.left, flips to end if off-screen.
-   * `end`: right-aligned to anchor.right, flips to start if off-screen.
-   */
   readonly placement = input<'start' | 'end'>('start');
-
-  /** Raw px coordinates — only used when `anchor` is null and `positionMode` is `fixed`. */
   readonly top = input<number>(0);
   readonly left = input<number>(0);
-
   readonly minWidth = input<number | null>(null);
   readonly maxWidth = input<number | null>(null);
   readonly panelClass = input('');
@@ -111,38 +74,27 @@ export class DropdownShellComponent {
   protected readonly clampedTop = signal(0);
   protected readonly clampedLeft = signal(0);
 
-  /** Null in absolute mode or when anchor-based positioning is active — removes the inline style so CSS takes over. */
-  protected readonly inlineTop = computed(() =>
-    this.positionMode() === 'fixed' ? this.clampedTop() : null,
-  );
-  protected readonly inlineLeft = computed(() =>
-    this.positionMode() === 'fixed' ? this.clampedLeft() : null,
-  );
+  protected readonly inlineTop = computed(() => this.clampedTop());
+  protected readonly inlineLeft = computed(() => this.clampedLeft());
 
   readonly closeRequested = output<void>();
 
   constructor() {
-    // Positioning effect: anchor-based or legacy raw coords.
     effect(() => {
       const anchor = this.anchor();
       if (anchor) {
-        // Seed an approximate position immediately (before panel size is known).
-        const anchorRect = anchor.getBoundingClientRect();
-        this.clampedTop.set(anchorRect.bottom + PLACEMENT_GAP_PX);
-        this.clampedLeft.set(anchorRect.left);
         untracked(() => {
-          if (typeof window !== 'undefined') {
-            requestAnimationFrame(() => this.positionFromAnchor());
-          }
+          this.bindResizeObserver(anchor);
+          this.scheduleReposition();
         });
         return;
       }
 
-      if (this.positionMode() !== 'fixed') {
-        return;
-      }
+      untracked(() => {
+        this.bindResizeObserver(null);
+        this.cancelRepositionFrame();
+      });
 
-      // Legacy raw coordinates path.
       const desiredTop = this.top();
       const desiredLeft = this.left();
       this.clampedTop.set(desiredTop);
@@ -152,71 +104,76 @@ export class DropdownShellComponent {
 
     afterNextRender(() => {
       if (this.anchor()) {
-        requestAnimationFrame(() => this.positionFromAnchor());
-      } else if (this.positionMode() === 'fixed') {
+        this.scheduleReposition();
+      } else {
         this.scheduleViewportClamp(this.left(), this.top());
       }
     });
 
-    // Re-position on scroll (any ancestor) and viewport resize.
     if (typeof window !== 'undefined') {
-      const reposition = () => {
-        if (this.anchor() && this.positionMode() === 'fixed') {
-          requestAnimationFrame(() => this.positionFromAnchor());
+      const onScrollOrResize = () => {
+        if (this.anchor()) {
+          this.scheduleReposition();
         }
       };
-      document.addEventListener('scroll', reposition, { capture: true, passive: true });
-      window.addEventListener('resize', reposition, { passive: true });
+      document.addEventListener('scroll', onScrollOrResize, { capture: true, passive: true });
+      window.addEventListener('resize', onScrollOrResize, { passive: true });
       this.destroyRef.onDestroy(() => {
-        document.removeEventListener('scroll', reposition, true);
-        window.removeEventListener('resize', reposition);
+        document.removeEventListener('scroll', onScrollOrResize, true);
+        window.removeEventListener('resize', onScrollOrResize);
+        this.bindResizeObserver(null);
+        this.cancelRepositionFrame();
       });
     }
   }
 
-  /**
-   * Position the shell relative to `anchor()` with below/above and start/end flip logic.
-   * Called after render so the panel's actual size is available.
-   */
-  private positionFromAnchor(): void {
-    const anchor = this.anchor();
-    if (!anchor || this.positionMode() !== 'fixed') {
+  private scheduleReposition(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (this.repositionFrame != null) {
+      return;
+    }
+    this.repositionFrame = requestAnimationFrame(() => {
+      this.repositionFrame = null;
+      this.positionFromAnchor();
+    });
+  }
+
+  private cancelRepositionFrame(): void {
+    if (this.repositionFrame != null) {
+      cancelAnimationFrame(this.repositionFrame);
+      this.repositionFrame = null;
+    }
+  }
+
+  private bindResizeObserver(anchor: HTMLElement | null): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    if (!anchor || typeof ResizeObserver === 'undefined') {
       return;
     }
 
-    const anchorRect = anchor.getBoundingClientRect();
-    const panel = this.host.nativeElement;
-    const panelW = panel.offsetWidth || 0;
-    const panelH = panel.offsetHeight || 0;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const margin = PLACEMENT_MARGIN_PX;
-    const gap = PLACEMENT_GAP_PX;
+    this.resizeObserver = new ResizeObserver(() => this.scheduleReposition());
+    this.resizeObserver.observe(anchor);
+    this.resizeObserver.observe(this.host.nativeElement);
+  }
 
-    // Vertical: prefer below anchor; flip above when not enough space.
-    const belowTop = anchorRect.bottom + gap;
-    const aboveTop = anchorRect.top - gap - panelH;
-    const fitsBelow = panelH === 0 || belowTop + panelH <= vh - margin;
-    const rawTop = fitsBelow ? belowTop : Math.max(margin, aboveTop);
-    const top = Math.min(rawTop, vh - panelH - margin);
-
-    // Horizontal: start = left-align to anchor.left, end = right-align to anchor.right.
-    let left: number;
-    if (this.placement() === 'end') {
-      left = anchorRect.right - panelW;
-      if (left < margin) {
-        left = anchorRect.left; // flip to start
-      }
-    } else {
-      left = anchorRect.left;
-      if (panelW > 0 && left + panelW > vw - margin) {
-        left = anchorRect.right - panelW; // flip to end
-      }
+  private positionFromAnchor(): void {
+    const anchor = this.anchor();
+    if (!anchor) {
+      return;
     }
-    left = Math.max(margin, Math.min(left, vw - panelW - margin));
 
-    this.clampedTop.set(Math.round(Math.max(margin, top)));
-    this.clampedLeft.set(Math.round(left));
+    const { top, left } = computeAnchorPlacementForElement(
+      anchor,
+      this.host.nativeElement,
+      this.placement(),
+      PLACEMENT_GAP_PX,
+      PLACEMENT_MARGIN_PX,
+    );
+    this.clampedTop.set(top);
+    this.clampedLeft.set(left);
   }
 
   private scheduleViewportClamp(desiredLeft: number, desiredTop: number): void {
@@ -262,9 +219,18 @@ export class DropdownShellComponent {
       return;
     }
 
-    if (!this.host.nativeElement.contains(target)) {
-      this.requestClose();
+    if (this.isClickInside(target)) {
+      return;
     }
+
+    this.requestClose();
+  }
+
+  private isClickInside(target: Node): boolean {
+    if (this.host.nativeElement.contains(target)) {
+      return true;
+    }
+    return !!this.anchor()?.contains(target);
   }
 
   onEscape(): void {

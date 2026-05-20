@@ -101,14 +101,51 @@
           [isCorrected]="isCorrected()"
           [saving]="saving()"
           (fieldEditRequested)="onDetailFieldEditRequested($event)"
-          (fieldSaveRequested)="saveImageField($event.field, $event.value)"
+          (fieldSaveRequested)="saveAddressField($event)"
           (editingCancelled)="editingField.set(null)"
+          (fieldResolveRequested)="onAddressFieldResolveRequested($event.field)"
           (addressSuggestionApplied)="applyAddressSuggestion($event)"
           (addressClearRequested)="confirmClearAddress()"
           (copyCoordinatesRequested)="copyCoordinates()"
           (mapLocationPickRequested)="requestMapLocationPick()"
           (revertCoordinatesRequested)="confirmRevertCoordinates()"
         />
+
+        <!-- Reconciliation offer banner: shown when an address suggestion is available -->
+        <!-- @see docs/specs/service/location-resolver/address-reconciliation.md#detail-open-flow -->
+        @if (reconciliationOffer(); as offer) {
+          <div class="detail-reconciliation-banner" role="region" [attr.aria-label]="t('workspace.reconciliation.prompt.title', 'Address suggestion found')">
+            <div class="detail-reconciliation-banner__body">
+              <span class="material-icons detail-reconciliation-banner__icon" aria-hidden="true">travel_explore</span>
+              <div class="detail-reconciliation-banner__text">
+                <span class="detail-reconciliation-banner__title">{{ t('workspace.reconciliation.prompt.title', 'Address suggestion found') }}</span>
+                <span class="detail-reconciliation-banner__candidate">{{ offer.candidateLabel }}</span>
+              </div>
+            </div>
+            <div class="detail-reconciliation-banner__actions">
+              <button hlmBtn variant="ghost" size="sm" type="button" (click)="onReconciliationApply()">
+                {{ t('workspace.reconciliation.action.apply', 'Apply') }}
+              </button>
+              <button hlmBtn variant="ghost" size="sm" type="button" (click)="onReconciliationSuppress()">
+                {{ t('workspace.reconciliation.action.dontAskAgain', "Don't ask again") }}
+              </button>
+              <button hlmBtn variant="ghost" size="sm" type="button" (click)="onReconciliationRetry()">
+                {{ t('workspace.reconciliation.action.retry', 'Try again') }}
+              </button>
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                type="button"
+                class="detail-reconciliation-banner__close"
+                [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel')"
+                (click)="onReconciliationDismiss()"
+              >
+                <span class="material-icons" aria-hidden="true">close</span>
+              </button>
+            </div>
+          </div>
+        }
 
         <app-metadata-section
           [entries]="metadata()"

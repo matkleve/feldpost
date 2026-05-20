@@ -24709,4 +24709,438 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.unverified.hint', 'Unverified', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox unverified badge')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Unverified', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.unverified.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nicht verifiziert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.unverified.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non verificato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.unverified.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.action.resolve.aria', 'Resolve address field', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox resolve button bound-attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolve address field', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressfeld aufloesen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risolvi campo indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.action.resolve.title', 'Resolve address field', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox resolve button bound-attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolve address field', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressfeld aufloesen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risolvi campo indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.suggest.sectionOrgDb', 'Your locations', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox dropdown section label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Your locations', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.sectionOrgDb'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ihre Standorte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.sectionOrgDb'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'I tuoi luoghi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.sectionOrgDb'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.suggest.sectionGeocoder', 'Suggestions', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox dropdown geocoder section label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Suggestions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.sectionGeocoder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Vorschlaege', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.sectionGeocoder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Suggerimenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.sectionGeocoder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.suggest.loading', 'Searching...', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox dropdown loading state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Searching...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Suche...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ricerca in corso...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.suggest.empty', 'No results', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox dropdown empty state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No results', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Ergebnisse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun risultato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressField.suggest.suggestionAria', 'Select {value}', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox suggestion button bound-attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Select {value}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.suggestionAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{value} auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.suggestionAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Seleziona {value}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressField.suggest.suggestionAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.reconciliation.prompt.title', 'Address suggestion found', 'en', 'apps/web/src/app/core/address-reconciliation reconciliation prompt dialog title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address suggestion found', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.prompt.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressvorschlag gefunden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.prompt.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Suggerimento indirizzo trovato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.prompt.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.reconciliation.prompt.body', 'We found: {candidateLabel}. Apply to this item?', 'en', 'apps/web/src/app/core/address-reconciliation reconciliation prompt dialog body')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'We found: {candidateLabel}. Apply to this item?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.prompt.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gefunden: {candidateLabel}. Auf dieses Element anwenden?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.prompt.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Trovato: {candidateLabel}. Applicare a questo elemento?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.prompt.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.reconciliation.action.apply', 'Apply', 'en', 'apps/web/src/app/core/address-reconciliation reconciliation prompt apply button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Apply', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.apply'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anwenden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.apply'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Applica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.apply'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.reconciliation.action.dontAskAgain', 'Don''t ask again', 'en', 'apps/web/src/app/core/address-reconciliation reconciliation prompt suppress button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Don''t ask again', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.dontAskAgain'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nicht mehr fragen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.dontAskAgain'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non chiedere di nuovo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.dontAskAgain'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.reconciliation.action.retry', 'Try again', 'en', 'apps/web/src/app/core/address-reconciliation reconciliation prompt retry button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Try again', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erneut versuchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprova', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.action.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.reconciliation.toast.notFound', 'No suggestion found', 'en', 'apps/web/src/app/core/address-reconciliation no suggestion found toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No suggestion found', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.toast.notFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kein Vorschlag gefunden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.toast.notFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun suggerimento trovato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.reconciliation.toast.notFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

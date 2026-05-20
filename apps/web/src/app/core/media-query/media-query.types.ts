@@ -1,3 +1,5 @@
+import type { AddressFieldMeta } from '../address-field-suggest/address-field-suggest.types';
+
 /**
  * Canonical media row / list-query DTO for gallery-style surfaces.
  * @see docs/specs/service/media-query/media-query-service.md
@@ -24,4 +26,6 @@ export interface ImageRecord {
   country: string | null;
   direction: number | null;
   location_unresolved: boolean | null;
+  /** Per-field address verification metadata. @see AddressFieldMeta */
+  address_field_meta?: AddressFieldMeta | null;
 }
