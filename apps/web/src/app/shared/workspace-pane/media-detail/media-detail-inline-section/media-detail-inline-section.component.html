@@ -65,12 +65,11 @@
           (cancel)="editingCancelled.emit()"
         />
       </div>
-      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
       <button
         hlmBtn
         variant="ghost"
         size="icon"
-        class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+        class="detail-row-action detail-row-action--r1 detail-row-action--danger"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
         [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
@@ -78,6 +77,7 @@
       >
         <span class="material-icons" aria-hidden="true">close</span>
       </button>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     } @else {
       <button
         hlmBtn
@@ -105,13 +105,88 @@
     }
   </div>
 
-  <div
-    class="detail-row"
-    [class.detail-row--editing]="editingField() === 'project_ids'"
-    [attr.data-detail-active-editor]="editingField() === 'project_ids' ? 'project_ids' : null"
-  >
-    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    @if (editingField() !== 'project_ids') {
+  @if (editingField() === 'project_ids') {
+    <div
+      class="media-detail-projects-stack"
+      data-detail-active-editor="project_ids"
+    >
+      <div class="detail-row detail-row--editing media-detail-projects-row">
+        <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--l1 detail-row-action--slot-reserved"
+          type="button"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <span class="material-icons" aria-hidden="true">edit</span>
+        </button>
+        <div class="detail-row__center">
+          <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
+          <span class="detail-row__label">{{
+            t('workspace.imageDetail.field.projects', 'Projects')
+          }}</span>
+          <div
+            class="detail-row__field-slot media-detail-projects-editor"
+            role="group"
+            [attr.aria-label]="t('workspace.imageDetail.projects.manage.aria', 'Manage projects')"
+          >
+            <div
+              class="media-detail-projects-editor__chips detail-row__field-input detail-row__field-slot"
+              (click)="focusProjectsDropdownSearch()"
+            >
+              @for (opt of selectedProjectOptions(); track opt.id) {
+                <button
+                  type="button"
+                  class="media-detail-projects-editor__chip"
+                  (click)="removeProject(opt.id); $event.stopPropagation()"
+                  [attr.aria-label]="
+                    t('workspace.imageDetail.projects.removePrefix', 'Remove project') +
+                    ' ' +
+                    opt.label
+                  "
+                >
+                  <span class="media-detail-projects-editor__chip-label">{{ opt.label }}</span>
+                  <span class="material-icons" aria-hidden="true">close</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--r1 detail-row-action--danger"
+          type="button"
+          [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
+          [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
+          (click)="editingCancelled.emit()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+      </div>
+      <app-dropdown-shell
+        class="media-detail-projects-shell"
+        positionMode="absolute"
+        panelClass="option-menu-surface"
+        (closeRequested)="editingCancelled.emit()"
+      >
+        <app-projects-dropdown
+          #projectsDropdown
+          variant="media-detail"
+          [projectsInput]="projectsForDropdown()"
+          [selectedIdsInput]="selectedProjectIds()"
+          (projectsChanged)="projectsChanged.emit($event)"
+        />
+      </app-dropdown-shell>
+    </div>
+  } @else {
+    <div class="detail-row">
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
       <button
         hlmBtn
         variant="ghost"
@@ -124,124 +199,11 @@
       >
         <span class="material-icons" aria-hidden="true">edit</span>
       </button>
-    } @else {
-      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-    }
-    <div class="detail-row__center">
-      <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
-      <span class="detail-row__label">{{
-        t('workspace.imageDetail.field.projects', 'Projects')
-      }}</span>
-      @if (editingField() === 'project_ids') {
-        <div
-          #projectEditor
-          class="detail-tags detail-row__field-slot"
-          role="group"
-          [attr.aria-label]="t('workspace.imageDetail.projects.manage.aria', 'Manage projects')"
-        >
-          <div class="detail-tags__editor">
-            @for (opt of projectOptions(); track opt.id) {
-              @if (selectedProjectIds().has(opt.id)) {
-                <button
-                  type="button"
-                  class="detail-tags__chip"
-                  (click)="projectMembershipToggled.emit(opt.id)"
-                  [attr.aria-label]="
-                    t('workspace.imageDetail.projects.removePrefix', 'Remove project') +
-                    ' ' +
-                    opt.label
-                  "
-                  [attr.title]="t('workspace.imageDetail.projects.remove', 'Remove')"
-                >
-                  <span class="detail-tags__chip-label">{{ opt.label }}</span>
-                  <span class="material-icons" aria-hidden="true">close</span>
-                </button>
-              }
-            }
-
-            <input
-              #projectSearchInput
-              class="detail-tags__input"
-              type="text"
-              [value]="projectSearch()"
-              [placeholder]="
-                t('workspace.imageDetail.projects.search.placeholder', 'Select project or create one')
-              "
-              [attr.aria-label]="t('workspace.imageDetail.projects.search.aria', 'Search projects')"
-              (input)="projectSearchChanged.emit(projectSearchInput.value)"
-              (keydown)="onProjectSearchKeydown($event)"
-              (keydown.enter)="projectCreateRequested.emit()"
-            />
-          </div>
-
-          <app-dropdown-shell
-            #projectDropdown
-            class="detail-tags__dropdown"
-            [top]="projectDropdownTop()"
-            [left]="projectDropdownLeft()"
-            [minWidth]="projectDropdownWidth()"
-            [maxWidth]="projectDropdownWidth()"
-            panelClass="detail-tags__dropdown option-menu-surface"
-            (closeRequested)="onProjectDropdownCloseRequested()"
-          >
-            <div
-              role="listbox"
-              [attr.aria-label]="t('workspace.imageDetail.projects.options.aria', 'Project options')"
-            >
-              <div class="detail-tags__hint">
-                {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
-              </div>
-
-              @if (isGpsAssignmentLocked()) {
-                <div class="detail-tags__note" role="status">
-                  {{
-                    t(
-                      'workspace.imageDetail.projects.gpsDisabled',
-                      'GPS assignment is disabled for this file type.'
-                    )
-                  }}
-                </div>
-              }
-
-              @if (projectCanCreate()) {
-                <button
-                  type="button"
-                  class="detail-tags__create"
-                  (keydown)="onProjectDropdownKeydown($event)"
-                  (click)="projectCreateRequested.emit()"
-                >
-                  <span class="detail-tags__create-label">{{
-                    t('workspace.imageDetail.projects.create', 'Create')
-                  }}</span>
-                  <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
-                </button>
-              }
-
-              <div class="detail-tags__divider" aria-hidden="true"></div>
-
-              @for (opt of filteredProjectOptions(); track opt.id) {
-                <div class="detail-tags__option-row">
-                  <button
-                    type="button"
-                    class="detail-tags__option"
-                    [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
-                    (keydown)="onProjectDropdownKeydown($event)"
-                    (click)="projectMembershipToggled.emit(opt.id)"
-                  >
-                    <span class="detail-tags__option-color" aria-hidden="true"></span>
-                    <span class="detail-tags__option-check" aria-hidden="true">
-                      @if (selectedProjectIds().has(opt.id)) {
-                        <span class="material-icons">check</span>
-                      }
-                    </span>
-                    <span>{{ opt.label }}</span>
-                  </button>
-                </div>
-              }
-            </div>
-          </app-dropdown-shell>
-        </div>
-      } @else {
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.projects', 'Projects')
+        }}</span>
         <button
           class="detail-row__field-trigger"
           type="button"
@@ -249,27 +211,11 @@
         >
           {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
         </button>
-      }
-    </div>
-    @if (editingField() === 'project_ids') {
-      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--r2 detail-row-action--danger"
-        type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
-        [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
-        (click)="editingCancelled.emit()"
-      >
-        <span class="material-icons" aria-hidden="true">close</span>
-      </button>
-    } @else {
+      </div>
       <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
       <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
-    }
-  </div>
+    </div>
+  }
 
   <div class="detail-row detail-row--readonly">
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
@@ -287,4 +233,3 @@
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 </div>
-

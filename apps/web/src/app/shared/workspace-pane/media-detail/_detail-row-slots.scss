@@ -88,6 +88,7 @@
 }
 
 // Action slots fill from the center outward: L1/R1 inner, L2/R2 outer.
+// Compaction: sole right action uses R1 when R2 would be empty (closer to value column).
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 .detail-row-action--l2 {
   grid-area: action-l2;
@@ -204,6 +205,13 @@
   min-height: var(--detail-row-action-size);
   justify-self: center;
   align-self: stretch;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+// Keeps l1/l2 grid cell size when edit is hidden during inline edit (no value jump).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.detail-row-action--slot-reserved:is(button) {
   visibility: hidden;
   pointer-events: none;
 }

@@ -287,8 +287,83 @@
   }
 }
 
-// Projects row editing — inset field chrome matches address search (no border width jump).
+// Active stack anchors dropdown below the projects row (scrolls with detail panel).
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.media-detail-projects-stack {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+// Chip field in center column when editing projects.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.media-detail-projects-editor {
+  min-width: 0;
+  width: 100%;
+  align-self: stretch;
+}
+
+// Notion-style chip field in row; search + pick list live in dropdown panel.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.media-detail-projects-editor__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+  align-items: center;
+  align-self: stretch;
+  min-height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--detail-row-field-inset, 0.125rem));
+  height: auto;
+  padding: var(--spacing-1);
+  text-align: left;
+  cursor: text;
+  box-sizing: border-box;
+}
+
+.media-detail-projects-editor__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  max-width: 100%;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 14%, var(--card));
+  color: var(--foreground);
+  min-height: 1.5rem;
+  padding: 0 0.125rem 0 var(--spacing-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  cursor: pointer;
+  font-family: inherit;
+
+  .material-icons {
+    font-size: var(--font-size-md);
+    color: var(--muted-foreground);
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 22%, var(--card));
+  }
+}
+
+.media-detail-projects-editor__chip-label {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Absolute-positioned shell aligned to center value column (positionMode="absolute", CSS owns top/width).
+// Visual chrome (bg, border, shadow) comes from `option-menu-surface` on the shell host.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.media-detail-projects-stack .media-detail-projects-shell {
+  @include detail-row-slots.detail-row-center-width;
+  top: calc(100% + 4px);
+  max-height: min(40vh, 16rem);
+  overflow-y: auto;
+}
+
+// Legacy detail-tags (unused after projects-dropdown reuse); keep until SCSS budget cleanup.
 .detail-row--editing .detail-tags {
   margin-left: 0;
   max-width: none;

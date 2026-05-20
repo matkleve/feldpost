@@ -36,4 +36,13 @@
       var(--shadow-md),
       0 0 0 1px color-mix(in srgb, var(--foreground) 22%, transparent);
   }
+
+  // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).
+  // @see docs/specs/ui/media-detail/media-detail-inline-section.md
+  :host.toolbar-dropdown.media-detail-projects-panel {
+    width: 100%;
+    min-width: 0;
+    max-width: min(20rem, calc(100vw - 2rem));
+    max-height: min(calc(14rem + 2rem), calc(100vh - 2rem));
+  }
 }

@@ -605,6 +605,20 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.projectMembershipHelper.toggleProjectMembership(projectId);
   }
 
+  async applyDetailProjectsSelection(next: Set<string>): Promise<void> {
+    const previous = this.selectedProjectIds();
+    for (const projectId of next) {
+      if (!previous.has(projectId)) {
+        await this.toggleProjectMembership(projectId);
+      }
+    }
+    for (const projectId of previous) {
+      if (!next.has(projectId)) {
+        await this.toggleProjectMembership(projectId);
+      }
+    }
+  }
+
   setProjectSearch(value: string): void {
     this.projectMembershipHelper.setProjectSearch(value);
   }

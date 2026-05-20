@@ -65,12 +65,11 @@
         {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}
       </button>
     </div>
-    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     <button
       hlmBtn
       variant="ghost"
       size="icon"
-      class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+      class="detail-row-action detail-row-action--r1 detail-row-action--danger"
       type="button"
       [attr.aria-label]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"
       [attr.title]="t('workspace.metadata.row.removeTitle', 'Remove metadata')"
@@ -78,5 +77,6 @@
     >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   }
 </div>

@@ -2,7 +2,10 @@
  * Open-time stacking: shell host only — inline `z-index: 300` (dropdown plane); no subtree co-owner; `hlmMenu` CVA `z-50` is subordinate (cascade).
  * @see docs/specs/component/filters/dropdown-system.md#open-time-stacking-owner-normative
  *
- * DropdownShell — generic fixed-position floating container.
+ * DropdownShell — generic floating container. Supports two position modes:
+ * - `fixed` (default): viewport-anchored via caller-supplied `[top]` / `[left]` px coordinates.
+ * - `absolute`: in-flow anchor; caller's CSS (not top/left inputs) controls positioning. Used for
+ *   detail-row inline panels (e.g. projects picker) where the panel must scroll with the parent.
  *
  * NAMING NOTE: This component is semantically a *popover shell*, not a dropdown.
  * A dropdown implies a list of options; this shell hosts arbitrary content anchored
@@ -32,6 +35,7 @@
 import {
   afterNextRender,
   Component,
+  computed,
   effect,
   ElementRef,
   inject,
@@ -56,9 +60,9 @@ import { HlmMenuContentDirective } from '../ui/menu';
   template: ` <ng-content /> `,
   styleUrl: './dropdown-shell.component.scss',
   host: {
-    '[style.position]': '"fixed"',
-    '[style.top.px]': 'clampedTop()',
-    '[style.left.px]': 'clampedLeft()',
+    '[style.position]': 'positionMode()',
+    '[style.top.px]': 'inlineTop()',
+    '[style.left.px]': 'inlineLeft()',
     '[style.min-width.px]': 'minWidth()',
     '[style.max-width.px]': 'maxWidth()',
     '[style.z-index]': '"300"',
@@ -70,8 +74,15 @@ import { HlmMenuContentDirective } from '../ui/menu';
 export class DropdownShellComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
 
-  readonly top = input.required<number>();
-  readonly left = input.required<number>();
+  /**
+   * `fixed` (default): viewport-anchored via `[top]` / `[left]` px inputs.
+   * `absolute`: caller CSS owns positioning; `top`/`left` inputs are ignored.
+   */
+  readonly positionMode = input<'fixed' | 'absolute'>('fixed');
+  /** Required in `fixed` mode; ignored in `absolute` mode. */
+  readonly top = input<number>(0);
+  /** Required in `fixed` mode; ignored in `absolute` mode. */
+  readonly left = input<number>(0);
   readonly minWidth = input<number | null>(null);
   readonly maxWidth = input<number | null>(null);
   readonly panelClass = input('');
@@ -81,10 +92,21 @@ export class DropdownShellComponent {
   protected readonly clampedTop = signal(0);
   protected readonly clampedLeft = signal(0);
 
+  /** Null in absolute mode — removes the inline style so CSS takes over. */
+  protected readonly inlineTop = computed(() =>
+    this.positionMode() === 'fixed' ? this.clampedTop() : null,
+  );
+  protected readonly inlineLeft = computed(() =>
+    this.positionMode() === 'fixed' ? this.clampedLeft() : null,
+  );
+
   readonly closeRequested = output<void>();
 
   constructor() {
     effect(() => {
+      if (this.positionMode() !== 'fixed') {
+        return;
+      }
       const desiredTop = this.top();
       const desiredLeft = this.left();
       this.clampedTop.set(desiredTop);
@@ -93,7 +115,9 @@ export class DropdownShellComponent {
     });
 
     afterNextRender(() => {
-      this.scheduleViewportClamp(this.left(), this.top());
+      if (this.positionMode() === 'fixed') {
+        this.scheduleViewportClamp(this.left(), this.top());
+      }
     });
   }
 

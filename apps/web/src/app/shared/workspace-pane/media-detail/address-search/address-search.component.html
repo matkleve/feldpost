@@ -21,15 +21,15 @@
           (click)="$event.stopPropagation()"
         />
       </div>
-      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
       <button
-        class="detail-row-action detail-row-action--r2 detail-row-action--danger address-search__clear-btn address-search__clear-btn--visible"
+        class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn address-search__clear-btn--visible"
         type="button"
         (click)="cancel(); $event.stopPropagation()"
         [attr.aria-label]="t('workspace.addressSearch.aria.cancel', 'Cancel search')"
       >
         <span class="material-icons" aria-hidden="true">close</span>
       </button>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
 
     @if (savedSuggestions().length > 0 || placeSuggestions().length > 0 || loadingSaved() || loadingPlaces()) {
@@ -100,9 +100,8 @@
         }
       </button>
     </div>
-    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     <button
-      class="detail-row-action detail-row-action--r2 detail-row-action--danger address-search__clear-btn"
+      class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn"
       type="button"
       [class.address-search__clear-btn--visible]="!!currentAddress()"
       [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear address')"
@@ -110,5 +109,6 @@
     >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 }

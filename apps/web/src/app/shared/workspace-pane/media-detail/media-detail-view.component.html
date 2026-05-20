@@ -84,20 +84,13 @@
           [projectName]="projectName()"
           [projectOptions]="projectOptions()"
           [selectedProjectIds]="selectedProjectIds()"
-          [projectSearch]="projectSearch()"
-          [filteredProjectOptions]="filteredProjectOptions()"
-          [projectCanCreate]="projectCanCreate()"
-          [canAssignMultipleProjects]="canAssignMultipleProjects()"
-          [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
           [isImageLike]="isImageLike()"
           (fieldEditRequested)="onDetailFieldEditRequested($event)"
           (fieldSaveRequested)="saveImageField($event.field, $event.value)"
           (editingCancelled)="editingField.set(null)"
           (capturedAtEditRequested)="openCapturedAtEditor()"
           (capturedAtSaved)="saveCapturedAt($event)"
-          (projectSearchChanged)="setProjectSearch($event)"
-          (projectCreateRequested)="createProjectFromSearch()"
-          (projectMembershipToggled)="toggleProjectMembership($event)"
+          (projectsChanged)="applyDetailProjectsSelection($event)"
         />
 
         <app-media-detail-location-section

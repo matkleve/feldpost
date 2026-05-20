@@ -20,6 +20,29 @@
   min-height: var(--std-dropdown-min-height);
 }
 
+// Media-detail project picker: spacing-2 inset on standard-dropdown host (shell stays p-0).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+:host.projects-dropdown__shell--media-detail {
+  --std-dropdown-padding-inline: var(--spacing-2);
+  --std-dropdown-min-height: 0;
+  min-height: 0;
+  padding: var(--spacing-2);
+  gap: var(--spacing-2);
+}
+
+:host.projects-dropdown__shell--media-detail .standard-dropdown__search {
+  padding: 0;
+  border-bottom: none;
+}
+
+:host.projects-dropdown__shell--media-detail .standard-dropdown__search-field {
+  padding: 0;
+}
+
+:host.projects-dropdown__shell--media-detail .standard-dropdown__items {
+  padding: 0;
+}
+
 // Reserves the scrollbar track via layout (no extra pe-* on this host); rows stay full width inside shell padding-inline.
 // @see docs/specs/component/filters/dropdown-system.md
 .standard-dropdown__items {
