@@ -33,7 +33,7 @@ type ComboboxState = 'closed' | 'typing' | 'loading' | 'open' | 'empty';
   standalone: true,
   imports: [DropdownShellComponent],
   templateUrl: './address-field-combobox.component.html',
-  styleUrl: './address-field-combobox.component.scss',
+  styleUrls: ['./address-field-combobox.component.scss', '../_detail-row-slots.scss'],
   host: {
     '[attr.data-state]': 'state()',
     '[attr.data-detail-active-editor]': 'field()',

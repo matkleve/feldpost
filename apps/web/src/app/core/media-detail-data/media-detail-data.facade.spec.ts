@@ -72,6 +72,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
             city: overrides?.image?.city ?? MOCK_IMAGE.city,
             district: overrides?.image?.district ?? MOCK_IMAGE.district,
             country: overrides?.image?.country ?? MOCK_IMAGE.country,
+            address_field_meta: overrides?.image?.address_field_meta ?? null,
           };
           return {
             select: vi.fn(() => ({

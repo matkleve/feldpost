@@ -4,12 +4,12 @@
   <div class="detail-row address-field-combobox__row detail-row--editing">
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-    <div class="detail-row__center address-field-combobox__center" #fieldCenter>
+    <div class="detail-row__center address-search__center" #fieldCenter>
       <span class="material-icons detail-row__icon" aria-hidden="true">{{ icon() }}</span>
       <span class="detail-row__label">{{ t(labelKey(), labelFallback()) }}</span>
       <input
         #comboboxInput
-        class="detail-row__field-input detail-row__field-slot address-field-combobox__input"
+        class="detail-row__field-input detail-row__field-slot address-search__input address-field-combobox__input"
         type="text"
         autocomplete="off"
         [attr.aria-label]="t(editAriaKey(), editAriaFallback())"
@@ -31,7 +31,7 @@
       <span class="material-icons" aria-hidden="true">check</span>
     </button>
     <button
-      class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+      class="detail-row-action detail-row-action--r2 detail-row-action--danger address-field-combobox__cancel-btn--visible"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
       [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
@@ -43,14 +43,14 @@
 
   @if (showResultsPanel()) {
     <app-dropdown-shell
-      class="address-field-combobox-shell"
-      panelClass="option-menu-surface address-field-combobox-panel"
+      class="address-search-shell address-field-combobox-shell"
+      panelClass="option-menu-surface address-search-panel"
       placement="end"
       [anchor]="fieldAnchorEl()"
       [minWidth]="fieldCenterWidth()"
       [outsideCloseEnabled]="false"
     >
-      <div class="address-field-combobox__dropdown option-menu-list" role="listbox">
+      <div class="address-search__dropdown address-field-combobox__dropdown option-menu-list" role="listbox">
         @if (loading()) {
           <div class="address-field-combobox__loading" role="status">
             {{ t('workspace.addressField.suggest.loading', 'Searching...') }}

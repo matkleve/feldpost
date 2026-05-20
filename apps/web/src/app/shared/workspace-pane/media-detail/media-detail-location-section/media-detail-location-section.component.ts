@@ -85,11 +85,17 @@ export class MediaDetailLocationSectionComponent {
   });
 
   fieldVerification(field: AddressFieldDefinition['name']): 'verified' | 'unverified' | 'unknown' {
-    const meta = this.image().address_field_meta;
-    if (!meta) return 'unknown';
-    const f = meta[field];
-    if (!f) return 'unknown';
-    return f.verified ? 'verified' : 'unverified';
+    const img = this.image();
+    const meta = img.address_field_meta;
+    const fieldMeta = meta?.[field];
+    if (fieldMeta) {
+      return fieldMeta.verified ? 'verified' : 'unverified';
+    }
+    // Legacy rows: address came from GPS/address-search before address_field_meta existed.
+    if (this.fieldValue(field) && !img.location_unresolved) {
+      return 'verified';
+    }
+    return 'unknown';
   }
 
   onSuggestionSelected(field: AddressFieldDefinition['name'], suggestion: AddressFieldSuggestion): void {

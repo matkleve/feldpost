@@ -617,7 +617,14 @@ export class MediaDetailViewComponent implements OnDestroy {
     const offer = await this.addressReconciliationService.reconcileOnDetailOpen(mediaItem);
     if (!offer) return;
 
-    await this.showReconciliationPrompt(offer);
+    // Values already match geocoder — persist verification without a banner.
+    if (offer.verificationOnly) {
+      await this.addressReconciliationService.applyOffer(offer.mediaItemId, offer, 'apply');
+      this.patchMediaFromReconciliationOffer(offer);
+      return;
+    }
+
+    this.showReconciliationPrompt(offer);
   }
 
   /**

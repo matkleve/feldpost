@@ -1,4 +1,8 @@
 import type { WritableSignal } from '@angular/core';
+import type {
+  AddressFieldKind,
+  AddressFieldMeta,
+} from '../../../core/address-field-suggest/address-field-suggest.types';
 import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ToastService } from '../../../core/toast/toast.service';
@@ -26,6 +30,20 @@ export const EMPTY_ADDRESS_SUGGESTION: ForwardGeocodeResult = {
   zip: null,
   country: null,
 };
+
+function verifiedMetaFromGeocodeSuggestion(suggestion: ForwardGeocodeResult): AddressFieldMeta {
+  const meta: AddressFieldMeta = {};
+  const pairs: [AddressFieldKind, string | null][] = [
+    ['street', suggestion.street],
+    ['city', suggestion.city],
+    ['district', suggestion.district],
+    ['country', suggestion.country],
+  ];
+  for (const [field, value] of pairs) {
+    if (value) meta[field] = { source: 'address-search', verified: true };
+  }
+  return meta;
+}
 
 export function snapshotAddressFields(img: ImageRecord): AddressFieldSnapshot {
   return {
@@ -171,6 +189,8 @@ export class ImageDetailFieldsHelper {
     if (!img) return;
 
     const hasCoordinates = Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng);
+    const verifiedMeta = verifiedMetaFromGeocodeSuggestion(suggestion);
+    const addressFieldMeta = { ...(img.address_field_meta ?? {}), ...verifiedMeta };
 
     this.deps.signals.image.update((prev) =>
       prev
@@ -181,6 +201,7 @@ export class ImageDetailFieldsHelper {
             district: suggestion.district,
             country: suggestion.country,
             address_label: suggestion.addressLabel,
+            address_field_meta: addressFieldMeta,
             ...(hasCoordinates
               ? {
                   latitude: suggestion.lat,
@@ -202,6 +223,7 @@ export class ImageDetailFieldsHelper {
         district: suggestion.district,
         country: suggestion.country,
         address_label: suggestion.addressLabel,
+        address_field_meta: addressFieldMeta,
         ...(hasCoordinates
           ? {
               latitude: suggestion.lat,
@@ -222,6 +244,7 @@ export class ImageDetailFieldsHelper {
               district: img.district,
               country: img.country,
               address_label: img.address_label,
+              address_field_meta: img.address_field_meta,
               latitude: img.latitude,
               longitude: img.longitude,
               location_unresolved: img.location_unresolved,

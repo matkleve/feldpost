@@ -1,5 +1,7 @@
-// Address field combobox — same row/dropdown geometry as address-search.
+// Address field combobox — row/dropdown geometry copied from address-search.
 // @see docs/specs/ui/media-detail/address-search.md
+
+@use '../detail-row-slots';
 
 :host {
   display: grid;
@@ -21,6 +23,15 @@
 .address-field-combobox__input {
   grid-column: 3;
   min-width: 0;
+}
+
+// Save/cancel visible while editing (address search only exposes clear on r1).
+.address-field-combobox__row.detail-row--editing {
+  .detail-row-action--save,
+  .detail-row-action--danger.address-field-combobox__cancel-btn--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .address-field-combobox__stack {
@@ -50,20 +61,19 @@
   color: var(--muted-foreground);
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  text-align: right;
 }
 
 .address-field-combobox__result-item {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  gap: var(--spacing-2);
   width: 100%;
   box-sizing: border-box;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--foreground);
-  text-align: right;
+  text-align: left;
   min-height: 2rem;
   padding-block: var(--spacing-1);
   padding-inline: var(--spacing-2);
@@ -111,5 +121,5 @@
   padding: var(--spacing-2);
   font-size: var(--font-size-xs);
   color: var(--muted-foreground);
-  text-align: right;
+  text-align: center;
 }

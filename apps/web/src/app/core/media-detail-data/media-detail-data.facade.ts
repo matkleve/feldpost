@@ -4,6 +4,7 @@ import type { MediaTier } from '../media/media-renderer.types';
 import type { MediaDownloadService } from '../media-download/media-download.service';
 import type { SupabaseService } from '../supabase/supabase.service';
 import type { MetadataService } from '../metadata/metadata.service';
+import type { AddressFieldMeta } from '../address-field-suggest/address-field-suggest.types';
 import type { ImageRecord, MetadataEntry, SelectOption } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 import {
   isImageLikeMedia,
@@ -37,6 +38,7 @@ interface MediaDetailRow {
   city: string | null;
   district: string | null;
   country: string | null;
+  address_field_meta: AddressFieldMeta | null;
 }
 
 interface ProjectRow {
@@ -176,7 +178,7 @@ export class MediaDetailDataFacade {
     const mediaResult = await this.deps.services.supabase.client
       .from('media_items')
       .select(
-        'id,source_image_id,organization_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status,address_label,street,city,district,country',
+        'id,source_image_id,organization_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status,address_label,street,city,district,country,address_field_meta',
       )
       .or(`id.eq.${id},source_image_id.eq.${id}`)
       .limit(1)
@@ -215,6 +217,7 @@ export class MediaDetailDataFacade {
       country: media.country,
       direction: null,
       location_unresolved: unresolved,
+      address_field_meta: media.address_field_meta ?? null,
     };
   }
 }
