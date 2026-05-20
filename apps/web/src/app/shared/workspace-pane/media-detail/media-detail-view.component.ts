@@ -94,7 +94,11 @@ import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/works
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import { AddressReconciliationService } from '../../../core/address-reconciliation/address-reconciliation.service';
 import type { AddressFieldSaveEvent } from './media-detail-location-section/media-detail-location-section.component';
-import type { AddressFieldKind } from '../../../core/address-field-suggest/address-field-suggest.types';
+import type {
+  AddressFieldKind,
+  AddressFieldMeta,
+} from '../../../core/address-field-suggest/address-field-suggest.types';
+import type { ReconciliationOffer } from '../../../core/address-reconciliation/address-reconciliation.types';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
@@ -632,7 +636,26 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (!offer) return;
     this.reconciliationOffer.set(null);
     await this.addressReconciliationService.applyOffer(offer.mediaItemId, offer, 'apply');
+    this.patchMediaFromReconciliationOffer(offer);
     void this.loadMedia(offer.mediaItemId);
+  }
+
+  /** Merge verification meta (and any changed values) into the in-memory media row. */
+  private patchMediaFromReconciliationOffer(offer: ReconciliationOffer): void {
+    const mediaItem = this.media();
+    if (!mediaItem) return;
+
+    const meta: AddressFieldMeta = { ...(mediaItem.address_field_meta ?? {}) };
+    const patch: Partial<ImageRecord> = { address_field_meta: meta };
+
+    for (const fieldOffer of offer.fields) {
+      meta[fieldOffer.field] = { source: 'geocoder', verified: true };
+      if (fieldOffer.changed) {
+        (patch as Record<string, string | null>)[fieldOffer.field] = fieldOffer.suggestedValue;
+      }
+    }
+
+    this.media.set({ ...mediaItem, ...patch });
   }
 
   async onReconciliationSuppress(): Promise<void> {
@@ -753,7 +776,14 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    await this.showReconciliationPrompt(offer);
+    // Single-field ISO / match-only: confirm immediately without a banner.
+    if (offer.verificationOnly && offer.fields.length === 1) {
+      await this.addressReconciliationService.applyOffer(offer.mediaItemId, offer, 'apply');
+      this.patchMediaFromReconciliationOffer(offer);
+      return;
+    }
+
+    this.showReconciliationPrompt(offer);
   }
 
   onDetailFieldEditRequested(field: Exclude<DetailEditingField, null>): void {

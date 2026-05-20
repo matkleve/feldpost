@@ -48,7 +48,6 @@ import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-s
 import {
   toolbarDropdownPanelClass,
   toolbarDropdownPositionWidthPx,
-  toolbarDropdownPositionWidthPx,
 } from '../../shared/dropdown-trigger/toolbar-menu-panel-layout';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';

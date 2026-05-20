@@ -118,7 +118,11 @@
             <div class="detail-reconciliation-banner__body">
               <span class="material-icons detail-reconciliation-banner__icon" aria-hidden="true">travel_explore</span>
               <div class="detail-reconciliation-banner__text">
-                <span class="detail-reconciliation-banner__title">{{ t('workspace.reconciliation.prompt.title', 'Address suggestion found') }}</span>
+                <span class="detail-reconciliation-banner__title">{{
+                  offer.verificationOnly
+                    ? t('workspace.reconciliation.prompt.confirmTitle', 'Confirm this address?')
+                    : t('workspace.reconciliation.prompt.title', 'Address suggestion found')
+                }}</span>
                 <span class="detail-reconciliation-banner__candidate">{{ offer.candidateLabel }}</span>
               </div>
             </div>

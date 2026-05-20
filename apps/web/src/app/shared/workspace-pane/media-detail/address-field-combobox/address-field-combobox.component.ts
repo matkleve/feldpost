@@ -24,7 +24,6 @@ import {
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
 import { AddressFieldSuggestService } from '../../../../core/address-field-suggest/address-field-suggest.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
 import type { AddressFieldKind, AddressFieldContext, AddressFieldSuggestion } from '../../../../core/address-field-suggest/address-field-suggest.types';
 
 type ComboboxState = 'closed' | 'typing' | 'loading' | 'open' | 'empty';
@@ -32,27 +31,32 @@ type ComboboxState = 'closed' | 'typing' | 'loading' | 'open' | 'empty';
 @Component({
   selector: 'app-address-field-combobox',
   standalone: true,
-  imports: [DropdownShellComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [DropdownShellComponent],
   templateUrl: './address-field-combobox.component.html',
   styleUrl: './address-field-combobox.component.scss',
   host: {
     '[attr.data-state]': 'state()',
+    '[attr.data-detail-active-editor]': 'field()',
   },
 })
 export class AddressFieldComboboxComponent implements OnDestroy {
   private readonly suggestService = inject(AddressFieldSuggestService);
-  readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly i18nService = inject(I18nService);
-
-  /** Expose the host element for the dropdown anchor binding. */
-  get hostElement(): HTMLElement {
-    return this.elementRef.nativeElement;
-  }
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   // ── Inputs ─────────────────────────────────────────────────────────────────
 
   readonly field = input.required<AddressFieldKind>();
+  readonly icon = input.required<string>();
+  readonly labelKey = input.required<string>();
+  readonly labelFallback = input.required<string>();
+  readonly editAriaKey = input.required<string>();
+  readonly editAriaFallback = input.required<string>();
+  readonly saveAriaKey = input.required<string>();
+  readonly saveAriaFallback = input.required<string>();
+  readonly saveTitleKey = input.required<string>();
+  readonly saveTitleFallback = input.required<string>();
   readonly value = input<string>('');
   readonly context = input<AddressFieldContext>({});
   readonly verificationState = input<'verified' | 'unverified' | 'unknown'>('unknown');
@@ -63,8 +67,8 @@ export class AddressFieldComboboxComponent implements OnDestroy {
   readonly valueChange = output<string>();
   /** Emitted when user picks a suggestion from the dropdown. */
   readonly suggestionSelected = output<AddressFieldSuggestion>();
-  /** Emitted when the resolve button is clicked (forwarded to parent). */
-  readonly resolveRequested = output<void>();
+  readonly saveRequested = output<string>();
+  readonly cancelRequested = output<void>();
 
   // ── Internal state ─────────────────────────────────────────────────────────
 
@@ -93,6 +97,19 @@ export class AddressFieldComboboxComponent implements OnDestroy {
   });
 
   private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('comboboxInput');
+  private readonly fieldCenterRef = viewChild<ElementRef<HTMLElement>>('fieldCenter');
+  readonly fieldAnchorEl = computed(() => this.fieldCenterRef()?.nativeElement ?? null);
+  readonly fieldCenterWidth = computed(
+    () => this.fieldCenterRef()?.nativeElement.offsetWidth ?? null,
+  );
+  readonly showResultsPanel = computed(
+    () =>
+      this.panelOpen() &&
+      (this.loading() ||
+        this.suggestions().length > 0 ||
+        this.inputValue().trim().length >= (this.field() === 'country' ? 0 : 2)),
+  );
+
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private ignoreOutsideCloseUntil = 0;
 
@@ -188,8 +205,15 @@ export class AddressFieldComboboxComponent implements OnDestroy {
     this.suggestionSelected.emit(suggestion);
   }
 
-  onResolveClick(): void {
-    this.resolveRequested.emit();
+  onSaveClick(): void {
+    this.closePanel();
+    const val = this.inputValue().trim();
+    this.saveRequested.emit(val);
+  }
+
+  onCancelClick(): void {
+    this.closePanel();
+    this.cancelRequested.emit();
   }
 
   allSuggestions(): AddressFieldSuggestion[] {

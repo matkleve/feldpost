@@ -6,7 +6,6 @@ import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-s
 import {
   toolbarDropdownPanelClass,
   toolbarDropdownPositionWidthPx,
-  toolbarDropdownPositionWidthPx,
 } from '../../shared/dropdown-trigger/toolbar-menu-panel-layout';
 import {
   GroupingDropdownComponent,

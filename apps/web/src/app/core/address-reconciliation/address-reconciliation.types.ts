@@ -33,6 +33,11 @@ export interface ReconciliationOffer {
   confidence: 'high' | 'medium';
   /** Human-readable assembled address shown in the prompt. */
   candidateLabel: string;
+  /**
+   * True when geocoder values match what is stored — Apply only marks fields verified,
+   * without changing column values.
+   */
+  verificationOnly?: boolean;
 }
 
 export type ReconciliationDecision = 'apply' | 'suppress' | 'retry';

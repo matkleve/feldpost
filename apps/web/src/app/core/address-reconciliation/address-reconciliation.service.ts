@@ -24,6 +24,7 @@ import {
 } from './address-reconciliation.types';
 import type { AddressFieldMeta, AddressFieldVerification } from '../address-field-suggest/address-field-suggest.types';
 import type { ForwardGeocodeResult } from '../geocoding/geocoding.service';
+import { ISO_COUNTRY_BY_CODE, isoCodeFromCountryName } from '../address-field-suggest/data/iso-countries';
 
 const ADDRESS_FIELDS: readonly AddressFieldKind[] = ['street', 'city', 'district', 'country'];
 
@@ -66,6 +67,11 @@ export class AddressReconciliationService {
     const meta = mediaItem.address_field_meta;
     const fieldMeta = meta?.[field];
     if (fieldMeta?.suppressReconciliationPrompt) return null;
+
+    if (field === 'country') {
+      const localOffer = this.tryLocalCountryOffer(mediaItem);
+      if (localOffer) return localOffer;
+    }
 
     const assembled = this.assembleQuery(mediaItem);
     if (!assembled) return null;
@@ -143,7 +149,6 @@ export class AddressReconciliationService {
     focusField?: AddressFieldKind,
   ): ReconciliationOffer | null {
     const fieldOffers: ReconciliationFieldOffer[] = [];
-    let matchCount = 0;
 
     const suggested: Record<AddressFieldKind, string | null> = {
       street: result.street,
@@ -157,11 +162,7 @@ export class AddressReconciliationService {
       const suggestion = suggested[field];
       if (!suggestion) continue;
 
-      const changed = normalizeForCompare(suggestion) !== normalizeForCompare(current ?? '');
-
-      if (!changed || normalizeForCompare(current ?? '') === normalizeForCompare(suggestion)) {
-        matchCount++;
-      }
+      const changed = !fieldValuesMatch(field, current, suggestion);
 
       fieldOffers.push({ field, currentValue: current, suggestedValue: suggestion, changed });
     }
@@ -175,7 +176,7 @@ export class AddressReconciliationService {
       if (!current) continue;
       const suggestion = suggested[field];
       if (!suggestion) continue;
-      if (normalizeForCompare(current) === normalizeForCompare(suggestion)) matchingFields++;
+      if (fieldValuesMatch(field, current, suggestion)) matchingFields++;
     }
 
     // Confidence scoring
@@ -199,34 +200,81 @@ export class AddressReconciliationService {
     if (!confidence) return null;
 
     const changedFields = fieldOffers.filter((f) => f.changed);
-    if (changedFields.length === 0) return null; // nothing to suggest
+    const verificationOnly = changedFields.length === 0 && matchingFields > 0;
+    if (changedFields.length === 0 && !verificationOnly) return null;
 
     return {
       mediaItemId: item.id,
       fields: fieldOffers,
       confidence,
       candidateLabel: result.addressLabel,
+      verificationOnly,
+    };
+  }
+
+  /**
+   * Country values that match the static ISO list can be verified without Nominatim.
+   */
+  private tryLocalCountryOffer(item: ReconciliationInput): ReconciliationOffer | null {
+    const current = item.country?.trim();
+    if (!current) return null;
+
+    const code = isoCodeFromCountryName(current);
+    if (!code) return null;
+
+    const canonical = ISO_COUNTRY_BY_CODE[code]?.name;
+    if (!canonical) return null;
+
+    const changed = normalizeForCompare(current) !== normalizeForCompare(canonical);
+
+    return {
+      mediaItemId: item.id,
+      fields: [
+        {
+          field: 'country',
+          currentValue: current,
+          suggestedValue: canonical,
+          changed,
+        },
+      ],
+      confidence: 'high',
+      candidateLabel: canonical,
+      verificationOnly: !changed,
     };
   }
 
   private async persistApply(mediaItemId: string, offer: ReconciliationOffer): Promise<void> {
     const updates: Record<string, string> = {};
-    const metaUpdates: AddressFieldMeta = {};
+
+    const existingMeta = await this.loadAddressFieldMeta(mediaItemId);
+    const metaUpdates: AddressFieldMeta = { ...existingMeta };
 
     for (const fieldOffer of offer.fields) {
       if (fieldOffer.changed) {
         updates[fieldOffer.field] = fieldOffer.suggestedValue;
       }
-      const verification: AddressFieldVerification = { source: 'geocoder', verified: true };
-      metaUpdates[fieldOffer.field] = verification;
+      metaUpdates[fieldOffer.field] = { source: 'geocoder', verified: true };
     }
 
-    if (Object.keys(updates).length === 0) return;
+    const payload: Record<string, unknown> = { address_field_meta: metaUpdates };
+    if (Object.keys(updates).length > 0) {
+      Object.assign(payload, updates);
+    }
 
     await this.supabase.client
       .from('media_items')
-      .update({ ...updates, address_field_meta: metaUpdates })
+      .update(payload)
       .or(`id.eq.${mediaItemId},source_image_id.eq.${mediaItemId}`);
+  }
+
+  private async loadAddressFieldMeta(mediaItemId: string): Promise<AddressFieldMeta> {
+    const { data } = await this.supabase.client
+      .from('media_items')
+      .select('address_field_meta')
+      .eq('id', mediaItemId)
+      .maybeSingle();
+
+    return (data as { address_field_meta?: AddressFieldMeta } | null)?.address_field_meta ?? {};
   }
 
   private async persistSuppress(mediaItemId: string, offer: ReconciliationOffer): Promise<void> {
@@ -254,4 +302,19 @@ export class AddressReconciliationService {
 
 function normalizeForCompare(value: string): string {
   return value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function fieldValuesMatch(
+  field: AddressFieldKind,
+  current: string | null | undefined,
+  suggestion: string | null | undefined,
+): boolean {
+  if (!current || !suggestion) return false;
+  if (normalizeForCompare(current) === normalizeForCompare(suggestion)) return true;
+  if (field === 'country') {
+    const codeA = isoCodeFromCountryName(current);
+    const codeB = isoCodeFromCountryName(suggestion);
+    return !!codeA && codeA === codeB;
+  }
+  return false;
 }

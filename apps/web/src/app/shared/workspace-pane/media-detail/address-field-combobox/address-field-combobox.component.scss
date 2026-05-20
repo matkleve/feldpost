@@ -1,99 +1,115 @@
-// AddressFieldCombobox — inline combobox for per-field address suggestions.
-// @see docs/specs/component/address-field-combobox/address-field-combobox.md
+// Address field combobox — same row/dropdown geometry as address-search.
+// @see docs/specs/ui/media-detail/address-search.md
 
-@layer components {
-  // Host is an inline block within the detail-row center slot.
-  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#ownership-matrix
-  :host {
-    display: contents;
-    position: relative;
-  }
+:host {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  column-gap: var(--spacing-1);
+  align-items: start;
+  position: relative;
+  min-width: 0;
+  overflow: visible;
+}
 
-  // Input: fills the detail-row__field-slot, inherits parent input styles.
-  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#component-hierarchy
-  .address-field-combobox__input {
-    width: 100%;
-    min-width: 0;
+:host .address-field-combobox__row.detail-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  width: 100%;
+}
+
+.address-field-combobox__input {
+  grid-column: 3;
+  min-width: 0;
+}
+
+.address-field-combobox__stack {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  position: relative;
+  overflow: visible;
+}
+
+.address-field-combobox-shell {
+  max-height: min(40vh, 16rem);
+  overflow-y: auto;
+}
+
+.address-field-combobox__dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.address-field-combobox__section-label {
+  padding: var(--spacing-1) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.address-field-combobox__result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--foreground);
+  text-align: right;
+  min-height: 2rem;
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: normal;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  &:hover,
+  &.address-field-combobox__result-item--focused {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+
+    .address-field-combobox__result-label,
+    .address-field-combobox__result-subtitle {
+      color: var(--primary);
+    }
   }
 }
 
-@layer states {
-  // Loading state: spinner row in panel.
-  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#fsm
-  .address-field-combobox__loading {
-    padding: var(--spacing-2) var(--spacing-3);
-    font-size: var(--text-small);
-    color: var(--muted-foreground);
-  }
+.address-field-combobox__result-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+  transition: color 80ms ease-out;
+}
 
-  // Empty state: no results message.
-  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#fsm
-  .address-field-combobox__empty {
-    padding: var(--spacing-2) var(--spacing-3);
-    font-size: var(--text-small);
-    color: var(--muted-foreground);
-  }
+.address-field-combobox__result-subtitle {
+  font-size: var(--font-size-2xs);
+  color: var(--muted-foreground);
+  transition: color 80ms ease-out;
+}
 
-  // Section label for org-db and geocoder tiers.
-  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#component-hierarchy
-  .address-field-combobox__section-label {
-    padding: var(--spacing-1) var(--spacing-3) 0;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--muted-foreground);
-  }
+.address-field-combobox__divider {
+  height: 1px;
+  margin: var(--spacing-1) 0;
+  background: var(--border);
+}
 
-  // Divider between org-db and geocoder tiers.
-  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#component-hierarchy
-  .address-field-combobox__divider {
-    height: 1px;
-    margin: var(--spacing-1) 0;
-    background: var(--border);
-  }
-
-  // Suggestion row.
-  // @see docs/specs/component/address-field-combobox/address-field-combobox.md#ownership-matrix
-  .address-field-combobox__suggestion {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    padding: var(--spacing-1) var(--spacing-3);
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    text-align: left;
-    gap: 0.125rem;
-    border-radius: var(--radius-sm);
-    transition: background-color 80ms ease-out;
-
-    &:hover,
-    &:focus-visible,
-    &.address-field-combobox__suggestion--focused {
-      background: color-mix(in srgb, var(--color-clay, var(--primary)) 8%, transparent);
-      outline: none;
-    }
-  }
-
-  // Primary value text.
-  .address-field-combobox__suggestion-value {
-    font-size: var(--text-body, 0.9375rem);
-    color: var(--foreground);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
-
-  // Subtitle (e.g. city, country).
-  .address-field-combobox__suggestion-subtitle {
-    font-size: var(--text-small, 0.8125rem);
-    color: var(--muted-foreground);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
+.address-field-combobox__loading,
+.address-field-combobox__empty {
+  padding: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+  text-align: right;
 }
