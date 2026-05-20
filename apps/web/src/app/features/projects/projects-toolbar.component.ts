@@ -6,6 +6,7 @@ import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-s
 import {
   toolbarDropdownPanelClass,
   toolbarDropdownPositionWidthPx,
+  toolbarDropdownPositionWidthPx,
 } from '../../shared/dropdown-trigger/toolbar-menu-panel-layout';
 import {
   GroupingDropdownComponent,
@@ -52,6 +53,7 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 export class ProjectsToolbarComponent {
   /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
   protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
+  protected readonly toolbarDropdownPositionWidthPx = toolbarDropdownPositionWidthPx;
 
   /** Template helper: icon/text layout for status pill options. */
   readonly optLayout = toggleOptionLayout;

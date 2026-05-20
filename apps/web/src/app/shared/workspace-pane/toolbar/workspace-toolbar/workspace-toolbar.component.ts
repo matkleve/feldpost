@@ -52,6 +52,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
 export class WorkspaceToolbarComponent implements OnInit {
   /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
   protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
+  protected readonly toolbarDropdownPositionWidthPx = toolbarDropdownPositionWidthPx;
 
   private readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);

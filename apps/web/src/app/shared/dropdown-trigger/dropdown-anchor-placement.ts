@@ -19,7 +19,11 @@ export interface AnchorPlacementResult {
   openBelow: boolean;
 }
 
-/** Nearest ancestor that clips or scrolls content (detail panel, modal body, etc.). */
+/**
+ * Nearest scrollable ancestor (overflow auto/scroll with overflow content).
+ * Ignores `overflow: hidden` alone — e.g. `.workspace-toolbar` must not become the clip box
+ * (that mis-positions toolbar menus to the pane edge).
+ */
 export function findScrollClipParent(node: HTMLElement): HTMLElement | null {
   let el: HTMLElement | null = node.parentElement;
   while (el && el !== document.body) {
@@ -31,11 +35,8 @@ export function findScrollClipParent(node: HTMLElement): HTMLElement | null {
       overflowY === 'scroll' ||
       overflow === 'auto' ||
       overflow === 'scroll';
-    const hiddenY = overflowY === 'hidden' || overflow === 'hidden';
-    if (scrollableY || hiddenY) {
-      if (hiddenY || el.scrollHeight > el.clientHeight + 1) {
-        return el;
-      }
+    if (scrollableY && el.scrollHeight > el.clientHeight + 1) {
+      return el;
     }
     el = el.parentElement;
   }

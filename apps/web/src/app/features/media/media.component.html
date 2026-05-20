@@ -74,6 +74,7 @@
     <app-dropdown-shell
       [panelClass]="toolbarDropdownPanelClass(activeDropdown())"
       [anchor]="dropdownAnchor()"
+      [minWidth]="toolbarDropdownPositionWidthPx(activeDropdown())"
       [outsideCloseEnabled]="!isDragging()"
       (closeRequested)="closeDropdown()"
     >
