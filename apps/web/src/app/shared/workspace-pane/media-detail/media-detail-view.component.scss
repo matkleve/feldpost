@@ -1,5 +1,4 @@
 // MediaDetailViewComponent styles.
-@use '../../../../styles/subtle-scrollbar';
 
 :host {
   --detail-row-height: 2rem;
@@ -137,7 +136,6 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-top: var(--spacing-2);
-  @include subtle-scrollbar.subtle;
 }
 
 // ─── Content area ───

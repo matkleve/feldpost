@@ -51,6 +51,11 @@
     .detail-row-action--danger:is(button) {
       color: var(--destructive);
     }
+
+    .detail-row-action--save:is(button),
+    .detail-row-action--confirm:is(button) {
+      color: var(--success);
+    }
   }
 
   &--readonly {
@@ -246,7 +251,9 @@
     font-size: var(--font-size-md);
   }
 
-  &:hover:not(.detail-row-action--danger) {
+  &:hover:not(.detail-row-action--danger):not(.detail-row-action--save):not(
+      .detail-row-action--confirm
+    ) {
     color: var(--primary);
     background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent));
   }
@@ -265,6 +272,22 @@
     color: var(--destructive);
     background: color-mix(in srgb, var(--destructive) 10%, transparent);
     outline-color: var(--destructive);
+  }
+
+  // Save/confirm check icon uses success green; tint background only on hover/focus.
+  // @see docs/design/tokens.md#semantic-colors
+  &.detail-row-action--save,
+  &.detail-row-action--confirm {
+    color: var(--success);
+  }
+
+  &.detail-row-action--save:hover,
+  &.detail-row-action--confirm:hover,
+  &.detail-row-action--save:focus-visible,
+  &.detail-row-action--confirm:focus-visible {
+    color: var(--success);
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    outline-color: var(--success);
   }
 }
 

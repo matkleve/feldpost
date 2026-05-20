@@ -102,11 +102,11 @@
     <p class="project-card__meta">{{ relativeActivity() }}</p>
   }
 
-  @if (menuOpen() && menuPosition(); as menuPos) {
+  @if (menuOpen()) {
     <app-dropdown-shell
       class="map-context-menu"
-      [top]="menuPos.y"
-      [left]="menuPos.x"
+      [anchor]="menuAnchor()"
+      placement="end"
       [minWidth]="contextMenuMinWidthPx"
       [panelClass]="menuPanelClass()"
       (closeRequested)="onMenuCloseRequested()"

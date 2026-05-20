@@ -70,10 +70,9 @@
 
   @if (showContextMenu()) {
     <app-dropdown-shell
-      #contextMenuPanel
       class="detail-context-menu"
-      [top]="contextMenuTop()"
-      [left]="contextMenuLeft()"
+      [anchor]="contextMenuAnchor()"
+      placement="end"
       [minWidth]="176"
       panelClass="detail-context-menu option-menu-surface"
       (closeRequested)="onContextMenuCloseRequested()"

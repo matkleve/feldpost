@@ -85,8 +85,7 @@ export class ProjectsToolbarComponent {
   readonly statusFilterChange = output<ProjectStatusFilter>();
 
   readonly activeDropdown = signal<ProjectsToolbarDropdown>(null);
-  readonly dropdownTop = signal(0);
-  readonly dropdownLeft = signal(0);
+  readonly dropdownAnchor = signal<HTMLElement | null>(null);
   readonly isDragging = signal(false);
   readonly activeGroupings = signal<GroupingProperty[]>([]);
 
@@ -146,24 +145,13 @@ export class ProjectsToolbarComponent {
       return;
     }
 
-    const trigger = event.currentTarget as HTMLElement;
-    const rect = trigger.getBoundingClientRect();
-    const dropdownWidth = toolbarDropdownPositionWidthPx(id);
-    const viewportWidth = window.innerWidth;
-    const padding = 16;
-
-    let left = rect.left;
-    if (left + dropdownWidth > viewportWidth - padding) {
-      left = Math.max(padding, viewportWidth - dropdownWidth - padding);
-    }
-
-    this.dropdownTop.set(rect.bottom + 4);
-    this.dropdownLeft.set(left);
+    this.dropdownAnchor.set(event.currentTarget as HTMLElement);
     this.activeDropdown.set(id);
   }
 
   closeDropdown(): void {
     this.activeDropdown.set(null);
+    this.dropdownAnchor.set(null);
   }
 
   onDragStarted(): void {

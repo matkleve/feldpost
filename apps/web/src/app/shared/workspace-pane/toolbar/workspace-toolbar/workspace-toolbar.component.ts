@@ -96,9 +96,7 @@ export class WorkspaceToolbarComponent implements OnInit {
     return template.replace('{{view}}', next.label);
   });
 
-  // Dropdown position (fixed, computed from button rect)
-  readonly dropdownTop = signal(0);
-  readonly dropdownLeft = signal(0);
+  readonly dropdownAnchor = signal<HTMLElement | null>(null);
 
   // --- Grouping state (persists across dropdown open/close) ---
   readonly activeGroupings = signal<GroupingProperty[]>([]);
@@ -182,27 +180,16 @@ export class WorkspaceToolbarComponent implements OnInit {
   toggleDropdown(id: ToolbarDropdown, event: MouseEvent): void {
     if (this.activeDropdown() === id) {
       this.activeDropdown.set(null);
+      this.dropdownAnchor.set(null);
       return;
     }
-    // Position dropdown below the clicked button, clamped to viewport
-    const btn = event.currentTarget as HTMLElement;
-    const rect = btn.getBoundingClientRect();
-    const dropdownWidth = toolbarDropdownPositionWidthPx(id);
-    const viewportWidth = window.innerWidth;
-    const padding = 16; // keep 16px from viewport edge
-
-    let left = rect.left;
-    if (left + dropdownWidth > viewportWidth - padding) {
-      left = Math.max(padding, viewportWidth - dropdownWidth - padding);
-    }
-
-    this.dropdownTop.set(rect.bottom + 4);
-    this.dropdownLeft.set(left);
+    this.dropdownAnchor.set(event.currentTarget as HTMLElement);
     this.activeDropdown.set(id);
   }
 
   closeDropdown(): void {
     this.activeDropdown.set(null);
+    this.dropdownAnchor.set(null);
   }
 
   onThumbnailSizeToggleChange(raw: ToggleValue<string>): void {

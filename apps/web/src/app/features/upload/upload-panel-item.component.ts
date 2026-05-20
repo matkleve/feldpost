@@ -15,8 +15,6 @@ import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-s
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../shared/ui/menu';
 import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 
-const UPLOAD_ITEM_MENU_WIDTH = 224;
-const UPLOAD_ITEM_MENU_OFFSET_Y = 4;
 
 export type UploadItemMenuAction =
   | 'view_file_details'
@@ -109,7 +107,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   readonly selectionChanged = output<{ jobId: string; selected: boolean }>();
 
   readonly menuOpen = signal(false);
-  readonly menuPosition = signal<{ x: number; y: number } | null>(null);
+  readonly menuAnchor = signal<HTMLElement | null>(null);
   readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
   readonly showDuplicateExistingMediaShortcut = computed(() => {
     const job = this.job();
@@ -272,13 +270,7 @@ export class UploadPanelItemComponent implements OnDestroy {
 
     event.preventDefault();
     event.stopPropagation();
-    const menuHeight = this.availableMenuActions().length * 44 + 48;
-    const downwardY = event.clientY + UPLOAD_ITEM_MENU_OFFSET_Y;
-    const hasSpaceBelow = downwardY + menuHeight <= window.innerHeight - 8;
-    const menuY = hasSpaceBelow
-      ? downwardY
-      : event.clientY - menuHeight - UPLOAD_ITEM_MENU_OFFSET_Y;
-    this.openMenuAt(event.clientX, menuY, menuHeight);
+    this.openMenu(event.currentTarget instanceof HTMLElement ? event.currentTarget : null);
   }
 
   onMenuTriggerClick(event: MouseEvent): void {
@@ -288,20 +280,7 @@ export class UploadPanelItemComponent implements OnDestroy {
 
     event.preventDefault();
     event.stopPropagation();
-    const target = event.currentTarget;
-    if (target instanceof HTMLElement) {
-      const rect = target.getBoundingClientRect();
-      const menuHeight = this.availableMenuActions().length * 44 + 48; // rough estimate
-
-      // Try to position downward first; fall back to upward if insufficient space
-      const downwardY = rect.bottom + UPLOAD_ITEM_MENU_OFFSET_Y;
-      const hasSpaceBelow = downwardY + menuHeight <= window.innerHeight - 8; // 8px margin
-
-      const menuY = hasSpaceBelow ? downwardY : rect.top - menuHeight - UPLOAD_ITEM_MENU_OFFSET_Y;
-      this.openMenuAt(rect.right - UPLOAD_ITEM_MENU_WIDTH, menuY, menuHeight);
-    } else {
-      this.openMenuAt(event.clientX, event.clientY, 200);
-    }
+    this.openMenu(event.currentTarget instanceof HTMLElement ? event.currentTarget : null);
   }
 
   onMenuCloseRequested(): void {
@@ -309,6 +288,7 @@ export class UploadPanelItemComponent implements OnDestroy {
       UploadPanelItemComponent.activeMenuOwner = null;
     }
     this.menuOpen.set(false);
+    this.menuAnchor.set(null);
   }
 
   onMenuAction(action: UploadItemMenuAction): void {
@@ -423,28 +403,15 @@ export class UploadPanelItemComponent implements OnDestroy {
     );
   }
 
-  private clampMenuPosition(x: number, y: number, menuHeight: number): { x: number; y: number } {
-    if (typeof window === 'undefined') {
-      return { x, y };
-    }
-
-    const menuWidth = UPLOAD_ITEM_MENU_WIDTH;
-    const margin = 8;
-    return {
-      x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),
-      y: Math.min(Math.max(y, margin), window.innerHeight - menuHeight - margin),
-    };
-  }
-
-  private openMenuAt(x: number, y: number, menuHeight: number): void {
+  private openMenu(anchor: HTMLElement | null): void {
     // upload-panel.md § Dropdown Visibility Rationale: only one row menu should be active at once.
     const previousOwner = UploadPanelItemComponent.activeMenuOwner;
     if (previousOwner && previousOwner !== this) {
       previousOwner.menuOpen.set(false);
-      previousOwner.menuPosition.set(null);
+      previousOwner.menuAnchor.set(null);
     }
 
-    this.menuPosition.set(this.clampMenuPosition(x, y, menuHeight));
+    this.menuAnchor.set(anchor);
     this.menuOpen.set(true);
     UploadPanelItemComponent.activeMenuOwner = this;
   }

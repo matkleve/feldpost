@@ -328,6 +328,8 @@ html[data-theme="sandstone"] {
   }
 }
 
+@include meta.load-css('styles/subtle-scrollbar');
+
 // ── Shared floating panel surface ─────────────────────────────────────────────
 // Used on bare <div> / <section> overlay panels that lack HlmMenuContentDirective
 // (e.g. .add-metadata-suggestions, upload-panel modals, project-color-picker).

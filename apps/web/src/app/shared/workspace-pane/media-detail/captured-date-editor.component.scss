@@ -222,13 +222,13 @@
   }
 
   &__done-btn {
-    color: var(--primary-foreground);
+    color: var(--success-foreground);
     font-weight: var(--font-weight-medium);
-    background: var(--primary);
+    background: var(--success);
     border-radius: var(--radius-sm);
 
     &:hover {
-      background: color-mix(in srgb, var(--primary) 88%, black);
+      background: color-mix(in srgb, var(--success) 88%, black);
     }
   }
 }

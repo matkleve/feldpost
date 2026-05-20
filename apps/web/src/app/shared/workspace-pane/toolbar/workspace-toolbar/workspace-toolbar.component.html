@@ -79,8 +79,7 @@
 @if (activeDropdown()) {
   <app-dropdown-shell
     [panelClass]="toolbarDropdownPanelClass(activeDropdown())"
-    [top]="dropdownTop()"
-    [left]="dropdownLeft()"
+    [anchor]="dropdownAnchor()"
     [outsideCloseEnabled]="!isDragging()"
     (closeRequested)="closeDropdown()"
   >

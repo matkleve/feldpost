@@ -122,11 +122,11 @@
     </button>
   </div>
 
-  @if (menuOpen() && menuPosition(); as menuPos) {
+  @if (menuOpen()) {
     <app-dropdown-shell
       class="map-context-menu"
-      [top]="menuPos.y"
-      [left]="menuPos.x"
+      [anchor]="menuAnchor()"
+      placement="end"
       [minWidth]="224"
       [panelClass]="menuPanelClass()"
       (closeRequested)="onMenuCloseRequested()"

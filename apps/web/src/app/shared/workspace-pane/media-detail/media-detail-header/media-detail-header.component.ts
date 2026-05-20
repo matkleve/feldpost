@@ -1,12 +1,11 @@
 import {
   Component,
+  computed,
   ElementRef,
-  HostListener,
   effect,
   inject,
   input,
   output,
-  signal,
   viewChild,
 } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
@@ -31,19 +30,14 @@ import type { WorkspaceSingleActionId } from '../../footer/workspace-detail-acti
   styleUrl: './media-detail-header.component.scss',
 })
 export class MediaDetailHeaderComponent {
-  private static readonly MENU_GAP_PX = 8;
-  private static readonly MENU_MARGIN_PX = 8;
-  private static readonly MENU_MIN_WIDTH_PX = 176;
 
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   private readonly contextMenuTriggerRef =
     viewChild<ElementRef<HTMLButtonElement>>('contextMenuTrigger');
-  private readonly contextMenuPanelRef = viewChild('contextMenuPanel', {
-    read: ElementRef<HTMLElement>,
-  });
-  readonly contextMenuTop = signal(0);
-  readonly contextMenuLeft = signal(0);
+  readonly contextMenuAnchor = computed(
+    () => this.contextMenuTriggerRef()?.nativeElement ?? null,
+  );
 
   readonly displayTitle = input<string>('');
   readonly titleValue = input<string>('');
@@ -62,7 +56,6 @@ export class MediaDetailHeaderComponent {
   constructor() {
     effect(() => {
       if (this.showContextMenu()) {
-        this.positionContextMenu();
         this.focusFirstContextMenuItem();
       }
     });
@@ -105,62 +98,17 @@ export class MediaDetailHeaderComponent {
     this.focusAdjacentItem(event.key, focusableItems);
   }
 
-  @HostListener('window:resize')
-  @HostListener('window:scroll')
-  onViewportChanged(): void {
-    if (!this.showContextMenu()) {
-      return;
-    }
-
-    this.positionContextMenu();
-  }
-
   private focusFirstContextMenuItem(): void {
     if (typeof window === 'undefined') {
       return;
     }
 
     window.requestAnimationFrame(() => {
-      this.positionContextMenu();
-      const firstItem = this.contextMenuPanelRef()?.nativeElement.querySelector(
-        'button[role="menuitem"]',
-      ) as HTMLButtonElement | null;
+      const firstItem = this.contextMenuTriggerRef()?.nativeElement
+        .closest('[data-detail-header]')
+        ?.querySelector('app-dropdown-shell button[role="menuitem"]') as HTMLButtonElement | null;
       firstItem?.focus();
     });
-  }
-
-  private positionContextMenu(): void {
-    const trigger = this.contextMenuTriggerRef()?.nativeElement;
-    if (!trigger || typeof window === 'undefined') {
-      return;
-    }
-
-    const triggerRect = trigger.getBoundingClientRect();
-    const panel = this.contextMenuPanelRef()?.nativeElement;
-    const panelRect = panel?.getBoundingClientRect();
-    const menuWidth = Math.max(
-      MediaDetailHeaderComponent.MENU_MIN_WIDTH_PX,
-      panelRect?.width ?? MediaDetailHeaderComponent.MENU_MIN_WIDTH_PX,
-    );
-    const menuHeight = panelRect?.height ?? 0;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const margin = MediaDetailHeaderComponent.MENU_MARGIN_PX;
-    const gap = MediaDetailHeaderComponent.MENU_GAP_PX;
-
-    const preferredLeft = triggerRect.right - menuWidth;
-    const maxLeft = Math.max(margin, viewportWidth - menuWidth - margin);
-    const clampedLeft = Math.min(Math.max(preferredLeft, margin), maxLeft);
-
-    const belowTop = triggerRect.bottom + gap;
-    const aboveTop = triggerRect.top - gap - menuHeight;
-    const shouldOpenAbove = menuHeight > 0 && belowTop + menuHeight > viewportHeight - margin;
-    const preferredTop = shouldOpenAbove ? aboveTop : belowTop;
-    const maxTop = Math.max(margin, viewportHeight - menuHeight - margin);
-    const clampedTop = Math.min(Math.max(preferredTop, margin), maxTop);
-
-    this.contextMenuLeft.set(Math.round(clampedLeft));
-    this.contextMenuTop.set(Math.round(clampedTop));
   }
 
   private focusContextMenuTrigger(): void {

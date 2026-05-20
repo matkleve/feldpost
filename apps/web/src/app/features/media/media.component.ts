@@ -98,8 +98,7 @@ export class MediaComponent implements OnDestroy {
   readonly rawWorkspaceImages = signal<WorkspaceMedia[]>([]);
   readonly uploadRefreshTick = signal(0);
   readonly activeDropdown = signal<ToolbarDropdown>(null);
-  readonly dropdownTop = signal(0);
-  readonly dropdownLeft = signal(0);
+  readonly dropdownAnchor = signal<HTMLElement | null>(null);
   readonly activeGroupings = signal<GroupingProperty[]>(
     this.viewService.activeGroupings().map((g) => ({ id: g.id, label: g.label, icon: g.icon })),
   );
@@ -321,27 +320,17 @@ export class MediaComponent implements OnDestroy {
   toggleDropdown(id: ToolbarDropdown, event: MouseEvent): void {
     if (this.activeDropdown() === id) {
       this.activeDropdown.set(null);
+      this.dropdownAnchor.set(null);
       return;
     }
 
-    const btn = event.currentTarget as HTMLElement;
-    const rect = btn.getBoundingClientRect();
-    const dropdownWidth = toolbarDropdownPositionWidthPx(id);
-    const viewportWidth = window.innerWidth;
-    const padding = 16;
-
-    let left = rect.left;
-    if (left + dropdownWidth > viewportWidth - padding) {
-      left = Math.max(padding, viewportWidth - dropdownWidth - padding);
-    }
-
-    this.dropdownTop.set(rect.bottom + 4);
-    this.dropdownLeft.set(left);
+    this.dropdownAnchor.set(event.currentTarget as HTMLElement);
     this.activeDropdown.set(id);
   }
 
   closeDropdown(): void {
     this.activeDropdown.set(null);
+    this.dropdownAnchor.set(null);
   }
 
   @HostListener('document:keydown.escape')
