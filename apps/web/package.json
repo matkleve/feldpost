@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "node ../../scripts/start-web-dev.mjs",
     "build": "ng build",
     "build:vercel": "node ./scripts/write-env.mjs && ng build",
     "build:cloudflare": "node ./scripts/write-env.mjs && ng build",

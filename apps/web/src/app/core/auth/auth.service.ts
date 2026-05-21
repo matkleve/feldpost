@@ -69,23 +69,26 @@ export class AuthService {
    * Must resolve before any route guard runs.
    */
   async initialize(): Promise<void> {
-    // Load any existing session from storage
-    const { data } = await this.supabase.client.auth.getSession();
-    this._session.set(data.session);
+    try {
+      // Load any existing session from storage
+      const { data } = await this.supabase.client.auth.getSession();
+      this._session.set(data.session);
 
-    // Subscribe to auth state changes for the lifetime of the app.
-    // This fires on: sign-in, sign-out, token refresh, password recovery.
-    this.supabase.client.auth.onAuthStateChange((event, session) => {
-      this._session.set(session);
+      // Subscribe to auth state changes for the lifetime of the app.
+      // This fires on: sign-in, sign-out, token refresh, password recovery.
+      this.supabase.client.auth.onAuthStateChange((event, session) => {
+        this._session.set(session);
 
-      // After a PASSWORD_RECOVERY link is clicked, Supabase fires SIGNED_IN
-      // with type 'recovery'. Route the user to the update-password form.
-      if (event === 'PASSWORD_RECOVERY') {
-        this.router.navigate(['/auth/update-password']);
-      }
-    });
-
-    this._loading.set(false);
+        // After a PASSWORD_RECOVERY link is clicked, Supabase fires SIGNED_IN
+        // with type 'recovery'. Route the user to the update-password form.
+        if (event === 'PASSWORD_RECOVERY') {
+          this.router.navigate(['/auth/update-password']);
+        }
+      });
+    } finally {
+      // Guards wait on loading(); always clear even when getSession fails.
+      this._loading.set(false);
+    }
   }
 
   // ─── Auth actions ───────────────────────────────────────────────────────────

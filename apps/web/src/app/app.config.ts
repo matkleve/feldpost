@@ -14,7 +14,7 @@ import type {
   ApplicationConfig} from '@angular/core';
 import {
   APP_INITIALIZER,
-  inject,
+  Injector,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
@@ -26,6 +26,7 @@ import {
 } from '@angular/router';
 import { routes } from './app.routes';
 import { AuthService } from './core/auth/auth.service';
+import { resolveSupabaseRuntimeConfig } from './core/supabase/supabase-runtime-config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -40,14 +41,16 @@ export const appConfig: ApplicationConfig = {
       withPreloading(PreloadAllModules),
     ),
 
-    // Initialize auth session before the first route renders.
-    // Guards will wait for loading() === false before deciding.
+    // Resolve Supabase endpoint, then auth — single initializer so AuthService (and
+    // SupabaseService) are not constructed before runtime config exists.
     {
       provide: APP_INITIALIZER,
-      useFactory: () => {
-        const auth = inject(AuthService);
-        return () => auth.initialize();
+      useFactory: (injector: Injector) => async () => {
+        await resolveSupabaseRuntimeConfig();
+        // injector.get — inject() is invalid after await (loses injection context).
+        await injector.get(AuthService).initialize();
       },
+      deps: [Injector],
       multi: true,
     },
   ],
