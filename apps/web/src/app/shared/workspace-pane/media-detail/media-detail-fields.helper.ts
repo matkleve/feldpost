@@ -336,19 +336,28 @@ export class ImageDetailFieldsHelper {
     return true;
   }
 
-  async restoreCoordinates(latitude: number | null, longitude: number | null): Promise<boolean> {
+  async clearActiveCoordinates(options?: { suppressToast?: boolean }): Promise<boolean> {
     const img = this.deps.signals.image();
-    if (!img) return false;
+    if (!img || (img.latitude == null && img.longitude == null)) {
+      return false;
+    }
+
+    const hasAddressText = [img.street, img.city, img.district, img.country, img.address_label].some(
+      (part) => !!part?.trim(),
+    );
+    const nextStatus = hasAddressText ? 'unresolved' : 'unresolvable';
 
     const previousLatitude = img.latitude;
     const previousLongitude = img.longitude;
+    const previousStatus = img.location_status;
 
     this.deps.signals.image.update((prev) =>
       prev
         ? {
             ...prev,
-            latitude,
-            longitude,
+            latitude: null,
+            longitude: null,
+            location_status: nextStatus,
           }
         : prev,
     );
@@ -357,8 +366,9 @@ export class ImageDetailFieldsHelper {
     const { error } = await this.deps.services.supabase.client
       .from('media_items')
       .update({
-        latitude,
-        longitude,
+        latitude: null,
+        longitude: null,
+        location_status: nextStatus,
       })
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
@@ -369,6 +379,81 @@ export class ImageDetailFieldsHelper {
               ...prev,
               latitude: previousLatitude,
               longitude: previousLongitude,
+              location_status: previousStatus,
+            }
+          : prev,
+      );
+      this.deps.services.toastService.show({
+        message: this.deps.helpers.t(
+          'workspace.imageDetail.toast.coordinatesClearFailed',
+          'Could not clear coordinates',
+        ),
+        type: 'error',
+      });
+      this.deps.signals.saving.set(false);
+      return false;
+    }
+
+    if (!options?.suppressToast) {
+      this.deps.services.toastService.show({
+        message: this.deps.helpers.t(
+          'workspace.imageDetail.toast.coordinatesCleared',
+          'Coordinates removed',
+        ),
+        type: 'success',
+      });
+    }
+
+    this.deps.signals.saving.set(false);
+    return true;
+  }
+
+  async restoreCoordinates(
+    latitude: number | null,
+    longitude: number | null,
+    options?: { location_status?: string | null },
+  ): Promise<boolean> {
+    const img = this.deps.signals.image();
+    if (!img) return false;
+
+    const previousLatitude = img.latitude;
+    const previousLongitude = img.longitude;
+    const previousStatus = img.location_status;
+    const nextStatus = options?.location_status;
+
+    this.deps.signals.image.update((prev) =>
+      prev
+        ? {
+            ...prev,
+            latitude,
+            longitude,
+            ...(nextStatus !== undefined ? { location_status: nextStatus } : {}),
+          }
+        : prev,
+    );
+
+    this.deps.signals.saving.set(true);
+    const updatePayload: {
+      latitude: number | null;
+      longitude: number | null;
+      location_status?: string | null;
+    } = { latitude, longitude };
+    if (nextStatus !== undefined) {
+      updatePayload.location_status = nextStatus;
+    }
+    const { error } = await this.deps.services.supabase.client
+      .from('media_items')
+      .update(updatePayload)
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+
+    if (error) {
+      this.deps.signals.image.update((prev) =>
+        prev
+          ? {
+              ...prev,
+              latitude: previousLatitude,
+              longitude: previousLongitude,
+              location_status: previousStatus,
             }
           : prev,
       );

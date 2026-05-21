@@ -301,6 +301,12 @@ export class MapShellComponent implements OnDestroy {
       this.locationMapPickNavigationService.readPayload(this.router),
     );
   private locationMapPickReturnUrl: string | null = null;
+  private lastLocationMapPickSync: {
+    mediaId: string;
+    lat: number;
+    lng: number;
+    address?: import('../../../core/media-location-update/media-location-update.types').MediaLocationAddressPatch;
+  } | null = null;
 
   /**
    * Leaflet map instance. Protected (not private) so unit tests can inject
@@ -2295,11 +2301,23 @@ export class MapShellComponent implements OnDestroy {
 
   private navigateBackAfterLocationMapPick(): void {
     const returnUrl = this.locationMapPickReturnUrl;
+    const sync = this.lastLocationMapPickSync;
     if (!returnUrl) {
       return;
     }
     this.locationMapPickReturnUrl = null;
-    void this.router.navigateByUrl(returnUrl);
+    void this.router.navigateByUrl(returnUrl).then(() => {
+      if (!sync) {
+        return;
+      }
+      this.lastLocationMapPickSync = null;
+      this.mediaDetailLocationSync.notifyCoordinatesUpdated(
+        sync.mediaId,
+        sync.lat,
+        sync.lng,
+        sync.address,
+      );
+    });
   }
 
   private handleMapClick(e: MapMouseEvent): void {
@@ -2435,6 +2453,12 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.onImageUploaded({ id: request.mediaId, lat: result.lat, lng: result.lng });
+    this.lastLocationMapPickSync = {
+      mediaId: request.mediaId,
+      lat: result.lat,
+      lng: result.lng,
+      address: result.address,
+    };
     this.mediaDetailLocationSync.notifyCoordinatesUpdated(
       request.mediaId,
       result.lat,

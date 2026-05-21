@@ -3,7 +3,7 @@
 
   <app-address-search
     [currentAddress]="fullAddress()"
-    [addressResolving]="addressResolving()"
+    [addressFieldsResolving]="addressFieldsResolving()"
     [searchContext]="addressSearchContext()"
     [editingActive]="editingField() === 'address_search'"
     (searchOpened)="fieldEditRequested.emit('address_search')"
@@ -53,7 +53,7 @@
         <div class="detail-row__center">
           <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
           <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
-          @if (addressResolving() && !fieldValue(fieldDef.name)) {
+          @if (addressFieldsResolving()) {
             <span
               class="detail-row__value-loading"
               role="status"
@@ -91,10 +91,38 @@
           >
             <span class="material-icons" aria-hidden="true">travel_explore</span>
           </button>
-        } @else {
+        } @else if (!fieldValue(fieldDef.name)) {
           <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
         }
-        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+        @if (fieldValue(fieldDef.name)) {
+          <app-detail-row-inline-confirm-action
+            [slot]="
+              fieldVerification(fieldDef.name) !== 'verified' ? 'r2' : 'r1'
+            "
+            [initialAriaFallback]="
+              t('workspace.addressField.action.clear.aria', 'Clear') +
+              ' ' +
+              t(fieldDef.labelKey, fieldDef.labelFallback)
+            "
+            initialAriaKey="workspace.addressField.action.clear.aria"
+            initialTitleKey="workspace.addressField.action.clear.title"
+            [initialTitleFallback]="
+              t('workspace.addressField.action.clear.title', 'Clear') +
+              ' ' +
+              t(fieldDef.labelKey, fieldDef.labelFallback)
+            "
+            confirmAriaKey="workspace.addressField.action.confirmClear.aria"
+            confirmAriaFallback="Confirm clear field"
+            confirmTitleKey="workspace.addressField.action.confirmClear.title"
+            confirmTitleFallback="Click again to clear"
+            (confirmed)="onFieldClear(fieldDef.name)"
+          />
+          @if (fieldVerification(fieldDef.name) === 'verified' || fieldVerification(fieldDef.name) === 'unknown') {
+            <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+          }
+        } @else {
+          <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+        }
     </div>
     }
   }
@@ -143,7 +171,15 @@
             ? t('workspace.imageDetail.field.correctedCoordinates', 'Corrected coordinates')
             : t('workspace.imageDetail.field.coordinates', 'Coordinates')
         }}</span>
-        @if (hasResolvableCoordinates()) {
+        @if (showCoordinatesResolving()) {
+          <span
+            class="detail-row__value-loading"
+            role="status"
+            [attr.aria-label]="t('workspace.imageDetail.location.coordinatesResolving', 'Resolving coordinates')"
+          >
+            <hlm-spinner size="sm" />
+          </span>
+        } @else if (hasResolvableCoordinates()) {
           <button
             class="detail-row__field-trigger detail-row__value--mono"
             type="button"
@@ -166,6 +202,7 @@
       @if (isCorrected()) {
         <app-detail-row-inline-confirm-action
           [disabled]="saving()"
+          idleIcon="undo"
           initialAriaKey="workspace.imageDetail.action.revertCoordinates.aria"
           initialAriaFallback="Revert corrected coordinates"
           initialTitleKey="workspace.imageDetail.action.revertCoordinates.title"
@@ -190,7 +227,19 @@
         >
           <span class="material-icons" aria-hidden="true">content_copy</span>
         </button>
-        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+        <app-detail-row-inline-confirm-action
+          slot="r2"
+          [disabled]="saving()"
+          initialAriaKey="workspace.imageDetail.action.clearCoordinates.aria"
+          initialAriaFallback="Clear coordinates"
+          initialTitleKey="workspace.imageDetail.action.clearCoordinates.title"
+          initialTitleFallback="Clear coordinates"
+          confirmAriaKey="workspace.imageDetail.action.confirmClearCoordinates.aria"
+          confirmAriaFallback="Confirm clear coordinates"
+          confirmTitleKey="workspace.imageDetail.action.confirmClearCoordinates.title"
+          confirmTitleFallback="Click again to clear coordinates"
+          (confirmed)="coordinatesClearRequested.emit()"
+        />
       } @else {
         <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
         <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>

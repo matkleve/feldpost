@@ -37,7 +37,7 @@ import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './address-search.component.html',
-  styleUrl: './address-search.component.scss',
+  styleUrls: ['./address-search.component.scss', '../_detail-row-slots.scss'],
   host: {
     '[attr.data-detail-active-editor]': 'active() ? "address_search" : null',
   },
@@ -50,7 +50,7 @@ export class AddressSearchComponent implements OnDestroy {
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly currentAddress = input('');
-  readonly addressResolving = input(false);
+  readonly addressFieldsResolving = input(false);
   readonly searchContext = input<SearchQueryContext>({});
   /** When parent clears `editingField`, close the active search surface. */
   readonly editingActive = input(false);

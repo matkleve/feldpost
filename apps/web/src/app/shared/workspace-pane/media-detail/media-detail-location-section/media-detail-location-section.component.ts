@@ -5,7 +5,10 @@ import { CoordinatesFieldEditorComponent } from '../coordinates-field-editor/coo
 import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { formatCoordinate } from '../media-detail-view.utils';
+import {
+  formatCoordinate,
+  hasValidGpsCoordinates,
+} from '../media-detail-view.utils';
 import type { SearchQueryContext } from '../../../../core/search/search.models';
 import type { DetailEditingField, ImageRecord } from '../media-detail-view.types';
 import type { AddressFieldContext, AddressFieldSuggestion } from '../../../../core/address-field-suggest/address-field-suggest.types';
@@ -47,19 +50,20 @@ export interface AddressFieldSaveEvent {
     HlmSpinnerComponent,
   ],
   templateUrl: './media-detail-location-section.component.html',
-  styleUrl: './media-detail-location-section.component.scss',
+  styleUrls: ['./media-detail-location-section.component.scss', '../_detail-row-slots.scss'],
 })
 export class MediaDetailLocationSectionComponent {
   private readonly i18nService = inject(I18nService);
   private readonly addressFieldSuggest = inject(AddressFieldSuggestService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  readonly image = input<ImageRecord>({} as ImageRecord);
+  readonly image = input.required<ImageRecord>();
   readonly fullAddress = input('');
   readonly editingField = input<DetailEditingField>(null);
   readonly isCorrected = input(false);
   readonly saving = input(false);
-  readonly addressResolving = input(false);
+  readonly addressFieldsResolving = input(false);
+  readonly coordinatesResolving = input(false);
 
   readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();
   /** Extended save event includes optional suggestion for meta persistence. */
@@ -71,6 +75,7 @@ export class MediaDetailLocationSectionComponent {
   readonly copyCoordinatesRequested = output<void>();
   readonly mapLocationPickRequested = output<void>();
   readonly revertCoordinatesRequested = output<void>();
+  readonly coordinatesClearRequested = output<void>();
   readonly coordinatesSaveRequested = output<string>();
 
   readonly addressSearchContext = computed<SearchQueryContext>(() => {
@@ -115,6 +120,10 @@ export class MediaDetailLocationSectionComponent {
 
   onFreeTextSave(field: AddressFieldDefinition['name'], value: string): void {
     this.fieldSaveRequested.emit({ field, value });
+  }
+
+  onFieldClear(field: AddressFieldDefinition['name']): void {
+    this.fieldSaveRequested.emit({ field, value: '' });
   }
 
   onResolveRequested(field: AddressFieldDefinition['name']): void {
@@ -184,33 +193,43 @@ export class MediaDetailLocationSectionComponent {
     return formatCoordinate(value);
   }
 
-  readonly hasResolvableCoordinates = computed(() => {
-    const img = this.image();
-    return img.latitude != null && img.longitude != null;
-  });
+  readonly hasResolvableCoordinates = computed(() => hasValidGpsCoordinates(this.image()));
 
-  coordinatesDisplayValue(): string {
+  readonly coordinatesDisplayValue = computed(() => {
     const img = this.image();
-    if (img.latitude == null || img.longitude == null) {
+    if (!hasValidGpsCoordinates(img)) {
       return '';
     }
     return `${this.formatCoord(img.latitude)}°, ${this.formatCoord(img.longitude)}°`;
-  }
+  });
 
-  coordinatesEditInitialValue(): string {
+  readonly coordinatesEditInitialValue = computed(() => {
     const img = this.image();
-    if (img.latitude == null || img.longitude == null) {
+    if (!hasValidGpsCoordinates(img)) {
       return '';
     }
-    return `${img.latitude.toFixed(6)}, ${img.longitude.toFixed(6)}`;
-  }
+    return `${img.latitude!.toFixed(6)}, ${img.longitude!.toFixed(6)}`;
+  });
 
-  coordinatesRowIcon(): string {
-    return this.hasResolvableCoordinates() ? 'gps_fixed' : 'gps_off';
-  }
+  readonly coordinatesRowIcon = computed(() =>
+    this.hasResolvableCoordinates() ? 'gps_fixed' : 'gps_off',
+  );
+
+  readonly showCoordinatesResolving = computed(
+    () => this.coordinatesResolving() || (this.addressFieldsResolving() && !this.hasResolvableCoordinates()),
+  );
+
+  readonly fieldValues = computed(() => {
+    const img = this.image();
+    return {
+      street: img.street ?? '',
+      city: img.city ?? '',
+      district: img.district ?? '',
+      country: img.country ?? '',
+    } as const;
+  });
 
   fieldValue(field: AddressFieldDefinition['name']): string {
-    const image = this.image();
-    return image[field] ?? '';
+    return this.fieldValues()[field];
   }
 }

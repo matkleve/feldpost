@@ -1,20 +1,23 @@
-<button
-  hlmBtn
-  variant="ghost"
-  size="icon"
-  [class]="
-    'detail-row-action detail-row-action--' +
-    slot() +
-    ' detail-row-action--remove' +
-    (armed() ? ' detail-row-action--armed' : '') +
-    (visible() || armed() ? ' detail-row-action--revealed' : '')
-  "
-  type="button"
-  [disabled]="disabled()"
-  [attr.aria-label]="ariaLabel()"
-  [attr.title]="title()"
-  [attr.data-state]="armed() ? 'armed' : 'idle'"
-  (click)="onClick($event)"
->
-  <span class="material-icons" aria-hidden="true">{{ armed() ? 'delete' : 'close' }}</span>
-</button>
+@if (enabled()) {
+  <button
+    #actionButton
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    [class]="
+      'detail-row-action detail-row-action--' +
+      slot() +
+      ' detail-row-action--remove' +
+      (armed() ? ' detail-row-action--armed' : '')
+    "
+    type="button"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.title]="title()"
+    [attr.data-state]="armed() ? 'armed' : 'idle'"
+    (pointerdown)="onActionPointerDown($event)"
+    (click)="onClick($event)"
+  >
+    <span class="material-icons" aria-hidden="true">{{ armed() ? armedIcon() : idleIcon() }}</span>
+  </button>
+}

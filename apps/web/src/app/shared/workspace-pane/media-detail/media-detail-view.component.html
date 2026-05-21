@@ -99,7 +99,8 @@
           [editingField]="editingField()"
           [isCorrected]="isCorrected()"
           [saving]="saving()"
-          [addressResolving]="addressResolving()"
+          [addressFieldsResolving]="addressFieldsResolving()"
+          [coordinatesResolving]="coordinatesResolving()"
           (fieldEditRequested)="onDetailFieldEditRequested($event)"
           (fieldSaveRequested)="saveAddressField($event)"
           (editingCancelled)="editingField.set(null)"
@@ -110,6 +111,7 @@
           (mapLocationPickRequested)="requestMapLocationPick()"
           (coordinatesSaveRequested)="saveCoordinatesFromInput($event)"
           (revertCoordinatesRequested)="revertCoordinatesToExif()"
+          (coordinatesClearRequested)="clearCoordinates()"
         />
 
         <!-- Reconciliation offer banner: shown when an address suggestion is available -->

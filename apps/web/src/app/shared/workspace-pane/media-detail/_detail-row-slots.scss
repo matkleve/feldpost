@@ -104,8 +104,9 @@
     color 80ms ease-out;
 }
 
-// Action slots fill from the center outward: L1/R1 inner, L2/R2 outer.
-// Compaction: sole right action uses R1 when R2 would be empty (closer to value column).
+// Action slots fill from the center outward: L2/L1 left; R1 inner, R2 outer (rightmost).
+// Sole right action uses R1 (no gap beside value). Second action uses R2 (clear when resolve on R1).
+// Edit mode: check R1, cancel R2 — same compaction.
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 .detail-row-action--l2 {
   grid-area: action-l2;

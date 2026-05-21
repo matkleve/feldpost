@@ -105,7 +105,7 @@
       <span class="detail-row__label">{{
         t('workspace.imageDetail.field.address', 'Address')
       }}</span>
-      @if (addressResolving() && !currentAddress()) {
+      @if (addressFieldsResolving()) {
         <span
           class="detail-row__value-loading"
           role="status"
@@ -125,19 +125,23 @@
         </button>
       }
     </div>
-    <app-detail-row-inline-confirm-action
-      class="address-search__clear-btn"
-      [visible]="!!currentAddress()"
-      initialAriaKey="workspace.addressSearch.aria.clear"
-      initialAriaFallback="Clear address"
-      initialTitleKey="workspace.addressSearch.aria.clear"
-      initialTitleFallback="Clear address"
-      confirmAriaKey="workspace.addressSearch.aria.confirmClear"
-      confirmAriaFallback="Confirm clear address"
-      confirmTitleKey="workspace.addressSearch.title.confirmClear"
-      confirmTitleFallback="Click again to clear address"
-      (confirmed)="clearAddress()"
-    />
-    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    @if (currentAddress()) {
+      <app-detail-row-inline-confirm-action
+        class="address-search__clear-btn"
+        initialAriaKey="workspace.addressSearch.aria.clear"
+        initialAriaFallback="Clear address"
+        initialTitleKey="workspace.addressSearch.aria.clear"
+        initialTitleFallback="Clear address"
+        confirmAriaKey="workspace.addressSearch.aria.confirmClear"
+        confirmAriaFallback="Confirm clear address"
+        confirmTitleKey="workspace.addressSearch.title.confirmClear"
+        confirmTitleFallback="Click again to clear address"
+        (confirmed)="clearAddress()"
+      />
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    } @else {
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    }
   </div>
 }

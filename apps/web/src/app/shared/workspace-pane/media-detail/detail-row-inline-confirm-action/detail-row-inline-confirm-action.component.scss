@@ -1,17 +1,26 @@
-// Host is a grid passthrough only — geometry lives on the action button.
+// Host passes through grid; button visibility follows parent .detail-row hover.
 // @see docs/specs/ui/media-detail/media-detail-inline-editing.md
 :host {
   display: contents;
 }
 
-// Armed remove: same slot size as idle; warm primary tint only (no row growth).
+button.detail-row-action--remove {
+  opacity: 0;
+  pointer-events: none;
+}
+
+// Parent row hover/focus reveals remove; armed stays visible for two-step confirm.
 // @see docs/specs/ui/media-detail/media-detail-inline-editing.md
-.detail-row-action--armed.detail-row-action--remove:is(button) {
+:host-context(.detail-row:hover:not(.detail-row--editing)) button.detail-row-action--remove,
+:host-context(.detail-row:focus-within:not(.detail-row--editing)) button.detail-row-action--remove,
+button.detail-row-action--armed {
   opacity: 1;
   pointer-events: auto;
 }
 
-.detail-row-action--revealed:is(button) {
-  opacity: 1;
-  pointer-events: auto;
+@media (hover: none) {
+  button.detail-row-action--remove {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }

@@ -237,7 +237,27 @@ export function resolveFullAddress(image: ImageRecord | null): string {
 }
 
 export function hasResolvableCoordinates(image: ImageRecord | null): boolean {
-  return image?.latitude != null && image?.longitude != null;
+  return hasValidGpsCoordinates(image);
+}
+
+/** Active GPS present and not the null-island placeholder pair. */
+export function hasValidGpsCoordinates(image: ImageRecord | null): boolean {
+  if (!image || image.latitude == null || image.longitude == null) {
+    return false;
+  }
+  return !(image.latitude === 0 && image.longitude === 0);
+}
+
+export function hasCompleteStructuredAddress(image: ImageRecord | null): boolean {
+  if (!image) {
+    return false;
+  }
+  return !!(
+    image.street?.trim() &&
+    image.city?.trim() &&
+    image.district?.trim() &&
+    image.country?.trim()
+  );
 }
 
 export function locationPatchFromForwardGeocode(
@@ -286,15 +306,12 @@ export function mergeImageLocationPatch(
   return next;
 }
 
-/** True when GPS exists but structured address lines are still empty (reverse geocode in flight). */
+/** True when GPS exists but structured address lines are still incomplete (reverse geocode in flight). */
 export function needsAddressResolutionAfterGps(image: ImageRecord | null): boolean {
-  if (!hasResolvableCoordinates(image)) {
+  if (!hasValidGpsCoordinates(image)) {
     return false;
   }
-  const hasStructured =
-    !!(image?.street?.trim() || image?.city?.trim() || image?.district?.trim() || image?.country?.trim());
-  const hasLabel = !!(image?.address_label?.trim());
-  return !hasStructured && !hasLabel;
+  return !hasCompleteStructuredAddress(image);
 }
 
 export function buildInfoChips(args: {

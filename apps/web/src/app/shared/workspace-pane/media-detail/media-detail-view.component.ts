@@ -36,7 +36,10 @@ import {
 } from '../../../core/media-download/media-download.service';
 import type { MediaTier } from '../../../core/media/media-renderer.types';
 import type { MediaLoadState } from '../../../core/media-download/media-download.types';
-import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
+import {
+  GeocodingService,
+  type ForwardGeocodeResult,
+} from '../../../core/geocoding/geocoding.service';
 import { detectCoordinates } from '../../../core/search/coordinate-detection';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { buildLocationUpdateFailureToast } from '../../../core/media-location-update/location-update-toast.util';
@@ -60,6 +63,7 @@ import {
   formatUploadDate,
   isImageLikeMedia,
   needsAddressResolutionAfterGps,
+  hasValidGpsCoordinates,
   mergeImageLocationPatch,
   locationPatchFromForwardGeocode,
   resolveDisplayTitle,
@@ -155,6 +159,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly addressReconciliationService = inject(AddressReconciliationService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
+  private readonly geocodingService = inject(GeocodingService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
@@ -198,7 +203,10 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly editDate = signal('');
   readonly editTime = signal('');
   readonly reconciliationOffer = signal<import('../../../core/address-reconciliation/address-reconciliation.types').ReconciliationOffer | null>(null);
-  readonly addressResolving = signal(false);
+  /** Reverse geocode in flight after GPS / map pick — spinners on address rows. */
+  readonly addressFieldsResolving = signal(false);
+  /** Forward geocode in flight after address edit — spinner on coordinates row. */
+  readonly coordinatesResolving = signal(false);
   readonly acceptTypes = Array.from(ALLOWED_MIME_TYPES).join(',');
   private readonly activeJobId = signal<string | null>(null);
 
@@ -244,10 +252,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     return media.latitude !== media.exif_latitude || media.longitude !== media.exif_longitude;
   });
 
-  readonly hasCoordinates = computed(() => {
-    const media = this.media();
-    return media?.latitude != null && media?.longitude != null;
-  });
+  readonly hasCoordinates = computed(() => hasValidGpsCoordinates(this.media()));
 
   readonly hasAddress = computed(() => this.fullAddress().trim().length > 0);
 
@@ -540,12 +545,15 @@ export class MediaDetailViewComponent implements OnDestroy {
         return;
       }
       this.lastHandledLocationSyncSeq = evt.seq;
-      this.applyLocationPatch({
+      const patch = {
         latitude: evt.lat,
         longitude: evt.lng,
+        location_unresolved: false,
         ...evt.address,
-      });
-      void this.finishLocationFieldsIfNeeded(mediaId);
+      };
+      const targetMediaId = mediaId;
+      // Patch signals after the effect completes — writing `media` inside this effect breaks the page.
+      queueMicrotask(() => this.handleExternalLocationSync(targetMediaId, patch));
     });
 
     this.uploadManager.imageReplaced$
@@ -620,6 +628,72 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.media.set(mergeImageLocationPatch(current, patch));
   }
 
+  /** Map-pick / external coordinate save — in-place patch only, no `loadMedia`. */
+  private handleExternalLocationSync(
+    mediaId: string,
+    patch: MediaLocationAddressPatch & {
+      latitude?: number | null;
+      longitude?: number | null;
+      location_unresolved?: boolean;
+      gps_assignment_allowed?: boolean;
+    },
+  ): void {
+    if (this.mediaId() !== mediaId) {
+      return;
+    }
+    const current = this.media();
+    if (!current) {
+      return;
+    }
+    this.mediaDetailLocationSync.clearPending(mediaId);
+    const mergedAfterPatch = mergeImageLocationPatch(current, patch);
+    const needsFollowUp = needsAddressResolutionAfterGps(mergedAfterPatch);
+    if (needsFollowUp) {
+      this.addressFieldsResolving.set(true);
+    }
+    this.applyLocationPatch(patch);
+    if (!needsFollowUp) {
+      this.mediaLocationStatus.set('resolved');
+      return;
+    }
+    void this.syncLocationFieldsAfterGps(mediaId);
+  }
+
+  /** Refresh structured address + coords from DB after GPS assignment (keeps spinners, no full reload). */
+  private async syncLocationFieldsAfterGps(mediaId: string): Promise<void> {
+    try {
+      const mediaItemId = this.mediaItemId();
+      if (mediaItemId) {
+        await this.locationResolverService.resolvePendingMediaItem(mediaItemId);
+      }
+      const signal = this.abortController?.signal ?? new AbortController().signal;
+      const refresh = await this.dataFacade.refreshImageLocationFields(mediaId, signal);
+      if (refresh.applied && refresh.locationStatus) {
+        this.mediaLocationStatus.set(refresh.locationStatus);
+      }
+      if (refresh.applied && hasValidGpsCoordinates(this.media())) {
+        this.mediaLocationStatus.set('resolved');
+      }
+    } finally {
+      this.addressFieldsResolving.set(false);
+    }
+  }
+
+  private applyPendingLocationSyncIfAny(mediaId: string): void {
+    const pending = this.mediaDetailLocationSync.consumePending(mediaId);
+    if (!pending) {
+      return;
+    }
+    queueMicrotask(() =>
+      this.handleExternalLocationSync(pending.mediaId, {
+        latitude: pending.lat,
+        longitude: pending.lng,
+        location_unresolved: false,
+        ...pending.address,
+      }),
+    );
+  }
+
   /** Silent location/address refresh — no full detail reload or loading skeleton. */
   private async finishLocationFieldsIfNeeded(mediaId: string): Promise<void> {
     const img = this.media();
@@ -634,20 +708,8 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    this.addressResolving.set(true);
-    try {
-      const signal = this.abortController?.signal ?? new AbortController().signal;
-      const result = await this.locationResolverService.resolvePendingMediaItem(mediaItemId);
-      if (!result.changed || signal.aborted) {
-        return;
-      }
-      const refresh = await this.dataFacade.refreshImageLocationFields(mediaId, signal);
-      if (refresh.applied && refresh.locationStatus) {
-        this.mediaLocationStatus.set(refresh.locationStatus);
-      }
-    } finally {
-      this.addressResolving.set(false);
-    }
+    this.addressFieldsResolving.set(true);
+    await this.syncLocationFieldsAfterGps(mediaId);
   }
 
   private async loadMedia(id: string): Promise<void> {
@@ -657,6 +719,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (this.abortController.signal.aborted) {
       return;
     }
+
+    this.applyPendingLocationSyncIfAny(id);
 
     await this.retryPendingLocationOnceOnOpen(id, this.abortController.signal);
 
@@ -820,6 +884,48 @@ export class MediaDetailViewComponent implements OnDestroy {
       .or(`id.eq.${mediaItem.id},source_image_id.eq.${mediaItem.id}`);
 
     this.media.set({ ...mediaItem, address_field_meta: updatedMeta });
+    void this.resolveGpsFromAddressFields();
+  }
+
+  /** Forward-geocode composed address lines and update active coordinates (address → GPS). */
+  private async resolveGpsFromAddressFields(): Promise<void> {
+    const media = this.media();
+    if (!media) {
+      return;
+    }
+
+    const query = this.fullAddress().trim();
+    if (!query) {
+      return;
+    }
+
+    this.coordinatesResolving.set(true);
+    try {
+      const suggestion = await this.geocodingService.forward(query);
+      if (!suggestion) {
+        return;
+      }
+
+      const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
+        media.id,
+        suggestion,
+      );
+      if (!result.ok) {
+        this.toastService.show({
+          ...buildLocationUpdateFailureToast(result.error, {
+            file: 'media-detail-view.component.ts',
+            fn: 'resolveGpsFromAddressFields',
+          }),
+        });
+        return;
+      }
+
+      this.applyLocationPatch(locationPatchFromForwardGeocode(suggestion));
+      await this.fieldsHelper.persistAddressFieldMetaFromGeocode(suggestion);
+      this.mediaLocationStatus.set('resolved');
+    } finally {
+      this.coordinatesResolving.set(false);
+    }
   }
 
   /**
@@ -938,6 +1044,10 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   async revertCoordinatesToExif(): Promise<void> {
     await this.executeRevertCoordinates();
+  }
+
+  async clearCoordinates(): Promise<void> {
+    await this.executeClearCoordinates();
   }
 
   async clearAddress(): Promise<void> {
@@ -1082,14 +1192,14 @@ export class MediaDetailViewComponent implements OnDestroy {
     }
 
     this.saving.set(true);
-    this.addressResolving.set(true);
+    this.coordinatesResolving.set(true);
     const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
       media.id,
       suggestion,
     );
     if (!result.ok) {
       this.saving.set(false);
-      this.addressResolving.set(false);
+      this.coordinatesResolving.set(false);
       this.toastService.show({
         ...buildLocationUpdateFailureToast(result.error, {
           file: 'media-detail-view.component.ts',
@@ -1104,7 +1214,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.mediaLocationStatus.set('resolved');
     this.editingField.set(null);
     this.saving.set(false);
-    this.addressResolving.set(false);
+    this.coordinatesResolving.set(false);
   }
 
   onChipClicked(index: number): void {
@@ -1156,6 +1266,34 @@ export class MediaDetailViewComponent implements OnDestroy {
       this.t('workspace.imageDetail.toast.addressCleared', 'Address removed'),
       async () => {
         await this.fieldsHelper.applyAddressSuggestion(addressSnapshotToSuggestion(snapshot));
+      },
+    );
+  }
+
+  private async executeClearCoordinates(): Promise<void> {
+    const img = this.media();
+    if (!img) {
+      return;
+    }
+
+    const undoSnapshot = {
+      latitude: img.latitude,
+      longitude: img.longitude,
+      location_status: this.mediaLocationStatus(),
+    };
+    const cleared = await this.fieldsHelper.clearActiveCoordinates({ suppressToast: true });
+    if (!cleared) {
+      return;
+    }
+
+    this.showUndoToast(
+      this.t('workspace.imageDetail.toast.coordinatesCleared', 'Coordinates removed'),
+      async () => {
+        await this.fieldsHelper.restoreCoordinates(
+          undoSnapshot.latitude,
+          undoSnapshot.longitude,
+          { location_status: undoSnapshot.location_status },
+        );
       },
     );
   }
@@ -1278,9 +1416,11 @@ export class MediaDetailViewComponent implements OnDestroy {
     }
 
     this.saving.set(true);
+    this.addressFieldsResolving.set(true);
     const result = await this.mediaLocationUpdateService.updateFromCoordinates(media.id, coords);
     if (!result.ok) {
       this.saving.set(false);
+      this.addressFieldsResolving.set(false);
       this.toastService.show({
         ...buildLocationUpdateFailureToast(result.error, {
           file: 'media-detail-view.component.ts',
@@ -1290,14 +1430,21 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    this.applyLocationPatch({
+    const patch = {
       latitude: result.lat ?? coords.lat,
       longitude: result.lng ?? coords.lng,
+      location_unresolved: false,
       ...result.address,
-    });
-    this.mediaLocationStatus.set('resolved');
+    };
+    this.applyLocationPatch(patch);
+    const merged = this.media();
+    if (merged && !needsAddressResolutionAfterGps(merged)) {
+      this.mediaLocationStatus.set('resolved');
+      this.addressFieldsResolving.set(false);
+    } else {
+      await this.finishLocationFieldsIfNeeded(media.id);
+    }
     this.editingField.set(null);
-    await this.finishLocationFieldsIfNeeded(media.id);
     this.saving.set(false);
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Location updated.'),
