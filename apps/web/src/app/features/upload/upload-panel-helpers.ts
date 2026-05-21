@@ -76,6 +76,7 @@ export function buildLaneSwitchOptions(
       type: 'icon-with-text',
       ariaLabel: `${t('upload.panel.lane.issues', 'Issues')} (${counts.issues})`,
       attention: issueAttentionPulse && counts.issues > 0 && effectiveLane !== 'issues',
+      destructiveHint: counts.issues > 0,
     },
   ];
 }

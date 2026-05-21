@@ -198,6 +198,7 @@
             [value]="option.id"
             [disabled]="!!option.disabled"
             [attr.data-attention]="option.attention ? 'true' : null"
+            [attr.data-destructive-hint]="option.destructiveHint ? 'true' : null"
             [attr.aria-label]="option.ariaLabel || option.label"
             [attr.title]="option.title || option.label"
           >

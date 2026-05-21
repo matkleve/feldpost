@@ -10,4 +10,6 @@ export interface ToggleGroupOption {
   disabled?: boolean;
   inactive?: boolean;
   attention?: boolean;
+  /** Error-tone label/icon when set (e.g. Issues lane with jobs); hover uses light destructive fill at callsite. */
+  destructiveHint?: boolean;
 }

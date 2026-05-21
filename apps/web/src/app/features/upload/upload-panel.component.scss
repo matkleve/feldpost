@@ -190,24 +190,62 @@
   // @see nav.component.scss — .nav__link (hover/active colors live in toggle-group-variants.ts)
   &__segmented {
     width: 100%;
+  }
+
+  // Lane switch — Issues segment uses destructive tone when the lane has jobs.
+  // @see detail-actions.component.scss — .detail-actions__item--destructive
+  &__area--switch.upload-panel__segmented {
+    width: 100%;
 
     [hlmToggleGroupItem] {
       transition:
         background 80ms ease-out,
         color 80ms ease-out;
 
-      &[data-state='on'] .material-icons {
+      &[data-state='on']:not([data-destructive-hint='true']) .material-icons {
         color: var(--primary);
       }
 
-      &[data-state='on']:hover:not(:disabled) .material-icons {
+      &[data-state='on']:not([data-destructive-hint='true']):hover:not(:disabled) .material-icons {
         color: var(--foreground);
       }
     }
-  }
 
-  &__area--switch.upload-panel__segmented {
-    width: 100%;
+    [hlmToggleGroupItem][data-destructive-hint='true'] {
+      color: var(--destructive);
+      box-shadow: none;
+
+      .material-icons {
+        color: var(--destructive);
+      }
+
+      &:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--destructive) 10%, transparent);
+        color: var(--destructive);
+
+        .material-icons {
+          color: var(--destructive);
+        }
+      }
+
+      &[data-state='on'] {
+        color: var(--destructive);
+        background: color-mix(in srgb, var(--destructive) 10%, transparent);
+
+        .material-icons {
+          color: var(--destructive);
+        }
+      }
+
+      &[data-state='on']:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--destructive) 14%, transparent);
+        color: var(--destructive);
+
+        .material-icons {
+          color: var(--destructive);
+        }
+      }
+    }
   }
 
   &__folder-unsupported-hint {
