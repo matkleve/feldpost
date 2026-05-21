@@ -9,6 +9,7 @@ vi.mock('../../../environments/environment', () => ({
     production: false,
     i18n: { enableLegacyDomFallback: true },
     supabase: {
+      preferLocalWhenAvailable: true,
       cloud: {
         url: 'https://cloud.example.supabase.co',
         anonKey: 'cloud-key',
@@ -52,5 +53,17 @@ describe('resolveSupabaseRuntimeConfig', () => {
 
     expect(resolved.target).toBe('cloud');
     expect(resolved.url).toBe('https://cloud.example.supabase.co');
+  });
+
+  it('uses cloud when preferLocalWhenAvailable is false', async () => {
+    const env = (await import('../../../environments/environment')).environment as {
+      supabase: { preferLocalWhenAvailable: boolean };
+    };
+    env.supabase.preferLocalWhenAvailable = false;
+    vi.mocked(fetch).mockResolvedValue({ ok: true } as Response);
+
+    const resolved = await resolveSupabaseRuntimeConfig();
+
+    expect(resolved.target).toBe('cloud');
   });
 });

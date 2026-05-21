@@ -20,6 +20,7 @@ Share/export UI receives a **token** and **expiry** after creation (plus chosen 
 | --- | --- | --- | --- |
 | 1 | User creates share from selection | RPC returns share set id + token + expiry | `createOrReuseShareSet(mediaIds, options?)` |
 | 2 | Viewer opens link (paste URL) | Client sends token only | `resolveShareSet(token)` → single RPC |
+| 3 | Viewer opens link with optional detail | Layout calls restore orchestration (not this facade) | See [share-link-restore.md](share-link-restore.md) → `restoreFromRoute` |
 
 ## Component Hierarchy
 
@@ -56,6 +57,7 @@ None (stateless facade).
 | `apps/web/src/app/core/share-set/share-set.service.ts` | Facade |
 | `docs/specs/service/share-set/share-set-service.md` | This contract |
 | `docs/specs/service/share-set/share-set-access-model.md` | Audience × caller matrix |
+| `docs/specs/service/share-set/share-link-restore.md` | Restore-on-navigation (`?share=`, `?media=`) |
 
 ## Wiring
 

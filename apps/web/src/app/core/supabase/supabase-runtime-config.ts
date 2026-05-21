@@ -26,7 +26,10 @@ export function isLocalSupabaseTarget(): boolean {
   return resolvedConfig?.target === 'local';
 }
 
+const DEV_TARGET_STORAGE_KEY = 'feldpost.supabase.target';
+
 type DevSupabaseEnv = {
+  preferLocalWhenAvailable?: boolean;
   cloud?: SupabaseEndpoint;
   local?: SupabaseEndpoint;
   url?: string;
@@ -52,6 +55,21 @@ function getLocalEndpoint(): SupabaseEndpoint | null {
   return getSupabaseEnv().local ?? null;
 }
 
+function prefersLocalWhenAvailable(): boolean {
+  return getSupabaseEnv().preferLocalWhenAvailable === true;
+}
+
+function getDevTargetOverride(): SupabaseTarget | null {
+  if (typeof localStorage === 'undefined') {
+    return null;
+  }
+  const value = localStorage.getItem(DEV_TARGET_STORAGE_KEY);
+  if (value === 'local' || value === 'cloud') {
+    return value;
+  }
+  return null;
+}
+
 /** Dev relay port — must match scripts/supabase-dev-log-server.mjs */
 const DEV_LOG_RELAY_PORT = 47291;
 
@@ -66,7 +84,7 @@ function reportSupabaseTargetToDevTerminal(config: ResolvedSupabaseConfig): void
   } else {
     const hasLocal = getLocalEndpoint() !== null;
     message = hasLocal
-      ? `Supabase: cloud (${config.url}) — local not reachable; run \`supabase start\` to use local`
+      ? `Supabase: cloud (${config.url}) — local skipped (cloud users); localStorage feldpost.supabase.target=local or preferLocalWhenAvailable`
       : `Supabase: cloud (${config.url})`;
   }
 
@@ -100,7 +118,7 @@ async function isLocalSupabaseReachable(apiUrl: string): Promise<boolean> {
 
 /**
  * Picks Supabase endpoint before Auth initializes.
- * Production always uses cloud. Development probes local health, then falls back to cloud.
+ * Production always uses cloud. Development defaults to cloud (hosted users); opt in to local.
  */
 export async function resolveSupabaseRuntimeConfig(): Promise<ResolvedSupabaseConfig> {
   const cloud = getCloudEndpoint();
@@ -110,8 +128,18 @@ export async function resolveSupabaseRuntimeConfig(): Promise<ResolvedSupabaseCo
     return resolvedConfig;
   }
 
+  const override = getDevTargetOverride();
+  if (override === 'cloud') {
+    resolvedConfig = { ...cloud, target: 'cloud' };
+    reportSupabaseTargetToDevTerminal(resolvedConfig);
+    return resolvedConfig;
+  }
+
   const local = getLocalEndpoint();
-  if (local && (await isLocalSupabaseReachable(local.url))) {
+  const useLocal =
+    override === 'local' || (prefersLocalWhenAvailable() && local !== null);
+
+  if (useLocal && local && (await isLocalSupabaseReachable(local.url))) {
     resolvedConfig = { ...local, target: 'local' };
     reportSupabaseTargetToDevTerminal(resolvedConfig);
     return resolvedConfig;

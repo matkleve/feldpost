@@ -32,6 +32,8 @@ Users experience this system as a responsive workspace pane that immediately ope
 | 4   | Single media click path    | Opens detail view and still maintains grid state for back navigation | No state loss                     |
 | 5   | Cluster path               | Clears detail selection and renders grouped thumbnail content        | Grid-first display                |
 
+**Share link restore:** Hydrating active selection from `?share=` (`setActiveSelectionImages`, `clearActiveSelectionAndSettings`) is specified in [share-link-restore.md](../share-set/share-link-restore.md); this document does not duplicate that matrix.
+
 ## Component Hierarchy
 
 **Diagram (interim wiring):** reflects pane DOM under **`MapShellComponent`** today. **Canonical** composition is **authenticated layout host** → split → main column + **Workspace Pane** — see [workspace-pane § Layout host](../../ui/workspace/workspace-pane.md#layout-host-canonical) and [§ Interim implementation](../../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).

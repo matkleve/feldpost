@@ -6,11 +6,18 @@ import {
   Component,
   afterNextRender,
   computed,
+  DestroyRef,
   effect,
   inject,
   signal,
 } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { ShareLinkRestoreService } from '../core/share-set/share-link-restore.service';
+import type { ShareLinkRestoreResult } from '../core/share-set/share-link-restore.types';
+import { I18nService } from '../core/i18n/i18n.service';
+import { ToastService } from '../core/toast/toast.service';
 import { NavComponent } from '../features/nav/nav.component';
 import { DragDividerComponent } from '../shared/workspace-pane/shell/drag-divider/drag-divider.component';
 import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace-pane.component';
@@ -58,6 +65,11 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly mapLayoutEffects = inject(WorkspacePaneLayoutMapEffectsService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly shareLinkRestoreService = inject(ShareLinkRestoreService);
+  private readonly toastService = inject(ToastService);
+  private readonly i18nService = inject(I18nService);
 
   private readonly preferredWorkspacePaneWidth = signal<number | null>(null);
 
@@ -99,7 +111,17 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
         return;
       }
       this.restoreWorkspacePaneWidthPreference();
+      void this.tryRestoreShareLinkFromRoute();
     });
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        void this.tryRestoreShareLinkFromRoute();
+      });
   }
 
   openDetailView(mediaId: string): void {
@@ -241,5 +263,88 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
       return;
     }
     window.localStorage.setItem(WORKSPACE_PANE_WIDTH_STORAGE_KEY, String(width));
+  }
+
+  /** @see docs/specs/service/share-set/share-link-restore.md */
+  private async tryRestoreShareLinkFromRoute(): Promise<void> {
+    const result = await this.shareLinkRestoreService.restoreFromRoute(this.route.snapshot, this);
+    this.applyShareLinkRestoreResult(result);
+    if (result.shouldStripQueryParams) {
+      await this.stripShareLinkQueryParams();
+    }
+  }
+
+  private applyShareLinkRestoreResult(result: ShareLinkRestoreResult): void {
+    if (result.status === 'skipped') {
+      return;
+    }
+
+    const t = (key: string, fallback: string): string => this.i18nService.t(key, fallback);
+
+    switch (result.status) {
+      case 'invalid':
+        this.toastService.show({
+          message: t(
+            'share.restore.error.invalid',
+            'Share link invalid, expired, or not accessible.',
+          ),
+          type: 'warning',
+          dedupe: true,
+        });
+        return;
+      case 'no-images':
+        this.toastService.show({
+          message: t(
+            'share.restore.error.noImages',
+            'Share link contains no available media.',
+          ),
+          type: 'warning',
+          dedupe: true,
+        });
+        return;
+      case 'error':
+        this.toastService.show({
+          message: t('share.restore.error.resolveFailed', 'Share link could not be resolved.'),
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      case 'success':
+        this.workspacePaneObserver.setActiveTab('selected-items');
+        if (!result.detailMediaId) {
+          this.closeDetailView();
+          if (!this.shellState.photoPanelOpen()) {
+            this.shellState.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
+          }
+          this.shellState.setPhotoPanelOpen(true);
+        }
+        if (result.detailSkipped) {
+          this.toastService.show({
+            message: t(
+              'share.restore.warning.mediaNotInSet',
+              'That item is not in this shared set. Showing the group.',
+            ),
+            type: 'warning',
+            dedupe: true,
+          });
+        }
+        this.toastService.show({
+          message: t(
+            'share.restore.success.loaded',
+            '{count} media loaded from share link.',
+          ).replace('{count}', String(result.selectionIds.length)),
+          type: 'success',
+          dedupe: true,
+        });
+        return;
+    }
+  }
+
+  private async stripShareLinkQueryParams(): Promise<void> {
+    await this.router.navigate([], {
+      queryParams: { share: null, media: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }

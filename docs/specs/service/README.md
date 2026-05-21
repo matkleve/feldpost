@@ -40,7 +40,7 @@ Symmetry tracker: [service-spec-symmetry-matrix](../../backlog/service-spec-symm
 | projects | [projects/projects-service.md](projects/projects-service.md) |
 | search | [search/search-bar-service.md](search/search-bar-service.md) |
 | settings-pane | [settings-pane/settings-pane-service.md](settings-pane/settings-pane-service.md) |
-| share-set | [share-set/share-set-service.md](share-set/share-set-service.md) |
+| share-set | [share-set/share-set-service.md](share-set/share-set-service.md) — restore: [share-link-restore.md](share-set/share-link-restore.md) |
 | supabase | [supabase/supabase-service.md](supabase/supabase-service.md) |
 | toast | [toast/toast-system.md](toast/toast-system.md) |
 | user-profile | [user-profile/user-profile-service.md](user-profile/user-profile-service.md) |

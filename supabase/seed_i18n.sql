@@ -25143,4 +25143,159 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.restore.error.invalid', 'Share link invalid expired or not accessible.', 'en', 'apps/web/src/app/layout/authenticated-app-layout.component.ts share restore toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share link invalid expired or not accessible.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Freigabelink ungueltig abgelaufen oder ohne Zugriff.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link di condivisione non valido scaduto o non accessibile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.restore.error.noImages', 'Share link contains no available media.', 'en', 'apps/web/src/app/layout/authenticated-app-layout.component.ts share restore toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share link contains no available media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.noImages'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Freigabelink enthaelt keine verfuegbaren Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.noImages'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Il link di condivisione non contiene media disponibili.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.noImages'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.restore.error.resolveFailed', 'Share link could not be resolved.', 'en', 'apps/web/src/app/layout/authenticated-app-layout.component.ts share restore toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share link could not be resolved.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.resolveFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Freigabelink konnte nicht aufgeloest werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.resolveFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile risolvere il link di condivisione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.error.resolveFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.restore.success.loaded', '{count} media loaded from share link.', 'en', 'apps/web/src/app/layout/authenticated-app-layout.component.ts share restore toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} media loaded from share link.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.success.loaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Medien aus Freigabelink geladen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.success.loaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} media caricati dal link di condivisione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.success.loaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.restore.warning.mediaNotInSet', 'That item is not in this shared set. Showing the group.', 'en', 'apps/web/src/app/layout/authenticated-app-layout.component.ts share restore toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'That item is not in this shared set. Showing the group.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.warning.mediaNotInSet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieses Element ist nicht in dieser Freigabe. Gruppe wird angezeigt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.warning.mediaNotInSet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo elemento non e in questo set condiviso. Viene mostrato il gruppo.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.restore.warning.mediaNotInSet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

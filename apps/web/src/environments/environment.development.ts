@@ -4,6 +4,12 @@ export const environment = {
     enableLegacyDomFallback: true,
   },
   supabase: {
+    /**
+     * When true, dev uses local Supabase if `supabase start` is reachable.
+     * Default false: cloud credentials (normal login) keep working while Docker is up.
+     * Or set `localStorage.setItem('feldpost.supabase.target', 'local'|'cloud')`.
+     */
+    preferLocalWhenAvailable: false,
     cloud: {
       url: 'https://yvvzbpnoesxlzlbomlkv.supabase.co',
       anonKey:

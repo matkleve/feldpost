@@ -119,6 +119,15 @@ If the app reverts to mounting **`app-workspace-pane`** only under **`MapShellCo
 | 15      | Hovers media item in workspace list/grid                 | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer                                     | `hoveredWorkspaceMediaId`                                |
 | 16      | Hovers marker on map                                     | Matching workspace media item receives linked-hover highlight state                                                                                                     | `hoveredMarkerMediaId` / cluster hover payload           |
 | 17      | Leaves hover (either side)                               | Linked-hover highlight is removed on both sides; persistent selection state remains unchanged                                                                           | hover clear events                                       |
+| 18      | Opens share URL (`?share=` on any layout child route)    | Layout restores **selection scope** (not metadata grouping), opens pane on **Selected items** tab; optional `?media=` opens detail when id ∈ resolved set | [`share-link-restore.md`](../../service/share-set/share-link-restore.md) |
+
+### Restore from share URL
+
+Normative service contract: [`docs/specs/service/share-set/share-link-restore.md`](../../service/share-set/share-link-restore.md).
+
+- **Group** in this flow means workspace **selection scope** only.
+- Orchestration lives on **`AuthenticatedAppLayoutComponent`** (`implements WorkspacePaneShellHost`); not on map shell.
+- After restore, `share` and `media` query params are stripped from the URL.
 
 ### Interaction Flowchart
 

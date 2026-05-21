@@ -9,6 +9,7 @@ import { ProjectsService } from '../../core/projects/projects.service';
 import { ShareSetService } from '../../core/share-set/share-set.service';
 import type { ShareAudienceDialogResult } from '../../core/share-set/share-set.types';
 import { ToastService } from '../../core/toast/toast.service';
+import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspace-pane-observer.adapter';
 import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import type {
@@ -30,6 +31,7 @@ export class WorkspaceBulkActionService {
   private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly projectsService = inject(ProjectsService);
   private readonly shareSetService = inject(ShareSetService);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
 
@@ -163,7 +165,11 @@ export class WorkspaceBulkActionService {
         recipientUserIds:
           audience.audience === 'named' ? audience.recipientUserIds : undefined,
       });
-      const url = `${window.location.origin}/?share=${result.token}`;
+      let url = `${window.location.origin}/?share=${encodeURIComponent(result.token)}`;
+      const detailMediaId = this.workspacePaneObserver.detailImageId$();
+      if (detailMediaId && selectedIds.includes(detailMediaId)) {
+        url += `&media=${encodeURIComponent(detailMediaId)}`;
+      }
 
       if (copyToClipboard) {
         await this.copyShareUrlToClipboard(url);

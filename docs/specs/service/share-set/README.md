@@ -4,6 +4,8 @@
 
 **Access model (audience × caller):** [share-set-access-model.md](share-set-access-model.md)
 
+**Restore on navigation (`?share=`, optional `?media=`):** [share-link-restore.md](share-link-restore.md)
+
 **General grants (RLS + roles, not share):** [authorization-model.md](../../system/authorization-model.md)
 
 Code module: `apps/web/src/app/core/share-set/`

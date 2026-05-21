@@ -117,7 +117,6 @@ import {
   MapLeafletService,
 } from './map-leaflet.service';
 import { MapFocusPayloadService } from './map-focus-payload.service';
-import { ShareTokenSelectionService } from './share-token-selection.service';
 import { MapGeolocationService } from './map-geolocation.service';
 import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferred-startup.service';
 import { MapProjectActionsService } from './map-project-actions.service';
@@ -267,7 +266,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
-  private readonly shareTokenSelectionService = inject(ShareTokenSelectionService);
   private readonly mapGeolocationService = inject(MapGeolocationService);
   private readonly mapDeferredStartupService = inject(MapDeferredStartupService);
   private readonly mapProjectActionsService = inject(MapProjectActionsService);
@@ -722,7 +720,6 @@ export class MapShellComponent implements OnDestroy {
     lng: number;
     requestedAt: number;
   } | null = null;
-  private shareTokenResolved = false;
   private workspacePaneMapEffectsRegistration: WorkspacePaneLayoutMapEffects | null = null;
   private readonly mapSelectedItemsContext: SelectedItemsContextPort = {
     contextKey: 'map',
@@ -769,7 +766,6 @@ export class MapShellComponent implements OnDestroy {
       window.addEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
       this.initMap();
       this.subscribeToUploadManagerEvents();
-      void this.tryResolveShareTokenFromQuery();
       this.scheduleDeferredStartupWork();
     });
   }
@@ -2250,71 +2246,6 @@ export class MapShellComponent implements OnDestroy {
 
     this.map.setView([payload.lat, payload.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM);
     this.pendingMapFocus.set(null);
-  }
-
-  private async tryResolveShareTokenFromQuery(): Promise<void> {
-    if (this.shareTokenResolved) {
-      return;
-    }
-
-    this.shareTokenResolved = true;
-    const shareToken = this.shareTokenSelectionService.readShareTokenFromRoute(this.route.snapshot);
-    if (!shareToken) {
-      return;
-    }
-
-    const result = await this.shareTokenSelectionService.loadSelectionFromShareToken(shareToken);
-    try {
-      if (result.status === 'invalid') {
-        this.toastService.show({
-          message: 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.',
-          type: 'warning',
-          dedupe: true,
-        });
-        return;
-      }
-
-      if (result.status === 'no-images') {
-        this.toastService.show({
-          message: 'Freigabelink enthaelt keine verfuegbaren Medien.',
-          type: 'warning',
-          dedupe: true,
-        });
-        return;
-      }
-
-      if (result.status === 'error') {
-        this.toastService.show({
-          message: 'Freigabelink konnte nicht aufgeloest werden.',
-          type: 'error',
-          dedupe: true,
-        });
-        return;
-      }
-
-      this.patchDetailMediaId(null);
-      this.setSelectedMarker(null);
-      this.setSelectedMarkerKeys(new Set());
-      this.searchPlacementActive.set(false);
-      this.placementActive.set(false);
-      if (!this.photoPanelOpen()) {
-        this.state.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
-      }
-      this.state.setPhotoPanelOpen(true);
-
-      this.toastService.show({
-        message: `${result.selectionIds.length} Medien aus Freigabelink geladen.`,
-        type: 'success',
-        dedupe: true,
-      });
-    } finally {
-      await this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { share: null },
-        queryParamsHandling: 'merge',
-        replaceUrl: true,
-      });
-    }
   }
 
   private handleMapClick(e: MapMouseEvent): void {
