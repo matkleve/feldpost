@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { normalizeToastOptions } from './toast.helpers';
 import type { ToastItem, ToastOptions } from './toast.types';
 
 const MAX_VISIBLE = 3;
@@ -24,16 +25,26 @@ export class ToastService {
     const type = options.type ?? 'info';
     const duration = options.duration ?? (type === 'error' ? ERROR_DURATION : DEFAULT_DURATION);
 
+    const normalized = normalizeToastOptions(options);
+
     if (options.dedupe) {
       const existing = this._items().find(
-        (t) => t.message === options.message && t.type === type && t.state !== 'exiting',
+        (t) =>
+          t.message === normalized.message &&
+          t.title === normalized.title &&
+          t.type === type &&
+          t.state !== 'exiting',
       );
       if (existing) return existing.id;
     }
 
     const item: ToastItem = {
       id: generateId(),
-      message: options.message,
+      message: normalized.message,
+      title: normalized.title,
+      body: normalized.body,
+      detail: normalized.detail,
+      codeRef: normalized.codeRef,
       type,
       duration,
       state: 'entering',

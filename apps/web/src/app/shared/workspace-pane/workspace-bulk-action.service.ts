@@ -3,6 +3,7 @@ import type { ForwardGeocodeResult } from '../../core/geocoding/geocoding.servic
 import { GeocodingService } from '../../core/geocoding/geocoding.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaDeleteUndoService } from '../../core/media-delete/media-delete-undo.service';
+import { buildLocationUpdateFailureToast } from '../../core/media-location-update/location-update-toast.util';
 import { MediaLocationUpdateService } from '../../core/media-location-update/media-location-update.service';
 import { MediaQueryService } from '../../core/media-query/media-query.service';
 import { ProjectsService } from '../../core/projects/projects.service';
@@ -122,6 +123,7 @@ export class WorkspaceBulkActionService {
     }
 
     let updatedCount = 0;
+    let lastUpdateError: string | undefined;
     for (const mediaItemId of selectedMediaItemIds) {
       const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
         mediaItemId,
@@ -129,14 +131,28 @@ export class WorkspaceBulkActionService {
       );
       if (result.ok) {
         updatedCount += 1;
+      } else if (result.error) {
+        lastUpdateError = result.error;
       }
     }
 
     if (updatedCount === 0) {
-      this.toastService.show({
-        message: this.t('workspace.export.error.addressUpdateFailed', 'Address update failed.'),
-        type: 'error',
-      });
+      this.toastService.show(
+        lastUpdateError
+          ? {
+              ...buildLocationUpdateFailureToast(lastUpdateError, {
+                file: 'workspace-bulk-action.service.ts',
+                fn: 'confirmAddressForSelection',
+              }),
+            }
+          : {
+              message: this.t(
+                'workspace.export.error.addressUpdateFailed',
+                'Address update failed.',
+              ),
+              type: 'error',
+            },
+      );
       return { status: 'update_failed' };
     }
 

@@ -17,6 +17,7 @@ import { Injectable, inject, signal, type Signal } from '@angular/core';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 import { GeocodingService } from '../../core/geocoding/geocoding.service';
 import { ToastService } from '../../core/toast/toast.service';
+import { buildLocationUpdateFailureToast } from '../../core/media-location-update/location-update-toast.util';
 import { MediaLocationUpdateService } from '../../core/media-location-update/media-location-update.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';
@@ -160,9 +161,10 @@ export class UploadPanelDialogHandlersService {
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
       this.toastService.show({
-        message: this.t('upload.location.update.failed', 'Location could not be updated.'),
-        type: 'error',
-        dedupe: true,
+        ...buildLocationUpdateFailureToast(result.error, {
+          file: 'upload-panel-dialog-handlers.service.ts',
+          fn: 'updateLocationFromAddressSuggestion',
+        }),
       });
       return null;
     }

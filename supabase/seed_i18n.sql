@@ -21331,7 +21331,69 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.location.update.failed', 'Location could not be updated.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message')
+values (null, 'toast.showDetails', 'Show details', 'en', 'apps/web/src/app/shared/toast/toast-item.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Show details', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.showDetails'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Details anzeigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.showDetails'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Mostra dettagli', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.showDetails'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'toast.hideDetails', 'Hide details', 'en', 'apps/web/src/app/shared/toast/toast-item.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Hide details', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.hideDetails'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Details ausblenden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.hideDetails'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nascondi dettagli', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.hideDetails'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.update.failed', 'Location could not be updated.', 'en', 'apps/web/src/app/core/media-location-update/location-update-toast.util.ts; fallback when no RPC detail')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -21357,6 +21419,99 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Impossibile aggiornare la posizione.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.update.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.error.hint.retryConnection', 'Check your connection', 'en', 'apps/web/src/app/core/upload/upload-error-messages.util.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Check your connection', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.retryConnection'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'sign in again', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.retryConnection'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'and retry. If this persists', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.retryConnection'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.error.hint.localDevProfile', 'For local dev', 'en', 'apps/web/src/app/core/media-location-update/media-location-update.helpers.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'For local dev', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.localDevProfile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'run scripts/create-local-dev-user.sql', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.localDevProfile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'then sign out and sign in again.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.localDevProfile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.error.hint.localDbReset', 'Run `supabase db reset` locally so document GPS migrations are applied', 'en', 'apps/web/src/app/core/media-location-update/media-location-update.helpers.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Run `supabase db reset` locally so document GPS migrations are applied', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.localDbReset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'then retry.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.localDbReset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Führe lokal `supabase db reset` aus damit die Document-GPS-Migrationen angewendet werden und versuche es erneut.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.hint.localDbReset'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

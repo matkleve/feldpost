@@ -27,7 +27,15 @@ import { FilenameParserService } from '../filename-parser/filename-parser.servic
 import { FolderScanService } from '../folder-scan/folder-scan.service';
 import { MediaPreviewService } from '../media-preview/media-preview.service';
 import { ProjectsService } from '../projects/projects.service';
+import {
+  describeLocationUpdateRpcError,
+  LOCATION_UPDATE_NOT_FOUND_ERROR,
+} from '../media-location-update/media-location-update.helpers';
 import { SupabaseService } from '../supabase/supabase.service';
+import {
+  formatUploadFailureMessage,
+  uploadFailureMessageToToastText,
+} from './upload-error-messages.util';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadBatchService } from './upload-batch.service';
 import {
@@ -399,18 +407,23 @@ export class UploadManagerService {
     imageId: string,
     coords: ExifCoords,
   ): Promise<void> {
-    const { error } = await this.supabase.client.rpc('resolve_media_location', {
+    const { data, error } = await this.supabase.client.rpc('resolve_media_location', {
       p_media_item_id: imageId,
       p_latitude: coords.lat,
       p_longitude: coords.lng,
     });
 
-    if (error) {
+    if (error || data !== true) {
+      const failureMessage = uploadFailureMessageToToastText(
+        formatUploadFailureMessage(
+          error ? describeLocationUpdateRpcError(error) : LOCATION_UPDATE_NOT_FOUND_ERROR,
+        ),
+      );
       this.jobState.updateJob(jobId, {
         phase: 'error',
         issueKind: 'upload_error',
-        error: error.message,
-        statusLabel: error.message,
+        error: failureMessage,
+        statusLabel: failureMessage,
       });
       return;
     }

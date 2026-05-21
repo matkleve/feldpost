@@ -44,9 +44,9 @@ import {
   UploadManagerService,
   ImageReplacedEvent,
   ImageAttachedEvent,
-  UploadFailedEvent,
   type UploadJob,
 } from '../../../core/upload/upload-manager.service';
+import { buildLocationUpdateFailureToast } from '../../../core/media-location-update/location-update-toast.util';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import {
@@ -965,7 +965,10 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.toastService.show({
-      message: 'Adresse konnte nicht aufgeloest werden.',
+      message: this.t(
+        'workspace.export.error.addressNotFound',
+        'Address could not be resolved.',
+      ),
       type: 'warning',
       dedupe: true,
     });
@@ -1439,7 +1442,10 @@ export class MapShellComponent implements OnDestroy {
     const suggestion = await this.geocodingService.forward(input);
     if (!suggestion) {
       this.toastService.show({
-        message: 'Adresse konnte nicht aufgeloest werden.',
+        message: this.t(
+          'workspace.export.error.addressNotFound',
+          'Address could not be resolved.',
+        ),
         type: 'warning',
         dedupe: true,
       });
@@ -1561,7 +1567,10 @@ export class MapShellComponent implements OnDestroy {
       this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
     } else {
       this.toastService.show({
-        message: 'Adresse konnte nicht aufgeloest werden.',
+        message: this.t(
+          'workspace.export.error.addressNotFound',
+          'Address could not be resolved.',
+        ),
         type: 'warning',
         dedupe: true,
       });
@@ -2368,12 +2377,10 @@ export class MapShellComponent implements OnDestroy {
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
       this.toastService.show({
-        message: this.t(
-          'upload.location.update.failed',
-          'Standort konnte nicht aktualisiert werden.',
-        ),
-        type: 'error',
-        dedupe: true,
+        ...buildLocationUpdateFailureToast(result.error, {
+          file: 'map-shell.component.ts',
+          fn: 'applyUploadedLocationMapPick',
+        }),
       });
       return;
     }
@@ -2916,9 +2923,7 @@ export class MapShellComponent implements OnDestroy {
       this.uploadManagerService.imageAttached$.subscribe((event: ImageAttachedEvent) => {
         this.handleImageAttached(event);
       }),
-      this.uploadManagerService.uploadFailed$.subscribe((event: UploadFailedEvent) => {
-        this.toastService.show({ message: event.error, type: 'error', dedupe: true });
-      }),
+      // Upload failure toasts are owned by UploadNotificationService (global, deduped).
     );
   }
 

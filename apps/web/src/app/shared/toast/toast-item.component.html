@@ -1,6 +1,48 @@
 <div class="toast-surface" data-toast-surface>
-  <span class="toast-indicator" aria-hidden="true"></span>
-  <span class="toast-message">{{ item().message }}</span>
+  <div class="toast-header">
+    <span class="toast-indicator" aria-hidden="true"></span>
+    @if (item().title) {
+      <p class="toast-title">{{ item().title }}</p>
+    } @else {
+      <p class="toast-title toast-title--legacy">{{ item().message }}</p>
+    }
+    <button
+      type="button"
+      class="toast-dismiss"
+      aria-label="Dismiss notification"
+      (click)="onDismiss()"
+    >
+      <span class="toast-dismiss__glyph" aria-hidden="true">×</span>
+    </button>
+  </div>
+
+  @if (item().title && (item().body || item().codeRef)) {
+    <div class="toast-content">
+      @if (item().body) {
+        <p class="toast-body" [class.toast-body--expanded]="expanded()">{{ item().body }}</p>
+      }
+      @if (item().codeRef; as ref) {
+        <p class="toast-code-ref">{{ formatCodeRef(ref) }}</p>
+      }
+      @if (item().detail && expanded()) {
+        <p class="toast-detail">{{ item().detail }}</p>
+      }
+      @if (showExpandControl()) {
+        <button
+          type="button"
+          class="toast-expand"
+          hlmBtn
+          variant="ghost"
+          size="sm"
+          [attr.aria-expanded]="expanded()"
+          (click)="toggleExpanded()"
+        >
+          {{ expandLabel() }}
+        </button>
+      }
+    </div>
+  }
+
   @if (item().action; as action) {
     <button
       type="button"
@@ -13,12 +55,4 @@
       {{ action.label }}
     </button>
   }
-  <button
-    type="button"
-    class="toast-dismiss"
-    aria-label="Dismiss notification"
-    (click)="onDismiss()"
-  >
-    <span class="toast-dismiss__glyph" aria-hidden="true">×</span>
-  </button>
 </div>

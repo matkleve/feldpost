@@ -5,13 +5,13 @@ import {
   type ReverseGeocodeResult,
 } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import {
+  describeLocationUpdateRpcError,
+  LOCATION_UPDATE_NOT_FOUND_ERROR,
+} from './media-location-update.helpers';
+import type { MediaLocationUpdateResult } from './media-location-update.types';
 
-export interface MediaLocationUpdateResult {
-  ok: boolean;
-  error?: string;
-  lat?: number;
-  lng?: number;
-}
+export type { MediaLocationUpdateResult } from './media-location-update.types';
 
 @Injectable({ providedIn: 'root' })
 export class MediaLocationUpdateService {
@@ -33,18 +33,10 @@ export class MediaLocationUpdateService {
       p_country: suggestion.country,
     };
 
-    const { error } = await this.supabaseService.client.rpc('resolve_media_location', payload);
-    if (error) {
-      return {
-        ok: false,
-        error:
-          typeof error.message === 'string' && error.message.trim().length > 0
-            ? error.message
-            : 'Location update failed.',
-      };
-    }
-
-    return { ok: true, lat: suggestion.lat, lng: suggestion.lng };
+    return this.finishResolveMediaLocationRpc(
+      await this.supabaseService.client.rpc('resolve_media_location', payload),
+      { lat: suggestion.lat, lng: suggestion.lng },
+    );
   }
 
   async updateFromCoordinates(
@@ -71,15 +63,22 @@ export class MediaLocationUpdateService {
       p_country: reverse?.country ?? null,
     };
 
-    const { error } = await this.supabaseService.client.rpc('resolve_media_location', payload);
-    if (error) {
-      return {
-        ok: false,
-        error:
-          typeof error.message === 'string' && error.message.trim().length > 0
-            ? error.message
-            : 'Location update failed.',
-      };
+    return this.finishResolveMediaLocationRpc(
+      await this.supabaseService.client.rpc('resolve_media_location', payload),
+      { lat: coords.lat, lng: coords.lng },
+    );
+  }
+
+  private finishResolveMediaLocationRpc(
+    response: { data: boolean | null; error: { message?: string } | null },
+    coords: { lat: number; lng: number },
+  ): MediaLocationUpdateResult {
+    if (response.error) {
+      return { ok: false, error: describeLocationUpdateRpcError(response.error) };
+    }
+
+    if (response.data !== true) {
+      return { ok: false, error: LOCATION_UPDATE_NOT_FOUND_ERROR };
     }
 
     return { ok: true, lat: coords.lat, lng: coords.lng };

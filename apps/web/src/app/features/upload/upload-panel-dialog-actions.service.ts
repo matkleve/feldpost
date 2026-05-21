@@ -26,6 +26,7 @@ import {
   GeocodingService,
   type ForwardGeocodeResult,
 } from '../../core/geocoding/geocoding.service';
+import { buildLocationUpdateFailureToast } from '../../core/media-location-update/location-update-toast.util';
 import { MediaLocationUpdateService } from '../../core/media-location-update/media-location-update.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
@@ -181,9 +182,10 @@ export class UploadPanelDialogActionsService {
     });
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
       this.toastService.show({
-        message: this.t('upload.location.update.failed', 'Location could not be updated.'),
-        type: 'error',
-        dedupe: true,
+        ...buildLocationUpdateFailureToast(result.error, {
+          file: 'upload-panel-dialog-actions.service.ts',
+          fn: 'onAddressAmbiguousCandidateSelect',
+        }),
       });
       return;
     }
@@ -225,9 +227,10 @@ export class UploadPanelDialogActionsService {
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
       this.toastService.show({
-        message: this.t('upload.location.update.failed', 'Location could not be updated.'),
-        type: 'error',
-        dedupe: true,
+        ...buildLocationUpdateFailureToast(result.error, {
+          file: 'upload-panel-dialog-actions.service.ts',
+          fn: 'onLocationAddressSuggestionApply',
+        }),
       });
       return;
     }

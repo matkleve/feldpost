@@ -4,6 +4,10 @@ import type {
   UploadFailedEvent,
   UploadManagerService,
 } from '../../../core/upload/upload-manager.service';
+import {
+  formatUploadFailureMessage,
+  uploadFailureMessageToToastText,
+} from '../../../core/upload/upload-error-messages.util';
 import type { ImageRecord } from './media-detail-view.types';
 
 interface ImageDetailUploadHelperDeps {
@@ -52,8 +56,9 @@ export class ImageDetailUploadHelper {
   }
 
   handleUploadFailed(event: UploadFailedEvent): string {
-    this.deps.signals.replaceError.set(event.error);
+    const message = uploadFailureMessageToToastText(formatUploadFailureMessage(event.error));
+    this.deps.signals.replaceError.set(message);
     this.deps.signals.activeJobId.set(null);
-    return event.error;
+    return message;
   }
 }

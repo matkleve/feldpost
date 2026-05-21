@@ -5,12 +5,12 @@
   pointer-events: auto;
 }
 
-// Pill surface: card background, border, flex row for indicator, message, and controls.
+// Card surface: column layout for title, body, code ref, and optional detail.
 // @see docs/specs/service/toast/toast-system.md
 .toast-surface {
   display: flex;
-  align-items: center;
-  gap: 0.625rem;
+  flex-direction: column;
+  gap: 0.375rem;
   width: 100%;
   padding: 0.625rem 0.375rem 0.625rem 0.75rem;
   border: 1px solid var(--border);
@@ -20,12 +20,22 @@
   box-shadow: var(--shadow-md);
 }
 
+// Top row: severity dot, title, dismiss.
+// @see docs/specs/service/toast/toast-system.md
+.toast-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 // Severity dot; default muted, overridden per toast type on :host.
 // @see docs/specs/service/toast/toast-system.md
 .toast-indicator {
   flex-shrink: 0;
   width: 0.5rem;
   height: 0.5rem;
+  margin-top: 0.35rem;
   border-radius: 50%;
   background: var(--muted-foreground);
 }
@@ -46,11 +56,43 @@
   background: var(--primary);
 }
 
-// Message text: sm body, clamped to three lines.
+// Short headline (one line).
 // @see docs/specs/service/toast/toast-system.md
-.toast-message {
+.toast-title {
   flex: 1;
   min-width: 0;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--foreground);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Legacy flat message used as title when no structured title exists.
+// @see docs/specs/service/toast/toast-system.md
+.toast-title--legacy {
+  font-weight: 400;
+  -webkit-line-clamp: 3;
+}
+
+// Body + code ref block under the title.
+// @see docs/specs/service/toast/toast-system.md
+.toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-inline-start: 1rem;
+  min-width: 0;
+}
+
+// Summary/hint: up to three lines when collapsed.
+// @see docs/specs/service/toast/toast-system.md
+.toast-body {
+  margin: 0;
   font-size: var(--font-size-sm);
   font-weight: 400;
   line-height: 1.35;
@@ -60,13 +102,51 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+:host(.expanded) .toast-body--expanded {
+  -webkit-line-clamp: unset;
+  display: block;
+}
+
+// App code pointer (file + function).
+// @see docs/specs/service/toast/toast-system.md
+.toast-code-ref {
+  margin: 0;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  word-break: break-all;
+}
+
+// Full technical detail when expanded.
+// @see docs/specs/service/toast/toast-system.md
+.toast-detail {
+  margin: 0;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-height: 8rem;
+  overflow-y: auto;
+}
+
+// Expand/collapse control for long detail.
+// @see docs/specs/service/toast/toast-system.md
+.toast-expand {
+  align-self: flex-start;
+  margin-top: 0.125rem;
 }
 
 // Optional action (e.g. Undo); ghost button from hlmBtn.
 // @see docs/specs/service/toast/toast-system.md
 .toast-action {
-  flex-shrink: 0;
+  align-self: flex-start;
+  margin-inline-start: 1rem;
 }
 
 // Dismiss control: compact ghost X at the trailing edge.

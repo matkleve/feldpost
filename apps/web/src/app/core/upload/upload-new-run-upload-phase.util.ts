@@ -9,6 +9,10 @@ import type { ExifCoords, ParsedExif } from './upload.service';
 import type { UploadResult } from './upload.types';
 import type { SupabaseService } from '../supabase/supabase.service';
 import type { MediaDownloadService } from '../media-download/media-download.service';
+import {
+  formatUploadFailureMessage,
+  uploadFailureMessageToToastText,
+} from './upload-error-messages.util';
 
 type RunNewUploadPhaseArgs = {
   jobId: string;
@@ -212,13 +216,13 @@ function handleCancelledSavedJob(
 }
 
 function getUploadErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  if (typeof error === 'object') {
-    return (error as { message?: string }).message ?? String(error);
-  }
-  return String(error);
+  const raw =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'object'
+        ? ((error as { message?: string }).message ?? String(error))
+        : String(error);
+  return uploadFailureMessageToToastText(formatUploadFailureMessage(raw));
 }
 
 async function withTimeout<T>(
