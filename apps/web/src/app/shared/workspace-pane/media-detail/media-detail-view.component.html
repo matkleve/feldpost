@@ -32,11 +32,11 @@
   </div>
 }
 
-@if (image() && !loading()) {
+@if (media() && !loading()) {
   <div class="detail-main-column">
     <app-media-detail-header
       [displayTitle]="displayTitle()"
-      [titleValue]="image()!.address_label ?? ''"
+      [titleValue]="media()!.address_label ?? ''"
       [editingTitle]="editingField() === 'address_label'"
       [showContextMenu]="showContextMenu()"
       [contextActions]="workspaceHeaderActions()"
@@ -73,7 +73,7 @@
         <app-quick-info-chips [chips]="infoChips()" (chipClicked)="onChipClicked($event)" />
 
         <app-media-detail-inline-section
-          [image]="image()!"
+          [media]="media()!"
           [detailViewLabel]="detailViewLabel()"
           [fileFormatLabel]="fileFormatLabel()"
           [editingField]="editingField()"
@@ -94,7 +94,7 @@
         />
 
         <app-media-detail-location-section
-          [image]="image()!"
+          [media]="media()!"
           [fullAddress]="fullAddress()"
           [editingField]="editingField()"
           [isCorrected]="isCorrected()"

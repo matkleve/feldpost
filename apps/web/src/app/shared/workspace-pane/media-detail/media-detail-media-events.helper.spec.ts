@@ -8,8 +8,8 @@ const MOCK_IMAGE: ImageRecord = {
   user_id: 'user-1',
   organization_id: 'org-1',
   project_id: 'proj-1',
-  storage_path: 'images/old.jpg',
-  thumbnail_path: 'images/old-thumb.jpg',
+  storage_path: 'org-001/user-001/old.jpg',
+  thumbnail_path: 'org-001/user-001/old-thumb.jpg',
   latitude: null,
   longitude: null,
   exif_latitude: null,
@@ -36,13 +36,13 @@ describe('MediaDetailMediaEventsHelper', () => {
       services: {
         mediaDownloadService: { invalidate } as any,
         workspaceView: {
-          rawImages: signal([{ id: 'img-1', storagePath: 'images/old.jpg' }]),
+          rawImages: signal([{ id: 'img-1', storagePath: 'org-001/user-001/old.jpg' }]),
           batchSignThumbnails,
         } as any,
         toastService: { show: vi.fn() } as any,
       },
       signals: {
-        image,
+        media: image,
         fullResPreloaded: signal(true),
         activeJobId: signal('job-1'),
       },
@@ -55,12 +55,12 @@ describe('MediaDetailMediaEventsHelper', () => {
     const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     await helper.handleImageReplaced({
       imageId: 'img-1',
-      newStoragePath: 'images/new.jpg',
+      newStoragePath: 'org-001/user-001/new.jpg',
       localObjectUrl: 'blob:test',
       jobId: 'job-1',
     } as any);
 
-    expect(image()!.storage_path).toBe('images/new.jpg');
+    expect(image()!.storage_path).toBe('org-001/user-001/new.jpg');
     expect(invalidate).toHaveBeenCalledWith('img-1');
     expect(reloadSignedUrlsForCurrentMedia).toHaveBeenCalled();
     expect(batchSignThumbnails).toHaveBeenCalled();

@@ -24,7 +24,7 @@
         }}</span>
         @if (hasExifCoordinates()) {
           <span class="detail-row__value detail-row__value--static detail-row__value--mono">
-            {{ formatCoord(image().exif_latitude) }}°, {{ formatCoord(image().exif_longitude) }}°
+            {{ formatCoord(media().exif_latitude) }}°, {{ formatCoord(media().exif_longitude) }}°
           </span>
         } @else {
           <span class="detail-row__value detail-row__value--static">{{

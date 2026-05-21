@@ -2,12 +2,12 @@ import type { WritableSignal } from '@angular/core';
 import type { MediaDeleteUndoService } from '../../../core/media-delete/media-delete-undo.service';
 import type { DetailDestructiveConfirmState } from './media-detail-destructive-confirm';
 
-interface ImageDetailDeleteHelperDeps {
+interface MediaDetailDeleteHelperDeps {
   services: {
     mediaDeleteUndo: MediaDeleteUndoService;
   };
   signals: {
-    imageId: () => string | null;
+    mediaId: () => string | null;
     destructiveConfirm: WritableSignal<DetailDestructiveConfirmState | null>;
     showContextMenu: WritableSignal<boolean>;
   };
@@ -17,8 +17,8 @@ interface ImageDetailDeleteHelperDeps {
   };
 }
 
-export class ImageDetailDeleteHelper {
-  constructor(private readonly deps: ImageDetailDeleteHelperDeps) {}
+export class MediaDetailDeleteHelper {
+  constructor(private readonly deps: MediaDetailDeleteHelperDeps) {}
 
   confirmDelete(): void {
     this.deps.signals.destructiveConfirm.set({ kind: 'delete_media' });
@@ -30,7 +30,7 @@ export class ImageDetailDeleteHelper {
   }
 
   async executeDelete(): Promise<void> {
-    const id = this.deps.signals.imageId();
+    const id = this.deps.signals.mediaId();
     if (!id) return;
 
     const result = await this.deps.services.mediaDeleteUndo.deleteWithUndo({

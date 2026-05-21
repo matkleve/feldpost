@@ -67,7 +67,7 @@ interface MediaDetailDataFacadeDeps {
     projectMemberships: ImageDetailProjectMembershipHelper;
   };
   signals: {
-    image: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<ImageRecord | null>;
     metadata: WritableSignal<MetadataEntry[]>;
     loading: WritableSignal<boolean>;
     error: WritableSignal<string | null>;
@@ -88,10 +88,10 @@ export class MediaDetailDataFacade {
   constructor(private readonly deps: MediaDetailDataFacadeDeps) {}
 
   /**
-   * Merges location/address columns into the current detail image without full-pane reload.
+   * Merges location/address columns into the current detail media row without full-pane reload.
    * Does not touch loading state, metadata, URLs, or projects.
    */
-  async refreshImageLocationFields(
+  async refreshMediaLocationFields(
     id: string,
     abortSignal: AbortSignal,
   ): Promise<{ applied: boolean; locationStatus: string | null }> {
@@ -102,12 +102,19 @@ export class MediaDetailDataFacade {
 
     const legacyImageId = media.source_image_id ?? media.id;
     const patch = this.toImageRecord(media, legacyImageId);
-    const current = this.deps.signals.image();
-    if (!current || current.id !== legacyImageId) {
+    const current = this.deps.signals.media();
+    const matchesCurrent =
+      !!current &&
+      (current.id === legacyImageId ||
+        current.id === media.id ||
+        current.id === id ||
+        id === legacyImageId ||
+        id === media.id);
+    if (!matchesCurrent) {
       return { applied: false, locationStatus: null };
     }
 
-    this.deps.signals.image.set({
+    this.deps.signals.media.set({
       ...current,
       latitude: patch.latitude,
       longitude: patch.longitude,
@@ -124,35 +131,35 @@ export class MediaDetailDataFacade {
     return { applied: true, locationStatus: media.location_status };
   }
 
-  async loadImage(id: string, abortSignal: AbortSignal): Promise<void> {
+  async loadMedia(id: string, abortSignal: AbortSignal): Promise<void> {
     this.resetLoadState();
 
-    const media = await this.loadMediaRow(id);
+    const mediaRow = await this.loadMediaRow(id);
     if (abortSignal.aborted) return;
-    if (!media) return;
+    if (!mediaRow) return;
 
-    const legacyImageId = media.source_image_id ?? media.id;
-    const image = this.toImageRecord(media, legacyImageId);
+    const legacyImageId = mediaRow.source_image_id ?? mediaRow.id;
+    const record = this.toImageRecord(mediaRow, legacyImageId);
     const metadataEntries = await this.deps.services.metadata.loadMetadataEntriesForMediaItem(
-      media.id,
+      mediaRow.id,
     );
 
-    this.deps.signals.image.set(image);
+    this.deps.signals.media.set(record);
     this.deps.signals.error.set(null);
     this.deps.signals.loading.set(false);
     this.deps.signals.metadata.set(metadataEntries);
 
-    if (image.storage_path) {
-      void this.loadSignedUrls(image, abortSignal);
+    if (record.storage_path) {
+      void this.loadSignedUrls(record, abortSignal);
     } else {
-      this.deps.services.mediaDownloadService.markNoMedia(image.id);
+      this.deps.services.mediaDownloadService.markNoMedia(record.id);
     }
 
-    await this.deps.services.projectMemberships.loadProjectMemberships(id, image.project_id);
+    await this.deps.services.projectMemberships.loadProjectMemberships(id, record.project_id);
 
-    if (image.organization_id) {
-      void this.loadProjects(image.organization_id);
-      void this.loadMetadataKeyDefinitions(image.organization_id);
+    if (record.organization_id) {
+      void this.loadProjects(record.organization_id);
+      void this.loadMetadataKeyDefinitions(record.organization_id);
     }
   }
 

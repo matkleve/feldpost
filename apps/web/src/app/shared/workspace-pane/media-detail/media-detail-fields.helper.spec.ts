@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
+import { MediaDetailFieldsHelper } from './media-detail-fields.helper';
 import type { ImageRecord } from './media-detail-view.types';
 
 const MOCK_IMAGE: ImageRecord = {
@@ -8,7 +8,7 @@ const MOCK_IMAGE: ImageRecord = {
   user_id: 'user-1',
   organization_id: 'org-1',
   project_id: 'proj-1',
-  storage_path: 'images/photo.jpg',
+  storage_path: 'org-001/user-001/photo.jpg',
   thumbnail_path: null,
   latitude: 1,
   longitude: 2,
@@ -27,13 +27,13 @@ const MOCK_IMAGE: ImageRecord = {
 };
 
 function createHelper() {
-  const image = signal<ImageRecord | null>({ ...MOCK_IMAGE });
+  const media = signal<ImageRecord | null>({ ...MOCK_IMAGE });
   const editingField = signal<any>(null);
   const saving = signal(false);
   const editDate = signal('');
   const editTime = signal('');
   const updateOr = vi.fn(async () => ({ error: null }));
-  const helper = new ImageDetailFieldsHelper({
+  const helper = new MediaDetailFieldsHelper({
     services: {
       supabase: {
         client: {
@@ -47,7 +47,7 @@ function createHelper() {
       toastService: { show: vi.fn() } as any,
     },
     signals: {
-      image,
+      media,
       editingField,
       saving,
       editDate,
@@ -58,17 +58,17 @@ function createHelper() {
     },
   });
 
-  return { helper, signals: { image, editingField, editDate, editTime }, updateOr };
+  return { helper, signals: { media, editingField, editDate, editTime }, updateOr };
 }
 
-describe('ImageDetailFieldsHelper', () => {
+describe('MediaDetailFieldsHelper', () => {
   it('saves text fields and clears edit mode', async () => {
     const { helper, signals } = createHelper();
     signals.editingField.set('city');
 
     await helper.saveImageField('city', 'New city');
 
-    expect(signals.image()!.city).toBe('New city');
+    expect(signals.media()!.city).toBe('New city');
     expect(signals.editingField()).toBeNull();
   });
 

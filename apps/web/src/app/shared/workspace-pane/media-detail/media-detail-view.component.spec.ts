@@ -268,7 +268,7 @@ describe('MediaDetailViewComponent', () => {
   describe('initial state', () => {
     it('starts with null image and empty metadata', () => {
       const { component } = setup();
-      expect(component.image()).toBeNull();
+      expect(component.media()).toBeNull();
       expect(component.metadata()).toEqual([]);
       expect(component.loading()).toBe(false);
       expect(component.editingField()).toBeNull();
@@ -290,13 +290,13 @@ describe('MediaDetailViewComponent', () => {
   describe('computed signals', () => {
     it('displayTitle returns address_label when available', () => {
       const { component } = setup();
-      component.image.set(MOCK_IMAGE);
+      component.media.set(MOCK_IMAGE);
       expect(component.displayTitle()).toBe('Stephansplatz 1, Wien');
     });
 
     it('displayTitle falls back to filename when no address_label', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE, address_label: null });
+      component.media.set({ ...MOCK_IMAGE, address_label: null });
       expect(component.displayTitle()).toBe('photo.jpg');
     });
 
@@ -307,25 +307,25 @@ describe('MediaDetailViewComponent', () => {
 
     it('isCorrected returns false when coords match EXIF', () => {
       const { component } = setup();
-      component.image.set(MOCK_IMAGE);
+      component.media.set(MOCK_IMAGE);
       expect(component.isCorrected()).toBe(false);
     });
 
     it('isCorrected returns true when coords differ from EXIF', () => {
       const { component } = setup();
-      component.image.set(MOCK_CORRECTED_IMAGE);
+      component.media.set(MOCK_CORRECTED_IMAGE);
       expect(component.isCorrected()).toBe(true);
     });
 
     it('isCorrected returns false when lat/exif_lat is null', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE, latitude: null });
+      component.media.set({ ...MOCK_IMAGE, latitude: null });
       expect(component.isCorrected()).toBe(false);
     });
 
     it('captureDate formats captured_at', () => {
       const { component } = setup();
-      component.image.set(MOCK_IMAGE);
+      component.media.set(MOCK_IMAGE);
       const date = component.captureDate();
       expect(date).toBeTruthy();
       expect(date).toContain('2025');
@@ -338,7 +338,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('uploadDate formats created_at', () => {
       const { component } = setup();
-      component.image.set(MOCK_IMAGE);
+      component.media.set(MOCK_IMAGE);
       const date = component.uploadDate();
       expect(date).toBeTruthy();
       expect(date).toContain('2025');
@@ -346,7 +346,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('projectName returns matching project label', () => {
       const { component } = setup();
-      component.image.set(MOCK_IMAGE);
+      component.media.set(MOCK_IMAGE);
       component.projectOptions.set([
         { id: 'proj-001', label: 'Project Alpha' },
         { id: 'proj-002', label: 'Project Beta' },
@@ -356,20 +356,20 @@ describe('MediaDetailViewComponent', () => {
 
     it('projectName returns empty string when no project assigned', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE, project_id: null });
+      component.media.set({ ...MOCK_IMAGE, project_id: null });
       expect(component.projectName()).toBe('');
     });
 
     it('projectName returns empty string when project not in options', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE, project_id: 'proj-999' });
+      component.media.set({ ...MOCK_IMAGE, project_id: 'proj-999' });
       component.projectOptions.set([{ id: 'proj-001', label: 'Alpha' }]);
       expect(component.projectName()).toBe('');
     });
 
     it('projectName prefers explicit primary project label for multi-membership', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       component.projectOptions.set([
         { id: 'proj-001', label: 'Project Alpha' },
         { id: 'proj-002', label: 'Project Beta' },
@@ -385,18 +385,18 @@ describe('MediaDetailViewComponent', () => {
   describe('saveImageField', () => {
     it('updates address_label optimistically', async () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.saveImageField('address_label', 'New Address');
 
-      expect(component.image()!.address_label).toBe('New Address');
+      expect(component.media()!.address_label).toBe('New Address');
       expect(component.editingField()).toBeNull();
       expect(component.saving()).toBe(false);
     });
 
     it('calls Supabase media_items.update for a changed field', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.saveImageField('city', 'Graz');
 
@@ -409,7 +409,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('skips save when value is unchanged', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       fake.client.from.mockClear();
 
       await component.saveImageField('city', 'Wien');
@@ -419,17 +419,17 @@ describe('MediaDetailViewComponent', () => {
 
     it('stores null for empty string values', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.saveImageField('district', '');
 
-      expect(component.image()!.district).toBeNull();
+      expect(component.media()!.district).toBeNull();
       expect(fake.updateFn).toHaveBeenCalledWith({ district: null });
     });
 
     it('does nothing when image is null', async () => {
       const { component, fake } = setup();
-      component.image.set(null);
+      component.media.set(null);
       fake.client.from.mockClear();
 
       await component.saveImageField('city', 'Wien');
@@ -439,13 +439,13 @@ describe('MediaDetailViewComponent', () => {
 
     it('rolls back on Supabase error', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       fake.updateEqFn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
 
       await component.saveImageField('city', 'Graz');
 
       // Rolled back to original value
-      expect(component.image()!.city).toBe('Wien');
+      expect(component.media()!.city).toBe('Wien');
       expect(component.saving()).toBe(false);
     });
   });
@@ -457,7 +457,7 @@ describe('MediaDetailViewComponent', () => {
       const { component, ref, fixture } = setup();
       setImageId(component, 'img-001');
       fixture.detectChanges();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       component.metadata.set([...MOCK_METADATA]);
 
       await component.saveMetadata(MOCK_METADATA[0], 'Commercial');
@@ -469,7 +469,7 @@ describe('MediaDetailViewComponent', () => {
       const { component, ref, fake, fixture } = setup();
       setImageId(component, 'img-001');
       fixture.detectChanges();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       component.metadata.set([...MOCK_METADATA]);
 
       await component.saveMetadata(MOCK_METADATA[0], 'Commercial');
@@ -487,7 +487,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('skips save when value is unchanged', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       component.metadata.set([...MOCK_METADATA]);
       fake.upsertFn.mockClear();
 
@@ -509,7 +509,7 @@ describe('MediaDetailViewComponent', () => {
     it('rolls back on upsert error', async () => {
       const { component, ref, fake } = setup();
       setImageId(component, 'img-001');
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       component.metadata.set([...MOCK_METADATA]);
       fake.upsertFn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
 
@@ -562,7 +562,7 @@ describe('MediaDetailViewComponent', () => {
   describe('addMetadata', () => {
     it('does nothing with empty key', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       fake.client.from.mockClear();
 
       await component.addMetadata('', 'text', 'value');
@@ -572,7 +572,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('does nothing with empty value', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       fake.client.from.mockClear();
 
       await component.addMetadata('key', 'text', '');
@@ -582,7 +582,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('does nothing when image is null', async () => {
       const { component, fake } = setup();
-      component.image.set(null);
+      component.media.set(null);
       fake.client.from.mockClear();
 
       await component.addMetadata('Floor', 'text', '5th');
@@ -592,7 +592,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('appends new entry to metadata list on success', async () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       component.metadata.set([]);
 
       await component.addMetadata('Phase', 'text', 'Construction');
@@ -722,7 +722,7 @@ describe('MediaDetailViewComponent', () => {
   describe('address search', () => {
     it('openAddressSearch sets editingField to address_search', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       component.openAddressSearch();
 
@@ -731,7 +731,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('applyAddressSuggestion updates image address fields', async () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.applyAddressSuggestion({
         lat: 47.07,
@@ -745,15 +745,15 @@ describe('MediaDetailViewComponent', () => {
         zip: '',
       });
 
-      expect(component.image()!.street).toBe('Hauptplatz');
-      expect(component.image()!.city).toBe('Graz');
-      expect(component.image()!.address_label).toBe('Hauptplatz 1, Graz');
+      expect(component.media()!.street).toBe('Hauptplatz');
+      expect(component.media()!.city).toBe('Graz');
+      expect(component.media()!.address_label).toBe('Hauptplatz 1, Graz');
       expect(component.editingField()).toBeNull();
     });
 
     it('applyAddressSuggestion calls Supabase update', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.applyAddressSuggestion({
         lat: 47.07,
@@ -784,7 +784,7 @@ describe('MediaDetailViewComponent', () => {
   describe('captured date editor', () => {
     it('openCapturedAtEditor parses date and time when has_time=true', () => {
       const { component } = setup();
-      component.image.set({
+      component.media.set({
         ...MOCK_IMAGE,
         captured_at: '2025-06-15T10:30:00Z',
         has_time: true,
@@ -799,7 +799,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('openCapturedAtEditor sets empty time when has_time=false', () => {
       const { component } = setup();
-      component.image.set({
+      component.media.set({
         ...MOCK_IMAGE,
         captured_at: '2025-06-15T00:00:00Z',
         has_time: false,
@@ -813,7 +813,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('openCapturedAtEditor sets empty fields when no captured_at', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE, captured_at: null, has_time: false });
+      component.media.set({ ...MOCK_IMAGE, captured_at: null, has_time: false });
 
       component.openCapturedAtEditor();
 
@@ -824,51 +824,51 @@ describe('MediaDetailViewComponent', () => {
 
     it('saveCapturedAt with date+time saves combined with has_time=true', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.saveCapturedAt({ date: '2025-07-20', time: '14:30' });
 
       const expectedIso = new Date('2025-07-20T14:30:00').toISOString();
       expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: expectedIso });
-      expect(component.image()!.has_time).toBe(true);
+      expect(component.media()!.has_time).toBe(true);
     });
 
     it('saveCapturedAt with date-only saves with has_time=false', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.saveCapturedAt({ date: '2025-07-20', time: null });
 
       const expectedIso = new Date('2025-07-20T00:00:00').toISOString();
       expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: expectedIso });
-      expect(component.image()!.has_time).toBe(false);
+      expect(component.media()!.has_time).toBe(false);
     });
 
     it('saveCapturedAt with 00:00 time saves with has_time=true', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.saveCapturedAt({ date: '2025-07-20', time: '00:00' });
 
       const expectedIso = new Date('2025-07-20T00:00:00').toISOString();
       expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: expectedIso });
-      expect(component.image()!.has_time).toBe(true);
+      expect(component.media()!.has_time).toBe(true);
     });
 
     it('saveCapturedAt with null date clears captured_at', async () => {
       const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
 
       await component.saveCapturedAt({ date: null, time: null });
 
-      expect(component.image()!.captured_at).toBeNull();
-      expect(component.image()!.has_time).toBe(false);
+      expect(component.media()!.captured_at).toBeNull();
+      expect(component.media()!.has_time).toBe(false);
       expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: null });
     });
 
     it('saveCapturedAt closes editor', async () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE });
+      component.media.set({ ...MOCK_IMAGE });
       component.editingField.set('captured_at');
 
       await component.saveCapturedAt({ date: '2025-07-20', time: '09:00' });
@@ -879,18 +879,18 @@ describe('MediaDetailViewComponent', () => {
     it('saveCapturedAt rolls back on Supabase error', async () => {
       const { component, fake } = setup();
       const original = '2025-06-15T10:30:00Z';
-      component.image.set({ ...MOCK_IMAGE, captured_at: original, has_time: true });
+      component.media.set({ ...MOCK_IMAGE, captured_at: original, has_time: true });
       fake.updateEqFn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
 
       await component.saveCapturedAt({ date: '2026-01-01', time: '08:00' });
 
-      expect(component.image()!.captured_at).toBe(original);
-      expect(component.image()!.has_time).toBe(true);
+      expect(component.media()!.captured_at).toBe(original);
+      expect(component.media()!.has_time).toBe(true);
     });
 
     it('saveCapturedAt does nothing when image is null', async () => {
       const { component, fake } = setup();
-      component.image.set(null);
+      component.media.set(null);
       fake.client.from.mockClear();
 
       await component.saveCapturedAt({ date: '2025-07-20', time: '14:30' });
@@ -900,7 +900,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('captureDate shows date+time when has_time=true', () => {
       const { component } = setup();
-      component.image.set({
+      component.media.set({
         ...MOCK_IMAGE,
         captured_at: '2025-06-15T10:30:00',
         has_time: true,
@@ -913,7 +913,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('captureDate shows date-only when has_time=false', () => {
       const { component } = setup();
-      component.image.set({
+      component.media.set({
         ...MOCK_IMAGE,
         captured_at: '2025-06-15T00:00:00',
         has_time: false,
@@ -926,7 +926,7 @@ describe('MediaDetailViewComponent', () => {
 
     it('captureDate returns null when captured_at is null', () => {
       const { component } = setup();
-      component.image.set({ ...MOCK_IMAGE, captured_at: null });
+      component.media.set({ ...MOCK_IMAGE, captured_at: null });
       expect(component.captureDate()).toBeNull();
     });
   });
@@ -1189,7 +1189,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('delegates to uploadManager.replaceFile for images with storage_path', () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
 
     ctx.component.onFileSelected(createFileEvent(createTestFile()));
 
@@ -1199,7 +1199,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('delegates to uploadManager.attachFile for photoless images', () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE, storage_path: null });
+    ctx.component.media.set({ ...MOCK_IMAGE, storage_path: null });
 
     ctx.component.onFileSelected(createFileEvent(createTestFile()));
 
@@ -1211,7 +1211,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('shows error when file validation fails', () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
     ctx.fakeUpload.validateFile.mockReturnValueOnce({
       valid: false,
       error: 'File too large (30 MB)',
@@ -1227,7 +1227,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('replacing computed reflects active UploadManagerService job state', () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
 
     // Before delegation
     expect(ctx.component.replacing()).toBe(false);
@@ -1248,7 +1248,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('updates image state on imageReplaced$', async () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
     // Simulate the component seeing this image as "current"
     setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
@@ -1263,13 +1263,13 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
     await Promise.resolve();
 
-    expect(ctx.component.image()?.storage_path).toBe('org-001/user-001/new-photo.jpg');
+    expect(ctx.component.media()?.storage_path).toBe('org-001/user-001/new-photo.jpg');
     expect(ctx.component.fullResPreloaded()).toBe(false);
   });
 
   it('updates workspace grid cache on imageReplaced$', () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
     setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
 
@@ -1294,7 +1294,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('switches from no-photo to photo display on imageAttached$', async () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE, storage_path: null });
+    ctx.component.media.set({ ...MOCK_IMAGE, storage_path: null });
     setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
 
@@ -1311,14 +1311,14 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
     await Promise.resolve();
 
     expect(ctx.component.hasPhoto()).toBe(true);
-    expect(ctx.component.image()?.storage_path).toBe('org-001/user-001/attached.jpg');
+    expect(ctx.component.media()?.storage_path).toBe('org-001/user-001/attached.jpg');
   });
 
   // ── Blob URL cleanup ──────────────────────────────────────────────────────
 
   it('revokes blob URL after replace event is handled', async () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
     setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
 
@@ -1344,7 +1344,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('does nothing when no file is selected (cancel)', () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
 
     const input = document.createElement('input');
     input.type = 'file';
@@ -1355,7 +1355,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('does nothing when image is null', () => {
     const ctx = setupReplace();
-    ctx.component.image.set(null);
+    ctx.component.media.set(null);
 
     ctx.component.onFileSelected(createFileEvent(createTestFile()));
 
@@ -1364,7 +1364,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
   it('clears previous replaceError on new attempt', () => {
     const ctx = setupReplace();
-    ctx.component.image.set({ ...MOCK_IMAGE });
+    ctx.component.media.set({ ...MOCK_IMAGE });
     ctx.component.replaceError.set('Previous error');
 
     ctx.component.onFileSelected(createFileEvent(createTestFile()));

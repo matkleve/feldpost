@@ -314,8 +314,50 @@ export function needsAddressResolutionAfterGps(image: ImageRecord | null): boole
   return !hasCompleteStructuredAddress(image);
 }
 
+/** True when patch assigns new latitude/longitude different from the current media row. */
+export function patchChangesGps(
+  current: ImageRecord,
+  patch: { latitude?: number | null; longitude?: number | null },
+): boolean {
+  if (patch.latitude === undefined || patch.longitude === undefined) {
+    return false;
+  }
+  return current.latitude !== patch.latitude || current.longitude !== patch.longitude;
+}
+
+/**
+ * When GPS moves, clear address lines not included in the patch so stale city/street
+ * is not kept while reverse geocode runs.
+ */
+export function prepareLocationPatchAfterGpsChange(
+  current: ImageRecord,
+  patch: MediaLocationAddressPatch & {
+    latitude?: number | null;
+    longitude?: number | null;
+    location_unresolved?: boolean;
+    gps_assignment_allowed?: boolean;
+  },
+): MediaLocationAddressPatch & {
+  latitude?: number | null;
+  longitude?: number | null;
+  location_unresolved?: boolean;
+  gps_assignment_allowed?: boolean;
+} {
+  if (!patchChangesGps(current, patch)) {
+    return patch;
+  }
+  return {
+    ...patch,
+    address_label: patch.address_label !== undefined ? patch.address_label : null,
+    street: patch.street !== undefined ? patch.street : null,
+    city: patch.city !== undefined ? patch.city : null,
+    district: patch.district !== undefined ? patch.district : null,
+    country: patch.country !== undefined ? patch.country : null,
+  };
+}
+
 export function buildInfoChips(args: {
-  image: ImageRecord | null;
+  media: ImageRecord | null;
   mediaTypeChipLabel: string;
   projectName: string;
   selectedProjectCount: number;
@@ -324,7 +366,7 @@ export function buildInfoChips(args: {
   t: DetailTranslateFn;
 }): ChipDef[] {
   const {
-    image,
+    media,
     mediaTypeChipLabel,
     projectName,
     selectedProjectCount,
@@ -332,9 +374,9 @@ export function buildInfoChips(args: {
     isCorrected,
     t,
   } = args;
-  if (!image) return [];
+  if (!media) return [];
 
-  const hasGps = image.latitude != null;
+  const hasGps = media.latitude != null;
   return [
     {
       icon: 'description',

@@ -40,7 +40,7 @@ export class MediaDetailInlineSectionComponent {
   readonly projectsAnchorEl = computed(() => this.projectsCenterRef()?.nativeElement ?? null);
   readonly projectsCenterWidth = computed(() => this.projectsCenterRef()?.nativeElement.offsetWidth ?? null);
 
-  readonly image = input<ImageRecord>({} as ImageRecord);
+  readonly media = input<ImageRecord>({} as ImageRecord);
   readonly detailViewLabel = input('');
   readonly fileFormatLabel = input('');
   readonly editingField = input<DetailEditingField>(null);
@@ -68,8 +68,8 @@ export class MediaDetailInlineSectionComponent {
 
   readonly hasExifCoordinates = computed(
     () =>
-      this.image().exif_latitude != null &&
-      this.image().exif_longitude != null,
+      this.media().exif_latitude != null &&
+      this.media().exif_longitude != null,
   );
 
   readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();

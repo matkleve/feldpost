@@ -123,7 +123,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   const facade = new MediaDetailDataFacade({
     services: { supabase, metadata: metadataService, mediaDownloadService, projectMemberships },
     signals: {
-      image,
+      media: image,
       metadata,
       loading,
       error,
@@ -151,7 +151,7 @@ describe('MediaDetailDataFacade', () => {
   it('loads image state and metadata', async () => {
     const { facade, signals, deps } = createFacade();
 
-    await facade.loadImage('img-1', new AbortController().signal);
+    await facade.loadMedia('img-1', new AbortController().signal);
 
     expect(signals.image()?.id).toBe('img-1');
     expect(signals.metadata()[0].key).toBe('Key');
@@ -161,7 +161,7 @@ describe('MediaDetailDataFacade', () => {
   it('marks no-photo rows without requesting signed urls', async () => {
     const { facade, deps } = createFacade({ image: { storage_path: null, thumbnail_path: null } });
 
-    await facade.loadImage('img-1', new AbortController().signal);
+    await facade.loadMedia('img-1', new AbortController().signal);
 
     expect(deps.mediaDownloadService.markNoMedia).toHaveBeenCalledWith('img-1');
     expect(deps.mediaDownloadService.getSignedUrl).not.toHaveBeenCalled();

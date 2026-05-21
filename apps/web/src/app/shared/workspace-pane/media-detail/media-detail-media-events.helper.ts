@@ -17,7 +17,7 @@ interface MediaDetailMediaEventsHelperDeps {
     toastService: ToastService;
   };
   signals: {
-    image: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<ImageRecord | null>;
     fullResPreloaded: WritableSignal<boolean>;
     activeJobId: WritableSignal<string | null>;
   };
@@ -33,7 +33,7 @@ export class MediaDetailMediaEventsHelper {
   async handleImageReplaced(event: ImageReplacedEvent): Promise<void> {
     console.log('[detail-view] handleImageReplaced received:', event);
 
-    this.deps.signals.image.update((prev) =>
+    this.deps.signals.media.update((prev) =>
       prev ? { ...prev, storage_path: event.newStoragePath, thumbnail_path: null } : prev,
     );
     this.deps.signals.fullResPreloaded.set(false);
@@ -56,8 +56,8 @@ export class MediaDetailMediaEventsHelper {
   async handleImageAttached(event: ImageAttachedEvent): Promise<void> {
     console.log('[detail-view] handleImageAttached received:', event);
 
-    this.deps.signals.image.update((prev) => {
-      console.log('[detail-view] updating image record: storage_path =', event.newStoragePath);
+    this.deps.signals.media.update((prev) => {
+      console.log('[detail-view] updating media record: storage_path =', event.newStoragePath);
       return prev ? { ...prev, storage_path: event.newStoragePath, thumbnail_path: null } : prev;
     });
     this.deps.signals.fullResPreloaded.set(false);

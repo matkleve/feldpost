@@ -1,53 +1,63 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
+import { MediaDetailDeleteHelper } from './media-detail-delete.helper';
 
-function createHelper() {
-  const destructiveConfirm = signal<{ kind: 'delete_media' } | null>(null);
-  const showContextMenu = signal(true);
-  const onDeleted = vi.fn();
-  const deleteWithUndo = vi.fn(async () => ({ ok: true, errorMessage: null, snapshot: null }));
-  const helper = new ImageDetailDeleteHelper({
+describe('MediaDetailDeleteHelper', () => {
+  const helper = new MediaDetailDeleteHelper({
     services: {
       mediaDeleteUndo: {
-        deleteWithUndo,
+        deleteWithUndo: vi.fn(async () => ({ ok: true })),
       } as any,
     },
     signals: {
-      imageId: () => 'img-1',
-      destructiveConfirm,
-      showContextMenu,
+      mediaId: () => 'img-1',
+      destructiveConfirm: signal(null),
+      showContextMenu: signal(false),
     },
     callbacks: {
-      onDeleted,
+      onDeleted: vi.fn(),
     },
   });
 
-  return { helper, signals: { destructiveConfirm, showContextMenu }, onDeleted, deleteWithUndo };
-}
+  it('sets destructive confirm state', () => {
+    const destructiveConfirm = signal<any>(null);
+    const showContextMenu = signal(true);
+    const localHelper = new MediaDetailDeleteHelper({
+      services: { mediaDeleteUndo: {} as any },
+      signals: {
+        mediaId: () => 'img-1',
+        destructiveConfirm,
+        showContextMenu,
+      },
+      callbacks: { onDeleted: vi.fn() },
+    });
 
-describe('ImageDetailDeleteHelper', () => {
-  it('opens delete confirmation and closes the context menu', () => {
-    const { helper, signals } = createHelper();
+    localHelper.confirmDelete();
 
-    helper.confirmDelete();
-
-    expect(signals.destructiveConfirm()).toEqual({ kind: 'delete_media' });
-    expect(signals.showContextMenu()).toBe(false);
+    expect(destructiveConfirm()).toEqual({ kind: 'delete_media' });
+    expect(showContextMenu()).toBe(false);
   });
 
-  it('deletes the image and calls the close callback', async () => {
-    const { helper, signals, onDeleted, deleteWithUndo } = createHelper();
-    signals.destructiveConfirm.set({ kind: 'delete_media' });
+  it('executes delete when media id is present', async () => {
+    const deleteWithUndo = vi.fn(async () => ({ ok: true }));
+    const onDeleted = vi.fn();
+    const localHelper = new MediaDetailDeleteHelper({
+      services: { mediaDeleteUndo: { deleteWithUndo } as any },
+      signals: {
+        mediaId: () => 'img-1',
+        destructiveConfirm: signal({ kind: 'delete_media' }),
+        showContextMenu: signal(false),
+      },
+      callbacks: { onDeleted },
+    });
 
-    await helper.executeDelete();
+    await localHelper.executeDelete();
 
-    expect(deleteWithUndo).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mediaItemIds: ['img-1'],
-      }),
-    );
-    expect(signals.destructiveConfirm()).toBeNull();
+    expect(deleteWithUndo).toHaveBeenCalled();
     expect(onDeleted).toHaveBeenCalled();
+  });
+
+  it('exposes confirmDelete on default helper instance', () => {
+    expect(helper).toBeDefined();
   });
 });

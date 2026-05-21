@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailUploadHelper } from './media-detail-upload.helper';
+import { MediaDetailUploadHelper } from './media-detail-upload.helper';
 import type { ImageRecord } from './media-detail-view.types';
 
 const MOCK_IMAGE: ImageRecord = {
@@ -8,7 +8,7 @@ const MOCK_IMAGE: ImageRecord = {
   user_id: 'user-1',
   organization_id: 'org-1',
   project_id: 'proj-1',
-  storage_path: 'images/photo.jpg',
+  storage_path: 'org-001/user-001/photo.jpg',
   thumbnail_path: null,
   latitude: 1,
   longitude: 2,
@@ -27,7 +27,7 @@ const MOCK_IMAGE: ImageRecord = {
 };
 
 function createHelper() {
-  const image = signal<ImageRecord | null>({ ...MOCK_IMAGE });
+  const media = signal<ImageRecord | null>({ ...MOCK_IMAGE });
   const replaceError = signal<string | null>(null);
   const activeJobId = signal<string | null>(null);
   const uploadService = {
@@ -38,18 +38,18 @@ function createHelper() {
     attachFile: vi.fn(() => 'attach-job'),
   } as any;
 
-  const helper = new ImageDetailUploadHelper({
+  const helper = new MediaDetailUploadHelper({
     services: { uploadService, uploadManager },
-    signals: { image, replaceError, activeJobId },
+    signals: { media, replaceError, activeJobId },
     callbacks: {
       findJobForFailure: vi.fn(() => true),
     },
   });
 
-  return { helper, signals: { image, replaceError, activeJobId }, deps: { uploadService, uploadManager } };
+  return { helper, signals: { media, replaceError, activeJobId }, deps: { uploadService, uploadManager } };
 }
 
-describe('ImageDetailUploadHelper', () => {
+describe('MediaDetailUploadHelper', () => {
   it('starts a replace job for images with an existing storage path', () => {
     const { helper, signals, deps } = createHelper();
     const file = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });

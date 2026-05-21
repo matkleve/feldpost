@@ -2,24 +2,24 @@ import type { WritableSignal } from '@angular/core';
 import type { MetadataService } from '../../../core/metadata/metadata.service';
 import type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
-interface ImageDetailMetadataHelperDeps {
+interface MediaDetailMetadataHelperDeps {
   services: {
     metadata: MetadataService;
   };
   signals: {
-    image: WritableSignal<ImageRecord | null>;
-    imageId: () => string | null;
+    media: WritableSignal<ImageRecord | null>;
+    mediaId: () => string | null;
     metadata: WritableSignal<MetadataEntry[]>;
     saving: WritableSignal<boolean>;
   };
 }
 
-export class ImageDetailMetadataHelper {
-  constructor(private readonly deps: ImageDetailMetadataHelperDeps) {}
+export class MediaDetailMetadataHelper {
+  constructor(private readonly deps: MediaDetailMetadataHelperDeps) {}
 
   async saveMetadata(entry: MetadataEntry, newValue: string): Promise<void> {
     if (newValue === entry.value) return;
-    const id = this.deps.signals.imageId();
+    const id = this.deps.signals.mediaId();
     if (!id) return;
 
     const composeType =
@@ -58,8 +58,8 @@ export class ImageDetailMetadataHelper {
     keyType: 'text' | 'number' | 'date',
     value: string,
   ): Promise<void> {
-    const img = this.deps.signals.image();
-    if (!img || !keyName.trim()) return;
+    const media = this.deps.signals.media();
+    if (!media || !keyName.trim()) return;
 
     const validation = this.deps.services.metadata.validateMetadataValueForSave(keyType, value);
     if (!validation.valid) return;
@@ -67,8 +67,8 @@ export class ImageDetailMetadataHelper {
     this.deps.signals.saving.set(true);
 
     const result = await this.deps.services.metadata.addMetadataValueByLookupId(
-      img.id,
-      img.organization_id,
+      media.id,
+      media.organization_id,
       keyName.trim(),
       keyType,
       validation.normalizedValue,
@@ -90,7 +90,7 @@ export class ImageDetailMetadataHelper {
   }
 
   async removeMetadata(entry: MetadataEntry): Promise<void> {
-    const id = this.deps.signals.imageId();
+    const id = this.deps.signals.mediaId();
     if (!id) return;
 
     const previousList = this.deps.signals.metadata();

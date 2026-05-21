@@ -66,13 +66,13 @@ export function addressSnapshotToSuggestion(snapshot: AddressFieldSnapshot): For
   };
 }
 
-interface ImageDetailFieldsHelperDeps {
+interface MediaDetailFieldsHelperDeps {
   services: {
     supabase: SupabaseService;
     toastService: ToastService;
   };
   signals: {
-    image: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<ImageRecord | null>;
     editingField: WritableSignal<DetailEditingField>;
     saving: WritableSignal<boolean>;
     editDate: WritableSignal<string>;
@@ -83,11 +83,11 @@ interface ImageDetailFieldsHelperDeps {
   };
 }
 
-export class ImageDetailFieldsHelper {
-  constructor(private readonly deps: ImageDetailFieldsHelperDeps) {}
+export class MediaDetailFieldsHelper {
+  constructor(private readonly deps: MediaDetailFieldsHelperDeps) {}
 
   async saveImageField(field: string, newValue: string): Promise<void> {
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (!img) return;
 
     const oldValue = (img as unknown as Record<string, unknown>)[field] as string | null;
@@ -97,7 +97,7 @@ export class ImageDetailFieldsHelper {
     }
 
     const updateValue = newValue || null;
-    this.deps.signals.image.update((prev) => (prev ? { ...prev, [field]: updateValue } : prev));
+    this.deps.signals.media.update((prev) => (prev ? { ...prev, [field]: updateValue } : prev));
     this.deps.signals.editingField.set(null);
     this.deps.signals.saving.set(true);
 
@@ -107,14 +107,14 @@ export class ImageDetailFieldsHelper {
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
-      this.deps.signals.image.update((prev) => (prev ? { ...prev, [field]: oldValue } : prev));
+      this.deps.signals.media.update((prev) => (prev ? { ...prev, [field]: oldValue } : prev));
     }
 
     this.deps.signals.saving.set(false);
   }
 
   openCapturedAtEditor(): void {
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (img?.captured_at) {
       const d = new Date(img.captured_at);
       this.deps.signals.editDate.set(
@@ -136,13 +136,13 @@ export class ImageDetailFieldsHelper {
 
   async saveCapturedAt(event: DateSaveEvent): Promise<void> {
     this.deps.signals.editingField.set(null);
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (!img) return;
 
     if (!event.date) {
       const oldCapturedAt = img.captured_at;
       const oldHasTime = img.has_time;
-      this.deps.signals.image.update((prev) =>
+      this.deps.signals.media.update((prev) =>
         prev ? { ...prev, captured_at: null, has_time: false } : prev,
       );
       this.deps.signals.saving.set(true);
@@ -151,7 +151,7 @@ export class ImageDetailFieldsHelper {
         .update({ captured_at: null })
         .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
       if (error) {
-        this.deps.signals.image.update((prev) =>
+        this.deps.signals.media.update((prev) =>
           prev ? { ...prev, captured_at: oldCapturedAt, has_time: oldHasTime } : prev,
         );
       }
@@ -165,7 +165,7 @@ export class ImageDetailFieldsHelper {
     const oldCapturedAt = img.captured_at;
     const oldHasTime = img.has_time;
 
-    this.deps.signals.image.update((prev) =>
+    this.deps.signals.media.update((prev) =>
       prev ? { ...prev, captured_at: combined, has_time: hasTime } : prev,
     );
     this.deps.signals.saving.set(true);
@@ -176,7 +176,7 @@ export class ImageDetailFieldsHelper {
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
-      this.deps.signals.image.update((prev) =>
+      this.deps.signals.media.update((prev) =>
         prev ? { ...prev, captured_at: oldCapturedAt, has_time: oldHasTime } : prev,
       );
     }
@@ -186,7 +186,7 @@ export class ImageDetailFieldsHelper {
 
   /** Writes geocoder verification meta after resolve_media_location already saved address + coords. */
   async persistAddressFieldMetaFromGeocode(suggestion: ForwardGeocodeResult): Promise<void> {
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (!img) return;
 
     const addressFieldMeta = {
@@ -194,7 +194,7 @@ export class ImageDetailFieldsHelper {
       ...verifiedMetaFromGeocodeSuggestion(suggestion),
     };
 
-    this.deps.signals.image.update((prev) =>
+    this.deps.signals.media.update((prev) =>
       prev ? { ...prev, address_field_meta: addressFieldMeta } : prev,
     );
 
@@ -205,14 +205,14 @@ export class ImageDetailFieldsHelper {
   }
 
   async applyAddressSuggestion(suggestion: ForwardGeocodeResult): Promise<void> {
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (!img) return;
 
     const hasCoordinates = Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng);
     const verifiedMeta = verifiedMetaFromGeocodeSuggestion(suggestion);
     const addressFieldMeta = { ...(img.address_field_meta ?? {}), ...verifiedMeta };
 
-    this.deps.signals.image.update((prev) =>
+    this.deps.signals.media.update((prev) =>
       prev
         ? {
             ...prev,
@@ -255,7 +255,7 @@ export class ImageDetailFieldsHelper {
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
-      this.deps.signals.image.update((prev) =>
+      this.deps.signals.media.update((prev) =>
         prev
           ? {
               ...prev,
@@ -275,13 +275,13 @@ export class ImageDetailFieldsHelper {
   }
 
   async revertCoordinatesToExif(options?: { suppressToast?: boolean }): Promise<boolean> {
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (!img || img.exif_latitude == null || img.exif_longitude == null) return false;
 
     const oldLatitude = img.latitude;
     const oldLongitude = img.longitude;
 
-    this.deps.signals.image.update((prev) =>
+    this.deps.signals.media.update((prev) =>
       prev
         ? {
             ...prev,
@@ -302,7 +302,7 @@ export class ImageDetailFieldsHelper {
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
-      this.deps.signals.image.update((prev) =>
+      this.deps.signals.media.update((prev) =>
         prev
           ? {
               ...prev,
@@ -337,7 +337,7 @@ export class ImageDetailFieldsHelper {
   }
 
   async clearActiveCoordinates(options?: { suppressToast?: boolean }): Promise<boolean> {
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (!img || (img.latitude == null && img.longitude == null)) {
       return false;
     }
@@ -345,13 +345,13 @@ export class ImageDetailFieldsHelper {
     const hasAddressText = [img.street, img.city, img.district, img.country, img.address_label].some(
       (part) => !!part?.trim(),
     );
-    const nextStatus = hasAddressText ? 'unresolved' : 'unresolvable';
+    const nextStatus = hasAddressText ? 'pending' : 'unresolvable';
 
     const previousLatitude = img.latitude;
     const previousLongitude = img.longitude;
     const previousStatus = img.location_status;
 
-    this.deps.signals.image.update((prev) =>
+    this.deps.signals.media.update((prev) =>
       prev
         ? {
             ...prev,
@@ -373,7 +373,7 @@ export class ImageDetailFieldsHelper {
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
-      this.deps.signals.image.update((prev) =>
+      this.deps.signals.media.update((prev) =>
         prev
           ? {
               ...prev,
@@ -413,7 +413,7 @@ export class ImageDetailFieldsHelper {
     longitude: number | null,
     options?: { location_status?: string | null },
   ): Promise<boolean> {
-    const img = this.deps.signals.image();
+    const img = this.deps.signals.media();
     if (!img) return false;
 
     const previousLatitude = img.latitude;
@@ -421,7 +421,7 @@ export class ImageDetailFieldsHelper {
     const previousStatus = img.location_status;
     const nextStatus = options?.location_status;
 
-    this.deps.signals.image.update((prev) =>
+    this.deps.signals.media.update((prev) =>
       prev
         ? {
             ...prev,
@@ -447,7 +447,7 @@ export class ImageDetailFieldsHelper {
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
-      this.deps.signals.image.update((prev) =>
+      this.deps.signals.media.update((prev) =>
         prev
           ? {
               ...prev,

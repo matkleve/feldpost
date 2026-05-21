@@ -10,13 +10,13 @@ import {
 } from '../../../core/upload/upload-error-messages.util';
 import type { ImageRecord } from './media-detail-view.types';
 
-interface ImageDetailUploadHelperDeps {
+interface MediaDetailUploadHelperDeps {
   services: {
     uploadService: UploadService;
     uploadManager: UploadManagerService;
   };
   signals: {
-    image: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<ImageRecord | null>;
     replaceError: WritableSignal<string | null>;
     activeJobId: WritableSignal<string | null>;
   };
@@ -25,8 +25,8 @@ interface ImageDetailUploadHelperDeps {
   };
 }
 
-export class ImageDetailUploadHelper {
-  constructor(private readonly deps: ImageDetailUploadHelperDeps) {}
+export class MediaDetailUploadHelper {
+  constructor(private readonly deps: MediaDetailUploadHelperDeps) {}
 
   onFileSelected(event: Event | File): void {
     const file =
@@ -35,8 +35,8 @@ export class ImageDetailUploadHelper {
         : ((event.target as HTMLInputElement | null)?.files?.[0] ?? null);
     if (!file) return;
 
-    const image = this.deps.signals.image();
-    if (!image) return;
+    const media = this.deps.signals.media();
+    if (!media) return;
 
     const validation = this.deps.services.uploadService.validateFile(file);
     if (!validation.valid) {
@@ -45,9 +45,9 @@ export class ImageDetailUploadHelper {
     }
 
     this.deps.signals.replaceError.set(null);
-    const jobId = image.storage_path
-      ? this.deps.services.uploadManager.replaceFile(image.id, file)
-      : this.deps.services.uploadManager.attachFile(image.id, file);
+    const jobId = media.storage_path
+      ? this.deps.services.uploadManager.replaceFile(media.id, file)
+      : this.deps.services.uploadManager.attachFile(media.id, file);
     this.deps.signals.activeJobId.set(jobId);
   }
 

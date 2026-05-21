@@ -57,7 +57,7 @@ export class MediaDetailLocationSectionComponent {
   private readonly addressFieldSuggest = inject(AddressFieldSuggestService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  readonly image = input.required<ImageRecord>();
+  readonly media = input.required<ImageRecord>();
   readonly fullAddress = input('');
   readonly editingField = input<DetailEditingField>(null);
   readonly isCorrected = input(false);
@@ -79,7 +79,7 @@ export class MediaDetailLocationSectionComponent {
   readonly coordinatesSaveRequested = output<string>();
 
   readonly addressSearchContext = computed<SearchQueryContext>(() => {
-    const img = this.image();
+    const img = this.media();
     const lat = img.latitude ?? img.exif_latitude;
     const lng = img.longitude ?? img.exif_longitude;
     if (lat == null || lng == null) return {};
@@ -88,7 +88,7 @@ export class MediaDetailLocationSectionComponent {
 
   /** Context passed to AddressFieldComboboxComponent for hierarchical suggestion constraints. */
   readonly addressFieldContext = computed<AddressFieldContext>(() => {
-    const img = this.image();
+    const img = this.media();
     return {
       country: img.country,
       countryCode: this.addressFieldSuggest.countryCodeFromName(img.country),
@@ -101,7 +101,7 @@ export class MediaDetailLocationSectionComponent {
   });
 
   fieldVerification(field: AddressFieldDefinition['name']): 'verified' | 'unverified' | 'unknown' {
-    const img = this.image();
+    const img = this.media();
     const meta = img.address_field_meta;
     const fieldMeta = meta?.[field];
     if (fieldMeta) {
@@ -193,10 +193,10 @@ export class MediaDetailLocationSectionComponent {
     return formatCoordinate(value);
   }
 
-  readonly hasResolvableCoordinates = computed(() => hasValidGpsCoordinates(this.image()));
+  readonly hasResolvableCoordinates = computed(() => hasValidGpsCoordinates(this.media()));
 
   readonly coordinatesDisplayValue = computed(() => {
-    const img = this.image();
+    const img = this.media();
     if (!hasValidGpsCoordinates(img)) {
       return '';
     }
@@ -204,7 +204,7 @@ export class MediaDetailLocationSectionComponent {
   });
 
   readonly coordinatesEditInitialValue = computed(() => {
-    const img = this.image();
+    const img = this.media();
     if (!hasValidGpsCoordinates(img)) {
       return '';
     }
@@ -220,7 +220,7 @@ export class MediaDetailLocationSectionComponent {
   );
 
   readonly fieldValues = computed(() => {
-    const img = this.image();
+    const img = this.media();
     return {
       street: img.street ?? '',
       city: img.city ?? '',
