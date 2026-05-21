@@ -24617,6 +24617,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.delete.toast.restoreFailedTitle', 'Restore failed', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Restore failed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.restoreFailedTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wiederherstellung fehlgeschlagen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.restoreFailedTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristino non riuscito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.delete.toast.restoreFailedTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'media.delete.toast.restoreFailed', 'Could not restore deleted media. Please refresh.', 'en', 'apps/web/src/app/core/media-delete/media-delete-undo.service.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

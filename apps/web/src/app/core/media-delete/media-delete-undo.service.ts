@@ -47,11 +47,11 @@ export class MediaDeleteUndoService {
     snapshot: MediaDeleteSnapshot,
     onAfterUndo?: () => void | Promise<void>,
   ): void {
-    const message = this.buildDeletedMessage(snapshot);
+    const title = this.buildDeletedMessage(snapshot);
     const undoLabel = this.t('media.delete.toast.undo', 'Undo');
 
     this.toastService.show({
-      message,
+      title,
       type: 'success',
       duration: DELETE_TOAST_DURATION_MS,
       dedupe: false,
@@ -71,10 +71,12 @@ export class MediaDeleteUndoService {
     const restored = await this.restoreFromSnapshot(snapshot);
     if (!restored.ok) {
       this.toastService.show({
-        message: this.t(
+        title: this.t('media.delete.toast.restoreFailedTitle', 'Restore failed'),
+        body: this.t(
           'media.delete.toast.restoreFailed',
           'Could not restore deleted media. Please refresh.',
         ),
+        codeRef: { file: 'media-delete-undo.service.ts', fn: 'restoreSnapshot' },
         type: 'error',
         dedupe: true,
       });

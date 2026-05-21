@@ -5,27 +5,34 @@
   pointer-events: auto;
 }
 
-// Card surface: column layout for title, body, code ref, and optional detail.
-// @see docs/specs/service/toast/toast-system.md
+// Card surface aligned with media-detail panels (card bg, md radius, section spacing).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
 .toast-surface {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: var(--spacing-2);
   width: 100%;
-  padding: 0.625rem 0.375rem 0.625rem 0.75rem;
+  padding: var(--spacing-3);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--card);
   color: var(--foreground);
   box-shadow: var(--shadow-md);
 }
 
-// Top row: severity dot, title, dismiss.
+// Top row: severity dot, heading, dismiss.
 // @see docs/specs/service/toast/toast-system.md
 .toast-header {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+// Title block grows between indicator and dismiss.
+// @see docs/specs/service/toast/toast-system.md
+.toast-head {
+  flex: 1;
   min-width: 0;
 }
 
@@ -35,7 +42,7 @@
   flex-shrink: 0;
   width: 0.5rem;
   height: 0.5rem;
-  margin-top: 0.35rem;
+  margin-top: 0.4rem;
   border-radius: 50%;
   background: var(--muted-foreground);
 }
@@ -56,47 +63,55 @@
   background: var(--primary);
 }
 
-// Short headline (one line).
-// @see docs/specs/service/toast/toast-system.md
+// Section heading — mirrors `.detail-section__label` in media detail view.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
 .toast-title {
-  flex: 1;
-  min-width: 0;
   margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--foreground);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-// Legacy flat message used as title when no structured title exists.
-// @see docs/specs/service/toast/toast-system.md
-.toast-title--legacy {
+// Legacy flat message — mirrors `.detail-row__value` readable body copy.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
+.toast-message {
+  margin: 0;
+  font-size: var(--font-size-xs);
   font-weight: 400;
+  line-height: var(--line-height-comfortable);
+  color: var(--foreground);
+  word-break: break-word;
+  display: -webkit-box;
   -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-// Body + code ref block under the title.
+// Body block under section title.
 // @see docs/specs/service/toast/toast-system.md
 .toast-content {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding-inline-start: 1rem;
+  gap: var(--spacing-1);
+  padding-inline-start: calc(0.5rem + var(--spacing-2));
   min-width: 0;
 }
 
-// Summary/hint: up to three lines when collapsed.
-// @see docs/specs/service/toast/toast-system.md
+// Summary/hint — mirrors `.detail-row__value--static` / subvalue stack.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
 .toast-body {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: 400;
-  line-height: 1.35;
-  color: var(--foreground);
+  line-height: var(--line-height-comfortable);
+  color: var(--muted-foreground);
   word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -109,23 +124,24 @@
   display: block;
 }
 
-// App code pointer (file + function).
-// @see docs/specs/service/toast/toast-system.md
+// App code pointer — mirrors `.detail-row__value--mono` at compact scale.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
 .toast-code-ref {
   margin: 0;
-  font-size: var(--font-size-xs, 0.75rem);
-  font-weight: 500;
-  line-height: 1.3;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: var(--font-size-2xs);
+  font-weight: 400;
+  line-height: 1.35;
   color: var(--muted-foreground);
-  font-family: var(--font-mono, ui-monospace, monospace);
+  letter-spacing: -0.02em;
   word-break: break-all;
 }
 
-// Full technical detail when expanded.
-// @see docs/specs/service/toast/toast-system.md
+// Full technical detail when expanded — mirrors `.detail-row__subvalue`.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
 .toast-detail {
   margin: 0;
-  font-size: var(--font-size-xs, 0.75rem);
+  font-size: var(--font-size-2xs);
   font-weight: 400;
   line-height: 1.35;
   color: var(--muted-foreground);
@@ -135,18 +151,63 @@
   overflow-y: auto;
 }
 
-// Expand/collapse control for long detail.
-// @see docs/specs/service/toast/toast-system.md
+// Text control for expand — same scale as detail row actions (link-like).
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
 .toast-expand {
   align-self: flex-start;
-  margin-top: 0.125rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-comfortable);
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+
+  &:hover {
+    color: color-mix(in srgb, var(--primary) 82%, var(--foreground));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
 }
 
-// Optional action (e.g. Undo); ghost button from hlmBtn.
+// Footer row for primary action (e.g. Undo).
 // @see docs/specs/service/toast/toast-system.md
+.toast-footer {
+  padding-inline-start: calc(0.5rem + var(--spacing-2));
+}
+
+// Action link — mirrors editable `.detail-row__value` text button.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
 .toast-action {
-  align-self: flex-start;
-  margin-inline-start: 1rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-comfortable);
+  color: var(--primary);
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    color: color-mix(in srgb, var(--primary) 82%, var(--foreground));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
 }
 
 // Dismiss control: compact ghost X at the trailing edge.
@@ -158,7 +219,6 @@
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  margin-inline-start: 0.125rem;
   padding: 0;
   border: none;
   border-radius: var(--radius-sm);

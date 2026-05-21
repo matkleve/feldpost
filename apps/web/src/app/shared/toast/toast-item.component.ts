@@ -3,12 +3,11 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { formatToastCodeRef, toastHasExpandableDetail } from '../../core/toast/toast.helpers';
 import type { ToastCodeRef, ToastItem } from '../../core/toast/toast.types';
 import { ToastService } from '../../core/toast/toast.service';
-import { HLM_BUTTON_IMPORTS } from '../ui/button';
 
 @Component({
   selector: 'ss-toast-item',
   standalone: true,
-  imports: [...HLM_BUTTON_IMPORTS],
+  imports: [],
   templateUrl: './toast-item.component.html',
   styleUrl: './toast-item.component.scss',
   host: {

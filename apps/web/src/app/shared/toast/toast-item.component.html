@@ -1,11 +1,13 @@
 <div class="toast-surface" data-toast-surface>
   <div class="toast-header">
     <span class="toast-indicator" aria-hidden="true"></span>
-    @if (item().title) {
-      <p class="toast-title">{{ item().title }}</p>
-    } @else {
-      <p class="toast-title toast-title--legacy">{{ item().message }}</p>
-    }
+    <div class="toast-head">
+      @if (item().title) {
+        <p class="toast-title">{{ item().title }}</p>
+      } @else {
+        <p class="toast-message">{{ item().message }}</p>
+      }
+    </div>
     <button
       type="button"
       class="toast-dismiss"
@@ -16,7 +18,7 @@
     </button>
   </div>
 
-  @if (item().title && (item().body || item().codeRef)) {
+  @if (item().title && (item().body || item().codeRef || item().detail)) {
     <div class="toast-content">
       @if (item().body) {
         <p class="toast-body" [class.toast-body--expanded]="expanded()">{{ item().body }}</p>
@@ -31,9 +33,6 @@
         <button
           type="button"
           class="toast-expand"
-          hlmBtn
-          variant="ghost"
-          size="sm"
           [attr.aria-expanded]="expanded()"
           (click)="toggleExpanded()"
         >
@@ -44,15 +43,10 @@
   }
 
   @if (item().action; as action) {
-    <button
-      type="button"
-      class="toast-action"
-      hlmBtn
-      variant="ghost"
-      size="sm"
-      (click)="onAction()"
-    >
-      {{ action.label }}
-    </button>
+    <div class="toast-footer">
+      <button type="button" class="toast-action" (click)="onAction()">
+        {{ action.label }}
+      </button>
+    </div>
   }
 </div>
