@@ -37,6 +37,8 @@ export class ChipComponent {
   readonly maxWidth = input('auto');
   /** Accessible name + native tooltip; defaults to `text()` when omitted. */
   readonly ariaLabel = input<string | undefined>(undefined);
+  /** When true, chip is presentational inside a parent control (no tabindex / aria on root). */
+  readonly decorative = input(false);
   readonly dismissAriaLabel = input<string | undefined>(undefined);
 
   protected readonly chipAriaLabel = computed(() => {

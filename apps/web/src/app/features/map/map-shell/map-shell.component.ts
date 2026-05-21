@@ -838,8 +838,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private cleanupMapUiState(): void {
-    this.userLocationMarker?.remove();
-    this.userLocationMarker = null;
+    this.removeUserLocationMarker();
     this.removeDraftMediaMarker();
     this.clearSearchLocationMarker();
     this.cancelRadiusDrawing();
@@ -2203,7 +2202,6 @@ export class MapShellComponent implements OnDestroy {
       onSuccess: (coords) => {
         this.userPosition.set(coords);
         void this.refreshSearchCountryCode(coords[0], coords[1]);
-        this.renderOrUpdateUserLocationMarker(coords);
       },
       onError: () => {
         // Geolocation denied or unavailable — Vienna fallback already set.
@@ -2236,6 +2234,17 @@ export class MapShellComponent implements OnDestroy {
   private stopGpsTracking(): void {
     this.gpsTrackingActive.set(false);
     this.gpsTrackingTimer = this.mapGeolocationService.clearTrackingTimer(this.gpsTrackingTimer);
+    this.removeUserLocationMarker();
+  }
+
+  private removeUserLocationMarker(): void {
+    if (this.userLocationFoundTimer) {
+      clearTimeout(this.userLocationFoundTimer);
+      this.userLocationFoundTimer = null;
+    }
+
+    this.userLocationMarker?.remove();
+    this.userLocationMarker = null;
   }
 
   private applyMapBasemapLayer(): void {

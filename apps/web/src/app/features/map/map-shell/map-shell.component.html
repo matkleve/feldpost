@@ -335,7 +335,9 @@
     @if (gpsLocating()) {
       <span class="map-gps-btn__spinner" aria-hidden="true"></span>
     } @else {
-      <span class="material-icons" aria-hidden="true">my_location</span>
+      <span class="material-icons" aria-hidden="true">{{
+        gpsTrackingActive() ? 'gps_fixed' : 'gps_not_fixed'
+      }}</span>
     }
   </button>
 

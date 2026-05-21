@@ -484,6 +484,28 @@ describe('MapShellComponent', () => {
 
     const spinner = (fixture.nativeElement as HTMLElement).querySelector('.map-gps-btn__spinner');
     expect(spinner).not.toBeNull();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.map-gps-btn .material-icons'),
+    ).toBeNull();
+  });
+
+  it('GPS button uses crosshair without center dot when inactive', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const icon = (fixture.nativeElement as HTMLElement).querySelector('.map-gps-btn .material-icons');
+    expect(icon?.textContent?.trim()).toBe('gps_not_fixed');
+  });
+
+  it('GPS button uses crosshair with center dot when tracking active', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.gpsTrackingActive.set(true);
+    fixture.detectChanges();
+
+    const icon = (fixture.nativeElement as HTMLElement).querySelector('.map-gps-btn .material-icons');
+    expect(icon?.textContent?.trim()).toBe('gps_fixed');
   });
 
   it('goToUserPosition() requests current position when unknown', () => {
@@ -529,6 +551,9 @@ describe('MapShellComponent', () => {
     fixture.componentInstance.goToUserPosition();
     expect(fixture.componentInstance.gpsTrackingActive()).toBe(false);
     expect(clearIntervalSpy).toHaveBeenCalled();
+    expect(
+      (fixture.componentInstance as unknown as { userLocationMarker: unknown }).userLocationMarker,
+    ).toBeNull();
 
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
@@ -537,6 +562,27 @@ describe('MapShellComponent', () => {
 
     setIntervalSpy.mockRestore();
     clearIntervalSpy.mockRestore();
+  });
+
+  it('goToUserPosition() removes the user marker when tracking is turned off', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const markerRemove = vi.fn();
+    (
+      fixture.componentInstance as unknown as {
+        userLocationMarker: { remove: ReturnType<typeof vi.fn> };
+      }
+    ).userLocationMarker = { remove: markerRemove };
+
+    fixture.componentInstance.gpsTrackingActive.set(true);
+    fixture.componentInstance.goToUserPosition();
+
+    expect(fixture.componentInstance.gpsTrackingActive()).toBe(false);
+    expect(markerRemove).toHaveBeenCalledTimes(1);
+    expect(
+      (fixture.componentInstance as unknown as { userLocationMarker: unknown }).userLocationMarker,
+    ).toBeNull();
   });
 
   it('goToUserPosition() recenters only after a fresh fix when userPosition is already known', () => {
@@ -666,6 +712,9 @@ describe('MapShellComponent', () => {
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
     expect(mapStub.setView).not.toHaveBeenCalled();
     expect(fixture.componentInstance.userPosition()).toEqual([48.2082, 16.3738]);
+    expect(
+      (fixture.componentInstance as unknown as { userLocationMarker: unknown }).userLocationMarker,
+    ).toBeNull();
 
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,

@@ -10,6 +10,8 @@ import type { ChipVariant } from '../../shared/components/chip/chip.component';
 import type { UploadLane } from './upload-phase.helpers';
 
 export type UploadFileTypeChip = {
+  /** Canonical extension without dot (e.g. `jpg`). */
+  extension: string;
   type: string;
   icon: string;
   variant: ChipVariant;
@@ -46,6 +48,7 @@ export const DEFAULT_FILE_TYPE_CHIPS: ReadonlyArray<UploadFileTypeChip> =
     const definition = resolveFileType({ extension: ext });
     const description = fileTypeDescriptionForExtension(ext);
     return {
+      extension: ext,
       type: fileTypeBadge({ extension: ext }) ?? ext.toUpperCase(),
       icon: definition.category === 'unknown' ? 'description' : definition.icon,
       variant: chipVariantForFileType(definition),

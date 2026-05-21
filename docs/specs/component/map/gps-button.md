@@ -6,7 +6,7 @@ A floating toggle button in Map Zone that controls GPS tracking mode. On activat
 
 ## What It Looks Like
 
-2.75rem circle (desktop / about 44px) and 3rem circle (mobile / about 48px). Background stays color-bg-surface. Crosshair icon color is text-primary (black/dark) when inactive and color-clay (orange) while active or seeking. Subtle elevation-overlay shadow and spinner while seeking.
+2.75rem circle (desktop / about 44px) and 3rem circle (mobile / about 48px). Background stays color-bg-surface. Crosshair icon color is text-primary (black/dark) when inactive and color-clay (orange) while active or seeking. Inactive icon is `gps_not_fixed` (no center dot); active icon is `gps_fixed` (center dot). Spinner replaces the icon while seeking. Subtle elevation-overlay shadow.
 
 User marker visual contract:
 
@@ -32,10 +32,10 @@ Unit note: button geometry uses rem for accessibility scaling; borders and shado
 | --- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | 1   | Clicks button while inactive                        | Enters seeking, requests high-accuracy GPS fix                                                       | navigator.geolocation.getCurrentPosition |
 | 2   | First fix resolves                                  | Drops/updates user marker, recenters map, marker flashes orange 1s then blue, enters active tracking | gpsTrackingActive true                   |
-| 3   | Clicks button while active                          | Disables tracking and stops minute refresh loop; marker remains on map                               | gpsTrackingActive false                  |
+| 3   | Clicks button while active                          | Disables tracking, stops minute refresh loop, and removes user marker from map                     | gpsTrackingActive false                  |
 | 4   | Active tracking timer fires (~60s)                  | Requests a fresh fix, updates marker position, pulses orange 1s then blue, no forced recenter        | interval tick                            |
 | 5   | GPS lookup fails or times out for long              | Exits tracking mode automatically; icon returns to inactive black state                              | geolocation error callback               |
-| 6   | App start geolocation resolves without button click | Can cache/update user position and marker, but must not auto-recenter map                            | startup geolocation path                 |
+| 6   | App start geolocation resolves without button click | Can cache/update user position for search context, but must not show marker or auto-recenter map     | startup geolocation path                 |
 
 ## Component Hierarchy
 

@@ -20,7 +20,7 @@
   [class.upload-panel--visible]="visible()"
   [class.upload-panel--embedded]="embeddedInPane()"
   role="region"
-  aria-label="Upload files"
+  [attr.aria-label]="t('auto.0366.upload_files', 'Upload files')"
 >
   <!-- ═══════════════════════════════════════════════════════════════════════════
     BLOCK 1: INTAKE ZONE
@@ -30,9 +30,14 @@
     <div class="upload-panel__header">
       <span class="material-icons upload-panel__header-icon" aria-hidden="true">cloud_upload</span>
       <div class="upload-panel__header-copy">
-        <h3 class="upload-panel__title">Upload files</h3>
+        <h3 class="upload-panel__title">{{ t('auto.0366.upload_files', 'Upload files') }}</h3>
         <p class="upload-panel__subtitle">
-          Add photos, videos, PDFs, and Office files for the active project.
+          {{
+            t(
+              'auto.0012.add_photos_videos_pdfs_and_office_files_for_the_active_project',
+              'Add photos, videos, PDFs, and Office files for the active project.'
+            )
+          }}
         </p>
       </div>
     </div>
@@ -48,38 +53,59 @@
       (dragover)="inputHandlers.onDragOver($event)"
       (dragleave)="inputHandlers.onDragLeave($event)"
       (drop)="inputHandlers.onDrop($event); laneHandlers.setSelectedLane('uploading')"
-      role="button"
-      tabindex="0"
-      aria-label="Drag files here or click to select"
-      (click)="inputHandlers.openFilePicker(fileInput)"
-      (keydown)="inputHandlers.onDropZoneKeydown($event, fileInput)"
     >
-      <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
-      <p class="upload-panel__dropzone-label">
-        {{ dropzoneLabelText() }}
-      </p>
-      <div class="upload-panel__file-type-chips">
+      <button
+        type="button"
+        class="upload-panel__dropzone-hit"
+        [attr.aria-label]="t('auto.0103.drag_files_here_or_click_to_select', 'Drag files here or click to select')"
+        (click)="onDropzonePickAll(fileInput)"
+        (keydown)="inputHandlers.onDropZoneKeydown($event, fileInput)"
+      ></button>
+      <div class="upload-panel__dropzone-content" aria-hidden="true">
+        <span class="upload-panel__dropzone-icon material-icons">upload_file</span>
+        <p class="upload-panel__dropzone-label">
+          {{ dropzoneLabelText() }}
+        </p>
+      </div>
+      <div class="upload-panel__file-type-chips" #fileTypeChips>
         @for (group of fileTypeGroups; track group.id) {
-          <div class="upload-panel__file-type-group">
-            <app-chip
-              class="upload-panel__file-type-group-chip"
-              [icon]="group.icon"
-              [text]="t(group.labelKey, group.labelFallback)"
-              [ariaLabel]="t(group.descriptionKey, group.descriptionFallback)"
-              [variant]="group.variant"
-            ></app-chip>
+          <div
+            class="upload-panel__file-type-group"
+            [class.upload-panel__file-type-group--expanded]="isFileTypeGroupExpanded(group.id)"
+          >
+            <button
+              type="button"
+              class="upload-panel__file-type-chip-trigger"
+              [attr.aria-label]="fileTypeGroupPickAriaLabel(group)"
+              [attr.aria-expanded]="isFileTypeGroupExpanded(group.id)"
+              (click)="onPickFileTypeGroup(fileInput, group, $event)"
+            >
+              <app-chip
+                [decorative]="true"
+                [icon]="group.icon"
+                [text]="t(group.labelKey, group.labelFallback)"
+                [variant]="group.variant"
+              ></app-chip>
+            </button>
             <div
               class="upload-panel__file-type-group-detail"
               role="group"
               [attr.aria-label]="t(group.descriptionKey, group.descriptionFallback)"
             >
-              @for (member of group.members; track member.type) {
-                <app-chip
-                  [icon]="member.icon"
-                  [text]="member.type"
-                  [ariaLabel]="t(member.descriptionKey, member.descriptionFallback)"
-                  [variant]="member.variant"
-                ></app-chip>
+              @for (member of group.members; track member.extension) {
+                <button
+                  type="button"
+                  class="upload-panel__file-type-chip-trigger"
+                  [attr.aria-label]="fileTypeMemberPickAriaLabel(member)"
+                  (click)="onPickFileTypeMember(fileInput, group, member, $event)"
+                >
+                  <app-chip
+                    [decorative]="true"
+                    [icon]="member.icon"
+                    [text]="member.type"
+                    [variant]="member.variant"
+                  ></app-chip>
+                </button>
               }
             </div>
           </div>
@@ -92,7 +118,7 @@
       #fileInput
       type="file"
       class="upload-panel__file-input"
-      accept="image/jpeg,image/png,image/heic,image/heif,image/webp,video/mp4,video/quicktime,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/vnd.oasis.opendocument.graphics,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.oasis.opendocument.presentation,text/plain,text/csv,application/csv"
+      [attr.accept]="defaultFileInputAccept"
       multiple
       aria-hidden="true"
       tabindex="-1"
@@ -114,7 +140,7 @@
       (click)="inputHandlers.onSelectFolder($event, folderInput)"
     >
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
-      Upload folder
+      {{ t('auto.0367.upload_folder', 'Upload folder') }}
     </button>
 
     @if (!folderImportSupported) {
@@ -135,7 +161,7 @@
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
         >photo_camera</span
       >
-      Take photo
+      {{ t('auto.0349.take_photo', 'Take photo') }}
     </button>
 
     <button
@@ -156,19 +182,30 @@
           <span class="upload-panel__location-mode-title">{{
             t('upload.location.mode.title.on', 'Auto location')
           }}</span>
-          <span class="upload-panel__location-mode-subtitle">{{
-            t(
-              'upload.location.mode.subtitle.on',
-              'GPS and file names; missing location → Issues.'
-            )
-          }}</span>
+          @let locationSubtitle = t(
+            'upload.location.mode.subtitle.on',
+            'GPS and file names; missing location → Issues.'
+          );
+          <span
+            class="upload-panel__location-mode-subtitle"
+            [attr.aria-label]="locationSubtitle"
+            [attr.title]="locationSubtitle"
+            >{{ locationSubtitle }}</span
+          >
         } @else {
           <span class="upload-panel__location-mode-title">{{
             t('upload.location.mode.title.off', 'No auto location')
           }}</span>
-          <span class="upload-panel__location-mode-subtitle">{{
-            t('upload.location.mode.subtitle.off', 'Uploads without a location.')
-          }}</span>
+          @let locationSubtitle = t(
+            'upload.location.mode.subtitle.off',
+            'Uploads without a location.'
+          );
+          <span
+            class="upload-panel__location-mode-subtitle"
+            [attr.aria-label]="locationSubtitle"
+            [attr.title]="locationSubtitle"
+            >{{ locationSubtitle }}</span
+          >
         }
       </span>
       <span

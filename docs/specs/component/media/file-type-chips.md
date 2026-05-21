@@ -55,6 +55,9 @@ Example layout:
 | 5   | User removes files from queue                       | Chip list recomputes and removed types disappear                           | Reactive update                        |
 | 6   | Unsupported extension only                          | No unknown chip is rendered                                                | `filter(Boolean)` path                 |
 | 7   | Small viewport width                                | Chip row wraps or scrolls horizontally without overflow                    | Mobile behavior                        |
+| 8   | User clicks a **group** chip in the upload dropzone | Native file picker opens filtered to that group’s extensions/MIMEs only   | `openFilePicker` + `acceptForUploadFileTypeGroup` |
+| 9   | User clicks a **member** chip (e.g. JPEG)           | Native file picker opens filtered to that extension only                  | `buildUploadFileInputAccept([extension])` |
+| 10  | User clicks dropzone background/icon/label          | Native file picker opens with full default accept (all intake types)    | `DEFAULT_UPLOAD_FILE_INPUT_ACCEPT` |
 
 ## Component Hierarchy
 
@@ -197,6 +200,9 @@ const definition = resolveFileType({ mimeType: file.type, fileName: file.name })
 
 **Group dropdown contract** (`upload-panel.component.scss`):
 
+- Group and member chips are **`<button type="button">`** wrappers around decorative `app-chip` (`decorative=true`); parent button owns `aria-label` and focus. Chips must not nest inside the dropzone `role="button"` hit target (ESLint `no-nested-interactive`).
+- After a chip opens the native file picker (select or cancel), the member dropdown stays open via `upload-panel__file-type-group--expanded` until the user clicks outside the chip row or presses Escape.
+- Full-area dropzone hit: `upload-panel__dropzone-hit` (sibling layer, z-index below chips).
 - Group row: flex wrap, centered; only group chips occupy layout space.
 - `upload-panel__file-type-group-detail`: absolute under group chip, `z-index` above intake, **transparent** (no border/background/shadow — only member chips visible), no CSS transition.
 - `upload-panel` root: `overflow: visible` so the dropdown can paint over controls below the dropzone.

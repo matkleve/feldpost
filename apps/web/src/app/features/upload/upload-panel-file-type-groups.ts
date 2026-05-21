@@ -104,6 +104,7 @@ function memberChipForExtension(ext: string, order: number): UploadFileTypeChip 
   const definition = resolveFileType({ extension: ext });
   const description = fileTypeDescriptionForExtension(ext);
   return {
+    extension: ext,
     type: fileTypeBadge({ extension: ext }) ?? ext.toUpperCase(),
     icon: definition.category === 'unknown' ? 'description' : definition.icon,
     variant: chipVariantForFileType(definition),

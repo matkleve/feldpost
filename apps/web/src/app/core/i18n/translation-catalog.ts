@@ -1,4 +1,6 @@
-﻿export type LanguageCode = 'en' | 'de' | 'it';
+import { UPLOAD_PANEL_TRANSLATION_CATALOG } from './upload-panel-translation.catalog';
+
+export type LanguageCode = 'en' | 'de' | 'it';
 
 export interface TranslationEntry {
   key: string;
@@ -4575,6 +4577,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     de: 'Kartenansicht',
     it: 'Vista schede',
   },
+  ...UPLOAD_PANEL_TRANSLATION_CATALOG,
 ];
 
 export const TRANSLATION_BY_KEY: Readonly<Record<string, TranslationEntry>> = Object.freeze(

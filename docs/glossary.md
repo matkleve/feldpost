@@ -453,7 +453,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 ### Controls & Buttons
 
 - **GPS Button**  
-  44 px circle, bottom-right of map zone. `my_location` icon. Locating state: spinner replaces icon.
+  44 px circle, bottom-right of map zone. `gps_not_fixed` when inactive, `gps_fixed` when tracking active. Locating state: spinner replaces icon.
 
 - **Theme Toggle**  
   Toolbar button cycling light → dark → system. `--color-clay` fill accent.

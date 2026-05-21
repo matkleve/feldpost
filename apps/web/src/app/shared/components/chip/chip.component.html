@@ -2,9 +2,10 @@
   [class]="chipClass()"
   [style.--chip-color]="chipColorValue()"
   [style.max-width]="maxWidth()"
-  [attr.aria-label]="chipAriaLabel()"
-  [attr.title]="chipTitle()"
-  tabindex="0"
+  [attr.aria-label]="decorative() ? null : chipAriaLabel()"
+  [attr.title]="decorative() ? null : chipTitle()"
+  [attr.aria-hidden]="decorative() ? true : null"
+  [attr.tabindex]="decorative() ? -1 : 0"
 >
   @if (isAvatarText()) {
     <img

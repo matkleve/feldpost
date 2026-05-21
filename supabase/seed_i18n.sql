@@ -24245,6 +24245,719 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickGroup.images', 'Images — select image files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Images — select image files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.images'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bilder — Bilddateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.images'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Immagini — seleziona file immagine', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.images'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickGroup.video', 'Video — select video files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Video — select video files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Video — Videodateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Video — seleziona file video', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickGroup.pdf', 'PDF — select PDF files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PDF — select PDF files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PDF — PDF-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'PDF — seleziona file PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickGroup.documents', 'Documents — select document files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Documents — select document files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dokumente — Dokumentdateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti — seleziona file documento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickGroup.spreadsheets', 'Spreadsheets — select spreadsheet files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Spreadsheets — select spreadsheet files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Tabellen — Tabellendateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fogli di calcolo — seleziona file foglio', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickGroup.presentations', 'Presentations — select presentation files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Presentations — select presentation files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Praesentationen — Praesentationsdateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Presentazioni — seleziona file presentazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.jpg', 'JPEG photos — select JPEG files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'JPEG photos — select JPEG files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.jpg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'JPEG-Fotos — JPEG-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.jpg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Foto JPEG — seleziona file JPEG', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.jpg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.png', 'Raster image files — select PNG files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Raster image files — select PNG files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.png'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rasterbilder — PNG-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.png'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Immagini raster — seleziona file PNG', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.png'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.heic', 'HEIC photos — select HEIC files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'HEIC photos — select HEIC files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.heic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'HEIC-Fotos — HEIC-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.heic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Foto HEIC — seleziona file HEIC', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.heic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.webp', 'WebP images — select WebP files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'WebP images — select WebP files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'WebP-Bilder — WebP-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Immagini WebP — seleziona file WebP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.mp4', 'MP4 video files — select MP4 files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'MP4 video files — select MP4 files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mp4'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'MP4-Videodateien — MP4-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mp4'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File video MP4 — seleziona file MP4', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mp4'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.mov', 'QuickTime video files — select MOV files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'QuickTime video files — select MOV files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mov'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'QuickTime-Videodateien — MOV-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mov'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File video QuickTime — seleziona file MOV', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mov'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.webm', 'WebM video files — select WebM files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'WebM video files — select WebM files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'WebM-Videodateien — WebM-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File video WebM — seleziona file WebM', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.pdf', 'PDF documents — select PDF files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PDF documents — select PDF files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PDF-Dokumente — PDF-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti PDF — seleziona file PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.docx', 'Microsoft Word documents — select DOCX files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Microsoft Word documents — select DOCX files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.docx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Microsoft-Word-Dokumente — DOCX-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.docx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti Microsoft Word — seleziona file DOCX', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.docx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.odt', 'OpenDocument text files — select ODT files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument text files — select ODT files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Textdateien — ODT-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File di testo OpenDocument — seleziona file ODT', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.odg', 'OpenDocument drawing files — select ODG files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument drawing files — select ODG files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Zeichnungen — ODG-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Disegni OpenDocument — seleziona file ODG', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.txt', 'Plain text files — select TXT files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Plain text files — select TXT files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.txt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einfache Textdateien — TXT-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.txt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File di testo semplice — seleziona file TXT', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.txt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.xlsx', 'Excel spreadsheet files — select XLSX files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Excel spreadsheet files — select XLSX files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.xlsx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Excel-Tabellendateien — XLSX-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.xlsx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fogli di calcolo Excel — seleziona file XLSX', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.xlsx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.ods', 'OpenDocument spreadsheet files — select ODS files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument spreadsheet files — select ODS files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.ods'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Tabellen — ODS-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.ods'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fogli di calcolo OpenDocument — seleziona file ODS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.ods'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.csv', 'Comma-separated data files — select CSV files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Comma-separated data files — select CSV files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.csv'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kommagetrennte Datendateien — CSV-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.csv'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File dati separati da virgola — seleziona file CSV', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.csv'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.pptx', 'PowerPoint presentation files — select PPTX files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PowerPoint presentation files — select PPTX files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pptx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PowerPoint-Praesentationen — PPTX-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pptx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Presentazioni PowerPoint — seleziona file PPTX', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pptx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeChip.pickExtension.odp', 'OpenDocument presentation files — select ODP files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip picker button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument presentation files — select ODP files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Praesentationen — ODP-Dateien auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Presentazioni OpenDocument — seleziona file ODP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.location.mode.title.on', 'Auto location', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html upload auto-location toggle row title when on')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

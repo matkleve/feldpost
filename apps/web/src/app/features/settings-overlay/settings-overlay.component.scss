@@ -470,6 +470,13 @@
     color: var(--muted-foreground);
   }
 
+  // Switch host — block row line-height from shifting thumb inside track
+  // @see docs/specs/component/ui-primitives/ui-primitives.toggle.md
+  .settings-overlay__switch {
+    flex: 0 0 auto;
+    line-height: 0;
+  }
+
   // Native range input accent in detail fields
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__range {

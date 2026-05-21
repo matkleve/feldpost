@@ -46,6 +46,14 @@ describe('UploadPanelComponent DOM basic inputs', () => {
     expect(input.accept).toContain('text/csv');
   });
 
+  it('renders file-type chip trigger buttons', async () => {
+    const { fixture } = await setupUploadPanel();
+    const triggers = fixture.debugElement.queryAll(
+      By.css('.upload-panel__file-type-chip-trigger'),
+    );
+    expect(triggers.length).toBeGreaterThan(0);
+  });
+
   it('file input has multiple attribute', async () => {
     const { fixture } = await setupUploadPanel();
     const input = fixture.debugElement.query(By.css('.upload-panel__file-input'))

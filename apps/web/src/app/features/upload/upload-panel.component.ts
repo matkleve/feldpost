@@ -8,7 +8,17 @@
  *  - Component only bridges template events to services.
  */
 
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent } from './upload-panel-item.component';
 import type { ExifCoords } from '../../core/upload/upload.service';
@@ -40,6 +50,16 @@ import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
 import { toggleOptionLayout } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { DEFAULT_FILE_TYPE_GROUPS } from './upload-panel-file-type-groups';
+import type {
+  UploadFileTypeGroup,
+  UploadFileTypeGroupId,
+} from './upload-panel-file-type-groups';
+import { DEFAULT_UPLOAD_FILE_INPUT_ACCEPT } from './upload-panel-file-accept';
+import type { UploadFileTypeChip } from './upload-panel.constants';
+import {
+  fileTypeGroupPickAriaLabel,
+  fileTypeMemberPickAriaLabel,
+} from './upload-panel-file-type-pick-labels';
 import { UploadPanelJobActionsService } from './upload-panel-job-actions.service';
 import { UploadPanelBulkActionsService } from './upload-panel-bulk-actions.service';
 import { UploadPanelViewModelService } from './upload-panel-view-model.service';
@@ -178,6 +198,9 @@ export class UploadPanelComponent {
   readonly visibleLaneJobs = this.viewModel.visibleLaneJobs;
   readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
   readonly fileTypeGroups = DEFAULT_FILE_TYPE_GROUPS;
+  readonly defaultFileInputAccept = DEFAULT_UPLOAD_FILE_INPUT_ACCEPT;
+  private readonly fileTypeChipsRef = viewChild<ElementRef<HTMLElement>>('fileTypeChips');
+  private readonly pinnedFileTypeGroupId = signal<UploadFileTypeGroupId | null>(null);
   readonly documentFallbackLabel = documentFallbackLabel;
   readonly trackByJobId = trackByJobId;
   readonly selectedUploadJobIds = signal<Set<string>>(new Set());
@@ -242,5 +265,73 @@ export class UploadPanelComponent {
     const next = alternateUploadLocationRequirementMode(this.locationRequirementMode());
     this.signals.setLocationRequirementMode(next);
     this.locationModeRowPreview.set(false);
+  }
+
+  onDropzonePickAll(fileInput: HTMLInputElement): void {
+    this.clearPinnedFileTypeGroup();
+    this.inputHandlers.openFilePicker(fileInput);
+  }
+
+  isFileTypeGroupExpanded(groupId: UploadFileTypeGroupId): boolean {
+    return this.pinnedFileTypeGroupId() === groupId;
+  }
+
+  onPickFileTypeGroup(
+    fileInput: HTMLInputElement,
+    group: UploadFileTypeGroup,
+    event: MouseEvent,
+  ): void {
+    event.stopPropagation();
+    this.pinFileTypeGroup(group.id);
+    this.inputHandlers.openFilePicker(fileInput, {
+      extensions: group.members.map((member) => member.extension),
+    });
+  }
+
+  onPickFileTypeMember(
+    fileInput: HTMLInputElement,
+    group: UploadFileTypeGroup,
+    member: UploadFileTypeChip,
+    event: MouseEvent,
+  ): void {
+    event.stopPropagation();
+    this.pinFileTypeGroup(group.id);
+    this.inputHandlers.openFilePicker(fileInput, { extensions: [member.extension] });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.pinnedFileTypeGroupId()) {
+      return;
+    }
+    const chipsHost = this.fileTypeChipsRef()?.nativeElement;
+    const target = event.target;
+    if (chipsHost && target instanceof Node && chipsHost.contains(target)) {
+      return;
+    }
+    this.clearPinnedFileTypeGroup();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.pinnedFileTypeGroupId()) {
+      this.clearPinnedFileTypeGroup();
+    }
+  }
+
+  private pinFileTypeGroup(groupId: UploadFileTypeGroupId): void {
+    this.pinnedFileTypeGroupId.set(groupId);
+  }
+
+  private clearPinnedFileTypeGroup(): void {
+    this.pinnedFileTypeGroupId.set(null);
+  }
+
+  fileTypeGroupPickAriaLabel(group: UploadFileTypeGroup): string {
+    return fileTypeGroupPickAriaLabel(group, (key, fallback) => this.t(key, fallback));
+  }
+
+  fileTypeMemberPickAriaLabel(member: UploadFileTypeChip): string {
+    return fileTypeMemberPickAriaLabel(member, (key, fallback) => this.t(key, fallback));
   }
 }

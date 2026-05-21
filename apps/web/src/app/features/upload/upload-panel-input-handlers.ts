@@ -6,6 +6,10 @@ import { Injectable, inject, signal } from '@angular/core';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
+import {
+  DEFAULT_UPLOAD_FILE_INPUT_ACCEPT,
+  buildUploadFileInputAccept,
+} from './upload-panel-file-accept';
 
 interface DirectoryPickerWindow extends Window {
   showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
@@ -53,6 +57,7 @@ export class UploadPanelInputHandlersService {
         locationRequirementMode: this.uploadSignals.locationRequirementMode(),
       });
       input.value = '';
+      this.resetFileInputAccept(input);
     }
   }
 
@@ -67,8 +72,20 @@ export class UploadPanelInputHandlersService {
     }
   }
 
-  openFilePicker(input: HTMLInputElement): void {
+  openFilePicker(
+    input: HTMLInputElement,
+    options?: { extensions?: readonly string[] },
+  ): void {
+    const extensions = options?.extensions;
+    input.accept =
+      extensions && extensions.length > 0
+        ? buildUploadFileInputAccept(extensions)
+        : DEFAULT_UPLOAD_FILE_INPUT_ACCEPT;
     input.click();
+  }
+
+  resetFileInputAccept(input: HTMLInputElement): void {
+    input.accept = DEFAULT_UPLOAD_FILE_INPUT_ACCEPT;
   }
 
   openCapturePicker(event: MouseEvent, input: HTMLInputElement): void {
@@ -80,7 +97,7 @@ export class UploadPanelInputHandlersService {
   onDropZoneKeydown(event: KeyboardEvent, input: HTMLInputElement): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      input.click();
+      this.openFilePicker(input);
     }
   }
 

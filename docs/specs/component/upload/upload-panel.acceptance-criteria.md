@@ -70,6 +70,9 @@ sequenceDiagram
 
 - [ ] Panel appears as compact container expansion from Upload Button
 - [x] Top section is a Drop Zone with drag-and-drop and click upload
+- [x] Clicking a file-type group chip opens the native file picker filtered to that group’s extensions
+- [x] Clicking a file-type member chip opens the native file picker filtered to that extension only
+- [x] Clicking dropzone icon/label/background (not a chip) opens the picker with all supported intake types
 - [x] `Upload folder` action is always visible in intake area
 - [x] When folder import is unsupported, `Upload folder` is disabled and shows fallback guidance
 - [x] Folder scan shows progress text and disables repeat folder action while scanning

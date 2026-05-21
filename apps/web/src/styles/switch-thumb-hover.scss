@@ -1,57 +1,69 @@
-// Switch thumb travel, track hover darken, motion (transform-only — no margin animation).
-// Easing aligned with docs/design/components/segmented-switch-motion-resource.md.
+// Switch thumb slide + hover (spacing grid + semantic colors; motion per segmented-switch doc).
+// Track: Tailwind h-6/w-11 = var(--spacing-5) height × calc(0.25rem * 11) width; thumb = calc(0.25rem * 5).
+// @see docs/design/tokens.md §3.3
+// @see docs/design/components/segmented-switch-motion-resource.md
 // @see docs/specs/component/ui-primitives/ui-primitives.toggle.md
 @layer utilities {
-  $switch-motion-duration: 180ms;
-  $switch-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  $switch-thumb-nudge: 0.125rem;
-  $switch-track-hover-darken: 10%;
-
   [hlmSwitch] {
-    container-type: inline-size;
-    transition: background-color $switch-motion-duration $switch-motion-ease;
+    --switch-thumb-size: calc(0.25rem * 5);
+    --switch-thumb-travel: calc(0.25rem * 5);
+    --switch-thumb-nudge: var(--spacing-1);
+    --switch-motion-duration: calc(var(--motion-duration-fast) * 1.8);
+    --switch-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    position: relative;
+    line-height: 0;
+    transition: background-color var(--switch-motion-duration) var(--switch-motion-ease);
+  }
+
+  [hlmSwitchThumb] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--switch-thumb-size);
+    height: var(--switch-thumb-size);
+    margin: 0;
+    box-sizing: border-box;
+    transition: transform var(--switch-motion-duration) var(--switch-motion-ease);
   }
 
   [hlmSwitchThumb][data-state='unchecked'] {
     transform: translateX(0);
-    transition: transform $switch-motion-duration $switch-motion-ease;
   }
 
   [hlmSwitchThumb][data-state='checked'] {
-    transform: translateX(calc(100cqw - 100%));
-    transition: transform $switch-motion-duration $switch-motion-ease;
+    transform: translateX(var(--switch-thumb-travel));
   }
 
   @media (hover: hover) and (pointer: fine) {
     [hlmSwitch][data-state='unchecked']:hover,
     .settings-overlay__toggle-row:hover > [hlmSwitch][data-state='unchecked'],
     .upload-panel__location-mode-row:hover > [hlmSwitch][data-state='unchecked'] {
-      background-color: color-mix(in srgb, var(--input) calc(100% - #{$switch-track-hover-darken}), black);
+      background-color: color-mix(in srgb, var(--input) 90%, var(--foreground));
     }
 
     [hlmSwitch][data-state='checked']:hover,
     .settings-overlay__toggle-row:hover > [hlmSwitch][data-state='checked'],
     .upload-panel__location-mode-row:hover > [hlmSwitch][data-state='checked'] {
-      background-color: color-mix(in srgb, var(--primary) calc(100% - #{$switch-track-hover-darken}), black);
+      background-color: color-mix(in srgb, var(--primary) 90%, var(--foreground));
     }
 
     [hlmSwitch]:hover > [hlmSwitchThumb][data-state='unchecked'],
     .settings-overlay__toggle-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'],
     .upload-panel__location-mode-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'] {
-      transform: translateX($switch-thumb-nudge);
+      transform: translateX(var(--switch-thumb-nudge));
     }
 
     [hlmSwitch]:hover > [hlmSwitchThumb][data-state='checked'],
     .settings-overlay__toggle-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'],
     .upload-panel__location-mode-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'] {
-      transform: translateX(calc(100cqw - 100% - #{$switch-thumb-nudge}));
+      transform: translateX(calc(var(--switch-thumb-travel) - var(--switch-thumb-nudge)));
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     [hlmSwitch],
-    [hlmSwitchThumb][data-state='unchecked'],
-    [hlmSwitchThumb][data-state='checked'] {
+    [hlmSwitchThumb] {
       transition: none;
     }
   }
