@@ -14,6 +14,7 @@ import {
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
 import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import { HlmSpinnerComponent } from '../../../../shared/ui/spinner';
+import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
@@ -29,7 +30,12 @@ import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
 @Component({
   selector: 'app-address-search',
   standalone: true,
-  imports: [DropdownShellComponent, HlmSpinnerComponent, DetailRowInlineConfirmActionComponent],
+  imports: [
+    DropdownShellComponent,
+    HlmSpinnerComponent,
+    DetailRowInlineConfirmActionComponent,
+    ...HLM_BUTTON_IMPORTS,
+  ],
   templateUrl: './address-search.component.html',
   styleUrl: './address-search.component.scss',
   host: {

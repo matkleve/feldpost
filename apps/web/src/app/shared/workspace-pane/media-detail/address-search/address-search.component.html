@@ -22,6 +22,9 @@
         />
       </div>
       <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
         class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn address-search__clear-btn--visible"
         type="button"
         (click)="cancel(); $event.stopPropagation()"
@@ -87,6 +90,9 @@
   <div class="detail-row address-search__row">
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
       class="detail-row-action detail-row-action--l1 address-search__edit-btn"
       type="button"
       (click)="open($event)"

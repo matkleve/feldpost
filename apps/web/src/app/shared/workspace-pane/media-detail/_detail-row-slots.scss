@@ -238,11 +238,16 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  height: 100%;
-  width: auto;
+  // Clamp hlmBtn size="icon" (h-10 w-10) to the detail row rail.
+  // @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+  height: var(--detail-row-action-size);
+  width: var(--detail-row-action-size);
+  max-height: var(--detail-row-action-size);
+  max-width: var(--detail-row-action-size);
   aspect-ratio: 1;
   min-width: var(--detail-row-action-size);
   min-height: var(--detail-row-action-size);
+  padding: 0;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
   color: var(--mdv-action-text-default, var(--muted-foreground));
@@ -294,6 +299,7 @@
   &.detail-row-action--remove:focus-visible,
   &.detail-row-action--remove.detail-row-action--armed {
     color: var(--primary);
+    // Overrides hlmBtn ghost hover:bg-accent on remove/clear rails.
     background: color-mix(in srgb, var(--primary) 10%, transparent);
     outline-color: var(--primary);
   }
