@@ -186,6 +186,37 @@
     flex: 0 0 auto;
   }
 
+  // Segmented toggles (lanes + location mode) — ghost nav link hover/active on white track.
+  // @see nav.component.scss — .nav__link, .nav__link--active
+  &__segmented {
+    width: 100%;
+
+    .upload-panel__segmented__track {
+      gap: var(--spacing-1);
+      padding: var(--spacing-1);
+      border-radius: var(--container-radius-control);
+    }
+
+    .upload-panel__segmented__item {
+      border-radius: var(--container-radius-control);
+      transition:
+        background 80ms ease-out,
+        color 80ms ease-out;
+
+      &[data-state='on'] .material-icons {
+        color: var(--primary);
+      }
+
+      &[data-state='on']:hover:not(:disabled) .material-icons {
+        color: var(--foreground);
+      }
+    }
+  }
+
+  &__area--switch.upload-panel__segmented {
+    width: 100%;
+  }
+
   &__folder-unsupported-hint {
     margin: 0;
     font-size: var(--font-size-xs);
