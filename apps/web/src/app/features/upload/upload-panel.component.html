@@ -115,41 +115,34 @@
       Take photo
     </button>
 
-    <div class="upload-panel__location-mode-row">
-      <div class="upload-panel__location-mode-switch upload-panel__segmented" hlmPillToggle size="sm">
-        <div
-          hlmToggleGroup
-          class="w-full border border-border bg-card shadow-none"
-          brnToggleGroup
-          type="single"
-          [nullable]="false"
-          [value]="locationRequirementMode()"
-          (valueChange)="onLocationModeValueChange($event)"
-          [attr.aria-label]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
-        >
-          @for (option of locationModeSwitchOptions(); track option.id) {
-            <button
-              hlmToggleGroupItem
-              class="shadow-none"
-              type="button"
-              brnToggleGroupItem
-              [value]="option.id"
-              [disabled]="!!option.disabled"
-              [attr.data-attention]="option.attention ? 'true' : null"
-              [attr.aria-label]="option.ariaLabel || option.label"
-              [attr.title]="option.title || option.label"
-            >
-              @if (option.icon && optLayout(option) !== 'text-only') {
-                <span class="material-icons" aria-hidden="true">{{
-                  option.icon
-                }}</span>
-              }
-              @if (optLayout(option) !== 'icon-only') {
-                <span>{{ option.label }}</span>
-              }
-            </button>
-          }
-        </div>
+    <div class="upload-panel__location-mode" hlmPillToggle size="sm" fill>
+      <div
+        hlmToggleGroup
+        brnToggleGroup
+        type="single"
+        [nullable]="false"
+        [value]="locationRequirementMode()"
+        (valueChange)="onLocationModeValueChange($event)"
+        [attr.aria-label]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
+      >
+        @for (option of locationModeSwitchOptions(); track option.id) {
+          <button
+            hlmToggleGroupItem
+            type="button"
+            brnToggleGroupItem
+            [value]="option.id"
+            [disabled]="!!option.disabled"
+            [attr.aria-label]="option.ariaLabel || option.label"
+            [attr.title]="option.title || option.label"
+          >
+            @if (option.icon && optLayout(option) !== 'text-only') {
+              <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
+            }
+            @if (optLayout(option) !== 'icon-only') {
+              <span>{{ option.label }}</span>
+            }
+          </button>
+        }
       </div>
     </div>
 

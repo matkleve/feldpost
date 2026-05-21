@@ -167,27 +167,13 @@
     }
   }
 
-  &__location-mode-row {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
+  // Location requirement toggle — default muted pill track (same as toolbar view toggles).
+  // @see workspace-toolbar.component.html — hlmPillToggle + hlmToggleGroup
+  &__location-mode {
     width: 100%;
-    border-radius: var(--radius-pill);
-    padding: var(--spacing-1);
-    transition: background-color var(--motion-duration-fast) var(--motion-ease-out);
-
-    &:hover {
-      background: color-mix(in srgb, var(--primary) 10%, var(--card));
-    }
   }
 
-  &__location-mode-switch {
-    display: inline-flex;
-    flex: 0 0 auto;
-  }
-
-  // Pill toggles (lanes + location mode): white track; segment radius from shared hlm toggle-group CVA.
-  // @see nav.component.scss — .nav__link (hover/active colors live in toggle-group-variants.ts)
+  // Lane switch only — white card track (not used for location mode).
   &__segmented {
     width: 100%;
   }
