@@ -1,6 +1,8 @@
 import {
   Component,
+  computed,
   ElementRef,
+  HostListener,
   inject,
   input,
   output,
@@ -10,7 +12,6 @@ import {
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
-import { HlmMenuItemDirective } from '../../../ui/menu';
 import type { MetadataComposeValueType } from '../../../../core/metadata/metadata-validation.helpers';
 import {
   METADATA_COMPOSE_TYPE_ICONS,
@@ -20,7 +21,7 @@ import {
 @Component({
   selector: 'app-metadata-type-picker',
   standalone: true,
-  imports: [DropdownShellComponent, HlmMenuItemDirective, ...HLM_BUTTON_IMPORTS],
+  imports: [DropdownShellComponent, ...HLM_BUTTON_IMPORTS],
   template: `
     <button
       #triggerRef
@@ -31,46 +32,52 @@ import {
       class="metadata-type-picker__trigger"
       [class.metadata-type-picker__trigger--open]="open()"
       [disabled]="disabled() || locked()"
-      [attr.aria-label]="t('workspace.metadata.typePicker.aria', 'Property type')"
+      [attr.aria-label]="typePickerAriaLabel()"
       [attr.aria-expanded]="open()"
       (click)="toggleOpen()"
     >
-      <span
-        class="material-icons metadata-type-picker__icon"
-        aria-hidden="true"
-        >{{ iconFor(valueType()) }}</span
-      >
+      <span class="material-icons metadata-type-picker__icon" aria-hidden="true">{{
+        iconFor(valueType())
+      }}</span>
     </button>
     @if (open()) {
       <app-dropdown-shell
-        panelClass="option-menu-surface"
+        class="address-search-shell metadata-type-picker__shell"
+        panelClass="option-menu-surface address-search-panel"
         [anchor]="triggerEl()"
-        [minWidth]="40"
+        [minWidth]="panelMinWidth()"
+        [outsideCloseEnabled]="false"
         (closeRequested)="close()"
       >
-        @for (type of types; track type) {
-          <button
-            hlmMenuItem
-            type="button"
-            class="metadata-type-picker__option w-full"
-            (click)="selectType(type)"
-          >
-            <span class="material-icons option-menu-item__icon" aria-hidden="true">{{
-              iconFor(type)
-            }}</span>
-            <span>{{ typeLabel(type) }}</span>
-          </button>
-        }
+        <div
+          class="address-search__dropdown address-field-combobox__dropdown option-menu-list metadata-type-picker__dropdown"
+          role="listbox"
+        >
+          @for (type of types; track type) {
+            <button
+              type="button"
+              class="metadata-type-picker__result-item"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectType(type)"
+            >
+              <span class="material-icons metadata-type-picker__result-icon" aria-hidden="true">{{
+                iconFor(type)
+              }}</span>
+              <span class="metadata-type-picker__result-label min-w-0">{{ typeLabel(type) }}</span>
+            </button>
+          }
+        </div>
       </app-dropdown-shell>
     }
   `,
   styleUrl: './metadata-type-picker.component.scss',
   host: {
-    class: 'metadata-type-picker relative shrink-0',
+    class: 'metadata-type-picker relative inline-flex shrink-0',
   },
 })
 export class MetadataTypePickerComponent {
   private readonly i18nService = inject(I18nService);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly valueType = input.required<MetadataComposeValueType>();
@@ -86,6 +93,10 @@ export class MetadataTypePickerComponent {
   private readonly triggerRef = viewChild<ElementRef<HTMLElement>>('triggerRef');
   readonly triggerEl = signal<HTMLElement | null>(null);
 
+  readonly panelMinWidth = computed(
+    () => this.triggerRef()?.nativeElement.getBoundingClientRect().width ?? 40,
+  );
+
   iconFor(type: MetadataComposeValueType): string {
     return METADATA_COMPOSE_TYPE_ICONS[type];
   }
@@ -99,6 +110,22 @@ export class MetadataTypePickerComponent {
       default:
         return this.t('workspace.metadata.type.text', 'Text');
     }
+  }
+
+  typePickerAriaLabel(): string {
+    return `${this.t('workspace.metadata.typePicker.aria', 'Property type')}: ${this.typeLabel(this.valueType())}`;
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
+    if (!this.open()) {
+      return;
+    }
+    const target = event.target as Node | null;
+    if (!target || this.elementRef.nativeElement.contains(target)) {
+      return;
+    }
+    this.close();
   }
 
   toggleOpen(): void {

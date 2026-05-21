@@ -46,16 +46,18 @@ export function isImageLikeMedia(
   mimeType: string | null,
   storagePath: string | null,
 ): boolean {
+  // Prefer bytes/path over media_type — rows can be mis-tagged as `document`.
+  if (mimeType?.startsWith('image/')) {
+    return true;
+  }
+  if (isLikelyImagePath(storagePath)) {
+    return true;
+  }
   if (mediaType) {
     // Canonical DB value is `photo`; legacy rows and RPCs may still use `image`.
     return mediaType === 'photo' || mediaType === 'image';
   }
-
-  if (mimeType) {
-    return mimeType.startsWith('image/');
-  }
-
-  return isLikelyImagePath(storagePath);
+  return false;
 }
 
 export function isLikelyImagePath(path: string | null): boolean {
@@ -230,6 +232,21 @@ export function resolveFullAddress(image: ImageRecord | null): string {
   }
 
   return image.address_label?.trim() ?? '';
+}
+
+export function hasResolvableCoordinates(image: ImageRecord | null): boolean {
+  return image?.latitude != null && image?.longitude != null;
+}
+
+/** True when GPS exists but structured address lines are still empty (reverse geocode in flight). */
+export function needsAddressResolutionAfterGps(image: ImageRecord | null): boolean {
+  if (!hasResolvableCoordinates(image)) {
+    return false;
+  }
+  const hasStructured =
+    !!(image?.street?.trim() || image?.city?.trim() || image?.district?.trim() || image?.country?.trim());
+  const hasLabel = !!(image?.address_label?.trim());
+  return !hasStructured && !hasLabel;
 }
 
 export function buildInfoChips(args: {

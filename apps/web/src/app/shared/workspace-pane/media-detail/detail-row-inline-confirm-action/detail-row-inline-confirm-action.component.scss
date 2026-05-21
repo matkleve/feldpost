@@ -1,0 +1,24 @@
+// Armed destructive action stays visible without row hover.
+// @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+:host {
+  display: contents;
+}
+
+.detail-row-action--armed:is(button) {
+  opacity: 1;
+  pointer-events: auto;
+  color: var(--destructive);
+  background: color-mix(in srgb, var(--destructive) 18%, transparent);
+}
+
+.detail-row-action--armed:is(button):hover,
+.detail-row-action--armed:is(button):focus-visible {
+  color: var(--destructive);
+  background: color-mix(in srgb, var(--destructive) 24%, transparent);
+  outline-color: var(--destructive);
+}
+
+.detail-row-action--revealed:is(button) {
+  opacity: 1;
+  pointer-events: auto;
+}

@@ -3,6 +3,7 @@
 
   <app-address-search
     [currentAddress]="fullAddress()"
+    [addressResolving]="addressResolving()"
     [searchContext]="addressSearchContext()"
     [editingActive]="editingField() === 'address_search'"
     (searchOpened)="fieldEditRequested.emit('address_search')"
@@ -52,20 +53,30 @@
         <div class="detail-row__center">
           <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
           <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
-          <button
-            class="detail-row__field-trigger"
-            type="button"
-            (click)="fieldEditRequested.emit(fieldDef.name)"
-          >
-            {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
-            @if (fieldValue(fieldDef.name) && fieldVerification(fieldDef.name) !== 'verified') {
-              <span
-                class="detail-row__unverified-hint"
-                [attr.aria-label]="t('workspace.addressField.unverified.hint', 'Unverified')"
-                aria-hidden="true"
-              >?</span>
-            }
-          </button>
+          @if (addressResolving() && !fieldValue(fieldDef.name)) {
+            <span
+              class="detail-row__value-loading"
+              role="status"
+              [attr.aria-label]="t('workspace.imageDetail.location.addressResolving', 'Resolving address')"
+            >
+              <hlm-spinner size="sm" />
+            </span>
+          } @else {
+            <button
+              class="detail-row__field-trigger"
+              type="button"
+              (click)="fieldEditRequested.emit(fieldDef.name)"
+            >
+              {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
+              @if (fieldValue(fieldDef.name) && fieldVerification(fieldDef.name) !== 'verified') {
+                <span
+                  class="detail-row__unverified-hint"
+                  [attr.aria-label]="t('workspace.addressField.unverified.hint', 'Unverified')"
+                  aria-hidden="true"
+                >?</span>
+              }
+            </button>
+          }
         </div>
         @if (fieldValue(fieldDef.name) && fieldVerification(fieldDef.name) !== 'verified') {
           <button
@@ -88,20 +99,17 @@
     }
   }
 
-  @if (image().latitude != null) {
-    <div class="detail-row detail-row--readonly">
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--l2"
-        type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-        [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-        (click)="copyCoordinatesRequested.emit()"
-      >
-        <span class="material-icons" aria-hidden="true">content_copy</span>
-      </button>
+  @if (editingField() === 'coordinates') {
+    <app-coordinates-field-editor
+      [icon]="coordinatesRowIcon()"
+      [isCorrected]="isCorrected()"
+      [initialValue]="coordinatesEditInitialValue()"
+      (saveRequested)="coordinatesSaveRequested.emit($event)"
+      (cancelRequested)="editingCancelled.emit()"
+    />
+  } @else {
+    <!-- Active lat/lng only — never readonly; EXIF coords stay in the Details section. -->
+    <div class="detail-row">
       <button
         hlmBtn
         variant="ghost"
@@ -109,77 +117,84 @@
         class="detail-row-action detail-row-action--l1"
         type="button"
         [attr.aria-label]="
-          t('workspace.imageDetail.action.changeLocationMap.aria', 'Change location on map')
+          t('workspace.imageDetail.action.chooseLocationMap.aria', 'Choose on map')
         "
-        [attr.title]="
-          t('workspace.imageDetail.action.changeLocationMap.title', 'Change location on map')
-        "
-        [disabled]="isGpsAssignmentLocked()"
+        [attr.title]="t('workspace.imageDetail.action.chooseLocationMap.title', 'Choose on map')"
         (click)="mapLocationPickRequested.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">pin_drop</span>
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--l2"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
+        [attr.title]="t('workspace.imageDetail.action.editCoordinates.title', 'Edit coordinates')"
+        (click)="fieldEditRequested.emit('coordinates')"
       >
         <span class="material-icons" aria-hidden="true">edit</span>
       </button>
       <div class="detail-row__center">
-        <span class="material-icons detail-row__icon" aria-hidden="true">gps_fixed</span>
+        <span class="material-icons detail-row__icon" aria-hidden="true">{{ coordinatesRowIcon() }}</span>
         <span class="detail-row__label">{{
           isCorrected()
             ? t('workspace.imageDetail.field.correctedCoordinates', 'Corrected coordinates')
-            : t('workspace.imageDetail.field.resolvedCoordinates', 'Resolved coordinates')
+            : t('workspace.imageDetail.field.coordinates', 'Coordinates')
         }}</span>
-        <span class="detail-row__value detail-row__value--static detail-row__value--mono">
-          {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
-        </span>
+        @if (hasResolvableCoordinates()) {
+          <button
+            class="detail-row__field-trigger detail-row__value--mono"
+            type="button"
+            [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
+            (click)="fieldEditRequested.emit('coordinates')"
+          >
+            {{ coordinatesDisplayValue() }}
+          </button>
+        } @else {
+          <button
+            class="detail-row__field-trigger"
+            type="button"
+            [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
+            (click)="fieldEditRequested.emit('coordinates')"
+          >
+            {{ t('workspace.imageDetail.value.noGps', 'No GPS') }}
+          </button>
+        }
       </div>
       @if (isCorrected()) {
+        <app-detail-row-inline-confirm-action
+          [disabled]="saving()"
+          initialAriaKey="workspace.imageDetail.action.revertCoordinates.aria"
+          initialAriaFallback="Revert corrected coordinates"
+          initialTitleKey="workspace.imageDetail.action.revertCoordinates.title"
+          initialTitleFallback="Revert corrected coordinates"
+          confirmAriaKey="workspace.imageDetail.action.revertCoordinates.confirmAria"
+          confirmAriaFallback="Confirm revert coordinates"
+          confirmTitleKey="workspace.imageDetail.action.revertCoordinates.confirmTitle"
+          confirmTitleFallback="Click again to revert coordinates"
+          (confirmed)="revertCoordinatesRequested.emit()"
+        />
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+      } @else if (hasResolvableCoordinates()) {
         <button
           hlmBtn
           variant="ghost"
           size="icon"
-          class="detail-row-action detail-row-action--r1 detail-row-action--danger"
+          class="detail-row-action detail-row-action--r1"
           type="button"
-          [attr.aria-label]="
-            t('workspace.imageDetail.action.revertCoordinates.aria', 'Revert corrected coordinates')
-          "
-          [attr.title]="
-            t('workspace.imageDetail.action.revertCoordinates.title', 'Revert corrected coordinates')
-          "
-          [disabled]="saving()"
-          (click)="revertCoordinatesRequested.emit()"
+          [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+          [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
+          (click)="copyCoordinatesRequested.emit()"
         >
-          <span class="material-icons" aria-hidden="true">close</span>
+          <span class="material-icons" aria-hidden="true">content_copy</span>
         </button>
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
       } @else {
         <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
       }
-      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
-    </div>
-  }
-
-  @if (image().latitude == null || image().longitude == null) {
-    <div class="detail-row detail-row--readonly">
-      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-      <div class="detail-row__center">
-        <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
-        <span class="detail-row__label">{{
-          t('workspace.imageDetail.field.resolvedCoordinates', 'Resolved coordinates')
-        }}</span>
-        <div class="detail-row__value-wrap">
-          <span class="detail-row__value detail-row__value--static">{{
-            t('workspace.imageDetail.value.noGps', 'No GPS')
-          }}</span>
-          @if (isGpsAssignmentLocked()) {
-            <span class="detail-row__subvalue">{{
-              t(
-                'workspace.imageDetail.projects.gpsDisabled',
-                'GPS assignment disabled for this file type.'
-              )
-            }}</span>
-          }
-        </div>
-      </div>
-      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
   }
 </div>

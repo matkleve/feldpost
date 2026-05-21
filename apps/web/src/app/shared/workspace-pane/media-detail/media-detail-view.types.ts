@@ -29,6 +29,7 @@ export type DetailEditingField =
   | 'district'
   | 'country'
   | 'address_search'
+  | 'coordinates'
   | null;
 
 export interface MediaContextRow {

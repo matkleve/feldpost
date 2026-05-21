@@ -233,7 +233,20 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   }
 
   onUploadLocationMapPickRequestedFromWorkspacePane(event: UploadLocationMapPickRequest): void {
-    this.mapLayoutEffects.getMapEffects()?.onUploadLocationMapPickRequested(event);
+    const mapFx = this.mapLayoutEffects.getMapEffects();
+    if (mapFx) {
+      mapFx.onUploadLocationMapPickRequested(event);
+      return;
+    }
+
+    void this.router.navigate(['/map'], {
+      state: {
+        locationMapPickNav: {
+          request: event,
+          returnUrl: this.router.url,
+        },
+      },
+    });
   }
 
   onWorkspaceItemHoverStartedFromPane(event: ThumbnailCardHoverEvent): void {

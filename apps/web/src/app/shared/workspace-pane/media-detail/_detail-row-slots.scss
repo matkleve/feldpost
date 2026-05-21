@@ -36,7 +36,8 @@
     .detail-row__icon,
     .detail-row__label,
     .detail-row__value,
-    .detail-row__value--static {
+    .detail-row__value--static,
+    .detail-row__field-trigger {
       color: var(--primary);
     }
   }
@@ -66,6 +67,13 @@
     &:hover:not(.detail-row--editing) .detail-row__center,
     &:focus-within:not(.detail-row--editing) .detail-row__center {
       background: var(--mdv-menu-item-hover-bg, color-mix(in srgb, var(--primary) 8%, transparent));
+    }
+
+    // Readonly rows keep one action-rail height (no multi-line value growth).
+    // @see docs/specs/ui/media-detail/media-detail-inline-section.md
+    .detail-row__center {
+      max-height: var(--detail-row-action-size);
+      overflow: hidden;
     }
 
     .detail-row__value--static {

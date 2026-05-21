@@ -119,6 +119,8 @@ import {
   MapLeafletService,
 } from './map-leaflet.service';
 import { MapFocusPayloadService } from './map-focus-payload.service';
+import { LocationMapPickNavigationService } from '../../../core/workspace-pane/location-map-pick-navigation.service';
+import { MediaDetailLocationSyncService } from '../../../core/media-detail-data/media-detail-location-sync.service';
 import { MapGeolocationService } from './map-geolocation.service';
 import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferred-startup.service';
 import { MapProjectActionsService } from './map-project-actions.service';
@@ -269,6 +271,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
+  private readonly locationMapPickNavigationService = inject(LocationMapPickNavigationService);
+  private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
   private readonly mapGeolocationService = inject(MapGeolocationService);
   private readonly mapDeferredStartupService = inject(MapDeferredStartupService);
   private readonly mapProjectActionsService = inject(MapProjectActionsService);
@@ -292,6 +296,11 @@ export class MapShellComponent implements OnDestroy {
   private readonly pendingMapFocus = signal<{ mediaId: string; lat: number; lng: number } | null>(
     this.mapFocusPayloadService.readMapFocusPayload(this.router),
   );
+  private readonly pendingLocationMapPickNav =
+    signal<ReturnType<LocationMapPickNavigationService['readPayload']>>(
+      this.locationMapPickNavigationService.readPayload(this.router),
+    );
+  private locationMapPickReturnUrl: string | null = null;
 
   /**
    * Leaflet map instance. Protected (not private) so unit tests can inject
@@ -1991,6 +2000,7 @@ export class MapShellComponent implements OnDestroy {
     this.placementActive.set(false);
     this.searchPlacementActive.set(false);
     this.map?.getContainer().classList.remove('map-container--placing');
+    this.navigateBackAfterLocationMapPick();
   }
 
   // ── GPS button ────────────────────────────────────────────────────────────
@@ -2132,6 +2142,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.updateSearchViewportBounds();
     this.applyPendingMapFocus();
+    this.applyPendingLocationMapPickNavigation();
 
     // Map click handler: closes upload panel and, when active, places images
     // that had no GPS EXIF data.
@@ -2270,6 +2281,27 @@ export class MapShellComponent implements OnDestroy {
     this.pendingMapFocus.set(null);
   }
 
+  /** Resume map pick after layout navigated here from /media (or another non-map route). */
+  private applyPendingLocationMapPickNavigation(): void {
+    const payload = this.pendingLocationMapPickNav();
+    if (!payload) {
+      return;
+    }
+
+    this.pendingLocationMapPickNav.set(null);
+    this.locationMapPickReturnUrl = payload.returnUrl;
+    this.onUploadLocationMapPickRequested(payload.request);
+  }
+
+  private navigateBackAfterLocationMapPick(): void {
+    const returnUrl = this.locationMapPickReturnUrl;
+    if (!returnUrl) {
+      return;
+    }
+    this.locationMapPickReturnUrl = null;
+    void this.router.navigateByUrl(returnUrl);
+  }
+
   private handleMapClick(e: MapMouseEvent): void {
     this.closeContextMenus();
 
@@ -2377,13 +2409,17 @@ export class MapShellComponent implements OnDestroy {
     void this.applyUploadedLocationMapPick(pendingUploadLocation, {
       lat: latlng.lat,
       lng: latlng.lng,
+    }).then((saved) => {
+      if (saved) {
+        this.navigateBackAfterLocationMapPick();
+      }
     });
   }
 
   private async applyUploadedLocationMapPick(
     request: UploadLocationMapPickRequest,
     coords: { lat: number; lng: number },
-  ): Promise<void> {
+  ): Promise<boolean> {
     const result = await this.mediaLocationUpdateService.updateFromCoordinates(
       request.mediaId,
       coords,
@@ -2395,15 +2431,21 @@ export class MapShellComponent implements OnDestroy {
           fn: 'applyUploadedLocationMapPick',
         }),
       });
-      return;
+      return false;
     }
 
     this.onImageUploaded({ id: request.mediaId, lat: result.lat, lng: result.lng });
+    this.mediaDetailLocationSync.notifyCoordinatesUpdated(
+      request.mediaId,
+      result.lat,
+      result.lng,
+    );
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Standort wurde aktualisiert.'),
       type: 'success',
       dedupe: true,
     });
+    return true;
   }
 
   private handleMapMouseDown(event: MapMouseEvent): void {

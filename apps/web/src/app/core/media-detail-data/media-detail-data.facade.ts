@@ -35,6 +35,7 @@ interface MediaDetailRow {
   captured_at: string | null;
   created_at: string;
   mime_type: string | null;
+  gps_assignment_allowed: boolean | null;
   location_status:
     | 'pending'
     | 'resolved'
@@ -237,6 +238,7 @@ export class MediaDetailDataFacade {
       country: media.country,
       direction: null,
       location_unresolved: unresolved,
+      gps_assignment_allowed: media.gps_assignment_allowed ?? true,
       address_field_meta: media.address_field_meta ?? null,
     };
   }

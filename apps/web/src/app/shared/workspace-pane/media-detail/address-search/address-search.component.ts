@@ -12,6 +12,8 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
+import { HlmSpinnerComponent } from '../../../../shared/ui/spinner';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
@@ -27,7 +29,7 @@ import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
 @Component({
   selector: 'app-address-search',
   standalone: true,
-  imports: [DropdownShellComponent],
+  imports: [DropdownShellComponent, HlmSpinnerComponent, DetailRowInlineConfirmActionComponent],
   templateUrl: './address-search.component.html',
   styleUrl: './address-search.component.scss',
   host: {
@@ -42,6 +44,7 @@ export class AddressSearchComponent implements OnDestroy {
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly currentAddress = input('');
+  readonly addressResolving = input(false);
   readonly searchContext = input<SearchQueryContext>({});
   /** When parent clears `editingField`, close the active search surface. */
   readonly editingActive = input(false);

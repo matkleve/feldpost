@@ -1,0 +1,20 @@
+// Coordinates inline editor — mono input in detail row center slot.
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+@layer components {
+  .coordinates-field-editor__input {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: var(--font-size-xs);
+    letter-spacing: -0.02em;
+  }
+
+  .coordinates-field-editor__cancel-btn--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

@@ -1,7 +1,11 @@
 import {
+  afterNextRender,
+  ChangeDetectorRef,
   Component,
   computed,
+  effect,
   ElementRef,
+  HostListener,
   inject,
   input,
   output,
@@ -10,9 +14,6 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
-import { StandardDropdownComponent } from '../../../dropdown-trigger/standard-dropdown.component';
-import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
-import { HlmMenuItemDirective } from '../../../ui/menu';
 import {
   normalizeMetadataKeyName,
   toMetadataComposeValueType,
@@ -24,96 +25,89 @@ import { METADATA_COMPOSE_TYPE_ICONS } from './metadata-type-icons';
 @Component({
   selector: 'app-metadata-property-picker',
   standalone: true,
-  imports: [
-    DropdownShellComponent,
-    StandardDropdownComponent,
-    ...HLM_BUTTON_IMPORTS,
-    HlmMenuItemDirective,
-  ],
+  imports: [DropdownShellComponent],
   template: `
-    <button
+    <input
       #triggerRef
-      type="button"
-      class="detail-row__field-input detail-row__field-input--trigger metadata-property-picker__trigger w-full min-w-0"
+      type="text"
+      class="detail-row__field-input w-full min-w-0"
       [disabled]="disabled()"
       [attr.aria-expanded]="open()"
       [attr.aria-label]="t('workspace.metadata.propertyPicker.aria', 'Property name')"
-      (click)="toggleOpen()"
-    >
-      @if (showTriggerTypeIcon()) {
-        <span class="material-icons metadata-property-picker__type-icon" aria-hidden="true">{{
-          iconFor(displayType())
-        }}</span>
-      }
-      <span class="metadata-property-picker__label min-w-0 truncate">{{
-        displayLabel()
-      }}</span>
-    </button>
+      [attr.aria-autocomplete]="'list'"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      (input)="onInput($event)"
+    />
     @if (open()) {
       <app-dropdown-shell
-        class="metadata-property-picker__shell"
-        panelClass="option-menu-surface"
-        [anchor]="triggerEl()"
+        class="address-search-shell metadata-property-picker__shell"
+        panelClass="option-menu-surface address-search-panel"
+        [anchor]="shellAnchor()"
         [minWidth]="panelMinWidth()"
+        [outsideCloseEnabled]="false"
         (closeRequested)="close()"
       >
-        <app-standard-dropdown
-          class="metadata-property-picker__dropdown"
-          [showSearch]="true"
-          [searchTerm]="searchTerm()"
-          [searchPlaceholder]="
-            t('workspace.metadata.propertyPicker.searchPlaceholder', 'Search or create property')
-          "
-          (searchTermChange)="onSearchTermChange($event)"
-          (clearRequested)="onSearchTermChange('')"
+        <div
+          class="address-search__dropdown address-field-combobox__dropdown option-menu-list metadata-property-picker__dropdown"
+          role="listbox"
         >
-          <div dropdown-items class="metadata-property-picker__items w-full min-w-0">
-            @if (showCreateRow()) {
-              <button
-                hlmMenuItem
-                type="button"
-                class="metadata-property-picker__create w-full"
-                (click)="selectCreate()"
-              >
-                <span class="material-icons option-menu-item__icon" aria-hidden="true">add</span>
-                <span class="min-w-0 flex-1 text-left">{{ createRowLabel() }}</span>
-              </button>
-            }
-            @for (def of filteredDefinitions(); track def.id) {
-              <button
-                hlmMenuItem
-                type="button"
-                class="metadata-property-picker__option w-full"
-                (click)="selectDefinition(def)"
-              >
-                <span class="material-icons option-menu-item__icon" aria-hidden="true">{{
+          @if (showCreateRow()) {
+            <button
+              type="button"
+              class="metadata-property-picker__result-item"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectCreate()"
+            >
+              <span class="metadata-property-picker__option-type" aria-hidden="true">
+                <span class="material-icons metadata-property-picker__type-surface">add</span>
+              </span>
+              <span class="metadata-property-picker__result-label min-w-0">{{
+                createRowLabel()
+              }}</span>
+            </button>
+          }
+          @for (def of filteredDefinitions(); track def.id) {
+            <button
+              type="button"
+              class="metadata-property-picker__result-item"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectDefinition(def)"
+            >
+              <span class="metadata-property-picker__option-type" aria-hidden="true">
+                <span class="material-icons metadata-property-picker__type-surface">{{
                   iconFor(composeType(def.key_type))
                 }}</span>
-                <span class="metadata-property-picker__chip min-w-0 flex-1 text-left">{{
-                  def.key_name
-                }}</span>
-              </button>
-            }
-          </div>
-        </app-standard-dropdown>
+              </span>
+              <span class="metadata-property-picker__result-label min-w-0">{{ def.key_name }}</span>
+            </button>
+          }
+          @if (!showCreateRow() && filteredDefinitions().length === 0) {
+            <div class="address-field-combobox__empty">
+              {{ t('workspace.addressField.suggest.empty', 'No results') }}
+            </div>
+          }
+        </div>
       </app-dropdown-shell>
     }
   `,
-  styleUrl: './metadata-property-picker.component.scss',
+  styleUrls: ['./metadata-property-picker.component.scss', '../_detail-row-slots.scss'],
   host: {
     class: 'metadata-property-picker relative block min-w-0 w-full',
   },
 })
 export class MetadataPropertyPickerComponent {
   private readonly i18nService = inject(I18nService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  readonly showTriggerTypeIcon = input(true);
+  readonly panelAnchor = input<HTMLElement | null>(null);
+
   readonly definitions = input<MetadataKeyDefinitionView[]>([]);
   readonly excludedKeyIds = input<ReadonlySet<string>>(new Set());
   readonly valueType = input.required<MetadataComposeValueType>();
   readonly keyName = input('');
-  readonly metadataKeyId = input<string | null>(null);
   readonly disabled = input(false);
   readonly open = input(false);
 
@@ -123,10 +117,22 @@ export class MetadataPropertyPickerComponent {
 
   readonly searchTerm = signal('');
 
-  private readonly triggerRef = viewChild<ElementRef<HTMLElement>>('triggerRef');
-  readonly triggerEl = signal<HTMLElement | null>(null);
+  private readonly triggerRef = viewChild<ElementRef<HTMLInputElement>>('triggerRef');
+  readonly shellAnchor = signal<HTMLElement | null>(null);
 
-  readonly panelMinWidth = computed(() => this.triggerRef()?.nativeElement.offsetWidth ?? 200);
+  readonly panelMinWidth = computed(() => {
+    const anchor = this.panelAnchor() ?? this.triggerRef()?.nativeElement;
+    return anchor?.getBoundingClientRect().width ?? 200;
+  });
+
+  constructor() {
+    afterNextRender(() => this.focusInput());
+    effect(() => {
+      if (this.open()) {
+        this.syncShellAnchor();
+      }
+    });
+  }
 
   readonly filteredDefinitions = computed(() => {
     const query = normalizeMetadataKeyName(this.searchTerm());
@@ -151,27 +157,15 @@ export class MetadataPropertyPickerComponent {
     );
   });
 
-  displayType(): MetadataComposeValueType {
-    if (this.metadataKeyId()) {
-      const match = this.definitions().find((d) => d.id === this.metadataKeyId());
-      if (match) return toMetadataComposeValueType(match.key_type);
-    }
-    return this.valueType();
-  }
-
-  displayLabel(): string {
-    const name = this.keyName().trim();
-    if (name) return name;
-    return this.t('workspace.metadata.propertyPicker.placeholder', 'Property name');
-  }
-
-  createRowLabel(): string {
+  readonly createRowLabel = computed(() => {
     const raw = this.searchTerm().trim();
     const typeLabel = this.typeLabel(this.valueType());
-    return this.t('workspace.metadata.propertyPicker.create', 'Create "{name}" ({type})')
-      .replace('{name}', raw)
-      .replace('{type}', typeLabel);
-  }
+    const template = this.t(
+      'workspace.metadata.propertyPicker.create',
+      'Create "{name}" ({type})',
+    );
+    return template.replaceAll('{name}', raw).replaceAll('{type}', typeLabel);
+  });
 
   composeType(valueType: MetadataKeyDefinitionView['key_type']): MetadataComposeValueType {
     return toMetadataComposeValueType(valueType);
@@ -192,25 +186,66 @@ export class MetadataPropertyPickerComponent {
     }
   }
 
-  toggleOpen(): void {
-    if (this.disabled()) return;
-    const next = !this.open();
-    if (next) {
-      this.searchTerm.set(this.keyName());
-      queueMicrotask(() => {
-        this.triggerEl.set(this.triggerRef()?.nativeElement ?? null);
-      });
+  focusInput(): void {
+    const el = this.triggerRef()?.nativeElement;
+    if (!el || this.disabled()) return;
+    el.focus();
+  }
+
+  private syncShellAnchor(): void {
+    queueMicrotask(() => {
+      this.shellAnchor.set(this.panelAnchor() ?? this.triggerRef()?.nativeElement ?? null);
+    });
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
+    if (!this.open()) {
+      return;
     }
-    this.openChange.emit(next);
+    const target = event.target as Node | null;
+    if (!target || this.elementRef.nativeElement.contains(target)) {
+      return;
+    }
+    this.close();
+  }
+
+  onFocus(): void {
+    if (this.disabled()) return;
+    const initial = this.keyName();
+    this.applySearchTerm(initial);
+    const el = this.triggerRef()?.nativeElement;
+    if (el) {
+      el.value = initial;
+    }
+    this.syncShellAnchor();
+    if (!this.open()) {
+      this.openChange.emit(true);
+    }
+  }
+
+  onBlur(): void {
+    this.close();
+  }
+
+  onInput(event: Event): void {
+    const term = (event.target as HTMLInputElement).value;
+    this.applySearchTerm(term);
+    if (!this.open()) {
+      this.openChange.emit(true);
+    }
+  }
+
+  private applySearchTerm(term: string): void {
+    this.searchTerm.set(term);
+    this.cdr.detectChanges();
+    this.draftNameChange.emit(term);
+    this.syncShellAnchor();
   }
 
   close(): void {
+    this.searchTerm.set(this.keyName());
     this.openChange.emit(false);
-  }
-
-  onSearchTermChange(term: string): void {
-    this.searchTerm.set(term);
-    this.draftNameChange.emit(term.trim());
   }
 
   selectDefinition(def: MetadataKeyDefinitionView): void {

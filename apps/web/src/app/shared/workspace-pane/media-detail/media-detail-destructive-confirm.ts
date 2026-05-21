@@ -1,15 +1,7 @@
-import type { MetadataEntry } from './media-detail-view.types';
-
-export type DetailDestructiveConfirmKind =
-  | 'delete_media'
-  | 'clear_address'
-  | 'revert_coordinates'
-  | 'remove_metadata'
-  | 'remove_from_projects';
+export type DetailDestructiveConfirmKind = 'delete_media' | 'remove_from_projects';
 
 export interface DetailDestructiveConfirmState {
   kind: DetailDestructiveConfirmKind;
-  metadataEntry?: MetadataEntry;
 }
 
 export interface DetailDestructiveConfirmCopy {
@@ -34,38 +26,6 @@ export function getDetailDestructiveConfirmCopy(
         ),
         confirmLabel: t('workspace.imageDetail.deleteDialog.confirm', 'Delete'),
       };
-    case 'clear_address':
-      return {
-        title: t('workspace.imageDetail.confirm.clearAddress.title', 'Remove address?'),
-        message: t(
-          'workspace.imageDetail.confirm.clearAddress.message',
-          'This removes the saved address for this media item. You can undo this action.',
-        ),
-        confirmLabel: t('workspace.imageDetail.confirm.clearAddress.confirm', 'Remove'),
-      };
-    case 'revert_coordinates':
-      return {
-        title: t('workspace.imageDetail.confirm.revertCoordinates.title', 'Revert coordinates?'),
-        message: t(
-          'workspace.imageDetail.confirm.revertCoordinates.message',
-          'This restores the original EXIF coordinates and replaces the corrected position.',
-        ),
-        confirmLabel: t(
-          'workspace.imageDetail.confirm.revertCoordinates.confirm',
-          'Revert',
-        ),
-      };
-    case 'remove_metadata': {
-      const key = state.metadataEntry?.key ?? '';
-      return {
-        title: t('workspace.imageDetail.confirm.removeMetadata.title', 'Remove metadata?'),
-        message: t(
-          'workspace.imageDetail.confirm.removeMetadata.message',
-          'Remove "{key}" from this media item? You can undo this action.',
-        ).replace('{key}', key),
-        confirmLabel: t('workspace.imageDetail.confirm.removeMetadata.confirm', 'Remove'),
-      };
-    }
     case 'remove_from_projects':
       return {
         title: t(

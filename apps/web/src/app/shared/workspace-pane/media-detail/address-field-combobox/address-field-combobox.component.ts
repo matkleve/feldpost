@@ -135,6 +135,18 @@ export class AddressFieldComboboxComponent implements OnDestroy {
     });
   }
 
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
+    if (Date.now() < this.ignoreOutsideCloseUntil) {
+      return;
+    }
+    const target = event.target as Node | null;
+    if (!target || this.elementRef.nativeElement.contains(target)) {
+      return;
+    }
+    this.onCancelClick();
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.panelOpen() || Date.now() < this.ignoreOutsideCloseUntil) return;

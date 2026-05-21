@@ -26,6 +26,8 @@ export interface ImageRecord {
   country: string | null;
   direction: number | null;
   location_unresolved: boolean | null;
+  /** When false, map/GPS assignment is blocked for this item. */
+  gps_assignment_allowed?: boolean | null;
   /** Per-field address verification metadata. @see AddressFieldMeta */
   address_field_meta?: AddressFieldMeta | null;
 }

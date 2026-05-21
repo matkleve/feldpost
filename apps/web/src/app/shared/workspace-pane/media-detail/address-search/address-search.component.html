@@ -99,25 +99,39 @@
       <span class="detail-row__label">{{
         t('workspace.imageDetail.field.address', 'Address')
       }}</span>
-      <button class="detail-row__field-trigger address-search__trigger-text" type="button" (click)="open($event)">
-        @if (currentAddress()) {
-          {{ currentAddress() }}
-        } @else {
-          <span class="address-search__placeholder">{{
-            t('workspace.addressSearch.placeholder', 'Search address...')
-          }}</span>
-        }
-      </button>
+      @if (addressResolving() && !currentAddress()) {
+        <span
+          class="detail-row__value-loading"
+          role="status"
+          [attr.aria-label]="t('workspace.imageDetail.location.addressResolving', 'Resolving address')"
+        >
+          <hlm-spinner size="sm" />
+        </span>
+      } @else {
+        <button class="detail-row__field-trigger address-search__trigger-text" type="button" (click)="open($event)">
+          @if (currentAddress()) {
+            {{ currentAddress() }}
+          } @else {
+            <span class="address-search__placeholder">{{
+              t('workspace.addressSearch.placeholder', 'Search address...')
+            }}</span>
+          }
+        </button>
+      }
     </div>
-    <button
-      class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn"
-      type="button"
-      [class.address-search__clear-btn--visible]="!!currentAddress()"
-      [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear address')"
-      (click)="clearAddress(); $event.stopPropagation()"
-    >
-      <span class="material-icons" aria-hidden="true">close</span>
-    </button>
+    <app-detail-row-inline-confirm-action
+      class="address-search__clear-btn"
+      [visible]="!!currentAddress()"
+      initialAriaKey="workspace.addressSearch.aria.clear"
+      initialAriaFallback="Clear address"
+      initialTitleKey="workspace.addressSearch.aria.clear"
+      initialTitleFallback="Clear address"
+      confirmAriaKey="workspace.addressSearch.aria.confirmClear"
+      confirmAriaFallback="Confirm clear address"
+      confirmTitleKey="workspace.addressSearch.title.confirmClear"
+      confirmTitleFallback="Click again to clear address"
+      (confirmed)="clearAddress()"
+    />
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 }

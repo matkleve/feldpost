@@ -11504,14 +11504,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0430.workspace_imagedetail_field_coordinates', 'workspace.imageDetail.field.coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0430.workspace_imagedetail_field_coordinates', 'Coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.imageDetail.field.coordinates', 'published'
+select t.id, 'en', 'Coordinates', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_coordinates'
 on conflict (app_text_id, lang) do update set
@@ -11519,7 +11519,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.imageDetail.field.coordinates', 'published'
+select t.id, 'de', 'Koordinaten', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_coordinates'
 on conflict (app_text_id, lang) do update set
@@ -11527,7 +11527,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.imageDetail.field.coordinates', 'published'
+select t.id, 'it', 'Coordinate', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_coordinates'
 on conflict (app_text_id, lang) do update set
@@ -26973,37 +26973,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.field.resolvedCoordinates', 'Resolved coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Resolved coordinates', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.field.resolvedCoordinates'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aufgeloeste Koordinaten', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.field.resolvedCoordinates'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Coordinate risolte', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.field.resolvedCoordinates'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'workspace.imageDetail.field.correctedCoordinates', 'Corrected coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -27092,6 +27061,285 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Cambia posizione sulla mappa', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.chooseLocationMap.aria', 'Choose on map', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Choose on map', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auf der Karte waehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scegli sulla mappa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.chooseLocationMap.title', 'Choose on map', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Choose on map', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auf der Karte waehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scegli sulla mappa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Edit coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.editCoordinates.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Koordinaten bearbeiten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.editCoordinates.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modifica coordinate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.editCoordinates.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.editCoordinates.title', 'Edit coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Edit coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.editCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Koordinaten bearbeiten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.editCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modifica coordinate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.editCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.saveCoordinates.aria', 'Save coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/coordinates-field-editor/coordinates-field-editor.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.saveCoordinates.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Koordinaten speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.saveCoordinates.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva coordinate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.saveCoordinates.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.saveCoordinates.title', 'Save coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/coordinates-field-editor/coordinates-field-editor.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.saveCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Koordinaten speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.saveCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva coordinate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.saveCoordinates.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.field.coordinatesPlaceholder', 'apps/web/src/app/shared/workspace-pane/media-detail/coordinates-field-editor/coordinates-field-editor.component.html', 'en', '8.5417')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/coordinates-field-editor/coordinates-field-editor.component.html', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.coordinatesPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Placeholder for coordinates text input', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.coordinatesPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'e.g. 47.3769', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.field.coordinatesPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.coordinatesInvalid', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts', 'en', '8.5417.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.coordinatesInvalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Toast when pasted coordinates cannot be parsed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.coordinatesInvalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Could not read coordinates. Use a decimal pair like 47.3769', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.coordinatesInvalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.location.addressResolving', 'Loading state while reverse geocoding fills address fields after GPS assignment', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading state while reverse geocoding fills address fields after GPS assignment', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.location.addressResolving'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Resolving address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.location.addressResolving'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Adresse wird aufgeloest', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.location.addressResolving'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -27743,6 +27991,254 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Questo elemento non e in questo set condiviso. Viene mostrato il gruppo.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'share.restore.warning.mediaNotInSet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.inlineConfirm.aria', 'Confirm removal', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/detail-row-inline-confirm-action armed aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm removal', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.inlineConfirm.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Entfernen bestätigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.inlineConfirm.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma rimozione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.inlineConfirm.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.inlineConfirm.title', 'Click again to confirm', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/detail-row-inline-confirm-action armed title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click again to confirm', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.inlineConfirm.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zum Bestätigen erneut klicken', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.inlineConfirm.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca di nuovo per confermare', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.inlineConfirm.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressSearch.aria.confirmClear', 'Confirm clear address', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-search inline confirm armed aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm clear address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.aria.confirmClear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse löschen bestätigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.aria.confirmClear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma cancellazione indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.aria.confirmClear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressSearch.title.confirmClear', 'Click again to clear address', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-search inline confirm armed title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click again to clear address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.title.confirmClear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zum Löschen der Adresse erneut klicken', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.title.confirmClear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca di nuovo per cancellare l''indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.title.confirmClear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.metadata.row.confirmRemove.aria', 'Confirm remove metadata', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/metadata-property-row inline confirm armed aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm remove metadata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.metadata.row.confirmRemove.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Metadaten entfernen bestätigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.metadata.row.confirmRemove.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma rimozione metadati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.metadata.row.confirmRemove.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.metadata.row.confirmRemove.title', 'Click again to remove', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/metadata-property-row inline confirm armed title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click again to remove', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.metadata.row.confirmRemove.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zum Entfernen erneut klicken', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.metadata.row.confirmRemove.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca di nuovo per rimuovere', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.metadata.row.confirmRemove.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.revertCoordinates.confirmAria', 'Confirm revert coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section inline confirm armed aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm revert coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.revertCoordinates.confirmAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Koordinaten zurücksetzen bestätigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.revertCoordinates.confirmAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma ripristino coordinate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.revertCoordinates.confirmAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.revertCoordinates.confirmTitle', 'Click again to revert coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section inline confirm armed title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click again to revert coordinates', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.revertCoordinates.confirmTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zum Zurücksetzen der Koordinaten erneut klicken', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.revertCoordinates.confirmTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca di nuovo per ripristinare le coordinate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.revertCoordinates.confirmTitle'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -27,7 +27,8 @@
 }
 
 app-address-search,
-app-address-field-combobox {
+app-address-field-combobox,
+app-coordinates-field-editor {
   min-width: 0;
 }
 
@@ -54,5 +55,24 @@ app-address-field-combobox {
     font-size: var(--font-size-xs);
     color: var(--foreground);
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+}
+
+// Coordinates value trigger — mono stack matches static coordinate readout.
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+@layer components {
+  .detail-row__value-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 1rem;
+    min-height: 1rem;
+    margin-inline-start: auto;
+  }
+
+  .detail-row__field-trigger.detail-row__value--mono {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: var(--font-size-xs);
+    letter-spacing: -0.02em;
   }
 }

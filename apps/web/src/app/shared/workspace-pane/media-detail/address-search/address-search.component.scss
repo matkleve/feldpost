@@ -26,6 +26,16 @@
   min-width: 0;
 }
 
+.detail-row__value-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 1rem;
+  min-height: 1rem;
+  margin-inline-start: auto;
+  grid-column: 3;
+}
+
 .address-search__placeholder {
   color: var(--muted-foreground);
   transition: color 80ms ease-out;
@@ -40,11 +50,6 @@
   .address-search__placeholder {
     color: var(--primary);
   }
-}
-
-.address-search__clear-btn--visible {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 // Active stack spans host subgrid; dropdown anchors to the address row (scrolls with detail panel).

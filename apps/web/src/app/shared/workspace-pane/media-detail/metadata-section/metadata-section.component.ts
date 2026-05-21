@@ -1,4 +1,13 @@
-import { Component, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { MetadataPropertyRowComponent } from '../metadata-property-row.component';
 import type { MetadataEntry, MetadataKeyDefinitionView } from '../media-detail-view.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
@@ -54,6 +63,8 @@ export class MetadataSectionComponent {
   readonly openPanel = signal<'type' | 'property' | null>(null);
   readonly valueError = signal<string | null>(null);
   readonly duplicateError = signal<string | null>(null);
+
+  readonly composeAnchorRef = viewChild<ElementRef<HTMLElement>>('propertyPanelAnchor');
 
   readonly excludedKeyIds = () => buildExcludedKeyIds(this.entries());
 
@@ -166,10 +177,8 @@ export class MetadataSectionComponent {
     const target = event.target as Node | null;
     if (!target) return;
 
-    const addRow = this.elementRef.nativeElement.querySelector(
-      '[data-detail-active-editor="metadata-add"]',
-    );
-    if (addRow?.contains(target)) return;
+    const addStack = this.elementRef.nativeElement.querySelector('.metadata-add-row-stack');
+    if (addStack?.contains(target)) return;
 
     this.discardDraft();
   }

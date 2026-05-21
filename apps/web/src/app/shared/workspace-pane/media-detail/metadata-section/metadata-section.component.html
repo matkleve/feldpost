@@ -21,27 +21,28 @@
           <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
           <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
           <div class="detail-row__center">
-            <app-metadata-type-picker
-              class="metadata-add-row__type"
-              [valueType]="draft().valueType"
-              [locked]="draft().propertyMode === 'existing'"
-              [open]="openPanel() === 'type'"
-              (openChange)="onTypeOpenChange($event)"
-              (valueTypeChange)="onValueTypeChange($event)"
-            />
-            <app-metadata-property-picker
-              class="metadata-add-row__name"
-              [showTriggerTypeIcon]="false"
-              [definitions]="metadataKeyDefinitions()"
-              [excludedKeyIds]="excludedKeyIds()"
-              [valueType]="draft().valueType"
-              [keyName]="draft().keyName"
-              [metadataKeyId]="draft().metadataKeyId"
-              [open]="openPanel() === 'property'"
-              (openChange)="onPropertyOpenChange($event)"
-              (definitionSelected)="onDefinitionSelected($event)"
-              (draftNameChange)="onDraftNameChange($event)"
-            />
+            <div class="metadata-add-row__compose" #propertyPanelAnchor>
+              <app-metadata-type-picker
+                class="metadata-add-row__type"
+                [valueType]="draft().valueType"
+                [locked]="draft().propertyMode === 'existing'"
+                [open]="openPanel() === 'type'"
+                (openChange)="onTypeOpenChange($event)"
+                (valueTypeChange)="onValueTypeChange($event)"
+              />
+              <app-metadata-property-picker
+                class="metadata-add-row__name"
+                [panelAnchor]="composeAnchorRef()?.nativeElement ?? null"
+                [definitions]="metadataKeyDefinitions()"
+                [excludedKeyIds]="excludedKeyIds()"
+                [valueType]="draft().valueType"
+                [keyName]="draft().keyName"
+                [open]="openPanel() === 'property'"
+                (openChange)="onPropertyOpenChange($event)"
+                (definitionSelected)="onDefinitionSelected($event)"
+                (draftNameChange)="onDraftNameChange($event)"
+              />
+            </div>
             <div class="detail-row__field-slot metadata-add-row__value" (keydown.enter)="saveAdd()">
               <app-metadata-value-editor
                 [valueType]="draft().valueType"

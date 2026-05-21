@@ -12,13 +12,18 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../../ui/button';
 import type { MetadataValueType } from '../../../core/metadata/metadata.types';
 import { MetadataValueEditorComponent } from './metadata/metadata-value-editor.component';
+import { DetailRowInlineConfirmActionComponent } from './detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import { METADATA_COMPOSE_TYPE_ICONS } from './metadata/metadata-type-icons';
 import type { MetadataComposeValueType } from '../../../core/metadata/metadata-validation.helpers';
 
 @Component({
   selector: 'app-metadata-property-row',
   standalone: true,
-  imports: [...HLM_BUTTON_IMPORTS, MetadataValueEditorComponent],
+  imports: [
+    ...HLM_BUTTON_IMPORTS,
+    MetadataValueEditorComponent,
+    DetailRowInlineConfirmActionComponent,
+  ],
   templateUrl: './metadata-property-row.component.html',
   styleUrls: ['./metadata-property-row.component.scss', './_detail-row-slots.scss'],
 })
@@ -64,7 +69,7 @@ export class MetadataPropertyRowComponent {
     const target = event.target as Node | null;
     if (!target || this.elementRef.nativeElement.contains(target)) return;
 
-    this.commitEdit();
+    this.cancelEdit();
   }
 
   commitEditFromSave(): void {

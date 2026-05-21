@@ -97,18 +97,19 @@
           [image]="image()!"
           [fullAddress]="fullAddress()"
           [editingField]="editingField()"
-          [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
           [isCorrected]="isCorrected()"
           [saving]="saving()"
+          [addressResolving]="addressResolving()"
           (fieldEditRequested)="onDetailFieldEditRequested($event)"
           (fieldSaveRequested)="saveAddressField($event)"
           (editingCancelled)="editingField.set(null)"
           (fieldResolveRequested)="onAddressFieldResolveRequested($event.field)"
           (addressSuggestionApplied)="applyAddressSuggestion($event)"
-          (addressClearRequested)="confirmClearAddress()"
+          (addressClearRequested)="clearAddress()"
           (copyCoordinatesRequested)="copyCoordinates()"
           (mapLocationPickRequested)="requestMapLocationPick()"
-          (revertCoordinatesRequested)="confirmRevertCoordinates()"
+          (coordinatesSaveRequested)="saveCoordinatesFromInput($event)"
+          (revertCoordinatesRequested)="revertCoordinatesToExif()"
         />
 
         <!-- Reconciliation offer banner: shown when an address suggestion is available -->
@@ -155,7 +156,7 @@
           [entries]="metadata()"
           [metadataKeyDefinitions]="metadataKeyDefinitions()"
           (valueChanged)="saveMetadata($event.entry, $event.newValue)"
-          (entryRemoved)="confirmRemoveMetadata($event)"
+          (entryRemoved)="removeMetadata($event)"
           (entryAdded)="addMetadata($event.keyName, $event.keyType, $event.value)"
         />
 

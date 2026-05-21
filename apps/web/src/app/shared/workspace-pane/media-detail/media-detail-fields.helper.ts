@@ -184,6 +184,26 @@ export class ImageDetailFieldsHelper {
     this.deps.signals.saving.set(false);
   }
 
+  /** Writes geocoder verification meta after resolve_media_location already saved address + coords. */
+  async persistAddressFieldMetaFromGeocode(suggestion: ForwardGeocodeResult): Promise<void> {
+    const img = this.deps.signals.image();
+    if (!img) return;
+
+    const addressFieldMeta = {
+      ...(img.address_field_meta ?? {}),
+      ...verifiedMetaFromGeocodeSuggestion(suggestion),
+    };
+
+    this.deps.signals.image.update((prev) =>
+      prev ? { ...prev, address_field_meta: addressFieldMeta } : prev,
+    );
+
+    await this.deps.services.supabase.client
+      .from('media_items')
+      .update({ address_field_meta: addressFieldMeta })
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+  }
+
   async applyAddressSuggestion(suggestion: ForwardGeocodeResult): Promise<void> {
     const img = this.deps.signals.image();
     if (!img) return;

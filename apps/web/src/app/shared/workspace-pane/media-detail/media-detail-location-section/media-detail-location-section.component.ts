@@ -1,6 +1,8 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { AddressSearchComponent } from '../address-search/address-search.component';
 import { AddressFieldComboboxComponent } from '../address-field-combobox/address-field-combobox.component';
+import { CoordinatesFieldEditorComponent } from '../coordinates-field-editor/coordinates-field-editor.component';
+import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../media-detail-view.utils';
@@ -9,6 +11,7 @@ import type { DetailEditingField, ImageRecord } from '../media-detail-view.types
 import type { AddressFieldContext, AddressFieldSuggestion } from '../../../../core/address-field-suggest/address-field-suggest.types';
 import { AddressFieldSuggestService } from '../../../../core/address-field-suggest/address-field-suggest.service';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
+import { HlmSpinnerComponent } from '../../../../shared/ui/spinner';
 
 interface AddressFieldDefinition {
   name: 'street' | 'city' | 'district' | 'country';
@@ -35,7 +38,14 @@ export interface AddressFieldSaveEvent {
 @Component({
   selector: 'app-media-detail-location-section',
   standalone: true,
-  imports: [AddressSearchComponent, AddressFieldComboboxComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [
+    AddressSearchComponent,
+    AddressFieldComboboxComponent,
+    CoordinatesFieldEditorComponent,
+    DetailRowInlineConfirmActionComponent,
+    ...HLM_BUTTON_IMPORTS,
+    HlmSpinnerComponent,
+  ],
   templateUrl: './media-detail-location-section.component.html',
   styleUrl: './media-detail-location-section.component.scss',
 })
@@ -47,9 +57,9 @@ export class MediaDetailLocationSectionComponent {
   readonly image = input<ImageRecord>({} as ImageRecord);
   readonly fullAddress = input('');
   readonly editingField = input<DetailEditingField>(null);
-  readonly isGpsAssignmentLocked = input(false);
   readonly isCorrected = input(false);
   readonly saving = input(false);
+  readonly addressResolving = input(false);
 
   readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();
   /** Extended save event includes optional suggestion for meta persistence. */
@@ -61,6 +71,7 @@ export class MediaDetailLocationSectionComponent {
   readonly copyCoordinatesRequested = output<void>();
   readonly mapLocationPickRequested = output<void>();
   readonly revertCoordinatesRequested = output<void>();
+  readonly coordinatesSaveRequested = output<string>();
 
   readonly addressSearchContext = computed<SearchQueryContext>(() => {
     const img = this.image();
@@ -171,6 +182,31 @@ export class MediaDetailLocationSectionComponent {
 
   formatCoord(value: number | null): string {
     return formatCoordinate(value);
+  }
+
+  readonly hasResolvableCoordinates = computed(() => {
+    const img = this.image();
+    return img.latitude != null && img.longitude != null;
+  });
+
+  coordinatesDisplayValue(): string {
+    const img = this.image();
+    if (img.latitude == null || img.longitude == null) {
+      return '';
+    }
+    return `${this.formatCoord(img.latitude)}°, ${this.formatCoord(img.longitude)}°`;
+  }
+
+  coordinatesEditInitialValue(): string {
+    const img = this.image();
+    if (img.latitude == null || img.longitude == null) {
+      return '';
+    }
+    return `${img.latitude.toFixed(6)}, ${img.longitude.toFixed(6)}`;
+  }
+
+  coordinatesRowIcon(): string {
+    return this.hasResolvableCoordinates() ? 'gps_fixed' : 'gps_off';
   }
 
   fieldValue(field: AddressFieldDefinition['name']): string {
