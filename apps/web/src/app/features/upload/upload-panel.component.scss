@@ -186,19 +186,12 @@
     flex: 0 0 auto;
   }
 
-  // Segmented toggles (lanes + location mode) — ghost nav link hover/active on white track.
-  // @see nav.component.scss — .nav__link, .nav__link--active
+  // Pill toggles (lanes + location mode): white track; segment radius from shared hlm toggle-group CVA.
+  // @see nav.component.scss — .nav__link (hover/active colors live in toggle-group-variants.ts)
   &__segmented {
     width: 100%;
 
-    .upload-panel__segmented__track {
-      gap: var(--spacing-1);
-      padding: var(--spacing-1);
-      border-radius: var(--container-radius-control);
-    }
-
-    .upload-panel__segmented__item {
-      border-radius: var(--container-radius-control);
+    [hlmToggleGroupItem] {
       transition:
         background 80ms ease-out,
         color 80ms ease-out;
