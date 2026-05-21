@@ -2,6 +2,7 @@
 // @see docs/specs/ui/workspace/workspace-pane.md
 
 @use '../detail-row-slots';
+@use '../detail-row-value-flash';
 
 :host {
   display: grid;
@@ -110,7 +111,8 @@
     background 80ms ease-out,
     color 80ms ease-out;
 
-  &:hover {
+  &:hover,
+  &.address-search__result-item--focused {
     background: color-mix(in srgb, var(--primary) 8%, transparent);
 
     .address-search__result-icon,

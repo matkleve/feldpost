@@ -86,14 +86,14 @@ interface MediaDetailFieldsHelperDeps {
 export class MediaDetailFieldsHelper {
   constructor(private readonly deps: MediaDetailFieldsHelperDeps) {}
 
-  async saveImageField(field: string, newValue: string): Promise<void> {
+  async saveImageField(field: string, newValue: string): Promise<boolean> {
     const img = this.deps.signals.media();
-    if (!img) return;
+    if (!img) return false;
 
     const oldValue = (img as unknown as Record<string, unknown>)[field] as string | null;
     if (newValue === (oldValue ?? '')) {
       this.deps.signals.editingField.set(null);
-      return;
+      return true;
     }
 
     const updateValue = newValue || null;
@@ -108,9 +108,12 @@ export class MediaDetailFieldsHelper {
 
     if (error) {
       this.deps.signals.media.update((prev) => (prev ? { ...prev, [field]: oldValue } : prev));
+      this.deps.signals.saving.set(false);
+      return false;
     }
 
     this.deps.signals.saving.set(false);
+    return true;
   }
 
   openCapturedAtEditor(): void {

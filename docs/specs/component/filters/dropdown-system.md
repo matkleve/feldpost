@@ -60,6 +60,17 @@ Implicit ownership caused “edit the wrong layer, no visible change.” The tab
 | **CDK drag vs shell close** | Toolbar: **`[outsideCloseEnabled]="!isDragging()"`**; grouping emits drag start/end | Shell stays generic | Drag does not close shell until drag end + timeout |
 | **Domain rows / rules** | Sort, grouping, filter, projects feature components | Shared body does not own domain row markup | — |
 
+### Typeahead list keyboard (media detail address surfaces)
+
+**Not** the toolbar `dd-item` inventory above — applies to **`option-menu-list`** panels mounted by **`app-dropdown-shell`** when the user is searching addresses:
+
+| Surface | Spec | Keys (when results exist) |
+| --- | --- | --- |
+| Whole-address bar | [address-search.md](../../ui/media-detail/address-search.md#keyboard-navigation-results-listbox) | Tab / ↓ enter list & next row; Shift+Tab / ↑ previous (first row → input); Enter applies first row from input or highlighted row from list |
+| Per-field combobox | [address-field-editing.md](../../ui/media-detail/address-field-editing.md) | Arrow ↑/↓ + Enter (Tab not used — see combobox spec) |
+
+Implementations must keep highlight class, `aria-activedescendant`, and scroll-into-view for the active option in sync.
+
 ### Escape (keyboard)
 
 **Owner:** **`DropdownShellComponent`** — host listens for **`document:keydown.escape`** and emits **`closeRequested`**.

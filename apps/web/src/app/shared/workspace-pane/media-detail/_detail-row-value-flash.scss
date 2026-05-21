@@ -1,0 +1,20 @@
+// Primary text flash on location value cells after geocode update (not background).
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+
+@layer states {
+  .detail-row__field-trigger.detail-row__value--flash-updated,
+  .address-search__trigger-text.detail-row__value--flash-updated {
+    animation: detail-location-value-flash 2.75s ease-out;
+  }
+}
+
+@keyframes detail-location-value-flash {
+  0%,
+  55% {
+    color: var(--primary);
+  }
+
+  100% {
+    color: var(--foreground);
+  }
+}

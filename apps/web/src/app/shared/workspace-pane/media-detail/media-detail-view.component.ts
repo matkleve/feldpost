@@ -110,8 +110,13 @@ import type { AddressFieldSaveEvent } from './media-detail-location-section/medi
 import type {
   AddressFieldKind,
   AddressFieldMeta,
+  AddressFieldVerification,
 } from '../../../core/address-field-suggest/address-field-suggest.types';
 import type { ReconciliationOffer } from '../../../core/address-reconciliation/address-reconciliation.types';
+import {
+  collectLocationFieldChanges,
+  type LocationHighlightField,
+} from './media-detail-location-highlight.util';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
@@ -208,7 +213,10 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly addressFieldsResolving = signal(false);
   /** Forward geocode in flight after address edit — spinner on coordinates row. */
   readonly coordinatesResolving = signal(false);
+  /** Location rows that briefly flash primary after a successful update. */
+  readonly highlightedLocationFields = signal<ReadonlySet<LocationHighlightField>>(new Set());
   readonly acceptTypes = Array.from(ALLOWED_MIME_TYPES).join(',');
+  private locationHighlightTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly activeJobId = signal<string | null>(null);
 
   private abortController: AbortController | null = null;
@@ -585,6 +593,10 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.abortController?.abort();
+    if (this.locationHighlightTimer) {
+      clearTimeout(this.locationHighlightTimer);
+      this.locationHighlightTimer = null;
+    }
   }
 
   private reset(): void {
@@ -627,6 +639,26 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.media.set(mergeImageLocationPatch(current, patch));
   }
 
+  private static readonly LOCATION_FIELD_FLASH_MS = 3200;
+
+  private flashLocationFields(fields: readonly LocationHighlightField[]): void {
+    if (fields.length === 0) {
+      return;
+    }
+    if (this.locationHighlightTimer) {
+      clearTimeout(this.locationHighlightTimer);
+    }
+    // Reset so repeated updates replay the animation; run after spinners hide values.
+    this.highlightedLocationFields.set(new Set());
+    queueMicrotask(() => {
+      this.highlightedLocationFields.set(new Set(fields));
+      this.locationHighlightTimer = setTimeout(() => {
+        this.highlightedLocationFields.set(new Set());
+        this.locationHighlightTimer = null;
+      }, MediaDetailViewComponent.LOCATION_FIELD_FLASH_MS);
+    });
+  }
+
   /** Map-pick / external coordinate save — in-place patch only, no `loadMedia`. */
   private handleExternalLocationSync(
     mediaId: string,
@@ -654,11 +686,16 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (!updatesGps) {
       return;
     }
-    void this.syncLocationFieldsAfterGps(mediaId);
+    void this.syncLocationFieldsAfterGps(mediaId, current);
   }
 
   /** Refresh structured address + coords from DB after GPS assignment (keeps spinners, no full reload). */
-  private async syncLocationFieldsAfterGps(mediaId: string): Promise<void> {
+  private async syncLocationFieldsAfterGps(
+    mediaId: string,
+    snapshotBefore?: ImageRecord,
+  ): Promise<void> {
+    const before = snapshotBefore ?? this.media();
+    let fieldsToFlash: LocationHighlightField[] = [];
     try {
       const mediaItemId = this.mediaItemId();
       if (mediaItemId) {
@@ -696,8 +733,16 @@ export class MediaDetailViewComponent implements OnDestroy {
       if (refresh.applied && hasValidGpsCoordinates(this.media())) {
         this.mediaLocationStatus.set('resolved');
       }
+
+      const after = this.media();
+      if (before && after) {
+        fieldsToFlash = collectLocationFieldChanges(before, after);
+      }
     } finally {
       this.addressFieldsResolving.set(false);
+      if (fieldsToFlash.length > 0) {
+        queueMicrotask(() => this.flashLocationFields(fieldsToFlash));
+      }
     }
   }
 
@@ -883,32 +928,104 @@ export class MediaDetailViewComponent implements OnDestroy {
    * Called from MediaDetailLocationSectionComponent.fieldSaveRequested.
    * @see docs/specs/ui/media-detail/address-field-editing.md
    */
+  async clearAddressField(field: AddressFieldKind): Promise<void> {
+    await this.executeClearAddressField(field);
+  }
+
   async saveAddressField(event: AddressFieldSaveEvent): Promise<void> {
-    await this.fieldsHelper.saveImageField(event.field, event.value);
+    const saved = await this.fieldsHelper.saveImageField(event.field, event.value);
+    if (!saved) {
+      return;
+    }
 
-    // Write verification metadata when field is a known address component
     const addressFields: readonly string[] = ['street', 'city', 'district', 'country'];
-    if (!addressFields.includes(event.field)) return;
-
-    const mediaItem = this.media();
-    if (!mediaItem) return;
+    if (!addressFields.includes(event.field)) {
+      return;
+    }
 
     const field = event.field as AddressFieldKind;
-    const existingMeta = mediaItem.address_field_meta ?? {};
     const newFieldMeta = event.suggestion
       ? { source: 'geocoder' as const, verified: true }
       : { source: 'user' as const, verified: false };
 
-    const updatedMeta = { ...existingMeta, [field]: newFieldMeta };
+    await this.persistAddressFieldMeta(field, newFieldMeta);
+
+    if (event.value.trim()) {
+      void this.resolveGpsFromAddressFields();
+    }
+  }
+
+  private async persistAddressFieldMeta(
+    field: AddressFieldKind,
+    verification: AddressFieldVerification,
+  ): Promise<void> {
+    const mediaItem = this.media();
+    if (!mediaItem) {
+      return;
+    }
+
+    const updatedMeta = { ...(mediaItem.address_field_meta ?? {}), [field]: verification };
     await this.supabaseService.client
       .from('media_items')
       .update({ address_field_meta: updatedMeta })
       .or(`id.eq.${mediaItem.id},source_image_id.eq.${mediaItem.id}`);
 
-    this.media.set({ ...mediaItem, address_field_meta: updatedMeta });
-    if (event.value.trim()) {
-      void this.resolveGpsFromAddressFields();
+    this.media.update((current) =>
+      current ? { ...current, address_field_meta: updatedMeta } : current,
+    );
+  }
+
+  private static readonly ADDRESS_FIELD_LABEL_KEYS: Record<
+    AddressFieldKind,
+    { key: string; fallback: string }
+  > = {
+    street: { key: 'workspace.imageDetail.field.street', fallback: 'Street' },
+    city: { key: 'workspace.imageDetail.field.city', fallback: 'City' },
+    district: { key: 'workspace.imageDetail.field.district', fallback: 'District' },
+    country: { key: 'workspace.imageDetail.field.country', fallback: 'Country' },
+  };
+
+  private async executeClearAddressField(field: AddressFieldKind): Promise<void> {
+    const img = this.media();
+    if (!img) {
+      return;
     }
+
+    const previousValue = img[field];
+    if (!previousValue?.trim()) {
+      return;
+    }
+
+    const previousMeta = img.address_field_meta?.[field];
+    const label = MediaDetailViewComponent.ADDRESS_FIELD_LABEL_KEYS[field];
+
+    const cleared = await this.fieldsHelper.saveImageField(field, '');
+    if (!cleared) {
+      this.toastService.show({
+        message: this.t(
+          'workspace.imageDetail.toast.addressFieldClearFailed',
+          'Could not clear field',
+        ),
+        type: 'error',
+      });
+      return;
+    }
+
+    await this.persistAddressFieldMeta(field, { source: 'user', verified: false });
+
+    const fieldLabel = this.t(label.key, label.fallback);
+    this.showUndoToast(
+      this.t('workspace.imageDetail.toast.addressFieldCleared', `${fieldLabel} removed`),
+      async () => {
+        const restored = await this.fieldsHelper.saveImageField(field, previousValue);
+        if (!restored) {
+          return;
+        }
+        if (previousMeta) {
+          await this.persistAddressFieldMeta(field, previousMeta);
+        }
+      },
+    );
   }
 
   /** Forward-geocode composed address lines and update active coordinates (address → GPS). */
@@ -923,6 +1040,8 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
+    const before = media;
+    let fieldsToFlash: LocationHighlightField[] = [];
     this.coordinatesResolving.set(true);
     try {
       const suggestion = await this.geocodingService.forward(query);
@@ -944,11 +1063,26 @@ export class MediaDetailViewComponent implements OnDestroy {
         return;
       }
 
-      this.applyLocationPatch(locationPatchFromForwardGeocode(suggestion));
+      const patch = locationPatchFromForwardGeocode(suggestion);
+      if (result.address) {
+        Object.assign(patch, result.address);
+      }
+      this.applyLocationPatch(patch);
       await this.fieldsHelper.persistAddressFieldMetaFromGeocode(suggestion);
+
+      const signal = this.abortController?.signal ?? new AbortController().signal;
+      await this.dataFacade.refreshMediaLocationFields(media.id, signal);
+
+      const after = this.media();
+      if (after) {
+        fieldsToFlash = collectLocationFieldChanges(before, after);
+      }
       this.mediaLocationStatus.set('resolved');
     } finally {
       this.coordinatesResolving.set(false);
+      if (fieldsToFlash.length > 0) {
+        queueMicrotask(() => this.flashLocationFields(fieldsToFlash));
+      }
     }
   }
 
@@ -1209,36 +1343,72 @@ export class MediaDetailViewComponent implements OnDestroy {
     const media = this.media();
     if (!media) return;
 
-    const hasCoordinates = Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng);
-    if (!hasCoordinates) {
-      await this.fieldsHelper.applyAddressSuggestion(suggestion);
-      return;
+    const before = media;
+    let resolved = suggestion;
+    if (!Number.isFinite(suggestion.lat) || !Number.isFinite(suggestion.lng)) {
+      const query = suggestion.addressLabel?.trim() || this.fullAddress().trim();
+      if (!query) {
+        await this.fieldsHelper.applyAddressSuggestion(suggestion);
+        return;
+      }
+      const forward = await this.geocodingService.forward(query);
+      if (!forward) {
+        await this.fieldsHelper.applyAddressSuggestion(suggestion);
+        return;
+      }
+      resolved = forward;
     }
 
     this.saving.set(true);
+    this.addressFieldsResolving.set(true);
     this.coordinatesResolving.set(true);
-    const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
-      media.id,
-      suggestion,
-    );
-    if (!result.ok) {
-      this.saving.set(false);
-      this.coordinatesResolving.set(false);
-      this.toastService.show({
-        ...buildLocationUpdateFailureToast(result.error, {
-          file: 'media-detail-view.component.ts',
-          fn: 'applyAddressSuggestion',
-        }),
-      });
-      return;
-    }
+    let fieldsToFlash: LocationHighlightField[] = [];
+    try {
+      const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
+        media.id,
+        resolved,
+      );
+      if (!result.ok) {
+        this.toastService.show({
+          ...buildLocationUpdateFailureToast(result.error, {
+            file: 'media-detail-view.component.ts',
+            fn: 'applyAddressSuggestion',
+          }),
+        });
+        return;
+      }
 
-    this.applyLocationPatch(locationPatchFromForwardGeocode(suggestion));
-    await this.fieldsHelper.persistAddressFieldMetaFromGeocode(suggestion);
-    this.mediaLocationStatus.set('resolved');
-    this.editingField.set(null);
-    this.saving.set(false);
-    this.coordinatesResolving.set(false);
+      const patch = locationPatchFromForwardGeocode(resolved);
+      if (result.lat !== undefined) {
+        patch.latitude = result.lat;
+      }
+      if (result.lng !== undefined) {
+        patch.longitude = result.lng;
+      }
+      if (result.address) {
+        Object.assign(patch, result.address);
+      }
+
+      this.applyLocationPatch(patch);
+      await this.fieldsHelper.persistAddressFieldMetaFromGeocode(resolved);
+
+      const signal = this.abortController?.signal ?? new AbortController().signal;
+      await this.dataFacade.refreshMediaLocationFields(media.id, signal);
+
+      const after = this.media();
+      if (after) {
+        fieldsToFlash = collectLocationFieldChanges(before, after);
+      }
+      this.mediaLocationStatus.set('resolved');
+      this.editingField.set(null);
+    } finally {
+      this.saving.set(false);
+      this.addressFieldsResolving.set(false);
+      this.coordinatesResolving.set(false);
+      if (fieldsToFlash.length > 0) {
+        queueMicrotask(() => this.flashLocationFields(fieldsToFlash));
+      }
+    }
   }
 
   onChipClicked(index: number): void {

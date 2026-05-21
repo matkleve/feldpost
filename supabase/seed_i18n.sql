@@ -10078,6 +10078,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.addressSearch.aria.results', 'Address suggestions', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/address-search listbox aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address suggestions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.aria.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressvorschläge', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.aria.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Suggerimenti indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.addressSearch.aria.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0386.workspace_addresssearch_placeholder', 'workspace.addressSearch.placeholder', 'en', 'apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -12119,6 +12150,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Indirizzo rimosso', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressCleared'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.addressFieldCleared', 'Field removed', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view toast after clear single address field (message includes field label)')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Field removed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressFieldCleared'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Feld entfernt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressFieldCleared'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Campo rimosso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressFieldCleared'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.addressFieldClearFailed', 'Could not clear field', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view toast when single address field clear fails')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not clear field', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressFieldClearFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Feld konnte nicht geleert werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressFieldClearFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile cancellare il campo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.addressFieldClearFailed'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -18,7 +18,7 @@ Search icon, text field, clear control, and results list with loading state; com
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/workspace-pane/address-search/`
+- **Code:** `apps/web/src/app/shared/workspace-pane/media-detail/address-search/`
 - **Parent:** `MediaDetailInlineSectionComponent` / `MediaDetailViewComponent` composition
 
 ## Actions
@@ -27,6 +27,23 @@ Search icon, text field, clear control, and results list with loading state; com
 | --- | --- | --- | --- |
 | 1 | Types query | Debounced geocode search | Input |
 | 2 | Selects result | Applies suggestion to media record | Pick |
+
+## Keyboard navigation (results listbox)
+
+Normative for `app-address-search` while the results panel is open (`showResultsPanel`) and at least one selectable row exists (saved locations, then places — section labels and loading rows are not selectable).
+
+| Key | Focus on input (`focusedIndex === -1`) | Focus in list (`focusedIndex >= 0`) |
+| --- | --- | --- |
+| **Tab** | Move highlight into the list on the **first** row (`focusedIndex = 0`); default browser tab order is suppressed so focus stays in the control | Move highlight to the **next** row; stops on the last row |
+| **Shift+Tab** | No-op (browser default) | Move highlight to the **previous** row; from the first row, return focus to the input (`focusedIndex = -1`) |
+| **ArrowDown** | Same as **Tab** (enter list on first row, else next row) | Next row (clamp at last) |
+| **ArrowUp** | No-op | Previous row; from the first row, return focus to the input |
+| **Enter** | Apply the **first** combined result (saved row 0, else first place) | Apply the **highlighted** row |
+| **Escape** | Close search and emit `deactivated` | Same |
+
+**Visual:** Highlighted row uses `.address-search__result-item--focused` (same clay tint as hover). Input exposes `role="combobox"`, `aria-expanded`, `aria-controls`, and `aria-activedescendant` pointing at `address-search-option-{index}`.
+
+**Shared pattern:** Per-field address rows use the same list-highlight model in [address-field-editing.md](address-field-editing.md) (`app-address-field-combobox`). Toolbar / filter menus use [dropdown-system.md](../../component/filters/dropdown-system.md) (different shell; no typeahead list).
 
 ## Component Hierarchy
 
@@ -62,9 +79,9 @@ Idle, loading, results, error — FSM via `[attr.data-state]` recommended.
 
 | File | Purpose |
 | --- | --- |
-| `apps/web/src/app/shared/workspace-pane/address-search/address-search.component.ts` | Component |
-| `apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html` | Template |
-| `apps/web/src/app/shared/workspace-pane/address-search/address-search.component.scss` | Styles |
+| `apps/web/src/app/shared/workspace-pane/media-detail/address-search/address-search.component.ts` | Component |
+| `apps/web/src/app/shared/workspace-pane/media-detail/address-search/address-search.component.html` | Template |
+| `apps/web/src/app/shared/workspace-pane/media-detail/address-search/address-search.component.scss` | Styles |
 
 ## Wiring
 
@@ -74,3 +91,4 @@ Idle, loading, results, error — FSM via `[attr.data-state]` recommended.
 
 - [ ] i18n keys `workspace.addressSearch.*`.
 - [ ] Loading and empty results are mutually exclusive visual owners.
+- [ ] Keyboard navigation matches [Keyboard navigation (results listbox)](#keyboard-navigation-results-listbox): Tab / Shift+Tab / arrows move highlight; Enter applies first result from input or highlighted row from list.

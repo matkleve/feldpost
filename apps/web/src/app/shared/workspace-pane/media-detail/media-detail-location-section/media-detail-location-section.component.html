@@ -4,6 +4,7 @@
   <app-address-search
     [currentAddress]="fullAddress()"
     [addressFieldsResolving]="addressFieldsResolving()"
+    [addressHighlighted]="isFieldHighlighted('address')"
     [searchContext]="addressSearchContext()"
     [editingActive]="editingField() === 'address_search'"
     (searchOpened)="fieldEditRequested.emit('address_search')"
@@ -65,6 +66,7 @@
             <button
               class="detail-row__field-trigger"
               type="button"
+              [class.detail-row__value--flash-updated]="isFieldHighlighted(fieldDef.name)"
               (click)="fieldEditRequested.emit(fieldDef.name)"
             >
               {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
@@ -183,6 +185,7 @@
           <button
             class="detail-row__field-trigger detail-row__value--mono"
             type="button"
+            [class.detail-row__value--flash-updated]="isFieldHighlighted('coordinates')"
             [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
             (click)="fieldEditRequested.emit('coordinates')"
           >

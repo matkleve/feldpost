@@ -2,6 +2,7 @@
 // @see docs/specs/ui/media-detail/media-detail-location-section.md
 
 @use '../detail-row-slots';
+@use '../detail-row-value-flash';
 
 :host {
   display: flex;
@@ -76,3 +77,4 @@ app-coordinates-field-editor {
     letter-spacing: -0.02em;
   }
 }
+

@@ -51,6 +51,7 @@ export class AddressSearchComponent implements OnDestroy {
 
   readonly currentAddress = input('');
   readonly addressFieldsResolving = input(false);
+  readonly addressHighlighted = input(false);
   readonly searchContext = input<SearchQueryContext>({});
   /** When parent clears `editingField`, close the active search surface. */
   readonly editingActive = input(false);
@@ -89,6 +90,20 @@ export class AddressSearchComponent implements OnDestroy {
         this.loadingSaved() ||
         this.loadingPlaces()),
   );
+
+  /** Flat selectable list: saved locations first, then geocoder places. */
+  readonly selectableCandidates = computed(() => [
+    ...this.savedSuggestions(),
+    ...this.placeSuggestions(),
+  ]);
+
+  /** -1 = highlight on input; 0..n-1 = highlighted result row. */
+  readonly focusedIndex = signal(-1);
+
+  readonly focusedOptionId = computed(() => {
+    const idx = this.focusedIndex();
+    return idx >= 0 ? `address-search-option-${idx}` : null;
+  });
 
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
@@ -170,6 +185,7 @@ export class AddressSearchComponent implements OnDestroy {
     this.placeSuggestions.set([]);
     this.loadingSaved.set(false);
     this.loadingPlaces.set(false);
+    this.focusedIndex.set(-1);
     this.clearGeocoderDebounce();
     this.searchSubscription?.unsubscribe();
     this.searchSubscription = null;
@@ -178,6 +194,7 @@ export class AddressSearchComponent implements OnDestroy {
 
   onInput(q: string): void {
     this.query.set(q);
+    this.focusedIndex.set(-1);
     if (!q.trim()) {
       this.savedSuggestions.set([]);
       this.placeSuggestions.set([]);
@@ -186,13 +203,63 @@ export class AddressSearchComponent implements OnDestroy {
     this.runGeocoderDebounced(q);
   }
 
-  selectFirst(): void {
-    const saved = this.savedSuggestions();
-    const places = this.placeSuggestions();
-    const first = saved[0] ?? places[0];
-    if (first) {
-      void this.apply(first);
+  onInputKeydown(event: KeyboardEvent): void {
+    const candidates = this.selectableCandidates();
+    const maxIndex = candidates.length - 1;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancel();
+      return;
     }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (candidates.length === 0) {
+        return;
+      }
+      const index = this.focusedIndex() >= 0 ? this.focusedIndex() : 0;
+      void this.apply(candidates[index]!);
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      if (!this.showResultsPanel() || candidates.length === 0) {
+        return;
+      }
+      event.preventDefault();
+      if (event.shiftKey) {
+        this.moveHighlight(-1, maxIndex);
+      } else {
+        this.moveHighlight(1, maxIndex);
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      if (!this.showResultsPanel() || candidates.length === 0) {
+        return;
+      }
+      event.preventDefault();
+      this.moveHighlight(1, maxIndex);
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      if (!this.showResultsPanel() || candidates.length === 0) {
+        return;
+      }
+      event.preventDefault();
+      this.moveHighlight(-1, maxIndex);
+    }
+  }
+
+  savedCandidateIndex(localIndex: number): number {
+    return localIndex;
+  }
+
+  placeCandidateIndex(localIndex: number): number {
+    return this.savedSuggestions().length + localIndex;
   }
 
   onResultSelect(candidate: SearchCandidate, event: Event): void {
@@ -299,6 +366,40 @@ export class AddressSearchComponent implements OnDestroy {
           },
         });
     }, 400);
+  }
+
+  private moveHighlight(delta: 1 | -1, maxIndex: number): void {
+    if (maxIndex < 0) {
+      return;
+    }
+
+    const current = this.focusedIndex();
+    if (delta > 0) {
+      if (current < 0) {
+        this.focusedIndex.set(0);
+      } else {
+        this.focusedIndex.set(Math.min(current + 1, maxIndex));
+      }
+    } else if (current <= 0) {
+      this.focusedIndex.set(-1);
+      this.searchInputRef()?.nativeElement.focus();
+    } else {
+      this.focusedIndex.set(current - 1);
+    }
+
+    this.scrollFocusedIntoView();
+  }
+
+  private scrollFocusedIntoView(): void {
+    const idx = this.focusedIndex();
+    if (idx < 0) {
+      return;
+    }
+    setTimeout(() => {
+      const root = this.elementRef.nativeElement as HTMLElement;
+      const option = root.querySelector(`[data-address-search-option="${idx}"]`);
+      option?.scrollIntoView({ block: 'nearest' });
+    });
   }
 
   private clearGeocoderDebounce(): void {

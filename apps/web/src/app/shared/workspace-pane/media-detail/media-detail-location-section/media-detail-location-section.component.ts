@@ -5,6 +5,7 @@ import { CoordinatesFieldEditorComponent } from '../coordinates-field-editor/coo
 import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import type { LocationHighlightField } from '../media-detail-location-highlight.util';
 import {
   formatCoordinate,
   hasValidGpsCoordinates,
@@ -64,10 +65,12 @@ export class MediaDetailLocationSectionComponent {
   readonly saving = input(false);
   readonly addressFieldsResolving = input(false);
   readonly coordinatesResolving = input(false);
+  readonly highlightedFields = input<ReadonlySet<LocationHighlightField>>(new Set());
 
   readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();
   /** Extended save event includes optional suggestion for meta persistence. */
   readonly fieldSaveRequested = output<AddressFieldSaveEvent>();
+  readonly fieldClearRequested = output<AddressFieldDefinition['name']>();
   readonly editingCancelled = output<void>();
   readonly fieldResolveRequested = output<{ field: string }>();
   readonly addressSuggestionApplied = output<ForwardGeocodeResult>();
@@ -123,7 +126,7 @@ export class MediaDetailLocationSectionComponent {
   }
 
   onFieldClear(field: AddressFieldDefinition['name']): void {
-    this.fieldSaveRequested.emit({ field, value: '' });
+    this.fieldClearRequested.emit(field);
   }
 
   onResolveRequested(field: AddressFieldDefinition['name']): void {
@@ -231,5 +234,9 @@ export class MediaDetailLocationSectionComponent {
 
   fieldValue(field: AddressFieldDefinition['name']): string {
     return this.fieldValues()[field];
+  }
+
+  isFieldHighlighted(field: LocationHighlightField): boolean {
+    return this.highlightedFields().has(field);
   }
 }
