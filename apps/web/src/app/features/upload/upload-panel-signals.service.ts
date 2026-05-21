@@ -71,12 +71,11 @@ export class UploadPanelSignalsService {
       const overrides = this.sessionLocationModeOverrides();
 
       if (!activeProjectId) {
-        this._locationRequirementMode.set('optional');
         return;
       }
 
       const overridden = overrides.get(activeProjectId);
-      if (overridden) {
+      if (overridden !== undefined) {
         this._locationRequirementMode.set(overridden);
         return;
       }
@@ -90,18 +89,16 @@ export class UploadPanelSignalsService {
   }
 
   setLocationRequirementMode(mode: UploadLocationRequirementMode): void {
-    this._locationRequirementMode.set(mode);
-
     const activeProjectId = this.activeProjectId();
-    if (!activeProjectId) {
-      return;
+    if (activeProjectId) {
+      this.sessionLocationModeOverrides.update((current) => {
+        const next = new Map(current);
+        next.set(activeProjectId, mode);
+        return next;
+      });
     }
 
-    this.sessionLocationModeOverrides.update((current) => {
-      const next = new Map(current);
-      next.set(activeProjectId, mode);
-      return next;
-    });
+    this._locationRequirementMode.set(mode);
   }
 
   private async applyProjectDefaultLocationMode(projectId: string): Promise<void> {

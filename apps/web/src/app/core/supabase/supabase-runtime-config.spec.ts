@@ -33,7 +33,13 @@ describe('resolveSupabaseRuntimeConfig', () => {
   });
 
   it('uses local when health check succeeds', async () => {
-    vi.mocked(fetch).mockResolvedValue({ ok: true } as Response);
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/functions/v1/geocode')) {
+        return { status: 200 } as Response;
+      }
+      return { ok: true } as Response;
+    });
 
     const resolved = await resolveSupabaseRuntimeConfig();
 
@@ -44,6 +50,23 @@ describe('resolveSupabaseRuntimeConfig', () => {
       'http://127.0.0.1:54321/auth/v1/health',
       expect.objectContaining({ method: 'GET' }),
     );
+  });
+
+  it('warns when local auth is up but geocode edge returns 503', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/functions/v1/geocode')) {
+        return { status: 503 } as Response;
+      }
+      return { ok: true } as Response;
+    });
+
+    const resolved = await resolveSupabaseRuntimeConfig();
+
+    expect(resolved.target).toBe('local');
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Edge Functions'));
+    warnSpy.mockRestore();
   });
 
   it('falls back to cloud when local health check fails', async () => {

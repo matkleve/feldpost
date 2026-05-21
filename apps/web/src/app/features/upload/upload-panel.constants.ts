@@ -3,8 +3,10 @@
  * Extracted to reduce component file size and improve testability.
  */
 
-import type { ChipVariant } from '../../shared/components/chip/chip.component';
+import { chipVariantForFileType } from '../../core/media/file-type-chip-variant';
 import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-registry';
+import { fileTypeDescriptionForExtension } from './upload-panel-file-type-descriptions';
+import type { ChipVariant } from '../../shared/components/chip/chip.component';
 import type { UploadLane } from './upload-phase.helpers';
 
 export type UploadFileTypeChip = {
@@ -12,6 +14,9 @@ export type UploadFileTypeChip = {
   icon: string;
   variant: ChipVariant;
   order: number;
+  /** Hover / screen-reader description (not the short badge label). */
+  descriptionKey: string;
+  descriptionFallback: string;
 };
 
 export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'uploaded', 'issues'];
@@ -39,27 +44,14 @@ export const DEFAULT_FILE_TYPE_EXTENSIONS: ReadonlyArray<string> = [
 export const DEFAULT_FILE_TYPE_CHIPS: ReadonlyArray<UploadFileTypeChip> =
   DEFAULT_FILE_TYPE_EXTENSIONS.map((ext, index) => {
     const definition = resolveFileType({ extension: ext });
+    const description = fileTypeDescriptionForExtension(ext);
     return {
       type: fileTypeBadge({ extension: ext }) ?? ext.toUpperCase(),
       icon: definition.category === 'unknown' ? 'description' : definition.icon,
-      variant: toChipVariant(definition.category),
+      variant: chipVariantForFileType(definition),
       order: index + 1,
+      descriptionKey: description.descriptionKey,
+      descriptionFallback: description.descriptionFallback,
     };
   });
 
-function toChipVariant(category: string): ChipVariant {
-  switch (category) {
-    case 'image':
-      return 'filetype-image';
-    case 'video':
-      return 'filetype-video';
-    case 'spreadsheet':
-      return 'filetype-spreadsheet';
-    case 'presentation':
-      return 'filetype-presentation';
-    case 'document':
-      return 'filetype-document';
-    default:
-      return 'default';
-  }
-}

@@ -23,22 +23,23 @@ import {
   type ZoomToLocationEvent,
 } from './upload-panel-row-handlers';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
-import { dropzoneLabelText } from './upload-panel-helpers';
+import {
+  alternateUploadLocationRequirementMode,
+  dropzoneLabelText,
+  locationModeToggleAriaLabel,
+} from './upload-panel-helpers';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../shared/ui/input';
+import { HLM_SWITCH_IMPORTS } from '../../shared/ui/switch';
 import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { HlmMenuItemDirective } from '../../shared/ui/menu';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectSelectDialogComponent } from '../../shared/project-select-dialog/project-select-dialog.component';
-import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { BrnToggleGroupImports } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
-import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
-import {
-  toggleOptionLayout,
-  toggleSingleStringValue,
-} from '../../shared/ui/toggle-group/toggle-group-option.helpers';
-import { DEFAULT_FILE_TYPE_CHIPS } from './upload-panel.constants';
+import { toggleOptionLayout } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
+import { DEFAULT_FILE_TYPE_GROUPS } from './upload-panel-file-type-groups';
 import { UploadPanelJobActionsService } from './upload-panel-job-actions.service';
 import { UploadPanelBulkActionsService } from './upload-panel-bulk-actions.service';
 import { UploadPanelViewModelService } from './upload-panel-view-model.service';
@@ -70,6 +71,7 @@ export type {
     ...HLM_TOGGLE_GROUP_IMPORTS,
     ...HLM_BUTTON_IMPORTS,
     ...HLM_INPUT_IMPORTS,
+    ...HLM_SWITCH_IMPORTS,
     HlmMenuItemDirective,
     ProjectSelectDialogComponent,
     PaneFooterComponent,
@@ -155,24 +157,18 @@ export class UploadPanelComponent {
   readonly priorityWorkflowEnabled = computed(() => this.embeddedInPane());
   readonly selectedLane = this.signals.selectedLane;
   readonly locationRequirementMode = this.signals.locationRequirementMode;
-  readonly locationModeSwitchOptions = computed<ReadonlyArray<ToggleGroupOption>>(() => [
-    {
-      id: 'required',
-      type: 'icon-with-text',
-      icon: 'verified_user',
-      label: this.t('upload.location.mode.required', 'Location required'),
-      title: this.t('upload.location.mode.required', 'Location required'),
-      ariaLabel: this.t('upload.location.mode.required', 'Location required'),
-    },
-    {
-      id: 'optional',
-      type: 'icon-with-text',
-      icon: 'gpp_maybe',
-      label: this.t('upload.location.mode.optional', 'Location not required'),
-      title: this.t('upload.location.mode.optional', 'Location not required'),
-      ariaLabel: this.t('upload.location.mode.optional', 'Location not required'),
-    },
-  ]);
+  private readonly locationModeRowPreview = signal(false);
+  readonly locationModeDisplayMode = computed(() => {
+    const current = this.locationRequirementMode();
+    return this.locationModeRowPreview()
+      ? alternateUploadLocationRequirementMode(current)
+      : current;
+  });
+  readonly locationModeToggleAria = computed(() =>
+    locationModeToggleAriaLabel(this.locationModeDisplayMode(), (key, fallback) =>
+      this.t(key, fallback),
+    ),
+  );
   readonly effectiveLane = this.signals.effectiveLane;
   readonly laneJobs = this.signals.laneJobs;
   readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
@@ -181,7 +177,7 @@ export class UploadPanelComponent {
   readonly laneSwitchOptions = this.viewModel.laneSwitchOptions;
   readonly visibleLaneJobs = this.viewModel.visibleLaneJobs;
   readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
-  readonly fileTypeChips = DEFAULT_FILE_TYPE_CHIPS;
+  readonly fileTypeGroups = DEFAULT_FILE_TYPE_GROUPS;
   readonly documentFallbackLabel = documentFallbackLabel;
   readonly trackByJobId = trackByJobId;
   readonly selectedUploadJobIds = signal<Set<string>>(new Set());
@@ -234,10 +230,17 @@ export class UploadPanelComponent {
     });
   }
 
-  onLocationModeValueChange(raw: ToggleValue<string>): void {
-    const value = toggleSingleStringValue(raw);
-    if (value === 'required' || value === 'optional') {
-      this.signals.setLocationRequirementMode(value);
-    }
+  onLocationModeRowPreviewStart(): void {
+    this.locationModeRowPreview.set(true);
+  }
+
+  onLocationModeRowPreviewEnd(): void {
+    this.locationModeRowPreview.set(false);
+  }
+
+  toggleLocationRequirementMode(): void {
+    const next = alternateUploadLocationRequirementMode(this.locationRequirementMode());
+    this.signals.setLocationRequirementMode(next);
+    this.locationModeRowPreview.set(false);
   }
 }

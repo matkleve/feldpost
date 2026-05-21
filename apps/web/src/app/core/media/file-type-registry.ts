@@ -25,7 +25,7 @@ const FILE_TYPE_DEFINITIONS: ReadonlyArray<FileTypeDefinition> = [
     id: 'pdf',
     label: 'PDF',
     category: 'document',
-    colorToken: '--filetype-document',
+    colorToken: '--filetype-pdf',
     icon: 'description',
     aspectRatio: { type: 'fixed', width: 3, height: 4 },
     mimeTypes: ['application/pdf'],

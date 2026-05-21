@@ -1,0 +1,58 @@
+// Switch thumb travel, track hover darken, motion (transform-only — no margin animation).
+// Easing aligned with docs/design/components/segmented-switch-motion-resource.md.
+// @see docs/specs/component/ui-primitives/ui-primitives.toggle.md
+@layer utilities {
+  $switch-motion-duration: 180ms;
+  $switch-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  $switch-thumb-nudge: 0.125rem;
+  $switch-track-hover-darken: 10%;
+
+  [hlmSwitch] {
+    container-type: inline-size;
+    transition: background-color $switch-motion-duration $switch-motion-ease;
+  }
+
+  [hlmSwitchThumb][data-state='unchecked'] {
+    transform: translateX(0);
+    transition: transform $switch-motion-duration $switch-motion-ease;
+  }
+
+  [hlmSwitchThumb][data-state='checked'] {
+    transform: translateX(calc(100cqw - 100%));
+    transition: transform $switch-motion-duration $switch-motion-ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    [hlmSwitch][data-state='unchecked']:hover,
+    .settings-overlay__toggle-row:hover > [hlmSwitch][data-state='unchecked'],
+    .upload-panel__location-mode-row:hover > [hlmSwitch][data-state='unchecked'] {
+      background-color: color-mix(in srgb, var(--input) calc(100% - #{$switch-track-hover-darken}), black);
+    }
+
+    [hlmSwitch][data-state='checked']:hover,
+    .settings-overlay__toggle-row:hover > [hlmSwitch][data-state='checked'],
+    .upload-panel__location-mode-row:hover > [hlmSwitch][data-state='checked'] {
+      background-color: color-mix(in srgb, var(--primary) calc(100% - #{$switch-track-hover-darken}), black);
+    }
+
+    [hlmSwitch]:hover > [hlmSwitchThumb][data-state='unchecked'],
+    .settings-overlay__toggle-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'],
+    .upload-panel__location-mode-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'] {
+      transform: translateX($switch-thumb-nudge);
+    }
+
+    [hlmSwitch]:hover > [hlmSwitchThumb][data-state='checked'],
+    .settings-overlay__toggle-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'],
+    .upload-panel__location-mode-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'] {
+      transform: translateX(calc(100cqw - 100% - #{$switch-thumb-nudge}));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [hlmSwitch],
+    [hlmSwitchThumb][data-state='unchecked'],
+    [hlmSwitchThumb][data-state='checked'] {
+      transition: none;
+    }
+  }
+}

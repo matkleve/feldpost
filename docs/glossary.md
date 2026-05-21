@@ -470,7 +470,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 ### Chips & badges
 
 - **Semantic chip (`app-chip`)**  
-  Shared Angular component for file-type tints, tags, and optional dismiss. Single canonical height (**2rem**) in product language; variants via tokens. Spec: [chip.md](specs/component/filters/chip.md); full UI inventory: [badges-and-chips](specs/component/ui-primitives/ui-primitives.badges-and-chips.md).
+  Shared Angular component for file-type tints, tags, and optional dismiss. Single canonical height (**16px** / `--spacing-4` per Figma). File-type colors: `chipVariantForFileType()` + `--filetype-*` tokens — see [file-type-chips](specs/component/media/file-type-chips.md) § Agent entry points. Spec: [chip.md](specs/component/filters/chip.md); inventory: [badges-and-chips](specs/component/ui-primitives/ui-primitives.badges-and-chips.md).
 
 - **UI chip (`uiChip` / `.ui-chip`)**  
   Directive-applied primitive styles for toolbar-adjacent chips and quick-info bridges—not necessarily the same DOM as `app-chip`.

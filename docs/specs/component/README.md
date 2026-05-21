@@ -54,7 +54,7 @@ Map chrome, placement, and location affordances.
 Media surfaces, items, toolbar, and file-type UI.
 
 - [photo-lightbox](media/photo-lightbox.md)
-- [file-type-chips](media/file-type-chips.md) (+ [lookup supplement](media/file-type-chips.lookup-table.supplement.md))
+- [file-type-chips](media/file-type-chips.md) — **`app-chip`** + `chipVariantForFileType()`; § **Agent entry points** (+ [lookup supplement](media/file-type-chips.lookup-table.supplement.md))
 - [media.component](media/media.component.md)
 - [media-content](media/media-content.md)
 - [media-display](media/media-display.md) (+ [rendering matrix supplement](media/media-display.rendering-matrix.supplement.md))

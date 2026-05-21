@@ -20,6 +20,18 @@
 - Paths are relative: `{org_id}/{user_id}/{uuid}.jpg`
 - Use signed URLs at runtime — never store or expose absolute URLs
 
+## Local Edge Functions
+
+Geocoding uses the `geocode` Edge Function. If the browser gets **503** on `http://127.0.0.1:54321/functions/v1/geocode`, the Edge Runtime container is usually stopped (`supabase status` lists `supabase_edge_runtime_*` under stopped services).
+
+From repo root:
+
+```bash
+npm run supabase:ensure-edge
+```
+
+`npm start` in `apps/web` runs this automatically before `ng serve`.
+
 ## References
 
 - Schema: `docs/architecture/database-schema.md`

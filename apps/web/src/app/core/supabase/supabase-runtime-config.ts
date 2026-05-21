@@ -100,7 +100,8 @@ function reportSupabaseTargetToDevTerminal(config: ResolvedSupabaseConfig): void
 }
 
 async function isLocalSupabaseReachable(apiUrl: string): Promise<boolean> {
-  const healthUrl = `${apiUrl.replace(/\/$/, '')}/auth/v1/health`;
+  const baseUrl = apiUrl.replace(/\/$/, '');
+  const healthUrl = `${baseUrl}/auth/v1/health`;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 2000);
   try {
@@ -114,6 +115,40 @@ async function isLocalSupabaseReachable(apiUrl: string): Promise<boolean> {
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+/** Kong returns 503 when the local Edge Runtime container is stopped. */
+async function isLocalGeocodeEdgeReachable(
+  apiUrl: string,
+  anonKey: string,
+): Promise<boolean> {
+  const geocodeUrl = `${apiUrl.replace(/\/$/, '')}/functions/v1/geocode`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
+  try {
+    const response = await fetch(geocodeUrl, {
+      method: 'POST',
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action: 'forward', q: 'health', limit: 1 }),
+      signal: controller.signal,
+    });
+    return response.status !== 503;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function warnLocalEdgeFunctionsUnavailable(): void {
+  console.warn(
+    '[feldpost] Local Supabase is up but Edge Functions (geocode) are unavailable (503). ' +
+      'Run: npm run supabase:ensure-edge — or: docker start supabase_edge_runtime_feldpost',
+  );
 }
 
 /**
@@ -141,6 +176,9 @@ export async function resolveSupabaseRuntimeConfig(): Promise<ResolvedSupabaseCo
 
   if (useLocal && local && (await isLocalSupabaseReachable(local.url))) {
     resolvedConfig = { ...local, target: 'local' };
+    if (!(await isLocalGeocodeEdgeReachable(local.url, local.anonKey))) {
+      warnLocalEdgeFunctionsUnavailable();
+    }
     reportSupabaseTargetToDevTerminal(resolvedConfig);
     return resolvedConfig;
   }

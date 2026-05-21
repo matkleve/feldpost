@@ -201,9 +201,10 @@ Use status variants only for real system states (success/warn/error). Do not use
 
 ### File-Type Variants (neutral category palette)
 
-- **filetype-image**: `--filetype-image` (blue)
+- **filetype-image**: `--filetype-image` (warm orange)
+- **filetype-pdf**: `--filetype-pdf` (red)
 - **filetype-video**: `--filetype-video` (purple)
-- **filetype-document**: `--filetype-document` (indigo / blue-grey)
+- **filetype-document**: `--filetype-document` (blue, Word-style)
 - **filetype-spreadsheet**: `--filetype-spreadsheet` (green)
 - **filetype-presentation**: `--filetype-presentation` (amber/orange)
 

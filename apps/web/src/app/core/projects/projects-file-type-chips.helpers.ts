@@ -1,3 +1,4 @@
+import { chipVariantForFileType } from '../media/file-type-chip-variant';
 import { resolveFileType } from '../media/file-type-registry';
 import type { FileTypeCategory } from '../media/media-renderer.types';
 import type { ProjectFileTypeCount } from './projects.types';
@@ -38,21 +39,12 @@ export function fileTypeCountsForProject(
   });
 }
 
+/** Category-level chip (project cards aggregate PDF + Word as `document`). */
 export function fileTypeChipVariant(category: FileTypeCategory): ChipVariant {
-  switch (category) {
-    case 'image':
-      return 'filetype-image';
-    case 'video':
-      return 'filetype-video';
-    case 'spreadsheet':
-      return 'filetype-spreadsheet';
-    case 'presentation':
-      return 'filetype-presentation';
-    case 'document':
-      return 'filetype-document';
-    default:
-      return 'default';
-  }
+  return chipVariantForFileType({
+    id: category === 'document' ? 'word' : category,
+    category,
+  });
 }
 
 export function fileTypeChipIcon(category: FileTypeCategory): string {

@@ -27,10 +27,15 @@
     Purpose: Drag-and-drop file selection + folder scanning progress feedback.
     ═══════════════════════════════════════════════════════════════════════════ -->
   <div class="upload-panel__area upload-panel__area--intake">
-    <h3 class="upload-panel__title">Upload files</h3>
-    <p class="upload-panel__subtitle">
-      Add photos, videos, PDFs, and Office files for the active project.
-    </p>
+    <div class="upload-panel__header">
+      <span class="material-icons upload-panel__header-icon" aria-hidden="true">cloud_upload</span>
+      <div class="upload-panel__header-copy">
+        <h3 class="upload-panel__title">Upload files</h3>
+        <p class="upload-panel__subtitle">
+          Add photos, videos, PDFs, and Office files for the active project.
+        </p>
+      </div>
+    </div>
 
     @if (scanningLabel(); as label) {
       <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
@@ -53,13 +58,31 @@
       <p class="upload-panel__dropzone-label">
         {{ dropzoneLabelText() }}
       </p>
-      <div class="upload-panel__file-type-chips" aria-hidden="true">
-        @for (chip of fileTypeChips; track chip.type) {
-          <app-chip
-            [icon]="chip.icon"
-            [text]="chip.type"
-            [variant]="chip.variant"
-          ></app-chip>
+      <div class="upload-panel__file-type-chips">
+        @for (group of fileTypeGroups; track group.id) {
+          <div class="upload-panel__file-type-group">
+            <app-chip
+              class="upload-panel__file-type-group-chip"
+              [icon]="group.icon"
+              [text]="t(group.labelKey, group.labelFallback)"
+              [ariaLabel]="t(group.descriptionKey, group.descriptionFallback)"
+              [variant]="group.variant"
+            ></app-chip>
+            <div
+              class="upload-panel__file-type-group-detail"
+              role="group"
+              [attr.aria-label]="t(group.descriptionKey, group.descriptionFallback)"
+            >
+              @for (member of group.members; track member.type) {
+                <app-chip
+                  [icon]="member.icon"
+                  [text]="member.type"
+                  [ariaLabel]="t(member.descriptionKey, member.descriptionFallback)"
+                  [variant]="member.variant"
+                ></app-chip>
+              }
+            </div>
+          </div>
         }
       </div>
     </div>
@@ -78,7 +101,7 @@
 
     <button
       hlmBtn
-      variant="outline"
+      variant="ghost"
       iconPlacement="start"
       class="upload-panel__intake-btn upload-panel__intake-btn--folder"
       type="button"
@@ -102,7 +125,7 @@
 
     <button
       hlmBtn
-      variant="outline"
+      variant="ghost"
       iconPlacement="start"
       class="upload-panel__intake-btn upload-panel__intake-btn--capture"
       type="button"
@@ -115,36 +138,48 @@
       Take photo
     </button>
 
-    <div class="upload-panel__location-mode" hlmPillToggle size="sm" fill>
-      <div
-        hlmToggleGroup
-        brnToggleGroup
-        type="single"
-        [nullable]="false"
-        [value]="locationRequirementMode()"
-        (valueChange)="onLocationModeValueChange($event)"
-        [attr.aria-label]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
+    <button
+      type="button"
+      class="upload-panel__location-mode-row"
+      (click)="toggleLocationRequirementMode()"
+      (mouseenter)="onLocationModeRowPreviewStart()"
+      (mouseleave)="onLocationModeRowPreviewEnd()"
+      (focusin)="onLocationModeRowPreviewStart()"
+      (focusout)="onLocationModeRowPreviewEnd()"
+      [attr.aria-label]="locationModeToggleAria()"
+    >
+      <span class="material-icons upload-panel__location-mode-icon" aria-hidden="true"
+        >location_searching</span
       >
-        @for (option of locationModeSwitchOptions(); track option.id) {
-          <button
-            hlmToggleGroupItem
-            type="button"
-            brnToggleGroupItem
-            [value]="option.id"
-            [disabled]="!!option.disabled"
-            [attr.aria-label]="option.ariaLabel || option.label"
-            [attr.title]="option.title || option.label"
-          >
-            @if (option.icon && optLayout(option) !== 'text-only') {
-              <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
-            }
-            @if (optLayout(option) !== 'icon-only') {
-              <span>{{ option.label }}</span>
-            }
-          </button>
+      <span class="upload-panel__location-mode-copy">
+        @if (locationModeDisplayMode() === 'required') {
+          <span class="upload-panel__location-mode-title">{{
+            t('upload.location.mode.title.on', 'Auto location')
+          }}</span>
+          <span class="upload-panel__location-mode-subtitle">{{
+            t(
+              'upload.location.mode.subtitle.on',
+              'GPS and file names; missing location → Issues.'
+            )
+          }}</span>
+        } @else {
+          <span class="upload-panel__location-mode-title">{{
+            t('upload.location.mode.title.off', 'No auto location')
+          }}</span>
+          <span class="upload-panel__location-mode-subtitle">{{
+            t('upload.location.mode.subtitle.off', 'Uploads without a location.')
+          }}</span>
         }
-      </div>
-    </div>
+      </span>
+      <span
+        hlmSwitch
+        class="upload-panel__location-mode-switch"
+        aria-hidden="true"
+        [checked]="locationRequirementMode() === 'required'"
+      >
+        <span hlmSwitchThumb [checked]="locationRequirementMode() === 'required'"></span>
+      </span>
+    </button>
 
     <input
       #captureInput
@@ -174,7 +209,7 @@
     <div class="upload-panel__area--switch upload-panel__segmented" hlmPillToggle fill>
       <div
         hlmToggleGroup
-        class="w-full border border-border bg-card shadow-none"
+        class="upload-panel__lane-toggle-group w-full"
         brnToggleGroup
         type="single"
         [nullable]="false"

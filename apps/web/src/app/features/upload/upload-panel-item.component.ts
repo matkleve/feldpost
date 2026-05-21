@@ -3,7 +3,8 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
-import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
+import { chipVariantForFileType } from '../../core/media/file-type-chip-variant';
+import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { getIssueKind, getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { statusLabelText, actionLabel, actionIcon } from './upload-panel-item-helpers';
 import { getBoundProjectIds } from './upload-panel-project-bindings.util';
@@ -354,27 +355,13 @@ export class UploadPanelItemComponent implements OnDestroy {
     });
   }
 
-  fileTypeChipVariant(): ChipVariant {
+  fileTypeChipVariant() {
     const file = this.job().file;
     const definition = this.mediaOrchestrator.resolveFileType({
       mimeType: file.type,
       fileName: file.name,
     });
-
-    switch (definition.category) {
-      case 'image':
-        return 'filetype-image';
-      case 'video':
-        return 'filetype-video';
-      case 'spreadsheet':
-        return 'filetype-spreadsheet';
-      case 'presentation':
-        return 'filetype-presentation';
-      case 'document':
-        return 'filetype-document';
-      default:
-        return 'default';
-    }
+    return chipVariantForFileType(definition);
   }
 
   fileTypeIcon(): string {

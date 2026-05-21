@@ -7,6 +7,7 @@
 
 import type { ForwardGeocodeResult, GeocoderSearchResult } from '../../core/geocoding/geocoding.service';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
+import type { UploadLocationRequirementMode } from '../../core/upload/upload-manager.types';
 import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import { UPLOAD_LANES } from './upload-panel.constants';
 import type { UploadLane } from './upload-phase.helpers';
@@ -38,6 +39,69 @@ export function isTerminalJob(phase: UploadPhase): boolean {
  */
 export function isUploadLane(value: string): value is UploadLane {
   return (UPLOAD_LANES as readonly string[]).includes(value);
+}
+
+function nonEmptyLocalized(
+  localized: string,
+  fallback: string,
+): string {
+  const trimmed = typeof localized === 'string' ? localized.trim() : '';
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+
+/** Returns the mode applied on the next toggle from the current mode. */
+export function alternateUploadLocationRequirementMode(
+  mode: UploadLocationRequirementMode,
+): UploadLocationRequirementMode {
+  return mode === 'required' ? 'optional' : 'required';
+}
+
+/** Title reflects switch state: on → Auto location, off → No auto location. */
+export function uploadLocationModeTitle(
+  mode: UploadLocationRequirementMode,
+  t: (key: string, fallback?: string) => string,
+): string {
+  return mode === 'required'
+    ? nonEmptyLocalized(
+        t('upload.location.mode.title.on', 'Auto location'),
+        'Auto location',
+      )
+    : nonEmptyLocalized(
+        t('upload.location.mode.title.off', 'No auto location'),
+        'No auto location',
+      );
+}
+
+export function uploadLocationModeSubtitle(
+  mode: UploadLocationRequirementMode,
+  t: (key: string, fallback?: string) => string,
+): string {
+  return mode === 'required'
+    ? nonEmptyLocalized(
+        t(
+          'upload.location.mode.subtitle.on',
+          'GPS and file names; missing location → Issues.',
+        ),
+        'GPS and file names; missing location → Issues.',
+      )
+    : nonEmptyLocalized(
+        t('upload.location.mode.subtitle.off', 'Uploads without a location.'),
+        'Uploads without a location.',
+      );
+}
+
+export function locationModeToggleAriaLabel(
+  mode: UploadLocationRequirementMode,
+  t: (key: string, fallback?: string) => string,
+): string {
+  const title = uploadLocationModeTitle(mode, t);
+  const state =
+    mode === 'required'
+      ? t('upload.location.mode.state.on', 'On')
+      : t('upload.location.mode.state.off', 'Off');
+  const detail = uploadLocationModeSubtitle(mode, t);
+  const action = t('upload.location.mode.activateAlternate', 'Press to toggle.');
+  return `${title}, ${state}. ${detail} ${action}`;
 }
 
 export function dropzoneLabelText(t: (key: string, fallback?: string) => string): string {

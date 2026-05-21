@@ -2,6 +2,8 @@
   [class]="chipClass()"
   [style.--chip-color]="chipColorValue()"
   [style.max-width]="maxWidth()"
+  [attr.aria-label]="chipAriaLabel()"
+  [attr.title]="chipTitle()"
   tabindex="0"
 >
   @if (isAvatarText()) {
@@ -20,7 +22,7 @@
   }
 
   @if (text()) {
-    <span class="chip__text" [title]="text()">{{ text() }}</span>
+    <span class="chip__text">{{ text() }}</span>
   }
 
   @if (dismissible()) {

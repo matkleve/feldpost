@@ -96,6 +96,8 @@
   --primary-hover: oklch(from var(--primary) calc(l - 0.04) c h);
   --text-disabled: color-mix(in oklch, var(--muted-foreground) 48%, var(--background));
   --border-strong: color-mix(in oklch, var(--border) 78%, var(--foreground));
+  --filetype-image: oklch(0.78 0.12 68);
+  --filetype-pdf: oklch(0.72 0.14 25);
   --filetype-video: oklch(0.62 0.14 25);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 75%, var(--foreground));
   --app-violet-accent: oklch(0.72 0.14 290);
@@ -186,11 +188,13 @@
   --primary-hover: oklch(from var(--primary) calc(l - 0.05) c h);
   --text-disabled: color-mix(in oklch, var(--muted-foreground) 55%, var(--background));
   --border-strong: color-mix(in oklch, var(--border) 72%, var(--foreground));
-  --filetype-image: var(--chart-3);
+  // De-facto office / Adobe hues (readable L for chip ink — not raw chart-3).
+  --filetype-image: oklch(0.55 0.13 68);
+  --filetype-pdf: oklch(0.52 0.17 25);
   --filetype-video: oklch(0.52 0.16 25);
-  --filetype-document: var(--chart-1);
+  --filetype-document: oklch(0.5 0.1 245);
   --filetype-spreadsheet: var(--success);
-  --filetype-presentation: var(--chart-5);
+  --filetype-presentation: oklch(0.56 0.15 42);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
   --app-violet-accent: oklch(0.52 0.19 290);
   --map-marker-user: var(--chart-1);
@@ -351,6 +355,7 @@ html[data-theme="sandstone"] {
 
 @include meta.load-css('styles/option-menu-list');
 @include meta.load-css('styles/option-menu-item-states');
+@include meta.load-css('styles/switch-thumb-hover');
 
 // Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).
 // @see docs/migration/phase-8-global-scss-elimination.md §7

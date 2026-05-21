@@ -13,6 +13,7 @@ export type ChipVariant =
   | 'filetype-image'
   | 'filetype-video'
   | 'filetype-document'
+  | 'filetype-pdf'
   | 'filetype-spreadsheet'
   | 'filetype-presentation'
   | 'custom';
@@ -34,7 +35,20 @@ export class ChipComponent {
   readonly variant = input<ChipVariant>('default');
   readonly color = input<string | undefined>(undefined);
   readonly maxWidth = input('auto');
+  /** Accessible name + native tooltip; defaults to `text()` when omitted. */
+  readonly ariaLabel = input<string | undefined>(undefined);
   readonly dismissAriaLabel = input<string | undefined>(undefined);
+
+  protected readonly chipAriaLabel = computed(() => {
+    const label = this.ariaLabel()?.trim();
+    if (label) {
+      return label;
+    }
+    const text = this.text()?.trim();
+    return text || null;
+  });
+
+  protected readonly chipTitle = computed(() => this.chipAriaLabel() ?? undefined);
 
   readonly chipDismissed = output<void>();
 
@@ -111,6 +125,8 @@ export class ChipComponent {
         return '--filetype-video';
       case 'filetype-document':
         return '--filetype-document';
+      case 'filetype-pdf':
+        return '--filetype-pdf';
       case 'filetype-spreadsheet':
         return '--filetype-spreadsheet';
       case 'filetype-presentation':

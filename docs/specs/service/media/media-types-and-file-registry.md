@@ -44,9 +44,11 @@ None (immutable definitions).
 
 | File | Purpose |
 | --- | --- |
-| `apps/web/src/app/core/media/file-type-registry.ts` | Definitions + lookup |
+| `apps/web/src/app/core/media/file-type-registry.ts` | Definitions + lookup (`resolveFileType`, `fileTypeBadge`) |
+| `apps/web/src/app/core/media/file-type-chip-variant.ts` | **`chipVariantForFileType(definition)`** → `app-chip` `ChipVariant` (PDF vs document split) |
 | `apps/web/src/app/core/media/media-renderer.types.ts` | Renderer contracts |
 | `docs/specs/service/media/media-types-and-file-registry.md` | This contract |
+| `docs/specs/component/media/file-type-chips.md` | UI contract, color table, **Agent entry points** |
 
 ## Wiring
 

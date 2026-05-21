@@ -144,15 +144,25 @@
 .chip--status-success,
 .chip--status-warning,
 .chip--status-danger,
+.chip--custom {
+  --chip-ink: var(--chip-color);
+  background: color-mix(in srgb, var(--chip-color) 12%, var(--card));
+  color: var(--chip-ink);
+  border-color: color-mix(in srgb, var(--chip-color) 28%, var(--border));
+}
+
+// File-type chips: stronger tint + ink mixed toward foreground for WCAG on frosted panels.
+// @see docs/specs/component/media/file-type-chips.md
 .chip--filetype-image,
 .chip--filetype-video,
 .chip--filetype-document,
+.chip--filetype-pdf,
 .chip--filetype-spreadsheet,
-.chip--filetype-presentation,
-.chip--custom {
-  background: color-mix(in srgb, var(--chip-color) 12%, var(--card));
-  color: var(--chip-color);
-  border-color: color-mix(in srgb, var(--chip-color) 28%, var(--border));
+.chip--filetype-presentation {
+  --chip-ink: color-mix(in oklch, var(--chip-color) 58%, var(--foreground));
+  background: color-mix(in srgb, var(--chip-color) 20%, var(--background));
+  color: var(--chip-ink);
+  border-color: color-mix(in srgb, var(--chip-color) 40%, var(--border));
 }
 
 .chip--primary:hover,
@@ -163,12 +173,40 @@
 .chip--status-success:hover,
 .chip--status-warning:hover,
 .chip--status-danger:hover,
-.chip--filetype-image:hover,
-.chip--filetype-video:hover,
-.chip--filetype-document:hover,
-.chip--filetype-spreadsheet:hover,
-.chip--filetype-presentation:hover,
 .chip--custom:hover {
   background: color-mix(in srgb, var(--chip-color) 18%, var(--card));
   border-color: color-mix(in srgb, var(--chip-color) 38%, var(--border));
+}
+
+.chip--filetype-image:hover,
+.chip--filetype-video:hover,
+.chip--filetype-document:hover,
+.chip--filetype-pdf:hover,
+.chip--filetype-spreadsheet:hover,
+.chip--filetype-presentation:hover {
+  background: color-mix(in srgb, var(--chip-color) 28%, var(--background));
+  border-color: color-mix(in srgb, var(--chip-color) 50%, var(--border));
+}
+
+:host-context([data-theme='dark']) {
+  .chip--filetype-image,
+  .chip--filetype-video,
+  .chip--filetype-document,
+  .chip--filetype-pdf,
+  .chip--filetype-spreadsheet,
+  .chip--filetype-presentation {
+    --chip-ink: color-mix(in oklch, var(--chip-color) 72%, var(--foreground));
+    background: color-mix(in srgb, var(--chip-color) 24%, var(--card));
+    border-color: color-mix(in srgb, var(--chip-color) 44%, var(--border));
+  }
+
+  .chip--filetype-image:hover,
+  .chip--filetype-video:hover,
+  .chip--filetype-document:hover,
+  .chip--filetype-pdf:hover,
+  .chip--filetype-spreadsheet:hover,
+  .chip--filetype-presentation:hover {
+    background: color-mix(in srgb, var(--chip-color) 32%, var(--card));
+    border-color: color-mix(in srgb, var(--chip-color) 54%, var(--border));
+  }
 }

@@ -1,6 +1,24 @@
 # File-Type Chips (Upload Area Feature)
 
-> **Architecture parent:** [media-download-service](media-download/media-download-service.md)
+> **Architecture parent:** [media-download-service](../service/media-download-service/media-download-service.md)
+
+## Agent entry points (read first)
+
+**Do not** build upload-only chip markup or colors. Reuse the shared primitive and central helpers.
+
+| Concern | Canonical location | Agent rule |
+| --- | --- | --- |
+| **UI primitive** | `apps/web/src/app/shared/components/chip/` (`app-chip`) | Spec: [chip.md](../filters/chip.md). Pill shape; product name **Chip**, not a separate upload component. |
+| **MIME / extension → definition** | `apps/web/src/app/core/media/file-type-registry.ts` | `resolveFileType({ mimeType, fileName, extension })` |
+| **Definition → chip `variant`** | `apps/web/src/app/core/media/file-type-chip-variant.ts` | **`chipVariantForFileType(definition)`** — PDF (`id === 'pdf'`) → `filetype-pdf`; Word/docs → `filetype-document`; images → `filetype-image`, etc. |
+| **Color tokens** | `apps/web/src/styles.scss` (`--filetype-*` on `:root` / dark palette) | Never invent names; never use raw `chart-3` for image ink (too light). Visual recipe: `chip.component.scss` `chip--filetype-*`. |
+| **Upload dropzone chip list** | `upload-panel-file-type-groups.ts` → `DEFAULT_FILE_TYPE_GROUPS` | Six **group** chips in one row; hover/focus opens an **absolute overlay dropdown** of member chips below the group (no layout shift, no transition). Per-extension data still from registry. |
+| **Flat extension list (helpers)** | `upload-panel.constants.ts` → `DEFAULT_FILE_TYPE_CHIPS` | Used to build groups; do not render flat list in dropzone. |
+| **Pill vs badge inventory** | [ui-primitives.badges-and-chips.md](../ui-primitives/ui-primitives.badges-and-chips.md) | When to use `app-chip` vs `ui-chip`. |
+
+**De-facto color semantics (no industry standard — Adobe/Microsoft conventions):** image = warm orange, PDF = red, Word/docs = blue, spreadsheet = green, presentation = amber, video = purple. Rationale table in § File-Type Categorization below.
+
+**Service mirror:** [media-types-and-file-registry.md](../../service/media/media-types-and-file-registry.md).
 
 ## What It Is
 
@@ -8,8 +26,8 @@ Visual chip-based display of the file types present in the current upload batch.
 
 ## What It Looks Like
 
-Horizontally scrolling (or wrapping) row of small chips below the upload dropzone. Each chip displays a **unique file type only once** (deduplicated). Chips are color-coded by neutral file-type categories: image (blue), video (purple), document (indigo/blue-grey), spreadsheet (green), presentation (amber). Icons are Material Icons matching file type (e.g., `image`, `videocam`, `description`, `table_chart`, `bar_chart`).
-Chips follow a subtle visual style: very light tinted background (10-15%), full-color icon/text for legibility, and an optional thin border derived from the same token.
+Horizontally scrolling (or wrapping) row of small chips below the upload dropzone. Each chip displays a **supported extension label** (static intake list in upload panel, or deduplicated batch in other surfaces). Chips are color-coded by file-type category (see § File-Type Categorization). Icons are Material Icons from the registry (e.g., `image`, `videocam`, `description`, `table_chart`, `slideshow`).
+Chips use `app-chip` filetype variants: tinted background (~20%), `--chip-ink` text/icon (accent mixed toward `foreground` for contrast on frosted panels), thin border from the same token.
 
 Example layout:
 
@@ -64,16 +82,18 @@ No direct Supabase calls are required for this feature; chips are derived from i
 
 | Category           | File Types                                          | Icon          | Primary Token             | Variant               | Notes                                               |
 | ------------------ | --------------------------------------------------- | ------------- | ------------------------- | --------------------- | --------------------------------------------------- |
-| **Image**          | JPEG, JPG, PNG, HEIC, HEIF, WebP, TIFF              | `image`       | `--filetype-image`        | filetype-image        | Neutral technical blue for photos/images            |
-| **Video**          | MP4, MOV, WebM, AVI, MKV                            | `videocam`    | `--filetype-video`        | filetype-video        | Distinct from image while staying non-alarmist      |
-| **Document**       | PDF, DOCX, DOC, ODT, ODG, TXT                       | `description` | `--filetype-document`     | filetype-document     | Office-style indigo/blue-grey; no warning semantics |
+| **Image**          | JPEG, JPG, PNG, HEIC, HEIF, WebP, TIFF              | `image`       | `--filetype-image`        | filetype-image        | Warm orange (photo); de-facto gallery tone          |
+| **Video**          | MP4, MOV, WebM, AVI, MKV                            | `videocam`    | `--filetype-video`        | filetype-video        | Purple; distinct from image                         |
+| **PDF**            | PDF                                                   | `description` | `--filetype-pdf`          | filetype-pdf          | Red (Adobe Reader convention)                       |
+| **Document**       | DOCX, DOC, ODT, ODG, TXT (not PDF)                  | `description` | `--filetype-document`     | filetype-document     | Blue (Microsoft Word convention)                    |
 | **Spreadsheet**    | XLSX, XLS, ODS, CSV                                 | `table_chart` | `--filetype-spreadsheet`  | filetype-spreadsheet  | Green, aligned with spreadsheet mental model        |
 | **Presentation**   | PPTX, PPT, ODP                                      | `bar_chart`   | `--filetype-presentation` | filetype-presentation | Warm amber/orange; avoids red error signal          |
 | **Office Generic** | DOCX, DOC, ODT, ODG, XLSX, XLS, ODS, PPTX, PPT, ODP | `article`     | `--filetype-office`       | custom                | Fallback if type-specific mapping unavailable       |
 
 **Rationale:**
 
-- **Image (blue)**: neutral and technical, not tied to success/warning/error states
+- **Image (orange)**: warm photo tone; readable chip ink via `--chip-ink` mix
+- **PDF (red)**: Adobe Reader de-facto; separate from Word/document blue
 - **Video (purple)**: distinct from static image category
 - **Document (indigo/blue-grey)**: office/work semantics without warning signal
 - **Spreadsheet (green)**: strong global association with Excel/Sheets
@@ -87,19 +107,20 @@ Keep status colors (`--color-success`, `--color-warning`, `--color-danger`) excl
 
 ```scss
 // apps/web/src/styles.scss — :root semantic extension (illustrative; confirm in repo)
-  --filetype-image: var(--chart-3);
+  --filetype-image: oklch(0.55 0.13 68);
+  --filetype-pdf: oklch(0.52 0.17 25);
   --filetype-video: oklch(0.52 0.16 25);
-  --filetype-document: var(--chart-1);
+  --filetype-document: oklch(0.5 0.1 245);
   --filetype-spreadsheet: var(--success);
-  --filetype-presentation: var(--chart-5);
+  --filetype-presentation: oklch(0.56 0.15 42);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
 ```
 
 Visual recipe for all file-type chips (matches **`chip.component.scss`** `chip--filetype-*`):
 
-- Background: `color-mix(in srgb, <filetype-token> 12%, var(--card))`
-- Text/Icon: `<filetype-token>` (bound as `--chip-color` on the chip host in implementation)
-- Border: `1px solid color-mix(in srgb, <filetype-token> 28%, var(--border))`
+- Background: `color-mix(in srgb, <filetype-token> 20%, var(--background))` (dark: 24% with `var(--card)`)
+- Text/Icon: `color-mix(in oklch, <filetype-token> 58%, var(--foreground))` as `--chip-ink` (dark: 72%)
+- Border: `1px solid color-mix(in srgb, <filetype-token> 40%, var(--border))`
 
 ## Deduplication Logic
 
@@ -142,64 +163,51 @@ const getUniqueFileTypes = () => {
 
 ## Component Architecture
 
-**Parent**: `upload-area.component.ts`  
-**Child**: `app-chip` (from chip primitive spec)
+**Parent**: `UploadPanelComponent` (`upload-panel.component.ts`)  
+**Child**: `app-chip` — variant from `chipVariantForFileType()`, never `[variant]="'custom'"` for known file types.
 
 ```typescript
-// Data structure passed to template
-interface FileTypeChip {
-  type: string; // "JPEG", "PDF", "MP4"
-  icon: string; // Material Icon name
-  category: string; // 'image' | 'video' | 'document' | 'spreadsheet' | 'presentation'
-  color: string; // CSS token name, e.g. '--filetype-image'
-  count?: number; // Optional: # of files with this type in batch
-}
+// Shipped pattern (upload panel + file rows)
+const definition = resolveFileType({ mimeType: file.type, fileName: file.name });
+// or: resolveFileType({ extension: 'pdf' })
 
-// Signal in component
-fileTypeChips = computed(() => {
-  return getUniqueFileTypes(); // as above
-});
+<app-chip
+  [icon]="definition.icon"
+  [text]="fileTypeBadge({ extension }) ?? label"
+  [variant]="chipVariantForFileType(definition)"
+/>
 ```
 
 ```html
-<!-- In upload-area.component.html (new section, placed after dropzone) -->
-<section
-  class="upload-area__file-types"
-  aria-label="Supported file types in this batch"
->
-  <div class="upload-area__file-type-chips">
-    @for (chip of fileTypeChips(); track chip.type) {
-    <app-chip
-      [icon]="chip.icon"
-      [text]="chip.type"
-      [variant]="'custom'"
-      [color]="chip.color"
-    ></app-chip>
-    }
+<!-- upload-panel.component.html — grouped supported-types row -->
+@for (group of fileTypeGroups; track group.id) {
+  <div class="upload-panel__file-type-group">
+    <app-chip [icon]="group.icon" [text]="…" [variant]="group.variant"></app-chip>
+    <div class="upload-panel__file-type-group-detail">… member chips …</div>
   </div>
-</section>
+}
 ```
 
 ## Display Placement & Styling
 
 **Location in Upload Panel:**
 
-- After dropzone, before "Upload folder" button
-- Or: below "Last upload" section if visible
+- Inside the dropzone, below the dropzone label (static supported-type groups).
+- Member chips open in an **overlay dropdown** (`position: absolute`) and must **not** expand dropzone height or push "Upload folder" / intake controls.
+
+**Group dropdown contract** (`upload-panel.component.scss`):
+
+- Group row: flex wrap, centered; only group chips occupy layout space.
+- `upload-panel__file-type-group-detail`: absolute under group chip, `z-index` above intake, **transparent** (no border/background/shadow — only member chips visible), no CSS transition.
+- `upload-panel` root: `overflow: visible` so the dropdown can paint over controls below the dropzone.
 
 **Container Styling**:
 
 ```scss
-.upload-area__file-type-chips {
+.upload-panel__file-type-chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-2);
-  // Optional: max-width constraint + horizontal scroll on mobile
-  @media (max-width: 640px) {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
 }
 ```
 

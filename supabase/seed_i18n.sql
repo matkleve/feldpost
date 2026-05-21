@@ -23315,63 +23315,1117 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.location.mode.required', 'Location required', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:locationRequirementOptions')
+values (null, 'upload.fileTypeGroup.images', 'Images', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Location required', 'published'
+select t.id, 'en', 'Images', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.location.mode.required'
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.images'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort erforderlich', 'published'
+select t.id, 'de', 'Bilder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.location.mode.required'
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.images'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Posizione obbligatoria', 'published'
+select t.id, 'it', 'Immagini', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.location.mode.required'
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.images'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.location.mode.optional', 'Location not required', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts method:locationModeLabel')
+values (null, 'upload.fileTypeGroup.video', 'Video', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Location not required', 'published'
+select t.id, 'en', 'Video', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.location.mode.optional'
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.video'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort nicht erforderlich', 'published'
+select t.id, 'de', 'Video', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.location.mode.optional'
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.video'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Posizione non obbligatoria', 'published'
+select t.id, 'it', 'Video', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.location.mode.optional'
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.pdf', 'PDF', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.documents', 'Documents', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Documents', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dokumente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.spreadsheets', 'Spreadsheets', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Spreadsheets', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Tabellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fogli di calcolo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.presentations', 'Presentations', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Presentations', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Praesentationen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Presentazioni', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.desc.images', 'Photo files: JPEG, PNG, HEIC, and WebP', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Photo files: JPEG, PNG, HEIC, and WebP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.images'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fotodateien: JPEG, PNG, HEIC und WebP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.images'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File foto: JPEG, PNG, HEIC e WebP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.images'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.desc.video', 'Video files: MP4, MOV, and WebM', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Video files: MP4, MOV, and WebM', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Videodateien: MP4, MOV und WebM', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File video: MP4, MOV e WebM', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.desc.pdf', 'PDF document files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PDF document files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PDF-Dokumente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.desc.documents', 'Text documents: DOCX, ODT, ODG, and TXT', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Text documents: DOCX, ODT, ODG, and TXT', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Textdokumente: DOCX, ODT, ODG und TXT', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti di testo: DOCX, ODT, ODG e TXT', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.documents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.desc.spreadsheets', 'Spreadsheets: XLSX, ODS, and CSV', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Spreadsheets: XLSX, ODS, and CSV', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Tabellen: XLSX, ODS und CSV', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fogli di calcolo: XLSX, ODS e CSV', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.spreadsheets'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileTypeGroup.desc.presentations', 'Presentations: PPTX and ODP', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Presentations: PPTX and ODP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Praesentationen: PPTX und ODP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Presentazioni: PPTX e ODP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.presentations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.jpg', 'JPEG photos', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'JPEG photos', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.jpg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'JPEG-Fotos', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.jpg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Foto JPEG', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.jpg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.png', 'Raster image files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Raster image files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.png'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rasterbilder', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.png'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Immagini raster', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.png'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.heic', 'HEIC photos from phones and cameras', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'HEIC photos from phones and cameras', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.heic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'HEIC-Fotos von Smartphones und Kameras', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.heic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Foto HEIC da smartphone e fotocamere', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.heic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.webp', 'WebP images for web and mobile', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'WebP images for web and mobile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.webp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'WebP-Bilder fuer Web und Mobil', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.webp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Immagini WebP per web e mobile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.webp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.mp4', 'MP4 video files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'MP4 video files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.mp4'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'MP4-Videodateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.mp4'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File video MP4', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.mp4'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.mov', 'QuickTime video files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'QuickTime video files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.mov'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'QuickTime-Videodateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.mov'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File video QuickTime', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.mov'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.webm', 'WebM video files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'WebM video files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.webm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'WebM-Videodateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.webm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File video WebM', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.webm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.pdf', 'PDF documents', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PDF documents', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PDF-Dokumente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.docx', 'Microsoft Word documents', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Microsoft Word documents', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.docx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Microsoft-Word-Dokumente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.docx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Documenti Microsoft Word', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.docx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.odt', 'OpenDocument text files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument text files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Textdateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File di testo OpenDocument', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.odg', 'OpenDocument drawing files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument drawing files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Zeichnungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Disegni OpenDocument', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odg'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.txt', 'Plain text files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Plain text files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.txt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einfache Textdateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.txt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File di testo semplice', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.txt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.xlsx', 'Excel spreadsheet files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Excel spreadsheet files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.xlsx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Excel-Tabellendateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.xlsx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fogli di calcolo Excel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.xlsx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.ods', 'OpenDocument spreadsheet files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument spreadsheet files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.ods'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Tabellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.ods'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fogli di calcolo OpenDocument', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.ods'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.csv', 'Comma-separated data files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Comma-separated data files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.csv'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kommagetrennte Datendateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.csv'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File dati separati da virgola', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.csv'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.pptx', 'PowerPoint presentation files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PowerPoint presentation files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.pptx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PowerPoint-Praesentationen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.pptx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Presentazioni PowerPoint', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.pptx'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.odp', 'OpenDocument presentation files', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label/title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'OpenDocument presentation files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'OpenDocument-Praesentationen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Presentazioni OpenDocument', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.odp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.fileType.desc.generic', 'Supported file format', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type member chip aria-label fallback')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Supported file format', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.generic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Unterstuetztes Dateiformat', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.generic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Formato file supportato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.fileType.desc.generic'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.title.on', 'Auto location', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html upload auto-location toggle row title when on')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Auto location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.title.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Automatische Ortung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.title.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione automatica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.title.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.title.off', 'No auto location', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html upload auto-location toggle row title when off')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No auto location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.title.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine automatische Ortung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.title.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna posizione automatica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.title.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.subtitle.on', 'GPS and file names; missing location → Issues.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html subtitle when auto-location on')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'GPS and file names; missing location → Issues.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'GPS und Dateinamen; fehlender Standort → Probleme.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'GPS e nomi file; posizione mancante → Problemi.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.subtitle.off', 'Uploads without a location.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html subtitle when auto-location off')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploads without a location.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.subtitle.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Upload ohne Standort.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.subtitle.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamenti senza posizione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.subtitle.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.state.on', 'On', 'en', 'apps/web/src/app/features/upload/upload-panel-helpers.ts aria state when required')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'On', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.state.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.state.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Attivo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.state.on'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.state.off', 'Off', 'en', 'apps/web/src/app/features/upload/upload-panel-helpers.ts aria state when optional')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Off', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.state.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.state.off'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Disattivo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.state.off'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -23403,6 +24457,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Requisito posizione per caricamento', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.ariaLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.activateAlternate', 'Press to toggle.', 'en', 'apps/web/src/app/features/upload/upload-panel-helpers.ts locationModeToggleAriaLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Press to toggle.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.activateAlternate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zum Umschalten tippen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.activateAlternate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Premi per attivare o disattivare.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.activateAlternate'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

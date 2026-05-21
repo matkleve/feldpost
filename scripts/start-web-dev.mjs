@@ -2,13 +2,22 @@
  * Starts Supabase dev log relay + Angular dev server (apps/web).
  * Use: npm start (from apps/web) — terminal shows local vs cloud when the app boots.
  */
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const webDir = path.join(repoRoot, 'apps/web');
 const logServerScript = path.join(repoRoot, 'scripts/supabase-dev-log-server.mjs');
+const ensureEdgeScript = path.join(repoRoot, 'scripts/ensure-supabase-edge-runtime.mjs');
+
+const ensureEdge = spawnSync(process.execPath, [ensureEdgeScript], {
+  cwd: repoRoot,
+  stdio: 'inherit',
+});
+if (ensureEdge.status !== 0 && ensureEdge.status !== null) {
+  console.warn('[feldpost] Continuing without Edge Runtime — geocode will fail until it is started.');
+}
 
 const logServer = spawn(process.execPath, [logServerScript], {
   cwd: repoRoot,
