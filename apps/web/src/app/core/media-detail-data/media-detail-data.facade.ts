@@ -10,6 +10,11 @@ import {
   isImageLikeMedia,
   resolvePreviewThumbnailPath,
 } from '../../shared/workspace-pane/media-detail/media-detail-view.utils';
+import {
+  MEDIA_ITEM_DETAIL_SELECT_BASE,
+  MEDIA_ITEM_DETAIL_SELECT_WITH_META,
+  isMissingAddressFieldMetaColumn,
+} from './media-detail-data.helpers';
 
 interface MediaDetailRow {
   id: string;
@@ -175,14 +180,19 @@ export class MediaDetailDataFacade {
   }
 
   private async loadMediaRow(id: string): Promise<MediaDetailRow | null> {
-    const mediaResult = await this.deps.services.supabase.client
-      .from('media_items')
-      .select(
-        'id,source_image_id,organization_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status,address_label,street,city,district,country,address_field_meta',
-      )
-      .or(`id.eq.${id},source_image_id.eq.${id}`)
-      .limit(1)
-      .maybeSingle();
+    const fetchRow = (columns: string) =>
+      this.deps.services.supabase.client
+        .from('media_items')
+        .select(columns)
+        .or(`id.eq.${id},source_image_id.eq.${id}`)
+        .limit(1)
+        .maybeSingle();
+
+    let mediaResult = await fetchRow(MEDIA_ITEM_DETAIL_SELECT_WITH_META);
+
+    if (mediaResult.error && isMissingAddressFieldMetaColumn(mediaResult.error.message)) {
+      mediaResult = await fetchRow(MEDIA_ITEM_DETAIL_SELECT_BASE);
+    }
 
     if (mediaResult.error || !mediaResult.data) {
       this.deps.signals.error.set(mediaResult.error?.message ?? 'Media not found');
@@ -190,7 +200,12 @@ export class MediaDetailDataFacade {
       return null;
     }
 
-    return mediaResult.data as MediaDetailRow;
+    const row = mediaResult.data as unknown as MediaDetailRow;
+
+    return {
+      ...row,
+      address_field_meta: row.address_field_meta ?? null,
+    };
   }
 
   private toImageRecord(media: MediaDetailRow, legacyImageId: string): ImageRecord {

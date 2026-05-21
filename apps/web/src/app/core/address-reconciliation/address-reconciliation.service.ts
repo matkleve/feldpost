@@ -25,6 +25,7 @@ import {
 import type { AddressFieldMeta, AddressFieldVerification } from '../address-field-suggest/address-field-suggest.types';
 import type { ForwardGeocodeResult } from '../geocoding/geocoding.service';
 import { ISO_COUNTRY_BY_CODE, isoCodeFromCountryName } from '../address-field-suggest/data/iso-countries';
+import { isMissingAddressFieldMetaColumn } from '../media-detail-data/media-detail-data.helpers';
 
 const ADDRESS_FIELDS: readonly AddressFieldKind[] = ['street', 'city', 'district', 'country'];
 
@@ -256,9 +257,13 @@ export class AddressReconciliationService {
       metaUpdates[fieldOffer.field] = { source: 'geocoder', verified: true };
     }
 
-    const payload: Record<string, unknown> = { address_field_meta: metaUpdates };
-    if (Object.keys(updates).length > 0) {
-      Object.assign(payload, updates);
+    const payload: Record<string, unknown> = { ...updates };
+    if (await this.canPersistAddressFieldMeta(mediaItemId)) {
+      payload['address_field_meta'] = metaUpdates;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      return;
     }
 
     await this.supabase.client
@@ -267,25 +272,36 @@ export class AddressReconciliationService {
       .or(`id.eq.${mediaItemId},source_image_id.eq.${mediaItemId}`);
   }
 
+  private async canPersistAddressFieldMeta(mediaItemId: string): Promise<boolean> {
+    const { error } = await this.supabase.client
+      .from('media_items')
+      .select('address_field_meta')
+      .eq('id', mediaItemId)
+      .limit(1);
+
+    return !error || !isMissingAddressFieldMetaColumn(error.message);
+  }
+
   private async loadAddressFieldMeta(mediaItemId: string): Promise<AddressFieldMeta> {
-    const { data } = await this.supabase.client
+    const { data, error } = await this.supabase.client
       .from('media_items')
       .select('address_field_meta')
       .eq('id', mediaItemId)
       .maybeSingle();
+
+    if (error && isMissingAddressFieldMetaColumn(error.message)) {
+      return {};
+    }
 
     return (data as { address_field_meta?: AddressFieldMeta } | null)?.address_field_meta ?? {};
   }
 
   private async persistSuppress(mediaItemId: string, offer: ReconciliationOffer): Promise<void> {
-    // Read current meta then merge suppress flags
-    const { data } = await this.supabase.client
-      .from('media_items')
-      .select('address_field_meta')
-      .eq('id', mediaItemId)
-      .maybeSingle();
+    if (!(await this.canPersistAddressFieldMeta(mediaItemId))) {
+      return;
+    }
 
-    const existingMeta: AddressFieldMeta = (data as { address_field_meta?: AddressFieldMeta } | null)?.address_field_meta ?? {};
+    const existingMeta = await this.loadAddressFieldMeta(mediaItemId);
     const metaUpdates: AddressFieldMeta = { ...existingMeta };
 
     for (const fieldOffer of offer.fields) {
