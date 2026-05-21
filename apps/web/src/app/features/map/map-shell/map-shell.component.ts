@@ -23,6 +23,7 @@
 
 import {
   Component,
+  DestroyRef,
   ElementRef,
   OnDestroy,
   afterNextRender,
@@ -31,6 +32,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UploadPanelComponent } from '../../upload/upload-panel.component';
 import type {
@@ -242,6 +244,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
   private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -766,6 +769,7 @@ export class MapShellComponent implements OnDestroy {
       window.addEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
       this.initMap();
       this.subscribeToUploadManagerEvents();
+      this.subscribeToMediaDeleteEvents();
       this.scheduleDeferredStartupWork();
     });
   }
@@ -2925,6 +2929,72 @@ export class MapShellComponent implements OnDestroy {
       }),
       // Upload failure toasts are owned by UploadNotificationService (global, deduped).
     );
+  }
+
+  private subscribeToMediaDeleteEvents(): void {
+    this.mediaDeleteUndo.mediaDeleted$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ mediaItemIds }) => {
+        this.syncMapAfterMediaDeleted(mediaItemIds);
+      });
+
+    this.mediaDeleteUndo.mediaRestored$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        void this.queryViewportMarkers();
+      });
+  }
+
+  /** Removes optimistic/upload markers and refreshes viewport markers after hard delete. */
+  private syncMapAfterMediaDeleted(mediaItemIds: readonly string[]): void {
+    if (mediaItemIds.length === 0) {
+      return;
+    }
+
+    const deleted = new Set(mediaItemIds);
+    const removals = new Map<string, string>();
+
+    for (const mediaId of deleted) {
+      const markerKey = this.markersByMediaId.get(mediaId);
+      if (markerKey) {
+        removals.set(markerKey, mediaId);
+      }
+    }
+
+    for (const [markerKey, state] of this.uploadedPhotoMarkers.entries()) {
+      if (state.mediaId && deleted.has(state.mediaId) && !removals.has(markerKey)) {
+        removals.set(markerKey, state.mediaId);
+      }
+    }
+
+    for (const [markerKey, mediaId] of removals) {
+      this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
+        markerKey,
+        mediaId,
+        uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+        photoMarkerLayer: this.photoMarkerLayer,
+        markersByMediaId: this.markersByMediaId,
+        selectedMarkerKey: this.selectedMarkerKey(),
+        selectedMarkerKeys: this.selectedMarkerKeys(),
+        detailMediaId: this.detailMediaId(),
+        cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+        setSelectedMarker: (key) => this.setSelectedMarker(key),
+        setSelectedMarkerKeys: (keys) => this.setSelectedMarkerKeys(keys),
+        setDetailImageId: (id) => this.patchDetailMediaId(id),
+      });
+    }
+
+    const selectedIds = [...this.workspaceSelectionService.selectedMediaIds()];
+    const nextSelected = selectedIds.filter((id) => !deleted.has(id));
+    if (nextSelected.length !== selectedIds.length) {
+      if (nextSelected.length === 0) {
+        this.workspaceSelectionService.clearSelection();
+      } else {
+        this.workspaceSelectionService.selectAllInScope(nextSelected);
+      }
+    }
+
+    void this.queryViewportMarkers();
   }
 
   /**

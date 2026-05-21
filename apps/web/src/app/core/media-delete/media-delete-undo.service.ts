@@ -1,13 +1,16 @@
 import { Injectable, inject } from '@angular/core';
+import { Subject } from 'rxjs';
 import { I18nService } from '../i18n/i18n.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { ToastService } from '../toast/toast.service';
 import type {
+  MediaDeletedEvent,
   MediaDeleteKind,
   MediaDeleteSnapshot,
   MediaDeleteWithUndoOptions,
   MediaDeleteWithUndoResult,
   MediaItemDeleteRow,
+  MediaRestoredEvent,
 } from './media-delete-undo.types';
 
 const DELETE_TOAST_DURATION_MS = 5000;
@@ -17,6 +20,13 @@ export class MediaDeleteUndoService {
   private readonly supabase = inject(SupabaseService);
   private readonly toastService = inject(ToastService);
   private readonly i18n = inject(I18nService);
+
+  private readonly _mediaDeleted$ = new Subject<MediaDeletedEvent>();
+  private readonly _mediaRestored$ = new Subject<MediaRestoredEvent>();
+
+  /** Fires after successful hard delete — map/workspace listeners refresh UI. */
+  readonly mediaDeleted$ = this._mediaDeleted$.asObservable();
+  readonly mediaRestored$ = this._mediaRestored$.asObservable();
 
   private readonly t = (key: string, fallback: string): string => this.i18n.t(key, fallback);
 
@@ -38,6 +48,7 @@ export class MediaDeleteUndoService {
       return { ok: false, errorMessage: error.message, snapshot: null };
     }
 
+    this._mediaDeleted$.next({ mediaItemIds: deleteIds });
     await options.onAfterDelete?.();
     this.showDeletedToast(snapshot, options.onAfterUndo);
     return { ok: true, errorMessage: null, snapshot };
@@ -83,6 +94,9 @@ export class MediaDeleteUndoService {
       return;
     }
 
+    this._mediaRestored$.next({
+      mediaItemIds: snapshot.items.map((row) => row.id),
+    });
     await onAfterUndo?.();
   }
 

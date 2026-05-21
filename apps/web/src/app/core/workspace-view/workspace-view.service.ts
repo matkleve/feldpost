@@ -1,4 +1,6 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MediaDeleteUndoService } from '../media-delete/media-delete-undo.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { FilterService } from '../filter/filter.service';
 import { LocationResolverService } from '../location-resolver/location-resolver.service';
@@ -23,6 +25,39 @@ export class WorkspaceViewService {
   private readonly locationResolver = inject(LocationResolverService);
   private readonly metadata = inject(MetadataService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
+  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+
+    this.mediaDeleteUndo.mediaDeleted$
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(({ mediaItemIds }) => {
+        const deleted = new Set(mediaItemIds);
+        if (deleted.size === 0) {
+          return;
+        }
+        this.updateRawImages((images) => images.filter((image) => !deleted.has(image.id)));
+      });
+
+    this.mediaDeleteUndo.mediaRestored$
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(({ mediaItemIds }) => {
+        if (mediaItemIds.length === 0) {
+          return;
+        }
+        void this.loadImagesByIdsOrdered(mediaItemIds).then((images) => {
+          if (images.length === 0) {
+            return;
+          }
+          this.updateRawImages((existing) => {
+            const existingIds = new Set(existing.map((image) => image.id));
+            const restored = images.filter((image) => !existingIds.has(image.id));
+            return restored.length > 0 ? [...existing, ...restored] : existing;
+          });
+        });
+      });
+  }
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Input signals Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 

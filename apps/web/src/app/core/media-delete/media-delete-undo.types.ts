@@ -24,3 +24,13 @@ export interface MediaDeleteWithUndoOptions {
   onAfterDelete?: () => void | Promise<void>;
   onAfterUndo?: () => void | Promise<void>;
 }
+
+/** Emitted after rows are removed from `media_items` (and related join tables). */
+export interface MediaDeletedEvent {
+  mediaItemIds: string[];
+}
+
+/** Emitted after undo restores rows from a delete snapshot. */
+export interface MediaRestoredEvent {
+  mediaItemIds: string[];
+}
