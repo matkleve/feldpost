@@ -8,17 +8,7 @@
  *  - Component only bridges template events to services.
  */
 
-import {
-  Component,
-  computed,
-  ElementRef,
-  HostListener,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, computed, HostListener, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent } from './upload-panel-item.component';
 import type { ExifCoords } from '../../core/upload/upload.service';
@@ -199,7 +189,6 @@ export class UploadPanelComponent {
   readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
   readonly fileTypeGroups = DEFAULT_FILE_TYPE_GROUPS;
   readonly defaultFileInputAccept = DEFAULT_UPLOAD_FILE_INPUT_ACCEPT;
-  private readonly fileTypeChipsRef = viewChild<ElementRef<HTMLElement>>('fileTypeChips');
   private readonly pinnedFileTypeGroupId = signal<UploadFileTypeGroupId | null>(null);
   readonly documentFallbackLabel = documentFallbackLabel;
   readonly trackByJobId = trackByJobId;
@@ -268,7 +257,10 @@ export class UploadPanelComponent {
   }
 
   onDropzonePickAll(fileInput: HTMLInputElement): void {
-    this.clearPinnedFileTypeGroup();
+    if (this.pinnedFileTypeGroupId()) {
+      this.clearPinnedFileTypeGroup();
+      return;
+    }
     this.inputHandlers.openFilePicker(fileInput);
   }
 
@@ -297,19 +289,6 @@ export class UploadPanelComponent {
     event.stopPropagation();
     this.pinFileTypeGroup(group.id);
     this.inputHandlers.openFilePicker(fileInput, { extensions: [member.extension] });
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (!this.pinnedFileTypeGroupId()) {
-      return;
-    }
-    const chipsHost = this.fileTypeChipsRef()?.nativeElement;
-    const target = event.target;
-    if (chipsHost && target instanceof Node && chipsHost.contains(target)) {
-      return;
-    }
-    this.clearPinnedFileTypeGroup();
   }
 
   @HostListener('document:keydown', ['$event'])
