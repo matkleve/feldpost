@@ -8652,14 +8652,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailGrid.emptySelection.title', 'No photos at this location', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty-selection title')
+values (null, 'workspace.thumbnailGrid.emptySelection.title', 'No media at this location', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty-selection title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'No photos at this location', 'published'
+select t.id, 'en', 'No media at this location', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.emptySelection.title'
 on conflict (app_text_id, lang) do update set
@@ -8667,7 +8667,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Fotos an diesem Ort', 'published'
+select t.id, 'de', 'Keine Medien an diesem Ort', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.emptySelection.title'
 on conflict (app_text_id, lang) do update set
@@ -8675,7 +8675,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessuna foto in questa posizione', 'published'
+select t.id, 'it', 'Nessun media in questa posizione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.emptySelection.title'
 on conflict (app_text_id, lang) do update set
@@ -8683,14 +8683,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailGrid.emptySelection.hint', 'Images may not have been uploaded yet for this area.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty-selection hint')
+values (null, 'workspace.thumbnailGrid.emptySelection.hint', 'Media may not have been uploaded yet for this area.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty-selection hint')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Images may not have been uploaded yet for this area.', 'published'
+select t.id, 'en', 'Media may not have been uploaded yet for this area.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.emptySelection.hint'
 on conflict (app_text_id, lang) do update set
@@ -8698,7 +8698,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Fuer diesen Bereich wurden moeglicherweise noch keine Bilder hochgeladen.', 'published'
+select t.id, 'de', 'Fuer diesen Bereich wurden moeglicherweise noch keine Medien hochgeladen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.emptySelection.hint'
 on conflict (app_text_id, lang) do update set
@@ -8706,7 +8706,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Le immagini potrebbero non essere ancora state caricate per quest''area.', 'published'
+select t.id, 'it', 'I media potrebbero non essere ancora stati caricati per quest''area.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.emptySelection.hint'
 on conflict (app_text_id, lang) do update set

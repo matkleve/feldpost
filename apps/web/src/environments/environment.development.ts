@@ -6,10 +6,9 @@ export const environment = {
   supabase: {
     /**
      * When true, dev uses local Supabase if `supabase start` is reachable.
-     * Default false: cloud credentials (normal login) keep working while Docker is up.
-     * Or set `localStorage.setItem('feldpost.supabase.target', 'local'|'cloud')`.
+     * Override: `localStorage.setItem('feldpost.supabase.target', 'cloud')` for hosted users/data.
      */
-    preferLocalWhenAvailable: false,
+    preferLocalWhenAvailable: true,
     cloud: {
       url: 'https://yvvzbpnoesxlzlbomlkv.supabase.co',
       anonKey:

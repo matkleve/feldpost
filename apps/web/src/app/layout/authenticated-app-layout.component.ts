@@ -16,6 +16,7 @@ import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/ro
 import { filter } from 'rxjs/operators';
 import { ShareLinkRestoreService } from '../core/share-set/share-link-restore.service';
 import type { ShareLinkRestoreResult } from '../core/share-set/share-link-restore.types';
+import { ShareUrlSyncService } from '../core/share-set/share-url-sync.service';
 import { I18nService } from '../core/i18n/i18n.service';
 import { ToastService } from '../core/toast/toast.service';
 import { NavComponent } from '../features/nav/nav.component';
@@ -68,6 +69,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly shareLinkRestoreService = inject(ShareLinkRestoreService);
+  private readonly shareUrlSyncService = inject(ShareUrlSyncService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
 
@@ -104,6 +106,16 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
       }
     });
 
+    effect(() => {
+      const scopeMediaIds = this.getOrderedScopeMediaIds();
+      const detailMediaId = this.workspacePaneObserver.detailImageId$();
+      this.shareUrlSyncService.scheduleSync({
+        routeSnapshot: this.route.snapshot,
+        scopeMediaIds,
+        detailMediaId,
+      });
+    });
+
     afterNextRender(() => {
       const isJsdom =
         typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('jsdom');
@@ -120,6 +132,13 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
+        const lastNavigation = this.router.lastSuccessfulNavigation();
+        const internalUrlSyncNavigation = Boolean(
+          lastNavigation?.extras.state?.['shareUrlSync'],
+        );
+        if (internalUrlSyncNavigation) {
+          return;
+        }
         void this.tryRestoreShareLinkFromRoute();
       });
   }
@@ -272,6 +291,19 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     if (result.shouldStripQueryParams) {
       await this.stripShareLinkQueryParams();
     }
+    this.shareUrlSyncService.scheduleSync({
+      routeSnapshot: this.route.snapshot,
+      scopeMediaIds: this.getOrderedScopeMediaIds(),
+      detailMediaId: this.workspacePaneObserver.detailImageId$(),
+    });
+  }
+
+  private getOrderedScopeMediaIds(): string[] {
+    const explicitSelection = Array.from(this.workspaceSelectionService.selectedMediaIds());
+    if (explicitSelection.length > 0) {
+      return explicitSelection;
+    }
+    return this.workspaceViewService.rawImages().map((image) => image.id);
   }
 
   private applyShareLinkRestoreResult(result: ShareLinkRestoreResult): void {

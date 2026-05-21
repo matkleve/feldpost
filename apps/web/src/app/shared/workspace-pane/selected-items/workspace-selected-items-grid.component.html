@@ -17,15 +17,15 @@
     </div>
   } @else if (viewService.emptySelection()) {
     <div class="thumbnail-grid__empty-selection">
-      <span class="thumbnail-grid__empty-icon" aria-hidden="true">📷</span>
+      <span class="material-icons thumbnail-grid__empty-icon" aria-hidden="true">perm_media</span>
       <p>
-        {{ t('workspace.thumbnailGrid.emptySelection.title', 'No photos at this location') }}
+        {{ t('workspace.thumbnailGrid.emptySelection.title', 'No media at this location') }}
       </p>
       <p class="thumbnail-grid__empty-hint">
         {{
           t(
             'workspace.thumbnailGrid.emptySelection.hint',
-            'Images may not have been uploaded yet for this area.'
+            'Media may not have been uploaded yet for this area.'
           )
         }}
       </p>

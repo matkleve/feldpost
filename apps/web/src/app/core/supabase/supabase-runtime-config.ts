@@ -80,11 +80,11 @@ function reportSupabaseTargetToDevTerminal(config: ResolvedSupabaseConfig): void
 
   let message: string;
   if (config.target === 'local') {
-    message = `Supabase: local (${config.url})`;
+    message = `Supabase: local (${config.url}) — use a local account; cloud login: localStorage feldpost.supabase.target=cloud`;
   } else {
     const hasLocal = getLocalEndpoint() !== null;
     message = hasLocal
-      ? `Supabase: cloud (${config.url}) — local skipped (cloud users); localStorage feldpost.supabase.target=local or preferLocalWhenAvailable`
+      ? `Supabase: cloud (${config.url}) — local not reachable; run \`supabase start\` or set preferLocalWhenAvailable`
       : `Supabase: cloud (${config.url})`;
   }
 

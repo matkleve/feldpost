@@ -129,6 +129,17 @@ Normative service contract: [`docs/specs/service/share-set/share-link-restore.md
 - Orchestration lives on **`AuthenticatedAppLayoutComponent`** (`implements WorkspacePaneShellHost`); not on map shell.
 - After restore, `share` and `media` query params are stripped from the URL.
 
+### Share affordance contract
+
+- The workspace footer keeps a share/copy affordance whenever footer actions are visible.
+- Footer primary share copy uses scope-aware labels:
+  - `Share All` when footer scope exists but explicit selection is empty.
+  - `Share Selected` when one or more media items are explicitly selected.
+- Generated URL shape follows the canonical matrix from [`share-link-restore.md`](../../service/share-set/share-link-restore.md):
+  - one selected detail target: `share + media`
+  - many selected without detail target: `share`
+  - many selected with detail target: `share + media`
+
 ### Interaction Flowchart
 
 ```mermaid

@@ -100,6 +100,23 @@ flowchart TD
 - v1: query params only (no `/map/selection/:token/...` paths).
 - `media` without `share`: ignored; no restore.
 
+## Live URL sync producer compatibility
+
+Restore remains consumer-only (`restoreFromRoute`), but URL values may be produced continuously by a layout-hosted sync service. The restore contract remains unchanged: only `share` activates restore.
+
+| Producer state | Canonical query params | Restore behavior |
+| --- | --- | --- |
+| no selected media | `share` removed, `media` removed | no restore (no `share`) |
+| one selected media | `share={token}&media={id}` | restore selection + detail |
+| many selected media, no detail target | `share={token}` | restore selection grid |
+| many selected media, detail target in set | `share={token}&media={id}` | restore selection + detail |
+
+Producer constraints:
+
+- `share` is always server-backed via `create_or_reuse_share_set`; no client-only hash restores.
+- Automatic producer updates MUST use `replaceUrl: true` to avoid history churn during rapid selection changes.
+- During token resolution, the address bar may show the previous canonical URL; restore still evaluates only the current route snapshot at navigation time.
+
 ### Copy-link shapes (creation)
 
 | Condition | URL |
@@ -204,7 +221,6 @@ Phase 2 MUST migrate hardcoded German strings from legacy map-shell restore to t
 
 ## Explicit non-goals (v1)
 
-- Live URL sync as selection changes on map or grid.
 - Metadata grouping / sort / collapse in URL.
 - `media` without `share`.
 - Map marker key sync after restore (optional Phase 2b; document as known gap).

@@ -167,8 +167,14 @@ export class WorkspaceBulkActionService {
       });
       let url = `${window.location.origin}/?share=${encodeURIComponent(result.token)}`;
       const detailMediaId = this.workspacePaneObserver.detailImageId$();
-      if (detailMediaId && selectedIds.includes(detailMediaId)) {
-        url += `&media=${encodeURIComponent(detailMediaId)}`;
+      const canonicalMediaId =
+        selectedIds.length === 1
+          ? selectedIds[0]
+          : detailMediaId && selectedIds.includes(detailMediaId)
+            ? detailMediaId
+            : null;
+      if (canonicalMediaId) {
+        url += `&media=${encodeURIComponent(canonicalMediaId)}`;
       }
 
       if (copyToClipboard) {

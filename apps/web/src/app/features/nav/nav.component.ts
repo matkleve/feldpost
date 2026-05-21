@@ -24,7 +24,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
 
 export interface NavItem {
-  /** Google Material Icon ligature name (e.g. 'map', 'photo_camera'). */
+  /** Google Material Icon ligature name (e.g. 'map', 'perm_media'). */
   icon: string;
   label: string;
   route: string;
@@ -49,7 +49,7 @@ export class NavComponent {
    *  out and non-interactive — reserved for future features. */
   readonly navItems = computed<NavItem[]>(() => [
     { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
-    { icon: 'photo_camera', label: this.t('nav.item.media', 'Media'), route: '/media' },
+    { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
     { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
   ]);
 
