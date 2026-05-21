@@ -14,7 +14,8 @@
 }
 
 :host-context([data-theme='sandstone']) {
-  --mdv-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
+  // Same 8% primary mix as default — location rows use this fallback, not 14% clay.
+  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
   --mdv-menu-item-text: #2f271f;
   --mdv-action-text-default: #6b5a47;
   --mdv-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
@@ -44,31 +45,9 @@
   min-width: 0;
 }
 
-// Center column hosts type + name + value sub-grid for add row.
+// Validation copy sits below the row so row height matches other detail rows.
 // @see docs/specs/ui/media-detail/metadata-section.md
-.metadata-add-row__center {
-  grid-template-columns: 1.25rem minmax(0, 1fr);
-  align-items: stretch;
-}
-
-.metadata-add-row__controls {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
-  align-items: start;
-  gap: var(--spacing-1);
-  min-width: 0;
-  width: 100%;
-}
-
-.metadata-add-row__type {
-  align-self: start;
-}
-
-.metadata-add-row__name {
-  min-width: 0;
-}
-
-.metadata-add-row__value {
+.metadata-add-row-stack {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -76,31 +55,79 @@
 }
 
 .metadata-add-row__error {
+  @include detail-row-slots.detail-row-center-width;
   margin: 0;
+  padding-inline: var(--spacing-2);
   font-size: var(--font-size-2xs);
   color: var(--destructive);
 }
 
-// Collapsed add: one trigger fills center (parent 3-col grid must not squeeze it to icon column).
+// Center tint — same token as other detail rows (hover + editing).
 // @see docs/specs/ui/media-detail/metadata-section.md
-.add-metadata-row:not(.detail-row--editing) .detail-row__center {
-  grid-template-columns: minmax(0, 1fr);
-}
+$metadata-row-center-bg: var(
+  --mdv-menu-item-hover-bg,
+  color-mix(in srgb, var(--primary) 8%, transparent)
+);
 
-.metadata-add-row__collapsed-trigger {
-  display: grid;
-  grid-template-columns: 1.25rem minmax(0, 1fr);
+// Parent grid assigns center column width (1fr); inner grid only lays out icon/label/value slots.
+// Editing padding is included in row height via border-box so the row does not grow past --detail-row-action-size.
+// @see docs/specs/ui/media-detail/metadata-section.md
+.add-metadata-row.detail-row--editing .detail-row__center {
+  box-sizing: border-box;
+  height: var(--detail-row-action-size);
+  min-height: var(--detail-row-action-size);
+  max-height: var(--detail-row-action-size);
+  grid-template-columns: auto minmax(4rem, auto) minmax(0, 1fr);
   align-items: center;
-  gap: var(--spacing-1);
-  width: 100%;
-  min-width: 0;
-  text-align: left;
+  background: $metadata-row-center-bg;
 }
 
+// Idle: no tint — override _detail-row-slots :focus-within (tabindex on collapsed center).
+.add-metadata-row.detail-row:not(.detail-row--editing) .detail-row__center,
+.add-metadata-row.detail-row:not(.detail-row--editing):focus-within .detail-row__center {
+  background-color: transparent;
+}
+
+.add-metadata-row.detail-row:not(.detail-row--editing):hover .detail-row__center {
+  background: $metadata-row-center-bg;
+
+  .detail-row__icon,
+  .detail-row__label {
+    color: var(--primary);
+  }
+}
+
+.add-metadata-row.detail-row--editing .metadata-add-row__type,
+.add-metadata-row.detail-row--editing .metadata-add-row__name,
+.add-metadata-row.detail-row--editing .metadata-add-row__value {
+  min-width: 0;
+}
+
+.add-metadata-row.detail-row--editing .metadata-add-row__type,
+.add-metadata-row.detail-row--editing .metadata-add-row__name {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  height: 100%;
+}
+
+.add-metadata-row.detail-row--editing .metadata-add-row__name {
+  width: 100%;
+}
+
+.add-metadata-row.detail-row--editing .detail-row__field-slot {
+  align-self: stretch;
+  height: 100%;
+}
+
+// Collapsed add: default 3-slot center; label spans label + value columns like a full-width CTA.
+// @see docs/specs/ui/media-detail/metadata-section.md
 .metadata-add-row__collapsed-label {
-  justify-self: start;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  grid-column: 2 / -1;
+}
+
+.metadata-add-row__collapsed-center {
+  cursor: pointer;
 }
 
 .add-metadata-confirm {

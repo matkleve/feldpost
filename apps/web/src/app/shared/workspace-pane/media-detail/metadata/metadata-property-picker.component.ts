@@ -33,18 +33,18 @@ import { METADATA_COMPOSE_TYPE_ICONS } from './metadata-type-icons';
   template: `
     <button
       #triggerRef
-      hlmBtn
-      variant="outline"
-      class="metadata-property-picker__trigger w-full min-w-0"
       type="button"
+      class="detail-row__field-input detail-row__field-input--trigger metadata-property-picker__trigger w-full min-w-0"
       [disabled]="disabled()"
       [attr.aria-expanded]="open()"
       [attr.aria-label]="t('workspace.metadata.propertyPicker.aria', 'Property name')"
       (click)="toggleOpen()"
     >
-      <span class="material-icons metadata-property-picker__type-icon" aria-hidden="true">{{
-        iconFor(displayType())
-      }}</span>
+      @if (showTriggerTypeIcon()) {
+        <span class="material-icons metadata-property-picker__type-icon" aria-hidden="true">{{
+          iconFor(displayType())
+        }}</span>
+      }
       <span class="metadata-property-picker__label min-w-0 truncate">{{
         displayLabel()
       }}</span>
@@ -108,6 +108,7 @@ export class MetadataPropertyPickerComponent {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
+  readonly showTriggerTypeIcon = input(true);
   readonly definitions = input<MetadataKeyDefinitionView[]>([]);
   readonly excludedKeyIds = input<ReadonlySet<string>>(new Set());
   readonly valueType = input.required<MetadataComposeValueType>();

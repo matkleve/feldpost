@@ -13,14 +13,14 @@
     }
 
     @if (showAddForm()) {
-      <div
-        class="detail-row add-metadata-row detail-row--editing"
-        data-detail-active-editor="metadata-add"
-      >
-        <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-        <div class="detail-row__center metadata-add-row__center">
-          <div class="metadata-add-row__controls">
+      <div class="metadata-add-row-stack">
+        <div
+          class="detail-row add-metadata-row detail-row--editing"
+          data-detail-active-editor="metadata-add"
+        >
+          <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+          <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+          <div class="detail-row__center">
             <app-metadata-type-picker
               class="metadata-add-row__type"
               [valueType]="draft().valueType"
@@ -31,6 +31,7 @@
             />
             <app-metadata-property-picker
               class="metadata-add-row__name"
+              [showTriggerTypeIcon]="false"
               [definitions]="metadataKeyDefinitions()"
               [excludedKeyIds]="excludedKeyIds()"
               [valueType]="draft().valueType"
@@ -41,61 +42,62 @@
               (definitionSelected)="onDefinitionSelected($event)"
               (draftNameChange)="onDraftNameChange($event)"
             />
-            <div class="metadata-add-row__value" (keydown.enter)="saveAdd()">
+            <div class="detail-row__field-slot metadata-add-row__value" (keydown.enter)="saveAdd()">
               <app-metadata-value-editor
                 [valueType]="draft().valueType"
                 [value]="draft().value"
                 [ariaLabel]="t('workspace.metadata.input.value.aria', 'New metadata value')"
                 (valueChange)="onDraftValueChange($event)"
               />
-              @if (valueError()) {
-                <p class="metadata-add-row__error" role="alert">{{ valueError() }}</p>
-              }
-              @if (duplicateError()) {
-                <p class="metadata-add-row__error" role="alert">{{ duplicateError() }}</p>
-              }
             </div>
           </div>
+          <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            class="detail-row-action detail-row-action--r1 add-metadata-confirm detail-row-action--confirm"
+            type="button"
+            [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
+            (click)="saveAdd()"
+          >
+            <span class="material-icons" aria-hidden="true">check</span>
+          </button>
+          <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+            type="button"
+            [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel')"
+            (click)="cancelAdd()"
+          >
+            <span class="material-icons" aria-hidden="true">close</span>
+          </button>
         </div>
-        <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="detail-row-action detail-row-action--r1 add-metadata-confirm detail-row-action--confirm"
-          type="button"
-          [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
-          (click)="saveAdd()"
-        >
-          <span class="material-icons" aria-hidden="true">check</span>
-        </button>
-        <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="detail-row-action detail-row-action--r2 detail-row-action--danger"
-          type="button"
-          [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel')"
-          (click)="cancelAdd()"
-        >
-          <span class="material-icons" aria-hidden="true">close</span>
-        </button>
+        @if (valueError()) {
+          <p class="metadata-add-row__error" role="alert">{{ valueError() }}</p>
+        }
+        @if (duplicateError()) {
+          <p class="metadata-add-row__error" role="alert">{{ duplicateError() }}</p>
+        }
       </div>
     } @else {
       <div class="detail-row add-metadata-row">
         <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
         <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-        <div class="detail-row__center">
-          <button
-            class="detail-row__field-trigger metadata-add-row__collapsed-trigger"
-            type="button"
-            [attr.aria-label]="t('workspace.metadata.action.add', 'Add metadata')"
-            (click)="openAddForm()"
-          >
-            <span class="material-icons detail-row__icon" aria-hidden="true">add</span>
-            <span class="detail-row__label metadata-add-row__collapsed-label">{{
-              t('workspace.metadata.action.add', 'Add metadata')
-            }}</span>
-          </button>
+        <div
+          class="detail-row__center metadata-add-row__collapsed-center"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="t('workspace.metadata.action.add', 'Add metadata')"
+          (click)="openAddForm()"
+          (keydown.enter)="openAddForm()"
+          (keydown.space)="$event.preventDefault(); openAddForm()"
+        >
+          <span class="material-icons detail-row__icon" aria-hidden="true">add</span>
+          <span class="detail-row__label metadata-add-row__collapsed-label">{{
+            t('workspace.metadata.action.add', 'Add metadata')
+          }}</span>
         </div>
         <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
         <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>

@@ -20,21 +20,26 @@ import {
 @Component({
   selector: 'app-metadata-type-picker',
   standalone: true,
-  imports: [DropdownShellComponent, ...HLM_BUTTON_IMPORTS, HlmMenuItemDirective],
+  imports: [DropdownShellComponent, HlmMenuItemDirective, ...HLM_BUTTON_IMPORTS],
   template: `
     <button
       #triggerRef
       hlmBtn
       variant="outline"
-      size="icon"
-      class="metadata-type-picker__trigger"
+      size="sm"
       type="button"
-      [disabled]="disabled()"
+      class="metadata-type-picker__trigger"
+      [class.metadata-type-picker__trigger--open]="open()"
+      [disabled]="disabled() || locked()"
       [attr.aria-label]="t('workspace.metadata.typePicker.aria', 'Property type')"
       [attr.aria-expanded]="open()"
       (click)="toggleOpen()"
     >
-      <span class="material-icons" aria-hidden="true">{{ iconFor(valueType()) }}</span>
+      <span
+        class="material-icons metadata-type-picker__icon"
+        aria-hidden="true"
+        >{{ iconFor(valueType()) }}</span
+      >
     </button>
     @if (open()) {
       <app-dropdown-shell

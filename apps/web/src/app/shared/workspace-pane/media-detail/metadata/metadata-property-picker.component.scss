@@ -1,16 +1,23 @@
-// Property name picker trigger and dropdown rows.
+// Property name trigger — detail-row field footprint (label column).
 // @see docs/specs/ui/media-detail/metadata-property-picker.md
 .metadata-property-picker__trigger {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
   justify-content: flex-start;
-  min-height: var(--detail-row-height, 2rem);
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--detail-row-field-inset, 0.125rem));
+  text-align: left;
 }
 
 .metadata-property-picker__type-icon {
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   flex-shrink: 0;
+}
+
+.metadata-property-picker__label {
+  min-width: 0;
 }
 
 .metadata-property-picker__chip {

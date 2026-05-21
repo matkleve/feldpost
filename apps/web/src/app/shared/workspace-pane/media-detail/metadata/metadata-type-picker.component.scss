@@ -1,5 +1,26 @@
-// Icon-only outline trigger for metadata property type.
+// Square outline trigger — fits inside editing center height (padding included in row box).
 // @see docs/specs/ui/media-detail/metadata-type-picker.md
 .metadata-type-picker__trigger {
+  --metadata-type-picker-inset: var(--detail-row-field-inset, 0.125rem);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   flex-shrink: 0;
+  width: calc(var(--detail-row-action-size, 2rem) - 2 * var(--metadata-type-picker-inset));
+  min-width: calc(var(--detail-row-action-size, 2rem) - 2 * var(--metadata-type-picker-inset));
+  height: calc(var(--detail-row-action-size, 2rem) - 2 * var(--metadata-type-picker-inset));
+  padding: var(--metadata-type-picker-inset);
+}
+
+.metadata-type-picker__icon {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.metadata-type-picker__trigger--open {
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
 }

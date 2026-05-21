@@ -30,7 +30,7 @@ import { METADATA_COMPOSE_TYPE_ICONS } from '../metadata/metadata-type-icons';
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './metadata-section.component.html',
-  styleUrls: ['./metadata-section.component.scss', '../_detail-row-slots.scss'],
+  styleUrls: ['../_detail-row-slots.scss', './metadata-section.component.scss'],
 })
 export class MetadataSectionComponent {
   private readonly i18nService = inject(I18nService);
