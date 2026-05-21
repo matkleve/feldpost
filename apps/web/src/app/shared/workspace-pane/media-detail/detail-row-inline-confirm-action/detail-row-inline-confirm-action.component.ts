@@ -9,7 +9,6 @@ import {
   signal,
 } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
 
 const INLINE_CONFIRM_REVERT_MS = 5000;
 
@@ -20,9 +19,11 @@ const INLINE_CONFIRM_REVERT_MS = 5000;
 @Component({
   selector: 'app-detail-row-inline-confirm-action',
   standalone: true,
-  imports: [...HLM_BUTTON_IMPORTS],
   templateUrl: './detail-row-inline-confirm-action.component.html',
-  styleUrl: './detail-row-inline-confirm-action.component.scss',
+  styleUrls: [
+    './detail-row-inline-confirm-action.component.scss',
+    '../_detail-row-slots.scss',
+  ],
 })
 export class DetailRowInlineConfirmActionComponent implements OnDestroy {
   private readonly elementRef = inject(ElementRef<HTMLElement>);

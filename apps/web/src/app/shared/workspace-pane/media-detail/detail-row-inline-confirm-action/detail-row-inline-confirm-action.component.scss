@@ -1,21 +1,14 @@
-// Armed destructive action stays visible without row hover.
+// Host is a grid passthrough only — geometry lives on the action button.
 // @see docs/specs/ui/media-detail/media-detail-inline-editing.md
 :host {
   display: contents;
 }
 
-.detail-row-action--armed:is(button) {
+// Armed remove: same slot size as idle; warm primary tint only (no row growth).
+// @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+.detail-row-action--armed.detail-row-action--remove:is(button) {
   opacity: 1;
   pointer-events: auto;
-  color: var(--destructive);
-  background: color-mix(in srgb, var(--destructive) 18%, transparent);
-}
-
-.detail-row-action--armed:is(button):hover,
-.detail-row-action--armed:is(button):focus-visible {
-  color: var(--destructive);
-  background: color-mix(in srgb, var(--destructive) 24%, transparent);
-  outline-color: var(--destructive);
 }
 
 .detail-row-action--revealed:is(button) {

@@ -2439,6 +2439,7 @@ export class MapShellComponent implements OnDestroy {
       request.mediaId,
       result.lat,
       result.lng,
+      result.address,
     );
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Standort wurde aktualisiert.'),

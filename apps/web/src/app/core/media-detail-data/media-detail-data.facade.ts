@@ -18,6 +18,8 @@ import {
 import {
   MEDIA_ITEM_DETAIL_SELECT_BASE,
   MEDIA_ITEM_DETAIL_SELECT_WITH_META,
+  MEDIA_ITEM_LOCATION_SELECT_BASE,
+  MEDIA_ITEM_LOCATION_SELECT_WITH_META,
   isMissingAddressFieldMetaColumn,
 } from './media-detail-data.helpers';
 
@@ -84,6 +86,43 @@ interface MediaDetailDataFacadeDeps {
 
 export class MediaDetailDataFacade {
   constructor(private readonly deps: MediaDetailDataFacadeDeps) {}
+
+  /**
+   * Merges location/address columns into the current detail image without full-pane reload.
+   * Does not touch loading state, metadata, URLs, or projects.
+   */
+  async refreshImageLocationFields(
+    id: string,
+    abortSignal: AbortSignal,
+  ): Promise<{ applied: boolean; locationStatus: string | null }> {
+    const media = await this.loadLocationRow(id);
+    if (abortSignal.aborted || !media) {
+      return { applied: false, locationStatus: null };
+    }
+
+    const legacyImageId = media.source_image_id ?? media.id;
+    const patch = this.toImageRecord(media, legacyImageId);
+    const current = this.deps.signals.image();
+    if (!current || current.id !== legacyImageId) {
+      return { applied: false, locationStatus: null };
+    }
+
+    this.deps.signals.image.set({
+      ...current,
+      latitude: patch.latitude,
+      longitude: patch.longitude,
+      address_label: patch.address_label,
+      street: patch.street,
+      city: patch.city,
+      district: patch.district,
+      country: patch.country,
+      location_unresolved: patch.location_unresolved,
+      gps_assignment_allowed: patch.gps_assignment_allowed,
+      address_field_meta: patch.address_field_meta ?? current.address_field_meta,
+    });
+
+    return { applied: true, locationStatus: media.location_status };
+  }
 
   async loadImage(id: string, abortSignal: AbortSignal): Promise<void> {
     this.resetLoadState();
@@ -183,6 +222,31 @@ export class MediaDetailDataFacade {
     this.deps.signals.fullResPreloaded.set(false);
     this.deps.signals.fullResUrl.set(null);
     this.deps.signals.thumbnailUrl.set(null);
+  }
+
+  private async loadLocationRow(id: string): Promise<MediaDetailRow | null> {
+    const fetchRow = (columns: string) =>
+      this.deps.services.supabase.client
+        .from('media_items')
+        .select(columns)
+        .or(`id.eq.${id},source_image_id.eq.${id}`)
+        .limit(1)
+        .maybeSingle();
+
+    let mediaResult = await fetchRow(MEDIA_ITEM_LOCATION_SELECT_WITH_META);
+    if (mediaResult.error && isMissingAddressFieldMetaColumn(mediaResult.error.message)) {
+      mediaResult = await fetchRow(MEDIA_ITEM_LOCATION_SELECT_BASE);
+    }
+
+    if (mediaResult.error || !mediaResult.data) {
+      return null;
+    }
+
+    const row = mediaResult.data as unknown as MediaDetailRow;
+    return {
+      ...row,
+      address_field_meta: row.address_field_meta ?? null,
+    };
   }
 
   private async loadMediaRow(id: string): Promise<MediaDetailRow | null> {

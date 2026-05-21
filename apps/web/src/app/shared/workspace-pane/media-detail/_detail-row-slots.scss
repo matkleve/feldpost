@@ -53,6 +53,10 @@
       color: var(--destructive);
     }
 
+    .detail-row-action--remove:is(button) {
+      color: var(--primary);
+    }
+
     .detail-row-action--save:is(button),
     .detail-row-action--confirm:is(button) {
       color: var(--success);
@@ -259,9 +263,9 @@
     font-size: var(--font-size-md);
   }
 
-  &:hover:not(.detail-row-action--danger):not(.detail-row-action--save):not(
-      .detail-row-action--confirm
-    ) {
+  &:hover:not(.detail-row-action--danger):not(.detail-row-action--remove):not(
+      .detail-row-action--save
+    ):not(.detail-row-action--confirm) {
     color: var(--primary);
     background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent));
   }
@@ -280,6 +284,23 @@
     color: var(--destructive);
     background: color-mix(in srgb, var(--destructive) 10%, transparent);
     outline-color: var(--destructive);
+  }
+
+  &.detail-row-action--remove {
+    color: var(--primary);
+  }
+
+  &.detail-row-action--remove:hover,
+  &.detail-row-action--remove:focus-visible,
+  &.detail-row-action--remove.detail-row-action--armed {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    outline-color: var(--primary);
+  }
+
+  &.detail-row-action--remove.detail-row-action--armed:hover,
+  &.detail-row-action--remove.detail-row-action--armed:focus-visible {
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
   }
 
   // Save/confirm check icon uses success green; tint background only on hover/focus.

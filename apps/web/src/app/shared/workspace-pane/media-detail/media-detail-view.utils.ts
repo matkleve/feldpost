@@ -1,4 +1,6 @@
 import type { ChipDef } from '../../../shared/quick-info-chips/quick-info-chips.component';
+import type { MediaLocationAddressPatch } from '../../../core/media-location-update/media-location-update.types';
+import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 import type { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
 
 export type DetailTranslateFn = (key: string, fallback: string) => string;
@@ -236,6 +238,52 @@ export function resolveFullAddress(image: ImageRecord | null): string {
 
 export function hasResolvableCoordinates(image: ImageRecord | null): boolean {
   return image?.latitude != null && image?.longitude != null;
+}
+
+export function locationPatchFromForwardGeocode(
+  suggestion: ForwardGeocodeResult,
+): MediaLocationAddressPatch & { latitude: number; longitude: number } {
+  return {
+    latitude: suggestion.lat,
+    longitude: suggestion.lng,
+    address_label: suggestion.addressLabel,
+    street: suggestion.street,
+    city: suggestion.city,
+    district: suggestion.district,
+    country: suggestion.country,
+  };
+}
+
+export function mergeImageLocationPatch(
+  image: ImageRecord,
+  patch: MediaLocationAddressPatch & {
+    latitude?: number | null;
+    longitude?: number | null;
+    location_unresolved?: boolean;
+    gps_assignment_allowed?: boolean;
+  },
+): ImageRecord {
+  const next: ImageRecord = {
+    ...image,
+    ...(patch.latitude !== undefined ? { latitude: patch.latitude } : {}),
+    ...(patch.longitude !== undefined ? { longitude: patch.longitude } : {}),
+    ...(patch.address_label !== undefined ? { address_label: patch.address_label } : {}),
+    ...(patch.street !== undefined ? { street: patch.street } : {}),
+    ...(patch.city !== undefined ? { city: patch.city } : {}),
+    ...(patch.district !== undefined ? { district: patch.district } : {}),
+    ...(patch.country !== undefined ? { country: patch.country } : {}),
+    ...(patch.gps_assignment_allowed !== undefined
+      ? { gps_assignment_allowed: patch.gps_assignment_allowed }
+      : {}),
+  };
+
+  if (patch.location_unresolved !== undefined) {
+    next.location_unresolved = patch.location_unresolved;
+  } else if (next.latitude != null && next.longitude != null) {
+    next.location_unresolved = false;
+  }
+
+  return next;
 }
 
 /** True when GPS exists but structured address lines are still empty (reverse geocode in flight). */

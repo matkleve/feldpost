@@ -60,6 +60,8 @@ import {
   formatUploadDate,
   isImageLikeMedia,
   needsAddressResolutionAfterGps,
+  mergeImageLocationPatch,
+  locationPatchFromForwardGeocode,
   resolveDisplayTitle,
   resolveFullAddress,
   resolveFileFormatLabel,
@@ -93,6 +95,7 @@ import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
 import type { ResolvedAction } from '../../../core/action/action-types';
 import { WORKSPACE_SINGLE_ACTION_DEFINITIONS } from '../footer/workspace-detail-actions.registry';
 import type { WorkspaceSingleActionId } from '../footer/workspace-detail-actions.types';
+import type { MediaLocationAddressPatch } from '../../../core/media-location-update/media-location-update.types';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
@@ -537,16 +540,12 @@ export class MediaDetailViewComponent implements OnDestroy {
         return;
       }
       this.lastHandledLocationSyncSeq = evt.seq;
-      this.media.update((prev) =>
-        prev
-          ? {
-              ...prev,
-              latitude: evt.lat,
-              longitude: evt.lng,
-            }
-          : prev,
-      );
-      void this.syncDetailAfterExternalCoordinates(mediaId);
+      this.applyLocationPatch({
+        latitude: evt.lat,
+        longitude: evt.lng,
+        ...evt.address,
+      });
+      void this.finishLocationFieldsIfNeeded(mediaId);
     });
 
     this.uploadManager.imageReplaced$
@@ -606,23 +605,45 @@ export class MediaDetailViewComponent implements OnDestroy {
     // per-session suppression across detail panel open/close cycles.
   }
 
-  private async syncDetailAfterExternalCoordinates(mediaId: string): Promise<void> {
+  private applyLocationPatch(
+    patch: MediaLocationAddressPatch & {
+      latitude?: number | null;
+      longitude?: number | null;
+      location_unresolved?: boolean;
+      gps_assignment_allowed?: boolean;
+    },
+  ): void {
+    const current = this.media();
+    if (!current) {
+      return;
+    }
+    this.media.set(mergeImageLocationPatch(current, patch));
+  }
+
+  /** Silent location/address refresh — no full detail reload or loading skeleton. */
+  private async finishLocationFieldsIfNeeded(mediaId: string): Promise<void> {
+    const img = this.media();
+    const mediaItemId = this.mediaItemId();
+    const status = this.locationResolverService.normalizeLocationStatus(this.mediaLocationStatus());
+    const needsResolver =
+      !!mediaItemId &&
+      !!img &&
+      (status === 'pending' || needsAddressResolutionAfterGps(img));
+
+    if (!needsResolver) {
+      return;
+    }
+
     this.addressResolving.set(true);
     try {
       const signal = this.abortController?.signal ?? new AbortController().signal;
-      await this.dataFacade.loadImage(mediaId, signal);
-      const mediaItemId = this.mediaItemId();
-      const img = this.media();
-      const status = this.locationResolverService.normalizeLocationStatus(this.mediaLocationStatus());
-      const shouldResolve =
-        !!mediaItemId &&
-        !!img &&
-        (status === 'pending' || needsAddressResolutionAfterGps(img));
-      if (shouldResolve) {
-        const result = await this.locationResolverService.resolvePendingMediaItem(mediaItemId);
-        if (result.changed && !signal.aborted) {
-          await this.dataFacade.loadImage(mediaId, signal);
-        }
+      const result = await this.locationResolverService.resolvePendingMediaItem(mediaItemId);
+      if (!result.changed || signal.aborted) {
+        return;
+      }
+      const refresh = await this.dataFacade.refreshImageLocationFields(mediaId, signal);
+      if (refresh.applied && refresh.locationStatus) {
+        this.mediaLocationStatus.set(refresh.locationStatus);
       }
     } finally {
       this.addressResolving.set(false);
@@ -1078,11 +1099,12 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
+    this.applyLocationPatch(locationPatchFromForwardGeocode(suggestion));
     await this.fieldsHelper.persistAddressFieldMetaFromGeocode(suggestion);
-    await this.loadMedia(media.id);
+    this.mediaLocationStatus.set('resolved');
+    this.editingField.set(null);
     this.saving.set(false);
     this.addressResolving.set(false);
-    this.editingField.set(null);
   }
 
   onChipClicked(index: number): void {
@@ -1268,17 +1290,14 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    this.media.update((prev) =>
-      prev
-        ? {
-            ...prev,
-            latitude: result.lat ?? coords.lat,
-            longitude: result.lng ?? coords.lng,
-          }
-        : prev,
-    );
+    this.applyLocationPatch({
+      latitude: result.lat ?? coords.lat,
+      longitude: result.lng ?? coords.lng,
+      ...result.address,
+    });
+    this.mediaLocationStatus.set('resolved');
     this.editingField.set(null);
-    await this.syncDetailAfterExternalCoordinates(media.id);
+    await this.finishLocationFieldsIfNeeded(media.id);
     this.saving.set(false);
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Location updated.'),
@@ -1402,7 +1421,11 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    await this.loadMedia(currentMediaId);
+    const signal = this.abortController?.signal ?? new AbortController().signal;
+    const refresh = await this.dataFacade.refreshImageLocationFields(currentMediaId, signal);
+    if (refresh.applied && refresh.locationStatus) {
+      this.mediaLocationStatus.set(refresh.locationStatus);
+    }
   }
 
   private async retryPendingLocationOnceOnOpen(id: string, signal: AbortSignal): Promise<void> {
@@ -1428,6 +1451,9 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    await this.dataFacade.loadImage(id, signal);
+    const refresh = await this.dataFacade.refreshImageLocationFields(id, signal);
+    if (refresh.applied && refresh.locationStatus) {
+      this.mediaLocationStatus.set(refresh.locationStatus);
+    }
   }
 }

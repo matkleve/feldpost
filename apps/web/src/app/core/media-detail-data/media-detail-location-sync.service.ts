@@ -1,10 +1,12 @@
 import { Injectable, signal } from '@angular/core';
+import type { MediaLocationAddressPatch } from '../media-location-update/media-location-update.types';
 
 export interface MediaDetailLocationSyncEvent {
   mediaId: string;
   lat: number;
   lng: number;
   seq: number;
+  address?: MediaLocationAddressPatch;
 }
 
 /**
@@ -16,8 +18,13 @@ export class MediaDetailLocationSyncService {
   private seq = 0;
   readonly lastEvent = signal<MediaDetailLocationSyncEvent | null>(null);
 
-  notifyCoordinatesUpdated(mediaId: string, lat: number, lng: number): void {
+  notifyCoordinatesUpdated(
+    mediaId: string,
+    lat: number,
+    lng: number,
+    address?: MediaLocationAddressPatch,
+  ): void {
     this.seq += 1;
-    this.lastEvent.set({ mediaId, lat, lng, seq: this.seq });
+    this.lastEvent.set({ mediaId, lat, lng, seq: this.seq, address });
   }
 }

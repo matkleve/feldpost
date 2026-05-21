@@ -1,11 +1,8 @@
 <button
-  hlmBtn
-  variant="ghost"
-  size="icon"
   [class]="
     'detail-row-action detail-row-action--' +
     slot() +
-    ' detail-row-action--danger' +
+    ' detail-row-action--remove' +
     (armed() ? ' detail-row-action--armed' : '') +
     (visible() || armed() ? ' detail-row-action--revealed' : '')
   "

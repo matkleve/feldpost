@@ -9,9 +9,9 @@ import {
   describeLocationUpdateRpcError,
   LOCATION_UPDATE_NOT_FOUND_ERROR,
 } from './media-location-update.helpers';
-import type { MediaLocationUpdateResult } from './media-location-update.types';
+import type { MediaLocationAddressPatch, MediaLocationUpdateResult } from './media-location-update.types';
 
-export type { MediaLocationUpdateResult } from './media-location-update.types';
+export type { MediaLocationAddressPatch, MediaLocationUpdateResult } from './media-location-update.types';
 
 @Injectable({ providedIn: 'root' })
 export class MediaLocationUpdateService {
@@ -36,6 +36,13 @@ export class MediaLocationUpdateService {
     return this.finishResolveMediaLocationRpc(
       await this.supabaseService.client.rpc('resolve_media_location', payload),
       { lat: suggestion.lat, lng: suggestion.lng },
+      {
+        address_label: suggestion.addressLabel,
+        street: suggestion.street,
+        city: suggestion.city,
+        district: suggestion.district,
+        country: suggestion.country,
+      },
     );
   }
 
@@ -66,12 +73,22 @@ export class MediaLocationUpdateService {
     return this.finishResolveMediaLocationRpc(
       await this.supabaseService.client.rpc('resolve_media_location', payload),
       { lat: coords.lat, lng: coords.lng },
+      reverse
+        ? {
+            address_label: reverse.addressLabel,
+            street: reverse.street,
+            city: reverse.city,
+            district: reverse.district,
+            country: reverse.country,
+          }
+        : undefined,
     );
   }
 
   private finishResolveMediaLocationRpc(
     response: { data: boolean | null; error: { message?: string } | null },
     coords: { lat: number; lng: number },
+    address?: MediaLocationAddressPatch,
   ): MediaLocationUpdateResult {
     if (response.error) {
       return { ok: false, error: describeLocationUpdateRpcError(response.error) };
@@ -81,6 +98,6 @@ export class MediaLocationUpdateService {
       return { ok: false, error: LOCATION_UPDATE_NOT_FOUND_ERROR };
     }
 
-    return { ok: true, lat: coords.lat, lng: coords.lng };
+    return { ok: true, lat: coords.lat, lng: coords.lng, address };
   }
 }
