@@ -53,21 +53,21 @@
       (dragover)="inputHandlers.onDragOver($event)"
       (dragleave)="inputHandlers.onDragLeave($event)"
       (drop)="inputHandlers.onDrop($event); laneHandlers.setSelectedLane('uploading')"
+      (click)="onDropzoneDismissPinned($event)"
     >
       <button
         type="button"
-        class="upload-panel__dropzone-hit"
+        class="upload-panel__dropzone-pick"
         [attr.aria-label]="t('auto.0103.drag_files_here_or_click_to_select', 'Drag files here or click to select')"
-        (click)="onDropzonePickAll(fileInput)"
+        (click)="onDropzonePickClick($event, fileInput)"
         (keydown)="inputHandlers.onDropZoneKeydown($event, fileInput)"
-      ></button>
-      <div class="upload-panel__dropzone-content" aria-hidden="true">
-        <span class="upload-panel__dropzone-icon material-icons">upload_file</span>
-        <p class="upload-panel__dropzone-label">
+      >
+        <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
+        <span class="upload-panel__dropzone-label">
           {{ dropzoneLabelText() }}
-        </p>
-      </div>
-      <div class="upload-panel__file-type-chips">
+        </span>
+      </button>
+      <div class="upload-panel__file-type-chips" (click)="$event.stopPropagation()">
         @for (group of fileTypeGroups; track group.id) {
           <div
             class="upload-panel__file-type-group"

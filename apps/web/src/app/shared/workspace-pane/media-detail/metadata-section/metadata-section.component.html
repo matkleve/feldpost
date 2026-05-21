@@ -5,6 +5,7 @@
     @for (entry of entries(); track entry.metadataKeyId) {
       <app-metadata-property-row
         [key]="entry.key"
+        [keyType]="entry.keyType"
         [value]="entry.value"
         (valueChanged)="valueChanged.emit({ entry, newValue: $event })"
         (deleteRequested)="entryRemoved.emit(entry)"
@@ -18,82 +19,82 @@
       >
         <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
         <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-        <div class="detail-row__center add-metadata-row__center">
-          <span class="material-icons detail-row__icon" aria-hidden="true">add</span>
-          <span class="detail-row__label">{{
-            t('workspace.metadata.action.add', 'Add metadata')
-          }}</span>
-          <div class="detail-row__field-dual detail-row__field-slot">
-            <div class="detail-row__field-key-wrap">
-              <input
-                #newKeyInput
-                class="detail-row__field-input"
-                type="text"
-                [placeholder]="t('workspace.metadata.input.key.placeholder', 'Key')"
-                [attr.aria-label]="t('workspace.metadata.input.key.aria', 'New metadata key')"
-                (input)="onMetadataKeyInput(newKeyInput.value)"
-                (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
-                (keydown.enter)="newValueInput.focus()"
+        <div class="detail-row__center metadata-add-row__center">
+          <div class="metadata-add-row__controls">
+            <app-metadata-type-picker
+              class="metadata-add-row__type"
+              [valueType]="draft().valueType"
+              [locked]="draft().propertyMode === 'existing'"
+              [open]="openPanel() === 'type'"
+              (openChange)="onTypeOpenChange($event)"
+              (valueTypeChange)="onValueTypeChange($event)"
+            />
+            <app-metadata-property-picker
+              class="metadata-add-row__name"
+              [definitions]="metadataKeyDefinitions()"
+              [excludedKeyIds]="excludedKeyIds()"
+              [valueType]="draft().valueType"
+              [keyName]="draft().keyName"
+              [metadataKeyId]="draft().metadataKeyId"
+              [open]="openPanel() === 'property'"
+              (openChange)="onPropertyOpenChange($event)"
+              (definitionSelected)="onDefinitionSelected($event)"
+              (draftNameChange)="onDraftNameChange($event)"
+            />
+            <div class="metadata-add-row__value" (keydown.enter)="saveAdd()">
+              <app-metadata-value-editor
+                [valueType]="draft().valueType"
+                [value]="draft().value"
+                [ariaLabel]="t('workspace.metadata.input.value.aria', 'New metadata value')"
+                (valueChange)="onDraftValueChange($event)"
               />
-              @if (keySuggestions().length > 0) {
-                <div
-                  class="add-metadata-suggestions option-menu-surface option-menu-list flex flex-col"
-                >
-                  @for (suggestion of keySuggestions(); track suggestion) {
-                    <button
-                      hlmMenuItem
-                      class="w-full"
-                      type="button"
-                      (click)="
-                        newKeyInput.value = suggestion;
-                        keySuggestions.set([]);
-                        newValueInput.focus()
-                      "
-                    >
-                      <span
-                        class="material-icons option-menu-item__icon"
-                        aria-hidden="true"
-                        >label</span>
-                      <span class="min-w-0 flex-1 text-left" data-i18n-skip>{{ suggestion }}</span>
-                    </button>
-                  }
-                </div>
+              @if (valueError()) {
+                <p class="metadata-add-row__error" role="alert">{{ valueError() }}</p>
+              }
+              @if (duplicateError()) {
+                <p class="metadata-add-row__error" role="alert">{{ duplicateError() }}</p>
               }
             </div>
-            <input
-              #newValueInput
-              class="detail-row__field-input detail-row__field-input--value"
-              type="text"
-              [placeholder]="t('workspace.metadata.input.value.placeholder', 'Value')"
-              [attr.aria-label]="t('workspace.metadata.input.value.aria', 'New metadata value')"
-              (keydown.enter)="addMetadata(newKeyInput.value, newValueInput.value)"
-              (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
-            />
           </div>
         </div>
         <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
           class="detail-row-action detail-row-action--r1 add-metadata-confirm detail-row-action--confirm"
           type="button"
           [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
-          (click)="addMetadata(newKeyInput.value, newValueInput.value)"
+          (click)="saveAdd()"
         >
           <span class="material-icons" aria-hidden="true">check</span>
         </button>
-        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+          type="button"
+          [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel')"
+          (click)="cancelAdd()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
       </div>
-    }
-
-    @if (!showAddForm()) {
+    } @else {
       <div class="detail-row add-metadata-row">
         <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
         <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
         <div class="detail-row__center">
-          <span class="material-icons detail-row__icon" aria-hidden="true">add</span>
-          <span class="detail-row__label">{{
-            t('workspace.metadata.action.add', 'Add metadata')
-          }}</span>
-          <button class="detail-row__value" type="button" (click)="showAddForm.set(true)">
-            {{ t('workspace.imageDetail.value.empty', '—') }}
+          <button
+            class="detail-row__field-trigger metadata-add-row__collapsed-trigger"
+            type="button"
+            [attr.aria-label]="t('workspace.metadata.action.add', 'Add metadata')"
+            (click)="openAddForm()"
+          >
+            <span class="material-icons detail-row__icon" aria-hidden="true">add</span>
+            <span class="detail-row__label metadata-add-row__collapsed-label">{{
+              t('workspace.metadata.action.add', 'Add metadata')
+            }}</span>
           </button>
         </div>
         <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>

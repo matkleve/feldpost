@@ -35,7 +35,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   const fullResUrl = signal<string | null>(null);
   const thumbnailUrl = signal<string | null>(null);
   const projectOptions = signal<any[]>([]);
-  const allMetadataKeyNames = signal<string[]>([]);
+  const metadataKeyDefinitions = signal<{ id: string; key_name: string; key_type: string }[]>([]);
 
   const supabase = {
     client: {
@@ -101,9 +101,11 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
 
   const metadataService = {
     loadMetadataEntriesForMediaItem: vi.fn(async () => [
-      { metadataKeyId: 'mk-1', key: 'Key', value: 'A' },
+      { metadataKeyId: 'mk-1', key: 'Key', keyType: 'text', value: 'A' },
     ]),
-    listMetadataKeyNamesForOrganization: vi.fn(async () => ['Phase']),
+    listMetadataKeyDefinitionsForOrganization: vi.fn(async () => [
+      { id: 'def-1', key_name: 'Phase', key_type: 'text' },
+    ]),
   } as any;
 
   const mediaDownloadService = {
@@ -129,7 +131,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
       fullResUrl,
       thumbnailUrl,
       projectOptions,
-      allMetadataKeyNames,
+      metadataKeyDefinitions,
     },
     computed: {
       mediaType: () => 'image',

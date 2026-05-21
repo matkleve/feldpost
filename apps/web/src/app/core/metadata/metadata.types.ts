@@ -23,6 +23,12 @@ export interface MetadataKeyRecord {
   key_type?: string | null;
 }
 
+export interface MetadataKeyDefinition {
+  id: string;
+  key_name: string;
+  key_type: MetadataValueType;
+}
+
 export interface MediaLookupRow {
   id: string;
   source_image_id: string | null;
@@ -37,5 +43,6 @@ export interface MediaMetadataValueRow {
 export interface MetadataEntryRecord {
   metadataKeyId: string;
   key: string;
+  keyType: MetadataValueType;
   value: string;
 }

@@ -178,7 +178,9 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly editingField = signal<DetailEditingField>(null);
   readonly fullResUrl = signal<string | null>(null);
   readonly thumbnailUrl = signal<string | null>(null);
-  readonly allMetadataKeyNames = signal<string[]>([]);
+  readonly metadataKeyDefinitions = signal<
+    import('./media-detail-view.types').MetadataKeyDefinitionView[]
+  >([]);
   readonly fullResPreloaded = signal(false);
   readonly detailSlotWidthRem = signal<number | null>(null);
   readonly detailSlotHeightRem = signal<number | null>(null);
@@ -400,7 +402,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       fullResUrl: this.fullResUrl,
       thumbnailUrl: this.thumbnailUrl,
       projectOptions: this.projectOptions,
-      allMetadataKeyNames: this.allMetadataKeyNames,
+      metadataKeyDefinitions: this.metadataKeyDefinitions,
     },
     computed: {
       mediaType: () => this.mediaType(),
@@ -852,8 +854,12 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.metadataHelper.saveMetadata(entry, newValue);
   }
 
-  async addMetadata(keyName: string, value: string): Promise<void> {
-    await this.metadataHelper.addMetadata(keyName, value);
+  async addMetadata(
+    keyName: string,
+    keyType: 'text' | 'number' | 'date',
+    value: string,
+  ): Promise<void> {
+    await this.metadataHelper.addMetadata(keyName, keyType, value);
   }
 
   confirmRemoveMetadata(entry: MetadataEntry): void {
@@ -1114,7 +1120,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.showUndoToast(
       this.t('workspace.imageDetail.toast.metadataRemoved', 'Metadata removed'),
       async () => {
-        await this.metadataHelper.addMetadata(entry.key, entry.value);
+        await this.metadataHelper.addMetadata(entry.key, entry.keyType as 'text' | 'number' | 'date', entry.value);
       },
     );
   }

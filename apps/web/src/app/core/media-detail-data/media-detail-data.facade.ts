@@ -5,7 +5,12 @@ import type { MediaDownloadService } from '../media-download/media-download.serv
 import type { SupabaseService } from '../supabase/supabase.service';
 import type { MetadataService } from '../metadata/metadata.service';
 import type { AddressFieldMeta } from '../address-field-suggest/address-field-suggest.types';
-import type { ImageRecord, MetadataEntry, SelectOption } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
+import type {
+  ImageRecord,
+  MetadataEntry,
+  MetadataKeyDefinitionView,
+  SelectOption,
+} from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 import {
   isImageLikeMedia,
   resolvePreviewThumbnailPath,
@@ -67,7 +72,7 @@ interface MediaDetailDataFacadeDeps {
     fullResUrl: WritableSignal<string | null>;
     thumbnailUrl: WritableSignal<string | null>;
     projectOptions: WritableSignal<SelectOption[]>;
-    allMetadataKeyNames: WritableSignal<string[]>;
+    metadataKeyDefinitions: WritableSignal<MetadataKeyDefinitionView[]>;
   };
   computed: {
     mediaType: () => string | null;
@@ -107,7 +112,7 @@ export class MediaDetailDataFacade {
 
     if (image.organization_id) {
       void this.loadProjects(image.organization_id);
-      void this.loadMetadataKeys(image.organization_id);
+      void this.loadMetadataKeyDefinitions(image.organization_id);
     }
   }
 
@@ -165,10 +170,10 @@ export class MediaDetailDataFacade {
     }
   }
 
-  async loadMetadataKeys(organizationId: string): Promise<void> {
-    const keyNames =
-      await this.deps.services.metadata.listMetadataKeyNamesForOrganization(organizationId);
-    this.deps.signals.allMetadataKeyNames.set(keyNames);
+  async loadMetadataKeyDefinitions(organizationId: string): Promise<void> {
+    const definitions =
+      await this.deps.services.metadata.listMetadataKeyDefinitionsForOrganization(organizationId);
+    this.deps.signals.metadataKeyDefinitions.set(definitions);
   }
 
   private resetLoadState(): void {

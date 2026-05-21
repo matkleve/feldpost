@@ -1,9 +1,18 @@
 export type { ImageRecord } from '../../../core/media-query/media-query.types';
 
+import type { MetadataValueType } from '../../../core/metadata/metadata.types';
+
 export interface MetadataEntry {
   metadataKeyId: string;
   key: string;
+  keyType: MetadataValueType;
   value: string;
+}
+
+export interface MetadataKeyDefinitionView {
+  id: string;
+  key_name: string;
+  key_type: MetadataValueType;
 }
 
 export interface SelectOption {

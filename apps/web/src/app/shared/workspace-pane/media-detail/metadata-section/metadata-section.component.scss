@@ -44,28 +44,66 @@
   min-width: 0;
 }
 
-// Add-metadata row: key + value fields share the value column (third grid cell).
+// Center column hosts type + name + value sub-grid for add row.
 // @see docs/specs/ui/media-detail/metadata-section.md
-.add-metadata-row__center {
-  grid-template-columns: 1.25rem minmax(4rem, auto) minmax(0, 1fr);
+.metadata-add-row__center {
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  align-items: stretch;
 }
 
-.add-metadata-row__center .detail-row__field-dual {
-  align-self: stretch;
+.metadata-add-row__controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--spacing-1);
+  min-width: 0;
+  width: 100%;
+}
+
+.metadata-add-row__type {
+  align-self: start;
+}
+
+.metadata-add-row__name {
+  min-width: 0;
+}
+
+.metadata-add-row__value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.metadata-add-row__error {
+  margin: 0;
+  font-size: var(--font-size-2xs);
+  color: var(--destructive);
+}
+
+// Collapsed add: one trigger fills center (parent 3-col grid must not squeeze it to icon column).
+// @see docs/specs/ui/media-detail/metadata-section.md
+.add-metadata-row:not(.detail-row--editing) .detail-row__center {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.metadata-add-row__collapsed-trigger {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.metadata-add-row__collapsed-label {
+  justify-self: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .add-metadata-confirm {
   opacity: 1;
   pointer-events: auto;
-}
-
-.add-metadata-suggestions {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  z-index: 300;
-  margin-top: var(--spacing-1);
-  --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
-  padding-inline: var(--std-dropdown-padding-inline);
 }

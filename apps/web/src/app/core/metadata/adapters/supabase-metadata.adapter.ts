@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';
+import type { MetadataComposeValueType } from '../metadata-validation.helpers';
 import type {
   MediaLookupRow,
   MediaMetadataValueRow,
   MetadataEntryRecord,
+  MetadataKeyDefinition,
   MetadataKeyRecord,
 } from '../metadata.types';
 
@@ -56,7 +58,7 @@ export class SupabaseMetadataAdapter {
   async fetchMetadataEntriesForMediaItem(mediaItemId: string): Promise<MetadataEntryRecord[]> {
     const { data, error } = await this.supabase.client
       .from('media_metadata')
-      .select('metadata_key_id, value_text, metadata_keys(key_name)')
+      .select('metadata_key_id, value_text, metadata_keys(key_name, key_type)')
       .eq('media_item_id', mediaItemId);
 
     if (error || !Array.isArray(data)) return [];
@@ -65,26 +67,31 @@ export class SupabaseMetadataAdapter {
       data as Array<{
         metadata_key_id: string;
         value_text: string;
-        metadata_keys?: { key_name?: string | null } | null;
+        metadata_keys?: { key_name?: string | null; key_type?: string | null } | null;
       }>
     ).map((row) => ({
       metadataKeyId: row.metadata_key_id,
       key: row.metadata_keys?.key_name ?? 'Unknown',
+      keyType: (row.metadata_keys?.key_type ?? 'text') as MetadataComposeValueType,
       value: row.value_text,
     }));
   }
 
-  async listMetadataKeyNames(organizationId: string): Promise<string[]> {
+  async listMetadataKeyDefinitions(organizationId: string): Promise<MetadataKeyDefinition[]> {
     const { data, error } = await this.supabase.client
       .from('metadata_keys')
-      .select('key_name')
+      .select('id, key_name, key_type')
       .eq('organization_id', organizationId)
       .order('key_name');
 
     if (error || !Array.isArray(data)) return [];
-    return (data as Array<{ key_name: string | null }>)
-      .map((row) => row.key_name ?? '')
-      .filter(Boolean);
+    return (data as Array<{ id: string; key_name: string | null; key_type: string | null }>)
+      .filter((row) => !!row.id && !!row.key_name)
+      .map((row) => ({
+        id: row.id,
+        key_name: row.key_name!,
+        key_type: (row.key_type ?? 'text') as MetadataComposeValueType,
+      }));
   }
 
   async resolveMediaItemIdByLookupId(lookupId: string): Promise<string | null> {
@@ -99,11 +106,16 @@ export class SupabaseMetadataAdapter {
     return data.id as string;
   }
 
-  async findMetadataKeyId(organizationId: string, keyName: string): Promise<string | null> {
+  async findMetadataKeyId(
+    organizationId: string,
+    keyName: string,
+    keyType: MetadataComposeValueType,
+  ): Promise<string | null> {
     const { data, error } = await this.supabase.client
       .from('metadata_keys')
       .select('id')
       .eq('key_name', keyName)
+      .eq('key_type', keyType)
       .eq('organization_id', organizationId)
       .maybeSingle();
 
@@ -111,10 +123,14 @@ export class SupabaseMetadataAdapter {
     return data.id as string;
   }
 
-  async createMetadataKey(organizationId: string, keyName: string): Promise<string | null> {
+  async createMetadataKey(
+    organizationId: string,
+    keyName: string,
+    keyType: MetadataComposeValueType,
+  ): Promise<string | null> {
     const { data, error } = await this.supabase.client
       .from('metadata_keys')
-      .insert({ key_name: keyName, organization_id: organizationId })
+      .insert({ key_name: keyName, key_type: keyType, organization_id: organizationId })
       .select('id')
       .single();
 

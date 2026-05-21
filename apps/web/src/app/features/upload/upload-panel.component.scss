@@ -148,28 +148,30 @@
     }
   }
 
-  // Full-area trigger for unfiltered multi-select (sibling of chip buttons).
+  // Icon + label pick control (no overlay under chips).
   // @see docs/specs/component/media/file-type-chips.md
-  &__dropzone-hit {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
+  &__dropzone-pick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2);
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: inherit;
     background: transparent;
+    color: inherit;
     cursor: pointer;
     outline: none;
 
-    &:hover + .upload-panel__dropzone-content,
-    &:focus-visible + .upload-panel__dropzone-content {
+    &:hover,
+    &:focus-visible {
       color: var(--primary);
     }
 
     &:focus-visible {
       outline: 2px solid var(--ring);
       outline-offset: 2px;
+      border-radius: var(--container-radius-control);
     }
   }
 
@@ -178,16 +180,6 @@
     border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
     background: color-mix(in srgb, var(--primary) 10%, transparent);
     color: var(--primary);
-  }
-
-  // Icon + label paint above hit layer; clicks pass through to hit button.
-  // @see docs/specs/component/upload/upload-panel.md
-  &__dropzone-content {
-    position: relative;
-    z-index: 1;
-    display: block;
-    pointer-events: none;
-    color: inherit;
   }
 
   &__dropzone-icon {
@@ -208,6 +200,7 @@
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-reading);
     color: inherit;
+    text-align: center;
   }
 
   &__dropzone--dragging {
@@ -226,7 +219,6 @@
 
   &__file-type-chips {
     position: relative;
-    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     flex-grow: 0;
@@ -237,7 +229,6 @@
     column-gap: var(--spacing-2);
     width: 100%;
     overflow: visible;
-    pointer-events: none;
   }
 
   // Group chip + absolute hover dropdown of format chips (no layout shift, no transition).
@@ -264,7 +255,6 @@
     border: 0;
     background: transparent;
     cursor: pointer;
-    pointer-events: auto;
     outline: none;
 
     &:focus-visible {

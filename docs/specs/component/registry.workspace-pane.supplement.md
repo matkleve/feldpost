@@ -307,11 +307,47 @@
 ### `<app-metadata-section>` — Metadata Section
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/metadata-section/metadata-section.component.ts`
-- **Purpose**: Collapsible EXIF/metadata table in the media detail panel.
-- **Spec**: @no-spec
+- **Purpose**: Notion-style custom metadata list and compose add-row in media detail.
+- **Spec**: [`docs/specs/ui/media-detail/metadata-section.md`](../ui/media-detail/metadata-section.md)
 - **Variant axes**: none
-- **Composed of**: `app-metadata-property-row`
+- **Composed of**: `app-metadata-property-row`, `app-metadata-type-picker`, `app-metadata-property-picker`, `app-metadata-value-editor`
 - **Used in**: `app-media-detail-view`
+- **Gaps**: none
+
+---
+
+### `<app-metadata-type-picker>` — Metadata Type Picker
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/metadata/metadata-type-picker.component.ts`
+- **Purpose**: Icon-only outline type trigger (text / number / date) for metadata compose.
+- **Spec**: [`docs/specs/ui/media-detail/metadata-type-picker.md`](../ui/media-detail/metadata-type-picker.md)
+- **Variant axes**: none
+- **Composed of**: `app-dropdown-shell`, Spartan menu
+- **Used in**: `app-metadata-section`
+- **Gaps**: none
+
+---
+
+### `<app-metadata-property-picker>` — Metadata Property Picker
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/metadata/metadata-property-picker.component.ts`
+- **Purpose**: Searchable property name picker with type icon + name chips (Projects-dropdown pattern).
+- **Spec**: [`docs/specs/ui/media-detail/metadata-property-picker.md`](../ui/media-detail/metadata-property-picker.md)
+- **Variant axes**: none
+- **Composed of**: `app-dropdown-shell`, `app-standard-dropdown`
+- **Used in**: `app-metadata-section`
+- **Gaps**: none
+
+---
+
+### `<app-metadata-value-editor>` — Metadata Value Editor
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/metadata/metadata-value-editor.component.ts`
+- **Purpose**: Type-aware value input (`text` / `number` / `date`); emits raw strings only.
+- **Spec**: @no-spec (covered by metadata-section compose contract)
+- **Variant axes**: `valueType`
+- **Composed of**: standalone
+- **Used in**: `app-metadata-section`, `app-metadata-property-row`
 - **Gaps**: none
 
 ---

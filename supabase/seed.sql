@@ -554,12 +554,12 @@ DECLARE _org_id uuid;
 BEGIN
   SELECT id INTO _org_id FROM public.organizations WHERE name = 'Default Organization' LIMIT 1;
 
-  INSERT INTO public.metadata_keys (id, organization_id, created_by, key_name) VALUES
-    ('d0000000-0000-0000-0000-000000000001', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Bauphase'),
-    ('d0000000-0000-0000-0000-000000000002', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Gewerk'),
-    ('d0000000-0000-0000-0000-000000000003', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Mangel'),
-    ('d0000000-0000-0000-0000-000000000004', _org_id, 'b0000000-0000-0000-0000-000000000002', 'Stockwerk'),
-    ('d0000000-0000-0000-0000-000000000005', _org_id, 'b0000000-0000-0000-0000-000000000003', 'Wetter')
+  INSERT INTO public.metadata_keys (id, organization_id, created_by, key_name, key_type) VALUES
+    ('d0000000-0000-0000-0000-000000000001', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Bauphase', 'text'),
+    ('d0000000-0000-0000-0000-000000000002', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Gewerk', 'text'),
+    ('d0000000-0000-0000-0000-000000000003', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Mangel', 'text'),
+    ('d0000000-0000-0000-0000-000000000004', _org_id, 'b0000000-0000-0000-0000-000000000002', 'Stockwerk', 'text'),
+    ('d0000000-0000-0000-0000-000000000005', _org_id, 'b0000000-0000-0000-0000-000000000003', 'Wetter', 'text')
   ON CONFLICT (id) DO NOTHING;
 END $$;
 

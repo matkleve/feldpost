@@ -61,8 +61,8 @@ const MOCK_CORRECTED_IMAGE: ImageRecord = {
 };
 
 const MOCK_METADATA: MetadataEntry[] = [
-  { metadataKeyId: 'mk-001', key: 'Building type', value: 'Residential' },
-  { metadataKeyId: 'mk-002', key: 'Floor', value: '3rd' },
+  { metadataKeyId: 'mk-001', key: 'Building type', keyType: 'text', value: 'Residential' },
+  { metadataKeyId: 'mk-002', key: 'Floor', keyType: 'text', value: '3rd' },
 ];
 
 // ── Fake Supabase client ──────────────────────────────────────────────────────
@@ -565,7 +565,7 @@ describe('MediaDetailViewComponent', () => {
       component.image.set({ ...MOCK_IMAGE });
       fake.client.from.mockClear();
 
-      await component.addMetadata('', 'value');
+      await component.addMetadata('', 'text', 'value');
 
       expect(fake.client.from).not.toHaveBeenCalled();
     });
@@ -575,7 +575,7 @@ describe('MediaDetailViewComponent', () => {
       component.image.set({ ...MOCK_IMAGE });
       fake.client.from.mockClear();
 
-      await component.addMetadata('key', '');
+      await component.addMetadata('key', 'text', '');
 
       expect(fake.client.from).not.toHaveBeenCalled();
     });
@@ -585,7 +585,7 @@ describe('MediaDetailViewComponent', () => {
       component.image.set(null);
       fake.client.from.mockClear();
 
-      await component.addMetadata('Floor', '5th');
+      await component.addMetadata('Floor', 'text', '5th');
 
       expect(fake.client.from).not.toHaveBeenCalled();
     });
@@ -595,7 +595,7 @@ describe('MediaDetailViewComponent', () => {
       component.image.set({ ...MOCK_IMAGE });
       component.metadata.set([]);
 
-      await component.addMetadata('Phase', 'Construction');
+      await component.addMetadata('Phase', 'text', 'Construction');
 
       expect(component.metadata().length).toBe(1);
       expect(component.metadata()[0].key).toBe('Phase');

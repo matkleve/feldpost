@@ -9,13 +9,24 @@ const MOCK_IMAGE = {
   organization_id: 'org-1',
 } as ImageRecord;
 
-const ENTRY: MetadataEntry = { metadataKeyId: 'mk-1', key: 'Phase', value: 'Old' };
+const ENTRY: MetadataEntry = {
+  metadataKeyId: 'mk-1',
+  key: 'Phase',
+  keyType: 'text',
+  value: 'Old',
+};
 
 describe('ImageDetailMetadataHelper', () => {
   it('updates metadata optimistically', async () => {
     const metadata = signal<MetadataEntry[]>([ENTRY]);
     const saveMetadataValueByLookupId = vi.fn(async () => true);
-    const metadataSvc = { saveMetadataValueByLookupId } as unknown as MetadataService;
+    const metadataSvc = {
+      validateMetadataValueForSave: vi.fn(() => ({
+        valid: true,
+        normalizedValue: 'New',
+      })),
+      saveMetadataValueByLookupId,
+    } as unknown as MetadataService;
 
     const helper = new ImageDetailMetadataHelper({
       services: {

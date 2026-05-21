@@ -16,9 +16,15 @@ import {
   resolveBuiltInMetadataValue,
 } from './adapters/built-in-metadata-fields.adapter';
 import { SupabaseMetadataAdapter } from './adapters/supabase-metadata.adapter';
+import {
+  validateMetadataValueForSave,
+  type MetadataComposeValueType,
+  type MetadataValueValidationResult,
+} from './metadata-validation.helpers';
 import type {
   MetadataEntryRecord,
   MetadataFieldDefinition,
+  MetadataKeyDefinition,
   MetadataKeyRecord,
 } from './metadata.types';
 
@@ -129,8 +135,17 @@ export class MetadataService {
     return this.adapter.fetchMetadataEntriesForMediaItem(mediaItemId);
   }
 
-  async listMetadataKeyNamesForOrganization(organizationId: string): Promise<string[]> {
-    return this.adapter.listMetadataKeyNames(organizationId);
+  async listMetadataKeyDefinitionsForOrganization(
+    organizationId: string,
+  ): Promise<MetadataKeyDefinition[]> {
+    return this.adapter.listMetadataKeyDefinitions(organizationId);
+  }
+
+  validateMetadataValueForSave(
+    valueType: MetadataComposeValueType,
+    rawValue: string,
+  ): MetadataValueValidationResult {
+    return validateMetadataValueForSave(valueType, rawValue);
   }
 
   async saveMetadataValueByLookupId(
@@ -148,24 +163,35 @@ export class MetadataService {
     lookupId: string,
     organizationId: string | null,
     keyName: string,
+    keyType: MetadataComposeValueType,
     valueText: string,
-  ): Promise<{ metadataKeyId: string; key: string } | null> {
+  ): Promise<{ metadataKeyId: string; key: string; keyType: MetadataComposeValueType } | null> {
     if (!organizationId) return null;
+
+    const trimmedName = keyName.trim();
+    if (!trimmedName) return null;
+
+    const validation = validateMetadataValueForSave(keyType, valueText);
+    if (!validation.valid) return null;
 
     const mediaItemId = await this.adapter.resolveMediaItemIdByLookupId(lookupId);
     if (!mediaItemId) return null;
 
-    let metadataKeyId = await this.adapter.findMetadataKeyId(organizationId, keyName);
+    let metadataKeyId = await this.adapter.findMetadataKeyId(organizationId, trimmedName, keyType);
     if (!metadataKeyId) {
-      metadataKeyId = await this.adapter.createMetadataKey(organizationId, keyName);
+      metadataKeyId = await this.adapter.createMetadataKey(organizationId, trimmedName, keyType);
     }
 
     if (!metadataKeyId) return null;
 
-    const saved = await this.adapter.upsertMetadataValue(mediaItemId, metadataKeyId, valueText);
+    const saved = await this.adapter.upsertMetadataValue(
+      mediaItemId,
+      metadataKeyId,
+      validation.normalizedValue,
+    );
     if (!saved) return null;
 
-    return { metadataKeyId, key: keyName };
+    return { metadataKeyId, key: trimmedName, keyType };
   }
 
   async removeMetadataValueByLookupId(lookupId: string, metadataKeyId: string): Promise<boolean> {

@@ -153,10 +153,10 @@
 
         <app-metadata-section
           [entries]="metadata()"
-          [allKeyNames]="allMetadataKeyNames()"
+          [metadataKeyDefinitions]="metadataKeyDefinitions()"
           (valueChanged)="saveMetadata($event.entry, $event.newValue)"
           (entryRemoved)="confirmRemoveMetadata($event)"
-          (entryAdded)="addMetadata($event.key, $event.value)"
+          (entryAdded)="addMetadata($event.keyName, $event.keyType, $event.value)"
         />
 
         <app-detail-actions

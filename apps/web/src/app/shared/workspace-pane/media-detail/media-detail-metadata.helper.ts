@@ -22,14 +22,26 @@ export class ImageDetailMetadataHelper {
     const id = this.deps.signals.imageId();
     if (!id) return;
 
+    const composeType =
+      entry.keyType === 'number' || entry.keyType === 'date' ? entry.keyType : 'text';
+    const validation = this.deps.services.metadata.validateMetadataValueForSave(
+      composeType,
+      newValue,
+    );
+    if (!validation.valid) return;
+
     this.deps.signals.metadata.update((list) =>
-      list.map((m) => (m.metadataKeyId === entry.metadataKeyId ? { ...m, value: newValue } : m)),
+      list.map((m) =>
+        m.metadataKeyId === entry.metadataKeyId
+          ? { ...m, value: validation.normalizedValue }
+          : m,
+      ),
     );
 
     const saved = await this.deps.services.metadata.saveMetadataValueByLookupId(
       id,
       entry.metadataKeyId,
-      newValue,
+      validation.normalizedValue,
     );
 
     if (!saved) {
@@ -41,9 +53,16 @@ export class ImageDetailMetadataHelper {
     }
   }
 
-  async addMetadata(keyName: string, value: string): Promise<void> {
+  async addMetadata(
+    keyName: string,
+    keyType: 'text' | 'number' | 'date',
+    value: string,
+  ): Promise<void> {
     const img = this.deps.signals.image();
-    if (!img || !keyName.trim() || !value.trim()) return;
+    if (!img || !keyName.trim()) return;
+
+    const validation = this.deps.services.metadata.validateMetadataValueForSave(keyType, value);
+    if (!validation.valid) return;
 
     this.deps.signals.saving.set(true);
 
@@ -51,13 +70,19 @@ export class ImageDetailMetadataHelper {
       img.id,
       img.organization_id,
       keyName.trim(),
-      value.trim(),
+      keyType,
+      validation.normalizedValue,
     );
 
     if (result) {
       this.deps.signals.metadata.update((list) => [
         ...list,
-        { metadataKeyId: result.metadataKeyId, key: result.key, value: value.trim() },
+        {
+          metadataKeyId: result.metadataKeyId,
+          key: result.key,
+          keyType: result.keyType,
+          value: validation.normalizedValue,
+        },
       ]);
     }
 

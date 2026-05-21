@@ -5,6 +5,7 @@ export type DetailTranslateFn = (key: string, fallback: string) => string;
 
 interface MetadataKeyRow {
   key_name?: string;
+  key_type?: string | null;
 }
 
 interface ImageMetadataRow {
@@ -19,6 +20,7 @@ export function mapImageMetadataRows(rows: unknown[]): MetadataEntry[] {
     return {
       metadataKeyId: r.metadata_key_id,
       key: r.metadata_keys?.key_name ?? 'Unknown',
+      keyType: (r.metadata_keys?.key_type ?? 'text') as MetadataEntry['keyType'],
       value: r.value_text,
     };
   });

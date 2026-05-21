@@ -8,7 +8,16 @@
  *  - Component only bridges template events to services.
  */
 
-import { Component, computed, HostListener, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  HostListener,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent } from './upload-panel-item.component';
 import type { ExifCoords } from '../../core/upload/upload.service';
@@ -211,6 +220,12 @@ export class UploadPanelComponent {
   readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
 
   constructor() {
+    effect(() => {
+      if (!this.visible()) {
+        this.clearPinnedFileTypeGroup();
+      }
+    });
+
     this.setup.initialize({
       imageUploaded: (event) => this.imageUploaded.emit(event),
       placementRequested: (jobId) => this.placementRequested.emit(jobId),
@@ -256,7 +271,22 @@ export class UploadPanelComponent {
     this.locationModeRowPreview.set(false);
   }
 
-  onDropzonePickAll(fileInput: HTMLInputElement): void {
+  onDropzoneDismissPinned(event: MouseEvent): void {
+    if (!this.pinnedFileTypeGroupId()) {
+      return;
+    }
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+    if (target.closest('.upload-panel__file-type-chips')) {
+      return;
+    }
+    this.clearPinnedFileTypeGroup();
+  }
+
+  onDropzonePickClick(event: MouseEvent, fileInput: HTMLInputElement): void {
+    event.stopPropagation();
     if (this.pinnedFileTypeGroupId()) {
       this.clearPinnedFileTypeGroup();
       return;

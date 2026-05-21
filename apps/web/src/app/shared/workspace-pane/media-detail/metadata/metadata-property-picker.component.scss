@@ -1,0 +1,21 @@
+// Property name picker trigger and dropdown rows.
+// @see docs/specs/ui/media-detail/metadata-property-picker.md
+.metadata-property-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  justify-content: flex-start;
+  min-height: var(--detail-row-height, 2rem);
+}
+
+.metadata-property-picker__type-icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.metadata-property-picker__chip {
+  display: inline-block;
+  padding: 0 var(--spacing-1);
+  border-radius: var(--radius-sm, 0.25rem);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}

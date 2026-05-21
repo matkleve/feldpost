@@ -7,18 +7,16 @@
   @if (editing()) {
     <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
     <div class="detail-row__center">
-      <span class="material-icons detail-row__icon" aria-hidden="true">label</span>
+      <span class="material-icons detail-row__icon" aria-hidden="true">{{ typeIcon() }}</span>
       <span class="detail-row__label" data-i18n-skip [title]="metaKey()">{{ metaKey() }}</span>
-      <input
-        #editInput
-        class="detail-row__field-input detail-row__field-slot"
-        type="text"
-        [value]="metaValue()"
-        [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
-        (keydown.enter)="commitEdit($event)"
-        (keydown.escape)="cancelEdit()"
-        (blur)="commitEdit($event)"
-      />
+      <div #valueEditorHost class="detail-row__field-slot">
+        <app-metadata-value-editor
+          [valueType]="composeType()"
+          [value]="editValue()"
+          [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+          (valueChange)="onEditValueChange($event)"
+        />
+      </div>
     </div>
     <button
       hlmBtn
@@ -59,7 +57,7 @@
       <span class="material-icons" aria-hidden="true">edit</span>
     </button>
     <div class="detail-row__center">
-      <span class="material-icons detail-row__icon" aria-hidden="true">label</span>
+      <span class="material-icons detail-row__icon" aria-hidden="true">{{ typeIcon() }}</span>
       <span class="detail-row__label" data-i18n-skip [title]="metaKey()">{{ metaKey() }}</span>
       <button class="detail-row__field-trigger" type="button" (click)="startEdit()">
         {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}

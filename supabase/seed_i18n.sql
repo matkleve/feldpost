@@ -12961,14 +12961,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0454.workspace_metadata_section_title', 'workspace.metadata.section.title', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
+values (null, 'auto.0454.workspace_metadata_section_title', 'Metadata', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.metadata.section.title', 'published'
+select t.id, 'en', 'Metadata', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0454.workspace_metadata_section_title'
 on conflict (app_text_id, lang) do update set
@@ -12976,7 +12976,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.metadata.section.title', 'published'
+select t.id, 'de', 'Metadaten', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0454.workspace_metadata_section_title'
 on conflict (app_text_id, lang) do update set
@@ -12984,9 +12984,474 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.metadata.section.title', 'published'
+select t.id, 'it', 'Metadati', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0454.workspace_metadata_section_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454a.workspace_metadata_action_save_aria', 'Save new metadata', 'en', 'metadata-section save button aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save new metadata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454a.workspace_metadata_action_save_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Neue Metadaten speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454a.workspace_metadata_action_save_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva nuovi metadati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454a.workspace_metadata_action_save_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454b.workspace_metadata_type_picker_aria', 'Property type', 'en', 'metadata-type-picker trigger aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Property type', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454b.workspace_metadata_type_picker_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Eigenschaftstyp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454b.workspace_metadata_type_picker_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tipo proprietà', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454b.workspace_metadata_type_picker_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454c.workspace_metadata_type_text', 'Text', 'en', 'type picker menu label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Text', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454c.workspace_metadata_type_text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Text', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454c.workspace_metadata_type_text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Testo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454c.workspace_metadata_type_text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454d.workspace_metadata_type_number', 'Number', 'en', 'type picker menu label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Number', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454d.workspace_metadata_type_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zahl', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454d.workspace_metadata_type_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Numero', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454d.workspace_metadata_type_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454e.workspace_metadata_type_date', 'Date', 'en', 'type picker menu label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Date', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454e.workspace_metadata_type_date'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Datum', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454e.workspace_metadata_type_date'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Data', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454e.workspace_metadata_type_date'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454f.workspace_metadata_property_picker_aria', 'Property name', 'en', 'property picker trigger aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Property name', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454f.workspace_metadata_property_picker_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Eigenschaftsname', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454f.workspace_metadata_property_picker_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nome proprietà', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454f.workspace_metadata_property_picker_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454g.workspace_metadata_property_picker_placeholder', 'Property name', 'en', 'property picker empty label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Property name', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454g.workspace_metadata_property_picker_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Eigenschaftsname', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454g.workspace_metadata_property_picker_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nome proprietà', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454g.workspace_metadata_property_picker_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454h.workspace_metadata_property_picker_search', 'Search or create property', 'en', 'property picker search')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search or create property', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454h.workspace_metadata_property_picker_search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Eigenschaft suchen oder erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454h.workspace_metadata_property_picker_search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca o crea proprietà', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454h.workspace_metadata_property_picker_search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454i.workspace_metadata_property_picker_create', 'Create "{name}" ({type})', 'en', 'create row with placeholders')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create "{name}" ({type})', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454i.workspace_metadata_property_picker_create'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '„{name}" ({type}) erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454i.workspace_metadata_property_picker_create'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea "{name}" ({type})', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454i.workspace_metadata_property_picker_create'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454j.workspace_metadata_validation_duplicate', 'This property is already on this image.', 'en', 'duplicate on save')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This property is already on this image.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454j.workspace_metadata_validation_duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Diese Eigenschaft ist bereits auf diesem Bild vorhanden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454j.workspace_metadata_validation_duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questa proprietà è già presente su questa immagine.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454j.workspace_metadata_validation_duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454k.workspace_metadata_validation_required', 'Value is required.', 'en', 'empty value on save')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Value is required.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454k.workspace_metadata_validation_required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wert ist erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454k.workspace_metadata_validation_required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Il valore è obbligatorio.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454k.workspace_metadata_validation_required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454l.workspace_metadata_validation_number', 'Enter a valid number.', 'en', 'invalid number on save')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter a valid number.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454l.workspace_metadata_validation_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Geben Sie eine gültige Zahl ein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454l.workspace_metadata_validation_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci un numero valido.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454l.workspace_metadata_validation_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454m.workspace_metadata_validation_date', 'Enter a date as YYYY-MM-DD.', 'en', 'invalid date on save')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter a date as YYYY-MM-DD.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454m.workspace_metadata_validation_date'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Datum als JJJJ-MM-TT eingeben.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454m.workspace_metadata_validation_date'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci una data come AAAA-MM-GG.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454m.workspace_metadata_validation_date'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454n.workspace_metadata_row_save_aria', 'Save', 'en', 'property row save prefix')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454n.workspace_metadata_row_save_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454n.workspace_metadata_row_save_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454n.workspace_metadata_row_save_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0454o.workspace_metadata_row_save_title', 'Save', 'en', 'property row save title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454o.workspace_metadata_row_save_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454o.workspace_metadata_row_save_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0454o.workspace_metadata_row_save_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

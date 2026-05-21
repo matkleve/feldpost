@@ -31,9 +31,11 @@ This is a service contract without direct UI rendering. In product behavior it a
 | 10  | Consumer requests filter value                     | Resolves built-in/custom value as filter string                             | getFilterValue(media, fieldId)                                           |
 | 11  | Media-detail flow loads values by lookup ids       | Loads media links + metadata values and returns lookupId keyed metadata map | loadMetadataValuesByLookupIds(lookupIds)                                 |
 | 12  | Media-detail flow loads entries for one item       | Loads metadata entries for a media item                                     | loadMetadataEntriesForMediaItem(mediaItemId)                             |
-| 13  | UI needs org key-name suggestions                  | Returns ordered key names for organization                                  | listMetadataKeyNamesForOrganization(organizationId)                      |
+| 13  | UI needs org property definitions                  | Returns `{ id, key_name, key_type }[]` for organization                     | listMetadataKeyDefinitionsForOrganization(organizationId)                |
 | 14  | User saves metadata value on existing key          | Upserts metadata value for resolved media item and key                      | saveMetadataValueByLookupId(lookupId, metadataKeyId, valueText)          |
-| 15  | User adds metadata with key name                   | Finds or creates metadata key, then upserts metadata value                  | addMetadataValueByLookupId(lookupId, organizationId, keyName, valueText) |
+| 15  | User adds metadata with type + name                | Finds or creates key by composite identity, upserts value (save-time validation) | addMetadataValueByLookupId(lookupId, organizationId, keyName, keyType, valueText) |
+| 16  | UI resolves existing property                      | Lookup by `organization_id` + `key_name` + `key_type`                         | findMetadataKeyId(organizationId, keyName, keyType)                        |
+| 17  | UI creates org property definition               | Insert with composite unique constraint                                       | createMetadataKey(organizationId, keyName, keyType)                        |
 | 16  | User removes metadata value                        | Deletes metadata value for resolved media item and key                      | removeMetadataValueByLookupId(lookupId, metadataKeyId)                   |
 
 ## Component Hierarchy
