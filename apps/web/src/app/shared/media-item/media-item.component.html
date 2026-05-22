@@ -1,15 +1,17 @@
 @if (item()) {
   <!-- Slot stack: media fill + interaction overlays share one parent-owned geometry box. -->
   <!-- @see docs/specs/component/media/media-item.md#spacing--framing-ownership -->
-  <div class="media-item__slot">
-    <!-- Delegates media rendering lifecycle to shared media display (fills slot, no slot resize). -->
+  <div class="media-item__slot" [style.--media-aspect-ratio]="mediaAspectRatio()">
+    <!-- Viewport/layers own intrinsic ratio; slot mirrors via --media-aspect-ratio. -->
     <!-- @see docs/specs/component/media/media-item.md#component-hierarchy -->
     <app-media-display
       class="media-item__preview"
-      slotGeometry="fill"
+      [style.--media-aspect-ratio]="mediaAspectRatio()"
+      [slotGeometry]="usesFillSlotGeometry() ? 'fill' : 'intrinsic'"
       [mediaId]="mediaIdentity()"
       [storagePath]="item()?.storage_path ?? null"
       [thumbnailPath]="item()?.thumbnail_path ?? null"
+      (aspectRatioChange)="onMediaAspectRatioChange($event)"
     />
 
     <!-- Renders selected emphasis border inside the slot, above media content. -->

@@ -1,17 +1,23 @@
-// Host participates in grid flow only; slot size tokens come from app-item-grid.
+// Host wraps slot height; grid column width only (no fixed square on host).
 // @see docs/specs/component/media/media-item.md#css-variable-ownership--dependency-matrix
 :host {
   display: block;
   inline-size: 100%;
+  block-size: auto;
   min-inline-size: 0;
   min-block-size: 0;
-  aspect-ratio: var(--item-grid-slot-aspect-ratio, auto);
-  block-size: var(--item-grid-slot-block-size, auto);
+}
+
+// Row mode keeps fixed lane height from item-grid.
+// @see docs/specs/component/item-grid/item-grid.md#row-mode
+:host([data-mode='row']) {
+  block-size: var(--item-grid-slot-block-size, 6.5rem);
 }
 
 // Placeholder tiles without item payload use muted pulse inside inherited slot geometry.
 // @see docs/specs/component/media/media-item.md#what-it-looks-like
 :host([data-has-item='false']) {
+  aspect-ratio: 1 / 1;
   background: var(--muted);
   animation: media-display-pulse 200ms ease-in-out infinite;
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
@@ -19,18 +25,17 @@
   overflow: hidden;
 }
 
-// Row placeholders use the row radius token when parent grid is in row mode.
-// @see docs/specs/component/item-grid/item-grid.md#row-mode
 :host([data-has-item='false'][data-mode='row']) {
   border-radius: var(--radius-md);
 }
 
-// Stacking context for media preview, border frame, and interaction overlays.
-// @see docs/specs/component/media/media-item.md#spacing--framing-ownership
+// Geometry owner for the whole tile stack; aspect-ratio follows media-display layers/viewport.
+// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
 .media-item__slot {
   position: relative;
   inline-size: 100%;
-  block-size: 100%;
+  aspect-ratio: var(--media-aspect-ratio, 1 / 1);
+  transition: aspect-ratio var(--transition-geometry);
   min-inline-size: 0;
   min-block-size: 0;
   border-radius: var(--radius-lg);
@@ -38,17 +43,23 @@
 }
 
 :host([data-mode='row']) .media-item__slot {
-  border-radius: var(--radius-md);
+  block-size: 100%;
+  aspect-ratio: auto;
+  transition: none;
 }
 
-// Preview host fills the slot; no geometry of its own.
+// Preview fills slot width; block-size follows viewport intrinsic height in grid modes.
 // @see docs/specs/component/media/media-item.md#component-hierarchy
 .media-item__preview {
   display: block;
   inline-size: 100%;
-  block-size: 100%;
+  block-size: auto;
   min-inline-size: 0;
   min-block-size: 0;
+}
+
+:host([data-mode='row']) .media-item__preview {
+  block-size: 100%;
 }
 
 // Border and shadow emphasis; does not affect layout size.

@@ -33,7 +33,7 @@
   min-height: 0;
   gap: var(--item-grid-gap);
   grid-template-columns: var(--item-grid-columns);
-  align-items: stretch;
+  align-items: start;
 }
 
 // Activates compact column token for grid-sm mode.
@@ -70,12 +70,11 @@
   --item-grid-slot-block-size: 6.5rem;
 }
 
-// Publishes square slot aspect for projected media tiles (consumed by app-media-item host).
+// Grid tiles size from media intrinsic ratio (media-item slot); column width only from grid.
 // @see docs/specs/component/item-grid/item-grid.md#what-it-looks-like
 :host(.item-grid--grid-sm),
 :host(.item-grid--grid-md),
 :host(.item-grid--grid-lg),
 :host(.item-grid--card) {
-  --item-grid-slot-aspect-ratio: 1 / 1;
   --item-grid-slot-block-size: auto;
 }

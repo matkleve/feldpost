@@ -1,4 +1,8 @@
-<div class="media-display__viewport" [attr.data-state]="state()">
+<div
+  class="media-display__viewport"
+  [attr.data-state]="state()"
+  (transitionend)="onViewportGeometryTransitionEnd($event)"
+>
   <!-- Stable state: loading-surface-visible -->
   <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div class="media-display__layer media-display__layer--loading-surface" aria-hidden="true"></div>
@@ -22,7 +26,12 @@
     (transitionend)="onLayerTransitionEnd($event, 'content')"
   >
     @if (resolvedUrl()) {
-      <img class="media-display__image" [src]="resolvedUrl()" [alt]="alt()" />
+      <img
+        class="media-display__image"
+        [src]="resolvedUrl()"
+        [alt]="alt()"
+        (load)="onContentImageLoad($event)"
+      />
     }
   </div>
 

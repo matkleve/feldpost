@@ -7,6 +7,7 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
   untracked,
 } from '@angular/core';
@@ -28,6 +29,7 @@ const SLOT_SIZE_REM_EPSILON = 0.05;
     '[attr.data-state]': 'state()',
     '[class.media-display]': 'true',
     '[class.media-display--fill-slot]': "slotGeometry() === 'fill'",
+    '[class.media-display--intrinsic]': "slotGeometry() === 'intrinsic'",
   },
 })
 export class MediaDisplayComponent implements AfterViewInit {
@@ -51,6 +53,8 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
   /** `fill` = occupy parent slot (grid tiles); `intrinsic` = viewport sizes to media aspect ratio. */
   readonly slotGeometry = input<'fill' | 'intrinsic'>('fill');
+  /** Notifies parent slot to update shared `--media-aspect-ratio` (CSS cannot inherit child → parent). */
+  readonly aspectRatioChange = output<number>();
   readonly state = signal<MediaDisplayState>('idle');
   readonly slotSizeRem = signal(1);
 
@@ -129,6 +133,16 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.setupResizeObserver();
   }
 
+  onViewportGeometryTransitionEnd(event: TransitionEvent): void {
+    if (event.propertyName !== 'aspect-ratio' || this.slotGeometry() !== 'intrinsic') {
+      return;
+    }
+
+    if (this.state() === 'ratio-known-contain') {
+      this.advanceAfterRatioSettled();
+    }
+  }
+
   onLayerTransitionEnd(event: TransitionEvent, layer: 'staged-content' | 'content'): void {
     if (event.propertyName !== 'opacity') {
       return;
@@ -141,6 +155,36 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     if (layer === 'staged-content' && this.state() === 'content-visible') {
       this.stagedContentUrl.set('');
+    }
+  }
+
+  onContentImageLoad(event: Event): void {
+    if (this.slotGeometry() !== 'intrinsic' || this.metadataAspectRatio() != null) {
+      return;
+    }
+
+    const img = event.target;
+    if (!(img instanceof HTMLImageElement)) {
+      return;
+    }
+
+    const { naturalWidth, naturalHeight } = img;
+    if (naturalWidth <= 0 || naturalHeight <= 0) {
+      return;
+    }
+
+    this.applyAspectRatio(naturalWidth / naturalHeight);
+
+    const currentState = this.state();
+    if (
+      currentState === 'loading-surface-visible' ||
+      currentState === 'media-ready' ||
+      currentState === 'content-fade-in'
+    ) {
+      this.goTo('ratio-known-contain');
+      if (this.prefersReducedMotion()) {
+        this.advanceAfterRatioSettled();
+      }
     }
   }
 
@@ -212,17 +256,25 @@ export class MediaDisplayComponent implements AfterViewInit {
       }
       case 'loaded': {
         const currentState = this.state();
-        const fillSlot = this.slotGeometry() === 'fill';
+        const intrinsic = this.slotGeometry() === 'intrinsic';
 
         if (
-          !fillSlot &&
+          intrinsic &&
           currentState === 'loading-surface-visible' &&
           this.hasKnownAspectRatio()
         ) {
           this.goTo('ratio-known-contain');
+          if (this.prefersReducedMotion()) {
+            this.advanceAfterRatioSettled();
+          }
+          return;
         }
 
-        if (this.state() === 'ratio-known-contain' || this.state() === 'loading-surface-visible') {
+        if (currentState === 'ratio-known-contain') {
+          return;
+        }
+
+        if (currentState === 'loading-surface-visible') {
           this.goTo('media-ready');
         }
 
@@ -263,25 +315,38 @@ export class MediaDisplayComponent implements AfterViewInit {
     return hintedRatio != null && hintedRatio > 0;
   }
 
-  private applyAspectRatio(ratio: number): void {
-    this.metadataAspectRatio.set(ratio);
-    if (this.slotGeometry() === 'fill') {
+  private advanceAfterRatioSettled(): void {
+    if (this.state() !== 'ratio-known-contain') {
       return;
     }
-    this.hostEl.nativeElement.style.setProperty('--media-aspect-ratio', String(ratio));
+
+    this.goTo('media-ready');
+    if (this.resolvedUrl()) {
+      this.goTo('content-fade-in');
+    }
+  }
+
+  private prefersReducedMotion(): boolean {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return false;
+    }
+
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  private applyAspectRatio(ratio: number): void {
+    this.metadataAspectRatio.set(ratio);
+    this.aspectRatioChange.emit(ratio);
   }
 
   private resetAspectRatio(): void {
     this.metadataAspectRatio.set(null);
-    if (this.slotGeometry() === 'fill') {
-      return;
-    }
     const hintedRatio = this.aspectRatio();
     if (hintedRatio != null && hintedRatio > 0) {
       this.applyAspectRatio(hintedRatio);
       return;
     }
-    this.hostEl.nativeElement.style.removeProperty('--media-aspect-ratio');
+    this.aspectRatioChange.emit(1);
   }
 
   private goTo(next: MediaDisplayState): void {

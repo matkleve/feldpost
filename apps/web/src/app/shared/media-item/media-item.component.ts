@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { UploadOverlayState } from '../../core/media/media-renderer.types';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
@@ -51,6 +60,24 @@ export class MediaItemComponent {
 
   readonly item = input<ImageRecord | null>(null);
   readonly selected = computed(() => this.state() === 'selected');
+  /** Shared by slot, media-display host, and viewport (set from MediaDisplay aspectRatioChange). */
+  readonly mediaAspectRatio = signal('1 / 1');
+  readonly usesFillSlotGeometry = computed(() => this.mode() === 'row');
+
+  constructor() {
+    effect(() => {
+      this.mediaIdentity();
+      this.mediaAspectRatio.set('1 / 1');
+    });
+  }
+
+  onMediaAspectRatioChange(ratio: number): void {
+    if (!Number.isFinite(ratio) || ratio <= 0) {
+      return;
+    }
+
+    this.mediaAspectRatio.set(String(ratio));
+  }
 
   readonly hasMapLocation = computed(() => {
     const record = this.item();

@@ -1,17 +1,26 @@
 :host {
   --media-display-max-width: 100%;
   --media-display-max-height: 100%;
-  --media-aspect-ratio: 1 / 1;
 
   display: contents;
 }
 
-// Fills a parent-owned grid slot; viewport does not resize when metadata ratio arrives.
-// @see docs/specs/component/item-grid/item-grid.md#what-it-looks-like
+// Fills a parent-owned fixed slot (row mode); viewport does not resize when metadata ratio arrives.
+// @see docs/specs/component/item-grid/item-grid.md#row-mode
 :host.media-display--fill-slot {
   display: block;
   inline-size: 100%;
   block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+// Viewport aspect-ratio drives stack height; inherits --media-aspect-ratio from media-item__slot.
+// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+:host.media-display--intrinsic {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
   min-inline-size: 0;
   min-block-size: 0;
 }
@@ -25,6 +34,14 @@
   aspect-ratio: var(--media-aspect-ratio, 1 / 1);
   transition: aspect-ratio var(--transition-geometry);
   overflow: hidden;
+}
+
+// Viewport follows slot --media-aspect-ratio (must not re-default to 1/1 on :host).
+// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+:host.media-display--intrinsic .media-display__viewport {
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: var(--media-aspect-ratio, 1 / 1);
 }
 
 // Viewport matches the full media-item slot; letterboxing stays on the image layer.
@@ -47,11 +64,39 @@
 }
 
 .media-display__image {
-  inline-size: 100%;
-  block-size: 100%;
+  display: block;
+  max-inline-size: 100%;
+  max-block-size: 100%;
   object-fit: contain;
   object-position: center center;
-  display: block;
+}
+
+// Fixed slot (row): image fills the absolute layer box.
+// @see docs/specs/component/item-grid/item-grid.md#row-mode
+:host.media-display--fill-slot .media-display__image {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+// Intrinsic grid: image keeps natural proportions inside the ratio-sized viewport.
+// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+:host.media-display--intrinsic .media-display__layer--content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host.media-display--intrinsic .media-display__layer--staged-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host.media-display--intrinsic .media-display__image {
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: 100%;
+  max-block-size: 100%;
 }
 
 .media-display__layer--loading-surface {

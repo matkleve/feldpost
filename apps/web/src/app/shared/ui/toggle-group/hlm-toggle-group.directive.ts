@@ -3,7 +3,7 @@
 
 import { computed, Directive, input } from '@angular/core';
 import { twMerge } from 'tailwind-merge';
-import { toggleGroupVariants } from './toggle-group-variants';
+import { toggleGroupVariants, type PillToggleSize } from './toggle-group-variants';
 
 /** Helm-style classes for `BrnToggleGroup` host (`[brnToggleGroup]`). */
 @Directive({
@@ -14,9 +14,11 @@ import { toggleGroupVariants } from './toggle-group-variants';
   },
 })
 export class HlmToggleGroupDirective {
+  /** Track height matches `hlmBtn` sm/md/lg row heights (default md = h-9). */
+  readonly size = input<PillToggleSize>('md');
   readonly userClass = input<string>('', { alias: 'class' });
 
   protected readonly hostClass = computed(() =>
-    twMerge(toggleGroupVariants(), this.userClass()),
+    twMerge(toggleGroupVariants({ size: this.size() }), this.userClass()),
   );
 }
