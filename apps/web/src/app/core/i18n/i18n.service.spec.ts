@@ -44,6 +44,22 @@ describe('I18nService language switch smoke', () => {
     );
   });
 
+  it('resolves upload panel intake keys for en/de/it', () => {
+    const service = TestBed.inject(I18nService);
+
+    service.setLanguage('en');
+    expect(service.t('auto.0367.upload_folder', 'Upload folder')).toBe('Upload folder');
+    expect(service.t('upload.dropzone.label.dragAndDrop', 'Drag & drop files here')).toBe(
+      'Drag & drop files here',
+    );
+
+    service.setLanguage('de');
+    expect(service.t('auto.0367.upload_folder', 'Upload folder')).toBe('Ordner hochladen');
+
+    service.setLanguage('it');
+    expect(service.t('auto.0349.take_photo', 'Take photo')).toBe('Scatta una foto');
+  });
+
   it('does not apply heuristic fallback for unknown phrases when legacy fallback is disabled', () => {
     const service = TestBed.inject(I18nService);
     service.setLanguage('de');

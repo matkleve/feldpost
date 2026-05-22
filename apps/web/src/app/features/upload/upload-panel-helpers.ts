@@ -41,10 +41,8 @@ export function isUploadLane(value: string): value is UploadLane {
   return (UPLOAD_LANES as readonly string[]).includes(value);
 }
 
-function nonEmptyLocalized(
-  localized: string,
-  fallback: string,
-): string {
+/** Never render empty UI copy when catalog/DB returns whitespace-only strings. */
+export function nonEmptyLocalized(localized: string, fallback: string): string {
   const trimmed = typeof localized === 'string' ? localized.trim() : '';
   return trimmed.length > 0 ? trimmed : fallback;
 }
@@ -105,9 +103,10 @@ export function locationModeToggleAriaLabel(
 }
 
 export function dropzoneLabelText(t: (key: string, fallback?: string) => string): string {
-  const localized = t('upload.dropzone.label.dragAndDrop', 'Drag & drop files here');
-  const trimmed = typeof localized === 'string' ? localized.trim() : '';
-  return trimmed.length > 0 ? trimmed : 'Drag & drop files here';
+  return nonEmptyLocalized(
+    t('upload.dropzone.label.dragAndDrop', 'Drag & drop files here'),
+    'Drag & drop files here',
+  );
 }
 
 export function buildLaneSwitchOptions(

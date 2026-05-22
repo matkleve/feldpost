@@ -204,7 +204,7 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-reading);
-    color: inherit;
+    color: var(--foreground);
     text-align: center;
   }
 
@@ -358,6 +358,13 @@
       font-size: var(--upload-panel-icon-size);
       line-height: var(--line-height-solid);
       color: inherit;
+    }
+
+    &-label {
+      flex: 0 1 auto;
+      min-width: 0;
+      color: var(--foreground);
+      white-space: nowrap;
     }
 
     &--capture {

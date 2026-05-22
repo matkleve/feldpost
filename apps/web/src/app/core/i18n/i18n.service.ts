@@ -291,11 +291,11 @@ export class I18nService {
     }
     switch (language) {
       case 'de':
-        return entry.de;
+        return this.firstNonEmpty(entry.de, fallback, entry.en, entry.original) ?? '';
       case 'it':
-        return entry.it ?? entry.en;
+        return this.firstNonEmpty(entry.it, fallback, entry.en, entry.original) ?? '';
       default:
-        return entry.en;
+        return this.firstNonEmpty(entry.en, fallback, entry.original) ?? '';
     }
   }
 

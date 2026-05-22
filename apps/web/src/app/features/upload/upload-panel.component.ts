@@ -36,6 +36,7 @@ import {
   alternateUploadLocationRequirementMode,
   dropzoneLabelText,
   locationModeToggleAriaLabel,
+  nonEmptyLocalized,
 } from './upload-panel-helpers';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../shared/ui/input';
@@ -192,6 +193,22 @@ export class UploadPanelComponent {
   readonly laneJobs = this.signals.laneJobs;
   readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
   readonly dropzoneLabelText = (): string => dropzoneLabelText(this.t);
+  readonly dropzonePickAriaLabel = (): string =>
+    nonEmptyLocalized(
+      this.t('auto.0103.drag_files_here_or_click_to_select', 'Drag files here or click to select'),
+      'Drag files here or click to select',
+    );
+  readonly panelTitleText = (): string =>
+    nonEmptyLocalized(this.t('upload.panel.title', 'Upload Panel'), 'Upload Panel');
+  readonly panelSubtitleText = (): string =>
+    nonEmptyLocalized(
+      this.t('upload.panel.subtitle', 'You can upload things here.'),
+      'You can upload things here.',
+    );
+  readonly uploadFolderLabelText = (): string =>
+    nonEmptyLocalized(this.t('auto.0367.upload_folder', 'Upload folder'), 'Upload folder');
+  readonly takePhotoLabelText = (): string =>
+    nonEmptyLocalized(this.t('auto.0349.take_photo', 'Take photo'), 'Take photo');
 
   readonly laneSwitchOptions = this.viewModel.laneSwitchOptions;
   readonly visibleLaneJobs = this.viewModel.visibleLaneJobs;

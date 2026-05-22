@@ -17,10 +17,11 @@
 
 <section
   class="upload-panel"
+  data-i18n-skip
   [class.upload-panel--visible]="visible()"
   [class.upload-panel--embedded]="embeddedInPane()"
   role="region"
-  [attr.aria-label]="t('upload.panel.title', 'Upload Panel')"
+  [attr.aria-label]="panelTitleText()"
 >
   <!-- ═══════════════════════════════════════════════════════════════════════════
     BLOCK 1: INTAKE ZONE
@@ -30,10 +31,8 @@
     <div class="upload-panel__header">
       <span class="material-icons upload-panel__header-icon" aria-hidden="true">cloud_upload</span>
       <div class="upload-panel__header-copy">
-        <h3 class="upload-panel__title">{{ t('upload.panel.title', 'Upload Panel') }}</h3>
-        <p class="upload-panel__subtitle">
-          {{ t('upload.panel.subtitle', 'You can upload things here.') }}
-        </p>
+        <h3 class="upload-panel__title">{{ panelTitleText() }}</h3>
+        <p class="upload-panel__subtitle">{{ panelSubtitleText() }}</p>
       </div>
     </div>
 
@@ -52,7 +51,7 @@
       <button
         type="button"
         class="upload-panel__dropzone-pick"
-        [attr.aria-label]="t('auto.0103.drag_files_here_or_click_to_select', 'Drag files here or click to select')"
+        [attr.aria-label]="dropzonePickAriaLabel()"
         (click)="onDropzonePickClick($event, fileInput)"
         (keydown)="inputHandlers.onDropZoneKeydown($event, fileInput)"
       >
@@ -134,7 +133,7 @@
       (click)="inputHandlers.onSelectFolder($event, folderInput)"
     >
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
-      {{ t('auto.0367.upload_folder', 'Upload folder') }}
+      <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
     </button>
 
     @if (!folderImportSupported) {
@@ -155,7 +154,7 @@
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
         >photo_camera</span
       >
-      {{ t('auto.0349.take_photo', 'Take photo') }}
+      <span class="upload-panel__intake-btn-label">{{ takePhotoLabelText() }}</span>
     </button>
 
     <button
