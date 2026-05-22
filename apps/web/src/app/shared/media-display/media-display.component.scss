@@ -6,6 +6,16 @@
   display: contents;
 }
 
+// Fills a parent-owned grid slot; viewport does not resize when metadata ratio arrives.
+// @see docs/specs/component/item-grid/item-grid.md#what-it-looks-like
+:host.media-display--fill-slot {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
 .media-display__viewport {
   position: relative;
   display: block;
@@ -15,6 +25,17 @@
   aspect-ratio: var(--media-aspect-ratio, 1 / 1);
   transition: aspect-ratio var(--transition-geometry);
   overflow: hidden;
+}
+
+// Viewport matches the full media-item slot; letterboxing stays on the image layer.
+// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+:host.media-display--fill-slot .media-display__viewport {
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  aspect-ratio: unset;
+  transition: none;
 }
 
 .media-display__layer {
@@ -29,7 +50,7 @@
   inline-size: 100%;
   block-size: 100%;
   object-fit: contain;
-  object-position: top center;
+  object-position: center center;
   display: block;
 }
 

@@ -23,6 +23,7 @@
 .pane-toolbar__right {
   flex: 1;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--spacing-2);
 }

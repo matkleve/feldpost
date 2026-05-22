@@ -66,4 +66,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
+  --item-grid-slot-aspect-ratio: auto;
+  --item-grid-slot-block-size: 6.5rem;
+}
+
+// Publishes square slot aspect for projected media tiles (consumed by app-media-item host).
+// @see docs/specs/component/item-grid/item-grid.md#what-it-looks-like
+:host(.item-grid--grid-sm),
+:host(.item-grid--grid-md),
+:host(.item-grid--grid-lg),
+:host(.item-grid--card) {
+  --item-grid-slot-aspect-ratio: 1 / 1;
+  --item-grid-slot-block-size: auto;
 }

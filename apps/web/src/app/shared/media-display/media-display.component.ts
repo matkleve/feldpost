@@ -27,6 +27,7 @@ const SLOT_SIZE_REM_EPSILON = 0.05;
   host: {
     '[attr.data-state]': 'state()',
     '[class.media-display]': 'true',
+    '[class.media-display--fill-slot]': "slotGeometry() === 'fill'",
   },
 })
 export class MediaDisplayComponent implements AfterViewInit {
@@ -48,6 +49,8 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
+  /** `fill` = occupy parent slot (grid tiles); `intrinsic` = viewport sizes to media aspect ratio. */
+  readonly slotGeometry = input<'fill' | 'intrinsic'>('fill');
   readonly state = signal<MediaDisplayState>('idle');
   readonly slotSizeRem = signal(1);
 
@@ -209,8 +212,13 @@ export class MediaDisplayComponent implements AfterViewInit {
       }
       case 'loaded': {
         const currentState = this.state();
+        const fillSlot = this.slotGeometry() === 'fill';
 
-        if (currentState === 'loading-surface-visible' && this.hasKnownAspectRatio()) {
+        if (
+          !fillSlot &&
+          currentState === 'loading-surface-visible' &&
+          this.hasKnownAspectRatio()
+        ) {
           this.goTo('ratio-known-contain');
         }
 
@@ -257,11 +265,17 @@ export class MediaDisplayComponent implements AfterViewInit {
 
   private applyAspectRatio(ratio: number): void {
     this.metadataAspectRatio.set(ratio);
+    if (this.slotGeometry() === 'fill') {
+      return;
+    }
     this.hostEl.nativeElement.style.setProperty('--media-aspect-ratio', String(ratio));
   }
 
   private resetAspectRatio(): void {
     this.metadataAspectRatio.set(null);
+    if (this.slotGeometry() === 'fill') {
+      return;
+    }
     const hintedRatio = this.aspectRatio();
     if (hintedRatio != null && hintedRatio > 0) {
       this.applyAspectRatio(hintedRatio);

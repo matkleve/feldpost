@@ -1,51 +1,58 @@
-/* 1. HOST: Zuständig für das Layout und den äußeren Schatten (Elevation).
-  WICHTIG: Kein overflow: hidden hier, damit der Schatten atmen kann!
-*/
+// Host participates in grid flow only; slot size tokens come from app-item-grid.
+// @see docs/specs/component/media/media-item.md#css-variable-ownership--dependency-matrix
 :host {
-  isolation: isolate;
-  position: relative;
   display: block;
   inline-size: 100%;
-  aspect-ratio: 1 / 1;
-  min-height: 0;
-  border-radius: var(--radius-lg);
-
-  /* Sanfte Übergänge für alle Zustände */
-  transition:
-    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
-    transform var(--motion-duration-fast) var(--motion-ease-out),
-    border var(--motion-duration-fast) var(--motion-ease-out);
-  animation: media-item-enter var(--motion-duration-fast) var(--motion-ease-out) ease-out both;
+  min-inline-size: 0;
+  min-block-size: 0;
+  aspect-ratio: var(--item-grid-slot-aspect-ratio, auto);
+  block-size: var(--item-grid-slot-block-size, auto);
 }
 
+// Placeholder tiles without item payload use muted pulse inside inherited slot geometry.
+// @see docs/specs/component/media/media-item.md#what-it-looks-like
 :host([data-has-item='false']) {
   background: var(--muted);
   animation: media-display-pulse 200ms ease-in-out infinite;
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-// Overrides square aspect-ratio for row mode; item fills full container width at fixed row height.
+// Row placeholders use the row radius token when parent grid is in row mode.
 // @see docs/specs/component/item-grid/item-grid.md#row-mode
-:host([data-mode='row']) {
-  aspect-ratio: auto;
-  height: 6.5rem;
+:host([data-has-item='false'][data-mode='row']) {
   border-radius: var(--radius-md);
 }
 
-/* 2. INNERER WRAPPER: Hier schneiden wir den Inhalt (Bild) ab.
-*/
-.media-item {
+// Stacking context for media preview, border frame, and interaction overlays.
+// @see docs/specs/component/media/media-item.md#spacing--framing-ownership
+.media-item__slot {
   position: relative;
   inline-size: 100%;
-  aspect-ratio: inherit;
-  border-radius: inherit;
-  overflow: hidden; /* Das Bild wird hier abgerundet */
-  min-height: 0;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-/* 3. DER FRAME: Zuständig für die Border-Simulation via Inset-Shadow.
-  Warum? Weil sich ein Schatten (inset) nicht auf das Layout auswirkt.
-*/
+:host([data-mode='row']) .media-item__slot {
+  border-radius: var(--radius-md);
+}
+
+// Preview host fills the slot; no geometry of its own.
+// @see docs/specs/component/media/media-item.md#component-hierarchy
+.media-item__preview {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+// Border and shadow emphasis; does not affect layout size.
+// @see docs/specs/component/media/media-item.md#visual-behavior-contract
 .media-item__frame {
   position: absolute;
   inset: 0;
@@ -53,37 +60,18 @@
   pointer-events: none;
   z-index: 2;
   transition: box-shadow var(--motion-duration-fast) var(--motion-ease-out);
-
-  /* DEFAULT BORDER: 1px, fast transparent */
-  border: 1px color-mix(in srgb, var(--primary) 10%, transparent);
-
-  /* DEFAULT SCHATTEN (ganz dezent) */
+  border: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
   box-shadow: var(--shadow-sm);
 }
 
-/* --- LOGIK-KETTE (REIHENFOLGE IST ENTSCHEIDEND!) --- */
-
-/* A: SELEKTIERT (Maus weg) -> Border bleibt 1px, Farbe wird aktiv */
 :host([data-state='selected']) .media-item__frame {
   box-shadow: var(--shadow-sm);
-
   border: 0.125rem solid var(--primary);
 }
 
-/* B: HOVER / FOCUS (Egal ob selektiert oder nicht) -> Border wird 2px */
-/* Dieser Selektor steht weiter unten und gewinnt daher bei Hover! */
 :host(:hover) .media-item__frame {
   box-shadow: var(--shadow-md);
-
-  // Hover border — Batch 39: inlined ex `--border-hover` (single compromise mix vs light 55% / dark 30% split)
-  // @see docs/migration/phase-7-token-migration.md §Batch 39
   border: 0.1875rem solid color-mix(in srgb, var(--primary) 45%, var(--border));
-}
-
-/* --- RESTLICHE ELEMENTE --- */
-
-.media-item__preview {
-  display: contents;
 }
 
 .media-item__open {
@@ -119,8 +107,7 @@
     transform var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
 }
 
-:host:hover .media-item__quiet-actions,
-:host:hover .media-item__quiet-actions {
+:host(:hover) .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   transition:
@@ -134,14 +121,4 @@
   transition:
     opacity var(--motion-duration-fast) var(--motion-ease-out),
     transform var(--motion-duration-fast) var(--motion-ease-out);
-}
-
-@keyframes media-item-enter {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
