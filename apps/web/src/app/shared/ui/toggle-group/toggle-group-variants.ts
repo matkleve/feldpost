@@ -8,9 +8,9 @@ export type PillToggleSize = 'sm' | 'md' | 'lg';
 /** Inline `--hlm-toggle-item-*` for caller SCSS that mirrors toggle segment geometry. */
 // @see docs/migration/phase-8-global-scss-elimination.md §6
 export const pillToggleSizeStyle: Record<PillToggleSize, string> = {
-  sm: '--hlm-toggle-item-padding-y:0.25rem;--hlm-toggle-item-padding-x:0.5rem;--hlm-toggle-icon-only-min:2.25rem',
-  md: '--hlm-toggle-item-padding-y:0.375rem;--hlm-toggle-item-padding-x:0.75rem;--hlm-toggle-icon-only-min:2.25rem',
-  lg: '--hlm-toggle-item-padding-y:0.5rem;--hlm-toggle-item-padding-x:1rem;--hlm-toggle-icon-only-min:2.5rem',
+  sm: '--hlm-toggle-item-padding-y:0.25rem;--hlm-toggle-item-padding-x:0.5rem;--hlm-toggle-icon-only-min:1.75rem',
+  md: '--hlm-toggle-item-padding-y:0.375rem;--hlm-toggle-item-padding-x:0.75rem;--hlm-toggle-icon-only-min:1.75rem',
+  lg: '--hlm-toggle-item-padding-y:0.5rem;--hlm-toggle-item-padding-x:1rem;--hlm-toggle-icon-only-min:2rem',
 };
 
 const pillVerticalChrome = [
@@ -39,12 +39,12 @@ export const pillToggleVariants = cva(
   ].join(' '),
   {
     variants: {
-      // Keeps nested track height aligned with `hlmBtn size="sm"` (h-9) per pill density.
+      // Nested track: outer h-9 matches `hlmBtn size="sm"`; p-1 inset around segments.
       // @see docs/design/components/action-interaction-kernel.md#button-policy
       size: {
-        sm: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
-        md: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
-        lg: '[&_[hlmToggleGroup]]:h-10 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
+        sm: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:p-1',
+        md: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:p-1',
+        lg: '[&_[hlmToggleGroup]]:h-10 [&_[hlmToggleGroup]]:p-1',
       },
       fill: {
         true: [
@@ -74,19 +74,19 @@ export const pillToggleVariants = cva(
 
 export type PillToggleVariantProps = VariantProps<typeof pillToggleVariants>;
 
-// Toggle group track — height locked to toolbar `hlmBtn size="sm"` (h-9); horizontal inset only.
+// Toggle group track — outer h-9 matches `hlmBtn size="sm"`; p-1 gap-1 inset around inner segments.
 // @see docs/design/components/action-interaction-kernel.md#button-policy
 export const toggleGroupVariants = cva(
   [
-    'inline-flex items-center justify-center rounded-md bg-muted gap-1',
+    'inline-flex items-center justify-center rounded-md bg-muted p-1 gap-1',
     'motion-reduce:transition-none motion-reduce:duration-0 motion-reduce:[animation-duration:1ms] motion-reduce:[transition-duration:1ms]',
   ].join(' '),
   {
     variants: {
       size: {
-        sm: 'h-9 px-1 py-0',
-        md: 'h-9 px-1 py-0',
-        lg: 'h-10 px-1 py-0',
+        sm: 'h-9',
+        md: 'h-9',
+        lg: 'h-10',
       },
     },
     defaultVariants: { size: 'md' },
@@ -111,10 +111,10 @@ export const toggleGroupItemVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-9 ps-2.5 pe-2 text-xs',
-        md: 'h-9 ps-2.5 pe-2 text-sm',
-        lg: 'h-10 ps-4 pe-3',
-        icon: 'h-9 w-9 min-h-9 min-w-9 p-0',
+        sm: 'h-7 ps-2.5 pe-2 text-xs',
+        md: 'h-7 ps-2.5 pe-2 text-sm',
+        lg: 'h-8 ps-4 pe-3',
+        icon: 'h-7 w-7 min-h-7 min-w-7 p-0',
       },
     },
     defaultVariants: { size: 'md' },

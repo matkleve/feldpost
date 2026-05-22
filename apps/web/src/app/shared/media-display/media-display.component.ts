@@ -95,11 +95,13 @@ export class MediaDisplayComponent implements AfterViewInit {
         return;
       }
 
-      if (this.lastRequestIdentity !== requestIdentity) {
+      const isNewHandoff = this.lastRequestIdentity !== requestIdentity;
+      if (isNewHandoff) {
         this.resolvedUrl.set('');
         this.stagedContentUrl.set('');
         this.resetAspectRatio();
         this.lastRequestIdentity = requestIdentity;
+        this.goTo('loading-surface-visible');
       }
 
       // Register storage paths before getState() subscription so that
@@ -109,8 +111,9 @@ export class MediaDisplayComponent implements AfterViewInit {
         this.mediaDownloadService.registerPreviewPaths(id, storagePath, thumbnailPath);
       }
 
-      this.goTo('loading-surface-visible');
-      const slot = this.slotSizeRem();
+      // Do not track slotSizeRem here — viewport resize after aspect-ratio transition must not
+      // restart this effect (that was forcing loading-surface-visible after content reveal).
+      const slot = untracked(() => this.slotSizeRem());
 
       // TODO: migrate to signal-based when MediaDownloadService
       // is refactored off Observable
@@ -176,11 +179,7 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.applyAspectRatio(naturalWidth / naturalHeight);
 
     const currentState = this.state();
-    if (
-      currentState === 'loading-surface-visible' ||
-      currentState === 'media-ready' ||
-      currentState === 'content-fade-in'
-    ) {
+    if (currentState === 'loading-surface-visible' || currentState === 'media-ready') {
       this.goTo('ratio-known-contain');
       if (this.prefersReducedMotion()) {
         this.advanceAfterRatioSettled();
@@ -251,6 +250,9 @@ export class MediaDisplayComponent implements AfterViewInit {
     switch (delivery.state) {
       case 'loading':
       case 'warm-preview': {
+        if (!this.shouldAcceptLoadingDelivery()) {
+          return;
+        }
         this.goTo('loading-surface-visible');
         return;
       }
@@ -313,6 +315,23 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     const hintedRatio = this.aspectRatio();
     return hintedRatio != null && hintedRatio > 0;
+  }
+
+  private shouldAcceptLoadingDelivery(): boolean {
+    const current = this.state();
+    if (
+      current === 'content-visible' ||
+      current === 'content-fade-in' ||
+      current === 'media-ready'
+    ) {
+      return false;
+    }
+
+    if (current === 'ratio-known-contain' && this.resolvedUrl().length > 0) {
+      return false;
+    }
+
+    return true;
   }
 
   private advanceAfterRatioSettled(): void {

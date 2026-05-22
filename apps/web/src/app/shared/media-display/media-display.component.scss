@@ -144,11 +144,18 @@
 /* Stable state: loading-surface-visible */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 /* State selectors target the viewport (real box), not :host — display:contents on host breaks host-anchored descendant rules. */
-.media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
-.media-display__viewport[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
+.media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface {
   opacity: 1;
   pointer-events: none;
   animation: media-display-pulse 200ms ease-in-out infinite;
+}
+
+// Ratio lock-in uses a static muted surface (no pulse) so reveal does not flash back to loading.
+// @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
+.media-display__viewport[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
+  opacity: 1;
+  pointer-events: none;
+  animation: none;
 }
 
 /* Stable state: media-ready (staged content) */

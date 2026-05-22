@@ -74,24 +74,13 @@ $toolbar-view-toggle-compact-max: 23.75rem;
     }
   }
 
-  // Single-segment toggle track: same outer footprint as menu triggers; drop track p-1 so icon is not clipped.
+  // Compact single-segment track uses shared p-1 inset; outer box matches menu trigger height.
   // @see docs/specs/ui/workspace/workspace-pane.md
   .#{$block}__size-control--compact .#{$block}__size-control-track {
     box-sizing: border-box;
-    inline-size: $toolbar-control-size;
     block-size: $toolbar-control-size;
-    min-inline-size: $toolbar-control-size;
     min-block-size: $toolbar-control-size;
-    padding: 0;
-    gap: 0;
-  }
-
-  .#{$block}__size-control--compact .#{$block}__size-control-track button {
-    inline-size: 100%;
-    block-size: 100%;
-    min-inline-size: 0;
-    min-block-size: 0;
-    padding: 0;
+    max-block-size: $toolbar-control-size;
   }
 }
 
