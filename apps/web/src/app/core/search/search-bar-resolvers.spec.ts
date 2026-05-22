@@ -574,4 +574,47 @@ describe('fetchGeocoderCandidates', () => {
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].label).toContain('Stephansdom');
   });
+
+  it('returns Austrian street hits for a specific street query even when the marker is far away', async () => {
+    const hits: GeocoderSearchResult[] = [
+      {
+        lat: 48.185,
+        lng: 16.365,
+        displayName: 'Denisgasse, Favoriten, Wien, Österreich',
+        name: null,
+        importance: 0.55,
+        address: {
+          road: 'Denisgasse',
+          city: 'Wien',
+          country: 'Österreich',
+          country_code: 'at',
+        },
+      },
+    ];
+
+    const geocodingService = {
+      search: async () => hits,
+    };
+
+    const results = await fetchGeocoderCandidates(
+      geocodingService as never,
+      'denisgasse',
+      {
+        countryCodes: ['at'],
+        activeMarkerCentroid: { lat: 47.8, lng: 13.04 },
+      },
+      5,
+      (result, query, index): SearchAddressCandidate => ({
+        id: `geo-${query}-${index}`,
+        family: 'geocoder',
+        label: result.address?.road ?? result.displayName,
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].label.toLowerCase()).toContain('denisgasse');
+  });
 });

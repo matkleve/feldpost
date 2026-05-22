@@ -9,7 +9,7 @@ import type {
   SearchContentCandidate,
   SearchQueryContext,
 } from './search.models';
-import { computeTextMatchScore } from './search-query';
+import { computeTextMatchScore, isSpecificStreetQuery } from './search-query';
 import {
   deduplicateGeocoderCandidatesByLabel,
   distanceToSearchContextMeters,
@@ -227,7 +227,7 @@ function rankGeocoderCandidates(
   if (streetLevelResults.length === 0) return [];
 
   const localizedResults = streetLevelResults.filter((result) =>
-    matchesCountryConstraint(result, context),
+    matchesCountryConstraint(result, context, normalizedQuery),
   );
 
   const lexicalResults = localizedResults.filter((result) =>
@@ -266,6 +266,7 @@ function hasGeographicSearchAnchor(context: SearchQueryContext): boolean {
 function matchesCountryConstraint(
   result: GeocoderSearchResult,
   context: SearchQueryContext,
+  normalizedQuery: string,
 ): boolean {
   const allowedCountryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
   if (allowedCountryCodes.length === 0) {
@@ -274,6 +275,10 @@ function matchesCountryConstraint(
     }
 
     if (isCoordinateInViewport(result.lat, result.lng, context.viewportBounds)) {
+      return true;
+    }
+
+    if (isSpecificStreetQuery(normalizedQuery)) {
       return true;
     }
 
@@ -286,7 +291,29 @@ function matchesCountryConstraint(
     return true;
   }
 
-  return isCoordinateInViewport(result.lat, result.lng, context.viewportBounds);
+  if (
+    !resultCountryCode &&
+    isCoordinateInAllowedCountries(result.lat, result.lng, allowedCountryCodes)
+  ) {
+    return true;
+  }
+
+  if (isCoordinateInViewport(result.lat, result.lng, context.viewportBounds)) {
+    return true;
+  }
+
+  return isSpecificStreetQuery(normalizedQuery);
+}
+
+function isCoordinateInAllowedCountries(
+  lat: number,
+  lng: number,
+  countryCodes: string[],
+): boolean {
+  if (countryCodes.includes('at')) {
+    return lat >= 46.3 && lat <= 49.1 && lng >= 9.4 && lng <= 17.2;
+  }
+  return false;
 }
 
 function meetsLexicalMatchThreshold(
@@ -362,10 +389,11 @@ function normalizeForLexicalMatch(value: string): string {
 }
 
 function minimumLexicalScore(query: string): number {
+  if (isSpecificStreetQuery(query)) return 0.7;
   if (query.length <= 4) return 0.6;
   if (query.length <= 6) return 0.7;
   if (query.length <= 9) return 0.8;
-  return 0.9;
+  return 0.85;
 }
 
 function isCoordinateInViewport(

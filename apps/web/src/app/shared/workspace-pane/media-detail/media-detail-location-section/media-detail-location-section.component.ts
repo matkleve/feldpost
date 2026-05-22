@@ -59,10 +59,16 @@ export class MediaDetailLocationSectionComponent {
 
   readonly addressSearchContext = computed<SearchQueryContext>(() => {
     const img = this.media();
+    const context: SearchQueryContext = {
+      organizationId: img.organization_id ?? undefined,
+      countryCodes: countryCodesForMediaSearch(img.country),
+    };
     const lat = img.latitude ?? img.exif_latitude;
     const lng = img.longitude ?? img.exif_longitude;
-    if (lat == null || lng == null) return {};
-    return { activeMarkerCentroid: { lat, lng } };
+    if (lat != null && lng != null) {
+      context.activeMarkerCentroid = { lat, lng };
+    }
+    return context;
   });
 
   readonly showListFilter = computed(
@@ -78,4 +84,15 @@ export class MediaDetailLocationSectionComponent {
   readonly listNeedsScroll = computed(
     () => this.filteredLocations().length > MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD,
   );
+}
+
+/** Bias geocoder toward Austria when media has no country; map free-text country to ISO codes. */
+function countryCodesForMediaSearch(country: string | null): string[] {
+  const raw = country?.trim().toLowerCase() ?? '';
+  if (!raw) return ['at'];
+  if (raw === 'at' || raw === 'austria' || raw.includes('osterreich') || raw.includes('österreich')) {
+    return ['at'];
+  }
+  if (raw.length === 2) return [raw];
+  return ['at'];
 }

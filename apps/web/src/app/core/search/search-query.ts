@@ -61,6 +61,12 @@ export function formatDbAddressLabel(
 
 // ── Query Normalization ────────────────────────────────────────────────────
 
+/** Single-token street names long enough to treat as an explicit address search (not a map-local prefix). */
+export function isSpecificStreetQuery(query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  return normalized.length >= 5 && !normalized.includes(' ');
+}
+
 export function normalizeSearchQuery(query: string): string {
   return applyStreetTokenCorrections(
     query
