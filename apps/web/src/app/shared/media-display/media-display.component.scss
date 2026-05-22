@@ -77,8 +77,9 @@
 
 /* Stable state: loading-surface-visible */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
-[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
-[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
+/* State selectors target the viewport (real box), not :host — display:contents on host breaks host-anchored descendant rules. */
+.media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
+.media-display__viewport[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
   opacity: 1;
   pointer-events: none;
   animation: media-display-pulse 200ms ease-in-out infinite;
@@ -86,44 +87,44 @@
 
 /* Stable state: media-ready (staged content) */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
-[data-state='media-ready'] .media-display__layer--staged-content,
-[data-state='content-fade-in'] .media-display__layer--staged-content,
-[data-state='content-visible'] .media-display__layer--staged-content {
+.media-display__viewport[data-state='media-ready'] .media-display__layer--staged-content,
+.media-display__viewport[data-state='content-fade-in'] .media-display__layer--staged-content,
+.media-display__viewport[data-state='content-visible'] .media-display__layer--staged-content {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 /* Stable state: content-fade-in/content-visible */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
-[data-state='content-fade-in'] .media-display__layer--content,
-[data-state='content-visible'] .media-display__layer--content {
+.media-display__viewport[data-state='content-fade-in'] .media-display__layer--content,
+.media-display__viewport[data-state='content-visible'] .media-display__layer--content {
   opacity: 1;
   pointer-events: auto;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
 }
 
-[data-state='content-visible'] .media-display__layer--staged-content {
+.media-display__viewport[data-state='content-visible'] .media-display__layer--staged-content {
   opacity: 0;
   transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* Stable state: icon-only */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
-[data-state='icon-only'] .media-display__layer--icon-only {
+.media-display__viewport[data-state='icon-only'] .media-display__layer--icon-only {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
 }
 
 /* Stable state: error */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
-[data-state='error'] .media-display__layer--error {
+.media-display__viewport[data-state='error'] .media-display__layer--error {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
 }
 
 /* Stable state: no-media */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
-[data-state='no-media'] .media-display__layer--no-media {
+.media-display__viewport[data-state='no-media'] .media-display__layer--no-media {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
 }
