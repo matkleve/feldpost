@@ -40,24 +40,24 @@ export class MediaDisplayComponent implements AfterViewInit {
 
   private resizeObserver: ResizeObserver | null = null;
   private lastRequestIdentity = '';
+  private ratioProbeImg: HTMLImageElement | null = null;
 
   readonly mediaId: InputSignal<string> = input.required<string>();
-  /** Storage path for the full-resolution asset. When provided, the display component registers
-   * the media record with MediaDownloadService so getState() can initiate the signed-URL fetch.
-   * @see docs/specs/component/media/media-display.md#rendering-pipeline */
   readonly storagePath = input<string | null>(null);
-  /** Thumbnail storage path used for small/grid-tier requests. */
   readonly thumbnailPath = input<string | null>(null);
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
-  /** `fill` = occupy parent slot (grid tiles); `intrinsic` = viewport sizes to media aspect ratio. */
+  /** `fill` = fixed-slot mode (row); `intrinsic` = height driven by media aspect-ratio (grid). */
   readonly slotGeometry = input<'fill' | 'intrinsic'>('fill');
-  /** Notifies parent slot to update shared `--media-aspect-ratio` (CSS cannot inherit child → parent). */
+  /**
+   * Emits the resolved aspect ratio so the parent slot can mirror it.
+   * CSS cannot inherit child → parent, so an output is the only spec-compliant channel.
+   */
   readonly aspectRatioChange = output<number>();
+
   readonly state = signal<MediaDisplayState>('idle');
   readonly slotSizeRem = signal(1);
-
   readonly resolvedUrl = signal('');
   readonly stagedContentUrl = signal('');
   readonly icon = signal('insert_drive_file');
@@ -66,14 +66,6 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly alt = computed(() => this.t('workspace.imageDetail.mediaPreview.alt', 'Media preview'));
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
-  readonly showSharpContent = computed(() => {
-    const current = this.state();
-    return current === 'content-fade-in' || current === 'content-visible';
-  });
-  readonly showStagedPreview = computed(() => {
-    const current = this.state();
-    return current === 'media-ready';
-  });
 
   constructor() {
     effect(() => {
@@ -92,51 +84,44 @@ export class MediaDisplayComponent implements AfterViewInit {
       const id = this.mediaId().trim();
       const storagePath = this.storagePath();
       const thumbnailPath = this.thumbnailPath();
-      const requestIdentity = id;
 
       if (!id) {
         this.resolvedUrl.set('');
         this.stagedContentUrl.set('');
-        this.resetAspectRatio();
+        this.resetState();
         this.lastRequestIdentity = '';
         this.goTo('idle');
         return;
       }
 
-      const isNewHandoff = this.lastRequestIdentity !== requestIdentity;
+      const isNewHandoff = this.lastRequestIdentity !== id;
       if (isNewHandoff) {
         this.resolvedUrl.set('');
         this.stagedContentUrl.set('');
-        this.resetAspectRatio();
-        this.lastRequestIdentity = requestIdentity;
+        this.resetState();
+        this.lastRequestIdentity = id;
         this.goTo('loading-surface-visible');
       }
 
-      // Register storage paths before getState() subscription so that
-      // requestPreviewIfKnown() inside getState() can initiate the signed-URL fetch.
-      // @see docs/specs/component/media/media-display.md#rendering-pipeline
       if (storagePath) {
         this.mediaDownloadService.registerPreviewPaths(id, storagePath, thumbnailPath);
       }
 
-      // Do not track slotSizeRem here — viewport resize after aspect-ratio transition must not
-      // restart this effect (that was forcing loading-surface-visible after content reveal).
+      // slotSizeRem read via untracked — viewport resize after aspect-ratio transition
+      // must NOT re-run this effect and push back to loading-surface-visible.
       const slot = untracked(() => this.slotSizeRem());
 
-      // TODO: migrate to signal-based when MediaDownloadService
-      // is refactored off Observable
-      const deliveryStreamSubscription = this.mediaDownloadService
+      const sub = this.mediaDownloadService
         .getState(id, slot)
-        .subscribe((delivery) => {
-          this.handleDelivery(delivery);
-        });
+        .subscribe((delivery) => this.handleDelivery(delivery));
 
-      onCleanup(() => deliveryStreamSubscription.unsubscribe());
+      onCleanup(() => sub.unsubscribe());
     });
 
     this.destroyRef.onDestroy(() => {
       this.resizeObserver?.disconnect();
       this.resizeObserver = null;
+      this.cancelRatioProbe();
     });
   }
 
@@ -144,16 +129,21 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.setupResizeObserver();
   }
 
-  onViewportGeometryTransitionEnd(event: TransitionEvent): void {
-    if (event.propertyName !== 'aspect-ratio' || this.slotGeometry() !== 'intrinsic') {
-      return;
-    }
-
-    if (this.state() === 'ratio-known-contain') {
+  /**
+   * Listens for the viewport's `aspect-ratio` transition end (ratio-known-contain path).
+   * Spec: transient-state exits are controlled by transitionend.
+   * @see docs/specs/component/media/media-display.md#transition-guard-contract
+   */
+  onViewportTransitionEnd(event: TransitionEvent): void {
+    if (event.propertyName === 'aspect-ratio' && this.state() === 'ratio-known-contain') {
       this.advanceAfterRatioSettled();
     }
   }
 
+  /**
+   * Listens for opacity transitions on staged-content and content layers.
+   * @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
+   */
   onLayerTransitionEnd(event: TransitionEvent, layer: 'staged-content' | 'content'): void {
     if (event.propertyName !== 'opacity') {
       return;
@@ -169,88 +159,37 @@ export class MediaDisplayComponent implements AfterViewInit {
     }
   }
 
+  /**
+   * Called when the sharp content image loads in the DOM.
+   * If no metadata ratio is known yet, derive it from natural dimensions and trigger
+   * the ratio-known-contain transition before advancing to content-fade-in.
+   */
   onContentImageLoad(event: Event): void {
-    if (this.slotGeometry() !== 'intrinsic' || this.metadataAspectRatio() != null) {
+    if (this.metadataAspectRatio() != null) {
       return;
     }
 
     const img = event.target;
-    if (!(img instanceof HTMLImageElement)) {
+    if (!(img instanceof HTMLImageElement) || img.naturalWidth <= 0 || img.naturalHeight <= 0) {
       return;
     }
 
-    const { naturalWidth, naturalHeight } = img;
-    if (naturalWidth <= 0 || naturalHeight <= 0) {
-      return;
-    }
+    const ratio = img.naturalWidth / img.naturalHeight;
 
-    const current = this.state();
-    if (
-      current !== 'loading-surface-visible' &&
-      current !== 'ratio-known-contain' &&
-      current !== 'media-ready'
-    ) {
-      return;
-    }
-
-    this.beginIntrinsicRatioTransition(naturalWidth / naturalHeight);
-  }
-
-  private setupResizeObserver(): void {
-    if (typeof ResizeObserver === 'undefined') {
-      return;
-    }
-
-    const viewportElement = this.hostEl.nativeElement.querySelector(
-      '.media-display__viewport',
-    ) as HTMLElement | null;
-    if (!viewportElement) {
-      return;
-    }
-
-    const ro = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) {
+    if (this.slotGeometry() === 'intrinsic') {
+      const current = this.state();
+      if (current === 'loading-surface-visible') {
+        this.triggerRatioTransition(ratio);
         return;
       }
-
-      const shortEdgePx = Math.min(entry.contentRect.width, entry.contentRect.height);
-      const rootFontSize = this.readRootFontSize();
-      const next = shortEdgePx > 0 ? shortEdgePx / rootFontSize : 1;
-      if (Math.abs(this.slotSizeRem() - next) < SLOT_SIZE_REM_EPSILON) {
-        return;
-      }
-      this.slotSizeRem.set(next);
-    });
-
-    ro.observe(viewportElement);
-    this.resizeObserver = ro;
-  }
-
-  private readRootFontSize(): number {
-    if (typeof document === 'undefined') {
-      return DEFAULT_ROOT_FONT_SIZE_PX;
     }
 
-    const raw = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    if (!Number.isFinite(raw) || raw <= 0) {
-      return DEFAULT_ROOT_FONT_SIZE_PX;
-    }
-    return raw;
+    this.applyAspectRatio(ratio);
   }
 
   private handleDelivery(delivery: MediaDisplayDeliveryState): void {
-    const deliveryRatio =
-      delivery.metadataAspectRatio != null && delivery.metadataAspectRatio > 0
-        ? delivery.metadataAspectRatio
-        : null;
-    const deferRatioForShrinkTransition =
-      this.slotGeometry() === 'intrinsic' &&
-      deliveryRatio != null &&
-      this.state() === 'loading-surface-visible';
-
-    if (!deferRatioForShrinkTransition && deliveryRatio != null) {
-      this.applyAspectRatio(deliveryRatio);
+    if (delivery.metadataAspectRatio != null && delivery.metadataAspectRatio > 0) {
+      this.applyAspectRatio(delivery.metadataAspectRatio);
     }
 
     if (delivery.warmPreviewUrl) {
@@ -268,33 +207,41 @@ export class MediaDisplayComponent implements AfterViewInit {
     switch (delivery.state) {
       case 'loading':
       case 'warm-preview': {
-        if (!this.shouldAcceptLoadingDelivery()) {
+        // Only accept loading signal when not already past it — prevents resize-driven regression.
+        const current = this.state();
+        if (
+          current !== 'loading-surface-visible' &&
+          current !== 'idle'
+        ) {
           return;
         }
+
         this.goTo('loading-surface-visible');
         return;
       }
-      case 'loaded': {
-        const currentState = this.state();
-        const intrinsic = this.slotGeometry() === 'intrinsic';
 
-        if (intrinsic && currentState === 'loading-surface-visible') {
-          if (deliveryRatio != null) {
-            this.beginIntrinsicRatioTransition(deliveryRatio);
+      case 'loaded': {
+        const current = this.state();
+
+        if (current === 'ratio-known-contain' || current === 'content-fade-in' || current === 'content-visible') {
+          return;
+        }
+
+        if (this.slotGeometry() === 'intrinsic' && current === 'loading-surface-visible') {
+          // Ratio not yet known from service metadata — probe from the URL via off-screen Image.
+          if (this.metadataAspectRatio() == null && delivery.resolvedUrl) {
+            this.probeRatioFromUrl(delivery.resolvedUrl);
             return;
           }
 
-          if (this.resolvedUrl()) {
-            this.probeIntrinsicAspectRatioFromUrl(this.resolvedUrl());
+          // Ratio already set (from hinted input or previous probe) — start geometry transition.
+          if (this.metadataAspectRatio() != null) {
+            this.triggerRatioTransition(this.metadataAspectRatio()!);
+            return;
           }
-          return;
         }
 
-        if (currentState === 'ratio-known-contain') {
-          return;
-        }
-
-        if (currentState === 'loading-surface-visible') {
+        if (current === 'loading-surface-visible') {
           this.goTo('media-ready');
         }
 
@@ -304,140 +251,104 @@ export class MediaDisplayComponent implements AfterViewInit {
 
         return;
       }
+
       case 'icon-only': {
         if (delivery.metadataAspectRatio == null && this.aspectRatio() == null) {
           this.applyAspectRatio(1);
         }
+
         this.goTo('icon-only');
         return;
       }
+
       case 'error': {
         this.goTo('error');
         return;
       }
+
       case 'no-media': {
         this.goTo('no-media');
         return;
       }
-      default: {
+
+      default:
         return;
-      }
     }
   }
 
-  private hasKnownAspectRatio(): boolean {
-    const metadataRatio = this.metadataAspectRatio();
-    if (metadataRatio != null && metadataRatio > 0) {
-      return true;
-    }
-
-    const hintedRatio = this.aspectRatio();
-    return hintedRatio != null && hintedRatio > 0;
-  }
-
-  private shouldAcceptLoadingDelivery(): boolean {
-    const current = this.state();
-    if (
-      current === 'content-visible' ||
-      current === 'content-fade-in' ||
-      current === 'media-ready'
-    ) {
-      return false;
-    }
-
-    if (current === 'ratio-known-contain' && this.resolvedUrl().length > 0) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private probeIntrinsicAspectRatioFromUrl(url: string): void {
-    if (this.slotGeometry() !== 'intrinsic' || !url.trim()) {
-      return;
-    }
+  /**
+   * Probe natural image dimensions off-screen to derive aspect-ratio when service does not
+   * supply metadataAspectRatio.  Triggers ratio-known-contain FSM path on success.
+   */
+  private probeRatioFromUrl(url: string): void {
+    this.cancelRatioProbe();
 
     const img = new Image();
-    img.onload = () => {
-      const width = img.naturalWidth;
-      const height = img.naturalHeight;
-      if (width > 0 && height > 0) {
-        this.beginIntrinsicRatioTransition(width / height);
-        return;
-      }
+    this.ratioProbeImg = img;
 
-      this.revealWithoutIntrinsicRatioTransition();
+    img.onload = () => {
+      this.ratioProbeImg = null;
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+        this.triggerRatioTransition(img.naturalWidth / img.naturalHeight);
+      } else {
+        this.fallThroughToReveal();
+      }
     };
-    img.onerror = () => this.revealWithoutIntrinsicRatioTransition();
+
+    img.onerror = () => {
+      this.ratioProbeImg = null;
+      this.fallThroughToReveal();
+    };
+
     img.src = url;
   }
 
-  private revealWithoutIntrinsicRatioTransition(): void {
-    const current = this.state();
-    if (current === 'ratio-known-contain') {
-      this.advanceAfterRatioSettled();
-      return;
-    }
-
-    if (current === 'loading-surface-visible' || current === 'media-ready') {
-      this.goTo('content-fade-in');
+  private cancelRatioProbe(): void {
+    if (this.ratioProbeImg) {
+      this.ratioProbeImg.onload = null;
+      this.ratioProbeImg.onerror = null;
+      this.ratioProbeImg = null;
     }
   }
 
-  private beginIntrinsicRatioTransition(ratio: number): void {
-    if (this.slotGeometry() !== 'intrinsic') {
-      this.applyAspectRatio(ratio);
-      return;
-    }
-
-    const current = this.state();
-    if (current !== 'loading-surface-visible' && current !== 'ratio-known-contain') {
-      return;
-    }
-
-    if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(() => {
-        if (this.state() !== 'loading-surface-visible') {
-          return;
-        }
-
-        this.goTo('ratio-known-contain');
-        this.applyAspectRatio(ratio);
-        this.scheduleRatioSettleCheck();
-      });
+  /**
+   * Start ratio-known-contain → sets variable → CSS aspect-ratio transition fires →
+   * onViewportTransitionEnd → advanceAfterRatioSettled → media-ready → content-fade-in.
+   * Spec: loading-surface-visible → ratio-known-contain: aspect-ratio with --transition-geometry.
+   */
+  private triggerRatioTransition(ratio: number): void {
+    if (this.state() !== 'loading-surface-visible') {
       return;
     }
 
     this.goTo('ratio-known-contain');
     this.applyAspectRatio(ratio);
-    this.scheduleRatioSettleCheck();
-  }
 
-  private scheduleRatioSettleCheck(): void {
+    // If no geometry transition runs, transitionend never fires — advance after layout.
     if (this.prefersReducedMotion()) {
       this.advanceAfterRatioSettled();
       return;
     }
 
-    if (typeof requestAnimationFrame !== 'function') {
-      return;
-    }
-
-    requestAnimationFrame(() => {
+    if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(() => {
-        const viewport = this.hostEl.nativeElement.querySelector(
-          '.media-display__viewport',
-        ) as HTMLElement | null;
-        if (!viewport || this.state() !== 'ratio-known-contain') {
-          return;
-        }
+        requestAnimationFrame(() => {
+          if (this.state() !== 'ratio-known-contain') {
+            return;
+          }
 
-        const duration = this.readActiveTransitionDurationMs(viewport, 'aspect-ratio');
-        if (duration <= 0) {
+          const viewport = this.hostEl.nativeElement.querySelector(
+            '.media-display__viewport',
+          ) as HTMLElement | null;
+
+          if (!viewport || this.readActiveTransitionDurationMs(viewport, 'aspect-ratio') > 0) {
+            return;
+          }
+
           this.advanceAfterRatioSettled();
-        }
+        });
       });
-    });
+    }
   }
 
   private readActiveTransitionDurationMs(element: HTMLElement, property: string): number {
@@ -466,20 +377,68 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
+    // Spec transition map: ratio-known-contain → media-ready only (not content-fade-in).
+    // @see media-display-state.ts MEDIA_DISPLAY_TRANSITIONS
+    this.goTo('media-ready');
+
     if (this.resolvedUrl()) {
       this.goTo('content-fade-in');
+    }
+  }
+
+  private fallThroughToReveal(): void {
+    const current = this.state();
+
+    if (current === 'loading-surface-visible') {
+      this.goTo('media-ready');
+    }
+
+    if (this.state() === 'media-ready') {
+      this.goTo('content-fade-in');
+    }
+  }
+
+  private setupResizeObserver(): void {
+    if (typeof ResizeObserver === 'undefined') {
       return;
     }
 
-    this.goTo('media-ready');
-  }
+    const viewportElement = this.hostEl.nativeElement.querySelector(
+      '.media-display__viewport',
+    ) as HTMLElement | null;
 
-  private prefersReducedMotion(): boolean {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-      return false;
+    if (!viewportElement) {
+      return;
     }
 
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+
+      const shortEdgePx = Math.min(entry.contentRect.width, entry.contentRect.height);
+      const rootFontSize = this.readRootFontSize();
+      const next = shortEdgePx > 0 ? shortEdgePx / rootFontSize : 1;
+
+      if (Math.abs(this.slotSizeRem() - next) < SLOT_SIZE_REM_EPSILON) {
+        return;
+      }
+
+      this.slotSizeRem.set(next);
+    });
+
+    ro.observe(viewportElement);
+    this.resizeObserver = ro;
+  }
+
+  private readRootFontSize(): number {
+    if (typeof document === 'undefined') {
+      return DEFAULT_ROOT_FONT_SIZE_PX;
+    }
+
+    const raw = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_ROOT_FONT_SIZE_PX;
   }
 
   private applyAspectRatio(ratio: number): void {
@@ -487,20 +446,24 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.aspectRatioChange.emit(ratio);
   }
 
-  private resetAspectRatio(): void {
+  private resetState(): void {
     this.metadataAspectRatio.set(null);
-    const hintedRatio = this.aspectRatio();
-    if (hintedRatio != null && hintedRatio > 0) {
-      this.applyAspectRatio(hintedRatio);
-      return;
-    }
+    this.cancelRatioProbe();
     this.aspectRatioChange.emit(1);
+  }
+
+  private prefersReducedMotion(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
   }
 
   private goTo(next: MediaDisplayState): void {
     const current = untracked(() => this.state());
-
     const target = transitionMediaDisplayState(current, next);
+
     if (target !== current) {
       this.state.set(target);
     }

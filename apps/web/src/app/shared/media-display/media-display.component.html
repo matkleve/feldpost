@@ -1,25 +1,25 @@
 <div
   class="media-display__viewport"
   [attr.data-state]="state()"
-  (transitionend)="onViewportGeometryTransitionEnd($event)"
+  (transitionend)="onViewportTransitionEnd($event)"
 >
-  <!-- Stable state: loading-surface-visible -->
+  <!-- Stable state: loading-surface-visible, ratio-known-contain -->
   <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div class="media-display__layer media-display__layer--loading-surface" aria-hidden="true"></div>
 
-  <!-- Stable state: media-ready (staged content) -->
+  <!-- Stable state: media-ready -->
   <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div
     class="media-display__layer media-display__layer--staged-content"
     aria-hidden="true"
     (transitionend)="onLayerTransitionEnd($event, 'staged-content')"
   >
-    @if (stagedContentUrl() && showStagedPreview()) {
+    @if (stagedContentUrl()) {
       <img class="media-display__image" [src]="stagedContentUrl()" alt="" aria-hidden="true" />
     }
   </div>
 
-  <!-- Stable state: content-fade-in/content-visible -->
+  <!-- Stable state: content-fade-in, content-visible -->
   <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div
     class="media-display__layer media-display__layer--content"
@@ -28,7 +28,6 @@
     @if (resolvedUrl()) {
       <img
         class="media-display__image"
-        [class.media-display__image--revealed]="showSharpContent()"
         [src]="resolvedUrl()"
         [alt]="alt()"
         (load)="onContentImageLoad($event)"

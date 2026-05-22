@@ -5,8 +5,8 @@
   display: contents;
 }
 
-// Fills a parent-owned fixed slot (row mode); viewport does not resize when metadata ratio arrives.
-// @see docs/specs/component/item-grid/item-grid.md#row-mode
+// fill mode: host is a real block so overlays in media-item__slot can anchor to it.
+// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
 :host.media-display--fill-slot {
   display: block;
   inline-size: 100%;
@@ -15,7 +15,7 @@
   min-block-size: 0;
 }
 
-// Viewport aspect-ratio drives stack height; inherits --media-aspect-ratio from media-item__slot.
+// intrinsic mode: host is a real block, height driven by viewport aspect-ratio.
 // @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
 :host.media-display--intrinsic {
   display: block;
@@ -25,85 +25,48 @@
   min-block-size: 0;
 }
 
+// Viewport is the single geometry owner for all layers.
+// @see docs/specs/component/media/media-display.md#state-rendering-matrix
 .media-display__viewport {
   position: relative;
-  display: block;
-  inline-size: min(100%, var(--media-display-max-width, 100%));
-  max-inline-size: var(--media-display-max-width, 100%);
-  max-block-size: var(--media-display-max-height, 100%);
-  aspect-ratio: var(--media-aspect-ratio, 1);
-  transition: aspect-ratio var(--transition-geometry);
   overflow: hidden;
+  inline-size: 100%;
+  block-size: 100%;
 }
 
-// Viewport follows slot --media-aspect-ratio (must not re-default to 1/1 on :host).
-// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+// intrinsic: viewport takes its height from the aspect-ratio variable.
+// Transition only on aspect-ratio — spec choreography table: loading-surface-visible → ratio-known-contain.
+// @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
 :host.media-display--intrinsic .media-display__viewport {
-  inline-size: 100%;
   block-size: auto;
   aspect-ratio: var(--media-aspect-ratio, 1);
   transition: aspect-ratio var(--transition-geometry);
 }
 
-// Viewport matches the full media-item slot; letterboxing stays on the image layer.
-// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
-:host.media-display--fill-slot .media-display__viewport {
-  inline-size: 100%;
-  block-size: 100%;
-  max-inline-size: 100%;
-  max-block-size: 100%;
-  aspect-ratio: unset;
-  transition: none;
-}
-
+// All layers: absolute, fill viewport, hidden by default (opacity-only, per spec).
+// @see docs/specs/component/media/media-display.md#state-rendering-matrix
 .media-display__layer {
   position: absolute;
   inset: 0;
   opacity: 0;
   pointer-events: none;
+  // default fade-out timing
   transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
 }
 
+// Image fills layer box; object-fit keeps proportions.
+// @see docs/specs/component/media/media-display.md#what-it-looks-like
 .media-display__image {
   display: block;
-  max-inline-size: 100%;
-  max-block-size: 100%;
+  inline-size: 100%;
+  block-size: 100%;
   object-fit: contain;
   object-position: center center;
 }
 
-// Fixed slot (row): image fills the absolute layer box.
-// @see docs/specs/component/item-grid/item-grid.md#row-mode
-:host.media-display--fill-slot .media-display__image {
-  inline-size: 100%;
-  block-size: 100%;
-}
-
-// Intrinsic grid: image keeps natural proportions inside the ratio-sized viewport.
-// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
-:host.media-display--intrinsic .media-display__layer--content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:host.media-display--intrinsic .media-display__layer--staged-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:host.media-display--intrinsic .media-display__image {
-  inline-size: auto;
-  block-size: auto;
-  max-inline-size: 100%;
-  max-block-size: 100%;
-  visibility: hidden;
-}
-
-:host.media-display--intrinsic .media-display__image--revealed {
-  visibility: visible;
-}
+// -------------------------------------------------------------------
+// Layer-specific base styles (not state-driven)
+// -------------------------------------------------------------------
 
 .media-display__layer--loading-surface {
   background: var(--muted);
@@ -147,28 +110,20 @@
   text-align: center;
 }
 
-/* Stable state: loading-surface-visible */
-/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
-/* State selectors target the viewport (real box), not :host — display:contents on host breaks host-anchored descendant rules. */
-// Loading uses a static muted surface only (pulse animation disabled).
+// -------------------------------------------------------------------
+// State-driven opacity — exactly per spec choreography table.
 // @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
+// -------------------------------------------------------------------
+
+// loading-surface-visible: loading layer visible, static (no pulse per product decision).
+// ratio-known-contain: same loading layer stays visible while viewport aspect-ratio transitions.
 .media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
 .media-display__viewport[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
   opacity: 1;
-  pointer-events: none;
-  animation: none;
 }
 
-// Hide loading shell once sharp content is revealed.
-// @see docs/specs/component/media/media-display.md#state-rendering-matrix
-.media-display__viewport[data-state='content-fade-in'] .media-display__layer--loading-surface,
-.media-display__viewport[data-state='content-visible'] .media-display__layer--loading-surface,
-.media-display__viewport[data-state='media-ready'] .media-display__layer--loading-surface {
-  opacity: 0;
-}
-
-/* Stable state: media-ready (staged content) */
-/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
+// media-ready: staged layer 0→1.
+// content-fade-in, content-visible: staged layer stays 1 until content-visible clears it.
 .media-display__viewport[data-state='media-ready'] .media-display__layer--staged-content,
 .media-display__viewport[data-state='content-fade-in'] .media-display__layer--staged-content,
 .media-display__viewport[data-state='content-visible'] .media-display__layer--staged-content {
@@ -176,8 +131,7 @@
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
 
-/* Stable state: content-fade-in/content-visible */
-/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
+// content-fade-in, content-visible: content layer 0→1, 60ms delay.
 .media-display__viewport[data-state='content-fade-in'] .media-display__layer--content,
 .media-display__viewport[data-state='content-visible'] .media-display__layer--content {
   opacity: 1;
@@ -185,39 +139,26 @@
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
 }
 
+// content-visible: staged layer 1→0.
 .media-display__viewport[data-state='content-visible'] .media-display__layer--staged-content {
   opacity: 0;
   transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
 }
 
-/* Stable state: icon-only */
-/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
+// icon-only: icon layer 0→1, 60ms delay.
 .media-display__viewport[data-state='icon-only'] .media-display__layer--icon-only {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
 }
 
-/* Stable state: error */
-/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
+// error: error layer 0→1, 60ms delay.
 .media-display__viewport[data-state='error'] .media-display__layer--error {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
 }
 
-/* Stable state: no-media */
-/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
+// no-media: no-media layer 0→1, 60ms delay.
 .media-display__viewport[data-state='no-media'] .media-display__layer--no-media {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
-}
-
-@keyframes media-display-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.4;
-  }
 }
