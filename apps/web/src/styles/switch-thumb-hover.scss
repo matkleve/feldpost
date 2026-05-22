@@ -36,27 +36,25 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
+    // Track tint — direct switch hover or parent row (switch often has pointer-events: none)
     [hlmSwitch][data-state='unchecked']:hover,
-    .settings-overlay__toggle-row:hover > [hlmSwitch][data-state='unchecked'],
-    .upload-panel__location-mode-row:hover > [hlmSwitch][data-state='unchecked'] {
+    :is(button, label, [role='switch']):hover > [hlmSwitch][data-state='unchecked'] {
       background-color: color-mix(in srgb, var(--input) 90%, var(--foreground));
     }
 
     [hlmSwitch][data-state='checked']:hover,
-    .settings-overlay__toggle-row:hover > [hlmSwitch][data-state='checked'],
-    .upload-panel__location-mode-row:hover > [hlmSwitch][data-state='checked'] {
+    :is(button, label, [role='switch']):hover > [hlmSwitch][data-state='checked'] {
       background-color: color-mix(in srgb, var(--primary) 90%, var(--foreground));
     }
 
+    // Thumb nudge toward the edge being activated
     [hlmSwitch]:hover > [hlmSwitchThumb][data-state='unchecked'],
-    .settings-overlay__toggle-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'],
-    .upload-panel__location-mode-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'] {
+    :is(button, label, [role='switch']):hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'] {
       transform: translateX(var(--switch-thumb-nudge));
     }
 
     [hlmSwitch]:hover > [hlmSwitchThumb][data-state='checked'],
-    .settings-overlay__toggle-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'],
-    .upload-panel__location-mode-row:hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'] {
+    :is(button, label, [role='switch']):hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'] {
       transform: translateX(calc(var(--switch-thumb-travel) - var(--switch-thumb-nudge)));
     }
   }

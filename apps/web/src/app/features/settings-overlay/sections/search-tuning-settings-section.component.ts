@@ -112,10 +112,6 @@ export class SearchTuningSettingsSectionComponent {
     return SEARCH_TUNING_SYSTEM_DEFAULTS.orchestrator.debounceMs;
   }
 
-  defaultInternetSearch(): boolean {
-    return SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.enableInternetSearch;
-  }
-
   defaultFor<K extends keyof SearchTuningDraft>(
     group: K,
     field: keyof SearchTuningDraft[K],
@@ -149,15 +145,6 @@ export class SearchTuningSettingsSectionComponent {
     this.lastError.set(null);
   }
 
-  resetInternetSearchToDefault(): void {
-    this.draft.update((d) => ({
-      ...d,
-      resolver: { ...d.resolver, enableInternetSearch: SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.enableInternetSearch },
-    }));
-    this.saveUiState.set('dirty');
-    this.lastError.set(null);
-  }
-
   resetContextDistanceToDefault(): void {
     this.draft.update((d) => ({
       ...d,
@@ -177,10 +164,6 @@ export class SearchTuningSettingsSectionComponent {
 
   isDebounceAtDefault(): boolean {
     return this.draft().orchestrator.debounceMs === SEARCH_TUNING_SYSTEM_DEFAULTS.orchestrator.debounceMs;
-  }
-
-  isInternetSearchAtDefault(): boolean {
-    return this.draft().resolver.enableInternetSearch === SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.enableInternetSearch;
   }
 
   isContextDistanceAtDefault(): boolean {
@@ -267,15 +250,6 @@ export class SearchTuningSettingsSectionComponent {
     }));
     this.saveUiState.set('dirty');
     this.lastError.set(null);
-  }
-
-  formatContextDistanceDisplay(meters: number): string {
-    const km = meters / 1000;
-    const rounded = km >= 100 ? Math.round(km) : Math.round(km * 10) / 10;
-    return this.t('settings.search_tuning.readout.distance_km', '{km} km').replace(
-      '{km}',
-      String(rounded),
-    );
   }
 
   // ── Weak top score helpers (slider 0–100 = 0–1) ────────────────────────────

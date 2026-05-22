@@ -30290,6 +30290,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.field.context_distance_km', 'Max distance for internet results (km)', 'en', 'org admin search tuning advanced field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Max distance for internet results (km)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.context_distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Max. Distanz fuer Internetergebnisse (km)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.context_distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Distanza massima risultati Internet (km)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.context_distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.help.context_distance_km', 'When an internet result has no country code, it must be within this distance (km) of your search anchor — usually this photo''s GPS, otherwise the map view or project center. It is not based on other media in the org (that would need a heavy query each search). Lower = stricter; higher = allow farther matches.', 'en', 'org admin search tuning field help')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'When an internet result has no country code, it must be within this distance (km) of your search anchor — usually this photo''s GPS, otherwise the map view or project center. It is not based on other media in the org (that would need a heavy query each search). Lower = stricter; higher = allow farther matches.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ohne Laendercode muss ein Internetergebnis innerhalb dieser Distanz (km) zum Suchanker liegen — meist GPS dieses Fotos, sonst Kartenansicht oder Projektzentrum. Nicht basierend auf anderen Medien der Organisation (waere eine schwere Abfrage pro Suche). Niedriger = strenger; hoeher = weiter entfernte Treffer.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Se un risultato Internet non ha codice paese, deve essere entro questa distanza (km) dall''ancora di ricerca — di solito il GPS di questa foto, altrimenti vista mappa o centro progetto. Non si basa su altri media dell''organizzazione (richiederebbe una query pesante per ogni ricerca). Piu basso = piu rigido; piu alto = corrispondenze piu lontane.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'settings.search_tuning.field.weak_top_score', 'Weak top score threshold', 'en', 'org admin search tuning advanced field')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

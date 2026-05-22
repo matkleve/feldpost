@@ -298,7 +298,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
           next: (items) => this.placeSuggestions.set(items),
           error: () => this.placeSuggestions.set([]),
         });
-    }, 400);
+    }, this.searchBarService.orchestratorOptionsFromOrg().debounceMs);
   }
 
   private clearGeocoder(): void {

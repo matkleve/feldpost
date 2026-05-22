@@ -24,71 +24,66 @@
   gap: var(--spacing-2);
 }
 
-// Full-width interactive row for switch-backed booleans (matches settings-overlay toggle rows)
-// @see docs/specs/ui/settings-overlay
+// Full-width toggle row — idle transparent; hover/focus like upload-panel location row
+// @see apps/web/src/app/features/upload/upload-panel.component.scss#__location-mode-row
 .search-tuning-settings__toggle-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  column-gap: var(--spacing-3);
-  min-height: 2.5rem;
+  gap: var(--spacing-3);
   width: 100%;
+  min-width: 0;
+  min-height: 2.5rem;
+  margin: 0;
   padding-block: var(--spacing-2);
   padding-inline: var(--spacing-3);
-  border: 1px solid transparent;
-  border-radius: max(2px, calc(var(--radius-sm) - 2px));
-  background: color-mix(
-    in srgb,
-    var(--settings-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent)) 35%,
-    transparent
-  );
+  border: 0;
+  border-radius: var(--container-radius-control);
+  background: transparent;
   text-align: left;
   color: var(--foreground);
   cursor: pointer;
-  transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
-    box-shadow 120ms ease-out;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--interactive-focus-ring);
+  }
 }
 
-// Native button reset for advanced-mode toggle row
-// @see docs/specs/ui/settings-overlay
+// Native button reset for toggle rows
+// @see apps/web/src/app/features/upload/upload-panel.component.scss#__location-mode-row
 button.search-tuning-settings__toggle-row {
   appearance: none;
   font: inherit;
 }
 
-// Hover surface for toggle rows (matches upload failure alert row)
-// @see docs/specs/ui/settings-overlay
-.search-tuning-settings__toggle-row:hover {
-  background: color-mix(
-    in srgb,
-    var(--settings-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent)) 65%,
-    transparent
-  );
-}
-
-// Focus ring for keyboard use on toggle rows
-// @see docs/specs/ui/settings-overlay
-.search-tuning-settings__toggle-row:focus-visible {
-  box-shadow: var(--interactive-focus-ring);
-  outline: none;
-}
-
 // Label stack inside a toggle row (title + helper)
-// @see docs/specs/ui/settings-overlay
+// @see apps/web/src/app/features/upload/upload-panel.component.scss#__location-mode-copy
 .search-tuning-settings__toggle-label {
-  display: grid;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   gap: var(--spacing-1);
   min-width: 0;
 }
 
-// Toggle row primary line (body emphasis; lighter than section h3 semibold)
+// Toggle row primary line — same title color as settings-overlay toggle rows
 // @see docs/specs/ui/settings-overlay
 .search-tuning-settings__toggle-label strong {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  color: var(--foreground);
 }
 
-// Toggle row helper line
+// Toggle row helper line — muted subtitle (settings overlay scale)
 // @see docs/specs/ui/settings-overlay
 .search-tuning-settings__toggle-label small {
   font-size: var(--font-size-xs);
@@ -115,7 +110,7 @@ button.search-tuning-settings__toggle-row {
 .search-tuning-settings__form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-3);
+  gap: var(--spacing-6);
 }
 
 // Single labeled control block (title, help, slider + number)
@@ -123,7 +118,7 @@ button.search-tuning-settings__toggle-row {
 .search-tuning-settings__field {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: var(--spacing-3);
 }
 
 // Explanatory copy under each field heading
@@ -186,15 +181,6 @@ button.search-tuning-settings__toggle-row {
   padding-inline: var(--spacing-2);
   height: auto;
   line-height: 1.4;
-}
-
-// Toggle row actions: reset button + switch together
-// @see docs/specs/ui/search-bar/search-tuning-settings.md
-.search-tuning-settings__toggle-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  flex-shrink: 0;
 }
 
 // Secondary readout for scaled values (e.g. km)

@@ -11,15 +11,13 @@
 </div>
 
 <div class="search-tuning-settings__toggles">
-  <div
+  <button
+    type="button"
     class="search-tuning-settings__toggle-row"
     role="switch"
-    tabindex="0"
     [attr.aria-checked]="draft().resolver.enableInternetSearch"
     [attr.aria-label]="t('settings.search_tuning.field.internet_search', 'Internet search')"
     (click)="toggleInternetSearch()"
-    (keydown.enter)="toggleInternetSearch(); $event.preventDefault()"
-    (keydown.space)="toggleInternetSearch(); $event.preventDefault()"
   >
     <span class="search-tuning-settings__toggle-label">
       <strong>{{ t('settings.search_tuning.field.internet_search', 'Internet search') }}</strong>
@@ -27,27 +25,15 @@
         t('settings.search_tuning.help.internet_search_short', 'Look up addresses via Nominatim')
       }}</small>
     </span>
-    <span class="search-tuning-settings__toggle-actions">
-      <button
-        hlmBtn
-        variant="ghost"
-        size="sm"
-        type="button"
-        class="search-tuning-settings__reset-btn"
-        [style.visibility]="!isInternetSearchAtDefault() ? null : 'hidden'"
-        [attr.aria-label]="t('settings.search_tuning.action.reset_field', 'Reset to default')"
-        (click)="$event.stopPropagation(); resetInternetSearchToDefault()"
-      >↺ {{ t('settings.search_tuning.action.reset_field_label', 'Reset') }}</button>
-      <span
-        hlmSwitch
-        class="search-tuning-settings__switch"
-        aria-hidden="true"
-        [checked]="draft().resolver.enableInternetSearch"
-      >
-        <span hlmSwitchThumb [checked]="draft().resolver.enableInternetSearch"></span>
-      </span>
+    <span
+      hlmSwitch
+      class="search-tuning-settings__switch"
+      aria-hidden="true"
+      [checked]="draft().resolver.enableInternetSearch"
+    >
+      <span hlmSwitchThumb [checked]="draft().resolver.enableInternetSearch"></span>
     </span>
-  </div>
+  </button>
 
   <button
     type="button"
@@ -312,7 +298,7 @@
         {{
           t(
             'settings.search_tuning.help.context_distance_km',
-            'When an internet result has no country info, it is only shown if it is within this distance from the closest media item in your org. Lower = stay near your project area; higher = allow more distant matches.'
+            'When an internet result has no country code, it must be within this distance (km) of your search anchor — usually this photo\'s GPS, otherwise the map view or project center. It is not based on other media in the org (that would need a heavy query each search). Lower = stricter; higher = allow farther matches.'
           )
         }}
       </p>
@@ -340,9 +326,6 @@
           (input)="onContextDistanceKmInput($any($event.target).value)"
         />
       </div>
-      <p class="search-tuning-settings__readout">
-        {{ formatContextDistanceDisplay(draft().resolver.contextDistanceMaxMeters) }}
-      </p>
     </div>
 
     <!-- Wide-search confidence threshold -->

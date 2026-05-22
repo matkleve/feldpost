@@ -366,7 +366,7 @@ export class AddressSearchComponent implements OnDestroy {
             this.loadingPlaces.set(false);
           },
         });
-    }, 400);
+    }, this.searchBarService.orchestratorOptionsFromOrg().debounceMs);
   }
 
   private moveHighlight(delta: 1 | -1, maxIndex: number): void {
