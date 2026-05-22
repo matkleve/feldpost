@@ -160,6 +160,7 @@ export class AddressSearchComponent implements OnDestroy {
     // Geocoder is bypassed here to avoid shared-singleton adapter conflicts with the map search bar.
     // resolveGeocoderCandidates is called directly in runGeocoderDebounced instead.
     // @see docs/specs/ui/workspace/workspace-pane.md
+    this.searchOrchestrator.configureOptions(this.searchBarService.orchestratorOptionsFromOrg());
     this.searchOrchestrator.configureSources({
       dbAddressResolver: (q, ctx) =>
         this.searchBarService.resolveDbAddressCandidates(this.dbSearchTerm(q), ctx),

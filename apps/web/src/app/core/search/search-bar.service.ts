@@ -34,6 +34,8 @@ import {
 } from './search-geocoder-scoring';
 import { logGeocoderDiagnostics, logSearchEvent } from './search-debug';
 import { fetchDbContentCandidates, fetchGeocoderCandidates } from './search-bar-resolvers';
+import { OrgSearchTuningService } from './org-search-tuning.service';
+import type { SearchOrchestratorOptions } from './search.models';
 import type {
   AddressGroup,
   StoredRecentSearch} from './search-bar-helpers';
@@ -53,9 +55,6 @@ export type { GhostTrieEntry } from './ghost-trie';
 const RECENT_SEARCHES_STORAGE_KEY = 'feldpost-recent-searches';
 const MAX_RECENT_SEARCHES = 20;
 const MAX_DB_ADDRESS_ROWS = 24;
-const MAX_DB_ADDRESS_RESULTS = 3;
-const MAX_DB_CONTENT_RESULTS = 6;
-const MAX_GEOCODER_RESULTS = 3;
 const CONTEXT_CITY_CACHE_TTL_MS = 10 * 60 * 1000;
 const MIN_CITY_HINT_STEM_LENGTH = 3;
 const MAX_CITY_HINT_STEMS = 4;
@@ -84,6 +83,17 @@ interface MediaItemAddressRow {
 export class SearchBarService {
   private readonly supabaseService = inject(SupabaseService);
   private readonly geocodingService = inject(GeocodingService);
+  private readonly orgSearchTuning = inject(OrgSearchTuningService);
+
+  orchestratorOptionsFromOrg(): SearchOrchestratorOptions {
+    const orchestrator = this.orgSearchTuning.orgSearchConfig().orchestrator;
+    return {
+      debounceMs: orchestrator.debounceMs,
+      cacheTtlMs: orchestrator.cacheTtlMs,
+      recentMaxItems: orchestrator.recentMaxItems,
+      geocoderDedupMeters: orchestrator.geocoderDedupMeters,
+    };
+  }
 
   private readonly ghostTrie = new GhostTrie();
   private readonly contextCityCache = new Map<
@@ -381,7 +391,7 @@ export class SearchBarService {
         if (labelDelta !== 0) return labelDelta;
         return (left.ids[0] ?? '').localeCompare(right.ids[0] ?? '');
       })
-      .slice(0, MAX_DB_ADDRESS_RESULTS)
+      .slice(0, this.orgSearchTuning.orgSearchConfig().resolver.maxDbAddressResults)
       .map((entry, index) => ({
         id: entry.ids[0] ?? `db-address-${index}`,
         stableId: entry.ids[0] ?? `db-address-${index}`,
@@ -398,20 +408,27 @@ export class SearchBarService {
     query: string,
     context: SearchQueryContext,
   ): Promise<SearchContentCandidate[]> {
-    return fetchDbContentCandidates(this.supabaseService, query, context, MAX_DB_CONTENT_RESULTS);
+    return fetchDbContentCandidates(
+      this.supabaseService,
+      query,
+      context,
+      this.orgSearchTuning.orgSearchConfig().resolver.maxDbContentResults,
+    );
   }
 
   private async fetchGeocoderCandidates(
     normalizedQuery: string,
     context: SearchQueryContext,
   ): Promise<SearchAddressCandidate[]> {
+    const tuning = this.orgSearchTuning.orgSearchConfig();
     return fetchGeocoderCandidates(
       this.geocodingService,
       normalizedQuery,
       context,
-      MAX_GEOCODER_RESULTS,
+      tuning.resolver.maxGeocoderResults,
       (result, query, index, candidateContext) =>
         this.toGeocoderCandidate(result, query, index, candidateContext),
+      tuning,
     );
   }
 
@@ -570,6 +587,7 @@ export class SearchBarService {
     const qualityScore = clamp01(result.importance || 0);
 
     const inViewport = isCandidateInViewport(primaryLabel, result.lat, result.lng, context);
+    const scoring = this.orgSearchTuning.orgSearchConfig().scoring;
     const noisePenalty = computeShortPrefixNoisePenalty(
       query,
       textScore,
@@ -577,6 +595,7 @@ export class SearchBarService {
       countryBoost,
       geoScore,
       primaryLabel,
+      scoring,
     );
     const weightedScore = computeGeocoderWeightedScore(
       query,
@@ -585,6 +604,7 @@ export class SearchBarService {
       qualityScore,
       countryScore,
       noisePenalty,
+      scoring,
     );
     const score = clamp01(weightedScore);
 

@@ -1,11 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 
-type SettingsSectionId =
+export type SettingsPaneSectionId =
   | 'general'
   | 'appearance'
   | 'notifications'
   | 'map'
-  | 'search'
+  | 'search-tuning'
   | 'data'
   | 'account'
   | 'invite-management';
@@ -27,7 +27,7 @@ interface SettingsSubsectionRequest {
 @Injectable({ providedIn: 'root' })
 export class SettingsPaneService {
   private readonly _open = signal(false);
-  private readonly _selectedSectionId = signal<SettingsSectionId | null>(null);
+  private readonly _selectedSectionId = signal<SettingsPaneSectionId | null>(null);
   private readonly _subsectionRequest = signal<SettingsSubsectionRequest>({
     id: null,
     requestToken: 0,
@@ -47,7 +47,7 @@ export class SettingsPaneService {
     this._open.set(open);
   }
 
-  setSelectedSection(sectionId: SettingsSectionId): void {
+  setSelectedSection(sectionId: SettingsPaneSectionId): void {
     this._selectedSectionId.set(sectionId);
     this.clearSubsectionTarget();
 
@@ -71,7 +71,7 @@ export class SettingsPaneService {
     this._open.set(true);
   }
 
-  openFromRoute(sectionId: SettingsSectionId | null, subsectionId: string | null): void {
+  openFromRoute(sectionId: SettingsPaneSectionId | null, subsectionId: string | null): void {
     this._selectedSectionId.set(sectionId ?? 'general');
 
     const normalizedSubsection = subsectionId && subsectionId.length > 0 ? subsectionId : null;

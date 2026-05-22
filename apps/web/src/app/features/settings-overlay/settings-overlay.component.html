@@ -537,87 +537,9 @@
             </div>
           }
 
-          @case ('search') {
-            @let tocAnchors = anchorsForSection('search');
+          @case ('search-tuning') {
             <div class="settings-overlay__detail-section">
-              <div class="settings-overlay__detail-lead">
-                <h3>{{ t('settings.overlay.search.title', 'Search Tuning') }}</h3>
-                <p>
-                  {{
-                    t(
-                      'settings.overlay.search.description',
-                      'Adjust bias and distance defaults for address and place results.'
-                    )
-                  }}
-                </p>
-              </div>
-              @if (tocAnchors.length > 0) {
-                <nav
-                  class="settings-overlay__detail-toc"
-                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
-                >
-                  @for (a of tocAnchors; track a.subsectionSlug) {
-                    <button
-                      type="button"
-                      class="settings-overlay__detail-toc-item"
-                      (click)="scrollToDetailAnchor('search', a.subsectionSlug)"
-                    >
-                      {{ t(a.labelKey, a.labelFallback) }}
-                    </button>
-                  }
-                </nav>
-              }
-              <div class="settings-overlay__detail-body">
-                <div class="settings-overlay__detail-group">
-                  <div
-                    class="settings-overlay__field-row settings-overlay__anchor-target"
-                    [attr.id]="settingsAnchorDomId('search', 'bias')"
-                  >
-                    <label hlmLabel for="settings-search-bias">{{
-                      t('settings.overlay.search.bias.label', 'Search bias')
-                    }}</label>
-                    <div class="settings-overlay__field-value">
-                      <select
-                        hlmSelect
-                        id="settings-search-bias"
-                        class="settings-overlay__select"
-                        [value]="settingsModel().searchBias"
-                        (change)="setSearchBias($any($event.target).value)"
-                      >
-                        <option value="balanced">
-                          {{ t('settings.overlay.search.bias.option.balanced', 'Balanced') }}
-                        </option>
-                        <option value="address-first">
-                          {{ t('settings.overlay.search.bias.option.addressFirst', 'Address first') }}
-                        </option>
-                        <option value="place-first">
-                          {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div
-                    class="settings-overlay__field-row settings-overlay__field-row--stacked settings-overlay__anchor-target"
-                    [attr.id]="settingsAnchorDomId('search', 'radius')"
-                  >
-                    <label hlmLabel for="settings-search-radius">{{
-                      t('settings.overlay.search.radius.label', 'Default radius (km)')
-                    }}</label>
-                    <input
-                      hlmInput
-                      id="settings-search-radius"
-                      class="settings-overlay__range"
-                      type="range"
-                      min="1"
-                      max="10"
-                      [value]="settingsModel().searchRadiusKm"
-                      (input)="setSearchRadius(+$any($event.target).value)"
-                    />
-                    <strong>{{ settingsModel().searchRadiusKm }} km</strong>
-                  </div>
-                </div>
-              </div>
+              <ss-search-tuning-settings-section />
             </div>
           }
 

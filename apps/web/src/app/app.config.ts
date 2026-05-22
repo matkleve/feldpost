@@ -26,6 +26,7 @@ import {
 } from '@angular/router';
 import { routes } from './app.routes';
 import { AuthService } from './core/auth/auth.service';
+import { OrgSearchTuningService } from './core/search/org-search-tuning.service';
 import { resolveSupabaseRuntimeConfig } from './core/supabase/supabase-runtime-config';
 
 export const appConfig: ApplicationConfig = {
@@ -48,7 +49,11 @@ export const appConfig: ApplicationConfig = {
       useFactory: (injector: Injector) => async () => {
         await resolveSupabaseRuntimeConfig();
         // injector.get — inject() is invalid after await (loses injection context).
-        await injector.get(AuthService).initialize();
+        const auth = injector.get(AuthService);
+        await auth.initialize();
+        if (auth.session()) {
+          await injector.get(OrgSearchTuningService).bootstrapFromSession();
+        }
       },
       deps: [Injector],
       multi: true,

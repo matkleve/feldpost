@@ -30,7 +30,7 @@ type SettingsSectionId =
   | 'appearance'
   | 'notifications'
   | 'map'
-  | 'search'
+  | 'search-tuning'
   | 'data'
   | 'account'
   | 'invite-management';
@@ -177,7 +177,7 @@ export class AppComponent implements OnInit {
       section === 'appearance' ||
       section === 'notifications' ||
       section === 'map' ||
-      section === 'search' ||
+      section === 'search-tuning' ||
       section === 'data' ||
       section === 'account' ||
       section === 'invite-management'

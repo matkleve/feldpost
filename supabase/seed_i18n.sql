@@ -29669,4 +29669,779 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.section.title', 'Search Tuning', 'en', 'org admin search tuning settings section title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search Tuning', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.section.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Such-Tuning', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.section.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ottimizzazione ricerca', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.section.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.section.description', 'Adjust org-wide geocoder filters and ranking for all members.', 'en', 'org admin search tuning section description')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Adjust org-wide geocoder filters and ranking for all members.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.section.description'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisationsweite Geocoder-Filter und Ranking fuer alle Mitglieder anpassen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.section.description'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Regola filtri geocoder e ranking per tutti i membri dell''organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.section.description'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.action.discard_changes', 'Discard changes', 'en', 'org admin search tuning revert A')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Discard changes', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.discard_changes'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aenderungen verwerfen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.discard_changes'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla modifiche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.discard_changes'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.action.reset_to_defaults', 'Reset to system defaults', 'en', 'org admin search tuning revert B trigger')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reset to system defaults', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_to_defaults'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auf Systemstandard zuruecksetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_to_defaults'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristina impostazioni di sistema', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_to_defaults'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.confirm.reset_to_defaults', 'Remove all org search customizations? All members will use system defaults.', 'en', 'org admin search tuning revert B confirm')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove all org search customizations? All members will use system defaults.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.confirm.reset_to_defaults'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Alle Organisations-Suchanpassungen entfernen? Alle Mitglieder nutzen danach die Systemstandards.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.confirm.reset_to_defaults'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovere tutte le personalizzazioni di ricerca dell''organizzazione? Tutti i membri useranno le impostazioni di sistema.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.confirm.reset_to_defaults'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.advanced_mode.warning', 'Advanced parameters affect all org members immediately after save.', 'en', 'org admin search tuning advanced banner')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Advanced parameters affect all org members immediately after save.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.advanced_mode.warning'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erweiterte Parameter wirken nach dem Speichern sofort fuer alle Mitglieder.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.advanced_mode.warning'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'I parametri avanzati si applicano a tutti i membri subito dopo il salvataggio.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.advanced_mode.warning'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.saved.success', 'Search tuning saved.', 'en', 'org admin search tuning save success')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search tuning saved.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.saved.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Such-Tuning gespeichert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.saved.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ottimizzazione ricerca salvata.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.saved.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.saved.error', 'Could not save search tuning.', 'en', 'org admin search tuning save error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not save search tuning.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.saved.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Such-Tuning konnte nicht gespeichert werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.saved.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile salvare l''ottimizzazione ricerca.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.saved.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.mode.advanced', 'Advanced mode', 'en', 'org admin search tuning mode toggle')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Advanced mode', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.mode.advanced'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erweiterter Modus', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.mode.advanced'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modalita avanzata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.mode.advanced'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.action.save', 'Save', 'en', 'org admin search tuning save button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.save'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.save'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.save'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.action.reset_confirm', 'Reset', 'en', 'org admin search tuning reset confirm button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reset', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zuruecksetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristina', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.action.reset_cancel', 'Cancel', 'en', 'org admin search tuning reset cancel button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abbrechen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.field.debounce_ms', 'Debounce (ms)', 'en', 'org admin search tuning field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Debounce (ms)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.debounce_ms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Debounce (ms)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.debounce_ms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Debounce (ms)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.debounce_ms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.field.max_geocoder_results', 'Max geocoder results', 'en', 'org admin search tuning field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Max geocoder results', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.max_geocoder_results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Max. Geocoder-Ergebnisse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.max_geocoder_results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risultati geocoder massimi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.max_geocoder_results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.field.specific_street_min', 'Specific street min length', 'en', 'org admin search tuning field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Specific street min length', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.specific_street_min'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mindestlaenge fuer konkrete Strasse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.specific_street_min'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Lunghezza minima via specifica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.specific_street_min'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.field.min_query_length', 'Min query length', 'en', 'org admin search tuning advanced field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Min query length', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.min_query_length'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Min. Abfragelaenge', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.min_query_length'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Lunghezza minima query', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.min_query_length'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.field.context_distance_m', 'Context distance max (m)', 'en', 'org admin search tuning advanced field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Context distance max (m)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.context_distance_m'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Max. Kontextdistanz (m)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.context_distance_m'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Distanza contesto max (m)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.context_distance_m'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.field.weak_top_score', 'Weak top score threshold', 'en', 'org admin search tuning advanced field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Weak top score threshold', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.weak_top_score'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Schwellwert schwache Top-Bewertung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.weak_top_score'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Soglia punteggio top debole', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.field.weak_top_score'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.help.debounce_ms', 'How long to wait after typing before running a search. Higher values reduce API calls but feel slower.', 'en', 'org admin search tuning field help')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'How long to wait after typing before running a search. Higher values reduce API calls but feel slower.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.debounce_ms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wartezeit nach der Eingabe bis zur Suche. Hoehere Werte sparen API-Aufrufe wirken aber traeger.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.debounce_ms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Attesa dopo la digitazione prima della ricerca. Valori alti riducono le chiamate API ma rallentano la risposta.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.debounce_ms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.help.max_geocoder_results', 'Maximum Internet address suggestions shown per search. Lower keeps the list focused; higher shows more alternatives.', 'en', 'org admin search tuning field help')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Maximum Internet address suggestions shown per search. Lower keeps the list focused; higher shows more alternatives.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Maximale Internet-Adressvorschlaege pro Suche. Niedriger haelt die Liste fokussiert; hoeher zeigt mehr Alternativen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Numero massimo di suggerimenti Internet per ricerca. Piu basso = lista piu mirata; piu alto = piu alternative.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.help.specific_street_min', 'Single-word queries at least this long are treated as a deliberate street search (e.g. Denisgasse), not a vague map-area prefix.', 'en', 'org admin search tuning field help')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Single-word queries at least this long are treated as a deliberate street search (e.g. Denisgasse), not a vague map-area prefix.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.specific_street_min'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einwort-Suchen ab dieser Laenge gelten als gezielte Strassensuche (z. B. Denisgasse), nicht als vager Kartenbereich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.specific_street_min'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Query a parola singola di almeno questa lunghezza sono trattate come ricerca strada mirata (es. Denisgasse), non come prefisso generico sulla mappa.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.specific_street_min'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.help.min_query_length', 'Shortest query length before geocoding runs. Increase to avoid noisy one- and two-letter lookups.', 'en', 'org admin search tuning field help')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Shortest query length before geocoding runs. Increase to avoid noisy one- and two-letter lookups.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.min_query_length'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mindestlaenge der Anfrage vor dem Geocoding. Erhoehen vermeidet laute Ein- und Zweibuchstaben-Suchen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.min_query_length'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Lunghezza minima della query prima del geocoding. Aumentarla evita ricerche rumorose con una o due lettere.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.min_query_length'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.help.context_distance_m', 'How far from the map or project center an Internet result may still appear when the country code is missing. Larger values include more distant matches.', 'en', 'org admin search tuning field help')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'How far from the map or project center an Internet result may still appear when the country code is missing. Larger values include more distant matches.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wie weit vom Karten- oder Projektzentrum ein Internetergebnis ohne Laendercode noch erscheinen darf. Groessere Werte zeigen entferntere Treffer.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Distanza massima dal centro mappa o progetto per risultati Internet senza codice paese. Valori maggiori includono corrispondenze piu lontane.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.help.weak_top_score', 'When the best short-prefix match scores below this value search retries without map bounds. Lower triggers retry more often.', 'en', 'org admin search tuning field help')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'When the best short-prefix match scores below this value search retries without map bounds. Lower triggers retry more often.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Liegt die beste Kurzprefix-Bewertung darunter wird ohne Kartenrahmen erneut gesucht. Niedriger loest oefter einen Retry aus.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Se il miglior punteggio con prefisso corto e sotto questa soglia la ricerca ripete senza limiti mappa. Piu basso = piu retry.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.readout.distance_km', '{km} km', 'en', 'org admin search tuning distance readout')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{km} km', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.readout.distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{km} km', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.readout.distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{km} km', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.readout.distance_km'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

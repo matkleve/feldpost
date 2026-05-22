@@ -42,7 +42,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | QR Invite Preferences | ui/settings-overlay/qr-invite-flow.md | default target role, auto-generate-on-open behavior, invite expiration window, and enabled share channels. |
 | QR Invite Preferences | ui/settings-overlay/settings-overlay.md | default role, auto-generation behavior, expiration policy, and allowed share channels for QR invites. |
 | Roles & Permissions | ui/settings-overlay/settings-overlay.md | role-based capability visibility and access constraints. |
-| Search Tuning | ui/search-bar/search-tuning-settings.md | address and place search filters, weights, penalties, and retry thresholds. |
+| Search Tuning | ui/search-bar/search-tuning-settings.md | org-level geocoder/search filters, weights, penalties, orchestrator timing, provider limits. |
 | Search Tuning | ui/settings-overlay/settings-overlay.md | address/place search filters, ranking weights, penalties, and retry behavior. |
 | Selection Bulk Actions | ui/workspace/workspace-actions-bar.md | default delete confirmation behavior, whether address-change requires non-empty validation, and which project targets are shown first (recent vs alphabetical). |
 | Session | ui/settings-overlay/account-page.md | logout confirmation and scope behavior. |

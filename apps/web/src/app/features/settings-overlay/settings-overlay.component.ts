@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
+import type { SettingsPaneSectionId } from '../../core/settings-pane/settings-pane.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
@@ -29,8 +30,15 @@ import { HLM_LABEL_IMPORTS } from '../../shared/ui/label';
 import { HLM_SELECT_IMPORTS } from '../../shared/ui/select';
 import { HLM_SWITCH_IMPORTS } from '../../shared/ui/switch';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
+import { SearchTuningSettingsSectionComponent } from './sections/search-tuning-settings-section.component';
 import { AccountComponent } from '../../shared/account/account.component';
-import { buildSettingsSectionList } from './settings-sections.const';
+import { OrgSearchTuningService } from '../../core/search/org-search-tuning.service';
+import {
+  buildSettingsSectionList,
+  buildSettingsSectionRegistry,
+  filterSettingsSectionsForViewer,
+  isKnownSettingsSectionId,
+} from './settings-sections.const';
 import {
   SETTINGS_SECTION_ANCHORS,
   settingsDetailAnchorDomId,
@@ -72,8 +80,6 @@ interface SettingsModel {
   mapAutoLocate: boolean;
   mapGridOverlay: boolean;
   markerMotion: MarkerMotionPreference;
-  searchBias: SearchBias;
-  searchRadiusKm: number;
   cacheRetentionDays: number;
   telemetryEnabled: boolean;
 }
@@ -87,6 +93,7 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
     ...BrnToggleGroupImports,
     ...HLM_TOGGLE_GROUP_IMPORTS,
     InviteManagementSectionComponent,
+    SearchTuningSettingsSectionComponent,
     AccountComponent,
     ...HLM_INPUT_IMPORTS,
     ...HLM_BUTTON_IMPORTS,
@@ -104,6 +111,7 @@ export class SettingsOverlayComponent {
 
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly orgSearchTuning = inject(OrgSearchTuningService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
   private readonly injector = inject(Injector);
   private highlightedSubsectionToken = 0;
@@ -118,8 +126,14 @@ export class SettingsOverlayComponent {
   readonly openChange = output<boolean>();
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
+  private readonly sectionRegistry = buildSettingsSectionRegistry();
+
+  readonly visibleSectionRegistry = computed(() =>
+    filterSettingsSectionsForViewer(this.sectionRegistry, this.orgSearchTuning.isOrgAdmin()),
+  );
+
   readonly sectionList = computed<ReadonlyArray<SettingsSection>>(() =>
-    buildSettingsSectionList(this.t),
+    buildSettingsSectionList(this.t, this.orgSearchTuning.isOrgAdmin()),
   );
 
   /** Anchors for the detail-column TOC; keyed separately from rail `SettingsSection` list. */
@@ -164,8 +178,6 @@ export class SettingsOverlayComponent {
     mapAutoLocate: false,
     mapGridOverlay: false,
     markerMotion: this.readMarkerMotionPreference(),
-    searchBias: 'balanced',
-    searchRadiusKm: 2,
     cacheRetentionDays: 30,
     telemetryEnabled: false,
   });
@@ -261,7 +273,7 @@ export class SettingsOverlayComponent {
   readonly settingsAnchorDomId = settingsDetailAnchorDomId;
 
   onOverlayAttach(): void {
-    // No-op: section content renders immediately; async loading is section-local.
+    void this.orgSearchTuning.bootstrapFromSession();
   }
 
   onEscape(event: KeyboardEvent): void {
@@ -276,19 +288,11 @@ export class SettingsOverlayComponent {
   }
 
   selectSection(sectionId: string): void {
-    this.selectedSectionId.set(sectionId);
-    if (
-      sectionId === 'general' ||
-      sectionId === 'appearance' ||
-      sectionId === 'notifications' ||
-      sectionId === 'map' ||
-      sectionId === 'search' ||
-      sectionId === 'data' ||
-      sectionId === 'account' ||
-      sectionId === 'invite-management'
-    ) {
-      this.settingsPaneService.setSelectedSection(sectionId);
+    if (!isKnownSettingsSectionId(sectionId, this.visibleSectionRegistry())) {
+      return;
     }
+    this.selectedSectionId.set(sectionId);
+    this.settingsPaneService.setSelectedSection(sectionId as SettingsPaneSectionId);
   }
 
   updatePosition(): void {
@@ -351,10 +355,6 @@ export class SettingsOverlayComponent {
     }
   }
 
-  setSearchBias(searchBias: SearchBias): void {
-    this.settingsModel.update((model) => ({ ...model, searchBias }));
-  }
-
   setMarkerMotion(markerMotion: MarkerMotionPreference): void {
     this.settingsModel.update((model) => ({ ...model, markerMotion }));
     if (typeof window === 'undefined') return;
@@ -365,10 +365,6 @@ export class SettingsOverlayComponent {
         detail: { markerMotion },
       }),
     );
-  }
-
-  setSearchRadius(radiusKm: number): void {
-    this.settingsModel.update((model) => ({ ...model, searchRadiusKm: radiusKm }));
   }
 
   setCacheRetentionDays(cacheRetentionDays: number): void {

@@ -1,0 +1,103 @@
+// Column layout for search tuning admin form and sticky actions
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-height: 0;
+  min-width: 0;
+}
+
+// Lead copy spacing under section title
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__lead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+// Advanced-mode warning emphasis
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__warning {
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+
+// Numeric field grid for tuning controls
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+// Single labeled control block (title, help, slider + number)
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+// Explanatory copy under each field heading
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__help {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--line-height-normal, 1.5);
+}
+
+// Slider and numeric input on one row
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem;
+  gap: var(--spacing-3);
+  align-items: center;
+}
+
+// Native range slider accent for tuning fields
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__range {
+  width: 100%;
+  accent-color: var(--primary);
+}
+
+// Compact numeric readout beside slider
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__number {
+  width: 100%;
+  text-align: right;
+}
+
+// Secondary readout for scaled values (e.g. km)
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__readout {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+}
+
+// Sticky action bar for discard / reset / save
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+// Save status feedback line
+// @see docs/specs/ui/search-bar/search-tuning-settings.md
+.search-tuning-settings__status {
+  font-size: var(--text-sm);
+
+  &--success {
+    color: var(--foreground);
+  }
+
+  &--error {
+    color: var(--destructive);
+  }
+}

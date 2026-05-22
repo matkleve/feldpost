@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { SearchBarService } from './search-bar.service';
+import { provideOrgSearchTuningTestDouble } from './search-test.providers';
 import { SupabaseService } from '../supabase/supabase.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
@@ -65,7 +66,7 @@ describe('SearchBarService', () => {
     supabaseMock = {
       client: {
         from: vi.fn((table: string) => {
-          if (table === 'images') return imagesBuilder;
+          if (table === 'media_items') return imagesBuilder;
           if (table === 'projects') return projectsBuilder;
           return createQueryBuilder({ data: [], error: null });
         }),
@@ -95,6 +96,7 @@ describe('SearchBarService', () => {
     TestBed.configureTestingModule({
       providers: [
         SearchBarService,
+        provideOrgSearchTuningTestDouble(),
         { provide: SupabaseService, useValue: supabaseMock },
         { provide: GeocodingService, useValue: geocodingMock },
       ],
@@ -258,7 +260,7 @@ describe('SearchBarService', () => {
       const failureSupabase = {
         client: {
           from: vi.fn((table: string) => {
-            if (table === 'images') return failingImagesBuilder;
+            if (table === 'media_items') return failingImagesBuilder;
             return defaultBuilder;
           }),
         },
@@ -268,6 +270,7 @@ describe('SearchBarService', () => {
       TestBed.configureTestingModule({
         providers: [
           SearchBarService,
+          provideOrgSearchTuningTestDouble(),
           { provide: SupabaseService, useValue: failureSupabase },
           { provide: GeocodingService, useValue: geocodingMock },
         ],

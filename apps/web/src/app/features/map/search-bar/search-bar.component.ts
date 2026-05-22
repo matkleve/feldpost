@@ -538,6 +538,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   private configureSearchSources(): void {
+    this.searchOrchestrator.configureOptions(this.searchBarService.orchestratorOptionsFromOrg());
     this.searchOrchestrator.configureSources({
       dbAddressResolver: (query, ctx) =>
         this.searchBarService.resolveDbAddressCandidates(query, ctx),

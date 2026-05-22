@@ -13,7 +13,8 @@ const DMS_COORDS_RE =
 
 /** Matches Google Maps URLs with embedded lat/lng. */
 const GOOGLE_MAPS_AT_RE = /google\.\w+\/maps\/@(-?\d+\.\d+),(-?\d+\.\d+)/;
-const GOOGLE_MAPS_LL_RE = /google\.\w+\/maps.*[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/;
+const GOOGLE_MAPS_LL_RE =
+  /(?:google\.\w+\/maps|maps\.google\.\w+).*[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/;
 const GOOGLE_MAPS_QUERY_RE = /google\.\w+\/maps.*[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
 
 const GOOGLE_MAPS_PATTERNS = [GOOGLE_MAPS_AT_RE, GOOGLE_MAPS_LL_RE, GOOGLE_MAPS_QUERY_RE];

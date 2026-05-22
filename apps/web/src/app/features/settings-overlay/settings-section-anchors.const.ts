@@ -68,18 +68,7 @@ export const SETTINGS_SECTION_ANCHORS: Readonly<
       labelFallback: 'Marker motion',
     },
   ],
-  search: [
-    {
-      subsectionSlug: 'bias',
-      labelKey: 'settings.overlay.toc.search.bias',
-      labelFallback: 'Search bias',
-    },
-    {
-      subsectionSlug: 'radius',
-      labelKey: 'settings.overlay.toc.search.radius',
-      labelFallback: 'Default radius',
-    },
-  ],
+  'search-tuning': [],
   data: [
     {
       subsectionSlug: 'cache',

@@ -1,0 +1,333 @@
+<div class="search-tuning-settings__lead">
+  <h3>{{ t('settings.search_tuning.section.title', 'Search Tuning') }}</h3>
+  <p>
+    {{
+      t(
+        'settings.search_tuning.section.description',
+        'Adjust org-wide geocoder filters and ranking for all members.'
+      )
+    }}
+  </p>
+</div>
+
+<div class="search-tuning-settings__mode">
+  <label hlmLabel class="search-tuning-settings__mode-label">
+    <input
+      hlmSwitch
+      type="checkbox"
+      [checked]="editorMode() === 'advanced'"
+      (change)="setEditorMode($any($event.target).checked ? 'advanced' : 'basic')"
+    />
+    {{ t('settings.search_tuning.mode.advanced', 'Advanced mode') }}
+  </label>
+</div>
+
+@if (editorMode() === 'advanced') {
+  <p class="search-tuning-settings__warning" role="note">
+    {{
+      t(
+        'settings.search_tuning.advanced_mode.warning',
+        'Advanced parameters affect all org members immediately after save.'
+      )
+    }}
+  </p>
+}
+
+<div class="search-tuning-settings__form">
+  <div class="search-tuning-settings__field">
+    <label hlmLabel for="search-tuning-debounce">{{
+      t('settings.search_tuning.field.debounce_ms', 'Debounce (ms)')
+    }}</label>
+    <p class="search-tuning-settings__help">
+      {{
+        t(
+          'settings.search_tuning.help.debounce_ms',
+          'How long to wait after typing before running a search. Higher values reduce API calls but feel slower.'
+        )
+      }}
+    </p>
+    <div class="search-tuning-settings__control">
+      <input
+        id="search-tuning-debounce-range"
+        class="search-tuning-settings__range"
+        type="range"
+        min="100"
+        max="2000"
+        step="50"
+        [value]="draft().orchestrator.debounceMs"
+        [attr.aria-label]="t('settings.search_tuning.field.debounce_ms', 'Debounce (ms)')"
+        (input)="onFieldChange('orchestrator', 'debounceMs', $any($event.target).value, 100, 2000)"
+      />
+      <input
+        hlmInput
+        id="search-tuning-debounce"
+        class="search-tuning-settings__number"
+        type="number"
+        min="100"
+        max="2000"
+        step="50"
+        [value]="draft().orchestrator.debounceMs"
+        (input)="onFieldChange('orchestrator', 'debounceMs', $any($event.target).value, 100, 2000)"
+      />
+    </div>
+  </div>
+
+  <div class="search-tuning-settings__field">
+    <label hlmLabel for="search-tuning-max-results">{{
+      t('settings.search_tuning.field.max_geocoder_results', 'Max geocoder results')
+    }}</label>
+    <p class="search-tuning-settings__help">
+      {{
+        t(
+          'settings.search_tuning.help.max_geocoder_results',
+          'Maximum Internet address suggestions shown per search. Lower keeps the list focused; higher shows more alternatives.'
+        )
+      }}
+    </p>
+    <div class="search-tuning-settings__control">
+      <input
+        id="search-tuning-max-results-range"
+        class="search-tuning-settings__range"
+        type="range"
+        min="1"
+        max="12"
+        step="1"
+        [value]="draft().resolver.maxGeocoderResults"
+        [attr.aria-label]="t('settings.search_tuning.field.max_geocoder_results', 'Max geocoder results')"
+        (input)="onFieldChange('resolver', 'maxGeocoderResults', $any($event.target).value, 1, 12)"
+      />
+      <input
+        hlmInput
+        id="search-tuning-max-results"
+        class="search-tuning-settings__number"
+        type="number"
+        min="1"
+        max="12"
+        step="1"
+        [value]="draft().resolver.maxGeocoderResults"
+        (input)="onFieldChange('resolver', 'maxGeocoderResults', $any($event.target).value, 1, 12)"
+      />
+    </div>
+  </div>
+
+  <div class="search-tuning-settings__field">
+    <label hlmLabel for="search-tuning-street-min">{{
+      t('settings.search_tuning.field.specific_street_min', 'Specific street min length')
+    }}</label>
+    <p class="search-tuning-settings__help">
+      {{
+        t(
+          'settings.search_tuning.help.specific_street_min',
+          'Single-word queries at least this long are treated as a deliberate street search (e.g. Denisgasse), not a vague map-area prefix.'
+        )
+      }}
+    </p>
+    <div class="search-tuning-settings__control">
+      <input
+        id="search-tuning-street-min-range"
+        class="search-tuning-settings__range"
+        type="range"
+        min="3"
+        max="12"
+        step="1"
+        [value]="draft().query.specificStreetMinLength"
+        [attr.aria-label]="
+          t('settings.search_tuning.field.specific_street_min', 'Specific street min length')
+        "
+        (input)="onFieldChange('query', 'specificStreetMinLength', $any($event.target).value, 3, 12)"
+      />
+      <input
+        hlmInput
+        id="search-tuning-street-min"
+        class="search-tuning-settings__number"
+        type="number"
+        min="3"
+        max="12"
+        step="1"
+        [value]="draft().query.specificStreetMinLength"
+        (input)="onFieldChange('query', 'specificStreetMinLength', $any($event.target).value, 3, 12)"
+      />
+    </div>
+  </div>
+
+  @if (editorMode() === 'advanced') {
+    <div class="search-tuning-settings__field">
+      <label hlmLabel for="search-tuning-min-query">{{
+        t('settings.search_tuning.field.min_query_length', 'Min query length')
+      }}</label>
+      <p class="search-tuning-settings__help">
+        {{
+          t(
+            'settings.search_tuning.help.min_query_length',
+            'Shortest query length before geocoding runs. Increase to avoid noisy one- and two-letter lookups.'
+          )
+        }}
+      </p>
+      <div class="search-tuning-settings__control">
+        <input
+          id="search-tuning-min-query-range"
+          class="search-tuning-settings__range"
+          type="range"
+          min="2"
+          max="6"
+          step="1"
+          [value]="draft().resolver.minQueryLength"
+          [attr.aria-label]="t('settings.search_tuning.field.min_query_length', 'Min query length')"
+          (input)="onFieldChange('resolver', 'minQueryLength', $any($event.target).value, 2, 6)"
+        />
+        <input
+          hlmInput
+          id="search-tuning-min-query"
+          class="search-tuning-settings__number"
+          type="number"
+          min="2"
+          max="6"
+          step="1"
+          [value]="draft().resolver.minQueryLength"
+          (input)="onFieldChange('resolver', 'minQueryLength', $any($event.target).value, 2, 6)"
+        />
+      </div>
+    </div>
+
+    <div class="search-tuning-settings__field">
+      <label hlmLabel for="search-tuning-context-distance">{{
+        t('settings.search_tuning.field.context_distance_m', 'Context distance max (m)')
+      }}</label>
+      <p class="search-tuning-settings__help">
+        {{
+          t(
+            'settings.search_tuning.help.context_distance_m',
+            'How far from the map or project center an Internet result may still appear when the country code is missing. Larger values include more distant matches.'
+          )
+        }}
+      </p>
+      <div class="search-tuning-settings__control">
+        <input
+          id="search-tuning-context-distance-range"
+          class="search-tuning-settings__range"
+          type="range"
+          min="10000"
+          max="500000"
+          step="5000"
+          [value]="draft().resolver.contextDistanceMaxMeters"
+          [attr.aria-label]="
+            t('settings.search_tuning.field.context_distance_m', 'Context distance max (m)')
+          "
+          (input)="
+            onFieldChange(
+              'resolver',
+              'contextDistanceMaxMeters',
+              $any($event.target).value,
+              10000,
+              500000
+            )
+          "
+        />
+        <input
+          hlmInput
+          id="search-tuning-context-distance"
+          class="search-tuning-settings__number"
+          type="number"
+          min="10000"
+          max="500000"
+          step="1000"
+          [value]="draft().resolver.contextDistanceMaxMeters"
+          (input)="
+            onFieldChange(
+              'resolver',
+              'contextDistanceMaxMeters',
+              $any($event.target).value,
+              10000,
+              500000
+            )
+          "
+        />
+      </div>
+      <p class="search-tuning-settings__readout">
+        {{ formatDistanceKm(draft().resolver.contextDistanceMaxMeters) }}
+      </p>
+    </div>
+
+    <div class="search-tuning-settings__field">
+      <label hlmLabel for="search-tuning-weak-top">{{
+        t('settings.search_tuning.field.weak_top_score', 'Weak top score threshold')
+      }}</label>
+      <p class="search-tuning-settings__help">
+        {{
+          t(
+            'settings.search_tuning.help.weak_top_score',
+            'When the best short-prefix match scores below this value, search retries without map bounds. Lower triggers retry more often.'
+          )
+        }}
+      </p>
+      <div class="search-tuning-settings__control">
+        <input
+          id="search-tuning-weak-top-range"
+          class="search-tuning-settings__range"
+          type="range"
+          min="0"
+          max="100"
+          step="5"
+          [value]="weakTopScoreSliderPercent()"
+          [attr.aria-label]="
+            t('settings.search_tuning.field.weak_top_score', 'Weak top score threshold')
+          "
+          (input)="onWeakTopScoreSliderChange($any($event.target).value)"
+        />
+        <input
+          hlmInput
+          id="search-tuning-weak-top"
+          class="search-tuning-settings__number"
+          type="number"
+          min="0"
+          max="1"
+          step="0.05"
+          [value]="draft().resolver.weakTopScoreThreshold"
+          (input)="
+            onFieldChange('resolver', 'weakTopScoreThreshold', $any($event.target).value, 0, 1)
+          "
+        />
+      </div>
+    </div>
+  }
+</div>
+
+@if (saveUiState() === 'saved') {
+  <p class="search-tuning-settings__status search-tuning-settings__status--success" role="status">
+    {{ t('settings.search_tuning.saved.success', 'Search tuning saved.') }}
+  </p>
+}
+@if (saveUiState() === 'save_error' && lastError()) {
+  <p class="search-tuning-settings__status search-tuning-settings__status--error" role="alert">
+    {{ t('settings.search_tuning.saved.error', 'Could not save search tuning.') }}
+    {{ lastError() }}
+  </p>
+}
+
+<div class="search-tuning-settings__actions">
+  <button hlmBtn variant="ghost" type="button" [disabled]="!isDirty()" (click)="discardChanges()">
+    {{ t('settings.search_tuning.action.discard_changes', 'Discard changes') }}
+  </button>
+  <button hlmBtn variant="outline" type="button" (click)="openResetConfirm()">
+    {{ t('settings.search_tuning.action.reset_to_defaults', 'Reset to system defaults') }}
+  </button>
+  <button hlmBtn type="button" [disabled]="!canSave()" (click)="saveChanges()">
+    {{ t('settings.search_tuning.action.save', 'Save') }}
+  </button>
+</div>
+
+@if (resetConfirmOpen()) {
+  <app-confirm-dialog
+    [title]="t('settings.search_tuning.action.reset_to_defaults', 'Reset to system defaults')"
+    [message]="
+      t(
+        'settings.search_tuning.confirm.reset_to_defaults',
+        'Remove all org search customizations? All members will use system defaults.'
+      )
+    "
+    [confirmLabel]="t('settings.search_tuning.action.reset_confirm', 'Reset')"
+    [cancelLabel]="t('settings.search_tuning.action.reset_cancel', 'Cancel')"
+    (confirmed)="confirmResetToDefaults()"
+    (cancelled)="closeResetConfirm()"
+  />
+}

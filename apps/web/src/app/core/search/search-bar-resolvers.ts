@@ -9,6 +9,8 @@ import type {
   SearchContentCandidate,
   SearchQueryContext,
 } from './search.models';
+import { SEARCH_TUNING_SYSTEM_DEFAULTS } from './search-tuning.defaults';
+import type { SearchTuningConfig } from './search-tuning.types';
 import { computeTextMatchScore, isSpecificStreetQuery } from './search-query';
 import {
   deduplicateGeocoderCandidatesByLabel,
@@ -107,13 +109,15 @@ export async function fetchGeocoderCandidates(
     index: number,
     context: SearchQueryContext,
   ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig = SEARCH_TUNING_SYSTEM_DEFAULTS,
 ): Promise<SearchAddressCandidate[]> {
-  if (normalizedQuery.length < 3) return [];
+  if (normalizedQuery.length < tuning.resolver.minQueryLength) return [];
 
   const constrainedOptions = buildConstrainedSearchOptions(
     context,
     maxGeocoderResults,
     normalizedQuery,
+    tuning,
   );
   logGeocoderResolverStage('constrained-request', {
     query: normalizedQuery,
@@ -132,9 +136,15 @@ export async function fetchGeocoderCandidates(
     context,
     toCandidate,
     maxGeocoderResults,
+    tuning,
   );
 
-  const shouldRetry = shouldRunUnconstrainedRetry(normalizedQuery, context, constrainedCandidates);
+  const shouldRetry = shouldRunUnconstrainedRetry(
+    normalizedQuery,
+    context,
+    constrainedCandidates,
+    tuning,
+  );
   logGeocoderResolverStage('retry-decision', {
     query: normalizedQuery,
     shouldRetry,
@@ -168,6 +178,7 @@ export async function fetchGeocoderCandidates(
     context,
     toCandidate,
     maxGeocoderResults * 3,
+    tuning,
   );
 
   const merged = deduplicateGeocoderCandidatesByLabel(
@@ -177,7 +188,7 @@ export async function fetchGeocoderCandidates(
       context,
       normalizedQuery,
     ),
-  ).slice(0, maxGeocoderResults);
+  ).slice(0, tuning.resolver.maxGeocoderResults);
 
   logGeocoderResolverStage('final-ranked', {
     query: normalizedQuery,
@@ -195,10 +206,17 @@ function buildConstrainedSearchOptions(
   context: SearchQueryContext,
   maxGeocoderResults: number,
   query: string,
+  tuning: SearchTuningConfig,
 ): GeocoderSearchOptions {
-  const useShortPrefixHeadroom = !!context.viewportBounds && isShortAmbiguousPrefixQuery(query);
+  const useShortPrefixHeadroom =
+    !!context.viewportBounds && isShortAmbiguousPrefixQuery(query, tuning);
   const searchOptions: GeocoderSearchOptions = {
-    limit: useShortPrefixHeadroom ? Math.max(maxGeocoderResults * 4, 12) : maxGeocoderResults,
+    limit: useShortPrefixHeadroom
+      ? Math.max(
+          maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
+          tuning.resolver.shortPrefixLimitFloor,
+        )
+      : maxGeocoderResults,
   };
   if (context.countryCodes?.length) {
     searchOptions.countrycodes = context.countryCodes;
@@ -222,16 +240,17 @@ function rankGeocoderCandidates(
     context: SearchQueryContext,
   ) => SearchAddressCandidate,
   limit: number,
+  tuning: SearchTuningConfig,
 ): SearchAddressCandidate[] {
   const streetLevelResults = rawResults.filter((r) => isStreetLevelResult(r));
   if (streetLevelResults.length === 0) return [];
 
   const localizedResults = streetLevelResults.filter((result) =>
-    matchesCountryConstraint(result, context, normalizedQuery),
+    matchesCountryConstraint(result, context, normalizedQuery, tuning),
   );
 
   const lexicalResults = localizedResults.filter((result) =>
-    meetsLexicalMatchThreshold(result, normalizedQuery),
+    meetsLexicalMatchThreshold(result, normalizedQuery, tuning),
   );
 
   logGeocoderResolverStage('candidate-filter', {
@@ -246,7 +265,7 @@ function rankGeocoderCandidates(
 
   const ranked = lexicalResults
     .map((result, index) => toCandidate(result, normalizedQuery, index, context))
-    .filter((candidate) => (candidate.score ?? 0) > 0.01)
+    .filter((candidate) => (candidate.score ?? 0) > tuning.resolver.candidateScoreFloor)
     .sort((left, right) => compareCandidateRank(left, right, context, normalizedQuery));
 
   return deduplicateGeocoderCandidatesByLabel(ranked).slice(0, limit);
@@ -267,6 +286,7 @@ function matchesCountryConstraint(
   result: GeocoderSearchResult,
   context: SearchQueryContext,
   normalizedQuery: string,
+  tuning: SearchTuningConfig,
 ): boolean {
   const allowedCountryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
   if (allowedCountryCodes.length === 0) {
@@ -278,12 +298,12 @@ function matchesCountryConstraint(
       return true;
     }
 
-    if (isSpecificStreetQuery(normalizedQuery)) {
+    if (isSpecificStreetQuery(normalizedQuery, tuning.query.specificStreetMinLength)) {
       return true;
     }
 
     const contextDistance = distanceFromContextMeters(result.lat, result.lng, context);
-    return contextDistance <= 120000;
+    return contextDistance <= tuning.resolver.contextDistanceMaxMeters;
   }
 
   const resultCountryCode = result.address?.country_code?.toLowerCase();
@@ -293,7 +313,7 @@ function matchesCountryConstraint(
 
   if (
     !resultCountryCode &&
-    isCoordinateInAllowedCountries(result.lat, result.lng, allowedCountryCodes)
+    isCoordinateInAllowedCountries(result.lat, result.lng, allowedCountryCodes, tuning)
   ) {
     return true;
   }
@@ -302,16 +322,26 @@ function matchesCountryConstraint(
     return true;
   }
 
-  return isSpecificStreetQuery(normalizedQuery);
+  return isSpecificStreetQuery(normalizedQuery, tuning.query.specificStreetMinLength);
 }
 
 function isCoordinateInAllowedCountries(
   lat: number,
   lng: number,
   countryCodes: string[],
+  tuning: SearchTuningConfig,
 ): boolean {
-  if (countryCodes.includes('at')) {
-    return lat >= 46.3 && lat <= 49.1 && lng >= 9.4 && lng <= 17.2;
+  for (const code of countryCodes) {
+    const bounds = tuning.resolver.countryBounds[code.toLowerCase()];
+    if (!bounds) continue;
+    if (
+      lat >= bounds.latMin &&
+      lat <= bounds.latMax &&
+      lng >= bounds.lngMin &&
+      lng <= bounds.lngMax
+    ) {
+      return true;
+    }
   }
   return false;
 }
@@ -319,6 +349,7 @@ function isCoordinateInAllowedCountries(
 function meetsLexicalMatchThreshold(
   result: GeocoderSearchResult,
   normalizedQuery: string,
+  tuning: SearchTuningConfig,
 ): boolean {
   const queryNorm = normalizeForLexicalMatch(normalizedQuery);
   if (queryNorm.length >= 3) {
@@ -372,12 +403,12 @@ function meetsLexicalMatchThreshold(
       return true;
     }
 
-    if (matchedTokens === queryTokens.length && bestScore >= 0.35) {
+    if (matchedTokens === queryTokens.length && bestScore >= tuning.resolver.multiTokenExactMinScore) {
       return true;
     }
   }
 
-  return bestScore >= minimumLexicalScore(normalizedQuery);
+  return bestScore >= minimumLexicalScore(normalizedQuery, tuning);
 }
 
 function normalizeForLexicalMatch(value: string): string {
@@ -388,12 +419,14 @@ function normalizeForLexicalMatch(value: string): string {
     .replace(/ß/g, 'ss');
 }
 
-function minimumLexicalScore(query: string): number {
-  if (isSpecificStreetQuery(query)) return 0.7;
-  if (query.length <= 4) return 0.6;
-  if (query.length <= 6) return 0.7;
-  if (query.length <= 9) return 0.8;
-  return 0.85;
+function minimumLexicalScore(query: string, tuning: SearchTuningConfig): number {
+  if (isSpecificStreetQuery(query, tuning.query.specificStreetMinLength)) {
+    return tuning.resolver.lexicalSpecificStreet;
+  }
+  if (query.length <= 4) return tuning.resolver.lexicalLenLe4;
+  if (query.length <= 6) return tuning.resolver.lexicalLen5to6;
+  if (query.length <= 9) return tuning.resolver.lexicalLen7to9;
+  return tuning.resolver.lexicalLenGe10;
 }
 
 function isCoordinateInViewport(
@@ -447,12 +480,13 @@ function shouldRunUnconstrainedRetry(
   normalizedQuery: string,
   context: SearchQueryContext,
   constrainedCandidates: SearchAddressCandidate[],
+  tuning: SearchTuningConfig,
 ): boolean {
   if (!context.countryCodes?.length && !context.viewportBounds) {
     return false;
   }
 
-  if (!isShortAmbiguousPrefixQuery(normalizedQuery)) {
+  if (!isShortAmbiguousPrefixQuery(normalizedQuery, tuning)) {
     return false;
   }
 
@@ -470,13 +504,17 @@ function shouldRunUnconstrainedRetry(
     return true;
   }
 
-  const clearlyRemote = topDistance > 60000;
-  const weakTopScore = (top.score ?? 0) < 0.75;
+  const clearlyRemote = topDistance > tuning.resolver.remoteTopDistanceMeters;
+  const weakTopScore = (top.score ?? 0) < tuning.resolver.weakTopScoreThreshold;
   return clearlyRemote || weakTopScore;
 }
 
-function isShortAmbiguousPrefixQuery(query: string): boolean {
-  return query.length >= 3 && query.length <= 6 && !query.includes(' ');
+function isShortAmbiguousPrefixQuery(query: string, tuning: SearchTuningConfig): boolean {
+  return (
+    query.length >= tuning.resolver.shortPrefixLenMin &&
+    query.length <= tuning.resolver.shortPrefixLenMax &&
+    !query.includes(' ')
+  );
 }
 
 function mergeAndRankCandidates(

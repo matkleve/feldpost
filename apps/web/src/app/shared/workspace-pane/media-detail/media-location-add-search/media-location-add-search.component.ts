@@ -172,6 +172,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     if (this.disabled()) return;
     this.active.set(true);
     this.query.set('');
+    this.searchOrchestrator.configureOptions(this.searchBarService.orchestratorOptionsFromOrg());
     this.searchOrchestrator.configureSources({
       dbAddressResolver: (q, ctx) =>
         this.searchBarService.resolveDbAddressCandidates(this.dbSearchTerm(q), ctx),
