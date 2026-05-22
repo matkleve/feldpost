@@ -18,6 +18,7 @@
  * @see docs/specs/ui/media-detail/address-search.md (legacy whole-address search)
  */
 import {
+  ChangeDetectorRef,
   Component,
   computed,
   effect,
@@ -62,6 +63,7 @@ import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
 })
 export class MediaLocationAddSearchComponent implements OnDestroy {
   private readonly elementRef = inject(ElementRef);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly searchBarService = inject(SearchBarService);
   private readonly searchOrchestrator = inject(SearchOrchestratorService);
   private readonly i18n = inject(I18nService);
@@ -74,15 +76,26 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   readonly addFromText = output<string>();
   readonly addFromGeocode = output<ForwardGeocodeResult>();
 
+  // Stable state: idle — collapsed row; active — combobox open; panelState maps to data-state on host.
+  // @see docs/specs/ui/media-detail/media-detail-location-section.md
+  /** Whether the add/search row is expanded (combobox + optional dropdown). */
   readonly active = signal(false);
+
+  /**
+   * Raw combobox text (may include trailing spaces). Drives DB/geocoder search and Results filter.
+   * Updated only in `syncQuery` from the native input — never bound with `[value]` on the input.
+   */
   readonly query = signal('');
+
   readonly otherMediaSuggestions = signal<SearchCandidate[]>([]);
   readonly placeSuggestions = signal<SearchCandidate[]>([]);
   readonly loadingOther = signal(false);
   readonly loadingPlaces = signal(false);
   readonly focusedIndex = signal(-1);
 
+  /** Template ref `#searchInput` — source of truth for typed text on `(input)`. */
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  /** Template ref `#addressCenter` — dropdown anchors to this element’s width/position. */
   private readonly addressCenterRef = viewChild<ElementRef<HTMLElement>>('addressCenter');
   readonly addressAnchorEl = computed(() => this.addressCenterRef()?.nativeElement ?? null);
   readonly addressCenterWidth = computed(
@@ -101,6 +114,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     ...this.placeSuggestions(),
   ]);
 
+  /** True when dropdown should render (any zone has content or user has typed non-empty query). */
   readonly showPanel = computed(
     () =>
       this.active() &&
@@ -118,15 +132,16 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     return 'typing';
   });
 
-  readonly addNewAriaLabel = computed(() => {
-    const q = this.query().trim();
-    return this.t('location.dropdown.addNew', 'Add new Address: "{query}"').replace('{query}', q);
-  });
+  /** i18n label for the New address row — derived from `query` only. */
+  readonly newAddressRowLabel = computed(() => this.formatNewAddressLabel(this.query().trim()));
+
+  readonly addNewAriaLabel = computed(() => this.newAddressRowLabel());
 
   formatRowLine(row: MediaItemLocationRow): string {
     return formatLocationDisplayLine(row, this.doorLabel());
   }
 
+  /** Rx bridge for `SearchOrchestratorService.searchInput` (debounced DB search). */
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
   private searchSub: Subscription | null = null;
@@ -135,6 +150,9 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
 
   constructor() {
     effect(() => this.contextChanges.next(this.searchContext()));
+    // Focus combobox once when row opens. MUST NOT read `query` here — that re-ran the effect on
+    // every keystroke and (with setTimeout) overwrote input.value back to a stale character.
+    // @see docs/specs/ui/media-detail/media-detail-location-section.md
     effect(() => {
       if (!this.active()) return;
       setTimeout(() => this.searchInputRef()?.nativeElement?.focus(), 0);
@@ -176,7 +194,17 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.searchSub = null;
   }
 
-  onInput(value: string): void {
+  /**
+   * Native `(input)` handler. Reads `event.target.value` synchronously — do not use `[value]="query()"`
+   * on the input; that binding fought the DOM and left `query` stuck on the first character.
+   */
+  onInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.syncQuery(value);
+  }
+
+  /** Single place that updates `query` and search side effects from combobox text. */
+  private syncQuery(value: string): void {
     this.query.set(value);
     this.focusedIndex.set(-1);
     if (value.trim()) {
@@ -187,6 +215,12 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     }
     this.queryChanges.next(value);
     this.runGeocoderDebounced(value);
+    // Same as metadata-property-picker: projected dropdown content must be re-checked explicitly.
+    this.cdr.detectChanges();
+  }
+
+  private formatNewAddressLabel(trimmedQuery: string): string {
+    return this.t('location.dropdown.addNew', 'Add new Address: "{query}"').replace('{query}', trimmedQuery);
   }
 
   onInputKeydown(event: KeyboardEvent): void {
@@ -201,11 +235,15 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     }
   }
 
+  /** Internet/DB pick: copy label into combobox and re-run search (does not create a row). */
   onInternetClick(candidate: SearchCandidate, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    this.query.set(candidate.label);
-    this.onInput(candidate.label);
+    this.syncQuery(candidate.label);
+    const input = this.searchInputRef()?.nativeElement;
+    if (input) {
+      input.value = candidate.label;
+    }
   }
 
   async commitAddNew(): Promise<void> {
@@ -276,4 +314,5 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     const head = trimmed.split(',')[0]?.trim() ?? trimmed;
     return head.length >= 3 ? head : trimmed;
   }
+
 }

@@ -16,3 +16,17 @@
   cursor: default;
   pointer-events: none;
 }
+
+// New-address row label must not clip to one character in narrow flex layout.
+.media-location-add-search__add-new-item {
+  min-width: 0;
+  width: 100%;
+}
+
+.media-location-add-search__add-new-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+}
