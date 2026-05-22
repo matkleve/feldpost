@@ -3,10 +3,10 @@
  * @see docs/specs/ui/search-bar/search-tuning-settings.md
  */
 
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../supabase/supabase.service';
-import { UserProfileService } from '../user-profile/user-profile.service';
+import { UserProfileService, profileHasAdminRole } from '../user-profile/user-profile.service';
 import { resolveOrgSearchConfig } from './resolve-org-search-config';
 import { SEARCH_TUNING_SYSTEM_DEFAULTS } from './search-tuning.defaults';
 import type { SearchTuningConfig, SearchTuningValuesJson } from './search-tuning.types';
@@ -32,13 +32,34 @@ export class OrgSearchTuningService {
 
   readonly canEdit = computed(() => this._isOrgAdmin());
 
+  constructor() {
+    effect(() => {
+      const userId = this.auth.user()?.id ?? null;
+      if (!userId) {
+        this._isOrgAdmin.set(false);
+        return;
+      }
+      void this.bootstrapFromSession();
+    });
+  }
+
   async bootstrapFromSession(): Promise<void> {
+    if (!this.auth.user()?.id) {
+      this._isOrgAdmin.set(false);
+      return;
+    }
+
     const profile = await this.profiles.getOwnProfile();
     const orgId = profile.data?.organizationId ?? null;
     const roles = profile.data?.roles ?? [];
-    const adminFromRoles = roles.includes('admin');
+    const adminFromRoles = profileHasAdminRole(roles);
     const adminFromRpc = await this.resolveIsAdminFromDatabase();
     this._isOrgAdmin.set(adminFromRoles || adminFromRpc);
+
+    if (profile.error) {
+      console.warn('[OrgSearchTuningService] profile load failed', profile.error.message);
+    }
+
     if (orgId) {
       await this.loadForOrganization(orgId);
     }

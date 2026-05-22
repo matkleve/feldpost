@@ -8,6 +8,11 @@ export interface UserProfileSnapshot {
   roles: string[];
 }
 
+/** True when profile roles include org admin (matches RLS `is_admin()` / `roles.name = 'admin'`). */
+export function profileHasAdminRole(roles: readonly string[]): boolean {
+  return roles.some((name) => name.toLowerCase() === 'admin');
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserProfileService {
   private readonly supabase = inject(SupabaseService);

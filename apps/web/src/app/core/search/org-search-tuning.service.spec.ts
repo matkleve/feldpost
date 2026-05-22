@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { OrgSearchTuningService } from './org-search-tuning.service';
@@ -39,11 +40,16 @@ describe('OrgSearchTuningService', () => {
         OrgSearchTuningService,
         {
           provide: SupabaseService,
-          useValue: { client: { from: fromMock } },
+          useValue: {
+            client: {
+              from: fromMock,
+              rpc: vi.fn().mockResolvedValue({ data: true, error: null }),
+            },
+          },
         },
         {
           provide: AuthService,
-          useValue: { user: () => ({ id: 'user-1' }) },
+          useValue: { user: signal({ id: 'user-1' }) },
         },
         {
           provide: UserProfileService,

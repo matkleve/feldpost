@@ -259,14 +259,14 @@
   .settings-overlay__detail-section {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-4);
+    gap: var(--spacing-6);
     min-width: 0;
   }
 
   // Embedded bodies (account, invites): TOC precedes child root; keep rhythm with inline sections
   // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .settings-overlay__detail-section--embedded {
-    gap: var(--spacing-3);
+    gap: var(--spacing-6);
   }
 
   // Title + intro block above the flat body (not inside bordered card chrome)
@@ -324,26 +324,17 @@
   .settings-overlay__detail-body {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: var(--spacing-6);
     min-width: 0;
   }
 
-  // Logical group inside the detail body; top rule separates groups (Notion-adjacent rhythm)
+  // Logical group inside the detail body; spacing-only separation (no divider rules)
   // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
   .settings-overlay__detail-group {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-4);
     min-width: 0;
-    padding-block-start: var(--spacing-5);
-    border-block-start: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-  }
-
-  // First group sits flush under lead/TOC without double rule
-  // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
-  .settings-overlay__detail-group:first-child {
-    padding-block-start: 0;
-    border-block-start: none;
   }
 
   // Scroll target for TOC / deep-link; keeps headings from sticking under overlay chrome

@@ -24,3 +24,9 @@
   top: 50%;
   transform: translateY(-50%);
 }
+
+// Smaller visibility icon so the control matches compact auth inputs
+// @see docs/migration/phase-10-visual-qa.md Part 3 login
+.password-toggle .material-icons {
+  font-size: var(--font-size-lg);
+}

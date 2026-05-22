@@ -18,8 +18,10 @@
         <h1 class="account-skeleton account-skeleton--line"></h1>
         <p class="account-skeleton account-skeleton--line account-skeleton--line-short"></p>
       } @else {
-        <h1>{{ displayName() }}</h1>
-        <p>{{ userEmail() || tr('Keine E-Mail verfügbar') }}</p>
+        <h1 [attr.title]="displayName()">{{ displayName() }}</h1>
+        <p [attr.title]="userEmail() || null">
+          {{ userEmail() || tr('Keine E-Mail verfügbar') }}
+        </p>
       }
     </div>
     <div class="account-card__badges">

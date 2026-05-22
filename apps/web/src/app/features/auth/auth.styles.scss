@@ -39,14 +39,14 @@
 .auth-card {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
-  padding-block: var(--spacing-6);
-  padding-inline: var(--spacing-6);
+  gap: var(--spacing-3);
+  padding-block: var(--spacing-5);
+  padding-inline: var(--spacing-5);
   border-radius: var(--radius-xl);
   background: var(--card);
   box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   max-height: calc(100dvh - (0.25rem * 12));
   z-index: 2;
   overflow: hidden;
@@ -54,8 +54,12 @@
 
 // Subtitle paragraph — secondary color directly below the page h1
 .auth-subtitle {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-reading);
   color: var(--muted-foreground);
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
 }
 
 // Scrollable form region for long forms (register) — shadows indicate overflow
@@ -85,30 +89,42 @@
 .field {
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
 
   label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
-    margin-bottom: var(--spacing-1);
+    margin-bottom: var(--spacing-2);
   }
 
   // Secondary helper link — smaller than the field label row
   // @see docs/migration/phase-10-visual-qa.md Part 3 login L4
   label a {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: 400;
   }
 }
 
-// Dark-surface inputs: override browser autofill / native fill to theme tokens
-// @see docs/migration/phase-10-visual-qa.md Part 3 login L2
+// Auth controls: calmer density than default h-10 / text-sm Tailwind on hlmInput
+// @see docs/migration/phase-10-visual-qa.md Part 3 login
 .auth-card input[hlmInput] {
+  min-height: 2.25rem;
+  height: 2.25rem;
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-solid);
   background-color: var(--background);
   color: var(--foreground);
+
+  &::placeholder {
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.02em;
+    color: color-mix(in srgb, var(--muted-foreground) 88%, transparent);
+  }
 
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
@@ -119,6 +135,14 @@
     caret-color: var(--foreground);
     transition: background-color 50000s ease-in-out 0s;
   }
+}
+
+// Native password masking tracks font metrics — keep password fields on the compact scale
+// @see apps/web/src/app/features/auth/login/login.component.scss
+.auth-card input[hlmInput][type='password'],
+.auth-card input[hlmInput].password-input {
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
 }
 
 // Error copy under control (hlm-form-field wraps label + input in inner stack)
@@ -142,8 +166,9 @@ hlm-form-field.field .field-error {
 .alert-error {
   border-radius: var(--radius-md);
   padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-md);
-  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-reading);
+  margin-bottom: var(--spacing-3);
   background: color-mix(in srgb, var(--destructive) 12%, transparent);
   color: var(--destructive);
   border: 1px solid color-mix(in srgb, var(--destructive) 40%, var(--border));
@@ -151,9 +176,11 @@ hlm-form-field.field .field-error {
 
 // Centered footer navigation text
 .auth-footer {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-reading);
   text-align: center;
   color: var(--muted-foreground);
-  margin-top: var(--spacing-5);
+  margin-top: var(--spacing-4);
 }
 
 // Success confirmation state

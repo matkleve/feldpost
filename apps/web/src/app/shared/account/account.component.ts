@@ -11,6 +11,11 @@ import {
 import type { MfaFactorViewModel } from '../../core/auth/auth.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
+import {
+  clearAccountProfileCache,
+  getAccountProfileCache,
+  setAccountProfileCache,
+} from './account-profile-cache';
 import { UserProfileService } from '../../core/user-profile/user-profile.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
@@ -39,15 +44,6 @@ import { HLM_LABEL_IMPORTS } from '../ui/label';
   },
 })
 export class AccountComponent implements OnInit {
-  private static cachedSnapshot: {
-    fullName: string;
-    roleNames: string[];
-    organizationId: string | null;
-    pendingEmail: string;
-    mfaFactors: MfaFactorViewModel[];
-    assuranceLevel: 'aal1' | 'aal2' | null;
-  } | null = null;
-
   /** When true, account is shown inside settings overlay detail column (shared layout contract). */
   readonly embeddedInSettings = input(false, { alias: 'embeddedInSettings' });
 
@@ -86,7 +82,13 @@ export class AccountComponent implements OnInit {
   readonly deletePhrase = signal('');
 
   readonly userEmail = computed(() => this.authService.user()?.email ?? '');
-  readonly roleBadgeLabel = computed(() => this.roleNames()[0] ?? this.tr('User'));
+  readonly roleBadgeLabel = computed(() => {
+    const names = this.roleNames();
+    if (names.some((name) => name.toLowerCase() === 'admin')) {
+      return this.tr('Admin');
+    }
+    return names[0] ?? this.tr('User');
+  });
   readonly displayName = computed(() => {
     const value = this.fullName().trim();
     if (value.length > 0) return value;
@@ -97,7 +99,7 @@ export class AccountComponent implements OnInit {
   readonly canConfirmDelete = computed(() => this.deletePhrase().trim().toUpperCase() === 'DELETE');
 
   async ngOnInit(): Promise<void> {
-    const snapshot = AccountComponent.cachedSnapshot;
+    const snapshot = getAccountProfileCache();
     if (snapshot) {
       this.applySnapshot(snapshot);
       this.loading.set(false);
@@ -370,6 +372,8 @@ export class AccountComponent implements OnInit {
 
     const profileResult = await this.userProfileService.getOwnProfile();
     if (profileResult.error) {
+      clearAccountProfileCache();
+      this.roleNames.set([]);
       this.toastService.show({ message: profileResult.error.message, type: 'error' });
     } else if (profileResult.data) {
       this.fullName.set(profileResult.data.fullName);
@@ -429,13 +433,13 @@ export class AccountComponent implements OnInit {
   }
 
   private cacheSnapshot(): void {
-    AccountComponent.cachedSnapshot = {
+    setAccountProfileCache({
       fullName: this.fullName(),
       roleNames: [...this.roleNames()],
       organizationId: this.organizationId(),
       pendingEmail: this.pendingEmail(),
       mfaFactors: [...this.mfaFactors()],
       assuranceLevel: this.assuranceLevel(),
-    };
+    });
   }
 }

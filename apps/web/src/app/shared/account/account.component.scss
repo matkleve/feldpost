@@ -16,7 +16,7 @@
   margin: 0 auto;
   padding: var(--spacing-4);
   display: grid;
-  gap: var(--spacing-4);
+  gap: var(--spacing-6);
   min-width: 0;
 }
 
@@ -26,7 +26,7 @@
   max-width: none;
   margin: 0;
   padding: 0;
-  gap: 0;
+  gap: var(--spacing-6);
 }
 
 .account-page__state {
@@ -37,19 +37,13 @@
   color: var(--muted-foreground);
 }
 
-// Subsection stack: rule line + heading, then flat controls (no outer card chrome in settings)
+// Subsection stack: heading + flat controls (no divider rules between blocks)
 // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-detail-block {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-3);
+  gap: var(--spacing-4);
   min-width: 0;
-  padding-block-start: var(--spacing-4);
-  border-block-start: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-}
-
-.account-detail-block + .account-detail-block {
-  margin-block-start: var(--spacing-2);
 }
 
 // Primary fields/actions under the subsection lead (flex column only; no border fill)
@@ -57,7 +51,7 @@
 .account-detail-block__body {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-3);
+  gap: var(--spacing-4);
   min-width: 0;
 }
 
@@ -102,7 +96,6 @@
   gap: var(--spacing-3);
   padding-block: var(--spacing-4);
   padding-inline: var(--spacing-4);
-  margin-block-end: var(--spacing-2);
 }
 
 .account-card__avatar {
@@ -116,10 +109,20 @@
   color: var(--primary);
 }
 
+// Text column between avatar and badges; must shrink so badges stay visible
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-card__identity-copy {
+  min-width: 0;
+  overflow: hidden;
+}
+
 // Display name color only (metrics from global h1 baseline)
 // @see apps/web/AGENTS.md (typography ownership)
 .account-card__identity-copy h1 {
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--foreground);
 }
 
@@ -127,14 +130,21 @@
 // @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-card__identity-copy p {
   margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--font-size-sm);
   font-weight: 400;
   line-height: var(--line-height-reading);
   color: var(--muted-foreground);
 }
 
+// Role and assurance chips stay full width; never compete with identity text
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-card__badges {
   display: flex;
+  flex-shrink: 0;
   gap: var(--spacing-1);
   align-items: center;
 }
@@ -207,9 +217,11 @@
   animation: account-skeleton-shimmer 1.2s ease-in-out infinite;
 }
 
+// Label-to-control rhythm inside each hlm-form-field (matches settings field density)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-field {
   display: grid;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
 }
 
 .account-field label {
@@ -223,9 +235,11 @@
   min-width: 0;
 }
 
+// Stacked password (and similar) fields — looser than compact list rows
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
 .account-grid {
   display: grid;
-  gap: var(--spacing-2);
+  gap: var(--spacing-4);
 }
 
 .account-actions {

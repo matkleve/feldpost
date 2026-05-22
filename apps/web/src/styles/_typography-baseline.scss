@@ -113,6 +113,14 @@ h6 {
   line-height: 1.1;
 }
 
+// Auth card title — same scale as global h1, slightly lighter weight
+// @see apps/web/src/app/features/auth/auth.styles.scss
+h1.auth-page-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
 // ── Link baseline ─────────────────────────────────────────────────────────────
 // Must follow @tailwind base; aligns default anchors with primary token.
 // @see apps/web/AGENTS.md (typography / link ownership)
