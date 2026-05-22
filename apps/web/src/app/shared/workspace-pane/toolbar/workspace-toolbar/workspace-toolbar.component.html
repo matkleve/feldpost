@@ -62,18 +62,22 @@
     </div>
   </div>
 
-  <button
-    type="button"
-    hlmBtn
-    variant="default"
-    size="icon"
-    class="workspace-toolbar__size-control workspace-toolbar__size-control--compact"
-    [attr.aria-label]="compactCardVariantToggleTitle()"
-    [attr.title]="compactCardVariantToggleTitle()"
-    (click)="cycleThumbnailSizePreset()"
-  >
-    <span class="material-icons" aria-hidden="true">{{ currentCardVariantToggleOption()?.icon }}</span>
-  </button>
+  <div class="workspace-toolbar__size-control workspace-toolbar__size-control--compact">
+    <div class="workspace-toolbar__size-control-track p-0 gap-0" hlmToggleGroup>
+      <button
+        type="button"
+        hlmToggleGroupItem
+        brnToggleGroupItem
+        size="icon"
+        [attr.data-state]="'on'"
+        [attr.aria-label]="compactCardVariantToggleTitle()"
+        [attr.title]="compactCardVariantToggleTitle()"
+        (click)="cycleThumbnailSizePreset()"
+      >
+        <span class="material-icons" aria-hidden="true">{{ currentCardVariantToggleOption()?.icon }}</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 @if (activeDropdown()) {

@@ -121,18 +121,22 @@
       </div>
     </div>
 
-    <button
-      type="button"
-      hlmBtn
-      variant="default"
-      size="icon"
-      class="projects-toolbar__size-control projects-toolbar__size-control--compact"
-      [attr.aria-label]="compactCardVariantToggleTitle()"
-      [attr.title]="compactCardVariantToggleTitle()"
-      (click)="cycleCardVariant()"
-    >
-      <span class="material-icons" aria-hidden="true">{{ currentCardVariantToggleOption()?.icon }}</span>
-    </button>
+    <div class="projects-toolbar__size-control projects-toolbar__size-control--compact">
+      <div class="projects-toolbar__size-control-track p-0 gap-0" hlmToggleGroup>
+        <button
+          type="button"
+          hlmToggleGroupItem
+          brnToggleGroupItem
+          size="icon"
+          [attr.data-state]="'on'"
+          [attr.aria-label]="compactCardVariantToggleTitle()"
+          [attr.title]="compactCardVariantToggleTitle()"
+          (click)="cycleCardVariant()"
+        >
+          <span class="material-icons" aria-hidden="true">{{ currentCardVariantToggleOption()?.icon }}</span>
+        </button>
+      </div>
+    </div>
   </div>
 </app-pane-toolbar>
 
