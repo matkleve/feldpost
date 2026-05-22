@@ -66,7 +66,7 @@
         min="100"
         max="2000"
         step="50"
-        [value]="draft().orchestrator.debounceMs"
+      [value]="draft().orchestrator.debounceMs"
         (input)="onFieldChange('orchestrator', 'debounceMs', $any($event.target).value, 100, 2000)"
       />
     </div>
@@ -104,7 +104,7 @@
         min="1"
         max="12"
         step="1"
-        [value]="draft().resolver.maxGeocoderResults"
+      [value]="draft().resolver.maxGeocoderResults"
         (input)="onFieldChange('resolver', 'maxGeocoderResults', $any($event.target).value, 1, 12)"
       />
     </div>
@@ -144,7 +144,7 @@
         min="3"
         max="12"
         step="1"
-        [value]="draft().query.specificStreetMinLength"
+      [value]="draft().query.specificStreetMinLength"
         (input)="onFieldChange('query', 'specificStreetMinLength', $any($event.target).value, 3, 12)"
       />
     </div>
@@ -183,7 +183,7 @@
           min="2"
           max="6"
           step="1"
-          [value]="draft().resolver.minQueryLength"
+      [value]="draft().resolver.minQueryLength"
           (input)="onFieldChange('resolver', 'minQueryLength', $any($event.target).value, 2, 6)"
         />
       </div>
@@ -231,7 +231,7 @@
           min="10000"
           max="500000"
           step="1000"
-          [value]="draft().resolver.contextDistanceMaxMeters"
+      [value]="draft().resolver.contextDistanceMaxMeters"
           (input)="
             onFieldChange(
               'resolver',
@@ -282,7 +282,7 @@
           min="0"
           max="1"
           step="0.05"
-          [value]="draft().resolver.weakTopScoreThreshold"
+      [value]="draft().resolver.weakTopScoreThreshold"
           (input)="
             onFieldChange('resolver', 'weakTopScoreThreshold', $any($event.target).value, 0, 1)
           "

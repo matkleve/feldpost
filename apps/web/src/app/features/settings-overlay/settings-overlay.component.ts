@@ -184,6 +184,12 @@ export class SettingsOverlayComponent {
 
   constructor() {
     effect(() => {
+      if (this.open()) {
+        void this.orgSearchTuning.bootstrapFromSession();
+      }
+    });
+
+    effect(() => {
       const pendingSection = this.settingsPaneService.selectedSectionId();
       if (pendingSection) {
         this.selectedSectionId.set(pendingSection);

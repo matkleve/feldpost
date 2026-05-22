@@ -43,7 +43,7 @@ export class MediaDetailLocationSectionComponent {
   readonly media = input.required<ImageRecord>();
   readonly locations = input<MediaItemLocationRow[]>([]);
   readonly saving = input(false);
-  readonly primaryErrors = input<Record<string, string>>({});
+  readonly primaryErrors = input<Partial<Record<string, string>>>({});
 
   readonly addFromText = output<string>();
   readonly addFromGeocode = output<ForwardGeocodeResult>();

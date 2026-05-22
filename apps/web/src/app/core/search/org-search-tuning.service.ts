@@ -36,10 +36,22 @@ export class OrgSearchTuningService {
     const profile = await this.profiles.getOwnProfile();
     const orgId = profile.data?.organizationId ?? null;
     const roles = profile.data?.roles ?? [];
-    this._isOrgAdmin.set(roles.includes('admin'));
+    const adminFromRoles = roles.includes('admin');
+    const adminFromRpc = await this.resolveIsAdminFromDatabase();
+    this._isOrgAdmin.set(adminFromRoles || adminFromRpc);
     if (orgId) {
       await this.loadForOrganization(orgId);
     }
+  }
+
+  /** Aligns with RLS `public.is_admin()` used on org_search_tuning_profiles writes. */
+  private async resolveIsAdminFromDatabase(): Promise<boolean> {
+    const { data, error } = await this.supabase.client.rpc('is_admin');
+    if (error) {
+      console.warn('[OrgSearchTuningService] is_admin rpc failed', error.message);
+      return false;
+    }
+    return data === true;
   }
 
   async loadForOrganization(orgId: string): Promise<SearchTuningConfig> {

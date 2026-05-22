@@ -13,7 +13,7 @@ describe('settings-section-registry', () => {
     expect(entry?.visibility).toBe('admin-only');
   });
 
-  it('hides admin-only sections from non-admin viewers', () => {
+  it('hides search-tuning from non-admin viewers', () => {
     const visible = filterSettingsSectionsForViewer(registry, false);
     expect(visible.some((e) => e.id === 'search-tuning')).toBe(false);
     expect(visible.some((e) => e.id === 'general')).toBe(true);

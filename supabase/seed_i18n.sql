@@ -30444,4 +30444,35 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.search_tuning.readonly.notice', 'Only org admins can change search tuning. You can view the current org settings below.', 'en', 'org search tuning read-only banner')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Only org admins can change search tuning. You can view the current org settings below.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nur Organisations-Admins koennen die Such-Tuning-Einstellungen aendern. Die aktuellen Werte kannst du unten einsehen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Solo gli admin dell''organizzazione possono modificare l''ottimizzazione ricerca. Puoi consultare le impostazioni correnti qui sotto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;
