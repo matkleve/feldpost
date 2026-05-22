@@ -17,9 +17,9 @@
 // Placeholder tiles without item payload use muted pulse inside inherited slot geometry.
 // @see docs/specs/component/media/media-item.md#what-it-looks-like
 :host([data-has-item='false']) {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1;
   background: var(--muted);
-  animation: media-display-pulse 200ms ease-in-out infinite;
+  animation: none;
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -34,7 +34,7 @@
 .media-item__slot {
   position: relative;
   inline-size: 100%;
-  aspect-ratio: var(--media-aspect-ratio, 1 / 1);
+  aspect-ratio: var(--media-aspect-ratio, 1);
   transition: aspect-ratio var(--transition-geometry);
   min-inline-size: 0;
   min-block-size: 0;

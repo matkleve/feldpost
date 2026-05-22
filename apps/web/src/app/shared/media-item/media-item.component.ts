@@ -67,7 +67,7 @@ export class MediaItemComponent {
   constructor() {
     effect(() => {
       this.mediaIdentity();
-      this.mediaAspectRatio.set('1 / 1');
+      this.mediaAspectRatio.set('1');
     });
   }
 
@@ -76,6 +76,7 @@ export class MediaItemComponent {
       return;
     }
 
+    // Unitless ratio required by CSS aspect-ratio (e.g. 1.777, not "1 / 1").
     this.mediaAspectRatio.set(String(ratio));
   }
 

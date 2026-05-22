@@ -31,7 +31,7 @@
   inline-size: min(100%, var(--media-display-max-width, 100%));
   max-inline-size: var(--media-display-max-width, 100%);
   max-block-size: var(--media-display-max-height, 100%);
-  aspect-ratio: var(--media-aspect-ratio, 1 / 1);
+  aspect-ratio: var(--media-aspect-ratio, 1);
   transition: aspect-ratio var(--transition-geometry);
   overflow: hidden;
 }
@@ -41,7 +41,8 @@
 :host.media-display--intrinsic .media-display__viewport {
   inline-size: 100%;
   block-size: auto;
-  aspect-ratio: var(--media-aspect-ratio, 1 / 1);
+  aspect-ratio: var(--media-aspect-ratio, 1);
+  transition: aspect-ratio var(--transition-geometry);
 }
 
 // Viewport matches the full media-item slot; letterboxing stays on the image layer.
@@ -97,6 +98,11 @@
   block-size: auto;
   max-inline-size: 100%;
   max-block-size: 100%;
+  visibility: hidden;
+}
+
+:host.media-display--intrinsic .media-display__image--revealed {
+  visibility: visible;
 }
 
 .media-display__layer--loading-surface {
@@ -144,18 +150,21 @@
 /* Stable state: loading-surface-visible */
 /* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 /* State selectors target the viewport (real box), not :host — display:contents on host breaks host-anchored descendant rules. */
-.media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface {
-  opacity: 1;
-  pointer-events: none;
-  animation: media-display-pulse 200ms ease-in-out infinite;
-}
-
-// Ratio lock-in uses a static muted surface (no pulse) so reveal does not flash back to loading.
+// Loading uses a static muted surface only (pulse animation disabled).
 // @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
+.media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
 .media-display__viewport[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
   opacity: 1;
   pointer-events: none;
   animation: none;
+}
+
+// Hide loading shell once sharp content is revealed.
+// @see docs/specs/component/media/media-display.md#state-rendering-matrix
+.media-display__viewport[data-state='content-fade-in'] .media-display__layer--loading-surface,
+.media-display__viewport[data-state='content-visible'] .media-display__layer--loading-surface,
+.media-display__viewport[data-state='media-ready'] .media-display__layer--loading-surface {
+  opacity: 0;
 }
 
 /* Stable state: media-ready (staged content) */

@@ -14,7 +14,7 @@
     aria-hidden="true"
     (transitionend)="onLayerTransitionEnd($event, 'staged-content')"
   >
-    @if (stagedContentUrl()) {
+    @if (stagedContentUrl() && showStagedPreview()) {
       <img class="media-display__image" [src]="stagedContentUrl()" alt="" aria-hidden="true" />
     }
   </div>
@@ -28,6 +28,7 @@
     @if (resolvedUrl()) {
       <img
         class="media-display__image"
+        [class.media-display__image--revealed]="showSharpContent()"
         [src]="resolvedUrl()"
         [alt]="alt()"
         (load)="onContentImageLoad($event)"

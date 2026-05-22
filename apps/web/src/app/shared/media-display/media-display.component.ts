@@ -66,6 +66,14 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly alt = computed(() => this.t('workspace.imageDetail.mediaPreview.alt', 'Media preview'));
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
+  readonly showSharpContent = computed(() => {
+    const current = this.state();
+    return current === 'content-fade-in' || current === 'content-visible';
+  });
+  readonly showStagedPreview = computed(() => {
+    const current = this.state();
+    return current === 'media-ready';
+  });
 
   constructor() {
     effect(() => {
@@ -176,15 +184,16 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
-    this.applyAspectRatio(naturalWidth / naturalHeight);
-
-    const currentState = this.state();
-    if (currentState === 'loading-surface-visible' || currentState === 'media-ready') {
-      this.goTo('ratio-known-contain');
-      if (this.prefersReducedMotion()) {
-        this.advanceAfterRatioSettled();
-      }
+    const current = this.state();
+    if (
+      current !== 'loading-surface-visible' &&
+      current !== 'ratio-known-contain' &&
+      current !== 'media-ready'
+    ) {
+      return;
     }
+
+    this.beginIntrinsicRatioTransition(naturalWidth / naturalHeight);
   }
 
   private setupResizeObserver(): void {
@@ -231,8 +240,17 @@ export class MediaDisplayComponent implements AfterViewInit {
   }
 
   private handleDelivery(delivery: MediaDisplayDeliveryState): void {
-    if (delivery.metadataAspectRatio != null && delivery.metadataAspectRatio > 0) {
-      this.applyAspectRatio(delivery.metadataAspectRatio);
+    const deliveryRatio =
+      delivery.metadataAspectRatio != null && delivery.metadataAspectRatio > 0
+        ? delivery.metadataAspectRatio
+        : null;
+    const deferRatioForShrinkTransition =
+      this.slotGeometry() === 'intrinsic' &&
+      deliveryRatio != null &&
+      this.state() === 'loading-surface-visible';
+
+    if (!deferRatioForShrinkTransition && deliveryRatio != null) {
+      this.applyAspectRatio(deliveryRatio);
     }
 
     if (delivery.warmPreviewUrl) {
@@ -260,14 +278,14 @@ export class MediaDisplayComponent implements AfterViewInit {
         const currentState = this.state();
         const intrinsic = this.slotGeometry() === 'intrinsic';
 
-        if (
-          intrinsic &&
-          currentState === 'loading-surface-visible' &&
-          this.hasKnownAspectRatio()
-        ) {
-          this.goTo('ratio-known-contain');
-          if (this.prefersReducedMotion()) {
-            this.advanceAfterRatioSettled();
+        if (intrinsic && currentState === 'loading-surface-visible') {
+          if (deliveryRatio != null) {
+            this.beginIntrinsicRatioTransition(deliveryRatio);
+            return;
+          }
+
+          if (this.resolvedUrl()) {
+            this.probeIntrinsicAspectRatioFromUrl(this.resolvedUrl());
           }
           return;
         }
@@ -334,15 +352,126 @@ export class MediaDisplayComponent implements AfterViewInit {
     return true;
   }
 
+  private probeIntrinsicAspectRatioFromUrl(url: string): void {
+    if (this.slotGeometry() !== 'intrinsic' || !url.trim()) {
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      if (width > 0 && height > 0) {
+        this.beginIntrinsicRatioTransition(width / height);
+        return;
+      }
+
+      this.revealWithoutIntrinsicRatioTransition();
+    };
+    img.onerror = () => this.revealWithoutIntrinsicRatioTransition();
+    img.src = url;
+  }
+
+  private revealWithoutIntrinsicRatioTransition(): void {
+    const current = this.state();
+    if (current === 'ratio-known-contain') {
+      this.advanceAfterRatioSettled();
+      return;
+    }
+
+    if (current === 'loading-surface-visible' || current === 'media-ready') {
+      this.goTo('content-fade-in');
+    }
+  }
+
+  private beginIntrinsicRatioTransition(ratio: number): void {
+    if (this.slotGeometry() !== 'intrinsic') {
+      this.applyAspectRatio(ratio);
+      return;
+    }
+
+    const current = this.state();
+    if (current !== 'loading-surface-visible' && current !== 'ratio-known-contain') {
+      return;
+    }
+
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => {
+        if (this.state() !== 'loading-surface-visible') {
+          return;
+        }
+
+        this.goTo('ratio-known-contain');
+        this.applyAspectRatio(ratio);
+        this.scheduleRatioSettleCheck();
+      });
+      return;
+    }
+
+    this.goTo('ratio-known-contain');
+    this.applyAspectRatio(ratio);
+    this.scheduleRatioSettleCheck();
+  }
+
+  private scheduleRatioSettleCheck(): void {
+    if (this.prefersReducedMotion()) {
+      this.advanceAfterRatioSettled();
+      return;
+    }
+
+    if (typeof requestAnimationFrame !== 'function') {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const viewport = this.hostEl.nativeElement.querySelector(
+          '.media-display__viewport',
+        ) as HTMLElement | null;
+        if (!viewport || this.state() !== 'ratio-known-contain') {
+          return;
+        }
+
+        const duration = this.readActiveTransitionDurationMs(viewport, 'aspect-ratio');
+        if (duration <= 0) {
+          this.advanceAfterRatioSettled();
+        }
+      });
+    });
+  }
+
+  private readActiveTransitionDurationMs(element: HTMLElement, property: string): number {
+    const style = getComputedStyle(element);
+    const durations = style.transitionDuration.split(',').map((part) => part.trim());
+    const properties = style.transitionProperty.split(',').map((part) => part.trim());
+
+    let maxMs = 0;
+    for (let i = 0; i < properties.length; i++) {
+      if (properties[i] !== property) {
+        continue;
+      }
+
+      const raw = durations[i] ?? durations[0] ?? '0s';
+      const seconds = raw.endsWith('ms') ? parseFloat(raw) / 1000 : parseFloat(raw);
+      if (Number.isFinite(seconds)) {
+        maxMs = Math.max(maxMs, seconds * 1000);
+      }
+    }
+
+    return maxMs;
+  }
+
   private advanceAfterRatioSettled(): void {
     if (this.state() !== 'ratio-known-contain') {
       return;
     }
 
-    this.goTo('media-ready');
     if (this.resolvedUrl()) {
       this.goTo('content-fade-in');
+      return;
     }
+
+    this.goTo('media-ready');
   }
 
   private prefersReducedMotion(): boolean {
