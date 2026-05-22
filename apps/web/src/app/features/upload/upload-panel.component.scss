@@ -152,9 +152,14 @@
   // @see docs/specs/component/media/file-type-chips.md
   &__dropzone-pick {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     align-items: center;
+    align-self: stretch;
+    justify-content: center;
     gap: var(--spacing-2);
+    width: 100%;
+    min-height: 0;
     margin: 0;
     padding: 0;
     border: 0;
@@ -219,6 +224,7 @@
 
   &__file-type-chips {
     position: relative;
+    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     flex-grow: 0;

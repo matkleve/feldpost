@@ -20,7 +20,7 @@
   [class.upload-panel--visible]="visible()"
   [class.upload-panel--embedded]="embeddedInPane()"
   role="region"
-  [attr.aria-label]="t('auto.0366.upload_files', 'Upload files')"
+  [attr.aria-label]="t('upload.panel.title', 'Upload Panel')"
 >
   <!-- ═══════════════════════════════════════════════════════════════════════════
     BLOCK 1: INTAKE ZONE
@@ -30,14 +30,9 @@
     <div class="upload-panel__header">
       <span class="material-icons upload-panel__header-icon" aria-hidden="true">cloud_upload</span>
       <div class="upload-panel__header-copy">
-        <h3 class="upload-panel__title">{{ t('auto.0366.upload_files', 'Upload files') }}</h3>
+        <h3 class="upload-panel__title">{{ t('upload.panel.title', 'Upload Panel') }}</h3>
         <p class="upload-panel__subtitle">
-          {{
-            t(
-              'auto.0012.add_photos_videos_pdfs_and_office_files_for_the_active_project',
-              'Add photos, videos, PDFs, and Office files for the active project.'
-            )
-          }}
+          {{ t('upload.panel.subtitle', 'You can upload things here.') }}
         </p>
       </div>
     </div>
@@ -53,7 +48,6 @@
       (dragover)="inputHandlers.onDragOver($event)"
       (dragleave)="inputHandlers.onDragLeave($event)"
       (drop)="inputHandlers.onDrop($event); laneHandlers.setSelectedLane('uploading')"
-      (click)="onDropzoneDismissPinned($event)"
     >
       <button
         type="button"

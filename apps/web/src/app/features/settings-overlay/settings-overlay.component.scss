@@ -121,19 +121,21 @@
     min-width: 0;
   }
 
-  // Small uppercase kicker line above the rail title
+  // Rail primary line — same hierarchy as section title (global h2 metrics; color only here)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__kicker {
-    font-size: var(--font-size-xs);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted-foreground);
+    margin: 0;
+    color: var(--foreground);
   }
 
-  // Primary rail heading color (typography scale from global styles.scss)
+  // Secondary rail line under Settings (intro scale, not a second heading)
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__title {
-    color: var(--foreground);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--muted-foreground);
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -399,11 +401,10 @@
     --hlm-toggle-button-flex: 1 1 0;
   }
 
-  // Theme mode pill toggle tighter inline padding
+  // Theme mode row uses the same shared pill track padding as other segmented controls
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__segmented--theme {
-    --hlm-toggle-button-padding-inline: 0.75rem;
-    --hlm-toggle-button-padding-inline-mobile: 0.6rem;
+    --hlm-pill-toggle-width: 100%;
   }
 
   // Full-width interactive row for switch-backed booleans

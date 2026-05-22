@@ -1,4 +1,6 @@
+import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
 import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec';
 
 describe('UploadPanelComponent creation', () => {
@@ -23,6 +25,15 @@ describe('UploadPanelComponent DOM basic inputs', () => {
     const { fixture } = await setupUploadPanel();
     const zone = fixture.debugElement.query(By.css('.upload-panel__dropzone'));
     expect(zone).not.toBeNull();
+  });
+
+  it('opens the file picker when clicking the drop zone pick surface', async () => {
+    const { fixture } = await setupUploadPanel();
+    const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
+    const openSpy = vi.spyOn(inputHandlers, 'openFilePicker');
+    const pick = fixture.debugElement.query(By.css('.upload-panel__dropzone-pick'));
+    pick.triggerEventHandler('click', new MouseEvent('click'));
+    expect(openSpy).toHaveBeenCalled();
   });
 
   it('renders a hidden file input', async () => {

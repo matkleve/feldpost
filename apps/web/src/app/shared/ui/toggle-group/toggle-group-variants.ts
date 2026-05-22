@@ -67,32 +67,32 @@ export const pillToggleVariants = cva(
       {
         vertical: false,
         size: 'sm',
-        class: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
+        class: '[&_[hlmToggleGroup]]:h-9',
       },
       {
         vertical: false,
         size: 'md',
-        class: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
+        class: '[&_[hlmToggleGroup]]:h-9',
       },
       {
         vertical: false,
         size: 'lg',
-        class: '[&_[hlmToggleGroup]]:h-10 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
+        class: '[&_[hlmToggleGroup]]:h-10',
       },
       {
         vertical: true,
         size: 'sm',
-        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0 [&_[hlmToggleGroup]]:p-1',
+        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0',
       },
       {
         vertical: true,
         size: 'md',
-        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0 [&_[hlmToggleGroup]]:p-1',
+        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0',
       },
       {
         vertical: true,
         size: 'lg',
-        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0 [&_[hlmToggleGroup]]:p-1',
+        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0',
       },
     ],
     defaultVariants: {
@@ -106,19 +106,19 @@ export const pillToggleVariants = cva(
 
 export type PillToggleVariantProps = VariantProps<typeof pillToggleVariants>;
 
-// Toggle group track — outer h-9 matches `hlmBtn size="sm"`; p-1 gap-1 inset around inner segments.
+// Toggle group track — fixed button row height; p-1 inset; segments shrink inside
 // @see docs/design/components/action-interaction-kernel.md#button-policy
 export const toggleGroupVariants = cva(
   [
-    'inline-flex items-center justify-center rounded-md bg-muted gap-1',
+    'box-border inline-flex items-center justify-center rounded-md bg-muted gap-1 p-1',
     'motion-reduce:transition-none motion-reduce:duration-0 motion-reduce:[animation-duration:1ms] motion-reduce:[transition-duration:1ms]',
   ].join(' '),
   {
     variants: {
       size: {
-        sm: 'h-9 px-1 py-0',
-        md: 'h-9 px-1 py-0',
-        lg: 'h-10 px-1 py-0',
+        sm: 'h-9',
+        md: 'h-9',
+        lg: 'h-10',
       },
     },
     defaultVariants: { size: 'md' },
@@ -132,6 +132,7 @@ export const toggleGroupItemVariants = cva(
     // Horizontal padding lives on size variants only (`ps-*` / `pe-*`): icon+label rows need slightly larger inline-start than end for optical balance (matches action-interaction kernel intent; `icon` uses `p-0`).
     // @see docs/design/components/action-interaction-kernel.md#button-policy
     'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium text-muted-foreground ring-offset-background transition-all',
+    '[&_.material-icons]:text-[1.125rem] [&_.material-icons]:leading-none',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
     'data-[state=on]:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=on]:text-[color:var(--primary)] data-[state=on]:shadow-none',
@@ -143,10 +144,10 @@ export const toggleGroupItemVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-9 ps-2.5 pe-2 text-xs',
-        md: 'h-9 ps-2.5 pe-2 text-sm',
-        lg: 'h-10 ps-4 pe-3',
-        icon: 'h-9 w-9 min-h-9 min-w-9 p-0',
+        sm: 'h-7 min-h-0 shrink-0 ps-2 pe-1.5 text-xs',
+        md: 'h-7 min-h-0 shrink-0 ps-2.5 pe-2 text-xs',
+        lg: 'h-8 min-h-0 shrink-0 ps-3 pe-2 text-xs',
+        icon: 'h-7 w-7 min-h-7 min-w-7 shrink-0 p-0',
       },
     },
     defaultVariants: { size: 'md' },

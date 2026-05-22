@@ -3,12 +3,12 @@ import type { TranslationEntry } from './translation-catalog';
 /** Upload panel + file-type chip keys (deterministic DE/IT without DB seed). */
 export const UPLOAD_PANEL_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
   {
-    key: 'auto.0012.add_photos_videos_pdfs_and_office_files_for_the_active_project',
-    original: 'Add photos, videos, PDFs, and Office files for the active project.',
+    key: 'upload.panel.subtitle',
+    original: 'You can upload things here.',
     context: 'Upload panel section subtitle.',
-    en: 'Add photos, videos, PDFs, and Office files for the active project.',
-    de: 'Fügen Sie Fotos, Videos, PDFs und Office-Dateien für das aktive Projekt hinzu.',
-    it: 'Aggiungi foto, video, PDF e file Office per il progetto attivo.',
+    en: 'You can upload things here.',
+    de: 'Du kannst hier Dinge hochladen.',
+    it: 'Puoi caricare file qui.',
   },
   {
     key: 'auto.0103.drag_files_here_or_click_to_select',
@@ -27,12 +27,12 @@ export const UPLOAD_PANEL_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> =
     it: 'Scatta una foto',
   },
   {
-    key: 'auto.0366.upload_files',
-    original: 'Upload files',
+    key: 'upload.panel.title',
+    original: 'Upload Panel',
     context: 'Upload panel section title.',
-    en: 'Upload files',
-    de: 'Dateien hochladen',
-    it: 'Carica file',
+    en: 'Upload Panel',
+    de: 'Upload-Panel',
+    it: 'Pannello caricamento',
   },
   {
     key: 'auto.0367.upload_folder',

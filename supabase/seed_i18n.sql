@@ -22323,6 +22323,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.title', 'Upload Panel', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload Panel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Upload-Panel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Pannello caricamento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.subtitle', 'You can upload things here.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'You can upload things here.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Du kannst hier Dinge hochladen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Puoi caricare file qui.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.panel.lane.uploading', 'Queue', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

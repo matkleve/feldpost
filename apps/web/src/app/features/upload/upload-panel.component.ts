@@ -271,20 +271,6 @@ export class UploadPanelComponent {
     this.locationModeRowPreview.set(false);
   }
 
-  onDropzoneDismissPinned(event: MouseEvent): void {
-    if (!this.pinnedFileTypeGroupId()) {
-      return;
-    }
-    const target = event.target;
-    if (!(target instanceof Element)) {
-      return;
-    }
-    if (target.closest('.upload-panel__file-type-chips')) {
-      return;
-    }
-    this.clearPinnedFileTypeGroup();
-  }
-
   onDropzonePickClick(event: MouseEvent, fileInput: HTMLInputElement): void {
     event.stopPropagation();
     if (this.pinnedFileTypeGroupId()) {

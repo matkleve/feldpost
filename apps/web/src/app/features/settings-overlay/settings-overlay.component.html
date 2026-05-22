@@ -25,13 +25,13 @@
           </button>
         </div>
         <header class="settings-overlay__sections-header">
-          <p class="settings-overlay__kicker">{{ t('settings.overlay.kicker', 'Settings') }}</p>
-          <h2
+          <h2 class="settings-overlay__kicker">{{ t('settings.overlay.kicker', 'Settings') }}</h2>
+          <p
             class="settings-overlay__title"
             [attr.title]="t('settings.overlay.title', 'Workspace Preferences')"
           >
             {{ t('settings.overlay.title', 'Workspace Preferences') }}
-          </h2>
+          </p>
           <p
             class="settings-overlay__subtitle"
             [attr.title]="
@@ -119,7 +119,7 @@
                   >
                     <label hlmLabel>{{ t('settings.overlay.general.language.label', 'Language') }}</label>
                     <div class="settings-overlay__field-value">
-                      <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+                      <div class="settings-overlay__segmented" hlmPillToggle size="sm" data-i18n-skip>
                         <div
                           hlmToggleGroup
                           brnToggleGroup
@@ -160,7 +160,7 @@
                   >
                     <label hlmLabel>{{ t('settings.overlay.general.density.label', 'Density') }}</label>
                     <div class="settings-overlay__field-value">
-                      <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+                      <div class="settings-overlay__segmented" hlmPillToggle size="sm" data-i18n-skip>
                         <div
                           hlmToggleGroup
                           brnToggleGroup
@@ -242,7 +242,7 @@
                       <div
                         class="settings-overlay__segmented settings-overlay__segmented--theme"
                         hlmPillToggle
-                        size="md"
+                        size="sm"
                         data-i18n-skip
                       >
                         <div
@@ -498,7 +498,7 @@
                       t('settings.overlay.map.markerMotion.label', 'Marker motion')
                     }}</label>
                     <div class="settings-overlay__field-value">
-                      <div class="settings-overlay__segmented" hlmPillToggle size="md" data-i18n-skip>
+                      <div class="settings-overlay__segmented" hlmPillToggle size="sm" data-i18n-skip>
                         <div
                           hlmToggleGroup
                           brnToggleGroup
