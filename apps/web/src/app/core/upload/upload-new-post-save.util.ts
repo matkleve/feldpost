@@ -65,6 +65,20 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
   // - If we have a title address and no coords, do forward geocoding (address -> coords).
   // - If both are present, keep existing upload result as-is in this phase.
   //   Reconciliation/mismatch handling is intentionally separated from this finalization step.
+  if (updatedJob.locationRequirementMode === 'optional') {
+    setPhase('complete');
+    markDone();
+    emitCompletion({
+      jobId,
+      finalJob: updatedJob,
+      setLocalUrl,
+      emitImageUploaded,
+      emitBatchProgress,
+      drainQueue,
+    });
+    return;
+  }
+
   if (updatedJob.coords && !updatedJob.titleAddress) {
     setPhase('resolving_address');
     await enrichWithReverseGeocode(updatedJob.imageId!);

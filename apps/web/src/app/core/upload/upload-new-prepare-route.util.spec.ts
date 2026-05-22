@@ -114,6 +114,37 @@ describe('routePreparedNewJob source precedence (positive branches)', () => {
   });
 });
 
+describe('routePreparedNewJob locationRequirementMode optional', () => {
+  it('uploads without auto location when panel mode is optional despite EXIF coords', async () => {
+    let job = createJob({
+      locationRequirementMode: 'optional',
+      coords: { lat: 48.2082, lng: 16.3738 },
+    });
+    const deps = createRouteDeps({
+      getJob: () => job,
+      setJob: (next) => {
+        job = next;
+      },
+      parsedAddress: { address: 'Denisgasse 46, Wien', confidence: 'high' },
+    });
+
+    const runUploadPhase = vi.fn().mockResolvedValue(undefined);
+    await routePreparedNewJob(
+      deps as Parameters<typeof routePreparedNewJob>[0],
+      job.id,
+      job,
+      { coords: { lat: 48.2082, lng: 16.3738 } },
+      createPipelineContext(),
+      runUploadPhase,
+    );
+
+    expect(job.locationSourceUsed).toBe('none');
+    expect(job.titleAddress).toBeUndefined();
+    expect(job.coords).toBeUndefined();
+    expect(runUploadPhase).toHaveBeenCalledWith(job.id, undefined, expect.anything(), expect.anything());
+  });
+});
+
 describe('routePreparedNewJob source precedence (unresolved branches)', () => {
   it('routes to issues and marks source none when no exif and no reliable title', async () => {
     let job = createJob({ titleAddress: undefined, titleAddressSource: undefined });

@@ -51,10 +51,12 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
   if (!job) return;
   if (isCancelled()) return;
 
+  const locationInputs = resolveUploadLocationInputs(job, coords, parsedExif);
+
   const result = await runUploadCall({
     job,
-    coords,
-    parsedExif,
+    coords: locationInputs.coords,
+    parsedExif: locationInputs.parsedExif,
     uploadService,
     jobState,
     timeoutMs: uploadPhaseTimeoutMs,
@@ -90,6 +92,22 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     setLocalUrl: (imageId, localUrl) => mediaDownloadService.setLocalUrl(imageId, localUrl),
     emitImageUploaded: (event) => ctx.emitImageUploaded(event),
   });
+}
+
+/** Keeps EXIF metadata but blocks map assignment when panel mode is "No auto location". */
+export function resolveUploadLocationInputs(
+  job: UploadJob,
+  coords: ExifCoords | undefined,
+  parsedExif: ParsedExif | undefined,
+): { coords: ExifCoords | undefined; parsedExif: ParsedExif | undefined } {
+  if (job.locationRequirementMode !== 'optional') {
+    return { coords, parsedExif };
+  }
+
+  return {
+    coords: undefined,
+    parsedExif: parsedExif ? { ...parsedExif, coords: undefined } : parsedExif,
+  };
 }
 
 async function runUploadCall(args: {
@@ -151,11 +169,16 @@ async function handleUploadResult(args: {
   }
 
   jobState.setPhase(jobId, 'saving_record');
+  const savedCoords =
+    jobState.findJob(jobId)?.locationRequirementMode === 'optional'
+      ? undefined
+      : result.coords;
+
   jobState.updateJob(jobId, {
     progress: 100,
     imageId: result.id,
     storagePath: result.storagePath,
-    coords: result.coords,
+    coords: savedCoords,
     direction: result.direction,
   });
 

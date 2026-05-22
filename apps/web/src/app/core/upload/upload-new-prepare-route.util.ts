@@ -33,7 +33,7 @@ export async function resumeIfAlreadyRoutedNewJob(
 ): Promise<boolean> {
   const job = deps.jobState.findJob(jobId)!;
 
-  if (job.coords && !job.conflictResolution) {
+  if (job.coords && !job.conflictResolution && isAutoLocationEnabled(job)) {
     await runUploadPhase(jobId, job.coords, job.parsedExif, ctx);
     return true;
   }
@@ -108,6 +108,11 @@ export async function routePreparedNewJob(
   type TextSource = 'file' | 'folder';
   deps.jobState.setPhase(jobId, 'extracting_title');
 
+  if (!isAutoLocationEnabled(job)) {
+    await uploadWithoutAutoLocation(deps, jobId, job, parsedExif, ctx, runUploadPhase);
+    return;
+  }
+
   const parsed = deps.filenameParser.extractAddress(job.file.name);
   const inheritedTitleAddress = job.titleAddress?.trim();
   const titleConfidenceThreshold = config.titleConfidenceThreshold;
@@ -153,14 +158,8 @@ export async function routePreparedNewJob(
     return;
   }
 
-  if (job.locationRequirementMode !== 'required') {
-    deps.jobState.updateJob(jobId, {
-      issueKind: undefined,
-      locationSourceUsed: 'none',
-    });
-    const conflicted = await runConflictCheck(deps, jobId, ctx);
-    if (conflicted) return;
-    await runUploadPhase(jobId, undefined, parsedExif, ctx);
+  if (job.locationRequirementMode === 'optional') {
+    await uploadWithoutAutoLocation(deps, jobId, job, parsedExif, ctx, runUploadPhase);
     return;
   }
 
@@ -190,7 +189,7 @@ async function prepareExifAndFile(
   const parsedExif = job.parsedExif ?? (await deps.uploadService.parseExif(job.file));
   deps.jobState.updateJob(jobId, { parsedExif });
 
-  if (parsedExif.coords) {
+  if (parsedExif.coords && isAutoLocationEnabled(job)) {
     deps.jobState.updateJob(jobId, {
       coords: parsedExif.coords,
       direction: parsedExif.direction,
@@ -262,6 +261,36 @@ async function hashAndCheckDedup(
     ctx,
   });
   return true;
+}
+
+/** Panel "No auto location" — only explicit optional disables GPS/filename routing. */
+function isAutoLocationEnabled(job: UploadJob): boolean {
+  return job.locationRequirementMode !== 'optional';
+}
+
+async function uploadWithoutAutoLocation(
+  deps: NewPrepareRouteDeps,
+  jobId: string,
+  job: UploadJob,
+  parsedExif: ParsedExif,
+  ctx: PipelineContext,
+  runUploadPhase: (
+    jobId: string,
+    coords: UploadJob['coords'],
+    parsedExif: ParsedExif | undefined,
+    ctx: PipelineContext,
+  ) => Promise<void>,
+): Promise<void> {
+  deps.jobState.updateJob(jobId, {
+    issueKind: undefined,
+    locationSourceUsed: 'none',
+    coords: undefined,
+    titleAddress: undefined,
+    titleAddressSource: undefined,
+  });
+  const conflicted = await runConflictCheck(deps, jobId, ctx);
+  if (conflicted) return;
+  await runUploadPhase(jobId, undefined, parsedExif, ctx);
 }
 
 async function runConflictCheck(
