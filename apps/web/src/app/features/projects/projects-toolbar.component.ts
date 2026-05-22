@@ -24,7 +24,11 @@ import {
   toggleOptionLayout,
   toggleSingleStringValue,
 } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
-import { buildCardVariantToggleOptions } from '../../shared/ui-primitives/card-variant-toggle.helpers';
+import {
+  buildCardVariantToggleOptions,
+  buildCompactCardVariantSwitchTitle,
+  getNextCardVariantToggleOption,
+} from '../../shared/ui-primitives/card-variant-toggle.helpers';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
@@ -115,19 +119,34 @@ export class ProjectsToolbarComponent {
   readonly cardVariantToggleOptions = computed(() =>
     buildCardVariantToggleOptions(this.t, this.allowedCardVariants(), true),
   );
+  readonly currentCardVariantToggleOption = computed(() => {
+    const options = this.cardVariantToggleOptions();
+    if (options.length === 0) return null;
+    const current = this.cardVariant();
+    return options.find((opt) => opt.id === current) ?? options[0];
+  });
+  readonly nextCardVariantToggleOption = computed(() =>
+    getNextCardVariantToggleOption(this.cardVariantToggleOptions(), this.cardVariant()),
+  );
+  readonly compactCardVariantToggleTitle = computed(() =>
+    buildCompactCardVariantSwitchTitle(this.t, this.nextCardVariantToggleOption()),
+  );
   readonly buttons = computed(() => [
     {
       id: 'grouping' as const,
+      icon: 'group_work',
       label: this.t('workspace.toolbar.button.grouping', 'Grouping'),
       active: this.hasGrouping(),
     },
     {
       id: 'filter' as const,
+      icon: 'filter_list',
       label: this.t('workspace.toolbar.button.filter', 'Filter'),
       active: this.hasFilters(),
     },
     {
       id: 'sort' as const,
+      icon: 'sort',
       label: this.t('workspace.toolbar.button.sort', 'Sort'),
       active: this.hasCustomSort(),
     },
@@ -180,6 +199,15 @@ export class ProjectsToolbarComponent {
 
   onCardVariantToggleChange(raw: ToggleValue<string>): void {
     const value = toggleSingleStringValue(raw);
+    if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
+      this.cardVariantChange.emit(value);
+    }
+  }
+
+  cycleCardVariant(): void {
+    const next = this.nextCardVariantToggleOption();
+    if (!next) return;
+    const value = next.id;
     if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
       this.cardVariantChange.emit(value);
     }

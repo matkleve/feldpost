@@ -24,7 +24,11 @@ import {
   toolbarDropdownPositionWidthPx,
 } from '../../../../shared/dropdown-trigger/toolbar-menu-panel-layout';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
-import { buildCardVariantToggleOptions } from '../../../../shared/ui-primitives/card-variant-toggle.helpers';
+import {
+  buildCardVariantToggleOptions,
+  buildCompactCardVariantSwitchTitle,
+  getNextCardVariantToggleOption,
+} from '../../../../shared/ui-primitives/card-variant-toggle.helpers';
 import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { CardVariantSettingsService } from '../../../../shared/ui-primitives/card-variant-settings.service';
 import {
@@ -82,20 +86,12 @@ export class WorkspaceToolbarComponent implements OnInit {
     const current = this.thumbnailSizePreset();
     return options.find((opt) => opt.id === current) ?? options[0];
   });
-  readonly nextCardVariantToggleOption = computed(() => {
-    const options = this.cardVariantToggleOptions();
-    if (options.length === 0) return null;
-    const current = this.thumbnailSizePreset();
-    const currentIndex = options.findIndex((opt) => opt.id === current);
-    const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % options.length;
-    return options[nextIndex] ?? options[0];
-  });
-  readonly compactCardVariantToggleTitle = computed(() => {
-    const next = this.nextCardVariantToggleOption();
-    if (!next) return this.t('workspace.toolbar.size.compact.switchTo.fallback', 'Switch view');
-    const template = this.t('workspace.toolbar.size.compact.switchTo', 'Switch to {{view}}');
-    return template.replace('{{view}}', next.label);
-  });
+  readonly nextCardVariantToggleOption = computed(() =>
+    getNextCardVariantToggleOption(this.cardVariantToggleOptions(), this.thumbnailSizePreset()),
+  );
+  readonly compactCardVariantToggleTitle = computed(() =>
+    buildCompactCardVariantSwitchTitle(this.t, this.nextCardVariantToggleOption()),
+  );
 
   readonly dropdownAnchor = signal<HTMLElement | null>(null);
 

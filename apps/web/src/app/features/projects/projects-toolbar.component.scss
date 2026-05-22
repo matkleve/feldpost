@@ -1,7 +1,12 @@
 @use '../../shared/dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../../shared/dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
 
+// Container query root: toolbar width drives icon-only menu triggers and compact view toggle.
+// @see docs/specs/page/projects-page.md
 :host {
   display: block;
+  container-type: inline-size;
+  container-name: projects-toolbar;
 }
 
 .projects-toolbar__controls {
@@ -24,10 +29,13 @@
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
 }
 
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('projects-toolbar');
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('projects-toolbar');
 
   // Non-interactive preview strip beside the live status toggle; appears when archived projects exist.
   // @see docs/specs/ui/workspace/workspace-view-system.md
@@ -74,7 +82,11 @@
 
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('projects-toolbar');
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-active-states('projects-toolbar');
 }
+
+@include fp-toolbar-breakpoints.toolbar-size-control-responsive('projects-toolbar', projects-toolbar);
+@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('projects-toolbar', projects-toolbar);
 
 // Entrance motion for inactive strip appearing beside the live pill.
 // @see docs/specs/ui/workspace/workspace-view-system.md

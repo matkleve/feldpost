@@ -15,7 +15,11 @@ import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { VStackComponent } from '../../shared/containers';
 import { MediaPageHeaderComponent, type MediaPageHeaderState } from './media-page-header.component';
 import { MediaContentComponent, type MediaContentState } from './media-content.component';
-import { buildCardVariantToggleOptions } from '../../shared/ui-primitives/card-variant-toggle.helpers';
+import {
+  buildCardVariantToggleOptions,
+  buildCompactCardVariantSwitchTitle,
+  getNextCardVariantToggleOption,
+} from '../../shared/ui-primitives/card-variant-toggle.helpers';
 import { toggleSingleStringValue } from '../../shared/ui/toggle-group/toggle-group-option.helpers';
 import type { SelectedItemsContextPort } from '../../core/workspace-pane/workspace-pane-context.port';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspace-pane-observer.adapter';
@@ -108,6 +112,18 @@ export class MediaComponent implements OnDestroy {
   readonly cardVariantToggleOptions = computed(() =>
     buildCardVariantToggleOptions((k, f) => this.t(k, f), this.allowedCardVariants, true),
   );
+  readonly currentCardVariantToggleOption = computed(() => {
+    const options = this.cardVariantToggleOptions();
+    if (options.length === 0) return null;
+    const current = this.cardVariant();
+    return options.find((opt) => opt.id === current) ?? options[0];
+  });
+  readonly nextCardVariantToggleOption = computed(() =>
+    getNextCardVariantToggleOption(this.cardVariantToggleOptions(), this.cardVariant()),
+  );
+  readonly compactCardVariantToggleTitle = computed(() =>
+    buildCompactCardVariantSwitchTitle((k, f) => this.t(k, f), this.nextCardVariantToggleOption()),
+  );
   readonly projectNameForFn = (projectId: string | null): string => this.projectNameFor(projectId);
   readonly emptyReason = computed<'auth-required' | 'no-results'>(() => {
     if (!this.authService.loading() && !this.authService.user()) {
@@ -185,21 +201,25 @@ export class MediaComponent implements OnDestroy {
     return [
       {
         id: 'projects' as const,
+        icon: 'folder',
         label: this.t('workspace.toolbar.button.projects', 'Projects'),
         active: this.hasProject,
       },
       {
         id: 'filter' as const,
+        icon: 'filter_list',
         label: this.t('workspace.toolbar.button.filter', 'Filter'),
         active: this.hasFilters,
       },
       {
         id: 'sort' as const,
+        icon: 'sort',
         label: this.t('workspace.toolbar.button.sort', 'Sort'),
         active: this.hasCustomSort,
       },
       {
         id: 'grouping' as const,
+        icon: 'group_work',
         label: this.t('workspace.toolbar.button.grouping', 'Grouping'),
         active: this.hasGrouping,
       },
@@ -268,6 +288,15 @@ export class MediaComponent implements OnDestroy {
 
   onCardVariantToggleChange(raw: ToggleValue<string>): void {
     const value = toggleSingleStringValue(raw);
+    if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
+      this.cardVariant.set(value);
+    }
+  }
+
+  cycleCardVariant(): void {
+    const next = this.nextCardVariantToggleOption();
+    if (!next) return;
+    const value = next.id;
     if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
       this.cardVariant.set(value);
     }

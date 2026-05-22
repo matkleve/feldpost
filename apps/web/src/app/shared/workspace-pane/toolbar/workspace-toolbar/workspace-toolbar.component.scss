@@ -1,8 +1,5 @@
 @use '../../../dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
-
-// Container query root: toolbar width drives icon-only vs icon+label menu triggers
-// @see docs/specs/ui/workspace/workspace-pane.md
-$workspace-toolbar-compact-max: 42.5rem; // 680px — four labeled triggers + view toggle minimum width
+@use '../../../dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
 
 // Flex child of .workspace-pane — owns its own padding, replaces workspace-pane-toolbar wrapper
 // @see docs/specs/ui/workspace/workspace-pane.md
@@ -41,117 +38,15 @@ $workspace-toolbar-compact-max: 42.5rem; // 680px — four labeled triggers + vi
   flex: 1;
 }
 
-.workspace-toolbar__size-control {
-  inline-size: auto;
-  min-inline-size: auto;
-  flex-shrink: 0;
-}
-
-.workspace-toolbar__size-control app-snap-size-slider {
-  min-inline-size: auto;
-}
-
-.workspace-toolbar__size-control--compact {
-  display: none;
-  width: 2.25rem;
-  height: 2.25rem;
-  min-width: 2.25rem;
-  padding: 0;
-  justify-content: center;
-  align-items: center;
-}
-
-@container workspace-toolbar (max-width: 23.75rem) {
-  .workspace-toolbar__size-control--full {
-    display: none;
-  }
-
-  .workspace-toolbar__size-control--compact {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('workspace-toolbar');
-
-  // Spacious mode: fixed intrinsic width — labels do not wrap or compress in a narrow toolbar
-  // @see docs/specs/ui/workspace/workspace-pane.md
-  .workspace-toolbar__menu-trigger {
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  // Leading Material icon sizing when compact query shows it
-  // @see docs/specs/ui/workspace/workspace-pane.md
-  .workspace-toolbar__menu-trigger-icon {
-    flex-shrink: 0;
-    font-size: 1.125rem;
-    line-height: 1;
-  }
-
-  // Full label text (never truncated); hidden in compact container query
-  // @see docs/specs/ui/workspace/workspace-pane.md
-  .workspace-toolbar__menu-trigger-label {
-    white-space: nowrap;
-  }
-
-  // Trailing chevron for dropdown affordance in spacious mode
-  // @see docs/specs/ui/workspace/workspace-pane.md
-  .workspace-toolbar__menu-trigger-chevron {
-    flex-shrink: 0;
-    font-size: 1rem;
-    line-height: 1;
-    transition: transform var(--motion-duration-fast) var(--motion-ease-out);
-  }
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('workspace-toolbar');
 }
 
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('workspace-toolbar');
-
-  // Primary highlight when filter/sort/group/project selection is active
-  // @see docs/specs/ui/workspace/workspace-pane.md
-  button.workspace-toolbar__menu-trigger[data-active='true'] {
-    background-color: color-mix(in srgb, var(--primary) 10%, transparent);
-    color: var(--primary);
-    border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
-  }
-
-  // Open shell: rotate trailing chevron (spacious mode only; chevron hidden when compact)
-  // @see docs/specs/ui/workspace/workspace-pane.md
-  .workspace-toolbar__menu-trigger--open .workspace-toolbar__menu-trigger-chevron {
-    transform: rotate(180deg);
-  }
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-active-states('workspace-toolbar');
 }
 
-// Spacious default: hide leading icon (unlayered so global `.material-icons` does not win)
-// @see docs/specs/ui/workspace/workspace-pane.md
-.workspace-toolbar__menu-trigger-icon {
-  display: none;
-}
-
-// Compact toolbar: icon-only menu triggers (label + chevron hidden)
-// @see docs/specs/ui/workspace/workspace-pane.md
-@container workspace-toolbar (max-width: #{$workspace-toolbar-compact-max}) {
-  .workspace-toolbar__menu-trigger-icon {
-    display: inline-flex;
-    font-size: 22px;
-    line-height: 1;
-  }
-
-  .workspace-toolbar__menu-trigger-label,
-  .workspace-toolbar__menu-trigger-chevron {
-    display: none;
-  }
-
-  .workspace-toolbar__menu-trigger {
-    width: 2.25rem;
-    height: 2.25rem;
-    min-width: 2.25rem;
-    flex-shrink: 0;
-    padding: 0;
-    justify-content: center;
-    align-items: center;
-  }
-}
+@include fp-toolbar-breakpoints.toolbar-size-control-responsive('workspace-toolbar', workspace-toolbar);
+@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('workspace-toolbar', workspace-toolbar);

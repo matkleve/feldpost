@@ -18,6 +18,29 @@ export function iconForCardVariant(variant: CardVariant): string {
   }
 }
 
+/** Returns the next card-variant option in toolbar toggle order (wraps). */
+/** @see docs/specs/ui/workspace/workspace-pane.md */
+export function getNextCardVariantToggleOption<T extends { id: string }>(
+  options: ReadonlyArray<T>,
+  currentId: string,
+): T | null {
+  if (options.length === 0) return null;
+  const currentIndex = options.findIndex((opt) => opt.id === currentId);
+  const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % options.length;
+  return options[nextIndex] ?? options[0];
+}
+
+/** Builds aria-label/title for the compact single-button card-variant cycle control. */
+/** @see docs/specs/ui/workspace/workspace-pane.md */
+export function buildCompactCardVariantSwitchTitle(
+  t: (key: string, fallback: string) => string,
+  next: { label: string } | null,
+): string {
+  if (!next) return t('workspace.toolbar.size.compact.switchTo.fallback', 'Switch view');
+  const template = t('workspace.toolbar.size.compact.switchTo', 'Switch to {{view}}');
+  return template.replace('{{view}}', next.label);
+}
+
 /** Builds toggle options for thumbnail / card layout presets with i18n labels. */
 /** @see docs/MIGRATION_PLAN.md */
 export function buildCardVariantToggleOptions(

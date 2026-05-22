@@ -1,4 +1,5 @@
 @use '../../shared/dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../../shared/dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
 
 // Declares host block container for the /media route shell.
 // @see docs/specs/component/item-grid/item-grid.md#wiring
@@ -8,8 +9,18 @@
   padding: var(--spacing-4);
 }
 
+// Container query root for toolbar breakpoints (pane-toolbar host carries class).
+// @see docs/specs/component/item-grid/item-grid.md#actions
+app-pane-toolbar.media-toolbar {
+  display: block;
+  width: 100%;
+  container-type: inline-size;
+  container-name: media-toolbar;
+}
+
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('media-toolbar');
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('media-toolbar');
 
   // Defines full-width toolbar host area for variant switch controls.
   // @see docs/specs/component/item-grid/item-grid.md#actions
@@ -21,22 +32,32 @@
   // @see docs/specs/component/item-grid/item-grid.md#actions
   .media-toolbar__left {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: var(--spacing-2);
+    min-width: 0;
+
+    > .media-toolbar__menu-trigger {
+      flex-shrink: 0;
+    }
   }
 
   // Defines horizontal cluster layout for media toolbar view and size controls.
   // @see docs/specs/component/item-grid/item-grid.md#actions
   .media-toolbar__right {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
     gap: var(--spacing-2);
+    flex-shrink: 0;
   }
 }
 
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('media-toolbar');
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-active-states('media-toolbar');
 }
+
+@include fp-toolbar-breakpoints.toolbar-size-control-responsive('media-toolbar', media-toolbar);
+@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('media-toolbar', media-toolbar);
