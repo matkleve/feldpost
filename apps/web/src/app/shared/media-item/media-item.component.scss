@@ -35,7 +35,8 @@
   position: relative;
   inline-size: 100%;
   aspect-ratio: var(--media-aspect-ratio, 1);
-  transition: aspect-ratio var(--transition-geometry);
+  // Geometry shrink (1:1 → media ratio): 300ms per tokens.md §3.6 + motion.md thumbnail timing.
+  transition: aspect-ratio 300ms var(--motion-ease-out);
   min-inline-size: 0;
   min-block-size: 0;
   border-radius: var(--radius-lg);
@@ -53,7 +54,7 @@
 .media-item__preview {
   display: block;
   inline-size: 100%;
-  block-size: auto;
+  block-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
 }

@@ -7,6 +7,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { UploadOverlayState } from '../../core/media/media-renderer.types';
@@ -60,15 +61,24 @@ export class MediaItemComponent {
 
   readonly item = input<ImageRecord | null>(null);
   readonly selected = computed(() => this.state() === 'selected');
-  /** Shared by slot, media-display host, and viewport (set from MediaDisplay aspectRatioChange). */
-  readonly mediaAspectRatio = signal('1 / 1');
+  /** Slot geometry: 1 until media-display commits ratio for shrink transition. */
+  readonly mediaAspectRatio = signal('1');
   readonly usesFillSlotGeometry = computed(() => this.mode() === 'row');
+  private readonly mediaPreview = viewChild(MediaDisplayComponent);
 
   constructor() {
     effect(() => {
       this.mediaIdentity();
       this.mediaAspectRatio.set('1');
     });
+  }
+
+  onSlotGeometryTransitionEnd(event: TransitionEvent): void {
+    if (event.propertyName !== 'aspect-ratio') {
+      return;
+    }
+
+    this.mediaPreview()?.onSlotGeometryTransitionEnd();
   }
 
   onMediaAspectRatioChange(ratio: number): void {

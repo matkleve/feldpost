@@ -1,12 +1,16 @@
 @if (item()) {
   <!-- Slot stack: media fill + interaction overlays share one parent-owned geometry box. -->
   <!-- @see docs/specs/component/media/media-item.md#spacing--framing-ownership -->
-  <div class="media-item__slot" [style.--media-aspect-ratio]="mediaAspectRatio()">
-    <!-- Viewport/layers own intrinsic ratio; slot mirrors via --media-aspect-ratio. -->
+  <div
+    class="media-item__slot"
+    [style.--media-aspect-ratio]="mediaAspectRatio()"
+    (transitionend)="onSlotGeometryTransitionEnd($event)"
+  >
+    <!-- Slot owns aspect-ratio transition; display fills slot and drives layer states. -->
     <!-- @see docs/specs/component/media/media-item.md#component-hierarchy -->
     <app-media-display
+      #mediaPreview
       class="media-item__preview"
-      [style.--media-aspect-ratio]="mediaAspectRatio()"
       [slotGeometry]="usesFillSlotGeometry() ? 'fill' : 'intrinsic'"
       [mediaId]="mediaIdentity()"
       [storagePath]="item()?.storage_path ?? null"

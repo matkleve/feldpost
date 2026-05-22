@@ -15,32 +15,23 @@
   min-block-size: 0;
 }
 
-// intrinsic mode: host is a real block, height driven by viewport aspect-ratio.
-// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+// intrinsic mode: fills parent slot; slot owns aspect-ratio transition + border clip.
+// @see docs/specs/component/media/media-item.md#spacing--framing-ownership
 :host.media-display--intrinsic {
   display: block;
   inline-size: 100%;
-  block-size: auto;
+  block-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
 }
 
-// Viewport is the single geometry owner for all layers.
+// Viewport fills media-display host; layers stack inside (state-driven opacity).
 // @see docs/specs/component/media/media-display.md#state-rendering-matrix
 .media-display__viewport {
   position: relative;
   overflow: hidden;
   inline-size: 100%;
   block-size: 100%;
-}
-
-// intrinsic: viewport takes its height from the aspect-ratio variable.
-// Transition only on aspect-ratio — spec choreography table: loading-surface-visible → ratio-known-contain.
-// @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
-:host.media-display--intrinsic .media-display__viewport {
-  block-size: auto;
-  aspect-ratio: var(--media-aspect-ratio, 1);
-  transition: aspect-ratio var(--transition-geometry);
 }
 
 // All layers: absolute, fill viewport, hidden by default (opacity-only, per spec).
@@ -70,6 +61,19 @@
 
 .media-display__layer--loading-surface {
   background: var(--muted);
+}
+
+// Muted pulse while loading surface is active (through ratio-known-contain shrink).
+// @see docs/specs/component/media/media-display.md#state-rendering-matrix
+@keyframes media-display-loading-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
 }
 
 .media-display__layer--staged-content {
@@ -115,11 +119,12 @@
 // @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
 // -------------------------------------------------------------------
 
-// loading-surface-visible: loading layer visible, static (no pulse per product decision).
-// ratio-known-contain: same loading layer stays visible while viewport aspect-ratio transitions.
+// loading-surface-visible + ratio-known-contain: pulse stays until content-fade-in.
+// Slot aspect-ratio transition runs in parallel on media-item__slot (parent).
 .media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
 .media-display__viewport[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
   opacity: 1;
+  animation: media-display-loading-pulse 1.2s ease-in-out infinite;
 }
 
 // media-ready: staged layer 0→1.

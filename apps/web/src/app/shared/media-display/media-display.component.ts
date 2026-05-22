@@ -76,7 +76,7 @@ export class MediaDisplayComponent implements AfterViewInit {
     effect(() => {
       const hintedRatio = this.aspectRatio();
       if (hintedRatio != null && hintedRatio > 0 && this.metadataAspectRatio() == null) {
-        this.applyAspectRatio(hintedRatio);
+        this.storeAspectRatio(hintedRatio, this.shouldDeferSlotAspectRatio());
       }
     });
 
@@ -130,12 +130,12 @@ export class MediaDisplayComponent implements AfterViewInit {
   }
 
   /**
-   * Listens for the viewport's `aspect-ratio` transition end (ratio-known-contain path).
+   * Called when parent slot finishes aspect-ratio transition (ratio-known-contain path).
    * Spec: transient-state exits are controlled by transitionend.
-   * @see docs/specs/component/media/media-display.md#transition-guard-contract
+   * @see docs/specs/component/media/media-item.md#spacing--framing-ownership
    */
-  onViewportTransitionEnd(event: TransitionEvent): void {
-    if (event.propertyName === 'aspect-ratio' && this.state() === 'ratio-known-contain') {
+  onSlotGeometryTransitionEnd(): void {
+    if (this.state() === 'ratio-known-contain') {
       this.advanceAfterRatioSettled();
     }
   }
@@ -184,12 +184,12 @@ export class MediaDisplayComponent implements AfterViewInit {
       }
     }
 
-    this.applyAspectRatio(ratio);
+    this.storeAspectRatio(ratio, this.shouldDeferSlotAspectRatio());
   }
 
   private handleDelivery(delivery: MediaDisplayDeliveryState): void {
     if (delivery.metadataAspectRatio != null && delivery.metadataAspectRatio > 0) {
-      this.applyAspectRatio(delivery.metadataAspectRatio);
+      this.storeAspectRatio(delivery.metadataAspectRatio, this.shouldDeferSlotAspectRatio());
     }
 
     if (delivery.warmPreviewUrl) {
@@ -254,7 +254,7 @@ export class MediaDisplayComponent implements AfterViewInit {
 
       case 'icon-only': {
         if (delivery.metadataAspectRatio == null && this.aspectRatio() == null) {
-          this.applyAspectRatio(1);
+          this.storeAspectRatio(1, false);
         }
 
         this.goTo('icon-only');
@@ -314,7 +314,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   /**
    * Start ratio-known-contain → sets variable → CSS aspect-ratio transition fires →
    * onViewportTransitionEnd → advanceAfterRatioSettled → media-ready → content-fade-in.
-   * Spec: loading-surface-visible → ratio-known-contain: aspect-ratio with --transition-geometry.
+   * Spec: loading-surface-visible → ratio-known-contain: slot aspect-ratio 300ms var(--motion-ease-out).
    */
   private triggerRatioTransition(ratio: number): void {
     if (this.state() !== 'loading-surface-visible') {
@@ -322,54 +322,11 @@ export class MediaDisplayComponent implements AfterViewInit {
     }
 
     this.goTo('ratio-known-contain');
-    this.applyAspectRatio(ratio);
+    this.commitAspectRatioToSlot(ratio);
 
-    // If no geometry transition runs, transitionend never fires — advance after layout.
     if (this.prefersReducedMotion()) {
       this.advanceAfterRatioSettled();
-      return;
     }
-
-    if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (this.state() !== 'ratio-known-contain') {
-            return;
-          }
-
-          const viewport = this.hostEl.nativeElement.querySelector(
-            '.media-display__viewport',
-          ) as HTMLElement | null;
-
-          if (!viewport || this.readActiveTransitionDurationMs(viewport, 'aspect-ratio') > 0) {
-            return;
-          }
-
-          this.advanceAfterRatioSettled();
-        });
-      });
-    }
-  }
-
-  private readActiveTransitionDurationMs(element: HTMLElement, property: string): number {
-    const style = getComputedStyle(element);
-    const durations = style.transitionDuration.split(',').map((part) => part.trim());
-    const properties = style.transitionProperty.split(',').map((part) => part.trim());
-
-    let maxMs = 0;
-    for (let i = 0; i < properties.length; i++) {
-      if (properties[i] !== property) {
-        continue;
-      }
-
-      const raw = durations[i] ?? durations[0] ?? '0s';
-      const seconds = raw.endsWith('ms') ? parseFloat(raw) / 1000 : parseFloat(raw);
-      if (Number.isFinite(seconds)) {
-        maxMs = Math.max(maxMs, seconds * 1000);
-      }
-    }
-
-    return maxMs;
   }
 
   private advanceAfterRatioSettled(): void {
@@ -377,8 +334,7 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
-    // Spec transition map: ratio-known-contain → media-ready only (not content-fade-in).
-    // @see media-display-state.ts MEDIA_DISPLAY_TRANSITIONS
+    // ratio-known-contain → media-ready → content-fade-in (staged layer optional / may stay empty).
     this.goTo('media-ready');
 
     if (this.resolvedUrl()) {
@@ -441,7 +397,23 @@ export class MediaDisplayComponent implements AfterViewInit {
     return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_ROOT_FONT_SIZE_PX;
   }
 
-  private applyAspectRatio(ratio: number): void {
+  private shouldDeferSlotAspectRatio(): boolean {
+    return (
+      this.slotGeometry() === 'intrinsic' &&
+      (this.state() === 'loading-surface-visible' || this.state() === 'idle')
+    );
+  }
+
+  /** Stores ratio internally; emits to slot only when not deferring (keeps 1:1 until shrink). */
+  private storeAspectRatio(ratio: number, deferEmit: boolean): void {
+    this.metadataAspectRatio.set(ratio);
+    if (!deferEmit) {
+      this.aspectRatioChange.emit(ratio);
+    }
+  }
+
+  /** Commits ratio to parent slot — triggers CSS aspect-ratio transition on media-item__slot. */
+  private commitAspectRatioToSlot(ratio: number): void {
     this.metadataAspectRatio.set(ratio);
     this.aspectRatioChange.emit(ratio);
   }
