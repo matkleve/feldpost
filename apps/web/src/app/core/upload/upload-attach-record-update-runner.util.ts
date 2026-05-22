@@ -52,6 +52,7 @@ export async function runAttachRecordUpdate(
   setPhase('replacing_record');
   return performAttachRecordUpdate({
     storagePath,
+    originalFilename: job.file.name,
     targetImageId: targetMediaItemId,
     parsedExif,
     conflictResolution: job.conflictResolution,

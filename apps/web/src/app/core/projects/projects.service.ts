@@ -700,7 +700,7 @@ export class ProjectsService {
     const response = await this.supabase.client
       .from('media_projects')
       .select('project_id,media_item_id,media_items!inner(source_image_id)')
-      .or(`file_name.ilike.%${escaped}%,storage_path.ilike.%${escaped}%`, {
+      .or(`original_filename.ilike.%${escaped}%,storage_path.ilike.%${escaped}%`, {
         foreignTable: 'media_items',
       });
 

@@ -17,6 +17,7 @@ type AttachRecordUpdateResult = {
 
 type AttachRecordUpdateArgs = {
   storagePath: string;
+  originalFilename: string;
   targetImageId: string;
   parsedExif: ParsedExif;
   conflictResolution: ConflictResolution | undefined;
@@ -58,6 +59,7 @@ export async function performAttachRecordUpdate(
   const { updateData, isAttachKeep } = buildAttachUpdateData({
     storagePath: args.storagePath,
     parsedExif: args.parsedExif,
+    originalFilename: args.originalFilename,
     hadExistingCoords,
     conflictResolution: args.conflictResolution,
   });

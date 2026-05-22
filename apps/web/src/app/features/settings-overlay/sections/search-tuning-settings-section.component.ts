@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { OrgSearchTuningService } from '../../../core/search/org-search-tuning.service';
+import { SEARCH_TUNING_SYSTEM_DEFAULTS } from '../../../core/search/search-tuning.defaults';
 import type { SearchTuningValuesJson } from '../../../core/search/search-tuning.types';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
@@ -28,6 +29,7 @@ interface SearchTuningDraft {
     debounceMs: number;
   };
   resolver: {
+    enableInternetSearch: boolean;
     minQueryLength: number;
     maxGeocoderResults: number;
     contextDistanceMaxMeters: number;
@@ -36,6 +38,20 @@ interface SearchTuningDraft {
   query: {
     specificStreetMinLength: number;
   };
+}
+
+/** Exponential context-distance helpers — slider 0–100 maps to 0.5–2000 km */
+const CTX_MIN_KM = 0.5;
+const CTX_MAX_KM = 2000;
+const CTX_RATIO = CTX_MAX_KM / CTX_MIN_KM; // 4000
+
+function ctxSliderToKm(slider: number): number {
+  return CTX_MIN_KM * Math.pow(CTX_RATIO, slider / 100);
+}
+
+function ctxKmToSlider(km: number): number {
+  const clamped = Math.max(CTX_MIN_KM, Math.min(CTX_MAX_KM, km));
+  return (Math.log(clamped / CTX_MIN_KM) / Math.log(CTX_RATIO)) * 100;
 }
 
 @Component({
@@ -88,6 +104,99 @@ export class SearchTuningSettingsSectionComponent {
     this.editorMode.set(mode);
   }
 
+  toggleEditorMode(): void {
+    this.setEditorMode(this.editorMode() === 'advanced' ? 'basic' : 'advanced');
+  }
+
+  defaultDebounceMs(): number {
+    return SEARCH_TUNING_SYSTEM_DEFAULTS.orchestrator.debounceMs;
+  }
+
+  defaultInternetSearch(): boolean {
+    return SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.enableInternetSearch;
+  }
+
+  defaultFor<K extends keyof SearchTuningDraft>(
+    group: K,
+    field: keyof SearchTuningDraft[K],
+  ): number {
+    // Access nested default via group/field path
+    const g = group as string;
+    const f = field as string;
+    const defaults = SEARCH_TUNING_SYSTEM_DEFAULTS as unknown as Record<string, Record<string, number>>;
+    return defaults[g]?.[f] ?? 0;
+  }
+
+  resetFieldToDefault<K extends keyof SearchTuningDraft>(
+    group: K,
+    field: keyof SearchTuningDraft[K],
+  ): void {
+    const defaultValue = this.defaultFor(group, field);
+    this.draft.update((current) => ({
+      ...current,
+      [group]: { ...current[group], [field]: defaultValue },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
+  resetDebounceToDefault(): void {
+    this.draft.update((d) => ({
+      ...d,
+      orchestrator: { ...d.orchestrator, debounceMs: SEARCH_TUNING_SYSTEM_DEFAULTS.orchestrator.debounceMs },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
+  resetInternetSearchToDefault(): void {
+    this.draft.update((d) => ({
+      ...d,
+      resolver: { ...d.resolver, enableInternetSearch: SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.enableInternetSearch },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
+  resetContextDistanceToDefault(): void {
+    this.draft.update((d) => ({
+      ...d,
+      resolver: { ...d.resolver, contextDistanceMaxMeters: SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.contextDistanceMaxMeters },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
+  isFieldAtDefault<K extends keyof SearchTuningDraft>(
+    group: K,
+    field: keyof SearchTuningDraft[K],
+  ): boolean {
+    const current = (this.draft()[group] as Record<string, unknown>)[field as string];
+    return current === this.defaultFor(group, field);
+  }
+
+  isDebounceAtDefault(): boolean {
+    return this.draft().orchestrator.debounceMs === SEARCH_TUNING_SYSTEM_DEFAULTS.orchestrator.debounceMs;
+  }
+
+  isInternetSearchAtDefault(): boolean {
+    return this.draft().resolver.enableInternetSearch === SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.enableInternetSearch;
+  }
+
+  isContextDistanceAtDefault(): boolean {
+    return this.draft().resolver.contextDistanceMaxMeters === SEARCH_TUNING_SYSTEM_DEFAULTS.resolver.contextDistanceMaxMeters;
+  }
+
+  toggleInternetSearch(): void {
+    const current = this.draft().resolver.enableInternetSearch;
+    this.draft.update((d) => ({
+      ...d,
+      resolver: { ...d.resolver, enableInternetSearch: !current },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
   onFieldChange<K extends keyof SearchTuningDraft>(
     group: K,
     field: keyof SearchTuningDraft[K],
@@ -106,7 +215,71 @@ export class SearchTuningSettingsSectionComponent {
     this.lastError.set(null);
   }
 
-  /** Slider uses 0–100 for weak top score (stored as 0–1). */
+  // ── Debounce helpers (internal: ms, display: seconds) ──────────────────────
+
+  debounceMsToSeconds(ms: number): number {
+    return Math.round(ms / 100) / 10;
+  }
+
+  onDebounceSecondsInput(rawSeconds: string): void {
+    const s = Number(rawSeconds);
+    if (!Number.isFinite(s)) return;
+    const ms = Math.round(Math.min(5, Math.max(0.1, s)) * 1000);
+    this.draft.update((d) => ({
+      ...d,
+      orchestrator: { ...d.orchestrator, debounceMs: ms },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
+  // ── Context distance helpers (internal: meters, display: km, slider: exponential) ──
+
+  contextDistanceKm(): number {
+    const km = this.draft().resolver.contextDistanceMaxMeters / 1000;
+    return Math.round(km * 10) / 10;
+  }
+
+  contextDistanceSlider(): number {
+    return Math.round(ctxKmToSlider(this.contextDistanceKm()));
+  }
+
+  onContextDistanceSliderChange(rawSlider: string): void {
+    const v = Number(rawSlider);
+    if (!Number.isFinite(v)) return;
+    const km = ctxSliderToKm(Math.max(0, Math.min(100, v)));
+    const meters = Math.round(km * 1000);
+    this.draft.update((d) => ({
+      ...d,
+      resolver: { ...d.resolver, contextDistanceMaxMeters: meters },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
+  onContextDistanceKmInput(rawKm: string): void {
+    const km = Number(rawKm);
+    if (!Number.isFinite(km)) return;
+    const clamped = Math.max(CTX_MIN_KM, Math.min(CTX_MAX_KM, km));
+    this.draft.update((d) => ({
+      ...d,
+      resolver: { ...d.resolver, contextDistanceMaxMeters: Math.round(clamped * 1000) },
+    }));
+    this.saveUiState.set('dirty');
+    this.lastError.set(null);
+  }
+
+  formatContextDistanceDisplay(meters: number): string {
+    const km = meters / 1000;
+    const rounded = km >= 100 ? Math.round(km) : Math.round(km * 10) / 10;
+    return this.t('settings.search_tuning.readout.distance_km', '{km} km').replace(
+      '{km}',
+      String(rounded),
+    );
+  }
+
+  // ── Weak top score helpers (slider 0–100 = 0–1) ────────────────────────────
+
   weakTopScoreSliderPercent(): number {
     return Math.round(this.draft().resolver.weakTopScoreThreshold * 100);
   }
@@ -117,14 +290,7 @@ export class SearchTuningSettingsSectionComponent {
     this.onFieldChange('resolver', 'weakTopScoreThreshold', String(percent / 100), 0, 1);
   }
 
-  formatDistanceKm(meters: number): string {
-    const km = meters / 1000;
-    const rounded = km >= 100 ? Math.round(km) : Math.round(km * 10) / 10;
-    return this.t('settings.search_tuning.readout.distance_km', '{km} km').replace(
-      '{km}',
-      String(rounded),
-    );
-  }
+  // ── Lifecycle ───────────────────────────────────────────────────────────────
 
   discardChanges(): void {
     this.draft.set(structuredClone(this.persistedDraft()));
@@ -186,6 +352,7 @@ export class SearchTuningSettingsSectionComponent {
     return {
       orchestrator: { debounceMs: merged.orchestrator.debounceMs },
       resolver: {
+        enableInternetSearch: merged.resolver.enableInternetSearch,
         minQueryLength: merged.resolver.minQueryLength,
         maxGeocoderResults: merged.resolver.maxGeocoderResults,
         contextDistanceMaxMeters: merged.resolver.contextDistanceMaxMeters,
@@ -204,7 +371,11 @@ export class SearchTuningSettingsSectionComponent {
     if (next.orchestrator.debounceMs !== persisted.orchestrator.debounceMs) {
       partial.orchestrator = { debounceMs: next.orchestrator.debounceMs };
     }
+
     const resolverPatch: SearchTuningValuesJson['resolver'] = {};
+    if (next.resolver.enableInternetSearch !== persisted.resolver.enableInternetSearch) {
+      resolverPatch.enableInternetSearch = next.resolver.enableInternetSearch;
+    }
     if (next.resolver.minQueryLength !== persisted.resolver.minQueryLength) {
       resolverPatch.minQueryLength = next.resolver.minQueryLength;
     }
@@ -220,6 +391,7 @@ export class SearchTuningSettingsSectionComponent {
     if (Object.keys(resolverPatch).length > 0) {
       partial.resolver = resolverPatch;
     }
+
     if (next.query.specificStreetMinLength !== persisted.query.specificStreetMinLength) {
       partial.query = { specificStreetMinLength: next.query.specificStreetMinLength };
     }

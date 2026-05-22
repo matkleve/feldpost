@@ -4,6 +4,7 @@ import type { ParsedExif } from './upload.service';
 type BuildAttachUpdateDataArgs = {
   storagePath: string;
   parsedExif: ParsedExif;
+  originalFilename: string;
   hadExistingCoords: boolean;
   conflictResolution: UploadJob['conflictResolution'];
 };
@@ -12,12 +13,13 @@ export function buildAttachUpdateData(args: BuildAttachUpdateDataArgs): {
   updateData: Record<string, unknown>;
   isAttachKeep: boolean;
 } {
-  const { storagePath, parsedExif, hadExistingCoords, conflictResolution } = args;
+  const { storagePath, parsedExif, originalFilename, hadExistingCoords, conflictResolution } = args;
   const isAttachKeep = conflictResolution === 'attach_keep';
 
   const updateData: Record<string, unknown> = {
     storage_path: storagePath,
     thumbnail_path: null,
+    original_filename: originalFilename,
   };
 
   if (parsedExif.coords) {

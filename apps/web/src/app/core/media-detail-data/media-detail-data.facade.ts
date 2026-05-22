@@ -30,6 +30,7 @@ interface MediaDetailRow {
   created_by: string | null;
   storage_path: string | null;
   thumbnail_path: string | null;
+  original_filename: string | null;
   latitude: number | null;
   longitude: number | null;
   exif_latitude: number | null;
@@ -295,6 +296,7 @@ export class MediaDetailDataFacade {
       project_id: null,
       storage_path: media.storage_path,
       thumbnail_path: media.thumbnail_path,
+      original_filename: media.original_filename,
       latitude: media.latitude,
       longitude: media.longitude,
       exif_latitude: media.exif_latitude,

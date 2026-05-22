@@ -86,13 +86,6 @@
     min-width: 0;
   }
 
-  &__header-icon {
-    flex: 0 0 var(--upload-panel-icon-size);
-    font-size: var(--upload-panel-icon-size);
-    line-height: var(--line-height-solid);
-    color: var(--foreground);
-  }
-
   &__header-copy {
     display: flex;
     flex: 1 1 auto;
@@ -204,7 +197,7 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-reading);
-    color: var(--foreground);
+    color: inherit;
     text-align: center;
   }
 

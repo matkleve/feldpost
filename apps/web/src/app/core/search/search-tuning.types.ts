@@ -20,6 +20,7 @@ export interface SearchTuningOrchestratorConfig {
 }
 
 export interface SearchTuningResolverConfig {
+  enableInternetSearch: boolean;
   minQueryLength: number;
   maxGeocoderResults: number;
   maxDbAddressResults: number;

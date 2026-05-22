@@ -12,6 +12,8 @@ export interface ImageRecord {
   project_ids?: string[];
   storage_path: string | null;
   thumbnail_path: string | null;
+  /** Client-side name at upload (immutable display label). */
+  original_filename?: string | null;
   latitude: number | null;
   longitude: number | null;
   exif_latitude: number | null;

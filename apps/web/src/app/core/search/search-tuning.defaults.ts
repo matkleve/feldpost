@@ -17,6 +17,7 @@ export const SEARCH_TUNING_SYSTEM_DEFAULTS: SearchTuningConfig = {
     geocoderDedupMeters: 30,
   },
   resolver: {
+    enableInternetSearch: true,
     minQueryLength: 3,
     maxGeocoderResults: 3,
     maxDbAddressResults: 3,

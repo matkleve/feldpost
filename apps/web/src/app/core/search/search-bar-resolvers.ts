@@ -111,6 +111,7 @@ export async function fetchGeocoderCandidates(
   ) => SearchAddressCandidate,
   tuning: SearchTuningConfig = SEARCH_TUNING_SYSTEM_DEFAULTS,
 ): Promise<SearchAddressCandidate[]> {
+  if (!tuning.resolver.enableInternetSearch) return [];
   if (normalizedQuery.length < tuning.resolver.minQueryLength) return [];
 
   const constrainedOptions = buildConstrainedSearchOptions(

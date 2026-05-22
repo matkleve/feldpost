@@ -203,7 +203,7 @@ export class UploadService {
         media_type: mediaType,
         mime_type: file.type,
         storage_path: storagePath,
-        file_name: file.name,
+        original_filename: file.name,
         relative_path: relativePath ?? null,
         file_size_bytes: file.size,
         captured_at: capturedAt ?? null,
