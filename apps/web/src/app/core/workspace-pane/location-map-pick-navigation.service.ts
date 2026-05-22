@@ -28,7 +28,15 @@ export class LocationMapPickNavigationService {
       return null;
     }
 
-    return { request: { mediaId: request.mediaId, fileName: request.fileName }, returnUrl: payload.returnUrl };
+    return {
+      request: {
+        mediaId: request.mediaId,
+        fileName: request.fileName,
+        locationRowId:
+          typeof request.locationRowId === 'string' ? request.locationRowId : undefined,
+      },
+      returnUrl: payload.returnUrl,
+    };
   }
 
   private readCandidate(router: Router): unknown {

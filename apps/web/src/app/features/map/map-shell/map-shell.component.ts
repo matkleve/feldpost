@@ -67,7 +67,7 @@ import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
 import type { ToggleGroupOption } from '../../../shared/ui/toggle-group/toggle-group-option.types';
-import { toggleOptionLayout, toggleSingleStringValue } from '../../../shared/ui/toggle-group/toggle-group-option.helpers';
+import { toggleSingleStringValue } from '../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
 import { ActionEngineService } from '../../../core/action/action-engine.service';
@@ -128,6 +128,7 @@ import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
+import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane/workspace-pane-context.port';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane/workspace-pane-shell-host.token';
@@ -238,7 +239,6 @@ export class MapShellComponent implements OnDestroy {
 
   readonly placeholderIconUrl = `url("${MEDIA_PLACEHOLDER_ICON}")`;
   /** Template helper: icon/text layout for map style pill options. */
-  readonly optLayout = toggleOptionLayout;
   private readonly geocodingService = inject(GeocodingService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
@@ -282,6 +282,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  private readonly mediaLocationsService = inject(MediaLocationsService);
   private readonly locationResolverService = inject(LocationResolverService);
   private readonly actionEngineService = inject(ActionEngineService);
   private readonly mapWorkspaceContextResolverService = inject(MapWorkspaceContextResolverService);
@@ -305,6 +306,7 @@ export class MapShellComponent implements OnDestroy {
     mediaId: string;
     lat: number;
     lng: number;
+    locationRowId?: string;
     address?: import('../../../core/media-location-update/media-location-update.types').MediaLocationAddressPatch;
   } | null = null;
 
@@ -2316,6 +2318,7 @@ export class MapShellComponent implements OnDestroy {
         sync.lat,
         sync.lng,
         sync.address,
+        sync.locationRowId,
       );
     });
   }
@@ -2438,32 +2441,86 @@ export class MapShellComponent implements OnDestroy {
     request: UploadLocationMapPickRequest,
     coords: { lat: number; lng: number },
   ): Promise<boolean> {
-    const result = await this.mediaLocationUpdateService.updateFromCoordinates(
-      request.mediaId,
-      coords,
-    );
-    if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
-      this.toastService.show({
-        ...buildLocationUpdateFailureToast(result.error, {
-          file: 'map-shell.component.ts',
-          fn: 'applyUploadedLocationMapPick',
-        }),
-      });
+    const rowId = request.locationRowId;
+    let lat: number | undefined;
+    let lng: number | undefined;
+    let address:
+      | import('../../../core/media-location-update/media-location-update.types').MediaLocationAddressPatch
+      | undefined;
+
+    if (rowId) {
+      const rowResult = await this.mediaLocationsService.updateFromCoordinates(rowId, coords);
+      if (!rowResult.ok) {
+        this.toastService.show({
+          ...buildLocationUpdateFailureToast(rowResult.error, {
+            file: 'map-shell.component.ts',
+            fn: 'applyUploadedLocationMapPick',
+          }),
+        });
+        return false;
+      }
+      if (!('row' in rowResult)) {
+        return false;
+      }
+      const row = rowResult.row;
+      if (row.latitude == null || row.longitude == null) {
+        this.toastService.show({
+          ...buildLocationUpdateFailureToast('Location update failed.', {
+            file: 'map-shell.component.ts',
+            fn: 'applyUploadedLocationMapPick',
+          }),
+        });
+        return false;
+      }
+      lat = row.latitude;
+      lng = row.longitude;
+      address = {
+        address_label: row.address_label,
+        street: row.street,
+        city: row.city,
+        district: row.district,
+        country: row.country,
+      };
+    } else {
+      const legacyResult = await this.mediaLocationUpdateService.updateFromCoordinates(
+        request.mediaId,
+        coords,
+      );
+      if (!legacyResult.ok || typeof legacyResult.lat !== 'number' || typeof legacyResult.lng !== 'number') {
+        this.toastService.show({
+          ...buildLocationUpdateFailureToast(
+            legacyResult.ok ? 'Location update failed.' : legacyResult.error,
+            {
+              file: 'map-shell.component.ts',
+              fn: 'applyUploadedLocationMapPick',
+            },
+          ),
+        });
+        return false;
+      }
+      lat = legacyResult.lat;
+      lng = legacyResult.lng;
+      address = legacyResult.address;
+    }
+
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
       return false;
     }
 
-    this.onImageUploaded({ id: request.mediaId, lat: result.lat, lng: result.lng });
+    this.onImageUploaded({ id: request.mediaId, lat, lng });
     this.lastLocationMapPickSync = {
       mediaId: request.mediaId,
-      lat: result.lat,
-      lng: result.lng,
-      address: result.address,
+      lat,
+      lng,
+      locationRowId: rowId,
+      address,
     };
     this.mediaDetailLocationSync.notifyCoordinatesUpdated(
       request.mediaId,
-      result.lat,
-      result.lng,
-      result.address,
+      lat,
+      lng,
+      address,
+      rowId,
     );
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Standort wurde aktualisiert.'),

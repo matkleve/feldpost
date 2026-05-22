@@ -1,0 +1,148 @@
+@if (active()) {
+  <div class="address-search__stack">
+    <div class="detail-row address-search__row detail-row--editing">
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center address-search__center" #addressCenter>
+        <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
+        <span class="detail-row__label">{{ t('location.addSearch.label', 'Add or search address') }}</span>
+        <input
+          #searchInput
+          class="detail-row__field-input detail-row__field-slot address-search__input"
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          [attr.aria-expanded]="showPanel()"
+          aria-controls="media-location-add-search-listbox"
+          [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
+          [attr.aria-label]="t('location.addSearch.aria', 'Add or search for an address')"
+          [value]="query()"
+          (input)="onInput($any($event.target).value)"
+          (keydown)="onInputKeydown($event)"
+          (click)="$event.stopPropagation()"
+        />
+      </div>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn address-search__clear-btn--visible"
+        type="button"
+        (click)="close(); $event.stopPropagation()"
+        [attr.aria-label]="t('workspace.addressSearch.aria.cancel', 'Cancel search')"
+      >
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    </div>
+
+    @if (showPanel() && addressAnchorEl()) {
+      <app-dropdown-shell
+        class="address-search-shell"
+        panelClass="option-menu-surface address-search-panel"
+        [anchor]="addressAnchorEl()"
+        [minWidth]="addressCenterWidth()"
+        [outsideCloseEnabled]="false"
+        (closeRequested)="close()"
+      >
+        <div
+          id="media-location-add-search-listbox"
+          class="address-search__dropdown option-menu-list"
+          role="listbox"
+          [attr.aria-label]="t('workspace.addressSearch.aria.results', 'Address suggestions')"
+        >
+          @if (resultRows().length > 0) {
+            <div class="address-search__section-label">
+              {{ t('location.dropdown.section.results', 'Results') }}
+            </div>
+            @for (row of resultRows(); track row.id) {
+              <div class="address-search__result-item media-location-add-search__result-item--static" role="presentation">
+                <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
+                <span class="address-search__result-label">{{ formatRowLine(row) }}</span>
+              </div>
+            }
+          }
+
+          @if (otherMediaSuggestions().length > 0 || loadingOther()) {
+            <div class="address-search__section-label">
+              {{ t('location.dropdown.section.otherMedia', 'Other media') }}
+            </div>
+            @if (loadingOther() && otherMediaSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (c of otherMediaSuggestions(); track c.id) {
+              <button
+                class="address-search__result-item"
+                type="button"
+                role="option"
+                (mousedown)="$event.preventDefault()"
+                (click)="onInternetClick(c, $event)"
+              >
+                <span class="material-icons address-search__result-icon" aria-hidden="true">photo_library</span>
+                <span class="address-search__result-label">{{ c.label }}</span>
+              </button>
+            }
+          }
+
+          @if (placeSuggestions().length > 0 || loadingPlaces()) {
+            <div class="address-search__section-label">
+              {{ t('location.dropdown.section.internet', 'Internet') }}
+            </div>
+            @if (loadingPlaces() && placeSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (c of placeSuggestions(); track c.id) {
+              <button
+                class="address-search__result-item"
+                type="button"
+                role="option"
+                (mousedown)="$event.preventDefault()"
+                (click)="onInternetClick(c, $event)"
+              >
+                <span class="material-icons address-search__result-icon" aria-hidden="true">public</span>
+                <span class="address-search__result-label">{{ c.label }}</span>
+              </button>
+            }
+          }
+
+          @if (query().trim()) {
+            <div class="address-search__section-label">
+              {{ t('location.dropdown.section.addNew', 'New address') }}
+            </div>
+            <button
+              class="address-search__result-item"
+              type="button"
+              role="option"
+              [attr.aria-label]="addNewAriaLabel()"
+              (mousedown)="$event.preventDefault()"
+              (click)="commitAddNew()"
+            >
+              <span class="material-icons address-search__result-icon" aria-hidden="true">add</span>
+              <span class="address-search__result-label">{{ query().trim() }}</span>
+            </button>
+          }
+        </div>
+      </app-dropdown-shell>
+    }
+  </div>
+} @else {
+  <div
+    class="detail-row address-search__row media-location-add-search__collapsed"
+    role="button"
+    tabindex="0"
+    [class.media-location-add-search__collapsed--disabled]="disabled()"
+    [attr.aria-label]="t('location.addSearch.label', 'Add or search address')"
+    (click)="open()"
+    (keydown.enter)="open()"
+    (keydown.space)="$event.preventDefault(); open()"
+  >
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center address-search__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
+      <span class="detail-row__label">{{ t('location.addSearch.label', 'Add or search address') }}</span>
+    </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+  </div>
+}

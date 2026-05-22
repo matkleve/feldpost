@@ -1,0 +1,48 @@
+// Location row edit grid and primary marker
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+
+@layer components {
+  .media-location-row__edit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2);
+    width: 100%;
+  }
+
+  .media-location-row__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    min-width: 0;
+  }
+
+  .media-location-row__field--wide {
+    grid-column: 1 / -1;
+  }
+
+  .media-location-row__primary-icon {
+    color: var(--primary);
+    pointer-events: none;
+  }
+
+  .media-location-row--primary .detail-row__icon {
+    color: var(--primary);
+  }
+}
+
+@layer states {
+  .media-location-row__error {
+    margin: 0;
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--text-sm);
+    color: var(--destructive);
+  }
+
+  .option-menu-list__hint {
+    margin: 0;
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    pointer-events: none;
+  }
+}

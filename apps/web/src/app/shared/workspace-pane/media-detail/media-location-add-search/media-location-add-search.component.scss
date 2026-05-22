@@ -1,0 +1,18 @@
+// Location add/search — reuses address-search row + dropdown chrome; local rules only for collapsed/static rows.
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+// @see ../address-search/address-search.component.scss
+
+.media-location-add-search__collapsed {
+  cursor: pointer;
+}
+
+.media-location-add-search__collapsed--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+// Filter matches on this media — display-only row (same geometry as selectable results).
+.media-location-add-search__result-item--static {
+  cursor: default;
+  pointer-events: none;
+}

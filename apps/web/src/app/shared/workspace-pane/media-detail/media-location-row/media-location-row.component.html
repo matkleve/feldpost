@@ -1,0 +1,128 @@
+@if (effectiveVisualState() === 'editing') {
+  <div class="detail-row detail-row--editing media-location-row">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center media-location-row__edit-grid">
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.street.label', 'Street') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftStreet()" (input)="draftStreet.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.house_number.label', 'House number') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftHouseNumber()" (input)="draftHouseNumber.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.staircase.label', 'Staircase') }}</span>
+        <input class="detail-row__field-input" type="text" [placeholder]="t('location.staircase.placeholder', 'e.g. A, Aufgang 3')" [value]="draftStaircase()" (input)="draftStaircase.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.door.label', 'Top') }}</span>
+        <input class="detail-row__field-input" type="text" [placeholder]="t('location.door.placeholder', 'e.g. 1, DG, 11-12')" [value]="draftDoor()" (input)="draftDoor.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field media-location-row__field--wide">
+        <span class="detail-row__label">{{ t('location.extra_information.label', 'Extra information') }}</span>
+        <input class="detail-row__field-input" type="text" [placeholder]="t('location.extra_information.placeholder', 'e.g. Ring twice')" [value]="draftExtra()" (input)="draftExtra.set($any($event.target).value)" />
+      </label>
+    </div>
+    <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--r1 detail-row-action--confirm" type="button" [disabled]="saving()" (click)="saveEdit()">
+      <span class="material-icons" aria-hidden="true">check</span>
+    </button>
+    <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--r2 detail-row-action--danger" type="button" (click)="cancelEdit()">
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  </div>
+} @else {
+  <div class="detail-row media-location-row" [class.media-location-row--primary]="location().is_primary">
+    @if (location().is_primary) {
+      <span
+        class="detail-row-action detail-row-action--l1 media-location-row__primary-icon"
+        [attr.aria-label]="t('location.primary.badge', 'Primary')"
+        [attr.title]="t('location.primary.tooltip', 'This location is used as the map pin and in exports')"
+      >
+        <span class="material-icons" aria-hidden="true">pin_drop</span>
+      </span>
+      <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--l2" type="button" (click)="startEdit()">
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+    } @else {
+      <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--l1" type="button" (click)="startEdit()">
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    }
+    <div class="detail-row__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">location_on</span>
+      <button class="detail-row__field-trigger" type="button" (click)="startEdit()">{{ displayLine() }}</button>
+    </div>
+    <span #copyAnchorEl class="detail-row-action detail-row-action--r1">
+      @if (copyActions().length > 0) {
+        <button hlmBtn variant="ghost" size="icon" type="button" [attr.aria-expanded]="copyMenuOpen()" (click)="toggleCopyMenu()">
+          <span class="material-icons" aria-hidden="true">content_copy</span>
+        </button>
+      }
+    </span>
+    @if (effectiveVisualState() === 'delete_armed') {
+      <app-detail-row-inline-confirm-action
+        slot="r2"
+        [disabled]="saving()"
+        initialAriaKey="location.action.delete"
+        initialAriaFallback="Delete location"
+        confirmAriaKey="location.action.confirmDelete"
+        confirmAriaFallback="Confirm delete location"
+        (confirmed)="onDeleteConfirmed()"
+      />
+    } @else {
+      <span #overflowAnchorEl class="detail-row-action detail-row-action--r2">
+        <button hlmBtn variant="ghost" size="icon" type="button" [attr.aria-expanded]="overflowMenuOpen()" (click)="toggleOverflowMenu()">
+          <span class="material-icons" aria-hidden="true">more_vert</span>
+        </button>
+      </span>
+    }
+  </div>
+  @if (copyMenuOpen() && copyAnchorElement()) {
+    <app-dropdown-shell
+      [anchor]="copyAnchorElement()"
+      panelClass="option-menu-surface"
+      [minWidth]="200"
+      (closeRequested)="closeCopyMenu()"
+    >
+      <div class="option-menu-list" role="menu">
+        @for (action of copyActions(); track action.field) {
+          <button class="option-menu-list__item" type="button" role="menuitem" (click)="onCopyAction(action)">
+            {{ t(action.labelKey, action.labelFallback) }}
+          </button>
+        }
+      </div>
+    </app-dropdown-shell>
+  }
+  @if (overflowMenuOpen() && overflowAnchorElement()) {
+    <app-dropdown-shell
+      [anchor]="overflowAnchorElement()"
+      panelClass="option-menu-surface"
+      placement="end"
+      [minWidth]="220"
+      (closeRequested)="closeOverflowMenu()"
+    >
+      <div class="option-menu-list" role="menu">
+        @if (location().is_primary) {
+          <p class="option-menu-list__hint" role="presentation">
+            {{ t('location.primary.tooltip', 'This location is used as the map pin and in exports') }}
+          </p>
+        } @else if (showSetPrimaryAction()) {
+          <button class="option-menu-list__item" type="button" role="menuitem" (click)="onSetPrimary()">
+            {{ t('location.action.set_primary', 'Set as primary') }}
+          </button>
+        }
+        <button class="option-menu-list__item" type="button" role="menuitem" (click)="onMapPick()">
+          {{ t('workspace.imageDetail.action.chooseLocationMap.title', 'Change GPS on map') }}
+        </button>
+        <button class="option-menu-list__item option-menu-list__item--danger" type="button" role="menuitem" (click)="armDelete()">
+          {{ t('location.action.delete', 'Delete location') }}
+        </button>
+      </div>
+    </app-dropdown-shell>
+  }
+  @if (effectiveVisualState() === 'set_primary_error' && primaryError()) {
+    <p class="media-location-row__error" role="alert">{{ primaryError() }}</p>
+  }
+}

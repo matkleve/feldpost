@@ -17,7 +17,14 @@ export interface UploadLocationPreviewEvent {
   lng: number;
 }
 
+/** Map placement request from detail row overflow or header action. Consumed by MapShell. */
 export interface UploadLocationMapPickRequest {
   mediaId: string;
   fileName: string;
+  /**
+   * When set (from `app-media-location-row` → Change GPS on map), persistence targets
+   * `media_item_locations` via `MediaLocationsService`, not only `media_items`.
+   * @see docs/specs/ui/media-detail/media-detail-location-section.md
+   */
+  locationRowId?: string;
 }

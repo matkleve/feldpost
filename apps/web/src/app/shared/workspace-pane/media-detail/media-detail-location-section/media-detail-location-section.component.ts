@@ -1,85 +1,61 @@
-import { Component, computed, inject, input, output } from '@angular/core';
-import { AddressSearchComponent } from '../address-search/address-search.component';
-import { AddressFieldComboboxComponent } from '../address-field-combobox/address-field-combobox.component';
-import { CoordinatesFieldEditorComponent } from '../coordinates-field-editor/coordinates-field-editor.component';
-import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
+/**
+ * Media detail **Location** section — multi-address UI (replaces single shared street/GPS block).
+ *
+ * **Structure (top → bottom):**
+ * 1. `app-media-location-add-search` — collapsed "Add or search address" → 4-zone dropdown
+ * 2. Optional list filter (when row count > threshold)
+ * 3. Scrollable `app-media-location-row` list (plain rows, no card chrome)
+ *
+ * **What it does:** Presentational only. All persistence goes through parent
+ * `MediaDetailViewComponent` → `MediaLocationsService`.
+ *
+ * **Parent:** `media-detail-view.component.html` (below Details, above Metadata).
+ *
+ * @see docs/specs/ui/media-detail/media-detail-location-section.md
+ * @see apps/web/src/app/core/media-locations/README.md
+ */
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import type { LocationHighlightField } from '../media-detail-location-highlight.util';
-import {
-  formatCoordinate,
-  hasValidGpsCoordinates,
-} from '../media-detail-view.utils';
+import type { MediaItemLocationRow } from '../../../../core/media-locations/media-locations.types';
+import { locationMatchesQuery } from '../../../../core/media-locations/media-locations.helpers';
 import type { SearchQueryContext } from '../../../../core/search/search.models';
-import type { DetailEditingField, ImageRecord } from '../media-detail-view.types';
-import type { AddressFieldContext, AddressFieldSuggestion } from '../../../../core/address-field-suggest/address-field-suggest.types';
-import { AddressFieldSuggestService } from '../../../../core/address-field-suggest/address-field-suggest.service';
-import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
-import { HlmSpinnerComponent } from '../../../../shared/ui/spinner';
-
-interface AddressFieldDefinition {
-  name: 'street' | 'city' | 'district' | 'country';
-  icon: string;
-  labelKey: string;
-  labelFallback: string;
-  editAriaKey: string;
-  editAriaFallback: string;
-  editTitleKey: string;
-  editTitleFallback: string;
-  saveAriaKey: string;
-  saveAriaFallback: string;
-  saveTitleKey: string;
-  saveTitleFallback: string;
-}
-
-export interface AddressFieldSaveEvent {
-  field: string;
-  value: string;
-  /** Set when user picked a suggestion (geocoder-verified). */
-  suggestion?: AddressFieldSuggestion;
-}
+import type { ImageRecord } from '../media-detail-view.types';
+import { MediaLocationAddSearchComponent } from '../media-location-add-search/media-location-add-search.component';
+import {
+  MediaLocationRowComponent,
+  type MediaLocationCopyField,
+  type MediaLocationRowSavePayload,
+} from '../media-location-row/media-location-row.component';
+import { MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD } from '../media-location-constants';
 
 @Component({
   selector: 'app-media-detail-location-section',
   standalone: true,
-  imports: [
-    AddressSearchComponent,
-    AddressFieldComboboxComponent,
-    CoordinatesFieldEditorComponent,
-    DetailRowInlineConfirmActionComponent,
-    ...HLM_BUTTON_IMPORTS,
-    HlmSpinnerComponent,
-  ],
+  imports: [MediaLocationAddSearchComponent, MediaLocationRowComponent],
   templateUrl: './media-detail-location-section.component.html',
   styleUrls: ['./media-detail-location-section.component.scss', '../_detail-row-slots.scss'],
 })
 export class MediaDetailLocationSectionComponent {
   private readonly i18nService = inject(I18nService);
-  private readonly addressFieldSuggest = inject(AddressFieldSuggestService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly media = input.required<ImageRecord>();
-  readonly fullAddress = input('');
-  readonly editingField = input<DetailEditingField>(null);
-  readonly isCorrected = input(false);
+  readonly locations = input<MediaItemLocationRow[]>([]);
   readonly saving = input(false);
-  readonly addressFieldsResolving = input(false);
-  readonly coordinatesResolving = input(false);
-  readonly highlightedFields = input<ReadonlySet<LocationHighlightField>>(new Set());
+  readonly primaryErrors = input<Record<string, string>>({});
 
-  readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();
-  /** Extended save event includes optional suggestion for meta persistence. */
-  readonly fieldSaveRequested = output<AddressFieldSaveEvent>();
-  readonly fieldClearRequested = output<AddressFieldDefinition['name']>();
-  readonly editingCancelled = output<void>();
-  readonly fieldResolveRequested = output<{ field: string }>();
-  readonly addressSuggestionApplied = output<ForwardGeocodeResult>();
-  readonly addressClearRequested = output<void>();
-  readonly copyCoordinatesRequested = output<void>();
-  readonly mapLocationPickRequested = output<void>();
-  readonly revertCoordinatesRequested = output<void>();
-  readonly coordinatesClearRequested = output<void>();
-  readonly coordinatesSaveRequested = output<string>();
+  readonly addFromText = output<string>();
+  readonly addFromGeocode = output<ForwardGeocodeResult>();
+  readonly rowSaveRequested = output<MediaLocationRowSavePayload>();
+  readonly rowDeleteRequested = output<string>();
+  readonly setPrimaryRequested = output<string>();
+  readonly mapPickRequested = output<string>();
+  readonly copyFieldRequested = output<MediaLocationCopyField>();
+
+  readonly listFilter = signal('');
+
+  readonly scrollThreshold = MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD;
 
   readonly addressSearchContext = computed<SearchQueryContext>(() => {
     const img = this.media();
@@ -89,154 +65,17 @@ export class MediaDetailLocationSectionComponent {
     return { activeMarkerCentroid: { lat, lng } };
   });
 
-  /** Context passed to AddressFieldComboboxComponent for hierarchical suggestion constraints. */
-  readonly addressFieldContext = computed<AddressFieldContext>(() => {
-    const img = this.media();
-    return {
-      country: img.country,
-      countryCode: this.addressFieldSuggest.countryCodeFromName(img.country),
-      city: img.city,
-      district: img.district,
-      latitude: img.latitude ?? img.exif_latitude,
-      longitude: img.longitude ?? img.exif_longitude,
-      organizationId: img.organization_id,
-    };
-  });
-
-  fieldVerification(field: AddressFieldDefinition['name']): 'verified' | 'unverified' | 'unknown' {
-    const img = this.media();
-    const meta = img.address_field_meta;
-    const fieldMeta = meta?.[field];
-    if (fieldMeta) {
-      return fieldMeta.verified ? 'verified' : 'unverified';
-    }
-    // Legacy rows: address came from GPS/address-search before address_field_meta existed.
-    if (this.fieldValue(field) && !img.location_unresolved) {
-      return 'verified';
-    }
-    return 'unknown';
-  }
-
-  onSuggestionSelected(field: AddressFieldDefinition['name'], suggestion: AddressFieldSuggestion): void {
-    this.fieldSaveRequested.emit({ field, value: suggestion.value, suggestion });
-  }
-
-  onFreeTextSave(field: AddressFieldDefinition['name'], value: string): void {
-    this.fieldSaveRequested.emit({ field, value });
-  }
-
-  onFieldClear(field: AddressFieldDefinition['name']): void {
-    this.fieldClearRequested.emit(field);
-  }
-
-  onResolveRequested(field: AddressFieldDefinition['name']): void {
-    this.fieldResolveRequested.emit({ field });
-  }
-
-  readonly addressFields: AddressFieldDefinition[] = [
-    {
-      name: 'street',
-      icon: 'signpost',
-      labelKey: 'workspace.imageDetail.field.street',
-      labelFallback: 'Street',
-      editAriaKey: 'workspace.imageDetail.action.editStreet.aria',
-      editAriaFallback: 'Edit street',
-      editTitleKey: 'workspace.imageDetail.action.editStreet.title',
-      editTitleFallback: 'Edit street',
-      saveAriaKey: 'workspace.imageDetail.action.saveStreet.aria',
-      saveAriaFallback: 'Save street',
-      saveTitleKey: 'workspace.imageDetail.action.saveStreet.title',
-      saveTitleFallback: 'Save street',
-    },
-    {
-      name: 'city',
-      icon: 'location_city',
-      labelKey: 'workspace.imageDetail.field.city',
-      labelFallback: 'City',
-      editAriaKey: 'workspace.imageDetail.action.editCity.aria',
-      editAriaFallback: 'Edit city',
-      editTitleKey: 'workspace.imageDetail.action.editCity.title',
-      editTitleFallback: 'Edit city',
-      saveAriaKey: 'workspace.imageDetail.action.saveCity.aria',
-      saveAriaFallback: 'Save city',
-      saveTitleKey: 'workspace.imageDetail.action.saveCity.title',
-      saveTitleFallback: 'Save city',
-    },
-    {
-      name: 'district',
-      icon: 'map',
-      labelKey: 'workspace.imageDetail.field.district',
-      labelFallback: 'District',
-      editAriaKey: 'workspace.imageDetail.action.editDistrict.aria',
-      editAriaFallback: 'Edit district',
-      editTitleKey: 'workspace.imageDetail.action.editDistrict.title',
-      editTitleFallback: 'Edit district',
-      saveAriaKey: 'workspace.imageDetail.action.saveDistrict.aria',
-      saveAriaFallback: 'Save district',
-      saveTitleKey: 'workspace.imageDetail.action.saveDistrict.title',
-      saveTitleFallback: 'Save district',
-    },
-    {
-      name: 'country',
-      icon: 'public',
-      labelKey: 'workspace.imageDetail.field.country',
-      labelFallback: 'Country',
-      editAriaKey: 'workspace.imageDetail.action.editCountry.aria',
-      editAriaFallback: 'Edit country',
-      editTitleKey: 'workspace.imageDetail.action.editCountry.title',
-      editTitleFallback: 'Edit country',
-      saveAriaKey: 'workspace.imageDetail.action.saveCountry.aria',
-      saveAriaFallback: 'Save country',
-      saveTitleKey: 'workspace.imageDetail.action.saveCountry.title',
-      saveTitleFallback: 'Save country',
-    },
-  ];
-
-  formatCoord(value: number | null): string {
-    return formatCoordinate(value);
-  }
-
-  readonly hasResolvableCoordinates = computed(() => hasValidGpsCoordinates(this.media()));
-
-  readonly coordinatesDisplayValue = computed(() => {
-    const img = this.media();
-    if (!hasValidGpsCoordinates(img)) {
-      return '';
-    }
-    return `${this.formatCoord(img.latitude)}°, ${this.formatCoord(img.longitude)}°`;
-  });
-
-  readonly coordinatesEditInitialValue = computed(() => {
-    const img = this.media();
-    if (!hasValidGpsCoordinates(img)) {
-      return '';
-    }
-    return `${img.latitude!.toFixed(6)}, ${img.longitude!.toFixed(6)}`;
-  });
-
-  readonly coordinatesRowIcon = computed(() =>
-    this.hasResolvableCoordinates() ? 'gps_fixed' : 'gps_off',
+  readonly showListFilter = computed(
+    () => this.locations().length > MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD,
   );
 
-  readonly showCoordinatesResolving = computed(
-    () => this.coordinatesResolving() || (this.addressFieldsResolving() && !this.hasResolvableCoordinates()),
-  );
-
-  readonly fieldValues = computed(() => {
-    const img = this.media();
-    return {
-      street: img.street ?? '',
-      city: img.city ?? '',
-      district: img.district ?? '',
-      country: img.country ?? '',
-    } as const;
+  readonly filteredLocations = computed(() => {
+    const q = this.listFilter().trim();
+    if (!q) return this.locations();
+    return this.locations().filter((row) => locationMatchesQuery(row, q));
   });
 
-  fieldValue(field: AddressFieldDefinition['name']): string {
-    return this.fieldValues()[field];
-  }
-
-  isFieldHighlighted(field: LocationHighlightField): boolean {
-    return this.highlightedFields().has(field);
-  }
+  readonly listNeedsScroll = computed(
+    () => this.filteredLocations().length > MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD,
+  );
 }

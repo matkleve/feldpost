@@ -6,6 +6,7 @@ export interface MediaDetailLocationSyncEvent {
   lat: number;
   lng: number;
   seq: number;
+  locationRowId?: string;
   address?: MediaLocationAddressPatch;
 }
 
@@ -13,12 +14,23 @@ export interface MediaDetailLocationPendingPatch {
   mediaId: string;
   lat: number;
   lng: number;
+  locationRowId?: string;
   address?: MediaLocationAddressPatch;
 }
 
 /**
- * Notifies the open media detail view when coordinates were saved outside the detail form
- * (e.g. map pick) so it can patch GPS immediately and resolve address fields with loading UI.
+ * Cross-surface bus: map (or other features) → open **media detail** after GPS save.
+ *
+ * **What it does:** When the user picks a point on the map, `MapShellComponent` persists coords
+ * then emits here so `MediaDetailViewComponent` can refresh without a full reload.
+ *
+ * **Multi-location:** When `locationRowId` is set, the map pick updated one
+ * `media_item_locations` row; detail reloads the row list and patches `media()` from the
+ * primary row projection.
+ *
+ * **UI:** Workspace pane → Media detail (Location section). Not used by upload panel directly.
+ *
+ * @see docs/specs/ui/media-detail/media-detail-location-section.md (map pick contract)
  */
 @Injectable({ providedIn: 'root' })
 export class MediaDetailLocationSyncService {
@@ -31,10 +43,11 @@ export class MediaDetailLocationSyncService {
     lat: number,
     lng: number,
     address?: MediaLocationAddressPatch,
+    locationRowId?: string,
   ): void {
-    this.pendingByMediaId.set(mediaId, { mediaId, lat, lng, address });
+    this.pendingByMediaId.set(mediaId, { mediaId, lat, lng, address, locationRowId });
     this.seq += 1;
-    this.lastEvent.set({ mediaId, lat, lng, seq: this.seq, address });
+    this.lastEvent.set({ mediaId, lat, lng, seq: this.seq, address, locationRowId });
   }
 
   /** Patch waiting for detail media to load (e.g. map pick finished before `media()` was ready). */

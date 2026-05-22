@@ -5,7 +5,7 @@
 
 ## What It Is
 
-The inline editing system for media-item properties in the Media Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup, read-only location evidence breakdown (active coordinates, address-derived coordinates, EXIF coordinates), and parser notes for unresolved address fragments so no location information is lost.
+The inline editing system for media-item properties in the Media Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). **Location section** multi-row editing is defined in [media-detail-location-section.md](media-detail-location-section.md) (`media_item_locations` canonical model). This document retains title/Details/EXIF evidence; legacy single-location field rows in the Location section are deprecated.
 
 Address component fields (street/city/district/country) use `app-address-field-combobox` when editing — see [address-field-editing.md](address-field-editing.md) for the full combobox + hierarchical suggestion + verification + reconciliation contract.
 

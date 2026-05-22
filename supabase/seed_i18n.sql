@@ -28677,4 +28677,996 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.street.label', 'Street', 'en', 'media-detail location row edit label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Street', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.street.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Strasse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.street.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Via', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.street.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.house_number.label', 'House number', 'en', 'media-detail location row edit label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'House number', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.house_number.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hausnummer', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.house_number.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Numero civico', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.house_number.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.staircase.label', 'Staircase', 'en', 'media-detail location row edit label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Staircase', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.staircase.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Stiege', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.staircase.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scala', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.staircase.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.door.label', 'Top', 'en', 'media-detail location row door segment label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Top', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.door.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Top', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.door.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Piano', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.door.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.door.placeholder', 'e.g. 1', 'en', 'media-detail location row door input placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'e.g. 1', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.door.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'DG', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.door.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '11-12', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.door.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.staircase.placeholder', 'e.g. A', 'en', 'media-detail location row staircase placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'e.g. A', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.staircase.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aufgang 3', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.staircase.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'z. B. A', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.staircase.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.extra_information.label', 'Extra information', 'en', 'media-detail location row extra info label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Extra information', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.extra_information.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zusatzinfo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.extra_information.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Informazioni aggiuntive', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.extra_information.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.extra_information.placeholder', 'e.g. Ring twice', 'en', 'media-detail location row extra info placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'e.g. Ring twice', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.extra_information.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'z. B. Zweimal klingeln', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.extra_information.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'ad es. Suonare due volte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.extra_information.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.set_primary', 'Set as primary', 'en', 'media-detail location row overflow action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Set as primary', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.set_primary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Als primaer setzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.set_primary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Imposta come principale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.set_primary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.primary.badge', 'Primary', 'en', 'media-detail primary location row indicator a11y')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Primary', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.primary.badge'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Primaer', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.primary.badge'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Principale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.primary.badge'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.primary.tooltip', 'This location is used as the map pin and in exports', 'en', 'media-detail primary row overflow hint')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This location is used as the map pin and in exports', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.primary.tooltip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieser Standort wird fuer Kartenpin und Exporte verwendet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.primary.tooltip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questa posizione e usata per il pin sulla mappa e negli export', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.primary.tooltip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.set_primary_error', 'Could not set primary location', 'en', 'media-detail location row inline error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not set primary location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.set_primary_error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Primaerstandort konnte nicht gesetzt werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.set_primary_error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile impostare la posizione principale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.set_primary_error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.delete', 'Delete location', 'en', 'media-detail location row overflow delete')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort loeschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.confirmDelete', 'Confirm delete location', 'en', 'media-detail location row delete confirm')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm delete location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Loeschen bestaetigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma eliminazione posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.street', 'Copy street', 'en', 'media-detail location copy menu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy street', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.street'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Strasse kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.street'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia via', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.street'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.house_number', 'Copy house number', 'en', 'media-detail location copy menu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy house number', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.house_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hausnummer kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.house_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia numero civico', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.house_number'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.staircase', 'Copy staircase', 'en', 'media-detail location copy menu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy staircase', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.staircase'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Stiege kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.staircase'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia scala', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.staircase'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.door', 'Copy door / Top', 'en', 'media-detail location copy menu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy door / Top', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.door'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Top kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.door'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia piano', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.door'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.district', 'Copy district', 'en', 'media-detail location copy menu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy district', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.district'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bezirk kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.district'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia distretto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.district'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.country', 'Copy country', 'en', 'media-detail location copy menu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy country', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.country'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Land kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.country'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia paese', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.country'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.gps', 'Copy GPS', 'en', 'media-detail location copy menu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy GPS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.gps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'GPS kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.gps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia GPS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.gps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.addSearch.label', 'Add or search address', 'en', 'media-detail location add row collapsed label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add or search address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse hinzufuegen oder suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi o cerca indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.addSearch.placeholder', 'Search address...', 'en', 'media-detail location add search input placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search address...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse suchen...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca indirizzo...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.addSearch.aria', 'Add or search for an address', 'en', 'media-detail location add search combobox aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add or search for an address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse hinzufuegen oder suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi o cerca un indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.addSearch.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.section.results', 'Results', 'en', 'media-detail location add dropdown section')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Results', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ergebnisse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risultati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.section.otherMedia', 'Other media', 'en', 'media-detail location add dropdown section')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Other media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.otherMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Andere Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.otherMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Altri media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.otherMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.section.internet', 'Internet', 'en', 'media-detail location add dropdown section')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Internet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.internet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Internet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.internet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Internet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.internet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.section.addNew', 'New address', 'en', 'media-detail location add dropdown section heading for create row')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'New address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.addNew'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Neue Adresse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.addNew'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nuovo indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.addNew'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.addNew', 'Add new Address: {query}', 'en', 'media-detail location add dropdown create row aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add new Address: {query}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.addNew'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Neue Adresse hinzufuegen: {query}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.addNew'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi nuovo indirizzo: {query}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.addNew'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.listFilter.placeholder', 'Filter locations...', 'en', 'media-detail location list filter placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Filter locations...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.listFilter.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standorte filtern...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.listFilter.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Filtra posizioni...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.listFilter.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.toast.added', 'Location added', 'en', 'media-detail toast after add location')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location added', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.toast.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort hinzugefuegt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.toast.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione aggiunta', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.toast.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.mediaDetail.toast.copied', 'Copied', 'en', 'media-detail location copy toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copied', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kopiert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copiato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

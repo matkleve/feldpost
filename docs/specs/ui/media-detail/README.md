@@ -10,4 +10,6 @@ Module index for media-detail contracts.
 - media-detail-inline-editing.md
 - media-detail-actions.md
 - address-search.md
+- address-field-editing.md
+- media-detail-location-section.md
 - metadata-section.md

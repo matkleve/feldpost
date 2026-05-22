@@ -42,6 +42,8 @@ import {
 } from '../../../core/geocoding/geocoding.service';
 import { detectCoordinates } from '../../../core/search/coordinate-detection';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
+import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import type { MediaItemLocationRow } from '../../../core/media-locations/media-locations.types';
 import { buildLocationUpdateFailureToast } from '../../../core/media-location-update/location-update-toast.util';
 import type {
   DetailEditingField,
@@ -106,7 +108,16 @@ import { WorkspaceSelectionService } from '../../../core/workspace-selection/wor
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import { AddressReconciliationService } from '../../../core/address-reconciliation/address-reconciliation.service';
-import type { AddressFieldSaveEvent } from './media-detail-location-section/media-detail-location-section.component';
+import type {
+  MediaLocationCopyField,
+  MediaLocationRowSavePayload,
+} from './media-location-row/media-location-row.component';
+/** @deprecated Legacy single-field save; retained until address-field flows are fully removed. */
+interface AddressFieldSaveEvent {
+  field: string;
+  value: string;
+  suggestion?: import('../../../core/address-field-suggest/address-field-suggest.types').AddressFieldSuggestion;
+}
 import type {
   AddressFieldKind,
   AddressFieldMeta,
@@ -164,6 +175,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly locationResolverService = inject(LocationResolverService);
   private readonly addressReconciliationService = inject(AddressReconciliationService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  private readonly mediaLocationsService = inject(MediaLocationsService);
   private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly router = inject(Router);
@@ -197,6 +209,12 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly mediaLocationStatus = signal<string | null>(null);
   readonly projectSearch = signal('');
   readonly editingField = signal<DetailEditingField>(null);
+  /** Multi-location rows for Location section (`media_item_locations`). @see core/media-locations/README.md */
+  readonly locations = signal<MediaItemLocationRow[]>([]);
+  /** Inline errors for set-primary per row id (FSM `set_primary_error` on row). */
+  readonly locationPrimaryErrors = signal<Record<string, string>>({});
+  /** Target row for next map pick (`UploadLocationMapPickRequest.locationRowId`). */
+  private pendingMapPickLocationRowId: string | null = null;
   readonly fullResUrl = signal<string | null>(null);
   readonly thumbnailUrl = signal<string | null>(null);
   readonly metadataKeyDefinitions = signal<
@@ -560,7 +578,11 @@ export class MediaDetailViewComponent implements OnDestroy {
       };
       const targetMediaId = mediaId;
       // Patch signals after the effect completes — writing `media` inside this effect breaks the page.
-      queueMicrotask(() => this.handleExternalLocationSync(targetMediaId, patch));
+      if (evt.locationRowId) {
+        queueMicrotask(() => void this.handleExternalLocationRowSync(targetMediaId, evt.locationRowId!, patch));
+      } else {
+        queueMicrotask(() => this.handleExternalLocationSync(targetMediaId, patch));
+      }
     });
 
     this.uploadManager.imageReplaced$
@@ -617,6 +639,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.showContextMenu.set(false);
     this.destructiveConfirm.set(null);
     this.editingField.set(null);
+    this.locations.set([]);
+    this.locationPrimaryErrors.set({});
     this.activeJobId.set(null);
     this.replaceError.set(null);
     this.pendingLocationRetryAttempted.clear();
@@ -786,6 +810,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (this.abortController.signal.aborted) {
       return;
     }
+
+    await this.reloadLocations(id);
 
     this.applyPendingLocationSyncIfAny(id);
 
@@ -1646,19 +1672,167 @@ export class MediaDetailViewComponent implements OnDestroy {
     });
   }
 
-  requestMapLocationPick(): void {
+  requestMapLocationPick(locationRowId?: string): void {
     const media = this.media();
     if (!media) {
       return;
     }
 
     this.editingField.set(null);
+    this.pendingMapPickLocationRowId = locationRowId ?? null;
 
     // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> change-location-map action availability.
     this.locationMapPickRequested.emit({
       mediaId: media.id,
       fileName: media.id,
+      locationRowId,
     });
+  }
+
+  /** Loads `app-media-detail-location-section` row list from `MediaLocationsService`. */
+  async reloadLocations(mediaId: string): Promise<void> {
+    const result = await this.mediaLocationsService.listForMedia(mediaId);
+    if (result.ok && 'rows' in result) {
+      this.locations.set(result.rows);
+    }
+  }
+
+  /** After row CRUD: refresh legacy `media_items` columns from primary row + reload location list. */
+  private async refreshMediaAfterLocationMutation(mediaId: string): Promise<void> {
+    const signal = this.abortController?.signal ?? new AbortController().signal;
+    await this.dataFacade.refreshMediaLocationFields(mediaId, signal);
+    await this.reloadLocations(mediaId);
+  }
+
+  async onLocationAddFromText(label: string): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.addFromFreeText(media.id, label);
+    this.saving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+    this.toastService.show({
+      message: this.t('location.toast.added', 'Location added'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
+  async onLocationAddFromGeocode(suggestion: ForwardGeocodeResult): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.addFromGeocodeSuggestion(media.id, suggestion);
+    this.saving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+    this.toastService.show({
+      message: this.t('location.toast.added', 'Location added'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
+  async onLocationRowSave(payload: MediaLocationRowSavePayload): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.updateLocation({
+      locationId: payload.locationId,
+      street: payload.street,
+      house_number: payload.house_number,
+      staircase: payload.staircase,
+      door: payload.door,
+      extra_information: payload.extra_information,
+    });
+    this.saving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+  }
+
+  async onLocationRowDelete(locationId: string): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const { delete: del, list } = await this.mediaLocationsService.deleteAndReload(
+      locationId,
+      media.id,
+    );
+    this.saving.set(false);
+    if (!del.ok) {
+      this.toastService.show({ message: del.error, type: 'warning' });
+      return;
+    }
+    if (!list.ok || !('rows' in list)) {
+      this.toastService.show({
+        message: list.ok ? 'Could not reload locations.' : list.error,
+        type: 'warning',
+      });
+      return;
+    }
+    this.locations.set(list.rows);
+    await this.dataFacade.refreshMediaLocationFields(
+      media.id,
+      this.abortController?.signal ?? new AbortController().signal,
+    );
+  }
+
+  async onLocationSetPrimary(locationId: string): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.locationPrimaryErrors.update((m) => {
+      const next = { ...m };
+      delete next[locationId];
+      return next;
+    });
+    const result = await this.mediaLocationsService.setPrimary(locationId);
+    if (!result.ok) {
+      this.locationPrimaryErrors.update((m) => ({
+        ...m,
+        [locationId]: this.t('location.action.set_primary_error', 'Could not set primary location'),
+      }));
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+  }
+
+  async onLocationCopyField(action: MediaLocationCopyField): Promise<void> {
+    await navigator.clipboard.writeText(action.value).catch(() => undefined);
+    this.toastService.show({
+      message: this.t('workspace.mediaDetail.toast.copied', 'Copied'),
+      type: 'success',
+      duration: 1800,
+    });
+  }
+
+  private async handleExternalLocationRowSync(
+    mediaId: string,
+    _locationRowId: string,
+    patch: MediaLocationAddressPatch & {
+      latitude?: number | null;
+      longitude?: number | null;
+      location_unresolved?: boolean;
+    },
+  ): Promise<void> {
+    if (this.mediaId() !== mediaId) {
+      return;
+    }
+    await this.reloadLocations(mediaId);
+    const current = this.media();
+    if (!current) {
+      return;
+    }
+    this.applyLocationPatch(prepareLocationPatchAfterGpsChange(current, patch));
   }
 
   private async copyAddress(): Promise<void> {

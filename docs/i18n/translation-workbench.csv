@@ -924,3 +924,35 @@ workspace.imageDetail.action.confirmClearCoordinates.aria,Confirm clear coordina
 workspace.imageDetail.action.confirmClearCoordinates.title,Click again to clear coordinates,apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section coordinates row clear armed title,Click again to clear coordinates,Zum Löschen der Koordinaten erneut klicken,Clicca di nuovo per cancellare le coordinate
 workspace.imageDetail.toast.coordinatesCleared,Coordinates removed,apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view toast after clear coordinates,Coordinates removed,Koordinaten entfernt,Coordinate rimosse
 workspace.imageDetail.toast.coordinatesClearFailed,Could not clear coordinates,apps/web/src/app/shared/workspace-pane/media-detail/media-detail-fields.helper clear coordinates error,Could not clear coordinates,Koordinaten konnten nicht gelöscht werden,Impossibile cancellare le coordinate
+location.street.label,Street,media-detail location row edit label,Street,Strasse,Via
+location.house_number.label,House number,media-detail location row edit label,House number,Hausnummer,Numero civico
+location.staircase.label,Staircase,media-detail location row edit label,Staircase,Stiege,Scala
+location.door.label,Top,media-detail location row door segment label,Top,Top,Piano
+location.door.placeholder,e.g. 1 DG 11-12,media-detail location row door input placeholder,e.g. 1, DG, 11-12,z. B. 1, DG, 11-12,ad es. 1, DG, 11-12
+location.staircase.placeholder,e.g. A Aufgang 3,media-detail location row staircase placeholder,e.g. A, Aufgang 3,z. B. A, Aufgang 3,ad es. A, Aufgang 3
+location.extra_information.label,Extra information,media-detail location row extra info label,Extra information,Zusatzinfo,Informazioni aggiuntive
+location.extra_information.placeholder,e.g. Ring twice,media-detail location row extra info placeholder,e.g. Ring twice,z. B. Zweimal klingeln,ad es. Suonare due volte
+location.action.set_primary,Set as primary,media-detail location row overflow action,Set as primary,Als primaer setzen,Imposta come principale
+location.primary.badge,Primary,media-detail primary location row indicator a11y,Primary,Primaer,Principale
+location.primary.tooltip,This location is used as the map pin and in exports,media-detail primary row overflow hint,This location is used as the map pin and in exports,Dieser Standort wird fuer Kartenpin und Exporte verwendet.,Questa posizione e usata per il pin sulla mappa e negli export
+location.action.set_primary_error,Could not set primary location,media-detail location row inline error,Could not set primary location,Primaerstandort konnte nicht gesetzt werden,Impossibile impostare la posizione principale
+location.action.delete,Delete location,media-detail location row overflow delete,Delete location,Standort loeschen,Elimina posizione
+location.action.confirmDelete,Confirm delete location,media-detail location row delete confirm,Confirm delete location,Loeschen bestaetigen,Conferma eliminazione posizione
+location.copy.street,Copy street,media-detail location copy menu,Copy street,Strasse kopieren,Copia via
+location.copy.house_number,Copy house number,media-detail location copy menu,Copy house number,Hausnummer kopieren,Copia numero civico
+location.copy.staircase,Copy staircase,media-detail location copy menu,Copy staircase,Stiege kopieren,Copia scala
+location.copy.door,Copy door / Top,media-detail location copy menu,Copy door / Top,Top kopieren,Copia piano
+location.copy.district,Copy district,media-detail location copy menu,Copy district,Bezirk kopieren,Copia distretto
+location.copy.country,Copy country,media-detail location copy menu,Copy country,Land kopieren,Copia paese
+location.copy.gps,Copy GPS,media-detail location copy menu,Copy GPS,GPS kopieren,Copia GPS
+location.addSearch.label,Add or search address,media-detail location add row collapsed label,Add or search address,Adresse hinzufuegen oder suchen,Aggiungi o cerca indirizzo
+location.addSearch.placeholder,Search address...,media-detail location add search input placeholder,Search address...,Adresse suchen...,Cerca indirizzo...
+location.addSearch.aria,Add or search for an address,media-detail location add search combobox aria-label,Add or search for an address,Adresse hinzufuegen oder suchen,Aggiungi o cerca un indirizzo
+location.dropdown.section.results,Results,media-detail location add dropdown section,Results,Ergebnisse,Risultati
+location.dropdown.section.otherMedia,Other media,media-detail location add dropdown section,Other media,Andere Medien,Altri media
+location.dropdown.section.internet,Internet,media-detail location add dropdown section,Internet,Internet,Internet
+location.dropdown.section.addNew,New address,media-detail location add dropdown section heading for create row,New address,Neue Adresse,Nuovo indirizzo
+location.dropdown.addNew,"Add new Address: ""{query}""",media-detail location add dropdown create row aria-label,Add new Address: "{query}",Neue Adresse hinzufuegen: "{query}",Aggiungi nuovo indirizzo: "{query}"
+location.listFilter.placeholder,Filter locations...,media-detail location list filter placeholder,Filter locations...,Standorte filtern...,Filtra posizioni...
+location.toast.added,Location added,media-detail toast after add location,Location added,Standort hinzugefuegt,Posizione aggiunta
+workspace.mediaDetail.toast.copied,Copied,media-detail location copy toast,Copied,Kopiert,Copiato

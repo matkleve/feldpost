@@ -1,252 +1,45 @@
-<div class="detail-section">
+<!-- Location section: multi-address list. Orchestration in MediaDetailViewComponent. @see media-detail-location-section/README.md -->
+<div class="detail-section media-detail-location-section">
   <p class="detail-section__label">{{ t('workspace.imageDetail.section.location', 'Location') }}</p>
 
-  <app-address-search
-    [currentAddress]="fullAddress()"
-    [addressFieldsResolving]="addressFieldsResolving()"
-    [addressHighlighted]="isFieldHighlighted('address')"
-    [searchContext]="addressSearchContext()"
-    [editingActive]="editingField() === 'address_search'"
-    (searchOpened)="fieldEditRequested.emit('address_search')"
-    (suggestionApplied)="addressSuggestionApplied.emit($event)"
-    (addressClearRequested)="addressClearRequested.emit()"
-    (deactivated)="editingCancelled.emit()"
-  />
-
-  @for (fieldDef of addressFields; track fieldDef.name) {
-    @if (editingField() === fieldDef.name) {
-      <app-address-field-combobox
-        [field]="fieldDef.name"
-        [icon]="fieldDef.icon"
-        [labelKey]="fieldDef.labelKey"
-        [labelFallback]="fieldDef.labelFallback"
-        [editAriaKey]="fieldDef.editAriaKey"
-        [editAriaFallback]="fieldDef.editAriaFallback"
-        [saveAriaKey]="fieldDef.saveAriaKey"
-        [saveAriaFallback]="fieldDef.saveAriaFallback"
-        [saveTitleKey]="fieldDef.saveTitleKey"
-        [saveTitleFallback]="fieldDef.saveTitleFallback"
-        [value]="fieldValue(fieldDef.name)"
-        [context]="addressFieldContext()"
-        [verificationState]="fieldVerification(fieldDef.name)"
-        (suggestionSelected)="onSuggestionSelected(fieldDef.name, $event)"
-        (valueChange)="onFreeTextSave(fieldDef.name, $event)"
-        (saveRequested)="onFreeTextSave(fieldDef.name, $event)"
-        (cancelRequested)="editingCancelled.emit()"
-      />
-    } @else {
-    <div class="detail-row">
-      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-        <!-- Stable state: read — edit button left, resolve button right (if unverified) -->
-        <!-- @see docs/specs/ui/media-detail/address-field-editing.md#row-slot-table -->
-        <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="detail-row-action detail-row-action--l1"
-          type="button"
-          [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
-          [attr.title]="t(fieldDef.editTitleKey, fieldDef.editTitleFallback)"
-          (click)="fieldEditRequested.emit(fieldDef.name)"
-        >
-          <span class="material-icons" aria-hidden="true">edit</span>
-        </button>
-        <div class="detail-row__center">
-          <span class="material-icons detail-row__icon" aria-hidden="true">{{ fieldDef.icon }}</span>
-          <span class="detail-row__label">{{ t(fieldDef.labelKey, fieldDef.labelFallback) }}</span>
-          @if (addressFieldsResolving()) {
-            <span
-              class="detail-row__value-loading"
-              role="status"
-              [attr.aria-label]="t('workspace.imageDetail.location.addressResolving', 'Resolving address')"
-            >
-              <hlm-spinner size="sm" />
-            </span>
-          } @else {
-            <button
-              class="detail-row__field-trigger"
-              type="button"
-              [class.detail-row__value--flash-updated]="isFieldHighlighted(fieldDef.name)"
-              (click)="fieldEditRequested.emit(fieldDef.name)"
-            >
-              {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
-              @if (fieldValue(fieldDef.name) && fieldVerification(fieldDef.name) !== 'verified') {
-                <span
-                  class="detail-row__unverified-hint"
-                  [attr.aria-label]="t('workspace.addressField.unverified.hint', 'Unverified')"
-                  aria-hidden="true"
-                >?</span>
-              }
-            </button>
-          }
-        </div>
-        @if (fieldValue(fieldDef.name) && fieldVerification(fieldDef.name) !== 'verified') {
-          <button
-            hlmBtn
-            variant="ghost"
-            size="icon"
-            class="detail-row-action detail-row-action--r1"
-            type="button"
-            [attr.aria-label]="t('workspace.addressField.action.resolve.aria', 'Resolve address field')"
-            [attr.title]="t('workspace.addressField.action.resolve.title', 'Resolve address field')"
-            (click)="onResolveRequested(fieldDef.name)"
-          >
-            <span class="material-icons" aria-hidden="true">travel_explore</span>
-          </button>
-        } @else if (!fieldValue(fieldDef.name)) {
-          <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-        }
-        @if (fieldValue(fieldDef.name)) {
-          <app-detail-row-inline-confirm-action
-            [slot]="
-              fieldVerification(fieldDef.name) !== 'verified' ? 'r2' : 'r1'
-            "
-            [initialAriaFallback]="
-              t('workspace.addressField.action.clear.aria', 'Clear') +
-              ' ' +
-              t(fieldDef.labelKey, fieldDef.labelFallback)
-            "
-            initialAriaKey="workspace.addressField.action.clear.aria"
-            initialTitleKey="workspace.addressField.action.clear.title"
-            [initialTitleFallback]="
-              t('workspace.addressField.action.clear.title', 'Clear') +
-              ' ' +
-              t(fieldDef.labelKey, fieldDef.labelFallback)
-            "
-            confirmAriaKey="workspace.addressField.action.confirmClear.aria"
-            confirmAriaFallback="Confirm clear field"
-            confirmTitleKey="workspace.addressField.action.confirmClear.title"
-            confirmTitleFallback="Click again to clear"
-            (confirmed)="onFieldClear(fieldDef.name)"
-          />
-          @if (fieldVerification(fieldDef.name) === 'verified' || fieldVerification(fieldDef.name) === 'unknown') {
-            <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
-          }
-        } @else {
-          <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
-        }
-    </div>
-    }
-  }
-
-  @if (editingField() === 'coordinates') {
-    <app-coordinates-field-editor
-      [icon]="coordinatesRowIcon()"
-      [isCorrected]="isCorrected()"
-      [initialValue]="coordinatesEditInitialValue()"
-      (saveRequested)="coordinatesSaveRequested.emit($event)"
-      (cancelRequested)="editingCancelled.emit()"
+  <div class="detail-section__rows">
+    <app-media-location-add-search
+      [locations]="locations()"
+      [searchContext]="addressSearchContext()"
+      [disabled]="saving()"
+      (addFromText)="addFromText.emit($event)"
+      (addFromGeocode)="addFromGeocode.emit($event)"
     />
-  } @else {
-    <!-- Active lat/lng only — never readonly; EXIF coords stay in the Details section. -->
-    <div class="detail-row">
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--l1"
-        type="button"
-        [attr.aria-label]="
-          t('workspace.imageDetail.action.chooseLocationMap.aria', 'Choose on map')
-        "
-        [attr.title]="t('workspace.imageDetail.action.chooseLocationMap.title', 'Choose on map')"
-        (click)="mapLocationPickRequested.emit()"
-      >
-        <span class="material-icons" aria-hidden="true">pin_drop</span>
-      </button>
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon"
-        class="detail-row-action detail-row-action--l2"
-        type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
-        [attr.title]="t('workspace.imageDetail.action.editCoordinates.title', 'Edit coordinates')"
-        (click)="fieldEditRequested.emit('coordinates')"
-      >
-        <span class="material-icons" aria-hidden="true">edit</span>
-      </button>
-      <div class="detail-row__center">
-        <span class="material-icons detail-row__icon" aria-hidden="true">{{ coordinatesRowIcon() }}</span>
-        <span class="detail-row__label">{{
-          isCorrected()
-            ? t('workspace.imageDetail.field.correctedCoordinates', 'Corrected coordinates')
-            : t('workspace.imageDetail.field.coordinates', 'Coordinates')
-        }}</span>
-        @if (showCoordinatesResolving()) {
-          <span
-            class="detail-row__value-loading"
-            role="status"
-            [attr.aria-label]="t('workspace.imageDetail.location.coordinatesResolving', 'Resolving coordinates')"
-          >
-            <hlm-spinner size="sm" />
-          </span>
-        } @else if (hasResolvableCoordinates()) {
-          <button
-            class="detail-row__field-trigger detail-row__value--mono"
-            type="button"
-            [class.detail-row__value--flash-updated]="isFieldHighlighted('coordinates')"
-            [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
-            (click)="fieldEditRequested.emit('coordinates')"
-          >
-            {{ coordinatesDisplayValue() }}
-          </button>
-        } @else {
-          <button
-            class="detail-row__field-trigger"
-            type="button"
-            [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
-            (click)="fieldEditRequested.emit('coordinates')"
-          >
-            {{ t('workspace.imageDetail.value.noGps', 'No GPS') }}
-          </button>
-        }
+
+    @if (showListFilter()) {
+      <div class="media-detail-location-section__list-filter">
+        <input
+          class="detail-row__field-input"
+          type="search"
+          [placeholder]="t('location.listFilter.placeholder', 'Filter locations...')"
+          [value]="listFilter()"
+          (input)="listFilter.set($any($event.target).value)"
+        />
       </div>
-      @if (isCorrected()) {
-        <app-detail-row-inline-confirm-action
-          [disabled]="saving()"
-          idleIcon="undo"
-          initialAriaKey="workspace.imageDetail.action.revertCoordinates.aria"
-          initialAriaFallback="Revert corrected coordinates"
-          initialTitleKey="workspace.imageDetail.action.revertCoordinates.title"
-          initialTitleFallback="Revert corrected coordinates"
-          confirmAriaKey="workspace.imageDetail.action.revertCoordinates.confirmAria"
-          confirmAriaFallback="Confirm revert coordinates"
-          confirmTitleKey="workspace.imageDetail.action.revertCoordinates.confirmTitle"
-          confirmTitleFallback="Click again to revert coordinates"
-          (confirmed)="revertCoordinatesRequested.emit()"
+    }
+
+    <div
+      class="media-detail-location-section__list"
+      [class.media-detail-location-section__list--scroll]="listNeedsScroll()"
+    >
+      @for (row of filteredLocations(); track row.id) {
+        <app-media-location-row
+          [location]="row"
+          [locationCount]="locations().length"
+          [saving]="saving()"
+          [primaryError]="primaryErrors()[row.id] ?? null"
+          (saveRequested)="rowSaveRequested.emit($event)"
+          (deleteRequested)="rowDeleteRequested.emit($event)"
+          (setPrimaryRequested)="setPrimaryRequested.emit($event)"
+          (mapPickRequested)="mapPickRequested.emit($event)"
+          (copyFieldRequested)="copyFieldRequested.emit($event)"
         />
-        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
-      } @else if (hasResolvableCoordinates()) {
-        <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="detail-row-action detail-row-action--r1"
-          type="button"
-          [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-          [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-          (click)="copyCoordinatesRequested.emit()"
-        >
-          <span class="material-icons" aria-hidden="true">content_copy</span>
-        </button>
-        <app-detail-row-inline-confirm-action
-          slot="r2"
-          [disabled]="saving()"
-          initialAriaKey="workspace.imageDetail.action.clearCoordinates.aria"
-          initialAriaFallback="Clear coordinates"
-          initialTitleKey="workspace.imageDetail.action.clearCoordinates.title"
-          initialTitleFallback="Clear coordinates"
-          confirmAriaKey="workspace.imageDetail.action.confirmClearCoordinates.aria"
-          confirmAriaFallback="Confirm clear coordinates"
-          confirmTitleKey="workspace.imageDetail.action.confirmClearCoordinates.title"
-          confirmTitleFallback="Click again to clear coordinates"
-          (confirmed)="coordinatesClearRequested.emit()"
-        />
-      } @else {
-        <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
-        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
       }
     </div>
-  }
+  </div>
 </div>

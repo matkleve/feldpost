@@ -25,6 +25,7 @@
       @for (option of mapViewOptions(); track option.id) {
         <button
           hlmToggleGroupItem
+          size="icon"
           class="map-style-switch__option"
           type="button"
           brnToggleGroupItem
@@ -32,12 +33,7 @@
           [attr.aria-label]="option.ariaLabel || option.label"
           [attr.title]="option.title || option.label"
         >
-          @if (option.icon && optLayout(option) !== 'text-only') {
-            <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
-          }
-          @if (optLayout(option) !== 'icon-only') {
-            <span class="map-style-switch__option-label">{{ option.label }}</span>
-          }
+          <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
         </button>
       }
     </div>

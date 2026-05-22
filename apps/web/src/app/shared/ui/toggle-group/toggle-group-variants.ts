@@ -39,12 +39,12 @@ export const pillToggleVariants = cva(
   ].join(' '),
   {
     variants: {
-      // Nested track: outer h-9 matches `hlmBtn size="sm"`; p-1 inset around segments.
+      // Horizontal track height is set via compoundVariants; vertical stacks use h-auto.
       // @see docs/design/components/action-interaction-kernel.md#button-policy
       size: {
-        sm: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:p-1',
-        md: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:p-1',
-        lg: '[&_[hlmToggleGroup]]:h-10 [&_[hlmToggleGroup]]:p-1',
+        sm: '',
+        md: '',
+        lg: '',
       },
       fill: {
         true: [
@@ -63,6 +63,38 @@ export const pillToggleVariants = cva(
         false: '',
       },
     },
+    compoundVariants: [
+      {
+        vertical: false,
+        size: 'sm',
+        class: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
+      },
+      {
+        vertical: false,
+        size: 'md',
+        class: '[&_[hlmToggleGroup]]:h-9 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
+      },
+      {
+        vertical: false,
+        size: 'lg',
+        class: '[&_[hlmToggleGroup]]:h-10 [&_[hlmToggleGroup]]:px-1 [&_[hlmToggleGroup]]:py-0',
+      },
+      {
+        vertical: true,
+        size: 'sm',
+        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0 [&_[hlmToggleGroup]]:p-1',
+      },
+      {
+        vertical: true,
+        size: 'md',
+        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0 [&_[hlmToggleGroup]]:p-1',
+      },
+      {
+        vertical: true,
+        size: 'lg',
+        class: '[&_[hlmToggleGroup]]:h-auto [&_[hlmToggleGroup]]:min-h-0 [&_[hlmToggleGroup]]:p-1',
+      },
+    ],
     defaultVariants: {
       size: 'md',
       fill: false,
@@ -78,15 +110,15 @@ export type PillToggleVariantProps = VariantProps<typeof pillToggleVariants>;
 // @see docs/design/components/action-interaction-kernel.md#button-policy
 export const toggleGroupVariants = cva(
   [
-    'inline-flex items-center justify-center rounded-md bg-muted p-1 gap-1',
+    'inline-flex items-center justify-center rounded-md bg-muted gap-1',
     'motion-reduce:transition-none motion-reduce:duration-0 motion-reduce:[animation-duration:1ms] motion-reduce:[transition-duration:1ms]',
   ].join(' '),
   {
     variants: {
       size: {
-        sm: 'h-9',
-        md: 'h-9',
-        lg: 'h-10',
+        sm: 'h-9 px-1 py-0',
+        md: 'h-9 px-1 py-0',
+        lg: 'h-10 px-1 py-0',
       },
     },
     defaultVariants: { size: 'md' },
@@ -111,10 +143,10 @@ export const toggleGroupItemVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-7 ps-2.5 pe-2 text-xs',
-        md: 'h-7 ps-2.5 pe-2 text-sm',
-        lg: 'h-8 ps-4 pe-3',
-        icon: 'h-7 w-7 min-h-7 min-w-7 p-0',
+        sm: 'h-9 ps-2.5 pe-2 text-xs',
+        md: 'h-9 ps-2.5 pe-2 text-sm',
+        lg: 'h-10 ps-4 pe-3',
+        icon: 'h-9 w-9 min-h-9 min-w-9 p-0',
       },
     },
     defaultVariants: { size: 'md' },
