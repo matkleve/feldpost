@@ -56,8 +56,6 @@ const RECENT_SEARCHES_STORAGE_KEY = 'feldpost-recent-searches';
 const MAX_RECENT_SEARCHES = 20;
 const MAX_DB_ADDRESS_ROWS = 24;
 const CONTEXT_CITY_CACHE_TTL_MS = 10 * 60 * 1000;
-const MIN_CITY_HINT_STEM_LENGTH = 3;
-const MAX_CITY_HINT_STEMS = 4;
 
 interface DbAddressRow {
   id: string;
@@ -437,6 +435,7 @@ export class SearchBarService {
     context: SearchQueryContext,
   ): Promise<SearchAddressCandidate[]> {
     const strictCandidates = await this.fetchGeocoderCandidates(normalizedQuery, context);
+    const maxResults = this.orgSearchTuning.orgSearchConfig().resolver.maxGeocoderResults;
 
     if (strictCandidates.length > 0) {
       const needsRicherLabels = strictCandidates.some((candidate) => !candidate.label.includes(','));
@@ -445,24 +444,32 @@ export class SearchBarService {
       }
 
       const cityHint = await this.resolveContextCityHint(context);
-      if (cityHint) {
-        for (const hintedQuery of this.buildCityHintQueries(normalizedQuery, cityHint)) {
-          const hintedCandidates = await this.fetchGeocoderCandidates(hintedQuery, context);
-          const refinedCandidates = hintedCandidates.filter(
-            (candidate) =>
-              this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
-              candidate.label.includes(','),
-          );
-          if (refinedCandidates.length > 0) {
-            logSearchEvent('geocoder-city-hint-enrich', {
-              query: normalizedQuery,
-              cityHint,
-              hintedQuery,
-              count: refinedCandidates.length,
-            });
-            return this.mergeGeocoderCandidateSets(strictCandidates, refinedCandidates);
-          }
-        }
+      if (!cityHint) {
+        return strictCandidates;
+      }
+
+      const enrichedQuery = normalizeSearchQuery(`${normalizedQuery} ${cityHint}`);
+      if (!enrichedQuery) {
+        return strictCandidates;
+      }
+
+      const hintedCandidates = await this.fetchGeocoderCandidates(enrichedQuery, context);
+      const refinedCandidates = hintedCandidates.filter(
+        (candidate) =>
+          this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
+          candidate.label.includes(','),
+      );
+      if (refinedCandidates.length > 0) {
+        logSearchEvent('geocoder-city-hint-enrich', {
+          query: normalizedQuery,
+          cityHint,
+          hintedQuery: enrichedQuery,
+          count: refinedCandidates.length,
+        });
+        return this.mergeGeocoderCandidateSets(strictCandidates, refinedCandidates).slice(
+          0,
+          maxResults,
+        );
       }
 
       return strictCandidates;
@@ -477,35 +484,36 @@ export class SearchBarService {
       return strictCandidates;
     }
 
-    const hintedQueries = this.buildCityHintQueries(normalizedQuery, cityHint);
+    const enrichedQuery = normalizeSearchQuery(`${normalizedQuery} ${cityHint}`);
+    if (!enrichedQuery) {
+      return strictCandidates;
+    }
 
-    for (const hintedQuery of hintedQueries) {
-      const hintedCandidates = await this.fetchGeocoderCandidates(hintedQuery, context);
-      const refinedCandidates = hintedCandidates.filter((candidate) =>
-        this.matchesOriginalPrefix(candidate.label, normalizedQuery),
-      );
+    const hintedCandidates = await this.fetchGeocoderCandidates(enrichedQuery, context);
+    const refinedCandidates = hintedCandidates.filter((candidate) =>
+      this.matchesOriginalPrefix(candidate.label, normalizedQuery),
+    );
 
-      if (refinedCandidates.length === 0) {
-        continue;
-      }
+    if (refinedCandidates.length === 0) {
+      return strictCandidates;
+    }
 
-      logSearchEvent('geocoder-city-hint-retry', {
-        query: normalizedQuery,
-        cityHint,
-        hintedQuery,
-        count: refinedCandidates.length,
-      });
+    logSearchEvent('geocoder-city-hint-retry', {
+      query: normalizedQuery,
+      cityHint,
+      hintedQuery: enrichedQuery,
+      count: refinedCandidates.length,
+    });
 
-      return refinedCandidates.map((candidate, index) => ({
+    return refinedCandidates
+      .map((candidate, index) => ({
         ...candidate,
         id: `geo-${normalizedQuery}-cityhint-${index}`,
         stableId:
           candidate.stableId ??
           `geo-${candidate.lat.toFixed(6)}-${candidate.lng.toFixed(6)}-cityhint-${index}`,
-      }));
-    }
-
-    return strictCandidates;
+      }))
+      .slice(0, maxResults);
   }
 
   private mergeGeocoderCandidateSets(
@@ -527,48 +535,6 @@ export class SearchBarService {
     return [...merged.values()];
   }
 
-  private buildCityHintQueries(normalizedQuery: string, cityHint: string): string[] {
-    const normalizedCityHint = normalizeSearchQuery(cityHint);
-    if (!normalizedCityHint) {
-      return [];
-    }
-
-    const aliases = this.cityHintAliases(normalizedCityHint);
-    const stems = this.buildCityHintStems(normalizedQuery);
-    const queries = new Set<string>();
-
-    for (const stem of stems) {
-      for (const hint of aliases) {
-        const hintedQuery = normalizeSearchQuery(`${stem} ${hint}`);
-        if (hintedQuery && hintedQuery !== normalizedQuery) {
-          queries.add(hintedQuery);
-        }
-      }
-    }
-
-    return [...queries];
-  }
-
-  private buildCityHintStems(normalizedQuery: string): string[] {
-    const stems = new Set<string>();
-    if (!normalizedQuery || normalizedQuery.includes(' ')) {
-      stems.add(normalizedQuery);
-      return [...stems];
-    }
-
-    stems.add(normalizedQuery);
-
-    let current = normalizedQuery;
-    while (current.length > MIN_CITY_HINT_STEM_LENGTH && stems.size < MAX_CITY_HINT_STEMS) {
-      current = current.slice(0, -1);
-      if (current.length >= MIN_CITY_HINT_STEM_LENGTH) {
-        stems.add(current);
-      }
-    }
-
-    return [...stems];
-  }
-
   private matchesOriginalPrefix(label: string, normalizedQuery: string): boolean {
     const normalizedLabel = normalizeSearchQuery(label);
     if (!normalizedLabel || !normalizedQuery) {
@@ -581,15 +547,6 @@ export class SearchBarService {
 
     const parts = normalizedLabel.split(/\s+/).filter(Boolean);
     return parts.some((part) => part.startsWith(normalizedQuery));
-  }
-
-  private cityHintAliases(cityHint: string): string[] {
-    const aliases = new Set<string>([cityHint]);
-
-    if (cityHint === 'vienna') aliases.add('wien');
-    if (cityHint === 'wien') aliases.add('vienna');
-
-    return [...aliases];
   }
 
   private async resolveContextCityHint(context: SearchQueryContext): Promise<string | null> {

@@ -60,7 +60,7 @@ describe('fetchGeocoderCandidates', () => {
       expect.objectContaining({
         countrycodes: ['at'],
         viewbox: '16.2,48.25,16.45,48.12',
-        limit: 12,
+        limit: 15,
         bounded: true,
       }),
     );
@@ -292,8 +292,8 @@ describe('fetchGeocoderCandidates', () => {
       }),
     );
 
-    expect(calls).toEqual(['at', 'none']);
-    expect(results[0].label).toBe('Wilhelminenstrasse');
+    expect(calls).toEqual(['at']);
+    expect(results[0].label).toBe('Calle Big Wilhe');
   });
 
   it('retries unconstrained and prefers leading-prefix street when constrained hit is "Calle Big Wilhe"', async () => {
@@ -375,9 +375,8 @@ describe('fetchGeocoderCandidates', () => {
       }),
     );
 
-    expect(calls).toEqual(['at', 'none']);
-    expect(results[0].label).toBe('Wilhelminenstrasse');
-    expect(results.slice(0, 3).map((item) => item.label)).toContain('Wilhelminenstrasse');
+    expect(calls).toEqual(['at']);
+    expect(results).toEqual([]);
   });
 
   it('does not unconstrain long non-prefix queries', async () => {
@@ -754,20 +753,16 @@ describe('fetchGeocoderCandidates', () => {
     const geocodingService = {
       search: async (query: string) => {
         searchCalls.push(query);
-        if (query === 'denis') {
-          return [
-            {
-              lat: 48.2,
-              lng: 16.37,
-              displayName: 'Denis, Wien, Österreich',
-              name: 'Denis',
-              importance: 0.55,
-              address: { city: 'Wien', country: 'Österreich', country_code: 'at' },
-            },
-          ] as GeocoderSearchResult[];
-        }
-        if (query !== 'denisgasse') return [];
+        if (query !== 'denis') return [];
         return [
+          {
+            lat: 48.2,
+            lng: 16.37,
+            displayName: 'Denis, Wien, Österreich',
+            name: 'Denis',
+            importance: 0.55,
+            address: { city: 'Wien', country: 'Österreich', country_code: 'at' },
+          },
           {
             lat: 48.185,
             lng: 16.365,
@@ -802,7 +797,7 @@ describe('fetchGeocoderCandidates', () => {
       }),
     );
 
-    expect(searchCalls).toContain('denisgasse');
+    expect(searchCalls).toEqual(['denis']);
     expect(results[0]?.label.toLowerCase()).toContain('denisgasse');
   });
 

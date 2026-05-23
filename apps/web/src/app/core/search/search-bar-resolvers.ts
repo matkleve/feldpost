@@ -26,6 +26,9 @@ import {
 } from './search-bar-helpers';
 import { logGeocoderResolverStage } from './search-debug';
 
+/** Internal Nominatim fetch budget; display count stays `maxGeocoderResults`. */
+const NOMINATIM_FETCH_LIMIT = 15;
+
 interface DbContentRow {
   id: string;
   name: string | null;
@@ -120,12 +123,7 @@ export async function fetchGeocoderCandidates(
   if (!tuning.resolver.enableInternetSearch) return [];
   if (normalizedQuery.length < tuning.resolver.minQueryLength) return [];
 
-  const constrainedOptions = buildConstrainedSearchOptions(
-    context,
-    maxGeocoderResults,
-    normalizedQuery,
-    tuning,
-  );
+  const constrainedOptions = buildConstrainedSearchOptions(context);
   logGeocoderResolverStage('constrained-request', {
     query: normalizedQuery,
     options: constrainedOptions,
@@ -142,72 +140,14 @@ export async function fetchGeocoderCandidates(
     normalizedQuery,
     context,
     toCandidate,
-    maxGeocoderResults,
+    NOMINATIM_FETCH_LIMIT,
     tuning,
   );
 
-  const shouldRetry = shouldRunUnconstrainedRetry(
-    normalizedQuery,
-    context,
-    constrainedCandidates,
-    tuning,
-  );
-  logGeocoderResolverStage('retry-decision', {
-    query: normalizedQuery,
-    shouldRetry,
-    constrainedTop: constrainedCandidates.slice(0, 3).map((candidate) => ({
-      label: candidate.label,
-      score: candidate.score,
-      distanceMeters: distanceToSearchContextMeters(candidate, context),
-    })),
-  });
-
-  if (!shouldRetry) {
-    return finalizeGeocoderCandidates(
-      geocodingService,
-      constrainedCandidates,
-      normalizedQuery,
-      context,
-      maxGeocoderResults,
-      toCandidate,
-      tuning,
-    );
-  }
-
-  logGeocoderResolverStage('unconstrained-request', {
-    query: normalizedQuery,
-    options: { limit: maxGeocoderResults * 3 },
-  });
-  const unconstrainedResults = await geocodingService.search(normalizedQuery, {
-    limit: maxGeocoderResults * 3,
-  });
-  logGeocoderResolverStage('unconstrained-response', {
-    query: normalizedQuery,
-    count: unconstrainedResults.length,
-    labels: unconstrainedResults.slice(0, 20).map((result) => result.displayName),
-  });
-
-  const unconstrainedCandidates = rankGeocoderCandidates(
-    unconstrainedResults,
-    normalizedQuery,
-    context,
-    toCandidate,
-    maxGeocoderResults * 3,
-    tuning,
-  );
-
-  const merged = deduplicateGeocoderCandidatesByLabel(
-    mergeAndRankCandidates(
-      constrainedCandidates,
-      unconstrainedCandidates,
-      context,
-      normalizedQuery,
-    ),
-  ).slice(0, tuning.resolver.maxGeocoderResults);
-
+  // Unconstrained retry disabled: NOMINATIM_FETCH_LIMIT covers short-prefix cases in one call.
   return finalizeGeocoderCandidates(
     geocodingService,
-    merged,
+    constrainedCandidates,
     normalizedQuery,
     context,
     maxGeocoderResults,
@@ -241,24 +181,11 @@ async function finalizeGeocoderCandidates(
     toCandidate,
     tuning,
   );
-  const withStreetHouses = await expandStreetLevelHouseCandidates(
-    geocodingService,
-    withHouseNumbers,
-    normalizedQuery,
-    context,
-    maxGeocoderResults,
-    toCandidate,
-    tuning,
-  );
-  const results = await expandStreetSuffixProbeCandidates(
-    geocodingService,
-    withStreetHouses,
-    normalizedQuery,
-    context,
-    maxGeocoderResults,
-    toCandidate,
-    tuning,
-  );
+  // Expansions disabled: higher fetch limit covers these cases.
+  // Re-enable if NOMINATIM_FETCH_LIMIT drops below 8.
+  // const withStreetHouses = await expandStreetLevelHouseCandidates(...);
+  // const results = await expandStreetSuffixProbeCandidates(...);
+  const results = withHouseNumbers;
 
   logGeocoderResolverStage('final-ranked', {
     query: normalizedQuery,
@@ -269,7 +196,7 @@ async function finalizeGeocoderCandidates(
     })),
   });
 
-  return results;
+  return results.slice(0, maxGeocoderResults);
 }
 
 async function expandHouseNumberSiblingCandidates(
@@ -291,16 +218,7 @@ async function expandHouseNumberSiblingCandidates(
     return primary;
   }
 
-  const expansionLimit = Math.max(
-    maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
-    tuning.resolver.shortPrefixLimitFloor,
-  );
-  const streetOptions = buildConstrainedSearchOptions(
-    context,
-    expansionLimit,
-    parsed.street,
-    tuning,
-  );
+  const streetOptions = buildConstrainedSearchOptions(context);
 
   logGeocoderResolverStage('house-prefix-expansion-request', {
     query: normalizedQuery,
@@ -326,7 +244,7 @@ async function expandHouseNumberSiblingCandidates(
     normalizedQuery,
     context,
     toCandidate,
-    expansionLimit,
+    NOMINATIM_FETCH_LIMIT,
     tuning,
   );
 
@@ -337,7 +255,7 @@ async function expandHouseNumberSiblingCandidates(
     ),
   );
 
-  return merged;
+  return merged.slice(0, maxGeocoderResults);
 }
 
 function shouldExpandStreetLevelHouses(normalizedQuery: string, tuning: SearchTuningConfig): boolean {
@@ -372,16 +290,7 @@ async function expandStreetLevelHouseCandidates(
     return primary;
   }
 
-  const expansionLimit = Math.max(
-    maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
-    tuning.resolver.shortPrefixLimitFloor,
-  );
-  const streetOptions = buildConstrainedSearchOptions(
-    context,
-    expansionLimit,
-    normalizedQuery,
-    tuning,
-  );
+  const streetOptions = buildConstrainedSearchOptions(context);
 
   logGeocoderResolverStage('street-house-expansion-request', {
     query: normalizedQuery,
@@ -411,7 +320,7 @@ async function expandStreetLevelHouseCandidates(
     normalizedQuery,
     context,
     toCandidate,
-    expansionLimit,
+    NOMINATIM_FETCH_LIMIT,
     tuning,
   );
 
@@ -472,17 +381,13 @@ async function expandStreetSuffixProbeCandidates(
     return primary.slice(0, maxGeocoderResults);
   }
 
-  const probeLimit = Math.max(
-    maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
-    tuning.resolver.shortPrefixLimitFloor,
-  );
   const probeQueries = STREET_SUFFIX_PROBE_SUFFIXES.filter(
     (suffix) => !normalizedQuery.endsWith(suffix),
   ).map((suffix) => `${normalizedQuery}${suffix}`);
 
   const probeCandidates: SearchAddressCandidate[] = [];
   for (const probeQuery of probeQueries) {
-    const options = buildConstrainedSearchOptions(context, probeLimit, probeQuery, tuning);
+    const options = buildConstrainedSearchOptions(context);
     logGeocoderResolverStage('street-suffix-probe-request', {
       query: normalizedQuery,
       probeQuery,
@@ -504,7 +409,7 @@ async function expandStreetSuffixProbeCandidates(
         normalizedQuery,
         context,
         toCandidate,
-        probeLimit,
+        NOMINATIM_FETCH_LIMIT,
         tuning,
       ),
     );
@@ -601,21 +506,9 @@ function extractHouseNumberFromCandidateLabel(label: string, street: string): st
   return match ? match[1].toLowerCase() : null;
 }
 
-function buildConstrainedSearchOptions(
-  context: SearchQueryContext,
-  maxGeocoderResults: number,
-  query: string,
-  tuning: SearchTuningConfig,
-): GeocoderSearchOptions {
-  const useShortPrefixHeadroom =
-    !!context.viewportBounds && isShortAmbiguousPrefixQuery(query, tuning);
+function buildConstrainedSearchOptions(context: SearchQueryContext): GeocoderSearchOptions {
   const searchOptions: GeocoderSearchOptions = {
-    limit: useShortPrefixHeadroom
-      ? Math.max(
-          maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
-          tuning.resolver.shortPrefixLimitFloor,
-        )
-      : maxGeocoderResults,
+    limit: NOMINATIM_FETCH_LIMIT,
   };
   if (context.countryCodes?.length) {
     searchOptions.countrycodes = context.countryCodes;

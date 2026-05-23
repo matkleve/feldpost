@@ -13,6 +13,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { I18nService } from '../i18n/i18n.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadLocationConfigService } from '../upload/upload-location-config.service';
 
@@ -71,6 +72,7 @@ export interface GeocoderSearchOptions {
   countrycodes?: string[];
   viewbox?: string;
   bounded?: boolean;
+  acceptLanguage?: string;
 }
 
 /** A single result from a multi-result geocoder search. */
@@ -124,6 +126,7 @@ interface GeocodeFailureDetails {
 export class GeocodingService {
   private readonly supabase = inject(SupabaseService);
   private readonly locationConfig = inject(UploadLocationConfigService);
+  private readonly i18n = inject(I18nService);
 
   private readonly reverseCache = new Map<
     string,
@@ -132,6 +135,10 @@ export class GeocodingService {
   private readonly forwardCache = new Map<
     string,
     { data: ForwardGeocodeResult; expires: number }
+  >();
+  private readonly searchCache = new Map<
+    string,
+    { data: GeocoderSearchResult[]; expires: number }
   >();
   private readonly recentFailureLogs = new Map<string, number>();
   private authFailureUntilMs = 0;
@@ -237,13 +244,30 @@ export class GeocodingService {
     const trimmed = query.trim();
     if (!trimmed) return [];
 
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
+    const countrycodes = options?.countrycodes?.join(',') ?? '';
+    const viewbox = options?.viewbox ?? '';
+    const bounded = options?.bounded ? '1' : '';
+    const cacheKey = `${trimmed.toLowerCase()}|${limit}|${countrycodes}|${viewbox}|${bounded}|${acceptLanguage}`;
+    const cached = this.searchCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
     return this.enqueue(async () => {
+      const freshCached = this.searchCache.get(cacheKey);
+      if (freshCached && freshCached.expires > Date.now()) {
+        return freshCached.data;
+      }
+
       try {
         const body: Record<string, unknown> = {
           action: 'forward',
           q: trimmed,
+          limit,
+          acceptLanguage,
         };
-        body['limit'] = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
         if (options?.countrycodes?.length) {
           body['countrycodes'] = options.countrycodes.join(',');
         }
@@ -253,9 +277,15 @@ export class GeocodingService {
         const results = await this.callProxy<NominatimSearchResponse[]>(body, 'search');
         if (!results?.length) return [];
 
-        return results
+        const parsed = results
           .map((hit) => this.parseSearchHit(hit))
           .filter((r): r is GeocoderSearchResult => r !== null);
+
+        this.searchCache.set(cacheKey, {
+          data: parsed,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
+        return parsed;
       } catch {
         return [];
       }

@@ -108,6 +108,7 @@ Deno.serve(async (req: Request) => {
     countrycodes?: string;
     viewbox?: string;
     bounded?: number;
+    acceptLanguage?: string;
   };
   try {
     body = await req.json();
@@ -179,7 +180,10 @@ Deno.serve(async (req: Request) => {
       signal: AbortSignal.timeout(NOMINATIM_TIMEOUT_MS),
       headers: {
         "User-Agent": USER_AGENT,
-        "Accept-Language": "en",
+        "Accept-Language":
+          typeof body.acceptLanguage === "string" && body.acceptLanguage.trim()
+            ? body.acceptLanguage.trim()
+            : "de,en",
       },
     });
 

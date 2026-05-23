@@ -7,14 +7,16 @@
  *  - Arrange–Act–Assert; one behavior per `it` block.
  */
 
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { GeocodingService, type ReverseGeocodeResult } from './geocoding/geocoding.service';
-import { SupabaseService } from './supabase/supabase.service';
+import { GeocodingService, type ReverseGeocodeResult } from './geocoding.service';
+import { I18nService } from '../i18n/i18n.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import {
   DEFAULT_UPLOAD_LOCATION_CONFIG,
   type UploadLocationConfig,
-} from './upload/upload-location-config';
-import { UploadLocationConfigService } from './upload/upload-location-config.service';
+} from '../upload/upload-location-config';
+import { UploadLocationConfigService } from '../upload/upload-location-config.service';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +72,10 @@ describe('GeocodingService', () => {
       providers: [
         GeocodingService,
         { provide: SupabaseService, useValue: mockSupabaseService(invokeSpy) },
+        {
+          provide: I18nService,
+          useValue: { language: signal('de') },
+        },
       ],
     });
     service = TestBed.inject(GeocodingService);
@@ -116,6 +122,25 @@ describe('GeocodingService', () => {
     const results = await service.search('wilhe', { countrycodes: ['at'] });
 
     expect(results[0]?.address?.country_code).toBe('at');
+  });
+
+  it('reuses search cache for identical queries within TTL', async () => {
+    invokeSpy.mockResolvedValue({
+      data: [
+        {
+          lat: '48.2082',
+          lon: '16.3738',
+          display_name: 'Stephansplatz, Wien, Austria',
+          address: { city: 'Wien', country_code: 'at' },
+        },
+      ],
+      error: null,
+    });
+
+    await service.search('stephansplatz', { countrycodes: ['at'], limit: 15 });
+    await service.search('stephansplatz', { countrycodes: ['at'], limit: 15 });
+
+    expect(invokeSpy).toHaveBeenCalledTimes(1);
   });
 
   it('calls the geocode edge function with correct parameters', async () => {

@@ -608,9 +608,6 @@ describe('SearchBarService', () => {
       geocodingMock.reverse.mockResolvedValue({ city: 'Vienna' });
       geocodingMock.search
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
         .mockResolvedValueOnce([
           {
             lat: 48.2169,
@@ -655,12 +652,8 @@ describe('SearchBarService', () => {
 
       expect(results.length).toBe(1);
       expect(results[0].label).toBe('Wilhelminenstrasse, Vienna, Austria');
-      expect(
-        geocodingMock.search.mock.calls.some(
-          ([query]) =>
-            typeof query === 'string' && /^(wil|wilh|wilhe)\s+(vienna|wien)$/.test(query),
-        ),
-      ).toBe(true);
+      expect(geocodingMock.search).toHaveBeenCalledTimes(2);
+      expect(geocodingMock.search.mock.calls[1]?.[0]).toBe('wilhe vienna');
     });
   });
 
