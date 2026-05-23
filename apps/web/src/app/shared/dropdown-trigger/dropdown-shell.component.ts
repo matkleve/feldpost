@@ -3,8 +3,9 @@
  * @see docs/specs/component/filters/dropdown-system.md#open-time-stacking-owner-normative
  *
  * DropdownShell — floating menu/popover container (`position: fixed`).
- * Anchor path: `computeAnchorPlacementForElement` (scroll-parent bounds, below/above flip) — host stays in
- * the template DOM (no CDK DomPortal) so toolbar/grid layout does not shift.
+ * Anchor path: `computeAnchorPlacementForElement` (scroll-parent bounds, below/above flip). When an anchor
+ * is set, the host is moved to `document.body` so `position: fixed` is not trapped by `filter` /
+ * `backdrop-filter` / `transform` ancestors (e.g. frosted upload panel).
  * Legacy path: raw `[top]` / `[left]` for map/context menus without a DOM anchor.
  *
  * TODO: CDK Overlay (`FlexibleConnectedPositionStrategy`) when we can attach without DomPortal
@@ -61,6 +62,8 @@ export class DropdownShellComponent {
 
   private resizeObserver: ResizeObserver | null = null;
   private repositionFrame: number | null = null;
+  private bodyPortaled = false;
+  private outsideCloseSuppressedUntil = 0;
 
   readonly anchor = input<HTMLElement | null>(null);
   readonly placement = input<'start' | 'end'>('start');
@@ -84,7 +87,10 @@ export class DropdownShellComponent {
       const anchor = this.anchor();
       if (anchor) {
         untracked(() => {
+          this.portalHostToBody();
+          this.armOutsideCloseGuard();
           this.bindResizeObserver(anchor);
+          this.positionFromAnchor();
           this.scheduleReposition();
         });
         return;
@@ -104,6 +110,8 @@ export class DropdownShellComponent {
 
     afterNextRender(() => {
       if (this.anchor()) {
+        this.portalHostToBody();
+        this.positionFromAnchor();
         this.scheduleReposition();
       } else {
         this.scheduleViewportClamp(this.left(), this.top());
@@ -123,8 +131,40 @@ export class DropdownShellComponent {
         window.removeEventListener('resize', onScrollOrResize);
         this.bindResizeObserver(null);
         this.cancelRepositionFrame();
+        this.removeHostFromBody();
       });
     }
+  }
+
+  /** `backdrop-filter` / `transform` ancestors break viewport-fixed menus — portal to body. */
+  private portalHostToBody(): void {
+    if (typeof document === 'undefined' || this.bodyPortaled) {
+      return;
+    }
+
+    const el = this.host.nativeElement;
+    if (el.parentElement === document.body) {
+      this.bodyPortaled = true;
+      return;
+    }
+
+    document.body.appendChild(el);
+    this.bodyPortaled = true;
+  }
+
+  private removeHostFromBody(): void {
+    const el = this.host.nativeElement;
+    if (el.parentElement === document.body) {
+      el.remove();
+    }
+    this.bodyPortaled = false;
+  }
+
+  private armOutsideCloseGuard(): void {
+    if (typeof performance === 'undefined') {
+      return;
+    }
+    this.outsideCloseSuppressedUntil = performance.now() + 120;
   }
 
   private scheduleReposition(): void {
@@ -211,6 +251,10 @@ export class DropdownShellComponent {
 
   onDocumentClick(event: MouseEvent): void {
     if (!this.outsideCloseEnabled()) {
+      return;
+    }
+
+    if (typeof performance !== 'undefined' && performance.now() < this.outsideCloseSuppressedUntil) {
       return;
     }
 

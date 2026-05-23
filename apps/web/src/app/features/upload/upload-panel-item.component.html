@@ -11,13 +11,7 @@
       <button
         type="button"
         class="upload-panel__row-main-action"
-        [attr.aria-label]="
-          job().phase === 'missing_data'
-            ? 'Place ' + job().file.name + ' on map'
-            : canZoomToJob()
-              ? 'Zoom map to ' + job().file.name
-              : null
-        "
+        [attr.aria-label]="rowMainActionAriaLabel()"
         (click)="rowMainClick.emit(job())"
         (keydown)="rowMainKeydown.emit({ job: job(), event: $event })"
       ></button>
@@ -57,6 +51,11 @@
           role="status"
           [attr.aria-label]="t('upload.trigger.status.uploading', 'Uploading...')"
         ></div>
+      }
+      @if (showThumbnailLocationHint()) {
+        <span class="upload-panel__thumbnail-action-btn upload-panel__thumbnail-action-btn--hint" aria-hidden="true">
+          <span class="material-icons">{{ thumbnailHintIcon() }}</span>
+        </span>
       }
       @if (showDuplicateExistingMediaShortcut()) {
         <button
@@ -108,18 +107,22 @@
       </div>
     </div>
 
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="upload-panel__row-action upload-panel__row-action--menu"
-      type="button"
-      [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
-      [attr.title]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
-      (click)="onMenuTriggerClick($event)"
-    >
-      <span class="material-icons" aria-hidden="true">more_vert</span>
-    </button>
+    @if (hasMenuActions()) {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="upload-panel__row-action upload-panel__row-action--menu"
+        type="button"
+        [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+        [attr.title]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+        [attr.aria-expanded]="menuOpen()"
+        aria-haspopup="menu"
+        (click)="onMenuTriggerClick($event)"
+      >
+        <span class="material-icons" aria-hidden="true">more_vert</span>
+      </button>
+    }
   </div>
 
   @if (menuOpen()) {

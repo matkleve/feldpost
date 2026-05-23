@@ -21,6 +21,7 @@ import type {
 export interface UploadPanelSetupOptions {
   imageUploaded: (event: ImageUploadedEvent) => void;
   placementRequested: (jobId: string) => void;
+  detailRequested: UploadPanelRowInteractionsRegisterOptions['detailRequested'];
   zoomToLocationRequested: UploadPanelRowInteractionsRegisterOptions['zoomToLocationRequested'];
   locationMapPickRequested: (event: UploadLocationMapPickRequest) => void;
   locationPreviewRequested: (event: UploadLocationPreviewEvent) => void;
@@ -60,6 +61,7 @@ export class UploadPanelSetupService {
 
     this.rowInteractions.register({
       placementRequested: options.placementRequested,
+      detailRequested: options.detailRequested,
       zoomToLocationRequested: options.zoomToLocationRequested,
     });
 

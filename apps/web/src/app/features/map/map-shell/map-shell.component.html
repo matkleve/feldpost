@@ -99,6 +99,7 @@
       <app-upload-panel
         [visible]="uploadPanelOpen()"
         (imageUploaded)="onImageUploaded($event)"
+        (detailRequested)="openDetailView($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
         (placementRequested)="enterPlacementMode($event)"
         (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"

@@ -33,19 +33,29 @@
 // @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
 .media-item__slot {
   position: relative;
-  inline-size: 100%;
+  max-inline-size: 100%;
+  // Landscape: full column width; portrait: shrink width so block-size stays within column (spec AC).
+  // @see docs/specs/component/media/media-item.md#added-verification-cases
+  inline-size: min(100%, calc(100% * var(--media-aspect-ratio, 1)));
   aspect-ratio: var(--media-aspect-ratio, 1);
   // Geometry shrink (1:1 → media ratio): 300ms per tokens.md §3.6 + motion.md thumbnail timing.
-  transition: aspect-ratio 300ms var(--motion-ease-out);
+  transition:
+    aspect-ratio 300ms var(--motion-ease-out),
+    inline-size 300ms var(--motion-ease-out);
   min-inline-size: 0;
   min-block-size: 0;
+  // Centers portrait/narrow slots in the grid column; block flow keeps top alignment.
+  // @see docs/specs/component/media/media-item.md#added-verification-cases
+  margin-inline: auto;
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 :host([data-mode='row']) .media-item__slot {
   block-size: 100%;
+  inline-size: 100%;
   aspect-ratio: auto;
+  margin-inline: 0;
   transition: none;
 }
 

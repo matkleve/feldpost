@@ -74,7 +74,7 @@ export class MediaItemComponent {
   }
 
   onSlotGeometryTransitionEnd(event: TransitionEvent): void {
-    if (event.propertyName !== 'aspect-ratio') {
+    if (event.propertyName !== 'aspect-ratio' && event.propertyName !== 'inline-size') {
       return;
     }
 

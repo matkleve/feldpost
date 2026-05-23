@@ -18,6 +18,7 @@ import {
   type UploadJob,
   type UploadPhase,
 } from '../../core/upload/upload-manager.service';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import {
   UploadPanelRowHandlersService,
   type ZoomToLocationEvent,
@@ -26,12 +27,14 @@ import {
 export interface UploadPanelRowInteractionsRegisterOptions {
   placementRequested: (jobId: string) => void;
   zoomToLocationRequested: (event: ZoomToLocationEvent) => void;
+  detailRequested: (mediaId: string) => void;
 }
 
 @Injectable()
 export class UploadPanelRowInteractionsService {
   private readonly uploadManager = inject(UploadManagerService);
   private readonly rows = inject(UploadPanelRowHandlersService);
+  private readonly workspaceSelection = inject(WorkspaceSelectionService);
 
   private options: UploadPanelRowInteractionsRegisterOptions | null = null;
 
@@ -59,12 +62,10 @@ export class UploadPanelRowInteractionsService {
       this.ctx.placementRequested(job.id);
       return;
     }
-    if (!this.rows.canZoomToJob(job)) return;
-    this.ctx.zoomToLocationRequested({
-      mediaId: job.imageId!,
-      lat: job.coords!.lat,
-      lng: job.coords!.lng,
-    });
+    if (this.rows.canOpenUploadedInWorkspace(job) && job.imageId) {
+      this.workspaceSelection.setSingle(job.imageId);
+      this.ctx.detailRequested(job.imageId);
+    }
   }
 
   onRowMainKeydown(job: UploadJob, event: KeyboardEvent): void {

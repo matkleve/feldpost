@@ -77,12 +77,19 @@
   background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
+.upload-panel__file-main--has-menu .upload-panel__file-meta {
+  padding-inline-end: calc(2rem + var(--spacing-2));
+}
+
 .upload-panel__file-main--interactive {
   cursor: pointer;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
 }
 
 .upload-panel__file-main--interactive:hover {
-  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
 
   .upload-panel__thumbnail-helper {
     opacity: 0;
@@ -95,6 +102,10 @@
   .upload-panel__row-action--right {
     opacity: 1;
   }
+}
+
+.upload-panel__file-main--interactive:hover .upload-panel__file-name {
+  color: var(--primary);
 }
 
 .upload-panel__file-main--interactive:focus-visible {
@@ -136,12 +147,27 @@
 
 .upload-panel__thumbnail-action-btn {
   position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease-out;
+  color: var(--primary);
+
+  .material-icons {
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-solid);
+  }
+}
+
+.upload-panel__thumbnail-action-btn--hint {
+  z-index: 1;
 }
 
 .upload-panel__thumbnail-action-btn--interactive {
+  z-index: 2;
   pointer-events: auto;
 }
 
@@ -164,7 +190,41 @@
   top: 50%;
   right: var(--spacing-3);
   transform: translateY(-50%);
-  z-index: 2;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+// Matches upload-panel location-mode row / intake ghost hover (primary tint).
+// @see upload-panel.component.scss — &__location-mode-row, &__intake-btn
+.upload-panel__row-action--menu {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--container-radius-control);
+  color: var(--muted-foreground);
+  background: transparent;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--interactive-focus-ring);
+  }
+
+  .material-icons {
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-solid);
+  }
 }
 
 .upload-panel__file-meta {
@@ -197,8 +257,11 @@
 }
 
 .upload-panel__filetype-chip {
-  margin-left: auto;
   flex-shrink: 0;
+}
+
+.upload-panel__file-main--has-menu .upload-panel__filetype-chip {
+  margin-left: auto;
 }
 
 .upload-panel__status-row {
@@ -247,6 +310,18 @@
 .upload-panel__success-indicator {
   font-size: 1rem;
   vertical-align: middle;
+}
+
+// Context menu geometry (map-shell styles are encapsulated there).
+// @see apps/web/src/app/features/map/map-shell/_map-shell-context-menu.scss
+.map-context-menu {
+  width: 14rem;
+  max-width: calc(100vw - 1rem);
+
+  .map-context-menu__items {
+    overflow-y: auto;
+    max-height: min(20rem, calc(100vh - 9rem));
+  }
 }
 
 @keyframes upload-item-spin {

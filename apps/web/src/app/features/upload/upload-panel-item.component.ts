@@ -115,6 +115,16 @@ export class UploadPanelItemComponent implements OnDestroy {
     return getIssueKind(job) === 'duplicate_photo' && !!job.existingImageId;
   });
   readonly showThumbnailSpinner = computed(() => this.showsUploadOverlay(this.job().phase));
+  /** Location / open hint over thumbnail on interactive rows (workspace detail / placement). */
+  readonly showThumbnailLocationHint = computed(() => {
+    if (this.showDuplicateExistingMediaShortcut()) {
+      return false;
+    }
+    return (
+      this.interactive() &&
+      (this.canOpenInWorkspacePane() || this.canZoomToJob() || this.job().phase === 'missing_data')
+    );
+  });
 
   // Media renderer state
   readonly fileIdentity = (): { mimeType: string; fileName: string } => ({
@@ -167,6 +177,34 @@ export class UploadPanelItemComponent implements OnDestroy {
       typeof j.coords?.lat === 'number' &&
       typeof j.coords?.lng === 'number'
     );
+  }
+
+  canOpenInWorkspacePane(): boolean {
+    return getLaneForJob(this.job()) === 'uploaded' && !!this.job().imageId;
+  }
+
+  rowMainActionAriaLabel(): string | null {
+    const name = this.job().file.name;
+    if (this.job().phase === 'missing_data') {
+      return `Place ${name} on map`;
+    }
+    if (this.canOpenInWorkspacePane()) {
+      return `Open ${name} in workspace`;
+    }
+    if (this.canZoomToJob()) {
+      return `Zoom map to ${name}`;
+    }
+    return null;
+  }
+
+  thumbnailHintIcon(): string {
+    if (this.job().phase === 'missing_data') {
+      return 'add_location_alt';
+    }
+    if (this.canZoomToJob()) {
+      return 'my_location';
+    }
+    return 'open_in_full';
   }
 
   isUploading(): boolean {
@@ -281,19 +319,22 @@ export class UploadPanelItemComponent implements OnDestroy {
 
     event.preventDefault();
     event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    if (this.menuOpen()) {
+      this.closeMenu();
+      return;
+    }
+
     this.openMenu(event.currentTarget instanceof HTMLElement ? event.currentTarget : null);
   }
 
   onMenuCloseRequested(): void {
-    if (UploadPanelItemComponent.activeMenuOwner === this) {
-      UploadPanelItemComponent.activeMenuOwner = null;
-    }
-    this.menuOpen.set(false);
-    this.menuAnchor.set(null);
+    this.closeMenu();
   }
 
   onMenuAction(action: UploadItemMenuAction): void {
-    this.menuOpen.set(false);
+    this.closeMenu();
     this.menuActionSelected.emit({
       job: this.job(),
       action,
@@ -328,14 +369,12 @@ export class UploadPanelItemComponent implements OnDestroy {
   onDismissClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.menuOpen.set(false);
+    this.closeMenu();
     this.dismissFile.emit(this.job().id);
   }
 
   ngOnDestroy(): void {
-    if (UploadPanelItemComponent.activeMenuOwner === this) {
-      UploadPanelItemComponent.activeMenuOwner = null;
-    }
+    this.closeMenu();
   }
 
   onSelectionChanged(event: Event): void {
@@ -390,12 +429,23 @@ export class UploadPanelItemComponent implements OnDestroy {
     );
   }
 
+  private closeMenu(): void {
+    if (UploadPanelItemComponent.activeMenuOwner === this) {
+      UploadPanelItemComponent.activeMenuOwner = null;
+    }
+    this.menuOpen.set(false);
+    this.menuAnchor.set(null);
+  }
+
   private openMenu(anchor: HTMLElement | null): void {
+    if (!this.hasMenuActions()) {
+      return;
+    }
+
     // upload-panel.md § Dropdown Visibility Rationale: only one row menu should be active at once.
     const previousOwner = UploadPanelItemComponent.activeMenuOwner;
     if (previousOwner && previousOwner !== this) {
-      previousOwner.menuOpen.set(false);
-      previousOwner.menuAnchor.set(null);
+      previousOwner.closeMenu();
     }
 
     this.menuAnchor.set(anchor);

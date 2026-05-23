@@ -37,8 +37,12 @@ export class UploadPanelRowHandlersService {
     );
   }
 
+  canOpenUploadedInWorkspace(job: UploadJob): boolean {
+    return this.getLaneForJob(job) === 'uploaded' && !!job.imageId;
+  }
+
   isRowInteractive(job: UploadJob): boolean {
-    return this.canZoomToJob(job) || job.phase === 'missing_data';
+    return this.canOpenUploadedInWorkspace(job) || job.phase === 'missing_data';
   }
 
   onRowMainClick(job: UploadJob): void {

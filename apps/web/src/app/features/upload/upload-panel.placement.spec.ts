@@ -57,10 +57,10 @@ describe('UploadPanelComponent placement API interactions', () => {
   });
 });
 
-describe('UploadPanelComponent zoom click interactions', () => {
-  it('emits zoomToLocationRequested when clicking uploaded row with coordinates', async () => {
+describe('UploadPanelComponent workspace detail click interactions', () => {
+  it('emits detailRequested when clicking uploaded row with coordinates', async () => {
     const { fixture, component, fakeManager } = await setupUploadPanel();
-    const zoomSpy = vi.spyOn(component.zoomToLocationRequested, 'emit');
+    const detailSpy = vi.spyOn(component.detailRequested, 'emit');
     const job = makeUploadJob({
       phase: 'complete',
       imageId: 'img-123',
@@ -70,19 +70,15 @@ describe('UploadPanelComponent zoom click interactions', () => {
     fakeManager._jobsSignal.set([job]);
     fixture.detectChanges();
 
-    const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+    const rowMain = fixture.debugElement.query(By.css('.upload-panel__row-main-action'));
     (rowMain.nativeElement as HTMLElement).click();
 
-    expect(zoomSpy).toHaveBeenCalledWith({
-      imageId: 'img-123',
-      lat: 48.2082,
-      lng: 16.3738,
-    });
+    expect(detailSpy).toHaveBeenCalledWith('img-123');
   });
 
-  it('does not emit zoomToLocationRequested when uploaded row has no coords', async () => {
+  it('emits detailRequested when uploaded row has no coords but persisted media', async () => {
     const { fixture, component, fakeManager } = await setupUploadPanel();
-    const zoomSpy = vi.spyOn(component.zoomToLocationRequested, 'emit');
+    const detailSpy = vi.spyOn(component.detailRequested, 'emit');
 
     fakeManager._jobsSignal.set([
       makeUploadJob({
@@ -93,17 +89,17 @@ describe('UploadPanelComponent zoom click interactions', () => {
     ]);
     fixture.detectChanges();
 
-    const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+    const rowMain = fixture.debugElement.query(By.css('.upload-panel__row-main-action'));
     (rowMain.nativeElement as HTMLElement).click();
 
-    expect(zoomSpy).not.toHaveBeenCalled();
+    expect(detailSpy).toHaveBeenCalledWith('img-123');
   });
 });
 
-describe('UploadPanelComponent zoom keyboard interactions', () => {
-  it('supports keyboard zoom request on uploaded row', async () => {
+describe('UploadPanelComponent workspace detail keyboard interactions', () => {
+  it('supports keyboard open-detail request on uploaded row', async () => {
     const { fixture, component, fakeManager } = await setupUploadPanel();
-    const zoomSpy = vi.spyOn(component.zoomToLocationRequested, 'emit');
+    const detailSpy = vi.spyOn(component.detailRequested, 'emit');
 
     fakeManager._jobsSignal.set([
       makeUploadJob({
@@ -114,16 +110,12 @@ describe('UploadPanelComponent zoom keyboard interactions', () => {
     ]);
     fixture.detectChanges();
 
-    const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+    const rowMain = fixture.debugElement.query(By.css('.upload-panel__row-main-action'));
     (rowMain.nativeElement as HTMLElement).dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Enter' }),
     );
 
-    expect(zoomSpy).toHaveBeenCalledWith({
-      imageId: 'img-123',
-      lat: 48.2082,
-      lng: 16.3738,
-    });
+    expect(detailSpy).toHaveBeenCalledWith('img-123');
   });
 });
 

@@ -157,6 +157,7 @@ export class UploadPanelComponent {
   readonly embeddedInPane = input<boolean>(false);
   readonly imageUploaded = output<ImageUploadedEvent>();
   readonly placementRequested = output<string>();
+  readonly detailRequested = output<string>();
   readonly zoomToLocationRequested = output<ZoomToLocationEvent>();
   readonly locationPreviewRequested = output<UploadLocationPreviewEvent>();
   readonly locationPreviewCleared = output<void>();
@@ -246,6 +247,7 @@ export class UploadPanelComponent {
     this.setup.initialize({
       imageUploaded: (event) => this.imageUploaded.emit(event),
       placementRequested: (jobId) => this.placementRequested.emit(jobId),
+      detailRequested: (mediaId) => this.detailRequested.emit(mediaId),
       zoomToLocationRequested: (event) => this.zoomToLocationRequested.emit(event),
       locationMapPickRequested: (event) => this.locationMapPickRequested.emit(event),
       locationPreviewRequested: (event) => this.locationPreviewRequested.emit(event),

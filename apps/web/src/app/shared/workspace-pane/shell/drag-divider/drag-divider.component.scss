@@ -2,9 +2,9 @@
 // All colours use design tokens. No raw hex values.
 
 // ── Host — full-height strip, col-resize cursor ──────────────────────────────
-// The host takes up only 2px in the flex layout. The hit zone extends beyond
-// via absolute positioning to provide the 44px interactive target without
-// consuming layout space (same pattern as VS Code / Figma split handles).
+// The host takes up only 2px in the flex layout. The hit zone is a thin absolute
+// strip on the seam (host + small map-side extension) so adjacent pane controls
+// stay clickable.
 
 :host {
   position: relative;
@@ -15,7 +15,7 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
-  cursor: col-resize;
+  pointer-events: none;
   outline: none;
   z-index: 2; // above workspace-pane (z-index: 1) so grip paints at the seam
 
@@ -26,17 +26,18 @@
   }
 }
 
-// ── Hit zone — transparent target, min 2.75rem (44px) wide ───────────────────
-// Anchored to the map-facing edge of the 2px host so the target extends into the
-// map column only — never over workspace pane content (avoids open/flash overlay).
+// ── Hit zone — thin seam strip, map-facing only ──────────────────────────────
+// Covers the 2px host plus a small map-side extension. Does not extend into the
+// workspace pane so adjacent toolbar/thumbnail controls stay clickable.
 
 .drag-divider__hit-zone {
   position: absolute;
   top: 0;
   bottom: 0;
-  right: 100%;
-  left: auto;
-  width: 2.75rem; // 44px desktop touch-target — extends into map column only
+  left: calc(-1 * var(--spacing-2));
+  right: 0;
+  width: auto;
+  pointer-events: auto;
   cursor: col-resize;
 }
 

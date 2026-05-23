@@ -35,6 +35,7 @@
       [visible]="true"
       [embeddedInPane]="true"
       (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
+      (detailRequested)="openDetailView($event)"
       (zoomToLocationRequested)="onZoomToLocationRequested($event)"
       (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
       (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
