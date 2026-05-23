@@ -62,8 +62,36 @@ describe('fetchGeocoderCandidates', () => {
         viewbox: '16.2,48.25,16.45,48.12',
         limit: 15,
         bounded: true,
+        addressLayer: false,
       }),
     );
+  });
+
+  it('keeps addressLayer for non-ambiguous street queries', async () => {
+    const calls: Array<Record<string, unknown> | undefined> = [];
+    const geocodingService = {
+      search: async (_query: string, options?: Record<string, unknown>) => {
+        calls.push(options);
+        return [] as GeocoderSearchResult[];
+      },
+    };
+
+    await fetchGeocoderCandidates(
+      geocodingService as never,
+      'denisgasse',
+      { countryCodes: ['at'] },
+      3,
+      (result, query, index): SearchAddressCandidate => ({
+        id: `geo-${query}-${index}`,
+        family: 'geocoder',
+        label: result.displayName,
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(calls[0]?.['addressLayer']).toBe(true);
   });
 
   it('ranks local Wilhelminenstrasse-style match into top 3 for short prefix queries', async () => {

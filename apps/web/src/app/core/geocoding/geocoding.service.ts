@@ -73,6 +73,8 @@ export interface GeocoderSearchOptions {
   viewbox?: string;
   bounded?: boolean;
   acceptLanguage?: string;
+  /** When false, Nominatim forward search omits `layer=address` (short ambiguous prefixes). */
+  addressLayer?: boolean;
 }
 
 /** Options for Nominatim structured search (`street` + `city` fields). */
@@ -260,7 +262,8 @@ export class GeocodingService {
     const countrycodes = options?.countrycodes?.join(',') ?? '';
     const viewbox = options?.viewbox ?? '';
     const bounded = options?.bounded ? '1' : '';
-    const cacheKey = `${trimmed.toLowerCase()}|${limit}|${countrycodes}|${viewbox}|${bounded}|${acceptLanguage}`;
+    const addressLayer = options?.addressLayer === false ? '0' : '1';
+    const cacheKey = `${trimmed.toLowerCase()}|${limit}|${countrycodes}|${viewbox}|${bounded}|${addressLayer}|${acceptLanguage}`;
     const cached = this.searchCache.get(cacheKey);
     if (cached && cached.expires > Date.now()) {
       return cached.data;
@@ -278,6 +281,7 @@ export class GeocodingService {
           q: trimmed,
           limit,
           acceptLanguage,
+          addressLayer: options?.addressLayer !== false,
         };
         if (options?.countrycodes?.length) {
           body['countrycodes'] = options.countrycodes.join(',');

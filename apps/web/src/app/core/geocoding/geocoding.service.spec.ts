@@ -119,9 +119,20 @@ describe('GeocodingService', () => {
       error: null,
     });
 
-    const results = await service.search('wilhe', { countrycodes: ['at'] });
+    const results = await service.search('wilhe', { countrycodes: ['at'], addressLayer: false });
 
     expect(results[0]?.address?.country_code).toBe('at');
+    expect(invokeSpy).toHaveBeenCalledWith('geocode', {
+      body: {
+        action: 'forward',
+        q: 'wilhe',
+        limit: 10,
+        acceptLanguage: 'de',
+        addressLayer: false,
+        countrycodes: 'at',
+      },
+      headers: { Authorization: 'Bearer test-token' },
+    });
   });
 
   it('calls structured-search on the geocode edge function', async () => {

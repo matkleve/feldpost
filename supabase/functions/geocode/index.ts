@@ -110,6 +110,7 @@ Deno.serve(async (req: Request) => {
     viewbox?: string;
     bounded?: number;
     acceptLanguage?: string;
+    addressLayer?: boolean;
     street?: string;
     city?: string;
   };
@@ -195,7 +196,7 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    nominatimUrl = `${NOMINATIM_SEARCH_URL}?q=${encodeURIComponent(q.trim())}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1&layer=address${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}${body.viewbox ? `&viewbox=${encodeURIComponent(body.viewbox)}` : ""}${body.bounded != null ? `&bounded=${encodeURIComponent(String(body.bounded))}` : ""}`;
+    nominatimUrl = `${NOMINATIM_SEARCH_URL}?q=${encodeURIComponent(q.trim())}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.addressLayer !== false ? "&layer=address" : ""}${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}${body.viewbox ? `&viewbox=${encodeURIComponent(body.viewbox)}` : ""}${body.bounded != null ? `&bounded=${encodeURIComponent(String(body.bounded))}` : ""}`;
   }
 
   // Rate-limit then fetch from Nominatim

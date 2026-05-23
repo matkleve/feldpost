@@ -123,7 +123,7 @@ export async function fetchGeocoderCandidates(
   if (!tuning.resolver.enableInternetSearch) return [];
   if (normalizedQuery.length < tuning.resolver.minQueryLength) return [];
 
-  const constrainedOptions = buildConstrainedSearchOptions(context);
+  const constrainedOptions = buildConstrainedSearchOptions(context, normalizedQuery, tuning);
   logGeocoderResolverStage('constrained-request', {
     query: normalizedQuery,
     options: constrainedOptions,
@@ -252,7 +252,7 @@ async function expandHouseNumberSiblingCandidates(
     return primary;
   }
 
-  const streetOptions = buildConstrainedSearchOptions(context);
+  const streetOptions = buildConstrainedSearchOptions(context, parsed.street, tuning);
 
   logGeocoderResolverStage('house-prefix-expansion-request', {
     query: normalizedQuery,
@@ -324,7 +324,7 @@ async function expandStreetLevelHouseCandidates(
     return primary;
   }
 
-  const streetOptions = buildConstrainedSearchOptions(context);
+  const streetOptions = buildConstrainedSearchOptions(context, normalizedQuery, tuning);
 
   logGeocoderResolverStage('street-house-expansion-request', {
     query: normalizedQuery,
@@ -421,7 +421,7 @@ async function expandStreetSuffixProbeCandidates(
 
   const probeCandidates: SearchAddressCandidate[] = [];
   for (const probeQuery of probeQueries) {
-    const options = buildConstrainedSearchOptions(context);
+    const options = buildConstrainedSearchOptions(context, probeQuery, tuning);
     logGeocoderResolverStage('street-suffix-probe-request', {
       query: normalizedQuery,
       probeQuery,
@@ -540,9 +540,14 @@ function extractHouseNumberFromCandidateLabel(label: string, street: string): st
   return match ? match[1].toLowerCase() : null;
 }
 
-function buildConstrainedSearchOptions(context: SearchQueryContext): GeocoderSearchOptions {
+function buildConstrainedSearchOptions(
+  context: SearchQueryContext,
+  normalizedQuery: string,
+  tuning: SearchTuningConfig,
+): GeocoderSearchOptions {
   const searchOptions: GeocoderSearchOptions = {
     limit: NOMINATIM_FETCH_LIMIT,
+    addressLayer: !isShortAmbiguousPrefixQuery(normalizedQuery, tuning),
   };
   if (context.countryCodes?.length) {
     searchOptions.countrycodes = context.countryCodes;
