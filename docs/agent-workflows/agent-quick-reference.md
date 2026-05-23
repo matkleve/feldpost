@@ -10,6 +10,7 @@
 - **Anti-loop** — If the same search repeats without new signal, switch tactic or ask one precise question instead of re-running identical lookups.
 - **SPEC GAP** — If ownership, naming, or behavior is ambiguous in specs, stop and record a SPEC GAP per `docs/agent-workflows/element-spec-format.md` instead of inventing domain rules.
 - **Database-first** — For overlaps, uniqueness, immutability, or publication bugs, check PostgreSQL constraints and RLS (`supabase/migrations/`) before blaming UI code.
+- **Ask until clear** — Enough questions that ambiguities are resolved (batch in one message); not a 1–2 question cap → [`agent-communication.md`](./agent-communication.md). Latest diary: [`docs/ai-diary/2026-05-23.md`](../ai-diary/2026-05-23.md).
 
 ---
 

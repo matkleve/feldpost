@@ -143,6 +143,18 @@ The folder **`apps/web/src/app/archive/`** holds **dead code**: it is **excluded
 - **Spec system, structure contract, split policy, and index**: `docs/specs/README.md`; normative split rules also in **Spec split and organization policy** (this file).
 - **Spec writing template**: `docs/agent-workflows/element-spec-format.md`
 - **Post-implementation verification**: `docs/agent-workflows/implementation-checklist.md`
+- **Session memory (decisions, mistakes, communication)**: `docs/ai-diary/` — one file per day; read the latest entry before resuming the same feature area.
+- **Collaboration with the user (ask early, prompting)**: `docs/agent-workflows/agent-communication.md`
+
+## Collaboration with the user
+
+Agents should ask **enough questions that requirements are clear** before multi-file work — there is no fixed limit of one or two. Walk the ambiguity checklist in [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md) (equivalence/dedupe, geographic precedence, fallbacks, UI semantics, allowed-file boundaries, call budget). Batch related questions in one message; do not guess table or tuning names from prompts — verify against `docs/architecture/database-schema.md` and service types.
+
+**Before coding:** restate the invariant in your own words and confirm; list open ambiguities and ask about each that is not locked in spec/plan; then list files you will touch, what you will not touch, and how you will verify.
+
+**When the user corrects you:** treat it as an invariant update — fix minimal code, sync spec/plan if applicable, add a short note to `docs/ai-diary/YYYY-MM-DD.md` if the mistake is likely to recur.
+
+Full triggers, anti-patterns, and prompt templates: [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md). Recent example (geocoder Phases 1–3, list-level history): [`docs/ai-diary/2026-05-23.md`](docs/ai-diary/2026-05-23.md).
 
 ## Required Feature Workflow
 
