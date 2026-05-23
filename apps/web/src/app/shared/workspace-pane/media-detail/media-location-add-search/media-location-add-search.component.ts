@@ -282,7 +282,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     const stack = this.internetHistoryStack();
     if (stack.length === 0) return;
     this.clearGeocoder();
-    this.pushInternetForwardSnapshot();
+    this.pushInternetForwardSnapshotFrom([...this.placeSuggestions()]);
     this.placeSuggestions.set(stack[stack.length - 1] ?? []);
     this.internetHistoryStack.set(stack.slice(0, -1));
     this.cdr.detectChanges();
@@ -295,7 +295,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     const stack = this.internetForwardStack();
     if (stack.length === 0) return;
     this.clearGeocoder();
-    this.pushInternetBackSnapshot();
+    this.pushInternetBackSnapshotFrom([...this.placeSuggestions()]);
     this.placeSuggestions.set(stack[stack.length - 1] ?? []);
     this.internetForwardStack.set(stack.slice(0, -1));
     this.cdr.detectChanges();
@@ -324,12 +324,12 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   }
 
   private runGeocoderDebounced(q: string): void {
-    this.pushInternetHistorySnapshot();
     this.clearGeocoder();
     if (!q.trim()) {
       this.placeSuggestions.set([]);
       return;
     }
+    const previousSnapshot = [...this.placeSuggestions()];
     this.loadingPlaces.set(true);
     this.geocoderTimer = setTimeout(() => {
       this.geocoderTimer = null;
@@ -337,7 +337,19 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
         .resolveGeocoderCandidates(q.trim(), this.searchContext())
         .pipe(take(1), finalize(() => this.loadingPlaces.set(false)))
         .subscribe({
-          next: (items) => this.placeSuggestions.set(items),
+          next: (items) => {
+            if (
+              previousSnapshot.length > 0 &&
+              this.areInternetResultListsEquivalent(previousSnapshot, items)
+            ) {
+              return;
+            }
+            if (previousSnapshot.length > 0) {
+              this.pushInternetBackSnapshotFrom(previousSnapshot);
+              this.internetForwardStack.set([]);
+            }
+            this.placeSuggestions.set(items);
+          },
           error: () => this.placeSuggestions.set([]),
         });
     }, this.searchBarService.orchestratorOptionsFromOrg().debounceMs);
@@ -351,21 +363,50 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.loadingPlaces.set(false);
   }
 
-  private pushInternetHistorySnapshot(): void {
-    this.pushInternetBackSnapshot();
-    this.internetForwardStack.set([]);
+  /** True when two Internet snapshots list the same addresses (order/label noise ignored). */
+  private areInternetResultListsEquivalent(
+    left: SearchCandidate[],
+    right: SearchCandidate[],
+  ): boolean {
+    if (left.length !== right.length) return false;
+    const leftKeys = left.map((c) => this.internetResultFingerprint(c)).sort();
+    const rightKeys = right.map((c) => this.internetResultFingerprint(c)).sort();
+    return leftKeys.every((key, index) => key === rightKeys[index]);
   }
 
-  private pushInternetBackSnapshot(): void {
-    const current = this.placeSuggestions();
-    if (current.length === 0) return;
-    this.internetHistoryStack.update((stack) => [...stack, [...current]]);
+  private internetResultFingerprint(candidate: SearchCandidate): string {
+    const label = candidate.label.trim().toLowerCase().replace(/\s+/g, ' ');
+    const head = label.split(',')[0]?.trim() ?? label;
+    const houseMatch = head.match(/(\d+[a-z]?)$/i);
+    const street = (houseMatch ? head.slice(0, houseMatch.index).trim() : head).replace(/\.+$/, '');
+    const house = houseMatch?.[1]?.toLowerCase() ?? '';
+    const geo =
+      candidate.family === 'geocoder' || candidate.family === 'db-address'
+        ? `${candidate.lat.toFixed(4)}|${candidate.lng.toFixed(4)}`
+        : '';
+    return `${street}|${house}|${geo}`;
   }
 
-  private pushInternetForwardSnapshot(): void {
-    const current = this.placeSuggestions();
-    if (current.length === 0) return;
-    this.internetForwardStack.update((stack) => [...stack, [...current]]);
+  private pushInternetBackSnapshotFrom(snapshot: SearchCandidate[]): void {
+    if (snapshot.length === 0) return;
+    this.internetHistoryStack.update((stack) => {
+      const top = stack[stack.length - 1];
+      if (top && this.areInternetResultListsEquivalent(top, snapshot)) {
+        return stack;
+      }
+      return [...stack, snapshot];
+    });
+  }
+
+  private pushInternetForwardSnapshotFrom(snapshot: SearchCandidate[]): void {
+    if (snapshot.length === 0) return;
+    this.internetForwardStack.update((stack) => {
+      const top = stack[stack.length - 1];
+      if (top && this.areInternetResultListsEquivalent(top, snapshot)) {
+        return stack;
+      }
+      return [...stack, snapshot];
+    });
   }
 
   private dbSearchTerm(displayQuery: string): string {

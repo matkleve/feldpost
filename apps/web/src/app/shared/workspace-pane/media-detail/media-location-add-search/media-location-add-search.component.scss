@@ -31,42 +31,62 @@
   word-break: break-word;
 }
 
-// Internet section header — back | title | forward
+// Internet section header — nav buttons only when history exists
 // @see docs/specs/ui/media-detail/media-detail-location-section.md
 .media-location-add-search__internet-header {
-  display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
+  display: inline-flex;
   align-items: center;
-  gap: var(--spacing-1);
-  min-width: 0;
+  gap: 2px;
+  max-width: 100%;
+  padding: var(--spacing-1) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  line-height: 1;
 }
 
-// Fixed-width slot for back/forward icon buttons
+// Section label — same left edge as other sections until back button mounts
 // @see docs/specs/ui/media-detail/media-detail-location-section.md
-.media-location-add-search__internet-nav-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  min-width: 1.5rem;
+.media-location-add-search__internet-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 0;
 }
 
-// Compact back/forward affordances in section header row
+// Nav buttons match INTERNET label line-height (1lh square)
 // @see docs/specs/ui/media-detail/media-detail-location-section.md
 .media-location-add-search__internet-nav-btn {
   flex: 0 0 auto;
-  width: 1.5rem;
-  height: 1.5rem;
-  min-width: 1.5rem;
-  min-height: 1.5rem;
+  width: 1lh;
+  height: 1lh;
+  min-width: 1lh;
+  min-height: 1lh;
+  padding: 0;
+  margin: 0;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  animation: media-location-internet-nav-in var(--motion-duration-fast) var(--motion-ease-out);
+
+  .material-icons {
+    font-size: 1lh;
+    width: 1lh;
+    height: 1lh;
+    line-height: 1;
+  }
+
+  &:hover {
+    color: var(--foreground);
+  }
 }
 
-// Section label beside back — no extra top padding when in header row
-// @see docs/specs/ui/media-detail/media-detail-location-section.md
-.media-location-add-search__internet-label {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding-top: 0;
+@keyframes media-location-internet-nav-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 // Calm opacity pulse while Internet rows refresh in place
