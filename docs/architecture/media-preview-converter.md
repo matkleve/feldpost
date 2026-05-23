@@ -33,7 +33,7 @@
 1. Client sets `preview_generation_status = 'pending'` (org-scoped RLS update).
 2. Edge Function verifies JWT + row access, downloads `storage_path`, calls Gotenberg:
    - `POST /forms/libreoffice/convert` → PDF (page 1 via `nativePageRanges=1`)
-   - pdf.js + canvas rasterize → PNG (Gotenberg 8 has no PDF→image route)
+   - Gotenberg Chromium `screenshot/html` + pdf.js in-page → PNG (Edge has no native canvas)
 3. Edge uploads PNG to `thumbnail_path`, sets `ready`.
 4. On any error (missing `GOTENBERG_URL`, timeout, convert failure): `failed`.
 5. Grid: Realtime + `MediaDownloadService.invalidate`; delivery matrix v2 rows.

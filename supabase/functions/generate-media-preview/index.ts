@@ -8,13 +8,10 @@
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { createCanvas } from "npm:canvas@2.11.2";
-import * as pdfjs from "npm:pdfjs-dist@4.4.168/legacy/build/pdf.mjs";
 
 const DOCUMENT_LONG_EDGE_PX = 512;
 const NEUTRAL_PAD = "#f5f3ef";
-
-pdfjs.GlobalWorkerOptions.workerSrc = "";
+const PDFJS_VERSION = "4.4.168";
 
 const OFFICE_EXTENSIONS = new Set([
   "doc",
@@ -94,39 +91,56 @@ async function convertOfficeToPdf(
   return new Uint8Array(await pdfResponse.arrayBuffer());
 }
 
-/** Gotenberg 8 has no PDF→PNG route; rasterize with pdf.js (same approach as client PDF previews). */
-async function rasterizePdfFirstPageToPng(pdfBytes: Uint8Array): Promise<Uint8Array> {
-  const pdf = await pdfjs.getDocument({
-    data: pdfBytes,
-    useSystemFonts: true,
-    disableFontFace: true,
-  }).promise;
+/** Edge has no native canvas; rasterize PDF page 1 via Gotenberg Chromium + pdf.js in HTML. */
+function buildPdfScreenshotHtml(longEdgePx: number, padColor: string): string {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:${padColor};width:${longEdgePx}px;height:${longEdgePx}px;display:flex;align-items:center;justify-content:center}</style></head><body><canvas id="c"></canvas><script type="module">
+import * as pdfjs from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/+esm';
+pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.mjs';
+const data = await fetch('doc.pdf').then((r) => r.arrayBuffer());
+const pdf = await pdfjs.getDocument({ data, disableFontFace: true }).promise;
+const page = await pdf.getPage(1);
+const base = page.getViewport({ scale: 1 });
+const scale = ${longEdgePx - 32} / Math.max(base.width, base.height);
+const viewport = page.getViewport({ scale });
+const c = document.getElementById('c');
+c.width = Math.ceil(viewport.width);
+c.height = Math.ceil(viewport.height);
+const ctx = c.getContext('2d');
+ctx.fillStyle = '${padColor}';
+ctx.fillRect(0, 0, c.width, c.height);
+await page.render({ canvasContext: ctx, viewport }).promise;
+await pdf.destroy();
+</script></body></html>`;
+}
 
-  try {
-    const page = await pdf.getPage(1);
-    const baseViewport = page.getViewport({ scale: 1 });
-    const scale = DOCUMENT_LONG_EDGE_PX / Math.max(baseViewport.width, baseViewport.height);
-    const viewport = page.getViewport({ scale });
-    const width = Math.ceil(viewport.width);
-    const height = Math.ceil(viewport.height);
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      throw new Error("Canvas 2D context unavailable");
-    }
+async function rasterizePdfFirstPageToPng(
+  gotenbergUrl: string,
+  pdfBytes: Uint8Array,
+): Promise<Uint8Array> {
+  const base = gotenbergUrl.replace(/\/$/, "");
+  const html = buildPdfScreenshotHtml(DOCUMENT_LONG_EDGE_PX, NEUTRAL_PAD);
+  const form = new FormData();
+  form.append("files", new Blob([html], { type: "text/html" }), "index.html");
+  form.append("files", new Blob([pdfBytes], { type: "application/pdf" }), "doc.pdf");
+  form.append("format", "png");
+  // pdf.js loads from CDN inside Chromium; allow render to finish.
+  form.append("waitDelay", "3");
 
-    ctx.fillStyle = NEUTRAL_PAD;
-    ctx.fillRect(0, 0, width, height);
+  const response = await fetch(`${base}/forms/chromium/screenshot/html`, {
+    method: "POST",
+    body: form,
+  });
 
-    await page.render({
-      canvasContext: ctx as unknown as CanvasRenderingContext2D,
-      viewport,
-    }).promise;
-
-    return new Uint8Array(canvas.toBuffer("image/png"));
-  } finally {
-    await pdf.destroy();
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Chromium screenshot failed (${response.status}): ${detail.slice(0, 200)}`);
   }
+
+  const png = new Uint8Array(await response.arrayBuffer());
+  if (png.length < 500) {
+    throw new Error("Chromium screenshot returned empty PNG");
+  }
+  return png;
 }
 
 async function convertOfficeToPng(
@@ -135,7 +149,7 @@ async function convertOfficeToPng(
   fileName: string,
 ): Promise<Uint8Array> {
   const pdfBytes = await convertOfficeToPdf(gotenbergUrl, fileBytes, fileName);
-  return rasterizePdfFirstPageToPng(pdfBytes);
+  return rasterizePdfFirstPageToPng(gotenbergUrl, pdfBytes);
 }
 
 async function markStatus(
