@@ -10,3 +10,12 @@ export const PREVIEW_GENERATION_STATUSES: readonly PreviewGenerationStatus[] = [
   'ready',
   'failed',
 ] as const;
+
+export function normalizePreviewGenerationStatus(
+  value: string | null | undefined,
+): PreviewGenerationStatus {
+  if (value === 'pending' || value === 'ready' || value === 'failed') {
+    return value;
+  }
+  return 'idle';
+}

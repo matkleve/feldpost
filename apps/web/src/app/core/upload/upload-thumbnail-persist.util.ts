@@ -1,5 +1,7 @@
 import { resolveFileType } from '../media/file-type-registry';
 import { mediaFileIdentityFromRecord } from '../media/media-file-identity.helpers';
+import { requiresServerPreviewGeneration } from '../media/office-preview-eligibility.helpers';
+import type { MediaPreviewGenerationService } from '../media-thumbnail/media-preview-generation.service';
 import type { MediaDownloadService } from '../media-download/media-download.service';
 import type { MediaThumbnailPersistenceService } from '../media-thumbnail/media-thumbnail-persistence.service';
 import type { UploadJob } from './upload-manager.types';
@@ -14,6 +16,7 @@ type PersistUploadThumbnailArgs = {
   userId: string;
   persistence: MediaThumbnailPersistenceService;
   mediaDownload: MediaDownloadService;
+  previewGeneration?: MediaPreviewGenerationService;
 };
 
 /**
@@ -23,7 +26,7 @@ type PersistUploadThumbnailArgs = {
 export async function persistUploadJobThumbnailIfNeeded(
   args: PersistUploadThumbnailArgs,
 ): Promise<void> {
-  const { job, userId, persistence, mediaDownload } = args;
+  const { job, userId, persistence, mediaDownload, previewGeneration } = args;
 
   if (!job.mediaId || !job.thumbnailUrl || !job.storagePath) {
     return;
@@ -40,6 +43,13 @@ export async function persistUploadJobThumbnailIfNeeded(
       original_filename: job.file.name,
     }),
   );
+
+  if (requiresServerPreviewGeneration(fileType)) {
+    if (job.mediaId && previewGeneration) {
+      await previewGeneration.enqueue(job.mediaId, 'idle');
+    }
+    return;
+  }
 
   const isPhoto = fileType.category === 'image';
   const isPdf = fileType.id === 'pdf';

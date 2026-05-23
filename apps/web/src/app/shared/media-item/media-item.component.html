@@ -15,6 +15,7 @@
       [mediaId]="mediaIdentity()"
       [storagePath]="item()?.storage_path ?? null"
       [thumbnailPath]="item()?.thumbnail_path ?? null"
+      [previewGenerationStatus]="item()?.preview_generation_status ?? null"
       [aspectRatio]="registryAspectRatioHint()"
       [contentObjectPosition]="slotContentObjectPosition()"
       (aspectRatioChange)="onMediaAspectRatioChange($event)"

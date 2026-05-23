@@ -261,6 +261,9 @@ max_frequency = "5s"
 
 [functions.geocode]
 verify_jwt = true
+
+[functions.generate-media-preview]
+verify_jwt = true
 # [auth.hook.custom_access_token]
 # enabled = true
 # uri = "pg-functions://<database>/<schema>/<hook_name>"

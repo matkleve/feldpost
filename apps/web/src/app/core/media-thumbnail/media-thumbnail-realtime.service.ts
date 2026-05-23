@@ -1,11 +1,14 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { Subject } from 'rxjs';
+import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
+import type { PreviewGenerationStatus } from '../media/preview-generation-status.types';
 import { MediaDownloadService } from '../media-download/media-download.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
 export type MediaThumbnailRealtimePatch = {
   readonly mediaId: string;
-  readonly thumbnailPath: string;
+  readonly thumbnailPath: string | null;
+  readonly previewGenerationStatus: PreviewGenerationStatus;
 };
 
 /**
@@ -33,12 +36,26 @@ export class MediaThumbnailRealtimeService {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'media_items' },
         (payload) => {
-          const row = payload.new as { id?: string; thumbnail_path?: string | null };
-          if (!row.id || !row.thumbnail_path) {
+          const row = payload.new as {
+            id?: string;
+            thumbnail_path?: string | null;
+            preview_generation_status?: string | null;
+          };
+          if (!row.id) {
             return;
           }
-          this.mediaDownload.invalidate(row.id);
-          this.updatesSubject.next({ mediaId: row.id, thumbnailPath: row.thumbnail_path });
+          const thumbnailPath = row.thumbnail_path ?? null;
+          const previewGenerationStatus = normalizePreviewGenerationStatus(
+            row.preview_generation_status,
+          );
+          if (thumbnailPath) {
+            this.mediaDownload.invalidate(row.id);
+          }
+          this.updatesSubject.next({
+            mediaId: row.id,
+            thumbnailPath,
+            previewGenerationStatus,
+          });
         },
       )
       .subscribe();

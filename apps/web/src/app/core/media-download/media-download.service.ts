@@ -122,11 +122,15 @@ export class MediaDownloadService {
     mediaId: string,
     storagePath: string,
     thumbnailPath: string | null | undefined,
+    previewGenerationStatus?: MediaPreviewRequest['previewGenerationStatus'],
   ): void {
+    const existing = this.knownPreviewRequests.get(mediaId);
     this.knownPreviewRequests.set(mediaId, {
       mediaId,
       storagePath,
       thumbnailPath,
+      previewGenerationStatus:
+        previewGenerationStatus ?? existing?.previewGenerationStatus ?? 'idle',
       context: 'grid',
       desiredSize: 'thumb',
     });
@@ -520,6 +524,10 @@ export class MediaDownloadService {
       const previewTarget =
         knownRequest != null ? resolvePreviewTarget(knownRequest, tier, fileType) : null;
       if (!previewTarget) {
+        const genStatus = knownRequest?.previewGenerationStatus ?? 'idle';
+        if (genStatus === 'pending') {
+          return { state: 'loading', icon, resolvedUrl: cachedUrl };
+        }
         return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
       }
 

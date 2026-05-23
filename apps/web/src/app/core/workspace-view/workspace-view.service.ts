@@ -6,6 +6,7 @@ import { FilterService } from '../filter/filter.service';
 import { LocationResolverService } from '../location-resolver/location-resolver.service';
 import { MetadataService } from '../metadata/metadata.service';
 import { MediaDownloadService } from '../media-download/media-download.service';
+import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -308,13 +309,13 @@ export class WorkspaceViewService {
       this.supabase.client
         .from('media_items')
         .select(
-          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
+          'id, source_image_id, latitude, longitude, thumbnail_path, preview_generation_status, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
         )
         .in('id', uniqueIds),
       this.supabase.client
         .from('media_items')
         .select(
-          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
+          'id, source_image_id, latitude, longitude, thumbnail_path, preview_generation_status, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
         )
         .in('source_image_id', uniqueIds),
     ]);
@@ -409,6 +410,7 @@ export class WorkspaceViewService {
           latitude: row.latitude,
           longitude: row.longitude,
           thumbnailPath: row.thumbnail_path,
+          previewGenerationStatus: normalizePreviewGenerationStatus(row.preview_generation_status),
           storagePath: row.storage_path,
           capturedAt: row.captured_at,
           createdAt: row.created_at,
@@ -685,6 +687,7 @@ interface RawSharedMediaItemRow {
   latitude: number | null;
   longitude: number | null;
   thumbnail_path: string | null;
+  preview_generation_status?: string | null;
   storage_path: string | null;
   captured_at: string | null;
   created_at: string;

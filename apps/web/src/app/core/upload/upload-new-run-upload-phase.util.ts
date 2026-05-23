@@ -10,6 +10,7 @@ import type { UploadResult } from './upload.types';
 import type { SupabaseService } from '../supabase/supabase.service';
 import type { MediaDownloadService } from '../media-download/media-download.service';
 import type { MediaThumbnailPersistenceService } from '../media-thumbnail/media-thumbnail-persistence.service';
+import type { MediaPreviewGenerationService } from '../media-thumbnail/media-preview-generation.service';
 import { persistUploadJobThumbnailIfNeeded } from './upload-thumbnail-persist.util';
 import {
   formatUploadFailureMessage,
@@ -30,6 +31,7 @@ type RunNewUploadPhaseArgs = {
   enrich: UploadEnrichmentService;
   mediaDownloadService: MediaDownloadService;
   thumbnailPersistence: MediaThumbnailPersistenceService;
+  previewGeneration: MediaPreviewGenerationService;
   getUserId: () => string | undefined;
 };
 
@@ -48,6 +50,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     enrich,
     mediaDownloadService,
     thumbnailPersistence,
+    previewGeneration,
     getUserId,
   } = args;
 
@@ -104,6 +107,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
         userId,
         persistence: thumbnailPersistence,
         mediaDownload: mediaDownloadService,
+        previewGeneration,
       });
     },
     emitImageUploaded: (event) => ctx.emitImageUploaded(event),

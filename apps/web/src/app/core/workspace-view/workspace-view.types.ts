@@ -3,6 +3,8 @@
  * Used by WorkspaceViewService, FilterService, toolbar components, and the grid.
  */
 
+import type { PreviewGenerationStatus } from '../media/preview-generation-status.types';
+
 export type { FilterRule } from '../filter/filter.types';
 
 /** Filename-oriented metadata attached to a media item. */
@@ -24,6 +26,7 @@ export interface WorkspaceMedia {
   latitude: number;
   longitude: number;
   thumbnailPath: string | null;
+  previewGenerationStatus?: PreviewGenerationStatus | null;
   storagePath: string | null;
   capturedAt: string | null;
   createdAt: string;

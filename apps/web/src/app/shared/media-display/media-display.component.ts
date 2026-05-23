@@ -13,7 +13,12 @@ import {
 } from '@angular/core';
 import type { AfterViewInit, InputSignal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { resolveFileType } from '../../core/media/file-type-registry';
+import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identity.helpers';
+import { requiresServerPreviewGeneration } from '../../core/media/office-preview-eligibility.helpers';
+import type { PreviewGenerationStatus } from '../../core/media/preview-generation-status.types';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
+import { MediaPreviewGenerationService } from '../../core/media-thumbnail/media-preview-generation.service';
 import { type MediaDisplayState, transitionMediaDisplayState } from './media-display-state';
 import { type MediaDisplayDeliveryState } from './media-display.helpers';
 
@@ -36,6 +41,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   private readonly mediaDownloadService = inject(MediaDownloadService);
+  private readonly previewGeneration = inject(MediaPreviewGenerationService);
   private readonly i18nService = inject(I18nService);
 
   private resizeObserver: ResizeObserver | null = null;
@@ -45,6 +51,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly mediaId: InputSignal<string> = input.required<string>();
   readonly storagePath = input<string | null>(null);
   readonly thumbnailPath = input<string | null>(null);
+  readonly previewGenerationStatus = input<PreviewGenerationStatus | null>(null);
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
@@ -86,6 +93,7 @@ export class MediaDisplayComponent implements AfterViewInit {
       const id = this.mediaId().trim();
       const storagePath = this.storagePath();
       const thumbnailPath = this.thumbnailPath();
+      const previewStatus = this.previewGenerationStatus();
 
       if (!id) {
         this.resolvedUrl.set('');
@@ -106,7 +114,24 @@ export class MediaDisplayComponent implements AfterViewInit {
       }
 
       if (storagePath) {
-        this.mediaDownloadService.registerPreviewPaths(id, storagePath, thumbnailPath);
+        this.mediaDownloadService.registerPreviewPaths(
+          id,
+          storagePath,
+          thumbnailPath,
+          previewStatus,
+        );
+      }
+
+      if (storagePath && !thumbnailPath?.trim()) {
+        const fileType = resolveFileType(
+          mediaFileIdentityFromRecord({
+            storage_path: storagePath,
+            original_filename: null,
+          }),
+        );
+        if (requiresServerPreviewGeneration(fileType)) {
+          void this.previewGeneration.enqueue(id, previewStatus);
+        }
       }
 
       // slotSizeRem read via untracked — viewport resize after aspect-ratio transition

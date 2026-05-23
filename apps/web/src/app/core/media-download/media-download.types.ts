@@ -1,4 +1,5 @@
 import type { MediaTier } from '../media/media-renderer.types';
+import type { PreviewGenerationStatus } from '../media/preview-generation-status.types';
 
 export type MediaDeliveryItemState =
   | 'idle'
@@ -27,6 +28,7 @@ export interface MediaPreviewRequest {
   mediaId: string;
   storagePath: string | null;
   thumbnailPath?: string | null;
+  previewGenerationStatus?: PreviewGenerationStatus | null;
   desiredSize?: 'marker' | 'thumb' | 'detail' | 'full';
   boxPixels?: { width: number; height: number };
   context: 'map' | 'grid' | 'upload' | 'detail';

@@ -27,6 +27,7 @@ import {
   isMediaGalleryRenderRowHidden,
   type MediaGalleryRenderRow,
 } from '../../core/media-query/media-gallery-view.helpers';
+import type { PreviewGenerationStatus } from '../../core/media/preview-generation-status.types';
 import { MediaThumbnailRealtimeService } from '../../core/media-thumbnail/media-thumbnail-realtime.service';
 
 export type MediaContentState = 'loading' | 'error' | 'ready';
@@ -66,7 +67,12 @@ export class MediaContentComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly thumbnailRealtime = inject(MediaThumbnailRealtimeService);
   private resizeObserver: ResizeObserver | null = null;
-  private readonly thumbnailPathPatches = signal<ReadonlyMap<string, string>>(new Map());
+  private readonly itemPreviewPatches = signal<
+    ReadonlyMap<
+      string,
+      { thumbnail_path?: string | null; preview_generation_status?: PreviewGenerationStatus | null }
+    >
+  >(new Map());
   private placeholderExitTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly state = input.required<MediaContentState>();
@@ -74,14 +80,23 @@ export class MediaContentComponent implements AfterViewInit {
 
   /** Merges Realtime `thumbnail_path` updates into grid rows (no polling). */
   readonly gridItems = computed(() => {
-    const patches = this.thumbnailPathPatches();
+    const patches = this.itemPreviewPatches();
     const items = this.items();
     if (patches.size === 0) {
       return items;
     }
     return items.map((item) => {
-      const path = patches.get(item.id);
-      return path ? { ...item, thumbnail_path: path } : item;
+      const patch = patches.get(item.id);
+      if (!patch) {
+        return item;
+      }
+      return {
+        ...item,
+        ...(patch.thumbnail_path !== undefined ? { thumbnail_path: patch.thumbnail_path } : {}),
+        ...(patch.preview_generation_status !== undefined
+          ? { preview_generation_status: patch.preview_generation_status }
+          : {}),
+      };
     });
   });
   /** Flattened header + grid rows for grouped gallery layout (used when state is ready). */
@@ -250,10 +265,13 @@ export class MediaContentComponent implements AfterViewInit {
     this.thumbnailRealtime.connect(this.destroyRef);
     this.thumbnailRealtime.updates$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ mediaId, thumbnailPath }) => {
-        this.thumbnailPathPatches.update((current) => {
+      .subscribe(({ mediaId, thumbnailPath, previewGenerationStatus }) => {
+        this.itemPreviewPatches.update((current) => {
           const next = new Map(current);
-          next.set(mediaId, thumbnailPath);
+          next.set(mediaId, {
+            thumbnail_path: thumbnailPath,
+            preview_generation_status: previewGenerationStatus,
+          });
           return next;
         });
       });

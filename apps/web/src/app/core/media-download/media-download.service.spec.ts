@@ -39,4 +39,26 @@ describe('MediaDownloadService file preview delivery', () => {
 
     expect(delivery.state).toBe('icon-only');
   });
+
+  it('returns loading when preview_generation_status is pending without thumbnail_path', async () => {
+    const service = configureMediaDownloadService();
+
+    service.registerPreviewPaths('media-pptx', 'org/u/deck.pptx', null, 'pending');
+
+    const delivery = await firstValueFrom(service.getState('media-pptx', 10).pipe(take(1)));
+
+    expect(delivery.state).toBe('loading');
+  });
+
+  it('returns icon-only when preview_generation_status is failed', async () => {
+    const service = configureMediaDownloadService();
+
+    service.registerPreviewPaths('media-pptx-fail', 'org/u/deck.pptx', null, 'failed');
+
+    const delivery = await firstValueFrom(
+      service.getState('media-pptx-fail', 10).pipe(take(1)),
+    );
+
+    expect(delivery.state).toBe('icon-only');
+  });
 });

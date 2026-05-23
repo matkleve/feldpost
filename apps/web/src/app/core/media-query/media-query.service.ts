@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
 import { MetadataService } from '../metadata/metadata.service';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
+import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
 import type { ImageRecord } from './media-query.types';
 
 interface MediaItemRow {
@@ -32,6 +33,7 @@ interface MediaGalleryDbRow {
   created_by: string | null;
   storage_path: string | null;
   thumbnail_path: string | null;
+  preview_generation_status?: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
   exif_latitude: number | null;
@@ -110,7 +112,7 @@ export class MediaQueryService {
       const { data, error } = await this.supabase.client
         .from('media_items')
         .select(
-          'id, organization_id, created_by, storage_path, thumbnail_path, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id, address_label, street, city, district, country',
+          'id, organization_id, created_by, storage_path, thumbnail_path, preview_generation_status, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id, address_label, street, city, district, country',
         )
         .order('created_at', { ascending: false })
         .range(offset, offset + MediaQueryService.GALLERY_PAGE_SIZE - 1);
@@ -361,6 +363,7 @@ function mapGalleryRowToWorkspaceMedia(
     latitude: lat ?? 0,
     longitude: lng ?? 0,
     thumbnailPath: row.thumbnail_path,
+    previewGenerationStatus: normalizePreviewGenerationStatus(row.preview_generation_status),
     storagePath: row.storage_path,
     capturedAt: row.captured_at,
     createdAt: row.created_at,
