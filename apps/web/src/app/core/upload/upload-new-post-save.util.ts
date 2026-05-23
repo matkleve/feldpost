@@ -20,6 +20,7 @@ type FinalizeNewUploadPhaseArgs = {
   geocodeTitleAddress: (titleAddress: string) => Promise<ExifCoords | undefined>;
   mismatchToleranceMeters: number;
   setLocalUrl: (mediaId: string, localUrl: string) => void;
+  persistThumbnail?: (job: UploadJob) => Promise<void>;
   emitImageUploaded: (event: {
     jobId: string;
     batchId: string;
@@ -45,6 +46,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     geocodeTitleAddress,
     mismatchToleranceMeters,
     setLocalUrl,
+    persistThumbnail,
     emitImageUploaded,
   } = args;
 
@@ -72,6 +74,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
       jobId,
       finalJob: updatedJob,
       setLocalUrl,
+      persistThumbnail,
       emitImageUploaded,
       emitBatchProgress,
       drainQueue,
@@ -145,16 +148,18 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     jobId,
     finalJob,
     setLocalUrl,
+    persistThumbnail,
     emitImageUploaded,
     emitBatchProgress,
     drainQueue,
   });
 }
 
-function emitCompletion(args: {
+export function emitCompletion(args: {
   jobId: string;
   finalJob: UploadJob;
   setLocalUrl: (mediaId: string, localUrl: string) => void;
+  persistThumbnail?: (job: UploadJob) => Promise<void>;
   emitImageUploaded: (event: {
     jobId: string;
     batchId: string;
@@ -166,10 +171,15 @@ function emitCompletion(args: {
   emitBatchProgress: (batchId: string) => void;
   drainQueue: () => void;
 }): void {
-  const { jobId, finalJob, setLocalUrl, emitImageUploaded, emitBatchProgress, drainQueue } = args;
+  const { jobId, finalJob, setLocalUrl, persistThumbnail, emitImageUploaded, emitBatchProgress, drainQueue } =
+    args;
 
   if (finalJob.thumbnailUrl && finalJob.mediaId) {
     setLocalUrl(finalJob.mediaId, finalJob.thumbnailUrl);
+  }
+
+  if (persistThumbnail && finalJob.mediaId && finalJob.thumbnailUrl) {
+    void persistThumbnail(finalJob);
   }
 
   emitImageUploaded({

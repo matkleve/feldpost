@@ -9,6 +9,8 @@ import type { ExifCoords, ParsedExif } from './upload.service';
 import type { UploadResult } from './upload.types';
 import type { SupabaseService } from '../supabase/supabase.service';
 import type { MediaDownloadService } from '../media-download/media-download.service';
+import type { MediaThumbnailPersistenceService } from '../media-thumbnail/media-thumbnail-persistence.service';
+import { persistUploadJobThumbnailIfNeeded } from './upload-thumbnail-persist.util';
 import {
   formatUploadFailureMessage,
   uploadFailureMessageToToastText,
@@ -27,6 +29,7 @@ type RunNewUploadPhaseArgs = {
   supabaseClient: SupabaseService['client'];
   enrich: UploadEnrichmentService;
   mediaDownloadService: MediaDownloadService;
+  thumbnailPersistence: MediaThumbnailPersistenceService;
   getUserId: () => string | undefined;
 };
 
@@ -44,6 +47,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     supabaseClient,
     enrich,
     mediaDownloadService,
+    thumbnailPersistence,
     getUserId,
   } = args;
 
@@ -90,6 +94,18 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
     mismatchToleranceMeters: 15,
     setLocalUrl: (mediaId, localUrl) => mediaDownloadService.setLocalUrl(mediaId, localUrl),
+    persistThumbnail: async (job: UploadJob) => {
+      const userId = getUserId();
+      if (!userId) {
+        return;
+      }
+      await persistUploadJobThumbnailIfNeeded({
+        job,
+        userId,
+        persistence: thumbnailPersistence,
+        mediaDownload: mediaDownloadService,
+      });
+    },
     emitImageUploaded: (event) => ctx.emitImageUploaded(event),
   });
 }

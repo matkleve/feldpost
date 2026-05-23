@@ -48,6 +48,8 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
+  /** CSS object-position for bitmap layers (documents: top center). */
+  readonly contentObjectPosition = input('center center');
   /** `fill` = fixed-slot mode (row); `intrinsic` = height driven by media aspect-ratio (grid). */
   readonly slotGeometry = input<'fill' | 'intrinsic'>('fill');
   /**

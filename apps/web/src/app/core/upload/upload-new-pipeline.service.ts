@@ -29,6 +29,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { FilenameParserService } from '../filename-parser/filename-parser.service';
 import { MediaDownloadService } from '../media-download/media-download.service';
+import { MediaThumbnailPersistenceService } from '../media-thumbnail/media-thumbnail-persistence.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { isCancelledUploadJob } from './upload-cancelled.util';
@@ -59,6 +60,7 @@ export class UploadNewPipelineService {
   private readonly enrichment = inject(UploadEnrichmentService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
+  private readonly thumbnailPersistence = inject(MediaThumbnailPersistenceService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
   private readonly supabase = inject(SupabaseService);
 
@@ -114,6 +116,7 @@ export class UploadNewPipelineService {
       supabaseClient: this.supabase.client,
       enrich: this.enrichment,
       mediaDownloadService: this.mediaDownloadService,
+      thumbnailPersistence: this.thumbnailPersistence,
       getUserId: () => this.auth.user()?.id,
     });
   }

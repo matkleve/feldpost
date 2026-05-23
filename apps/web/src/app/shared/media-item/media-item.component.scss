@@ -69,6 +69,18 @@
   min-block-size: 0;
 }
 
+// Anchors file-type chip in lower-right corner of the slot (non-image tiles).
+// @see docs/specs/component/media/media-item.md#what-it-looks-like
+.media-item__filetype-chip {
+  position: absolute;
+  inset-inline-end: var(--spacing-2);
+  inset-block-end: var(--spacing-2);
+  z-index: 3;
+  max-inline-size: calc(100% - (var(--spacing-2) * 2));
+  display: block;
+  pointer-events: none;
+}
+
 :host([data-mode='row']) .media-item__preview {
   block-size: 100%;
 }

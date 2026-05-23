@@ -36,6 +36,13 @@ Selection and context actions MUST be emitted as typed intents to the parent she
 - Item system contract: docs/specs/component/item-grid/item-grid.md
 - Trigger: MediaComponent updates state or list payload for /media content area
 
+## Thumbnail refresh (Realtime only)
+
+When `media_items.thumbnail_path` is updated (upload persist or v2 worker), the grid MUST refresh without polling:
+
+- Subscribe to Supabase Realtime `UPDATE` on `media_items` (`MediaThumbnailRealtimeService`).
+- Call `MediaDownloadService.invalidate(mediaId)` and patch the in-memory row `thumbnail_path` for visible items.
+
 ## Actions & Interactions
 
 | #   | User/System Trigger                                | System Response                                                 | Output Contract                                                     |

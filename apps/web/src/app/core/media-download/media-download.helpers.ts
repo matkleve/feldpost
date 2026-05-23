@@ -1,4 +1,10 @@
-import type { MediaContext, MediaTier } from '../media/media-renderer.types';
+import type {
+  FileTypeCategory,
+  FileTypeDefinition,
+  MediaContext,
+  MediaTier,
+} from '../media/media-renderer.types';
+import type { MediaPreviewRequest } from './media-download.types';
 import type {
   WorkspaceMediaCustomMetadata,
   WorkspaceMediaFileMetadata,
@@ -11,6 +17,9 @@ import type {
 } from './media-download.types';
 
 export const PIXELS_PER_REM = 16;
+
+/** Non-image tiles below this short edge use icon-only without signing. @see media-display.md */
+export const NON_IMAGE_ICON_ONLY_MAX_SLOT_REM = 8;
 
 export const CONTEXT_DEFAULT_TIER: Readonly<Record<MediaContext, MediaTier>> = {
   map: 'inline',
@@ -240,4 +249,43 @@ function firstNonEmpty(values: Array<string | null | undefined>): string | null 
     if (trimmed) return trimmed;
   }
   return null;
+}
+
+export function isBitmapMediaCategory(category: FileTypeCategory): boolean {
+  return category === 'image' || category === 'video';
+}
+
+/**
+ * Storage path to sign for grid preview, or null when v1 must not fetch (Office without thumb).
+ * @see docs/specs/service/media-download-service/media-download-service.md
+ */
+export function resolvePreviewTarget(
+  request: MediaPreviewRequest,
+  tier: MediaTier,
+  fileType: FileTypeDefinition,
+): string | null {
+  if (isBitmapMediaCategory(fileType.category)) {
+    return resolveStoragePathForPreviewTier(request, tier);
+  }
+
+  const thumb = request.thumbnailPath?.trim();
+  return thumb ? thumb : null;
+}
+
+function resolveStoragePathForPreviewTier(
+  request: MediaPreviewRequest,
+  tier: MediaTier,
+): string | null {
+  const storagePath = request.storagePath?.trim();
+  if (!storagePath) {
+    return null;
+  }
+
+  const useThumbnailTier =
+    tier === 'inline' || tier === 'small' || tier === 'mid' || tier === 'mid2';
+  if (useThumbnailTier && request.thumbnailPath?.trim()) {
+    return request.thumbnailPath.trim();
+  }
+
+  return storagePath;
 }

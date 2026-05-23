@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import type { AfterViewInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { ImageRecord } from '../../core/media-query/media-query.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { MediaErrorComponent } from './media-error.component';
@@ -26,6 +27,7 @@ import {
   isMediaGalleryRenderRowHidden,
   type MediaGalleryRenderRow,
 } from '../../core/media-query/media-gallery-view.helpers';
+import { MediaThumbnailRealtimeService } from '../../core/media-thumbnail/media-thumbnail-realtime.service';
 
 export type MediaContentState = 'loading' | 'error' | 'ready';
 
@@ -62,11 +64,26 @@ export class MediaContentComponent implements AfterViewInit {
   private readonly i18nService = inject(I18nService);
   private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly thumbnailRealtime = inject(MediaThumbnailRealtimeService);
   private resizeObserver: ResizeObserver | null = null;
+  private readonly thumbnailPathPatches = signal<ReadonlyMap<string, string>>(new Map());
   private placeholderExitTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly state = input.required<MediaContentState>();
   readonly items = input.required<ImageRecord[]>();
+
+  /** Merges Realtime `thumbnail_path` updates into grid rows (no polling). */
+  readonly gridItems = computed(() => {
+    const patches = this.thumbnailPathPatches();
+    const items = this.items();
+    if (patches.size === 0) {
+      return items;
+    }
+    return items.map((item) => {
+      const path = patches.get(item.id);
+      return path ? { ...item, thumbnail_path: path } : item;
+    });
+  });
   /** Flattened header + grid rows for grouped gallery layout (used when state is ready). */
   /** @see docs/specs/component/item-grid/item-grid.md#wiring */
   readonly renderRows = input<readonly MediaGalleryRenderRow[]>([]);
@@ -148,7 +165,7 @@ export class MediaContentComponent implements AfterViewInit {
       }));
     }
 
-    const items = this.items();
+    const items = this.gridItems();
     const includePlaceholderTail =
       this.placeholderExitActive() && this.loadingPlaceholderSnapshotCount() > items.length;
     const totalSlots = includePlaceholderTail
@@ -230,6 +247,17 @@ export class MediaContentComponent implements AfterViewInit {
   );
 
   ngAfterViewInit(): void {
+    this.thumbnailRealtime.connect(this.destroyRef);
+    this.thumbnailRealtime.updates$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ mediaId, thumbnailPath }) => {
+        this.thumbnailPathPatches.update((current) => {
+          const next = new Map(current);
+          next.set(mediaId, thumbnailPath);
+          return next;
+        });
+      });
+
     this.updateViewportMetrics();
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', this.updateViewportMetrics);

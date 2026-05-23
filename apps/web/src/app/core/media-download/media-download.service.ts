@@ -13,16 +13,20 @@ import type {
   MediaTier,
   MediaTierSelectionInput,
 } from '../media/media-renderer.types';
+import { mediaFileIdentityFromRecord } from '../media/media-file-identity.helpers';
 import {
   ALL_MEDIA_TIERS,
   CONTEXT_DEFAULT_TIER,
+  NON_IMAGE_ICON_ONLY_MAX_SLOT_REM,
   PIXELS_PER_REM,
   desiredSizeToTier,
+  isBitmapMediaCategory,
   mapExportErrorCode,
   mapFetchErrorCode,
   mapLegacyState,
   mapSigningErrorCode,
   readyStateForTier,
+  resolvePreviewTarget,
   tierToMediaSize,
 } from './media-download.helpers';
 import type {
@@ -140,8 +144,19 @@ export class MediaDownloadService {
       return { url: null, resolvedTier: null, source: 'none', state: stateSignal() };
     }
 
+    const fileType = this.resolveFileType(
+      mediaFileIdentityFromRecord({
+        storage_path: request.storagePath,
+        original_filename: null,
+      }),
+    );
+    const targetPath = resolvePreviewTarget(request, resolvedTier, fileType);
+    if (!targetPath) {
+      stateSignal.set('idle');
+      return { url: null, resolvedTier, source: 'none', state: stateSignal() };
+    }
+
     const tierSize = tierToMediaSize(resolvedTier);
-    const targetPath = this.resolvePathForTier(request, resolvedTier);
     const hadLoaded = this.signedUrlCache.getLoadState(request.mediaId, tierSize)() === 'loaded';
 
     stateSignal.set('signing');
@@ -195,7 +210,7 @@ export class MediaDownloadService {
       const size = tierToMediaSize(tier);
 
       const emit = (): void => {
-        subscriber.next(this.toDisplayDeliveryState(normalizedId, tier));
+        subscriber.next(this.toDisplayDeliveryState(normalizedId, tier, slotSizeRem));
       };
 
       emit();
@@ -454,13 +469,6 @@ export class MediaDownloadService {
     });
   }
 
-  private resolvePathForTier(request: MediaPreviewRequest, tier: MediaTier): string {
-    const useThumbnailTier =
-      tier === 'inline' || tier === 'small' || tier === 'mid' || tier === 'mid2';
-    if (useThumbnailTier && request.thumbnailPath) return request.thumbnailPath;
-    return request.storagePath as string;
-  }
-
   private resolveResultSource(
     cacheKey: string,
     url: string,
@@ -476,13 +484,21 @@ export class MediaDownloadService {
     return `${mediaId}:${tier}`;
   }
 
-  private toDisplayDeliveryState(mediaId: string, tier: MediaTier): MediaDisplayDeliveryState {
+  private toDisplayDeliveryState(
+    mediaId: string,
+    tier: MediaTier,
+    slotSizeRem: number,
+  ): MediaDisplayDeliveryState {
     const state = this.getItemState(mediaId, tier)();
     const cachedUrl = this.getCachedUrl(mediaId, tierToMediaSize(tier));
 
     const knownRequest = this.knownPreviewRequests.get(mediaId);
-    const extension = knownRequest?.storagePath?.split('.').pop()?.toLowerCase() ?? '';
-    const icon = this.resolveIcon({ fileName: knownRequest?.storagePath ?? null, extension });
+    const identity = mediaFileIdentityFromRecord({
+      storage_path: knownRequest?.storagePath ?? null,
+      original_filename: null,
+    });
+    const fileType = this.resolveFileType(identity);
+    const icon = this.resolveIcon(identity);
 
     if (state === 'error') {
       return { state: 'error', icon, resolvedUrl: cachedUrl };
@@ -490,6 +506,28 @@ export class MediaDownloadService {
 
     if (state === 'no-media') {
       return { state: 'no-media', icon, resolvedUrl: cachedUrl };
+    }
+
+    if (!isBitmapMediaCategory(fileType.category)) {
+      if (slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM) {
+        return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
+      }
+
+      if (cachedUrl) {
+        return { state: 'loaded', resolvedUrl: cachedUrl, icon };
+      }
+
+      const previewTarget =
+        knownRequest != null ? resolvePreviewTarget(knownRequest, tier, fileType) : null;
+      if (!previewTarget) {
+        return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
+      }
+
+      if (state === 'signing' || state === 'idle') {
+        return { state: 'loading', icon, resolvedUrl: cachedUrl };
+      }
+
+      return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
     }
 
     if (state === 'ready-low-res' || state === 'ready-high-res') {
@@ -509,6 +547,19 @@ export class MediaDownloadService {
   private requestPreviewIfKnown(mediaId: string, tier: MediaTier, slotSizeRem: number): void {
     const request = this.knownPreviewRequests.get(mediaId);
     if (!request) {
+      return;
+    }
+
+    const identity = mediaFileIdentityFromRecord({
+      storage_path: request.storagePath,
+      original_filename: null,
+    });
+    const fileType = this.resolveFileType(identity);
+    if (!resolvePreviewTarget(request, tier, fileType)) {
+      return;
+    }
+
+    if (slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM && !isBitmapMediaCategory(fileType.category)) {
       return;
     }
 

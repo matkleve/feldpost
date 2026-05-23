@@ -22,7 +22,12 @@ import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.compo
 import type { MediaItemQuietActionsState } from './media-item-quiet-actions.component';
 import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
 import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
+import { aspectRatioHintFromFileType, usesNativeAspectRatio } from '../../core/media/aspect-ratio-from-file-type.helpers';
+import { chipVariantForFileType } from '../../core/media/file-type-chip-variant';
+import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-registry';
+import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identity.helpers';
 import { MediaDisplayComponent } from '../media-display/media-display.component';
+import { ChipComponent, type ChipVariant } from '../components/chip/chip.component';
 
 export const MEDIA_ITEM_ACTION_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
 
@@ -30,7 +35,12 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
 
 @Component({
   selector: 'app-media-item',
-  imports: [MediaDisplayComponent, MediaItemUploadOverlayComponent, MediaItemQuietActionsComponent],
+  imports: [
+    ChipComponent,
+    MediaDisplayComponent,
+    MediaItemUploadOverlayComponent,
+    MediaItemQuietActionsComponent,
+  ],
   templateUrl: './media-item.component.html',
   styleUrl: './media-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +49,7 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
     '[attr.data-state]': 'state()',
     '[attr.data-has-item]': "item() ? 'true' : 'false'",
     '[attr.data-mode]': 'mode()',
+    '[attr.data-file-category]': 'fileCategory()',
     '[class.media-item]': 'true',
     '[class.media-item--selected]': 'selected()',
     '(contextmenu)': 'onContextMenu($event)',
@@ -66,10 +77,48 @@ export class MediaItemComponent {
   readonly usesFillSlotGeometry = computed(() => this.mode() === 'row');
   private readonly mediaPreview = viewChild(MediaDisplayComponent);
 
+  readonly fileIdentity = computed(() => {
+    const record = this.item();
+    if (!record) {
+      return mediaFileIdentityFromRecord({ storage_path: null, original_filename: null });
+    }
+    return mediaFileIdentityFromRecord({
+      storage_path: record.storage_path,
+      original_filename: record.original_filename ?? null,
+    });
+  });
+
+  readonly fileTypeDefinition = computed(() => resolveFileType(this.fileIdentity()));
+
+  readonly fileCategory = computed(() => this.fileTypeDefinition().category);
+
+  readonly registryAspectRatioHint = computed(() =>
+    aspectRatioHintFromFileType(this.fileTypeDefinition()),
+  );
+
+  readonly usesNativeSlotAspect = computed(() => usesNativeAspectRatio(this.fileTypeDefinition()));
+
+  readonly fileTypeChipText = computed(() => fileTypeBadge(this.fileIdentity()));
+
+  readonly fileTypeChipVariant = computed<ChipVariant>(() =>
+    chipVariantForFileType(this.fileTypeDefinition()),
+  );
+
+  readonly fileTypeChipIcon = computed(() => this.fileTypeDefinition().icon);
+
+  readonly showFileTypeChip = computed(
+    () => (this.fileTypeChipText()?.length ?? 0) > 0 && this.fileCategory() !== 'image',
+  );
+
+  readonly slotContentObjectPosition = computed(() =>
+    this.usesNativeSlotAspect() ? 'center center' : 'top center',
+  );
+
   constructor() {
     effect(() => {
       this.mediaIdentity();
-      this.mediaAspectRatio.set('1');
+      const hint = this.registryAspectRatioHint();
+      this.mediaAspectRatio.set(hint != null ? String(hint) : '1');
     });
   }
 
@@ -82,6 +131,9 @@ export class MediaItemComponent {
   }
 
   onMediaAspectRatioChange(ratio: number): void {
+    if (!this.usesNativeSlotAspect()) {
+      return;
+    }
     if (!Number.isFinite(ratio) || ratio <= 0) {
       return;
     }

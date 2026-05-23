@@ -372,6 +372,23 @@ Mandatory rule:
 - `icon-only` media: shell remains square-aligned with rendered media box.
 - Hover/select/click hit areas remain bound to visible media frame after ratio change.
 
+## File-type aspect ratio policy
+
+Registry lookup via `mediaFileIdentityFromRecord` (see [media-file-identity.md](../../service/media-download-service/media-file-identity.md)).
+
+| Registry `aspectRatio.type` | Slot ratio before bitmap loads | After bitmap loads |
+| --- | --- | --- |
+| `fixed` (PDF, Office families) | `width / height` from definition | Unchanged |
+| `native` (photos) | `1` until image metadata | `aspectRatioChange` from `onload` |
+| `free` | `1` (square) | Stays `1` unless type reclassified |
+| `unknown` category | `1` (square) | Stays `1` |
+
+`MediaItem` passes `[aspectRatio]` hint to `MediaDisplay`; non-native types use `object-position: top center` for bitmap paint.
+
+## File-type chip (Phase 2)
+
+Non-image tiles show `app-chip` (lower-right) with registry badge text and `chipVariantForFileType`. Images omit the chip.
+
 ## Canonical Name Registry Gate
 
 - Every component name used in this spec MUST match a canonical entry in glossary/registry.

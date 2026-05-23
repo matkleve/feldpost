@@ -9,13 +9,14 @@
 
 ### Document First-Page Thumbnail Generation
 
-Document uploads can produce a generated first-page thumbnail path used by media consumers.
+Client v1 (Phase 1b): `MediaThumbnailPersistenceService` writes the **master raster** to existing `thumbnail_path` after upload finalize (PDF + photos).
 
-- Generation trigger: after successful document upload and record persist.
-- Generation output: storage path (for example `document_preview_path`) pointing to first-page rasterized preview.
-- Retrieval path: media delivery orchestrator resolves this path before icon fallback for eligible slot sizes.
-- Failure mode: upload remains successful; preview path stays null and consumer falls back to deterministic icon/no-media rendering.
-- Provider model: generation may run via edge function/service worker pipeline using pluggable renderer libraries/services (for example PDF renderer and office-to-preview converter).
+- Generation trigger: after successful upload and record persist (`emitCompletion` → `persistUploadJobThumbnailIfNeeded`).
+- Generation output: `thumbnail_path` in `media` bucket (`{org}/{user}/{uuid}_thumb.webp` for PDF; `{uuid}_thumb.jpg` for photos per glossary).
+- Master spec: 512px long-edge WebP ~0.85 `contain` on neutral pad (documents); 128×128 JPEG cover (photos until glossary aligned).
+- Retrieval: `MediaDownloadService` signs `thumbnail_path` at `thumb` / `marker` tiers only for grid tiles.
+- Failure mode: upload remains successful; `thumbnail_path` stays null → grid `icon-only` (v1 Office) per delivery matrix.
+- v2 Office: external converter worker + `preview_generation_status` — [media-preview-converter ADR](../../../architecture/media-preview-converter.md) (blocked until ADR merge).
 
 ### Standortaufloesung: Algorithmus GPS vs. Titel
 

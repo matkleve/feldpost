@@ -11,7 +11,13 @@
     (transitionend)="onLayerTransitionEnd($event, 'staged-content')"
   >
     @if (stagedContentUrl()) {
-      <img class="media-display__image" [src]="stagedContentUrl()" alt="" aria-hidden="true" />
+      <img
+        class="media-display__image"
+        [src]="stagedContentUrl()"
+        alt=""
+        aria-hidden="true"
+        [style.object-position]="contentObjectPosition()"
+      />
     }
   </div>
 
@@ -26,6 +32,7 @@
         class="media-display__image"
         [src]="resolvedUrl()"
         [alt]="alt()"
+        [style.object-position]="contentObjectPosition()"
         (load)="onContentImageLoad($event)"
       />
     }

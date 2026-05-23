@@ -378,6 +378,32 @@ Forbidden shortcuts:
 | image/video                           | Lower tier bitmap allowed | Higher tier bitmap requested        | No geometry jump, deterministic fade sequence              |
 | document-like (`pdf`, `ppt`, similar) | icon-only representation  | first-page thumbnail representation | Deterministic branch selection, no unstable fallback loops |
 
+### v1 delivery state matrix (`toDisplayDeliveryState`)
+
+Grid tiles in **ItemGrid** only sign **`thumbnail_path`** for non-images (never raw PDF/Office bytes in `<img>`).
+
+| Condition | Delivery `state` | Network |
+| --- | --- | --- |
+| `image` / `video` | Existing path | Sign per tier |
+| Non-image, slot &lt; 8rem | `icon-only` | None |
+| Non-image, `thumbnail_path` set, sign in flight | `loading` | Sign thumb only |
+| Non-image, `thumbnail_path` set, cached URL | `loaded` | None |
+| Non-image, no thumb, v1 Office / spreadsheet / presentation / unknown | `icon-only` immediately | None |
+| Non-image, no thumb, PDF + active `setLocalUrl` | `loaded` / brief `loading` | Local / sign |
+| Non-image, no thumb, PDF, no local blob | `icon-only` | None |
+
+`resolvePreview` / `requestPreviewIfKnown` MUST NOT run when `resolvePreviewTarget` returns `null` (G3 unit test).
+
+v2 rows (`preview_generation_status`): see [media-preview-converter ADR](../../../../architecture/media-preview-converter.md).
+
+File identity: [media-file-identity.md](./media-file-identity.md).
+
+### Preview resolution (generate once, deliver many)
+
+- **Master raster:** one object per item in `thumbnail_path` (512px long-edge WebP for documents; photos 128×128 JPEG until glossary aligned).
+- **Delivery tiers:** `marker` 80×80, `thumb` 256×256, `full` none — applied at sign time via `SignedUrlCacheAdapter` (no per-upload 80/256/512 files).
+- **Writer:** `MediaThumbnailPersistenceService` is the sole client writer of `thumbnail_path`.
+
 ### Resize and Tier Reconciliation Rule
 
 - Slot-size driven tier recalculation must be allowed after initial non-idle states.
