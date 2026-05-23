@@ -30,3 +30,63 @@
   white-space: normal;
   word-break: break-word;
 }
+
+// Internet section header — back | title | forward
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+.media-location-add-search__internet-header {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+// Fixed-width slot for back/forward icon buttons
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+.media-location-add-search__internet-nav-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  min-width: 1.5rem;
+}
+
+// Compact back/forward affordances in section header row
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+.media-location-add-search__internet-nav-btn {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+}
+
+// Section label beside back — no extra top padding when in header row
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+.media-location-add-search__internet-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 0;
+}
+
+// Calm opacity pulse while Internet rows refresh in place
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+@keyframes media-location-internet-result-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@layer states {
+  // Stable state: loading refresh — prior Internet hits pulse until new set arrives
+  // @see docs/specs/ui/media-detail/media-detail-location-section.md
+  .media-location-add-search__result-item--pulse {
+    animation: media-location-internet-result-pulse 1.1s var(--motion-ease-out) infinite;
+    pointer-events: none;
+  }
+}

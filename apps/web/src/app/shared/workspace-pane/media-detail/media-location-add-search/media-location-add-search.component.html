@@ -91,8 +91,42 @@
           }
 
           @if (placeSuggestions().length > 0 || loadingPlaces()) {
-            <div class="address-search__section-label">
-              {{ t('location.dropdown.section.internet', 'Internet') }}
+            <div class="media-location-add-search__internet-header">
+              <div class="media-location-add-search__internet-nav-slot">
+                @if (canGoBackInternet()) {
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon"
+                    class="media-location-add-search__internet-nav-btn"
+                    type="button"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="goBackInternet($event)"
+                    [attr.aria-label]="t('location.dropdown.internet.back', 'Back to previous Internet results')"
+                  >
+                    <span class="material-icons" aria-hidden="true">arrow_back</span>
+                  </button>
+                }
+              </div>
+              <div class="address-search__section-label media-location-add-search__internet-label">
+                {{ t('location.dropdown.section.internet', 'Internet') }}
+              </div>
+              <div class="media-location-add-search__internet-nav-slot">
+                @if (canGoForwardInternet()) {
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="icon"
+                    class="media-location-add-search__internet-nav-btn"
+                    type="button"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="goForwardInternet($event)"
+                    [attr.aria-label]="t('location.dropdown.internet.forward', 'Forward to newer Internet results')"
+                  >
+                    <span class="material-icons" aria-hidden="true">arrow_forward</span>
+                  </button>
+                }
+              </div>
             </div>
             @if (loadingPlaces() && placeSuggestions().length === 0) {
               <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
@@ -100,6 +134,7 @@
             @for (c of placeSuggestions(); track c.id) {
               <button
                 class="address-search__result-item"
+                [class.media-location-add-search__result-item--pulse]="internetResultsRefreshing()"
                 type="button"
                 role="option"
                 (mousedown)="$event.preventDefault()"

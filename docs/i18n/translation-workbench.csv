@@ -954,6 +954,8 @@ location.addSearch.aria,Add or search for an address,media-detail location add s
 location.dropdown.section.results,Results,media-detail location add dropdown section,Results,Ergebnisse,Risultati
 location.dropdown.section.otherMedia,Other media,media-detail location add dropdown section,Other media,Andere Medien,Altri media
 location.dropdown.section.internet,Internet,media-detail location add dropdown section,Internet,Internet,Internet
+location.dropdown.internet.back,Back to previous Internet results,media-detail location add search Internet section back button aria-label,Back to previous Internet results,Zurueck zu vorherigen Internet-Ergebnissen,Torna ai risultati Internet precedenti
+location.dropdown.internet.forward,Forward to newer Internet results,media-detail location add search Internet section forward button aria-label,Forward to newer Internet results,Vor zu neueren Internet-Ergebnissen,Avanti a risultati Internet piu recenti
 location.dropdown.section.addNew,New address,media-detail location add dropdown section heading for create row,New address,Neue Adresse,Nuovo indirizzo
 location.dropdown.addNew,"Add new Address: ""{query}""",media-detail location add dropdown create row aria-label,Add new Address: "{query}",Neue Adresse hinzufuegen: "{query}",Aggiungi nuovo indirizzo: "{query}"
 location.listFilter.placeholder,Filter locations...,media-detail location list filter placeholder,Filter locations...,Standorte filtern...,Filtra posizioni...

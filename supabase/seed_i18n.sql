@@ -29608,6 +29608,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.internet.back', 'Back to previous Internet results', 'en', 'media-detail location add search Internet section back button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Back to previous Internet results', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.internet.back'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zurueck zu vorherigen Internet-Ergebnissen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.internet.back'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Torna ai risultati Internet precedenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.internet.back'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.internet.forward', 'Forward to newer Internet results', 'en', 'media-detail location add search Internet section forward button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Forward to newer Internet results', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.internet.forward'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Vor zu neueren Internet-Ergebnissen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.internet.forward'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Avanti a risultati Internet piu recenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.internet.forward'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'location.dropdown.section.addNew', 'New address', 'en', 'media-detail location add dropdown section heading for create row')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

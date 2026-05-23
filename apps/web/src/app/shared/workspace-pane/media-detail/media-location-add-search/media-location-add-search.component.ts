@@ -93,6 +93,19 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   readonly loadingPlaces = signal(false);
   readonly focusedIndex = signal(-1);
 
+  /** Prior Internet result sets while dropdown stays open (newest at end). */
+  private readonly internetHistoryStack = signal<SearchCandidate[][]>([]);
+  /** Internet sets navigated past via back (newest at end). */
+  private readonly internetForwardStack = signal<SearchCandidate[][]>([]);
+
+  readonly canGoBackInternet = computed(() => this.internetHistoryStack().length > 0);
+  readonly canGoForwardInternet = computed(() => this.internetForwardStack().length > 0);
+
+  /** Pulse Internet rows when refreshing while previous hits remain visible. */
+  readonly internetResultsRefreshing = computed(
+    () => this.loadingPlaces() && this.placeSuggestions().length > 0,
+  );
+
   /** Template ref `#searchInput` — source of truth for typed text on `(input)`. */
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   /** Template ref `#addressCenter` — dropdown anchors to this element’s width/position. */
@@ -189,6 +202,8 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.query.set('');
     this.otherMediaSuggestions.set([]);
     this.placeSuggestions.set([]);
+    this.internetHistoryStack.set([]);
+    this.internetForwardStack.set([]);
     this.focusedIndex.set(-1);
     this.clearGeocoder();
     this.searchSub?.unsubscribe();
@@ -260,6 +275,32 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.close();
   }
 
+  /** Restore the previous Internet result set (stack pop). */
+  goBackInternet(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const stack = this.internetHistoryStack();
+    if (stack.length === 0) return;
+    this.clearGeocoder();
+    this.pushInternetForwardSnapshot();
+    this.placeSuggestions.set(stack[stack.length - 1] ?? []);
+    this.internetHistoryStack.set(stack.slice(0, -1));
+    this.cdr.detectChanges();
+  }
+
+  /** Restore the next Internet result set after back (forward stack pop). */
+  goForwardInternet(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const stack = this.internetForwardStack();
+    if (stack.length === 0) return;
+    this.clearGeocoder();
+    this.pushInternetBackSnapshot();
+    this.placeSuggestions.set(stack[stack.length - 1] ?? []);
+    this.internetForwardStack.set(stack.slice(0, -1));
+    this.cdr.detectChanges();
+  }
+
   async applyInternetCandidate(candidate: SearchCandidate): Promise<void> {
     if (candidate.family !== 'geocoder' && candidate.family !== 'db-address') {
       return;
@@ -283,6 +324,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   }
 
   private runGeocoderDebounced(q: string): void {
+    this.pushInternetHistorySnapshot();
     this.clearGeocoder();
     if (!q.trim()) {
       this.placeSuggestions.set([]);
@@ -307,6 +349,23 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.geocoderSub?.unsubscribe();
     this.geocoderSub = null;
     this.loadingPlaces.set(false);
+  }
+
+  private pushInternetHistorySnapshot(): void {
+    this.pushInternetBackSnapshot();
+    this.internetForwardStack.set([]);
+  }
+
+  private pushInternetBackSnapshot(): void {
+    const current = this.placeSuggestions();
+    if (current.length === 0) return;
+    this.internetHistoryStack.update((stack) => [...stack, [...current]]);
+  }
+
+  private pushInternetForwardSnapshot(): void {
+    const current = this.placeSuggestions();
+    if (current.length === 0) return;
+    this.internetForwardStack.update((stack) => [...stack, [...current]]);
   }
 
   private dbSearchTerm(displayQuery: string): string {
