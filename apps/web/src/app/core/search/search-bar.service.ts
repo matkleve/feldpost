@@ -439,6 +439,32 @@ export class SearchBarService {
     const strictCandidates = await this.fetchGeocoderCandidates(normalizedQuery, context);
 
     if (strictCandidates.length > 0) {
+      const needsRicherLabels = strictCandidates.some((candidate) => !candidate.label.includes(','));
+      if (!needsRicherLabels) {
+        return strictCandidates;
+      }
+
+      const cityHint = await this.resolveContextCityHint(context);
+      if (cityHint) {
+        for (const hintedQuery of this.buildCityHintQueries(normalizedQuery, cityHint)) {
+          const hintedCandidates = await this.fetchGeocoderCandidates(hintedQuery, context);
+          const refinedCandidates = hintedCandidates.filter(
+            (candidate) =>
+              this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
+              candidate.label.includes(','),
+          );
+          if (refinedCandidates.length > 0) {
+            logSearchEvent('geocoder-city-hint-enrich', {
+              query: normalizedQuery,
+              cityHint,
+              hintedQuery,
+              count: refinedCandidates.length,
+            });
+            return this.mergeGeocoderCandidateSets(strictCandidates, refinedCandidates);
+          }
+        }
+      }
+
       return strictCandidates;
     }
 
@@ -480,6 +506,25 @@ export class SearchBarService {
     }
 
     return strictCandidates;
+  }
+
+  private mergeGeocoderCandidateSets(
+    primary: SearchAddressCandidate[],
+    enriched: SearchAddressCandidate[],
+  ): SearchAddressCandidate[] {
+    const merged = new Map<string, SearchAddressCandidate>();
+    for (const candidate of [...enriched, ...primary]) {
+      const key = `${candidate.label.toLowerCase()}::${candidate.lat.toFixed(5)}::${candidate.lng.toFixed(5)}`;
+      const existing = merged.get(key);
+      const prefer =
+        !existing ||
+        (candidate.label.includes(',') && !existing.label.includes(',')) ||
+        (candidate.score ?? 0) > (existing.score ?? 0);
+      if (prefer) {
+        merged.set(key, candidate);
+      }
+    }
+    return [...merged.values()];
   }
 
   private buildCityHintQueries(normalizedQuery: string, cityHint: string): string[] {
@@ -635,20 +680,17 @@ export class SearchBarService {
     if (name.length > 0) {
       const nameScore = computeGeocoderTextScore(name, formatted, query);
       const formattedScore = computeGeocoderTextScore(formatted, formatted, query);
-      if (nameScore > formattedScore + 0.05) {
+      const roadScore = computeGeocoderTextScore(road, formatted, query);
+      if (nameScore > formattedScore + 0.05 && nameScore >= roadScore) {
         return name;
       }
     }
 
-    if (
-      road.length > 0 &&
-      formatted.length > road.length &&
-      formatted.toLowerCase().includes(road.toLowerCase())
-    ) {
+    if (road.length > 0 && formatted.length > 0) {
       return formatted;
     }
 
-    return road || formatted || name;
+    return formatted || road || name;
   }
 
   private persistRecentSearches(recents: SearchRecentCandidate[]): void {

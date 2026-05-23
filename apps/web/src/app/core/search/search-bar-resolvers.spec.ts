@@ -617,4 +617,260 @@ describe('fetchGeocoderCandidates', () => {
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].label.toLowerCase()).toContain('denisgasse');
   });
+
+  it('fills internet results with same-street house numbers sharing the typed digit prefix', async () => {
+    const searchCalls: string[] = [];
+    const hitsByQuery: Record<string, GeocoderSearchResult[]> = {
+      'denisgasse 4': [
+        {
+          lat: 48.23,
+          lng: 16.37,
+          displayName: 'Denisgasse 4, 1200 Wien',
+          name: null,
+          importance: 0.7,
+          address: {
+            road: 'Denisgasse',
+            house_number: '4',
+            city: 'Wien',
+            postcode: '1200',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ],
+      denisgasse: [
+        {
+          lat: 48.23,
+          lng: 16.37,
+          displayName: 'Denisgasse 4, 1200 Wien',
+          name: null,
+          importance: 0.7,
+          address: {
+            road: 'Denisgasse',
+            house_number: '4',
+            city: 'Wien',
+            postcode: '1200',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.231,
+          lng: 16.371,
+          displayName: 'Denisgasse 40, 1200 Wien',
+          name: null,
+          importance: 0.65,
+          address: {
+            road: 'Denisgasse',
+            house_number: '40',
+            city: 'Wien',
+            postcode: '1200',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.232,
+          lng: 16.372,
+          displayName: 'Denisgasse 41, 1200 Wien',
+          name: null,
+          importance: 0.64,
+          address: {
+            road: 'Denisgasse',
+            house_number: '41',
+            city: 'Wien',
+            postcode: '1200',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.233,
+          lng: 16.373,
+          displayName: 'Denisgasse 42, 1200 Wien',
+          name: null,
+          importance: 0.63,
+          address: {
+            road: 'Denisgasse',
+            house_number: '42',
+            city: 'Wien',
+            postcode: '1200',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.24,
+          lng: 16.38,
+          displayName: 'Denisgasse 14, 1200 Wien',
+          name: null,
+          importance: 0.62,
+          address: {
+            road: 'Denisgasse',
+            house_number: '14',
+            city: 'Wien',
+            postcode: '1200',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ],
+    };
+
+    const geocodingService = {
+      search: async (query: string) => {
+        searchCalls.push(query);
+        return hitsByQuery[query] ?? [];
+      },
+    };
+
+    const results = await fetchGeocoderCandidates(
+      geocodingService as never,
+      'denisgasse 4',
+      { countryCodes: ['at'], activeMarkerCentroid: { lat: 48.2, lng: 16.37 } },
+      4,
+      (result, query, index): SearchAddressCandidate => ({
+        id: `geo-${query}-${index}`,
+        family: 'geocoder',
+        label: `${result.address?.road ?? ''} ${result.address?.house_number ?? ''}, ${result.address?.city ?? ''}`.trim(),
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(searchCalls).toContain('denisgasse');
+    expect(results.length).toBe(4);
+    expect(results.map((item) => item.label)).toEqual([
+      'Denisgasse 4, Wien',
+      'Denisgasse 40, Wien',
+      'Denisgasse 41, Wien',
+      'Denisgasse 42, Wien',
+    ]);
+  });
+
+  it('probes common street suffixes for short AT prefixes like "denis"', async () => {
+    const searchCalls: string[] = [];
+    const geocodingService = {
+      search: async (query: string) => {
+        searchCalls.push(query);
+        if (query === 'denis') {
+          return [
+            {
+              lat: 48.2,
+              lng: 16.37,
+              displayName: 'Denis, Wien, Österreich',
+              name: 'Denis',
+              importance: 0.55,
+              address: { city: 'Wien', country: 'Österreich', country_code: 'at' },
+            },
+          ] as GeocoderSearchResult[];
+        }
+        if (query !== 'denisgasse') return [];
+        return [
+          {
+            lat: 48.185,
+            lng: 16.365,
+            displayName: 'Denisgasse, Favoriten, Wien, Österreich',
+            name: 'Denis',
+            importance: 0.7,
+            address: {
+              road: 'Denisgasse',
+              city_district: 'Favoriten',
+              postcode: '1200',
+              city: 'Wien',
+              country: 'Österreich',
+              country_code: 'at',
+            },
+          },
+        ] as GeocoderSearchResult[];
+      },
+    };
+
+    const results = await fetchGeocoderCandidates(
+      geocodingService as never,
+      'denis',
+      { countryCodes: ['at'], activeMarkerCentroid: { lat: 48.2, lng: 16.37 } },
+      4,
+      (result, query, index): SearchAddressCandidate => ({
+        id: `geo-${query}-${index}`,
+        family: 'geocoder',
+        label: `${result.address?.road ?? ''}, ${result.address?.city_district ?? '1200 Wien'}, ${result.address?.country ?? ''}`,
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(searchCalls).toContain('denisgasse');
+    expect(results[0]?.label.toLowerCase()).toContain('denisgasse');
+  });
+
+  it('expands a full street query into multiple house-level internet rows with locality', async () => {
+    const geocodingService = {
+      search: async () =>
+        [
+          {
+            lat: 48.23,
+            lng: 16.37,
+            displayName: 'Denisgasse, Wien, Österreich',
+            name: 'Denisgasse',
+            importance: 0.5,
+            address: { road: 'Denisgasse' },
+          },
+          {
+            lat: 48.231,
+            lng: 16.371,
+            displayName: 'Denisgasse 4, 1200 Wien, Österreich',
+            name: null,
+            importance: 0.7,
+            address: {
+              road: 'Denisgasse',
+              house_number: '4',
+              postcode: '1200',
+              city: 'Wien',
+              country: 'Österreich',
+              country_code: 'at',
+            },
+          },
+          {
+            lat: 48.232,
+            lng: 16.372,
+            displayName: 'Denisgasse 40, 1200 Wien, Österreich',
+            name: null,
+            importance: 0.65,
+            address: {
+              road: 'Denisgasse',
+              house_number: '40',
+              postcode: '1200',
+              city: 'Wien',
+              country: 'Österreich',
+              country_code: 'at',
+            },
+          },
+        ] as GeocoderSearchResult[],
+    };
+
+    const results = await fetchGeocoderCandidates(
+      geocodingService as never,
+      'denisgasse',
+      { countryCodes: ['at'], activeMarkerCentroid: { lat: 48.2, lng: 16.37 } },
+      4,
+      (result, _query, index): SearchAddressCandidate => ({
+        id: `geo-${index}`,
+        family: 'geocoder',
+        label:
+          result.address?.house_number != null
+            ? `${result.address.road} ${result.address.house_number}, ${result.address.postcode} ${result.address.city}, ${result.address.country}`
+            : (result.displayName ?? ''),
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(results.length).toBeGreaterThan(1);
+    expect(results[0].label).toContain(',');
+    expect(results.some((item) => item.label.includes('40'))).toBe(true);
+  });
 });

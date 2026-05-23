@@ -11,7 +11,13 @@ import type {
 } from './search.models';
 import { SEARCH_TUNING_SYSTEM_DEFAULTS } from './search-tuning.defaults';
 import type { SearchTuningConfig } from './search-tuning.types';
-import { computeTextMatchScore, isSpecificStreetQuery } from './search-query';
+import {
+  computeTextMatchScore,
+  houseNumberSharesQueryPrefix,
+  isSpecificStreetQuery,
+  parseStreetAndHouseNumber,
+  type StreetHouseQuery,
+} from './search-query';
 import {
   deduplicateGeocoderCandidatesByLabel,
   distanceToSearchContextMeters,
@@ -157,7 +163,15 @@ export async function fetchGeocoderCandidates(
   });
 
   if (!shouldRetry) {
-    return constrainedCandidates;
+    return finalizeGeocoderCandidates(
+      geocodingService,
+      constrainedCandidates,
+      normalizedQuery,
+      context,
+      maxGeocoderResults,
+      toCandidate,
+      tuning,
+    );
   }
 
   logGeocoderResolverStage('unconstrained-request', {
@@ -191,16 +205,400 @@ export async function fetchGeocoderCandidates(
     ),
   ).slice(0, tuning.resolver.maxGeocoderResults);
 
+  return finalizeGeocoderCandidates(
+    geocodingService,
+    merged,
+    normalizedQuery,
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+}
+
+const STREET_SUFFIX_PROBE_SUFFIXES = ['gasse', 'strasse', 'weg', 'platz', 'allee'] as const;
+
+async function finalizeGeocoderCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  const withHouseNumbers = await expandHouseNumberSiblingCandidates(
+    geocodingService,
+    primary,
+    normalizedQuery,
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+  const withStreetHouses = await expandStreetLevelHouseCandidates(
+    geocodingService,
+    withHouseNumbers,
+    normalizedQuery,
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+  const results = await expandStreetSuffixProbeCandidates(
+    geocodingService,
+    withStreetHouses,
+    normalizedQuery,
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+
   logGeocoderResolverStage('final-ranked', {
     query: normalizedQuery,
-    top: merged.slice(0, 3).map((candidate) => ({
+    top: results.slice(0, 3).map((candidate) => ({
       label: candidate.label,
       score: candidate.score,
       distanceMeters: distanceToSearchContextMeters(candidate, context),
     })),
   });
 
+  return results;
+}
+
+async function expandHouseNumberSiblingCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  const parsed = parseStreetAndHouseNumber(normalizedQuery);
+  if (!parsed) {
+    return primary;
+  }
+
+  const expansionLimit = Math.max(
+    maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
+    tuning.resolver.shortPrefixLimitFloor,
+  );
+  const streetOptions = buildConstrainedSearchOptions(
+    context,
+    expansionLimit,
+    parsed.street,
+    tuning,
+  );
+
+  logGeocoderResolverStage('house-prefix-expansion-request', {
+    query: normalizedQuery,
+    street: parsed.street,
+    housePrefix: parsed.houseNumber,
+    options: streetOptions,
+  });
+
+  const streetResults = await geocodingService.search(parsed.street, streetOptions);
+  const prefixMatches = streetResults.filter((result) =>
+    geocoderResultMatchesHousePrefix(result, parsed),
+  );
+
+  logGeocoderResolverStage('house-prefix-expansion-response', {
+    query: normalizedQuery,
+    raw: streetResults.length,
+    prefixMatches: prefixMatches.length,
+    labels: prefixMatches.slice(0, 12).map((result) => result.displayName),
+  });
+
+  const expansionCandidates = rankGeocoderCandidates(
+    prefixMatches,
+    normalizedQuery,
+    context,
+    toCandidate,
+    expansionLimit,
+    tuning,
+  );
+
+  const merged = deduplicateGeocoderCandidatesByLabel(
+    sortHouseNumberPrefixCandidates(
+      mergeAndRankCandidates(primary, expansionCandidates, context, normalizedQuery),
+      parsed,
+    ),
+  );
+
   return merged;
+}
+
+function shouldExpandStreetLevelHouses(normalizedQuery: string, tuning: SearchTuningConfig): boolean {
+  if (!isSpecificStreetQuery(normalizedQuery, tuning.query.specificStreetMinLength)) {
+    return false;
+  }
+  if (parseStreetAndHouseNumber(normalizedQuery)) {
+    return false;
+  }
+  const streetSuffixes = [...STREET_SUFFIX_PROBE_SUFFIXES, 'strasse', 'zeile', 'ring'] as const;
+  return streetSuffixes.some((suffix) => normalizedQuery.endsWith(suffix));
+}
+
+async function expandStreetLevelHouseCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  if (!shouldExpandStreetLevelHouses(normalizedQuery, tuning)) {
+    return primary;
+  }
+  if (primary.length === 0) {
+    return primary;
+  }
+
+  const expansionLimit = Math.max(
+    maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
+    tuning.resolver.shortPrefixLimitFloor,
+  );
+  const streetOptions = buildConstrainedSearchOptions(
+    context,
+    expansionLimit,
+    normalizedQuery,
+    tuning,
+  );
+
+  logGeocoderResolverStage('street-house-expansion-request', {
+    query: normalizedQuery,
+    options: streetOptions,
+  });
+
+  const streetResults = await geocodingService.search(normalizedQuery, streetOptions);
+  const sameStreet = streetResults.filter((result) =>
+    geocoderRoadMatchesStreetQuery(result, normalizedQuery),
+  );
+  const withHouseNumbers = sameStreet.filter((result) => result.address?.house_number?.trim());
+  const pool = withHouseNumbers.length >= 2 ? withHouseNumbers : sameStreet;
+
+  logGeocoderResolverStage('street-house-expansion-response', {
+    query: normalizedQuery,
+    raw: streetResults.length,
+    sameStreet: sameStreet.length,
+    withHouseNumbers: withHouseNumbers.length,
+  });
+
+  if (pool.length === 0) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const expansionCandidates = rankGeocoderCandidates(
+    pool,
+    normalizedQuery,
+    context,
+    toCandidate,
+    expansionLimit,
+    tuning,
+  );
+
+  return deduplicateGeocoderCandidatesByLabel(
+    mergeAndRankCandidates(primary, expansionCandidates, context, normalizedQuery),
+  ).slice(0, maxGeocoderResults);
+}
+
+function geocoderRoadMatchesStreetQuery(
+  result: GeocoderSearchResult,
+  streetQuery: string,
+): boolean {
+  const road = result.address?.road?.trim();
+  if (!road) return false;
+
+  const roadNorm = normalizeForLexicalMatch(road);
+  const streetNorm = normalizeForLexicalMatch(streetQuery);
+  return (
+    roadNorm === streetNorm ||
+    roadNorm.startsWith(streetNorm) ||
+    streetNorm.startsWith(roadNorm)
+  );
+}
+
+async function expandStreetSuffixProbeCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  if (!isShortAmbiguousPrefixQuery(normalizedQuery, tuning)) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const countryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
+  if (!countryCodes.includes('at')) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  if (primary.length === 0) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const queryNorm = normalizeForLexicalMatch(normalizedQuery);
+  if (STREET_SUFFIX_PROBE_SUFFIXES.some((suffix) => normalizedQuery.endsWith(suffix))) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  if (primary.some((candidate) => candidateHasStrongStreetPrefixMatch(candidate.label, queryNorm))) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const probeLimit = Math.max(
+    maxGeocoderResults * tuning.resolver.constrainedLimitMultiplier,
+    tuning.resolver.shortPrefixLimitFloor,
+  );
+  const probeQueries = STREET_SUFFIX_PROBE_SUFFIXES.filter(
+    (suffix) => !normalizedQuery.endsWith(suffix),
+  ).map((suffix) => `${normalizedQuery}${suffix}`);
+
+  const probeCandidates: SearchAddressCandidate[] = [];
+  for (const probeQuery of probeQueries) {
+    const options = buildConstrainedSearchOptions(context, probeLimit, probeQuery, tuning);
+    logGeocoderResolverStage('street-suffix-probe-request', {
+      query: normalizedQuery,
+      probeQuery,
+      options,
+    });
+    const probeResults = await geocodingService.search(probeQuery, options);
+    const roadMatches = probeResults.filter((result) =>
+      geocoderRoadStartsWithQuery(result, queryNorm),
+    );
+    logGeocoderResolverStage('street-suffix-probe-response', {
+      query: normalizedQuery,
+      probeQuery,
+      raw: probeResults.length,
+      roadMatches: roadMatches.length,
+    });
+    probeCandidates.push(
+      ...rankGeocoderCandidates(
+        roadMatches,
+        normalizedQuery,
+        context,
+        toCandidate,
+        probeLimit,
+        tuning,
+      ),
+    );
+    if (probeCandidates.some((candidate) => candidateHasStrongStreetPrefixMatch(candidate.label, queryNorm))) {
+      break;
+    }
+  }
+
+  if (probeCandidates.length === 0) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  return deduplicateGeocoderCandidatesByLabel(
+    mergeAndRankCandidates(primary, probeCandidates, context, normalizedQuery),
+  ).slice(0, maxGeocoderResults);
+}
+
+function geocoderRoadStartsWithQuery(result: GeocoderSearchResult, queryNorm: string): boolean {
+  const road = result.address?.road?.trim();
+  if (!road) return false;
+  return normalizeForLexicalMatch(road).startsWith(queryNorm);
+}
+
+function candidateStreetTokenStartsWithQuery(label: string, queryNorm: string): boolean {
+  const streetSegment = label.split(',')[0]?.trim() ?? '';
+  const firstToken = streetSegment.split(/\s+/).find(Boolean) ?? '';
+  return normalizeForLexicalMatch(firstToken).startsWith(queryNorm);
+}
+
+function candidateHasStrongStreetPrefixMatch(label: string, queryNorm: string): boolean {
+  const firstToken = (label.split(',')[0]?.trim() ?? '').split(/\s+/).find(Boolean) ?? '';
+  const tokenNorm = normalizeForLexicalMatch(firstToken);
+  if (!tokenNorm.startsWith(queryNorm)) {
+    return false;
+  }
+  if (label.includes(',')) {
+    return true;
+  }
+  return (
+    tokenNorm.endsWith('gasse') ||
+    tokenNorm.endsWith('strasse') ||
+    tokenNorm.endsWith('weg') ||
+    tokenNorm.endsWith('platz') ||
+    tokenNorm.endsWith('allee')
+  );
+}
+
+function geocoderResultMatchesHousePrefix(
+  result: GeocoderSearchResult,
+  parsed: StreetHouseQuery,
+): boolean {
+  const road = result.address?.road?.trim();
+  if (!road) return false;
+
+  const roadNorm = normalizeForLexicalMatch(road);
+  const streetNorm = normalizeForLexicalMatch(parsed.street);
+  if (roadNorm !== streetNorm && !roadNorm.includes(streetNorm) && !streetNorm.includes(roadNorm)) {
+    return false;
+  }
+
+  const houseNumber = result.address?.house_number?.trim() ?? '';
+  if (!houseNumber) return false;
+
+  return houseNumberSharesQueryPrefix(houseNumber, parsed.houseNumber);
+}
+
+function sortHouseNumberPrefixCandidates(
+  candidates: SearchAddressCandidate[],
+  parsed: StreetHouseQuery,
+): SearchAddressCandidate[] {
+  return [...candidates].sort((left, right) => {
+    const tierDelta = houseNumberMatchTier(left, parsed) - houseNumberMatchTier(right, parsed);
+    if (tierDelta !== 0) return tierDelta;
+    return left.label.localeCompare(right.label);
+  });
+}
+
+function houseNumberMatchTier(candidate: SearchAddressCandidate, parsed: StreetHouseQuery): number {
+  const houseNumber = extractHouseNumberFromCandidateLabel(candidate.label, parsed.street);
+  if (!houseNumber) return 2;
+  if (houseNumber === parsed.houseNumber) return 0;
+  if (houseNumberSharesQueryPrefix(houseNumber, parsed.houseNumber)) return 1;
+  return 2;
+}
+
+function extractHouseNumberFromCandidateLabel(label: string, street: string): string | null {
+  const streetNorm = street.trim().toLowerCase();
+  const labelNorm = label.trim().toLowerCase();
+  const streetIndex = labelNorm.indexOf(streetNorm);
+  if (streetIndex < 0) return null;
+
+  const afterStreet = label.slice(streetIndex + street.length);
+  const match = afterStreet.match(/^\s*[,\s]*(\d+[a-z]?)/i);
+  return match ? match[1].toLowerCase() : null;
 }
 
 function buildConstrainedSearchOptions(
@@ -264,7 +662,11 @@ function rankGeocoderCandidates(
 
   if (lexicalResults.length === 0) return [];
 
-  const ranked = lexicalResults
+  const orderedLexical = isShortAmbiguousPrefixQuery(normalizedQuery, tuning)
+    ? orderGeocoderResultsByRoadPrefix(lexicalResults, normalizedQuery)
+    : lexicalResults;
+
+  const ranked = orderedLexical
     .map((result, index) => toCandidate(result, normalizedQuery, index, context))
     .filter((candidate) => (candidate.score ?? 0) > tuning.resolver.candidateScoreFloor)
     .sort((left, right) => compareCandidateRank(left, right, context, normalizedQuery));
@@ -464,6 +866,11 @@ function compareCandidateRank(
   const rightLocal = isInViewport(right, context.viewportBounds);
   if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
 
+  const queryNorm = normalizeForLexicalMatch(query);
+  const leftRoadPrefix = candidateStreetTokenStartsWithQuery(left.label, queryNorm);
+  const rightRoadPrefix = candidateStreetTokenStartsWithQuery(right.label, queryNorm);
+  if (leftRoadPrefix !== rightRoadPrefix) return leftRoadPrefix ? -1 : 1;
+
   const leftPrefixLeading = startsWithQueryPrefix(left.label, query);
   const rightPrefixLeading = startsWithQueryPrefix(right.label, query);
   if (leftPrefixLeading !== rightPrefixLeading) return leftPrefixLeading ? -1 : 1;
@@ -516,6 +923,25 @@ function isShortAmbiguousPrefixQuery(query: string, tuning: SearchTuningConfig):
     query.length <= tuning.resolver.shortPrefixLenMax &&
     !query.includes(' ')
   );
+}
+
+function orderGeocoderResultsByRoadPrefix(
+  results: GeocoderSearchResult[],
+  query: string,
+): GeocoderSearchResult[] {
+  const queryNorm = normalizeForLexicalMatch(query);
+  const roadMatches: GeocoderSearchResult[] = [];
+  const other: GeocoderSearchResult[] = [];
+
+  for (const result of results) {
+    if (geocoderRoadStartsWithQuery(result, queryNorm)) {
+      roadMatches.push(result);
+    } else {
+      other.push(result);
+    }
+  }
+
+  return roadMatches.length > 0 ? [...roadMatches, ...other] : results;
 }
 
 function mergeAndRankCandidates(

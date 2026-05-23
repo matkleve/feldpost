@@ -23,11 +23,72 @@ export function computeTextMatchScore(label: string, query: string): number {
 
 export function formatGeocoderAddressLabel(result: GeocoderSearchResult): string {
   const addr = result.address;
-  if (!addr) return truncateDisplayName(result.displayName);
+  if (!addr) {
+    return (
+      formatLabelFromGeocoderDisplayName(result.displayName, undefined) ??
+      truncateDisplayName(result.displayName)
+    );
+  }
 
   const city = addr.city || addr.town || addr.village || addr.municipality;
-  const parts = buildAddressParts(addr.road, addr.house_number, addr.postcode, city);
+  const district = extractGeocoderDistrict(addr);
+  const parts = buildAddressParts(
+    addr.road,
+    addr.house_number,
+    addr.postcode,
+    city,
+    district,
+    addr.country,
+  );
+  if (parts?.includes(',')) {
+    return parts;
+  }
+
+  const fromDisplay = formatLabelFromGeocoderDisplayName(result.displayName, addr.road);
+  if (fromDisplay?.includes(',')) {
+    return fromDisplay;
+  }
+
   return parts || truncateDisplayName(result.displayName);
+}
+
+/** Build "Street, Locality, Country" from Nominatim display_name when structured fields are sparse. */
+export function formatLabelFromGeocoderDisplayName(
+  displayName: string,
+  road?: string,
+): string | null {
+  const parts = displayName
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length < 2) return null;
+
+  const streetPart = road?.trim() || parts[0];
+  const country = parts[parts.length - 1];
+  const middle = parts.slice(1, -1);
+  const postcodeCity =
+    middle.find((part) => /\b\d{4,5}\b/.test(part)) ??
+    (middle.length > 0 ? middle[middle.length - 1] : parts[1]);
+  const locality = postcodeCity ?? parts[1];
+
+  return [streetPart, locality, country].filter(Boolean).join(', ');
+}
+
+export function extractGeocoderDistrict(
+  addr: NonNullable<GeocoderSearchResult['address']>,
+): string | null {
+  const district =
+    addr.city_district?.trim() ||
+    addr.suburb?.trim() ||
+    addr.borough?.trim() ||
+    addr.quarter?.trim() ||
+    null;
+  if (district) return district;
+
+  const city = (addr.city || addr.town || addr.village || addr.municipality)?.trim() || null;
+  const postcode = addr.postcode?.trim() || null;
+  if (postcode && city) return `${postcode} ${city}`;
+  return city;
 }
 
 function buildAddressParts(
@@ -35,13 +96,20 @@ function buildAddressParts(
   number?: string,
   postcode?: string,
   city?: string,
+  district?: string | null,
+  country?: string,
 ): string | null {
   const streetPart = street ? (number ? `${street} ${number}` : street) : null;
-  const cityPart = postcode && city ? `${postcode} ${city}` : city || null;
+  const locality =
+    district?.trim() ||
+    (postcode && city ? `${postcode} ${city}` : city?.trim() || null);
+  const countryPart = country?.trim() || null;
 
-  if (streetPart && cityPart) return `${streetPart}, ${cityPart}`;
-  if (streetPart) return streetPart;
-  return cityPart;
+  const segments = [streetPart, locality, countryPart].filter(
+    (segment): segment is string => !!segment,
+  );
+  if (segments.length === 0) return null;
+  return segments.join(', ');
 }
 
 function truncateDisplayName(displayName: string): string {
@@ -79,6 +147,34 @@ export function normalizeSearchQuery(query: string): string {
       .replace(/\s+/g, ' ')
       .trim(),
   );
+}
+
+export interface StreetHouseQuery {
+  street: string;
+  houseNumber: string;
+}
+
+/** Street + trailing house number (e.g. `denisgasse 4` → Denisgasse / 4). */
+export function parseStreetAndHouseNumber(normalizedQuery: string): StreetHouseQuery | null {
+  const trimmed = normalizedQuery.trim();
+  if (!trimmed.includes(' ')) return null;
+
+  const match = trimmed.match(/^(.+?)\s+(\d+[a-z]?)$/i);
+  if (!match) return null;
+
+  const street = match[1].trim();
+  const houseNumber = match[2].trim().toLowerCase();
+  if (street.length < 3 || !houseNumber) return null;
+
+  return { street, houseNumber };
+}
+
+/** House numbers that share a digit prefix with the query (4 → 4, 40, 41; not 14). */
+export function houseNumberSharesQueryPrefix(houseNumber: string, queryHouseNumber: string): boolean {
+  const hn = houseNumber.trim().toLowerCase();
+  const query = queryHouseNumber.trim().toLowerCase();
+  if (!hn || !query) return false;
+  return hn === query || hn.startsWith(query);
 }
 
 export function buildFallbackQueries(normalizedQuery: string): string[] {

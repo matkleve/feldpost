@@ -153,7 +153,7 @@ describe('SearchBarService', () => {
   // ── Address Formatting ───────────────────────────────────────────────
 
   describe('formatAddressLabel', () => {
-    it('formats full address as "Street Number, Postcode City"', () => {
+    it('formats full address as "Street Number, Postcode City, Country"', () => {
       const result = service.formatAddressLabel({
         lat: 48.17,
         lng: 16.38,
@@ -165,9 +165,10 @@ describe('SearchBarService', () => {
           house_number: '18',
           postcode: '1100',
           city: 'Wien',
+          country: 'Österreich',
         },
       });
-      expect(result).toBe('Schleiergasse 18, 1100 Wien');
+      expect(result).toBe('Schleiergasse 18, 1100 Wien, Österreich');
     });
 
     it('formats without house number', () => {
@@ -177,9 +178,46 @@ describe('SearchBarService', () => {
         displayName: 'verbose',
         name: null,
         importance: 0.5,
-        address: { road: 'Schleiergasse', postcode: '1100', city: 'Wien' },
+        address: {
+          road: 'Schleiergasse',
+          postcode: '1100',
+          city: 'Wien',
+          country: 'Österreich',
+        },
       });
-      expect(result).toBe('Schleiergasse, 1100 Wien');
+      expect(result).toBe('Schleiergasse, 1100 Wien, Österreich');
+    });
+
+    it('fills locality from display_name when structured address is sparse', () => {
+      const result = service.formatAddressLabel({
+        lat: 48.185,
+        lng: 16.365,
+        displayName: 'Denisgasse, Favoriten, 1200 Wien, Österreich',
+        name: 'Denisgasse',
+        importance: 0.55,
+        address: {
+          road: 'Denisgasse',
+        },
+      });
+      expect(result).toBe('Denisgasse, 1200 Wien, Österreich');
+    });
+
+    it('prefers district over postcode when both are present', () => {
+      const result = service.formatAddressLabel({
+        lat: 48.17,
+        lng: 16.38,
+        displayName: 'verbose',
+        name: null,
+        importance: 0.5,
+        address: {
+          road: 'Denisgasse',
+          city_district: 'Favoriten',
+          postcode: '1100',
+          city: 'Wien',
+          country: 'Österreich',
+        },
+      });
+      expect(result).toBe('Denisgasse, Favoriten, Österreich');
     });
 
     it('falls back to city only', () => {
@@ -319,7 +357,7 @@ describe('SearchBarService', () => {
       const results = await firstValueFrom(service.resolveGeocoder('schleiergasse', {}));
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].family).toBe('geocoder');
-      expect(results[0].label).toBe('Schleiergasse 18, 1100 Wien');
+      expect(results[0].label).toBe('Schleiergasse 18, 1100 Wien, Austria');
     });
 
     it('passes countrycodes and viewbox when context has them', async () => {
@@ -451,13 +489,14 @@ describe('SearchBarService', () => {
             house_number: '18',
             postcode: '1100',
             city: 'Wien',
+            country: 'Österreich',
           },
         },
       ]);
 
       const results = await firstValueFrom(service.resolveGeocoder('kuratorium', {}));
       expect(results[0].label).toBe('Kuratorium für Verkehrssicherheit');
-      expect(results[0].secondaryLabel).toBe('Schleiergasse 18, 1100 Wien');
+      expect(results[0].secondaryLabel).toBe('Schleiergasse 18, 1100 Wien, Österreich');
     });
 
     it('does not retry fallback queries when strict geocoder hits are filtered out', async () => {
@@ -560,9 +599,9 @@ describe('SearchBarService', () => {
 
       expect(results.length).toBeGreaterThan(0);
       expect(results.slice(0, 3).map((item) => item.label)).toContain(
-        'Wilhelminenstrasse 85, 1160 Wien',
+        'Wilhelminenstrasse 85, 1160 Wien, Austria',
       );
-      expect(results[0].label).toBe('Wilhelminenstrasse 85, 1160 Wien');
+      expect(results[0].label).toBe('Wilhelminenstrasse 85, 1160 Wien, Austria');
     });
 
     it('broadens city-hint retries with query stems and keeps only original-prefix matches', async () => {
@@ -615,7 +654,7 @@ describe('SearchBarService', () => {
       );
 
       expect(results.length).toBe(1);
-      expect(results[0].label).toBe('Wilhelminenstrasse, Vienna');
+      expect(results[0].label).toBe('Wilhelminenstrasse, Vienna, Austria');
       expect(
         geocodingMock.search.mock.calls.some(
           ([query]) =>

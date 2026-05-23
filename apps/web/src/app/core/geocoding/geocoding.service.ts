@@ -89,6 +89,10 @@ export interface GeocoderSearchResult {
     town?: string;
     village?: string;
     municipality?: string;
+    city_district?: string;
+    suburb?: string;
+    borough?: string;
+    quarter?: string;
     country?: string;
   } | null;
 }
@@ -502,6 +506,10 @@ export class GeocodingService {
             town: hit.address.town,
             village: hit.address.village,
             municipality: hit.address.municipality,
+            city_district: hit.address.city_district,
+            suburb: hit.address.suburb,
+            borough: hit.address.borough,
+            quarter: hit.address.quarter,
             country: hit.address.country,
           }
         : null,
