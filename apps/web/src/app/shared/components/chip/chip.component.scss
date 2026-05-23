@@ -211,18 +211,3 @@
   }
 }
 
-// Upload dropzone hover — decorative file-type chip ink follows panel primary accent.
-// @see docs/specs/component/media/file-type-chips.md
-:host-context(.upload-panel__dropzone:hover),
-:host-context(.upload-panel__dropzone:focus-within),
-:host-context(.upload-panel__dropzone--dragging) {
-  .chip--filetype-image,
-  .chip--filetype-video,
-  .chip--filetype-document,
-  .chip--filetype-pdf,
-  .chip--filetype-spreadsheet,
-  .chip--filetype-presentation {
-    color: var(--primary);
-    --chip-ink: var(--primary);
-  }
-}

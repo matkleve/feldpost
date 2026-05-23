@@ -68,12 +68,34 @@ describe('UploadPanelComponent workspace detail click interactions', () => {
     });
 
     fakeManager._jobsSignal.set([job]);
+    component.laneHandlers.setSelectedLane('uploaded');
     fixture.detectChanges();
 
     const rowMain = fixture.debugElement.query(By.css('.upload-panel__row-main-action'));
     (rowMain.nativeElement as HTMLElement).click();
 
     expect(detailSpy).toHaveBeenCalledWith('img-123');
+  });
+
+  it('emits detailRequested when clicking duplicate issue row with existing media', async () => {
+    const { fixture, component, fakeManager } = await setupUploadPanel();
+    const detailSpy = vi.spyOn(component.detailRequested, 'emit');
+
+    fakeManager._jobsSignal.set([
+      makeUploadJob({
+        phase: 'skipped',
+        existingMediaId: 'img-existing-99',
+        statusLabel: 'Already uploaded',
+      }),
+    ]);
+    component.laneHandlers.setSelectedLane('issues');
+    fixture.detectChanges();
+
+    const rowMain = fixture.debugElement.query(By.css('.upload-panel__row-main-action'));
+    expect(rowMain).toBeTruthy();
+    (rowMain.nativeElement as HTMLElement).click();
+
+    expect(detailSpy).toHaveBeenCalledWith('img-existing-99');
   });
 
   it('emits detailRequested when uploaded row has no coords but persisted media', async () => {
@@ -87,6 +109,7 @@ describe('UploadPanelComponent workspace detail click interactions', () => {
         coords: undefined,
       }),
     ]);
+    component.laneHandlers.setSelectedLane('uploaded');
     fixture.detectChanges();
 
     const rowMain = fixture.debugElement.query(By.css('.upload-panel__row-main-action'));
@@ -108,6 +131,7 @@ describe('UploadPanelComponent workspace detail keyboard interactions', () => {
         coords: { lat: 48.2082, lng: 16.3738 },
       }),
     ]);
+    component.laneHandlers.setSelectedLane('uploaded');
     fixture.detectChanges();
 
     const rowMain = fixture.debugElement.query(By.css('.upload-panel__row-main-action'));
@@ -130,7 +154,7 @@ describe('UploadPanelComponent row placement interactions', () => {
         statusLabel: 'Missing location',
       }),
     ]);
-    component.setSelectedLane('issues');
+    component.laneHandlers.setSelectedLane('issues');
     fixture.detectChanges();
 
     const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
@@ -149,7 +173,7 @@ describe('UploadPanelComponent row placement interactions', () => {
         statusLabel: 'Missing location',
       }),
     ]);
-    component.setSelectedLane('issues');
+    component.laneHandlers.setSelectedLane('issues');
     fixture.detectChanges();
 
     const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));

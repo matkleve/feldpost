@@ -74,13 +74,42 @@ $toolbar-view-toggle-compact-max: 23.75rem;
     }
   }
 
-  // Compact single-segment track uses shared p-1 inset; outer box matches menu trigger height.
+  // Compact cycle control: same muted pill track as full view toggle; solo segment inside.
   // @see docs/specs/ui/workspace/workspace-pane.md
   .#{$block}__size-control--compact .#{$block}__size-control-track {
     box-sizing: border-box;
     block-size: $toolbar-control-size;
     min-block-size: $toolbar-control-size;
     max-block-size: $toolbar-control-size;
+  }
+
+  .#{$block}__size-control--compact .#{$block}__size-control-track button[hlmToggleGroupItem] {
+    color: var(--muted-foreground);
+    background: transparent;
+    box-shadow: none;
+    transition:
+      background 80ms ease-out,
+      color 80ms ease-out;
+
+    .material-icons {
+      color: inherit;
+    }
+
+    // Cycle control is not a selected segment — neutral idle even if toggle item reports "on".
+    // @see docs/specs/ui/workspace/workspace-pane.md
+    &[data-state='on'],
+    &[data-state='off'] {
+      background: transparent;
+      color: var(--muted-foreground);
+      box-shadow: none;
+    }
+
+    &:hover,
+    &[data-state='on']:hover,
+    &[data-state='off']:hover {
+      background: color-mix(in srgb, var(--primary) 10%, transparent);
+      color: var(--primary);
+    }
   }
 }
 

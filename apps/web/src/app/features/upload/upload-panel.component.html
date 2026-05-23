@@ -39,27 +39,30 @@
       <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
     }
 
-    <!-- Drop zone / file picker trigger -->
+    <!-- Drop zone shell: clickable dropzone + chip row (siblings — no nested interactives). -->
     <div
-      class="upload-panel__dropzone"
-      [class.upload-panel__dropzone--dragging]="isDragging()"
+      class="upload-panel__dropzone-shell"
       (dragover)="inputHandlers.onDragOver($event)"
       (dragleave)="inputHandlers.onDragLeave($event)"
       (drop)="inputHandlers.onDrop($event); laneHandlers.setSelectedLane('uploading')"
     >
-      <button
-        type="button"
-        class="upload-panel__dropzone-pick"
+      <div
+        class="upload-panel__dropzone"
+        [class.upload-panel__dropzone--dragging]="isDragging()"
+        role="button"
+        tabindex="0"
         [attr.aria-label]="dropzonePickAriaLabel()"
-        (click)="onDropzonePickClick($event, fileInput)"
+        (click)="onDropzoneClick($event, fileInput)"
         (keydown)="inputHandlers.onDropZoneKeydown($event, fileInput)"
       >
-        <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
-        <span class="upload-panel__dropzone-label">
-          {{ dropzoneLabelText() }}
-        </span>
-      </button>
-      <div class="upload-panel__file-type-chips" (click)="$event.stopPropagation()">
+        <div class="upload-panel__dropzone-pick">
+          <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
+          <span class="upload-panel__dropzone-label">
+            {{ dropzoneLabelText() }}
+          </span>
+        </div>
+      </div>
+      <div class="upload-panel__file-type-chips">
         @for (group of fileTypeGroups; track group.id) {
           <div
             class="upload-panel__file-type-group"

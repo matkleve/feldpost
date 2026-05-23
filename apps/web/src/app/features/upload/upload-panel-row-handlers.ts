@@ -9,7 +9,11 @@ import {
   type UploadPhase,
 } from '../../core/upload/upload-manager.service';
 import type { ExifCoords } from '../../core/upload/upload.service';
-import { getLaneForJob as mapJobToLane, type UploadLane } from './upload-phase.helpers';
+import {
+  getIssueKind,
+  getLaneForJob as mapJobToLane,
+  type UploadLane,
+} from './upload-phase.helpers';
 
 export interface ZoomToLocationEvent {
   mediaId: string;
@@ -41,8 +45,26 @@ export class UploadPanelRowHandlersService {
     return this.getLaneForJob(job) === 'uploaded' && !!job.mediaId;
   }
 
+  canOpenDuplicateInWorkspace(job: UploadJob): boolean {
+    return getIssueKind(job) === 'duplicate_photo' && !!job.existingMediaId;
+  }
+
+  /** Media id opened in workspace pane when the row main area is activated. */
+  workspaceMediaIdForRow(job: UploadJob): string | null {
+    if (this.canOpenUploadedInWorkspace(job) && job.mediaId) {
+      return job.mediaId;
+    }
+    if (this.canOpenDuplicateInWorkspace(job) && job.existingMediaId) {
+      return job.existingMediaId;
+    }
+    return null;
+  }
+
   isRowInteractive(job: UploadJob): boolean {
-    return this.canOpenUploadedInWorkspace(job) || job.phase === 'missing_data';
+    return (
+      !!this.workspaceMediaIdForRow(job) ||
+      job.phase === 'missing_data'
+    );
   }
 
   onRowMainClick(job: UploadJob): void {

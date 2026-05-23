@@ -290,8 +290,7 @@ export class UploadPanelComponent {
     this.locationModeRowPreview.set(false);
   }
 
-  onDropzonePickClick(event: MouseEvent, fileInput: HTMLInputElement): void {
-    event.stopPropagation();
+  onDropzoneClick(_event: MouseEvent, fileInput: HTMLInputElement): void {
     if (this.pinnedFileTypeGroupId()) {
       this.clearPinnedFileTypeGroup();
       return;

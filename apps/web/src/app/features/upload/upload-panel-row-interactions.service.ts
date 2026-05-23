@@ -62,9 +62,10 @@ export class UploadPanelRowInteractionsService {
       this.ctx.placementRequested(job.id);
       return;
     }
-    if (this.rows.canOpenUploadedInWorkspace(job) && job.mediaId) {
-      this.workspaceSelection.setSingle(job.mediaId);
-      this.ctx.detailRequested(job.mediaId);
+    const mediaId = this.rows.workspaceMediaIdForRow(job);
+    if (mediaId) {
+      this.workspaceSelection.setSingle(mediaId);
+      this.ctx.detailRequested(mediaId);
     }
   }
 

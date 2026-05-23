@@ -112,27 +112,49 @@
 
   // ── Drop zone ──────────────────────────────────────────────────────────────
 
+  // Wraps clickable dropzone + chip row (chip buttons are not nested inside dropzone).
+  // @see docs/specs/component/media/file-type-chips.md
+  &__dropzone-shell {
+    position: relative;
+    min-height: 11rem;
+  }
+
   // Clickable surface — same text/hover colors as `.nav__link`.
   // @see apps/web/src/app/features/nav/nav.component.scss
   &__dropzone {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-2);
-    position: relative;
     padding: var(--spacing-5) var(--spacing-3);
-    min-height: 11rem;
+    padding-bottom: calc(var(--spacing-5) + var(--spacing-6) + var(--spacing-2));
     border: 1px dashed color-mix(in srgb, var(--border) 50%, transparent);
     border-radius: var(--container-radius-control);
     background: transparent;
     color: var(--muted-foreground);
     text-align: center;
+    cursor: pointer;
+    outline: none;
     transition:
       border-color 80ms ease-out,
       background 80ms ease-out,
       color 80ms ease-out;
     overflow: visible;
+
+    &:hover,
+    &:focus-visible {
+      border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
+      background: color-mix(in srgb, var(--primary) 10%, transparent);
+      color: var(--primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 2px;
+    }
 
     &--dragging {
       border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
@@ -141,43 +163,18 @@
     }
   }
 
-  // Icon + label pick control (no overlay under chips).
+  // Icon + label copy (activation on `.upload-panel__dropzone`).
   // @see docs/specs/component/media/file-type-chips.md
   &__dropzone-pick {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     align-items: center;
-    align-self: stretch;
     justify-content: center;
     gap: var(--spacing-2);
     width: 100%;
     min-height: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
     color: inherit;
-    cursor: pointer;
-    outline: none;
-
-    &:hover,
-    &:focus-visible {
-      color: var(--primary);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--ring);
-      outline-offset: 2px;
-      border-radius: var(--container-radius-control);
-    }
-  }
-
-  &__dropzone:hover,
-  &__dropzone:focus-within {
-    border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
-    background: color-mix(in srgb, var(--primary) 10%, transparent);
-    color: var(--primary);
   }
 
   &__dropzone-icon {
@@ -216,7 +213,10 @@
   }
 
   &__file-type-chips {
-    position: relative;
+    position: absolute;
+    right: var(--spacing-3);
+    bottom: var(--spacing-5);
+    left: var(--spacing-3);
     z-index: 1;
     display: flex;
     flex-wrap: wrap;
@@ -226,8 +226,9 @@
     align-items: center;
     row-gap: var(--spacing-2);
     column-gap: var(--spacing-2);
-    width: 100%;
+    width: auto;
     overflow: visible;
+    pointer-events: none;
   }
 
   // Group chip + absolute hover dropdown of format chips (no layout shift, no transition).
@@ -237,6 +238,8 @@
     display: inline-flex;
     flex: 0 0 auto;
     z-index: 1;
+    // Re-enable hits on the group subtree (parent `.file-type-chips` uses `none` for dropzone passthrough).
+    pointer-events: auto;
 
     &:hover,
     &:focus-within,
@@ -254,6 +257,7 @@
     border: 0;
     background: transparent;
     cursor: pointer;
+    pointer-events: auto;
     outline: none;
 
     &:focus-visible {
@@ -291,6 +295,7 @@
       right: 0;
       left: 0;
       height: var(--spacing-2);
+      pointer-events: auto;
     }
   }
 

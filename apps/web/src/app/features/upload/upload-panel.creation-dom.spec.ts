@@ -27,12 +27,12 @@ describe('UploadPanelComponent DOM basic inputs', () => {
     expect(zone).not.toBeNull();
   });
 
-  it('opens the file picker when clicking the drop zone pick surface', async () => {
+  it('opens the file picker when clicking the drop zone', async () => {
     const { fixture } = await setupUploadPanel();
     const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
     const openSpy = vi.spyOn(inputHandlers, 'openFilePicker');
-    const pick = fixture.debugElement.query(By.css('.upload-panel__dropzone-pick'));
-    pick.triggerEventHandler('click', new MouseEvent('click'));
+    const zone = fixture.debugElement.query(By.css('.upload-panel__dropzone'));
+    zone.triggerEventHandler('click', new MouseEvent('click'));
     expect(openSpy).toHaveBeenCalled();
   });
 

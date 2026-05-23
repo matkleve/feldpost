@@ -180,7 +180,11 @@ export class UploadPanelItemComponent implements OnDestroy {
   }
 
   canOpenInWorkspacePane(): boolean {
-    return getLaneForJob(this.job()) === 'uploaded' && !!this.job().mediaId;
+    const job = this.job();
+    if (getLaneForJob(job) === 'uploaded' && !!job.mediaId) {
+      return true;
+    }
+    return getIssueKind(job) === 'duplicate_photo' && !!job.existingMediaId;
   }
 
   rowMainActionAriaLabel(): string | null {
@@ -188,7 +192,7 @@ export class UploadPanelItemComponent implements OnDestroy {
     if (this.job().phase === 'missing_data') {
       return `Place ${name} on map`;
     }
-    if (this.canOpenInWorkspacePane()) {
+    if (this.canOpenInWorkspacePane() || this.showDuplicateExistingMediaShortcut()) {
       return `Open ${name} in workspace`;
     }
     if (this.canZoomToJob()) {
