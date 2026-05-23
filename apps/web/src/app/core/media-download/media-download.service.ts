@@ -1,7 +1,8 @@
 /* eslint-disable max-lines */
 import { Injectable, Injector, effect, inject, signal } from '@angular/core';
 import type { WritableSignal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import type { PreviewGenerationStatus } from '../media/preview-generation-status.types';
 import { EdgeExportOrchestratorAdapter } from './adapters/edge-export-orchestrator.adapter';
 import type { ZipExportContext } from './adapters/edge-export-orchestrator.adapter';
 import { SignedUrlCacheAdapter } from './adapters/signed-url-cache.adapter';
@@ -87,6 +88,7 @@ export class MediaDownloadService {
   >([]);
   private readonly resolvedUrlCache = new Map<string, string>();
   private readonly knownPreviewRequests = new Map<string, MediaPreviewRequest>();
+  private readonly deliveryRefresh$ = new Subject<string>();
 
   // Legacy streams still consumed by parts of the app during migration.
   readonly urlChanged$ = this.signedUrlCache.urlChanged$;
@@ -134,6 +136,15 @@ export class MediaDownloadService {
       context: 'grid',
       desiredSize: 'thumb',
     });
+  }
+
+  /** Updates preview lifecycle on a registered tile and re-emits display delivery state. */
+  notifyPreviewGenerationStatus(mediaId: string, status: PreviewGenerationStatus): void {
+    const existing = this.knownPreviewRequests.get(mediaId);
+    if (existing) {
+      this.knownPreviewRequests.set(mediaId, { ...existing, previewGenerationStatus: status });
+    }
+    this.deliveryRefresh$.next(mediaId);
   }
 
   async resolvePreview(request: MediaPreviewRequest): Promise<MediaPreviewResult> {
@@ -232,9 +243,16 @@ export class MediaDownloadService {
         }
       });
 
+      const deliverySubscription = this.deliveryRefresh$.subscribe((id) => {
+        if (id === normalizedId) {
+          emit();
+        }
+      });
+
       return () => {
         stateSubscription.unsubscribe();
         urlSubscription.unsubscribe();
+        deliverySubscription.unsubscribe();
       };
     });
   }

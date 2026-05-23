@@ -1,3 +1,70 @@
+<!-- Upload trigger — fixed top-right, same chrome as map route. -->
+<!-- @see docs/specs/page/media-page.md#actions -->
+<div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
+  @if (collapsedPreviewItems().length > 0) {
+    <div
+      class="upload-btn-zone__preview-list"
+      [attr.aria-label]="t('upload.trigger.preview.aria', 'Uploading previews')"
+      role="list"
+    >
+      @for (job of collapsedPreviewItems(); track job.id) {
+        <div class="upload-btn-zone__preview-item" role="listitem">
+          <span class="upload-btn-zone__preview-dot" aria-hidden="true"></span>
+          <span class="upload-btn-zone__preview-name" [title]="job.file.name">{{ job.file.name }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <button
+    hlmBtn
+    variant="default"
+    size="icon"
+    class="map-upload-btn"
+    type="button"
+    [attr.aria-label]="t('auto.0369.upload_images', 'Upload images')"
+    [attr.title]="t('auto.0369.upload_images', 'Upload images')"
+    [class.map-upload-btn--active]="uploadPanelOpen()"
+    [class.map-upload-btn--busy]="showExpandedUploadButton()"
+    [class.map-upload-btn--issues]="uploadHasIssues() && !uploadPanelOpen()"
+    (click)="toggleUploadPanel()"
+  >
+    <span class="map-upload-btn__icon-shell" aria-hidden="true">
+      @if (uploadBatchActive()) {
+        <span
+          class="map-upload-btn__progress"
+          [style.--upload-progress]="uploadBatchProgress() + '%'"
+          aria-hidden="true"
+        ></span>
+      }
+      <span class="material-icons" aria-hidden="true">cloud_upload</span>
+    </span>
+    @if (uploadBatchActive()) {
+      <span class="map-upload-btn__summary" aria-hidden="true">
+        <span class="map-upload-btn__summary-label">{{
+          t('upload.trigger.status.uploading', 'Uploading...')
+        }}</span>
+        <span class="map-upload-btn__summary-count"
+          >{{ uploadSummaryCurrent() }}/{{ uploadSummaryTotal() }}</span
+        >
+      </span>
+    }
+  </button>
+
+  <div class="upload-expand" [class.upload-expand--visible]="uploadPanelOpen()">
+    <app-upload-panel
+      [visible]="uploadPanelOpen()"
+      (imageUploaded)="onImageUploaded($event)"
+      (detailRequested)="openDetailView($event)"
+      (zoomToLocationRequested)="onZoomToLocation($event)"
+      (placementRequested)="enterPlacementMode($event)"
+      (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
+      (locationPreviewCleared)="onUploadLocationPreviewCleared()"
+      (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+    />
+  </div>
+</div>
+
 <!-- Renders the /media page content stack in a flat host-owned layout. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md#data -->
 <!-- Stacks header, toolbar, content, and progressive-loading footer with token spacing. -->

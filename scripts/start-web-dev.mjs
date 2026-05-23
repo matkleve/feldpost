@@ -10,6 +10,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const webDir = path.join(repoRoot, 'apps/web');
 const logServerScript = path.join(repoRoot, 'scripts/supabase-dev-log-server.mjs');
 const ensureEdgeScript = path.join(repoRoot, 'scripts/ensure-supabase-edge-runtime.mjs');
+const ensureMediaPreviewScript = path.join(repoRoot, 'scripts/ensure-media-preview-dev.mjs');
 
 const ensureEdge = spawnSync(process.execPath, [ensureEdgeScript], {
   cwd: repoRoot,
@@ -18,6 +19,11 @@ const ensureEdge = spawnSync(process.execPath, [ensureEdgeScript], {
 if (ensureEdge.status !== 0 && ensureEdge.status !== null) {
   console.warn('[feldpost] Continuing without Edge Runtime — geocode will fail until it is started.');
 }
+
+spawnSync(process.execPath, [ensureMediaPreviewScript], {
+  cwd: repoRoot,
+  stdio: 'inherit',
+});
 
 const logServer = spawn(process.execPath, [logServerScript], {
   cwd: repoRoot,

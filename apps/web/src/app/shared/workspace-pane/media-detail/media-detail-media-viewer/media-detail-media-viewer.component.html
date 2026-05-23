@@ -14,6 +14,7 @@
       type="button"
       [disabled]="!canOpenLightbox()"
       [class.detail-image-wrap--static]="!canOpenLightbox()"
+      [class.detail-image-wrap--resolving]="currentViewerState().status !== 'loaded'"
       [class.detail-image-wrap--thumb-preview]="usesThumbnailPreview()"
       [attr.aria-label]="
         t('workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media')
@@ -28,7 +29,7 @@
         [renderState]="currentViewerState()"
         [altText]="viewerAltText()"
         [fit]="'contain'"
-        [minHeightRem]="8"
+        [minHeightRem]="detailMediaMinHeightRem()"
       />
     </button>
 

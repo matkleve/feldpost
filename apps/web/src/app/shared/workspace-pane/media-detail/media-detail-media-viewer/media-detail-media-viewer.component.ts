@@ -99,6 +99,11 @@ export class MediaDetailMediaViewerComponent implements AfterViewInit {
       this.canOpenLightbox(),
   );
 
+  /** Drop fixed slot height once the asset defines the preview footprint. */
+  readonly detailMediaMinHeightRem = computed(() =>
+    this.currentViewerState().status === 'loaded' ? null : 8,
+  );
+
   readonly viewerAltText = computed(() => {
     const title = this.displayTitle().trim();
     return title.length > 0

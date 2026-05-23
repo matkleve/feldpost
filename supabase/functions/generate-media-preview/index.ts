@@ -8,6 +8,13 @@
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createCanvas } from "npm:canvas@2.11.2";
+import * as pdfjs from "npm:pdfjs-dist@4.4.168/legacy/build/pdf.mjs";
+
+const DOCUMENT_LONG_EDGE_PX = 512;
+const NEUTRAL_PAD = "#f5f3ef";
+
+pdfjs.GlobalWorkerOptions.workerSrc = "";
 
 const OFFICE_EXTENSIONS = new Set([
   "doc",
@@ -32,7 +39,7 @@ type MediaItemRow = {
   storage_path: string;
   thumbnail_path: string | null;
   preview_generation_status: PreviewGenerationStatus;
-  file_name: string;
+  original_filename: string | null;
 };
 
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
@@ -58,7 +65,7 @@ function buildThumbPath(storagePath: string, organizationId: string): string {
   return `${organizationId}/${userId}/${stem}_thumb.png`;
 }
 
-async function convertOfficeToPng(
+async function convertOfficeToPdf(
   gotenbergUrl: string,
   fileBytes: Uint8Array,
   fileName: string,
@@ -71,6 +78,8 @@ async function convertOfficeToPng(
     new Blob([fileBytes]),
     fileName.includes(".") ? fileName : `${fileName}.bin`,
   );
+  // First slide/page only for presentations and multi-page docs.
+  officeForm.append("nativePageRanges", "1");
 
   const pdfResponse = await fetch(`${base}/forms/libreoffice/convert`, {
     method: "POST",
@@ -82,24 +91,51 @@ async function convertOfficeToPng(
     throw new Error(`LibreOffice convert failed (${pdfResponse.status}): ${detail.slice(0, 200)}`);
   }
 
-  const pdfBytes = new Uint8Array(await pdfResponse.arrayBuffer());
+  return new Uint8Array(await pdfResponse.arrayBuffer());
+}
 
-  const pngForm = new FormData();
-  pngForm.append("files", new Blob([pdfBytes], { type: "application/pdf" }), "document.pdf");
-  pngForm.append("format", "png");
-  pngForm.append("page", "1");
+/** Gotenberg 8 has no PDF→PNG route; rasterize with pdf.js (same approach as client PDF previews). */
+async function rasterizePdfFirstPageToPng(pdfBytes: Uint8Array): Promise<Uint8Array> {
+  const pdf = await pdfjs.getDocument({
+    data: pdfBytes,
+    useSystemFonts: true,
+    disableFontFace: true,
+  }).promise;
 
-  const pngResponse = await fetch(`${base}/forms/pdfengines/convert`, {
-    method: "POST",
-    body: pngForm,
-  });
+  try {
+    const page = await pdf.getPage(1);
+    const baseViewport = page.getViewport({ scale: 1 });
+    const scale = DOCUMENT_LONG_EDGE_PX / Math.max(baseViewport.width, baseViewport.height);
+    const viewport = page.getViewport({ scale });
+    const width = Math.ceil(viewport.width);
+    const height = Math.ceil(viewport.height);
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("Canvas 2D context unavailable");
+    }
 
-  if (!pngResponse.ok) {
-    const detail = await pngResponse.text();
-    throw new Error(`PDF to PNG failed (${pngResponse.status}): ${detail.slice(0, 200)}`);
+    ctx.fillStyle = NEUTRAL_PAD;
+    ctx.fillRect(0, 0, width, height);
+
+    await page.render({
+      canvasContext: ctx as unknown as CanvasRenderingContext2D,
+      viewport,
+    }).promise;
+
+    return new Uint8Array(canvas.toBuffer("image/png"));
+  } finally {
+    await pdf.destroy();
   }
+}
 
-  return new Uint8Array(await pngResponse.arrayBuffer());
+async function convertOfficeToPng(
+  gotenbergUrl: string,
+  fileBytes: Uint8Array,
+  fileName: string,
+): Promise<Uint8Array> {
+  const pdfBytes = await convertOfficeToPdf(gotenbergUrl, fileBytes, fileName);
+  return rasterizePdfFirstPageToPng(pdfBytes);
 }
 
 async function markStatus(
@@ -166,7 +202,7 @@ Deno.serve(async (req: Request) => {
   const { data: row, error: readError } = await userClient
     .from("media_items")
     .select(
-      "id, organization_id, storage_path, thumbnail_path, preview_generation_status, file_name",
+      "id, organization_id, storage_path, thumbnail_path, preview_generation_status, original_filename",
     )
     .eq("id", mediaId)
     .maybeSingle();
@@ -212,7 +248,7 @@ Deno.serve(async (req: Request) => {
     const pngBytes = await convertOfficeToPng(
       gotenbergUrl,
       fileBytes,
-      item.file_name || `file.${ext}`,
+      item.original_filename?.trim() || `file.${ext}`,
     );
 
     const thumbPath = buildThumbPath(item.storage_path, item.organization_id);

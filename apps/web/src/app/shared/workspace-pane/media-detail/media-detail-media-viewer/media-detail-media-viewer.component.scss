@@ -39,21 +39,39 @@
 
 .detail-image-media {
   display: block;
-  width: min(calc(100%), calc(40rem / 1.618));
-  max-width: 100%;
+  width: fit-content;
+  max-width: min(calc(100%), calc(40rem / 1.618));
   min-height: 0;
-  --universal-media-slot-border: 0;
-  --universal-media-slot-radius: var(--radius-lg);
+  --universal-media-host-width: fit-content;
+  --universal-media-slot-border: none;
+  --universal-media-slot-radius: 0;
+  --universal-media-slot-width: fit-content;
+  --universal-media-slot-min-width: 0;
+  --universal-media-slot-background: transparent;
+  --universal-media-slot-max-height: 33vh;
+  --universal-media-asset-border: 1px solid var(--border);
+  --universal-media-asset-border-radius: var(--radius-lg);
+  --universal-media-asset-width: auto;
+  --universal-media-asset-height: auto;
+  --universal-media-asset-max-width: 100%;
+  --universal-media-asset-max-height: 33vh;
+}
+
+// Loading/error slot keeps a stable footprint before the asset sizes the frame.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+.detail-image-wrap--resolving .detail-image-media {
+  width: min(100%, calc(40rem / 1.618));
+  --universal-media-host-width: 100%;
+  --universal-media-slot-width: min(100%, calc(40rem / 1.618));
+  --universal-media-slot-min-width: min(100%, calc(40rem / 1.618));
   --universal-media-slot-background: linear-gradient(
     135deg,
     var(--card) 0%,
     var(--background) 100%
   );
-  --universal-media-slot-max-height: 33vh;
-  --universal-media-asset-width: auto;
-  --universal-media-asset-height: auto;
-  --universal-media-asset-max-width: 100%;
-  --universal-media-asset-max-height: 33vh;
+  --universal-media-slot-radius: var(--radius-lg);
+  --universal-media-asset-border: none;
+  --universal-media-asset-border-radius: 0;
 }
 
 // Thumb-preview blur / scale via inherited custom properties (no pierce).

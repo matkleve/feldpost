@@ -367,6 +367,7 @@ deno_version = 2
 
 [edge_runtime.secrets]
 ALLOWED_ORIGINS = "http://localhost:4200,http://127.0.0.1:4200"
+GOTENBERG_URL = "http://host.docker.internal:3000"
 
 [analytics]
 enabled = true

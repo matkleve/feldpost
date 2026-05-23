@@ -1,10 +1,12 @@
 @use '../../shared/dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
 @use '../../shared/dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
+@use '../map/map-shell/map-shell-upload';
 
 // Declares host block container for the /media route shell.
 // @see docs/specs/component/item-grid/item-grid.md#wiring
 :host {
   display: block;
+  position: relative;
   min-height: 100%;
   padding: var(--spacing-4);
 }
@@ -19,6 +21,13 @@ app-pane-toolbar.media-toolbar {
 }
 
 @layer components {
+  // Offsets host padding so upload chrome aligns with map route top-right inset.
+  // @see docs/specs/page/media-page.md#actions
+  .upload-btn-zone {
+    top: calc(var(--spacing-3) - var(--spacing-4));
+    right: calc(var(--spacing-3) - var(--spacing-4));
+  }
+
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('media-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('media-toolbar');
 

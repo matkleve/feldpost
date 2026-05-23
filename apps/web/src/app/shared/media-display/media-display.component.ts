@@ -52,6 +52,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly storagePath = input<string | null>(null);
   readonly thumbnailPath = input<string | null>(null);
   readonly previewGenerationStatus = input<PreviewGenerationStatus | null>(null);
+  readonly originalFilename = input<string | null>(null);
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
@@ -126,7 +127,7 @@ export class MediaDisplayComponent implements AfterViewInit {
         const fileType = resolveFileType(
           mediaFileIdentityFromRecord({
             storage_path: storagePath,
-            original_filename: null,
+            original_filename: this.originalFilename(),
           }),
         );
         if (requiresServerPreviewGeneration(fileType)) {
