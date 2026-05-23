@@ -7,6 +7,7 @@
  * Endpoints:
  *   POST /geocode  { action: "reverse", lat, lng }
  *   POST /geocode  { action: "forward", q }
+ *   POST /geocode  { action: "structured-search", street, city }
  */
 
 const NOMINATIM_REVERSE_URL = "https://nominatim.openstreetmap.org/reverse";
@@ -109,6 +110,8 @@ Deno.serve(async (req: Request) => {
     viewbox?: string;
     bounded?: number;
     acceptLanguage?: string;
+    street?: string;
+    city?: string;
   };
   try {
     body = await req.json();
@@ -121,9 +124,16 @@ Deno.serve(async (req: Request) => {
 
   const { action } = body;
 
-  if (action !== "reverse" && action !== "forward") {
+  if (
+    action !== "reverse" &&
+    action !== "forward" &&
+    action !== "structured-search"
+  ) {
     return new Response(
-      JSON.stringify({ error: 'Invalid action. Use "reverse" or "forward".' }),
+      JSON.stringify({
+        error:
+          'Invalid action. Use "reverse", "forward", or "structured-search".',
+      }),
       {
         status: 400,
         headers: { ...corsHeaders(req), "Content-Type": "application/json" },
@@ -158,6 +168,22 @@ Deno.serve(async (req: Request) => {
       );
     }
     nominatimUrl = `${NOMINATIM_REVERSE_URL}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&format=json&addressdetails=1`;
+  } else if (action === "structured-search") {
+    const street =
+      typeof body.street === "string" ? body.street.trim() : "";
+    const city = typeof body.city === "string" ? body.city.trim() : "";
+    if (!street || !city) {
+      return new Response(
+        JSON.stringify({
+          error: "street and city are required for structured-search",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+        },
+      );
+    }
+    nominatimUrl = `${NOMINATIM_SEARCH_URL}?street=${encodeURIComponent(street)}&city=${encodeURIComponent(city)}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}`;
   } else {
     const { q } = body;
     if (typeof q !== "string" || !q.trim()) {
@@ -169,7 +195,7 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    nominatimUrl = `${NOMINATIM_SEARCH_URL}?q=${encodeURIComponent(q.trim())}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}${body.viewbox ? `&viewbox=${encodeURIComponent(body.viewbox)}` : ""}${body.bounded != null ? `&bounded=${encodeURIComponent(String(body.bounded))}` : ""}`;
+    nominatimUrl = `${NOMINATIM_SEARCH_URL}?q=${encodeURIComponent(q.trim())}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1&layer=address${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}${body.viewbox ? `&viewbox=${encodeURIComponent(body.viewbox)}` : ""}${body.bounded != null ? `&bounded=${encodeURIComponent(String(body.bounded))}` : ""}`;
   }
 
   // Rate-limit then fetch from Nominatim

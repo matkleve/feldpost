@@ -27,7 +27,7 @@ import {
 import { logGeocoderResolverStage } from './search-debug';
 
 /** Internal Nominatim fetch budget; display count stays `maxGeocoderResults`. */
-const NOMINATIM_FETCH_LIMIT = 15;
+export const NOMINATIM_FETCH_LIMIT = 15;
 
 interface DbContentRow {
   id: string;
@@ -148,6 +148,40 @@ export async function fetchGeocoderCandidates(
   return finalizeGeocoderCandidates(
     geocodingService,
     constrainedCandidates,
+    normalizedQuery,
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+}
+
+/** Rank and finalize raw Nominatim hits (structured search or other non-`q` paths). */
+export async function processGeocoderSearchResults(
+  geocodingService: GeocodingService,
+  rawResults: GeocoderSearchResult[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig = SEARCH_TUNING_SYSTEM_DEFAULTS,
+): Promise<SearchAddressCandidate[]> {
+  const ranked = rankGeocoderCandidates(
+    rawResults,
+    normalizedQuery,
+    context,
+    toCandidate,
+    NOMINATIM_FETCH_LIMIT,
+    tuning,
+  );
+  return finalizeGeocoderCandidates(
+    geocodingService,
+    ranked,
     normalizedQuery,
     context,
     maxGeocoderResults,

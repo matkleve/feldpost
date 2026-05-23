@@ -22,6 +22,7 @@ import {
   formatGeocoderAddressLabel,
   formatDbAddressLabel,
   normalizeSearchQuery,
+  isSpecificStreetQuery,
   buildFallbackQueries,
   toNumber,
 } from './search-query';
@@ -33,7 +34,12 @@ import {
   isCandidateInViewport,
 } from './search-geocoder-scoring';
 import { logGeocoderDiagnostics, logSearchEvent } from './search-debug';
-import { fetchDbContentCandidates, fetchGeocoderCandidates } from './search-bar-resolvers';
+import {
+  fetchDbContentCandidates,
+  fetchGeocoderCandidates,
+  NOMINATIM_FETCH_LIMIT,
+  processGeocoderSearchResults,
+} from './search-bar-resolvers';
 import { OrgSearchTuningService } from './org-search-tuning.service';
 import type { SearchOrchestratorOptions } from './search.models';
 import type {
@@ -448,22 +454,16 @@ export class SearchBarService {
         return strictCandidates;
       }
 
-      const enrichedQuery = normalizeSearchQuery(`${normalizedQuery} ${cityHint}`);
-      if (!enrichedQuery) {
-        return strictCandidates;
-      }
-
-      const hintedCandidates = await this.fetchGeocoderCandidates(enrichedQuery, context);
-      const refinedCandidates = hintedCandidates.filter(
-        (candidate) =>
-          this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
-          candidate.label.includes(','),
+      const refinedCandidates = await this.fetchCityHintedGeocoderCandidates(
+        normalizedQuery,
+        context,
+        cityHint,
+        { requireCommaInLabel: true },
       );
       if (refinedCandidates.length > 0) {
         logSearchEvent('geocoder-city-hint-enrich', {
           query: normalizedQuery,
           cityHint,
-          hintedQuery: enrichedQuery,
           count: refinedCandidates.length,
         });
         return this.mergeGeocoderCandidateSets(strictCandidates, refinedCandidates).slice(
@@ -484,14 +484,11 @@ export class SearchBarService {
       return strictCandidates;
     }
 
-    const enrichedQuery = normalizeSearchQuery(`${normalizedQuery} ${cityHint}`);
-    if (!enrichedQuery) {
-      return strictCandidates;
-    }
-
-    const hintedCandidates = await this.fetchGeocoderCandidates(enrichedQuery, context);
-    const refinedCandidates = hintedCandidates.filter((candidate) =>
-      this.matchesOriginalPrefix(candidate.label, normalizedQuery),
+    const refinedCandidates = await this.fetchCityHintedGeocoderCandidates(
+      normalizedQuery,
+      context,
+      cityHint,
+      { requireCommaInLabel: false },
     );
 
     if (refinedCandidates.length === 0) {
@@ -501,7 +498,6 @@ export class SearchBarService {
     logSearchEvent('geocoder-city-hint-retry', {
       query: normalizedQuery,
       cityHint,
-      hintedQuery: enrichedQuery,
       count: refinedCandidates.length,
     });
 
@@ -514,6 +510,68 @@ export class SearchBarService {
           `geo-${candidate.lat.toFixed(6)}-${candidate.lng.toFixed(6)}-cityhint-${index}`,
       }))
       .slice(0, maxResults);
+  }
+
+  private async fetchCityHintedGeocoderCandidates(
+    normalizedQuery: string,
+    context: SearchQueryContext,
+    cityHint: string,
+    options: { requireCommaInLabel: boolean },
+  ): Promise<SearchAddressCandidate[]> {
+    const tuning = this.orgSearchTuning.orgSearchConfig();
+    const toCandidate = (
+      result: GeocoderSearchResult,
+      query: string,
+      index: number,
+      candidateContext: SearchQueryContext,
+    ) => this.toGeocoderCandidate(result, query, index, candidateContext);
+
+    if (isSpecificStreetQuery(normalizedQuery, tuning.query.specificStreetMinLength)) {
+      const structuredResults = await this.geocodingService.searchStructured(
+        normalizedQuery,
+        cityHint,
+        {
+          limit: NOMINATIM_FETCH_LIMIT,
+          countrycodes: context.countryCodes,
+        },
+      );
+      if (structuredResults.length > 0) {
+        const structuredCandidates = await processGeocoderSearchResults(
+          this.geocodingService,
+          structuredResults,
+          normalizedQuery,
+          context,
+          tuning.resolver.maxGeocoderResults,
+          toCandidate,
+          tuning,
+        );
+        const refinedStructured = structuredCandidates.filter(
+          (candidate) =>
+            this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
+            (!options.requireCommaInLabel || candidate.label.includes(',')),
+        );
+        if (refinedStructured.length > 0) {
+          logSearchEvent('geocoder-city-hint-structured', {
+            query: normalizedQuery,
+            cityHint,
+            count: refinedStructured.length,
+          });
+          return refinedStructured;
+        }
+      }
+    }
+
+    const enrichedQuery = normalizeSearchQuery(`${normalizedQuery} ${cityHint}`);
+    if (!enrichedQuery) {
+      return [];
+    }
+
+    const hintedCandidates = await this.fetchGeocoderCandidates(enrichedQuery, context);
+    return hintedCandidates.filter(
+      (candidate) =>
+        this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
+        (!options.requireCommaInLabel || candidate.label.includes(',')),
+    );
   }
 
   private mergeGeocoderCandidateSets(

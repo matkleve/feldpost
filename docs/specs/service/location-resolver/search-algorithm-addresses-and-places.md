@@ -207,11 +207,48 @@ Before ranking geocoder candidates:
 \end{cases}
 \]
 
-Short query fallback behavior also exists:
+Geocoder fetch uses a fixed Nominatim `limit` of **15** (`NOMINATIM_FETCH_LIMIT`); UI display count remains `maxGeocoderResults`. See **§2.4–2.6** for pipeline phases, city-hint, and call budget.
 
-- constrained query first (country/viewport aware)
-- optional unconstrained retry for ambiguous short prefixes
-- optional city-hint retry when strict search has no hits
+---
+
+### 2.4 Expansion phases (post-rank pipeline)
+
+After the initial free-form forward search (`action: forward`, `layer=address`, `limit=15`), candidates are ranked up to 15 hits, then optionally expanded:
+
+| Phase | Status | Trigger | Nominatim call |
+| --- | --- | --- | --- |
+| Constrained forward | **active** | every geocoder query | `q=…`, `layer=address`, country/viewbox when set, `limit=15` |
+| Unconstrained retry | **disabled** (Phase 1) | — | — |
+| Street-level house expansion | **disabled** (Phase 1) | — | — |
+| Street suffix probe | **disabled** (Phase 1) | — | — |
+| House-number sibling | **active** | `parseStreetAndHouseNumber(query)` | second forward: street token only, `limit=15` |
+
+Final list is sliced to `maxGeocoderResults` at pipeline exit. Org tuning fields `constrainedLimitMultiplier` and `shortPrefixLimitFloor` remain in schema but are runtime no-ops.
+
+### 2.5 City-hint retry
+
+When `fetchGeocoderCandidatesWithCityHint` runs (media-detail / map Internet search):
+
+1. **Strict pass** — one constrained forward (`q=normalizedQuery`).
+2. **Early exit** if every label already contains `,` (rich enough).
+3. **Reverse** once on context coordinates (`activeMarkerCentroid` → project → user) to obtain `cityHint` (10 min cache).
+4. **Structured forward** (Phase 2) when `isSpecificStreetQuery(query)` and `cityHint` is set: Edge `structured-search` with `street=` + `city=` (no `layer`, no viewbox), `limit=15`. Results pass through the same rank + expansion pipeline via `processGeocoderSearchResults`.
+5. **Free-form enriched fallback** if structured returns zero usable rows: single forward `q="{query} {cityHint}"` (normalized), same filters as strict pass.
+6. Prefix filter: `matchesOriginalPrefix(label, query)`; enrich branch also requires `,` in label.
+
+Empty strict results (single token, length ≥ 4): steps 3–5 only (no enrich merge).
+
+Max geocoder HTTP per user query: **1 reverse + 2 forward** (strict + structured or enriched, not both when structured succeeds).
+
+### 2.6 Call budget (typical media-detail: `countryCodes: ['at']`, marker centroid, `maxGeocoderResults=3`)
+
+| Scenario | Search (forward) | Reverse |
+| --- | --- | --- |
+| `"denis"` (labels OK) | 1 | 0 |
+| `"denis"` (needs city) | 2 (strict + structured or enriched) | 1 |
+| `"denisgasse"` (specific street, needs city) | 2 (strict + structured preferred) | 1 |
+| `"denisgasse 4"` | 2 (strict + house-sibling street) | 0–1 |
+| Repeat identical query within cache TTL | 0 (client search/structured cache, 5 min) | 0 |
 
 ---
 
@@ -415,17 +452,26 @@ Where to edit:
 
 ### Step 7: Rank Ordering and Retry Strategy
 
-After scoring, final ordering uses comparator logic (viewport, prefix, proximity, score, label) and optional retries (unconstrained retry, city-hint retry).
+After scoring, final ordering uses comparator logic (viewport, prefix, proximity, score, label).
+
+Geocoder retries (see **§2.4–2.6**):
+
+- **Unconstrained retry:** disabled (Phase 1); `shouldRunUnconstrainedRetry` retained but not called.
+- **City-hint:** 1 reverse + structured search for specific-street queries, else one enriched free-form forward.
+- **Expansion:** house-number sibling only; suffix probe and street-level house expansion disabled.
 
 Main tuning values:
 
 - Comparator priority order
-- Retry trigger thresholds (`distance > 60km`, `top score < 0.75`)
+- `maxGeocoderResults` (display cap; Nominatim fetch uses fixed 15)
+- `specificStreetMinLength` (structured city-hint gate)
 
 Where to edit:
 
 - `apps/web/src/app/core/search/search-bar-resolvers.ts`
 - `apps/web/src/app/core/search/search-bar.service.ts`
+- `apps/web/src/app/core/geocoding/geocoding.service.ts`
+- `supabase/functions/geocode/index.ts`
 
 ---
 
@@ -494,9 +540,23 @@ search_tuning:
 		group_boost_if_selected: 1.6
 		size_signal_multiplier: 0.35
 
+	geocoder_fetch:
+		nominatim_fetch_limit: 15
+		forward_layer: address
+		unconstrained_retry: disabled
+		expansion_house_sibling: active
+		expansion_street_houses: disabled
+		expansion_suffix_probe: disabled
+
+	city_hint:
+		max_forward_per_query: 2
+		structured_when: isSpecificStreetQuery and cityHint present
+		enriched_fallback: "q={query} {cityHint}"
+
 	retries:
 		unconstrained_if_top_distance_gt_meters: 60000
 		unconstrained_if_top_score_lt: 0.75
+		note: unconstrained thresholds retained in tuning schema; call site disabled Phase 1
 ```
 
 ---

@@ -124,6 +124,61 @@ describe('GeocodingService', () => {
     expect(results[0]?.address?.country_code).toBe('at');
   });
 
+  it('calls structured-search on the geocode edge function', async () => {
+    invokeSpy.mockResolvedValueOnce({
+      data: [
+        {
+          lat: '48.2082',
+          lon: '16.3738',
+          display_name: 'Wilhelminenstrasse, Wien, Austria',
+          address: {
+            road: 'Wilhelminenstrasse',
+            city: 'Wien',
+            country_code: 'at',
+          },
+        },
+      ],
+      error: null,
+    });
+
+    const results = await service.searchStructured('wilhelminenstrasse', 'Wien', {
+      countrycodes: ['at'],
+      limit: 15,
+    });
+
+    expect(results[0]?.address?.road).toBe('Wilhelminenstrasse');
+    expect(invokeSpy).toHaveBeenCalledWith('geocode', {
+      body: {
+        action: 'structured-search',
+        street: 'wilhelminenstrasse',
+        city: 'Wien',
+        limit: 15,
+        acceptLanguage: 'de',
+        countrycodes: 'at',
+      },
+      headers: { Authorization: 'Bearer test-token' },
+    });
+  });
+
+  it('reuses structured search cache for identical street/city within TTL', async () => {
+    invokeSpy.mockResolvedValue({
+      data: [
+        {
+          lat: '48.2082',
+          lon: '16.3738',
+          display_name: 'Wilhelminenstrasse, Wien, Austria',
+          address: { road: 'Wilhelminenstrasse', city: 'Wien', country_code: 'at' },
+        },
+      ],
+      error: null,
+    });
+
+    await service.searchStructured('wilhelminenstrasse', 'Wien', { limit: 15 });
+    await service.searchStructured('wilhelminenstrasse', 'Wien', { limit: 15 });
+
+    expect(invokeSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('reuses search cache for identical queries within TTL', async () => {
     invokeSpy.mockResolvedValue({
       data: [

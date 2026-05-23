@@ -30,6 +30,7 @@ describe('SearchBarService', () => {
   let supabaseMock: { client: { from: ReturnType<typeof vi.fn> } };
   let geocodingMock: {
     search: ReturnType<typeof vi.fn>;
+    searchStructured: ReturnType<typeof vi.fn>;
     reverse: ReturnType<typeof vi.fn>;
   };
 
@@ -90,6 +91,7 @@ describe('SearchBarService', () => {
           },
         },
       ]),
+      searchStructured: vi.fn().mockResolvedValue([]),
       reverse: vi.fn().mockResolvedValue(null),
     };
 
@@ -606,36 +608,36 @@ describe('SearchBarService', () => {
 
     it('broadens city-hint retries with query stems and keeps only original-prefix matches', async () => {
       geocodingMock.reverse.mockResolvedValue({ city: 'Vienna' });
-      geocodingMock.search
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([
-          {
-            lat: 48.2169,
-            lng: 16.3136,
-            displayName: 'Wilhelminenstrasse, Ottakring, Vienna, Austria',
-            name: null,
-            importance: 0.62,
-            address: {
-              road: 'Wilhelminenstrasse',
-              city: 'Vienna',
-              country_code: 'at',
-              country: 'Austria',
-            },
+      geocodingMock.search.mockResolvedValueOnce([]);
+      geocodingMock.searchStructured.mockResolvedValueOnce([]);
+      geocodingMock.search.mockResolvedValueOnce([
+        {
+          lat: 48.2169,
+          lng: 16.3136,
+          displayName: 'Wilhelminenstrasse, Ottakring, Vienna, Austria',
+          name: null,
+          importance: 0.62,
+          address: {
+            road: 'Wilhelminenstrasse',
+            city: 'Vienna',
+            country_code: 'at',
+            country: 'Austria',
           },
-          {
-            lat: 48.2346,
-            lng: 16.3193,
-            displayName: 'Dr. Wilhelmine Lowenstein-Brill, Bastiengasse, Vienna, Austria',
-            name: null,
-            importance: 0.68,
-            address: {
-              road: 'Bastiengasse',
-              city: 'Vienna',
-              country_code: 'at',
-              country: 'Austria',
-            },
+        },
+        {
+          lat: 48.2346,
+          lng: 16.3193,
+          displayName: 'Dr. Wilhelmine Lowenstein-Brill, Bastiengasse, Vienna, Austria',
+          name: null,
+          importance: 0.68,
+          address: {
+            road: 'Bastiengasse',
+            city: 'Vienna',
+            country_code: 'at',
+            country: 'Austria',
           },
-        ]);
+        },
+      ]);
 
       const results = await firstValueFrom(
         service.resolveGeocoder('wilhe', {
@@ -652,7 +654,12 @@ describe('SearchBarService', () => {
 
       expect(results.length).toBe(1);
       expect(results[0].label).toBe('Wilhelminenstrasse, Vienna, Austria');
+      expect(geocodingMock.searchStructured).toHaveBeenCalledWith('wilhe', 'Vienna', {
+        limit: 15,
+        countrycodes: ['at'],
+      });
       expect(geocodingMock.search).toHaveBeenCalledTimes(2);
+      expect(geocodingMock.search.mock.calls[0]?.[0]).toBe('wilhe');
       expect(geocodingMock.search.mock.calls[1]?.[0]).toBe('wilhe vienna');
     });
   });
