@@ -1,2 +1,2 @@
 -- Deprecated alias — use promote-local-dev-admin.sql instead.
---   docker exec -i supabase_db_feldpost psql -U postgres -d postgres < scripts/promote-local-dev-admin.sql
+--   See header in scripts/promote-local-dev-admin.sql (use supabase_admin, not postgres).

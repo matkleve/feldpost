@@ -1,5 +1,8 @@
 -- Grant admin to kleveta.matthias@gmail.com on local Supabase (idempotent).
--- Run: docker exec -i supabase_db_feldpost psql -U postgres -d postgres < scripts/promote-local-dev-admin.sql
+-- Run (local Supabase; postgres is not superuser — use supabase_admin):
+--   PGPASSWORD=postgres docker exec -i -e PGPASSWORD=postgres supabase_db_feldpost \
+--     psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+--     < scripts/promote-local-dev-admin.sql
 --
 -- After running: sign OUT in the app, hard-refresh, sign IN with the local password below.
 -- Local auth user id differs from cloud — a cloud session on local Supabase shows "User" and hides admin settings.
@@ -66,6 +69,7 @@ BEGIN
       jsonb_build_object('full_name', v_full_name),
       now(),
       now(),
+      '',
       '',
       '',
       '',
