@@ -941,6 +941,10 @@ location.primary.tooltip,This location is used as the map pin and in exports,med
 location.action.set_primary_error,Could not set primary location,media-detail location row inline error,Could not set primary location,Primaerstandort konnte nicht gesetzt werden,Impossibile impostare la posizione principale
 location.action.delete,Delete location,media-detail location row overflow delete,Delete location,Standort loeschen,Elimina posizione
 location.action.confirmDelete,Confirm delete location,media-detail location row delete confirm,Confirm delete location,Loeschen bestaetigen,Conferma eliminazione posizione
+location.action.show_on_map,Show on map,media-detail location row map action button,Show on map,Auf Karte anzeigen,Mostra sulla mappa
+location.action.show_on_map.disabled,No coordinates for this location,media-detail location row map action disabled,No coordinates for this location,Keine Koordinaten fuer diesen Standort,Nessuna coordinata per questa posizione
+location.action.overflow,More location actions,media-detail location row overflow menu button,More location actions,Weitere Standortaktionen,Altre azioni posizione
+location.copy.menu,Copy location field,media-detail location row copy menu button,Copy location field,Standortfeld kopieren,Copia campo posizione
 location.copy.street,Copy street,media-detail location copy menu,Copy street,Strasse kopieren,Copia via
 location.copy.house_number,Copy house number,media-detail location copy menu,Copy house number,Hausnummer kopieren,Copia numero civico
 location.copy.staircase,Copy staircase,media-detail location copy menu,Copy staircase,Stiege kopieren,Copia scala

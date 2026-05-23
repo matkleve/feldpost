@@ -86,6 +86,7 @@ export class MediaLocationRowComponent {
   readonly deleteRequested = output<string>();
   readonly setPrimaryRequested = output<string>();
   readonly mapPickRequested = output<string>();
+  readonly showOnMapRequested = output<string>();
   readonly copyFieldRequested = output<MediaLocationCopyField>();
   readonly primaryErrorDismissed = output<void>();
 
@@ -108,6 +109,11 @@ export class MediaLocationRowComponent {
   readonly showSetPrimaryAction = computed(
     () => !this.location().is_primary && this.locationCount() > 1,
   );
+
+  readonly canShowOnMap = computed(() => {
+    const row = this.location();
+    return row.latitude != null && row.longitude != null;
+  });
 
   readonly draftStreet = signal('');
   readonly draftHouseNumber = signal('');
@@ -258,6 +264,13 @@ export class MediaLocationRowComponent {
   onMapPick(): void {
     this.mapPickRequested.emit(this.location().id);
     this.closeOverflowMenu();
+  }
+
+  onShowOnMap(): void {
+    if (!this.canShowOnMap()) {
+      return;
+    }
+    this.showOnMapRequested.emit(this.location().id);
   }
 
   onDeleteConfirmed(): void {

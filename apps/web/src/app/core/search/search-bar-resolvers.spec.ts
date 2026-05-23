@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { fetchGeocoderCandidates } from './search-bar-resolvers';
+import { fetchGeocoderCandidates, searchContextFromClusterViewbox } from './search-bar-resolvers';
 import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
 import type { GeocoderSearchOptions } from '../geocoding/geocoding.service';
 import type { SearchAddressCandidate, SearchQueryContext } from './search.models';
+
+describe('searchContextFromClusterViewbox', () => {
+  it('maps Nominatim viewbox string to viewportBounds', () => {
+    const context = searchContextFromClusterViewbox({}, '16.2,48.3,16.5,48.1');
+    expect(context.viewportBounds).toEqual({
+      west: 16.2,
+      north: 48.3,
+      east: 16.5,
+      south: 48.1,
+    });
+  });
+});
 
 describe('fetchGeocoderCandidates', () => {
   it('returns empty for queries shorter than 3 chars', async () => {

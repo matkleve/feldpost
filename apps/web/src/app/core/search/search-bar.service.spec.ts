@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { SearchBarService } from './search-bar.service';
 import { provideOrgSearchTuningTestDouble } from './search-test.providers';
 import { SupabaseService } from '../supabase/supabase.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
+import { MediaClusterService } from '../geocoding/media-cluster.service';
 import { firstValueFrom } from 'rxjs';
 
 function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
@@ -95,12 +97,20 @@ describe('SearchBarService', () => {
       reverse: vi.fn().mockResolvedValue(null),
     };
 
+    const emptyClusters = signal([]).asReadonly();
     TestBed.configureTestingModule({
       providers: [
         SearchBarService,
         provideOrgSearchTuningTestDouble(),
         { provide: SupabaseService, useValue: supabaseMock },
         { provide: GeocodingService, useValue: geocodingMock },
+        {
+          provide: MediaClusterService,
+          useValue: {
+            ensureLoaded: vi.fn().mockResolvedValue(undefined),
+            clusters: emptyClusters,
+          },
+        },
       ],
     });
 
@@ -306,6 +316,7 @@ describe('SearchBarService', () => {
         },
       };
 
+      const emptyClusters = signal([]).asReadonly();
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         providers: [
@@ -313,6 +324,13 @@ describe('SearchBarService', () => {
           provideOrgSearchTuningTestDouble(),
           { provide: SupabaseService, useValue: failureSupabase },
           { provide: GeocodingService, useValue: geocodingMock },
+          {
+            provide: MediaClusterService,
+            useValue: {
+              ensureLoaded: vi.fn().mockResolvedValue(undefined),
+              clusters: emptyClusters,
+            },
+          },
         ],
       });
 

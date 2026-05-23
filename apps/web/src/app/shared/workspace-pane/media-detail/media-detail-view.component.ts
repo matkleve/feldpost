@@ -1689,6 +1689,23 @@ export class MediaDetailViewComponent implements OnDestroy {
     });
   }
 
+  onLocationShowOnMap(locationRowId: string): void {
+    const media = this.media();
+    if (!media) {
+      return;
+    }
+    const row = this.locations().find((item) => item.id === locationRowId);
+    if (!row || row.latitude == null || row.longitude == null) {
+      return;
+    }
+    this.zoomToLocationRequested.emit({
+      mediaId: media.id,
+      lat: row.latitude,
+      lng: row.longitude,
+      zoomMode: 'house',
+    });
+  }
+
   /** Loads `app-media-detail-location-section` row list from `MediaLocationsService`. */
   async reloadLocations(mediaId: string): Promise<void> {
     const result = await this.mediaLocationsService.listForMedia(mediaId);

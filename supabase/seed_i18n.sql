@@ -29205,6 +29205,130 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.show_on_map', 'Show on map', 'en', 'media-detail location row map action button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Show on map', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.show_on_map'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auf Karte anzeigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.show_on_map'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Mostra sulla mappa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.show_on_map'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.show_on_map.disabled', 'No coordinates for this location', 'en', 'media-detail location row map action disabled')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No coordinates for this location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.show_on_map.disabled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Koordinaten fuer diesen Standort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.show_on_map.disabled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna coordinata per questa posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.show_on_map.disabled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.overflow', 'More location actions', 'en', 'media-detail location row overflow menu button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'More location actions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.overflow'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Weitere Standortaktionen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.overflow'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Altre azioni posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.overflow'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.menu', 'Copy location field', 'en', 'media-detail location row copy menu button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy location field', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.menu'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standortfeld kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.menu'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia campo posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.menu'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'location.copy.street', 'Copy street', 'en', 'media-detail location copy menu')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

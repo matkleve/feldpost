@@ -250,6 +250,87 @@ Max geocoder HTTP per user query: **1 reverse + 2 forward** (strict + structured
 | `"denisgasse 4"` | 2 (strict + house-sibling street) | 0–1 |
 | Repeat identical query within cache TTL | 0 (client search/structured cache, 5 min) | 0 |
 
+### 2.7 Cluster viewports (Phase 3)
+
+When the active workspace project has GPS-tagged media, `get_media_clusters(project_id, radius_km)` returns one bounding box per geographic cluster. `MediaClusterService` loads clusters once per `(projectId, radiusKm)` session cache key; radius comes from org tuning `contextDistanceMaxMeters / 1000`.
+
+**DB:**
+
+- Table: `media_items` joined via `media_projects`.
+- Clustering: `ST_ClusterDBSCAN` with `eps = radius_km / 111.0`, `minpoints = 1` (approximate eps; acceptable for grouping).
+- Viewbox padding: `lat_pad = radius_km / 111.0`; `lon_pad = radius_km / (111.0 * cos(radians(AVG(latitude))))` per cluster.
+- Nominatim viewbox string: `lon_min,lat_max,lon_max,lat_min`.
+
+**Search integration (`SearchBarService.fetchGeocoderCandidates`):**
+
+| Clusters | Nominatim behavior |
+| --- | --- |
+| 0 | Phase 2 fallback: `context.viewportBounds` from map if set, else global |
+| 1 | One bounded forward with cluster viewbox (`bounded=1`) |
+| 2+ | `Promise.all`: one bounded forward per cluster; merge by label; slice `maxGeocoderResults` |
+
+When clusters exist, map `viewportBounds` is **not** passed to Nominatim (cluster boxes take precedence). City-hint (§2.5) still runs on merged strict results.
+
+**Call budget (Phase 3 vs Phase 2):**
+
+| Scenario | Phase 2 | Phase 3 |
+| --- | --- | --- |
+| 1 cluster (e.g. Vienna only) | 1–2 forward + 0–1 reverse | 1 bounded forward per cluster (+ city-hint as §2.5) |
+| 2 clusters (Vienna + Paris) | 1–2 forward (global ranking) | 2 parallel bounded forwards |
+| 0 clusters (no GPS media) | 1–2 forward | Same as Phase 2 |
+| Repeat keystrokes | search cache | + cluster RPC cached (0 extra RPC per keystroke) |
+
+Project scope: `WorkspaceViewService.selectedProjectIds()` (first selected project).
+
+---
+
+## Future: Geocoder Backend
+
+Currently using Nominatim (public instance) via Supabase Edge Function.
+Known limitations:
+
+- Partial-prefix gap zone ("denisga" returns empty)
+- Small Austrian localities (Katastralgemeinden) often not indexed
+- 1 req/s rate limit on public instance
+
+### Migration options (priority order)
+
+1. **Photon public instance** (`photon.komoot.io`)
+   - Zero cost, no API key
+   - Elasticsearch backend → gap zone resolved
+   - No SLA — Komoot can throttle anytime
+   - Migration effort: Edge Function URL swap only (~30 min)
+
+2. **Photon self-hosted** (Hetzner CX22, ~€4/month)
+   - Same as above but own SLA
+   - DACH dump only (~2GB, 4GB RAM sufficient)
+   - Migration effort: Docker setup + Edge Function URL swap
+
+3. **Mapbox Geocoding API**
+   - ~€0.75/1000 requests
+   - Best partial-prefix and locality coverage for DACH
+   - Migration effort: Edge Function adapter rewrite (~1 day)
+
+4. **Google Places API**
+   - Best quality overall
+   - ~€17/1000 requests — expensive at scale
+   - Migration effort: Edge Function adapter rewrite (~1 day)
+
+### Decision trigger
+
+Revisit when any of the following occur:
+
+- Photon public instance becomes unreliable
+- User complaints about missing localities exceed X/month
+- Budget allows €5+/month infrastructure cost
+
+### Edge Function abstraction note
+
+The geocode Edge Function should be kept as a thin adapter so backend
+can be swapped without touching client code. All geocoder-specific URL
+construction must stay inside the Edge Function — never leak provider
+details to the client.
+
 ---
 
 ## 3. Place Search Formula

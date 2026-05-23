@@ -9,6 +9,7 @@ import type {
 import {
   GeocodingService
 } from '../geocoding/geocoding.service';
+import { MediaClusterService } from '../geocoding/media-cluster.service';
 import type {
   SearchAddressCandidate,
   SearchContentCandidate,
@@ -39,6 +40,7 @@ import {
   fetchGeocoderCandidates,
   NOMINATIM_FETCH_LIMIT,
   processGeocoderSearchResults,
+  searchContextFromClusterViewbox,
 } from './search-bar-resolvers';
 import { OrgSearchTuningService } from './org-search-tuning.service';
 import type { SearchOrchestratorOptions } from './search.models';
@@ -88,6 +90,7 @@ export class SearchBarService {
   private readonly supabaseService = inject(SupabaseService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly orgSearchTuning = inject(OrgSearchTuningService);
+  private readonly mediaClusterService = inject(MediaClusterService);
 
   orchestratorOptionsFromOrg(): SearchOrchestratorOptions {
     const orchestrator = this.orgSearchTuning.orgSearchConfig().orchestrator;
@@ -425,15 +428,57 @@ export class SearchBarService {
     context: SearchQueryContext,
   ): Promise<SearchAddressCandidate[]> {
     const tuning = this.orgSearchTuning.orgSearchConfig();
-    return fetchGeocoderCandidates(
-      this.geocodingService,
-      normalizedQuery,
-      context,
-      tuning.resolver.maxGeocoderResults,
-      (result, query, index, candidateContext) =>
-        this.toGeocoderCandidate(result, query, index, candidateContext),
-      tuning,
+    const toCandidate = (
+      result: GeocoderSearchResult,
+      query: string,
+      index: number,
+      candidateContext: SearchQueryContext,
+    ) => this.toGeocoderCandidate(result, query, index, candidateContext);
+
+    await this.mediaClusterService.ensureLoaded();
+    const clusters = this.mediaClusterService.clusters();
+    if (clusters.length === 0) {
+      return fetchGeocoderCandidates(
+        this.geocodingService,
+        normalizedQuery,
+        context,
+        tuning.resolver.maxGeocoderResults,
+        toCandidate,
+        tuning,
+      );
+    }
+
+    const baseContext: SearchQueryContext = { ...context, viewportBounds: undefined };
+
+    if (clusters.length === 1) {
+      return fetchGeocoderCandidates(
+        this.geocodingService,
+        normalizedQuery,
+        searchContextFromClusterViewbox(baseContext, clusters[0].viewbox),
+        tuning.resolver.maxGeocoderResults,
+        toCandidate,
+        tuning,
+      );
+    }
+
+    const perCluster = await Promise.all(
+      clusters.map((cluster) =>
+        fetchGeocoderCandidates(
+          this.geocodingService,
+          normalizedQuery,
+          searchContextFromClusterViewbox(baseContext, cluster.viewbox),
+          tuning.resolver.maxGeocoderResults,
+          toCandidate,
+          tuning,
+        ),
+      ),
     );
+
+    let merged: SearchAddressCandidate[] = [];
+    for (const candidates of perCluster) {
+      merged = this.mergeGeocoderCandidateSets(merged, candidates);
+    }
+    return merged.slice(0, tuning.resolver.maxGeocoderResults);
   }
 
   private async fetchGeocoderCandidatesWithCityHint(

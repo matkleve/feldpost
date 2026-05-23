@@ -51,6 +51,7 @@ export class MediaDetailLocationSectionComponent {
   readonly rowDeleteRequested = output<string>();
   readonly setPrimaryRequested = output<string>();
   readonly mapPickRequested = output<string>();
+  readonly showOnMapRequested = output<string>();
   readonly copyFieldRequested = output<MediaLocationCopyField>();
 
   readonly listFilter = signal('');

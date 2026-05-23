@@ -540,6 +540,22 @@ function extractHouseNumberFromCandidateLabel(label: string, street: string): st
   return match ? match[1].toLowerCase() : null;
 }
 
+/** Clone context with cluster viewbox as viewportBounds (Nominatim west,north,east,south). */
+export function searchContextFromClusterViewbox(
+  context: SearchQueryContext,
+  viewbox: string,
+): SearchQueryContext {
+  const parts = viewbox.split(',').map((segment) => Number.parseFloat(segment.trim()));
+  if (parts.length !== 4 || parts.some((value) => !Number.isFinite(value))) {
+    return context;
+  }
+  const [west, north, east, south] = parts;
+  return {
+    ...context,
+    viewportBounds: { north, east, south, west },
+  };
+}
+
 function buildConstrainedSearchOptions(
   context: SearchQueryContext,
   normalizedQuery: string,
