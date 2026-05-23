@@ -16,13 +16,13 @@ type RunAttachPostUpdateArgs = {
   markDone: () => void;
   findJob: () => UploadJob | undefined;
   isCancelled: () => boolean;
-  setLocalUrl: (imageId: string, localUrl: string) => void;
+  setLocalUrl: (mediaId: string, localUrl: string) => void;
   emitImageAttached: (event: ImageAttachedEvent) => void;
   emitBatchProgress: (batchId: string) => void;
   drainQueue: () => void;
-  enrichWithReverseGeocode: (imageId: string) => Promise<void>;
+  enrichWithReverseGeocode: (mediaId: string) => Promise<void>;
   enrichWithForwardGeocode: (
-    imageId: string,
+    mediaId: string,
     titleAddress: string,
   ) => Promise<{ coords: ExifCoords } | undefined>;
   log: (...args: unknown[]) => void;
@@ -53,13 +53,13 @@ export async function runAttachPostUpdate(args: RunAttachPostUpdateArgs): Promis
     warn,
   } = args;
 
-  updateJob({ imageId: updatedJob.targetImageId, coords: finalCoords, direction });
+  updateJob({ mediaId: updatedJob.targetMediaId, coords: finalCoords, direction });
 
   await runAttachEnrichment({
     isAttachKeep,
     finalCoords,
     titleAddress: updatedJob.titleAddress,
-    targetImageId: updatedJob.targetImageId!,
+    targetMediaId: updatedJob.targetMediaId!,
     setPhase: (phase) => setPhase(phase),
     enrichWithReverseGeocode,
     enrichWithForwardGeocode,

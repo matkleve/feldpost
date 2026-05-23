@@ -69,7 +69,8 @@ export interface UploadJob {
   /** Distance between EXIF coords and title-derived coords when both are available. */
   locationMismatchMeters?: number;
   direction?: number;
-  imageId?: string;
+  /** Persisted `media_items` row id after save (canonical: mediaId). */
+  mediaId?: string;
   storagePath?: string;
   /** Original relative path from file/folder selection context, persisted immutably on insert. */
   relativePath?: string;
@@ -79,8 +80,8 @@ export interface UploadJob {
   parsedExif?: ParsedExif;
   /** Dedup content hash (set after 'hashing' phase). */
   contentHash?: string;
-  /** If phase === 'skipped', the existing image ID that matched. */
-  existingImageId?: string;
+  /** If phase === 'skipped', the existing media row id that matched. */
+  existingMediaId?: string;
   /** Optional UI issue classification derived by pipeline decisions. */
   issueKind?: UploadJobIssueKind;
   /** Candidate addresses used when title-derived location cannot be auto-disambiguated. */
@@ -92,8 +93,8 @@ export interface UploadJob {
 
   /** Pipeline mode. Determines the pipeline path the job follows. */
   mode: UploadJobMode;
-  /** For 'replace' and 'attach' modes: the existing image row ID to update. */
-  targetImageId?: string;
+  /** For 'replace' and 'attach' modes: the existing media row id to update. */
+  targetMediaId?: string;
   /** For 'replace' mode: the old storage_path to delete after DB update succeeds. */
   oldStoragePath?: string;
   /** For 'replace' mode: the old thumbnail_path to delete after DB update succeeds. */
@@ -123,7 +124,7 @@ export interface SubmitOptions {
 export interface ImageUploadedEvent {
   jobId: string;
   batchId: string;
-  imageId: string;
+  mediaId: string;
   coords?: ExifCoords;
   direction?: number;
   thumbnailUrl?: string;
@@ -148,7 +149,7 @@ export interface UploadSkippedEvent {
   batchId: string;
   fileName: string;
   contentHash: string;
-  existingImageId: string;
+  existingMediaId: string;
 }
 
 export interface JobPhaseChangedEvent {
@@ -193,7 +194,7 @@ export interface LocationConflictEvent {
 
 export interface ImageReplacedEvent {
   jobId: string;
-  imageId: string;
+  mediaId: string;
   newStoragePath: string;
   localObjectUrl?: string;
   coords?: ExifCoords;
@@ -202,7 +203,7 @@ export interface ImageReplacedEvent {
 
 export interface ImageAttachedEvent {
   jobId: string;
-  imageId: string;
+  mediaId: string;
   newStoragePath: string;
   localObjectUrl?: string;
   coords?: ExifCoords;
@@ -214,7 +215,7 @@ export interface ImageAttachedEvent {
 
 /** An existing images row (no photo) that conflicts with an incoming upload's location. */
 export interface ConflictCandidate {
-  imageId: string;
+  mediaId: string;
   addressLabel?: string;
   latitude?: number;
   longitude?: number;

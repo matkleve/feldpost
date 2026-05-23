@@ -186,7 +186,7 @@ describe('UploadManagerService', () => {
         direction: 90,
       });
 
-      const events: { imageId: string }[] = [];
+      const events: { mediaId: string }[] = [];
       service.imageUploaded$.subscribe((e) => events.push(e));
 
       service.submit([makeFile()]);
@@ -195,7 +195,7 @@ describe('UploadManagerService', () => {
         expect(events.length).toBe(1);
       });
 
-      expect(events[0].imageId).toBe('img-123');
+      expect(events[0].mediaId).toBe('img-123');
     });
   });
 
@@ -214,7 +214,7 @@ describe('UploadManagerService', () => {
         error: null,
       });
 
-      const events: { imageId: string }[] = [];
+      const events: { mediaId: string }[] = [];
       service.imageUploaded$.subscribe((e) => events.push(e));
 
       // Filename with street address
@@ -225,7 +225,7 @@ describe('UploadManagerService', () => {
       });
 
       expect(fakeGeocoding.forward).toHaveBeenCalled();
-      expect(events[0].imageId).toBe('img-456');
+      expect(events[0].mediaId).toBe('img-456');
     });
   });
 

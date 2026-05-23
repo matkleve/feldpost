@@ -4,11 +4,11 @@ type RunAttachEnrichmentArgs = {
   isAttachKeep: boolean;
   finalCoords: ExifCoords | undefined;
   titleAddress: string | undefined;
-  targetImageId: string;
+  targetMediaId: string;
   setPhase: (phase: 'resolving_address' | 'resolving_coordinates') => void;
-  enrichWithReverseGeocode: (imageId: string) => Promise<void>;
+  enrichWithReverseGeocode: (mediaId: string) => Promise<void>;
   enrichWithForwardGeocode: (
-    imageId: string,
+    mediaId: string,
     titleAddress: string,
   ) => Promise<{ coords: ExifCoords } | undefined>;
   updateCoords: (coords: ExifCoords) => void;
@@ -19,7 +19,7 @@ export async function runAttachEnrichment(args: RunAttachEnrichmentArgs): Promis
     isAttachKeep,
     finalCoords,
     titleAddress,
-    targetImageId,
+    targetMediaId,
     setPhase,
     enrichWithReverseGeocode,
     enrichWithForwardGeocode,
@@ -32,13 +32,13 @@ export async function runAttachEnrichment(args: RunAttachEnrichmentArgs): Promis
 
   if (finalCoords && !titleAddress) {
     setPhase('resolving_address');
-    await enrichWithReverseGeocode(targetImageId);
+    await enrichWithReverseGeocode(targetMediaId);
     return;
   }
 
   if (titleAddress && !finalCoords) {
     setPhase('resolving_coordinates');
-    const result = await enrichWithForwardGeocode(targetImageId, titleAddress);
+    const result = await enrichWithForwardGeocode(targetMediaId, titleAddress);
     if (result) {
       updateCoords(result.coords);
     }

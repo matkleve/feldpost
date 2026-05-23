@@ -63,7 +63,7 @@ export class UploadConflictService {
     }
 
     return {
-      imageId: candidates[0].id,
+      mediaId: candidates[0].id,
       addressLabel: candidates[0].address_label ?? undefined,
       latitude: candidates[0].latitude ?? undefined,
       longitude: candidates[0].longitude ?? undefined,

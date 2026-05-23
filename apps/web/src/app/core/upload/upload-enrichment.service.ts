@@ -37,8 +37,8 @@ export class UploadEnrichmentService {
    * UploadService.uploadFile already calls resolveAddress() internally,
    * so this is currently a no-op placeholder for state tracking.
    */
-  async enrichWithReverseGeocode(imageId: string): Promise<void> {
-    void imageId;
+  async enrichWithReverseGeocode(mediaId: string): Promise<void> {
+    void mediaId;
     // UploadService.uploadFile already fires reverse-geocode as fire-and-forget.
     // This method exists for future standalone usage.
   }
@@ -49,18 +49,18 @@ export class UploadEnrichmentService {
    * Returns the resolved coords, or undefined on failure.
    */
   async enrichWithForwardGeocode(
-    imageId: string,
+    mediaId: string,
     titleAddress: string,
   ): Promise<ForwardGeocodeResult | undefined> {
     try {
       const result = await this.geocoding.forward(titleAddress);
       if (!result) {
-        await this.markLocationUnresolvable(imageId);
+        await this.markLocationUnresolvable(mediaId);
         return undefined;
       }
 
       const { error } = await this.supabase.client.rpc('resolve_media_location', {
-        p_media_item_id: imageId,
+        p_media_item_id: mediaId,
         p_latitude: result.lat,
         p_longitude: result.lng,
         p_address_label: result.addressLabel,
@@ -71,13 +71,13 @@ export class UploadEnrichmentService {
       });
 
       if (error) {
-        await this.markLocationUnresolvable(imageId);
+        await this.markLocationUnresolvable(mediaId);
         return undefined;
       }
 
       return { coords: { lat: result.lat, lng: result.lng } };
     } catch {
-      await this.markLocationUnresolvable(imageId);
+      await this.markLocationUnresolvable(mediaId);
       return undefined;
     }
   }
@@ -95,9 +95,9 @@ export class UploadEnrichmentService {
     }
   }
 
-  private async markLocationUnresolvable(imageId: string): Promise<void> {
+  private async markLocationUnresolvable(mediaId: string): Promise<void> {
     await this.supabase.client.rpc('resolve_media_location', {
-      p_media_item_id: imageId,
+      p_media_item_id: mediaId,
       p_location_status: 'unresolvable',
     });
   }

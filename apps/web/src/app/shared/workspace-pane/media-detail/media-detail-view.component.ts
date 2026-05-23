@@ -500,7 +500,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     callbacks: {
       findJobForFailure: (event) => {
         const job = this.uploadManager.jobs().find((candidate) => candidate.id === event.jobId);
-        return job?.targetImageId === this.mediaId();
+        return job?.targetMediaId === this.mediaId();
       },
     },
   });
@@ -588,14 +588,14 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.uploadManager.imageReplaced$
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.imageId === this.mediaId()),
+        filter((event) => event.mediaId === this.mediaId()),
       )
       .subscribe((event) => void this.handleImageReplaced(event));
 
     this.uploadManager.imageAttached$
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.imageId === this.mediaId()),
+        filter((event) => event.mediaId === this.mediaId()),
       )
       .subscribe((event) => void this.handleImageAttached(event));
 

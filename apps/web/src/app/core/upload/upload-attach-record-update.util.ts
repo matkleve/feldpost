@@ -18,7 +18,7 @@ type AttachRecordUpdateResult = {
 type AttachRecordUpdateArgs = {
   storagePath: string;
   originalFilename: string;
-  targetImageId: string;
+  targetMediaId: string;
   parsedExif: ParsedExif;
   conflictResolution: ConflictResolution | undefined;
   contentHash: string | undefined;
@@ -84,7 +84,7 @@ export async function performAttachRecordUpdate(
 
   insertDedupHashFireAndForget({
     contentHash: args.contentHash,
-    mediaItemId: args.targetImageId,
+    mediaItemId: args.targetMediaId,
     userId: args.userId,
     insert: args.insertDedupHash,
   });

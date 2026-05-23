@@ -72,7 +72,7 @@ export class UploadPanelBulkActionsService {
 
   async downloadSelectedUploads(): Promise<void> {
     for (const job of this.ctx.selectedUploadJobs()) {
-      if (job.imageId && job.storagePath && this.ctx.canZoomToJob(job)) {
+      if (job.mediaId && job.storagePath && this.ctx.canZoomToJob(job)) {
         await this.ctx.downloadUploadedJob(job);
       }
     }

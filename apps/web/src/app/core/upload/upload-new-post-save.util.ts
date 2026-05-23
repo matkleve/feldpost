@@ -12,18 +12,18 @@ type FinalizeNewUploadPhaseArgs = {
   markDone: () => void;
   emitBatchProgress: (batchId: string) => void;
   drainQueue: () => void;
-  enrichWithReverseGeocode: (imageId: string) => Promise<void>;
+  enrichWithReverseGeocode: (mediaId: string) => Promise<void>;
   enrichWithForwardGeocode: (
-    imageId: string,
+    mediaId: string,
     titleAddress: string,
   ) => Promise<{ coords: ExifCoords } | undefined>;
   geocodeTitleAddress: (titleAddress: string) => Promise<ExifCoords | undefined>;
   mismatchToleranceMeters: number;
-  setLocalUrl: (imageId: string, localUrl: string) => void;
+  setLocalUrl: (mediaId: string, localUrl: string) => void;
   emitImageUploaded: (event: {
     jobId: string;
     batchId: string;
-    imageId: string;
+    mediaId: string;
     coords?: ExifCoords;
     direction?: number;
     thumbnailUrl?: string;
@@ -81,7 +81,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
 
   if (updatedJob.coords && !updatedJob.titleAddress) {
     setPhase('resolving_address');
-    await enrichWithReverseGeocode(updatedJob.imageId!);
+    await enrichWithReverseGeocode(updatedJob.mediaId!);
   } else if (updatedJob.coords && updatedJob.titleAddress) {
     // Reconciliation branch: compare EXIF coordinates with geocoded title address.
     // Upload remains successful even on mismatch; we persist audit information only.
@@ -98,7 +98,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
       if (distanceMeters > mismatchToleranceMeters) {
         console.warn('[upload-new] location source mismatch detected', {
           jobId,
-          imageId: updatedJob.imageId,
+          mediaId: updatedJob.mediaId,
           exifCoords: updatedJob.coords,
           titleAddress: updatedJob.titleAddress,
           titleAddressCoords: titleCoords,
@@ -110,7 +110,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
   } else if (updatedJob.titleAddress && !updatedJob.coords) {
     setPhase('resolving_coordinates');
     const enrichResult = await enrichWithForwardGeocode(
-      updatedJob.imageId!,
+      updatedJob.mediaId!,
       updatedJob.titleAddress,
     );
     if (enrichResult) {
@@ -154,11 +154,11 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
 function emitCompletion(args: {
   jobId: string;
   finalJob: UploadJob;
-  setLocalUrl: (imageId: string, localUrl: string) => void;
+  setLocalUrl: (mediaId: string, localUrl: string) => void;
   emitImageUploaded: (event: {
     jobId: string;
     batchId: string;
-    imageId: string;
+    mediaId: string;
     coords?: ExifCoords;
     direction?: number;
     thumbnailUrl?: string;
@@ -168,14 +168,14 @@ function emitCompletion(args: {
 }): void {
   const { jobId, finalJob, setLocalUrl, emitImageUploaded, emitBatchProgress, drainQueue } = args;
 
-  if (finalJob.thumbnailUrl && finalJob.imageId) {
-    setLocalUrl(finalJob.imageId, finalJob.thumbnailUrl);
+  if (finalJob.thumbnailUrl && finalJob.mediaId) {
+    setLocalUrl(finalJob.mediaId, finalJob.thumbnailUrl);
   }
 
   emitImageUploaded({
     jobId,
     batchId: finalJob.batchId,
-    imageId: finalJob.imageId!,
+    mediaId: finalJob.mediaId!,
     coords: finalJob.coords,
     direction: finalJob.direction,
     thumbnailUrl: finalJob.thumbnailUrl,

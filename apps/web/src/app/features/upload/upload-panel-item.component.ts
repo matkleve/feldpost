@@ -112,7 +112,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
   readonly showDuplicateExistingMediaShortcut = computed(() => {
     const job = this.job();
-    return getIssueKind(job) === 'duplicate_photo' && !!job.existingImageId;
+    return getIssueKind(job) === 'duplicate_photo' && !!job.existingMediaId;
   });
   readonly showThumbnailSpinner = computed(() => this.showsUploadOverlay(this.job().phase));
   /** Location / open hint over thumbnail on interactive rows (workspace detail / placement). */
@@ -173,14 +173,14 @@ export class UploadPanelItemComponent implements OnDestroy {
     const j = this.job();
     return (
       getLaneForJob(j) === 'uploaded' &&
-      !!j.imageId &&
+      !!j.mediaId &&
       typeof j.coords?.lat === 'number' &&
       typeof j.coords?.lng === 'number'
     );
   }
 
   canOpenInWorkspacePane(): boolean {
-    return getLaneForJob(this.job()) === 'uploaded' && !!this.job().imageId;
+    return getLaneForJob(this.job()) === 'uploaded' && !!this.job().mediaId;
   }
 
   rowMainActionAriaLabel(): string | null {
@@ -226,7 +226,7 @@ export class UploadPanelItemComponent implements OnDestroy {
     if (lane === 'issues') {
       const issueKind = getIssueKind(job);
       if (issueKind === 'duplicate_photo') {
-        if (job.existingImageId) {
+        if (job.existingMediaId) {
           actions.push('open_existing_media');
         }
         actions.push('upload_anyway');
@@ -250,7 +250,7 @@ export class UploadPanelItemComponent implements OnDestroy {
       }
       actions.push('dismiss');
       return actions;
-    } else if (lane === 'uploaded' && job.imageId) {
+    } else if (lane === 'uploaded' && job.mediaId) {
       actions.push('change_location_map');
       actions.push('change_location_address');
       actions.push('assign_to_project');

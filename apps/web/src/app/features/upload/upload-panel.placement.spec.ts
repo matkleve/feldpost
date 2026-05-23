@@ -63,7 +63,7 @@ describe('UploadPanelComponent workspace detail click interactions', () => {
     const detailSpy = vi.spyOn(component.detailRequested, 'emit');
     const job = makeUploadJob({
       phase: 'complete',
-      imageId: 'img-123',
+      mediaId: 'img-123',
       coords: { lat: 48.2082, lng: 16.3738 },
     });
 
@@ -83,7 +83,7 @@ describe('UploadPanelComponent workspace detail click interactions', () => {
     fakeManager._jobsSignal.set([
       makeUploadJob({
         phase: 'complete',
-        imageId: 'img-123',
+        mediaId: 'img-123',
         coords: undefined,
       }),
     ]);
@@ -104,7 +104,7 @@ describe('UploadPanelComponent workspace detail keyboard interactions', () => {
     fakeManager._jobsSignal.set([
       makeUploadJob({
         phase: 'complete',
-        imageId: 'img-123',
+        mediaId: 'img-123',
         coords: { lat: 48.2082, lng: 16.3738 },
       }),
     ]);

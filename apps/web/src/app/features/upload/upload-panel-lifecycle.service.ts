@@ -61,7 +61,7 @@ export class UploadPanelLifecycleService {
     this.uploadManager.imageUploaded$.subscribe((event: ManagerImageUploadedEvent) => {
       if (event.coords && this.imageUploadedCallback) {
         this.imageUploadedCallback({
-          id: event.imageId,
+          id: event.mediaId,
           lat: event.coords.lat,
           lng: event.coords.lng,
           direction: event.direction,

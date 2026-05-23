@@ -22,7 +22,7 @@ function makeJob(overrides: Partial<UploadJob> = {}): UploadJob {
     statusLabel: 'Uploaded',
     mode: 'new',
     submittedAt: new Date('2026-01-01T10:00:00.000Z'),
-    imageId: 'img-1',
+    mediaId: 'img-1',
     storagePath: 'org/u/photo.jpg',
     ...overrides,
   } as UploadJob;

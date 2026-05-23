@@ -84,12 +84,12 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     markDone: () => queue.markDone(jobId),
     emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
     drainQueue: () => ctx.drainQueue(),
-    enrichWithReverseGeocode: (imageId) => enrich.enrichWithReverseGeocode(imageId),
-    enrichWithForwardGeocode: (imageId, titleAddress) =>
-      enrich.enrichWithForwardGeocode(imageId, titleAddress),
+    enrichWithReverseGeocode: (mediaId) => enrich.enrichWithReverseGeocode(mediaId),
+    enrichWithForwardGeocode: (mediaId, titleAddress) =>
+      enrich.enrichWithForwardGeocode(mediaId, titleAddress),
     geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
     mismatchToleranceMeters: 15,
-    setLocalUrl: (imageId, localUrl) => mediaDownloadService.setLocalUrl(imageId, localUrl),
+    setLocalUrl: (mediaId, localUrl) => mediaDownloadService.setLocalUrl(mediaId, localUrl),
     emitImageUploaded: (event) => ctx.emitImageUploaded(event),
   });
 }
@@ -176,7 +176,7 @@ async function handleUploadResult(args: {
 
   jobState.updateJob(jobId, {
     progress: 100,
-    imageId: result.id,
+    mediaId: result.id,
     storagePath: result.storagePath,
     coords: savedCoords,
     direction: result.direction,
@@ -188,10 +188,10 @@ async function handleUploadResult(args: {
     return null;
   }
 
-  if (savedJob.contentHash && savedJob.imageId) {
+  if (savedJob.contentHash && savedJob.mediaId) {
     insertDedupHashFireAndForget({
       contentHash: savedJob.contentHash,
-      mediaItemId: savedJob.imageId,
+      mediaItemId: savedJob.mediaId,
       userId: getUserId(),
       insert: (payload) => supabaseClient.from('dedup_hashes').insert(payload),
     });

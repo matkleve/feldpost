@@ -86,24 +86,24 @@ export class UploadPanelJobFileActionsService {
   }
 
   async openUploadedJobInMedia(job: UploadJob): Promise<void> {
-    if (!job.imageId) {
+    if (!job.mediaId) {
       return;
     }
 
-    this.workspaceSelectionService.setSingle(job.imageId);
-    this.workspacePaneObserver.setDetailImageId(job.imageId);
+    this.workspaceSelectionService.setSingle(job.mediaId);
+    this.workspacePaneObserver.setDetailImageId(job.mediaId);
     this.workspacePaneObserver.setOpen(true);
 
     await this.router.navigate(['/media']);
   }
 
   async openExistingDuplicateInMedia(job: UploadJob): Promise<void> {
-    if (!job.existingImageId) {
+    if (!job.existingMediaId) {
       return;
     }
 
-    this.workspaceSelectionService.setSingle(job.existingImageId);
-    this.workspacePaneObserver.setDetailImageId(job.existingImageId);
+    this.workspaceSelectionService.setSingle(job.existingMediaId);
+    this.workspacePaneObserver.setDetailImageId(job.existingMediaId);
     this.workspacePaneObserver.setOpen(true);
 
     await this.router.navigate(['/media']);
@@ -156,7 +156,7 @@ export class UploadPanelJobFileActionsService {
 
   async removeUploadedJobFromProjects(job: UploadJob): Promise<boolean> {
     const boundProjectIds = getBoundProjectIds(job);
-    if (!job.imageId || boundProjectIds.length === 0) {
+    if (!job.mediaId || boundProjectIds.length === 0) {
       this.toastService.show({
         message: this.t('upload.item.menu.project.unavailable', 'No project assigned.'),
         type: 'warning',
@@ -167,7 +167,7 @@ export class UploadPanelJobFileActionsService {
 
     let allOk = true;
     for (const projectId of boundProjectIds) {
-      const ok = await this.projectsService.removeMediaFromProject(job.imageId, projectId);
+      const ok = await this.projectsService.removeMediaFromProject(job.mediaId, projectId);
       if (!ok) {
         allOk = false;
       }
@@ -194,7 +194,7 @@ export class UploadPanelJobFileActionsService {
   }
 
   async deleteUploadedMedia(job: UploadJob): Promise<boolean> {
-    if (!job.imageId) {
+    if (!job.mediaId) {
       this.toastService.show({
         message: this.t('upload.item.menu.media.unavailable', 'Media is not persisted yet.'),
         type: 'warning',
@@ -204,7 +204,7 @@ export class UploadPanelJobFileActionsService {
     }
 
     const result = await this.mediaDeleteUndo.deleteWithUndo({
-      mediaItemIds: [job.imageId],
+      mediaItemIds: [job.mediaId],
     });
 
     if (!result.ok) {
@@ -235,7 +235,7 @@ export class UploadPanelJobFileActionsService {
   }
 
   toggleJobPriority(job: UploadJob): void {
-    if (!job.imageId) {
+    if (!job.mediaId) {
       return;
     }
 
@@ -258,11 +258,11 @@ export class UploadPanelJobFileActionsService {
   }
 
   private async resolveMediaIdForJob(job: UploadJob): Promise<string | null> {
-    if (job.imageId) {
-      return job.imageId;
+    if (job.mediaId) {
+      return job.mediaId;
     }
 
-    // Some rows (especially non-photo uploads) can be rehydrated without imageId on the job object.
+    // Some rows (especially non-photo uploads) can be rehydrated without mediaId on the job object.
     // Use storage_path as deterministic fallback to locate the persisted media_items row.
     if (!job.storagePath) {
       return null;

@@ -111,6 +111,6 @@ export class UploadPanelViewModelService {
       return false;
     }
 
-    return jobs.every((job) => !!job.imageId && !!job.storagePath && options.canZoomToJob(job));
+    return jobs.every((job) => !!job.mediaId && !!job.storagePath && options.canZoomToJob(job));
   });
 }

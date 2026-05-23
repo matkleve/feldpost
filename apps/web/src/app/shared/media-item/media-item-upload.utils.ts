@@ -41,7 +41,7 @@ export function resolveMediaItemUploadOverlay(
 }
 
 function matchesMediaItemJob(job: UploadJob, item: ImageRecord): boolean {
-  if (job.targetImageId === item.id || job.imageId === item.id || job.existingImageId === item.id) {
+  if (job.targetMediaId === item.id || job.mediaId === item.id || job.existingMediaId === item.id) {
     return true;
   }
 

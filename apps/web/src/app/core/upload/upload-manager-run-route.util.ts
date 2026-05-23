@@ -20,7 +20,7 @@ export async function runUploadPipelineByMode(
   const shortId = job.id.slice(0, deps.logJobIdPrefixLen);
 
   console.log(
-    `[upload-manager] runPipeline: routing job ${shortId} via mode=${job.mode}, targetImageId=${job.targetImageId}`,
+    `[upload-manager] runPipeline: routing job ${shortId} via mode=${job.mode}, targetMediaId=${job.targetMediaId}`,
   );
 
   if (job.mode === 'replace') {

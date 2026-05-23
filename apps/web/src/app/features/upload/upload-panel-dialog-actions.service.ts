@@ -155,7 +155,7 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    if (!job.imageId && job.phase === 'missing_data') {
+    if (!job.mediaId && job.phase === 'missing_data') {
       this.uploadManager.selectAddressCandidate(job.id, candidate);
       this.toastService.show({
         message: this.t('upload.location.update.success', 'Location updated.'),
@@ -165,11 +165,11 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    if (!job.imageId) {
+    if (!job.mediaId) {
       return;
     }
 
-    const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(job.imageId, {
+    const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(job.mediaId, {
       lat: candidate.lat,
       lng: candidate.lng,
       addressLabel: candidate.addressLabel,
@@ -190,7 +190,7 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    this.ctx.imageUploaded({ id: job.imageId, lat: result.lat, lng: result.lng });
+    this.ctx.imageUploaded({ id: job.mediaId, lat: result.lat, lng: result.lng });
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Location updated.'),
       type: 'success',
@@ -205,7 +205,7 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    if (!job.imageId && job.phase === 'missing_data') {
+    if (!job.mediaId && job.phase === 'missing_data') {
       this.ctx.placeFile(job.id, suggestion.lat, suggestion.lng);
       this.toastService.show({
         message: this.t('upload.location.update.success', 'Location updated.'),
@@ -216,13 +216,13 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    if (!job.imageId) {
+    if (!job.mediaId) {
       this.onLocationAddressDialogClose();
       return;
     }
 
     const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
-      job.imageId,
+      job.mediaId,
       suggestion,
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
@@ -235,7 +235,7 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    this.ctx.imageUploaded({ id: job.imageId, lat: result.lat, lng: result.lng });
+    this.ctx.imageUploaded({ id: job.mediaId, lat: result.lat, lng: result.lng });
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Location updated.'),
       type: 'success',
@@ -264,7 +264,7 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    if (!job.imageId && job.phase === 'missing_data') {
+    if (!job.mediaId && job.phase === 'missing_data') {
       this.uploadManager.assignJobToProject(job.id, projectId);
       this.toastService.show({
         message: this.mapProjectActionsService.formatProjectAssignmentSuccess(selected.name, 1),
@@ -276,12 +276,12 @@ export class UploadPanelDialogActionsService {
       return;
     }
 
-    if (!job.imageId) {
+    if (!job.mediaId) {
       this.dialogSignals.setPendingProjectAssignmentJob(null);
       return;
     }
 
-    const ok = await this.projectsService.addMediaToProject(job.imageId, projectId);
+    const ok = await this.projectsService.addMediaToProject(job.mediaId, projectId);
     if (ok) {
       this.toastService.show({
         message: this.mapProjectActionsService.formatProjectAssignmentSuccess(selected.name, 1),
@@ -352,7 +352,7 @@ export class UploadPanelDialogActionsService {
   }
 
   async openProjectAssignmentForJob(job: UploadJob): Promise<void> {
-    if (!job.imageId && job.phase !== 'missing_data') {
+    if (!job.mediaId && job.phase !== 'missing_data') {
       return;
     }
 
@@ -391,7 +391,7 @@ export class UploadPanelDialogActionsService {
   }
 
   openLocationAddressDialog(job: UploadJob): void {
-    if (!job.imageId && job.phase !== 'missing_data') {
+    if (!job.mediaId && job.phase !== 'missing_data') {
       return;
     }
 
@@ -422,13 +422,13 @@ export class UploadPanelDialogActionsService {
     seed: UploadJob,
     applyToBatch: boolean,
   ): ReadonlyArray<UploadJob> {
-    if (!applyToBatch || !seed.existingImageId) {
+    if (!applyToBatch || !seed.existingMediaId) {
       return [seed];
     }
 
     return this.uploadManager
       .jobs()
-      .filter((job) => job.phase === 'skipped' && job.existingImageId === seed.existingImageId);
+      .filter((job) => job.phase === 'skipped' && job.existingMediaId === seed.existingMediaId);
   }
 
   private prioritizeBoundProjectOptions(

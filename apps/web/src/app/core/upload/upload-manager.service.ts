@@ -345,8 +345,8 @@ export class UploadManagerService {
    */
   placeJob(jobId: string, coords: ExifCoords): void {
     const job = this.jobState.findJob(jobId);
-    if (job?.phase === 'missing_data' && job.imageId) {
-      void this.resolvePersistedMissingDataLocation(jobId, job.imageId, coords);
+    if (job?.phase === 'missing_data' && job.mediaId) {
+      void this.resolvePersistedMissingDataLocation(jobId, job.mediaId, coords);
       return;
     }
 
@@ -363,7 +363,7 @@ export class UploadManagerService {
       return;
     }
 
-    if (job.imageId) {
+    if (job.mediaId) {
       this.jobState.updateJob(jobId, {
         titleAddress: candidate.addressLabel,
         titleAddressSource: 'file',
@@ -371,7 +371,7 @@ export class UploadManagerService {
         issueKind: undefined,
         addressCandidates: undefined,
       });
-      void this.resolvePersistedMissingDataLocation(jobId, job.imageId, {
+      void this.resolvePersistedMissingDataLocation(jobId, job.mediaId, {
         lat: candidate.lat,
         lng: candidate.lng,
       });
@@ -394,8 +394,8 @@ export class UploadManagerService {
    */
   assignJobToProject(jobId: string, projectId: string): void {
     const job = this.jobState.findJob(jobId);
-    if (job?.phase === 'missing_data' && job.imageId) {
-      void this.resolvePersistedMissingDataProject(jobId, job.imageId, projectId);
+    if (job?.phase === 'missing_data' && job.mediaId) {
+      void this.resolvePersistedMissingDataProject(jobId, job.mediaId, projectId);
       return;
     }
 
@@ -404,11 +404,11 @@ export class UploadManagerService {
 
   private async resolvePersistedMissingDataLocation(
     jobId: string,
-    imageId: string,
+    mediaId: string,
     coords: ExifCoords,
   ): Promise<void> {
     const { data, error } = await this.supabase.client.rpc('resolve_media_location', {
-      p_media_item_id: imageId,
+      p_media_item_id: mediaId,
       p_latitude: coords.lat,
       p_longitude: coords.lng,
     });
@@ -443,10 +443,10 @@ export class UploadManagerService {
 
   private async resolvePersistedMissingDataProject(
     jobId: string,
-    imageId: string,
+    mediaId: string,
     projectId: string,
   ): Promise<void> {
-    const ok = await this.projects.addMediaToProject(imageId, projectId);
+    const ok = await this.projects.addMediaToProject(mediaId, projectId);
     if (!ok) {
       const errorLabel = phaseLabel('error');
       this.jobState.updateJob(jobId, {
@@ -474,24 +474,24 @@ export class UploadManagerService {
    * Replace the photo file for an existing image row.
    * Pipeline: validating ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ hashing ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ dedup_check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ uploading ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ replacing_record ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ complete.
    *
-   * @param imageId  The existing image UUID whose file is being replaced.
+   * @param mediaId  The existing image UUID whose file is being replaced.
    * @param file     The new photo file.
    * @returns        The job ID for tracking progress.
    */
-  replaceFile(imageId: string, file: File): string {
-    return replaceUploadManagerFile(imageId, file, this.actionDeps);
+  replaceFile(mediaId: string, file: File): string {
+    return replaceUploadManagerFile(mediaId, file, this.actionDeps);
   }
 
   /**
    * Upload a photo to an existing image row that has no file (photoless datapoint).
    * Pipeline: validating ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ parsing_exif ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ hashing ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ dedup_check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ uploading ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ replacing_record ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ enrichment ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ complete.
    *
-   * @param imageId  The existing photoless image UUID.
+   * @param mediaId  The existing photoless image UUID.
    * @param file     The photo file to attach.
    * @returns        The job ID for tracking progress.
    */
-  attachFile(imageId: string, file: File): string {
-    return attachUploadManagerFile(imageId, file, this.actionDeps);
+  attachFile(mediaId: string, file: File): string {
+    return attachUploadManagerFile(mediaId, file, this.actionDeps);
   }
 
   private hydrateDeferredPreviews(jobs: ReadonlyArray<UploadJob>): void {

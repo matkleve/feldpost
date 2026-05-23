@@ -1256,7 +1256,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
     const blobUrl = 'blob:http://localhost/fake-blob';
     ctx.imageReplaced$.next({
       jobId: 'job-001',
-      imageId: MOCK_IMAGE.id,
+      mediaId: MOCK_IMAGE.id,
       newStoragePath: 'org-001/user-001/new-photo.jpg',
       localObjectUrl: blobUrl,
     });
@@ -1275,7 +1275,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
     ctx.imageReplaced$.next({
       jobId: 'job-001',
-      imageId: MOCK_IMAGE.id,
+      mediaId: MOCK_IMAGE.id,
       newStoragePath: 'org-001/user-001/new-photo.jpg',
     });
 
@@ -1302,7 +1302,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
 
     ctx.imageAttached$.next({
       jobId: 'job-002',
-      imageId: MOCK_IMAGE.id,
+      mediaId: MOCK_IMAGE.id,
       newStoragePath: 'org-001/user-001/attached.jpg',
       localObjectUrl: 'blob:http://localhost/fake-blob',
       hadExistingCoords: false,
@@ -1328,7 +1328,7 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
     // Simulate replace event with blobUrl
     ctx.imageReplaced$.next({
       jobId: 'job-001',
-      imageId: MOCK_IMAGE.id,
+      mediaId: MOCK_IMAGE.id,
       newStoragePath: 'org-001/user-001/new-photo.jpg',
       localObjectUrl: blobUrl,
     });

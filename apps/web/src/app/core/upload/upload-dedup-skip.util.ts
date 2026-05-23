@@ -4,7 +4,7 @@ type DedupSkipArgs = {
   jobId: string;
   job: UploadJob;
   contentHash: string;
-  existingImageId: string;
+  existingMediaId: string;
   setPhase: (jobId: string, phase: 'skipped') => void;
   updateJob: (jobId: string, patch: Partial<UploadJob>) => void;
   markDone: (jobId: string) => void;
@@ -12,17 +12,17 @@ type DedupSkipArgs = {
 };
 
 export function handleDedupSkip(args: DedupSkipArgs): void {
-  const { jobId, job, contentHash, existingImageId, setPhase, updateJob, markDone, ctx } = args;
+  const { jobId, job, contentHash, existingMediaId, setPhase, updateJob, markDone, ctx } = args;
 
   setPhase(jobId, 'skipped');
-  updateJob(jobId, { existingImageId });
+  updateJob(jobId, { existingMediaId });
   markDone(jobId);
   ctx.emitUploadSkipped({
     jobId,
     batchId: job.batchId,
     fileName: job.file.name,
     contentHash,
-    existingImageId,
+    existingMediaId,
   });
   ctx.emitBatchProgress(job.batchId);
   ctx.drainQueue();

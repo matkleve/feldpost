@@ -117,13 +117,13 @@ export class UploadAttachPipelineService {
       markDone: () => this.queue.markDone(jobId),
       findJob: () => this.jobState.findJob(jobId),
       isCancelled: () => this.isCancelled(jobId),
-      setLocalUrl: (imageId, localUrl) => this.mediaDownloadService.setLocalUrl(imageId, localUrl),
+      setLocalUrl: (mediaId, localUrl) => this.mediaDownloadService.setLocalUrl(mediaId, localUrl),
       emitImageAttached: (event) => ctx.emitImageAttached(event),
       emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
       drainQueue: () => ctx.drainQueue(),
-      enrichWithReverseGeocode: (imageId) => this.enrichment.enrichWithReverseGeocode(imageId),
-      enrichWithForwardGeocode: (imageId, titleAddress) =>
-        this.enrichment.enrichWithForwardGeocode(imageId, titleAddress),
+      enrichWithReverseGeocode: (mediaId) => this.enrichment.enrichWithReverseGeocode(mediaId),
+      enrichWithForwardGeocode: (mediaId, titleAddress) =>
+        this.enrichment.enrichWithForwardGeocode(mediaId, titleAddress),
       log: (...args) => console.log(...args),
       warn: (...args) => console.warn(...args),
     });
@@ -193,7 +193,7 @@ export class UploadAttachPipelineService {
         jobId,
         job: currentJob,
         contentHash,
-        existingImageId: dedupResult,
+        existingMediaId: dedupResult,
         setPhase: (id, phase) => this.jobState.setPhase(id, phase),
         updateJob: (id, patch) => this.jobState.updateJob(id, patch),
         markDone: (id) => this.queue.markDone(id),

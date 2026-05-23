@@ -146,7 +146,7 @@ export function assignUploadManagerJobToProject(
 }
 
 export function replaceUploadManagerFile(
-  imageId: string,
+  mediaId: string,
   file: File,
   deps: UploadManagerActionsDeps,
 ): string {
@@ -175,7 +175,7 @@ export function replaceUploadManagerFile(
     thumbnailUrl: deps.createImmediatePreviewUrl(file),
     submittedAt: new Date(),
     mode: 'replace',
-    targetImageId: imageId,
+    targetMediaId: mediaId,
   };
 
   deps.addJobs([job]);
@@ -185,12 +185,12 @@ export function replaceUploadManagerFile(
 }
 
 export function attachUploadManagerFile(
-  imageId: string,
+  mediaId: string,
   file: File,
   deps: UploadManagerActionsDeps,
 ): string {
   console.log('[upload-manager] attachFile called:', {
-    imageId,
+    mediaId,
     fileName: file.name,
     fileSize: file.size,
   });
@@ -220,7 +220,7 @@ export function attachUploadManagerFile(
     thumbnailUrl: deps.createImmediatePreviewUrl(file),
     submittedAt: new Date(),
     mode: 'attach',
-    targetImageId: imageId,
+    targetMediaId: mediaId,
   };
 
   deps.addJobs([job]);
@@ -268,7 +268,7 @@ export function resolveUploadManagerConflict(
   if (resolution === 'attach_replace' || resolution === 'attach_keep') {
     deps.updateJob(jobId, {
       mode: 'attach',
-      targetImageId: job.conflictCandidate!.imageId,
+      targetMediaId: job.conflictCandidate!.mediaId,
     });
   }
 
@@ -280,7 +280,7 @@ export function forceUploadManagerDuplicateUpload(
   deps: UploadManagerActionsDeps,
 ): void {
   const job = deps.findJob(jobId);
-  if (!job || job.phase !== 'skipped' || !job.existingImageId) return;
+  if (!job || job.phase !== 'skipped' || !job.existingMediaId) return;
 
   deps.updateJob(jobId, {
     forceDuplicateUpload: true,
@@ -288,7 +288,7 @@ export function forceUploadManagerDuplicateUpload(
     statusLabel: deps.queuedLabel,
     error: undefined,
     failedAt: undefined,
-    existingImageId: undefined,
+    existingMediaId: undefined,
   });
 
   deps.drainQueue();

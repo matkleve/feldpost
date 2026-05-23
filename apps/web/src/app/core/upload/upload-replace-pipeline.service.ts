@@ -62,7 +62,7 @@ export class UploadReplacePipelineService {
     const { data: targetRow, error: targetResolveError } = await this.supabase.client
       .from('media_items')
       .select('id')
-      .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+      .or(`id.eq.${job.targetMediaId!},source_image_id.eq.${job.targetMediaId!}`)
       .limit(1)
       .maybeSingle();
 
@@ -88,7 +88,7 @@ export class UploadReplacePipelineService {
     this.jobState.updateJob(jobId, {
       oldStoragePath: existingRow.storage_path ?? undefined,
       oldThumbnailPath: existingRow.thumbnail_path ?? undefined,
-      targetImageId: targetMediaItemId,
+      targetMediaId: targetMediaItemId,
     });
 
     this.jobState.setPhase(jobId, 'parsing_exif');
@@ -144,7 +144,7 @@ export class UploadReplacePipelineService {
         jobId,
         job,
         contentHash,
-        existingImageId: dedupResult,
+        existingMediaId: dedupResult,
         setPhase: (id, phase) => this.jobState.setPhase(id, phase),
         updateJob: (id, patch) => this.jobState.updateJob(id, patch),
         markDone: (id) => this.queue.markDone(id),
@@ -219,7 +219,7 @@ export class UploadReplacePipelineService {
     });
 
     this.jobState.updateJob(jobId, {
-      imageId: targetMediaItemId,
+      mediaId: targetMediaItemId,
       coords: parsedExif.coords,
       direction: parsedExif.direction,
     });
@@ -241,7 +241,7 @@ export class UploadReplacePipelineService {
 
     ctx.emitImageReplaced({
       jobId,
-      imageId: targetMediaItemId,
+      mediaId: targetMediaItemId,
       newStoragePath: storagePath,
       localObjectUrl: finalJob.thumbnailUrl,
       coords: parsedExif.coords,

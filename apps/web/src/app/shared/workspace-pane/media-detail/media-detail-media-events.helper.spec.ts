@@ -54,7 +54,7 @@ describe('MediaDetailMediaEventsHelper', () => {
 
     const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     await helper.handleImageReplaced({
-      imageId: 'img-1',
+      mediaId: 'img-1',
       newStoragePath: 'org-001/user-001/new.jpg',
       localObjectUrl: 'blob:test',
       jobId: 'job-1',

@@ -39,14 +39,14 @@ export class MediaDetailMediaEventsHelper {
     this.deps.signals.fullResPreloaded.set(false);
     this.deps.signals.activeJobId.set(null);
 
-    this.deps.services.mediaDownloadService.invalidate(event.imageId);
+    this.deps.services.mediaDownloadService.invalidate(event.mediaId);
     await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
       URL.revokeObjectURL(event.localObjectUrl);
     }
 
-    this.updateGridCache(event.imageId, event.newStoragePath);
+    this.updateGridCache(event.mediaId, event.newStoragePath);
     this.deps.services.toastService.show({
       message: this.deps.callbacks.t('workspace.imageDetail.toast.mediaReplaced', 'Media replaced'),
       type: 'success',
@@ -63,14 +63,14 @@ export class MediaDetailMediaEventsHelper {
     this.deps.signals.fullResPreloaded.set(false);
     this.deps.signals.activeJobId.set(null);
 
-    this.deps.services.mediaDownloadService.invalidate(event.imageId);
+    this.deps.services.mediaDownloadService.invalidate(event.mediaId);
     await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
       URL.revokeObjectURL(event.localObjectUrl);
     }
 
-    this.updateGridCache(event.imageId, event.newStoragePath);
+    this.updateGridCache(event.mediaId, event.newStoragePath);
     this.deps.services.toastService.show({
       message: this.deps.callbacks.t('workspace.imageDetail.toast.mediaAttached', 'Media attached'),
       type: 'success',

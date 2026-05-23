@@ -254,7 +254,7 @@ async function hashAndCheckDedup(
     jobId,
     job,
     contentHash,
-    existingImageId: dedupResult,
+    existingMediaId: dedupResult,
     setPhase: (id, phase) => deps.jobState.setPhase(id, phase),
     updateJob: (id, patch) => deps.jobState.updateJob(id, patch),
     markDone: (id) => deps.queue.markDone(id),

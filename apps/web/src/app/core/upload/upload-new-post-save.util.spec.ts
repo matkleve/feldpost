@@ -12,7 +12,7 @@ function createJob(overrides: Partial<UploadJob> = {}): UploadJob {
     statusLabel: 'Saving',
     submittedAt: new Date('2026-04-01T10:00:00.000Z'),
     mode: 'new',
-    imageId: 'media-1',
+    mediaId: 'media-1',
     ...overrides,
   };
 }

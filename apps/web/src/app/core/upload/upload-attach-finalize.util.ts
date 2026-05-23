@@ -6,10 +6,10 @@ type FinalizeAttachCompletionArgs = {
   storagePath: string;
   hadExistingCoords: boolean;
   isCancelled: () => boolean;
-  setLocalUrl: (imageId: string, localUrl: string) => void;
+  setLocalUrl: (mediaId: string, localUrl: string) => void;
   emitImageAttached: (event: {
     jobId: string;
-    imageId: string;
+    mediaId: string;
     newStoragePath: string;
     localObjectUrl?: string;
     coords?: UploadJob['coords'];
@@ -45,21 +45,21 @@ export function finalizeAttachCompletion(args: FinalizeAttachCompletionArgs): vo
 
   log('[attach-pipeline] phase: complete', {
     thumbnailUrl: finalJob.thumbnailUrl,
-    targetImageId: finalJob.targetImageId,
+    targetMediaId: finalJob.targetMediaId,
     coords: finalJob.coords,
     direction: finalJob.direction,
   });
 
   if (finalJob.thumbnailUrl) {
     log('[attach-pipeline] setting local URL for mediaDownloadService');
-    setLocalUrl(finalJob.targetImageId!, finalJob.thumbnailUrl);
+    setLocalUrl(finalJob.targetMediaId!, finalJob.thumbnailUrl);
   } else {
     warn('[attach-pipeline] no thumbnailUrl to set in mediaDownloadService');
   }
 
   const attachedEvent = {
     jobId,
-    imageId: finalJob.targetImageId!,
+    mediaId: finalJob.targetMediaId!,
     newStoragePath: storagePath,
     localObjectUrl: finalJob.thumbnailUrl,
     coords: finalJob.coords,

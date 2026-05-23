@@ -87,7 +87,7 @@ export function getIssueKind(job: UploadJob): UploadIssueKind {
     return 'upload_error';
   }
 
-  if (job.phase === 'skipped' && !!job.existingImageId) {
+  if (job.phase === 'skipped' && !!job.existingMediaId) {
     return 'duplicate_photo';
   }
 

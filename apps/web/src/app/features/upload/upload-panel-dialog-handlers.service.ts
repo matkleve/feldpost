@@ -106,9 +106,9 @@ export class UploadPanelDialogHandlersService {
   // ── Location Address Dialog ────────────────────────────────────────────
 
   openLocationAddressDialog(job: UploadJob): void {
-    // missing_data jobs may lack imageId until placement; uploaded rows require persisted id.
+    // missing_data jobs may lack mediaId until placement; uploaded rows require persisted id.
     // @see docs/specs/ui/upload/upload-panel-system.md — Actions (dialog outcomes via core APIs)
-    if (!job.imageId && job.phase !== 'missing_data') {
+    if (!job.mediaId && job.phase !== 'missing_data') {
       return;
     }
 
@@ -150,13 +150,13 @@ export class UploadPanelDialogHandlersService {
   async updateLocationFromAddressSuggestion(
     job: UploadJob,
     suggestion: ForwardGeocodeResult,
-  ): Promise<{ imageId: string; lat: number; lng: number } | null> {
-    if (!job.imageId) {
+  ): Promise<{ mediaId: string; lat: number; lng: number } | null> {
+    if (!job.mediaId) {
       return null;
     }
 
     const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
-      job.imageId,
+      job.mediaId,
       suggestion,
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
@@ -175,7 +175,7 @@ export class UploadPanelDialogHandlersService {
       dedupe: true,
     });
 
-    return { imageId: job.imageId, lat: result.lat, lng: result.lng };
+    return { mediaId: job.mediaId, lat: result.lat, lng: result.lng };
   }
 
   private async searchLocationAddress(query: string): Promise<void> {
@@ -226,7 +226,7 @@ export class UploadPanelDialogHandlersService {
   // ── Project Selection Dialog ───────────────────────────────────────────
 
   async openProjectSelectionDialog(job: UploadJob, dialogSignals: DialogSignals): Promise<void> {
-    if (!job.imageId && job.phase !== 'missing_data') {
+    if (!job.mediaId && job.phase !== 'missing_data') {
       return;
     }
 

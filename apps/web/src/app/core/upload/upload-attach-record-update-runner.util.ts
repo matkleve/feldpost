@@ -38,7 +38,7 @@ export async function runAttachRecordUpdate(
   const { data: targetRow, error: targetResolveError } = await supabaseClient
     .from('media_items')
     .select('id')
-    .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+    .or(`id.eq.${job.targetMediaId!},source_image_id.eq.${job.targetMediaId!}`)
     .limit(1)
     .maybeSingle();
 
@@ -53,7 +53,7 @@ export async function runAttachRecordUpdate(
   return performAttachRecordUpdate({
     storagePath,
     originalFilename: job.file.name,
-    targetImageId: targetMediaItemId,
+    targetMediaId: targetMediaItemId,
     parsedExif,
     conflictResolution: job.conflictResolution,
     contentHash,

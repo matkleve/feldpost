@@ -31,14 +31,14 @@ export class UploadPanelRowHandlersService {
   canZoomToJob(job: UploadJob): boolean {
     return (
       this.getLaneForJob(job) === 'uploaded' &&
-      !!job.imageId &&
+      !!job.mediaId &&
       typeof job.coords?.lat === 'number' &&
       typeof job.coords?.lng === 'number'
     );
   }
 
   canOpenUploadedInWorkspace(job: UploadJob): boolean {
-    return this.getLaneForJob(job) === 'uploaded' && !!job.imageId;
+    return this.getLaneForJob(job) === 'uploaded' && !!job.mediaId;
   }
 
   isRowInteractive(job: UploadJob): boolean {

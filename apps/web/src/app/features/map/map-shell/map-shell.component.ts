@@ -1453,8 +1453,8 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const targetImageIds = this.state.batchAddressTargetMediaIds();
-    if (targetImageIds.length === 0) {
+    const targetMediaIds = this.state.batchAddressTargetMediaIds();
+    if (targetMediaIds.length === 0) {
       this.onBatchAddressDialogCancelled();
       return;
     }
@@ -1473,7 +1473,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     let updatedCount = 0;
-    for (const mediaId of targetImageIds) {
+    for (const mediaId of targetMediaIds) {
       const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(mediaId, {
         lat: suggestion.lat,
         lng: suggestion.lng,
@@ -3135,7 +3135,7 @@ export class MapShellComponent implements OnDestroy {
    * localObjectUrl so the thumbnail swaps instantly (no placeholder flash).
    */
   private handleImageReplaced(event: ImageReplacedEvent): void {
-    const markerKey = this.markersByMediaId.get(event.imageId);
+    const markerKey = this.markersByMediaId.get(event.mediaId);
     if (!markerKey) return;
     const state = this.uploadedPhotoMarkers.get(markerKey);
     if (!state) return;
@@ -3156,7 +3156,7 @@ export class MapShellComponent implements OnDestroy {
    * to real thumbnail using the localObjectUrl from the upload.
    */
   private handleImageAttached(event: ImageAttachedEvent): void {
-    const markerKey = this.markersByMediaId.get(event.imageId);
+    const markerKey = this.markersByMediaId.get(event.mediaId);
     if (!markerKey) return;
     const state = this.uploadedPhotoMarkers.get(markerKey);
     if (!state) return;
