@@ -39,84 +39,6 @@
     overflow: hidden;
   }
 
-  // Groups multiple right-side icon actions in one grid rail (r1 / r2).
-  // @see docs/specs/ui/media-detail/media-detail-location-section.md
-  .media-location-row__action-group {
-    display: inline-flex;
-    align-items: stretch;
-    align-self: stretch;
-    height: 100%;
-    min-height: var(--detail-row-action-size, 2rem);
-    justify-self: center;
-  }
-
-  .media-location-row__action-group--r1 {
-    grid-area: action-r1;
-  }
-
-  .media-location-row__action-group--r2 {
-    grid-area: action-r2;
-  }
-
-  // Icon buttons inside action groups — same footprint as detail-row-action rails.
-  // @see docs/specs/ui/media-detail/media-detail-inline-section.md
-  .media-location-row__slot-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    height: var(--detail-row-action-size, 2rem);
-    width: var(--detail-row-action-size, 2rem);
-    max-height: var(--detail-row-action-size, 2rem);
-    max-width: var(--detail-row-action-size, 2rem);
-    min-width: var(--detail-row-action-size, 2rem);
-    min-height: var(--detail-row-action-size, 2rem);
-    padding: 0;
-    flex-shrink: 0;
-    border-radius: var(--radius-sm);
-    color: var(--mdv-action-text-default, var(--muted-foreground));
-    opacity: 0;
-    pointer-events: none;
-    transition:
-      opacity 80ms ease-out,
-      background 80ms ease-out,
-      color 80ms ease-out;
-    background: none;
-    border: none;
-    cursor: pointer;
-
-    .material-icons {
-      font-size: var(--font-size-md);
-    }
-
-    &:hover:not(:disabled):not(.detail-row-action--danger) {
-      color: var(--primary);
-      background: var(--mdv-action-bg-hover, color-mix(in srgb, var(--primary) 12%, transparent));
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--primary);
-      outline-offset: 2px;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.35;
-      pointer-events: none;
-    }
-
-    &.detail-row-action--danger {
-      color: var(--destructive);
-    }
-
-    &.detail-row-action--danger:hover,
-    &.detail-row-action--danger:focus-visible {
-      color: var(--destructive);
-      background: color-mix(in srgb, var(--destructive) 10%, transparent);
-      outline-color: var(--destructive);
-    }
-  }
-
   .media-location-row__delete-confirm {
     display: inline-flex;
     align-self: stretch;
@@ -130,28 +52,6 @@
 }
 
 @layer states {
-  .detail-row.media-location-row:hover:not(.detail-row--editing) .media-location-row__slot-btn:not(:disabled),
-  .detail-row.media-location-row:focus-within:not(.detail-row--editing) .media-location-row__slot-btn:not(:disabled) {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .detail-row.media-location-row:hover:not(.detail-row--editing) .media-location-row__delete-confirm button.detail-row-action--remove,
-  .detail-row.media-location-row:focus-within:not(.detail-row--editing)
-    .media-location-row__delete-confirm
-    button.detail-row-action--remove,
-  .media-location-row__delete-confirm button.detail-row-action--armed {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  @media (hover: none) {
-    .media-location-row__slot-btn:not(:disabled) {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  }
-
   .media-location-row__error {
     margin: 0;
     padding: var(--spacing-1) var(--spacing-2);

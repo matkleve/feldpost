@@ -1,5 +1,8 @@
 -- Smoke checks for 20260524120000_locations_nn_junction.sql
--- Run: supabase db query --local -f scripts/verify-locations-nn-migration.sql --agent=no
+-- Run one statement at a time (Supabase CLI prepared statements reject multi-command files):
+--   supabase db query --local "SELECT ..."
+--   supabase db query --linked "SELECT ..."
+-- Or: bash scripts/run-verify-locations-nn-migration.sh [--local|--linked]
 
 SELECT 'tables' AS check_id, table_name AS detail
 FROM information_schema.tables
@@ -23,6 +26,23 @@ SELECT 'row_counts' AS check_id,
   (SELECT count(*)::text FROM public.locations) || ' locations, '
   || (SELECT count(*)::text FROM public.media_item_location_links) || ' links, '
   || (SELECT count(*)::text FROM public.media_item_locations) || ' legacy_mil' AS detail;
+
+SELECT 'resolve_media_location_overloads' AS check_id,
+  CASE
+    WHEN count(*) = 1 THEN 'ok: exactly 1 signature'
+    ELSE 'FAIL: ' || count(*)::text || ' signatures — run 20260525210000_drop_resolve_media_location_nine_arg_overload.sql'
+  END AS detail
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname = 'resolve_media_location';
+
+SELECT 'resolve_media_location_signature' AS check_id,
+  pg_get_function_identity_arguments(p.oid) AS detail
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname = 'resolve_media_location';
 
 SELECT 'viewport_sample' AS check_id,
   'lat=' || cluster_lat::text || ' lng=' || cluster_lng::text

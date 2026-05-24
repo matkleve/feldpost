@@ -4,7 +4,7 @@
  * **What it does:**
  * - Read: `{street} {house_number}[, staircase][, Top door]`
  * - Edit: street, house_number, staircase, door, extra_information (note not in read line)
- * - Actions: copy field menu (r1), overflow — change GPS on map | delete (r2)
+ * - Actions: edit (l2), show on map (l1), overflow menu (r1), delete (r2)
  *
  * **Parent:** `app-media-detail-location-section` (list). **Data:** `MediaItemLocationRow` from
  * `MediaLocationsService` via parent view.
@@ -34,7 +34,6 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 export type MediaLocationRowVisualState =
   | 'read'
   | 'editing'
-  | 'copy_menu_open'
   | 'overflow_menu_open'
   | 'delete_armed';
 
@@ -88,13 +87,10 @@ export class MediaLocationRowComponent {
   readonly primaryErrorDismissed = output<void>();
 
   readonly visualState = signal<MediaLocationRowVisualState>('read');
-  readonly copyMenuOpen = signal(false);
   readonly overflowMenuOpen = signal(false);
 
-  private readonly copyAnchorRef = viewChild<ElementRef<HTMLElement>>('copyAnchorEl');
   private readonly overflowAnchorRef = viewChild<ElementRef<HTMLElement>>('overflowAnchorEl');
 
-  readonly copyAnchorElement = computed(() => this.copyAnchorRef()?.nativeElement ?? null);
   readonly overflowAnchorElement = computed(() => this.overflowAnchorRef()?.nativeElement ?? null);
 
   readonly doorLabel = computed(() => this.t('location.door.label', 'Top'));
@@ -187,9 +183,6 @@ export class MediaLocationRowComponent {
     if (this.visualState() === 'editing') {
       return 'editing';
     }
-    if (this.copyMenuOpen()) {
-      return 'copy_menu_open';
-    }
     if (this.overflowMenuOpen()) {
       return 'overflow_menu_open';
     }
@@ -229,18 +222,8 @@ export class MediaLocationRowComponent {
     this.visualState.set('read');
   }
 
-  toggleCopyMenu(): void {
-    this.copyMenuOpen.update((v) => !v);
-    this.overflowMenuOpen.set(false);
-  }
-
-  closeCopyMenu(): void {
-    this.copyMenuOpen.set(false);
-  }
-
   toggleOverflowMenu(): void {
     this.overflowMenuOpen.update((v) => !v);
-    this.copyMenuOpen.set(false);
   }
 
   closeOverflowMenu(): void {
@@ -249,7 +232,7 @@ export class MediaLocationRowComponent {
 
   onCopyAction(action: MediaLocationCopyField): void {
     this.copyFieldRequested.emit(action);
-    this.closeCopyMenu();
+    this.closeOverflowMenu();
   }
 
   onMapPick(): void {

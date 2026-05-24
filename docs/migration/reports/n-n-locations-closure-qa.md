@@ -24,6 +24,18 @@
 | Detail field save | Header `address_label` updates without extra list RPC when `displayLocationId` set | |
 | Attach keep + existing zoomable | No fake `(1,1)` coords; attach-keep respects zoomable count | |
 
+## E1 database verification (2026-05-25)
+
+| Env | Tables | Row counts | `media_items` lat/lng cols | `resolve_media_location` overloads |
+| --- | --- | --- | --- | --- |
+| **Local** | OK | 3 loc / 3 links / 0 legacy | Dropped | `ok: exactly 1 signature` (after `20260525210000`) |
+| **Linked (feldpost staging)** | OK | 13 loc / 15 links / 15 legacy | Dropped | `ok: exactly 1 signature` (after `db push`) |
+
+Backfill parity on staging: `links` (15) ≥ `legacy_mil` (15) — non-trivial; not only empty local seed.
+
+Re-run: `supabase db query --local|linked "<statement from scripts/verify-locations-nn-migration.sql>"`
+
 ## Notes
 
+- Migration `20260525210000_drop_resolve_media_location_nine_arg_overload.sql` drops the 9-arg `resolve_media_location` (no `p_postcode`); verify script asserts exactly one `pg_proc` row.
 - E2 (`media_item_locations` table drop) remains **blocked** until shim RPCs no longer return `SETOF media_item_locations`.

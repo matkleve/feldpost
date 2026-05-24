@@ -29143,7 +29143,38 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.action.delete', 'Delete location', 'en', 'media-detail location row overflow delete')
+values (null, 'location.action.edit', 'Edit location', 'en', 'media-detail location row edit button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Edit location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.edit'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort bearbeiten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.edit'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modifica posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.edit'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.delete', 'Delete location', 'en', 'media-detail location row delete button')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,

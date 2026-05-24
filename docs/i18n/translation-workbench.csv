@@ -939,7 +939,8 @@ location.door.placeholder,e.g. 1 DG 11-12,media-detail location row door input p
 location.staircase.placeholder,e.g. A Aufgang 3,media-detail location row staircase placeholder,e.g. A, Aufgang 3,z. B. A, Aufgang 3,ad es. A, Aufgang 3
 location.extra_information.label,Extra information,media-detail location row extra info label,Extra information,Zusatzinfo,Informazioni aggiuntive
 location.extra_information.placeholder,e.g. Ring twice,media-detail location row extra info placeholder,e.g. Ring twice,z. B. Zweimal klingeln,ad es. Suonare due volte
-location.action.delete,Delete location,media-detail location row overflow delete,Delete location,Standort löschen,Elimina posizione
+location.action.edit,Edit location,media-detail location row edit button,Edit location,Standort bearbeiten,Modifica posizione
+location.action.delete,Delete location,media-detail location row delete button,Delete location,Standort löschen,Elimina posizione
 location.action.confirmDelete,Confirm delete location,media-detail location row delete confirm,Confirm delete location,Löschen bestätigen,Conferma eliminazione posizione
 location.action.show_on_map,Show on map,media-detail location row map action button,Show on map,Auf Karte anzeigen,Mostra sulla mappa
 location.action.show_on_map.disabled,No coordinates for this location,media-detail location row map action disabled,No coordinates for this location,Keine Koordinaten für diesen Standort,Nessuna coordinata per questa posizione

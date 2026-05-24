@@ -12,7 +12,7 @@ Canonical persistence: **`locations`** + **`media_item_location_links`**. Detail
 
 ## What It Looks Like
 
-One **Add or search address** row at the top, then a plain scrollable list of location rows (no card chrome). Each row uses the standard five-slot `detail-row` layout with edit, copy menu, and overflow menu. No primary pin badge (primary model removed).
+One **Add or search address** row at the top, then a plain scrollable list of location rows (no card chrome). Each row uses the standard five-slot `detail-row` layout (two actions per side). No primary pin badge (primary model removed).
 
 ## Where It Lives
 
@@ -52,10 +52,9 @@ MediaDetailLocationSection
 
 | State | Visual | Transitions |
 | --- | --- | --- |
-| `read` | Single-line address + actions | → `editing`, `copy_menu_open`, `overflow_menu_open`, `delete_armed` |
+| `read` | Single-line address + actions | → `editing`, `overflow_menu_open`, `delete_armed` |
 | `editing` | Separate inputs: street, house_number, staircase, door, floor, postcode, extra_information | → `read` (save/cancel) |
-| `copy_menu_open` | Copy dropdown | → `read` |
-| `overflow_menu_open` | 3-dot menu | → `read`, `delete_armed` |
+| `overflow_menu_open` | 3-dot menu (copy fields, change GPS on map) | → `read` |
 | `delete_armed` | Inline double-confirm delete | → `read` (cancel) or row removed |
 
 Host exposes `[attr.data-state]` with the active state. **No** `set_primary` / `set_primary_error` states in product UX.
@@ -73,11 +72,12 @@ Single-line read format (segments in `[]` omitted when empty):
 
 | Slot | Action |
 | --- | --- |
-| `l1` | Edit |
-| `r1` | Copy dropdown (see copy table in service spec) |
-| `r2` | Overflow: change GPS on map, delete (double-confirm) |
+| `l2` | Edit |
+| `l1` | Show on map (disabled when row has no coordinates) |
+| `r1` | Overflow menu: change GPS on map, copy field actions (see copy table in service spec) |
+| `r2` | Delete (double-confirm inline) |
 
-Copy actions for null/empty fields are **hidden**. `extra_information` is excluded from copy menu.
+Copy actions for null/empty fields are **hidden** in the overflow menu. `extra_information` is excluded from copy.
 
 ## Add/Search Dropdown (4 zones)
 
