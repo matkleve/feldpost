@@ -4,6 +4,10 @@ import type {
   AddressFieldMeta,
 } from '../../../core/address-field-suggest/address-field-suggest.types';
 import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
+import type { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
+import type { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import { primaryLocationFromRows } from '../../../core/media-locations/media-locations.helpers';
+import type { MediaLocationAddressPatch } from '../../../core/media-locations/media-locations.types';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ToastService } from '../../../core/toast/toast.service';
 import type { DateSaveEvent } from './captured-date-editor.component';
@@ -66,10 +70,23 @@ export function addressSnapshotToSuggestion(snapshot: AddressFieldSnapshot): For
   };
 }
 
+/** Persisted on `locations` (first linked row), not `media_items`. */
+const LOCATION_DISPLAY_FIELDS = new Set([
+  'address_label',
+  'street',
+  'city',
+  'district',
+  'country',
+  'latitude',
+  'longitude',
+]);
+
 interface MediaDetailFieldsHelperDeps {
   services: {
     supabase: SupabaseService;
     toastService: ToastService;
+    mediaLocations: MediaLocationsService;
+    mediaLocationUpdate: MediaLocationUpdateService;
   };
   signals: {
     media: WritableSignal<ImageRecord | null>;
@@ -101,12 +118,11 @@ export class MediaDetailFieldsHelper {
     this.deps.signals.editingField.set(null);
     this.deps.signals.saving.set(true);
 
-    const { error } = await this.deps.services.supabase.client
-      .from('media_items')
-      .update({ [field]: updateValue })
-      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+    const persisted = LOCATION_DISPLAY_FIELDS.has(field)
+      ? await this.persistLocationDisplayField(img.id, field, updateValue)
+      : await this.persistMediaItemScalarField(img.id, field, updateValue);
 
-    if (error) {
+    if (!persisted) {
       this.deps.signals.media.update((prev) => (prev ? { ...prev, [field]: oldValue } : prev));
       this.deps.signals.saving.set(false);
       return false;
@@ -114,6 +130,113 @@ export class MediaDetailFieldsHelper {
 
     this.deps.signals.saving.set(false);
     return true;
+  }
+
+  private async persistMediaItemScalarField(
+    mediaId: string,
+    field: string,
+    updateValue: string | null,
+  ): Promise<boolean> {
+    const { error } = await this.deps.services.supabase.client
+      .from('media_items')
+      .update({ [field]: updateValue })
+      .or(`id.eq.${mediaId},source_image_id.eq.${mediaId}`);
+    return !error;
+  }
+
+  private async persistLocationDisplayField(
+    mediaId: string,
+    field: string,
+    updateValue: string | null,
+  ): Promise<boolean> {
+    const patch = this.locationPatchFromField(field, updateValue);
+    if (!patch) {
+      return false;
+    }
+
+    const list = await this.deps.services.mediaLocations.listForMedia(mediaId);
+    if (!list.ok || !('rows' in list)) {
+      return false;
+    }
+
+    const display = primaryLocationFromRows(list.rows);
+    if (display) {
+      const updated = await this.deps.services.mediaLocations.updateLocation({
+        locationId: display.id,
+        ...patch,
+      });
+      return updated.ok;
+    }
+
+    if (!this.hasPatchValue(patch)) {
+      return true;
+    }
+
+    const added = await this.deps.services.mediaLocations.addLocation({
+      mediaItemId: mediaId,
+      ...patch,
+    });
+    return added.ok;
+  }
+
+  private locationPatchFromField(
+    field: string,
+    value: string | null,
+  ): MediaLocationAddressPatch | null {
+    switch (field) {
+      case 'address_label':
+        return { address_label: value };
+      case 'street':
+        return { street: value };
+      case 'city':
+        return { city: value };
+      case 'district':
+        return { district: value };
+      case 'country':
+        return { country: value };
+      case 'latitude':
+        return { latitude: value != null ? Number(value) : null };
+      case 'longitude':
+        return { longitude: value != null ? Number(value) : null };
+      default:
+        return null;
+    }
+  }
+
+  private hasPatchValue(patch: MediaLocationAddressPatch): boolean {
+    return Object.values(patch).some((v) => v != null && v !== '');
+  }
+
+  private async updateMediaLocationStatus(
+    mediaId: string,
+    locationStatus: string,
+  ): Promise<boolean> {
+    const { error } = await this.deps.services.supabase.client
+      .from('media_items')
+      .update({ location_status: locationStatus })
+      .or(`id.eq.${mediaId},source_image_id.eq.${mediaId}`);
+    return !error;
+  }
+
+  private async patchDisplayLocationCoords(
+    mediaId: string,
+    latitude: number | null,
+    longitude: number | null,
+  ): Promise<boolean> {
+    const list = await this.deps.services.mediaLocations.listForMedia(mediaId);
+    if (!list.ok || !('rows' in list)) {
+      return false;
+    }
+    const display = primaryLocationFromRows(list.rows);
+    if (!display) {
+      return latitude == null && longitude == null;
+    }
+    const updated = await this.deps.services.mediaLocations.updateLocation({
+      locationId: display.id,
+      latitude,
+      longitude,
+    });
+    return updated.ok;
   }
 
   openCapturedAtEditor(): void {
@@ -237,27 +360,14 @@ export class MediaDetailFieldsHelper {
     );
 
     this.deps.signals.editingField.set(null);
+    this.deps.signals.saving.set(true);
 
-    const { error } = await this.deps.services.supabase.client
-      .from('media_items')
-      .update({
-        street: suggestion.street,
-        city: suggestion.city,
-        district: suggestion.district,
-        country: suggestion.country,
-        address_label: suggestion.addressLabel,
-        address_field_meta: addressFieldMeta,
-        ...(hasCoordinates
-          ? {
-              latitude: suggestion.lat,
-              longitude: suggestion.lng,
-              location_status: 'resolved',
-            }
-          : {}),
-      })
-      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+    const resolved = await this.deps.services.mediaLocationUpdate.updateFromAddressSuggestion(
+      img.id,
+      suggestion,
+    );
 
-    if (error) {
+    if (!resolved.ok) {
       this.deps.signals.media.update((prev) =>
         prev
           ? {
@@ -274,7 +384,20 @@ export class MediaDetailFieldsHelper {
             }
           : prev,
       );
+      this.deps.signals.saving.set(false);
+      return;
     }
+
+    if (hasCoordinates) {
+      await this.updateMediaLocationStatus(img.id, 'resolved');
+    }
+
+    await this.deps.services.supabase.client
+      .from('media_items')
+      .update({ address_field_meta: addressFieldMeta })
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+
+    this.deps.signals.saving.set(false);
   }
 
   async revertCoordinatesToExif(options?: { suppressToast?: boolean }): Promise<boolean> {
@@ -295,16 +418,14 @@ export class MediaDetailFieldsHelper {
     );
 
     this.deps.signals.saving.set(true);
-    const { error } = await this.deps.services.supabase.client
-      .from('media_items')
-      .update({
-        latitude: img.exif_latitude,
-        longitude: img.exif_longitude,
-        location_status: 'resolved',
-      })
-      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+    const coordsOk = await this.patchDisplayLocationCoords(
+      img.id,
+      img.exif_latitude,
+      img.exif_longitude,
+    );
+    const statusOk = await this.updateMediaLocationStatus(img.id, 'resolved');
 
-    if (error) {
+    if (!coordsOk || !statusOk) {
       this.deps.signals.media.update((prev) =>
         prev
           ? {
@@ -366,16 +487,10 @@ export class MediaDetailFieldsHelper {
     );
 
     this.deps.signals.saving.set(true);
-    const { error } = await this.deps.services.supabase.client
-      .from('media_items')
-      .update({
-        latitude: null,
-        longitude: null,
-        location_status: nextStatus,
-      })
-      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
+    const coordsOk = await this.patchDisplayLocationCoords(img.id, null, null);
+    const statusOk = await this.updateMediaLocationStatus(img.id, nextStatus);
 
-    if (error) {
+    if (!coordsOk || !statusOk) {
       this.deps.signals.media.update((prev) =>
         prev
           ? {

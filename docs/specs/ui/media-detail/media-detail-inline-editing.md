@@ -5,7 +5,7 @@
 
 ## What It Is
 
-The inline editing system for media-item properties in the Media Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). **Location section** multi-row editing is defined in [media-detail-location-section.md](media-detail-location-section.md) (`media_item_locations` canonical model). This document retains title/Details/EXIF evidence; legacy single-location field rows in the Location section are deprecated.
+The inline editing system for media-item properties in the Media Detail View. Covers the click-to-edit pattern for **title** (`address_label` on the first linked `locations` row), captured date, and project memberships. **Location section** multi-row editing is defined in [media-detail-location-section.md](media-detail-location-section.md) (`locations` + `media_item_location_links`). Legacy single-location street/city rows in Details are removed from the UI.
 
 Address component fields (street/city/district/country) use `app-address-field-combobox` when editing — see [address-field-editing.md](address-field-editing.md) for the full combobox + hierarchical suggestion + verification + reconciliation contract.
 
@@ -25,7 +25,7 @@ Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-t
 | #   | User Action                                        | System Response                                                                              | Triggers                         |
 | --- | -------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------- |
 | 1   | Clicks address label (title)                       | Title becomes an inline text input                                                           | `editingField` → `address_label` |
-| 2   | Presses Enter or blurs title input                 | Saves updated address_label to `media_items` table                                           | Supabase update                  |
+| 2   | Presses Enter or blurs title input                 | Saves `address_label` on first linked `locations` row (`update_media_item_location` or add) | RPC via `MediaLocationsService`  |
 | 3   | Clicks captured date value                         | Date becomes a `datetime-local` input                                                        | `editingField` → `captured_at`   |
 | 4   | Picks new date/time, blurs                         | Saves updated captured_at to `media_items` table                                             | Supabase update                  |
 | 5   | Clicks project value                               | Value becomes a multi-select checklist with org projects                                     | `editingField` → `project_ids`   |
@@ -55,13 +55,10 @@ All editable fields follow the same interaction pattern:
 
 | Field         | Input Type       | DB Table         | DB Column                     | Validation        |
 | ------------- | ---------------- | ---------------- | ----------------------------- | ----------------- |
-| Address label | `text`           | `media_items`    | `address_label`               | Max 500 chars     |
-| Captured date | `datetime-local` | `media_items`    | `captured_at`                 | Valid ISO date    |
-| Projects      | `multi-select`   | `media_projects` | `(media_item_id, project_id)` | Valid project IDs |
-| Street        | combobox (`app-address-field-combobox`) | `media_items` | `street`   | Max 200 chars |
-| City          | combobox (`app-address-field-combobox`) | `media_items` | `city`     | Max 200 chars |
-| District      | combobox (`app-address-field-combobox`) | `media_items` | `district` | Max 200 chars |
-| Country       | combobox (`app-address-field-combobox`) | `media_items` | `country`  | Max 200 chars |
+| Address label | `text`           | `locations` (first link) | `address_label` via RPC | Max 500 chars     |
+| Captured date | `datetime-local` | `media_items`            | `captured_at`           | Valid ISO date    |
+| Projects      | `multi-select`   | `media_projects`         | `(media_item_id, project_id)` | Valid project IDs |
+| Street/City/District/Country | — | `locations` (per row) | Location section row editor only | — |
 
 Verification metadata is persisted in `media_items.address_field_meta` (JSONB). See [address-field-editing.md](address-field-editing.md) for full row-slot choreography and cascade rules.
 
@@ -127,10 +124,10 @@ LocationSection                        ← dd-section-label "Location"
 
 ## Acceptance Criteria
 
-- [ ] **Address label**: click title → inline text input → save on Enter/blur → updates `media_items.address_label`
+- [x] **Address label**: click title → inline text input → save on Enter/blur → updates first linked `locations.address_label`
 - [ ] **Captured date**: click value → `datetime-local` input → save → updates `media_items.captured_at`
 - [ ] **Projects**: click value → multi-select checklist → save → updates `media_projects` memberships
-- [ ] **Street/City/District/Country**: click value → inline text input → save → updates `media_items.[field]`
+- [x] **Street/City/District/Country**: edited only in location rows (not Details inline section)
 - [ ] Escape key cancels any active edit without saving
 - [ ] Optimistic updates: UI reflects changes immediately, rolls back on error
 - [ ] All editable rows show dashed underline hover affordance

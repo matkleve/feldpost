@@ -1,10 +1,9 @@
 /**
- * Supabase RPC adapter for `media_item_locations`.
+ * Supabase RPC adapter for `locations` + `media_item_location_links`.
  *
  * Components must not call this directly — use `MediaLocationsService`.
- * All writes go through SECURITY DEFINER RPCs (org-scoped).
  *
- * @see supabase/migrations/20260522120000_media_item_locations.sql
+ * @see supabase/migrations/20260524120000_locations_nn_junction.sql
  */
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';

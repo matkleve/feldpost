@@ -403,6 +403,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     services: {
       supabase: this.supabaseService,
       toastService: this.toastService,
+      mediaLocations: this.mediaLocationsService,
+      mediaLocationUpdate: this.mediaLocationUpdateService,
     },
     signals: {
       media: this.media,

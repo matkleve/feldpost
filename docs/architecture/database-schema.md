@@ -117,19 +117,50 @@ Legacy image-era tables are removed from runtime schema:
 | page_count             | integer               | nullable                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | exif_latitude          | numeric(10,7)         | nullable                           | docs/specs/ui/media-marker/media-marker.md                                                                                  |
 | exif_longitude         | numeric(11,7)         | nullable                           | docs/specs/ui/media-marker/media-marker.md                                                                                  |
-| latitude               | numeric(10,7)         | nullable                           | docs/specs/ui/media-marker/media-marker.md                                                                                  |
-| longitude              | numeric(11,7)         | nullable                           | docs/specs/ui/media-marker/media-marker.md                                                                                  |
-| geog                   | geography(Point,4326) | nullable                           | docs/specs/ui/media-marker/media-marker.md                                                                                  |
 | location_status        | text                  | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | gps_assignment_allowed | boolean               | not null/default true              | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
+| address_field_meta     | jsonb                 | nullable                           | docs/specs/ui/media-detail/address-field-editing.md                                                                         |
 | source_image_id        | uuid                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
 | created_at             | timestamptz           | not null/default now()             | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
 | updated_at             | timestamptz           | not null/default now()             | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
-| address_label          | text                  | nullable                           | docs/specs/ui/search-bar/search-bar-data-and-service.md                                                                     |
-| street                 | text                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                  |
-| city                   | text                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                  |
-| district               | text                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                  |
-| country                | text                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                  |
+
+**Removed (20260525130000):** `latitude`, `longitude`, `geog`, `address_label`, `street`, `city`, `district`, `country` — canonical address/GPS live on `public.locations` via `public.media_item_location_links`. Gallery map affordance uses `zoomable_location_count` (list RPC/subselect). See [media-locations-service.md](../specs/service/media-locations/media-locations-service.md).
+
+### public.locations
+
+| column              | type                  | null/default                       | spec reference(s)                                      |
+| ------------------- | --------------------- | ---------------------------------- | ------------------------------------------------------ |
+| id                  | uuid                  | not null/default gen_random_uuid() | docs/specs/service/media-locations/media-locations-service.md |
+| organization_id     | uuid                  | not null                           | docs/specs/service/media-locations/media-locations-service.md |
+| street … country    | text                  | nullable                           | docs/specs/service/media-locations/media-locations-service.md |
+| house_number        | text                  | nullable                           | docs/specs/service/media-locations/media-locations-service.md |
+| staircase, door     | text                  | nullable                           | docs/specs/service/media-locations/media-locations-service.md |
+| floor               | text                  | nullable                           | docs/specs/service/media-locations/media-locations-service.md |
+| postcode            | text                  | nullable                           | docs/specs/service/media-locations/media-locations-service.md |
+| extra_information   | text                  | nullable                           | docs/specs/service/media-locations/media-locations-service.md |
+| latitude, longitude | numeric               | nullable (pair constraint)         | docs/specs/ui/media-marker/media-marker.md             |
+| address_label       | text                  | nullable                           | docs/specs/ui/search-bar/search-bar-data-and-service.md |
+| address_dedupe_key  | text                  | not null                           | docs/specs/service/media-locations/media-locations-service.md |
+| geog                | geography(Point,4326) | nullable                           | docs/specs/ui/media-marker/media-marker.md             |
+| staircase_sort_key  | text                  | not null                           | docs/specs/service/media-locations/media-locations-service.md |
+| door_sort_key       | text                  | not null                           | docs/specs/service/media-locations/media-locations-service.md |
+| created_at          | timestamptz           | not null/default now()             | docs/specs/service/media-locations/media-locations-service.md |
+| updated_at          | timestamptz           | not null/default now()             | docs/specs/service/media-locations/media-locations-service.md |
+
+Unique: `(organization_id, address_dedupe_key)`.
+
+### public.media_item_location_links
+
+| column          | type        | null/default                       | spec reference(s)                                      |
+| --------------- | ----------- | ---------------------------------- | ------------------------------------------------------ |
+| id              | uuid        | not null/default gen_random_uuid() | docs/specs/service/media-locations/media-locations-service.md |
+| media_item_id   | uuid        | not null                           | docs/specs/service/media-locations/media-locations-service.md |
+| location_id     | uuid        | not null                           | docs/specs/service/media-locations/media-locations-service.md |
+| organization_id | uuid        | not null                           | docs/specs/service/media-locations/media-locations-service.md |
+| sort_order      | integer     | not null/default 0                 | docs/specs/service/media-locations/media-locations-service.md |
+| created_at      | timestamptz | not null/default now()             | docs/specs/service/media-locations/media-locations-service.md |
+
+Unique: `(media_item_id, location_id)`.
 
 #### location_status contract migration (spec-first)
 

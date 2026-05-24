@@ -1,11 +1,14 @@
 # Media Locations Service
 
 > **Module:** `apps/web/src/app/core/media-locations/`  
-> **UI:** [media-detail-location-section.md](../../ui/media-detail/media-detail-location-section.md)
+> **UI:** [media-detail-location-section.md](../../ui/media-detail/media-detail-location-section.md)  
+> **Migrations:** `supabase/migrations/20260524120000_locations_nn_junction.sql`, `supabase/migrations/20260525130000_drop_media_items_location_columns.sql`
 
 ## What It Is
 
-Facade for `media_item_locations` CRUD, primary promotion, and compatibility projection to legacy `media_items` columns during rollout.
+Facade for org-scoped **`locations`** linked to media via **`media_item_location_links`**. No primary row: list order is `sort_order ASC`, then staircase/door sort keys. Detail title and legacy `ImageRecord` address fields are hydrated from the **first linked row** (`primaryLocationFromRows` — sort order only, not `is_primary`).
+
+Upload / map GPS assignment for a whole item uses **`MediaLocationUpdateService`** (`resolve_media_location` + `link_media_to_location`), not this facade.
 
 ## What It Looks Like
 
@@ -14,86 +17,100 @@ N/A (headless service). Consumers render rows per [media-detail-location-section
 ## Where It Lives
 
 - **Code:** `apps/web/src/app/core/media-locations/`
-- **UI consumer:** `MediaDetailViewComponent`, `MapShellComponent` (row-scoped map pick)
+- **UI consumer:** `MediaDetailViewComponent`, `MediaDetailLocationSection`, `MapShellComponent` (row-scoped map pick)
 
 ## Actions
 
-| RPC | Trigger |
+| RPC (stable name) | Trigger |
 | --- | --- |
-| `list_media_item_locations` | Detail open / after mutation |
+| `list_locations_for_media` | Detail open / after mutation / batch primary hydrate |
 | `add_media_item_location` | Add new Address |
-| `update_media_item_location` | Row save / map GPS |
+| `update_media_item_location` | Row save / map GPS on row / detail title field save |
 | `delete_media_item_location` | Row delete confirm |
-| `set_primary_media_item_location` | Overflow set primary |
+| `link_media_to_location` | Upload resolve, `resolve_media_location` completion |
+| `find_or_create_location` | Deduped org location create (internal to add/link flows) |
+| `update_location` | Direct location patch (SECURITY DEFINER) |
+| `set_primary_media_item_location` | **Deprecated shim** — no-op promotion; kept for adapter compatibility only |
 
-## Schema Contract (`media_item_locations`)
+## Schema Contract
+
+### `public.locations` (org-scoped, shared)
 
 | Column | Type | Notes |
 | --- | --- | --- |
 | `id` | uuid PK | |
-| `media_item_id` | uuid FK | CASCADE delete |
-| `organization_id` | uuid | RLS scope |
-| `street` | text nullable | |
-| `house_number` | text nullable | |
-| `staircase` | text nullable | |
-| `door` | text nullable | **Must stay text** — values like `11-12`, `DG`, `Dachgeschoss` |
-| `extra_information` | text nullable | User note only; never geocode/sort/projection |
-| `city` | text nullable | |
-| `district` | text nullable | |
-| `country` | text nullable | |
-| `latitude` | numeric nullable | |
-| `longitude` | numeric nullable | |
+| `organization_id` | uuid FK | RLS scope |
+| `street` … `country` | text nullable | Structured address |
+| `house_number`, `staircase`, `door` | text nullable | Door/staircase stay text (`11-12`, `DG`, …) |
+| `floor` | text nullable | **Per-location only** — excluded from dedupe key; editable when location is linked to multiple media |
+| `postcode` | text nullable | Included in dedupe key |
+| `extra_information` | text nullable | User note; never geocode/sort/map pin |
+| `latitude` / `longitude` | numeric nullable | Pair constraint; `(0,0)` invalid for map zoom |
 | `address_label` | text nullable | Display/search label |
-| `is_primary` | boolean NOT NULL | Max one true per media (partial unique index) |
-| `sort_order` | integer NOT NULL | |
-| `staircase_sort_key` | text NOT NULL | Derived; never shown/edited |
-| `door_sort_key` | text NOT NULL | Derived; never shown/edited |
+| `address_dedupe_key` | text NOT NULL | `compute_location_address_dedupe_key(...)` — excludes `floor`, `extra_information` |
+| `geog` | geography | Synced when lat/lng set |
+| `staircase_sort_key` / `door_sort_key` | text NOT NULL | Derived on write |
 | `created_at` / `updated_at` | timestamptz | |
 
-### Sort key derivation (pseudo-code)
+Unique: `(organization_id, address_dedupe_key)`.
 
-```text
-function buildSortKey(rawText):
-  if rawText is null: return "~~"
-  value = trim(rawText)
-  if value is empty: return "~"
-  firstNumber = first contiguous digit sequence in value
-  if firstNumber exists: return leftPad(firstNumber, 6, "0") + "|" + value
-  return "~" + value
-```
+### `public.media_item_location_links`
 
-List order: `sort_order ASC`, then `staircase_sort_key ASC`, then `door_sort_key ASC`.
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid PK | Returned as `link_id` in list RPC |
+| `media_item_id` | uuid FK | CASCADE |
+| `location_id` | uuid FK | CASCADE |
+| `organization_id` | uuid | RLS |
+| `sort_order` | integer NOT NULL | List order; first row = display hydrate |
 
-### Idempotent backfill
+Unique: `(media_item_id, location_id)`.
 
-Unique key: `(media_item_id, normalized_address_hash)` where hash covers street, house_number, staircase, door, lat/lng. `INSERT ... ON CONFLICT DO NOTHING`.
+### `public.media_items` (location columns removed)
+
+Address/GPS for map, search, and detail title are **not** stored on `media_items`. Remaining location-related columns: `exif_latitude`, `exif_longitude`, `location_status`, `gps_assignment_allowed`, `address_field_meta` (verification JSON only).
+
+## Dedupe key (normative)
+
+Hash covers: street, house_number, staircase, door, postcode, city, district, country, and lat/lng pair (when both set). **Excludes:** `floor`, `extra_information`, `address_label`.
 
 ## RPC Contract
 
 | RPC | Purpose |
 | --- | --- |
-| `list_media_item_locations(p_media_item_id, p_limit, p_offset)` | Paginated list; default limit 50 |
-| `add_media_item_location(...)` | Create row; first row becomes primary |
-| `update_media_item_location(p_location_id, ...)` | Patch fields/GPS |
-| `delete_media_item_location(p_location_id)` | Delete; trigger promotes new primary if needed |
-| `set_primary_media_item_location(p_location_id)` | Promote; sync projection |
+| `list_locations_for_media(p_media_item_id, p_limit, p_offset)` | Join links → locations; default limit 50 |
+| `add_media_item_location(...)` | `find_or_create_location` + link; assigns `sort_order` |
+| `update_media_item_location(p_location_id, ...)` | `update_location` with org gate |
+| `delete_media_item_location(p_location_id)` | Unlink; delete location if orphan |
+| `find_or_create_location(...)` | Insert or return existing by dedupe key |
+| `link_media_to_location(p_media_item_id, p_location_id)` | Idempotent link |
+| `update_location(p_location_id, ...)` | Patch shared location (shared-edit semantics) |
 
-### Error codes (taxonomy)
+### Error codes
 
 | Code | Meaning |
 | --- | --- |
-| `not_found` | Row or media not in org |
+| `not_found` | Location or media not in org |
 | `forbidden` | Viewer or wrong org |
 | `validation_error` | Invalid coords or empty patch |
-| `conflict` | Primary constraint violation |
+| `conflict` | Dedupe / constraint violation |
 
 ### Response DTO (`MediaItemLocationRow`)
 
-Includes: `id`, `media_item_id`, all address fields, `extra_information`, `latitude`, `longitude`, `is_primary`, `sort_order`, `staircase_sort_key`, `door_sort_key`.
+`id` = `locations.id`, optional `link_id`, all address fields including `floor` and `postcode`, `sort_order`, sort keys, timestamps. `is_primary` is **not** returned (shim may emit `false` during transition).
 
-### Compatibility projection
+## Map / gallery integration (read paths)
 
-When primary row changes, trigger/RPC updates `media_items.street`, `city`, `district`, `country`, `latitude`, `longitude`, `address_label` from primary row only.
+| Concern | Source |
+| --- | --- |
+| Viewport markers | `viewport_markers` v2 — zoomable links; `location_id` on marker; cluster count = `COUNT(DISTINCT media_item_id)` |
+| Grid map affordance | `zoomable_location_count` on gallery list rows |
+| Marker preview URL | `MediaDownloadService.resolveMarkerPreview(mediaId, path)` — cache key `mediaId` + `marker` tier |
+| Workspace primary hydrate | `loadPrimaryLocationsByMediaIds` → first row per media |
+
+## Floor edit rule
+
+When the same `location_id` is linked to more than one `media_item_id`, editing **floor** on one item updates the shared `locations` row (all linked items see the change). UI shows `location.shared_edit.hint`.
 
 ## Copy Dropdown Contract
 
@@ -111,24 +128,12 @@ Hidden when source empty. `extra_information` excluded.
 
 ## i18n Keys
 
-- `location.street.label`
-- `location.house_number.label`
-- `location.staircase.label`
-- `location.door.label`
-- `location.door.placeholder`
-- `location.staircase.placeholder`
-- `location.extra_information.label`
-- `location.extra_information.placeholder`
-- `location.action.set_primary`
-- `location.primary.badge`
-- `location.primary.tooltip`
-- `location.action.set_primary_error`
-- `location.copy.street` … `location.copy.gps` (see table)
-- `location.addSearch.placeholder`
-- `location.dropdown.section.results`
-- `location.dropdown.section.otherMedia`
-- `location.dropdown.section.internet`
-- `location.dropdown.addNew`
+- `location.street.label`, `location.house_number.label`, `location.staircase.label`, `location.door.label`
+- `location.postcode.label`, `location.floor.label`
+- `location.extra_information.label`, `location.addSearch.placeholder`
+- `location.shared_edit.hint`
+- `location.copy.*` (see table)
+- Dropdown sections: `location.dropdown.section.results`, `.otherMedia`, `.internet`, `location.dropdown.addNew`
 
 ## File Map
 
@@ -136,17 +141,15 @@ Hidden when source empty. `extra_information` excluded.
 | --- | --- |
 | `media-locations.service.ts` | Facade |
 | `media-locations.types.ts` | DTOs |
-| `media-locations.helpers.ts` | Display line, sort helpers |
+| `media-locations.helpers.ts` | Display line, `primaryLocationFromRows`, zoomable helpers |
+| `media-locations-batch.helpers.ts` | Batch list for workspace/projects |
 | `adapters/supabase-media-locations.adapter.ts` | RPC calls |
-| `README.md` | Module index |
 
 ## Acceptance Criteria
 
-- [ ] All CRUD via RPC only (no direct table writes from components)
-- [ ] Primary promotion updates projection
-- [ ] Sort keys recomputed on write
-- [ ] Backfill migration is idempotent
-
-## Reconciliation Note (SPEC GAP resolved in this module)
-
-`media_items.address_label` remains for map/search/index compatibility but is **not** canonical storage for multi-location detail. Canonical granular storage is `media_item_locations`. Resolver/search string flows are unchanged (out of scope).
+- [x] All CRUD via RPC only (no direct table writes from components)
+- [x] No primary promotion in product UX; list order defines display hydrate
+- [x] Dedupe key excludes floor and extra_information; includes postcode
+- [x] `media_items` has no latitude/longitude/address_label/street/city/district/country/geog columns after `20260525130000`
+- [x] Upload completion links location via `resolve_media_location` + `link_media_to_location`
+- [x] Detail mutation exit: `refreshMediaAfterLocationMutation` reloads links only (no `media_items` address projection)

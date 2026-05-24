@@ -432,7 +432,7 @@ describe('UploadService', () => {
       }
     });
 
-    it('persists EXIF lat/lng in both exif_ columns and mutable columns', async () => {
+    it('persists EXIF lat/lng on exif_ columns only (coords live on locations after resolve)', async () => {
       const { service, fakeSupabase } = setup();
 
       await service.uploadFile(makeFile());
@@ -440,8 +440,8 @@ describe('UploadService', () => {
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(insertCall.exif_latitude).toBe(51.5074);
       expect(insertCall.exif_longitude).toBe(-0.1278);
-      expect(insertCall.latitude).toBe(51.5074);
-      expect(insertCall.longitude).toBe(-0.1278);
+      expect(insertCall.latitude).toBeUndefined();
+      expect(insertCall.longitude).toBeUndefined();
     });
 
     it('sets null coords in DB when no EXIF GPS and no manual coords provided', async () => {
@@ -455,10 +455,10 @@ describe('UploadService', () => {
       expect(result.error).toBeNull();
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(insertCall.exif_latitude).toBeNull();
-      expect(insertCall.latitude).toBeNull();
+      expect(insertCall).not.toHaveProperty('latitude');
     });
 
-    it('uses manual coords for latitude/longitude when EXIF is absent', async () => {
+    it('does not write latitude/longitude on media_items when EXIF is absent (manual coords via resolve)', async () => {
       vi.mocked(exifr.gps).mockResolvedValue(null as any);
       vi.mocked(exifr.parse).mockResolvedValue(null as any);
 
@@ -469,9 +469,9 @@ describe('UploadService', () => {
 
       expect(result.error).toBeNull();
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
-      expect(insertCall.exif_latitude).toBeNull(); // no EXIF
-      expect(insertCall.latitude).toBe(48.8566); // manual
-      expect(insertCall.longitude).toBe(2.3522);
+      expect(insertCall.exif_latitude).toBeNull();
+      expect(insertCall).not.toHaveProperty('latitude');
+      expect(insertCall).not.toHaveProperty('longitude');
     });
 
     it('allows document uploads with provided coordinates by enabling GPS assignment on insert', async () => {
@@ -487,8 +487,7 @@ describe('UploadService', () => {
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(insertCall.media_type).toBe('document');
       expect(insertCall.gps_assignment_allowed).toBe(true);
-      expect(insertCall.latitude).toBe(48.2082);
-      expect(insertCall.longitude).toBe(16.3738);
+      expect(insertCall).not.toHaveProperty('latitude');
     });
 
     it('builds the storage path using org_id / user_id segments', async () => {

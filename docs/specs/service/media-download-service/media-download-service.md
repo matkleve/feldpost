@@ -132,6 +132,13 @@ MediaDownloadServiceContract
   └── Future image proxy URL transformers (Cloudinary/Imgix-compatible)
 ```
 
+### Map marker preview (`resolveMarkerPreview`)
+
+- **API:** `MediaDownloadService.resolveMarkerPreview(mediaId, storagePath)` → signed URL at tier `marker`.
+- **Cache key:** `${mediaId}:marker` (one thumbnail sign per media item, not per map pin / `location_id`).
+- **In-flight coalescing:** concurrent marker requests for the same `mediaId` share one signing promise (`SignedUrlCacheAdapter`).
+- **Consumer:** `MapShellComponent` when reconciling marker DOM; uses `mediaId` from marker index even when marker key is `location_id`.
+
 ### Cache Synchronization Rules
 
 - Tier cache entries (`${mediaId}:${tier}`) own per-tier delivery artifacts (`url`, `signedAt`, `isLocal`).

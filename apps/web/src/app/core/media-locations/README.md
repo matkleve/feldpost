@@ -1,6 +1,6 @@
 # media-locations (core service module)
 
-**What it does (short):** Loads and saves **multiple address rows per media item** in Postgres (`media_item_locations`). One row can be **primary**; that row is mirrored onto legacy `media_items` columns for map/search compatibility.
+**What it does:** Loads and saves **multiple org-scoped locations per media item** via `locations` + `media_item_location_links`. List order (`sort_order`) defines which row hydrates detail title / legacy `ImageRecord` address fields (`primaryLocationFromRows`).
 
 **UI it connects to:**
 
@@ -8,46 +8,37 @@
 | --- | --- |
 | `app-media-detail-location-section` | Workspace pane → Media detail → **Location** block |
 | `app-media-location-add-search` | Top row: add/search address (4-zone dropdown) |
-| `app-media-location-row` | One saved address per row (edit, copy, map GPS, delete) |
-| `MediaDetailViewComponent` | Orchestrator: loads list, calls this service, refreshes `media()` after primary changes |
-| `MapShellComponent` | Map pick with `locationRowId` → `updateFromCoordinates` on a specific row |
+| `app-media-location-row` | One linked location per row (edit, copy, map GPS, delete) |
+| `MediaDetailViewComponent` | Orchestrator: list load, mutations, `refreshMediaAfterLocationMutation` |
+| `MapShellComponent` | Map pick with `locationRowId` → row-scoped update |
 
-**Not used for:** Upload panel location pick (still uses `MediaLocationUpdateService` + `media_items` until migrated).
+**Upload / whole-item resolve:** `core/media-location-update/` (`resolve_media_location` + `link_media_to_location`).
 
 ## Structure
 
 ```
 media-locations/
-├── README.md                          ← you are here
-├── media-locations.types.ts           ← DTOs matching DB/RPC rows
-├── media-locations.helpers.ts           ← display line, list filter, RPC error text
-├── media-locations.helpers.spec.ts
-├── media-locations.service.ts           ← facade (inject this from components)
+├── README.md
+├── media-locations.types.ts
+├── media-locations.helpers.ts
+├── media-locations-batch.helpers.ts
+├── media-locations.service.ts
 └── adapters/
-    └── supabase-media-locations.adapter.ts  ← RPC only; no direct table writes
+    └── supabase-media-locations.adapter.ts
 ```
 
 ## Database (source of truth)
 
-- Table: `public.media_item_locations` — migration `supabase/migrations/20260522120000_media_item_locations.sql`
-- RPCs: `list_*`, `add_*`, `update_*`, `delete_*`, `set_primary_*`
+- Tables: `public.locations`, `public.media_item_location_links`
+- Migrations: `20260524120000_locations_nn_junction.sql`, `20260525130000_drop_media_items_location_columns.sql`
 - Spec: `docs/specs/service/media-locations/media-locations-service.md`
-- UI spec: `docs/specs/ui/media-detail/media-detail-location-section.md`
-
-## Related legacy module
-
-- `core/media-location-update/` — still updates **`media_items`** via `resolve_media_location` (single-location era). Multi-location detail should prefer **this** module; primary row projection keeps `media_items` in sync.
 
 ## Data flow (detail panel)
 
 ```
 MediaDetailViewComponent
-  ├─ loadMedia() → dataFacade (media_items row)
+  ├─ loadMedia() → dataFacade (media_items + enrichWithPrimaryLocation)
   ├─ reloadLocations() → MediaLocationsService.listForMedia()
-  └─ user actions → add/update/delete/setPrimary → RPC → refreshMediaAfterLocationMutation()
-        └─ dataFacade.refreshMediaLocationFields()  (legacy columns from primary row)
-
-MapShell (change GPS on row)
-  └─ MediaLocationsService.updateFromCoordinates(locationRowId)
-  └─ MediaDetailLocationSyncService.notifyCoordinatesUpdated(..., locationRowId)
+  └─ mutations → RPC → refreshMediaAfterLocationMutation()
+        └─ re-list links; merge first row into media() display fields
 ```

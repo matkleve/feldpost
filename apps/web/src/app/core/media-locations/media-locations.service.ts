@@ -1,14 +1,14 @@
 /**
- * Facade for **multi-location** persistence (`media_item_locations`).
+ * Facade for org-scoped `locations` linked to media via `media_item_location_links`.
  *
- * **What it does:** CRUD + set-primary for address rows tied to one `media_item_id`.
- * The primary row is projected to legacy `media_items.street/city/...` by DB triggers.
+ * **What it does:** List / add / update / delete linked locations for one `media_item_id`.
+ * Detail display fields are hydrated from the first row by `sort_order` (see `primaryLocationFromRows`).
  *
  * **UI wiring:**
- * - `MediaDetailViewComponent` — list load, add, save row, delete, set primary, copy (clipboard only in view)
+ * - `MediaDetailViewComponent` — list load, add, save row, delete, copy
  * - `MapShellComponent` — `updateFromCoordinates(locationRowId)` after map pick on a row
  *
- * **Do not use** for upload-row GPS (see `MediaLocationUpdateService` on `media_items`).
+ * **Upload / item-level resolve:** `MediaLocationUpdateService` (`resolve_media_location` + link).
  *
  * @see apps/web/src/app/core/media-locations/README.md
  * @see docs/specs/service/media-locations/media-locations-service.md

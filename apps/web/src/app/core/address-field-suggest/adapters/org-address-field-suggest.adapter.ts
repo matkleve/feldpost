@@ -1,6 +1,6 @@
 /**
- * Org-DB adapter: queries media_items for distinct address field values
- * scoped to the current organization. Results surface before geocoder results.
+ * Org-DB adapter: queries org-scoped `locations` for distinct address field values.
+ * Results surface before geocoder results.
  * @see docs/specs/service/address-field-suggest/adapters/org-field-suggest.adapter.md
  */
 
@@ -22,7 +22,7 @@ const ORG_DB_MAX_RESULTS = 5;
 const MIN_ORG_DB_SCORE = 0.1;
 
 /**
- * Query the org's media_items for distinct non-null values for the given address field.
+ * Query the org's `locations` for distinct non-null values for the given address field.
  * Returns [] for country queries (handled by static ISO list).
  * Returns [] when organizationId is absent or on Supabase error.
  */
@@ -41,14 +41,13 @@ export async function fetchOrgFieldSuggestions(
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let q = (supabase as any)
-      .from('media_items')
+      .from('locations')
       .select(column)
       .eq('organization_id', context.organizationId)
       .ilike(column, `*${query}*`)
       .not(column, 'is', null)
       .limit(ORG_DB_LIMIT);
 
-    // Narrow by parent city for district/street queries
     if ((field === 'district' || field === 'street') && context.city) {
       q = q.eq('city', context.city);
     }
