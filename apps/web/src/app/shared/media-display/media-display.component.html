@@ -31,7 +31,8 @@
       <img
         class="media-display__image"
         [src]="resolvedUrl()"
-        [alt]="alt()"
+        alt=""
+        aria-hidden="true"
         [style.object-position]="contentObjectPosition()"
         (load)="onContentImageLoad($event)"
       />

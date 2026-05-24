@@ -74,7 +74,6 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly metadataAspectRatio = signal<number | null>(null);
 
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
-  readonly alt = computed(() => this.t('workspace.imageDetail.mediaPreview.alt', 'Media preview'));
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
 
   constructor() {
