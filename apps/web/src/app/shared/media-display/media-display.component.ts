@@ -266,22 +266,14 @@ export class MediaDisplayComponent implements AfterViewInit {
         }
 
         if (this.slotGeometry() === 'intrinsic' && current === 'loading-surface-visible') {
-          // Ratio not yet known from service metadata — probe from the URL via off-screen Image.
-          if (this.metadataAspectRatio() == null && delivery.resolvedUrl) {
+          const targetRatio = this.resolveTargetAspectRatioForTransition();
+          if (targetRatio != null) {
+            this.triggerRatioTransition(targetRatio);
+            return;
+          }
+
+          if (delivery.resolvedUrl) {
             this.probeRatioFromUrl(delivery.resolvedUrl);
-            return;
-          }
-
-          // Fixed registry hint (presentation/pdf): parent slot already has target aspect-ratio.
-          // No transitionend will fire — reveal content immediately.
-          const hintedRatio = this.aspectRatio();
-          if (hintedRatio != null && hintedRatio > 0 && delivery.resolvedUrl) {
-            this.fallThroughToReveal();
-            return;
-          }
-
-          if (this.metadataAspectRatio() != null) {
-            this.triggerRatioTransition(this.metadataAspectRatio()!);
             return;
           }
         }
@@ -367,15 +359,26 @@ export class MediaDisplayComponent implements AfterViewInit {
     }
 
     this.goTo('ratio-known-contain');
-    const priorRatio = this.metadataAspectRatio();
     this.commitAspectRatioToSlot(ratio);
 
-    const ratioUnchanged =
-      priorRatio != null && Number.isFinite(priorRatio) && Math.abs(priorRatio - ratio) < 0.001;
-
-    if (this.prefersReducedMotion() || ratioUnchanged) {
+    if (this.prefersReducedMotion()) {
       queueMicrotask(() => this.advanceAfterRatioSettled());
     }
+  }
+
+  /** Registry hint or deferred metadata; null when ratio must come from image probe. */
+  private resolveTargetAspectRatioForTransition(): number | null {
+    const metadata = this.metadataAspectRatio();
+    if (metadata != null && metadata > 0) {
+      return metadata;
+    }
+
+    const hint = this.aspectRatio();
+    if (hint != null && hint > 0) {
+      return hint;
+    }
+
+    return null;
   }
 
   private advanceAfterRatioSettled(): void {

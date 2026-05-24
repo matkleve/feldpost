@@ -117,8 +117,9 @@ export class MediaItemComponent {
   constructor() {
     effect(() => {
       this.mediaIdentity();
-      const hint = this.registryAspectRatioHint();
-      this.mediaAspectRatio.set(hint != null ? String(hint) : '1');
+      // Unified grid choreography: square slot until media-display commits ratio after load.
+      // @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
+      this.mediaAspectRatio.set('1');
     });
   }
 
@@ -131,9 +132,6 @@ export class MediaItemComponent {
   }
 
   onMediaAspectRatioChange(ratio: number): void {
-    if (!this.usesNativeSlotAspect()) {
-      return;
-    }
     if (!Number.isFinite(ratio) || ratio <= 0) {
       return;
     }

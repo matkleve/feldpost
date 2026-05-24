@@ -378,12 +378,12 @@ Registry lookup via `mediaFileIdentityFromRecord` (see [media-file-identity.md](
 
 | Registry `aspectRatio.type` | Slot ratio before bitmap loads | After bitmap loads |
 | --- | --- | --- |
-| `fixed` (PDF, Office families) | `width / height` from definition | Unchanged |
-| `native` (photos) | `1` until image metadata | `aspectRatioChange` from `onload` |
+| `fixed` (PDF, Office families) | `1` (square) | `aspectRatioChange` to registry `width / height` when preview is `loaded` |
+| `native` (photos) | `1` until image metadata | `aspectRatioChange` from probe / `onload` |
 | `free` | `1` (square) | Stays `1` unless type reclassified |
 | `unknown` category | `1` (square) | Stays `1` |
 
-`MediaItem` passes `[aspectRatio]` hint to `MediaDisplay`; non-native types use `object-position: top center` for bitmap paint.
+All grid tiles (`intrinsic` slot) share the same choreography: `loading-surface-visible` → `ratio-known-contain` (slot 300ms transition) → `content-fade-in`. `MediaItem` passes `[aspectRatio]` as the **target** hint to `MediaDisplay` (deferred until reveal); non-native types use `object-position: top center` for bitmap paint.
 
 ## File-type chip (Phase 2)
 

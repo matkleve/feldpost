@@ -1,8 +1,8 @@
 import type { FileTypeDefinition } from './media-renderer.types';
 
 /**
- * Registry aspect hint for slot geometry before network (photos use 1 until onload).
- * @see docs/specs/component/media/media-item.md
+ * Target aspect ratio from registry (deferred until preview load; slot starts square).
+ * @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
  */
 export function aspectRatioHintFromFileType(
   definition: FileTypeDefinition,
