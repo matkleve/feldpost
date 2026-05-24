@@ -1,4 +1,5 @@
 type ExistingRow = {
+  hasZoomableLocation: boolean;
   latitude: number | null;
   longitude: number | null;
 };
@@ -21,6 +22,6 @@ export async function fetchAttachExistingRow(
 
   return {
     existingRow: data,
-    hadExistingCoords: data.latitude != null && data.longitude != null,
+    hadExistingCoords: data.hasZoomableLocation,
   };
 }

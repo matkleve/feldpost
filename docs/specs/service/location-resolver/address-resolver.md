@@ -266,23 +266,19 @@ Debounce and caching are implemented internally:
 
 ## 7. Address Label Storage
 
-For DB-first ranking to work, **media items** must have a human-readable `address_label` stored alongside their coordinates. This label is:
+For DB-first ranking to work, org-scoped **`locations.address_label`** (and structured fields) must be searchable via **`media_item_location_links`**. Canonical storage is **`locations`** + links — not `media_items` address columns (removed in migration `20260525130000`).
 
-- Set during upload (from resolved address, filename hint, or user-entered value).
-- Updated when the user corrects **media** location later.
-- Used in the materialized address index query (§4 Step 1).
+- Set during upload / resolve via `resolve_media_location` + `link_media_to_location`.
+- Updated when the user edits a location row or detail title (first linked row by `sort_order`).
+- Search and gallery map affordances read via links join (see [`search-bar.service.ts`](../../ui/search-bar/search-bar.md) and [`media-locations-service.md`](../media-locations/media-locations-service.md)).
 
-**Normative table:** `media_items.address_label` (and related address fields). **Legacy migration narrative** (pre–`media_items` primary table):
+**Normative tables:** `public.locations` (`address_label`, `street`, `city`, …, `latitude`, `longitude`), `public.media_item_location_links`.
 
-```sql
--- Historical: legacy `images` table migration example only
-ALTER TABLE images
-  ADD COLUMN address_label text;   -- nullable; populated on insert when known
-```
+**`media_items` retains:** `location_status`, `gps_assignment_allowed`, `address_field_meta` (verification JSON only) — not granular address lines.
 
-If `address_label` is NULL (e.g., **media** imported before this feature shipped, or rows resolved only via raw coordinates), those rows are excluded from the DB candidate pool.
+If `address_label` is NULL on a linked `locations` row (e.g. text-only link before geocode), that row may be excluded from DB candidate pools until resolved.
 
-Reverse geocoding (`AddressResolverService.reverse()`) can be used to back-fill `address_label` for **media items** where it is NULL — either on a background job or when the user opens **media** detail ("Address: Resolving…").
+Reverse geocoding (`AddressResolverService.reverse()`) can back-fill `locations` fields when coordinates exist but labels are missing — detail open or workspace background resolution.
 
 ### On-Load Background Resolution (Implemented)
 

@@ -28802,6 +28802,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.postcode.label', 'Postcode', 'en', 'media-detail location row edit label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Postcode', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.postcode.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PLZ', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.postcode.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'CAP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.postcode.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.floor.label', 'Floor', 'en', 'media-detail location row edit label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Floor', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.floor.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Stock', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.floor.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Piano', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.floor.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.shared_edit.hint', 'Editing this address updates it for all linked media.', 'en', 'media-detail location row shared location warning')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Editing this address updates it for all linked media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Änderungen an dieser Adresse gelten für alle verknüpften Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La modifica di questo indirizzo si applica a tutti i media collegati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'location.street.label', 'Street', 'en', 'media-detail location row edit label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -29045,130 +29138,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'ad es. Suonare due volte', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.extra_information.placeholder'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.action.set_primary', 'Set as primary', 'en', 'media-detail location row overflow action')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Set as primary', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.action.set_primary'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Als primär setzen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.action.set_primary'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Imposta come principale', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.action.set_primary'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.primary.badge', 'Primary', 'en', 'media-detail primary location row indicator a11y')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Primary', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.primary.badge'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Primär', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.primary.badge'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Principale', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.primary.badge'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.primary.tooltip', 'This location is used as the map pin and in exports', 'en', 'media-detail primary row overflow hint')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'This location is used as the map pin and in exports', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.primary.tooltip'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dieser Standort wird für Kartenpin und Exporte verwendet.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.primary.tooltip'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questa posizione e usata per il pin sulla mappa e negli export', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.primary.tooltip'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.action.set_primary_error', 'Could not set primary location', 'en', 'media-detail location row inline error')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Could not set primary location', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.action.set_primary_error'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Primärstandort konnte nicht gesetzt werden', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.action.set_primary_error'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Impossibile impostare la posizione principale', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.action.set_primary_error'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

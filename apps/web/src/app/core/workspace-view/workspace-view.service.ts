@@ -7,7 +7,7 @@ import { LocationResolverService } from '../location-resolver/location-resolver.
 import { MetadataService } from '../metadata/metadata.service';
 import { MediaDownloadService } from '../media-download/media-download.service';
 import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
-import { loadPrimaryLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
+import { loadDisplayLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -360,7 +360,7 @@ export class WorkspaceViewService {
 
     const membershipByMediaId = new Map<string, Array<{ id: string; name: string | null }>>();
     const mediaItemIds = rows.map((row) => row.id);
-    const primaryLocationByMediaId = await loadPrimaryLocationsByMediaIds(
+    const primaryLocationByMediaId = await loadDisplayLocationsByMediaIds(
       this.supabase.client,
       mediaItemIds,
     );

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import type { FileTypeCategory } from '../media/media-renderer.types';
-import { loadPrimaryLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
+import { loadDisplayLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
 import { SupabaseService } from '../supabase/supabase.service';
 import {
   bumpProjectFileTypeCount,
@@ -380,7 +380,7 @@ export class ProjectsService {
           return media?.id;
         })
         .filter((id): id is string => typeof id === 'string' && id.length > 0);
-      const primaryByMediaId = await loadPrimaryLocationsByMediaIds(this.supabase.client, mediaIds);
+      const primaryByMediaId = await loadDisplayLocationsByMediaIds(this.supabase.client, mediaIds);
 
       const mappedPreferred: ProjectScopedWorkspaceImage[] = [];
       for (const row of joinRows) {

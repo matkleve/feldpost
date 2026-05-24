@@ -41,6 +41,10 @@ import {
 import { detectCoordinates } from '../../../core/search/coordinate-detection';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import {
+  locationDisplaySnapshotFromRows,
+  mergeLocationDisplayIntoImageRecord,
+} from '../../../core/media-locations/media-locations.helpers';
 import type { MediaItemLocationRow } from '../../../core/media-locations/media-locations.types';
 import { buildLocationUpdateFailureToast } from '../../../core/media-location-update/location-update-toast.util';
 import type {
@@ -206,10 +210,10 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly mediaLocationStatus = signal<string | null>(null);
   readonly projectSearch = signal('');
   readonly editingField = signal<DetailEditingField>(null);
-  /** Multi-location rows for Location section (`media_item_locations`). @see core/media-locations/README.md */
+  /** Multi-location rows for Location section. @see core/media-locations/README.md */
   readonly locations = signal<MediaItemLocationRow[]>([]);
-  /** Inline errors for set-primary per row id (FSM `set_primary_error` on row). */
-  readonly locationPrimaryErrors = signal<Record<string, string>>({});
+  /** First linked `locations.id` by sort_order — avoids list RPC on field save. */
+  readonly displayLocationId = signal<string | null>(null);
   /** Target row for next map pick (`UploadLocationMapPickRequest.locationRowId`). */
   private pendingMapPickLocationRowId: string | null = null;
   readonly metadataKeyDefinitions = signal<
@@ -412,6 +416,11 @@ export class MediaDetailViewComponent implements OnDestroy {
       saving: this.saving,
       editDate: this.editDate,
       editTime: this.editTime,
+      displayLocationId: this.displayLocationId,
+      locations: this.locations,
+    },
+    callbacks: {
+      syncDisplayFromRows: (rows) => this.applyLocationDisplayFromRows(rows),
     },
     helpers: {
       t: this.t,
@@ -583,7 +592,6 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.destructiveConfirm.set(null);
     this.editingField.set(null);
     this.locations.set([]);
-    this.locationPrimaryErrors.set({});
     this.activeJobId.set(null);
     this.replaceError.set(null);
     this.pendingLocationRetryAttempted.clear();
@@ -1637,15 +1645,27 @@ export class MediaDetailViewComponent implements OnDestroy {
     });
   }
 
-  /** Loads `app-media-detail-location-section` row list from `MediaLocationsService`. */
+  /** Loads location rows and syncs display projection onto `media()`. */
   async reloadLocations(mediaId: string): Promise<void> {
+    this.mediaLocationsService.invalidateListCache(mediaId);
     const result = await this.mediaLocationsService.listForMedia(mediaId);
     if (result.ok && 'rows' in result) {
       this.locations.set(result.rows);
+      this.applyLocationDisplayFromRows(result.rows);
     }
   }
 
-  /** After row CRUD: junction list is source of truth for map/detail locations. */
+  private applyLocationDisplayFromRows(rows: readonly MediaItemLocationRow[]): void {
+    const snapshot = locationDisplaySnapshotFromRows(rows);
+    this.displayLocationId.set(snapshot?.displayLocationId ?? null);
+    const current = this.media();
+    if (!current) {
+      return;
+    }
+    this.media.set(mergeLocationDisplayIntoImageRecord(current, snapshot));
+  }
+
+  /** After row CRUD: one list fetch, then patch `locations` + `media()` from same snapshot. */
   private async refreshMediaAfterLocationMutation(mediaId: string): Promise<void> {
     await this.reloadLocations(mediaId);
   }
@@ -1712,24 +1732,14 @@ export class MediaDetailViewComponent implements OnDestroy {
     const media = this.media();
     if (!media) return;
     this.saving.set(true);
-    const { delete: del, list } = await this.mediaLocationsService.deleteAndReload(
-      locationId,
-      media.id,
-    );
-    this.saving.set(false);
+    const del = await this.mediaLocationsService.deleteLocation(locationId);
     if (!del.ok) {
+      this.saving.set(false);
       this.toastService.show({ message: del.error, type: 'warning' });
       return;
     }
-    if (!list.ok || !('rows' in list)) {
-      this.toastService.show({
-        message: list.ok ? 'Could not reload locations.' : list.error,
-        type: 'warning',
-      });
-      return;
-    }
-    this.locations.set(list.rows);
-    await this.reloadLocations(media.id);
+    await this.refreshMediaAfterLocationMutation(media.id);
+    this.saving.set(false);
   }
 
   async onLocationCopyField(action: MediaLocationCopyField): Promise<void> {

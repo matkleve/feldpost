@@ -2,14 +2,12 @@
  * One **saved location row** in media detail (read / edit / actions).
  *
  * **What it does:**
- * - Read: `{street} {house_number}[, staircase][, Top door]` (+ primary pin in l1 when `is_primary`)
+ * - Read: `{street} {house_number}[, staircase][, Top door]`
  * - Edit: street, house_number, staircase, door, extra_information (note not in read line)
- * - Actions: copy field menu (r1), overflow — set primary | change GPS on map | delete (r2)
+ * - Actions: copy field menu (r1), overflow — change GPS on map | delete (r2)
  *
  * **Parent:** `app-media-detail-location-section` (list). **Data:** `MediaItemLocationRow` from
  * `MediaLocationsService` via parent view.
- *
- * **i18n:** `location.primary.badge` = a11y label for pin; `location.primary.tooltip` = overflow hint on primary row.
  *
  * @see docs/specs/ui/media-detail/media-detail-location-section.md
  */
@@ -38,8 +36,7 @@ export type MediaLocationRowVisualState =
   | 'editing'
   | 'copy_menu_open'
   | 'overflow_menu_open'
-  | 'delete_armed'
-  | 'set_primary_error';
+  | 'delete_armed';
 
 export interface MediaLocationRowSavePayload {
   locationId: string;
@@ -80,13 +77,11 @@ export class MediaLocationRowComponent {
   readonly location = input.required<MediaItemLocationRow>();
   readonly locationCount = input(1);
   readonly saving = input(false);
-  readonly primaryError = input<string | null>(null);
 
   readonly editRequested = output<string>();
   readonly saveRequested = output<MediaLocationRowSavePayload>();
   readonly editCancelled = output<void>();
   readonly deleteRequested = output<string>();
-  readonly setPrimaryRequested = output<string>();
   readonly mapPickRequested = output<string>();
   readonly showOnMapRequested = output<string>();
   readonly copyFieldRequested = output<MediaLocationCopyField>();
@@ -186,9 +181,6 @@ export class MediaLocationRowComponent {
   });
 
   readonly effectiveVisualState = computed((): MediaLocationRowVisualState => {
-    if (this.primaryError()) {
-      return 'set_primary_error';
-    }
     if (this.visualState() === 'delete_armed') {
       return 'delete_armed';
     }

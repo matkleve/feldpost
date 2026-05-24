@@ -6,7 +6,7 @@
 
 ## What It Is
 
-Facade for org-scoped **`locations`** linked to media via **`media_item_location_links`**. No primary row: list order is `sort_order ASC`, then staircase/door sort keys. Detail title and legacy `ImageRecord` address fields are hydrated from the **first linked row** (`primaryLocationFromRows` — sort order only, not `is_primary`).
+Facade for org-scoped **`locations`** linked to media via **`media_item_location_links`**. No primary row: list order is `sort_order ASC`, then staircase/door sort keys. Detail title and legacy `ImageRecord` address fields are hydrated from the **first linked row** (`displayLocationFromRows` — sort order only).
 
 Upload / map GPS assignment for a whole item uses **`MediaLocationUpdateService`** (`resolve_media_location` + `link_media_to_location`), not this facade.
 
@@ -30,8 +30,6 @@ N/A (headless service). Consumers render rows per [media-detail-location-section
 | `link_media_to_location` | Upload resolve, `resolve_media_location` completion |
 | `find_or_create_location` | Deduped org location create (internal to add/link flows) |
 | `update_location` | Direct location patch (SECURITY DEFINER) |
-| `set_primary_media_item_location` | **Deprecated shim** — no-op promotion; kept for adapter compatibility only |
-
 ## Schema Contract
 
 ### `public.locations` (org-scoped, shared)
@@ -106,7 +104,7 @@ Hash covers: street, house_number, staircase, door, postcode, city, district, co
 | Viewport markers | `viewport_markers` v2 — zoomable links; `location_id` on marker; cluster count = `COUNT(DISTINCT media_item_id)` |
 | Grid map affordance | `zoomable_location_count` on gallery list rows |
 | Marker preview URL | `MediaDownloadService.resolveMarkerPreview(mediaId, path)` — cache key `mediaId` + `marker` tier |
-| Workspace primary hydrate | `loadPrimaryLocationsByMediaIds` → first row per media |
+| Workspace / gallery hydrate | `loadLocationSummaryByMediaIds` or `loadDisplayLocationsByMediaIds` |
 
 ## Floor edit rule
 
@@ -141,7 +139,7 @@ Hidden when source empty. `extra_information` excluded.
 | --- | --- |
 | `media-locations.service.ts` | Facade |
 | `media-locations.types.ts` | DTOs |
-| `media-locations.helpers.ts` | Display line, `primaryLocationFromRows`, zoomable helpers |
+| `media-locations.helpers.ts` | Display line, `displayLocationFromRows`, zoomable helpers |
 | `media-locations-batch.helpers.ts` | Batch list for workspace/projects |
 | `adapters/supabase-media-locations.adapter.ts` | RPC calls |
 
@@ -152,4 +150,4 @@ Hidden when source empty. `extra_information` excluded.
 - [x] Dedupe key excludes floor and extra_information; includes postcode
 - [x] `media_items` has no latitude/longitude/address_label/street/city/district/country/geog columns after `20260525130000`
 - [x] Upload completion links location via `resolve_media_location` + `link_media_to_location`
-- [x] Detail mutation exit: `refreshMediaAfterLocationMutation` reloads links only (no `media_items` address projection)
+- [x] Detail mutation exit: one `list_locations_for_media` reload + `locationDisplaySnapshotFromRows` patches `media()` (no `media_items` address columns)

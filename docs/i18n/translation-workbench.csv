@@ -939,10 +939,6 @@ location.door.placeholder,e.g. 1 DG 11-12,media-detail location row door input p
 location.staircase.placeholder,e.g. A Aufgang 3,media-detail location row staircase placeholder,e.g. A, Aufgang 3,z. B. A, Aufgang 3,ad es. A, Aufgang 3
 location.extra_information.label,Extra information,media-detail location row extra info label,Extra information,Zusatzinfo,Informazioni aggiuntive
 location.extra_information.placeholder,e.g. Ring twice,media-detail location row extra info placeholder,e.g. Ring twice,z. B. Zweimal klingeln,ad es. Suonare due volte
-location.action.set_primary,Set as primary,media-detail location row overflow action,Set as primary,Als primär setzen,Imposta come principale
-location.primary.badge,Primary,media-detail primary location row indicator a11y,Primary,Primär,Principale
-location.primary.tooltip,This location is used as the map pin and in exports,media-detail primary row overflow hint,This location is used as the map pin and in exports,Dieser Standort wird für Kartenpin und Exporte verwendet.,Questa posizione e usata per il pin sulla mappa e negli export
-location.action.set_primary_error,Could not set primary location,media-detail location row inline error,Could not set primary location,Primärstandort konnte nicht gesetzt werden,Impossibile impostare la posizione principale
 location.action.delete,Delete location,media-detail location row overflow delete,Delete location,Standort löschen,Elimina posizione
 location.action.confirmDelete,Confirm delete location,media-detail location row delete confirm,Confirm delete location,Löschen bestätigen,Conferma eliminazione posizione
 location.action.show_on_map,Show on map,media-detail location row map action button,Show on map,Auf Karte anzeigen,Mostra sulla mappa

@@ -6,7 +6,11 @@ import type {
 import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 import type { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import type { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
-import { primaryLocationFromRows } from '../../../core/media-locations/media-locations.helpers';
+import {
+  locationDisplaySnapshotFromRows,
+  mergeLocationDisplayIntoImageRecord,
+} from '../../../core/media-locations/media-locations.helpers';
+import type { MediaItemLocationRow } from '../../../core/media-locations/media-locations.types';
 import type { MediaLocationAddressPatch } from '../../../core/media-locations/media-locations.types';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ToastService } from '../../../core/toast/toast.service';
@@ -94,6 +98,11 @@ interface MediaDetailFieldsHelperDeps {
     saving: WritableSignal<boolean>;
     editDate: WritableSignal<string>;
     editTime: WritableSignal<string>;
+    displayLocationId: WritableSignal<string | null>;
+    locations: WritableSignal<MediaItemLocationRow[]>;
+  };
+  callbacks: {
+    syncDisplayFromRows: (rows: readonly MediaItemLocationRow[]) => void;
   };
   helpers: {
     t: DetailTranslateFn;
@@ -154,18 +163,17 @@ export class MediaDetailFieldsHelper {
       return false;
     }
 
-    const list = await this.deps.services.mediaLocations.listForMedia(mediaId);
-    if (!list.ok || !('rows' in list)) {
-      return false;
-    }
-
-    const display = primaryLocationFromRows(list.rows);
-    if (display) {
+    const displayLocationId = this.deps.signals.displayLocationId();
+    if (displayLocationId) {
       const updated = await this.deps.services.mediaLocations.updateLocation({
-        locationId: display.id,
+        locationId: displayLocationId,
         ...patch,
       });
-      return updated.ok;
+      if (!updated.ok || !('row' in updated)) {
+        return false;
+      }
+      this.replaceLocationRowAndSyncDisplay(updated.row);
+      return true;
     }
 
     if (!this.hasPatchValue(patch)) {
@@ -176,7 +184,26 @@ export class MediaDetailFieldsHelper {
       mediaItemId: mediaId,
       ...patch,
     });
-    return added.ok;
+    if (!added.ok || !('row' in added)) {
+      return false;
+    }
+    const rows = [...this.deps.signals.locations(), added.row];
+    this.deps.signals.locations.set(rows);
+    this.deps.callbacks.syncDisplayFromRows(rows);
+    return true;
+  }
+
+  private replaceLocationRowAndSyncDisplay(row: MediaItemLocationRow): void {
+    const rows = this.deps.signals.locations().map((existing) =>
+      existing.id === row.id ? row : existing,
+    );
+    this.deps.signals.locations.set(rows);
+    this.deps.callbacks.syncDisplayFromRows(rows);
+    const current = this.deps.signals.media();
+    if (current) {
+      const snapshot = locationDisplaySnapshotFromRows(rows);
+      this.deps.signals.media.set(mergeLocationDisplayIntoImageRecord(current, snapshot));
+    }
   }
 
   private locationPatchFromField(
@@ -219,24 +246,24 @@ export class MediaDetailFieldsHelper {
   }
 
   private async patchDisplayLocationCoords(
-    mediaId: string,
+    _mediaId: string,
     latitude: number | null,
     longitude: number | null,
   ): Promise<boolean> {
-    const list = await this.deps.services.mediaLocations.listForMedia(mediaId);
-    if (!list.ok || !('rows' in list)) {
-      return false;
-    }
-    const display = primaryLocationFromRows(list.rows);
-    if (!display) {
+    const displayLocationId = this.deps.signals.displayLocationId();
+    if (!displayLocationId) {
       return latitude == null && longitude == null;
     }
     const updated = await this.deps.services.mediaLocations.updateLocation({
-      locationId: display.id,
+      locationId: displayLocationId,
       latitude,
       longitude,
     });
-    return updated.ok;
+    if (!updated.ok || !('row' in updated)) {
+      return false;
+    }
+    this.replaceLocationRowAndSyncDisplay(updated.row);
+    return true;
   }
 
   openCapturedAtEditor(): void {

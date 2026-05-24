@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { loadLocationSummaryByMediaIds } from '../media-locations/media-locations-batch.helpers';
 import { SupabaseService } from '../supabase/supabase.service';
 import { MetadataService } from '../metadata/metadata.service';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
@@ -190,7 +191,11 @@ export class MediaQueryService {
       }
     }
 
-    const zoomableCountByMediaId = await this.loadZoomableLocationCounts(mediaItemIds);
+    const { zoomableCountByMediaId } = await loadLocationSummaryByMediaIds(
+      this.supabase.client,
+      mediaItemIds,
+      MediaQueryService.MEMBERSHIP_QUERY_CHUNK,
+    );
 
     const images: WorkspaceMedia[] = accum.map((row) =>
       mapGalleryRowToWorkspaceMedia(
@@ -344,40 +349,6 @@ export class MediaQueryService {
     return merged;
   }
 
-  private async loadZoomableLocationCounts(mediaItemIds: string[]): Promise<Map<string, number>> {
-    const counts = new Map<string, number>();
-    if (mediaItemIds.length === 0) {
-      return counts;
-    }
-
-    for (let i = 0; i < mediaItemIds.length; i += MediaQueryService.MEMBERSHIP_QUERY_CHUNK) {
-      const chunk = mediaItemIds.slice(i, i + MediaQueryService.MEMBERSHIP_QUERY_CHUNK);
-      const { data, error } = await this.supabase.client
-        .from('media_item_location_links')
-        .select('media_item_id, locations!inner(latitude, longitude)')
-        .in('media_item_id', chunk);
-
-      if (error || !Array.isArray(data)) {
-        continue;
-      }
-
-      for (const row of data as Array<{
-        media_item_id: string;
-        locations: { latitude: number | null; longitude: number | null } | Array<{
-          latitude: number | null;
-          longitude: number | null;
-        }>;
-      }>) {
-        const loc = Array.isArray(row.locations) ? row.locations[0] : row.locations;
-        if (loc?.latitude == null || loc?.longitude == null) {
-          continue;
-        }
-        counts.set(row.media_item_id, (counts.get(row.media_item_id) ?? 0) + 1);
-      }
-    }
-
-    return counts;
-  }
 }
 
 function toFiniteNumber(value: number | string | null | undefined): number | null {

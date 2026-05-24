@@ -10,7 +10,7 @@ import type {
   MetadataKeyDefinitionView,
   SelectOption,
 } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
-import { primaryLocationFromRows } from '../media-locations/media-locations.helpers';
+import { displayLocationFromRows } from '../media-locations/media-locations.helpers';
 import type { MediaItemLocationRow } from '../media-locations/media-locations.types';
 import {
   MEDIA_ITEM_DETAIL_SELECT_BASE,
@@ -257,7 +257,7 @@ export class MediaDetailDataFacade {
     if (error || !Array.isArray(data) || data.length === 0) {
       return null;
     }
-    return primaryLocationFromRows(data as MediaItemLocationRow[]);
+    return displayLocationFromRows(data as MediaItemLocationRow[]);
   }
 
   private toImageRecord(media: MediaDetailRow, legacyImageId: string): ImageRecord {

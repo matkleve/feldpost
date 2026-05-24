@@ -4,7 +4,26 @@
  * Used by: `media-location-row` (read line), `media-location-add-search` (filter Results),
  * `media-detail-location-section` (list filter), `media-locations.service` (RPC errors).
  */
+import type { ImageRecord } from '../media-query/media-query.types';
 import type { MediaItemLocationRow } from './media-locations.types';
+
+/** Display fields projected from the first linked location row onto `ImageRecord`. */
+export type LocationDisplayFields = Pick<
+  ImageRecord,
+  | 'address_label'
+  | 'street'
+  | 'city'
+  | 'district'
+  | 'country'
+  | 'latitude'
+  | 'longitude'
+  | 'location_unresolved'
+>;
+
+export interface LocationDisplaySnapshot {
+  displayLocationId: string | null;
+  fields: LocationDisplayFields;
+}
 
 /** Read-mode single line on a location row. @see docs/specs/ui/media-detail/media-detail-location-section.md */
 export function formatLocationDisplayLine(
@@ -52,15 +71,63 @@ export function legacyMediaHasGps(latitude: number | null, longitude: number | n
   );
 }
 
-/** Gallery/map affordance: prefer link-based zoomable count when present. */
-/** First linked row by sort order — canonical “display” location for legacy ImageRecord fields. */
-export function primaryLocationFromRows(
+/** First linked row by sort order — canonical display location for legacy ImageRecord fields. */
+export function displayLocationFromRows(
   rows: readonly MediaItemLocationRow[],
 ): MediaItemLocationRow | null {
   if (rows.length === 0) {
     return null;
   }
   return [...rows].sort((a, b) => a.sort_order - b.sort_order)[0] ?? null;
+}
+
+/**
+ * Snapshot for detail header / map affordances from the current location list.
+ * @see docs/specs/ui/media-detail/media-detail-location-section.md
+ */
+export function locationDisplaySnapshotFromRows(
+  rows: readonly MediaItemLocationRow[],
+): LocationDisplaySnapshot | null {
+  const display = displayLocationFromRows(rows);
+  if (!display) {
+    return null;
+  }
+
+  return {
+    displayLocationId: display.id,
+    fields: {
+      address_label: display.address_label,
+      street: display.street,
+      city: display.city,
+      district: display.district,
+      country: display.country,
+      latitude: display.latitude,
+      longitude: display.longitude,
+      location_unresolved: !legacyMediaHasGps(display.latitude, display.longitude),
+    },
+  };
+}
+
+/** Merge first-link display fields into a loaded `ImageRecord` (pure). */
+export function mergeLocationDisplayIntoImageRecord<T extends ImageRecord>(
+  media: T,
+  snapshot: LocationDisplaySnapshot | null,
+): T {
+  if (!snapshot) {
+    return {
+      ...media,
+      address_label: null,
+      street: null,
+      city: null,
+      district: null,
+      country: null,
+      latitude: null,
+      longitude: null,
+      location_unresolved: true,
+    };
+  }
+
+  return { ...media, ...snapshot.fields };
 }
 
 export function mediaHasZoomableLocation(input: {

@@ -33,35 +33,32 @@ function createHelper() {
   const editDate = signal('');
   const editTime = signal('');
   const updateOr = vi.fn(async () => ({ error: null }));
-  const listForMedia = vi.fn(async () => ({
-    ok: true as const,
-    rows: [
-      {
-        id: 'loc-1',
-        media_item_id: 'img-1',
-        organization_id: 'org-1',
-        sort_order: 0,
-        street: 'Old street',
-        city: 'Old city',
-        district: 'Old district',
-        country: 'Old country',
-        address_label: 'Old label',
-        latitude: 1,
-        longitude: 2,
-        house_number: null,
-        staircase: null,
-        door: null,
-        floor: null,
-        postcode: null,
-        extra_information: null,
-        staircase_sort_key: '~~',
-        door_sort_key: '~~',
-        created_at: '',
-        updated_at: '',
-      },
-    ],
-  }));
-  const updateLocation = vi.fn(async () => ({ ok: true as const, row: {} }));
+  const locationRow = {
+    id: 'loc-1',
+    media_item_id: 'img-1',
+    organization_id: 'org-1',
+    sort_order: 0,
+    street: 'Old street',
+    city: 'Old city',
+    district: 'Old district',
+    country: 'Old country',
+    address_label: 'Old label',
+    latitude: 1,
+    longitude: 2,
+    house_number: null,
+    staircase: null,
+    door: null,
+    floor: null,
+    postcode: null,
+    extra_information: null,
+    staircase_sort_key: '~~',
+    door_sort_key: '~~',
+    created_at: '',
+    updated_at: '',
+  };
+  const locations = signal([locationRow]);
+  const displayLocationId = signal<string | null>('loc-1');
+  const updateLocation = vi.fn(async () => ({ ok: true as const, row: { ...locationRow, city: 'New city' } }));
   const helper = new MediaDetailFieldsHelper({
     services: {
       supabase: {
@@ -74,7 +71,7 @@ function createHelper() {
         },
       } as any,
       toastService: { show: vi.fn() } as any,
-      mediaLocations: { listForMedia, updateLocation, addLocation: vi.fn() } as any,
+      mediaLocations: { listForMedia: vi.fn(), updateLocation, addLocation: vi.fn() } as any,
       mediaLocationUpdate: { updateFromAddressSuggestion: vi.fn() } as any,
     },
     signals: {
@@ -83,6 +80,11 @@ function createHelper() {
       saving,
       editDate,
       editTime,
+      displayLocationId,
+      locations,
+    },
+    callbacks: {
+      syncDisplayFromRows: vi.fn(),
     },
     helpers: {
       t: (_key, fallback) => fallback,

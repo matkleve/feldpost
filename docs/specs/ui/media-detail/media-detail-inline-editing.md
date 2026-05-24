@@ -30,10 +30,10 @@ Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-t
 | 4   | Picks new date/time, blurs                         | Saves updated captured_at to `media_items` table                                             | Supabase update                  |
 | 5   | Clicks project value                               | Value becomes a multi-select checklist with org projects                                     | `editingField` → `project_ids`   |
 | 6   | Checks/unchecks projects                           | Upserts/deletes memberships in `media_projects`                                              | Supabase write batch             |
-| 7   | Clicks street/city/district/country value          | Value becomes `app-address-field-combobox` with hierarchical suggestions | `editingField` → field name |
-| 7a  | Picks a suggestion from combobox dropdown          | Field saved with `source: 'geocoder', verified: true` in `address_field_meta`               | `fieldSaveRequested` + meta write |
-| 7b  | Blurs / Enter without picking suggestion           | Field saved with `source: 'user', verified: false` in `address_field_meta`                  | `fieldSaveRequested` + meta write |
-| 8   | Presses Enter or blurs address input               | Saves updated address component to `media_items` table                                       | Supabase update                  |
+| 7   | Edits street/city/district/country on a location row | Row editor in [media-detail-location-section](media-detail-location-section.md) — not Details inline rows | Location section save RPC |
+| 7a  | Picks a suggestion from combobox on a location row   | Field saved on linked `locations` row via `update_media_item_location`                       | `MediaLocationsService.updateLocation` |
+| 7b  | Blurs / Enter without picking suggestion on row      | Same row RPC with user-entered text                                                          | `MediaLocationsService.updateLocation` |
+| 8   | — (removed)                                        | Legacy Details address rows are not editable here                                            | —                                |
 | 8a  | Clicks resolve button on unverified field row      | Runs field-scoped reconciliation; prompt shown if confident candidate found                  | `AddressReconciliationService.reconcileField()` |
 | 8b  | Detail view opens with unverified address fields   | Runs reconciliation; prompt shown if confidence ≥ threshold                                  | `AddressReconciliationService.reconcileOnDetailOpen()` |
 | 9   | Presses Escape during any edit                     | Cancels edit, restores original value, no DB write                                           | `editingField` → null            |

@@ -1,3 +1,5 @@
+import { locationDisplaySnapshotFromRows } from '../media-locations/media-locations.helpers';
+import type { MediaItemLocationRow } from '../media-locations/media-locations.types';
 import { performAttachRecordUpdate } from './upload-attach-record-update.util';
 import type { SupabaseService } from '../supabase/supabase.service';
 import type { UploadJob } from './upload-manager.types';
@@ -59,13 +61,35 @@ export async function runAttachRecordUpdate(
     contentHash,
     userId,
     fetchExistingRow: async () => {
-      const { data, error } = await supabaseClient.rpc('count_zoomable_locations_for_media', {
-        p_media_item_id: targetMediaItemId,
-      });
-      const count = typeof data === 'number' ? data : 0;
+      const { data: countData, error: countError } = await supabaseClient.rpc(
+        'count_zoomable_locations_for_media',
+        { p_media_item_id: targetMediaItemId },
+      );
+      if (countError) {
+        return { data: null, error: countError };
+      }
+
+      const hasZoomableLocation = typeof countData === 'number' && countData > 0;
+      let latitude: number | null = null;
+      let longitude: number | null = null;
+
+      if (hasZoomableLocation) {
+        const { data: rows, error: listError } = await supabaseClient.rpc('list_locations_for_media', {
+          p_media_item_id: targetMediaItemId,
+          p_limit: 50,
+          p_offset: 0,
+        });
+        if (listError) {
+          return { data: null, error: listError };
+        }
+        const snapshot = locationDisplaySnapshotFromRows((rows ?? []) as MediaItemLocationRow[]);
+        latitude = snapshot?.fields.latitude ?? null;
+        longitude = snapshot?.fields.longitude ?? null;
+      }
+
       return {
-        data: count > 0 ? { latitude: 1, longitude: 1 } : { latitude: null, longitude: null },
-        error,
+        data: { hasZoomableLocation, latitude, longitude },
+        error: null,
       };
     },
     updateImageRow: async (updateData) => {

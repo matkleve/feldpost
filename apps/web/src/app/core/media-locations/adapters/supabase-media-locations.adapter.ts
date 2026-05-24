@@ -60,16 +60,6 @@ export class SupabaseMediaLocationsAdapter {
       throw error;
     }
   }
-
-  async setPrimary(locationId: string): Promise<MediaItemLocationRow> {
-    const { data, error } = await this.supabase.client.rpc('set_primary_media_item_location', {
-      p_location_id: locationId,
-    });
-    if (error) {
-      throw error;
-    }
-    return data as MediaItemLocationRow;
-  }
 }
 
 function patchToRpcParams(patch: MediaLocationAddressPatch): Record<string, string | number | null> {

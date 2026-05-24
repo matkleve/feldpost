@@ -26,8 +26,6 @@ export interface MediaItemLocationRow {
   latitude: number | null;
   longitude: number | null;
   address_label: string | null;
-  /** @deprecated Primary model removed; always false from RPC shim. */
-  is_primary?: boolean;
   sort_order: number;
   staircase_sort_key: string;
   door_sort_key: string;
@@ -45,7 +43,7 @@ export interface MediaLocationMutationResult {
   row: MediaItemLocationRow;
 }
 
-export interface MediaLocationDeleteResult {
+export interface MediaLocationDeleteOkResult {
   ok: true;
 }
 
@@ -54,6 +52,8 @@ export interface MediaLocationErrorResult {
   error: string;
   code?: 'not_found' | 'forbidden' | 'validation_error' | 'conflict' | 'unknown';
 }
+
+export type MediaLocationDeleteResult = MediaLocationDeleteOkResult | MediaLocationErrorResult;
 
 export type MediaLocationResult =
   | MediaLocationListResult

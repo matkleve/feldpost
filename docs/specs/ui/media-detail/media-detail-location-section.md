@@ -8,7 +8,7 @@
 
 Multi-location editor for one media item: one always-visible **Add/Search Address** row, then a scrollable list of location rows (`0..n`). Each row owns granular address fields on a shared org **`locations`** row (via **`media_item_location_links`**). There is no shared global street/district/country/GPS block on `media_items`.
 
-Canonical persistence: **`locations`** + **`media_item_location_links`**. Detail header title (`address_label`) edits the **first linked row** by `sort_order` (same hydrate as `primaryLocationFromRows`).
+Canonical persistence: **`locations`** + **`media_item_location_links`**. Detail header title (`address_label`) edits the **first linked row** by `sort_order` (same hydrate as `displayLocationFromRows`). After any location CRUD, `reloadLocations` + `mergeLocationDisplayIntoImageRecord` patch `media()` from the same list snapshot.
 
 ## What It Looks Like
 

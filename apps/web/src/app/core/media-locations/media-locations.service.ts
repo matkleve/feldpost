@@ -2,7 +2,7 @@
  * Facade for org-scoped `locations` linked to media via `media_item_location_links`.
  *
  * **What it does:** List / add / update / delete linked locations for one `media_item_id`.
- * Detail display fields are hydrated from the first row by `sort_order` (see `primaryLocationFromRows`).
+ * Detail display fields are hydrated from the first row by `sort_order` (see `displayLocationFromRows`).
  *
  * **UI wiring:**
  * - `MediaDetailViewComponent` — list load, add, save row, delete, copy
@@ -20,6 +20,7 @@ import { describeMediaLocationRpcError } from './media-locations.helpers';
 import type {
   MediaItemLocationRow,
   MediaLocationAddInput,
+  MediaLocationDeleteResult,
   MediaLocationResult,
   MediaLocationUpdateInput,
 } from './media-locations.types';
@@ -34,10 +35,26 @@ export type {
 export class MediaLocationsService {
   private readonly adapter = inject(SupabaseMediaLocationsAdapter);
   private readonly geocodingService = inject(GeocodingService);
+  private readonly listCache = new Map<string, MediaItemLocationRow[]>();
+
+  /** Drop cached list rows after mutations or external reload. */
+  invalidateListCache(mediaItemId?: string): void {
+    if (mediaItemId) {
+      this.listCache.delete(mediaItemId);
+      return;
+    }
+    this.listCache.clear();
+  }
 
   async listForMedia(mediaItemId: string): Promise<MediaLocationResult> {
+    const cached = this.listCache.get(mediaItemId);
+    if (cached) {
+      return { ok: true, rows: cached };
+    }
+
     try {
       const rows = await this.adapter.list(mediaItemId);
+      this.listCache.set(mediaItemId, rows);
       return { ok: true, rows };
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
@@ -45,6 +62,7 @@ export class MediaLocationsService {
   }
 
   async addLocation(input: MediaLocationAddInput): Promise<MediaLocationResult> {
+    this.invalidateListCache(input.mediaItemId);
     try {
       const row = await this.adapter.add(input);
       return { ok: true, row };
@@ -89,6 +107,7 @@ export class MediaLocationsService {
   }
 
   async updateLocation(input: MediaLocationUpdateInput): Promise<MediaLocationResult> {
+    this.invalidateListCache();
     try {
       const row = await this.adapter.update(input);
       return { ok: true, row };
@@ -101,6 +120,7 @@ export class MediaLocationsService {
     locationId: string,
     coords: { lat: number; lng: number },
   ): Promise<MediaLocationResult> {
+    this.invalidateListCache();
     const reverse = await this.geocodingService.reverse(coords.lat, coords.lng);
     return this.updateLocation({
       locationId,
@@ -116,30 +136,14 @@ export class MediaLocationsService {
     });
   }
 
-  async deleteAndReload(
-    locationId: string,
-    mediaItemId: string,
-  ): Promise<{ delete: MediaLocationResult; list: MediaLocationResult }> {
+  /** Delete link/location only — caller owns a single `listForMedia` reload + display patch. */
+  async deleteLocation(locationId: string): Promise<MediaLocationDeleteResult> {
+    this.invalidateListCache();
     try {
       await this.adapter.delete(locationId);
-      const rows = await this.adapter.list(mediaItemId);
-      return { delete: { ok: true }, list: { ok: true, rows } };
-    } catch (error) {
-      const err = describeMediaLocationRpcError(error as { message?: string });
-      return {
-        delete: { ok: false, error: err },
-        list: { ok: false, error: err },
-      };
-    }
-  }
-
-  async setPrimary(locationId: string): Promise<MediaLocationResult> {
-    try {
-      const row = await this.adapter.setPrimary(locationId);
-      return { ok: true, row };
+      return { ok: true };
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
     }
   }
-
 }

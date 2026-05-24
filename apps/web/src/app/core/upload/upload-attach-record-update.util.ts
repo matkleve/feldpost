@@ -5,6 +5,7 @@ import type { ConflictResolution, UploadPhase } from './upload-manager.types';
 import type { ExifCoords, ParsedExif } from './upload.service';
 
 type ExistingRow = {
+  hasZoomableLocation: boolean;
   latitude: number | null;
   longitude: number | null;
 };
@@ -91,7 +92,11 @@ export async function performAttachRecordUpdate(
 
   const finalCoords =
     args.parsedExif.coords ??
-    (hadExistingCoords ? { lat: existingRow.latitude!, lng: existingRow.longitude! } : undefined);
+    (hadExistingCoords &&
+    existingRow.latitude != null &&
+    existingRow.longitude != null
+      ? { lat: existingRow.latitude, lng: existingRow.longitude }
+      : undefined);
 
   args.logInfo('[attach-pipeline] DB row updated successfully');
 
