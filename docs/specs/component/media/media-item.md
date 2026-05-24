@@ -388,7 +388,7 @@ All grid tiles (`intrinsic` slot) share the same choreography: `loading-surface-
 
 ## File-type chip (Phase 2)
 
-Non-image tiles show `app-chip` (lower-right) with registry badge text and `chipVariantForFileType`. Images omit the chip.
+Every loaded tile shows `app-chip` (lower-right of the grid cell host) with registry badge text (e.g. `JPEG`, `PPTX`) and `chipVariantForFileType`. Chip is presentational (`pointer-events: none`); primary action remains the open control.
 
 ## Canonical Name Registry Gate
 

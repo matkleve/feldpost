@@ -106,9 +106,7 @@ export class MediaItemComponent {
 
   readonly fileTypeChipIcon = computed(() => this.fileTypeDefinition().icon);
 
-  readonly showFileTypeChip = computed(
-    () => (this.fileTypeChipText()?.length ?? 0) > 0 && this.fileCategory() !== 'image',
-  );
+  readonly showFileTypeChip = computed(() => (this.fileTypeChipText()?.length ?? 0) > 0);
 
   readonly slotContentObjectPosition = computed(() =>
     this.usesNativeSlotAspect() ? 'center center' : 'top center',

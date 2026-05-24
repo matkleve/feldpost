@@ -22,15 +22,6 @@
       (aspectRatioChange)="onMediaAspectRatioChange($event)"
     />
 
-    @if (showFileTypeChip() && fileTypeChipText(); as chipText) {
-      <app-chip
-        class="media-item__filetype-chip"
-        [icon]="fileTypeChipIcon()"
-        [text]="chipText"
-        [variant]="fileTypeChipVariant()"
-      />
-    }
-
     <!-- Renders selected emphasis border inside the slot, above media content. -->
     <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
     <div
@@ -67,4 +58,13 @@
       (click)="onOpenClick($event)"
     ></button>
   </div>
+
+  @if (showFileTypeChip() && fileTypeChipText(); as chipText) {
+    <app-chip
+      class="media-item__filetype-chip"
+      [icon]="fileTypeChipIcon()"
+      [text]="chipText"
+      [variant]="fileTypeChipVariant()"
+    />
+  }
 }

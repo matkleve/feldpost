@@ -11,6 +11,7 @@ interface MediaItemRow {
   created_by: string | null;
   storage_path: string | null;
   thumbnail_path: string | null;
+  original_filename?: string | null;
   latitude: number | null;
   longitude: number | null;
   exif_latitude: number | null;
@@ -33,6 +34,7 @@ interface MediaGalleryDbRow {
   created_by: string | null;
   storage_path: string | null;
   thumbnail_path: string | null;
+  original_filename?: string | null;
   preview_generation_status?: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
@@ -112,7 +114,7 @@ export class MediaQueryService {
       const { data, error } = await this.supabase.client
         .from('media_items')
         .select(
-          'id, organization_id, created_by, storage_path, thumbnail_path, preview_generation_status, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id, address_label, street, city, district, country',
+          'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, preview_generation_status, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id, address_label, street, city, district, country',
         )
         .order('created_at', { ascending: false })
         .range(offset, offset + MediaQueryService.GALLERY_PAGE_SIZE - 1);
@@ -232,7 +234,7 @@ export class MediaQueryService {
     const { data, error } = await this.supabase.client
       .from('media_items')
       .select(
-        'id, organization_id, created_by, storage_path, thumbnail_path, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status',
+        'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status',
       )
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false });
@@ -300,6 +302,7 @@ export class MediaQueryService {
       project_id: null,
       storage_path: row.storage_path,
       thumbnail_path: row.thumbnail_path,
+      original_filename: row.original_filename ?? null,
       latitude: row.latitude,
       longitude: row.longitude,
       exif_latitude: row.exif_latitude,
@@ -365,6 +368,9 @@ function mapGalleryRowToWorkspaceMedia(
     thumbnailPath: row.thumbnail_path,
     previewGenerationStatus: normalizePreviewGenerationStatus(row.preview_generation_status),
     storagePath: row.storage_path,
+    fileMetadata: row.original_filename
+      ? { originalFilename: row.original_filename }
+      : null,
     capturedAt: row.captured_at,
     createdAt: row.created_at,
     projectId: projectIds[0] ?? null,

@@ -3,6 +3,7 @@
 // @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
 :host {
   display: block;
+  position: relative;
   inline-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
@@ -83,13 +84,13 @@
   min-block-size: 0;
 }
 
-// Anchors file-type chip in lower-right corner of the slot (non-image tiles).
-// @see docs/specs/component/media/media-item.md#what-it-looks-like
+// File-type chip: lower-right of grid cell (host), above open hit-target.
+// @see docs/specs/component/media/media-item.md#file-type-chip-phase-2
 .media-item__filetype-chip {
   position: absolute;
   inset-inline-end: var(--spacing-2);
   inset-block-end: var(--spacing-2);
-  z-index: 3;
+  z-index: 5;
   max-inline-size: calc(100% - (var(--spacing-2) * 2));
   display: block;
   pointer-events: none;

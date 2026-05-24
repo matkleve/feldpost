@@ -12,6 +12,7 @@ export function workspaceMediaToImageRecord(w: WorkspaceMedia): ImageRecord {
     project_ids: w.projectIds,
     storage_path: w.storagePath,
     thumbnail_path: w.thumbnailPath,
+    original_filename: w.fileMetadata?.originalFilename ?? null,
     preview_generation_status: w.previewGenerationStatus ?? null,
     latitude: Number.isFinite(w.latitude) ? w.latitude : null,
     longitude: Number.isFinite(w.longitude) ? w.longitude : null,
