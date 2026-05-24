@@ -28,5 +28,6 @@ export function workspaceMediaToImageRecord(w: WorkspaceMedia): ImageRecord {
     country: w.country,
     direction: w.direction,
     location_unresolved: null,
+    zoomable_location_count: w.zoomableLocationCount ?? 0,
   };
 }

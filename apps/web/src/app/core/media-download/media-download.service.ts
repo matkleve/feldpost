@@ -295,6 +295,14 @@ export class MediaDownloadService {
     return this.signedUrlCache.getSignedUrl(storagePath, size, mediaId);
   }
 
+  /** Map marker tier — cache key is always `mediaId` + `marker`, not per pin. */
+  async resolveMarkerPreview(
+    mediaId: string,
+    storagePath: string,
+  ): Promise<SignedUrlResult> {
+    return this.getSignedUrl(storagePath, 'marker', mediaId);
+  }
+
   async batchSign(
     items: Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }>,
     size: MediaSize,

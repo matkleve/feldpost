@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import type * as L from 'leaflet';
+import {
+  unregisterMarkerKeyForMedia,
+  type MarkersByMediaIdMap,
+} from './marker-media-index.helpers';
 
 interface MarkerStateLike {
   marker: L.Marker;
@@ -10,7 +14,7 @@ export class MarkerStateMutationsService {
   cleanupMarkerLayersAndCaches(params: {
     uploadedPhotoMarkers: Map<string, MarkerStateLike>;
     photoMarkerLayer: L.LayerGroup | null;
-    markersByMediaId: Map<string, string>;
+    markersByMediaId: MarkersByMediaIdMap;
     cancelMarkerMoveAnimation: (marker: L.Marker) => void;
   }): void {
     for (const state of params.uploadedPhotoMarkers.values()) {
@@ -27,7 +31,7 @@ export class MarkerStateMutationsService {
     mediaId: string;
     uploadedPhotoMarkers: Map<string, MarkerStateLike>;
     photoMarkerLayer: L.LayerGroup | null;
-    markersByMediaId: Map<string, string>;
+    markersByMediaId: MarkersByMediaIdMap;
     selectedMarkerKey: string | null;
     selectedMarkerKeys: Set<string>;
     detailMediaId: string | null;
@@ -43,7 +47,7 @@ export class MarkerStateMutationsService {
       params.uploadedPhotoMarkers.delete(params.markerKey);
     }
 
-    params.markersByMediaId.delete(params.mediaId);
+    unregisterMarkerKeyForMedia(params.markersByMediaId, params.mediaId, params.markerKey);
 
     if (params.selectedMarkerKey === params.markerKey) {
       params.setSelectedMarker(null);

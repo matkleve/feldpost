@@ -126,6 +126,11 @@ import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferre
 import { MapProjectActionsService } from './map-project-actions.service';
 import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
+import {
+  getFirstMarkerKeyForMedia,
+  getMarkerKeysForMedia,
+  registerMarkerKeyForMedia,
+} from './marker-media-index.helpers';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
@@ -159,6 +164,7 @@ type ViewportMarkerRow = {
   image_count: number;
   image_id: string | null;
   media_item_id?: string | null;
+  location_id?: string | null;
   direction: number | null;
   storage_path: string | null;
   thumbnail_path: string | null;
@@ -683,7 +689,7 @@ export class MapShellComponent implements OnDestroy {
    * Secondary index: mediaId → markerKey for O(1) lookups when
    * handling upload manager events (replace, attach).
    */
-  private readonly markersByMediaId = new Map<string, string>();
+  private readonly markersByMediaId = new Map<string, string[]>();
   private readonly markerMotionPreference = signal<MarkerMotionPreference>('smooth');
   private readonly markerMotionEventHandler = (event: Event): void => {
     const detail = (event as CustomEvent<{ markerMotion?: MarkerMotionPreference }>).detail;
@@ -750,7 +756,7 @@ export class MapShellComponent implements OnDestroy {
         this.setLinkedHoverMarkerFromWorkspace(null);
         return;
       }
-      this.setLinkedHoverMarkerFromWorkspace(this.markersByMediaId.get(mediaId) ?? null);
+      this.setLinkedHoverMarkerFromWorkspace(getFirstMarkerKeyForMedia(this.markersByMediaId, mediaId) ?? null);
     },
   };
 
@@ -3088,8 +3094,7 @@ export class MapShellComponent implements OnDestroy {
     const removals = new Map<string, string>();
 
     for (const mediaId of deleted) {
-      const markerKey = this.markersByMediaId.get(mediaId);
-      if (markerKey) {
+      for (const markerKey of getMarkerKeysForMedia(this.markersByMediaId, mediaId)) {
         removals.set(markerKey, mediaId);
       }
     }
@@ -3135,20 +3140,19 @@ export class MapShellComponent implements OnDestroy {
    * localObjectUrl so the thumbnail swaps instantly (no placeholder flash).
    */
   private handleImageReplaced(event: ImageReplacedEvent): void {
-    const markerKey = this.markersByMediaId.get(event.mediaId);
-    if (!markerKey) return;
-    const state = this.uploadedPhotoMarkers.get(markerKey);
-    if (!state) return;
+    for (const markerKey of getMarkerKeysForMedia(this.markersByMediaId, event.mediaId)) {
+      const state = this.uploadedPhotoMarkers.get(markerKey);
+      if (!state) continue;
 
-    // Revoke the old ObjectURL if it was a blob.
-    if (state.thumbnailUrl?.startsWith('blob:')) {
-      URL.revokeObjectURL(state.thumbnailUrl);
+      if (state.thumbnailUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(state.thumbnailUrl);
+      }
+
+      state.thumbnailUrl = event.localObjectUrl;
+      state.signedAt = undefined;
+      state.direction = event.direction ?? state.direction;
+      this.refreshPhotoMarker(markerKey);
     }
-
-    state.thumbnailUrl = event.localObjectUrl;
-    state.signedAt = undefined; // Will be re-signed on next viewport query.
-    state.direction = event.direction ?? state.direction;
-    this.refreshPhotoMarker(markerKey);
   }
 
   /**
@@ -3156,21 +3160,20 @@ export class MapShellComponent implements OnDestroy {
    * to real thumbnail using the localObjectUrl from the upload.
    */
   private handleImageAttached(event: ImageAttachedEvent): void {
-    const markerKey = this.markersByMediaId.get(event.mediaId);
-    if (!markerKey) return;
-    const state = this.uploadedPhotoMarkers.get(markerKey);
-    if (!state) return;
+    for (const markerKey of getMarkerKeysForMedia(this.markersByMediaId, event.mediaId)) {
+      const state = this.uploadedPhotoMarkers.get(markerKey);
+      if (!state) continue;
 
-    // Revoke the old ObjectURL if it was a blob.
-    if (state.thumbnailUrl?.startsWith('blob:')) {
-      URL.revokeObjectURL(state.thumbnailUrl);
+      if (state.thumbnailUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(state.thumbnailUrl);
+      }
+
+      state.thumbnailUrl = event.localObjectUrl;
+      state.signedAt = undefined;
+      state.direction = event.direction ?? state.direction;
+      state.thumbnailSourcePath = event.newStoragePath;
+      this.refreshPhotoMarker(markerKey);
     }
-
-    state.thumbnailUrl = event.localObjectUrl;
-    state.signedAt = undefined;
-    state.direction = event.direction ?? state.direction;
-    state.thumbnailSourcePath = event.newStoragePath;
-    this.refreshPhotoMarker(markerKey);
   }
 
   private upsertUploadedPhotoMarker(event: ImageUploadedEvent): void {
@@ -3220,7 +3223,7 @@ export class MapShellComponent implements OnDestroy {
 
     // Maintain secondary index for upload manager event lookups.
     if (event.id) {
-      this.markersByMediaId.set(event.id, markerKey);
+      registerMarkerKeyForMedia(this.markersByMediaId, event.id, markerKey);
     }
   }
 
@@ -3306,7 +3309,10 @@ export class MapShellComponent implements OnDestroy {
     const incoming = new Map<string, MergedViewportRow>();
     for (const row of merged) {
       if (typeof row.cluster_lat !== 'number' || typeof row.cluster_lng !== 'number') continue;
-      const key = this.toMarkerKey(row.cluster_lat, row.cluster_lng);
+      const key =
+        row.image_count === 1 && row.location_id
+          ? `loc:${row.location_id}`
+          : this.toMarkerKey(row.cluster_lat, row.cluster_lng);
       incoming.set(key, row);
     }
 
@@ -3851,6 +3857,7 @@ export class MapShellComponent implements OnDestroy {
   private async lazyLoadThumbnail(
     key: string,
     state: {
+      mediaId?: string;
       thumbnailSourcePath?: string;
       thumbnailUrl?: string;
       thumbnailLoading?: boolean;
@@ -3862,10 +3869,21 @@ export class MapShellComponent implements OnDestroy {
     state.thumbnailLoading = true;
     this.refreshPhotoMarker(key);
 
-    const result = await this.mediaDownloadService.getSignedUrl(
-      state.thumbnailSourcePath,
-      'marker',
-    );
+    const mediaId = state.mediaId;
+    if (mediaId) {
+      const cached = this.mediaDownloadService.getCachedUrl(mediaId, 'marker');
+      if (cached) {
+        state.thumbnailLoading = false;
+        state.thumbnailUrl = cached;
+        state.signedAt = Date.now();
+        this.refreshPhotoMarker(key);
+        return;
+      }
+    }
+
+    const result = mediaId
+      ? await this.mediaDownloadService.resolveMarkerPreview(mediaId, state.thumbnailSourcePath)
+      : await this.mediaDownloadService.getSignedUrl(state.thumbnailSourcePath, 'marker');
 
     if (result.url) {
       const loaded = await this.mediaDownloadService.preload(result.url);

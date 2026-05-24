@@ -7,6 +7,7 @@ import { LocationResolverService } from '../location-resolver/location-resolver.
 import { MetadataService } from '../metadata/metadata.service';
 import { MediaDownloadService } from '../media-download/media-download.service';
 import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
+import { loadPrimaryLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -309,13 +310,13 @@ export class WorkspaceViewService {
       this.supabase.client
         .from('media_items')
         .select(
-          'id, source_image_id, latitude, longitude, thumbnail_path, preview_generation_status, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
+          'id, source_image_id, thumbnail_path, preview_generation_status, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
         )
         .in('id', uniqueIds),
       this.supabase.client
         .from('media_items')
         .select(
-          'id, source_image_id, latitude, longitude, thumbnail_path, preview_generation_status, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
+          'id, source_image_id, thumbnail_path, preview_generation_status, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
         )
         .in('source_image_id', uniqueIds),
     ]);
@@ -359,6 +360,10 @@ export class WorkspaceViewService {
 
     const membershipByMediaId = new Map<string, Array<{ id: string; name: string | null }>>();
     const mediaItemIds = rows.map((row) => row.id);
+    const primaryLocationByMediaId = await loadPrimaryLocationsByMediaIds(
+      this.supabase.client,
+      mediaItemIds,
+    );
 
     const { data: membershipsData, error: membershipsError } = await this.supabase.client
       .from('media_projects')
@@ -380,12 +385,10 @@ export class WorkspaceViewService {
     const mediaByLookupId = new Map<string, WorkspaceImage>();
 
     for (const row of rows) {
-      if (
-        typeof row.latitude !== 'number' ||
-        !Number.isFinite(row.latitude) ||
-        typeof row.longitude !== 'number' ||
-        !Number.isFinite(row.longitude)
-      ) {
+      const primaryLoc = primaryLocationByMediaId.get(row.id);
+      const lat = primaryLoc?.latitude;
+      const lng = primaryLoc?.longitude;
+      if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
         continue;
       }
 
@@ -407,8 +410,8 @@ export class WorkspaceViewService {
       for (const lookupId of lookupIds) {
         mediaByLookupId.set(lookupId, {
           id: lookupId,
-          latitude: row.latitude,
-          longitude: row.longitude,
+          latitude: lat,
+          longitude: lng,
           thumbnailPath: row.thumbnail_path,
           previewGenerationStatus: normalizePreviewGenerationStatus(row.preview_generation_status),
           storagePath: row.storage_path,
@@ -421,13 +424,13 @@ export class WorkspaceViewService {
           direction: null,
           exifLatitude: row.exif_latitude,
           exifLongitude: row.exif_longitude,
-          addressLabel: null,
-          city: null,
-          district: null,
-          street: null,
-          streetNumber: null,
-          zip: null,
-          country: null,
+          addressLabel: primaryLoc?.address_label ?? null,
+          city: primaryLoc?.city ?? null,
+          district: primaryLoc?.district ?? null,
+          street: primaryLoc?.street ?? null,
+          streetNumber: primaryLoc?.house_number ?? null,
+          zip: primaryLoc?.postcode ?? null,
+          country: primaryLoc?.country ?? null,
           userName: row.created_by ? (profileNameById.get(row.created_by) ?? null) : null,
         });
       }
@@ -684,8 +687,6 @@ interface RawClusterRow {
 interface RawSharedMediaItemRow {
   id: string;
   source_image_id: string | null;
-  latitude: number | null;
-  longitude: number | null;
   thumbnail_path: string | null;
   preview_generation_status?: string | null;
   storage_path: string | null;

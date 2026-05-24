@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as L from 'leaflet';
+import {
+  registerMarkerKeyForMedia,
+  unregisterMarkerKeyForMedia,
+  type MarkersByMediaIdMap,
+} from './marker-media-index.helpers';
 
 export interface ReconcileIncomingRow {
   cluster_lat: number;
@@ -7,6 +12,7 @@ export interface ReconcileIncomingRow {
   image_count: number;
   image_id: string | null;
   media_item_id?: string | null;
+  location_id?: string | null;
   direction: number | null;
   thumbnail_path: string | null;
   storage_path: string | null;
@@ -42,7 +48,7 @@ export interface MarkerIconOverride {
 export interface ReconcileDependencies {
   photoMarkerLayer: L.LayerGroup;
   uploadedPhotoMarkers: Map<string, PhotoMarkerState>;
-  markersByMediaId: Map<string, string>;
+  markersByMediaId: MarkersByMediaIdMap;
   selectedMarkerKey: () => string | null;
   setSelectedMarkerKey: (markerKey: string | null) => void;
   findReusableMarkerKey: (row: ReconcileIncomingRow, recyclableKeys: Set<string>) => string | null;
@@ -133,7 +139,7 @@ export class MapMarkerReconcileFacade {
       deps.cancelMarkerMoveAnimation(oldState.marker);
       deps.photoMarkerLayer.removeLayer(oldState.marker);
       if (oldState.mediaId) {
-        deps.markersByMediaId.delete(oldState.mediaId);
+        unregisterMarkerKeyForMedia(deps.markersByMediaId, oldState.mediaId, oldKey);
       }
       if (deps.selectedMarkerKey() === oldKey) {
         deps.setSelectedMarkerKey(null);
@@ -161,9 +167,15 @@ export class MapMarkerReconcileFacade {
 
     const newImageId = count === 1 ? this.resolveMarkerMediaItemId(row) : undefined;
     if (existing.mediaId !== newImageId) {
-      if (existing.mediaId) deps.markersByMediaId.delete(existing.mediaId);
-      if (newImageId) deps.markersByMediaId.set(newImageId, key);
+      if (existing.mediaId) {
+        unregisterMarkerKeyForMedia(deps.markersByMediaId, existing.mediaId, key);
+      }
+      if (newImageId) {
+        registerMarkerKeyForMedia(deps.markersByMediaId, newImageId, key);
+      }
       existing.mediaId = newImageId;
+    } else if (newImageId) {
+      registerMarkerKeyForMedia(deps.markersByMediaId, newImageId, key);
     }
     existing.fallbackLabel = fallbackLabel;
 
@@ -224,10 +236,15 @@ export class MapMarkerReconcileFacade {
     const previousImageId = reusableState.mediaId;
     const nextImageId = count === 1 ? this.resolveMarkerMediaItemId(row) : undefined;
     if (previousImageId !== nextImageId) {
-      if (previousImageId) deps.markersByMediaId.delete(previousImageId);
-      if (nextImageId) deps.markersByMediaId.set(nextImageId, key);
+      if (previousImageId) {
+        unregisterMarkerKeyForMedia(deps.markersByMediaId, previousImageId, reusableKey);
+      }
+      if (nextImageId) {
+        registerMarkerKeyForMedia(deps.markersByMediaId, nextImageId, key);
+      }
     } else if (nextImageId) {
-      deps.markersByMediaId.set(nextImageId, key);
+      unregisterMarkerKeyForMedia(deps.markersByMediaId, nextImageId, reusableKey);
+      registerMarkerKeyForMedia(deps.markersByMediaId, nextImageId, key);
     }
 
     if (deps.selectedMarkerKey() === reusableKey) {
@@ -309,7 +326,7 @@ export class MapMarkerReconcileFacade {
 
     const markerMediaItemId = this.resolveMarkerMediaItemId(row);
     if (count === 1 && markerMediaItemId) {
-      deps.markersByMediaId.set(markerMediaItemId, key);
+      registerMarkerKeyForMedia(deps.markersByMediaId, markerMediaItemId, key);
     }
   }
 

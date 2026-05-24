@@ -59,13 +59,14 @@ export async function runAttachRecordUpdate(
     contentHash,
     userId,
     fetchExistingRow: async () => {
-      const { data, error } = await supabaseClient
-        .from('media_items')
-        .select('latitude, longitude')
-        .eq('id', targetMediaItemId)
-        .limit(1)
-        .maybeSingle();
-      return { data, error };
+      const { data, error } = await supabaseClient.rpc('count_zoomable_locations_for_media', {
+        p_media_item_id: targetMediaItemId,
+      });
+      const count = typeof data === 'number' ? data : 0;
+      return {
+        data: count > 0 ? { latitude: 1, longitude: 1 } : { latitude: null, longitude: null },
+        error,
+      };
     },
     updateImageRow: async (updateData) => {
       const { error } = await supabaseClient

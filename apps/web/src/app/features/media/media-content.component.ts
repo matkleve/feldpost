@@ -503,12 +503,14 @@ export class MediaContentComponent implements AfterViewInit {
       return;
     }
 
-    if (
-      target.closest('app-item-grid') ||
-      target.closest('app-media-item') ||
-      target.closest('app-group-header')
-    ) {
-      this.debugInteraction('document.click.ignored.insideGridOrItem', event);
+    if (target.closest('app-group-header')) {
+      this.debugInteraction('document.click.ignored.groupHeader', event);
+      return;
+    }
+
+    // Grid gaps, placeholder cells, and square-host padding outside the slot clear selection.
+    if (target.closest('app-media-item[data-has-item="true"] .media-item__slot')) {
+      this.debugInteraction('document.click.ignored.mediaItemSlot', event);
       return;
     }
 

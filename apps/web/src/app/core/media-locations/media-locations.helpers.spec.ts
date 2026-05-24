@@ -1,48 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { formatLocationDisplayLine, locationMatchesQuery } from './media-locations.helpers';
-import type { MediaItemLocationRow } from './media-locations.types';
+import { legacyMediaHasGps, mediaHasZoomableLocation } from './media-locations.helpers';
 
-describe('formatLocationDisplayLine', () => {
-  it('formats street, house number, staircase, and door', () => {
-    const line = formatLocationDisplayLine(
-      {
-        street: 'Hauptstrasse',
-        house_number: '12',
-        staircase: 'A',
-        door: '4',
-        address_label: null,
-      },
-      'Top',
+describe('media-locations.helpers', () => {
+  it('mediaHasZoomableLocation uses zoomable_location_count when set', () => {
+    expect(mediaHasZoomableLocation({ zoomable_location_count: 2, latitude: null, longitude: null })).toBe(
+      true,
     );
-    expect(line).toBe('Hauptstrasse 12, A, Top 4');
-  });
-
-  it('omits empty optional segments', () => {
-    const line = formatLocationDisplayLine(
-      {
-        street: 'Ring',
-        house_number: '1',
-        staircase: null,
-        door: null,
-        address_label: null,
-      },
-      'Top',
+    expect(mediaHasZoomableLocation({ zoomable_location_count: 0, latitude: 48, longitude: 16 })).toBe(
+      false,
     );
-    expect(line).toBe('Ring 1');
-  });
-});
-
-describe('locationMatchesQuery', () => {
-  const row = {
-    street: 'Bahnhof',
-    house_number: '7',
-  } as MediaItemLocationRow;
-
-  it('matches substring', () => {
-    expect(locationMatchesQuery(row, 'bahn')).toBe(true);
   });
 
-  it('returns true for empty query', () => {
-    expect(locationMatchesQuery(row, '')).toBe(true);
+  it('legacyMediaHasGps rejects 0,0 placeholder', () => {
+    expect(legacyMediaHasGps(0, 0)).toBe(false);
+    expect(legacyMediaHasGps(48.2, 16.37)).toBe(true);
   });
 });

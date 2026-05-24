@@ -27,6 +27,7 @@ export class SignedUrlCacheAdapter {
   private readonly storage = inject(SupabaseStorageAdapter);
 
   private readonly cache = new Map<string, CacheEntry>();
+  private readonly inFlight = new Map<string, Promise<SignedUrlResult>>();
   private readonly loadStates = new Map<string, WritableSignal<MediaLoadState>>();
 
   readonly urlChanged$ = new Subject<UrlChangedEvent>();
@@ -53,10 +54,33 @@ export class SignedUrlCacheAdapter {
     mediaId?: string,
   ): Promise<SignedUrlResult> {
     const id = mediaId ?? storagePath;
-    const cached = this.cache.get(this.cacheKey(id, size));
-    if (cached && !this.isStale(cached)) return { url: cached.url, error: null };
+    const key = this.cacheKey(id, size);
+    const cached = this.cache.get(key);
+    if (cached && !this.isStale(cached)) {
+      return { url: cached.url, error: null };
+    }
 
-    this.setLoadState(id, size, 'loading');
+    const pending = this.inFlight.get(key);
+    if (pending) {
+      return pending;
+    }
+
+    const promise = this.signOnce(storagePath, size, id, key);
+    this.inFlight.set(key, promise);
+    try {
+      return await promise;
+    } finally {
+      this.inFlight.delete(key);
+    }
+  }
+
+  private async signOnce(
+    storagePath: string,
+    size: MediaSize,
+    mediaId: string,
+    key: string,
+  ): Promise<SignedUrlResult> {
+    this.setLoadState(mediaId, size, 'loading');
     const transform = TRANSFORMS[size];
     const signed = await this.storage.createSignedUrlWithFallback(
       storagePath,
@@ -65,16 +89,16 @@ export class SignedUrlCacheAdapter {
     );
 
     if (!signed.data?.signedUrl || signed.error) {
-      this.setLoadState(id, size, 'error');
+      this.setLoadState(mediaId, size, 'error');
       return { url: null, error: signed.error?.message ?? 'Failed to sign URL' };
     }
 
-    this.setCacheEntry(id, size, {
+    this.setCacheEntry(mediaId, size, {
       url: signed.data.signedUrl,
       signedAt: Date.now(),
       isLocal: false,
     });
-    this.setLoadState(id, size, 'loaded');
+    this.setLoadState(mediaId, size, 'loaded');
     return { url: signed.data.signedUrl, error: null };
   }
 

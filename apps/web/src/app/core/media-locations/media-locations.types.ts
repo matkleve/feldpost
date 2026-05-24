@@ -1,22 +1,24 @@
 /**
- * Types for multi-location rows (`media_item_locations`).
- *
- * One media item has 0..n rows; exactly one may be `is_primary` (DB-enforced).
- * UI: each row is rendered by `app-media-location-row` in the workspace detail Location section.
+ * Types for org-scoped `locations` linked to media via `media_item_location_links`.
  *
  * @see docs/specs/service/media-locations/media-locations-service.md
  * @see docs/specs/ui/media-detail/media-detail-location-section.md
  */
 
-/** Row returned by `list_media_item_locations` / mutation RPCs. */
+/** Row returned by `list_locations_for_media` / legacy shim RPCs. */
 export interface MediaItemLocationRow {
+  /** Shared `locations.id`. */
   id: string;
+  /** Junction row id (`media_item_location_links.id`). */
+  link_id?: string;
   media_item_id: string;
   organization_id: string;
   street: string | null;
   house_number: string | null;
   staircase: string | null;
   door: string | null;
+  floor: string | null;
+  postcode: string | null;
   extra_information: string | null;
   city: string | null;
   district: string | null;
@@ -24,7 +26,8 @@ export interface MediaItemLocationRow {
   latitude: number | null;
   longitude: number | null;
   address_label: string | null;
-  is_primary: boolean;
+  /** @deprecated Primary model removed; always false from RPC shim. */
+  is_primary?: boolean;
   sort_order: number;
   staircase_sort_key: string;
   door_sort_key: string;
@@ -63,6 +66,8 @@ export interface MediaLocationAddressPatch {
   house_number?: string | null;
   staircase?: string | null;
   door?: string | null;
+  floor?: string | null;
+  postcode?: string | null;
   extra_information?: string | null;
   city?: string | null;
   district?: string | null;

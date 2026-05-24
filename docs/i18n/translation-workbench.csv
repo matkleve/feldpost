@@ -928,6 +928,9 @@ workspace.imageDetail.action.confirmClearCoordinates.aria,Confirm clear coordina
 workspace.imageDetail.action.confirmClearCoordinates.title,Click again to clear coordinates,apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section coordinates row clear armed title,Click again to clear coordinates,Zum Löschen der Koordinaten erneut klicken,Clicca di nuovo per cancellare le coordinate
 workspace.imageDetail.toast.coordinatesCleared,Coordinates removed,apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view toast after clear coordinates,Coordinates removed,Koordinaten entfernt,Coordinate rimosse
 workspace.imageDetail.toast.coordinatesClearFailed,Could not clear coordinates,apps/web/src/app/shared/workspace-pane/media-detail/media-detail-fields.helper clear coordinates error,Could not clear coordinates,Koordinaten konnten nicht gelöscht werden,Impossibile cancellare le coordinate
+location.postcode.label,Postcode,media-detail location row edit label,Postcode,PLZ,CAP
+location.floor.label,Floor,media-detail location row edit label,Floor,Stock,Piano
+location.shared_edit.hint,Editing this address updates it for all linked media.,media-detail location row shared location warning,Editing this address updates it for all linked media.,Änderungen an dieser Adresse gelten für alle verknüpften Medien.,La modifica di questo indirizzo si applica a tutti i media collegati.
 location.street.label,Street,media-detail location row edit label,Street,Straße,Via
 location.house_number.label,House number,media-detail location row edit label,House number,Hausnummer,Numero civico
 location.staircase.label,Staircase,media-detail location row edit label,Staircase,Stiege,Scala

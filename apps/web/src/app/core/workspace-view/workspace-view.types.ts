@@ -58,6 +58,8 @@ export interface WorkspaceMedia {
   metadata?: WorkspaceMediaCustomMetadata;
   /** Structured filename metadata for export/label use. */
   fileMetadata?: WorkspaceMediaFileMetadata | null;
+  /** Linked locations with GPS — drives grid map affordance without extra RPC. */
+  zoomableLocationCount?: number;
 }
 
 /** Backwards-compatible alias while codebase terminology migrates from image → media. */

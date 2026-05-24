@@ -59,21 +59,41 @@ export class LocationResolverService {
   }
 
   async resolvePendingMediaItem(mediaItemId: string): Promise<ResolvePendingMediaItemResult> {
-    const { data, error } = await this.supabase.client
+    const { data: mediaRow, error: mediaError } = await this.supabase.client
       .from('media_items')
-      .select(
-        'id,source_image_id,location_status,latitude,longitude,address_label,city,district,street,country',
-      )
+      .select('id,source_image_id,location_status')
       .or(`id.eq.${mediaItemId},source_image_id.eq.${mediaItemId}`)
       .limit(1)
       .maybeSingle();
 
-    if (error || !data) {
+    if (mediaError || !mediaRow) {
       return { status: 'unresolvable', changed: false };
     }
 
-    const row = data as UnresolvedRow & { id?: string | null };
-    const resolvedMediaId = row.id ?? row.media_item_id ?? row.image_id ?? null;
+    const resolvedMediaId = mediaRow.id;
+    const { data: locRows, error: locError } = await this.supabase.client.rpc(
+      'list_locations_for_media',
+      { p_media_item_id: resolvedMediaId, p_limit: 1, p_offset: 0 },
+    );
+
+    if (locError) {
+      return { status: 'unresolvable', changed: false };
+    }
+
+    const loc = Array.isArray(locRows) && locRows.length > 0 ? locRows[0] : null;
+    const row = {
+      id: resolvedMediaId,
+      media_item_id: resolvedMediaId,
+      image_id: mediaRow.source_image_id ?? resolvedMediaId,
+      location_status: mediaRow.location_status,
+      latitude: loc?.latitude ?? null,
+      longitude: loc?.longitude ?? null,
+      address_label: loc?.address_label ?? null,
+      city: loc?.city ?? null,
+      district: loc?.district ?? null,
+      street: loc?.street ?? null,
+      country: loc?.country ?? null,
+    } as UnresolvedRow & { id: string };
     if (!resolvedMediaId) {
       return { status: 'unresolvable', changed: false };
     }

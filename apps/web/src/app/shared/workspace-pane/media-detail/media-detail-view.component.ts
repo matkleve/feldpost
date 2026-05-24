@@ -1643,10 +1643,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     }
   }
 
-  /** After row CRUD: refresh legacy `media_items` columns from primary row + reload location list. */
+  /** After row CRUD: junction list is source of truth for map/detail locations. */
   private async refreshMediaAfterLocationMutation(mediaId: string): Promise<void> {
-    const signal = this.abortController?.signal ?? new AbortController().signal;
-    await this.dataFacade.refreshMediaLocationFields(mediaId, signal);
     await this.reloadLocations(mediaId);
   }
 
@@ -1696,6 +1694,8 @@ export class MediaDetailViewComponent implements OnDestroy {
       house_number: payload.house_number,
       staircase: payload.staircase,
       door: payload.door,
+      floor: payload.floor,
+      postcode: payload.postcode,
       extra_information: payload.extra_information,
     });
     this.saving.set(false);
@@ -1727,29 +1727,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
     this.locations.set(list.rows);
-    await this.dataFacade.refreshMediaLocationFields(
-      media.id,
-      this.abortController?.signal ?? new AbortController().signal,
-    );
-  }
-
-  async onLocationSetPrimary(locationId: string): Promise<void> {
-    const media = this.media();
-    if (!media) return;
-    this.locationPrimaryErrors.update((m) => {
-      const next = { ...m };
-      delete next[locationId];
-      return next;
-    });
-    const result = await this.mediaLocationsService.setPrimary(locationId);
-    if (!result.ok) {
-      this.locationPrimaryErrors.update((m) => ({
-        ...m,
-        [locationId]: this.t('location.action.set_primary_error', 'Could not set primary location'),
-      }));
-      return;
-    }
-    await this.refreshMediaAfterLocationMutation(media.id);
+    await this.reloadLocations(media.id);
   }
 
   async onLocationCopyField(action: MediaLocationCopyField): Promise<void> {

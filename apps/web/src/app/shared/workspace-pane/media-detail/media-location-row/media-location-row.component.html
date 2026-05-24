@@ -19,6 +19,14 @@
         <span class="detail-row__label">{{ t('location.door.label', 'Top') }}</span>
         <input class="detail-row__field-input" type="text" [placeholder]="t('location.door.placeholder', 'e.g. 1, DG, 11-12')" [value]="draftDoor()" (input)="draftDoor.set($any($event.target).value)" />
       </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.postcode.label', 'Postcode') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftPostcode()" (input)="draftPostcode.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.floor.label', 'Floor') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftFloor()" (input)="draftFloor.set($any($event.target).value)" />
+      </label>
       <label class="media-location-row__field media-location-row__field--wide">
         <span class="detail-row__label">{{ t('location.extra_information.label', 'Extra information') }}</span>
         <input class="detail-row__field-input" type="text" [placeholder]="t('location.extra_information.placeholder', 'e.g. Ring twice')" [value]="draftExtra()" (input)="draftExtra.set($any($event.target).value)" />
@@ -32,24 +40,11 @@
     </button>
   </div>
 } @else {
-  <div class="detail-row media-location-row" [class.media-location-row--primary]="location().is_primary">
-    @if (location().is_primary) {
-      <span
-        class="detail-row-action detail-row-action--l1 media-location-row__primary-icon"
-        [attr.aria-label]="t('location.primary.badge', 'Primary')"
-        [attr.title]="t('location.primary.tooltip', 'This location is used as the map pin and in exports')"
-      >
-        <span class="material-icons" aria-hidden="true">pin_drop</span>
-      </span>
-      <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--l2" type="button" (click)="startEdit()">
-        <span class="material-icons" aria-hidden="true">edit</span>
-      </button>
-    } @else {
-      <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--l1" type="button" (click)="startEdit()">
-        <span class="material-icons" aria-hidden="true">edit</span>
-      </button>
-      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    }
+  <div class="detail-row media-location-row">
+    <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--l1" type="button" (click)="startEdit()">
+      <span class="material-icons" aria-hidden="true">edit</span>
+    </button>
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">location_on</span>
       <span class="detail-row__label media-location-row__label-spacer" aria-hidden="true"></span>
@@ -164,15 +159,9 @@
       (closeRequested)="closeOverflowMenu()"
     >
       <div class="option-menu-list" role="menu">
-        @if (location().is_primary) {
-          <p class="option-menu-list__hint" role="presentation">
-            {{ t('location.primary.tooltip', 'This location is used as the map pin and in exports') }}
-          </p>
-        } @else if (showSetPrimaryAction()) {
-          <button class="option-menu-list__item" type="button" role="menuitem" (click)="onSetPrimary()">
-            {{ t('location.action.set_primary', 'Set as primary') }}
-          </button>
-        }
+        <p class="option-menu-list__hint" role="presentation">
+          {{ t('location.shared_edit.hint', 'Editing this address updates it for all linked media.') }}
+        </p>
         <button class="option-menu-list__item" type="button" role="menuitem" (click)="onMapPick()">
           {{ t('workspace.imageDetail.action.chooseLocationMap.title', 'Change GPS on map') }}
         </button>
@@ -181,8 +170,5 @@
         </button>
       </div>
     </app-dropdown-shell>
-  }
-  @if (effectiveVisualState() === 'set_primary_error' && primaryError()) {
-    <p class="media-location-row__error" role="alert">{{ primaryError() }}</p>
   }
 }

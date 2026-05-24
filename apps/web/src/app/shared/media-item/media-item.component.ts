@@ -17,6 +17,7 @@ import type {
   ItemDisplayMode,
 } from '../item-grid/item.component';
 import type { ImageRecord } from '../../core/media-query/media-query.types';
+import { mediaHasZoomableLocation } from '../../core/media-locations/media-locations.helpers';
 import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
 import type { MediaItemMapZoomEvent } from './media-item-map-action.component';
@@ -227,7 +228,7 @@ export class MediaItemComponent {
 
   readonly hasMapLocation = computed(() => {
     const record = this.item();
-    return !!record && record.latitude !== null && record.longitude !== null;
+    return !!record && mediaHasZoomableLocation(record);
   });
   readonly mediaIdentity = computed(() => this.item()?.id ?? this.itemId());
 

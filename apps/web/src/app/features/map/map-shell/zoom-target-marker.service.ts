@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import type * as L from 'leaflet';
 import type { PhotoMarkerState } from './map-marker-reconcile.facade';
+import { getMarkerKeysForMedia, type MarkersByMediaIdMap } from './marker-media-index.helpers';
 
 @Injectable({ providedIn: 'root' })
 export class ZoomTargetMarkerService {
@@ -10,16 +11,40 @@ export class ZoomTargetMarkerService {
     lng: number;
     allowClusterFallback: boolean;
     map: L.Map | undefined;
-    markersByMediaId: Map<string, string>;
+    markersByMediaId: MarkersByMediaIdMap;
     uploadedPhotoMarkers: Map<string, PhotoMarkerState>;
     toMarkerKey: (lat: number, lng: number) => string;
     clusterFallbackMaxMeters: number;
   }): string | null {
-    const byImageId = params.markersByMediaId.get(params.mediaId);
-    if (byImageId) {
-      const state = params.uploadedPhotoMarkers.get(byImageId);
-      if (state && state.count === 1) {
-        return byImageId;
+    const markerKeys = getMarkerKeysForMedia(params.markersByMediaId, params.mediaId);
+    let nearestSingle: { key: string; distanceMeters: number } | null = null;
+
+    for (const markerKey of markerKeys) {
+      const state = params.uploadedPhotoMarkers.get(markerKey);
+      if (!state || state.count !== 1) {
+        continue;
+      }
+      const distanceMeters = this.distanceMeters(
+        params.map,
+        params.lat,
+        params.lng,
+        state.lat,
+        state.lng,
+      );
+      if (!nearestSingle || distanceMeters < nearestSingle.distanceMeters) {
+        nearestSingle = { key: markerKey, distanceMeters };
+      }
+    }
+
+    if (nearestSingle && nearestSingle.distanceMeters <= params.clusterFallbackMaxMeters) {
+      return nearestSingle.key;
+    }
+
+    if (markerKeys.length === 1) {
+      const onlyKey = markerKeys[0];
+      const state = params.uploadedPhotoMarkers.get(onlyKey);
+      if (state?.count === 1) {
+        return onlyKey;
       }
     }
 

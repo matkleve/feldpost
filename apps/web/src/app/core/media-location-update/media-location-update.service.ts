@@ -34,14 +34,19 @@ export class MediaLocationUpdateService {
     };
 
     return this.finishResolveMediaLocationRpc(
+      mediaId,
       await this.supabaseService.client.rpc('resolve_media_location', payload),
       { lat: suggestion.lat, lng: suggestion.lng },
       {
         address_label: suggestion.addressLabel,
         street: suggestion.street,
+        house_number: suggestion.streetNumber,
+        postcode: suggestion.zip,
         city: suggestion.city,
         district: suggestion.district,
         country: suggestion.country,
+        latitude: suggestion.lat,
+        longitude: suggestion.lng,
       },
     );
   }
@@ -71,25 +76,34 @@ export class MediaLocationUpdateService {
     };
 
     return this.finishResolveMediaLocationRpc(
+      mediaId,
       await this.supabaseService.client.rpc('resolve_media_location', payload),
       { lat: coords.lat, lng: coords.lng },
       reverse
         ? {
             address_label: reverse.addressLabel,
             street: reverse.street,
+            house_number: reverse.streetNumber,
+            postcode: reverse.zip,
             city: reverse.city,
             district: reverse.district,
             country: reverse.country,
+            latitude: coords.lat,
+            longitude: coords.lng,
           }
-        : undefined,
+        : {
+            latitude: coords.lat,
+            longitude: coords.lng,
+          },
     );
   }
 
-  private finishResolveMediaLocationRpc(
+  private async finishResolveMediaLocationRpc(
+    mediaId: string,
     response: { data: boolean | null; error: { message?: string } | null },
     coords: { lat: number; lng: number },
     address?: MediaLocationAddressPatch,
-  ): MediaLocationUpdateResult {
+  ): Promise<MediaLocationUpdateResult> {
     if (response.error) {
       return { ok: false, error: describeLocationUpdateRpcError(response.error) };
     }
@@ -98,6 +112,47 @@ export class MediaLocationUpdateService {
       return { ok: false, error: LOCATION_UPDATE_NOT_FOUND_ERROR };
     }
 
+    await this.ensureLocationLink(mediaId, {
+      ...address,
+      latitude: address?.latitude ?? coords.lat,
+      longitude: address?.longitude ?? coords.lng,
+    });
+
     return { ok: true, lat: coords.lat, lng: coords.lng, address };
+  }
+
+  /** Upload / legacy resolve: also write junction so map v2 sees the item. */
+  private async ensureLocationLink(
+    mediaId: string,
+    patch: MediaLocationAddressPatch,
+  ): Promise<void> {
+    const { data: loc, error: findError } = await this.supabaseService.client.rpc(
+      'find_or_create_location',
+      {
+        p_street: patch.street ?? null,
+        p_house_number: patch.house_number ?? null,
+        p_staircase: patch.staircase ?? null,
+        p_door: patch.door ?? null,
+        p_floor: patch.floor ?? null,
+        p_postcode: patch.postcode ?? null,
+        p_extra_information: patch.extra_information ?? null,
+        p_city: patch.city ?? null,
+        p_district: patch.district ?? null,
+        p_country: patch.country ?? null,
+        p_latitude: patch.latitude ?? null,
+        p_longitude: patch.longitude ?? null,
+        p_address_label: patch.address_label ?? null,
+      },
+    );
+
+    if (findError || !loc || typeof loc !== 'object' || !('id' in loc)) {
+      return;
+    }
+
+    const locationId = (loc as { id: string }).id;
+    await this.supabaseService.client.rpc('link_media_to_location', {
+      p_media_item_id: mediaId,
+      p_location_id: locationId,
+    });
   }
 }

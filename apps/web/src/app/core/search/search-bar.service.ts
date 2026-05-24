@@ -66,21 +66,37 @@ const MAX_DB_ADDRESS_ROWS = 24;
 const CONTEXT_CITY_CACHE_TTL_MS = 10 * 60 * 1000;
 
 interface DbAddressRow {
-  id: string;
+  media_item_id: string;
   address_label: string | null;
   street: string | null;
   city: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
   created_at: string | null;
+  locations?: {
+    address_label: string | null;
+    street: string | null;
+    city: string | null;
+    latitude: number | string | null;
+    longitude: number | string | null;
+  } | Array<{
+    address_label: string | null;
+    street: string | null;
+    city: string | null;
+    latitude: number | string | null;
+    longitude: number | string | null;
+  }>;
+  media_items?: { created_at: string | null } | Array<{ created_at: string | null }>;
 }
 
 interface MediaItemAddressRow {
   address_label: string | null;
   street: string | null;
+  house_number?: string | null;
   city: string | null;
   district: string | null;
   country: string | null;
+  postcode?: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
 }
@@ -291,18 +307,17 @@ export class SearchBarService {
     if (!trimmedQuery) return [];
 
     let request = this.supabaseService.client
-      .from('media_items')
+      .from('media_item_location_links')
       .select(
-        'id,address_label,street,city,latitude,longitude,created_at',
+        'media_item_id, locations!inner(address_label, street, city, latitude, longitude), media_items!inner(created_at, organization_id)',
       )
-      .ilike('address_label', `*${trimmedQuery}*`)
-      .not('address_label', 'is', null)
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null)
+      .ilike('locations.address_label', `%${trimmedQuery}%`)
+      .not('locations.latitude', 'is', null)
+      .not('locations.longitude', 'is', null)
       .limit(MAX_DB_ADDRESS_ROWS);
 
     if (context.organizationId) {
-      request = request.eq('organization_id', context.organizationId);
+      request = request.eq('media_items.organization_id', context.organizationId);
     }
 
     const response = await request;
@@ -321,7 +336,7 @@ export class SearchBarService {
 
     if (!Array.isArray(response.data)) return [];
 
-    const grouped = this.groupAddressRows(response.data as DbAddressRow[], trimmedQuery);
+    const grouped = this.groupAddressRows(response.data as unknown as DbAddressRow[], trimmedQuery);
     return this.rankedAddressCandidates(grouped, context);
   }
 
@@ -332,24 +347,29 @@ export class SearchBarService {
     const grouped = new Map<string, AddressGroup>();
 
     for (const row of rows) {
-      const rawLabel = row.address_label?.trim();
-      const lat = toNumber(row.latitude);
-      const lng = toNumber(row.longitude);
-      if (!rawLabel || lat === null || lng === null) continue;
+      const locRaw = row.locations;
+      const loc = Array.isArray(locRaw) ? locRaw[0] : locRaw;
+      const mediaRaw = row.media_items;
+      const media = Array.isArray(mediaRaw) ? mediaRaw[0] : mediaRaw;
+      const mediaId = row.media_item_id;
+      const rawLabel = (loc?.address_label ?? row.address_label)?.trim();
+      const lat = toNumber(loc?.latitude ?? row.latitude);
+      const lng = toNumber(loc?.longitude ?? row.longitude);
+      if (!rawLabel || lat === null || lng === null || !mediaId) continue;
 
       const label = formatDbAddressLabel(
         rawLabel,
-        normalizeStreetPart(row.street),
-        buildCityPart(null, row.city),
+        normalizeStreetPart(loc?.street ?? row.street),
+        buildCityPart(null, loc?.city ?? row.city),
       );
       const key = label.toLowerCase();
       const textMatch = computeTextMatchScore(label, trimmedQuery);
-      const createdAtMs = row.created_at ? Date.parse(row.created_at) : 0;
+      const createdAtMs = media?.created_at ? Date.parse(media.created_at) : row.created_at ? Date.parse(row.created_at) : 0;
       const activeProjectHit = 0;
 
       const existing = grouped.get(key);
       if (existing) {
-        existing.ids.push(row.id);
+        existing.ids.push(mediaId);
         existing.latTotal += lat;
         existing.lngTotal += lng;
         existing.count += 1;
@@ -361,7 +381,7 @@ export class SearchBarService {
 
       grouped.set(key, {
         label,
-        ids: [row.id],
+        ids: [mediaId],
         latTotal: lat,
         lngTotal: lng,
         count: 1,
@@ -792,17 +812,17 @@ export class SearchBarService {
   private async resolveDbAddressForwardGeocode(
     candidate: SearchAddressCandidate,
   ): Promise<ForwardGeocodeResult> {
-    const { data, error } = await this.supabaseService.client
-      .from('media_items')
-      .select('address_label,street,city,district,country,latitude,longitude')
-      .eq('id', candidate.id)
-      .maybeSingle();
+    const { data, error } = await this.supabaseService.client.rpc('list_locations_for_media', {
+      p_media_item_id: candidate.id,
+      p_limit: 1,
+      p_offset: 0,
+    });
 
-    if (error || !data) {
+    if (error || !Array.isArray(data) || data.length === 0) {
       return this.fallbackForwardGeocodeFromCandidate(candidate);
     }
 
-    const row = data as MediaItemAddressRow;
+    const row = data[0] as MediaItemAddressRow;
     return {
       lat: toNumber(row.latitude) ?? candidate.lat,
       lng: toNumber(row.longitude) ?? candidate.lng,
@@ -811,8 +831,8 @@ export class SearchBarService {
       city: row.city,
       district: row.district,
       country: row.country,
-      streetNumber: null,
-      zip: null,
+      streetNumber: row.house_number ?? null,
+      zip: row.postcode ?? null,
     };
   }
 

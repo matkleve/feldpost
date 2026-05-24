@@ -43,7 +43,35 @@ export function locationsWithGps(rows: readonly MediaItemLocationRow[]): MediaIt
 }
 
 export function legacyMediaHasGps(latitude: number | null, longitude: number | null): boolean {
-  return latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude);
+  return (
+    latitude != null &&
+    longitude != null &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    !(latitude === 0 && longitude === 0)
+  );
+}
+
+/** Gallery/map affordance: prefer link-based zoomable count when present. */
+/** First linked row by sort order — canonical “display” location for legacy ImageRecord fields. */
+export function primaryLocationFromRows(
+  rows: readonly MediaItemLocationRow[],
+): MediaItemLocationRow | null {
+  if (rows.length === 0) {
+    return null;
+  }
+  return [...rows].sort((a, b) => a.sort_order - b.sort_order)[0] ?? null;
+}
+
+export function mediaHasZoomableLocation(input: {
+  zoomable_location_count?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}): boolean {
+  if (input.zoomable_location_count != null) {
+    return input.zoomable_location_count > 0;
+  }
+  return legacyMediaHasGps(input.latitude ?? null, input.longitude ?? null);
 }
 
 export function locationMatchesQuery(row: MediaItemLocationRow, query: string): boolean {

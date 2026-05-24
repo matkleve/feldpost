@@ -114,7 +114,7 @@ export class MediaQueryService {
       const { data, error } = await this.supabase.client
         .from('media_items')
         .select(
-          'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, preview_generation_status, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id, address_label, street, city, district, country',
+          'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, preview_generation_status, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id',
         )
         .order('created_at', { ascending: false })
         .range(offset, offset + MediaQueryService.GALLERY_PAGE_SIZE - 1);
@@ -190,11 +190,14 @@ export class MediaQueryService {
       }
     }
 
+    const zoomableCountByMediaId = await this.loadZoomableLocationCounts(mediaItemIds);
+
     const images: WorkspaceMedia[] = accum.map((row) =>
       mapGalleryRowToWorkspaceMedia(
         row,
         membershipByMediaId.get(row.id) ?? [],
         row.created_by ? (profileNameById.get(row.created_by) ?? null) : null,
+        zoomableCountByMediaId.get(row.id) ?? 0,
       ),
     );
 
@@ -234,7 +237,7 @@ export class MediaQueryService {
     const { data, error } = await this.supabase.client
       .from('media_items')
       .select(
-        'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status',
+        'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, exif_latitude, exif_longitude, captured_at, created_at, location_status',
       )
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false });
@@ -340,6 +343,41 @@ export class MediaQueryService {
 
     return merged;
   }
+
+  private async loadZoomableLocationCounts(mediaItemIds: string[]): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (mediaItemIds.length === 0) {
+      return counts;
+    }
+
+    for (let i = 0; i < mediaItemIds.length; i += MediaQueryService.MEMBERSHIP_QUERY_CHUNK) {
+      const chunk = mediaItemIds.slice(i, i + MediaQueryService.MEMBERSHIP_QUERY_CHUNK);
+      const { data, error } = await this.supabase.client
+        .from('media_item_location_links')
+        .select('media_item_id, locations!inner(latitude, longitude)')
+        .in('media_item_id', chunk);
+
+      if (error || !Array.isArray(data)) {
+        continue;
+      }
+
+      for (const row of data as Array<{
+        media_item_id: string;
+        locations: { latitude: number | null; longitude: number | null } | Array<{
+          latitude: number | null;
+          longitude: number | null;
+        }>;
+      }>) {
+        const loc = Array.isArray(row.locations) ? row.locations[0] : row.locations;
+        if (loc?.latitude == null || loc?.longitude == null) {
+          continue;
+        }
+        counts.set(row.media_item_id, (counts.get(row.media_item_id) ?? 0) + 1);
+      }
+    }
+
+    return counts;
+  }
 }
 
 function toFiniteNumber(value: number | string | null | undefined): number | null {
@@ -355,16 +393,16 @@ function mapGalleryRowToWorkspaceMedia(
   row: MediaGalleryDbRow,
   memberships: Array<{ id: string; name: string | null }>,
   userName: string | null,
+  zoomableLocationCount: number,
 ): WorkspaceMedia {
-  const lat = toFiniteNumber(row.latitude);
-  const lng = toFiniteNumber(row.longitude);
   const projectIds = memberships.map((m) => m.id);
   const projectNames = memberships.map((m) => m.name ?? '').filter((name) => !!name);
 
   return {
     id: row.id,
-    latitude: lat ?? 0,
-    longitude: lng ?? 0,
+    latitude: 0,
+    longitude: 0,
+    zoomableLocationCount,
     thumbnailPath: row.thumbnail_path,
     previewGenerationStatus: normalizePreviewGenerationStatus(row.preview_generation_status),
     storagePath: row.storage_path,

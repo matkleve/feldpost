@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import type { FileTypeCategory } from '../media/media-renderer.types';
+import { loadPrimaryLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
 import { SupabaseService } from '../supabase/supabase.service';
 import {
   bumpProjectFileTypeCount,
@@ -366,25 +367,36 @@ export class ProjectsService {
     const preferred = await this.supabase.client
       .from('media_projects')
       .select(
-        'project_id,media_items!inner(id,latitude,longitude,thumbnail_path,storage_path,captured_at,created_at,exif_latitude,exif_longitude)',
+        'project_id,media_items!inner(id,thumbnail_path,storage_path,captured_at,created_at,exif_latitude,exif_longitude)',
       )
       .eq('project_id', projectId)
       .order('created_at', { foreignTable: 'media_items', ascending: false });
 
     if (!preferred.error && Array.isArray(preferred.data)) {
+      const joinRows = preferred.data as MediaWorkspaceJoinRow[];
+      const mediaIds = joinRows
+        .map((row) => {
+          const media = Array.isArray(row.media_items) ? row.media_items[0] : row.media_items;
+          return media?.id;
+        })
+        .filter((id): id is string => typeof id === 'string' && id.length > 0);
+      const primaryByMediaId = await loadPrimaryLocationsByMediaIds(this.supabase.client, mediaIds);
+
       const mappedPreferred: ProjectScopedWorkspaceImage[] = [];
-      for (const row of preferred.data as MediaWorkspaceJoinRow[]) {
+      for (const row of joinRows) {
         const media = Array.isArray(row.media_items) ? row.media_items[0] : row.media_items;
         if (!media) continue;
-        if (typeof media.latitude !== 'number' || !Number.isFinite(media.latitude)) continue;
-        if (typeof media.longitude !== 'number' || !Number.isFinite(media.longitude)) continue;
+        const primary = primaryByMediaId.get(media.id);
+        const lat = primary?.latitude;
+        const lng = primary?.longitude;
+        if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) continue;
 
         mappedPreferred.push({
           id: media.id,
           projectId: row.project_id,
           projectName: null,
-          latitude: media.latitude,
-          longitude: media.longitude,
+          latitude: lat,
+          longitude: lng,
           thumbnailPath: media.thumbnail_path,
           storagePath: media.storage_path,
           capturedAt: media.captured_at,

@@ -10,6 +10,8 @@ import type {
   MetadataKeyDefinitionView,
   SelectOption,
 } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
+import { primaryLocationFromRows } from '../media-locations/media-locations.helpers';
+import type { MediaItemLocationRow } from '../media-locations/media-locations.types';
 import {
   MEDIA_ITEM_DETAIL_SELECT_BASE,
   MEDIA_ITEM_DETAIL_SELECT_WITH_META,
@@ -197,10 +199,10 @@ export class MediaDetailDataFacade {
     }
 
     const row = mediaResult.data as unknown as MediaDetailRow;
-    return {
+    return this.enrichWithPrimaryLocation({
       ...row,
       address_field_meta: row.address_field_meta ?? null,
-    };
+    });
   }
 
   private async loadMediaRow(id: string): Promise<MediaDetailRow | null> {
@@ -226,10 +228,36 @@ export class MediaDetailDataFacade {
 
     const row = mediaResult.data as unknown as MediaDetailRow;
 
-    return {
+    return this.enrichWithPrimaryLocation({
       ...row,
       address_field_meta: row.address_field_meta ?? null,
+    });
+  }
+
+  private async enrichWithPrimaryLocation(row: MediaDetailRow): Promise<MediaDetailRow> {
+    const loc = await this.fetchPrimaryLocationRow(row.id);
+    return {
+      ...row,
+      latitude: loc?.latitude ?? null,
+      longitude: loc?.longitude ?? null,
+      address_label: loc?.address_label ?? null,
+      street: loc?.street ?? null,
+      city: loc?.city ?? null,
+      district: loc?.district ?? null,
+      country: loc?.country ?? null,
     };
+  }
+
+  private async fetchPrimaryLocationRow(mediaItemId: string): Promise<MediaItemLocationRow | null> {
+    const { data, error } = await this.deps.services.supabase.client.rpc('list_locations_for_media', {
+      p_media_item_id: mediaItemId,
+      p_limit: 50,
+      p_offset: 0,
+    });
+    if (error || !Array.isArray(data) || data.length === 0) {
+      return null;
+    }
+    return primaryLocationFromRows(data as MediaItemLocationRow[]);
   }
 
   private toImageRecord(media: MediaDetailRow, legacyImageId: string): ImageRecord {

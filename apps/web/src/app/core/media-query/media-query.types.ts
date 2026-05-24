@@ -36,4 +36,6 @@ export interface ImageRecord {
   gps_assignment_allowed?: boolean | null;
   /** Per-field address verification metadata. @see AddressFieldMeta */
   address_field_meta?: AddressFieldMeta | null;
+  /** Count of linked locations with paired GPS (gallery map icon). */
+  zoomable_location_count?: number | null;
 }

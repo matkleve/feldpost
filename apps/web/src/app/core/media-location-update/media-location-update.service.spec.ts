@@ -26,7 +26,18 @@ describe('MediaLocationUpdateService', () => {
   });
 
   it('returns ok when RPC resolves true', async () => {
-    rpc.mockResolvedValue({ data: true, error: null });
+    rpc.mockImplementation((fn: string) => {
+      if (fn === 'resolve_media_location') {
+        return Promise.resolve({ data: true, error: null });
+      }
+      if (fn === 'find_or_create_location') {
+        return Promise.resolve({ data: { id: 'loc-1' }, error: null });
+      }
+      if (fn === 'link_media_to_location') {
+        return Promise.resolve({ data: { id: 'link-1' }, error: null });
+      }
+      return Promise.resolve({ data: null, error: null });
+    });
     const service = TestBed.inject(MediaLocationUpdateService);
     const result = await service.updateFromAddressSuggestion('media-1', {
       lat: 48.2,

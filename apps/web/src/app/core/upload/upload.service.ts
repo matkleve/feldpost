@@ -210,8 +210,6 @@ export class UploadService {
         exif_latitude: exifCoords?.lat ?? null,
         exif_longitude: exifCoords?.lng ?? null,
         exif_raw: parsedExif?.exifRaw ?? null,
-        latitude: finalCoords?.lat ?? null,
-        longitude: finalCoords?.lng ?? null,
         location_status: locationStatus,
         gps_assignment_allowed: gpsAssignmentAllowed,
       })

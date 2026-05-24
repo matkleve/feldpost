@@ -47,6 +47,8 @@ export interface MediaLocationRowSavePayload {
   house_number: string | null;
   staircase: string | null;
   door: string | null;
+  floor: string | null;
+  postcode: string | null;
   extra_information: string | null;
 }
 
@@ -106,10 +108,6 @@ export class MediaLocationRowComponent {
     formatLocationDisplayLine(this.location(), this.doorLabel()),
   );
 
-  readonly showSetPrimaryAction = computed(
-    () => !this.location().is_primary && this.locationCount() > 1,
-  );
-
   readonly canShowOnMap = computed(() => {
     const row = this.location();
     return row.latitude != null && row.longitude != null;
@@ -120,6 +118,8 @@ export class MediaLocationRowComponent {
   readonly draftStaircase = signal('');
   readonly draftDoor = signal('');
   readonly draftExtra = signal('');
+  readonly draftPostcode = signal('');
+  readonly draftFloor = signal('');
 
   readonly copyActions = computed((): MediaLocationCopyField[] => {
     const row = this.location();
@@ -211,6 +211,8 @@ export class MediaLocationRowComponent {
     this.draftStaircase.set(row.staircase ?? '');
     this.draftDoor.set(row.door ?? '');
     this.draftExtra.set(row.extra_information ?? '');
+    this.draftPostcode.set(row.postcode ?? '');
+    this.draftFloor.set(row.floor ?? '');
     this.visualState.set('editing');
     this.editRequested.emit(row.id);
   }
@@ -228,6 +230,8 @@ export class MediaLocationRowComponent {
       house_number: this.draftHouseNumber().trim() || null,
       staircase: this.draftStaircase().trim() || null,
       door: this.draftDoor().trim() || null,
+      floor: this.draftFloor().trim() || null,
+      postcode: this.draftPostcode().trim() || null,
       extra_information: this.draftExtra().trim() || null,
     });
     this.visualState.set('read');
@@ -254,11 +258,6 @@ export class MediaLocationRowComponent {
   onCopyAction(action: MediaLocationCopyField): void {
     this.copyFieldRequested.emit(action);
     this.closeCopyMenu();
-  }
-
-  onSetPrimary(): void {
-    this.setPrimaryRequested.emit(this.location().id);
-    this.closeOverflowMenu();
   }
 
   onMapPick(): void {

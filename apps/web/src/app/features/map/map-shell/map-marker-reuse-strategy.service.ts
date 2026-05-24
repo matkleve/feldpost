@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import type * as L from 'leaflet';
 import type { PhotoMarkerState, ReconcileIncomingRow } from './map-marker-reconcile.facade';
+import { getMarkerKeysForMedia, type MarkersByMediaIdMap } from './marker-media-index.helpers';
 
 @Injectable({ providedIn: 'root' })
 export class MapMarkerReuseStrategyService {
   findReusableMarkerKey(
     map: L.Map | undefined,
-    markersByMediaId: Map<string, string>,
+    markersByMediaId: MarkersByMediaIdMap,
     uploadedPhotoMarkers: Map<string, PhotoMarkerState>,
     row: Pick<
       ReconcileIncomingRow,
@@ -19,9 +20,10 @@ export class MapMarkerReuseStrategyService {
     const incomingMediaItemId = row.media_item_id ?? row.image_id;
 
     if (incomingIsSingle && incomingMediaItemId) {
-      const byImageId = markersByMediaId.get(incomingMediaItemId);
-      if (byImageId && recyclableKeys.has(byImageId)) {
-        return byImageId;
+      for (const markerKey of getMarkerKeysForMedia(markersByMediaId, incomingMediaItemId)) {
+        if (recyclableKeys.has(markerKey)) {
+          return markerKey;
+        }
       }
     }
 

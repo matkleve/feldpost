@@ -189,7 +189,7 @@ export class MediaItemMapActionComponent {
       lat: row.latitude!,
       lng: row.longitude!,
       label: formatLocationDisplayLine(row, doorLabel),
-      isPrimary: row.is_primary,
+      isPrimary: false,
       searchRow: row,
     };
   }

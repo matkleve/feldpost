@@ -20,7 +20,7 @@ export class SupabaseMediaLocationsAdapter {
   private readonly supabase = inject(SupabaseService);
 
   async list(mediaItemId: string, limit = 50, offset = 0): Promise<MediaItemLocationRow[]> {
-    const { data, error } = await this.supabase.client.rpc('list_media_item_locations', {
+    const { data, error } = await this.supabase.client.rpc('list_locations_for_media', {
       p_media_item_id: mediaItemId,
       p_limit: limit,
       p_offset: offset,
@@ -79,6 +79,8 @@ function patchToRpcParams(patch: MediaLocationAddressPatch): Record<string, stri
     p_house_number: patch.house_number ?? null,
     p_staircase: patch.staircase ?? null,
     p_door: patch.door ?? null,
+    p_floor: patch.floor ?? null,
+    p_postcode: patch.postcode ?? null,
     p_extra_information: patch.extra_information ?? null,
     p_city: patch.city ?? null,
     p_district: patch.district ?? null,

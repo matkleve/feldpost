@@ -61,6 +61,8 @@ export class MediaLocationsService {
     return this.addLocation({
       mediaItemId,
       street: suggestion.street,
+      house_number: suggestion.streetNumber,
+      postcode: suggestion.zip,
       city: suggestion.city,
       district: suggestion.district,
       country: suggestion.country,
@@ -106,6 +108,8 @@ export class MediaLocationsService {
       longitude: coords.lng,
       address_label: reverse?.addressLabel ?? null,
       street: reverse?.street ?? null,
+      house_number: reverse?.streetNumber ?? null,
+      postcode: reverse?.zip ?? null,
       city: reverse?.city ?? null,
       district: reverse?.district ?? null,
       country: reverse?.country ?? null,

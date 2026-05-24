@@ -33,13 +33,7 @@ export function buildAttachUpdateData(args: BuildAttachUpdateDataArgs): {
     updateData['direction'] = parsedExif.direction;
   }
 
-  if (!hadExistingCoords && parsedExif.coords && !isAttachKeep) {
-    updateData['latitude'] = parsedExif.coords.lat;
-    updateData['longitude'] = parsedExif.coords.lng;
-  } else if (conflictResolution === 'attach_replace' && parsedExif.coords) {
-    updateData['latitude'] = parsedExif.coords.lat;
-    updateData['longitude'] = parsedExif.coords.lng;
-  }
+  // Resolved GPS/address is written via resolve_media_location → locations + links (not media_items).
 
   return { updateData, isAttachKeep };
 }

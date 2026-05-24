@@ -50,11 +50,6 @@
             (mousedown)="$event.preventDefault()"
             (click)="selectTarget(target)"
           >
-            @if (target.isPrimary) {
-              <span class="material-icons media-item-map-action__primary-icon" aria-hidden="true"
-                >star</span
-              >
-            }
             <span class="media-item-map-action__option-label min-w-0">{{ target.label }}</span>
           </button>
         } @empty {
