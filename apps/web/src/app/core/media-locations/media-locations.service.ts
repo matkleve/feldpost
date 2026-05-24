@@ -20,7 +20,9 @@ import { describeMediaLocationRpcError } from './media-locations.helpers';
 import type {
   MediaItemLocationRow,
   MediaLocationAddInput,
+  MediaLocationAddressPatch,
   MediaLocationDeleteResult,
+  MediaLocationReplaceLinkInput,
   MediaLocationResult,
   MediaLocationUpdateInput,
 } from './media-locations.types';
@@ -146,4 +148,78 @@ export class MediaLocationsService {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
     }
   }
+
+  /**
+   * Move one media item to a different shared location: unlink → find_or_create → link.
+   * Does not patch the previous `locations` row.
+   */
+  async replaceMediaItemLocationLink(
+    input: MediaLocationReplaceLinkInput,
+  ): Promise<MediaLocationResult> {
+    this.invalidateListCache(input.mediaItemId);
+    try {
+      await this.adapter.unlink(input.mediaItemId, input.previousLocationId);
+      const created = await this.adapter.findOrCreate(input.patch);
+      await this.adapter.link(input.mediaItemId, created.id);
+      const rows = await this.adapter.list(input.mediaItemId);
+      const row = rows.find((item) => item.id === created.id) ?? rows[rows.length - 1];
+      if (!row) {
+        return { ok: false, error: 'Location link not found after replace.', code: 'unknown' };
+      }
+      this.listCache.set(input.mediaItemId, rows);
+      return { ok: true, row };
+    } catch (error) {
+      return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
+    }
+  }
+
+  async replaceLocationLinkFromFreeText(
+    mediaItemId: string,
+    previousLocationId: string,
+    label: string,
+  ): Promise<MediaLocationResult> {
+    const trimmed = label.trim();
+    if (!trimmed) {
+      return { ok: false, error: 'Address label is required.', code: 'validation_error' };
+    }
+    const forward = await this.geocodingService.forward(trimmed);
+    if (forward) {
+      return this.replaceMediaItemLocationLink({
+        mediaItemId,
+        previousLocationId,
+        patch: forwardPatchFromGeocode(forward),
+      });
+    }
+    return this.replaceMediaItemLocationLink({
+      mediaItemId,
+      previousLocationId,
+      patch: { address_label: trimmed },
+    });
+  }
+
+  async replaceLocationLinkFromGeocode(
+    mediaItemId: string,
+    previousLocationId: string,
+    suggestion: ForwardGeocodeResult,
+  ): Promise<MediaLocationResult> {
+    return this.replaceMediaItemLocationLink({
+      mediaItemId,
+      previousLocationId,
+      patch: forwardPatchFromGeocode(suggestion),
+    });
+  }
+}
+
+function forwardPatchFromGeocode(suggestion: ForwardGeocodeResult): MediaLocationAddressPatch {
+  return {
+    street: suggestion.street,
+    house_number: suggestion.streetNumber,
+    postcode: suggestion.zip,
+    city: suggestion.city,
+    district: suggestion.district,
+    country: suggestion.country,
+    latitude: suggestion.lat,
+    longitude: suggestion.lng,
+    address_label: suggestion.addressLabel,
+  };
 }

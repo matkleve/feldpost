@@ -77,7 +77,16 @@ Single-line read format (segments in `[]` omitted when empty):
 | `r1` | Overflow menu: change GPS on map, **Copy** submenu (flyout to the right) |
 | `r2` | Delete (double-confirm inline) |
 
-Overflow menu uses `hlmMenuItem` rows with icons (same pattern as detail header context menu). **Copy** opens a side submenu: **Copy full address** first, then per-field copy actions (see service spec copy table). Null/empty fields are hidden. `extra_information` is excluded from copy.
+Overflow menu uses `hlmMenuItem` rows with icons (same pattern as detail header context menu).
+
+| Menu item | Behavior |
+| --- | --- |
+| **Edit address** | `app-confirm-dialog` with `location.shared_edit.confirm.*` — then inline row edit → `update_media_item_location` (patches shared `locations` row for all linked media) |
+| **Change to different address** | Opens section **Add or search address** in replace mode → `unlink_media_from_location` + `find_or_create_location` + `link_media_to_location` via `MediaLocationsService.replaceMediaItemLocationLink` |
+| **Change GPS on map** | Map pick → `update_media_item_location` on row |
+| **Copy** | Side submenu (full address first, then parts) |
+
+Slot **l2** edit and center address click use the same shared-edit confirm as **Edit address**. Null/empty copy fields hidden; `extra_information` excluded from copy.
 
 ## Add/Search Dropdown (4 zones)
 

@@ -29174,6 +29174,192 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.edit_address', 'Edit address', 'en', 'media-detail location row overflow edit shared address')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Edit address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.edit_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse bearbeiten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.edit_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modifica indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.edit_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.action.change_address', 'Change to different address', 'en', 'media-detail location row overflow re-link address')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change to different address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.change_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Andere Adresse zuweisen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.change_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.action.change_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.shared_edit.confirm.title', 'Edit shared address?', 'en', 'media-detail location row shared edit confirm title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Edit shared address?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gemeinsame Adresse bearbeiten?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modificare indirizzo condiviso?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.shared_edit.confirm.message', 'Editing this address updates it for all media items linked to this location.', 'en', 'media-detail location row shared edit confirm body')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Editing this address updates it for all media items linked to this location.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Diese Änderung gilt für alle Medien mit diesem Standort.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La modifica si applica a tutti i media collegati a questa posizione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.shared_edit.confirm.continue', 'Continue editing', 'en', 'media-detail location row shared edit confirm button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Continue editing', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.continue'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Weiter bearbeiten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.continue'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Continua modifica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.shared_edit.confirm.continue'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.toast.changed', 'Location changed', 'en', 'media-detail location row replace link toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location changed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.toast.changed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort geändert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.toast.changed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione cambiata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.toast.changed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'location.action.delete', 'Delete location', 'en', 'media-detail location row delete button')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

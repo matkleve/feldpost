@@ -27,9 +27,10 @@ N/A (headless service). Consumers render rows per [media-detail-location-section
 | `add_media_item_location` | Add new Address |
 | `update_media_item_location` | Row save / map GPS on row / detail title field save |
 | `delete_media_item_location` | Row delete confirm |
-| `link_media_to_location` | Upload resolve, `resolve_media_location` completion |
-| `find_or_create_location` | Deduped org location create (internal to add/link flows) |
-| `update_location` | Direct location patch (SECURITY DEFINER) |
+| `link_media_to_location` | Upload resolve, `resolve_media_location` completion; row **Change to different address** (via facade) |
+| `find_or_create_location` | Deduped org location create; add flow and replace-link flow |
+| `unlink_media_from_location` | Row **Change to different address** (via facade `replaceMediaItemLocationLink`) |
+| `update_location` | Direct location patch (SECURITY DEFINER); reached via `update_media_item_location` |
 ## Schema Contract
 
 ### `public.locations` (org-scoped, shared)
@@ -80,9 +81,20 @@ Hash covers: street, house_number, staircase, door, postcode, city, district, co
 | `add_media_item_location(...)` | `find_or_create_location` + link; assigns `sort_order` |
 | `update_media_item_location(p_location_id, ...)` | `update_location` with org gate |
 | `delete_media_item_location(p_location_id)` | Unlink; delete location if orphan |
+| `unlink_media_from_location(p_media_item_id, p_location_id)` | Remove one junction row (scoped to media item) |
 | `find_or_create_location(...)` | Insert or return existing by dedupe key |
 | `link_media_to_location(p_media_item_id, p_location_id)` | Idempotent link |
 | `update_location(p_location_id, ...)` | Patch shared location (shared-edit semantics) |
+
+### Facade: replace link (normative)
+
+`MediaLocationsService.replaceMediaItemLocationLink({ mediaItemId, previousLocationId, patch })` calls, in order:
+
+1. `unlink_media_from_location`
+2. `find_or_create_location`
+3. `link_media_to_location`
+
+Does **not** call `update_media_item_location` on the previous location. Helpers: `replaceLocationLinkFromFreeText`, `replaceLocationLinkFromGeocode`.
 
 ### Error codes
 

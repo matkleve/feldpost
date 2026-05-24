@@ -111,6 +111,10 @@ import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/works
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import { AddressReconciliationService } from '../../../core/address-reconciliation/address-reconciliation.service';
 import type {
+  MediaLocationReplaceFromGeocodePayload,
+  MediaLocationReplaceFromTextPayload,
+} from './media-detail-location-section/media-detail-location-section.component';
+import type {
   MediaLocationCopyField,
   MediaLocationRowSavePayload,
 } from './media-location-row/media-location-row.component';
@@ -1701,6 +1705,50 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.refreshMediaAfterLocationMutation(media.id);
     this.toastService.show({
       message: this.t('location.toast.added', 'Location added'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
+  async onLocationReplaceFromText(payload: MediaLocationReplaceFromTextPayload): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.replaceLocationLinkFromFreeText(
+      media.id,
+      payload.previousLocationId,
+      payload.label,
+    );
+    this.saving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+    this.toastService.show({
+      message: this.t('location.toast.changed', 'Location changed'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
+  async onLocationReplaceFromGeocode(payload: MediaLocationReplaceFromGeocodePayload): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.replaceLocationLinkFromGeocode(
+      media.id,
+      payload.previousLocationId,
+      payload.suggestion,
+    );
+    this.saving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+    this.toastService.show({
+      message: this.t('location.toast.changed', 'Location changed'),
       type: 'success',
       dedupe: true,
     });

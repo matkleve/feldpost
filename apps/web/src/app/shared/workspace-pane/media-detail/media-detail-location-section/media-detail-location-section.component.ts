@@ -14,7 +14,7 @@
  * @see docs/specs/ui/media-detail/media-detail-location-section.md
  * @see apps/web/src/app/core/media-locations/README.md
  */
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { MediaItemLocationRow } from '../../../../core/media-locations/media-locations.types';
@@ -28,6 +28,16 @@ import {
   type MediaLocationRowSavePayload,
 } from '../media-location-row/media-location-row.component';
 import { MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD } from '../media-location-constants';
+
+export interface MediaLocationReplaceFromTextPayload {
+  previousLocationId: string;
+  label: string;
+}
+
+export interface MediaLocationReplaceFromGeocodePayload {
+  previousLocationId: string;
+  suggestion: ForwardGeocodeResult;
+}
 
 @Component({
   selector: 'app-media-detail-location-section',
@@ -46,6 +56,8 @@ export class MediaDetailLocationSectionComponent {
 
   readonly addFromText = output<string>();
   readonly addFromGeocode = output<ForwardGeocodeResult>();
+  readonly replaceFromText = output<MediaLocationReplaceFromTextPayload>();
+  readonly replaceFromGeocode = output<MediaLocationReplaceFromGeocodePayload>();
   readonly rowSaveRequested = output<MediaLocationRowSavePayload>();
   readonly rowDeleteRequested = output<string>();
   readonly mapPickRequested = output<string>();
@@ -53,6 +65,11 @@ export class MediaDetailLocationSectionComponent {
   readonly copyFieldRequested = output<MediaLocationCopyField>();
 
   readonly listFilter = signal('');
+
+  /** When set, the next add/search completion replaces this row's link instead of adding. */
+  private readonly replaceTargetLocationId = signal<string | null>(null);
+
+  private readonly addSearchRef = viewChild(MediaLocationAddSearchComponent);
 
   readonly scrollThreshold = MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD;
 
@@ -83,6 +100,33 @@ export class MediaDetailLocationSectionComponent {
   readonly listNeedsScroll = computed(
     () => this.filteredLocations().length > MEDIA_DETAIL_LOCATION_LIST_SCROLL_THRESHOLD,
   );
+
+  beginChangeAddress(locationId: string): void {
+    this.replaceTargetLocationId.set(locationId);
+    this.addSearchRef()?.open();
+  }
+
+  onAddFromText(label: string): void {
+    const previousLocationId = this.replaceTargetLocationId();
+    if (previousLocationId) {
+      this.replaceTargetLocationId.set(null);
+      this.addSearchRef()?.close();
+      this.replaceFromText.emit({ previousLocationId, label });
+      return;
+    }
+    this.addFromText.emit(label);
+  }
+
+  onAddFromGeocode(suggestion: ForwardGeocodeResult): void {
+    const previousLocationId = this.replaceTargetLocationId();
+    if (previousLocationId) {
+      this.replaceTargetLocationId.set(null);
+      this.addSearchRef()?.close();
+      this.replaceFromGeocode.emit({ previousLocationId, suggestion });
+      return;
+    }
+    this.addFromGeocode.emit(suggestion);
+  }
 }
 
 /** Bias geocoder toward Austria when media has no country; map free-text country to ISO codes. */

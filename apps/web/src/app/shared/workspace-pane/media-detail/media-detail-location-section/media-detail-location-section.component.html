@@ -7,8 +7,8 @@
       [locations]="locations()"
       [searchContext]="addressSearchContext()"
       [disabled]="saving()"
-      (addFromText)="addFromText.emit($event)"
-      (addFromGeocode)="addFromGeocode.emit($event)"
+      (addFromText)="onAddFromText($event)"
+      (addFromGeocode)="onAddFromGeocode($event)"
     />
 
     @if (showListFilter()) {
@@ -37,6 +37,7 @@
           (mapPickRequested)="mapPickRequested.emit($event)"
           (showOnMapRequested)="showOnMapRequested.emit($event)"
           (copyFieldRequested)="copyFieldRequested.emit($event)"
+          (changeAddressRequested)="beginChangeAddress($event)"
         />
       }
     </div>

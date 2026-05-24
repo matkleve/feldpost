@@ -84,3 +84,10 @@ export interface MediaLocationAddInput extends MediaLocationAddressPatch {
 export interface MediaLocationUpdateInput extends MediaLocationAddressPatch {
   locationId: string;
 }
+
+/** Re-link one media item from an existing location to a deduped/new location row. */
+export interface MediaLocationReplaceLinkInput {
+  mediaItemId: string;
+  previousLocationId: string;
+  patch: MediaLocationAddressPatch;
+}

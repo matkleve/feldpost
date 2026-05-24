@@ -92,6 +92,8 @@
           [saving]="saving()"
           (addFromText)="onLocationAddFromText($event)"
           (addFromGeocode)="onLocationAddFromGeocode($event)"
+          (replaceFromText)="onLocationReplaceFromText($event)"
+          (replaceFromGeocode)="onLocationReplaceFromGeocode($event)"
           (rowSaveRequested)="onLocationRowSave($event)"
           (rowDeleteRequested)="onLocationRowDelete($event)"
           (mapPickRequested)="requestMapLocationPick($event)"

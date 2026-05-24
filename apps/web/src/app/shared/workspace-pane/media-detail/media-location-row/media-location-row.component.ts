@@ -27,9 +27,10 @@ import {
   type LocationCopySubmenuGeom,
 } from './media-location-copy-submenu-geometry';
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
 import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
-import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
+import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import type { MediaItemLocationRow } from '../../../../core/media-locations/media-locations.types';
 import {
   formatLocationFullAddressCopy,
@@ -95,8 +96,10 @@ const COPY_FIELD_ICONS: Record<MediaLocationCopyFieldId, string> = {
   standalone: true,
   imports: [
     DropdownShellComponent,
+    ConfirmDialogComponent,
     DetailRowInlineConfirmActionComponent,
     HlmMenuItemDirective,
+    HlmMenuSeparatorDirective,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './media-location-row.component.html',
@@ -120,12 +123,14 @@ export class MediaLocationRowComponent {
   readonly deleteRequested = output<string>();
   readonly mapPickRequested = output<string>();
   readonly showOnMapRequested = output<string>();
+  readonly changeAddressRequested = output<string>();
   readonly copyFieldRequested = output<MediaLocationCopyField>();
   readonly primaryErrorDismissed = output<void>();
 
   readonly visualState = signal<MediaLocationRowVisualState>('read');
   readonly overflowMenuOpen = signal(false);
   readonly copySubmenuOpen = signal(false);
+  readonly sharedEditConfirmOpen = signal(false);
   readonly copySubmenuGeom = signal<LocationCopySubmenuGeom | null>(null);
 
   private readonly overflowAnchorRef = viewChild<ElementRef<HTMLElement>>('overflowAnchorEl');
@@ -289,6 +294,29 @@ export class MediaLocationRowComponent {
     }
     return 'read';
   });
+
+  requestEditAddress(): void {
+    this.sharedEditConfirmOpen.set(true);
+  }
+
+  onSharedEditConfirm(): void {
+    this.sharedEditConfirmOpen.set(false);
+    this.startEdit();
+  }
+
+  onSharedEditCancel(): void {
+    this.sharedEditConfirmOpen.set(false);
+  }
+
+  onEditAddressMenu(): void {
+    this.closeOverflowMenu();
+    this.requestEditAddress();
+  }
+
+  onChangeAddressMenu(): void {
+    this.changeAddressRequested.emit(this.location().id);
+    this.closeOverflowMenu();
+  }
 
   startEdit(): void {
     const row = this.location();

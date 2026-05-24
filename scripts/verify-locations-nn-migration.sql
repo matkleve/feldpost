@@ -44,6 +44,16 @@ JOIN pg_namespace n ON n.oid = p.pronamespace
 WHERE n.nspname = 'public'
   AND p.proname = 'resolve_media_location';
 
+SELECT 'update_media_item_location_overloads' AS check_id,
+  CASE
+    WHEN count(*) = 1 THEN 'ok: exactly 1 signature'
+    ELSE 'FAIL: ' || count(*)::text || ' signatures'
+  END AS detail
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname = 'update_media_item_location';
+
 SELECT 'viewport_sample' AS check_id,
   'lat=' || cluster_lat::text || ' lng=' || cluster_lng::text
   || ' count=' || image_count::text

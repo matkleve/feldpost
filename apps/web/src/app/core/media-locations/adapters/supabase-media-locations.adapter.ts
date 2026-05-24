@@ -60,6 +60,40 @@ export class SupabaseMediaLocationsAdapter {
       throw error;
     }
   }
+
+  async unlink(mediaItemId: string, locationId: string): Promise<void> {
+    const { error } = await this.supabase.client.rpc('unlink_media_from_location', {
+      p_media_item_id: mediaItemId,
+      p_location_id: locationId,
+    });
+    if (error) {
+      throw error;
+    }
+  }
+
+  async findOrCreate(patch: MediaLocationAddressPatch): Promise<{ id: string }> {
+    const { data, error } = await this.supabase.client.rpc('find_or_create_location', {
+      ...patchToRpcParams(patch),
+    });
+    if (error) {
+      throw error;
+    }
+    const row = data as { id: string } | null;
+    if (!row?.id) {
+      throw new Error('find_or_create_location returned no row');
+    }
+    return { id: row.id };
+  }
+
+  async link(mediaItemId: string, locationId: string): Promise<void> {
+    const { error } = await this.supabase.client.rpc('link_media_to_location', {
+      p_media_item_id: mediaItemId,
+      p_location_id: locationId,
+    });
+    if (error) {
+      throw error;
+    }
+  }
 }
 
 function patchToRpcParams(patch: MediaLocationAddressPatch): Record<string, string | number | null> {

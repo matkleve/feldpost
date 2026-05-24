@@ -940,6 +940,12 @@ location.staircase.placeholder,e.g. A Aufgang 3,media-detail location row stairc
 location.extra_information.label,Extra information,media-detail location row extra info label,Extra information,Zusatzinfo,Informazioni aggiuntive
 location.extra_information.placeholder,e.g. Ring twice,media-detail location row extra info placeholder,e.g. Ring twice,z. B. Zweimal klingeln,ad es. Suonare due volte
 location.action.edit,Edit location,media-detail location row edit button,Edit location,Standort bearbeiten,Modifica posizione
+location.action.edit_address,Edit address,media-detail location row overflow edit shared address,Edit address,Adresse bearbeiten,Modifica indirizzo
+location.action.change_address,Change to different address,media-detail location row overflow re-link address,Change to different address,Andere Adresse zuweisen,Cambia indirizzo
+location.shared_edit.confirm.title,Edit shared address?,media-detail location row shared edit confirm title,Edit shared address?,Gemeinsame Adresse bearbeiten?,Modificare indirizzo condiviso?
+location.shared_edit.confirm.message,Editing this address updates it for all media items linked to this location.,media-detail location row shared edit confirm body,Editing this address updates it for all media items linked to this location.,Diese Änderung gilt für alle Medien mit diesem Standort.,La modifica si applica a tutti i media collegati a questa posizione.
+location.shared_edit.confirm.continue,Continue editing,media-detail location row shared edit confirm button,Continue editing,Weiter bearbeiten,Continua modifica
+location.toast.changed,Location changed,media-detail location row replace link toast,Location changed,Standort geändert,Posizione cambiata
 location.action.delete,Delete location,media-detail location row delete button,Delete location,Standort löschen,Elimina posizione
 location.action.confirmDelete,Confirm delete location,media-detail location row delete confirm,Confirm delete location,Löschen bestätigen,Conferma eliminazione posizione
 location.action.show_on_map,Show on map,media-detail location row map action button,Show on map,Auf Karte anzeigen,Mostra sulla mappa

@@ -14,6 +14,8 @@
 
 **Upload / whole-item resolve:** `core/media-location-update/` (`resolve_media_location` + `link_media_to_location`).
 
+**Row “Change to different address”:** `replaceMediaItemLocationLink` → `unlink_media_from_location` + `find_or_create_location` + `link_media_to_location` (adapter; not `update_media_item_location` on the old row).
+
 ## Structure
 
 ```
