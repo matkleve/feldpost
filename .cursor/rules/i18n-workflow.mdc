@@ -23,3 +23,23 @@ When creating or changing UI components, all user-facing text must be added to t
 5. If new language content is needed, keep `en/de/it` columns populated (no mixed-language fragments).
 
 Translation data in DB (`app_texts` + `app_text_translations`) is part of the feature definition, not an optional follow-up.
+
+## Locale diacritics rule (mandatory for non-English columns)
+
+Every non-English locale column must use **native diacritics** — never ASCII fallbacks from machine translation, autofill, or legacy exports. Also reject mojibake: no Unicode replacement character (`U+FFFD`, often shown as `�`).
+
+| Locale | Forbidden | Required examples |
+| --- | --- | --- |
+| `de` | `ae` / `oe` / `ue`, `ss` where ß is standard | `Ausgewählte`, `öffnen`, `für`, `Straße` |
+| `it` | unaccented vowels where accents are required | `già`, `città`, `può`, `verrà`, `perché`, `non è` |
+| future locales | locale-specific ASCII fallbacks | add rules in `scripts/i18n-diacritics.helpers.mjs` |
+
+Rule registry: `scripts/i18n-diacritics.helpers.mjs` (`I18N_DIACRITIC_LANGUAGES`, per-language replacement tables, shared mojibake repair).
+
+**After any non-English translation add/edit** (manual, Google translate script, or autofill):
+
+1. Run `node scripts/normalize-i18n-diacritics.mjs` — or `--lang=de` / `--lang=it` for one locale.
+2. Run `node scripts/validate-i18n-diacritics.mjs` — must exit 0 before commit.
+3. Regenerate SQL: `node scripts/import-i18n-csv-to-sql.mjs`.
+
+When adding a new product language, extend `I18N_DIACRITIC_LANGUAGES` and add that locale's replacement table before shipping translations.

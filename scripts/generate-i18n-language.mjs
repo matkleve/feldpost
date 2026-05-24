@@ -20,6 +20,8 @@ run("node scripts/export-i18n-workbench.mjs");
 run(
   `node scripts/translate-i18n-google.mjs --lang=${targetLanguage}${force ? " --force" : ""}`,
 );
+run(`node scripts/normalize-i18n-diacritics.mjs --lang=${targetLanguage}`);
+run(`node scripts/validate-i18n-diacritics.mjs --lang=${targetLanguage}`);
 run("node scripts/import-i18n-csv-to-sql.mjs");
 run(
   `node scripts/validate-i18n-language.mjs --lang=${targetLanguage}${strictSame ? " --strict-same" : ""}${maxSameArg ? ` ${maxSameArg}` : ""}`,

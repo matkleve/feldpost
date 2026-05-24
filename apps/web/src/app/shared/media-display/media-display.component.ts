@@ -134,11 +134,21 @@ export class MediaDisplayComponent implements AfterViewInit {
           void this.previewGeneration.enqueue(id, previewStatus);
         }
       }
+    });
 
-      // slotSizeRem read via untracked — viewport resize after aspect-ratio transition
-      // must NOT re-run this effect and push back to loading-surface-visible.
-      const slot = untracked(() => this.slotSizeRem());
+    // Delivery subscription tracks slot size — untracked slot in the handoff effect above
+    // left getState stuck at 1rem → immediate icon-only for documents (spec: sign when thumb exists).
+    effect((onCleanup) => {
+      const id = this.mediaId().trim();
+      const storagePath = this.storagePath();
+      // Re-subscribe when thumb path / status changes (registered in handoff effect above).
+      this.thumbnailPath();
+      this.previewGenerationStatus();
+      if (!id || !storagePath) {
+        return;
+      }
 
+      const slot = this.slotSizeRem();
       const sub = this.mediaDownloadService
         .getState(id, slot)
         .subscribe((delivery) => this.handleDelivery(delivery));
@@ -262,7 +272,14 @@ export class MediaDisplayComponent implements AfterViewInit {
             return;
           }
 
-          // Ratio already set (from hinted input or previous probe) — start geometry transition.
+          // Fixed registry hint (presentation/pdf): parent slot already has target aspect-ratio.
+          // No transitionend will fire — reveal content immediately.
+          const hintedRatio = this.aspectRatio();
+          if (hintedRatio != null && hintedRatio > 0 && delivery.resolvedUrl) {
+            this.fallThroughToReveal();
+            return;
+          }
+
           if (this.metadataAspectRatio() != null) {
             this.triggerRatioTransition(this.metadataAspectRatio()!);
             return;
@@ -350,10 +367,14 @@ export class MediaDisplayComponent implements AfterViewInit {
     }
 
     this.goTo('ratio-known-contain');
+    const priorRatio = this.metadataAspectRatio();
     this.commitAspectRatioToSlot(ratio);
 
-    if (this.prefersReducedMotion()) {
-      this.advanceAfterRatioSettled();
+    const ratioUnchanged =
+      priorRatio != null && Number.isFinite(priorRatio) && Math.abs(priorRatio - ratio) < 0.001;
+
+    if (this.prefersReducedMotion() || ratioUnchanged) {
+      queueMicrotask(() => this.advanceAfterRatioSettled());
     }
   }
 
@@ -395,13 +416,8 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
-    const ro = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) {
-        return;
-      }
-
-      const shortEdgePx = Math.min(entry.contentRect.width, entry.contentRect.height);
+    const applyMeasuredSlot = (widthPx: number, heightPx: number): void => {
+      const shortEdgePx = Math.min(widthPx, heightPx);
       const rootFontSize = this.readRootFontSize();
       const next = shortEdgePx > 0 ? shortEdgePx / rootFontSize : 1;
 
@@ -410,6 +426,18 @@ export class MediaDisplayComponent implements AfterViewInit {
       }
 
       this.slotSizeRem.set(next);
+    };
+
+    const rect = viewportElement.getBoundingClientRect();
+    applyMeasuredSlot(rect.width, rect.height);
+
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+
+      applyMeasuredSlot(entry.contentRect.width, entry.contentRect.height);
     });
 
     ro.observe(viewportElement);

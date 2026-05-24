@@ -826,7 +826,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Large',
     context: 'Thumbnail size preset label in workspace toolbar slider.',
     en: 'Large',
-    de: 'Gross',
+    de: 'Groß',
     it: 'Grande',
   },
   {
@@ -1394,7 +1394,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Searching...',
     context: 'Loading text while workspace address search is running.',
     en: 'Searching...',
-    de: 'Suche laeuft...',
+    de: 'Suche läuft...',
     it: 'Ricerca in corso...',
   },
   {
@@ -1450,7 +1450,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Add metadata',
     context: 'Button label to open metadata add form.',
     en: 'Add metadata',
-    de: 'Metadaten hinzufuegen',
+    de: 'Metadaten hinzufügen',
     it: 'Aggiungi metadati',
   },
   {
@@ -1602,7 +1602,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Back to gallery',
     context: 'ARIA label for button returning from detail view to gallery.',
     en: 'Back to gallery',
-    de: 'Zurueck zur Galerie',
+    de: 'Zurück zur Galerie',
     it: 'Torna alla galleria',
   },
   {
@@ -1610,7 +1610,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Back to gallery',
     context: 'Tooltip for button returning from detail view to gallery.',
     en: 'Back to gallery',
-    de: 'Zurueck zur Galerie',
+    de: 'Zurück zur Galerie',
     it: 'Torna alla galleria',
   },
   {
@@ -1658,7 +1658,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Delete media',
     context: 'Label or tooltip for deleting current media item in detail view.',
     en: 'Delete media',
-    de: 'Medium loeschen',
+    de: 'Medium löschen',
     it: 'Elimina media',
   },
   {
@@ -1706,7 +1706,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Copy street',
     context: 'ARIA label for copy-action button on the Street address row in media detail inline section.',
     en: 'Copy street',
-    de: 'Strasse kopieren',
+    de: 'Straße kopieren',
     it: 'Copia via',
   },
   {
@@ -1738,7 +1738,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'View full-size media',
     context: 'ARIA label for button opening media lightbox from detail view.',
     en: 'View full-size media',
-    de: 'Medium in voller Groesse anzeigen',
+    de: 'Medium in voller Große anzeigen',
     it: 'Visualizza media a dimensione intera',
   },
   {
@@ -1746,7 +1746,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Image unavailable',
     context: 'Screen-reader text when image cannot be displayed.',
     en: 'Image unavailable',
-    de: 'Bild nicht verfuegbar',
+    de: 'Bild nicht verfügbar',
     it: 'Immagine non disponibile',
   },
   {
@@ -1834,7 +1834,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Street',
     context: 'Label for street row in image detail location section.',
     en: 'Street',
-    de: 'Strasse',
+    de: 'Straße',
     it: 'Via',
   },
   {
@@ -1843,7 +1843,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Label for city row in image detail location section.',
     en: 'City',
     de: 'Stadt',
-    it: 'Citta',
+    it: 'Città',
   },
   {
     key: 'workspace.imageDetail.field.district',
@@ -1962,7 +1962,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Primary',
     context: 'Badge label for primary project chip in project editor.',
     en: 'Primary',
-    de: 'Primaer',
+    de: 'Primär',
     it: 'Principale',
   },
   {
@@ -1970,7 +1970,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Select project or create one',
     context: 'Placeholder in project picker search field in image detail.',
     en: 'Select project or create one',
-    de: 'Projekt waehlen oder neu erstellen',
+    de: 'Projekt wählen oder neu erstellen',
     it: 'Seleziona un progetto o creane uno',
   },
   {
@@ -1994,7 +1994,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Select an option or create one',
     context: 'Hint text shown above project options list.',
     en: 'Select an option or create one',
-    de: 'Option waehlen oder neu erstellen',
+    de: 'Option wählen oder neu erstellen',
     it: "Seleziona un'opzione o creane una",
   },
   {
@@ -2003,14 +2003,14 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Project picker note when media has no GPS and must be single-project.',
     en: 'No GPS: this item can only belong to one project.',
     de: 'Kein GPS: Dieses Element kann nur zu einem Projekt gehoeren.',
-    it: 'Nessun GPS: questo elemento puo appartenere solo a un progetto.',
+    it: 'Nessun GPS: questo elemento può appartenere solo a un progetto.',
   },
   {
     key: 'workspace.imageDetail.projects.gpsDisabled',
     original: 'GPS assignment is disabled for this file type.',
     context: 'Project picker or location note when GPS assignment is disabled by media type.',
     en: 'GPS assignment is disabled for this file type.',
-    de: 'GPS-Zuweisung ist fuer diesen Dateityp deaktiviert.',
+    de: 'GPS-Zuweisung ist für diesen Dateityp deaktiviert.',
     it: "L'assegnazione GPS e disattivata per questo tipo di file.",
   },
   {
@@ -2034,7 +2034,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'as primary project',
     context: 'Suffix for aria label to set project as primary in project picker.',
     en: 'as primary project',
-    de: 'als Primaerprojekt',
+    de: 'als Primärprojekt',
     it: 'come progetto principale',
   },
   {
@@ -2058,7 +2058,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Edit street',
     context: 'ARIA label for street edit input or action button.',
     en: 'Edit street',
-    de: 'Strasse bearbeiten',
+    de: 'Straße bearbeiten',
     it: 'Modifica via',
   },
   {
@@ -2066,7 +2066,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Edit street',
     context: 'Tooltip for street edit action button.',
     en: 'Edit street',
-    de: 'Strasse bearbeiten',
+    de: 'Straße bearbeiten',
     it: 'Modifica via',
   },
   {
@@ -2074,7 +2074,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Save street',
     context: 'ARIA label for street save button in edit mode.',
     en: 'Save street',
-    de: 'Strasse speichern',
+    de: 'Straße speichern',
     it: 'Salva via',
   },
   {
@@ -2082,7 +2082,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Save street',
     context: 'Tooltip for street save button in edit mode.',
     en: 'Save street',
-    de: 'Strasse speichern',
+    de: 'Straße speichern',
     it: 'Salva via',
   },
   {
@@ -2091,7 +2091,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'ARIA label for city edit input or action button.',
     en: 'Edit city',
     de: 'Stadt bearbeiten',
-    it: 'Modifica citta',
+    it: 'Modifica città',
   },
   {
     key: 'workspace.imageDetail.action.editCity.title',
@@ -2099,7 +2099,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Tooltip for city edit action button.',
     en: 'Edit city',
     de: 'Stadt bearbeiten',
-    it: 'Modifica citta',
+    it: 'Modifica città',
   },
   {
     key: 'workspace.imageDetail.action.saveCity.aria',
@@ -2107,7 +2107,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'ARIA label for city save button in edit mode.',
     en: 'Save city',
     de: 'Stadt speichern',
-    it: 'Salva citta',
+    it: 'Salva città',
   },
   {
     key: 'workspace.imageDetail.action.saveCity.title',
@@ -2115,7 +2115,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Tooltip for city save button in edit mode.',
     en: 'Save city',
     de: 'Stadt speichern',
-    it: 'Salva citta',
+    it: 'Salva città',
   },
   {
     key: 'workspace.imageDetail.action.editDistrict.aria',
@@ -2210,7 +2210,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Revert corrected coordinates',
     context: 'ARIA label for action reverting corrected coordinates to EXIF.',
     en: 'Revert corrected coordinates',
-    de: 'Korrigierte Koordinaten rueckgaengig machen',
+    de: 'Korrigierte Koordinaten rückgängig machen',
     it: 'Ripristina coordinate corrette',
   },
   {
@@ -2218,7 +2218,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Revert corrected coordinates',
     context: 'Tooltip for action reverting corrected coordinates to EXIF.',
     en: 'Revert corrected coordinates',
-    de: 'Korrigierte Koordinaten rueckgaengig machen',
+    de: 'Korrigierte Koordinaten rückgängig machen',
     it: 'Ripristina coordinate corrette',
   },
   {
@@ -2234,7 +2234,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Delete this media?',
     context: 'Title of confirm dialog when deleting media in detail view.',
     en: 'Delete this media?',
-    de: 'Dieses Medium loeschen?',
+    de: 'Dieses Medium löschen?',
     it: 'Eliminare questo media?',
   },
   {
@@ -2243,15 +2243,15 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
       'This will permanently remove the media item and all its metadata. This cannot be undone.',
     context: 'Message in confirm dialog when deleting media in detail view.',
     en: 'This will permanently remove the media item and all its metadata. This cannot be undone.',
-    de: 'Das Medium und alle Metadaten werden dauerhaft entfernt. Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
-    it: 'Questa operazione rimuovera definitivamente il media e tutti i suoi metadati. Non puo essere annullata.',
+    de: 'Das Medium und alle Metadaten werden dauerhaft entfernt. Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    it: 'Questa operazione rimuoverà definitivamente il media e tutti i suoi metadati. Non può essere annullata.',
   },
   {
     key: 'workspace.imageDetail.deleteDialog.confirm',
     original: 'Delete',
     context: 'Confirm button label in image delete dialog.',
     en: 'Delete',
-    de: 'Loeschen',
+    de: 'Löschen',
     it: 'Elimina',
   },
   {
@@ -2291,7 +2291,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'No-GPS media can only belong to one project.',
     context: 'Warning toast when trying to assign no-GPS media to multiple projects.',
     en: 'No-GPS media can only belong to one project.',
-    de: 'Medien ohne GPS koennen nur zu einem Projekt gehoeren.',
+    de: 'Medien ohne GPS können nur zu einem Projekt gehoeren.',
     it: 'I media senza GPS possono appartenere a un solo progetto.',
   },
   {
@@ -2307,7 +2307,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Could not set primary project.',
     context: 'Error toast when setting primary project fails.',
     en: 'Could not set primary project.',
-    de: 'Primaerprojekt konnte nicht gesetzt werden.',
+    de: 'Primärprojekt konnte nicht gesetzt werden.',
     it: 'Impossibile impostare il progetto principale.',
   },
   {
@@ -2315,7 +2315,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Could not revert coordinates',
     context: 'Error toast when reverting corrected coordinates fails.',
     en: 'Could not revert coordinates',
-    de: 'Koordinaten konnten nicht rueckgaengig gemacht werden',
+    de: 'Koordinaten konnten nicht rückgängig gemacht werden',
     it: 'Impossibile ripristinare le coordinate',
   },
   {
@@ -2323,7 +2323,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Coordinates reverted to EXIF',
     context: 'Success toast when corrected coordinates are reverted to EXIF.',
     en: 'Coordinates reverted to EXIF',
-    de: 'Koordinaten auf EXIF zurueckgesetzt',
+    de: 'Koordinaten auf EXIF zurückgesetzt',
     it: 'Coordinate ripristinate ai dati EXIF',
   },
   {
@@ -2507,7 +2507,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Media may not have been uploaded yet for this area.',
     context: 'Empty state hint for marker without uploaded media yet.',
     en: 'Media may not have been uploaded yet for this area.',
-    de: 'Fuer diesen Bereich wurden moeglicherweise noch keine Medien hochgeladen.',
+    de: 'Für diesen Bereich wurden möglicherweise noch keine Medien hochgeladen.',
     it: "I media potrebbero non essere ancora stati caricati per quest'area.",
   },
   {
@@ -2515,7 +2515,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Select a marker on the map to see photos.',
     context: 'Workspace pane hint shown before selecting a marker on the map.',
     en: 'Select a marker on the map to see photos.',
-    de: 'Waehle einen Marker auf der Karte aus, um Fotos zu sehen.',
+    de: 'Wähle einen Marker auf der Karte aus, um Fotos zu sehen.',
     it: 'Seleziona un indicatore sulla mappa per vedere le foto.',
   },
   {
@@ -2531,7 +2531,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Clear filters',
     context: 'Action label to reset active filters in workspace pane.',
     en: 'Clear filters',
-    de: 'Filter zuruecksetzen',
+    de: 'Filter zurücksetzen',
     it: 'Cancella filtri',
   },
   {
@@ -2563,7 +2563,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Street',
     context: 'Visible label for street map style mode.',
     en: 'Street',
-    de: 'Strasse',
+    de: 'Straße',
     it: 'Strada',
   },
   {
@@ -2643,7 +2643,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Map context menu',
     context: 'ARIA label for map background context menu.',
     en: 'Map context menu',
-    de: 'Karten-Kontextmenue',
+    de: 'Karten-Kontextmenü',
     it: 'Menu contestuale mappa',
   },
   {
@@ -2659,7 +2659,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Hierhin zoomen (Hausnaehe)',
     context: 'Context menu action to zoom to house-level proximity.',
     en: 'Zoom here (house proximity)',
-    de: 'Hierhin zoomen (Hausnaehe)',
+    de: 'Hierhin zoomen (Hausnähe)',
     it: 'Zoom qui (vicinanza casa)',
   },
   {
@@ -2667,7 +2667,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Hierhin zoomen (Strassennaehe)',
     context: 'Context menu action to zoom to street-level proximity.',
     en: 'Zoom here (street proximity)',
-    de: 'Hierhin zoomen (Strassennaehe)',
+    de: 'Hierhin zoomen (Straßennaehe)',
     it: 'Zoom qui (vicinanza strada)',
   },
   {
@@ -2691,7 +2691,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'In Google Maps oeffnen',
     context: 'Context menu action to open current position in Google Maps.',
     en: 'Open in Google Maps',
-    de: 'In Google Maps oeffnen',
+    de: 'In Google Maps öffnen',
     it: 'Apri in Google Maps',
   },
   {
@@ -2699,7 +2699,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Radius context menu',
     context: 'ARIA label for radius selection context menu.',
     en: 'Radius context menu',
-    de: 'Radius-Kontextmenue',
+    de: 'Radius-Kontextmenü',
     it: 'Menu contestuale raggio',
   },
   {
@@ -2731,7 +2731,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Marker context menu',
     context: 'ARIA label for photo marker context menu.',
     en: 'Marker context menu',
-    de: 'Marker-Kontextmenue',
+    de: 'Marker-Kontextmenü',
     it: 'Menu contestuale marker',
   },
   {
@@ -2755,7 +2755,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Details oeffnen',
     context: 'Marker context menu action to open details for single marker.',
     en: 'Open details',
-    de: 'Details oeffnen',
+    de: 'Details öffnen',
     it: 'Apri dettagli',
   },
   {
@@ -2763,7 +2763,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Auswahl oeffnen',
     context: 'Marker context menu action to open selection for clustered marker.',
     en: 'Open selection',
-    de: 'Auswahl oeffnen',
+    de: 'Auswahl öffnen',
     it: 'Apri selezione',
   },
   {
@@ -2771,7 +2771,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Projekt hinzufuegen...',
     context: 'Marker context menu action to add marker photos to a project.',
     en: 'Add to project...',
-    de: 'Projekt hinzufuegen...',
+    de: 'Projekt hinzufügen...',
     it: 'Aggiungi al progetto...',
   },
   {
@@ -2779,7 +2779,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Foto loeschen',
     context: 'Marker context menu action to delete single photo.',
     en: 'Delete photo',
-    de: 'Foto loeschen',
+    de: 'Foto löschen',
     it: 'Elimina foto',
   },
   {
@@ -2835,7 +2835,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Auswaehlen',
     context: 'Confirm label in project selection dialog from map shell.',
     en: 'Select',
-    de: 'Auswaehlen',
+    de: 'Auswählen',
     it: 'Seleziona',
   },
   {
@@ -2883,7 +2883,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Keine Medien in Radius-Auswahl verfuegbar.',
     context: 'Warning toast when radius selection contains no media.',
     en: 'No media available in radius selection.',
-    de: 'Keine Medien in Radius-Auswahl verfuegbar.',
+    de: 'Keine Medien in Radius-Auswahl verfügbar.',
     it: 'Nessun media disponibile nella selezione raggio.',
   },
   {
@@ -2891,7 +2891,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Keine Medien fuer Projektzuweisung gefunden.',
     context: 'Warning toast when no media IDs could be resolved for assignment.',
     en: 'No media found for project assignment.',
-    de: 'Keine Medien fuer Projektzuweisung gefunden.',
+    de: 'Keine Medien für Projektzuweisung gefunden.',
     it: "Nessun media trovato per l'assegnazione al progetto.",
   },
   {
@@ -2955,15 +2955,15 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
     context: 'Confirmation message before deleting a single photo marker image.',
     en: 'Delete photo permanently? This action cannot be undone.',
-    de: 'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
-    it: 'Eliminare definitivamente la foto? Questa azione non puo essere annullata.',
+    de: 'Foto wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    it: 'Eliminare definitivamente la foto? Questa azione non può essere annullata.',
   },
   {
     key: 'map.shell.toast.deleteFailed',
     original: 'Loeschen fehlgeschlagen.',
     context: 'Error toast when deleting a photo fails.',
     en: 'Delete failed.',
-    de: 'Loeschen fehlgeschlagen.',
+    de: 'Löschen fehlgeschlagen.',
     it: 'Eliminazione non riuscita.',
   },
   {
@@ -2971,7 +2971,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Foto geloescht.',
     context: 'Success toast when a photo was deleted via marker context menu.',
     en: 'Photo deleted.',
-    de: 'Foto geloescht.',
+    de: 'Foto gelöscht.',
     it: 'Foto eliminata.',
   },
   {
@@ -2979,7 +2979,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Photo deleted',
     context: 'Success toast after deleting a single photo with optional undo.',
     en: 'Photo deleted',
-    de: 'Foto geloescht',
+    de: 'Foto gelöscht',
     it: 'Foto eliminata',
   },
   {
@@ -2987,7 +2987,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'File deleted',
     context: 'Success toast after deleting a single non-photo media file with optional undo.',
     en: 'File deleted',
-    de: 'Datei geloescht',
+    de: 'Datei gelöscht',
     it: 'File eliminato',
   },
   {
@@ -2995,7 +2995,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Media deleted',
     context: 'Success toast after deleting a single mixed-type media item with optional undo.',
     en: 'Media deleted',
-    de: 'Medium geloescht',
+    de: 'Medium gelöscht',
     it: 'Media eliminato',
   },
   {
@@ -3003,7 +3003,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: '{count} photos deleted',
     context: 'Success toast after bulk-deleting multiple photos with optional undo.',
     en: '{count} photos deleted',
-    de: '{count} Fotos geloescht',
+    de: '{count} Fotos gelöscht',
     it: '{count} foto eliminate',
   },
   {
@@ -3011,7 +3011,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: '{count} files deleted',
     context: 'Success toast after bulk-deleting multiple non-photo files with optional undo.',
     en: '{count} files deleted',
-    de: '{count} Dateien geloescht',
+    de: '{count} Dateien gelöscht',
     it: '{count} file eliminati',
   },
   {
@@ -3019,7 +3019,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: '{count} media deleted',
     context: 'Success toast after bulk-deleting a mixed photo/file selection with optional undo.',
     en: '{count} media deleted',
-    de: '{count} Medien geloescht',
+    de: '{count} Medien gelöscht',
     it: '{count} media eliminati',
   },
   {
@@ -3027,7 +3027,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Undo',
     context: 'Secondary action on delete success toasts that restores deleted media.',
     en: 'Undo',
-    de: 'Rueckgaengig',
+    de: 'Rückgängig',
     it: 'Annulla',
   },
   {
@@ -3051,7 +3051,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Adresse konnte nicht aufgeloest werden.',
     context: 'Warning toast when reverse geocoding could not resolve an address.',
     en: 'Could not resolve address.',
-    de: 'Adresse konnte nicht aufgeloest werden.',
+    de: 'Adresse konnte nicht aufgelöst werden.',
     it: "Impossibile risolvere l'indirizzo.",
   },
   {
@@ -3067,7 +3067,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.',
     context: 'Warning toast when share link token is invalid or expired.',
     en: 'Share link invalid, expired, or inaccessible.',
-    de: 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.',
+    de: 'Freigabelink ungültig, abgelaufen oder ohne Zugriff.',
     it: 'Link di condivisione non valido, scaduto o senza accesso.',
   },
   {
@@ -3075,7 +3075,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Freigabelink enthaelt keine verfuegbaren Medien.',
     context: 'Warning toast when share token resolves but contains no images.',
     en: 'Share link contains no available media.',
-    de: 'Freigabelink enthaelt keine verfuegbaren Medien.',
+    de: 'Freigabelink enthält keine verfügbaren Medien.',
     it: 'Il link di condivisione non contiene media disponibili.',
   },
   {
@@ -3083,7 +3083,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Freigabelink konnte nicht aufgeloest werden.',
     context: 'Error toast when share token lookup fails unexpectedly.',
     en: 'Could not resolve share link.',
-    de: 'Freigabelink konnte nicht aufgeloest werden.',
+    de: 'Freigabelink konnte nicht aufgelöst werden.',
     it: 'Impossibile risolvere il link di condivisione.',
   },
   {
@@ -3100,7 +3100,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Keine Projekte verfuegbar.',
     context: 'Warning toast when no projects are available for assignment.',
     en: 'No projects available.',
-    de: 'Keine Projekte verfuegbar.',
+    de: 'Keine Projekte verfügbar.',
     it: 'Nessun progetto disponibile.',
   },
   {
@@ -3108,7 +3108,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Projekt auswaehlen',
     context: 'Title for project selection dialog from map marker/radius actions.',
     en: 'Select project',
-    de: 'Projekt auswaehlen',
+    de: 'Projekt auswählen',
     it: 'Seleziona progetto',
   },
   {
@@ -3116,7 +3116,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Waehle ein bestehendes Projekt fuer die Zuweisung aus.',
     context: 'Description in project selection dialog for map actions.',
     en: 'Choose an existing project for assignment.',
-    de: 'Waehle ein bestehendes Projekt fuer die Zuweisung aus.',
+    de: 'Wähle ein bestehendes Projekt für die Zuweisung aus.',
     it: "Scegli un progetto esistente per l'assegnazione.",
   },
   {
@@ -3124,7 +3124,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Name fuer neues Projekt aus Radius',
     context: 'Title for new-project name dialog opened from radius context menu.',
     en: 'Name for new project from radius',
-    de: 'Name fuer neues Projekt aus Radius',
+    de: 'Name für neues Projekt aus Radius',
     it: 'Nome per nuovo progetto dal raggio',
   },
   {
@@ -3261,7 +3261,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context:
       'Empty state title when query has no matching address result. {query} is search input.',
     en: 'No address found for {query}',
-    de: 'Keine Adresse gefunden fuer {query}',
+    de: 'Keine Adresse gefunden für {query}',
     it: 'Nessun indirizzo trovato per {query}',
   },
   {
@@ -3286,7 +3286,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context:
       'Screen-reader live region announcing available results. {count} number of items, {query} search input.',
     en: '{count} results available for {query}.',
-    de: '{count} Ergebnisse verfuegbar fuer {query}.',
+    de: '{count} Ergebnisse verfügbar für {query}.',
     it: '{count} risultati disponibili per {query}.',
   },
   {
@@ -3294,7 +3294,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'No address found for {query}.',
     context: 'Screen-reader live region announcing empty address results. {query} search input.',
     en: 'No address found for {query}.',
-    de: 'Keine Adresse gefunden fuer {query}.',
+    de: 'Keine Adresse gefunden für {query}.',
     it: 'Nessun indirizzo trovato per {query}.',
   },
   {
@@ -3382,7 +3382,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Clear filters',
     context: 'Command suggestion label in search command mode to clear active filters.',
     en: 'Clear filters',
-    de: 'Filter loeschen',
+    de: 'Filter löschen',
     it: 'Cancella filtri',
   },
   {
@@ -3399,7 +3399,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Title attribute for decorative map iframe on login screen.',
     en: 'Decorative city map background',
     de: 'Dekorativer Stadtplan-Hintergrund',
-    it: 'Sfondo decorativo mappa citta',
+    it: 'Sfondo decorativo mappa città',
   },
   {
     key: 'auth.login.title',
@@ -3414,7 +3414,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Welcome back to Feldpost',
     context: 'Login page subtitle.',
     en: 'Welcome back to Feldpost',
-    de: 'Willkommen zurueck bei Feldpost',
+    de: 'Willkommen zurück bei Feldpost',
     it: 'Bentornato su Feldpost',
   },
   {
@@ -3446,7 +3446,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Enter a valid email address.',
     context: 'Login validation error for invalid email format.',
     en: 'Enter a valid email address.',
-    de: 'Gib eine gueltige E-Mail-Adresse ein.',
+    de: 'Gib eine gültige E-Mail-Adresse ein.',
     it: 'Inserisci un indirizzo email valido.',
   },
   {
@@ -3486,7 +3486,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Signing in…',
     context: 'Login submit button label while request is pending.',
     en: 'Signing in…',
-    de: 'Anmeldung laeuft…',
+    de: 'Anmeldung läuft…',
     it: 'Accesso in corso…',
   },
   {
@@ -3519,14 +3519,14 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Title attribute for decorative map iframe on register screen.',
     en: 'Decorative city map background',
     de: 'Dekorativer Stadtplan-Hintergrund',
-    it: 'Sfondo decorativo mappa citta',
+    it: 'Sfondo decorativo mappa città',
   },
   {
     key: 'auth.register.success.title',
     original: 'Check your email',
     context: 'Register success heading after signup submission.',
     en: 'Check your email',
-    de: 'Pruefe deine E-Mail',
+    de: 'Prüfe deine E-Mail',
     it: 'Controlla la tua email',
   },
   {
@@ -3534,7 +3534,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'We sent a confirmation link to',
     context: 'Register success message prefix before email address.',
     en: 'We sent a confirmation link to',
-    de: 'Wir haben einen Bestaetigungslink gesendet an',
+    de: 'Wir haben einen Bestätigungslink gesendet an',
     it: 'Abbiamo inviato un link di conferma a',
   },
   {
@@ -3550,7 +3550,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Back to sign in',
     context: 'Register success link back to login.',
     en: 'Back to sign in',
-    de: 'Zurueck zur Anmeldung',
+    de: 'Zurück zur Anmeldung',
     it: "Torna all'accesso",
   },
   {
@@ -3582,7 +3582,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Full name',
     context: 'Register form full name label.',
     en: 'Full name',
-    de: 'Vollstaendiger Name',
+    de: 'Vollständiger Name',
     it: 'Nome completo',
   },
   {
@@ -3598,7 +3598,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Full name is required.',
     context: 'Register validation error when full name is missing.',
     en: 'Full name is required.',
-    de: 'Vollstaendiger Name ist erforderlich.',
+    de: 'Vollständiger Name ist erforderlich.',
     it: 'Il nome completo e obbligatorio.',
   },
   {
@@ -3630,7 +3630,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Enter a valid email address.',
     context: 'Register validation error for invalid email format.',
     en: 'Enter a valid email address.',
-    de: 'Gib eine gueltige E-Mail-Adresse ein.',
+    de: 'Gib eine gültige E-Mail-Adresse ein.',
     it: 'Inserisci un indirizzo email valido.',
   },
   {
@@ -3646,7 +3646,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Paste invite code from QR link',
     context: 'Register form invite code placeholder.',
     en: 'Paste invite code from QR link',
-    de: 'Einladungscode aus QR-Link einfuegen',
+    de: 'Einladungscode aus QR-Link einfügen',
     it: 'Incolla il codice invito dal link QR',
   },
   {
@@ -3678,7 +3678,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Min. 12 incl. upper/lower, number, symbol',
     context: 'Register form password placeholder text.',
     en: 'Min. 12 incl. upper/lower, number, symbol',
-    de: 'Mind. 12 Zeichen inkl. Gross/Klein, Zahl, Symbol',
+    de: 'Mind. 12 Zeichen inkl. Groß/Klein, Zahl, Symbol',
     it: 'Min. 12 con maiusc/minusc, numero, simbolo',
   },
   {
@@ -3694,7 +3694,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Password must include uppercase, lowercase, number, and symbol.',
     context: 'Register validation error for password complexity.',
     en: 'Password must include uppercase, lowercase, number, and symbol.',
-    de: 'Passwort muss Grossbuchstaben, Kleinbuchstaben, Zahl und Symbol enthalten.',
+    de: 'Passwort muss Großbuchstaben, Kleinbuchstaben, Zahl und Symbol enthalten.',
     it: 'La password deve includere maiuscola, minuscola, numero e simbolo.',
   },
   {
@@ -3702,7 +3702,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Confirm password',
     context: 'Register form confirm password label.',
     en: 'Confirm password',
-    de: 'Passwort bestaetigen',
+    de: 'Passwort bestätigen',
     it: 'Conferma password',
   },
   {
@@ -3718,7 +3718,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Passwords do not match.',
     context: 'Register validation error when passwords do not match.',
     en: 'Passwords do not match.',
-    de: 'Passwoerter stimmen nicht ueberein.',
+    de: 'Passwörter stimmen nicht überein.',
     it: 'Le password non corrispondono.',
   },
   {
@@ -3743,7 +3743,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Register footer prompt for existing users.',
     en: 'Already have an account?',
     de: 'Hast du bereits ein Konto?',
-    it: 'Hai gia un account?',
+    it: 'Hai già un account?',
   },
   {
     key: 'auth.register.footer.signIn',
@@ -3758,7 +3758,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Check your email',
     context: 'Reset password success heading after submit.',
     en: 'Check your email',
-    de: 'Pruefe deine E-Mail',
+    de: 'Prüfe deine E-Mail',
     it: 'Controlla la tua email',
   },
   {
@@ -3766,7 +3766,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'We sent a password reset link to',
     context: 'Reset password success message prefix before email address.',
     en: 'We sent a password reset link to',
-    de: 'Wir haben einen Link zum Zuruecksetzen gesendet an',
+    de: 'Wir haben einen Link zum Zurücksetzen gesendet an',
     it: 'Abbiamo inviato un link di reimpostazione password a',
   },
   {
@@ -3774,7 +3774,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Back to sign in',
     context: 'Reset password success link back to login.',
     en: 'Back to sign in',
-    de: 'Zurueck zur Anmeldung',
+    de: 'Zurück zur Anmeldung',
     it: "Torna all'accesso",
   },
   {
@@ -3782,7 +3782,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Reset password',
     context: 'Reset password page heading.',
     en: 'Reset password',
-    de: 'Passwort zuruecksetzen',
+    de: 'Passwort zurücksetzen',
     it: 'Reimposta password',
   },
   {
@@ -3822,7 +3822,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Enter a valid email address.',
     context: 'Reset password validation error for invalid email format.',
     en: 'Enter a valid email address.',
-    de: 'Gib eine gueltige E-Mail-Adresse ein.',
+    de: 'Gib eine gültige E-Mail-Adresse ein.',
     it: 'Inserisci un indirizzo email valido.',
   },
   {
@@ -3846,7 +3846,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Back to sign in',
     context: 'Reset password footer link to login.',
     en: 'Back to sign in',
-    de: 'Zurueck zur Anmeldung',
+    de: 'Zurück zur Anmeldung',
     it: "Torna all'accesso",
   },
   {
@@ -3862,7 +3862,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Choose a strong password for your account.',
     context: 'Update password page subtitle.',
     en: 'Choose a strong password for your account.',
-    de: 'Waehle ein sicheres Passwort fuer dein Konto.',
+    de: 'Wähle ein sicheres Passwort für dein Konto.',
     it: 'Scegli una password sicura per il tuo account.',
   },
   {
@@ -3878,7 +3878,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Min. 12 incl. upper/lower, number, symbol',
     context: 'Update password form placeholder for password field.',
     en: 'Min. 12 incl. upper/lower, number, symbol',
-    de: 'Mind. 12 Zeichen inkl. Gross/Klein, Zahl, Symbol',
+    de: 'Mind. 12 Zeichen inkl. Groß/Klein, Zahl, Symbol',
     it: 'Min. 12 con maiusc/minusc, numero, simbolo',
   },
   {
@@ -3894,7 +3894,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Password must include uppercase, lowercase, number, and symbol.',
     context: 'Update password validation error for password complexity.',
     en: 'Password must include uppercase, lowercase, number, and symbol.',
-    de: 'Passwort muss Grossbuchstaben, Kleinbuchstaben, Zahl und Symbol enthalten.',
+    de: 'Passwort muss Großbuchstaben, Kleinbuchstaben, Zahl und Symbol enthalten.',
     it: 'La password deve includere maiuscola, minuscola, numero e simbolo.',
   },
   {
@@ -3902,7 +3902,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Confirm new password',
     context: 'Update password form label for confirm password field.',
     en: 'Confirm new password',
-    de: 'Neues Passwort bestaetigen',
+    de: 'Neues Passwort bestätigen',
     it: 'Conferma nuova password',
   },
   {
@@ -3918,7 +3918,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Passwords do not match.',
     context: 'Update password validation error when passwords do not match.',
     en: 'Passwords do not match.',
-    de: 'Passwoerter stimmen nicht ueberein.',
+    de: 'Passwörter stimmen nicht überein.',
     it: 'Le password non corrispondono.',
   },
   {
@@ -4062,7 +4062,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Invite unavailable',
     context: 'Title in invite panel error state.',
     en: 'Invite unavailable',
-    de: 'Einladung nicht verfuegbar',
+    de: 'Einladung nicht verfügbar',
     it: 'Invito non disponibile',
   },
   {
@@ -4086,7 +4086,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Share a role-scoped one-time invite to your organization.',
     context: 'Invite management section intro text.',
     en: 'Share a role-scoped one-time invite to your organization.',
-    de: 'Teile eine rollenbezogene Einmaleinladung fuer deine Organisation.',
+    de: 'Teile eine rollenbezogene Einmaleinladung für deine Organisation.',
     it: 'Condividi un invito monouso con ambito ruolo per la tua organizzazione.',
   },
   {
@@ -4094,7 +4094,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Expires:',
     context: 'Label prefix before invite expiration timestamp.',
     en: 'Expires:',
-    de: 'Laeuft ab:',
+    de: 'Läuft ab:',
     it: 'Scade:',
   },
   {
@@ -4335,7 +4335,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Projects toolbar property option label for primary city.',
     en: 'Primary city',
     de: 'Primare Stadt',
-    it: 'Citta principale',
+    it: 'Città principale',
   },
   {
     key: 'projects.toolbar.option.color',
@@ -4527,7 +4527,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Fallback grouping value when project city is missing.',
     en: 'Unknown city',
     de: 'Unbekannte Stadt',
-    it: 'Citta sconosciuta',
+    it: 'Città sconosciuta',
   },
   {
     key: 'projects.page.value.other',
@@ -4543,7 +4543,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'ARIA label for projects view mode toggle button group.',
     en: 'View mode',
     de: 'Ansichtsmodus',
-    it: 'Modalita visualizzazione',
+    it: 'Modalità visualizzazione',
   },
   {
     key: 'projects.viewToggle.list.aria',

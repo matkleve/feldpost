@@ -50,6 +50,44 @@ describe('MediaDownloadService file preview delivery', () => {
     expect(delivery.state).toBe('loading');
   });
 
+  it('returns loaded for non-image when signing completed (ready-low-res)', async () => {
+    const service = configureMediaDownloadService();
+    service.registerPreviewPaths('media-pptx-ready', 'org/u/deck.pptx', 'org/u/deck_thumb.webp', 'ready');
+    service.getItemState('media-pptx-ready', 'small').set('ready-low-res');
+    vi.spyOn(service, 'getCachedUrl').mockReturnValue('https://signed.example/thumb.webp');
+
+    const delivery = await firstValueFrom(
+      service.getState('media-pptx-ready', 6.5).pipe(take(1)),
+    );
+
+    expect(delivery.state).toBe('loaded');
+    expect(delivery.resolvedUrl).toBe('https://signed.example/thumb.webp');
+  });
+
+  it('returns loading for non-image with thumbnail_path even when slot is below 8rem', async () => {
+    const service = configureMediaDownloadService();
+    const resolvePreviewSpy = vi.spyOn(service, 'resolvePreview').mockResolvedValue({
+      url: 'https://signed.example/thumb.webp',
+      resolvedTier: 'small',
+      source: 'signed',
+      state: 'ready-low-res',
+    });
+
+    service.registerPreviewPaths(
+      'media-pptx-thumb',
+      'org/u/deck.pptx',
+      'org/u/deck_thumb.webp',
+      'ready',
+    );
+
+    const delivery = await firstValueFrom(
+      service.getState('media-pptx-thumb', 6.5).pipe(take(1)),
+    );
+
+    expect(delivery.state).toBe('loading');
+    expect(resolvePreviewSpy).toHaveBeenCalled();
+  });
+
   it('returns icon-only when preview_generation_status is failed', async () => {
     const service = configureMediaDownloadService();
 

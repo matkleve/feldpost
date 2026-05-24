@@ -251,6 +251,8 @@ export class MediaDownloadService {
       const deliverySubscription = this.deliveryRefresh$.subscribe((id) => {
         if (id === normalizedId) {
           emit();
+          // Thumb path may arrive after first emit (realtime / patch); must sign, not only re-emit.
+          this.requestPreviewIfKnown(normalizedId, tier, slotSizeRem);
         }
       });
 
@@ -536,26 +538,31 @@ export class MediaDownloadService {
     }
 
     if (!isBitmapMediaCategory(fileType.category)) {
-      if (slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM) {
-        return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
-      }
-
+      // v2: persisted thumbnail_path wins over small-slot icon-only (see media-download-service.md delivery matrix).
       if (cachedUrl) {
         return { state: 'loaded', resolvedUrl: cachedUrl, icon };
       }
 
       const previewTarget =
         knownRequest != null ? resolvePreviewTarget(knownRequest, tier, fileType) : null;
-      if (!previewTarget) {
-        const genStatus = knownRequest?.previewGenerationStatus ?? 'idle';
-        if (genStatus === 'pending') {
+
+      if (previewTarget) {
+        if (state === 'signing' || state === 'idle') {
           return { state: 'loading', icon, resolvedUrl: cachedUrl };
+        }
+        if (state === 'ready-low-res' || state === 'ready-high-res' || cachedUrl) {
+          return { state: 'loaded', resolvedUrl: cachedUrl, icon };
         }
         return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
       }
 
-      if (state === 'signing' || state === 'idle') {
+      const genStatus = knownRequest?.previewGenerationStatus ?? 'idle';
+      if (genStatus === 'pending') {
         return { state: 'loading', icon, resolvedUrl: cachedUrl };
+      }
+
+      if (slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM) {
+        return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
       }
 
       return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
@@ -590,7 +597,11 @@ export class MediaDownloadService {
       return;
     }
 
-    if (slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM && !isBitmapMediaCategory(fileType.category)) {
+    if (
+      slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM &&
+      !isBitmapMediaCategory(fileType.category) &&
+      !request.thumbnailPath?.trim()
+    ) {
       return;
     }
 

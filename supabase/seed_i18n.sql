@@ -127,14 +127,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0001.none', '� None �', 'en', 'apps/web/src/app/shared/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0001.none', '— None —', 'en', 'apps/web/src/app/shared/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '� None �', 'published'
+select t.id, 'en', '— None —', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0001.none'
 on conflict (app_text_id, lang) do update set
@@ -142,7 +142,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '� None �', 'published'
+select t.id, 'de', '— None —', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0001.none'
 on conflict (app_text_id, lang) do update set
@@ -189,14 +189,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0004.2fa_best_tigen', '2FA best�tigen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0004.2fa_best_tigen', '2FA best…tigen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '2FA best�tigen', 'published'
+select t.id, 'en', '2FA best…tigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0004.2fa_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -204,7 +204,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '2FA best�tigen', 'published'
+select t.id, 'de', '2FA bestätigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0004.2fa_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -212,7 +212,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Best�tigen 2FA', 'published'
+select t.id, 'it', 'Best…tigen 2FA', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0004.2fa_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -359,7 +359,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zum Starten Dateien hinzuf�gen. Statuspunkte und Spurfilter werden angezeigt, sobald Dateien in die Warteschlange gelangen.', 'published'
+select t.id, 'de', 'Zum Starten Dateien hinzufügen. Statuspunkte und Spurfilter werden angezeigt, sobald Dateien in die Warteschlange gelangen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0010.add_files_to_start_status_dots_and_lane_filters_appear_once_file'
 on conflict (app_text_id, lang) do update set
@@ -390,7 +390,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Metadaten hinzuf�gen', 'published'
+select t.id, 'de', 'Metadaten hinzufügen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0011.add_metadata'
 on conflict (app_text_id, lang) do update set
@@ -421,7 +421,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'F�gen Sie Fotos, Videos, PDFs und Office-Dateien f�r das aktive Projekt hinzu.', 'published'
+select t.id, 'de', 'Fügen Sie Fotos, Videos, PDFs und Office-Dateien für das aktive Projekt hinzu.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0012.add_photos_videos_pdfs_and_office_files_for_the_active_project'
 on conflict (app_text_id, lang) do update set
@@ -452,7 +452,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zum Projekt hinzuf�gen', 'published'
+select t.id, 'de', 'Zum Projekt hinzufügen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0013.add_to_project'
 on conflict (app_text_id, lang) do update set
@@ -483,7 +483,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zus�tzliche Upload-Aktionen', 'published'
+select t.id, 'de', 'Zusätzliche Upload-Aktionen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0014.additional_upload_actions'
 on conflict (app_text_id, lang) do update set
@@ -576,7 +576,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse konnte nicht aufgeloest werden.', 'published'
+select t.id, 'de', 'Adresse konnte nicht aufgelöst werden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0018.adresse_konnte_nicht_aufgeloest_werden'
 on conflict (app_text_id, lang) do update set
@@ -584,7 +584,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'L''indirizzo non verr� visualizzato.', 'published'
+select t.id, 'it', 'L''indirizzo non verr… visualizzato.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0018.adresse_konnte_nicht_aufgeloest_werden'
 on conflict (app_text_id, lang) do update set
@@ -871,14 +871,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0030.app_preferences_coming_in_m_ui8', 'App preferences � coming in M-UI8.', 'en', 'apps/web/src/app/features/settings/settings.component.ts inline-template text-node')
+values (null, 'auto.0030.app_preferences_coming_in_m_ui8', 'App preferences – coming in M-UI8.', 'en', 'apps/web/src/app/features/settings/settings.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'App preferences � coming in M-UI8.', 'published'
+select t.id, 'en', 'App preferences – coming in M-UI8.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0030.app_preferences_coming_in_m_ui8'
 on conflict (app_text_id, lang) do update set
@@ -886,7 +886,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'App preferences � coming in M-UI8.', 'published'
+select t.id, 'de', 'App preferences – coming in M-UI8.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0030.app_preferences_coming_in_m_ui8'
 on conflict (app_text_id, lang) do update set
@@ -948,7 +948,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ausgewaehlte Elemente', 'published'
+select t.id, 'de', 'Ausgewählte Elemente', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.pane.tab.selectedItems'
 on conflict (app_text_id, lang) do update set
@@ -1010,7 +1010,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Adresse verfuegbar.', 'published'
+select t.id, 'de', 'Keine Adresse verfügbar.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.addressMissing'
 on conflict (app_text_id, lang) do update set
@@ -1072,7 +1072,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Details sind bereits geoeffnet.', 'published'
+select t.id, 'de', 'Details sind bereits geöffnet.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.detailsAlreadyOpen'
 on conflict (app_text_id, lang) do update set
@@ -1080,7 +1080,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'I dettagli sono gia aperti.', 'published'
+select t.id, 'it', 'I dettagli sono già aperti.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.detailsAlreadyOpen'
 on conflict (app_text_id, lang) do update set
@@ -1134,7 +1134,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Auswahl oeffnen', 'published'
+select t.id, 'de', 'Auswahl öffnen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0035.auswahl_oeffnen'
 on conflict (app_text_id, lang) do update set
@@ -1274,14 +1274,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0041.best_tigung', 'Best�tigung', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0041.best_tigung', 'Best…tigung', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Best�tigung', 'published'
+select t.id, 'en', 'Best…tigung', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0041.best_tigung'
 on conflict (app_text_id, lang) do update set
@@ -1289,7 +1289,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Best�tigung', 'published'
+select t.id, 'de', 'Bestätigung', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0041.best_tigung'
 on conflict (app_text_id, lang) do update set
@@ -1305,14 +1305,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0042.bitte_gib_delete_ein_um_die_l_schung_zu_best_tigen', 'Bitte gib DELETE ein, um die L�schung zu best�tigen.', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0042.bitte_gib_delete_ein_um_die_l_schung_zu_best_tigen', 'Bitte gib DELETE ein, um die L…schung zu best…tigen.', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Bitte gib DELETE ein, um die L�schung zu best�tigen.', 'published'
+select t.id, 'en', 'Bitte gib DELETE ein, um die L…schung zu best…tigen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0042.bitte_gib_delete_ein_um_die_l_schung_zu_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -1320,7 +1320,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Bitte gib DELETE ein, um die L�schung zu best�tigen.', 'published'
+select t.id, 'de', 'Bitte gib DELETE ein, um die Löschung zu bestätigen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0042.bitte_gib_delete_ein_um_die_l_schung_zu_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -1514,7 +1514,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Citt�', 'published'
+select t.id, 'it', 'Citt…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0051.city'
 on conflict (app_text_id, lang) do update set
@@ -1537,7 +1537,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'L�schen', 'published'
+select t.id, 'de', 'Löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0052.clear'
 on conflict (app_text_id, lang) do update set
@@ -1692,7 +1692,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Schlie�en', 'published'
+select t.id, 'de', 'Schließen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0058.close'
 on conflict (app_text_id, lang) do update set
@@ -1855,7 +1855,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Controlla la lingua di base e la densit� dei contenuti per le superfici dell''area di lavoro.', 'published'
+select t.id, 'it', 'Controlla la lingua di base e la densit… dei contenuti per le superfici dell''area di lavoro.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0066.control_base_language_and_content_density_for_workspace_surfaces'
 on conflict (app_text_id, lang) do update set
@@ -2219,7 +2219,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Bild l�schen', 'published'
+select t.id, 'de', 'Bild löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0086.delete_image'
 on conflict (app_text_id, lang) do update set
@@ -2250,7 +2250,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dieses Bild l�schen?', 'published'
+select t.id, 'de', 'Dieses Bild löschen?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0087.delete_this_image'
 on conflict (app_text_id, lang) do update set
@@ -2289,7 +2289,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Densit�', 'published'
+select t.id, 'it', 'Densit…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0088.density'
 on conflict (app_text_id, lang) do update set
@@ -2312,7 +2312,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Details oeffnen', 'published'
+select t.id, 'de', 'Details öffnen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0089.details_oeffnen'
 on conflict (app_text_id, lang) do update set
@@ -2390,14 +2390,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0092.dieser_schritt_ist_endg_ltig_und_entfernt_kontodaten_dauerhaft', 'Dieser Schritt ist endg�ltig und entfernt Kontodaten dauerhaft.', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0092.dieser_schritt_ist_endg_ltig_und_entfernt_kontodaten_dauerhaft', 'Dieser Schritt ist endg…ltig und entfernt Kontodaten dauerhaft.', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Dieser Schritt ist endg�ltig und entfernt Kontodaten dauerhaft.', 'published'
+select t.id, 'en', 'Dieser Schritt ist endg…ltig und entfernt Kontodaten dauerhaft.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0092.dieser_schritt_ist_endg_ltig_und_entfernt_kontodaten_dauerhaft'
 on conflict (app_text_id, lang) do update set
@@ -2405,7 +2405,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dieser Schritt ist endg�ltig und entfernt Kontodaten dauerhaft.', 'published'
+select t.id, 'de', 'Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0092.dieser_schritt_ist_endg_ltig_und_entfernt_kontodaten_dauerhaft'
 on conflict (app_text_id, lang) do update set
@@ -2413,7 +2413,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questo passaggio � definitivo e rimuove permanentemente i dati dell''account.', 'published'
+select t.id, 'it', 'Questo passaggio è definitivo e rimuove permanentemente i dati dell''account.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0092.dieser_schritt_ist_endg_ltig_und_entfernt_kontodaten_dauerhaft'
 on conflict (app_text_id, lang) do update set
@@ -2436,7 +2436,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zur�ckweisen', 'published'
+select t.id, 'de', 'Zurückweisen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0093.dismiss'
 on conflict (app_text_id, lang) do update set
@@ -2560,7 +2560,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekt oeffnen', 'published'
+select t.id, 'de', 'Projekt öffnen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.project.open'
 on conflict (app_text_id, lang) do update set
@@ -2630,7 +2630,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Assegna priorita', 'published'
+select t.id, 'it', 'Assegna priorità', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.add'
 on conflict (app_text_id, lang) do update set
@@ -2653,7 +2653,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Prioritaet entfernen', 'published'
+select t.id, 'de', 'Priorität entfernen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.remove'
 on conflict (app_text_id, lang) do update set
@@ -2661,7 +2661,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Rimuovi priorita', 'published'
+select t.id, 'it', 'Rimuovi priorità', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.remove'
 on conflict (app_text_id, lang) do update set
@@ -2715,7 +2715,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Prioritaet entfernt.', 'published'
+select t.id, 'de', 'Priorität entfernt.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.removedToast'
 on conflict (app_text_id, lang) do update set
@@ -2723,7 +2723,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Priorita rimossa.', 'published'
+select t.id, 'it', 'Priorità rimossa.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.removedToast'
 on conflict (app_text_id, lang) do update set
@@ -2746,7 +2746,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Bestehendes Medium oeffnen', 'published'
+select t.id, 'de', 'Bestehendes Medium öffnen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.issue.openExisting'
 on conflict (app_text_id, lang) do update set
@@ -2963,7 +2963,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dateien hierher ziehen oder zum Ausw�hlen klicken', 'published'
+select t.id, 'de', 'Dateien hierher ziehen oder zum Auswählen klicken', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0103.drag_files_here_or_click_to_select'
 on conflict (app_text_id, lang) do update set
@@ -3010,14 +3010,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0106.e_mail_ndern', 'E-Mail �ndern', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0106.e_mail_ndern', 'E-Mail …ndern', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'E-Mail �ndern', 'published'
+select t.id, 'en', 'E-Mail …ndern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0106.e_mail_ndern'
 on conflict (app_text_id, lang) do update set
@@ -3025,7 +3025,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'E-Mail �ndern', 'published'
+select t.id, 'de', 'E-Mail ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0106.e_mail_ndern'
 on conflict (app_text_id, lang) do update set
@@ -3041,14 +3041,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0107.e_mail_und_passwortverwaltung_mit_sicherheitspr_fung', 'E-Mail- und Passwortverwaltung mit Sicherheitspr�fung.', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0107.e_mail_und_passwortverwaltung_mit_sicherheitspr_fung', 'E-Mail- und Passwortverwaltung mit Sicherheitspr…fung.', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'E-Mail- und Passwortverwaltung mit Sicherheitspr�fung.', 'published'
+select t.id, 'en', 'E-Mail- und Passwortverwaltung mit Sicherheitspr…fung.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0107.e_mail_und_passwortverwaltung_mit_sicherheitspr_fung'
 on conflict (app_text_id, lang) do update set
@@ -3056,7 +3056,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'E-Mail- und Passwortverwaltung mit Sicherheitspr�fung.', 'published'
+select t.id, 'de', 'E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0107.e_mail_und_passwortverwaltung_mit_sicherheitspr_fung'
 on conflict (app_text_id, lang) do update set
@@ -3103,14 +3103,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0111.endg_ltig_l_schen', 'Endg�ltig l�schen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0111.endg_ltig_l_schen', 'Endg…ltig l…schen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Endg�ltig l�schen', 'published'
+select t.id, 'en', 'Endg…ltig l…schen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0111.endg_ltig_l_schen'
 on conflict (app_text_id, lang) do update set
@@ -3118,7 +3118,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Endg�ltig l�schen', 'published'
+select t.id, 'de', 'Endgültig löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0111.endg_ltig_l_schen'
 on conflict (app_text_id, lang) do update set
@@ -3273,7 +3273,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Foto geloescht.', 'published'
+select t.id, 'de', 'Foto gelöscht.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0120.foto_geloescht'
 on conflict (app_text_id, lang) do update set
@@ -3304,7 +3304,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Foto loeschen', 'published'
+select t.id, 'de', 'Foto löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0121.foto_loeschen'
 on conflict (app_text_id, lang) do update set
@@ -3335,7 +3335,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Freigabelink enthaelt keine verfuegbaren Medien.', 'published'
+select t.id, 'de', 'Freigabelink enthält keine verfügbaren Medien.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0122.freigabelink_enthaelt_keine_verfuegbaren_medien'
 on conflict (app_text_id, lang) do update set
@@ -3366,7 +3366,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Freigabelink konnte nicht aufgeloest werden.', 'published'
+select t.id, 'de', 'Freigabelink konnte nicht aufgelöst werden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0123.freigabelink_konnte_nicht_aufgeloest_werden'
 on conflict (app_text_id, lang) do update set
@@ -3397,7 +3397,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.', 'published'
+select t.id, 'de', 'Freigabelink ungültig, abgelaufen oder ohne Zugriff.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0124.freigabelink_ungueltig_abgelaufen_oder_ohne_zugriff'
 on conflict (app_text_id, lang) do update set
@@ -3428,7 +3428,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Foto in voller Gr��e', 'published'
+select t.id, 'de', 'Foto in voller Größe', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0127.full_size_photo'
 on conflict (app_text_id, lang) do update set
@@ -3552,7 +3552,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'GPS-Zuordnung f�r diesen Dateityp deaktiviert.', 'published'
+select t.id, 'de', 'GPS-Zuordnung für diesen Dateityp deaktiviert.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0131.gps_assignment_disabled_for_this_file_type'
 on conflict (app_text_id, lang) do update set
@@ -3583,7 +3583,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Die GPS-Zuordnung ist f�r diesen Dateityp deaktiviert.', 'published'
+select t.id, 'de', 'Die GPS-Zuordnung ist für diesen Dateityp deaktiviert.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0132.gps_assignment_is_disabled_for_this_file_type'
 on conflict (app_text_id, lang) do update set
@@ -3591,7 +3591,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'L''assegnazione GPS � disabilitata per questo tipo di file.', 'published'
+select t.id, 'it', 'L''assegnazione GPS è disabilitata per questo tipo di file.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0132.gps_assignment_is_disabled_for_this_file_type'
 on conflict (app_text_id, lang) do update set
@@ -3707,7 +3707,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Hierhin zoomen (Hausnaehe)', 'published'
+select t.id, 'de', 'Hierhin zoomen (Hausnähe)', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0138.hierhin_zoomen_hausnaehe'
 on conflict (app_text_id, lang) do update set
@@ -3738,7 +3738,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Hierhin zoomen (Strassennaehe)', 'published'
+select t.id, 'de', 'Hierhin zoomen (Straßennaehe)', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0139.hierhin_zoomen_strassennaehe'
 on conflict (app_text_id, lang) do update set
@@ -3769,7 +3769,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Bild nicht verf�gbar', 'published'
+select t.id, 'de', 'Bild nicht verfügbar', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0142.image_unavailable'
 on conflict (app_text_id, lang) do update set
@@ -3831,7 +3831,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'In Google Maps oeffnen', 'published'
+select t.id, 'de', 'In Google Maps öffnen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0144.in_google_maps_oeffnen'
 on conflict (app_text_id, lang) do update set
@@ -3971,14 +3971,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0156.jpeg_png_heic_webp_mp4_mov_webm_pdf_docx_xlsx_pptx_max_25_mb', 'JPEG � PNG � HEIC � WebP � MP4 � MOV � WebM � PDF � DOCX � XLSX � PPTX � max 25 MB', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
+values (null, 'auto.0156.jpeg_png_heic_webp_mp4_mov_webm_pdf_docx_xlsx_pptx_max_25_mb', 'JPEG – PNG – HEIC – WebP – MP4 – MOV – WebM – PDF – DOCX – XLSX – PPTX – max 25 MB', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'JPEG � PNG � HEIC � WebP � MP4 � MOV � WebM � PDF � DOCX � XLSX � PPTX � max 25 MB', 'published'
+select t.id, 'en', 'JPEG – PNG – HEIC – WebP – MP4 – MOV – WebM – PDF – DOCX – XLSX – PPTX – max 25 MB', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0156.jpeg_png_heic_webp_mp4_mov_webm_pdf_docx_xlsx_pptx_max_25_mb'
 on conflict (app_text_id, lang) do update set
@@ -3986,7 +3986,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'JPEG � PNG � HEIC � WebP � MP4 � MOV � WebM � PDF � DOCX � XLSX � PPTX � max. 25 MB', 'published'
+select t.id, 'de', 'JPEG – PNG – HEIC – WebP – MP4 – MOV – WebM – PDF – DOCX – XLSX – PPTX – max. 25 MB', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0156.jpeg_png_heic_webp_mp4_mov_webm_pdf_docx_xlsx_pptx_max_25_mb'
 on conflict (app_text_id, lang) do update set
@@ -3994,7 +3994,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'JPEG � PNG � HEIC � WebP � MP4 � MOV � WebM � PDF � DOCX � XLSX � PPTX � max 25 MB', 'published'
+select t.id, 'it', 'JPEG – PNG – HEIC – WebP – MP4 – MOV – WebM – PDF – DOCX – XLSX – PPTX – max 25 MB', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0156.jpeg_png_heic_webp_mp4_mov_webm_pdf_docx_xlsx_pptx_max_25_mb'
 on conflict (app_text_id, lang) do update set
@@ -4033,14 +4033,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0158.keine_e_mail_verf_gbar', 'Keine E-Mail verf�gbar', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0158.keine_e_mail_verf_gbar', 'Keine E-Mail verf…gbar', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Keine E-Mail verf�gbar', 'published'
+select t.id, 'en', 'Keine E-Mail verf…gbar', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0158.keine_e_mail_verf_gbar'
 on conflict (app_text_id, lang) do update set
@@ -4048,7 +4048,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine E-Mail verf�gbar', 'published'
+select t.id, 'de', 'Keine E-Mail verfügbar', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0158.keine_e_mail_verf_gbar'
 on conflict (app_text_id, lang) do update set
@@ -4079,7 +4079,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Medien fuer Projektzuweisung gefunden.', 'published'
+select t.id, 'de', 'Keine Medien für Projektzuweisung gefunden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0159.keine_medien_fuer_projektzuweisung_gefunden'
 on conflict (app_text_id, lang) do update set
@@ -4110,7 +4110,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Medien in Radius-Auswahl verfuegbar.', 'published'
+select t.id, 'de', 'Keine Medien in Radius-Auswahl verfügbar.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0160.keine_medien_in_radius_auswahl_verfuegbar'
 on conflict (app_text_id, lang) do update set
@@ -4141,7 +4141,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Projekte verfuegbar.', 'published'
+select t.id, 'de', 'Keine Projekte verfügbar.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0161.keine_projekte_verfuegbar'
 on conflict (app_text_id, lang) do update set
@@ -4172,7 +4172,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Schl�ssel', 'published'
+select t.id, 'de', 'Schlüssel', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0162.key'
 on conflict (app_text_id, lang) do update set
@@ -4188,14 +4188,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0163.konto_l_schen', 'Konto l�schen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0163.konto_l_schen', 'Konto l…schen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Konto l�schen', 'published'
+select t.id, 'en', 'Konto l…schen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0163.konto_l_schen'
 on conflict (app_text_id, lang) do update set
@@ -4203,7 +4203,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Konto l�schen', 'published'
+select t.id, 'de', 'Konto löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0163.konto_l_schen'
 on conflict (app_text_id, lang) do update set
@@ -4219,14 +4219,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0164.l_dt', 'L�dt...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0164.l_dt', 'L…dt...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'L�dt...', 'published'
+select t.id, 'en', 'L…dt...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0164.l_dt'
 on conflict (app_text_id, lang) do update set
@@ -4234,7 +4234,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'L�dt...', 'published'
+select t.id, 'de', 'Lädt...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0164.l_dt'
 on conflict (app_text_id, lang) do update set
@@ -4560,14 +4560,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0177.logout_best_tigen', 'Logout best�tigen', 'en', 'apps/web/src/app/features/account/account.component.html bound-attr:title')
+values (null, 'auto.0177.logout_best_tigen', 'Logout best…tigen', 'en', 'apps/web/src/app/features/account/account.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Logout best�tigen', 'published'
+select t.id, 'en', 'Logout best…tigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0177.logout_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -4575,7 +4575,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Logout best�tigen', 'published'
+select t.id, 'de', 'Logout bestätigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0177.logout_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -4591,14 +4591,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0178.l_sche', 'L�sche...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0178.l_sche', 'L…sche...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'L�sche...', 'published'
+select t.id, 'en', 'L…sche...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0178.l_sche'
 on conflict (app_text_id, lang) do update set
@@ -4606,7 +4606,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'L�sche...', 'published'
+select t.id, 'de', 'Lösche...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0178.l_sche'
 on conflict (app_text_id, lang) do update set
@@ -4777,14 +4777,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0184.marker_verschieben_folgt_im_n_chsten_schritt', 'Marker verschieben folgt im n�chsten Schritt.', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:message')
+values (null, 'auto.0184.marker_verschieben_folgt_im_n_chsten_schritt', 'Marker verschieben folgt im n…chsten Schritt.', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Marker verschieben folgt im n�chsten Schritt.', 'published'
+select t.id, 'en', 'Marker verschieben folgt im n…chsten Schritt.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0184.marker_verschieben_folgt_im_n_chsten_schritt'
 on conflict (app_text_id, lang) do update set
@@ -4792,7 +4792,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Marker verschieben folgt im n�chsten Schritt.', 'published'
+select t.id, 'de', 'Marker verschieben folgt im nächsten Schritt.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0184.marker_verschieben_folgt_im_n_chsten_schritt'
 on conflict (app_text_id, lang) do update set
@@ -4831,7 +4831,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Media Marker � stato creato. Caricamento avviato.', 'published'
+select t.id, 'it', 'Media Marker è stato creato. Caricamento avviato.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0185.media_marker_erstellt_upload_starten'
 on conflict (app_text_id, lang) do update set
@@ -4932,14 +4932,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0189.m_chtest_du_die_aktuelle_sitzung_wirklich_beenden', 'M�chtest du die aktuelle Sitzung wirklich beenden?', 'en', 'apps/web/src/app/features/account/account.component.html bound-attr:message')
+values (null, 'auto.0189.m_chtest_du_die_aktuelle_sitzung_wirklich_beenden', 'M…chtest du die aktuelle Sitzung wirklich beenden?', 'en', 'apps/web/src/app/features/account/account.component.html bound-attr:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'M�chtest du die aktuelle Sitzung wirklich beenden?', 'published'
+select t.id, 'en', 'M…chtest du die aktuelle Sitzung wirklich beenden?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0189.m_chtest_du_die_aktuelle_sitzung_wirklich_beenden'
 on conflict (app_text_id, lang) do update set
@@ -4947,7 +4947,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'M�chtest du die aktuelle Sitzung wirklich beenden?', 'published'
+select t.id, 'de', 'Möchtest du die aktuelle Sitzung wirklich beenden?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0189.m_chtest_du_die_aktuelle_sitzung_wirklich_beenden'
 on conflict (app_text_id, lang) do update set
@@ -5180,14 +5180,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0197.neues_passwort_best_tigen', 'Neues Passwort best�tigen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0197.neues_passwort_best_tigen', 'Neues Passwort best…tigen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Neues Passwort best�tigen', 'published'
+select t.id, 'en', 'Neues Passwort best…tigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0197.neues_passwort_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -5195,7 +5195,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Neues Passwort best�tigen', 'published'
+select t.id, 'de', 'Neues Passwort bestätigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0197.neues_passwort_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -5203,7 +5203,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nuova password best�tigen', 'published'
+select t.id, 'it', 'Nuova password best…tigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0197.neues_passwort_best_tigen'
 on conflict (app_text_id, lang) do update set
@@ -5319,7 +5319,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Kein GPS: Dieser Eintrag kann nur zu einem Projekt geh�ren.', 'published'
+select t.id, 'de', 'Kein GPS: Dieser Eintrag kann nur zu einem Projekt gehören.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0203.no_gps_this_item_can_only_belong_to_one_project'
 on conflict (app_text_id, lang) do update set
@@ -5327,7 +5327,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessun GPS: questo elemento pu� appartenere a un solo progetto.', 'published'
+select t.id, 'it', 'Nessun GPS: questo elemento pu… appartenere a un solo progetto.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0203.no_gps_this_item_can_only_belong_to_one_project'
 on conflict (app_text_id, lang) do update set
@@ -5420,7 +5420,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessuna propriet� corrispondente', 'published'
+select t.id, 'it', 'Nessuna propriet… corrispondente', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0206.no_matching_properties'
 on conflict (app_text_id, lang) do update set
@@ -5443,7 +5443,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Kein Foto beigef�gt', 'published'
+select t.id, 'de', 'Kein Foto beigefügt', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0207.no_photo_attached'
 on conflict (app_text_id, lang) do update set
@@ -5513,7 +5513,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Non c''� tempo', 'published'
+select t.id, 'it', 'Non c''… tempo', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0212.no_time'
 on conflict (app_text_id, lang) do update set
@@ -5691,7 +5691,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'oder klicken Sie, um Dateien auszuw�hlen', 'published'
+select t.id, 'de', 'oder klicken Sie, um Dateien auszuwählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0218.or_click_to_select_files'
 on conflict (app_text_id, lang) do update set
@@ -5800,14 +5800,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0226.passwort_ndern', 'Passwort �ndern', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0226.passwort_ndern', 'Passwort …ndern', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Passwort �ndern', 'published'
+select t.id, 'en', 'Passwort …ndern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0226.passwort_ndern'
 on conflict (app_text_id, lang) do update set
@@ -5815,7 +5815,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort �ndern', 'published'
+select t.id, 'de', 'Passwort ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0226.passwort_ndern'
 on conflict (app_text_id, lang) do update set
@@ -5854,7 +5854,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'La password � inutilizzabile', 'published'
+select t.id, 'it', 'La password è inutilizzabile', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0227.passwort_vergessen'
 on conflict (app_text_id, lang) do update set
@@ -5893,14 +5893,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0230.photo_gallery_coming_in_m_ui6', 'Photo gallery � coming in M-UI6.', 'en', 'apps/web/src/app/features/media/media.component.ts inline-template text-node')
+values (null, 'auto.0230.photo_gallery_coming_in_m_ui6', 'Photo gallery – coming in M-UI6.', 'en', 'apps/web/src/app/features/media/media.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Photo gallery � coming in M-UI6.', 'published'
+select t.id, 'en', 'Photo gallery – coming in M-UI6.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0230.photo_gallery_coming_in_m_ui6'
 on conflict (app_text_id, lang) do update set
@@ -5908,7 +5908,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Photo gallery � coming in M-UI6.', 'published'
+select t.id, 'de', 'Photo gallery – coming in M-UI6.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0230.photo_gallery_coming_in_m_ui6'
 on conflict (app_text_id, lang) do update set
@@ -6125,7 +6125,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Prim�r', 'published'
+select t.id, 'de', 'Primär', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0238.primary'
 on conflict (app_text_id, lang) do update set
@@ -6280,7 +6280,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekt hinzufuegen...', 'published'
+select t.id, 'de', 'Projekt hinzufügen...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0251.projekt_hinzufuegen'
 on conflict (app_text_id, lang) do update set
@@ -6350,7 +6350,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Propriet�', 'published'
+select t.id, 'it', 'Propriet…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0253.property'
 on conflict (app_text_id, lang) do update set
@@ -6358,14 +6358,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0254.pr_fe', 'Pr�fe...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0254.pr_fe', 'Pr…fe...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Pr�fe...', 'published'
+select t.id, 'en', 'Pr…fe...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0254.pr_fe'
 on conflict (app_text_id, lang) do update set
@@ -6373,7 +6373,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pr�fe...', 'published'
+select t.id, 'de', 'Prüfe...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0254.pr_fe'
 on conflict (app_text_id, lang) do update set
@@ -6505,7 +6505,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Tonalit� casuale del marchio', 'published'
+select t.id, 'it', 'Tonalit… casuale del marchio', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0259.random_brand_hue'
 on conflict (app_text_id, lang) do update set
@@ -6869,7 +6869,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'W�hle eine Option oder erstelle eine', 'published'
+select t.id, 'de', 'Wähle eine Option oder erstelle eine', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0275.select_an_option_or_create_one'
 on conflict (app_text_id, lang) do update set
@@ -6931,7 +6931,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekt ausw�hlen oder eines erstellen', 'published'
+select t.id, 'de', 'Projekt auswählen oder eines erstellen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0277.select_project_or_create_one'
 on conflict (app_text_id, lang) do update set
@@ -7497,7 +7497,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'impostazioni.overlay.generale.densit�.opzione.comodo', 'published'
+select t.id, 'it', 'impostazioni.overlay.generale.densit….opzione.comodo', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0296.settings_overlay_general_density_option_comfortable'
 on conflict (app_text_id, lang) do update set
@@ -8698,7 +8698,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Fuer diesen Bereich wurden moeglicherweise noch keine Medien hochgeladen.', 'published'
+select t.id, 'de', 'Für diesen Bereich wurden möglicherweise noch keine Medien hochgeladen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.emptySelection.hint'
 on conflict (app_text_id, lang) do update set
@@ -8729,7 +8729,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Waehle einen Marker auf der Karte aus um Fotos zu sehen.', 'published'
+select t.id, 'de', 'Wähle einen Marker auf der Karte aus um Fotos zu sehen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.empty.selectMarker'
 on conflict (app_text_id, lang) do update set
@@ -8791,7 +8791,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Filter zuruecksetzen', 'published'
+select t.id, 'de', 'Filter zurücksetzen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.thumbnailGrid.filterEmpty.clear'
 on conflict (app_text_id, lang) do update set
@@ -8946,7 +8946,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Stra�e', 'published'
+select t.id, 'de', 'Straße', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0346.street'
 on conflict (app_text_id, lang) do update set
@@ -9109,7 +9109,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Modalit� tema', 'published'
+select t.id, 'it', 'Modalit… tema', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0351.theme_mode'
 on conflict (app_text_id, lang) do update set
@@ -9132,7 +9132,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Diese Funktion ist bald verf�gbar.', 'published'
+select t.id, 'de', 'Diese Funktion ist bald verfügbar.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0352.this_feature_is_coming_soon'
 on conflict (app_text_id, lang) do update set
@@ -9140,7 +9140,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questa funzionalit� sar� presto disponibile.', 'published'
+select t.id, 'it', 'Questa funzionalit… sar… presto disponibile.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0352.this_feature_is_coming_soon'
 on conflict (app_text_id, lang) do update set
@@ -9861,14 +9861,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0378.value', 'Value�', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
+values (null, 'auto.0378.value', 'Value…', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Value�', 'published'
+select t.id, 'en', 'Value…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0378.value'
 on conflict (app_text_id, lang) do update set
@@ -9876,7 +9876,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Value�', 'published'
+select t.id, 'de', 'Value…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0378.value'
 on conflict (app_text_id, lang) do update set
@@ -9884,7 +9884,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Valore�', 'published'
+select t.id, 'it', 'Valore…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0378.value'
 on conflict (app_text_id, lang) do update set
@@ -9915,7 +9915,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Modalit� di visualizzazione', 'published'
+select t.id, 'it', 'Modalit… di visualizzazione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0379.view_mode'
 on conflict (app_text_id, lang) do update set
@@ -11240,7 +11240,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Medium loeschen', 'published'
+select t.id, 'de', 'Medium löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_action_delete'
 on conflict (app_text_id, lang) do update set
@@ -11426,7 +11426,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Das Medium und alle Metadaten werden dauerhaft entfernt. Dieser Vorgang kann nicht rueckgaengig gemacht werden.', 'published'
+select t.id, 'de', 'Das Medium und alle Metadaten werden dauerhaft entfernt. Dieser Vorgang kann nicht rückgängig gemacht werden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
@@ -11434,7 +11434,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questa operazione rimuovera definitivamente il media e tutti i suoi metadati. Non puo essere annullata.', 'published'
+select t.id, 'it', 'Questa operazione rimuoverà definitivamente il media e tutti i suoi metadati. Non può essere annullata.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
@@ -11457,7 +11457,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dieses Medium loeschen?', 'published'
+select t.id, 'de', 'Dieses Medium löschen?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_deletedialog_title'
 on conflict (app_text_id, lang) do update set
@@ -11798,7 +11798,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dies entfernt die gespeicherte Adresse fuer dieses Medium. Sie koennen die Aktion rueckgaengig machen.', 'published'
+select t.id, 'de', 'Dies entfernt die gespeicherte Adresse für dieses Medium. Sie können die Aktion rückgängig machen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.clearAddress.message'
 on conflict (app_text_id, lang) do update set
@@ -11860,7 +11860,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Koordinaten zuruecksetzen?', 'published'
+select t.id, 'de', 'Koordinaten zurücksetzen?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.title'
 on conflict (app_text_id, lang) do update set
@@ -11891,7 +11891,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dies stellt die urspruenglichen EXIF-Koordinaten wieder her und ersetzt die korrigierte Position.', 'published'
+select t.id, 'de', 'Dies stellt die ursprünglichen EXIF-Koordinaten wieder her und ersetzt die korrigierte Position.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.message'
 on conflict (app_text_id, lang) do update set
@@ -11922,7 +11922,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zuruecksetzen', 'published'
+select t.id, 'de', 'Zurücksetzen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.revertCoordinates.confirm'
 on conflict (app_text_id, lang) do update set
@@ -11984,7 +11984,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '"{key}" von diesem Medium entfernen? Sie koennen die Aktion rueckgaengig machen.', 'published'
+select t.id, 'de', '"{key}" von diesem Medium entfernen? Sie können die Aktion rückgängig machen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeMetadata.message'
 on conflict (app_text_id, lang) do update set
@@ -12085,7 +12085,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questo media verra scollegato da tutti i progetti a cui appartiene.', 'published'
+select t.id, 'it', 'Questo media verrà scollegato da tutti i progetti a cui appartiene.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.confirm.removeFromProjects.message'
 on conflict (app_text_id, lang) do update set
@@ -12449,7 +12449,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Medium in voller Groesse anzeigen', 'published'
+select t.id, 'de', 'Medium in voller Große anzeigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.action.viewFullSizeMedia.aria'
 on conflict (app_text_id, lang) do update set
@@ -13829,14 +13829,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.searchBar.placeholder.search', 'Search address, project, group�', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+values (null, 'map.searchBar.placeholder.search', 'Search address, project, group…', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Search address, project, group�', 'published'
+select t.id, 'en', 'Search address, project, group…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.search'
 on conflict (app_text_id, lang) do update set
@@ -13844,7 +13844,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Suche nach Adresse, Projekt, Gruppe�', 'published'
+select t.id, 'de', 'Suche nach Adresse, Projekt, Gruppe…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.search'
 on conflict (app_text_id, lang) do update set
@@ -13852,7 +13852,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Cerca indirizzo, progetto, gruppo�', 'published'
+select t.id, 'it', 'Cerca indirizzo, progetto, gruppo…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.search'
 on conflict (app_text_id, lang) do update set
@@ -13922,14 +13922,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.searchBar.placeholder.example.mapsUrl', 'maps.google.com/�', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+values (null, 'map.searchBar.placeholder.example.mapsUrl', 'maps.google.com/…', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'maps.google.com/�', 'published'
+select t.id, 'en', 'maps.google.com/…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.mapsUrl'
 on conflict (app_text_id, lang) do update set
@@ -13937,7 +13937,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'maps.google.com/�', 'published'
+select t.id, 'de', 'maps.google.com/…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.mapsUrl'
 on conflict (app_text_id, lang) do update set
@@ -13945,7 +13945,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'maps.google.com/�', 'published'
+select t.id, 'it', 'maps.google.com/…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.mapsUrl'
 on conflict (app_text_id, lang) do update set
@@ -13984,14 +13984,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.searchBar.placeholder.example.schoenbrunnerAllee', 'Sch�nbrunner Allee 6', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+values (null, 'map.searchBar.placeholder.example.schoenbrunnerAllee', 'Sch…nbrunner Allee 6', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Sch�nbrunner Allee 6', 'published'
+select t.id, 'en', 'Sch…nbrunner Allee 6', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.schoenbrunnerAllee'
 on conflict (app_text_id, lang) do update set
@@ -13999,7 +13999,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Sch�nbrunner Allee 6', 'published'
+select t.id, 'de', 'Schönbrunner Allee 6', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.schoenbrunnerAllee'
 on conflict (app_text_id, lang) do update set
@@ -14007,7 +14007,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Sch�nbrunner Allee 6', 'published'
+select t.id, 'it', 'Sch…nbrunner Allee 6', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.schoenbrunnerAllee'
 on conflict (app_text_id, lang) do update set
@@ -14015,14 +14015,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.searchBar.placeholder.example.coordsDms', '48�12''30"N 16�22''23"E', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+values (null, 'map.searchBar.placeholder.example.coordsDms', '48°12''30"N 16°22''23"E', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '48�12''30"N 16�22''23"E', 'published'
+select t.id, 'en', '48°12''30"N 16°22''23"E', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDms'
 on conflict (app_text_id, lang) do update set
@@ -14030,7 +14030,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '48�12''30"N 16�22''23"E', 'published'
+select t.id, 'de', '48°12''30"N 16°22''23"E', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDms'
 on conflict (app_text_id, lang) do update set
@@ -14038,7 +14038,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '48�12''30"N 16�22''23"E', 'published'
+select t.id, 'it', '48°12''30"N 16°22''23"E', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDms'
 on conflict (app_text_id, lang) do update set
@@ -14278,7 +14278,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Adresse gefunden fuer {query}', 'published'
+select t.id, 'de', 'Keine Adresse gefunden für {query}', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.empty.noAddressFound'
 on conflict (app_text_id, lang) do update set
@@ -14371,7 +14371,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Ergebnisse verfuegbar fuer {query}.', 'published'
+select t.id, 'de', '{count} Ergebnisse verfügbar für {query}.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.liveRegion.resultsAvailable'
 on conflict (app_text_id, lang) do update set
@@ -14402,7 +14402,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Adresse gefunden fuer {query}.', 'published'
+select t.id, 'de', 'Keine Adresse gefunden für {query}.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.liveRegion.noAddressFound'
 on conflict (app_text_id, lang) do update set
@@ -14743,7 +14743,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Filter loeschen', 'published'
+select t.id, 'de', 'Filter löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.command.clearFilters'
 on conflict (app_text_id, lang) do update set
@@ -14813,7 +14813,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Sfondo decorativo mappa citta', 'published'
+select t.id, 'it', 'Sfondo decorativo mappa città', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.mapBackground.title'
 on conflict (app_text_id, lang) do update set
@@ -14867,7 +14867,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Willkommen zurueck bei Feldpost', 'published'
+select t.id, 'de', 'Willkommen zurück bei Feldpost', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.subtitle'
 on conflict (app_text_id, lang) do update set
@@ -14991,7 +14991,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gib eine gueltige E-Mail-Adresse ein.', 'published'
+select t.id, 'de', 'Gib eine gültige E-Mail-Adresse ein.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.field.email.error.invalid'
 on conflict (app_text_id, lang) do update set
@@ -15069,14 +15069,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auth.login.field.password.placeholder', '��������', 'en', 'apps/web/src/app/features/auth/login/login.component.html attr:placeholder')
+values (null, 'auth.login.field.password.placeholder', '••••••••', 'en', 'apps/web/src/app/features/auth/login/login.component.html attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '��������', 'published'
+select t.id, 'en', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.field.password.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -15084,7 +15084,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '��������', 'published'
+select t.id, 'de', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.field.password.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -15092,7 +15092,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '��������', 'published'
+select t.id, 'it', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.field.password.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -15131,14 +15131,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auth.login.action.signingIn', 'Signing in�', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+values (null, 'auth.login.action.signingIn', 'Signing in…', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Signing in�', 'published'
+select t.id, 'en', 'Signing in…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.action.signingIn'
 on conflict (app_text_id, lang) do update set
@@ -15146,7 +15146,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Anmeldung laeuft�', 'published'
+select t.id, 'de', 'Anmeldung läuft…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.action.signingIn'
 on conflict (app_text_id, lang) do update set
@@ -15154,7 +15154,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Accesso in corso�', 'published'
+select t.id, 'it', 'Accesso in corso…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.login.action.signingIn'
 on conflict (app_text_id, lang) do update set
@@ -15278,7 +15278,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Sfondo decorativo mappa citta', 'published'
+select t.id, 'it', 'Sfondo decorativo mappa città', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.mapBackground.title'
 on conflict (app_text_id, lang) do update set
@@ -15301,7 +15301,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pruefe deine E-Mail', 'published'
+select t.id, 'de', 'Prüfe deine E-Mail', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.success.title'
 on conflict (app_text_id, lang) do update set
@@ -15332,7 +15332,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wir haben einen Bestaetigungslink gesendet an', 'published'
+select t.id, 'de', 'Wir haben einen Bestätigungslink gesendet an', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.success.message.prefix'
 on conflict (app_text_id, lang) do update set
@@ -15394,7 +15394,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zurueck zur Anmeldung', 'published'
+select t.id, 'de', 'Zurück zur Anmeldung', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.success.backToSignIn'
 on conflict (app_text_id, lang) do update set
@@ -15518,7 +15518,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Vollstaendiger Name', 'published'
+select t.id, 'de', 'Vollständiger Name', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.fullName.label'
 on conflict (app_text_id, lang) do update set
@@ -15580,7 +15580,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Vollstaendiger Name ist erforderlich.', 'published'
+select t.id, 'de', 'Vollständiger Name ist erforderlich.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.fullName.error.required'
 on conflict (app_text_id, lang) do update set
@@ -15704,7 +15704,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gib eine gueltige E-Mail-Adresse ein.', 'published'
+select t.id, 'de', 'Gib eine gültige E-Mail-Adresse ein.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.email.error.invalid'
 on conflict (app_text_id, lang) do update set
@@ -15766,7 +15766,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladungscode aus QR-Link einfuegen', 'published'
+select t.id, 'de', 'Einladungscode aus QR-Link einfügen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.inviteCode.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -15890,7 +15890,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Mind. 12 Zeichen inkl. Gross/Klein Zahl Symbol', 'published'
+select t.id, 'de', 'Mind. 12 Zeichen inkl. Groß/Klein Zahl Symbol', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.password.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -15952,7 +15952,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort muss Grossbuchstaben Kleinbuchstaben Zahl und Symbol enthalten.', 'published'
+select t.id, 'de', 'Passwort muss Großbuchstaben Kleinbuchstaben Zahl und Symbol enthalten.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.password.error.pattern'
 on conflict (app_text_id, lang) do update set
@@ -15983,7 +15983,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort bestaetigen', 'published'
+select t.id, 'de', 'Passwort bestätigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.label'
 on conflict (app_text_id, lang) do update set
@@ -15999,14 +15999,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auth.register.field.confirmPassword.placeholder', '��������', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
+values (null, 'auth.register.field.confirmPassword.placeholder', '••••••••', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '��������', 'published'
+select t.id, 'en', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -16014,7 +16014,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '��������', 'published'
+select t.id, 'de', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -16022,7 +16022,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '��������', 'published'
+select t.id, 'it', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -16045,7 +16045,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwoerter stimmen nicht ueberein.', 'published'
+select t.id, 'de', 'Passwörter stimmen nicht überein.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.error.mismatch'
 on conflict (app_text_id, lang) do update set
@@ -16076,7 +16076,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekt auswaehlen', 'published'
+select t.id, 'de', 'Projekt auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.projectDialog.title'
 on conflict (app_text_id, lang) do update set
@@ -16107,7 +16107,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Waehle ein Projekt fuer die ausgewaehlten Medien.', 'published'
+select t.id, 'de', 'Wähle ein Projekt für die ausgewählten Medien.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.projectDialog.message'
 on conflict (app_text_id, lang) do update set
@@ -16169,7 +16169,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse aendern', 'published'
+select t.id, 'de', 'Adresse ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.addressDialog.title'
 on conflict (app_text_id, lang) do update set
@@ -16200,7 +16200,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Eine Adresse auf alle ausgewaehlten Medien anwenden.', 'published'
+select t.id, 'de', 'Eine Adresse auf alle ausgewählten Medien anwenden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.addressDialog.message'
 on conflict (app_text_id, lang) do update set
@@ -16293,7 +16293,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Auswahl loeschen', 'published'
+select t.id, 'de', 'Auswahl löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.deleteDialog.aria'
 on conflict (app_text_id, lang) do update set
@@ -16324,7 +16324,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ausgewaehlte Medien loeschen', 'published'
+select t.id, 'de', 'Ausgewählte Medien löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.deleteDialog.title'
 on conflict (app_text_id, lang) do update set
@@ -16355,7 +16355,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Diese Aktion kann nicht rueckgaengig gemacht werden. Alle ausgewaehlten Medien werden geloescht.', 'published'
+select t.id, 'de', 'Diese Aktion kann nicht rückgängig gemacht werden. Alle ausgewählten Medien werden gelöscht.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.deleteDialog.message'
 on conflict (app_text_id, lang) do update set
@@ -16363,7 +16363,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questa azione non puo essere annullata. Tutti i media selezionati verranno eliminati.', 'published'
+select t.id, 'it', 'Questa azione non può essere annullata. Tutti i media selezionati verranno eliminati.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.deleteDialog.message'
 on conflict (app_text_id, lang) do update set
@@ -16386,7 +16386,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Loeschen', 'published'
+select t.id, 'de', 'Löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.deleteDialog.confirm'
 on conflict (app_text_id, lang) do update set
@@ -16448,7 +16448,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse konnte nicht aufgeloest werden.', 'published'
+select t.id, 'de', 'Adresse konnte nicht aufgelöst werden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.error.addressNotFound'
 on conflict (app_text_id, lang) do update set
@@ -16541,7 +16541,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ausgewaehlte Medien geloescht.', 'published'
+select t.id, 'de', 'Ausgewählte Medien gelöscht.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.success.deleted'
 on conflict (app_text_id, lang) do update set
@@ -16572,7 +16572,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Projekte verfuegbar.', 'published'
+select t.id, 'de', 'Keine Projekte verfügbar.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.export.error.noProjectsAvailable'
 on conflict (app_text_id, lang) do update set
@@ -16588,14 +16588,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auth.register.action.creatingAccount', 'Creating account�', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+values (null, 'auth.register.action.creatingAccount', 'Creating account…', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Creating account�', 'published'
+select t.id, 'en', 'Creating account…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.action.creatingAccount'
 on conflict (app_text_id, lang) do update set
@@ -16603,7 +16603,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Konto wird erstellt�', 'published'
+select t.id, 'de', 'Konto wird erstellt…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.action.creatingAccount'
 on conflict (app_text_id, lang) do update set
@@ -16611,7 +16611,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Creazione account in corso�', 'published'
+select t.id, 'it', 'Creazione account in corso…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.action.creatingAccount'
 on conflict (app_text_id, lang) do update set
@@ -16673,7 +16673,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Hai gia un account?', 'published'
+select t.id, 'it', 'Hai già un account?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.register.footer.alreadyHaveAccount'
 on conflict (app_text_id, lang) do update set
@@ -16727,7 +16727,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pruefe deine E-Mail', 'published'
+select t.id, 'de', 'Prüfe deine E-Mail', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.success.title'
 on conflict (app_text_id, lang) do update set
@@ -16758,7 +16758,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wir haben einen Link zum Zuruecksetzen gesendet an', 'published'
+select t.id, 'de', 'Wir haben einen Link zum Zurücksetzen gesendet an', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.success.message.prefix'
 on conflict (app_text_id, lang) do update set
@@ -16789,7 +16789,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zurueck zur Anmeldung', 'published'
+select t.id, 'de', 'Zurück zur Anmeldung', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.success.backToSignIn'
 on conflict (app_text_id, lang) do update set
@@ -16820,7 +16820,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort zuruecksetzen', 'published'
+select t.id, 'de', 'Passwort zurücksetzen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.title'
 on conflict (app_text_id, lang) do update set
@@ -16975,7 +16975,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gib eine gueltige E-Mail-Adresse ein.', 'published'
+select t.id, 'de', 'Gib eine gültige E-Mail-Adresse ein.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.field.email.error.invalid'
 on conflict (app_text_id, lang) do update set
@@ -16991,14 +16991,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auth.resetPassword.action.sending', 'Sending�', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+values (null, 'auth.resetPassword.action.sending', 'Sending…', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Sending�', 'published'
+select t.id, 'en', 'Sending…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.action.sending'
 on conflict (app_text_id, lang) do update set
@@ -17006,7 +17006,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wird gesendet�', 'published'
+select t.id, 'de', 'Wird gesendet…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.action.sending'
 on conflict (app_text_id, lang) do update set
@@ -17014,7 +17014,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Invio in corso�', 'published'
+select t.id, 'it', 'Invio in corso…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.action.sending'
 on conflict (app_text_id, lang) do update set
@@ -17068,7 +17068,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zurueck zur Anmeldung', 'published'
+select t.id, 'de', 'Zurück zur Anmeldung', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.resetPassword.footer.backToSignIn'
 on conflict (app_text_id, lang) do update set
@@ -17130,7 +17130,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Waehle ein sicheres Passwort fuer dein Konto.', 'published'
+select t.id, 'de', 'Wähle ein sicheres Passwort für dein Konto.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.subtitle'
 on conflict (app_text_id, lang) do update set
@@ -17192,7 +17192,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Mind. 12 Zeichen inkl. Gross/Klein Zahl Symbol', 'published'
+select t.id, 'de', 'Mind. 12 Zeichen inkl. Groß/Klein Zahl Symbol', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.field.password.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -17254,7 +17254,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort muss Grossbuchstaben Kleinbuchstaben Zahl und Symbol enthalten.', 'published'
+select t.id, 'de', 'Passwort muss Großbuchstaben Kleinbuchstaben Zahl und Symbol enthalten.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.field.password.error.pattern'
 on conflict (app_text_id, lang) do update set
@@ -17285,7 +17285,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Neues Passwort bestaetigen', 'published'
+select t.id, 'de', 'Neues Passwort bestätigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.label'
 on conflict (app_text_id, lang) do update set
@@ -17301,14 +17301,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auth.updatePassword.field.confirmPassword.placeholder', '��������', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html attr:placeholder')
+values (null, 'auth.updatePassword.field.confirmPassword.placeholder', '••••••••', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '��������', 'published'
+select t.id, 'en', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -17316,7 +17316,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '��������', 'published'
+select t.id, 'de', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -17324,7 +17324,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '��������', 'published'
+select t.id, 'it', '••••••••', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.placeholder'
 on conflict (app_text_id, lang) do update set
@@ -17347,7 +17347,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwoerter stimmen nicht ueberein.', 'published'
+select t.id, 'de', 'Passwörter stimmen nicht überein.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.error.mismatch'
 on conflict (app_text_id, lang) do update set
@@ -17363,14 +17363,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auth.updatePassword.action.updating', 'Updating�', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+values (null, 'auth.updatePassword.action.updating', 'Updating…', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Updating�', 'published'
+select t.id, 'en', 'Updating…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.action.updating'
 on conflict (app_text_id, lang) do update set
@@ -17378,7 +17378,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wird aktualisiert�', 'published'
+select t.id, 'de', 'Wird aktualisiert…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.action.updating'
 on conflict (app_text_id, lang) do update set
@@ -17386,7 +17386,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Aggiornamento in corso�', 'published'
+select t.id, 'it', 'Aggiornamento in corso…', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auth.updatePassword.action.updating'
 on conflict (app_text_id, lang) do update set
@@ -17905,7 +17905,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladung nicht verfuegbar', 'published'
+select t.id, 'de', 'Einladung nicht verfügbar', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.inviteManagement.errorState.title'
 on conflict (app_text_id, lang) do update set
@@ -17998,7 +17998,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Teile eine rollenbezogene Einmaleinladung fuer deine Organisation.', 'published'
+select t.id, 'de', 'Teile eine rollenbezogene Einmaleinladung für deine Organisation.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.inviteManagement.subtitle'
 on conflict (app_text_id, lang) do update set
@@ -18029,7 +18029,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Laeuft ab:', 'published'
+select t.id, 'de', 'Läuft ab:', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.inviteManagement.expiresLabel'
 on conflict (app_text_id, lang) do update set
@@ -18626,7 +18626,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Modalita visualizzazione', 'published'
+select t.id, 'it', 'Modalità visualizzazione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.viewToggle.aria.group'
 on conflict (app_text_id, lang) do update set
@@ -19122,7 +19122,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Citta principale', 'published'
+select t.id, 'it', 'Città principale', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.toolbar.option.primaryCity'
 on conflict (app_text_id, lang) do update set
@@ -19866,7 +19866,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Citta sconosciuta', 'published'
+select t.id, 'it', 'Città sconosciuta', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.value.unknownCity'
 on conflict (app_text_id, lang) do update set
@@ -19920,7 +19920,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Farbe �ndern f�r {name}', 'published'
+select t.id, 'de', 'Farbe ändern für {name}', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.action.changeColorFor'
 on conflict (app_text_id, lang) do update set
@@ -20075,7 +20075,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekt l�schen', 'published'
+select t.id, 'de', 'Projekt löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.action.deleteProject'
 on conflict (app_text_id, lang) do update set
@@ -20509,7 +20509,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Archiviertes Projekt konnte nicht gel�scht werden. Berechtigungen pr�fen oder Seite aktualisieren und erneut versuchen.', 'published'
+select t.id, 'de', 'Archiviertes Projekt konnte nicht gelöscht werden. Berechtigungen prüfen oder Seite aktualisieren und erneut versuchen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.deleteError'
 on conflict (app_text_id, lang) do update set
@@ -20540,7 +20540,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Archiviertes Projekt gel�scht', 'published'
+select t.id, 'de', 'Archiviertes Projekt gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.deleteSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20571,7 +20571,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Archiviertes Projekt l�schen?', 'published'
+select t.id, 'de', 'Archiviertes Projekt löschen?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.title.deleteArchived'
 on conflict (app_text_id, lang) do update set
@@ -20633,7 +20633,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{name} wird wieder auf Aktiv gesetzt und kehrt in die normalen Projektabl�ufe zur�ck.', 'published'
+select t.id, 'de', '{name} wird wieder auf Aktiv gesetzt und kehrt in die normalen Projektabläufe zurück.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.message.restore'
 on conflict (app_text_id, lang) do update set
@@ -20641,7 +20641,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{name} torner� su Attivo e riaprir� i normali flussi di progetto.', 'published'
+select t.id, 'it', '{name} torner… su Attivo e riaprir… i normali flussi di progetto.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.message.restore'
 on conflict (app_text_id, lang) do update set
@@ -20757,7 +20757,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '\{name}\ wird f�r deine Organisation dauerhaft gel�scht.', 'published'
+select t.id, 'de', '\{name}\ wird für deine Organisation dauerhaft gelöscht.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.message.delete'
 on conflict (app_text_id, lang) do update set
@@ -20765,7 +20765,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '\{name}\ verr� eliminato definitivamente per la tua organizzazione.', 'published'
+select t.id, 'it', '\{name}\ verr… eliminato definitivamente per la tua organizzazione.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.message.delete'
 on conflict (app_text_id, lang) do update set
@@ -20788,7 +20788,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '\{name}\ wird nach Archiviert verschoben und bleibt f�r alle Nutzer deiner Organisation sichtbar.', 'published'
+select t.id, 'de', '\{name}\ wird nach Archiviert verschoben und bleibt für alle Nutzer deiner Organisation sichtbar.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.message.archive'
 on conflict (app_text_id, lang) do update set
@@ -20796,7 +20796,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '\{name}\ verr� spostato in Archivio e rester� visibile a tutti gli utenti della tua organizzazione.', 'published'
+select t.id, 'it', '\{name}\ verr… spostato in Archivio e rester… visibile a tutti gli utenti della tua organizzazione.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.message.archive'
 on conflict (app_text_id, lang) do update set
@@ -20819,7 +20819,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Jetzt l�schen', 'published'
+select t.id, 'de', 'Jetzt löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.confirm.delete'
 on conflict (app_text_id, lang) do update set
@@ -21129,7 +21129,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Fuer deine Organisation sind noch keine Medien verfuegbar.', 'published'
+select t.id, 'de', 'Für deine Organisation sind noch keine Medien verfügbar.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.page.empty.org.body'
 on conflict (app_text_id, lang) do update set
@@ -21470,7 +21470,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Thumbnail-Gr��e', 'published'
+select t.id, 'de', 'Thumbnail-Größe', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.toolbar.size.aria'
 on conflict (app_text_id, lang) do update set
@@ -21594,7 +21594,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gro�', 'published'
+select t.id, 'de', 'Groß', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.toolbar.size.large'
 on conflict (app_text_id, lang) do update set
@@ -21811,7 +21811,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort aendern', 'published'
+select t.id, 'de', 'Standort ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.section.location'
 on conflict (app_text_id, lang) do update set
@@ -22152,7 +22152,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort per Adresse aendern', 'published'
+select t.id, 'de', 'Standort per Adresse ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.editor.aria'
 on conflict (app_text_id, lang) do update set
@@ -22555,7 +22555,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'In /media oeffnen', 'published'
+select t.id, 'de', 'In /media öffnen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.openInMedia'
 on conflict (app_text_id, lang) do update set
@@ -22842,7 +22842,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Il media non e ancora salvato.', 'published'
+select t.id, 'it', 'Il media non è ancora salvato.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.media.unavailable'
 on conflict (app_text_id, lang) do update set
@@ -22865,7 +22865,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Medium konnte nicht geloescht werden.', 'published'
+select t.id, 'de', 'Medium konnte nicht gelöscht werden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.media.delete.failed'
 on conflict (app_text_id, lang) do update set
@@ -22896,7 +22896,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Medium geloescht.', 'published'
+select t.id, 'de', 'Medium gelöscht.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.media.delete.success'
 on conflict (app_text_id, lang) do update set
@@ -22958,7 +22958,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'GPS hinzufuegen', 'published'
+select t.id, 'de', 'GPS hinzufügen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.location.addGps'
 on conflict (app_text_id, lang) do update set
@@ -22989,7 +22989,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'GPS aendern', 'published'
+select t.id, 'de', 'GPS ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.location.changeGps'
 on conflict (app_text_id, lang) do update set
@@ -23020,7 +23020,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse hinzufuegen', 'published'
+select t.id, 'de', 'Adresse hinzufügen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.location.addAddress'
 on conflict (app_text_id, lang) do update set
@@ -23051,7 +23051,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse aendern', 'published'
+select t.id, 'de', 'Adresse ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.location.changeAddress'
 on conflict (app_text_id, lang) do update set
@@ -23237,7 +23237,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pruefe Dateiname...', 'published'
+select t.id, 'de', 'Prüfe Dateiname...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.extractingTitle'
 on conflict (app_text_id, lang) do update set
@@ -23299,7 +23299,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pruefe Duplikate...', 'published'
+select t.id, 'de', 'Prüfe Duplikate...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.dedupCheck'
 on conflict (app_text_id, lang) do update set
@@ -23330,7 +23330,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pruefe Konflikte...', 'published'
+select t.id, 'de', 'Prüfe Konflikte...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.conflictCheck'
 on conflict (app_text_id, lang) do update set
@@ -23547,7 +23547,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort waehlen', 'published'
+select t.id, 'de', 'Standort wählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.missingData.gps'
 on conflict (app_text_id, lang) do update set
@@ -23578,7 +23578,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort oder Projekt waehlen', 'published'
+select t.id, 'de', 'Standort oder Projekt wählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.missingData.document'
 on conflict (app_text_id, lang) do update set
@@ -23617,7 +23617,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Gia caricato', 'published'
+select t.id, 'it', 'Già caricato', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.skipped.duplicate'
 on conflict (app_text_id, lang) do update set
@@ -23640,7 +23640,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Uebersprungen', 'published'
+select t.id, 'de', 'Übersprungen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.skipped'
 on conflict (app_text_id, lang) do update set
@@ -23733,7 +23733,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Doppelten Upload aufloesen', 'published'
+select t.id, 'de', 'Doppelten Upload auflösen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.duplicate.dialog.title'
 on conflict (app_text_id, lang) do update set
@@ -23764,7 +23764,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Diese Datei existiert bereits. Waehle', 'published'
+select t.id, 'de', 'Diese Datei existiert bereits. Wähle', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.duplicate.dialog.message'
 on conflict (app_text_id, lang) do update set
@@ -23919,7 +23919,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ordner-Upload wird in diesem Browser nicht unterstuetzt.', 'published'
+select t.id, 'de', 'Ordner-Upload wird in diesem Browser nicht unterstützt.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.folder.unsupported.hint'
 on conflict (app_text_id, lang) do update set
@@ -23927,7 +23927,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Il caricamento di cartelle non e supportato in questo browser.', 'published'
+select t.id, 'it', 'Il caricamento di cartelle non è supportato in questo browser.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.folder.unsupported.hint'
 on conflict (app_text_id, lang) do update set
@@ -24105,7 +24105,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Praesentationen', 'published'
+select t.id, 'de', 'Präsentationen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeGroup.presentations'
 on conflict (app_text_id, lang) do update set
@@ -24291,7 +24291,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Praesentationen: PPTX und ODP', 'published'
+select t.id, 'de', 'Präsentationen: PPTX und ODP', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeGroup.desc.presentations'
 on conflict (app_text_id, lang) do update set
@@ -24415,7 +24415,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'WebP-Bilder fuer Web und Mobil', 'published'
+select t.id, 'de', 'WebP-Bilder für Web und Mobil', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileType.desc.webp'
 on conflict (app_text_id, lang) do update set
@@ -24787,7 +24787,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'PowerPoint-Praesentationen', 'published'
+select t.id, 'de', 'PowerPoint-Präsentationen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileType.desc.pptx'
 on conflict (app_text_id, lang) do update set
@@ -24818,7 +24818,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'OpenDocument-Praesentationen', 'published'
+select t.id, 'de', 'OpenDocument-Präsentationen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileType.desc.odp'
 on conflict (app_text_id, lang) do update set
@@ -24849,7 +24849,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Unterstuetztes Dateiformat', 'published'
+select t.id, 'de', 'Unterstütztes Dateiformat', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileType.desc.generic'
 on conflict (app_text_id, lang) do update set
@@ -24880,7 +24880,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Bilder — Bilddateien auswaehlen', 'published'
+select t.id, 'de', 'Bilder — Bilddateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.images'
 on conflict (app_text_id, lang) do update set
@@ -24911,7 +24911,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Video — Videodateien auswaehlen', 'published'
+select t.id, 'de', 'Video — Videodateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.video'
 on conflict (app_text_id, lang) do update set
@@ -24942,7 +24942,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'PDF — PDF-Dateien auswaehlen', 'published'
+select t.id, 'de', 'PDF — PDF-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.pdf'
 on conflict (app_text_id, lang) do update set
@@ -24973,7 +24973,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dokumente — Dokumentdateien auswaehlen', 'published'
+select t.id, 'de', 'Dokumente — Dokumentdateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.documents'
 on conflict (app_text_id, lang) do update set
@@ -25004,7 +25004,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Tabellen — Tabellendateien auswaehlen', 'published'
+select t.id, 'de', 'Tabellen — Tabellendateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.spreadsheets'
 on conflict (app_text_id, lang) do update set
@@ -25035,7 +25035,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Praesentationen — Praesentationsdateien auswaehlen', 'published'
+select t.id, 'de', 'Präsentationen — Präsentationsdateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickGroup.presentations'
 on conflict (app_text_id, lang) do update set
@@ -25066,7 +25066,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'JPEG-Fotos — JPEG-Dateien auswaehlen', 'published'
+select t.id, 'de', 'JPEG-Fotos — JPEG-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.jpg'
 on conflict (app_text_id, lang) do update set
@@ -25097,7 +25097,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Rasterbilder — PNG-Dateien auswaehlen', 'published'
+select t.id, 'de', 'Rasterbilder — PNG-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.png'
 on conflict (app_text_id, lang) do update set
@@ -25128,7 +25128,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'HEIC-Fotos — HEIC-Dateien auswaehlen', 'published'
+select t.id, 'de', 'HEIC-Fotos — HEIC-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.heic'
 on conflict (app_text_id, lang) do update set
@@ -25159,7 +25159,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'WebP-Bilder — WebP-Dateien auswaehlen', 'published'
+select t.id, 'de', 'WebP-Bilder — WebP-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webp'
 on conflict (app_text_id, lang) do update set
@@ -25190,7 +25190,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'MP4-Videodateien — MP4-Dateien auswaehlen', 'published'
+select t.id, 'de', 'MP4-Videodateien — MP4-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mp4'
 on conflict (app_text_id, lang) do update set
@@ -25221,7 +25221,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'QuickTime-Videodateien — MOV-Dateien auswaehlen', 'published'
+select t.id, 'de', 'QuickTime-Videodateien — MOV-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.mov'
 on conflict (app_text_id, lang) do update set
@@ -25252,7 +25252,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'WebM-Videodateien — WebM-Dateien auswaehlen', 'published'
+select t.id, 'de', 'WebM-Videodateien — WebM-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.webm'
 on conflict (app_text_id, lang) do update set
@@ -25283,7 +25283,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'PDF-Dokumente — PDF-Dateien auswaehlen', 'published'
+select t.id, 'de', 'PDF-Dokumente — PDF-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pdf'
 on conflict (app_text_id, lang) do update set
@@ -25314,7 +25314,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Microsoft-Word-Dokumente — DOCX-Dateien auswaehlen', 'published'
+select t.id, 'de', 'Microsoft-Word-Dokumente — DOCX-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.docx'
 on conflict (app_text_id, lang) do update set
@@ -25345,7 +25345,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'OpenDocument-Textdateien — ODT-Dateien auswaehlen', 'published'
+select t.id, 'de', 'OpenDocument-Textdateien — ODT-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odt'
 on conflict (app_text_id, lang) do update set
@@ -25376,7 +25376,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'OpenDocument-Zeichnungen — ODG-Dateien auswaehlen', 'published'
+select t.id, 'de', 'OpenDocument-Zeichnungen — ODG-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odg'
 on conflict (app_text_id, lang) do update set
@@ -25407,7 +25407,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einfache Textdateien — TXT-Dateien auswaehlen', 'published'
+select t.id, 'de', 'Einfache Textdateien — TXT-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.txt'
 on conflict (app_text_id, lang) do update set
@@ -25438,7 +25438,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Excel-Tabellendateien — XLSX-Dateien auswaehlen', 'published'
+select t.id, 'de', 'Excel-Tabellendateien — XLSX-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.xlsx'
 on conflict (app_text_id, lang) do update set
@@ -25469,7 +25469,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'OpenDocument-Tabellen — ODS-Dateien auswaehlen', 'published'
+select t.id, 'de', 'OpenDocument-Tabellen — ODS-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.ods'
 on conflict (app_text_id, lang) do update set
@@ -25500,7 +25500,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Kommagetrennte Datendateien — CSV-Dateien auswaehlen', 'published'
+select t.id, 'de', 'Kommagetrennte Datendateien — CSV-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.csv'
 on conflict (app_text_id, lang) do update set
@@ -25531,7 +25531,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'PowerPoint-Praesentationen — PPTX-Dateien auswaehlen', 'published'
+select t.id, 'de', 'PowerPoint-Präsentationen — PPTX-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.pptx'
 on conflict (app_text_id, lang) do update set
@@ -25562,7 +25562,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'OpenDocument-Praesentationen — ODP-Dateien auswaehlen', 'published'
+select t.id, 'de', 'OpenDocument-Präsentationen — ODP-Dateien auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.fileTypeChip.pickExtension.odp'
 on conflict (app_text_id, lang) do update set
@@ -25779,7 +25779,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standortanforderung fuer Upload', 'published'
+select t.id, 'de', 'Standortanforderung für Upload', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.ariaLabel'
 on conflict (app_text_id, lang) do update set
@@ -25872,7 +25872,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Waehle, wer diesen Link oeffnen darf. Der geheime Token in der URL bleibt erforderlich.', 'published'
+select t.id, 'de', 'Wähle, wer diesen Link öffnen darf. Der geheime Token in der URL bleibt erforderlich.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.message'
 on conflict (app_text_id, lang) do update set
@@ -25880,7 +25880,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Scegli chi puo aprire questo link. Il token segreto nell URL resta obbligatorio.', 'published'
+select t.id, 'it', 'Scegli chi può aprire questo link. Il token segreto nell URL resta obbligatorio.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.message'
 on conflict (app_text_id, lang) do update set
@@ -25903,7 +25903,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wer diesen Link aufloesen darf', 'published'
+select t.id, 'de', 'Wer diesen Link auflösen darf', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.audienceLegend'
 on conflict (app_text_id, lang) do update set
@@ -25911,7 +25911,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Chi puo risolvere questo link', 'published'
+select t.id, 'it', 'Chi può risolvere questo link', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.audienceLegend'
 on conflict (app_text_id, lang) do update set
@@ -26027,7 +26027,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Empfaenger-Nutzer-IDs', 'published'
+select t.id, 'de', 'Empfänger-Nutzer-IDs', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.recipientsLabel'
 on conflict (app_text_id, lang) do update set
@@ -26120,7 +26120,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gib eine oder mehrere gueltige Nutzer-IDs durch Kommas getrennt ein.', 'published'
+select t.id, 'de', 'Gib eine oder mehrere gültige Nutzer-IDs durch Kommas getrennt ein.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.error.invalidRecipients'
 on conflict (app_text_id, lang) do update set
@@ -26128,7 +26128,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Inserisci uno o piu ID utente validi separati da virgole.', 'published'
+select t.id, 'it', 'Inserisci uno o più ID utente validi separati da virgole.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.error.invalidRecipients'
 on conflict (app_text_id, lang) do update set
@@ -26151,7 +26151,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Benannte Links benoetigen mindestens eine Empfaenger-Nutzer-ID.', 'published'
+select t.id, 'de', 'Benannte Links benötigen mindestens eine Empfänger-Nutzer-ID.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.shareAudience.error.namedRequiresRecipients'
 on conflict (app_text_id, lang) do update set
@@ -26252,7 +26252,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Densita', 'published'
+select t.id, 'it', 'Densità', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.overlay.toc.general.density'
 on conflict (app_text_id, lang) do update set
@@ -26283,7 +26283,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Modalita tema', 'published'
+select t.id, 'it', 'Modalità tema', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.overlay.toc.appearance.theme'
 on conflict (app_text_id, lang) do update set
@@ -26709,7 +26709,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Konto loeschen', 'published'
+select t.id, 'de', 'Konto löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.overlay.toc.account.delete'
 on conflict (app_text_id, lang) do update set
@@ -26833,7 +26833,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Foto geloescht', 'published'
+select t.id, 'de', 'Foto gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.delete.toast.photoDeleted'
 on conflict (app_text_id, lang) do update set
@@ -26864,7 +26864,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Datei geloescht', 'published'
+select t.id, 'de', 'Datei gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.delete.toast.fileDeleted'
 on conflict (app_text_id, lang) do update set
@@ -26895,7 +26895,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Medium geloescht', 'published'
+select t.id, 'de', 'Medium gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.delete.toast.mediaDeleted'
 on conflict (app_text_id, lang) do update set
@@ -26926,7 +26926,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Fotos geloescht', 'published'
+select t.id, 'de', '{count} Fotos gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.delete.toast.photosDeleted'
 on conflict (app_text_id, lang) do update set
@@ -26957,7 +26957,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Dateien geloescht', 'published'
+select t.id, 'de', '{count} Dateien gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.delete.toast.filesDeleted'
 on conflict (app_text_id, lang) do update set
@@ -26988,7 +26988,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Medien geloescht', 'published'
+select t.id, 'de', '{count} Medien gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.delete.toast.mediaItemsDeleted'
 on conflict (app_text_id, lang) do update set
@@ -27019,7 +27019,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Rueckgaengig', 'published'
+select t.id, 'de', 'Rückgängig', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.delete.toast.undo'
 on conflict (app_text_id, lang) do update set
@@ -27205,7 +27205,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort auf der Karte aendern', 'published'
+select t.id, 'de', 'Standort auf der Karte ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.aria'
 on conflict (app_text_id, lang) do update set
@@ -27236,7 +27236,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort auf der Karte aendern', 'published'
+select t.id, 'de', 'Standort auf der Karte ändern', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.action.changeLocationMap.title'
 on conflict (app_text_id, lang) do update set
@@ -27267,7 +27267,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Auf der Karte waehlen', 'published'
+select t.id, 'de', 'Auf der Karte wählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.aria'
 on conflict (app_text_id, lang) do update set
@@ -27298,7 +27298,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Auf der Karte waehlen', 'published'
+select t.id, 'de', 'Auf der Karte wählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.action.chooseLocationMap.title'
 on conflict (app_text_id, lang) do update set
@@ -27670,7 +27670,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adressfeld aufloesen', 'published'
+select t.id, 'de', 'Adressfeld auflösen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.aria'
 on conflict (app_text_id, lang) do update set
@@ -27701,7 +27701,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adressfeld aufloesen', 'published'
+select t.id, 'de', 'Adressfeld auflösen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.addressField.action.resolve.title'
 on conflict (app_text_id, lang) do update set
@@ -27763,7 +27763,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Vorschlaege', 'published'
+select t.id, 'de', 'Vorschläge', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.addressField.suggest.sectionGeocoder'
 on conflict (app_text_id, lang) do update set
@@ -27856,7 +27856,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{value} auswaehlen', 'published'
+select t.id, 'de', '{value} auswählen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.addressField.suggest.suggestionAria'
 on conflict (app_text_id, lang) do update set
@@ -28073,7 +28073,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Freigabelink ungueltig abgelaufen oder ohne Zugriff.', 'published'
+select t.id, 'de', 'Freigabelink ungültig abgelaufen oder ohne Zugriff.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'share.restore.error.invalid'
 on conflict (app_text_id, lang) do update set
@@ -28104,7 +28104,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Freigabelink enthaelt keine verfuegbaren Medien.', 'published'
+select t.id, 'de', 'Freigabelink enthält keine verfügbaren Medien.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'share.restore.error.noImages'
 on conflict (app_text_id, lang) do update set
@@ -28135,7 +28135,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Freigabelink konnte nicht aufgeloest werden.', 'published'
+select t.id, 'de', 'Freigabelink konnte nicht aufgelöst werden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'share.restore.error.resolveFailed'
 on conflict (app_text_id, lang) do update set
@@ -28205,7 +28205,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questo elemento non e in questo set condiviso. Viene mostrato il gruppo.', 'published'
+select t.id, 'it', 'Questo elemento non è in questo set condiviso. Viene mostrato il gruppo.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'share.restore.warning.mediaNotInSet'
 on conflict (app_text_id, lang) do update set
@@ -28786,7 +28786,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Strasse', 'published'
+select t.id, 'de', 'Straße', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.street.label'
 on conflict (app_text_id, lang) do update set
@@ -29034,7 +29034,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Als primaer setzen', 'published'
+select t.id, 'de', 'Als primär setzen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.action.set_primary'
 on conflict (app_text_id, lang) do update set
@@ -29065,7 +29065,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Primaer', 'published'
+select t.id, 'de', 'Primär', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.primary.badge'
 on conflict (app_text_id, lang) do update set
@@ -29096,7 +29096,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dieser Standort wird fuer Kartenpin und Exporte verwendet.', 'published'
+select t.id, 'de', 'Dieser Standort wird für Kartenpin und Exporte verwendet.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.primary.tooltip'
 on conflict (app_text_id, lang) do update set
@@ -29127,7 +29127,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Primaerstandort konnte nicht gesetzt werden', 'published'
+select t.id, 'de', 'Primärstandort konnte nicht gesetzt werden', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.action.set_primary_error'
 on conflict (app_text_id, lang) do update set
@@ -29158,7 +29158,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort loeschen', 'published'
+select t.id, 'de', 'Standort löschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.action.delete'
 on conflict (app_text_id, lang) do update set
@@ -29189,7 +29189,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Loeschen bestaetigen', 'published'
+select t.id, 'de', 'Löschen bestätigen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.action.confirmDelete'
 on conflict (app_text_id, lang) do update set
@@ -29251,7 +29251,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Koordinaten fuer diesen Standort', 'published'
+select t.id, 'de', 'Keine Koordinaten für diesen Standort', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.action.show_on_map.disabled'
 on conflict (app_text_id, lang) do update set
@@ -29344,7 +29344,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Strasse kopieren', 'published'
+select t.id, 'de', 'Straße kopieren', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.copy.street'
 on conflict (app_text_id, lang) do update set
@@ -29561,7 +29561,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse hinzufuegen oder suchen', 'published'
+select t.id, 'de', 'Adresse hinzufügen oder suchen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.addSearch.label'
 on conflict (app_text_id, lang) do update set
@@ -29623,7 +29623,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse hinzufuegen oder suchen', 'published'
+select t.id, 'de', 'Adresse hinzufügen oder suchen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.addSearch.aria'
 on conflict (app_text_id, lang) do update set
@@ -29747,7 +29747,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zurueck zu vorherigen Internet-Ergebnissen', 'published'
+select t.id, 'de', 'Zurück zu vorherigen Internet-Ergebnissen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.dropdown.internet.back'
 on conflict (app_text_id, lang) do update set
@@ -29786,7 +29786,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Avanti a risultati Internet piu recenti', 'published'
+select t.id, 'it', 'Avanti a risultati Internet più recenti', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.dropdown.internet.forward'
 on conflict (app_text_id, lang) do update set
@@ -29840,7 +29840,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Neue Adresse hinzufuegen: {query}', 'published'
+select t.id, 'de', 'Neue Adresse hinzufügen: {query}', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.dropdown.addNew'
 on conflict (app_text_id, lang) do update set
@@ -29902,7 +29902,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort hinzugefuegt', 'published'
+select t.id, 'de', 'Standort hinzugefügt', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.toast.added'
 on conflict (app_text_id, lang) do update set
@@ -29995,7 +29995,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Organisationsweite Geocoder-Filter und Ranking fuer alle Mitglieder anpassen.', 'published'
+select t.id, 'de', 'Organisationsweite Geocoder-Filter und Ranking für alle Mitglieder anpassen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.section.description'
 on conflict (app_text_id, lang) do update set
@@ -30026,7 +30026,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aenderungen verwerfen', 'published'
+select t.id, 'de', 'Änderungen verwerfen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.action.discard_changes'
 on conflict (app_text_id, lang) do update set
@@ -30057,7 +30057,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Auf Systemstandard zuruecksetzen', 'published'
+select t.id, 'de', 'Auf Systemstandard zurücksetzen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_to_defaults'
 on conflict (app_text_id, lang) do update set
@@ -30119,7 +30119,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Erweiterte Parameter wirken nach dem Speichern sofort fuer alle Mitglieder.', 'published'
+select t.id, 'de', 'Erweiterte Parameter wirken nach dem Speichern sofort für alle Mitglieder.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.advanced_mode.warning'
 on conflict (app_text_id, lang) do update set
@@ -30220,7 +30220,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Modalita avanzata', 'published'
+select t.id, 'it', 'Modalità avanzata', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.mode.advanced'
 on conflict (app_text_id, lang) do update set
@@ -30274,7 +30274,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zuruecksetzen', 'published'
+select t.id, 'de', 'Zurücksetzen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.action.reset_confirm'
 on conflict (app_text_id, lang) do update set
@@ -30398,7 +30398,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Mindestlaenge fuer konkrete Strasse', 'published'
+select t.id, 'de', 'Mindestlänge für konkrete Straße', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.field.specific_street_min'
 on conflict (app_text_id, lang) do update set
@@ -30429,7 +30429,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Min. Abfragelaenge', 'published'
+select t.id, 'de', 'Min. Abfragelänge', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.field.min_query_length'
 on conflict (app_text_id, lang) do update set
@@ -30491,7 +30491,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Max. Distanz fuer Internetergebnisse (km)', 'published'
+select t.id, 'de', 'Max. Distanz für Internetergebnisse (km)', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.field.context_distance_km'
 on conflict (app_text_id, lang) do update set
@@ -30522,7 +30522,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ohne Laendercode muss ein Internetergebnis innerhalb dieser Distanz (km) zum Suchanker liegen — meist GPS dieses Fotos, sonst Kartenansicht oder Projektzentrum. Nicht basierend auf anderen Medien der Organisation (waere eine schwere Abfrage pro Suche). Niedriger = strenger; hoeher = weiter entfernte Treffer.', 'published'
+select t.id, 'de', 'Ohne Ländercode muss ein Internetergebnis innerhalb dieser Distanz (km) zum Suchanker liegen — meist GPS dieses Fotos, sonst Kartenansicht oder Projektzentrum. Nicht basierend auf anderen Medien der Organisation (wäre eine schwere Abfrage pro Suche). Niedriger = strenger; höher = weiter entfernte Treffer.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
 on conflict (app_text_id, lang) do update set
@@ -30530,7 +30530,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Se un risultato Internet non ha codice paese, deve essere entro questa distanza (km) dall''ancora di ricerca — di solito il GPS di questa foto, altrimenti vista mappa o centro progetto. Non si basa su altri media dell''organizzazione (richiederebbe una query pesante per ogni ricerca). Piu basso = piu rigido; piu alto = corrispondenze piu lontane.', 'published'
+select t.id, 'it', 'Se un risultato Internet non ha codice paese, deve essere entro questa distanza (km) dall''ancora di ricerca — di solito il GPS di questa foto, altrimenti vista mappa o centro progetto. Non si basa su altri media dell''organizzazione (richiederebbe una query pesante per ogni ricerca). Più basso = più rigido; più alto = corrispondenze più lontane.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
 on conflict (app_text_id, lang) do update set
@@ -30584,7 +30584,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wartezeit nach der Eingabe bis zur Suche. Hoehere Werte sparen API-Aufrufe wirken aber traeger.', 'published'
+select t.id, 'de', 'Wartezeit nach der Eingabe bis zur Suche. Höhere Werte sparen API-Aufrufe wirken aber träger.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.debounce_ms'
 on conflict (app_text_id, lang) do update set
@@ -30615,7 +30615,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Maximale Internet-Adressvorschlaege pro Suche. Niedriger haelt die Liste fokussiert; hoeher zeigt mehr Alternativen.', 'published'
+select t.id, 'de', 'Maximale Internet-Adressvorschlaege pro Suche. Niedriger hält die Liste fokussiert; höher zeigt mehr Alternativen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
 on conflict (app_text_id, lang) do update set
@@ -30623,7 +30623,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Numero massimo di suggerimenti Internet per ricerca. Piu basso = lista piu mirata; piu alto = piu alternative.', 'published'
+select t.id, 'it', 'Numero massimo di suggerimenti Internet per ricerca. Più basso = lista più mirata; più alto = più alternative.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
 on conflict (app_text_id, lang) do update set
@@ -30646,7 +30646,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einwort-Suchen ab dieser Laenge gelten als gezielte Strassensuche (z. B. Denisgasse), nicht als vager Kartenbereich.', 'published'
+select t.id, 'de', 'Einwort-Suchen ab dieser Laenge gelten als gezielte Straßensuche (z. B. Denisgasse), nicht als vager Kartenbereich.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.specific_street_min'
 on conflict (app_text_id, lang) do update set
@@ -30677,7 +30677,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Mindestlaenge der Anfrage vor dem Geocoding. Erhoehen vermeidet laute Ein- und Zweibuchstaben-Suchen.', 'published'
+select t.id, 'de', 'Mindestlänge der Anfrage vor dem Geocoding. Erhöhen vermeidet laute Ein- und Zweibuchstaben-Suchen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.min_query_length'
 on conflict (app_text_id, lang) do update set
@@ -30708,7 +30708,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wie weit vom Karten- oder Projektzentrum ein Internetergebnis ohne Laendercode noch erscheinen darf. Groessere Werte zeigen entferntere Treffer.', 'published'
+select t.id, 'de', 'Wie weit vom Karten- oder Projektzentrum ein Internetergebnis ohne Ländercode noch erscheinen darf. Großere Werte zeigen entferntere Treffer.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
 on conflict (app_text_id, lang) do update set
@@ -30716,7 +30716,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Distanza massima dal centro mappa o progetto per risultati Internet senza codice paese. Valori maggiori includono corrispondenze piu lontane.', 'published'
+select t.id, 'it', 'Distanza massima dal centro mappa o progetto per risultati Internet senza codice paese. Valori maggiori includono corrispondenze più lontane.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
 on conflict (app_text_id, lang) do update set
@@ -30739,7 +30739,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Liegt die beste Kurzprefix-Bewertung darunter wird ohne Kartenrahmen erneut gesucht. Niedriger loest oefter einen Retry aus.', 'published'
+select t.id, 'de', 'Liegt die beste Kurzprefix-Bewertung darunter wird ohne Kartenrahmen erneut gesucht. Niedriger löst oefter einen Retry aus.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
 on conflict (app_text_id, lang) do update set
@@ -30747,7 +30747,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Se il miglior punteggio con prefisso corto e sotto questa soglia la ricerca ripete senza limiti mappa. Piu basso = piu retry.', 'published'
+select t.id, 'it', 'Se il miglior punteggio con prefisso corto e sotto questa soglia la ricerca ripete senza limiti mappa. Più basso = più retry.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
 on conflict (app_text_id, lang) do update set
@@ -30801,7 +30801,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Nur Organisations-Admins koennen die Such-Tuning-Einstellungen aendern. Die aktuellen Werte kannst du unten einsehen.', 'published'
+select t.id, 'de', 'Nur Organisations-Admins können die Such-Tuning-Einstellungen ändern. Die aktuellen Werte kannst du unten einsehen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
 on conflict (app_text_id, lang) do update set
