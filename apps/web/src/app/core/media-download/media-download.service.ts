@@ -14,6 +14,7 @@ import type {
   MediaTier,
   MediaTierSelectionInput,
 } from '../media/media-renderer.types';
+import { MediaAspectRatioCacheService } from '../media/media-aspect-ratio-cache.service';
 import { mediaFileIdentityFromRecord } from '../media/media-file-identity.helpers';
 import {
   ALL_MEDIA_TIERS,
@@ -77,6 +78,7 @@ export class MediaDownloadService {
   private readonly signedUrlCache = inject(SignedUrlCacheAdapter);
   private readonly tierResolver = inject(TierResolverAdapter);
   private readonly edgeExport = inject(EdgeExportOrchestratorAdapter);
+  private readonly aspectRatioCache = inject(MediaAspectRatioCacheService);
 
   private readonly stateStore = new Map<string, WritableSignal<MediaDeliveryItemState>>();
   private readonly stateBridgeEntries = signal<
@@ -329,6 +331,7 @@ export class MediaDownloadService {
 
   invalidate(mediaId: string): void {
     this.signedUrlCache.invalidate(mediaId);
+    this.aspectRatioCache.invalidate(mediaId);
     for (const tier of ALL_MEDIA_TIERS) {
       const key = this.stateKey(mediaId, tier);
       this.resolvedUrlCache.delete(key);
@@ -342,6 +345,7 @@ export class MediaDownloadService {
   }
 
   injectLocalUrl(mediaId: string, blobUrl: string): void {
+    this.aspectRatioCache.invalidate(mediaId);
     this.signedUrlCache.setLocalUrl(mediaId, blobUrl);
     for (const tier of ALL_MEDIA_TIERS) {
       const key = this.stateKey(mediaId, tier);

@@ -21,16 +21,18 @@
   block-size: var(--item-grid-slot-block-size, 6.5rem);
 }
 
-// Detail pane embed: host shrink-wraps slot so border/hover geometry matches media, not hero band width.
+// Detail pane embed: height-first slot inside fixed hero band; border hugs media width.
 // @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
 :host.media-item--detail-embed {
-  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   aspect-ratio: unset;
-  display: block;
   block-size: 100%;
-  inline-size: fit-content;
+  max-block-size: 100%;
+  min-block-size: 0;
+  inline-size: 100%;
   max-inline-size: 100%;
-  margin-inline: auto;
 }
 
 :host.media-item--detail-embed .media-item__slot {
@@ -38,10 +40,22 @@
   inset-block-start: auto;
   inset-inline-start: auto;
   transform: none;
-  margin-inline: 0;
-  block-size: auto;
-  max-block-size: 100cqh;
-  inline-size: min(100cqw, calc(100cqh * var(--media-aspect-ratio, 1)));
+  margin-inline: auto;
+  block-size: 100%;
+  inline-size: auto;
+  max-block-size: 100%;
+  max-inline-size: 100%;
+  aspect-ratio: var(--media-aspect-ratio, 1);
+  transition:
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+// Fills hero band (app-media-item footprint) until native ratio arrives — no 1:1 grow animation.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+:host.media-item--detail-embed .media-item__slot--detail-pending-ratio {
+  inline-size: 100%;
+  aspect-ratio: unset;
 }
 
 // Placeholder tiles without item payload use muted pulse inside inherited slot geometry.

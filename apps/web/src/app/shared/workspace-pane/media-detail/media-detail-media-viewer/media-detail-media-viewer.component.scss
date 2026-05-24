@@ -2,12 +2,14 @@
 // @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
 :host {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   position: relative;
   box-sizing: border-box;
   block-size: 33vh;
   padding-block-start: var(--spacing-3);
+  min-block-size: 0;
   min-inline-size: 0;
   max-inline-size: 100%;
 
@@ -17,15 +19,16 @@
   }
 }
 
-// Shrink-wrap embed so slot border tracks media width, centered in the hero band.
+// Constrained to hero band height; slot shrink-wraps width from aspect-ratio.
 // @see docs/specs/component/media/media-item.md#visual-behavior-contract
 :host app-media-item {
   display: block;
-  flex: 0 1 auto;
-  align-self: center;
   block-size: 100%;
-  inline-size: fit-content;
-  max-inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
+  max-block-size: 100%;
+  min-block-size: 0;
+  inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
+  max-inline-size: 100%;
+  margin-inline: auto;
 }
 
 .detail-media__edit-btn {

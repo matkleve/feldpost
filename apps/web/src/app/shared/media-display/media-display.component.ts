@@ -18,6 +18,7 @@ import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identit
 import { requiresServerPreviewGeneration } from '../../core/media/office-preview-eligibility.helpers';
 import type { MediaContext } from '../../core/media/media-renderer.types';
 import type { PreviewGenerationStatus } from '../../core/media/preview-generation-status.types';
+import { MediaAspectRatioCacheService } from '../../core/media/media-aspect-ratio-cache.service';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaPreviewGenerationService } from '../../core/media-thumbnail/media-preview-generation.service';
 import { type MediaDisplayState, transitionMediaDisplayState } from './media-display-state';
@@ -42,6 +43,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   private readonly mediaDownloadService = inject(MediaDownloadService);
+  private readonly aspectRatioCache = inject(MediaAspectRatioCacheService);
   private readonly previewGeneration = inject(MediaPreviewGenerationService);
   private readonly i18nService = inject(I18nService);
 
@@ -270,6 +272,18 @@ export class MediaDisplayComponent implements AfterViewInit {
 
         if (this.slotGeometry() === 'intrinsic' && current === 'loading-surface-visible') {
           const targetRatio = this.resolveTargetAspectRatioForTransition();
+
+          if (this.downloadContext() === 'detail') {
+            if (targetRatio != null) {
+              this.storeAspectRatio(targetRatio, false);
+            } else if (delivery.resolvedUrl) {
+              this.probeRatioFromUrl(delivery.resolvedUrl);
+              return;
+            }
+            this.fallThroughToReveal();
+            return;
+          }
+
           if (targetRatio != null) {
             this.triggerRatioTransition(targetRatio);
             return;
@@ -358,6 +372,12 @@ export class MediaDisplayComponent implements AfterViewInit {
    */
   private triggerRatioTransition(ratio: number): void {
     if (this.state() !== 'loading-surface-visible') {
+      return;
+    }
+
+    if (this.downloadContext() === 'detail') {
+      this.storeAspectRatio(ratio, false);
+      this.fallThroughToReveal();
       return;
     }
 
@@ -460,6 +480,10 @@ export class MediaDisplayComponent implements AfterViewInit {
   }
 
   private shouldDeferSlotAspectRatio(): boolean {
+    if (this.downloadContext() === 'detail') {
+      return false;
+    }
+
     return (
       this.slotGeometry() === 'intrinsic' &&
       (this.state() === 'loading-surface-visible' || this.state() === 'idle')
@@ -470,6 +494,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   private storeAspectRatio(ratio: number, deferEmit: boolean): void {
     this.metadataAspectRatio.set(ratio);
     if (!deferEmit) {
+      this.cachePublishedAspectRatio(ratio);
       this.aspectRatioChange.emit(ratio);
     }
   }
@@ -477,13 +502,25 @@ export class MediaDisplayComponent implements AfterViewInit {
   /** Commits ratio to parent slot — triggers CSS aspect-ratio transition on media-item__slot. */
   private commitAspectRatioToSlot(ratio: number): void {
     this.metadataAspectRatio.set(ratio);
+    this.cachePublishedAspectRatio(ratio);
     this.aspectRatioChange.emit(ratio);
+  }
+
+  /** Session cache for workspace detail; grid still owns 1:1 shrink choreography locally. */
+  private cachePublishedAspectRatio(ratio: number): void {
+    const id = this.mediaId().trim();
+    if (!id || !Number.isFinite(ratio) || ratio <= 0) {
+      return;
+    }
+    this.aspectRatioCache.set(id, ratio, 'intrinsic');
   }
 
   private resetState(): void {
     this.metadataAspectRatio.set(null);
     this.cancelRatioProbe();
-    this.aspectRatioChange.emit(1);
+    if (this.downloadContext() !== 'detail') {
+      this.aspectRatioChange.emit(1);
+    }
   }
 
   private prefersReducedMotion(): boolean {

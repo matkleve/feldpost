@@ -26,7 +26,10 @@ import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
 import { aspectRatioHintFromFileType, usesNativeAspectRatio } from '../../core/media/aspect-ratio-from-file-type.helpers';
 import { chipVariantForFileType } from '../../core/media/file-type-chip-variant';
 import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-registry';
+import { MediaAspectRatioCacheService } from '../../core/media/media-aspect-ratio-cache.service';
 import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identity.helpers';
+import { probeImageAspectRatio } from '../../core/media/probe-image-aspect-ratio.helpers';
+import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaDisplayComponent } from '../media-display/media-display.component';
 import { ChipComponent, type ChipVariant } from '../components/chip/chip.component';
 
@@ -61,6 +64,8 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
 export class MediaItemComponent {
   private readonly i18nService = inject(I18nService);
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly aspectRatioCache = inject(MediaAspectRatioCacheService);
+  private readonly mediaDownload = inject(MediaDownloadService);
 
   readonly itemId = input.required<string>();
   readonly mode = input<ItemDisplayMode>('grid-md');
@@ -84,8 +89,13 @@ export class MediaItemComponent {
 
   readonly item = input<ImageRecord | null>(null);
   readonly selected = computed(() => this.state() === 'selected');
-  /** Slot geometry: 1 until media-display commits ratio for shrink transition. */
+  /** Slot geometry: grid starts square (1); detail uses hero band until ratio is committed. */
   readonly mediaAspectRatio = signal('1');
+  /** Detail embed: true once real aspect ratio is known (skips square-first grid choreography). */
+  private readonly detailSlotRatioCommitted = signal(false);
+  readonly detailSlotRatioPending = computed(
+    () => !this.showInteractionChrome() && !this.detailSlotRatioCommitted(),
+  );
   readonly usesFillSlotGeometry = computed(() => this.mode() === 'row');
   private readonly mediaPreview = viewChild(MediaDisplayComponent);
 
@@ -126,11 +136,63 @@ export class MediaItemComponent {
 
   constructor() {
     effect(() => {
-      this.mediaIdentity();
-      // Unified grid choreography: square slot until media-display commits ratio after load.
+      const mediaId = this.mediaIdentity();
+      const isDetailEmbed = !this.showInteractionChrome();
+      if (isDetailEmbed) {
+        // Detail: use session cache / registry / full URL probe — no 1:1 grid bootstrap.
+        // @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+        this.bootstrapDetailSlotAspect(mediaId);
+        return;
+      }
+
+      // Grid choreography: square slot until media-display commits ratio after load.
       // @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
+      this.detailSlotRatioCommitted.set(true);
       this.mediaAspectRatio.set('1');
     });
+  }
+
+  /** Detail-only: apply cached or hinted ratio; otherwise probe full-res when already signed. */
+  private bootstrapDetailSlotAspect(mediaId: string): void {
+    this.detailSlotRatioCommitted.set(false);
+
+    const cached = this.aspectRatioCache.get(mediaId);
+    if (cached != null) {
+      this.mediaAspectRatio.set(String(cached));
+      this.detailSlotRatioCommitted.set(true);
+      return;
+    }
+
+    const hint = this.registryAspectRatioHint();
+    if (hint != null && hint > 0) {
+      this.aspectRatioCache.set(mediaId, hint, 'registry');
+      this.mediaAspectRatio.set(String(hint));
+      this.detailSlotRatioCommitted.set(true);
+      return;
+    }
+
+    void this.probeDetailAspectFromFullUrl(mediaId);
+  }
+
+  private async probeDetailAspectFromFullUrl(mediaId: string): Promise<void> {
+    const fullUrl = this.mediaDownload.getCachedUrl(mediaId, 'full');
+    if (!fullUrl) {
+      return;
+    }
+
+    const ratio = await probeImageAspectRatio(fullUrl);
+    if (
+      ratio == null ||
+      this.showInteractionChrome() ||
+      this.mediaIdentity() !== mediaId ||
+      this.detailSlotRatioCommitted()
+    ) {
+      return;
+    }
+
+    this.aspectRatioCache.set(mediaId, ratio, 'intrinsic');
+    this.mediaAspectRatio.set(String(ratio));
+    this.detailSlotRatioCommitted.set(true);
   }
 
   onSlotGeometryTransitionEnd(event: TransitionEvent): void {
@@ -146,8 +208,21 @@ export class MediaItemComponent {
       return;
     }
 
+    // Ignore media-display handoff reset (1) before native image dimensions are known.
+    if (
+      !this.showInteractionChrome() &&
+      !this.detailSlotRatioCommitted() &&
+      this.usesNativeSlotAspect() &&
+      ratio === 1
+    ) {
+      return;
+    }
+
     // Unitless ratio required by CSS aspect-ratio (e.g. 1.777, not "1 / 1").
     this.mediaAspectRatio.set(String(ratio));
+    if (!this.showInteractionChrome()) {
+      this.detailSlotRatioCommitted.set(true);
+    }
   }
 
   readonly hasMapLocation = computed(() => {
