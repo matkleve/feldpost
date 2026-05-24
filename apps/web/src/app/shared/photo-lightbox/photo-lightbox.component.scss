@@ -34,10 +34,29 @@
   }
 }
 
+// Scrollable stage for zoomed image dimensions (geometry owner for zoom pan).
+// @see docs/specs/component/media/photo-lightbox.md
+.lightbox__viewport {
+  max-width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .lightbox__image {
   max-width: 95vw;
   max-height: 95vh;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  cursor: default;
+  cursor: zoom-in;
   border-radius: var(--radius-md);
+}
+
+// Stable state: zoomed — wheel adjusts scale; default cursor (pan via viewport scroll).
+// @see docs/specs/component/media/photo-lightbox.md
+.photo-lightbox__panel[data-state='zoomed'] .lightbox__image {
+  cursor: default;
 }
