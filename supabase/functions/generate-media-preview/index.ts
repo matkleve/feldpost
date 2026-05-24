@@ -1,5 +1,9 @@
 /**
- * generate-media-preview — rasterize Office documents to PNG thumbnail_path via Gotenberg.
+ * @deprecated Superseded by worker/thumbnail (LibreOffice + sharp). Do not extend.
+ * Canonical preview generation: POST worker/thumbnail /generate via DB webhook.
+ * Kept for reference only; removal is a separate cleanup task.
+ *
+ * generate-media-preview — legacy Gotenberg rasterization (PNG).
  *
  * POST { mediaId: string }
  * Requires Authorization JWT. Uses service role after row access check.

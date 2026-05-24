@@ -127,6 +127,8 @@ export class MediaDownloadService {
     previewGenerationStatus?: MediaPreviewRequest['previewGenerationStatus'],
   ): void {
     const existing = this.knownPreviewRequests.get(mediaId);
+    const hadThumb = Boolean(existing?.thumbnailPath?.trim());
+    const hasThumb = Boolean(thumbnailPath?.trim());
     this.knownPreviewRequests.set(mediaId, {
       mediaId,
       storagePath,
@@ -136,6 +138,9 @@ export class MediaDownloadService {
       context: 'grid',
       desiredSize: 'thumb',
     });
+    if (!hadThumb && hasThumb) {
+      this.deliveryRefresh$.next(mediaId);
+    }
   }
 
   /** Updates preview lifecycle on a registered tile and re-emits display delivery state. */

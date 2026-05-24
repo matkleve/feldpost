@@ -39,6 +39,24 @@ type MediaContentGridSlot = {
   readonly exiting: boolean;
 };
 
+type MediaPreviewPatch = {
+  thumbnail_path?: string | null;
+  preview_generation_status?: PreviewGenerationStatus | null;
+};
+
+function applyMediaPreviewPatch(item: ImageRecord, patch: MediaPreviewPatch | undefined): ImageRecord {
+  if (!patch) {
+    return item;
+  }
+  return {
+    ...item,
+    ...(patch.thumbnail_path !== undefined ? { thumbnail_path: patch.thumbnail_path } : {}),
+    ...(patch.preview_generation_status !== undefined
+      ? { preview_generation_status: patch.preview_generation_status }
+      : {}),
+  };
+}
+
 @Component({
   selector: 'app-media-content',
   standalone: true,
@@ -67,35 +85,32 @@ export class MediaContentComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly thumbnailRealtime = inject(MediaThumbnailRealtimeService);
   private resizeObserver: ResizeObserver | null = null;
-  private readonly itemPreviewPatches = signal<
-    ReadonlyMap<
-      string,
-      { thumbnail_path?: string | null; preview_generation_status?: PreviewGenerationStatus | null }
-    >
-  >(new Map());
+  private readonly itemPreviewPatches = signal<ReadonlyMap<string, MediaPreviewPatch>>(new Map());
   private placeholderExitTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly state = input.required<MediaContentState>();
   readonly items = input.required<ImageRecord[]>();
 
-  /** Merges Realtime `thumbnail_path` updates into grid rows (no polling). */
+  /** Merges Realtime `thumbnail_path` updates into flat grid rows (no polling). */
   readonly gridItems = computed(() => {
     const patches = this.itemPreviewPatches();
-    const items = this.items();
+    return this.items().map((item) => applyMediaPreviewPatch(item, patches.get(item.id)));
+  });
+
+  /** Grouped /media layout must apply the same patches as {@link gridItems}. */
+  readonly displayRenderRows = computed(() => {
+    const patches = this.itemPreviewPatches();
+    const rows = this.renderRows();
     if (patches.size === 0) {
-      return items;
+      return rows;
     }
-    return items.map((item) => {
-      const patch = patches.get(item.id);
-      if (!patch) {
-        return item;
+    return rows.map((row) => {
+      if (row.type !== 'grid') {
+        return row;
       }
       return {
-        ...item,
-        ...(patch.thumbnail_path !== undefined ? { thumbnail_path: patch.thumbnail_path } : {}),
-        ...(patch.preview_generation_status !== undefined
-          ? { preview_generation_status: patch.preview_generation_status }
-          : {}),
+        ...row,
+        items: row.items.map((item) => applyMediaPreviewPatch(item, patches.get(item.id))),
       };
     });
   });

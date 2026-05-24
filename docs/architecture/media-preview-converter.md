@@ -1,16 +1,17 @@
 # ADR: Media preview converter
 
-**Status:** Accepted (2026-05-23)  
+**Status:** Accepted (2026-05-23), revised for thumbnail worker (2026-05-23)  
 **Owner:** Matthias (product/infra)
 
 ## Decision
 
 | Topic | Choice |
 | --- | --- |
-| **Converter** | [Gotenberg](https://gotenberg.dev/) 8 (self-hosted HTTP API, LibreOffice inside Gotenberg — **not** bundled in Supabase Edge) |
-| **Worker** | Supabase Edge Function `generate-media-preview` |
-| **Trigger** | Client `POST` after upload finalize for Office types; grid enqueue when `idle` + no `thumbnail_path` |
-| **Output** | PNG master raster in `media` bucket → `thumbnail_path`; `preview_generation_status` → `ready` \| `failed` |
+| **Converter** | LibreOffice headless (`libreoffice-nogui`) + **sharp** / libvips (poppler for PDF input) |
+| **Worker** | Node.js service [`worker/thumbnail`](../../worker/thumbnail/) — `POST /generate`, `GET /health` |
+| **Trigger** | Supabase **Database Webhook** on `media_items` INSERT (filter below); manual `POST /generate` for local dev |
+| **Output** | WebP master raster in `media` bucket → `thumbnail_path`; `preview_generation_status` → `ready` \| `failed` |
+| **Deprecated** | Edge Function `generate-media-preview` + Gotenberg — reference/fallback only; **do not** dual-write; removal is a separate task |
 
 ## Locked schema
 
@@ -24,35 +25,39 @@
 | Property | Value |
 | --- | --- |
 | Bucket | `media` |
-| Path pattern | `{org_id}/{user_id}/{uuid}_thumb.png` (Office server path; client PDF may use `.webp`) |
-| Document spec | First page / slide; long edge 512px equivalent via Gotenberg PNG export |
-| Photo spec | Unchanged: client 128×128 JPEG per glossary |
+| Path pattern | `{org_id}/{user_id}/{stem}_thumb.webp` — `stem` = filename without extension from `storage_path` |
+| Document spec | First page / slide; long edge 512px, WebP quality ~80, `fit: inside` |
+| Photo spec | Client 128×128 JPEG per glossary — **worker does not generate** (webhook excludes `image/*`) |
 
-## Pipeline
+## Pipeline (thumbnail worker)
 
-1. Client sets `preview_generation_status = 'pending'` (org-scoped RLS update).
-2. Edge Function verifies JWT + row access, downloads `storage_path`, calls Gotenberg:
-   - `POST /forms/libreoffice/convert` → PDF (page 1 via `nativePageRanges=1`)
-   - Gotenberg Chromium `screenshot/html` + pdf.js in-page → PNG (Edge has no native canvas)
-3. Edge uploads PNG to `thumbnail_path`, sets `ready`.
-4. On any error (missing `GOTENBERG_URL`, timeout, convert failure): `failed`.
-5. Grid: Realtime + `MediaDownloadService.invalidate`; delivery matrix v2 rows.
+1. Webhook or manual `POST /generate` with `{ mediaId, storagePath, mimeType, organizationId, userId }`.
+2. Worker returns **202** immediately; generation runs async.
+3. Idempotency: if `thumbnail_path` already set → no-op success.
+4. `preview_generation_status = 'pending'`.
+5. Download `storage_path` from `media` bucket.
+6. Office mime/extension → LibreOffice headless → PDF bytes.
+7. PDF mime/extension → use source bytes directly.
+8. `sharp(pdf, { page: 0 }).resize(512, 512, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 80 })`.
+9. Upload to `{org}/{user}/{stem}_thumb.webp`; UPDATE `thumbnail_path` + `ready`.
+10. On error → `failed` + structured log.
 
-## Environment
+## Environment (worker)
 
-| Variable | Where | Purpose |
-| --- | --- | --- |
-| `GOTENBERG_URL` | Edge Function secret | e.g. `http://host.docker.internal:3000` local, internal URL in prod |
-| `SUPABASE_SERVICE_ROLE_KEY` | Edge (auto) | Storage upload + status updates after auth check |
+| Variable | Purpose |
+| --- | --- |
+| `SUPABASE_URL` | Supabase API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Storage + row updates (server only) |
+| `MEDIA_BUCKET_NAME` | Default `media` |
+| `PORT` | HTTP port (default `3001`) |
 
-Local: `docker compose -f supabase/gotenberg/docker-compose.yml up -d` then  
-`supabase secrets set GOTENBERG_URL=http://host.docker.internal:3000`
+Local: build/run per [`worker/thumbnail/README.md`](../../worker/thumbnail/README.md). Webhook from Supabase container should target `http://host.docker.internal:3001/generate`.
 
-## Out of scope
+## Deprecated path (Edge + Gotenberg)
 
-- CloudConvert / paid SaaS (revisit if Gotenberg ops burden is too high)
-- Grid retry loop for `failed` (terminal `icon-only` per product matrix)
-- LibreOffice inside Edge runtime
+`supabase/functions/generate-media-preview` — superseded by `worker/thumbnail`. Not deleted in this ADR revision. Client enqueue may still call Edge until a follow-up removes it; **webhook + idempotent thumb guard** avoid duplicate writes.
+
+Gotenberg compose under `supabase/gotenberg/` remains for historical local experiments only.
 
 ## Delivery when `preview_generation_status` is set
 
@@ -61,3 +66,43 @@ Local: `docker compose -f supabase/gotenberg/docker-compose.yml up -d` then
 | `pending` | `loading` |
 | `failed` | `icon-only` immediately |
 | `ready` + `thumbnail_path` | `loaded` when signed URL available |
+
+### Video (v1)
+
+Webhook filter excludes `video/%`. Worker never runs. `preview_generation_status` stays **`idle`** (default). Grid uses existing non-image delivery (`icon-only` without thumb) — not `pending` / `failed`.
+
+## Database webhook (manual apply)
+
+Do not auto-apply in migrations. Configure in Supabase Dashboard → Database Webhooks:
+
+```sql
+-- Webhook: trigger thumbnail worker on non-image media insert
+-- Table: media_items
+-- Event: INSERT
+-- Filter: thumbnail_path IS NULL
+--   AND mime_type IS NOT NULL
+--   AND mime_type NOT LIKE 'image/%'
+--   AND mime_type NOT LIKE 'video/%'  -- v1: no server preview for video; status stays idle
+-- URL: http://thumbnail-worker:3001/generate
+--       (local: http://host.docker.internal:3001/generate)
+-- Payload fields: id (as mediaId), storage_path, mime_type, organization_id, user_id
+```
+
+JSON body mapping (example):
+
+```json
+{
+  "mediaId": "{{ record.id }}",
+  "storagePath": "{{ record.storage_path }}",
+  "mimeType": "{{ record.mime_type }}",
+  "organizationId": "{{ record.organization_id }}",
+  "userId": "{{ record.user_id }}"
+}
+```
+
+## Out of scope
+
+- CloudConvert / paid SaaS
+- Grid retry loop for `failed` (terminal `icon-only` per product matrix)
+- LibreOffice or sharp inside Supabase Edge runtime
+- Removing Edge function or Gotenberg compose in this delivery

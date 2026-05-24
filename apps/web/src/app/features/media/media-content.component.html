@@ -7,7 +7,7 @@
 } @else if (useGroupedRenderLayout()) {
   <!-- Renders grouped headers and item grids for toolbar-driven grouping on /media. -->
   <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
-  @for (row of renderRows(); track $index) {
+  @for (row of displayRenderRows(); track $index) {
     @if (!isRowHidden($index)) {
       @switch (row.type) {
         @case ('header') {
