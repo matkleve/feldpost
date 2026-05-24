@@ -36,8 +36,8 @@
   border-radius: var(--radius-md);
 }
 
-// Geometry owner for tile stack; ratio transition runs inside the square grid cell (host).
-// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+// Slot owns media geometry, border emphasis, and file-type chip stacking context.
+// @see docs/specs/component/media/media-item.md#visual-behavior-contract
 .media-item__slot {
   position: relative;
   max-inline-size: 100%;
@@ -46,14 +46,18 @@
   // @see docs/specs/component/media/media-item.md#added-verification-cases
   inline-size: min(100%, calc(100% * var(--media-aspect-ratio, 1)));
   aspect-ratio: var(--media-aspect-ratio, 1);
-  // Geometry shrink (1:1 → media ratio): 300ms per tokens.md §3.6 + motion.md thumbnail timing.
-  transition:
-    aspect-ratio 300ms var(--motion-ease-out),
-    inline-size 300ms var(--motion-ease-out);
   min-inline-size: 0;
   min-block-size: 0;
   border-radius: var(--radius-lg);
   overflow: hidden;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  box-shadow: none;
+  transition:
+    aspect-ratio 300ms var(--motion-ease-out),
+    inline-size 300ms var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 // Positions shrinking slot inside fixed square host so grid rows/columns stay stable.
@@ -84,7 +88,7 @@
   min-block-size: 0;
 }
 
-// File-type chip: lower-right of grid cell (host), above open hit-target.
+// File-type chip: lower-right inside slot, above open hit-target.
 // @see docs/specs/component/media/media-item.md#file-type-chip-phase-2
 .media-item__filetype-chip {
   position: absolute;
@@ -100,27 +104,19 @@
   block-size: 100%;
 }
 
-// Border and shadow emphasis; does not affect layout size.
+// Stable state: selected — elevation level 1 (constant 1px border; no inset shrink).
 // @see docs/specs/component/media/media-item.md#visual-behavior-contract
-.media-item__frame {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 2;
-  transition: box-shadow var(--motion-duration-fast) var(--motion-ease-out);
-  border: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
+.media-item__slot--selected {
   box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
 }
 
-:host([data-state='selected']) .media-item__frame {
-  box-shadow: var(--shadow-sm);
-  border: 0.125rem solid var(--primary);
-}
-
-:host(:hover) .media-item__frame {
+// Hover/focus-within on slot only (not empty square host padding).
+// @see docs/design/tokens.md §3.5
+.media-item__slot:hover,
+.media-item__slot:focus-within {
   box-shadow: var(--shadow-md);
-  border: 0.1875rem solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
 }
 
 .media-item__open {
@@ -156,7 +152,8 @@
     transform var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
 }
 
-:host(:hover) .media-item__quiet-actions {
+.media-item__slot:hover .media-item__quiet-actions,
+.media-item__slot:focus-within .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   transition:
@@ -164,7 +161,7 @@
     transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
-:host([data-state='selected']) .media-item__quiet-actions.media-item__quiet-actions--select {
+.media-item__slot--selected .media-item__quiet-actions.media-item__quiet-actions--select {
   opacity: 1;
   transform: translateY(0);
   transition:

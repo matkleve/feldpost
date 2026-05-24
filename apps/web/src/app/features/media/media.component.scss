@@ -2,13 +2,18 @@
 @use '../../shared/dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
 @use '../map/map-shell/map-shell-upload';
 
-// Declares host block container for the /media route shell.
-// @see docs/specs/component/item-grid/item-grid.md#wiring
+// Scroll owner for /media (parent chain: router-outlet child height 100% + layout min-height 0).
+// @see apps/web/src/styles/layout/app.scss
 :host {
   display: block;
   position: relative;
-  min-height: 100%;
-  padding: var(--spacing-4);
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--spacing-6);
+  padding-bottom: calc(var(--spacing-8) * 2);
 }
 
 // Container query root for toolbar breakpoints (pane-toolbar host carries class).

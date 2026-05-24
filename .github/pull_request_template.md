@@ -12,6 +12,7 @@ Describe what changed and why.
 ## Validation
 
 - [ ] `npm run design-system:check` (required for design-system, panel SCSS, and geometry-related changes)
+- [ ] `npm run i18n:check` (required when `docs/i18n/`, `translation-catalog.ts`, or `seed_i18n.sql` change)
 - [ ] Additional local checks were run
 
 ## Design System Contract (required when applicable)

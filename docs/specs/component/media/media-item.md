@@ -230,30 +230,31 @@ Remount rules:
 
 | Behavior             | Visual Geometry Owner         | Stacking Context Owner | Interaction Hit-Area Owner           | Selector(s)                    | Layer (z-index/token) | Test Oracle                                                   |
 | -------------------- | ----------------------------- | ---------------------- | ------------------------------------ | ------------------------------ | --------------------- | ------------------------------------------------------------- |
-| Selected emphasis    | `.media-item__frame`          | `app-media-item:host`  | `.media-item__open`                  | `.media-item__frame--selected` | layer/selected (2)    | Emphasis stays on media frame only                            |
+| Selected emphasis    | `.media-item__slot`           | `app-media-item:host`  | `.media-item__open`                  | `.media-item__slot--selected` | layer/selected (2)    | Emphasis stays on media slot only                             |
 | Upload overlay       | `.media-item__upload-overlay` | `app-media-item:host`  | none (passive)                       | `.media-item__upload-overlay`  | layer/upload (3)      | Upload layer sits above media content and below quiet actions |
-| Quiet actions reveal | `.media-item__quiet-actions`  | `app-media-item:host`  | `.media-item-quiet-actions__button*` | `.media-item__quiet-actions`   | layer/actions (4)     | Controls reveal deterministically on hover/focus              |
+| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot`    | `.media-item-quiet-actions__button*` | `.media-item__quiet-actions`   | layer/actions (4)     | Reveal on slot hover/focus only                               |
 
 ### Ownership Triad Declaration
 
 | Behavior             | Geometry Owner                | State Owner                          | Visual Owner                   | Same element?                                                                  |
 | -------------------- | ----------------------------- | ------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------ |
-| Selected emphasis    | `.media-item__frame`          | `.media-item__frame--selected`       | `.media-item__frame--selected` | yes                                                                            |
+| Selected emphasis    | `.media-item__slot`           | `.media-item__slot--selected`        | `.media-item__slot--selected`  | yes — `box-shadow: var(--shadow-sm)`; **1px** border only (no width change)   |
 | Upload overlay       | `.media-item__upload-overlay` | `.media-item__upload-overlay`        | `.media-item__upload-overlay`  | yes                                                                            |
-| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item` (host data-state gate) | `.media-item__quiet-actions`   | exception: CSS cascade trigger only — no FSM state crosses component boundary. |
+| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot:hover` / `--selected` | `.media-item__quiet-actions`   | exception: slot-scoped CSS only — not `:host(:hover)`.                          |
 
 ### Stacking Context
 
-- `app-media-item:host` is the sole stacking-context owner.
+- `app-media-item:host` is the sole stacking-context owner (fixed square grid cell).
+- **Hover/focus visuals** (elevation, border tint, quiet-actions reveal) are triggered by **`.media-item__slot:hover` / `:focus-within`**, not `:host(:hover)`, so letterbox padding in the host does not activate chrome.
 - `MediaDisplayComponent` is rendered as base content layer.
-- Upload overlay and quiet actions are absolute overlays anchored to host.
+- Upload overlay and quiet actions are absolute overlays anchored to `.media-item__slot`.
 
 ### Layer Order
 
 | Layer             | z-index | Element                        |
 | ----------------- | ------- | ------------------------------ |
 | Media content     | 1       | `MediaDisplayComponent`        |
-| Selected emphasis | 2       | `.media-item__frame--selected` |
+| Selected emphasis | 2       | `.media-item__slot--selected` |
 | Upload overlay    | 3       | `.media-item__upload-overlay`  |
 | Quiet actions     | 4       | `.media-item__quiet-actions`   |
 
@@ -314,7 +315,7 @@ sequenceDiagram
 - [ ] Upload state and delivery/render state stay orthogonal and do not share enum values or component inputs.
 - [ ] `MediaItemComponent` exposes no boolean visual-state inputs.
 - [ ] Public input contract includes `mediaId`, `state`, and non-visual data (`item`, `mode`, `actionContextId`).
-- [ ] Selected emphasis is rendered around media frame only.
+- [ ] Selected emphasis is rendered on `.media-item__slot` only (not the square grid host).
 - [ ] Upload overlay z-order is above media content and below quiet actions.
 - [ ] Quiet actions reveal remains deterministic and keyboard accessible.
 - [ ] `MediaItemComponent` does not proxy or await `MediaDisplayComponent` internal states.
@@ -388,7 +389,7 @@ All grid tiles (`intrinsic` slot) share the same choreography: `loading-surface-
 
 ## File-type chip (Phase 2)
 
-Every loaded tile shows `app-chip` (lower-right of the grid cell host) with registry badge text (e.g. `JPEG`, `PPTX`) and `chipVariantForFileType`. Chip is presentational (`pointer-events: none`); primary action remains the open control.
+Every loaded tile shows `app-chip` inside `.media-item__slot` (lower-right) with registry badge text (e.g. `JPEG`, `PPTX`) and `chipVariantForFileType`. Hover/selected border and shadow are owned by `.media-item__slot`, not the host wrapper. Chip is presentational (`pointer-events: none`); primary action remains the open control.
 
 ## Canonical Name Registry Gate
 

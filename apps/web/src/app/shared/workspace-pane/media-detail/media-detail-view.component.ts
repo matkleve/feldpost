@@ -633,6 +633,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.fullResPreloaded.set(false);
     this.fullResUrl.set(null);
     this.thumbnailUrl.set(null);
+    this.detailSlotWidthRem.set(null);
+    this.detailSlotHeightRem.set(null);
     this.error.set(null);
     this.loading.set(false);
     this.saving.set(false);
@@ -806,6 +808,8 @@ export class MediaDetailViewComponent implements OnDestroy {
   private async loadMedia(id: string): Promise<void> {
     this.abortController?.abort();
     this.abortController = new AbortController();
+    this.detailSlotWidthRem.set(null);
+    this.detailSlotHeightRem.set(null);
     await this.dataFacade.loadMedia(id, this.abortController.signal);
     if (this.abortController.signal.aborted) {
       return;

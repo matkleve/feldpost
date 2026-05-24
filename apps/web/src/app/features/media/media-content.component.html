@@ -38,6 +38,16 @@
       }
     }
   }
+  @if (showListEnd()) {
+    <p class="media-content__list-end" aria-live="polite">
+      {{ t('media.page.listEnd', 'No more media') }}
+    </p>
+  }
+  @if (loadingMore()) {
+    <p class="media-content__list-loading-more" aria-live="polite">
+      {{ t('media.page.loading.more', 'Loading more media...') }}
+    </p>
+  }
 } @else if (showGrid()) {
   <app-item-grid [mode]="itemMode()" [role]="gridRole()">
     @for (slot of gridSlots(); track slot.trackId) {
@@ -63,6 +73,16 @@
       }
     }
   </app-item-grid>
+  @if (showListEnd()) {
+    <p class="media-content__list-end" aria-live="polite">
+      {{ t('media.page.listEnd', 'No more media') }}
+    </p>
+  }
+  @if (loadingMore()) {
+    <p class="media-content__list-loading-more" aria-live="polite">
+      {{ t('media.page.loading.more', 'Loading more media...') }}
+    </p>
+  }
 } @else if (showEmptyState()) {
   <!-- Renders media empty state branch when no items are available. -->
   <!-- @see docs/specs/component/item-grid/item-grid.md#state -->

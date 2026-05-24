@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
+import type { MediaTier } from '../media/media-renderer.types';
 import { MediaDetailDataFacade } from './media-detail-data.facade';
 import type { ImageRecord } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 
@@ -26,7 +27,7 @@ const MOCK_IMAGE: ImageRecord = {
   location_unresolved: false,
 };
 
-function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
+function createFacade(overrides?: { image?: Partial<ImageRecord>; detailTier?: MediaTier }) {
   const image = signal<ImageRecord | null>(null);
   const metadata = signal<any[]>([]);
   const loading = signal(false);
@@ -136,7 +137,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
     computed: {
       mediaType: () => 'image',
       mediaMimeType: () => 'image/jpeg',
-      detailTier: () => 'full',
+      detailTier: () => overrides?.detailTier ?? 'full',
     },
   });
 
@@ -165,5 +166,14 @@ describe('MediaDetailDataFacade', () => {
 
     expect(deps.mediaDownloadService.markNoMedia).toHaveBeenCalledWith('img-1');
     expect(deps.mediaDownloadService.getSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it('preloads full-res for images even when measured detail tier is below large', async () => {
+    const { facade, signals, deps } = createFacade({ detailTier: 'mid' });
+
+    await facade.loadSignedUrls(MOCK_IMAGE, new AbortController().signal);
+
+    expect(deps.mediaDownloadService.preload).toHaveBeenCalledWith('full-url');
+    expect(signals.fullResPreloaded()).toBe(true);
   });
 });

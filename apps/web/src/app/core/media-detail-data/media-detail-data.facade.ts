@@ -189,8 +189,10 @@ export class MediaDetailDataFacade {
     this.deps.signals.thumbnailUrl.set(thumbResult.url);
     this.deps.signals.fullResUrl.set(fullResult.url);
 
-    const shouldPreloadFull = this.shouldPreloadFull(this.deps.computed.detailTier());
-    if (isImageAsset && fullResult.url && shouldPreloadFull) {
+    // Detail pane always crossfades to full-res for image/video when a full URL exists.
+    // Do not gate on measured slot tier: slot rem from the previous item can still be set
+    // when loadSignedUrls runs, which wrongly skipped preload after the first open.
+    if (isImageAsset && fullResult.url) {
       const preloaded = await this.deps.services.mediaDownloadService.preload(fullResult.url);
       if (!abortSignal.aborted) {
         this.deps.signals.fullResPreloaded.set(preloaded);
@@ -198,10 +200,6 @@ export class MediaDetailDataFacade {
     } else {
       this.deps.signals.fullResPreloaded.set(false);
     }
-  }
-
-  private shouldPreloadFull(tier: MediaTier): boolean {
-    return tier === 'large' || tier === 'full';
   }
 
   async loadProjects(organizationId: string): Promise<void> {

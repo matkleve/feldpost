@@ -121,6 +121,9 @@ export class MediaContentComponent implements AfterViewInit {
   /** @see docs/specs/service/workspace-view/workspace-view-system.md */
   readonly collapsedGroupHeadings = input<ReadonlySet<string>>(new Set());
   readonly emptyReason = input<'auth-required' | 'no-results'>('no-results');
+  /** When false and list is ready, show end-of-list copy (full gallery load has no more pages). */
+  readonly hasMore = input(false);
+  readonly loadingMore = input(false);
   readonly cardVariant = input<CardVariant>('medium');
   readonly projectNameFor = input.required<(projectId: string | null) => string>();
   readonly containerWidthPx = signal<number>(0);
@@ -174,6 +177,17 @@ export class MediaContentComponent implements AfterViewInit {
       this.items().length === 0 &&
       !this.placeholderExitActive(),
   );
+  readonly showListEnd = computed(() => {
+    if (this.state() !== 'ready' || this.hasMore() || this.loadingMore()) {
+      return false;
+    }
+
+    if (this.useGroupedRenderLayout()) {
+      return this.renderRows().some((row) => row.type === 'grid' && row.items.length > 0);
+    }
+
+    return this.items().length > 0;
+  });
   readonly gridRole = computed<string | null>(() =>
     this.state() === 'ready' &&
     (this.useGroupedRenderLayout() || this.items().length > 0)

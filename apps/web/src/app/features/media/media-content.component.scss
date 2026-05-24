@@ -3,6 +3,18 @@
 :host {
   display: grid;
   gap: var(--spacing-3);
+  padding-bottom: var(--spacing-8);
+}
+
+// End-of-list copy below the grid when the full gallery is loaded.
+// @see docs/specs/component/media/media-content.md
+.media-content__list-end,
+.media-content__list-loading-more {
+  margin: 0;
+  padding-block: var(--spacing-4) var(--spacing-6);
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-2xs, 0.875rem);
 }
 
 // Fades trailing loading placeholders out when fewer real items are returned.

@@ -699,7 +699,8 @@ workspace.toolbar.size.large,Large,apps/web/src/app/shared/ui-primitives/card-va
 media.page.header.item,item,apps/web/src/app/features/media/media-page-header.component.ts ts:content,item,Element,elemento
 media.page.header.items,items,apps/web/src/app/features/media/media-page-header.component.ts ts:content,items,Elemente,elementi
 media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/app/features/media/media-page-header.component.ts inline-template text-node,{loaded} of {total} items loaded,{loaded} von {total} Elementen geladen,{loaded} di {total} elementi caricati
-media.page.loading.more,Loading more media...,apps/web/src/app/features/media/media.component.html text-node,Loading more media...,Weitere Medien werden geladen...,Caricamento di altri contenuti multimediali...
+media.page.loading.more,Loading more media...,apps/web/src/app/features/media/media-content.component.html text-node,Loading more media...,Weitere Medien werden geladen...,Caricamento di altri contenuti multimediali...
+media.page.listEnd,No more media,apps/web/src/app/features/media/media-content.component.html text-node,No more media,Keine weiteren Medien,Nessun altro file multimediale
 nav.item.media,Media,apps/web/src/app/features/nav/nav.component.ts computed navItems label,Media,Medien,Media
 nav.home,Home,apps/web/src/app/features/media/media-page-header.component.ts ts:content,Home,Startseite,Home
 upload.item.menu.section.location,Change location,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Change location,Standort ändern,Cambia posizione

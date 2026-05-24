@@ -80,6 +80,24 @@ Reference workflow and checklist:
 - `.github/pull_request_template.md`
 - `CONTRIBUTING.md`
 
+### i18n Gates (Required)
+
+Run from repository root when changes touch translation workbench CSV, `translation-catalog.ts`, or `seed_i18n.sql`:
+
+```bash
+npm run i18n:check
+```
+
+After editing non-English translations, normalize first if needed:
+
+```bash
+node scripts/normalize-i18n-diacritics.mjs
+npm run i18n:check
+node scripts/import-i18n-csv-to-sql.mjs
+```
+
+CI workflow: `.github/workflows/i18n-check.yml`
+
 ## Code Conventions
 
 - Use Angular **standalone components** (no NgModules)

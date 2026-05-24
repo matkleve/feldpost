@@ -3,6 +3,7 @@
   <!-- @see docs/specs/component/media/media-item.md#spacing--framing-ownership -->
   <div
     class="media-item__slot"
+    [class.media-item__slot--selected]="selected()"
     [style.--media-aspect-ratio]="mediaAspectRatio()"
     (transitionend)="onSlotGeometryTransitionEnd($event)"
   >
@@ -21,14 +22,6 @@
       [contentObjectPosition]="slotContentObjectPosition()"
       (aspectRatioChange)="onMediaAspectRatioChange($event)"
     />
-
-    <!-- Renders selected emphasis border inside the slot, above media content. -->
-    <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
-    <div
-      class="media-item__frame"
-      [class.media-item__frame--selected]="selected()"
-      aria-hidden="true"
-    ></div>
 
     <!-- Renders upload overlay as slot-aligned absolute layer below quiet actions. -->
     <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
@@ -57,14 +50,14 @@
       "
       (click)="onOpenClick($event)"
     ></button>
-  </div>
 
-  @if (showFileTypeChip() && fileTypeChipText(); as chipText) {
-    <app-chip
-      class="media-item__filetype-chip"
-      [icon]="fileTypeChipIcon()"
-      [text]="chipText"
-      [variant]="fileTypeChipVariant()"
-    />
-  }
+    @if (showFileTypeChip() && fileTypeChipText(); as chipText) {
+      <app-chip
+        class="media-item__filetype-chip"
+        [icon]="fileTypeChipIcon()"
+        [text]="chipText"
+        [variant]="fileTypeChipVariant()"
+      />
+    }
+  </div>
 }

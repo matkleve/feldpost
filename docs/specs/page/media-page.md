@@ -75,6 +75,8 @@ AuthenticatedAppLayout (split host)
 - **Workspace Pane:** Same `WorkspacePane` tree as map/projects routes (mounted by layout host).
 - **Trigger:** Navigation via app menu, or view-all-media action
 - **Persistence:** Media page state (filters, sort, group) saved to localStorage; media list snapshots and pagination cursor are cache-retained per user/query (no forced clear on normal revisit); workspace pane state (tab, selection, uploads) is independent
+- **Scroll:** `MediaComponent` `:host` is the main-column scroll owner (`height: 100%`, `overflow-y: auto`, generous page padding) so the grid can extend past the viewport without clipping the last row.
+- **List end:** When the gallery is fully loaded (`hasMore === false`), `MediaContentComponent` shows centered **No more media** below the grid.
 
 ## Terminology (symbols)
 

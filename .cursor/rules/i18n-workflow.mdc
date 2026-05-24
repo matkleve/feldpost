@@ -43,3 +43,5 @@ Rule registry: `scripts/i18n-diacritics.helpers.mjs` (`I18N_DIACRITIC_LANGUAGES`
 3. Regenerate SQL: `node scripts/import-i18n-csv-to-sql.mjs`.
 
 When adding a new product language, extend `I18N_DIACRITIC_LANGUAGES` and add that locale's replacement table before shipping translations.
+
+**CI gate:** `.github/workflows/i18n-check.yml` runs `npm run i18n:check` on PRs and pushes to `main` when translation data changes. PRs with bad `de`/`it` diacritics or mojibake will fail CI.

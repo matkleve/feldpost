@@ -10,6 +10,7 @@
     "i18n:validate-language": "node scripts/validate-i18n-language.mjs",
     "i18n:normalize-diacritics": "node scripts/normalize-i18n-diacritics.mjs",
     "i18n:validate-diacritics": "node scripts/validate-i18n-diacritics.mjs",
+    "i18n:check": "node scripts/validate-i18n-diacritics.mjs",
     "i18n:normalize-de-umlauts": "node scripts/normalize-i18n-diacritics.mjs --lang=de",
     "i18n:validate-de-umlauts": "node scripts/validate-i18n-diacritics.mjs --lang=de",
     "i18n:guard": "node scripts/check-i18n-hardcoded-literals.mjs",

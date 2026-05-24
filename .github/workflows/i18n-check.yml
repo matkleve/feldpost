@@ -1,0 +1,58 @@
+name: i18n Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "docs/i18n/**"
+      - "supabase/seed_i18n.sql"
+      - "apps/web/src/app/core/i18n/**"
+      - "scripts/i18n-diacritics.helpers.mjs"
+      - "scripts/i18n-de-umlauts.helpers.mjs"
+      - "scripts/normalize-i18n-diacritics.mjs"
+      - "scripts/validate-i18n-diacritics.mjs"
+      - "scripts/import-i18n-csv-to-sql.mjs"
+      - "scripts/export-i18n-workbench.mjs"
+      - "scripts/generate-i18n-language.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/i18n-check.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/i18n/**"
+      - "supabase/seed_i18n.sql"
+      - "apps/web/src/app/core/i18n/**"
+      - "scripts/i18n-diacritics.helpers.mjs"
+      - "scripts/i18n-de-umlauts.helpers.mjs"
+      - "scripts/normalize-i18n-diacritics.mjs"
+      - "scripts/validate-i18n-diacritics.mjs"
+      - "scripts/import-i18n-csv-to-sql.mjs"
+      - "scripts/export-i18n-workbench.mjs"
+      - "scripts/generate-i18n-language.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/i18n-check.yml"
+
+jobs:
+  i18n-check:
+    name: Locale diacritics & translation data
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run i18n checks
+        run: npm run i18n:check
