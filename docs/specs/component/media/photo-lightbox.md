@@ -18,8 +18,9 @@ The image scales within the host bounds using standard object-fit rules from par
 | #   | User Action | System Response | Triggers |
 | --- | ----------- | --------------- | -------- |
 | 1   | Parent mounts component with `imageUrl` | Image loads in viewer | input binding |
-| 2   | Press Escape | `closed` output emits | `document:keydown.escape` host listener |
-| 3   | Parent removes host | Component destroys | parent state |
+| 2   | Press Escape | `closed` output emits | BrnDialog default |
+| 3   | Click outside the image (letterbox / scrim on the full-screen panel) | Dialog closes; `closed` emits | panel `(click)` when target is panel root |
+| 4   | Parent removes host | Component destroys | parent state |
 
 ## Component Hierarchy
 
@@ -63,7 +64,7 @@ No internal open/closed enum: parent controls presence in DOM or visibility wrap
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
 | -------- | --------------------- | ---------------------- | --------------------------- | ------------- | ---------------------- | ----------- |
 | Image fill | `img` or host per SCSS | parent overlay (if any) | image (non-interactive) | `img` | content | image respects parent bounds |
-| Dismiss | N/A (keyboard) | parent | document | host listener | n/a | Escape emits `closed` once per press |
+| Dismiss | N/A (keyboard / panel letterbox) | parent | panel root, document | panel click, Escape | n/a | Escape or outside-image click emits `closed` |
 
 ### Ownership Triad Declaration
 
@@ -74,5 +75,6 @@ No internal open/closed enum: parent controls presence in DOM or visibility wrap
 ## Acceptance Criteria
 
 - [ ] `imageUrl` is required; missing binding is a compile-time error in consumers.
-- [ ] Escape key emits `closed` exactly once per keydown while mounted.
+- [ ] Escape key emits `closed` while mounted.
+- [ ] Click on panel letterbox (not on the image) closes and emits `closed`.
 - [ ] Component does not call Supabase or map adapters directly.
