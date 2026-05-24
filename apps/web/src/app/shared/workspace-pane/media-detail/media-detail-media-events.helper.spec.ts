@@ -29,7 +29,6 @@ const MOCK_IMAGE: ImageRecord = {
 describe('MediaDetailMediaEventsHelper', () => {
   it('updates image state and reloads URLs after replace', async () => {
     const image = signal<ImageRecord | null>({ ...MOCK_IMAGE });
-    const reloadSignedUrlsForCurrentMedia = vi.fn(async () => {});
     const invalidate = vi.fn();
     const batchSignThumbnails = vi.fn(async () => {});
     const helper = new MediaDetailMediaEventsHelper({
@@ -37,17 +36,19 @@ describe('MediaDetailMediaEventsHelper', () => {
         mediaDownloadService: { invalidate } as any,
         workspaceView: {
           rawImages: signal([{ id: 'img-1', storagePath: 'org-001/user-001/old.jpg' }]),
+          updateRawImages: (fn: (all: Array<{ id: string; storagePath: string }>) => unknown) => {
+            const current = [{ id: 'img-1', storagePath: 'org-001/user-001/old.jpg' }];
+            fn(current);
+          },
           batchSignThumbnails,
         } as any,
         toastService: { show: vi.fn() } as any,
       },
       signals: {
         media: image,
-        fullResPreloaded: signal(true),
         activeJobId: signal('job-1'),
       },
       callbacks: {
-        reloadSignedUrlsForCurrentMedia,
         t: (_key, fallback) => fallback,
       },
     });
@@ -62,7 +63,6 @@ describe('MediaDetailMediaEventsHelper', () => {
 
     expect(image()!.storage_path).toBe('org-001/user-001/new.jpg');
     expect(invalidate).toHaveBeenCalledWith('img-1');
-    expect(reloadSignedUrlsForCurrentMedia).toHaveBeenCalled();
     expect(batchSignThumbnails).toHaveBeenCalled();
     expect(revokeSpy).toHaveBeenCalledWith('blob:test');
     revokeSpy.mockRestore();

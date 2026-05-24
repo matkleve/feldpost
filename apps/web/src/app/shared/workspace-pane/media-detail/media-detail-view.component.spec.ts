@@ -931,20 +931,6 @@ describe('MediaDetailViewComponent', () => {
     });
   });
 
-  // ── fullResPreloaded ──────────────────────────────────────────────────────
-
-  describe('fullResPreloaded', () => {
-    it('can gate imageReady once preloading is complete', () => {
-      const { component } = setup();
-      expect(component.fullResPreloaded()).toBe(false);
-      expect(component.imageReady()).toBe(false);
-
-      component.fullResPreloaded.set(true);
-
-      expect(component.fullResPreloaded()).toBe(true);
-      expect(component.imageReady()).toBe(true);
-    });
-  });
 });
 
 // ── IE-10 Replace Photo — dedicated setup ──────────────────────────────────
@@ -1264,7 +1250,6 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
     await Promise.resolve();
 
     expect(ctx.component.media()?.storage_path).toBe('org-001/user-001/new-photo.jpg');
-    expect(ctx.component.fullResPreloaded()).toBe(false);
   });
 
   it('updates workspace grid cache on imageReplaced$', () => {

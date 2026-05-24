@@ -487,7 +487,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     if (currentlySelected === selected) {
       return;
     }
-    this.selectionService.toggle(imageId, { additive: false });
+    this.selectionService.toggle(imageId, { additive: true });
   }
 
   onCellHoverStarted(img: WorkspaceImage): void {

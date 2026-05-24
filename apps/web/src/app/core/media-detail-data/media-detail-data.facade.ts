@@ -1,6 +1,5 @@
 import type { WritableSignal } from '@angular/core';
 import type { ImageDetailProjectMembershipHelper } from '../../shared/workspace-pane/media-detail/media-detail-project-membership.helper';
-import type { MediaTier } from '../media/media-renderer.types';
 import type { MediaDownloadService } from '../media-download/media-download.service';
 import type { SupabaseService } from '../supabase/supabase.service';
 import type { MetadataService } from '../metadata/metadata.service';
@@ -11,10 +10,6 @@ import type {
   MetadataKeyDefinitionView,
   SelectOption,
 } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
-import {
-  isImageLikeMedia,
-  resolvePreviewThumbnailPath,
-} from '../../shared/workspace-pane/media-detail/media-detail-view.utils';
 import {
   MEDIA_ITEM_DETAIL_SELECT_BASE,
   MEDIA_ITEM_DETAIL_SELECT_WITH_META,
@@ -72,16 +67,12 @@ interface MediaDetailDataFacadeDeps {
     metadata: WritableSignal<MetadataEntry[]>;
     loading: WritableSignal<boolean>;
     error: WritableSignal<string | null>;
-    fullResPreloaded: WritableSignal<boolean>;
-    fullResUrl: WritableSignal<string | null>;
-    thumbnailUrl: WritableSignal<string | null>;
     projectOptions: WritableSignal<SelectOption[]>;
     metadataKeyDefinitions: WritableSignal<MetadataKeyDefinitionView[]>;
   };
   computed: {
     mediaType: () => string | null;
     mediaMimeType: () => string | null;
-    detailTier: () => MediaTier;
   };
 }
 
@@ -150,9 +141,7 @@ export class MediaDetailDataFacade {
     this.deps.signals.loading.set(false);
     this.deps.signals.metadata.set(metadataEntries);
 
-    if (record.storage_path) {
-      void this.loadSignedUrls(record, abortSignal);
-    } else {
+    if (!record.storage_path) {
       this.deps.services.mediaDownloadService.markNoMedia(record.id);
     }
 
@@ -161,44 +150,6 @@ export class MediaDetailDataFacade {
     if (record.organization_id) {
       void this.loadProjects(record.organization_id);
       void this.loadMetadataKeyDefinitions(record.organization_id);
-    }
-  }
-
-  async loadSignedUrls(img: ImageRecord, abortSignal: AbortSignal): Promise<void> {
-    if (!img.storage_path) return;
-
-    const isImageAsset = isImageLikeMedia(
-      this.deps.computed.mediaType(),
-      this.deps.computed.mediaMimeType(),
-      img.storage_path,
-    );
-    const thumbPath = resolvePreviewThumbnailPath(img.thumbnail_path, img.storage_path);
-    const fullPath = isImageAsset ? img.storage_path : null;
-
-    const [thumbResult, fullResult] = await Promise.all([
-      thumbPath
-        ? this.deps.services.mediaDownloadService.getSignedUrl(thumbPath, 'thumb', img.id)
-        : Promise.resolve({ url: null }),
-      fullPath
-        ? this.deps.services.mediaDownloadService.getSignedUrl(fullPath, 'full', img.id)
-        : Promise.resolve({ url: null }),
-    ]);
-
-    if (abortSignal.aborted) return;
-
-    this.deps.signals.thumbnailUrl.set(thumbResult.url);
-    this.deps.signals.fullResUrl.set(fullResult.url);
-
-    // Detail pane always crossfades to full-res for image/video when a full URL exists.
-    // Do not gate on measured slot tier: slot rem from the previous item can still be set
-    // when loadSignedUrls runs, which wrongly skipped preload after the first open.
-    if (isImageAsset && fullResult.url) {
-      const preloaded = await this.deps.services.mediaDownloadService.preload(fullResult.url);
-      if (!abortSignal.aborted) {
-        this.deps.signals.fullResPreloaded.set(preloaded);
-      }
-    } else {
-      this.deps.signals.fullResPreloaded.set(false);
     }
   }
 
@@ -225,9 +176,6 @@ export class MediaDetailDataFacade {
   private resetLoadState(): void {
     this.deps.signals.loading.set(true);
     this.deps.signals.error.set(null);
-    this.deps.signals.fullResPreloaded.set(false);
-    this.deps.signals.fullResUrl.set(null);
-    this.deps.signals.thumbnailUrl.set(null);
   }
 
   private async loadLocationRow(id: string): Promise<MediaDetailRow | null> {

@@ -1,6 +1,5 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import type { MediaTier } from '../media/media-renderer.types';
 import { MediaDetailDataFacade } from './media-detail-data.facade';
 import type { ImageRecord } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 
@@ -27,14 +26,11 @@ const MOCK_IMAGE: ImageRecord = {
   location_unresolved: false,
 };
 
-function createFacade(overrides?: { image?: Partial<ImageRecord>; detailTier?: MediaTier }) {
+function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   const image = signal<ImageRecord | null>(null);
   const metadata = signal<any[]>([]);
   const loading = signal(false);
   const error = signal<string | null>(null);
-  const fullResPreloaded = signal(false);
-  const fullResUrl = signal<string | null>(null);
-  const thumbnailUrl = signal<string | null>(null);
   const projectOptions = signal<any[]>([]);
   const metadataKeyDefinitions = signal<{ id: string; key_name: string; key_type: string }[]>([]);
 
@@ -128,22 +124,18 @@ function createFacade(overrides?: { image?: Partial<ImageRecord>; detailTier?: M
       metadata,
       loading,
       error,
-      fullResPreloaded,
-      fullResUrl,
-      thumbnailUrl,
       projectOptions,
       metadataKeyDefinitions,
     },
     computed: {
       mediaType: () => 'image',
       mediaMimeType: () => 'image/jpeg',
-      detailTier: () => overrides?.detailTier ?? 'full',
     },
   });
 
   return {
     facade,
-    signals: { image, metadata, loading, error, fullResPreloaded, fullResUrl, thumbnailUrl },
+    signals: { image, metadata, loading, error },
     deps: { metadataService, mediaDownloadService, projectMemberships },
   };
 }
@@ -168,12 +160,4 @@ describe('MediaDetailDataFacade', () => {
     expect(deps.mediaDownloadService.getSignedUrl).not.toHaveBeenCalled();
   });
 
-  it('preloads full-res for images even when measured detail tier is below large', async () => {
-    const { facade, signals, deps } = createFacade({ detailTier: 'mid' });
-
-    await facade.loadSignedUrls(MOCK_IMAGE, new AbortController().signal);
-
-    expect(deps.mediaDownloadService.preload).toHaveBeenCalledWith('full-url');
-    expect(signals.fullResPreloaded()).toBe(true);
-  });
 });

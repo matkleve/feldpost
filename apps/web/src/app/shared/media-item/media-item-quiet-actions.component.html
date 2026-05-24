@@ -8,8 +8,9 @@
   type="button"
   class="media-item-quiet-actions__button media-item-quiet-actions__button--select"
   hlmBtn
-  variant="outline"
-  size="icon"
+  [variant]="selected() ? 'default' : 'outline'"
+  size="icon-sm"
+  [disabled]="interactionsDisabled()"
   [attr.aria-pressed]="selected()"
   [attr.aria-label]="selectLabel()"
   (click)="onSelectClick($event)"
@@ -19,7 +20,7 @@
   @if (selected()) {
     <!-- Shows check glyph when item is currently selected. -->
     <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
-    <span class="material-icons" aria-hidden="true">check</span>
+    <span class="material-icons media-item-quiet-actions__icon" aria-hidden="true">check</span>
   }
 </button>
 
@@ -30,12 +31,12 @@
   class="media-item-quiet-actions__button media-item-quiet-actions__button--map"
   hlmBtn
   variant="outline"
-  size="icon"
+  size="icon-sm"
   [disabled]="mapActionDisabled()"
   [attr.aria-label]="mapLabel()"
   (click)="onMapClick($event)"
 >
   <!-- Shows map glyph for jump-to-location quick action. -->
   <!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
-  <span class="material-icons" aria-hidden="true">map</span>
+  <span class="material-icons media-item-quiet-actions__icon" aria-hidden="true">map</span>
 </button>

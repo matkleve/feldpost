@@ -1,172 +1,83 @@
-// Grid child of detail-content — media viewer region
-// @see docs/specs/ui/workspace/workspace-pane.md
+// Grid child of detail-content — media viewer uses media-item slot framing + MediaDisplay FSM.
+// @see docs/specs/component/media/media-display.md
+// @see docs/specs/component/media/media-item.md#spacing--framing-ownership
 :host {
   display: block;
   min-height: 0;
   min-width: 0;
 }
 
-.detail-image-wrap {
-  display: grid;
-  place-items: center;
-  width: fit-content;
-  max-width: 100%;
-  overflow: hidden;
-  cursor: pointer;
-  border: none;
-  padding: 0;
-  transition: box-shadow 120ms ease-out;
+.detail-media__container {
+  position: relative;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - var(--spacing-4) * 2);
+  margin: var(--spacing-3) auto 0;
 
-  &:hover {
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent);
+  &:hover .detail-media__edit-btn,
+  &:focus-within .detail-media__edit-btn {
+    opacity: 1;
+  }
+}
+
+// Slot owns border-radius, clip, and hover emphasis (aligned with media-item__slot).
+// @see docs/specs/component/media/media-item.md#visual-behavior-contract
+.detail-media__slot {
+  position: relative;
+  max-inline-size: 100%;
+  max-block-size: 33vh;
+  inline-size: min(100%, calc(100% * var(--media-aspect-ratio, 1)));
+  aspect-ratio: var(--media-aspect-ratio, 1);
+  min-inline-size: 0;
+  min-block-size: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  box-shadow: none;
+  transition:
+    aspect-ratio 300ms var(--motion-ease-out),
+    inline-size 300ms var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.detail-media__slot:hover,
+.detail-media__slot:focus-within {
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.detail-media__preview {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.detail-media__open {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  &:disabled {
+    cursor: default;
   }
 
   &:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
-
-  &:disabled {
-    cursor: default;
-  }
-
-  &--static:hover,
-  &--static:focus-visible {
-    box-shadow: none;
-    outline: none;
-  }
 }
 
-.detail-image-media {
-  display: block;
-  width: fit-content;
-  max-width: min(calc(100%), calc(40rem / 1.618));
-  min-height: 0;
-  --universal-media-host-width: fit-content;
-  --universal-media-slot-border: none;
-  --universal-media-slot-radius: 0;
-  --universal-media-slot-width: fit-content;
-  --universal-media-slot-min-width: 0;
-  --universal-media-slot-background: transparent;
-  --universal-media-slot-max-height: 33vh;
-  --universal-media-asset-border: 1px solid var(--border);
-  --universal-media-asset-border-radius: var(--radius-lg);
-  --universal-media-asset-width: auto;
-  --universal-media-asset-height: auto;
-  --universal-media-asset-max-width: 100%;
-  --universal-media-asset-max-height: 33vh;
-}
-
-// Loading/error slot keeps a stable footprint before the asset sizes the frame.
-// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
-.detail-image-wrap--resolving .detail-image-media {
-  width: min(100%, calc(40rem / 1.618));
-  --universal-media-host-width: 100%;
-  --universal-media-slot-width: min(100%, calc(40rem / 1.618));
-  --universal-media-slot-min-width: min(100%, calc(40rem / 1.618));
-  --universal-media-slot-background: linear-gradient(
-    135deg,
-    var(--card) 0%,
-    var(--background) 100%
-  );
-  --universal-media-slot-radius: var(--radius-lg);
-  --universal-media-asset-border: none;
-  --universal-media-asset-border-radius: 0;
-}
-
-// Thumb-preview blur / scale via inherited custom properties (no pierce).
-// @see docs/migration/phase-8-global-scss-elimination.md §Open
-.detail-image-wrap--thumb-preview {
-  --universal-media-asset-filter: blur(2px);
-  --universal-media-asset-transform: scale(1.02);
-}
-
-.detail-image-wrap--static {
-  --universal-media-asset-filter: none;
-  --universal-media-asset-transform: none;
-}
-
-.detail-image-placeholder {
-  min-height: 8rem;
-  aspect-ratio: 4 / 3;
-  max-height: 33vh;
-  width: 100%;
-  background: linear-gradient(
-    135deg,
-    var(--card) 0%,
-    var(--background) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &--loading {
-    animation: detail-placeholder-pulse 1400ms ease-in-out infinite;
-  }
-
-  &--no-photo {
-    width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
-    max-width: 100%;
-    opacity: 0.55;
-  }
-
-  &__icon {
-    width: 2rem;
-    height: 2rem;
-    background: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
-    mask-image: var(--placeholder-icon);
-    mask-size: contain;
-    mask-repeat: no-repeat;
-    mask-position: center;
-
-    &--no-photo {
-      mask-image: var(--no-photo-icon);
-    }
-  }
-}
-
-.detail-image {
-  display: block;
-  max-height: 33vh;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-
-  &--thumb {
-    filter: blur(2px);
-    transform: scale(1.02);
-  }
-
-  &--preview {
-    filter: none;
-    transform: none;
-  }
-
-  &--full {
-    opacity: 0;
-    transition: opacity 200ms ease-in;
-  }
-
-  &--loaded {
-    opacity: 1;
-  }
-}
-
-.detail-image-container {
-  position: relative;
-  width: fit-content;
-  max-width: calc(100% - var(--spacing-4) * 2);
-  margin: var(--spacing-3) auto 0;
-
-  &:hover .detail-image-edit-btn {
-    opacity: 1;
-  }
-}
-
-.detail-image-edit-btn {
+.detail-media__edit-btn {
   position: absolute;
-  top: var(--spacing-2);
-  right: var(--spacing-2);
+  inset-block-start: var(--spacing-2);
+  inset-inline-end: var(--spacing-2);
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -246,7 +157,7 @@
   &__icon {
     width: 2.5rem;
     height: 2.5rem;
-    background: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
+    background: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
     mask-image: var(--no-photo-icon);
     mask-size: contain;
     mask-repeat: no-repeat;
@@ -315,16 +226,5 @@
 @keyframes detail-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes detail-placeholder-pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-
-  50% {
-    opacity: 1;
   }
 }

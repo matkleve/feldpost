@@ -18,11 +18,9 @@ interface MediaDetailMediaEventsHelperDeps {
   };
   signals: {
     media: WritableSignal<ImageRecord | null>;
-    fullResPreloaded: WritableSignal<boolean>;
     activeJobId: WritableSignal<string | null>;
   };
   callbacks: {
-    reloadSignedUrlsForCurrentMedia: () => Promise<void>;
     t: DetailTranslateFn;
   };
 }
@@ -36,11 +34,9 @@ export class MediaDetailMediaEventsHelper {
     this.deps.signals.media.update((prev) =>
       prev ? { ...prev, storage_path: event.newStoragePath, thumbnail_path: null } : prev,
     );
-    this.deps.signals.fullResPreloaded.set(false);
     this.deps.signals.activeJobId.set(null);
 
     this.deps.services.mediaDownloadService.invalidate(event.mediaId);
-    await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
       URL.revokeObjectURL(event.localObjectUrl);
@@ -60,11 +56,9 @@ export class MediaDetailMediaEventsHelper {
       console.log('[detail-view] updating media record: storage_path =', event.newStoragePath);
       return prev ? { ...prev, storage_path: event.newStoragePath, thumbnail_path: null } : prev;
     });
-    this.deps.signals.fullResPreloaded.set(false);
     this.deps.signals.activeJobId.set(null);
 
     this.deps.services.mediaDownloadService.invalidate(event.mediaId);
-    await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
       URL.revokeObjectURL(event.localObjectUrl);

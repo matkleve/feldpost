@@ -125,18 +125,21 @@ export class MediaDownloadService {
     storagePath: string,
     thumbnailPath: string | null | undefined,
     previewGenerationStatus?: MediaPreviewRequest['previewGenerationStatus'],
+    context: MediaPreviewRequest['context'] = 'grid',
   ): void {
     const existing = this.knownPreviewRequests.get(mediaId);
     const hadThumb = Boolean(existing?.thumbnailPath?.trim());
     const hasThumb = Boolean(thumbnailPath?.trim());
+    const desiredSize =
+      context === 'detail' ? 'detail' : context === 'map' ? 'marker' : 'thumb';
     this.knownPreviewRequests.set(mediaId, {
       mediaId,
       storagePath,
       thumbnailPath,
       previewGenerationStatus:
         previewGenerationStatus ?? existing?.previewGenerationStatus ?? 'idle',
-      context: 'grid',
-      desiredSize: 'thumb',
+      context,
+      desiredSize,
     });
     if (!hadThumb && hasThumb) {
       this.deliveryRefresh$.next(mediaId);

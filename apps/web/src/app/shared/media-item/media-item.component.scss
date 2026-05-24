@@ -161,7 +161,7 @@
     transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
-.media-item__slot--selected .media-item__quiet-actions.media-item__quiet-actions--select {
+.media-item__slot--selected .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   transition:

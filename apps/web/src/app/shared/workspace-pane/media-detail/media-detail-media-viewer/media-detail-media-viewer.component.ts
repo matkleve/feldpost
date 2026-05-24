@@ -1,9 +1,6 @@
-import type {
-  AfterViewInit} from '@angular/core';
 import {
+  ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  ElementRef,
   computed,
   effect,
   inject,
@@ -12,129 +9,89 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import type { MediaLoadState } from '../../../../core/media-download/media-download.types';
+import type { PreviewGenerationStatus } from '../../../../core/media/preview-generation-status.types';
+import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { PhotoLightboxComponent } from '../../../../shared/photo-lightbox/photo-lightbox.component';
-import { UniversalMediaComponent } from '../../../../shared/media/universal-media.component';
-import type { MediaRenderState } from '../../../../core/media/media-renderer.types';
-import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
+import { PhotoLightboxComponent } from '../../../photo-lightbox/photo-lightbox.component';
+import { MediaDisplayComponent } from '../../../media-display/media-display.component';
+import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
+
 @Component({
   selector: 'app-media-detail-media-viewer',
   standalone: true,
-  imports: [
-    PhotoLightboxComponent,
-    UniversalMediaComponent,
-    ...HLM_BUTTON_IMPORTS,
-  ],
+  imports: [MediaDisplayComponent, PhotoLightboxComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './media-detail-media-viewer.component.html',
   styleUrl: './media-detail-media-viewer.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MediaDetailMediaViewerComponent implements AfterViewInit {
+export class MediaDetailMediaViewerComponent {
   private readonly i18nService = inject(I18nService);
-  private readonly hostElement = inject(ElementRef<HTMLElement>);
-  private readonly destroyRef = inject(DestroyRef);
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
+
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   readonly hasPhoto = input(false);
-  readonly canOpenLightbox = input(false);
-  readonly imageReady = input(false);
-  readonly isImageLoading = input(false);
-  readonly thumbState = input<MediaLoadState>('idle');
-  readonly fullState = input<MediaLoadState>('idle');
-  readonly thumbnailUrl = input<string | null>(null);
-  readonly fullResUrl = input<string | null>(null);
-  readonly fullResPreloaded = input(false);
+  readonly mediaId = input.required<string>();
+  readonly storagePath = input<string | null>(null);
+  readonly thumbnailPath = input<string | null>(null);
+  readonly previewGenerationStatus = input<PreviewGenerationStatus | null>(null);
+  readonly originalFilename = input<string | null>(null);
+  readonly aspectRatioHint = input<number | null>(null);
+  readonly contentObjectPosition = input('center center');
+  readonly isImageLike = input(false);
   readonly displayTitle = input('');
   readonly replacing = input(false);
   readonly replaceError = input<string | null>(null);
   readonly acceptTypes = input('');
 
   readonly fileSelected = output<File>();
-  readonly slotMeasured = output<{ widthRem: number; heightRem: number }>();
   readonly contextMenuRequested = output<void>();
+
   readonly showLightbox = signal(false);
+  readonly mediaAspectRatio = signal('1');
 
-  readonly currentViewerState = computed<MediaRenderState>(() => {
-    const fullResUrl = this.fullResUrl();
-    const thumbnailUrl = this.thumbnailUrl();
+  private readonly mediaPreview = viewChild(MediaDisplayComponent);
 
-    if (fullResUrl && this.fullResPreloaded()) {
-      return {
-        status: 'loaded',
-        url: fullResUrl,
-        resolvedTier: 'full',
-      };
+  readonly canOpenLightbox = computed(() => {
+    if (!this.isImageLike()) {
+      return false;
     }
-
-    if (thumbnailUrl && this.thumbState() === 'loaded') {
-      return {
-        status: 'loaded',
-        url: thumbnailUrl,
-        resolvedTier: 'mid',
-      };
+    const preview = this.mediaPreview();
+    if (!preview) {
+      return false;
     }
-
-    if (this.thumbState() === 'error' && this.fullState() === 'error') {
-      return {
-        status: 'error',
-        reason: 'image-unavailable',
-      };
-    }
-
-    if (
-      this.isImageLoading() ||
-      this.thumbState() === 'loading' ||
-      this.fullState() === 'loading'
-    ) {
-      return { status: 'loading' };
-    }
-
-    return { status: 'placeholder' };
+    const state = preview.state();
+    return state === 'content-visible' || state === 'content-fade-in' || !!preview.resolvedUrl();
   });
 
-  readonly usesThumbnailPreview = computed(
-    () =>
-      this.currentViewerState().status === 'loaded' &&
-      !this.fullResPreloaded() &&
-      this.canOpenLightbox(),
-  );
-
-  /** Drop fixed slot height once the asset defines the preview footprint. */
-  readonly detailMediaMinHeightRem = computed(() =>
-    this.currentViewerState().status === 'loaded' ? null : 8,
-  );
-
-  readonly viewerAltText = computed(() => {
-    const title = this.displayTitle().trim();
-    return title.length > 0
-      ? title
-      : this.t('workspace.imageDetail.mediaPreview.alt', 'Media preview');
+  readonly lightboxImageUrl = computed(() => {
+    const id = this.mediaId().trim();
+    if (!id) {
+      return null;
+    }
+    return (
+      this.mediaDownloadService.getCachedUrl(id, 'full') ??
+      this.mediaPreview()?.resolvedUrl() ??
+      this.mediaDownloadService.getCachedUrl(id, 'thumb')
+    );
   });
 
-  readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
-
-  private resizeObserver: ResizeObserver | null = null;
-  private observedSlotElement: HTMLElement | null = null;
-
-  constructor() {
-    effect(() => {
-      this.hasPhoto();
-      queueMicrotask(() => this.observeCurrentSlot());
-    });
-
-    this.destroyRef.onDestroy(() => {
-      this.resizeObserver?.disconnect();
-      this.resizeObserver = null;
-      this.observedSlotElement = null;
-    });
+  onMediaAspectRatioChange(ratio: number): void {
+    if (!Number.isFinite(ratio) || ratio <= 0) {
+      return;
+    }
+    this.mediaAspectRatio.set(String(ratio));
   }
 
-  ngAfterViewInit(): void {
-    this.observeCurrentSlot();
+  onSlotGeometryTransitionEnd(event: TransitionEvent): void {
+    if (event.propertyName !== 'aspect-ratio' && event.propertyName !== 'inline-size') {
+      return;
+    }
+    this.mediaPreview()?.onSlotGeometryTransitionEnd();
   }
 
   openLightbox(): void {
-    if (!this.canOpenLightbox()) {
+    if (!this.canOpenLightbox() || !this.lightboxImageUrl()) {
       return;
     }
     this.showLightbox.set(true);
@@ -147,76 +104,27 @@ export class MediaDetailMediaViewerComponent implements AfterViewInit {
   }
 
   triggerFileInput(): void {
-    const input = this.fileInput()?.nativeElement;
-    if (input) {
-      input.value = '';
-      input.click();
+    const inputEl = document.getElementById(this.fileInputId) as HTMLInputElement | null;
+    if (inputEl) {
+      inputEl.value = '';
+      inputEl.click();
     }
   }
 
   onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+    const inputEl = event.target as HTMLInputElement;
+    const file = inputEl.files?.[0];
     if (file) {
       this.fileSelected.emit(file);
     }
   }
 
-  private observeCurrentSlot(): void {
-    const host = this.hostElement.nativeElement;
-    const slotElement = host.querySelector(
-      '.detail-image-wrap, .detail-upload-prompt',
-    ) as HTMLElement | null;
+  readonly fileInputId = 'media-detail-file-input';
 
-    if (!slotElement) {
-      return;
-    }
-
-    if (this.observedSlotElement === slotElement) {
-      return;
-    }
-
-    if (typeof ResizeObserver === 'undefined') {
-      const rect = slotElement.getBoundingClientRect();
-      this.emitRemSlot(rect.width, rect.height);
-      this.observedSlotElement = slotElement;
-      return;
-    }
-
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) {
-        return;
-      }
-      this.emitRemSlot(entry.contentRect.width, entry.contentRect.height);
+  constructor() {
+    effect(() => {
+      this.mediaId();
+      this.mediaAspectRatio.set('1');
     });
-    this.resizeObserver.observe(slotElement);
-
-    const rect = slotElement.getBoundingClientRect();
-    this.emitRemSlot(rect.width, rect.height);
-    this.observedSlotElement = slotElement;
-  }
-
-  private emitRemSlot(widthPx: number, heightPx: number): void {
-    if (widthPx <= 0 || heightPx <= 0) {
-      return;
-    }
-
-    const rootSize = this.rootFontSizePx();
-    this.slotMeasured.emit({
-      widthRem: widthPx / rootSize,
-      heightRem: heightPx / rootSize,
-    });
-  }
-
-  private rootFontSizePx(): number {
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return 16;
-    }
-
-    const rootSize = getComputedStyle(document.documentElement).fontSize;
-    const parsed = Number.parseFloat(rootSize);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 16;
   }
 }

@@ -1,5 +1,5 @@
 <input
-  #fileInput
+  [id]="fileInputId"
   type="file"
   [accept]="acceptTypes()"
   class="visually-hidden"
@@ -8,36 +8,46 @@
 />
 
 @if (hasPhoto()) {
-  <div class="detail-image-container">
-    <button
-      class="detail-image-wrap"
-      type="button"
-      [disabled]="!canOpenLightbox()"
-      [class.detail-image-wrap--static]="!canOpenLightbox()"
-      [class.detail-image-wrap--resolving]="currentViewerState().status !== 'loaded'"
-      [class.detail-image-wrap--thumb-preview]="usesThumbnailPreview()"
-      [attr.aria-label]="
-        t('workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media')
-      "
-      (click)="openLightbox()"
-      (contextmenu)="requestContextMenu($event)"
+  <div class="detail-media__container">
+    <div
+      class="detail-media__slot"
+      [style.--media-aspect-ratio]="mediaAspectRatio()"
+      (transitionend)="onSlotGeometryTransitionEnd($event)"
     >
-      <app-universal-media
-        class="detail-image-media"
-        [context]="'detail'"
-        [requestedTier]="'full'"
-        [renderState]="currentViewerState()"
-        [altText]="viewerAltText()"
-        [fit]="'contain'"
-        [minHeightRem]="detailMediaMinHeightRem()"
+      <app-media-display
+        #mediaPreview
+        class="detail-media__preview"
+        downloadContext="detail"
+        slotGeometry="intrinsic"
+        [mediaId]="mediaId()"
+        [storagePath]="storagePath()"
+        [thumbnailPath]="thumbnailPath()"
+        [previewGenerationStatus]="previewGenerationStatus()"
+        [originalFilename]="originalFilename()"
+        [aspectRatio]="aspectRatioHint()"
+        [contentObjectPosition]="contentObjectPosition()"
+        maxWidth="min(100%, calc(40rem / 1.618))"
+        maxHeight="33vh"
+        (aspectRatioChange)="onMediaAspectRatioChange($event)"
       />
-    </button>
+
+      <button
+        type="button"
+        class="detail-media__open"
+        [disabled]="!canOpenLightbox()"
+        [attr.aria-label]="
+          t('workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media')
+        "
+        (click)="openLightbox()"
+        (contextmenu)="requestContextMenu($event)"
+      ></button>
+    </div>
 
     <button
       hlmBtn
       variant="ghost"
       size="icon"
-      class="detail-image-edit-btn"
+      class="detail-media__edit-btn"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.replaceMedia.aria', 'Replace media')"
       [attr.title]="t('workspace.imageDetail.action.replaceMedia.title', 'Replace media')"
@@ -45,7 +55,7 @@
       (click)="triggerFileInput()"
     >
       @if (replacing()) {
-        <span class="detail-image-edit-btn__spinner" aria-hidden="true"></span>
+        <span class="detail-media__edit-btn__spinner" aria-hidden="true"></span>
       } @else {
         <span class="material-icons" aria-hidden="true">edit</span>
       }
@@ -83,9 +93,9 @@
   </div>
 }
 
-@if (showLightbox() && canOpenLightbox() && (fullResUrl() || thumbnailUrl())) {
+@if (showLightbox() && lightboxImageUrl(); as imageUrl) {
   <app-photo-lightbox
-    [imageUrl]="(fullResUrl() ?? thumbnailUrl())!"
+    [imageUrl]="imageUrl"
     [alt]="displayTitle()"
     (closed)="showLightbox.set(false)"
   />

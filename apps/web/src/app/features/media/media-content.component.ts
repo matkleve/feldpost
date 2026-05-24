@@ -29,6 +29,7 @@ import {
 } from '../../core/media-query/media-gallery-view.helpers';
 import type { PreviewGenerationStatus } from '../../core/media/preview-generation-status.types';
 import { MediaThumbnailRealtimeService } from '../../core/media-thumbnail/media-thumbnail-realtime.service';
+import type { ZoomToLocationEvent } from '../upload/upload-panel-row-handlers';
 
 export type MediaContentState = 'loading' | 'error' | 'ready';
 
@@ -254,6 +255,7 @@ export class MediaContentComponent implements AfterViewInit {
   });
 
   readonly itemClicked = output<string>();
+  readonly zoomToLocationRequested = output<ZoomToLocationEvent>();
   readonly retry = output<void>();
 
   private readonly loadingTransitionEffect = effect(
@@ -366,6 +368,23 @@ export class MediaContentComponent implements AfterViewInit {
 
   onItemContextActionRequested(event: ItemContextActionEvent): void {
     this.debugInteraction('item.contextActionRequested.received', null, { event });
+
+    if (event.actionId !== 'zoom_house' && event.actionId !== 'zoom_street') {
+      return;
+    }
+
+    const item =
+      this.gridItems().find((row) => row.id === event.itemId) ??
+      this.items().find((row) => row.id === event.itemId);
+    if (!item || item.latitude === null || item.longitude === null) {
+      return;
+    }
+
+    this.zoomToLocationRequested.emit({
+      mediaId: item.id,
+      lat: item.latitude,
+      lng: item.longitude,
+    });
   }
 
   isSelected(mediaId: string): boolean {
@@ -379,16 +398,12 @@ export class MediaContentComponent implements AfterViewInit {
       selectedBefore: Array.from(this.workspaceSelectionService.selectedMediaIds()),
     });
 
-    const current = this.workspaceSelectionService.selectedMediaIds();
-    const next = new Set(current);
-
-    if (selected) {
-      next.add(mediaId);
-    } else {
-      next.delete(mediaId);
+    const currentlySelected = this.workspaceSelectionService.isSelected(mediaId);
+    if (currentlySelected === selected) {
+      return;
     }
 
-    this.workspaceSelectionService.selectAllInScope(Array.from(next));
+    this.workspaceSelectionService.toggle(mediaId, { additive: true });
 
     this.debugInteraction('selection.toggle.applied', null, {
       mediaId,

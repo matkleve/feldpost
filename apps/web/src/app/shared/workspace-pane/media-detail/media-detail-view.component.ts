@@ -34,8 +34,9 @@ import {
   MEDIA_PLACEHOLDER_ICON,
   MediaDownloadService,
 } from '../../../core/media-download/media-download.service';
-import type { MediaTier } from '../../../core/media/media-renderer.types';
-import type { MediaLoadState } from '../../../core/media-download/media-download.types';
+import { aspectRatioHintFromFileType, usesNativeAspectRatio } from '../../../core/media/aspect-ratio-from-file-type.helpers';
+import { resolveFileType } from '../../../core/media/file-type-registry';
+import { mediaFileIdentityFromRecord } from '../../../core/media/media-file-identity.helpers';
 import {
   GeocodingService,
   type ForwardGeocodeResult,
@@ -166,7 +167,6 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly workspaceView = inject(WorkspaceViewService);
   private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
-  private readonly mediaOrchestrator = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
   private readonly actionEngineService = inject(ActionEngineService);
@@ -215,14 +215,9 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly locationPrimaryErrors = signal<Record<string, string>>({});
   /** Target row for next map pick (`UploadLocationMapPickRequest.locationRowId`). */
   private pendingMapPickLocationRowId: string | null = null;
-  readonly fullResUrl = signal<string | null>(null);
-  readonly thumbnailUrl = signal<string | null>(null);
   readonly metadataKeyDefinitions = signal<
     import('./media-detail-view.types').MetadataKeyDefinitionView[]
   >([]);
-  readonly fullResPreloaded = signal(false);
-  readonly detailSlotWidthRem = signal<number | null>(null);
-  readonly detailSlotHeightRem = signal<number | null>(null);
   readonly replaceError = signal<string | null>(null);
   readonly editDate = signal('');
   readonly editTime = signal('');
@@ -252,17 +247,27 @@ export class MediaDetailViewComponent implements OnDestroy {
     'country',
   ]);
 
-  readonly thumbState = computed<MediaLoadState>(() => {
-    const id = this.mediaId();
-    return id ? this.mediaDownloadService.getLoadState(id, 'thumb')() : 'idle';
-  });
-
-  readonly fullState = computed<MediaLoadState>(() => {
-    const id = this.mediaId();
-    return id ? this.mediaDownloadService.getLoadState(id, 'full')() : 'idle';
-  });
-
   readonly hasPhoto = computed(() => !!this.media()?.storage_path);
+
+  readonly detailMediaIdentity = computed(() => this.media()?.id ?? this.mediaId() ?? '');
+
+  readonly detailFileIdentity = computed(() => {
+    const record = this.media();
+    return mediaFileIdentityFromRecord({
+      storage_path: record?.storage_path ?? null,
+      original_filename: record?.original_filename ?? null,
+    });
+  });
+
+  readonly detailFileTypeDefinition = computed(() => resolveFileType(this.detailFileIdentity()));
+
+  readonly detailAspectRatioHint = computed(() =>
+    aspectRatioHintFromFileType(this.detailFileTypeDefinition()),
+  );
+
+  readonly detailSlotContentObjectPosition = computed(() =>
+    usesNativeAspectRatio(this.detailFileTypeDefinition()) ? 'center center' : 'top center',
+  );
 
   readonly replacing = computed(() => {
     const jobId = this.activeJobId();
@@ -325,46 +330,12 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly fullAddress = computed(() => resolveFullAddress(this.media()));
 
-  readonly isMediaLoading = computed(() => {
-    const thumb = this.thumbState();
-    const full = this.fullState();
-    if (thumb === 'no-media') return false;
-    if (thumb === 'error' && full === 'error') return false;
-    if (thumb === 'loaded' || this.fullResPreloaded()) return false;
-    return true;
-  });
-
-  readonly isImageLoading = this.isMediaLoading;
-
-  readonly mediaReady = computed(() => {
-    if (this.fullResPreloaded()) return true;
-    return this.thumbState() === 'loaded' && !!this.thumbnailUrl();
-  });
-
-  readonly imageReady = computed(() => this.mediaReady());
-
   readonly isImageLike = computed(() =>
     isImageLikeMedia(
       this.mediaType(),
       this.mediaMimeType(),
       this.media()?.storage_path ?? null,
     ),
-  );
-
-  readonly canOpenLightbox = computed(() => {
-    if (!(this.fullResUrl() || this.thumbnailUrl())) return false;
-    return this.isImageLike();
-  });
-
-  readonly requestedDetailTier = computed<MediaTier>(() => 'full');
-
-  readonly effectiveDetailTier = computed<MediaTier>(() =>
-    this.mediaOrchestrator.selectRequestedTierForSlot({
-      requestedTier: this.requestedDetailTier(),
-      slotWidthRem: this.detailSlotWidthRem(),
-      slotHeightRem: this.detailSlotHeightRem(),
-      context: 'detail',
-    }),
   );
 
   readonly infoChips = computed(() =>
@@ -428,16 +399,12 @@ export class MediaDetailViewComponent implements OnDestroy {
       metadata: this.metadata,
       loading: this.loading,
       error: this.error,
-      fullResPreloaded: this.fullResPreloaded,
-      fullResUrl: this.fullResUrl,
-      thumbnailUrl: this.thumbnailUrl,
       projectOptions: this.projectOptions,
       metadataKeyDefinitions: this.metadataKeyDefinitions,
     },
     computed: {
       mediaType: () => this.mediaType(),
       mediaMimeType: () => this.mediaMimeType(),
-      detailTier: () => this.effectiveDetailTier(),
     },
   });
 
@@ -478,11 +445,9 @@ export class MediaDetailViewComponent implements OnDestroy {
     },
     signals: {
       media: this.media,
-      fullResPreloaded: this.fullResPreloaded,
       activeJobId: this.activeJobId,
     },
     callbacks: {
-      reloadSignedUrlsForCurrentMedia: () => this.reloadSignedUrlsForCurrentMedia(),
       t: this.t,
     },
   });
@@ -630,11 +595,6 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.mediaMimeType.set(null);
     this.mediaLocationStatus.set(null);
     this.projectSearch.set('');
-    this.fullResPreloaded.set(false);
-    this.fullResUrl.set(null);
-    this.thumbnailUrl.set(null);
-    this.detailSlotWidthRem.set(null);
-    this.detailSlotHeightRem.set(null);
     this.error.set(null);
     this.loading.set(false);
     this.saving.set(false);
@@ -808,8 +768,6 @@ export class MediaDetailViewComponent implements OnDestroy {
   private async loadMedia(id: string): Promise<void> {
     this.abortController?.abort();
     this.abortController = new AbortController();
-    this.detailSlotWidthRem.set(null);
-    this.detailSlotHeightRem.set(null);
     await this.dataFacade.loadMedia(id, this.abortController.signal);
     if (this.abortController.signal.aborted) {
       return;
@@ -905,18 +863,6 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   onReconciliationDismiss(): void {
     this.reconciliationOffer.set(null);
-  }
-
-  private async reloadSignedUrlsForCurrentMedia(): Promise<void> {
-    const media = this.media();
-    if (!media?.storage_path) return;
-    const signal = this.abortController?.signal ?? new AbortController().signal;
-    await this.dataFacade.loadSignedUrls(media, signal);
-  }
-
-  onDetailSlotMeasured(slot: { widthRem: number; heightRem: number }): void {
-    this.detailSlotWidthRem.set(slot.widthRem);
-    this.detailSlotHeightRem.set(slot.heightRem);
   }
 
   close(): void {

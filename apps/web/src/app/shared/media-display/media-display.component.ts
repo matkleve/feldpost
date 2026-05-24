@@ -16,6 +16,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { resolveFileType } from '../../core/media/file-type-registry';
 import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identity.helpers';
 import { requiresServerPreviewGeneration } from '../../core/media/office-preview-eligibility.helpers';
+import type { MediaContext } from '../../core/media/media-renderer.types';
 import type { PreviewGenerationStatus } from '../../core/media/preview-generation-status.types';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaPreviewGenerationService } from '../../core/media-thumbnail/media-preview-generation.service';
@@ -60,6 +61,8 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly contentObjectPosition = input('center center');
   /** `fill` = fixed-slot mode (row); `intrinsic` = height driven by media aspect-ratio (grid). */
   readonly slotGeometry = input<'fill' | 'intrinsic'>('fill');
+  /** Drives tier floor and cache registration context in MediaDownloadService. */
+  readonly downloadContext = input<MediaContext>('grid');
   /**
    * Emits the resolved aspect ratio so the parent slot can mirror it.
    * CSS cannot inherit child → parent, so an output is the only spec-compliant channel.
@@ -119,6 +122,7 @@ export class MediaDisplayComponent implements AfterViewInit {
           storagePath,
           thumbnailPath,
           previewStatus,
+          this.downloadContext(),
         );
       }
 

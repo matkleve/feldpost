@@ -38,7 +38,7 @@ export class HlmButtonDirective {
     const size = this.size();
     const edge = this.iconPlacement();
     let iconPlacement: ButtonIconPlacementCva = 'balanced';
-    if (size !== 'icon') {
+    if (size !== 'icon' && size !== 'icon-sm' && size !== 'icon-md') {
       if (edge === 'start') iconPlacement = 'iconStart';
       else if (edge === 'end') iconPlacement = 'iconEnd';
     }
