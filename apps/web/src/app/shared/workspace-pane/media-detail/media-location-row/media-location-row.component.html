@@ -124,22 +124,79 @@
   @if (overflowMenuOpen() && overflowAnchorElement()) {
     <app-dropdown-shell
       [anchor]="overflowAnchorElement()"
-      panelClass="option-menu-surface"
+      panelClass="media-location-row__overflow-panel option-menu-surface"
       placement="end"
       [minWidth]="220"
       (closeRequested)="closeOverflowMenu()"
     >
-      <div class="option-menu-list" role="menu">
+      <div class="media-location-row__overflow-menu detail-context-menu__items flex flex-col" role="menu">
         <p class="option-menu-list__hint" role="presentation">
           {{ t('location.shared_edit.hint', 'Editing this address updates it for all linked media.') }}
         </p>
-        <button class="option-menu-list__item" type="button" role="menuitem" (click)="onMapPick()">
-          {{ t('workspace.imageDetail.action.chooseLocationMap.title', 'Change GPS on map') }}
+        <button
+          hlmMenuItem
+          class="w-full"
+          type="button"
+          role="menuitem"
+          (click)="onMapPick()"
+        >
+          <span class="material-icons option-menu-item__icon" aria-hidden="true">map</span>
+          <span class="min-w-0 flex-1 text-left">{{
+            t('workspace.imageDetail.action.chooseLocationMap.title', 'Change GPS on map')
+          }}</span>
         </button>
-        @for (action of copyActions(); track action.field) {
-          <button class="option-menu-list__item" type="button" role="menuitem" (click)="onCopyAction(action)">
-            {{ t(action.labelKey, action.labelFallback) }}
-          </button>
+        @if (copyMenuActions().length > 0) {
+          <div
+            class="media-location-row__copy-submenu-host"
+            (mouseenter)="openCopySubmenu()"
+            (mouseleave)="scheduleCloseCopySubmenu()"
+            (focusin)="openCopySubmenu()"
+            (focusout)="scheduleCloseCopySubmenu()"
+          >
+            <button
+              #copySubmenuTrigger
+              hlmMenuItem
+              class="media-location-row__copy-trigger w-full"
+              type="button"
+              role="menuitem"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="copySubmenuOpen()"
+              (click)="onCopySubmenuTriggerClick($event)"
+            >
+              <span class="material-icons option-menu-item__icon" aria-hidden="true">content_copy</span>
+              <span class="min-w-0 flex-1 text-left">{{ t('location.copy.menu', 'Copy') }}</span>
+              <span
+                class="material-icons option-menu-item__icon media-location-row__copy-chevron"
+                aria-hidden="true"
+                >chevron_right</span
+              >
+            </button>
+            @if (copySubmenuOpen() && copySubmenuGeom(); as geom) {
+              <div
+                class="media-location-row__copy-submenu option-menu-surface flex flex-col"
+                role="menu"
+                data-location-copy-submenu
+                [style.top.px]="geom.top"
+                [style.left.px]="geom.left"
+                [attr.aria-label]="t('location.copy.menu', 'Copy')"
+                (mouseenter)="cancelCloseCopySubmenu()"
+                (mouseleave)="scheduleCloseCopySubmenu()"
+              >
+                @for (action of copyMenuActions(); track action.field) {
+                  <button
+                    hlmMenuItem
+                    class="w-full"
+                    type="button"
+                    role="menuitem"
+                    (click)="onCopyAction(action)"
+                  >
+                    <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
+                    <span class="min-w-0 flex-1 text-left">{{ t(action.labelKey, action.labelFallback) }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
         }
       </div>
     </app-dropdown-shell>

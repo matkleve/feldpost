@@ -47,6 +47,46 @@ export function formatLocationDisplayLine(
   return parts.join(', ') || '—';
 }
 
+/** Clipboard string for “Copy full address” — all populated address parts, comma-separated. */
+export function formatLocationFullAddressCopy(
+  row: Pick<
+    MediaItemLocationRow,
+    | 'street'
+    | 'house_number'
+    | 'staircase'
+    | 'door'
+    | 'floor'
+    | 'postcode'
+    | 'city'
+    | 'district'
+    | 'country'
+    | 'address_label'
+  >,
+  doorLabel: string,
+): string {
+  const segments: string[] = [];
+  const line = formatLocationDisplayLine(row, doorLabel);
+  if (line && line !== '—') {
+    segments.push(line);
+  }
+  if (row.postcode?.trim()) {
+    segments.push(row.postcode.trim());
+  }
+  if (row.floor?.trim()) {
+    segments.push(row.floor.trim());
+  }
+  if (row.city?.trim()) {
+    segments.push(row.city.trim());
+  }
+  if (row.district?.trim()) {
+    segments.push(row.district.trim());
+  }
+  if (row.country?.trim()) {
+    segments.push(row.country.trim());
+  }
+  return segments.join(', ');
+}
+
 export function locationGpsDisplay(row: MediaItemLocationRow): string | null {
   if (row.latitude == null || row.longitude == null) {
     return null;

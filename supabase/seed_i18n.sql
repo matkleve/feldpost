@@ -29329,14 +29329,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.copy.menu', 'Copy location field', 'en', 'media-detail location row copy menu button')
+values (null, 'location.copy.menu', 'Copy', 'en', 'media-detail location row copy submenu trigger')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Copy location field', 'published'
+select t.id, 'en', 'Copy', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.copy.menu'
 on conflict (app_text_id, lang) do update set
@@ -29344,7 +29344,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standortfeld kopieren', 'published'
+select t.id, 'de', 'Kopieren', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.copy.menu'
 on conflict (app_text_id, lang) do update set
@@ -29352,7 +29352,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Copia campo posizione', 'published'
+select t.id, 'it', 'Copia', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.copy.menu'
 on conflict (app_text_id, lang) do update set
@@ -29360,7 +29360,38 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.copy.street', 'Copy street', 'en', 'media-detail location copy menu')
+values (null, 'location.copy.full_address', 'Copy full address', 'en', 'media-detail location copy submenu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy full address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.full_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gesamte Adresse kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.full_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia indirizzo completo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.full_address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.street', 'Copy street', 'en', 'media-detail location copy submenu')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -29386,6 +29417,99 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Copia via', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.copy.street'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.postcode', 'Copy postcode', 'en', 'media-detail location copy submenu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy postcode', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.postcode'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Postleitzahl kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.postcode'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia CAP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.postcode'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.floor', 'Copy floor', 'en', 'media-detail location copy submenu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy floor', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.floor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Stockwerk kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.floor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia piano', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.floor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.copy.city', 'Copy city', 'en', 'media-detail location copy submenu')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy city', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.city'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Stadt kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.city'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia città', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.copy.city'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

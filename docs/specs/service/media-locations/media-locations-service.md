@@ -112,17 +112,21 @@ When the same `location_id` is linked to more than one `media_item_id`, editing 
 
 ## Copy Dropdown Contract
 
+Side submenu under overflow **Copy** (full address first, then parts). Hidden when source empty. `extra_information` excluded.
+
 | Copy action | Field | i18n key |
 | --- | --- | --- |
+| Copy full address | composed line | `location.copy.full_address` |
 | Copy street | `street` | `location.copy.street` |
 | Copy house number | `house_number` | `location.copy.house_number` |
 | Copy staircase | `staircase` | `location.copy.staircase` |
 | Copy door / Top | `door` | `location.copy.door` |
+| Copy postcode | `postcode` | `location.copy.postcode` |
+| Copy floor | `floor` | `location.copy.floor` |
+| Copy city | `city` | `location.copy.city` |
 | Copy district | `district` | `location.copy.district` |
 | Copy country | `country` | `location.copy.country` |
 | Copy GPS | `latitude,longitude` | `location.copy.gps` |
-
-Hidden when source empty. `extra_information` excluded.
 
 ## i18n Keys
 

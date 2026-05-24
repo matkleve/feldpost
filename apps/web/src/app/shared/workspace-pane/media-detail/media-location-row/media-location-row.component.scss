@@ -66,4 +66,25 @@
     color: var(--muted-foreground);
     pointer-events: none;
   }
+
+  // Copy flyout uses fixed viewport coords — escapes dropdown-shell overflow clipping.
+  // @see docs/specs/ui/media-detail/media-detail-location-section.md
+  .media-location-row__copy-chevron {
+    margin-left: auto;
+  }
+
+  .media-location-row__copy-submenu {
+    position: fixed;
+    z-index: 302;
+    min-width: 11rem;
+    box-sizing: border-box;
+    padding: var(--spacing-1);
+    gap: 2px;
+  }
+}
+
+// Allow side flyout to paint outside the overflow dropdown host.
+// @see apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.scss
+app-dropdown-shell.media-location-row__overflow-panel {
+  overflow: visible;
 }

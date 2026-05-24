@@ -945,8 +945,12 @@ location.action.confirmDelete,Confirm delete location,media-detail location row 
 location.action.show_on_map,Show on map,media-detail location row map action button,Show on map,Auf Karte anzeigen,Mostra sulla mappa
 location.action.show_on_map.disabled,No coordinates for this location,media-detail location row map action disabled,No coordinates for this location,Keine Koordinaten für diesen Standort,Nessuna coordinata per questa posizione
 location.action.overflow,More location actions,media-detail location row overflow menu button,More location actions,Weitere Standortaktionen,Altre azioni posizione
-location.copy.menu,Copy location field,media-detail location row copy menu button,Copy location field,Standortfeld kopieren,Copia campo posizione
-location.copy.street,Copy street,media-detail location copy menu,Copy street,Straße kopieren,Copia via
+location.copy.menu,Copy,media-detail location row copy submenu trigger,Copy,Kopieren,Copia
+location.copy.full_address,Copy full address,media-detail location copy submenu,Copy full address,Gesamte Adresse kopieren,Copia indirizzo completo
+location.copy.street,Copy street,media-detail location copy submenu,Copy street,Straße kopieren,Copia via
+location.copy.postcode,Copy postcode,media-detail location copy submenu,Copy postcode,Postleitzahl kopieren,Copia CAP
+location.copy.floor,Copy floor,media-detail location copy submenu,Copy floor,Stockwerk kopieren,Copia piano
+location.copy.city,Copy city,media-detail location copy submenu,Copy city,Stadt kopieren,Copia città
 location.copy.house_number,Copy house number,media-detail location copy menu,Copy house number,Hausnummer kopieren,Copia numero civico
 location.copy.staircase,Copy staircase,media-detail location copy menu,Copy staircase,Stiege kopieren,Copia scala
 location.copy.door,Copy door / Top,media-detail location copy menu,Copy door / Top,Top kopieren,Copia piano

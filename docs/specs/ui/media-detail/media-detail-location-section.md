@@ -74,10 +74,10 @@ Single-line read format (segments in `[]` omitted when empty):
 | --- | --- |
 | `l2` | Edit |
 | `l1` | Show on map (disabled when row has no coordinates) |
-| `r1` | Overflow menu: change GPS on map, copy field actions (see copy table in service spec) |
+| `r1` | Overflow menu: change GPS on map, **Copy** submenu (flyout to the right) |
 | `r2` | Delete (double-confirm inline) |
 
-Copy actions for null/empty fields are **hidden** in the overflow menu. `extra_information` is excluded from copy.
+Overflow menu uses `hlmMenuItem` rows with icons (same pattern as detail header context menu). **Copy** opens a side submenu: **Copy full address** first, then per-field copy actions (see service spec copy table). Null/empty fields are hidden. `extra_information` is excluded from copy.
 
 ## Add/Search Dropdown (4 zones)
 

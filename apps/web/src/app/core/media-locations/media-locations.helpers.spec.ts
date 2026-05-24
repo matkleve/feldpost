@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatLocationFullAddressCopy,
   legacyMediaHasGps,
   locationDisplaySnapshotFromRows,
   mergeLocationDisplayIntoImageRecord,
@@ -89,5 +90,9 @@ describe('media-locations.helpers', () => {
     expect(merged.latitude).toBeNull();
     expect(merged.address_label).toBeNull();
     expect(merged.location_unresolved).toBe(true);
+  });
+
+  it('formatLocationFullAddressCopy joins populated address segments', () => {
+    expect(formatLocationFullAddressCopy(BASE_ROW, 'Top')).toBe('Main 1, Vienna, AT');
   });
 });
