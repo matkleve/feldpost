@@ -15,8 +15,14 @@ import {
 } from '@angular/core';
 import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { Router } from '@angular/router';
 import type { SettingsPaneSectionId } from '../../core/settings-pane/settings-pane.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
+import {
+  buildSettingsUrl,
+  parseSettingsUrl,
+  resolveShellSegmentsFromUrl,
+} from '../../core/settings-pane/settings-url.helpers';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
@@ -110,6 +116,7 @@ export class SettingsOverlayComponent {
   readonly optLayout = toggleOptionLayout;
 
   private readonly i18nService = inject(I18nService);
+  private readonly router = inject(Router);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly orgSearchTuning = inject(OrgSearchTuningService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
@@ -256,6 +263,9 @@ export class SettingsOverlayComponent {
 
   /** Scroll + highlight from TOC buttons (same visual treatment as URL-driven subsection). */
   scrollToDetailAnchor(sectionId: string, subsectionSlug: string): void {
+    if (isKnownSettingsSectionId(sectionId, this.visibleSectionRegistry())) {
+      this.syncSettingsUrl(sectionId as SettingsPaneSectionId, subsectionSlug);
+    }
     const token = ++this.tocHighlightToken;
     const invite = this.inviteSection();
     void invite?.panelMode();
@@ -501,5 +511,18 @@ export class SettingsOverlayComponent {
 
       target.classList.remove('settings-overlay__subsection-highlight');
     }, SUBSECTION_HIGHLIGHT_DURATION_MS);
+  }
+
+  private syncSettingsUrl(section: SettingsPaneSectionId, subsection: string | null): void {
+    const parsed = parseSettingsUrl(this.router.url);
+    const shellSegments = parsed?.shellSegments ?? resolveShellSegmentsFromUrl(this.router.url);
+    const target = buildSettingsUrl(shellSegments, section, subsection);
+    const currentPath = this.router.url.split('?')[0]?.split('#')[0] ?? this.router.url;
+
+    if (currentPath === target) {
+      return;
+    }
+
+    void this.router.navigateByUrl(target, { replaceUrl: true });
   }
 }

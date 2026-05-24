@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Full-screen **map route host** after login: **map zone** (Leaflet), floating controls, and map-specific dialogs. **`MapShellComponent`** is loaded as the **child** of **`app-authenticated-app-layout`** for **`/`**, **`/map`**, and **`/settings/**`** (`app.routes.ts`). **Workspace Pane** + horizontal split are **not** owned here — they live on **`AuthenticatedAppLayoutComponent`** (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload/upload-button-zone.md), [drag-divider](../component/workspace/drag-divider.md); product UCs 1–3 in use-case docs.
+Full-screen **map route host** after login: **map zone** (Leaflet), floating controls, and map-specific dialogs. **`MapShellComponent`** is loaded as the **child** of **`app-authenticated-app-layout`** for **`/`**, **`/map`**, and **`/map/settings/**`** (`authenticated-app.routes.ts`). Settings overlay is global; see [settings-routes.md](settings-routes.md). **Workspace Pane** + horizontal split are **not** owned here — they live on **`AuthenticatedAppLayoutComponent`** (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload/upload-button-zone.md), [drag-divider](../component/workspace/drag-divider.md); product UCs 1–3 in use-case docs.
 
 ## What It Looks Like
 
@@ -98,7 +98,7 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- Loaded via Angular Router as a **child** of **`app-authenticated-app-layout`** at `/`, `/map`, and `/settings/**` with `authGuard`
+- Loaded via Angular Router as a **child** of **`app-authenticated-app-layout`** at `/`, `/map`, and `/map/settings/**` with `authGuard`
 - Initializes Leaflet in `afterNextRender` (browser-only)
 - All child floating components are positioned via CSS within Map Zone
 - Never calls Leaflet directly from template — uses `MapAdapter`

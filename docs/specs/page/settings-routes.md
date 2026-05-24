@@ -2,26 +2,40 @@
 
 ## What It Is
 
-Deep-linkable settings under `/settings` and optional `/settings/:section/:subsection` segments. The visible UI is the **settings overlay**. `AppComponent` parses the URL, drives `SettingsPaneService.openFromRoute`, and keeps the user on the prior map/app URL when the overlay closes while still on a settings path.
+Deep-linkable settings as a **suffix on the active app shell**, not a standalone page:
+
+- `/{shell}/settings`
+- `/{shell}/settings/:section`
+- `/{shell}/settings/:section/:subsection`
+
+`shell` is one of: `map` (canonical for map root), `media`, `projects`, or `projects/:projectId`.
+
+The visible UI is the **settings overlay** on `AppComponent`. The shell route (`MapShellComponent`, `MediaComponent`, `ProjectsPageComponent`, …) stays mounted under the authenticated layout `router-outlet`.
+
+Legacy top-level `/settings/...` URLs redirect to `/map/settings/...`.
 
 ## What It Looks Like
 
-Same overlay as manual open from the nav avatar: two-column panel anchored to the sidebar. URL only changes which section/subsection is selected inside the overlay; the host route remains `MapShellComponent` for `/settings*` per `app.routes.ts`.
+Same overlay as manual open from the nav avatar: two-column panel anchored to the sidebar. The URL encodes shell + section + subsection; closing the overlay strips the `/settings/...` suffix and leaves the shell path (e.g. `/media/settings/account` → `/media`).
 
 ## Where It Lives
 
-- **Routes**: `'' | 'map' | 'settings' | 'settings/:section' | 'settings/:section/:subsection'` → `MapShellComponent` (`app.routes.ts`).
-- **URL → pane**: `AppComponent` constructor effects (`parseSettingsUrl`, `normalizeSettingsSection`).
-- **Overlay UI**: [settings-overlay.md](../ui/settings-overlay/settings-overlay.md), code `features/settings-overlay/`.
+- **Routes:** `apps/web/src/app/layout/authenticated-app.routes.ts` — per-shell `settings` suffix routes; legacy `settings` → `map/settings` redirects.
+- **URL helpers:** `apps/web/src/app/core/settings-pane/settings-url.helpers.ts`
+- **URL → pane:** `AppComponent` constructor effects (`parseSettingsUrl`, overlay close → `stripSettingsSuffix`).
+- **In-overlay navigation:** `SettingsOverlayComponent` updates the URL on section / TOC selection (`replaceUrl: true`).
+- **Overlay UI:** [settings-overlay.md](../ui/settings-overlay/settings-overlay.md), code `features/settings-overlay/`.
 
 ## Actions
 
-| #   | User Action                         | System Response                                           | Triggers                    |
-| --- | ----------------------------------- | --------------------------------------------------------- | --------------------------- |
-| 1   | Navigates to `/settings`            | Overlay opens; section defaults via `openFromRoute`       | `NavigationEnd` → effect    |
-| 2   | Navigates to `/settings/account`    | Overlay opens on `account` section                        | URL segments                |
-| 3   | Closes overlay while URL is `/settings*` | Router navigates to `lastNonSettingsUrl` (fallback `/`) | overlay close + effect      |
-| 4   | Opens overlay from nav without URL  | User may navigate to `/settings` explicitly               | `NavComponent`              |
+| #   | User Action                                      | System Response                                              | Triggers                         |
+| --- | ------------------------------------------------ | ------------------------------------------------------------ | -------------------------------- |
+| 1   | Navigates to `/media/settings`                   | `MediaComponent` in outlet; overlay opens (default section)  | `NavigationEnd` → effect         |
+| 2   | Navigates to `/map/settings/map/marker-motion`   | `MapShellComponent`; overlay opens map section + subsection  | URL segments                     |
+| 3   | Opens settings from nav while on `/projects`     | Navigates to `/projects/settings`                            | `NavComponent.toggleSettingsOverlay` |
+| 4   | Closes overlay while URL has settings suffix     | Router navigates to shell-only path (`stripSettingsSuffix`)  | overlay close + effect           |
+| 5   | Navigates to legacy `/settings/account`          | Redirect to `/map/settings/account`                          | route redirect                   |
+| 6   | Cold link `/media/settings/general/language`     | Media shell + overlay on general → language anchor           | parse + `openFromRoute`          |
 
 ## Component Hierarchy
 
@@ -29,16 +43,15 @@ Same overlay as manual open from the nav avatar: two-column panel anchored to th
 AppComponent
 ├── effects: URL ↔ SettingsPaneService
 ├── ss-settings-overlay
-└── router-outlet → AuthenticatedAppLayout → MapShell (for /settings*)
+└── router-outlet → AuthenticatedAppLayout → { MapShell | Media | Projects } (shell from URL)
 ```
-
-Section bodies (account, appearance, etc.) are specified under [settings-overlay](../ui/settings-overlay/README.md), not duplicated here.
 
 ## Data
 
 | Concern           | Owner spec / module                                      |
 | ----------------- | -------------------------------------------------------- |
 | Section IDs       | `SettingsPaneService` (typed section union)              |
+| URL parsing       | `settings-url.helpers.ts`                              |
 | Section content   | Per-file specs in `docs/specs/ui/settings-overlay/`      |
 | Facade orchestration | [settings-pane service](../service/settings-pane/README.md) — code: `core/settings-pane/` |
 
@@ -46,25 +59,29 @@ Section bodies (account, appearance, etc.) are specified under [settings-overlay
 
 | Name                 | Owner                 | Notes                                      |
 | -------------------- | --------------------- | ------------------------------------------ |
-| `lastNonSettingsUrl` | `AppComponent`        | Restores map/media/projects after settings |
 | Pane open + section  | `SettingsPaneService` | Signals: `open`, `selectedSectionId`, etc. |
+| Shell path           | Router URL            | Prefix before `/settings` segment          |
 
 ## File Map
 
-| File                              | Purpose                    |
-| --------------------------------- | -------------------------- |
-| `app.component.ts`                | URL parse + pane sync      |
-| `app.routes.ts`                   | `/settings*` → map shell   |
-| `features/settings-overlay/*`     | Overlay presentation       |
+| File                                              | Purpose                         |
+| ------------------------------------------------- | ------------------------------- |
+| `app.component.ts`                                | URL parse + overlay sync        |
+| `layout/authenticated-app.routes.ts`              | Shell + settings suffix routes  |
+| `core/settings-pane/settings-url.helpers.ts`      | Parse / build / strip URLs        |
+| `features/settings-overlay/settings-overlay.component.ts` | Section / TOC → URL sync |
+| `features/nav/nav.component.ts`                   | Open/close settings on current shell |
+| `features/settings-overlay/*`                     | Overlay presentation            |
 
 ## Wiring
 
 - `SettingsPaneService.openFromRoute(section, subsection)` centralizes open + selection.
-- **Subsection slugs** must match `SETTINGS_SECTION_ANCHORS` in `apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts` (examples: `/settings/general/language`, `/settings/map/marker-motion`, `/settings/invite-management/qr`). Legacy **Account** blocks also accept `data-settings-subsection` values (`profile`, `password`, …) aligned with the same slugs.
-- Invalid section slug: `normalizeSettingsSection` returns `null`; service still receives normalized input from `openFromRoute` implementation (see code).
+- **Subsection slugs** must match `SETTINGS_SECTION_ANCHORS` in `apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts` (examples: `/map/settings/general/language`, `/media/settings/map/marker-motion`).
+- Invalid section slug: `normalizeSettingsSection` returns `null`; `openFromRoute` still defaults section via service.
 
 ## Acceptance Criteria
 
-- [ ] Adding a new settings URL segment updates `AppComponent` parsing and this doc in the same change.
+- [ ] Settings URLs use `/{shell}/settings/...` for all new links and docs.
+- [ ] Legacy `/settings/...` redirects preserve section/subsection.
+- [ ] Closing overlay from a settings suffix URL returns to the same shell without loading the wrong host (e.g. map shell under `/media`).
 - [ ] Overlay UX changes remain authored in `docs/specs/ui/settings-overlay/` with this page linking only.
-- [ ] Closing overlay from a `/settings*` URL returns the user to a non-settings surface without stranding them on a blank settings path.

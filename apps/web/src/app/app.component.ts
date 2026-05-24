@@ -8,6 +8,10 @@ import { ToastContainerComponent } from './shared/toast/toast-container.componen
 import { LocationResolverService } from './core/location-resolver/location-resolver.service';
 import { AuthService } from './core/auth/auth.service';
 import { SettingsPaneService } from './core/settings-pane/settings-pane.service';
+import {
+  parseSettingsUrl,
+  stripSettingsSuffix,
+} from './core/settings-pane/settings-url.helpers';
 import { UploadNotificationService } from './core/upload/upload-notification.service';
 import { DbTranslationService } from './core/i18n/db-translation.service';
 import { DomTranslationService } from './core/i18n/dom-translation.service';
@@ -24,16 +28,6 @@ interface I18nDevCommands {
     localStorageOverride: 'true' | 'false' | null;
   };
 }
-
-type SettingsSectionId =
-  | 'general'
-  | 'appearance'
-  | 'notifications'
-  | 'map'
-  | 'search-tuning'
-  | 'data'
-  | 'account'
-  | 'invite-management';
 
 declare global {
   interface Window {
@@ -55,7 +49,6 @@ export class AppComponent implements OnInit {
   private readonly uploadNotifications = inject(UploadNotificationService);
   private readonly dbTranslationService = inject(DbTranslationService);
   private readonly domTranslationService = inject(DomTranslationService);
-  private lastNonSettingsUrl = '/';
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -72,7 +65,7 @@ export class AppComponent implements OnInit {
   constructor() {
     effect(() => {
       const url = this.currentUrl();
-      const settingsTarget = this.parseSettingsUrl(url);
+      const settingsTarget = parseSettingsUrl(url);
 
       if (settingsTarget) {
         this.settingsPaneService.openFromRoute(settingsTarget.section, settingsTarget.subsection);
@@ -82,18 +75,15 @@ export class AppComponent implements OnInit {
       if (this.settingsPaneService.open()) {
         this.settingsPaneService.close();
       }
-
-      if (!url.startsWith('/auth')) {
-        this.lastNonSettingsUrl = url;
-      }
     });
 
     effect(() => {
-      const onSettingsRoute = this.parseSettingsUrl(this.currentUrl()) !== null;
+      const url = this.currentUrl();
+      const onSettingsRoute = parseSettingsUrl(url) !== null;
       const overlayOpen = this.settingsPaneService.open();
 
       if (onSettingsRoute && !overlayOpen) {
-        void this.router.navigateByUrl(this.lastNonSettingsUrl || '/');
+        void this.router.navigateByUrl(stripSettingsSuffix(url));
       }
     });
   }
@@ -148,52 +138,5 @@ export class AppComponent implements OnInit {
     }
 
     window.location.reload();
-  }
-
-  private parseSettingsUrl(
-    url: string,
-  ): { section: SettingsSectionId | null; subsection: string | null } | null {
-    const parsedUrl = this.router.parseUrl(url);
-    const segments =
-      parsedUrl.root.children['primary']?.segments.map((segment) => segment.path) ?? [];
-
-    if (segments[0] !== 'settings') {
-      return null;
-    }
-
-    const section = this.normalizeSettingsSection(segments[1] ?? null);
-    const subsection = this.normalizeSubsection(segments[2] ?? null);
-
-    return { section, subsection };
-  }
-
-  private normalizeSettingsSection(section: string | null): SettingsSectionId | null {
-    if (!section) {
-      return null;
-    }
-
-    if (
-      section === 'general' ||
-      section === 'appearance' ||
-      section === 'notifications' ||
-      section === 'map' ||
-      section === 'search-tuning' ||
-      section === 'data' ||
-      section === 'account' ||
-      section === 'invite-management'
-    ) {
-      return section;
-    }
-
-    return null;
-  }
-
-  private normalizeSubsection(subsection: string | null): string | null {
-    if (!subsection) {
-      return null;
-    }
-
-    const normalized = subsection.trim().toLowerCase();
-    return normalized.length > 0 ? normalized : null;
   }
 }

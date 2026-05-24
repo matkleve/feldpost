@@ -10,7 +10,7 @@ Full-screen or large overlay settings UI reacts to **`open`**, **`selectedSectio
 
 ## Where It Lives
 
-- **Route:** `/settings/**` and global command actions
+- **Route:** `/{shell}/settings/**` (legacy `/settings/**` → `/map/settings/**`) and global command actions
 - **Runtime module:** `apps/web/src/app/core/settings-pane/`
 
 ## Actions

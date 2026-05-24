@@ -1773,6 +1773,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   onQrInviteCommandRequested(): void {
+    void this.router.navigateByUrl('/map/settings/invite-management/qr');
     this.settingsPaneService.openInviteManagementFromCommand('worker');
   }
 

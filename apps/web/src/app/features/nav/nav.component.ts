@@ -22,6 +22,12 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
+import {
+  buildSettingsUrl,
+  parseSettingsUrl,
+  resolveShellSegmentsFromUrl,
+  stripSettingsSuffix,
+} from '../../core/settings-pane/settings-url.helpers';
 
 export interface NavItem {
   /** Google Material Icon ligature name (e.g. 'map', 'perm_media'). */
@@ -93,7 +99,18 @@ export class NavComponent {
   });
 
   toggleSettingsOverlay(): void {
-    void this.router.navigate(['/settings']);
+    const url = this.router.url;
+
+    if (this.settingsPaneService.open()) {
+      this.settingsPaneService.close();
+      if (parseSettingsUrl(url)) {
+        void this.router.navigateByUrl(stripSettingsSuffix(url));
+      }
+      return;
+    }
+
+    const shellSegments = resolveShellSegmentsFromUrl(url);
+    void this.router.navigateByUrl(buildSettingsUrl(shellSegments));
   }
 
   @HostListener('document:pointerdown', ['$event'])
@@ -112,6 +129,10 @@ export class NavComponent {
 
     if (!clickedInsideSidebar && !clickedInsideSettingsPane) {
       this.settingsPaneService.close();
+      const url = this.router.url;
+      if (parseSettingsUrl(url)) {
+        void this.router.navigateByUrl(stripSettingsSuffix(url));
+      }
     }
   }
 }

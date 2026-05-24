@@ -55,7 +55,7 @@ AuthenticatedAppLayout (split host)
         └── Tab: "Upload" → UploadPanelComponent (1:1 embed)
 ```
 
-**Settings:** **`/settings/**`** uses the same authenticated layout and **`MapShellComponent`** in the main column (settings overlay behavior unchanged). No separate settings-only layout fork in this phase.
+**Settings:** **`/{shell}/settings/**`** (e.g. `/media/settings/...`) keeps the current shell in the main column; overlay is global on `AppComponent`. See [settings-routes.md](settings-routes.md).
 
 ---
 
