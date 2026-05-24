@@ -19,11 +19,8 @@
   border-radius: var(--radius-full);
 }
 
-// Positions map action in the top-right corner of the media item.
-// @see docs/specs/component/media/media-item.md#what-it-looks-like
-.media-item-quiet-actions__button--map {
-  inset-inline-end: var(--spacing-2);
-}
+// Map button geometry and hover visibility live in app-media-item-map-action (encapsulated child).
+// @see docs/specs/component/media/media-item-map-action.md
 
 // Scales Material icon glyphs to the compact icon-sm hit target.
 // @see docs/specs/component/media/media-item-quiet-actions.md#state-machine

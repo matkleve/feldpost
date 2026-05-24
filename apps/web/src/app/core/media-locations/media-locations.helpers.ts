@@ -35,6 +35,17 @@ export function locationGpsDisplay(row: MediaItemLocationRow): string | null {
   return `${row.latitude.toFixed(6)}, ${row.longitude.toFixed(6)}`;
 }
 
+/** Rows that can drive map zoom (paired lat/lng). */
+export function locationsWithGps(rows: readonly MediaItemLocationRow[]): MediaItemLocationRow[] {
+  return rows.filter(
+    (row) => row.latitude != null && row.longitude != null && Number.isFinite(row.latitude) && Number.isFinite(row.longitude),
+  );
+}
+
+export function legacyMediaHasGps(latitude: number | null, longitude: number | null): boolean {
+  return latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude);
+}
+
 export function locationMatchesQuery(row: MediaItemLocationRow, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) {

@@ -19,6 +19,7 @@ import type {
 import type { ImageRecord } from '../../core/media-query/media-query.types';
 import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
+import type { MediaItemMapZoomEvent } from './media-item-map-action.component';
 import type { MediaItemQuietActionsState } from './media-item-quiet-actions.component';
 import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
 import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
@@ -234,6 +235,7 @@ export class MediaItemComponent {
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
     });
+    (event.currentTarget as HTMLElement | null)?.blur();
   }
 
   onOpenDoubleClick(event: MouseEvent): void {
@@ -290,21 +292,14 @@ export class MediaItemComponent {
     this.contextActionRequested.emit(payload);
   }
 
-  onMapActionRequested(): void {
-    this.debugInteraction('quietAction.map.requested', null);
-    if (this.disabled() || !this.hasMapLocation()) {
-      this.debugInteraction('quietAction.map.blocked', null, {
-        blockedByDisabled: this.disabled(),
-        blockedByMissingMapLocation: !this.hasMapLocation(),
-      });
-      return;
-    }
-    const payload = {
-      itemId: this.itemId(),
+  onMapZoomRequested(event: MediaItemMapZoomEvent): void {
+    this.debugInteraction('quietAction.map.zoomRequested', null, { event });
+    this.contextActionRequested.emit({
+      itemId: event.mediaId,
       actionId: 'zoom_house',
       contextId: this.actionContextId(),
-    };
-    this.debugInteraction('quietAction.map.emit.contextActionRequested', null, { payload });
-    this.contextActionRequested.emit(payload);
+      lat: event.lat,
+      lng: event.lng,
+    });
   }
 }

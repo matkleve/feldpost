@@ -402,14 +402,16 @@ export class MediaContentComponent implements AfterViewInit {
     const item =
       this.gridItems().find((row) => row.id === event.itemId) ??
       this.items().find((row) => row.id === event.itemId);
-    if (!item || item.latitude === null || item.longitude === null) {
+    const lat = event.lat ?? item?.latitude ?? null;
+    const lng = event.lng ?? item?.longitude ?? null;
+    if (!item || lat === null || lng === null) {
       return;
     }
 
     this.zoomToLocationRequested.emit({
       mediaId: item.id,
-      lat: item.latitude,
-      lng: item.longitude,
+      lat,
+      lng,
     });
   }
 

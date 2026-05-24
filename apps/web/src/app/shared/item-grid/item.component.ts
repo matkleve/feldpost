@@ -7,6 +7,9 @@ export type ItemContextActionEvent = {
   itemId: string;
   actionId: string;
   contextId: string | null;
+  /** Map zoom targets a specific `media_item_locations` row when provided. */
+  lat?: number;
+  lng?: number;
 };
 
 @Directive({

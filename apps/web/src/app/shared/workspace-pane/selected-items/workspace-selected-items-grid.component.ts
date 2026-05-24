@@ -545,13 +545,15 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
 
   onMediaItemContextAction(img: WorkspaceImage, event: ItemContextActionEvent): void {
     if (event.actionId === 'zoom_house' || event.actionId === 'zoom_street') {
-      if (!Number.isFinite(img.latitude) || !Number.isFinite(img.longitude)) {
+      const lat = event.lat ?? img.latitude;
+      const lng = event.lng ?? img.longitude;
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
         return;
       }
       this.zoomToLocationRequested.emit({
         mediaId: img.id,
-        lat: img.latitude,
-        lng: img.longitude,
+        lat,
+        lng,
       });
       return;
     }

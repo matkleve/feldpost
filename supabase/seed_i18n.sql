@@ -21703,7 +21703,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.loading.more', 'Loading more media...', 'en', 'apps/web/src/app/features/media/media.component.html text-node')
+values (null, 'media.page.loading.more', 'Loading more media...', 'en', 'apps/web/src/app/features/media/media-content.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -21729,6 +21729,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Caricamento di altri contenuti multimediali...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.page.loading.more'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.listEnd', 'No more media', 'en', 'apps/web/src/app/features/media/media-content.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No more media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.listEnd'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine weiteren Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.listEnd'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun altro file multimediale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.listEnd'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -30812,6 +30843,130 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Solo gli admin dell''organizzazione possono modificare l''ottimizzazione ricerca. Puoi consultare le impostazioni correnti qui sotto.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.thumbnailCard.mapLocations.search.placeholder', 'Search locations…', 'en', 'media grid map location picker search')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search locations…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standorte suchen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca ubicazioni…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.thumbnailCard.mapLocations.search.clear', 'Clear search', 'en', 'media grid map location picker search')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Clear search', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.clear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Suche löschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.clear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cancella ricerca', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.clear'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.thumbnailCard.mapLocations.filterEmpty', 'No locations match your search', 'en', 'media grid map location picker empty filter')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No locations match your search', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.filterEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Standorte passen zur Suche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.filterEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna ubicazione corrisponde alla ricerca', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.filterEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.thumbnailCard.mapLocations.legacyFallback', 'Location', 'en', 'media grid map location picker legacy label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.legacyFallback'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.legacyFallback'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ubicazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.legacyFallback'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -1,0 +1,73 @@
+<button
+  #mapTriggerRef
+  type="button"
+  class="media-item-map-action__trigger"
+  hlmBtn
+  variant="outline"
+  size="icon-sm"
+  [disabled]="disabled() || loading()"
+  [attr.aria-label]="mapLabel()"
+  [attr.aria-expanded]="open()"
+  [attr.aria-haspopup]="open() ? 'listbox' : null"
+  (click)="onMapClick($event)"
+>
+  @if (loading()) {
+    <span class="media-item-map-action__spinner" aria-hidden="true"></span>
+  } @else {
+    <span class="material-icons media-item-map-action__icon" aria-hidden="true">map</span>
+  }
+</button>
+
+@if (open()) {
+  <app-dropdown-shell
+    class="media-item-map-action__shell"
+    panelClass="option-menu-surface media-item-map-action__panel"
+    placement="end"
+    [anchor]="triggerEl()"
+    [minWidth]="panelMinWidth()"
+    (closeRequested)="close()"
+  >
+    <app-standard-dropdown
+      class="media-item-map-action__dropdown"
+      [showSearch]="showSearch()"
+      [searchTerm]="searchTerm()"
+      [searchPlaceholder]="
+        t('workspace.thumbnailCard.mapLocations.search.placeholder', 'Search locations…')
+      "
+      [showDefaultClearAction]="true"
+      [clearSearchAriaLabel]="t('workspace.thumbnailCard.mapLocations.search.clear', 'Clear search')"
+      [itemsClass]="'standard-dropdown__items--scrollbar-gutter-delegate'"
+      (searchTermChange)="searchTerm.set($event)"
+      (clearRequested)="searchTerm.set('')"
+    >
+      <div dropdown-items class="media-item-map-action__list" role="listbox">
+        @for (target of filteredTargets(); track target.locationId ?? target.label) {
+          <button
+            hlmMenuItem
+            type="button"
+            class="media-item-map-action__option"
+            role="option"
+            (mousedown)="$event.preventDefault()"
+            (click)="selectTarget(target)"
+          >
+            @if (target.isPrimary) {
+              <span class="material-icons media-item-map-action__primary-icon" aria-hidden="true"
+                >star</span
+              >
+            }
+            <span class="media-item-map-action__option-label min-w-0">{{ target.label }}</span>
+          </button>
+        } @empty {
+          <p class="media-item-map-action__empty">
+            {{
+              t(
+                'workspace.thumbnailCard.mapLocations.filterEmpty',
+                'No locations match your search'
+              )
+            }}
+          </p>
+        }
+      </div>
+    </app-standard-dropdown>
+  </app-dropdown-shell>
+}

@@ -24,19 +24,14 @@
   }
 </button>
 
-<!-- Renders top-right map quick action as icon-only control. -->
-<!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
-<button
-  type="button"
-  class="media-item-quiet-actions__button media-item-quiet-actions__button--map"
-  hlmBtn
-  variant="outline"
-  size="icon-sm"
+<!-- Map zoom: single location flies to map; multiple opens StandardDropdown picker. -->
+<!-- @see docs/specs/component/media/media-item-quiet-actions.md#state-machine -->
+<app-media-item-map-action
+  [mediaItemId]="mediaItemId()"
+  [legacyLatitude]="legacyLatitude()"
+  [legacyLongitude]="legacyLongitude()"
+  [legacyAddressLabel]="legacyAddressLabel()"
+  [mapLabel]="mapLabel()"
   [disabled]="mapActionDisabled()"
-  [attr.aria-label]="mapLabel()"
-  (click)="onMapClick($event)"
->
-  <!-- Shows map glyph for jump-to-location quick action. -->
-  <!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
-  <span class="material-icons media-item-quiet-actions__icon" aria-hidden="true">map</span>
-</button>
+  (mapZoomRequested)="mapZoomRequested.emit($event)"
+/>

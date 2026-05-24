@@ -1,16 +1,15 @@
-// Detail preview uses app-media-item + media-display (same stack as /media grid).
-// @see docs/specs/component/media/media-item.md#spacing--framing-ownership
+// Reserves the detail hero band (~⅓ viewport) and centers embedded media-item.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
 :host {
-  display: block;
-  min-height: 0;
-  min-width: 0;
-}
-
-.detail-media__container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  inline-size: fit-content;
-  max-inline-size: calc(100% - var(--spacing-4) * 2);
-  margin: var(--spacing-3) auto 0;
+  box-sizing: border-box;
+  block-size: 33vh;
+  padding-block-start: var(--spacing-3);
+  min-inline-size: 0;
+  max-inline-size: 100%;
 
   &:hover .detail-media__edit-btn,
   &:focus-within .detail-media__edit-btn {
@@ -18,18 +17,15 @@
   }
 }
 
-// Fixed footprint for detail hero; media-item slot + display fill inside.
-.detail-media__frame {
+// Shrink-wrap embed so slot border tracks media width, centered in the hero band.
+// @see docs/specs/component/media/media-item.md#visual-behavior-contract
+:host app-media-item {
   display: block;
-  inline-size: min(100%, calc(40rem / 1.618));
-  max-block-size: 33vh;
-  min-block-size: 8rem;
-  margin-inline: auto;
-}
-
-.detail-media__item {
-  display: block;
-  inline-size: 100%;
+  flex: 0 1 auto;
+  align-self: center;
+  block-size: 100%;
+  inline-size: fit-content;
+  max-inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
 }
 
 .detail-media__edit-btn {
@@ -87,30 +83,30 @@
 }
 
 .detail-replace-error {
-  margin-top: var(--spacing-1);
+  position: absolute;
+  inset-inline: var(--spacing-2);
+  inset-block-end: 0;
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-xs);
   color: var(--destructive);
   text-align: center;
 }
 
+// No-media upload surface: single flex column, no nested placeholder wrapper.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
 .detail-upload-prompt {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-3);
-  margin: var(--spacing-3) auto 0;
+  box-sizing: border-box;
+  block-size: 100%;
+  margin-inline: auto;
   padding: var(--spacing-6) var(--spacing-4);
-  width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
+  inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
   background: var(--background);
   border-radius: var(--radius-lg);
-
-  &__placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-2);
-  }
 
   &__icon {
     width: 2.5rem;

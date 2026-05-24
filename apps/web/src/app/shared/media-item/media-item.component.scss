@@ -21,13 +21,16 @@
   block-size: var(--item-grid-slot-block-size, 6.5rem);
 }
 
-// Detail pane embed: no square grid cell; slot sizes to media inside max-height frame.
-// @see docs/specs/ui/media-detail/media-detail-media-viewer.md
+// Detail pane embed: host shrink-wraps slot so border/hover geometry matches media, not hero band width.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
 :host.media-item--detail-embed {
+  container-type: size;
   aspect-ratio: unset;
-  block-size: auto;
-  inline-size: 100%;
+  display: block;
+  block-size: 100%;
+  inline-size: fit-content;
   max-inline-size: 100%;
+  margin-inline: auto;
 }
 
 :host.media-item--detail-embed .media-item__slot {
@@ -35,8 +38,10 @@
   inset-block-start: auto;
   inset-inline-start: auto;
   transform: none;
-  margin-inline: auto;
-  max-block-size: 33vh;
+  margin-inline: 0;
+  block-size: auto;
+  max-block-size: 100cqh;
+  inline-size: min(100cqw, calc(100cqh * var(--media-aspect-ratio, 1)));
 }
 
 // Placeholder tiles without item payload use muted pulse inside inherited slot geometry.
@@ -179,10 +184,26 @@
     transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
+// Selected tiles keep the select affordance visible; map stays hover-only (see quiet-actions SCSS).
+// @see docs/specs/component/media/media-item.md#actions--interactions
 .media-item__slot--selected .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
+  pointer-events: none;
   transition:
     opacity var(--motion-duration-fast) var(--motion-ease-out),
     transform var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.media-item__slot--selected .media-item-quiet-actions__button--select {
+  pointer-events: auto;
+}
+
+.media-item__slot--selected app-media-item-map-action {
+  pointer-events: none;
+}
+
+.media-item__slot--selected:hover app-media-item-map-action,
+.media-item__slot--selected:focus-within app-media-item-map-action {
+  pointer-events: auto;
 }

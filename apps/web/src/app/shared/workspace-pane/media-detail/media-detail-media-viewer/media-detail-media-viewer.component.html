@@ -8,51 +8,44 @@
 />
 
 @if (hasPhoto() && item(); as record) {
-  <div class="detail-media__container">
-    <div class="detail-media__frame">
-      <app-media-item
-        class="detail-media__item"
-        [itemId]="mediaId()"
-        [item]="record"
-        mode="grid-md"
-        state="idle"
-        downloadContext="detail"
-        [showInteractionChrome]="false"
-        (pointerClick)="onItemPointerClick($event)"
-        (embedContextMenu)="onEmbedContextMenu()"
-      />
-    </div>
+  <app-media-item
+    [itemId]="mediaId()"
+    [item]="record"
+    mode="grid-md"
+    state="idle"
+    downloadContext="detail"
+    [showInteractionChrome]="false"
+    (pointerClick)="onItemPointerClick($event)"
+    (embedContextMenu)="onEmbedContextMenu()"
+  />
 
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="detail-media__edit-btn"
-      type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.replaceMedia.aria', 'Replace media')"
-      [attr.title]="t('workspace.imageDetail.action.replaceMedia.title', 'Replace media')"
-      [disabled]="replacing()"
-      (click)="triggerFileInput()"
-    >
-      @if (replacing()) {
-        <span class="detail-media__edit-btn__spinner" aria-hidden="true"></span>
-      } @else {
-        <span class="material-icons" aria-hidden="true">edit</span>
-      }
-    </button>
-
-    @if (replaceError()) {
-      <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+  <button
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-media__edit-btn"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.replaceMedia.aria', 'Replace media')"
+    [attr.title]="t('workspace.imageDetail.action.replaceMedia.title', 'Replace media')"
+    [disabled]="replacing()"
+    (click)="triggerFileInput()"
+  >
+    @if (replacing()) {
+      <span class="detail-media__edit-btn__spinner" aria-hidden="true"></span>
+    } @else {
+      <span class="material-icons" aria-hidden="true">edit</span>
     }
-  </div>
+  </button>
+
+  @if (replaceError()) {
+    <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+  }
 } @else {
   <div class="detail-upload-prompt">
-    <div class="detail-upload-prompt__placeholder">
-      <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
-      <span class="detail-upload-prompt__text">{{
-        t('workspace.imageDetail.noMediaAttached', 'No media attached')
-      }}</span>
-    </div>
+    <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
+    <span class="detail-upload-prompt__text">{{
+      t('workspace.imageDetail.noMediaAttached', 'No media attached')
+    }}</span>
     <button
       hlmBtn
       variant="default"

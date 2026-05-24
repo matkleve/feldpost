@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
+import {
+  MediaItemMapActionComponent,
+  type MediaItemMapZoomEvent,
+} from './media-item-map-action.component';
 
 // Stable state: interactive-unselected, interactive-selected,
 // interactive-map-disabled, interactive-selected-map-disabled, disabled.
@@ -13,7 +17,7 @@ export type MediaItemQuietActionsState =
 
 @Component({
   selector: 'app-media-item-quiet-actions',
-  imports: [...HLM_BUTTON_IMPORTS],
+  imports: [...HLM_BUTTON_IMPORTS, MediaItemMapActionComponent],
   templateUrl: './media-item-quiet-actions.component.html',
   styleUrl: './media-item-quiet-actions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +28,10 @@ export type MediaItemQuietActionsState =
 })
 export class MediaItemQuietActionsComponent {
   readonly state = input<MediaItemQuietActionsState>('interactive-unselected');
+  readonly mediaItemId = input.required<string>();
+  readonly legacyLatitude = input<number | null>(null);
+  readonly legacyLongitude = input<number | null>(null);
+  readonly legacyAddressLabel = input<string | null>(null);
   readonly selectLabel = input('');
   readonly mapLabel = input('');
 
@@ -49,7 +57,7 @@ export class MediaItemQuietActionsComponent {
   );
 
   readonly selectRequested = output<void>();
-  readonly mapRequested = output<void>();
+  readonly mapZoomRequested = output<MediaItemMapZoomEvent>();
 
   onSelectClick(event: Event): void {
     event.preventDefault();
@@ -58,14 +66,14 @@ export class MediaItemQuietActionsComponent {
       return;
     }
     this.selectRequested.emit();
+    this.releasePointerFocus(event);
   }
 
-  onMapClick(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    if (this.mapActionDisabled()) {
-      return;
+  /** Prevents :focus-within on the slot from keeping chrome visible after mouse use. */
+  private releasePointerFocus(event: Event): void {
+    const target = event.currentTarget;
+    if (target instanceof HTMLElement) {
+      target.blur();
     }
-    this.mapRequested.emit();
   }
 }

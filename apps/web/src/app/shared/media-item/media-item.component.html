@@ -36,10 +36,14 @@
     <app-media-item-quiet-actions
       class="media-item__quiet-actions"
       [state]="quietActionsState()"
+      [mediaItemId]="itemId()"
+      [legacyLatitude]="item()?.latitude ?? null"
+      [legacyLongitude]="item()?.longitude ?? null"
+      [legacyAddressLabel]="item()?.address_label ?? null"
       [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
       [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
       (selectRequested)="onSelectRequested()"
-      (mapRequested)="onMapActionRequested()"
+      (mapZoomRequested)="onMapZoomRequested($event)"
     />
     }
 
