@@ -51,14 +51,8 @@
 
     <div class="detail-scroll">
       <app-media-detail-media-viewer
-        [hasPhoto]="hasPhoto()"
+        [item]="media()"
         [mediaId]="detailMediaIdentity()"
-        [storagePath]="media()?.storage_path ?? null"
-        [thumbnailPath]="media()?.thumbnail_path ?? null"
-        [previewGenerationStatus]="media()?.preview_generation_status ?? null"
-        [originalFilename]="media()?.original_filename ?? null"
-        [aspectRatioHint]="detailAspectRatioHint()"
-        [contentObjectPosition]="detailSlotContentObjectPosition()"
         [isImageLike]="isImageLike()"
         [displayTitle]="displayTitle()"
         [replacing]="replacing()"

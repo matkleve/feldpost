@@ -34,9 +34,6 @@ import {
   MEDIA_PLACEHOLDER_ICON,
   MediaDownloadService,
 } from '../../../core/media-download/media-download.service';
-import { aspectRatioHintFromFileType, usesNativeAspectRatio } from '../../../core/media/aspect-ratio-from-file-type.helpers';
-import { resolveFileType } from '../../../core/media/file-type-registry';
-import { mediaFileIdentityFromRecord } from '../../../core/media/media-file-identity.helpers';
 import {
   GeocodingService,
   type ForwardGeocodeResult,
@@ -250,24 +247,6 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly hasPhoto = computed(() => !!this.media()?.storage_path);
 
   readonly detailMediaIdentity = computed(() => this.media()?.id ?? this.mediaId() ?? '');
-
-  readonly detailFileIdentity = computed(() => {
-    const record = this.media();
-    return mediaFileIdentityFromRecord({
-      storage_path: record?.storage_path ?? null,
-      original_filename: record?.original_filename ?? null,
-    });
-  });
-
-  readonly detailFileTypeDefinition = computed(() => resolveFileType(this.detailFileIdentity()));
-
-  readonly detailAspectRatioHint = computed(() =>
-    aspectRatioHintFromFileType(this.detailFileTypeDefinition()),
-  );
-
-  readonly detailSlotContentObjectPosition = computed(() =>
-    usesNativeAspectRatio(this.detailFileTypeDefinition()) ? 'center center' : 'top center',
-  );
 
   readonly replacing = computed(() => {
     const jobId = this.activeJobId();

@@ -1,5 +1,4 @@
-// Grid child of detail-content — media viewer uses media-item slot framing + MediaDisplay FSM.
-// @see docs/specs/component/media/media-display.md
+// Detail preview uses app-media-item + media-display (same stack as /media grid).
 // @see docs/specs/component/media/media-item.md#spacing--framing-ownership
 :host {
   display: block;
@@ -19,59 +18,18 @@
   }
 }
 
-// Slot owns border-radius, clip, and hover emphasis (aligned with media-item__slot).
-// @see docs/specs/component/media/media-item.md#visual-behavior-contract
-.detail-media__slot {
-  position: relative;
-  max-inline-size: 100%;
+// Fixed footprint for detail hero; media-item slot + display fill inside.
+.detail-media__frame {
+  display: block;
+  inline-size: min(100%, calc(40rem / 1.618));
   max-block-size: 33vh;
-  inline-size: min(100%, calc(100% * var(--media-aspect-ratio, 1)));
-  aspect-ratio: var(--media-aspect-ratio, 1);
-  min-inline-size: 0;
-  min-block-size: 0;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--card);
-  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-  box-shadow: none;
-  transition:
-    aspect-ratio 300ms var(--motion-ease-out),
-    inline-size 300ms var(--motion-ease-out),
-    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
-    border-color var(--motion-duration-fast) var(--motion-ease-out);
+  min-block-size: 8rem;
+  margin-inline: auto;
 }
 
-.detail-media__slot:hover,
-.detail-media__slot:focus-within {
-  box-shadow: var(--shadow-md);
-  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
-}
-
-.detail-media__preview {
+.detail-media__item {
   display: block;
   inline-size: 100%;
-  block-size: 100%;
-  min-inline-size: 0;
-  min-block-size: 0;
-}
-
-.detail-media__open {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-
-  &:disabled {
-    cursor: default;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-  }
 }
 
 .detail-media__edit-btn {

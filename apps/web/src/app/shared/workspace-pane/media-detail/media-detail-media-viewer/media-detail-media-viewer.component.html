@@ -7,40 +7,20 @@
   (change)="onFileSelected($event)"
 />
 
-@if (hasPhoto()) {
+@if (hasPhoto() && item(); as record) {
   <div class="detail-media__container">
-    <div
-      class="detail-media__slot"
-      [style.--media-aspect-ratio]="mediaAspectRatio()"
-      (transitionend)="onSlotGeometryTransitionEnd($event)"
-    >
-      <app-media-display
-        #mediaPreview
-        class="detail-media__preview"
+    <div class="detail-media__frame">
+      <app-media-item
+        class="detail-media__item"
+        [itemId]="mediaId()"
+        [item]="record"
+        mode="grid-md"
+        state="idle"
         downloadContext="detail"
-        slotGeometry="intrinsic"
-        [mediaId]="mediaId()"
-        [storagePath]="storagePath()"
-        [thumbnailPath]="thumbnailPath()"
-        [previewGenerationStatus]="previewGenerationStatus()"
-        [originalFilename]="originalFilename()"
-        [aspectRatio]="aspectRatioHint()"
-        [contentObjectPosition]="contentObjectPosition()"
-        maxWidth="min(100%, calc(40rem / 1.618))"
-        maxHeight="33vh"
-        (aspectRatioChange)="onMediaAspectRatioChange($event)"
+        [showInteractionChrome]="false"
+        (pointerClick)="onItemPointerClick($event)"
+        (embedContextMenu)="onEmbedContextMenu()"
       />
-
-      <button
-        type="button"
-        class="detail-media__open"
-        [disabled]="!canOpenLightbox()"
-        [attr.aria-label]="
-          t('workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media')
-        "
-        (click)="openLightbox()"
-        (contextmenu)="requestContextMenu($event)"
-      ></button>
     </div>
 
     <button

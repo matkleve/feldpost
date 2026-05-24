@@ -22,6 +22,9 @@ Selected rows show check counts in the workspace actions bar; map and grid keep 
 | 3 | Select many | Replace with scope list | `selectAllInScope(scopeIds)` |
 | 4 | Clear | Empty set | `clearSelection()` |
 | 5 | Query membership | Boolean | `isSelected(id)` |
+| 6 | Grid tile pointer click | Shift range / ctrl·meta toggle / plain open | `applyGridPointerSelection(orderedIds, id, modifiers)` |
+| 7 | Shift-range anchor | Last anchor for range | `setRangeAnchor(id)`, `rangeAnchorId` |
+| 8 | Shift-range in order | Replace or merge range | `selectRangeInOrder(orderedIds, targetId, { merge? })` |
 
 ## Component Hierarchy
 

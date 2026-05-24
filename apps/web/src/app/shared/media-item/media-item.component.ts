@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
-import type { UploadOverlayState } from '../../core/media/media-renderer.types';
+import type { MediaContext, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type {
   ItemContextActionEvent,
@@ -52,6 +52,7 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
     '[attr.data-file-category]': 'fileCategory()',
     '[class.media-item]': 'true',
     '[class.media-item--selected]': 'selected()',
+    '[class.media-item--detail-embed]': '!showInteractionChrome()',
     '(contextmenu)': 'onContextMenu($event)',
     '(dblclick)': 'onOpenDoubleClick($event)',
   },
@@ -65,10 +66,20 @@ export class MediaItemComponent {
   readonly state = input<MediaItemState>('idle');
   readonly actionContextId = input<string | null>(MEDIA_ITEM_ACTION_CONTEXT);
   readonly disabled = input(false);
+  /** When false, hides grid chrome (quiet actions, file-type chip) for detail-pane embed. */
+  readonly showInteractionChrome = input(true);
+  readonly downloadContext = input<MediaContext>('grid');
 
   readonly selectedChange = output<boolean>();
-  readonly opened = output<string>();
+  /** Primary tile click with modifier keys for range / additive selection. */
+  readonly pointerClick = output<{
+    shiftKey: boolean;
+    ctrlKey: boolean;
+    metaKey: boolean;
+  }>();
   readonly contextActionRequested = output<ItemContextActionEvent>();
+  /** Detail pane: right-click on preview (no workspace grid context menu). */
+  readonly embedContextMenu = output<void>();
 
   readonly item = input<ImageRecord | null>(null);
   readonly selected = computed(() => this.state() === 'selected');
@@ -217,15 +228,12 @@ export class MediaItemComponent {
       this.debugInteraction('open.click.blocked.disabled', event);
       return;
     }
-    if (event.ctrlKey || event.metaKey) {
-      const nextSelected = !this.selected();
-      this.debugInteraction('open.click.ctrlMeta.selectToggle', event, { nextSelected });
-      this.selectedChange.emit(!this.selected());
-      return;
-    }
-
-    this.debugInteraction('open.click.emit.opened', event, { openedItemId: this.itemId() });
-    this.opened.emit(this.itemId());
+    this.debugInteraction('open.click.emit.pointerClick', event, { itemId: this.itemId() });
+    this.pointerClick.emit({
+      shiftKey: event.shiftKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+    });
   }
 
   onOpenDoubleClick(event: MouseEvent): void {
@@ -265,6 +273,10 @@ export class MediaItemComponent {
     this.debugInteraction('contextmenu.received', event);
     event.preventDefault();
     event.stopPropagation();
+    if (!this.showInteractionChrome()) {
+      this.embedContextMenu.emit();
+      return;
+    }
     if (this.disabled()) {
       this.debugInteraction('contextmenu.blocked.disabled', event);
       return;

@@ -28,7 +28,7 @@
                 [mode]="itemMode()"
                 [state]="isSelected(item.id) ? 'selected' : 'idle'"
                 [actionContextId]="mediaItemActionContext"
-                (opened)="onItemOpened($event)"
+                (pointerClick)="onItemPointerClick(item.id, $event)"
                 (selectedChange)="onSelectionToggled(item.id, $event)"
                 (contextActionRequested)="onItemContextActionRequested($event)"
               />
@@ -60,7 +60,7 @@
           [mode]="itemMode()"
           [state]="isSelected(item.id) ? 'selected' : 'idle'"
           [actionContextId]="mediaItemActionContext"
-          (opened)="onItemOpened($event)"
+          (pointerClick)="onItemPointerClick(item.id, $event)"
           (selectedChange)="onSelectionToggled(item.id, $event)"
           (contextActionRequested)="onItemContextActionRequested($event)"
         />

@@ -12,6 +12,7 @@
     <app-media-display
       #mediaPreview
       class="media-item__preview"
+      [downloadContext]="downloadContext()"
       [slotGeometry]="usesFillSlotGeometry() ? 'fill' : 'intrinsic'"
       [mediaId]="mediaIdentity()"
       [storagePath]="item()?.storage_path ?? null"
@@ -25,12 +26,13 @@
 
     <!-- Renders upload overlay as slot-aligned absolute layer below quiet actions. -->
     <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
-    @if (uploadOverlay(); as overlay) {
+    @if (showInteractionChrome() && uploadOverlay(); as overlay) {
       <app-media-item-upload-overlay class="media-item__upload-overlay" [overlay]="overlay" />
     }
 
     <!-- Renders quiet actions as the top-most overlay layer for hover/focus interactions. -->
     <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
+    @if (showInteractionChrome()) {
     <app-media-item-quiet-actions
       class="media-item__quiet-actions"
       [state]="quietActionsState()"
@@ -39,6 +41,7 @@
       (selectRequested)="onSelectRequested()"
       (mapRequested)="onMapActionRequested()"
     />
+    }
 
     <!-- Defines primary open action region so quiet-action buttons remain reachable above it. -->
     <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
@@ -51,7 +54,7 @@
       (click)="onOpenClick($event)"
     ></button>
 
-    @if (showFileTypeChip() && fileTypeChipText(); as chipText) {
+    @if (showInteractionChrome() && showFileTypeChip() && fileTypeChipText(); as chipText) {
       <app-chip
         class="media-item__filetype-chip"
         [icon]="fileTypeChipIcon()"

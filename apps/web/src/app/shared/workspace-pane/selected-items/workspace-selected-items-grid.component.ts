@@ -352,6 +352,16 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     return sections.flatMap((s) => s.images);
   });
 
+  /** On-screen thumbnail order for shift-range selection. */
+  readonly orderedThumbnailIds = computed(() => {
+    if (this.hasGrouping()) {
+      return this.renderItems()
+        .filter((item): item is Extract<RenderItem, { type: 'grid' }> => item.type === 'grid')
+        .flatMap((item) => item.images.map((img) => img.id));
+    }
+    return this.flatImages().map((img) => img.id);
+  });
+
   readonly skeletonCards = Array.from({ length: 12 }, (_, i) => i);
   readonly languageTick = computed(() => this.currentLanguage());
   readonly targetMediaIds = computed(() => Array.from(this.selectionService.selectedMediaIds()));
@@ -482,12 +492,28 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     this.updateMaxColumns();
   }
 
+  onMediaItemPointerClick(
+    imageId: string,
+    modifiers: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean },
+  ): void {
+    const result = this.selectionService.applyGridPointerSelection(
+      this.orderedThumbnailIds(),
+      imageId,
+      modifiers,
+    );
+
+    if (result === 'open-item') {
+      this.thumbnailClicked.emit(imageId);
+    }
+  }
+
   onMediaItemSelectedChange(imageId: string, selected: boolean): void {
     const currentlySelected = this.selectionService.isSelected(imageId);
     if (currentlySelected === selected) {
       return;
     }
     this.selectionService.toggle(imageId, { additive: true });
+    this.selectionService.setRangeAnchor(imageId);
   }
 
   onCellHoverStarted(img: WorkspaceImage): void {

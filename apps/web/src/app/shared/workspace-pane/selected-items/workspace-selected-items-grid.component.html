@@ -79,7 +79,7 @@
                   [mode]="itemGridMode()"
                   [state]="selectionService.isSelected(img.id) ? 'selected' : 'idle'"
                   [actionContextId]="MEDIA_ITEM_ACTION_CONTEXT"
-                  (opened)="thumbnailClicked.emit($event)"
+                  (pointerClick)="onMediaItemPointerClick(img.id, $event)"
                   (selectedChange)="onMediaItemSelectedChange(img.id, $event)"
                   (contextActionRequested)="onMediaItemContextAction(img, $event)"
                 />
@@ -107,7 +107,7 @@
             [mode]="itemGridMode()"
             [state]="selectionService.isSelected(img.id) ? 'selected' : 'idle'"
             [actionContextId]="MEDIA_ITEM_ACTION_CONTEXT"
-            (opened)="thumbnailClicked.emit($event)"
+            (pointerClick)="onMediaItemPointerClick(img.id, $event)"
             (selectedChange)="onMediaItemSelectedChange(img.id, $event)"
             (contextActionRequested)="onMediaItemContextAction(img, $event)"
           />

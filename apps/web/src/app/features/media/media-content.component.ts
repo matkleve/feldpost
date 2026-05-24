@@ -178,6 +178,19 @@ export class MediaContentComponent implements AfterViewInit {
       this.items().length === 0 &&
       !this.placeholderExitActive(),
   );
+  /** Visible grid order for shift-range selection (grouped rows preserve on-screen order). */
+  readonly orderedVisibleMediaIds = computed(() => {
+    if (this.useGroupedRenderLayout()) {
+      return this.displayRenderRows()
+        .filter((row): row is Extract<MediaGalleryRenderRow, { type: 'grid' }> => row.type === 'grid')
+        .flatMap((row) => row.items.map((item) => item.id));
+    }
+
+    return this.gridSlots()
+      .map((slot) => slot.item?.id)
+      .filter((id): id is string => typeof id === 'string');
+  });
+
   readonly showListEnd = computed(() => {
     if (this.state() !== 'ready' || this.hasMore() || this.loadingMore()) {
       return false;
@@ -361,9 +374,22 @@ export class MediaContentComponent implements AfterViewInit {
     });
   }
 
-  onItemOpened(mediaId: string): void {
-    this.debugInteraction('item.opened.received', null, { mediaId });
-    this.itemClicked.emit(mediaId);
+  onItemPointerClick(
+    mediaId: string,
+    modifiers: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean },
+  ): void {
+    this.debugInteraction('item.pointerClick.received', null, { mediaId, modifiers });
+
+    const result = this.workspaceSelectionService.applyGridPointerSelection(
+      this.orderedVisibleMediaIds(),
+      mediaId,
+      modifiers,
+    );
+
+    if (result === 'open-item') {
+      this.debugInteraction('item.pointerClick.openItem', null, { mediaId });
+      this.itemClicked.emit(mediaId);
+    }
   }
 
   onItemContextActionRequested(event: ItemContextActionEvent): void {
@@ -404,6 +430,7 @@ export class MediaContentComponent implements AfterViewInit {
     }
 
     this.workspaceSelectionService.toggle(mediaId, { additive: true });
+    this.workspaceSelectionService.setRangeAnchor(mediaId);
 
     this.debugInteraction('selection.toggle.applied', null, {
       mediaId,
@@ -422,6 +449,42 @@ export class MediaContentComponent implements AfterViewInit {
 
   onGroupToggle(heading: string): void {
     this.workspaceViewService.toggleGroupCollapsed(heading);
+  }
+
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (this.state() !== 'ready') {
+      return;
+    }
+
+    const key = event.key.toLowerCase();
+    if (key === 'escape') {
+      if (this.workspaceSelectionService.selectedCount() > 0) {
+        event.preventDefault();
+        this.workspaceSelectionService.clearSelection();
+      }
+      return;
+    }
+
+    if (key !== 'a' || !(event.ctrlKey || event.metaKey) || event.shiftKey) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Node) || !this.hostElement.nativeElement.contains(target)) {
+      return;
+    }
+
+    const orderedIds = this.orderedVisibleMediaIds();
+    if (orderedIds.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    this.workspaceSelectionService.selectAllInScope(orderedIds);
+    const lastId = orderedIds[orderedIds.length - 1];
+    if (lastId) {
+      this.workspaceSelectionService.setRangeAnchor(lastId);
+    }
   }
 
   onDocumentClick(event: MouseEvent): void {

@@ -21,6 +21,24 @@
   block-size: var(--item-grid-slot-block-size, 6.5rem);
 }
 
+// Detail pane embed: no square grid cell; slot sizes to media inside max-height frame.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md
+:host.media-item--detail-embed {
+  aspect-ratio: unset;
+  block-size: auto;
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+:host.media-item--detail-embed .media-item__slot {
+  position: relative;
+  inset-block-start: auto;
+  inset-inline-start: auto;
+  transform: none;
+  margin-inline: auto;
+  max-block-size: 33vh;
+}
+
 // Placeholder tiles without item payload use muted pulse inside inherited slot geometry.
 // @see docs/specs/component/media/media-item.md#what-it-looks-like
 :host([data-has-item='false']) {
@@ -62,7 +80,7 @@
 
 // Positions shrinking slot inside fixed square host so grid rows/columns stay stable.
 // @see docs/specs/component/media/media-item.md#added-verification-cases
-:host:not([data-mode='row']) .media-item__slot {
+:host:not([data-mode='row']):not(.media-item--detail-embed) .media-item__slot {
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 50%;
