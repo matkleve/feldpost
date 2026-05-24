@@ -70,8 +70,8 @@
   --item-grid-slot-block-size: 6.5rem;
 }
 
-// Grid tiles size from media intrinsic ratio (media-item slot); column width only from grid.
-// @see docs/specs/component/item-grid/item-grid.md#what-it-looks-like
+// Grid cells: square host (media-item aspect-ratio 1); media ratio animates inside the cell.
+// @see docs/specs/component/media/media-item.md#added-verification-cases
 :host(.item-grid--grid-sm),
 :host(.item-grid--grid-md),
 :host(.item-grid--grid-lg),

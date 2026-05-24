@@ -1,11 +1,17 @@
-// Host wraps slot height; grid column width only (no fixed square on host).
-// @see docs/specs/component/media/media-item.md#css-variable-ownership--dependency-matrix
+// Grid: host reserves a fixed square cell; inner slot animates ratio without reflow.
+// Row: host height comes from item-grid lane.
+// @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
 :host {
   display: block;
   inline-size: 100%;
-  block-size: auto;
   min-inline-size: 0;
   min-block-size: 0;
+}
+
+:host:not([data-mode='row']) {
+  position: relative;
+  aspect-ratio: 1;
+  block-size: auto;
 }
 
 // Row mode keeps fixed lane height from item-grid.
@@ -29,12 +35,13 @@
   border-radius: var(--radius-md);
 }
 
-// Geometry owner for the whole tile stack; aspect-ratio follows media-display layers/viewport.
+// Geometry owner for tile stack; ratio transition runs inside the square grid cell (host).
 // @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
 .media-item__slot {
   position: relative;
   max-inline-size: 100%;
-  // Landscape: full column width; portrait: shrink width so block-size stays within column (spec AC).
+  max-block-size: 100%;
+  // Landscape: full width; portrait: shrink width (spec AC).
   // @see docs/specs/component/media/media-item.md#added-verification-cases
   inline-size: min(100%, calc(100% * var(--media-aspect-ratio, 1)));
   aspect-ratio: var(--media-aspect-ratio, 1);
@@ -44,11 +51,18 @@
     inline-size 300ms var(--motion-ease-out);
   min-inline-size: 0;
   min-block-size: 0;
-  // Centers portrait/narrow slots in the grid column; block flow keeps top alignment.
-  // @see docs/specs/component/media/media-item.md#added-verification-cases
-  margin-inline: auto;
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+// Positions shrinking slot inside fixed square host so grid rows/columns stay stable.
+// @see docs/specs/component/media/media-item.md#added-verification-cases
+:host:not([data-mode='row']) .media-item__slot {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  margin-inline: 0;
 }
 
 :host([data-mode='row']) .media-item__slot {

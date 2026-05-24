@@ -367,9 +367,10 @@ Mandatory rule:
 
 ### Added Verification Cases
 
-- Landscape media: shell width reaches slot limit while height shrinks to ratio.
-- Portrait media: shell height reaches slot limit while width shrinks to ratio.
-- `icon-only` media: shell remains square-aligned with rendered media box.
+- Grid host (`:host` not `row`) keeps a **fixed square** footprint (`aspect-ratio: 1`); neighbors do not reflow when inner slot ratio changes.
+- Landscape media: inner slot width reaches cell limit while height shrinks to ratio (top-aligned inside square cell).
+- Portrait media: inner slot height reaches cell limit while width shrinks to ratio (horizontally centered).
+- `icon-only` media: inner slot remains square-aligned with rendered media box.
 - Hover/select/click hit areas remain bound to visible media frame after ratio change.
 
 ## File-type aspect ratio policy
