@@ -368,12 +368,14 @@ export class MediaItemComponent {
 
   onMapZoomRequested(event: MediaItemMapZoomEvent): void {
     this.debugInteraction('quietAction.map.zoomRequested', null, { event });
-    this.contextActionRequested.emit({
-      itemId: event.mediaId,
-      actionId: 'zoom_house',
-      contextId: this.actionContextId(),
-      lat: event.lat,
-      lng: event.lng,
+    queueMicrotask(() => {
+      this.contextActionRequested.emit({
+        itemId: event.mediaId,
+        actionId: 'zoom_house',
+        contextId: this.actionContextId(),
+        lat: event.lat,
+        lng: event.lng,
+      });
     });
   }
 }

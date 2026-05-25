@@ -5,6 +5,7 @@ import {
   filterAndDedupeOrgSuggestions,
   formatGeocoderPickerLines,
   formatLocationPickerLines,
+  coerceLocationCoordinate,
   legacyMediaHasGps,
   countZoomableLinks,
   locationDisplaySnapshotFromRows,
@@ -55,6 +56,11 @@ describe('media-locations.helpers', () => {
       longitude: 16.37,
     });
     expect(galleryCoordsFromDisplayLocation(display, 0)).toEqual({ latitude: 0, longitude: 0 });
+  });
+
+  it('coerceLocationCoordinate accepts numeric strings from RPC', () => {
+    expect(coerceLocationCoordinate('48.230133')).toBeCloseTo(48.230133);
+    expect(legacyMediaHasGps('48.230133', '16.355936')).toBe(true);
   });
 
   it('mediaHasZoomableLocation uses zoomable_location_count when set', () => {

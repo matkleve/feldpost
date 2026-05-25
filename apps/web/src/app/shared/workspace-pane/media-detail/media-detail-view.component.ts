@@ -59,6 +59,10 @@ import { MetadataSectionComponent } from './metadata-section/metadata-section.co
 import { DetailActionsComponent } from './detail-actions/detail-actions.component';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import {
+  coerceLocationCoordinate,
+  legacyMediaHasGps,
+} from '../../../core/media-locations/media-locations.helpers';
+import {
   buildInfoChips,
   canCreateProjectOption,
   filterProjectOptions,
@@ -1655,11 +1659,17 @@ export class MediaDetailViewComponent implements OnDestroy {
     }
     const row = this.locations().find((item) => item.id === locationRowId);
     const fromRow =
-      row && row.latitude != null && row.longitude != null
-        ? { lat: row.latitude, lng: row.longitude }
+      row && legacyMediaHasGps(row.latitude, row.longitude)
+        ? {
+            lat: coerceLocationCoordinate(row.latitude)!,
+            lng: coerceLocationCoordinate(row.longitude)!,
+          }
         : null;
     const fromMedia = hasValidGpsCoordinates(media)
-      ? { lat: media.latitude!, lng: media.longitude! }
+      ? {
+          lat: coerceLocationCoordinate(media.latitude)!,
+          lng: coerceLocationCoordinate(media.longitude)!,
+        }
       : null;
     const target = fromRow ?? fromMedia;
     if (!target) {

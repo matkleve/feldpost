@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import {
+  coerceLocationCoordinate,
   formatLocationPickerLines,
   legacyMediaHasGps,
   locationMatchesQuery,
@@ -127,9 +128,11 @@ export class MediaItemMapActionComponent {
       switch (mapZoomAffordanceFromTargetCount(resolved.length)) {
         case 'noop':
           return;
-        case 'direct-zoom':
-          this.emitZoom(resolved[0]!);
+        case 'direct-zoom': {
+          const target = resolved[0]!;
+          queueMicrotask(() => this.emitZoom(target));
           return;
+        }
         case 'picker':
         case 'picker-with-search':
           this.searchTerm.set('');
@@ -178,9 +181,9 @@ export class MediaItemMapActionComponent {
       return retried;
     }
 
-    const lat = this.legacyLatitude();
-    const lng = this.legacyLongitude();
-    if (!legacyMediaHasGps(lat, lng)) {
+    const lat = coerceLocationCoordinate(this.legacyLatitude());
+    const lng = coerceLocationCoordinate(this.legacyLongitude());
+    if (lat == null || lng == null) {
       return [];
     }
 
@@ -189,8 +192,8 @@ export class MediaItemMapActionComponent {
       this.t('workspace.thumbnailCard.mapLocations.legacyFallback', 'Location');
     return [
       {
-        lat: lat!,
-        lng: lng!,
+        lat,
+        lng,
         primary: fallback,
         secondary: '',
         searchRow: null,
@@ -211,11 +214,13 @@ export class MediaItemMapActionComponent {
   }
 
   private rowToTarget(row: MediaItemLocationRow, doorLabel: string): MapZoomTarget {
+    const lat = coerceLocationCoordinate(row.latitude)!;
+    const lng = coerceLocationCoordinate(row.longitude)!;
     const lines = formatLocationPickerLines(row, doorLabel);
     return {
       locationId: row.id,
-      lat: row.latitude!,
-      lng: row.longitude!,
+      lat,
+      lng,
       primary: lines.primary,
       secondary: lines.secondary || row.address_label?.trim() || '',
       searchRow: row,

@@ -35,6 +35,7 @@ import type { MediaItemLocationRow } from '../../../../core/media-locations/medi
 import {
   formatLocationFullAddressCopy,
   formatLocationDisplayLine,
+  legacyMediaHasGps,
   locationGpsDisplay,
 } from '../../../../core/media-locations/media-locations.helpers';
 import { I18nService } from '../../../../core/i18n/i18n.service';
@@ -157,7 +158,7 @@ export class MediaLocationRowComponent {
 
   readonly canShowOnMap = computed(() => {
     const row = this.location();
-    return row.latitude != null && row.longitude != null;
+    return legacyMediaHasGps(row.latitude, row.longitude);
   });
 
   readonly draftStreet = signal('');

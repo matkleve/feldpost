@@ -260,14 +260,25 @@ export function zoomableCountMatchesListParity(
   return batchZoomableCount === countZoomableLinks(rows);
 }
 
-export function legacyMediaHasGps(latitude: number | null, longitude: number | null): boolean {
-  return (
-    latitude != null &&
-    longitude != null &&
-    Number.isFinite(latitude) &&
-    Number.isFinite(longitude) &&
-    !(latitude === 0 && longitude === 0)
-  );
+/** Coerce Supabase `numeric` / JSON number strings for map gates. */
+export function coerceLocationCoordinate(value: unknown): number | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function legacyMediaHasGps(
+  latitude: number | string | null | undefined,
+  longitude: number | string | null | undefined,
+): boolean {
+  const lat = coerceLocationCoordinate(latitude);
+  const lng = coerceLocationCoordinate(longitude);
+  if (lat == null || lng == null) {
+    return false;
+  }
+  return !(lat === 0 && lng === 0);
 }
 
 /**
