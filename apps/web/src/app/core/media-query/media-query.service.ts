@@ -4,7 +4,7 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { MetadataService } from '../metadata/metadata.service';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
-import type { ImageRecord } from './media-query.types';
+import type { MediaRecord } from './media-query.types';
 
 interface MediaItemRow {
   id: string;
@@ -71,7 +71,7 @@ interface MediaItemLookupRow {
 }
 
 export interface MediaLoadResult {
-  items: ImageRecord[];
+  items: MediaRecord[];
   totalCount: number | null;
   projectNameById: ReadonlyMap<string, string>;
 }
@@ -252,7 +252,7 @@ export class MediaQueryService {
     }
 
     const items = Array.isArray(data)
-      ? (data as MediaItemRow[]).map((row) => this.toImageRecord(row))
+      ? (data as MediaItemRow[]).map((row) => this.toMediaRecord(row))
       : [];
     return { items, totalCount, projectNameById: new Map<string, string>() };
   }
@@ -300,7 +300,7 @@ export class MediaQueryService {
     return { ok: true, errorMessage: null };
   }
 
-  private toImageRecord(row: MediaItemRow): ImageRecord {
+  private toMediaRecord(row: MediaItemRow): MediaRecord {
     const unresolved = row.location_status === 'pending' || row.location_status === 'no_gps';
 
     return {

@@ -1,9 +1,9 @@
-import type { ImageRecord } from '../media-query/media-query.types';
+import type { MediaRecord } from '../media-query/media-query.types';
 import type { MediaFileIdentity } from './media-renderer.types';
 
 /** @see docs/specs/service/media-download-service/media-download-service.md */
 export type MediaFileIdentityRecordInput = Pick<
-  ImageRecord,
+  MediaRecord,
   'storage_path' | 'original_filename'
 >;
 

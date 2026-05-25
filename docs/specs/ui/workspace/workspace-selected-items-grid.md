@@ -71,7 +71,7 @@ Programmatic UI states include loading, empty, filter-empty, grouped vs flat; ex
 | `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts` | Logic, signals, grid wiring |
 | `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.html` | Template |
 | `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.scss` | Layout and region styles |
-| `apps/web/src/app/core/workspace-view/workspace-media-mapper.ts` | `WorkspaceMedia` → `ImageRecord` |
+| `apps/web/src/app/core/workspace-view/workspace-media-mapper.ts` | `WorkspaceMedia` → `MediaRecord` |
 
 ## Wiring
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { inject } from '@angular/core';
 import { signal } from '@angular/core';
-import type { ImageRecord } from '../../../core/media-query/media-query.types';
+import type { MediaRecord } from '../../../core/media-query/media-query.types';
 import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { CardGridComponent } from '../../shared/ui-primitives/card-grid.component';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
@@ -18,7 +18,7 @@ import { MediaCardComponent } from './media-card.component';
 export class MediaGridComponent {
   protected readonly workspaceSelectionService = inject(WorkspaceSelectionService);
 
-  readonly items = input.required<ImageRecord[]>();
+  readonly items = input.required<MediaRecord[]>();
   readonly variant = input<CardVariant>('medium');
   readonly projectNameFor = input.required<(projectId: string | null) => string>();
   readonly itemClicked = output<string>();

@@ -27,13 +27,13 @@ import { WorkspaceSelectionService } from '../../core/workspace-selection/worksp
 import { I18nService } from '../../core/i18n/i18n.service';
 import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
-import type { ImageRecord } from '../../core/media-query/media-query.types';
+import type { MediaRecord } from '../../core/media-query/media-query.types';
 import { MediaQueryService } from '../../core/media-query/media-query.service';
 import {
   flattenGroupedSectionsToMediaRenderRows,
   runMediaGalleryViewPipeline,
 } from '../../core/media-query/media-gallery-view.helpers';
-import { workspaceMediaToImageRecord } from '../../core/workspace-view/workspace-media-mapper';
+import { workspaceMediaToMediaRecord } from '../../core/workspace-view/workspace-media-mapper';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import { AuthService } from '../../core/auth/auth.service';
 import {
@@ -174,11 +174,11 @@ export class MediaComponent implements OnDestroy {
     }),
   );
   readonly mediaRenderRows = computed(() =>
-    flattenGroupedSectionsToMediaRenderRows(this.gallerySections(), workspaceMediaToImageRecord),
+    flattenGroupedSectionsToMediaRenderRows(this.gallerySections(), workspaceMediaToMediaRecord),
   );
   readonly flatDisplayItems = computed(() =>
     this.mediaRenderRows()
-      .filter((r): r is { type: 'grid'; items: ImageRecord[] } => r.type === 'grid')
+      .filter((r): r is { type: 'grid'; items: MediaRecord[] } => r.type === 'grid')
       .flatMap((r) => r.items),
   );
   readonly projectNameById = computed(() => {

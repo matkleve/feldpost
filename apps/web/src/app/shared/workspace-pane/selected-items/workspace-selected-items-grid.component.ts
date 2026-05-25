@@ -32,7 +32,7 @@ import {
   MEDIA_ITEM_ACTION_CONTEXT,
   MediaItemComponent,
 } from '../../../shared/media-item/media-item.component';
-import { workspaceMediaToImageRecord } from '../../../core/workspace-view/workspace-media-mapper';
+import { workspaceMediaToMediaRecord } from '../../../core/workspace-view/workspace-media-mapper';
 import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
@@ -268,7 +268,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   readonly currentLanguage = this.i18nService.language;
 
   readonly MEDIA_ITEM_ACTION_CONTEXT = MEDIA_ITEM_ACTION_CONTEXT;
-  readonly workspaceMediaToImageRecord = workspaceMediaToImageRecord;
+  readonly workspaceMediaToMediaRecord = workspaceMediaToMediaRecord;
 
   readonly thumbnailCardSizePx = computed(() => {
     switch (this.viewService.thumbnailSizePreset()) {

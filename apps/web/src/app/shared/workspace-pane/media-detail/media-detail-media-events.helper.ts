@@ -6,7 +6,7 @@ import type {
 import type { MediaDownloadService } from '../../../core/media-download/media-download.service';
 import type { ToastService } from '../../../core/toast/toast.service';
 import type { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import type { ImageRecord } from './media-detail-view.types';
+import type { MediaRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 
@@ -17,7 +17,7 @@ interface MediaDetailMediaEventsHelperDeps {
     toastService: ToastService;
   };
   signals: {
-    media: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<MediaRecord | null>;
     activeJobId: WritableSignal<string | null>;
   };
   callbacks: {

@@ -80,7 +80,7 @@ MediaContentComponent
 | Field                           | Source                               | Type                             | Purpose                                      |
 | ------------------------------- | ------------------------------------ | -------------------------------- | -------------------------------------------- |
 | state                           | parent media shell                   | loading or error or ready        | primary render switch                        |
-| items                           | parent media shell                   | ImageRecord[]                    | grid payload                                 |
+| items                           | parent media shell                   | MediaRecord[]                    | grid payload                                 |
 | emptyReason                     | parent media shell                   | auth-required or no-results      | empty-state message contract                 |
 | cardVariant                     | parent media shell                   | CardVariant                      | item mode mapping                            |
 | loadingPlaceholderCount         | internal computed                    | number                           | deterministic placeholder slot volume        |

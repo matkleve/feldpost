@@ -1,9 +1,9 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
 import { MediaDetailMetadataHelper } from './media-detail-metadata.helper';
-import type { ImageRecord } from './media-detail-view.types';
+import type { MediaRecord } from './media-detail-view.types';
 
-const MOCK_IMAGE: ImageRecord = {
+const MOCK_MEDIA: MediaRecord = {
   id: 'img-1',
   user_id: 'user-1',
   organization_id: 'org-1',
@@ -45,7 +45,7 @@ describe('MediaDetailMetadataHelper', () => {
         } as any,
       },
       signals: {
-        media: signal<ImageRecord | null>(MOCK_IMAGE),
+        media: signal<MediaRecord | null>(MOCK_MEDIA),
         mediaId: () => 'img-1',
         metadata,
         saving: signal(false),
@@ -72,7 +72,7 @@ describe('MediaDetailMetadataHelper', () => {
         metadata: { removeMetadataValueByLookupId } as any,
       },
       signals: {
-        media: signal<ImageRecord | null>(MOCK_IMAGE),
+        media: signal<MediaRecord | null>(MOCK_MEDIA),
         mediaId: () => 'img-1',
         metadata,
         saving: signal(false),

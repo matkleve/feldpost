@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import type { AfterViewInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import type { ImageRecord } from '../../core/media-query/media-query.types';
+import type { MediaRecord } from '../../core/media-query/media-query.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { MediaErrorComponent } from './media-error.component';
 import { MediaEmptyComponent } from './media-empty.component';
@@ -35,7 +35,7 @@ export type MediaContentState = 'loading' | 'error' | 'ready';
 
 type MediaContentGridSlot = {
   readonly trackId: string;
-  readonly item: ImageRecord | null;
+  readonly item: MediaRecord | null;
   readonly placeholderId: number;
   readonly exiting: boolean;
 };
@@ -45,7 +45,7 @@ type MediaPreviewPatch = {
   preview_generation_status?: PreviewGenerationStatus | null;
 };
 
-function applyMediaPreviewPatch(item: ImageRecord, patch: MediaPreviewPatch | undefined): ImageRecord {
+function applyMediaPreviewPatch(item: MediaRecord, patch: MediaPreviewPatch | undefined): MediaRecord {
   if (!patch) {
     return item;
   }
@@ -90,7 +90,7 @@ export class MediaContentComponent implements AfterViewInit {
   private placeholderExitTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly state = input.required<MediaContentState>();
-  readonly items = input.required<ImageRecord[]>();
+  readonly items = input.required<MediaRecord[]>();
 
   /** Merges Realtime `thumbnail_path` updates into flat grid rows (no polling). */
   readonly gridItems = computed(() => {

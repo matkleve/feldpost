@@ -7,7 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import type { ImageRecord } from '../../../../core/media-query/media-query.types';
+import type { MediaRecord } from '../../../../core/media-query/media-query.types';
 import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PhotoLightboxComponent } from '../../../photo-lightbox/photo-lightbox.component';
@@ -28,7 +28,7 @@ export class MediaDetailMediaViewerComponent {
 
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
-  readonly item = input<ImageRecord | null>(null);
+  readonly item = input<MediaRecord | null>(null);
   readonly mediaId = input.required<string>();
   readonly isImageLike = input(false);
   readonly displayTitle = input('');

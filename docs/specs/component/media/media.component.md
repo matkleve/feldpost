@@ -74,7 +74,7 @@ MediaComponent
 
 | Field           | Source                     | Type                      | Purpose                                |
 | --------------- | -------------------------- | ------------------------- | -------------------------------------- |
-| mediaItems      | MediaQueryService          | ImageRecord[]             | current list payload                   |
+| mediaItems      | MediaQueryService          | MediaRecord[]             | current list payload                   |
 | mediaTotalCount | MediaQueryService          | number or null            | hasMore computation                    |
 | nextOffset      | pagination cursor          | number                    | next page offset                       |
 | cardVariant     | CardVariantSettingsService | CardVariant               | list display mode                      |

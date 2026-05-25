@@ -15,7 +15,7 @@ import type { MediaLocationAddressPatch } from '../../../core/media-locations/me
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ToastService } from '../../../core/toast/toast.service';
 import type { DateSaveEvent } from './captured-date-editor.component';
-import type { DetailEditingField, ImageRecord } from './media-detail-view.types';
+import type { DetailEditingField, MediaRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 
@@ -53,7 +53,7 @@ function verifiedMetaFromGeocodeSuggestion(suggestion: ForwardGeocodeResult): Ad
   return meta;
 }
 
-export function snapshotAddressFields(img: ImageRecord): AddressFieldSnapshot {
+export function snapshotAddressFields(img: MediaRecord): AddressFieldSnapshot {
   return {
     street: img.street,
     city: img.city,
@@ -93,7 +93,7 @@ interface MediaDetailFieldsHelperDeps {
     mediaLocationUpdate: MediaLocationUpdateService;
   };
   signals: {
-    media: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<MediaRecord | null>;
     editingField: WritableSignal<DetailEditingField>;
     saving: WritableSignal<boolean>;
     editDate: WritableSignal<string>;

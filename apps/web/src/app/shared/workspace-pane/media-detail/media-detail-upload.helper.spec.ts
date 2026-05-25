@@ -1,9 +1,9 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
 import { MediaDetailUploadHelper } from './media-detail-upload.helper';
-import type { ImageRecord } from './media-detail-view.types';
+import type { MediaRecord } from './media-detail-view.types';
 
-const MOCK_IMAGE: ImageRecord = {
+const MOCK_MEDIA: MediaRecord = {
   id: 'img-1',
   user_id: 'user-1',
   organization_id: 'org-1',
@@ -27,7 +27,7 @@ const MOCK_IMAGE: ImageRecord = {
 };
 
 function createHelper() {
-  const media = signal<ImageRecord | null>({ ...MOCK_IMAGE });
+  const media = signal<MediaRecord | null>({ ...MOCK_MEDIA });
   const replaceError = signal<string | null>(null);
   const activeJobId = signal<string | null>(null);
   const uploadService = {

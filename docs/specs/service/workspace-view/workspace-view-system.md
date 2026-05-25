@@ -19,7 +19,7 @@ Users experience this system as a responsive workspace pane that immediately ope
 - **Routes:** All routes that host **Workspace Pane** + selected-items (canonical: **`/`**, **`/map`**, **`/media`**, **`/projects`**, **`/settings/**`** under [authenticated app layout](../../ui/workspace/workspace-pane.md#layout-host-canonical)).
 - **Parent (interim):** `MapShellComponent` + `WorkspacePane` for map/settings routes until layout hoist; **target:** authenticated app layout owns split + pane.
 - **Core orchestrator:** `WorkspaceViewService`
-- **Workspace → ImageRecord mapper:** `workspaceMediaToImageRecord` in `apps/web/src/app/core/workspace-view/workspace-media-mapper.ts` (selected-items grid / item adapters)
+- **Workspace → MediaRecord mapper:** `workspaceMediaToMediaRecord` in `apps/web/src/app/core/workspace-view/workspace-media-mapper.ts` (selected-items grid / item adapters)
 - **Triggered by:** marker clicks, toolbar state changes, and active project/filter context
 
 ## Actions

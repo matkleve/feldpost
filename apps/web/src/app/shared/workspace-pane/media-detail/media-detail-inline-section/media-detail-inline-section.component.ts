@@ -11,7 +11,7 @@ import {
 import type { DateSaveEvent } from '../captured-date-editor.component';
 import { CapturedDateEditorComponent } from '../captured-date-editor.component';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import type { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
+import type { DetailEditingField, MediaRecord, SelectOption } from '../media-detail-view.types';
 import { formatCoordinate } from '../media-detail-view.utils';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
@@ -40,7 +40,7 @@ export class MediaDetailInlineSectionComponent {
   readonly projectsAnchorEl = computed(() => this.projectsCenterRef()?.nativeElement ?? null);
   readonly projectsCenterWidth = computed(() => this.projectsCenterRef()?.nativeElement.offsetWidth ?? null);
 
-  readonly media = input<ImageRecord>({} as ImageRecord);
+  readonly media = input<MediaRecord>({} as MediaRecord);
   readonly detailViewLabel = input('');
   readonly fileFormatLabel = input('');
   readonly editingField = input<DetailEditingField>(null);

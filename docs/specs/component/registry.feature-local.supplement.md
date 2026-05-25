@@ -80,7 +80,7 @@
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
   | `state` | `MediaContentState` | `loading`, `error`, `ready` | Grid vs. skeleton vs. empty state |
-- **Other inputs**: `items: ImageRecord[]` (required), `projectNameFor` (required)
+- **Other inputs**: `items: MediaRecord[]` (required), `projectNameFor` (required)
 - **Composed of**: `app-item-grid`, `app-media-item`, `app-group-header`
 - **Gaps**: none
 

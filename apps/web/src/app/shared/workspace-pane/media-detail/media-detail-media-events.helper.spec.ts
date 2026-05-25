@@ -1,9 +1,9 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
 import { MediaDetailMediaEventsHelper } from './media-detail-media-events.helper';
-import type { ImageRecord } from './media-detail-view.types';
+import type { MediaRecord } from './media-detail-view.types';
 
-const MOCK_IMAGE: ImageRecord = {
+const MOCK_MEDIA: MediaRecord = {
   id: 'img-1',
   user_id: 'user-1',
   organization_id: 'org-1',
@@ -28,7 +28,7 @@ const MOCK_IMAGE: ImageRecord = {
 
 describe('MediaDetailMediaEventsHelper', () => {
   it('updates image state and reloads URLs after replace', async () => {
-    const image = signal<ImageRecord | null>({ ...MOCK_IMAGE });
+    const media = signal<MediaRecord | null>({ ...MOCK_MEDIA });
     const invalidate = vi.fn();
     const batchSignThumbnails = vi.fn(async () => {});
     const helper = new MediaDetailMediaEventsHelper({
@@ -45,7 +45,7 @@ describe('MediaDetailMediaEventsHelper', () => {
         toastService: { show: vi.fn() } as any,
       },
       signals: {
-        media: image,
+        media,
         activeJobId: signal('job-1'),
       },
       callbacks: {
@@ -61,7 +61,7 @@ describe('MediaDetailMediaEventsHelper', () => {
       jobId: 'job-1',
     } as any);
 
-    expect(image()!.storage_path).toBe('org-001/user-001/new.jpg');
+    expect(media()!.storage_path).toBe('org-001/user-001/new.jpg');
     expect(invalidate).toHaveBeenCalledWith('img-1');
     expect(batchSignThumbnails).toHaveBeenCalled();
     expect(revokeSpy).toHaveBeenCalledWith('blob:test');

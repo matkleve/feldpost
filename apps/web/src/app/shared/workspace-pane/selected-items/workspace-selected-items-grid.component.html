@@ -75,7 +75,7 @@
               >
                 <app-media-item
                   [itemId]="img.id"
-                  [item]="workspaceMediaToImageRecord(img)"
+                  [item]="workspaceMediaToMediaRecord(img)"
                   [mode]="itemGridMode()"
                   [state]="selectionService.isSelected(img.id) ? 'selected' : 'idle'"
                   [actionContextId]="MEDIA_ITEM_ACTION_CONTEXT"
@@ -103,7 +103,7 @@
         >
           <app-media-item
             [itemId]="img.id"
-            [item]="workspaceMediaToImageRecord(img)"
+            [item]="workspaceMediaToMediaRecord(img)"
             [mode]="itemGridMode()"
             [state]="selectionService.isSelected(img.id) ? 'selected' : 'idle'"
             [actionContextId]="MEDIA_ITEM_ACTION_CONTEXT"

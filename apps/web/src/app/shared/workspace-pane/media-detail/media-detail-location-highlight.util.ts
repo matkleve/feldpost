@@ -1,4 +1,4 @@
-import type { ImageRecord } from './media-detail-view.types';
+import type { MediaRecord } from './media-detail-view.types';
 
 export type LocationHighlightField =
   | 'address'
@@ -14,8 +14,8 @@ function normLocationValue(value: string | null | undefined): string {
 
 /** Fields whose values changed between two media snapshots (for flash animation). */
 export function collectLocationFieldChanges(
-  before: ImageRecord,
-  after: ImageRecord,
+  before: MediaRecord,
+  after: MediaRecord,
 ): LocationHighlightField[] {
   const changed: LocationHighlightField[] = [];
 

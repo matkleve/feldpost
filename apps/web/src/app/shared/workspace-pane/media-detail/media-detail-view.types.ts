@@ -1,4 +1,4 @@
-export type { ImageRecord } from '../../../core/media-query/media-query.types';
+export type { MediaRecord } from '../../../core/media-query/media-query.types';
 
 import type { MetadataValueType } from '../../../core/metadata/metadata.types';
 

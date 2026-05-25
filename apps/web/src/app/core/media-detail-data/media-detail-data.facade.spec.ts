@@ -1,9 +1,9 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
 import { MediaDetailDataFacade } from './media-detail-data.facade';
-import type { ImageRecord } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
+import type { MediaRecord } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 
-const MOCK_IMAGE: ImageRecord = {
+const MOCK_MEDIA: MediaRecord = {
   id: 'img-1',
   user_id: 'user-1',
   organization_id: 'org-1',
@@ -26,8 +26,8 @@ const MOCK_IMAGE: ImageRecord = {
   location_unresolved: false,
 };
 
-function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
-  const image = signal<ImageRecord | null>(null);
+function createFacade(overrides?: { media?: Partial<MediaRecord> }) {
+  const media = signal<MediaRecord | null>(null);
   const metadata = signal<any[]>([]);
   const loading = signal(false);
   const error = signal<string | null>(null);
@@ -39,15 +39,15 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
       from: vi.fn((table: string) => {
         if (table === 'media_items') {
           const storagePath =
-            overrides?.image &&
-            Object.prototype.hasOwnProperty.call(overrides.image, 'storage_path')
-              ? overrides.image.storage_path
-              : MOCK_IMAGE.storage_path;
+            overrides?.media &&
+            Object.prototype.hasOwnProperty.call(overrides.media, 'storage_path')
+              ? overrides.media.storage_path
+              : MOCK_MEDIA.storage_path;
           const thumbnailPath =
-            overrides?.image &&
-            Object.prototype.hasOwnProperty.call(overrides.image, 'thumbnail_path')
-              ? overrides.image.thumbnail_path
-              : MOCK_IMAGE.thumbnail_path;
+            overrides?.media &&
+            Object.prototype.hasOwnProperty.call(overrides.media, 'thumbnail_path')
+              ? overrides.media.thumbnail_path
+              : MOCK_MEDIA.thumbnail_path;
 
           const data = {
             id: 'media-1',
@@ -56,20 +56,20 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
             created_by: 'user-1',
             storage_path: storagePath,
             thumbnail_path: thumbnailPath,
-            latitude: overrides?.image?.latitude ?? MOCK_IMAGE.latitude,
-            longitude: overrides?.image?.longitude ?? MOCK_IMAGE.longitude,
-            exif_latitude: overrides?.image?.exif_latitude ?? MOCK_IMAGE.exif_latitude,
-            exif_longitude: overrides?.image?.exif_longitude ?? MOCK_IMAGE.exif_longitude,
-            captured_at: overrides?.image?.captured_at ?? MOCK_IMAGE.captured_at,
-            created_at: overrides?.image?.created_at ?? MOCK_IMAGE.created_at,
+            latitude: overrides?.media?.latitude ?? MOCK_MEDIA.latitude,
+            longitude: overrides?.media?.longitude ?? MOCK_MEDIA.longitude,
+            exif_latitude: overrides?.media?.exif_latitude ?? MOCK_MEDIA.exif_latitude,
+            exif_longitude: overrides?.media?.exif_longitude ?? MOCK_MEDIA.exif_longitude,
+            captured_at: overrides?.media?.captured_at ?? MOCK_MEDIA.captured_at,
+            created_at: overrides?.media?.created_at ?? MOCK_MEDIA.created_at,
             mime_type: 'image/jpeg',
             location_status: 'gps',
-            address_label: overrides?.image?.address_label ?? MOCK_IMAGE.address_label,
-            street: overrides?.image?.street ?? MOCK_IMAGE.street,
-            city: overrides?.image?.city ?? MOCK_IMAGE.city,
-            district: overrides?.image?.district ?? MOCK_IMAGE.district,
-            country: overrides?.image?.country ?? MOCK_IMAGE.country,
-            address_field_meta: overrides?.image?.address_field_meta ?? null,
+            address_label: overrides?.media?.address_label ?? MOCK_MEDIA.address_label,
+            street: overrides?.media?.street ?? MOCK_MEDIA.street,
+            city: overrides?.media?.city ?? MOCK_MEDIA.city,
+            district: overrides?.media?.district ?? MOCK_MEDIA.district,
+            country: overrides?.media?.country ?? MOCK_MEDIA.country,
+            address_field_meta: overrides?.media?.address_field_meta ?? null,
           };
           return {
             select: vi.fn(() => ({
@@ -120,7 +120,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   const facade = new MediaDetailDataFacade({
     services: { supabase, metadata: metadataService, mediaDownloadService, projectMemberships },
     signals: {
-      media: image,
+      media,
       metadata,
       loading,
       error,
@@ -135,18 +135,18 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
 
   return {
     facade,
-    signals: { image, metadata, loading, error },
+    signals: { media, metadata, loading, error },
     deps: { metadataService, mediaDownloadService, projectMemberships },
   };
 }
 
 describe('MediaDetailDataFacade', () => {
-  it('loads image state and metadata', async () => {
+  it('loads media state and metadata', async () => {
     const { facade, signals, deps } = createFacade();
 
     await facade.loadMedia('img-1', new AbortController().signal);
 
-    expect(signals.image()?.id).toBe('img-1');
+    expect(signals.media()?.id).toBe('img-1');
     expect(signals.metadata()[0].key).toBe('Key');
     expect(deps.projectMemberships.loadProjectMemberships).toHaveBeenCalledWith('img-1', null);
   });

@@ -2,7 +2,7 @@ import type { WritableSignal } from '@angular/core';
 import type { ProjectsService } from '../../../core/projects/projects.service';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ToastService } from '../../../core/toast/toast.service';
-import type { ImageRecord, MediaContextRow, SelectOption } from './media-detail-view.types';
+import type { MediaRecord, MediaContextRow, SelectOption } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 
@@ -11,7 +11,7 @@ interface ProjectMembershipHelperDeps {
   projectsService: ProjectsService;
   toastService: ToastService;
   t: DetailTranslateFn;
-  media: WritableSignal<ImageRecord | null>;
+  media: WritableSignal<MediaRecord | null>;
   selectedProjectIds: WritableSignal<Set<string>>;
   mediaItemId: WritableSignal<string | null>;
   mediaType: WritableSignal<string | null>;

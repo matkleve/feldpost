@@ -4,11 +4,11 @@
  * Used by: `media-location-row` (read line), `media-location-add-search` (picker),
  * `media-detail-location-section` (list filter), `media-locations.service` (RPC errors).
  */
-import type { ImageRecord } from '../media-query/media-query.types';
+import type { MediaRecord } from '../media-query/media-query.types';
 import type { MediaItemLocationRow } from './media-locations.types';
 
 /**
- * Flat address/GPS fields patched onto the detail `media()` record (`ImageRecord` DTO).
+ * Flat address/GPS fields patched onto the detail `media()` record (`MediaRecord` DTO).
  *
  * Intentionally excludes `house_number`, `staircase`, `door`, `postcode` — those exist only on
  * `MediaItemLocationRow`, not on the gallery/detail media projection. Do **not** pass this type to
@@ -16,7 +16,7 @@ import type { MediaItemLocationRow } from './media-locations.types';
  * via `resolveFullAddress` in `media-detail-view.utils.ts`.
  */
 export type LocationDisplayFields = Pick<
-  ImageRecord,
+  MediaRecord,
   | 'address_label'
   | 'street'
   | 'city'
@@ -218,8 +218,8 @@ export function locationDisplaySnapshotFromRows(
   };
 }
 
-/** Merge first-link display fields into the loaded detail media record (`ImageRecord` DTO). */
-export function mergeLocationDisplayIntoMediaRecord<T extends ImageRecord>(
+/** Merge first-link display fields into the loaded detail media record (`MediaRecord` DTO). */
+export function mergeLocationDisplayIntoMediaRecord<T extends MediaRecord>(
   media: T,
   snapshot: LocationDisplaySnapshot | null,
 ): T {

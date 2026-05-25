@@ -1,13 +1,13 @@
 import type { WritableSignal } from '@angular/core';
 import type { MetadataService } from '../../../core/metadata/metadata.service';
-import type { ImageRecord, MetadataEntry } from './media-detail-view.types';
+import type { MediaRecord, MetadataEntry } from './media-detail-view.types';
 
 interface MediaDetailMetadataHelperDeps {
   services: {
     metadata: MetadataService;
   };
   signals: {
-    media: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<MediaRecord | null>;
     mediaId: () => string | null;
     metadata: WritableSignal<MetadataEntry[]>;
     saving: WritableSignal<boolean>;

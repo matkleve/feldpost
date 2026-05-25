@@ -5,7 +5,7 @@ import type { SupabaseService } from '../supabase/supabase.service';
 import type { MetadataService } from '../metadata/metadata.service';
 import type { AddressFieldMeta } from '../address-field-suggest/address-field-suggest.types';
 import type {
-  ImageRecord,
+  MediaRecord,
   MetadataEntry,
   MetadataKeyDefinitionView,
   SelectOption,
@@ -65,7 +65,7 @@ interface MediaDetailDataFacadeDeps {
     projectMemberships: ImageDetailProjectMembershipHelper;
   };
   signals: {
-    media: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<MediaRecord | null>;
     metadata: WritableSignal<MetadataEntry[]>;
     loading: WritableSignal<boolean>;
     error: WritableSignal<string | null>;
@@ -94,15 +94,15 @@ export class MediaDetailDataFacade {
       return { applied: false, locationStatus: null };
     }
 
-    const legacyImageId = media.source_image_id ?? media.id;
-    const patch = this.toImageRecord(media, legacyImageId);
+    const legacyMediaId = media.source_image_id ?? media.id;
+    const patch = this.toMediaRecord(media, legacyMediaId);
     const current = this.deps.signals.media();
     const matchesCurrent =
       !!current &&
-      (current.id === legacyImageId ||
+      (current.id === legacyMediaId ||
         current.id === media.id ||
         current.id === id ||
-        id === legacyImageId ||
+        id === legacyMediaId ||
         id === media.id);
     if (!matchesCurrent) {
       return { applied: false, locationStatus: null };
@@ -132,8 +132,8 @@ export class MediaDetailDataFacade {
     if (abortSignal.aborted) return;
     if (!mediaRow) return;
 
-    const legacyImageId = mediaRow.source_image_id ?? mediaRow.id;
-    const record = this.toImageRecord(mediaRow, legacyImageId);
+    const legacyMediaId = mediaRow.source_image_id ?? mediaRow.id;
+    const record = this.toMediaRecord(mediaRow, legacyMediaId);
     const metadataEntries = await this.deps.services.metadata.loadMetadataEntriesForMediaItem(
       mediaRow.id,
     );
@@ -260,11 +260,11 @@ export class MediaDetailDataFacade {
     return displayLocationFromRows(data as MediaItemLocationRow[]);
   }
 
-  private toImageRecord(media: MediaDetailRow, legacyImageId: string): ImageRecord {
+  private toMediaRecord(media: MediaDetailRow, legacyMediaId: string): MediaRecord {
     const unresolved = media.location_status === 'pending' || media.location_status === 'no_gps';
 
     return {
-      id: legacyImageId,
+      id: legacyMediaId,
       user_id: media.created_by ?? '',
       organization_id: media.organization_id,
       project_id: null,

@@ -5,7 +5,7 @@ import type { PreviewGenerationStatus } from '../media/preview-generation-status
  * Canonical media row / list-query DTO for gallery-style surfaces.
  * @see docs/specs/service/media-query/media-query-service.md
  */
-export interface ImageRecord {
+export interface MediaRecord {
   id: string;
   user_id: string;
   organization_id: string | null;

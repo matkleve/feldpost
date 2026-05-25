@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { PhotoLoadService } from '../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
-import type { ImageRecord } from '../../../core/media-query/media-query.types';
+import type { MediaRecord } from '../../../core/media-query/media-query.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { MediaRenderState } from '../../core/media/media-renderer.types';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
@@ -32,7 +32,7 @@ export class MediaCardComponent implements OnChanges {
   private readonly mediaOrchestrator = inject(MediaOrchestratorService);
   private thumbnailRequestId = 0;
 
-  readonly item = input.required<ImageRecord>();
+  readonly item = input.required<MediaRecord>();
   readonly variant = input<CardVariant>('medium');
   readonly projectName = input<string>('');
   readonly thumbnailUrl = signal('');
@@ -167,7 +167,7 @@ export class MediaCardComponent implements OnChanges {
     this.thumbnailFailed.set(true);
   }
 
-  private async resolveThumbnailUrl(item: ImageRecord): Promise<void> {
+  private async resolveThumbnailUrl(item: MediaRecord): Promise<void> {
     const preferredPath = item.thumbnail_path ?? item.storage_path;
     if (!preferredPath) {
       this.thumbnailFailed.set(false);

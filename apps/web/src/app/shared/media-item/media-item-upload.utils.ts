@@ -1,6 +1,6 @@
 import type { UploadOverlayState } from '../../core/media/media-renderer.types';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
-import type { ImageRecord } from '../../core/media-query/media-query.types';
+import type { MediaRecord } from '../../core/media-query/media-query.types';
 
 export function isMediaItemUploadOverlayPhase(phase: UploadPhase): boolean {
   return (
@@ -22,7 +22,7 @@ export function isMediaItemUploadOverlayPhase(phase: UploadPhase): boolean {
 
 export function resolveMediaItemUploadOverlay(
   jobs: ReadonlyArray<UploadJob>,
-  item: ImageRecord | null,
+  item: MediaRecord | null,
 ): UploadOverlayState | null {
   if (!item) {
     return null;
@@ -40,7 +40,7 @@ export function resolveMediaItemUploadOverlay(
   };
 }
 
-function matchesMediaItemJob(job: UploadJob, item: ImageRecord): boolean {
+function matchesMediaItemJob(job: UploadJob, item: MediaRecord): boolean {
   if (job.targetMediaId === item.id || job.mediaId === item.id || job.existingMediaId === item.id) {
     return true;
   }

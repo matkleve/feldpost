@@ -20,7 +20,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { MediaItemLocationRow } from '../../../../core/media-locations/media-locations.types';
 import { locationMatchesQuery } from '../../../../core/media-locations/media-locations.helpers';
 import type { SearchQueryContext } from '../../../../core/search/search.models';
-import type { ImageRecord } from '../media-detail-view.types';
+import type { MediaRecord } from '../media-detail-view.types';
 import { MediaLocationAddSearchComponent } from '../media-location-add-search/media-location-add-search.component';
 import {
   MediaLocationRowComponent,
@@ -61,7 +61,7 @@ export class MediaDetailLocationSectionComponent {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  readonly media = input.required<ImageRecord>();
+  readonly media = input.required<MediaRecord>();
   readonly locations = input<MediaItemLocationRow[]>([]);
   readonly saving = input(false);
 

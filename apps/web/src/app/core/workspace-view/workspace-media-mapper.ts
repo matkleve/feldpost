@@ -1,8 +1,8 @@
-import type { ImageRecord } from '../media-query/media-query.types';
+import type { MediaRecord } from '../media-query/media-query.types';
 import type { WorkspaceMedia } from './workspace-view.types';
 
-/** Maps workspace viewport media rows to canonical ImageRecord for MediaItem / MediaDownloadService. */
-export function workspaceMediaToImageRecord(w: WorkspaceMedia): ImageRecord {
+/** Maps workspace viewport media rows to canonical MediaRecord for MediaItem / MediaDownloadService. */
+export function workspaceMediaToMediaRecord(w: WorkspaceMedia): MediaRecord {
   const captured = w.capturedAt;
   return {
     id: w.id,

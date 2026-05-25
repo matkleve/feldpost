@@ -89,7 +89,7 @@ MediaDetailView
 
 | Name        | Type         | Default | Controls                              |
 | ----------- | ------------ | ------- | ------------------------------------- | ------------------------------ |
-| `image`     | `ImageRecord | null`   | `null`                                | The displayed image record     |
+| `image`     | `MediaRecord | null`   | `null`                                | The displayed image record     |
 | `loading`   | `boolean`    | `false` | Whether record loading is in flight   |
 | `error`     | `string      | null`   | `null`                                | Error message if loading fails |
 | `paneWidth` | `number`     | `0`     | Width of the workspace pane in pixels |

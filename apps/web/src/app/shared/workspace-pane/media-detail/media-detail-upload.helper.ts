@@ -8,7 +8,7 @@ import {
   formatUploadFailureMessage,
   uploadFailureMessageToToastText,
 } from '../../../core/upload/upload-error-messages.util';
-import type { ImageRecord } from './media-detail-view.types';
+import type { MediaRecord } from './media-detail-view.types';
 
 interface MediaDetailUploadHelperDeps {
   services: {
@@ -16,7 +16,7 @@ interface MediaDetailUploadHelperDeps {
     uploadManager: UploadManagerService;
   };
   signals: {
-    media: WritableSignal<ImageRecord | null>;
+    media: WritableSignal<MediaRecord | null>;
     replaceError: WritableSignal<string | null>;
     activeJobId: WritableSignal<string | null>;
   };

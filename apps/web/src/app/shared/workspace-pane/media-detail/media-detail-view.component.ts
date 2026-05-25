@@ -49,7 +49,7 @@ import type { MediaItemLocationRow } from '../../../core/media-locations/media-l
 import { buildLocationUpdateFailureToast } from '../../../core/media-location-update/location-update-toast.util';
 import type {
   DetailEditingField,
-  ImageRecord,
+  MediaRecord,
   MetadataEntry,
   SelectOption,
 } from './media-detail-view.types';
@@ -69,7 +69,7 @@ import {
   needsAddressResolutionAfterGps,
   hasValidGpsCoordinates,
   prepareLocationPatchAfterGpsChange,
-  mergeImageLocationPatch,
+  mergeMediaLocationPatch,
   locationPatchFromForwardGeocode,
   resolveDisplayTitle,
   resolveFullAddress,
@@ -137,7 +137,7 @@ import {
   type LocationHighlightField,
 } from './media-detail-location-highlight.util';
 
-export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
+export type { MediaRecord, MetadataEntry } from './media-detail-view.types';
 
 @Component({
   selector: 'app-media-detail-view',
@@ -201,7 +201,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   }>();
   readonly locationMapPickRequested = output<UploadLocationMapPickRequest>();
 
-  readonly media = signal<ImageRecord | null>(null);
+  readonly media = signal<MediaRecord | null>(null);
   readonly metadata = signal<MetadataEntry[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -617,7 +617,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (!current) {
       return;
     }
-    this.media.set(mergeImageLocationPatch(current, patch));
+    this.media.set(mergeMediaLocationPatch(current, patch));
   }
 
   private static readonly LOCATION_FIELD_FLASH_MS = 3200;
@@ -673,7 +673,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   /** Refresh structured address + coords from DB after GPS assignment (keeps spinners, no full reload). */
   private async syncLocationFieldsAfterGps(
     mediaId: string,
-    snapshotBefore?: ImageRecord,
+    snapshotBefore?: MediaRecord,
   ): Promise<void> {
     const before = snapshotBefore ?? this.media();
     let fieldsToFlash: LocationHighlightField[] = [];
@@ -829,7 +829,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (!mediaItem) return;
 
     const meta: AddressFieldMeta = { ...(mediaItem.address_field_meta ?? {}) };
-    const patch: Partial<ImageRecord> = { address_field_meta: meta };
+    const patch: Partial<MediaRecord> = { address_field_meta: meta };
 
     for (const fieldOffer of offer.fields) {
       meta[fieldOffer.field] = { source: 'geocoder', verified: true };

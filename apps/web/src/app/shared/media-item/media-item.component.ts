@@ -16,7 +16,7 @@ import type {
   ItemContextActionEvent,
   ItemDisplayMode,
 } from '../item-grid/item.component';
-import type { ImageRecord } from '../../core/media-query/media-query.types';
+import type { MediaRecord } from '../../core/media-query/media-query.types';
 import { mediaHasZoomableLocation } from '../../core/media-locations/media-locations.helpers';
 import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
@@ -88,7 +88,7 @@ export class MediaItemComponent {
   /** Detail pane: right-click on preview (no workspace grid context menu). */
   readonly embedContextMenu = output<void>();
 
-  readonly item = input<ImageRecord | null>(null);
+  readonly item = input<MediaRecord | null>(null);
   readonly selected = computed(() => this.state() === 'selected');
   /** Slot geometry: grid starts square (1); detail uses hero band until ratio is committed. */
   readonly mediaAspectRatio = signal('1');

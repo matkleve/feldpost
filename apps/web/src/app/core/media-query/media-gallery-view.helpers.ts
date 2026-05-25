@@ -1,7 +1,7 @@
 import type { FilterService } from '../filter/filter.service';
 import type { FilterRule } from '../filter/filter.types';
 import type { MetadataService } from '../metadata/metadata.service';
-import type { ImageRecord } from './media-query.types';
+import type { MediaRecord } from './media-query.types';
 import type {
   GroupedSection,
   MetadataFieldRef,
@@ -145,13 +145,13 @@ export function buildGroupedSectionsForMediaGallery(
 
 export type MediaGalleryRenderRow =
   | { type: 'header'; heading: string; imageCount: number; level: number }
-  | { type: 'grid'; items: ImageRecord[] };
+  | { type: 'grid'; items: MediaRecord[] };
 
 /** Flattens grouped sections into header + grid rows for the media content template. */
 /** @see docs/specs/component/item-grid/item-grid.md#wiring */
 export function flattenGroupedSectionsToMediaRenderRows(
   sections: readonly GroupedSection[],
-  mapToImageRecord: (w: WorkspaceMedia) => ImageRecord,
+  mapToMediaRecord: (w: WorkspaceMedia) => MediaRecord,
 ): MediaGalleryRenderRow[] {
   const out: MediaGalleryRenderRow[] = [];
 
@@ -168,7 +168,7 @@ export function flattenGroupedSectionsToMediaRenderRows(
       if (s.subGroups && s.subGroups.length > 0) {
         walk(s.subGroups);
       } else if (s.images.length > 0) {
-        out.push({ type: 'grid', items: s.images.map(mapToImageRecord) });
+        out.push({ type: 'grid', items: s.images.map(mapToMediaRecord) });
       }
     }
   };

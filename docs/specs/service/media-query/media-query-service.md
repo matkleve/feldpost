@@ -6,7 +6,7 @@ Loads **current user’s media items** from **`media_items`** for gallery-style 
 
 ## What It Looks Like
 
-`/media` page and similar grids receive rows as **`ImageRecord`** (canonical list/grid DTO; see [List query DTO](#list-query-dto-imagerecord) below). Workspace detail UI re-exports the same type from feature types for convenience; the normative definition lives in **`apps/web/src/app/core/media-query/media-query.types.ts`**.
+`/media` page and similar grids receive rows as **`MediaRecord`** (canonical list/grid DTO; see [List query DTO](#list-query-dto-imagerecord) below). Workspace detail UI re-exports the same type from feature types for convenience; the normative definition lives in **`apps/web/src/app/core/media-query/media-query.types.ts`**.
 
 ## Where It Lives
 
@@ -23,7 +23,7 @@ Loads **current user’s media items** from **`media_items`** for gallery-style 
 
 ```text
 MediaQueryService
-|- media-query.types.ts (ImageRecord + query row mapping)
+|- media-query.types.ts (MediaRecord + query row mapping)
 `- SupabaseService → media_items, projects
 ```
 
@@ -34,7 +34,7 @@ MediaQueryService
 | `media_items` | Select with offset/limit; optional count |
 | `projects` | Names for joined display (reserved for future name joins; `projectNameById` may be empty today) |
 
-### List query DTO (`ImageRecord`)
+### List query DTO (`MediaRecord`)
 
 Normative TypeScript: `apps/web/src/app/core/media-query/media-query.types.ts`. This is the shared row shape for **list-style** media queries (`loadCurrentUserMedia`) and grid/detail consumers; it is not the file-type registry (see [media types and file registry](../media/media-types-and-file-registry.md) for MIME/renderer contracts only).
 
@@ -56,7 +56,7 @@ Normative TypeScript: `apps/web/src/app/core/media-query/media-query.types.ts`. 
 | `direction` | number \| null | Not populated by list query (`null`). |
 | `location_unresolved` | boolean \| null | Derived: `true` when `location_status` is `pending` or `no_gps`; otherwise `false` from mapper (see service). |
 
-**`location_status` (read path):** Selected from `media_items` for mapping only; not part of `ImageRecord`. Legacy or extended enum values may appear on read; list mapper treats unknowns as not-unresolved except the branches above.
+**`location_status` (read path):** Selected from `media_items` for mapping only; not part of `MediaRecord`. Legacy or extended enum values may appear on read; list mapper treats unknowns as not-unresolved except the branches above.
 
 ## State
 
@@ -67,7 +67,7 @@ None on service (stateless async API).
 | File | Purpose |
 | --- | --- |
 | `apps/web/src/app/core/media-query/media-query.service.ts` | Facade |
-| `apps/web/src/app/core/media-query/media-query.types.ts` | `ImageRecord` + canonical list DTO |
+| `apps/web/src/app/core/media-query/media-query.types.ts` | `MediaRecord` + canonical list DTO |
 | `docs/specs/service/media-query/media-query-service.md` | This contract |
 
 ## Wiring

@@ -113,7 +113,7 @@ Slot **l2** edit and center address click use the same shared-edit confirm as **
 
 After any location mutation, parent calls `refreshMediaAfterLocationMutation(mediaId)`:
 
-- Re-load `list_locations_for_media` and merge into `ImageRecord` display fields (lat/lng, address_label, street, city, …).
+- Re-load `list_locations_for_media` and merge into `MediaRecord` display fields (lat/lng, address_label, street, city, …).
 - **Must not** read or write dropped `media_items` address/GPS columns.
 - Map actions use `media().latitude` / `longitude` from hydrated first link only.
 

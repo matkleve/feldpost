@@ -1,7 +1,7 @@
 import type { ChipDef } from '../../../shared/quick-info-chips/quick-info-chips.component';
 import type { MediaLocationAddressPatch } from '../../../core/media-location-update/media-location-update.types';
 import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
-import type { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
+import type { MediaRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
 
 export type DetailTranslateFn = (key: string, fallback: string) => string;
 
@@ -68,7 +68,7 @@ export function isLikelyImagePath(path: string | null): boolean {
 }
 
 export function resolveMediaTypeLabel(
-  image: ImageRecord | null,
+  media: MediaRecord | null,
   mediaType: string | null,
   mimeType: string | null,
   t: DetailTranslateFn,
@@ -79,7 +79,7 @@ export function resolveMediaTypeLabel(
   const fromMediaType = resolveLabelFromMediaType(mediaType, t);
   if (fromMediaType) return fromMediaType;
 
-  const fromPath = resolveLabelFromPath(image?.storage_path ?? null, t);
+  const fromPath = resolveLabelFromPath(media?.storage_path ?? null, t);
   if (fromPath) return fromPath;
 
   return t('workspace.imageDetail.mediaType.media', 'Media');
@@ -87,7 +87,7 @@ export function resolveMediaTypeLabel(
 
 /** Plain-language type for quick-info chips (Image, PDF, Document — not JPG/DOCX). */
 export function resolveMediaTypeChipLabel(
-  image: ImageRecord | null,
+  media: MediaRecord | null,
   mediaType: string | null,
   mimeType: string | null,
   t: DetailTranslateFn,
@@ -111,7 +111,7 @@ export function resolveMediaTypeChipLabel(
   const fromMediaType = resolveLabelFromMediaType(mediaType, t);
   if (fromMediaType) return fromMediaType;
 
-  const extension = image?.storage_path?.split('.').pop()?.toUpperCase();
+  const extension = media?.storage_path?.split('.').pop()?.toUpperCase();
   if (extension && isImageExtension(extension)) {
     return t('workspace.imageDetail.mediaType.image', 'Image');
   }
@@ -143,19 +143,19 @@ export function formatCoordinate(value: number | null): string {
   return value.toFixed(6);
 }
 
-export function resolveDisplayTitle(image: ImageRecord | null, t: DetailTranslateFn): string {
-  if (!image) return '';
+export function resolveDisplayTitle(media: MediaRecord | null, t: DetailTranslateFn): string {
+  if (!media) return '';
   return (
-    image.address_label ??
-    image.storage_path?.split('/').pop() ??
+    media.address_label ??
+    media.storage_path?.split('/').pop() ??
     t('workspace.imageDetail.fallback.file', 'File')
   );
 }
 
-export function formatCaptureDate(image: ImageRecord | null, locale: string): string | null {
-  if (!image?.captured_at) return null;
-  if (image.has_time) {
-    return new Date(image.captured_at).toLocaleString(locale, {
+export function formatCaptureDate(media: MediaRecord | null, locale: string): string | null {
+  if (!media?.captured_at) return null;
+  if (media.has_time) {
+    return new Date(media.captured_at).toLocaleString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -165,16 +165,16 @@ export function formatCaptureDate(image: ImageRecord | null, locale: string): st
     });
   }
 
-  return new Date(image.captured_at).toLocaleDateString(locale, {
+  return new Date(media.captured_at).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   });
 }
 
-export function formatUploadDate(image: ImageRecord | null, locale: string): string | null {
-  if (!image) return null;
-  return new Date(image.created_at).toLocaleString(locale, {
+export function formatUploadDate(media: MediaRecord | null, locale: string): string | null {
+  if (!media) return null;
+  return new Date(media.created_at).toLocaleString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -225,42 +225,42 @@ export function canCreateProjectOption(
 
 /**
  * Detail header / inline address summary from `media()` projection only (`LocationDisplayFields`).
- * Intentionally not `formatLocationDisplayLine` — no house_number/staircase/door/postcode on `ImageRecord`.
+ * Intentionally not `formatLocationDisplayLine` — no house_number/staircase/door/postcode on `MediaRecord`.
  */
-export function resolveFullAddress(image: ImageRecord | null): string {
-  if (!image) {
+export function resolveFullAddress(media: MediaRecord | null): string {
+  if (!media) {
     return '';
   }
 
-  const parts = [image.street, image.city, image.district, image.country].filter(Boolean);
+  const parts = [media.street, media.city, media.district, media.country].filter(Boolean);
   if (parts.length > 0) {
     return parts.join(', ');
   }
 
-  return image.address_label?.trim() ?? '';
+  return media.address_label?.trim() ?? '';
 }
 
-export function hasResolvableCoordinates(image: ImageRecord | null): boolean {
-  return hasValidGpsCoordinates(image);
+export function hasResolvableCoordinates(media: MediaRecord | null): boolean {
+  return hasValidGpsCoordinates(media);
 }
 
 /** Active GPS present and not the null-island placeholder pair. */
-export function hasValidGpsCoordinates(image: ImageRecord | null): boolean {
-  if (!image || image.latitude == null || image.longitude == null) {
+export function hasValidGpsCoordinates(media: MediaRecord | null): boolean {
+  if (!media || media.latitude == null || media.longitude == null) {
     return false;
   }
-  return !(image.latitude === 0 && image.longitude === 0);
+  return !(media.latitude === 0 && media.longitude === 0);
 }
 
-export function hasCompleteStructuredAddress(image: ImageRecord | null): boolean {
-  if (!image) {
+export function hasCompleteStructuredAddress(media: MediaRecord | null): boolean {
+  if (!media) {
     return false;
   }
   return !!(
-    image.street?.trim() &&
-    image.city?.trim() &&
-    image.district?.trim() &&
-    image.country?.trim()
+    media.street?.trim() &&
+    media.city?.trim() &&
+    media.district?.trim() &&
+    media.country?.trim()
   );
 }
 
@@ -278,17 +278,17 @@ export function locationPatchFromForwardGeocode(
   };
 }
 
-export function mergeImageLocationPatch(
-  image: ImageRecord,
+export function mergeMediaLocationPatch(
+  media: MediaRecord,
   patch: MediaLocationAddressPatch & {
     latitude?: number | null;
     longitude?: number | null;
     location_unresolved?: boolean;
     gps_assignment_allowed?: boolean;
   },
-): ImageRecord {
-  const next: ImageRecord = {
-    ...image,
+): MediaRecord {
+  const next: MediaRecord = {
+    ...media,
     ...(patch.latitude !== undefined ? { latitude: patch.latitude } : {}),
     ...(patch.longitude !== undefined ? { longitude: patch.longitude } : {}),
     ...(patch.address_label !== undefined ? { address_label: patch.address_label } : {}),
@@ -311,16 +311,16 @@ export function mergeImageLocationPatch(
 }
 
 /** True when GPS exists but structured address lines are still incomplete (reverse geocode in flight). */
-export function needsAddressResolutionAfterGps(image: ImageRecord | null): boolean {
-  if (!hasValidGpsCoordinates(image)) {
+export function needsAddressResolutionAfterGps(media: MediaRecord | null): boolean {
+  if (!hasValidGpsCoordinates(media)) {
     return false;
   }
-  return !hasCompleteStructuredAddress(image);
+  return !hasCompleteStructuredAddress(media);
 }
 
 /** True when patch assigns new latitude/longitude different from the current media row. */
 export function patchChangesGps(
-  current: ImageRecord,
+  current: MediaRecord,
   patch: { latitude?: number | null; longitude?: number | null },
 ): boolean {
   if (patch.latitude === undefined || patch.longitude === undefined) {
@@ -334,7 +334,7 @@ export function patchChangesGps(
  * is not kept while reverse geocode runs.
  */
 export function prepareLocationPatchAfterGpsChange(
-  current: ImageRecord,
+  current: MediaRecord,
   patch: MediaLocationAddressPatch & {
     latitude?: number | null;
     longitude?: number | null;
@@ -361,7 +361,7 @@ export function prepareLocationPatchAfterGpsChange(
 }
 
 export function buildInfoChips(args: {
-  media: ImageRecord | null;
+  media: MediaRecord | null;
   mediaTypeChipLabel: string;
   projectName: string;
   selectedProjectCount: number;
