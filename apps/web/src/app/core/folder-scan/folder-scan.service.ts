@@ -89,12 +89,16 @@ export class FolderScanService {
   ]);
 
   /**
-   * Whether folder upload is available via File System Access API (`showDirectoryPicker`).
-   * Avoids `<input webkitdirectory>` — Chromium shows a non-dismissable bulk-upload confirmation for that path.
+   * Whether folder upload is available:
+   * - File System Access API (`showDirectoryPicker`) — preferred on Chromium
+   * - `<input webkitdirectory>` fallback (Chromium bulk-upload confirmation)
    * @see docs/use-cases/folder-import.md#browser-support
    */
   readonly isSupported =
-    typeof window !== 'undefined' && 'showDirectoryPicker' in window;
+    typeof window !== 'undefined' &&
+    (typeof (window as Window & { showDirectoryPicker?: unknown }).showDirectoryPicker ===
+      'function' ||
+      'webkitdirectory' in HTMLInputElement.prototype);
 
   /**
    * Recursively scan a directory for image files.

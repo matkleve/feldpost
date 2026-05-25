@@ -23966,6 +23966,130 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.folder.picker.failed.title', 'Folder upload unavailable', 'en', 'apps/web/src/app/features/upload/upload-panel-input-handlers.ts toast title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Folder upload unavailable', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.picker.failed.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ordner-Upload nicht verfügbar', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.picker.failed.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento cartella non disponibile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.picker.failed.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.folder.picker.failed.body', 'apps/web/src/app/features/upload/upload-panel-input-handlers.ts toast body', 'en', 'or select multiple files instead.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'apps/web/src/app/features/upload/upload-panel-input-handlers.ts toast body', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.picker.failed.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Use Chrome or Edge', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.picker.failed.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'or select multiple files instead.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.picker.failed.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.folder.import.failed.title', 'Folder import failed', 'en', 'apps/web/src/app/features/upload/upload-panel-input-handlers.ts toast title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Folder import failed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.import.failed.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ordner-Import fehlgeschlagen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.import.failed.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Importazione cartella non riuscita', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.import.failed.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.folder.import.failed.body', 'Could not read the selected folder. Try again or pick files individually.', 'en', 'apps/web/src/app/features/upload/upload-panel-input-handlers.ts toast body')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not read the selected folder. Try again or pick files individually.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.import.failed.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Der gewählte Ordner konnte nicht gelesen werden. Erneut versuchen oder Dateien einzeln wählen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.import.failed.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile leggere la cartella selezionata. Riprova o scegli i file singolarmente.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.import.failed.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.fileTypeGroup.images', 'Images', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

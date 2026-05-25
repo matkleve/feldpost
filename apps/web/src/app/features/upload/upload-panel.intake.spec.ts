@@ -36,42 +36,48 @@ describe('UploadPanelComponent intake', () => {
     expect(click).toHaveBeenCalledTimes(1);
   });
 
-  it('onSelectFolder submits folder via showDirectoryPicker when available', async () => {
+  it('onSelectFolder starts showDirectoryPicker when available', async () => {
     const { fakeManager } = await setupUploadPanel();
     const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
     const dirHandle = { name: 'Mariahilferstraße 56' } as FileSystemDirectoryHandle;
     const showDirectoryPicker = vi.fn().mockResolvedValue(dirHandle);
     vi.stubGlobal('showDirectoryPicker', showDirectoryPicker);
 
-    await inputHandlers.onSelectFolder({
-      preventDefault: vi.fn(),
-      stopPropagation: vi.fn(),
-    } as unknown as MouseEvent);
+    inputHandlers.onSelectFolder(
+      { preventDefault: vi.fn(), stopPropagation: vi.fn() } as unknown as MouseEvent,
+      document.createElement('input'),
+    );
 
-    expect(showDirectoryPicker).toHaveBeenCalledWith({ mode: 'read' });
-    expect(fakeManager.submitFolder).toHaveBeenCalledWith(dirHandle, {
-      projectId: undefined,
-      locationRequirementMode: 'optional',
+    await vi.waitFor(() => {
+      expect(showDirectoryPicker).toHaveBeenCalledWith({ mode: 'read' });
+      expect(fakeManager.submitFolder).toHaveBeenCalledWith(dirHandle, {
+        projectId: undefined,
+        locationRequirementMode: 'optional',
+      });
     });
     vi.unstubAllGlobals();
   });
 
-  it('onSelectFolder does nothing when showDirectoryPicker is unavailable', async () => {
-    const { fakeManager } = await setupUploadPanel();
+  it('onSelectFolder clicks folder input when showDirectoryPicker is unavailable', async () => {
+    await setupUploadPanel();
     const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
-    const showDirectoryPicker = (window as Window & { showDirectoryPicker?: unknown })
-      .showDirectoryPicker;
-    Reflect.deleteProperty(window, 'showDirectoryPicker');
-
-    await inputHandlers.onSelectFolder({
-      preventDefault: vi.fn(),
-      stopPropagation: vi.fn(),
-    } as unknown as MouseEvent);
-
-    expect(fakeManager.submitFolder).not.toHaveBeenCalled();
-    if (showDirectoryPicker !== undefined) {
-      (window as Window & { showDirectoryPicker?: unknown }).showDirectoryPicker =
-        showDirectoryPicker;
+    vi.stubGlobal('showDirectoryPicker', undefined);
+    if (!('webkitdirectory' in HTMLInputElement.prototype)) {
+      Object.defineProperty(HTMLInputElement.prototype, 'webkitdirectory', {
+        configurable: true,
+        value: true,
+      });
     }
+
+    const folderInput = document.createElement('input');
+    const clickSpy = vi.spyOn(folderInput, 'click');
+
+    inputHandlers.onSelectFolder(
+      { preventDefault: vi.fn(), stopPropagation: vi.fn() } as unknown as MouseEvent,
+      folderInput,
+    );
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
   });
 });
