@@ -12,10 +12,12 @@
  *  - Used by LocationResolverService, UploadService, and PlacementMode.
  */
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { I18nService } from '../i18n/i18n.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { ToastService } from '../toast/toast.service';
 import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { isGeocodeInfrastructureFailure } from './geocoding.helpers';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -131,11 +133,14 @@ interface GeocodeFailureDetails {
 
 // ── Service ────────────────────────────────────────────────────────────────────
 
+const GEOCODE_PROBE_OK_TTL_MS = 5 * 60 * 1000;
+
 @Injectable({ providedIn: 'root' })
 export class GeocodingService {
   private readonly supabase = inject(SupabaseService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly i18n = inject(I18nService);
+  private readonly toastService = inject(ToastService);
 
   private readonly reverseCache = new Map<
     string,
@@ -155,12 +160,39 @@ export class GeocodingService {
   >();
   private readonly recentFailureLogs = new Map<string, number>();
   private authFailureUntilMs = 0;
+  private serviceUnavailableUntilMs = 0;
+  private probeOkUntilMs = 0;
+  private probeInFlight: Promise<boolean> | null = null;
+
+  readonly geocodeAvailable = signal<boolean | null>(null);
 
   /**
    * Serial queue: chains every request so only one is in-flight at a time.
    * This prevents concurrent callers from racing past the server-side rate limit.
    */
   private queue: Promise<void> = Promise.resolve();
+
+  isGeocodeBlocked(): boolean {
+    const now = Date.now();
+    return now < this.authFailureUntilMs || now < this.serviceUnavailableUntilMs;
+  }
+
+  async ensureGeocodeAvailable(): Promise<boolean> {
+    if (this.isGeocodeBlocked()) {
+      this.geocodeAvailable.set(false);
+      return false;
+    }
+    if (this.probeOkUntilMs > Date.now()) {
+      this.geocodeAvailable.set(true);
+      return true;
+    }
+    if (!this.probeInFlight) {
+      this.probeInFlight = this.runGeocodeProbe().finally(() => {
+        this.probeInFlight = null;
+      });
+    }
+    return this.probeInFlight;
+  }
 
   /**
    * Reverse-geocode a lat/lng pair to structured address fields.
@@ -387,8 +419,8 @@ export class GeocodingService {
     body: Record<string, unknown>,
     operation: 'reverse' | 'forward' | 'search' | 'structured-search',
   ): Promise<T> {
-    if (Date.now() < this.authFailureUntilMs) {
-      throw new Error('Geocoding temporarily unavailable due to authentication failure');
+    if (this.isGeocodeBlocked()) {
+      throw new Error('Geocoding temporarily unavailable');
     }
 
     let lastError: unknown;
@@ -403,6 +435,9 @@ export class GeocodingService {
         });
         if (error) throw error;
         this.authFailureUntilMs = 0;
+        this.serviceUnavailableUntilMs = 0;
+        this.probeOkUntilMs = Date.now() + GEOCODE_PROBE_OK_TTL_MS;
+        this.geocodeAvailable.set(true);
         return data as T;
       } catch (error) {
         lastError = error;
@@ -413,6 +448,11 @@ export class GeocodingService {
         if (details.status === 401) {
           this.authFailureUntilMs =
             Date.now() + this.locationConfig.getConfig().geocodeAuthFailureCooldownMs;
+          this.geocodeAvailable.set(false);
+        }
+
+        if (finalAttempt && isGeocodeInfrastructureFailure(details)) {
+          this.markServiceUnavailable();
         }
 
         if (finalAttempt) {
@@ -425,6 +465,57 @@ export class GeocodingService {
     }
 
     throw lastError;
+  }
+
+  private async runGeocodeProbe(): Promise<boolean> {
+    try {
+      const headers = await this.getFunctionAuthHeaders();
+      const { data, error } = await this.supabase.client.functions.invoke('geocode', {
+        body: { action: 'forward', q: 'wien', limit: 1 },
+        headers,
+      });
+      if (error) throw error;
+      if (!data) {
+        this.markServiceUnavailable();
+        return false;
+      }
+      this.serviceUnavailableUntilMs = 0;
+      this.probeOkUntilMs = Date.now() + GEOCODE_PROBE_OK_TTL_MS;
+      this.geocodeAvailable.set(true);
+      return true;
+    } catch (error) {
+      const details = await this.extractFailureDetails(error);
+      if (isGeocodeInfrastructureFailure(details)) {
+        this.markServiceUnavailable();
+      } else {
+        this.geocodeAvailable.set(false);
+      }
+      return false;
+    }
+  }
+
+  private markServiceUnavailable(): void {
+    const cooldownMs = this.locationConfig.getConfig().geocodeAuthFailureCooldownMs;
+    this.serviceUnavailableUntilMs = Date.now() + cooldownMs;
+    this.probeOkUntilMs = 0;
+    this.geocodeAvailable.set(false);
+    this.notifyGeocodeUnavailableToast();
+  }
+
+  private notifyGeocodeUnavailableToast(): void {
+    this.toastService.show({
+      type: 'warning',
+      dedupe: true,
+      duration: 8000,
+      title: this.i18n.t(
+        'geocoding.toast.unavailable.title',
+        'Internet address search unavailable',
+      ),
+      body: this.i18n.t(
+        'geocoding.toast.unavailable.body',
+        'The geocoding service is not reachable. Check local Supabase Edge (geocode) or try again later.',
+      ),
+    });
   }
 
   private async getFunctionAuthHeaders(): Promise<Record<string, string>> {

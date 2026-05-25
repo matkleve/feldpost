@@ -31374,4 +31374,66 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'geocoding.toast.unavailable.title', 'Address search unavailable', 'en', 'toast when geocode edge function is down (503/boot)')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address search unavailable', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'geocoding.toast.unavailable.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresssuche nicht verfügbar', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'geocoding.toast.unavailable.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ricerca indirizzi non disponibile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'geocoding.toast.unavailable.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'geocoding.toast.unavailable.body', 'Internet address search is temporarily unavailable. Try again in a few minutes.', 'en', 'toast when geocode edge function is down')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Internet address search is temporarily unavailable. Try again in a few minutes.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'geocoding.toast.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Die Internet-Adresssuche ist vorübergehend nicht verfügbar. Versuchen Sie es in einigen Minuten erneut.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'geocoding.toast.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La ricerca indirizzi su Internet non è temporaneamente disponibile. Riprovare tra qualche minuto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'geocoding.toast.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

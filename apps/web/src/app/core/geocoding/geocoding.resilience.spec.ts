@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { GeocodingService } from './geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { ToastService } from '../toast/toast.service';
+import { I18nService } from '../i18n/i18n.service';
 
 function nominatimResponse(overrides: Record<string, unknown> = {}) {
   return {
@@ -21,9 +23,11 @@ function nominatimResponse(overrides: Record<string, unknown> = {}) {
 describe('GeocodingService resilience', () => {
   let service: GeocodingService;
   let invokeSpy: ReturnType<typeof vi.fn>;
+  let toastShow: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     invokeSpy = vi.fn();
+    toastShow = vi.fn();
 
     TestBed.configureTestingModule({
       providers: [
@@ -44,6 +48,14 @@ describe('GeocodingService resilience', () => {
               },
             },
           },
+        },
+        {
+          provide: ToastService,
+          useValue: { show: toastShow },
+        },
+        {
+          provide: I18nService,
+          useValue: { t: (_key: string, fallback: string) => fallback, language: () => 'en' },
         },
       ],
     });
@@ -113,6 +125,28 @@ describe('GeocodingService resilience', () => {
         code: 'BAD_REQUEST',
       }),
     );
+  });
+
+  it('opens service cooldown after 503 so ensureGeocodeAvailable skips further invokes', async () => {
+    const unavailableError = {
+      name: 'FunctionsHttpError',
+      message: 'Edge function returned status 503',
+      status: 503,
+      context: new Response(JSON.stringify({ code: 'BOOT_ERROR', message: 'Worker failed to boot' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    };
+
+    invokeSpy.mockResolvedValue({ data: null, error: unavailableError });
+
+    const probeOk = await service.ensureGeocodeAvailable();
+    const secondProbe = await service.ensureGeocodeAvailable();
+
+    expect(probeOk).toBe(false);
+    expect(secondProbe).toBe(false);
+    expect(invokeSpy).toHaveBeenCalledTimes(1);
+    expect(toastShow).toHaveBeenCalledTimes(1);
   });
 
   it('opens auth cooldown after 401 so subsequent calls fail soft without extra network calls', async () => {
