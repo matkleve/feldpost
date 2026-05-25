@@ -46,6 +46,15 @@ argument-hint: "Element spec name or path (e.g., search-bar)"
 3. Mark `[x]` for items the code satisfies; leave `[ ]` for items that are incomplete or blocked
 4. If blocked on something, say what and why — don't guess
 
+### 4b. Stateful / layered UI (FSM) — extra gates
+
+When the spec defines a **state enum** and **stacked layers**:
+
+1. **Transition map:** grep every `goTo(` / state assignment against `MEDIA_DISPLAY_TRANSITIONS` (or equivalent). Spec-allowed edges must exist in the map.
+2. **FSM ↔ CSS:** update the supplement **layer opacity matrix** (`#fsm-layer-opacity-matrix` or equivalent); SCSS must implement every cell — no visibility outside the table (see `.cursor/rules/ui-state-machine.mdc` § FSM ↔ CSS ↔ DOM alignment).
+3. **DOM gates:** if template uses `@if` on a computed separate from `data-state`, document it in the spec; do not treat `data-state` alone as “what the user sees.”
+4. **🔴 LIVE CHECK (you):** for cache, route revisit, or `media-display` work, the agent **must** tell the owner to run the live table in `docs/agent-workflows/agent-communication.md` § **LIVE VERIFICATION** (map → `/media` ×2 minimum). Build green is not enough.
+
 ## What NOT to do
 
 - Do not re-plan what the spec already planned

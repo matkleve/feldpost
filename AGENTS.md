@@ -172,7 +172,11 @@ Agents should ask **enough questions that requirements are clear** before multi-
 
 **When the user corrects you:** treat it as an invariant update — fix minimal code, sync spec/plan if applicable, add a short note to `docs/ai-diary/YYYY-MM-DD.md` if the mistake is likely to recur.
 
-Full triggers, anti-patterns, and prompt templates: [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md). Recent example (geocoder Phases 1–3, list-level history): [`docs/ai-diary/2026-05-23.md`](docs/ai-diary/2026-05-23.md).
+**🔴 Live verification (product owner):** When agents change route cache, media preview FSM, signing, or tile aspect caches, you must run the browser checks in [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md) § **LIVE VERIFICATION** — especially **second visit to `/media`**. `ng build` alone does not prove revisit UX. Agents must call this out explicitly; if they do not, ask for the LIVE CHECK block.
+
+**FSM ↔ CSS:** Layered stateful components require transition map, layer opacity matrix in spec supplement, and aligned SCSS — see `.cursor/rules/ui-state-machine.mdc` § FSM ↔ CSS ↔ DOM alignment. Example: [`docs/specs/component/media/media-display.rendering-matrix.supplement.md`](docs/specs/component/media/media-display.rendering-matrix.supplement.md).
+
+Full triggers, anti-patterns, and prompt templates: [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md). Recent examples: geocoder [`docs/ai-diary/2026-05-23.md`](docs/ai-diary/2026-05-23.md); media grid FSM/cache [`docs/ai-diary/2026-05-25.md`](docs/ai-diary/2026-05-25.md).
 
 ## Required Feature Workflow
 

@@ -69,6 +69,17 @@ Any divergence is an exception and must be documented.
 - Use `position: absolute; inset: 0` on the visual owner relative to the geometry owner's stacking context.
 - Never duplicate geometry ownership across layers.
 
+## 1.25) FSM ↔ CSS ↔ DOM (layered stateful components)
+
+When the component uses `[attr.data-state]` and **stacked layers** (loading / content / error / empty):
+
+1. **Transition map** in TS — every `goTo(next)` must be a legal edge (grep vs map).
+2. **Layer opacity matrix** in spec supplement — one row per state, one column per layer; SCSS implements every cell.
+3. **DOM gates** — document any `@if` / computed that mounts content outside `data-state` (e.g. `showSharpContent`).
+4. **Live revisit check** — for cache/FSM media work, owner runs map → `/media` twice; see `docs/agent-workflows/agent-communication.md` § LIVE VERIFICATION.
+
+Reference: `.cursor/rules/ui-state-machine.mdc`, `docs/ai-diary/2026-05-25.md`, `media-display.rendering-matrix.supplement.md`.
+
 ### Stacking context rule
 
 Exactly one element per component declares `position: relative`.

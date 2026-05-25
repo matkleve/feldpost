@@ -11,21 +11,8 @@
   pointer-events: none;
 }
 
-// Org picker two-line block (format D primary + muted locality).
-.media-location-add-search__picker-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.media-location-add-search__picker-secondary {
-  font-size: var(--font-size-2xs);
-  line-height: 1.2;
-  color: var(--muted-foreground);
-}
-
+// Multi-line picker rows (format D) align icon to first line
+// @see location-picker-row.component.scss
 .media-location-add-search__org-option {
   align-items: flex-start;
 }

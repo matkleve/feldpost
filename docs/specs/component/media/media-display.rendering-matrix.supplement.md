@@ -4,6 +4,8 @@
 
 ## FSM layer opacity matrix
 
+> **Agent contract:** Transition map (`media-display-state.ts`), this matrix, and SCSS (`media-display-fsm-layers`) must ship together. Every `goTo('…')` must be a legal edge in the map. See `.cursor/rules/ui-state-machine.mdc` § FSM ↔ CSS ↔ DOM alignment and `docs/ai-diary/2026-05-25.md`.
+
 Every `data-state` on `.media-display__viewport` MUST set `opacity` for **all six** layers. No layer may rely on a default hidden opacity outside this table.
 
 Columns: `L` loading-surface, `S` staged-content, `C` content, `I` icon-only, `E` error, `N` no-media (`1` = visible, `0` = hidden).

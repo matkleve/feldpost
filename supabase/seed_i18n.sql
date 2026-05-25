@@ -31375,6 +31375,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.addNew.hint', 'Creates a new org location', 'en', 'media detail location picker new-address row secondary line')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Creates a new org location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.addNew.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erstellt einen neuen Organisationsstandort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.addNew.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea una nuova ubicazione organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.addNew.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'geocoding.toast.unavailable.title', 'Address search unavailable', 'en', 'toast when geocode edge function is down (503/boot)')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

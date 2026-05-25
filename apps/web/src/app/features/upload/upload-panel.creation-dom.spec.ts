@@ -91,13 +91,10 @@ describe('UploadPanelComponent DOM intake controls', () => {
     expect((button.nativeElement as HTMLButtonElement).textContent).toContain('Take photo');
   });
 
-  it('renders a hidden folder input for directory fallback', async () => {
+  it('does not render a webkitdirectory folder input (uses showDirectoryPicker only)', async () => {
     const { fixture } = await setupUploadPanel();
-    const input = fixture.debugElement.query(By.css('.upload-panel__folder-input'))
-      .nativeElement as HTMLInputElement;
-    expect(input).not.toBeNull();
-    expect(input.multiple).toBe(true);
-    expect(input.hasAttribute('webkitdirectory')).toBe(true);
+    const input = fixture.debugElement.query(By.css('.upload-panel__folder-input'));
+    expect(input).toBeNull();
   });
 
   it('renders the upload-folder intake button', async () => {

@@ -227,6 +227,19 @@
 
 ---
 
+### `<app-location-picker-row>` — Location Picker Row
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/location-picker-row/location-picker-row.component.ts`
+- **Purpose**: Shared two-line format D content (icon + primary + optional secondary) inside location add/search dropdown option buttons.
+- **Spec**: [`docs/specs/ui/media-detail/media-detail-location-section.md`](../../ui/media-detail/media-detail-location-section.md)
+- **Variant axes**: none
+- **Other inputs**: `primary`, `secondary`, `icon` (Material ligature)
+- **Composed of**: standalone
+- **Used in**: `app-media-location-add-search`
+- **Gaps**: none
+
+---
+
 ### `<app-address-search>` — Address Search
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/address-search/address-search.component.ts`

@@ -12,7 +12,9 @@ import {
 } from './upload-panel-file-accept';
 
 interface DirectoryPickerWindow extends Window {
-  showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
+  showDirectoryPicker?: (options?: {
+    mode?: 'read' | 'readwrite';
+  }) => Promise<FileSystemDirectoryHandle>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -101,33 +103,26 @@ export class UploadPanelInputHandlersService {
     }
   }
 
-  async onSelectFolder(event: MouseEvent, folderInput: HTMLInputElement): Promise<void> {
+  async onSelectFolder(event: MouseEvent): Promise<void> {
     event.preventDefault();
     event.stopPropagation();
-    const picker = (window as DirectoryPickerWindow).showDirectoryPicker;
-    if (!picker) {
-      folderInput.click();
+    if (!('showDirectoryPicker' in window)) {
       return;
     }
     try {
-      const dirHandle = await picker.call(window);
+      // Must call on `window` — a detached reference throws Illegal invocation in Chromium.
+      const dirHandle = await (window as DirectoryPickerWindow).showDirectoryPicker!({
+        mode: 'read',
+      });
       await this.uploadManager.submitFolder(dirHandle, {
         projectId: this.activeProjectId(),
         locationRequirementMode: this.uploadSignals.locationRequirementMode(),
       });
-    } catch {
-      // User cancel and permission errors are non-fatal
-    }
-  }
-
-  onFolderInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files), {
-        projectId: this.activeProjectId(),
-        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
-      });
-      input.value = '';
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+      console.error('[upload-panel] folder import failed', error);
     }
   }
 

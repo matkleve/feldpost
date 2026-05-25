@@ -39,23 +39,33 @@ describe('SearchBarService', () => {
   beforeEach(() => {
     localStorage.clear();
 
-    const imagesBuilder = createQueryBuilder({
+    const linksBuilder = createQueryBuilder({
       data: [
         {
-          id: 'img-1',
-          address_label: 'Schleiergasse 18, 1100 Wien',
-          street: 'Schleiergasse 18',
-          city: 'Wien',
-          latitude: 48.1746,
-          longitude: 16.3823,
+          media_item_id: 'img-1',
+          locations: {
+            address_label: 'Schleiergasse 18, 1100 Wien',
+            street: 'Schleiergasse',
+            house_number: '18',
+            postcode: '1100',
+            city: 'Wien',
+            latitude: 48.1746,
+            longitude: 16.3823,
+          },
+          media_items: { created_at: '2024-01-01T00:00:00Z' },
         },
         {
-          id: 'img-2',
-          address_label: 'Schleiergasse 18, 1100 Wien',
-          street: 'Schleiergasse 18',
-          city: 'Wien',
-          latitude: 48.1747,
-          longitude: 16.3824,
+          media_item_id: 'img-2',
+          locations: {
+            address_label: 'Schleiergasse 18, 1100 Wien',
+            street: 'Schleiergasse',
+            house_number: '18',
+            postcode: '1100',
+            city: 'Wien',
+            latitude: 48.1747,
+            longitude: 16.3824,
+          },
+          media_items: { created_at: '2024-01-02T00:00:00Z' },
         },
       ],
       error: null,
@@ -69,7 +79,7 @@ describe('SearchBarService', () => {
     supabaseMock = {
       client: {
         from: vi.fn((table: string) => {
-          if (table === 'media_items') return imagesBuilder;
+          if (table === 'media_item_location_links') return linksBuilder;
           if (table === 'projects') return projectsBuilder;
           return createQueryBuilder({ data: [], error: null });
         }),
@@ -77,6 +87,8 @@ describe('SearchBarService', () => {
     };
 
     geocodingMock = {
+      ensureGeocodeAvailable: vi.fn().mockResolvedValue(true),
+      isGeocodeBlocked: vi.fn().mockReturnValue(false),
       search: vi.fn().mockResolvedValue([
         {
           lat: 48.1746,
@@ -295,7 +307,8 @@ describe('SearchBarService', () => {
     it('fails soft and records one structured debug entry when the images query returns 400', async () => {
       localStorage.setItem('feldpost-search-debug', '1');
 
-      const failingImagesBuilder = createQueryBuilder({
+      const defaultBuilder = createQueryBuilder({ data: [], error: null });
+      const failingLinksBuilder = createQueryBuilder({
         data: [],
         error: {
           code: 'PGRST204',
@@ -306,11 +319,10 @@ describe('SearchBarService', () => {
         },
       });
 
-      const defaultBuilder = createQueryBuilder({ data: [], error: null });
       const failureSupabase = {
         client: {
           from: vi.fn((table: string) => {
-            if (table === 'media_items') return failingImagesBuilder;
+            if (table === 'media_item_location_links') return failingLinksBuilder;
             return defaultBuilder;
           }),
         },
@@ -378,6 +390,7 @@ describe('SearchBarService', () => {
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].family).toBe('geocoder');
       expect(results[0].label).toBe('Schleiergasse 18, 1100 Wien, Austria');
+      expect(results[0].secondaryLabel).toBe('1100 Wien · Austria');
     });
 
     it('passes countrycodes and viewbox when context has them', async () => {
@@ -494,6 +507,7 @@ describe('SearchBarService', () => {
       const results = await firstValueFrom(service.resolveGeocoder('handelskai', {}));
       expect(results).toHaveLength(1);
       expect(results[0].label).toBe('Handelskai, Wien');
+      expect(results[0].secondaryLabel).toBe('Wien');
     });
 
     it('handles POI results with secondary label', async () => {
@@ -516,7 +530,7 @@ describe('SearchBarService', () => {
 
       const results = await firstValueFrom(service.resolveGeocoder('kuratorium', {}));
       expect(results[0].label).toBe('Kuratorium für Verkehrssicherheit');
-      expect(results[0].secondaryLabel).toBe('Schleiergasse 18, 1100 Wien, Österreich');
+      expect(results[0].secondaryLabel).toBe('1100 Wien · Österreich');
     });
 
     it('does not retry fallback queries when strict geocoder hits are filtered out', async () => {

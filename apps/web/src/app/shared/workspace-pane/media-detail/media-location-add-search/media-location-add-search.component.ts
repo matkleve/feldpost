@@ -21,6 +21,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { LocationPickerRowComponent } from '../location-picker-row/location-picker-row.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
@@ -34,8 +35,9 @@ import type {
 } from '../../../../core/search/search.models';
 import type { OrgLocationSearchRow } from '../../../../core/media-locations/media-locations.types';
 import {
+  filterAndDedupeOrgSuggestions,
+  formatLocationDisplayLine,
   formatLocationPickerLines,
-  formatLocationDisplayPrimaryLine,
 } from '../../../../core/media-locations/media-locations.helpers';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
@@ -55,7 +57,7 @@ type FlatSelectable =
 @Component({
   selector: 'app-media-location-add-search',
   standalone: true,
-  imports: [DropdownShellComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [DropdownShellComponent, LocationPickerRowComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './media-location-add-search.component.html',
   styleUrls: [
     '../address-search/address-search.component.scss',
@@ -158,8 +160,23 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   readonly newAddressRowLabel = computed(() => this.formatNewAddressLabel(this.query().trim()));
   readonly addNewAriaLabel = computed(() => this.newAddressRowLabel());
 
+  readonly newAddressPickerLines = computed(() => ({
+    primary: this.query().trim(),
+    secondary: this.t('location.dropdown.addNew.hint', 'Creates a new org location'),
+  }));
+
   pickerLines(row: OrgLocationSearchRow): { primary: string; secondary: string } {
     return formatLocationPickerLines(row, this.doorLabel());
+  }
+
+  candidatePickerLines(candidate: SearchCandidate): { primary: string; secondary: string } {
+    if (candidate.family === 'db-address' || candidate.family === 'geocoder') {
+      return {
+        primary: candidate.label,
+        secondary: candidate.secondaryLabel?.trim() ?? '',
+      };
+    }
+    return { primary: candidate.label, secondary: '' };
   }
 
   isFocusedFlatIndex(index: number): boolean {
@@ -257,16 +274,14 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   onOrgLocationClick(row: OrgLocationSearchRow, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    const primary = formatLocationDisplayPrimaryLine(row, this.doorLabel());
+    const displayLine = formatLocationDisplayLine(row, this.doorLabel());
     this.preResolvedLocationId.set(row.id);
-    this.pickQuerySnapshot = primary;
+    this.pickQuerySnapshot = displayLine;
     const input = this.searchInputRef()?.nativeElement;
     if (input) {
-      input.value = primary;
+      input.value = displayLine;
     }
-    this.syncQuery(primary);
-    this.preResolvedLocationId.set(row.id);
-    this.pickQuerySnapshot = primary;
+    this.syncQuery(displayLine);
   }
 
   onInputKeydown(event: KeyboardEvent): void {
@@ -415,7 +430,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     if (gen !== this.orgSearchGen) return;
     this.loadingOrgLocations.set(false);
     if (result.ok) {
-      this.orgLocationSuggestions.set(result.rows);
+      this.orgLocationSuggestions.set(filterAndDedupeOrgSuggestions(result.rows));
     } else {
       this.orgLocationSuggestions.set([]);
     }

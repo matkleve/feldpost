@@ -80,6 +80,45 @@ describe('UploadPanelInputHandlersService', () => {
     expect(input.accept).toBe(DEFAULT_UPLOAD_FILE_INPUT_ACCEPT);
     expect(uploadManager.submit).toHaveBeenCalledTimes(1);
   });
+
+  it('onSelectFolder calls showDirectoryPicker on window and submits folder', async () => {
+    const uploadManager = {
+      submit: vi.fn(),
+      submitFolder: vi.fn().mockResolvedValue('batch-1'),
+    };
+    const uploadSignals = {
+      locationRequirementMode: signal('optional' as const),
+    };
+    const workspaceView = {
+      selectedProjectIds: vi.fn(() => new Set<string>()),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        UploadPanelInputHandlersService,
+        { provide: UploadManagerService, useValue: uploadManager },
+        { provide: UploadPanelSignalsService, useValue: uploadSignals },
+        { provide: WorkspaceViewService, useValue: workspaceView },
+      ],
+    });
+
+    const service = TestBed.inject(UploadPanelInputHandlersService);
+    const dirHandle = { name: 'Site Photos' } as FileSystemDirectoryHandle;
+    const showDirectoryPicker = vi.fn().mockResolvedValue(dirHandle);
+    vi.stubGlobal('showDirectoryPicker', showDirectoryPicker);
+
+    await service.onSelectFolder({
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+    } as unknown as MouseEvent);
+
+    expect(showDirectoryPicker).toHaveBeenCalledWith({ mode: 'read' });
+    expect(uploadManager.submitFolder).toHaveBeenCalledWith(dirHandle, {
+      projectId: undefined,
+      locationRequirementMode: 'optional',
+    });
+    vi.unstubAllGlobals();
+  });
 });
 
 function buildFilteredAccept(): string {

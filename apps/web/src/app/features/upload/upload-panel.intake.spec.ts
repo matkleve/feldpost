@@ -1,25 +1,32 @@
+import { TestBed } from '@angular/core/testing';
+import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
 import { setupUploadPanel } from './upload-panel.test-utils.spec';
 
 describe('UploadPanelComponent intake', () => {
   it('onCaptureInputChange submits exactly one captured file', async () => {
-    const { component, fakeManager } = await setupUploadPanel();
+    const { fakeManager } = await setupUploadPanel();
+    const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
     const file = new File([new Uint8Array(128)], 'captured.jpg', { type: 'image/jpeg' });
     const input = { files: [file], value: 'placeholder' } as unknown as HTMLInputElement;
     const event = { target: input } as unknown as Event;
 
-    component.onCaptureInputChange(event);
+    inputHandlers.onCaptureInputChange(event);
 
-    expect(fakeManager.submit).toHaveBeenCalledWith([file], { projectId: undefined });
+    expect(fakeManager.submit).toHaveBeenCalledWith([file], {
+      projectId: undefined,
+      locationRequirementMode: 'optional',
+    });
     expect(input.value).toBe('');
   });
 
   it('openCapturePicker stops bubbling and triggers capture input click', async () => {
-    const { component } = await setupUploadPanel();
+    await setupUploadPanel();
+    const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
     const preventDefault = vi.fn();
     const stopPropagation = vi.fn();
     const click = vi.fn();
 
-    component.openCapturePicker(
+    inputHandlers.openCapturePicker(
       { preventDefault, stopPropagation } as unknown as MouseEvent,
       { click } as unknown as HTMLInputElement,
     );
@@ -29,33 +36,42 @@ describe('UploadPanelComponent intake', () => {
     expect(click).toHaveBeenCalledTimes(1);
   });
 
-  it('onFolderInputChange submits all selected files', async () => {
-    const { component, fakeManager } = await setupUploadPanel();
-    const files = [
-      new File([new Uint8Array(64)], 'a.jpg', { type: 'image/jpeg' }),
-      new File([new Uint8Array(64)], 'b.jpg', { type: 'image/jpeg' }),
-    ];
-    const input = { files, value: 'placeholder' } as unknown as HTMLInputElement;
+  it('onSelectFolder submits folder via showDirectoryPicker when available', async () => {
+    const { fakeManager } = await setupUploadPanel();
+    const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
+    const dirHandle = { name: 'Mariahilferstraße 56' } as FileSystemDirectoryHandle;
+    const showDirectoryPicker = vi.fn().mockResolvedValue(dirHandle);
+    vi.stubGlobal('showDirectoryPicker', showDirectoryPicker);
 
-    component.onFolderInputChange({ target: input } as unknown as Event);
+    await inputHandlers.onSelectFolder({
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+    } as unknown as MouseEvent);
 
-    expect(fakeManager.submit).toHaveBeenCalledWith(files, { projectId: undefined });
-    expect(input.value).toBe('');
+    expect(showDirectoryPicker).toHaveBeenCalledWith({ mode: 'read' });
+    expect(fakeManager.submitFolder).toHaveBeenCalledWith(dirHandle, {
+      projectId: undefined,
+      locationRequirementMode: 'optional',
+    });
+    vi.unstubAllGlobals();
   });
 
-  it('onSelectFolder falls back to directory input click when picker API is unavailable', async () => {
-    const { component } = await setupUploadPanel();
-    const click = vi.fn();
-    const preventDefault = vi.fn();
-    const stopPropagation = vi.fn();
+  it('onSelectFolder does nothing when showDirectoryPicker is unavailable', async () => {
+    const { fakeManager } = await setupUploadPanel();
+    const inputHandlers = TestBed.inject(UploadPanelInputHandlersService);
+    const showDirectoryPicker = (window as Window & { showDirectoryPicker?: unknown })
+      .showDirectoryPicker;
+    Reflect.deleteProperty(window, 'showDirectoryPicker');
 
-    await component.onSelectFolder(
-      { preventDefault, stopPropagation } as unknown as MouseEvent,
-      { click } as unknown as HTMLInputElement,
-    );
+    await inputHandlers.onSelectFolder({
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+    } as unknown as MouseEvent);
 
-    expect(preventDefault).toHaveBeenCalledTimes(1);
-    expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(click).toHaveBeenCalledTimes(1);
+    expect(fakeManager.submitFolder).not.toHaveBeenCalled();
+    if (showDirectoryPicker !== undefined) {
+      (window as Window & { showDirectoryPicker?: unknown }).showDirectoryPicker =
+        showDirectoryPicker;
+    }
   });
 });

@@ -68,13 +68,11 @@
                 (mousedown)="$event.preventDefault()"
                 (click)="onOrgLocationClick(row, $event)"
               >
-                <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
-                <span class="media-location-add-search__picker-lines">
-                  <span class="address-search__result-label">{{ lines.primary }}</span>
-                  @if (lines.secondary) {
-                    <span class="media-location-add-search__picker-secondary">{{ lines.secondary }}</span>
-                  }
-                </span>
+                <app-location-picker-row
+                  [icon]="'bookmark'"
+                  [primary]="lines.primary"
+                  [secondary]="lines.secondary"
+                />
               </button>
             }
           }
@@ -87,17 +85,21 @@
               <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
             }
             @for (c of otherMediaSuggestions(); track c.id) {
+              @let lines = candidatePickerLines(c);
               @let flatIdx = flatSelectable().findIndex((item) => item.kind === 'other' && item.candidate.id === c.id);
               <button
-                class="address-search__result-item"
+                class="address-search__result-item media-location-add-search__org-option"
                 [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
                 type="button"
                 role="option"
                 (mousedown)="$event.preventDefault()"
                 (click)="onInternetClick(c, $event)"
               >
-                <span class="material-icons address-search__result-icon" aria-hidden="true">photo_library</span>
-                <span class="address-search__result-label">{{ c.label }}</span>
+                <app-location-picker-row
+                  [icon]="'photo_library'"
+                  [primary]="lines.primary"
+                  [secondary]="lines.secondary"
+                />
               </button>
             }
           }
@@ -140,9 +142,10 @@
               <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
             }
             @for (c of placeSuggestions(); track c.id) {
+              @let lines = candidatePickerLines(c);
               @let flatIdx = flatSelectable().findIndex((item) => item.kind === 'internet' && item.candidate.id === c.id);
               <button
-                class="address-search__result-item"
+                class="address-search__result-item media-location-add-search__org-option"
                 [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
                 [class.media-location-add-search__result-item--pulse]="internetResultsRefreshing()"
                 type="button"
@@ -150,8 +153,11 @@
                 (mousedown)="$event.preventDefault()"
                 (click)="onInternetClick(c, $event)"
               >
-                <span class="material-icons address-search__result-icon" aria-hidden="true">public</span>
-                <span class="address-search__result-label">{{ c.label }}</span>
+                <app-location-picker-row
+                  [icon]="'public'"
+                  [primary]="lines.primary"
+                  [secondary]="lines.secondary"
+                />
               </button>
             }
           }
@@ -161,8 +167,9 @@
             <div class="address-search__section-label">
               {{ t('location.dropdown.section.addNew', 'New address') }}
             </div>
+            @let addLines = newAddressPickerLines();
             <button
-              class="address-search__result-item media-location-add-search__add-new-item"
+              class="address-search__result-item media-location-add-search__add-new-item media-location-add-search__org-option"
               [class.address-search__result-item--focused]="isFocusedFlatIndex(addIdx)"
               type="button"
               role="option"
@@ -170,11 +177,11 @@
               (mousedown)="$event.preventDefault()"
               (click)="commitAddNew()"
             >
-              <span class="material-icons address-search__result-icon" aria-hidden="true">add</span>
-              <span
-                class="address-search__result-label media-location-add-search__add-new-label min-w-0"
-                [textContent]="newAddressRowLabel()"
-              ></span>
+              <app-location-picker-row
+                [icon]="'add'"
+                [primary]="addLines.primary"
+                [secondary]="addLines.secondary"
+              />
             </button>
           }
         </div>

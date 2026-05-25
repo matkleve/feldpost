@@ -94,12 +94,12 @@ Slot **l2** edit and center address click use the same shared-edit confirm as **
 
 ## Add/Search Dropdown (4 zones)
 
-1. **Recent** (empty query) or **Results** (typed query) — org locations via `search_locations` RPC; two-line format D (`formatLocationPickerLines`); clickable `role="option"` rows populate combobox and set `preResolvedLocationId`
-2. **Other media** — org DB address candidates (`SearchBarService`)
-3. **Internet** — geocoder; click fills input and re-runs search only
-4. **Add new Address: "{query}"** — when query non-empty; Enter or click uses text/geocode path unless pre-resolve commit applies
+1. **Recent** (empty query) or **Results** (typed query) — org locations via `search_locations` RPC; two-line format D via `app-location-picker-row` + `formatLocationPickerLines`; rows with `is_linked_to_media === true` are **excluded** on every org suggestions update (Recent and typed search). Org row click sets combobox + `pickQuerySnapshot` to the **same** `formatLocationDisplayLine` string (single assignment — must match for pre-resolve commit).
+2. **Other media** — org DB address candidates (`SearchBarService`); format D primary/secondary from structured location fields on `db-address` candidates (`label` + `secondaryLabel`).
+3. **Internet** — geocoder; format D via `formatGeocoderPickerLines` / candidate `label` + `secondaryLabel`; click fills input and re-runs search only
+4. **Add new Address** — when query non-empty; primary = trimmed query, secondary = `location.dropdown.addNew.hint`; Enter or click uses text/geocode path unless pre-resolve commit applies
 
-**Pre-resolved commit:** When query still equals `pickQuerySnapshot` after an org row click, Enter/confirm emits `locationLinked` → `link_media_to_location` only (no `find_or_create`). Any edit after pick clears pre-resolve and falls through to add/replace text flows.
+**Pre-resolved commit:** When query still equals `pickQuerySnapshot` after an org row click, Enter/confirm emits `locationLinked` → `link_media_to_location` only (no `find_or_create`). `pickQuerySnapshot` and the combobox value must both be set from one `formatLocationDisplayLine` result — divergence causes silent duplicate `locations` via `find_or_create`. Any edit after pick clears pre-resolve and falls through to add/replace text flows.
 
 **Keyboard focus order (ArrowUp/Down):** org Recent/Results → other media → internet → add new.
 

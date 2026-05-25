@@ -132,7 +132,7 @@
           ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
           : null
       "
-      (click)="inputHandlers.onSelectFolder($event, folderInput)"
+      (click)="inputHandlers.onSelectFolder($event)"
     >
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
       <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
@@ -224,17 +224,6 @@
       (change)="inputHandlers.onCaptureInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
 
-    <input
-      #folderInput
-      type="file"
-      class="upload-panel__folder-input"
-      multiple
-      webkitdirectory
-      directory
-      aria-hidden="true"
-      tabindex="-1"
-      (change)="inputHandlers.onFolderInputChange($event); laneHandlers.setSelectedLane('uploading')"
-    />
   </div>
 
   @if (showProgressBoard()) {

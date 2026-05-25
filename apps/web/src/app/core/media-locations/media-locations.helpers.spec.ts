@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   formatLocationDisplayLine,
   formatLocationFullAddressCopy,
+  filterAndDedupeOrgSuggestions,
+  formatGeocoderPickerLines,
   formatLocationPickerLines,
   legacyMediaHasGps,
   locationDisplaySnapshotFromRows,
@@ -168,5 +170,32 @@ describe('media-locations.helpers', () => {
     );
     expect(lines.primary).toBe('Liechtensteinstraße 135/Stiege 5/Top 4B');
     expect(lines.secondary).toBe('1090 Wien · Alsergrund · AT');
+  });
+
+  it('formatGeocoderPickerLines uses structured Nominatim address fields', () => {
+    const lines = formatGeocoderPickerLines(
+      {
+        displayName: 'Skodagasse, 1080 Wien, Austria',
+        name: 'Skodagasse',
+        address: {
+          road: 'Skodagasse',
+          house_number: '12',
+          postcode: '1080',
+          city: 'Wien',
+          city_district: 'Josefstadt',
+          country: 'Austria',
+        },
+      },
+      'Top',
+    );
+    expect(lines.primary).toBe('Skodagasse 12');
+    expect(lines.secondary).toBe('1080 Wien · Josefstadt · Austria');
+  });
+
+  it('filterAndDedupeOrgSuggestions drops linked rows and duplicate ids', () => {
+    const a = { ...BASE_ROW, id: 'a', is_linked_to_media: true };
+    const b = { ...BASE_ROW, id: 'b', is_linked_to_media: false };
+    const bDup = { ...BASE_ROW, id: 'b', is_linked_to_media: false };
+    expect(filterAndDedupeOrgSuggestions([a, b, bDup])).toEqual([b]);
   });
 });

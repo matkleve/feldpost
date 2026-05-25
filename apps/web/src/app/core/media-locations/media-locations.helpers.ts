@@ -4,8 +4,9 @@
  * Used by: `media-location-row` (read line), `media-location-add-search` (picker),
  * `media-detail-location-section` (list filter), `media-locations.service` (RPC errors).
  */
+import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
 import type { MediaRecord } from '../media-query/media-query.types';
-import type { MediaItemLocationRow } from './media-locations.types';
+import type { MediaItemLocationRow, OrgLocationSearchRow } from './media-locations.types';
 
 /**
  * Flat address/GPS fields patched onto the detail `media()` record (`MediaRecord` DTO).
@@ -114,6 +115,53 @@ export function formatLocationPickerLines(
     primary: formatLocationDisplayPrimaryLine(row, doorLabel),
     secondary: formatLocationDisplayLocalityLine(row),
   };
+}
+
+/** Nominatim hit → format D (structured address fields only). */
+export function formatGeocoderPickerLines(
+  result: Pick<GeocoderSearchResult, 'address' | 'name' | 'displayName'>,
+  doorLabel: string,
+): { primary: string; secondary: string } {
+  const addr = result.address;
+  const city =
+    addr?.city?.trim() ||
+    addr?.town?.trim() ||
+    addr?.village?.trim() ||
+    addr?.municipality?.trim() ||
+    null;
+  const district =
+    addr?.city_district?.trim() ||
+    addr?.suburb?.trim() ||
+    addr?.borough?.trim() ||
+    addr?.quarter?.trim() ||
+    null;
+  return formatLocationPickerLines(
+    {
+      street: addr?.road?.trim() || result.name?.trim() || null,
+      house_number: addr?.house_number?.trim() || null,
+      staircase: null,
+      door: null,
+      postcode: addr?.postcode?.trim() || null,
+      city,
+      address_label: result.displayName?.trim() || null,
+      district,
+      country: addr?.country?.trim() || null,
+    },
+    doorLabel,
+  );
+}
+
+/** Org picker: hide already-linked rows and duplicate ids (Recent + Results paths). */
+export function filterAndDedupeOrgSuggestions(rows: OrgLocationSearchRow[]): OrgLocationSearchRow[] {
+  const seen = new Set<string>();
+  const filtered: OrgLocationSearchRow[] = [];
+  for (const row of rows) {
+    if (row.is_linked_to_media === true) continue;
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+    filtered.push(row);
+  }
+  return filtered;
 }
 
 /** Clipboard string for “Copy full address” — all populated address parts, comma-separated. */

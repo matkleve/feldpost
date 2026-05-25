@@ -57,6 +57,37 @@ It is better to send **six specific questions once** than to ship code after gue
 
 ---
 
+## 🔴 LIVE VERIFICATION — owner must run (not optional)
+
+When an agent touches **route session cache**, **warm revisit**, **media preview FSM**, **signed-URL cache**, or **per-tile aspect cache**, automated gates (`ng build`, vitest) are **necessary but not sufficient**. The agent **must** end the turn with an explicit **LIVE CHECK** block. The product owner **must run it in the browser** before treating the task as done — agents cannot see your DevTools or second navigation.
+
+### You (human) — do this when the agent lists it
+
+| If the agent changed… | You must live-check… |
+| --------------------- | -------------------- |
+| `media-display` FSM / transitions / `goTo` | **Map → `/media` → map → `/media` again** (second visit is the bug surface). |
+| Layer opacity / `data-state` CSS | DevTools: `app-media-display` `data-state` + `.media-display__layer--content` has `<img src>` (not empty). |
+| Download / signing / `no-media` | Network: signed URL OK **and** state not stuck at `no-media` / `media-ready`. |
+| `media-item` grid aspect / session cache | Slot aspect looks right **and** thumbnails visible (not white boxes). |
+| Row vs grid geometry | Toggle row ↔ grid once; both modes should show previews. |
+
+### Red flags — stop and reply with a screenshot
+
+- `app-media-display` stays at **`media-ready`** after ~1s on second `/media` visit.
+- Content layer **empty** but slot aspect already correct (e.g. `1.33`, `0.75`).
+- **`no-media`** or error layer visible while Network shows a loaded image URL.
+- Agent says “fixed” but only ran **`ng build`** — **not accepted** for this class of work.
+
+### Do not confuse these `data-state` values
+
+- **`app-media-item` `idle`** = not selected (normal for grid tiles).
+- **`app-media-display` `idle`** = no valid handoff / display not started.
+- Inspect **`app-media-display`** (or `.media-display__viewport`) for preview FSM — never the item shell alone.
+
+Agents: copy the table row(s) that apply into every handoff; use the heading **🔴 LIVE CHECK (you)** so it is visible in the chat log.
+
+---
+
 ## What helps from the user (optional but high signal)
 
 - Invariant first: “Two lists are the same iff every address matches.”

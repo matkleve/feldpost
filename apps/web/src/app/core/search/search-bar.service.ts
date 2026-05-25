@@ -10,6 +10,10 @@ import {
   GeocodingService
 } from '../geocoding/geocoding.service';
 import { MediaClusterService } from '../geocoding/media-cluster.service';
+import {
+  formatGeocoderPickerLines,
+  formatLocationPickerLines,
+} from '../media-locations/media-locations.helpers';
 import type {
   SearchAddressCandidate,
   SearchContentCandidate,
@@ -69,20 +73,38 @@ interface DbAddressRow {
   media_item_id: string;
   address_label: string | null;
   street: string | null;
+  house_number?: string | null;
+  staircase?: string | null;
+  door?: string | null;
+  postcode?: string | null;
   city: string | null;
+  district?: string | null;
+  country?: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
   created_at: string | null;
   locations?: {
     address_label: string | null;
     street: string | null;
+    house_number?: string | null;
+    staircase?: string | null;
+    door?: string | null;
+    postcode?: string | null;
     city: string | null;
+    district?: string | null;
+    country?: string | null;
     latitude: number | string | null;
     longitude: number | string | null;
   } | Array<{
     address_label: string | null;
     street: string | null;
+    house_number?: string | null;
+    staircase?: string | null;
+    door?: string | null;
+    postcode?: string | null;
     city: string | null;
+    district?: string | null;
+    country?: string | null;
     latitude: number | string | null;
     longitude: number | string | null;
   }>;
@@ -367,6 +389,18 @@ export class SearchBarService {
       const createdAtMs = media?.created_at ? Date.parse(media.created_at) : row.created_at ? Date.parse(row.created_at) : 0;
       const activeProjectHit = 0;
 
+      const pickerSnapshot = {
+        street: loc?.street ?? row.street ?? null,
+        house_number: loc?.house_number ?? row.house_number ?? null,
+        staircase: loc?.staircase ?? row.staircase ?? null,
+        door: loc?.door ?? row.door ?? null,
+        postcode: loc?.postcode ?? row.postcode ?? null,
+        city: loc?.city ?? row.city ?? null,
+        district: loc?.district ?? row.district ?? null,
+        country: loc?.country ?? row.country ?? null,
+        address_label: rawLabel,
+      };
+
       const existing = grouped.get(key);
       if (existing) {
         existing.ids.push(mediaId);
@@ -388,6 +422,7 @@ export class SearchBarService {
         activeProjectHits: activeProjectHit,
         latestCreatedAtMs: createdAtMs,
         score: textMatch,
+        pickerSnapshot,
       });
     }
 
@@ -419,16 +454,20 @@ export class SearchBarService {
         return (left.ids[0] ?? '').localeCompare(right.ids[0] ?? '');
       })
       .slice(0, this.orgSearchTuning.orgSearchConfig().resolver.maxDbAddressResults)
-      .map((entry, index) => ({
-        id: entry.ids[0] ?? `db-address-${index}`,
-        stableId: entry.ids[0] ?? `db-address-${index}`,
-        family: 'db-address' as const,
-        label: entry.label,
-        lat: entry.latTotal / entry.count,
-        lng: entry.lngTotal / entry.count,
-        imageCount: entry.count,
-        score: entry.score,
-      }));
+      .map((entry, index) => {
+        const pickerLines = formatLocationPickerLines(entry.pickerSnapshot, 'Top');
+        return {
+          id: entry.ids[0] ?? `db-address-${index}`,
+          stableId: entry.ids[0] ?? `db-address-${index}`,
+          family: 'db-address' as const,
+          label: pickerLines.primary,
+          secondaryLabel: pickerLines.secondary || undefined,
+          lat: entry.latTotal / entry.count,
+          lng: entry.lngTotal / entry.count,
+          imageCount: entry.count,
+          score: entry.score,
+        };
+      });
   }
 
   private async fetchDbContentCandidates(
@@ -708,7 +747,8 @@ export class SearchBarService {
   ): SearchAddressCandidate {
     const formatted = this.formatAddressLabel(result);
     const primaryLabel = this.selectGeocoderPrimaryLabel(result, formatted, query);
-    const secondaryLabel = primaryLabel !== formatted ? formatted : undefined;
+    const pickerLines = formatGeocoderPickerLines(result, 'Top');
+    const secondaryLabel = pickerLines.secondary || undefined;
     const textScore = computeGeocoderTextScore(primaryLabel, formatted, query);
     const geoScore = computeProximityDecay(result.lat, result.lng, context);
     const countryBoost = computeCountryBoost(result, context.countryCodes);
@@ -742,7 +782,7 @@ export class SearchBarService {
       stableId: `geo-${result.lat.toFixed(6)}-${result.lng.toFixed(6)}-${index}`,
       family: 'geocoder',
       label: primaryLabel,
-      secondaryLabel,
+      secondaryLabel: pickerLines.secondary || secondaryLabel,
       lat: result.lat,
       lng: result.lng,
       textScore,
