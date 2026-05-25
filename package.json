@@ -21,7 +21,8 @@
     "supabase:ensure-edge": "node scripts/ensure-supabase-edge-runtime.mjs",
     "supabase:cli:version": "node scripts/run-supabase-cli.mjs --version",
     "supabase:db:push": "node scripts/run-supabase-cli.mjs db push",
-    "supabase:migration:list": "node scripts/run-supabase-cli.mjs migration list"
+    "supabase:migration:list": "node scripts/run-supabase-cli.mjs migration list",
+    "diagnose:geocoder": "node --experimental-strip-types scripts/diagnose-geocoder.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

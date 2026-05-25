@@ -73,7 +73,7 @@ describe('fetchGeocoderCandidates', () => {
         countrycodes: ['at'],
         viewbox: '16.2,48.25,16.45,48.12',
         limit: 15,
-        bounded: true,
+        bounded: false,
         addressLayer: false,
       }),
     );

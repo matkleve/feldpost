@@ -393,14 +393,14 @@ describe('SearchBarService', () => {
         expect.objectContaining({
           countrycodes: ['at'],
           viewbox: '15,49,17,47',
-          bounded: true,
+          bounded: false,
         }),
       );
 
       const lastCallOptions = geocodingMock.search.mock.calls.at(-1)?.[1] as
         | Record<string, unknown>
         | undefined;
-      expect(lastCallOptions?.['bounded']).toBe(true);
+      expect(lastCallOptions?.['bounded']).toBe(false);
     });
 
     it('returns empty array on geocoder failure', async () => {
@@ -692,6 +692,7 @@ describe('SearchBarService', () => {
     it('corrects street abbreviations', () => {
       expect(service.normalizeSearchQuery('schleier g.')).toBe('schleier gasse');
       expect(service.normalizeSearchQuery('burg str.')).toBe('burg strasse');
+      expect(service.normalizeSearchQuery('Denisgas')).toBe('denisgasse');
     });
   });
 

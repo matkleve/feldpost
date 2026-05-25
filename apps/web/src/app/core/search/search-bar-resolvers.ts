@@ -571,7 +571,11 @@ function buildConstrainedSearchOptions(
   if (context.viewportBounds) {
     const b = context.viewportBounds;
     searchOptions.viewbox = `${b.west},${b.north},${b.east},${b.south}`;
-    searchOptions.bounded = true;
+    // Viewbox biases ranking only; bounded=1 often returns [] for valid streets just outside
+    // the cluster (e.g. Denisgasse in Wien when project GPS is in NÖ). Country + distance
+    // gates in rankGeocoderCandidates still localize results.
+    // @see docs/specs/service/address-field-suggest/adapters/nominatim-field-suggest.adapter.md
+    searchOptions.bounded = false;
   }
   return searchOptions;
 }

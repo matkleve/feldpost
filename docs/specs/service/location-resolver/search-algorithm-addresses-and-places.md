@@ -256,8 +256,9 @@ When the active workspace project has GPS-tagged media, `get_media_clusters(proj
 
 **DB:**
 
-- Table: `media_items` joined via `media_projects`.
-- Clustering: `ST_ClusterDBSCAN` with `eps = radius_km / 111.0`, `minpoints = 1` (approximate eps; acceptable for grouping).
+- Scope: `media_items` → `media_projects` (project) → `media_item_location_links` → `locations` (GPS). One point per media item: primary link (`sort_order` ASC, then `created_at`).
+- Clustering: `ST_ClusterDBSCAN` on `locations.geog` with `eps = radius_km / 111.0`, `minpoints = 1` (approximate eps; acceptable for grouping).
+- Migration: `20260526120000_fix_get_media_clusters_locations_join.sql` (replaces `media_items.latitude` path dropped in `20260525130000`).
 - Viewbox padding: `lat_pad = radius_km / 111.0`; `lon_pad = radius_km / (111.0 * cos(radians(AVG(latitude))))` per cluster.
 - Nominatim viewbox string: `lon_min,lat_max,lon_max,lat_min`.
 
@@ -266,8 +267,10 @@ When the active workspace project has GPS-tagged media, `get_media_clusters(proj
 | Clusters | Nominatim behavior |
 | --- | --- |
 | 0 | Phase 2 fallback: `context.viewportBounds` from map if set, else global |
-| 1 | One bounded forward with cluster viewbox (`bounded=1`) |
-| 2+ | `Promise.all`: one bounded forward per cluster; merge by label; slice `maxGeocoderResults` |
+| 1 | One forward with cluster viewbox (`bounded=0`, viewbox biases only) |
+| 2+ | `Promise.all`: one forward per cluster viewbox (`bounded=0`); merge by label; slice `maxGeocoderResults` |
+
+`bounded=1` is intentionally **not** used with cluster/map viewboxes: it hard-drops hits outside the box (e.g. `Denisgasse` in Wien when project GPS clusters in Niederösterreich). Post-fetch country and `contextDistanceMaxMeters` gates retain locality.
 
 When clusters exist, map `viewportBounds` is **not** passed to Nominatim (cluster boxes take precedence). City-hint (§2.5) still runs on merged strict results.
 

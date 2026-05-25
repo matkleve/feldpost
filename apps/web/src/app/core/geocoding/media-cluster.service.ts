@@ -91,7 +91,7 @@ export class MediaClusterService {
     if (error) {
       console.warn('[MediaClusterService] get_media_clusters failed', error.message);
       this.clusterRows.set([]);
-      this.loadedCacheKey.set(key);
+      // Do not set loadedCacheKey — allow retry after migration deploy or transient errors.
       return;
     }
 
