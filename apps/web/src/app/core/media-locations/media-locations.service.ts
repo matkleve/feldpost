@@ -26,8 +26,10 @@ import type {
   MediaItemLocationRow,
   MediaLocationAddInput,
   MediaLocationAddressPatch,
+  MediaLocationCoreRow,
   MediaLocationDeleteResult,
   MediaLocationErrorResult,
+  MediaLocationLinkRef,
   MediaLocationReplaceLinkInput,
   MediaLocationResult,
   MediaLocationUpdateInput,
@@ -44,32 +46,35 @@ export type {
 export class MediaLocationsService {
   private readonly adapter = inject(SupabaseMediaLocationsAdapter);
   private readonly geocodingService = inject(GeocodingService);
-  private readonly listCache = new Map<string, MediaItemLocationRow[]>();
 
-  /** Drop cached list rows after mutations or external reload. */
+  /** Per media: ordered link refs (junction `sort_order`, `link_id`). */
+  private readonly mediaToLinks = new Map<string, MediaLocationLinkRef[]>();
+
+  /** Canonical row per `locations.id` (shared across media). */
+  private readonly locationToRow = new Map<string, MediaLocationCoreRow>();
+
+  /** Drop cached link lists; optional nuclear reset clears canonical locations too. */
   invalidateListCache(mediaItemId?: string): void {
     if (mediaItemId) {
-      this.listCache.delete(mediaItemId);
+      this.mediaToLinks.delete(mediaItemId);
       return;
     }
-    this.listCache.clear();
+    this.mediaToLinks.clear();
+    this.locationToRow.clear();
   }
 
   /**
    * Writes list rows from a batch hydrate; does not RPC.
-   * Clones each row at write — independent of batch-return clone (different mutation vectors).
+   * Clones each core row and link ref at write.
    */
   seedListCache(rowsByMediaId: ReadonlyMap<string, readonly MediaItemLocationRow[]>): void {
     for (const [mediaItemId, rows] of rowsByMediaId) {
-      this.listCache.set(
-        mediaItemId,
-        rows.map((row) => ({ ...row })),
-      );
+      this.applyRowsToCache(mediaItemId, rows);
     }
   }
 
   /**
-   * Batch summary load + `listCache` seed (gallery, workspace, projects).
+   * Batch summary load + list cache seed (gallery, workspace, projects).
    * @see docs/specs/service/media-locations/media-locations-service.md
    */
   async hydrateSummariesAndSeedCache(
@@ -122,7 +127,7 @@ export class MediaLocationsService {
       if (!row) {
         return { ok: false, error: 'Location link not found after link.', code: 'unknown' };
       }
-      this.listCache.set(mediaItemId, rows);
+      this.applyRowsToCache(mediaItemId, rows);
       return { ok: true, row };
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
@@ -130,15 +135,16 @@ export class MediaLocationsService {
   }
 
   async listForMedia(mediaItemId: string): Promise<MediaLocationResult> {
-    const cached = this.listCache.get(mediaItemId);
+    const cached = this.readCachedRowsForMedia(mediaItemId);
     if (cached) {
       return { ok: true, rows: cached };
     }
 
     try {
       const rows = await this.adapter.list(mediaItemId);
-      this.listCache.set(mediaItemId, rows);
-      return { ok: true, rows };
+      this.applyRowsToCache(mediaItemId, rows);
+      const hydrated = this.readCachedRowsForMedia(mediaItemId);
+      return { ok: true, rows: hydrated ?? rows };
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
     }
@@ -190,9 +196,9 @@ export class MediaLocationsService {
   }
 
   async updateLocation(input: MediaLocationUpdateInput): Promise<MediaLocationResult> {
-    this.invalidateListCache();
     try {
       const row = await this.adapter.update(input);
+      this.updateCachedLocation(row.id, row);
       return { ok: true, row };
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
@@ -203,7 +209,6 @@ export class MediaLocationsService {
     locationId: string,
     coords: { lat: number; lng: number },
   ): Promise<MediaLocationResult> {
-    this.invalidateListCache();
     const reverse = await this.geocodingService.reverse(coords.lat, coords.lng);
     return this.updateLocation({
       locationId,
@@ -221,9 +226,9 @@ export class MediaLocationsService {
 
   /** Delete link/location only — caller owns a single `listForMedia` reload + display patch. */
   async deleteLocation(locationId: string): Promise<MediaLocationDeleteResult> {
-    this.invalidateListCache();
     try {
       await this.adapter.delete(locationId);
+      this.invalidateByLocationId(locationId);
       return { ok: true };
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
@@ -247,7 +252,7 @@ export class MediaLocationsService {
       if (!row) {
         return { ok: false, error: 'Location link not found after replace.', code: 'unknown' };
       }
-      this.listCache.set(input.mediaItemId, rows);
+      this.applyRowsToCache(input.mediaItemId, rows);
       return { ok: true, row };
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
@@ -289,6 +294,95 @@ export class MediaLocationsService {
       patch: forwardPatchFromGeocode(suggestion),
     });
   }
+
+  private applyRowsToCache(mediaItemId: string, rows: readonly MediaItemLocationRow[]): void {
+    const refs: MediaLocationLinkRef[] = [];
+    for (const row of rows) {
+      this.locationToRow.set(row.id, this.cloneCoreRow(rowToCoreRow(row)));
+      refs.push({
+        locationId: row.id,
+        link_id: row.link_id,
+        sort_order: row.sort_order,
+      });
+    }
+    this.mediaToLinks.set(
+      mediaItemId,
+      refs.map((ref) => ({ ...ref })),
+    );
+  }
+
+  /**
+   * Cache read: assemble rows for one media item.
+   * Returns null on miss or partial integrity failure (never a shortened list).
+   */
+  private readCachedRowsForMedia(mediaItemId: string): MediaItemLocationRow[] | null {
+    const refs = this.mediaToLinks.get(mediaItemId);
+    if (!refs) {
+      return null;
+    }
+
+    const resolvedCores: MediaLocationCoreRow[] = [];
+    for (const ref of refs) {
+      const core = this.locationToRow.get(ref.locationId);
+      if (core) {
+        resolvedCores.push(core);
+      }
+    }
+
+    if (refs.length !== resolvedCores.length) {
+      return null;
+    }
+
+    const rows = refs.map((ref) => {
+      const core = this.locationToRow.get(ref.locationId)!;
+      return this.assembleMediaRow(mediaItemId, ref, core);
+    });
+    return [...rows].sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  private updateCachedLocation(locationId: string, row: MediaItemLocationRow): void {
+    const existing = this.locationToRow.get(locationId);
+    if (!existing) {
+      return;
+    }
+    const patch = rowToCoreRow(row);
+    this.locationToRow.set(locationId, { ...existing, ...patch, id: locationId });
+  }
+
+  private invalidateByLocationId(locationId: string): void {
+    this.locationToRow.delete(locationId);
+    for (const [mediaId, refs] of this.mediaToLinks) {
+      const next = refs.filter((ref) => ref.locationId !== locationId);
+      if (next.length === 0) {
+        this.mediaToLinks.delete(mediaId);
+      } else {
+        this.mediaToLinks.set(mediaId, next);
+      }
+    }
+  }
+
+  private cloneCoreRow(row: MediaLocationCoreRow): MediaLocationCoreRow {
+    return { ...row };
+  }
+
+  private assembleMediaRow(
+    mediaItemId: string,
+    ref: MediaLocationLinkRef,
+    core: MediaLocationCoreRow,
+  ): MediaItemLocationRow {
+    return {
+      ...core,
+      id: core.id,
+      link_id: ref.link_id,
+      media_item_id: mediaItemId,
+      sort_order: ref.sort_order,
+    };
+  }
+}
+
+function rowToCoreRow(row: MediaItemLocationRow): MediaLocationCoreRow {
+  const { media_item_id: _mediaItemId, sort_order: _sortOrder, link_id: _linkId, ...core } = row;
+  return { ...core };
 }
 
 function forwardPatchFromGeocode(suggestion: ForwardGeocodeResult): MediaLocationAddressPatch {

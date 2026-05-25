@@ -5,6 +5,19 @@
  * @see docs/specs/ui/media-detail/media-detail-location-section.md
  */
 
+/** Junction metadata per media item (sort order is per link, not per location). */
+export interface MediaLocationLinkRef {
+  locationId: string;
+  link_id?: string;
+  sort_order: number;
+}
+
+/** Canonical shared `locations` fields — one entry per `locations.id` in list cache. */
+export type MediaLocationCoreRow = Omit<
+  MediaItemLocationRow,
+  'media_item_id' | 'sort_order' | 'link_id'
+>;
+
 /** Row returned by `list_locations_for_media` / legacy shim RPCs. */
 export interface MediaItemLocationRow {
   /** Shared `locations.id`. */

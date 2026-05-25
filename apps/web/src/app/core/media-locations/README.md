@@ -45,6 +45,11 @@ MediaDetailViewComponent
         └─ re-list links; merge first row into media() display fields
 ```
 
-## List cache (gallery / workspace / map panel)
+## List cache (N:N in-memory)
 
-`loadLocationSummaryByMediaIds` (batch) → `MediaLocationsService.hydrateSummariesAndSeedCache` / `seedListCache` fills `listCache` with **full** link rows (not GPS-only). Thumbnail map menu `listForMedia` then hits cache instead of `list_locations_for_media`. Invalidated on location mutations via `invalidateListCache`. Cluster / selection panel loads seed cache fire-and-forget after `rawImages` is set.
+Two maps in `MediaLocationsService`:
+
+- `locationToRow` — one canonical clone per `locations.id` (shared address/GPS).
+- `mediaToLinks` — per `media_item_id`, ordered `MediaLocationLinkRef[]` (`locationId`, `link_id`, `sort_order`).
+
+`hydrateSummariesAndSeedCache` / `seedListCache` (batch) seed both maps. `listForMedia` assembles rows from refs + core; **partial miss** (`refs.length !== resolved cores`) returns cache miss → RPC (never a shortened list). `updateLocation` patches `locationToRow` for all linked media. `invalidateListCache(mediaId)` drops link list only; `deleteLocation` uses `invalidateByLocationId`. No-arg `invalidateListCache()` clears both maps (nuclear reset only).
