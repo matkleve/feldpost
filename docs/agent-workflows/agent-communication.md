@@ -59,7 +59,9 @@ It is better to send **six specific questions once** than to ship code after gue
 
 ## 🔴 LIVE VERIFICATION — owner must run (not optional)
 
-When an agent touches **route session cache**, **warm revisit**, **media preview FSM**, **signed-URL cache**, or **per-tile aspect cache**, automated gates (`ng build`, vitest) are **necessary but not sufficient**. The agent **must** end the turn with an explicit **LIVE CHECK** block. The product owner **must run it in the browser** before treating the task as done — agents cannot see your DevTools or second navigation.
+When an agent touches **route session cache**, **warm revisit**, **media preview FSM**, **signed-URL cache**, **per-tile aspect cache**, or **upload location routing** (post-save geocode order, folder webkit fallback, upload panel Auto location default), automated gates (`ng build`, vitest) are **necessary but not sufficient** for browser-only behavior. The agent **must** end the turn with an explicit **LIVE CHECK** block when the table below applies. The product owner **must run it in the browser** before treating the task as done — agents cannot see your DevTools or second navigation.
+
+**Upload placement:** Agents without a browser **cannot** complete manual folder-upload smoke. Vitest + `ng build` are the agent completion gate; owner checks supplement AC “Manual browser smoke.”
 
 ### You (human) — do this when the agent lists it
 
@@ -70,6 +72,7 @@ When an agent touches **route session cache**, **warm revisit**, **media preview
 | Download / signing / `no-media` | Network: signed URL OK **and** state not stuck at `no-media` / `media-ready`. |
 | `media-item` grid aspect / session cache | Slot aspect looks right **and** thumbnails visible (not white boxes). |
 | Row vs grid geometry | Toggle row ↔ grid once; both modes should show previews. |
+| Upload location routing / post-save geocode / webkit folder fallback | Cold load → **Auto location ON** (default) → FSA folder named e.g. `Mariahilferstraße 56` → upload `IMG_*.jpg` → workspace detail: **location field filled** + **GPS** chip (not “No GPS” with only EXIF in Details). |
 
 ### Red flags — stop and reply with a screenshot
 

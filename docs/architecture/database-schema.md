@@ -97,6 +97,7 @@ Legacy image-era tables are removed from runtime schema:
 | updated_at      | timestamptz | not null/default now()             | docs/specs/page/projects-page.md |
 | archived_at     | timestamptz | nullable                           | docs/specs/page/projects-page.md |
 | color_key       | text        | not null/default 'clay'            | docs/specs/page/projects-page.md |
+| location_required | boolean   | not null/default false — **deprecated** | [deprecated-schema.md](./deprecated-schema.md); not used by frontend |
 
 ### public.media_items
 

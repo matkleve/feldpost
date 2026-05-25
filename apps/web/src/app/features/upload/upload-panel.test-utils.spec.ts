@@ -36,6 +36,7 @@ export function buildFakeUploadManager() {
     missingData$: missingData$.asObservable(),
     submit: vi.fn().mockReturnValue([]),
     submitFolder: vi.fn().mockResolvedValue('batch-1'),
+    submitWebkitFolder: vi.fn().mockResolvedValue('batch-webkit'),
     retryJob: vi.fn(),
     dismissJob: vi.fn(),
     dismissAllCompleted: vi.fn(),

@@ -70,6 +70,7 @@ import { createUploadManagerPipelineContext } from './upload-manager-runtime.uti
 import {
   submitUploadManagerFiles,
   submitUploadManagerFolder,
+  submitUploadManagerWebkitFolder,
   type UploadManagerSubmitDeps,
 } from './upload-manager-submit.util';
 import { UploadLocationConfigService } from './upload-location-config.service';
@@ -312,6 +313,19 @@ export class UploadManagerService {
     options?: SubmitOptions,
   ): Promise<string> {
     return submitUploadManagerFolder(dirHandle, options, this.submitDeps);
+  }
+
+  async submitWebkitFolder(
+    scannedEntries: Parameters<typeof submitUploadManagerWebkitFolder>[0],
+    rootFolderLabel: string | undefined,
+    options?: SubmitOptions,
+  ): Promise<string> {
+    return submitUploadManagerWebkitFolder(
+      scannedEntries,
+      rootFolderLabel,
+      options,
+      this.submitDeps,
+    );
   }
 
   /** Retry a failed job from the beginning. */

@@ -38,7 +38,7 @@ Deterministische Reihenfolge (first-match-wins):
 9. Wenn weiterhin mehrdeutig und EXIF vorhanden: EXIF als Assistenz mit `exifAssistRadiusMeters` pruefen.
 10. Wenn danach eindeutig: Titel-Treffer verwenden.
 11. Wenn weiter mehrdeutig: User-Prompt fuer Kandidatenauswahl.
-12. Wenn kein aufloesbarer Titelkandidat: EXIF als Fallback verwenden.
+12. Wenn kein aufloesbarer Titelkandidat: EXIF als Fallback fuer **Platzierung** verwenden (EXIF-Metadaten-Spalten koennen trotzdem gesetzt sein). Siehe [upload-manager-pipeline.location-routing.supplement.md](./upload-manager-pipeline.location-routing.supplement.md).
 13. Wenn weder Titel noch EXIF aufloesbar: `missing_data` issue setzen.
 
 Algorithmus-Parameter (`UploadLocationConfig`) mit Defaults:

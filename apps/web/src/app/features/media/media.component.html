@@ -22,10 +22,18 @@
     size="icon"
     class="map-upload-btn"
     type="button"
-    [attr.aria-label]="t('auto.0369.upload_images', 'Upload images')"
-    [attr.title]="t('auto.0369.upload_images', 'Upload images')"
+    [attr.aria-label]="
+      uploadBatchActive()
+        ? t('upload.trigger.status.uploading', 'Uploading...')
+        : t('auto.0369.upload_images', 'Upload images')
+    "
+    [attr.title]="
+      uploadBatchActive()
+        ? t('upload.trigger.status.uploading', 'Uploading...')
+        : t('auto.0369.upload_images', 'Upload images')
+    "
     [class.map-upload-btn--active]="uploadPanelOpen()"
-    [class.map-upload-btn--busy]="showExpandedUploadButton()"
+    [class.map-upload-btn--uploading]="uploadBatchActive()"
     [class.map-upload-btn--issues]="uploadHasIssues() && !uploadPanelOpen()"
     (click)="toggleUploadPanel()"
   >
@@ -36,19 +44,11 @@
           [style.--upload-progress]="uploadBatchProgress() + '%'"
           aria-hidden="true"
         ></span>
+        <span class="map-upload-btn__spinner" aria-hidden="true"></span>
+      } @else {
+        <span class="material-icons" aria-hidden="true">cloud_upload</span>
       }
-      <span class="material-icons" aria-hidden="true">cloud_upload</span>
     </span>
-    @if (uploadBatchActive()) {
-      <span class="map-upload-btn__summary" aria-hidden="true">
-        <span class="map-upload-btn__summary-label">{{
-          t('upload.trigger.status.uploading', 'Uploading...')
-        }}</span>
-        <span class="map-upload-btn__summary-count"
-          >{{ uploadSummaryCurrent() }}/{{ uploadSummaryTotal() }}</span
-        >
-      </span>
-    }
   </button>
 
   <div class="upload-expand" [class.upload-expand--visible]="uploadPanelOpen()">

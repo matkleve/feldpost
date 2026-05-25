@@ -24,8 +24,10 @@ export async function resolveUploadAddress(args: {
       return;
     }
 
-    const { error } = await supabaseClient.rpc('bulk_update_media_addresses', {
-      p_media_item_ids: [mediaItemId],
+    const { error } = await supabaseClient.rpc('resolve_media_location', {
+      p_media_item_id: mediaItemId,
+      p_latitude: lat,
+      p_longitude: lng,
       p_address_label: result.addressLabel,
       p_city: result.city,
       p_district: result.district,

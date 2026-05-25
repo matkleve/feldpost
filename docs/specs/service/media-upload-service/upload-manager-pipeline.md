@@ -115,6 +115,7 @@ Full field matrices, location-resolution algorithm, duplicate/issue contracts, a
 | `docs/specs/service/media-upload-service/upload-manager.md`          | Parent contract                                  |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for deep operational behavior         |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.data.md` | Data matrices / location algorithm (lint: supplement only) |
+| `docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md` | Location routing FSM, persistence matrix, webkit fallback |
 | `docs/specs/service/location-path-parser/location-path-parser.md`    | Address extraction from path hierarchy           |
 | `docs/specs/service/folder-scan/folder-scan.md`                      | Folder scanning and per-file aggregation         |
 | `docs/specs/service/filename-parser/filename-parser.md`              | Per-file metadata extraction (address, date)     |

@@ -16,6 +16,7 @@ import {
   formatUploadFailureMessage,
   uploadFailureMessageToToastText,
 } from './upload-error-messages.util';
+import { resolveUploadPhaseInputs } from './upload-location-inputs.helpers';
 
 type RunNewUploadPhaseArgs = {
   jobId: string;
@@ -58,7 +59,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
   if (!job) return;
   if (isCancelled()) return;
 
-  const locationInputs = resolveUploadLocationInputs(job, coords, parsedExif);
+  const locationInputs = resolveUploadPhaseInputs({ job, manualCoords: coords, parsedExif });
 
   const result = await runUploadCall({
     job,
@@ -114,20 +115,13 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
   });
 }
 
-/** Keeps EXIF metadata but blocks map assignment when panel mode is "No auto location". */
+/** @deprecated Use resolveUploadPhaseInputs from upload-location-inputs.helpers.ts */
 export function resolveUploadLocationInputs(
   job: UploadJob,
   coords: ExifCoords | undefined,
   parsedExif: ParsedExif | undefined,
 ): { coords: ExifCoords | undefined; parsedExif: ParsedExif | undefined } {
-  if (job.locationRequirementMode !== 'optional') {
-    return { coords, parsedExif };
-  }
-
-  return {
-    coords: undefined,
-    parsedExif: parsedExif ? { ...parsedExif, coords: undefined } : parsedExif,
-  };
+  return resolveUploadPhaseInputs({ job, manualCoords: coords, parsedExif });
 }
 
 async function runUploadCall(args: {

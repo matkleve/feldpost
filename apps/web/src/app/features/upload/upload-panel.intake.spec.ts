@@ -14,7 +14,7 @@ describe('UploadPanelComponent intake', () => {
 
     expect(fakeManager.submit).toHaveBeenCalledWith([file], {
       projectId: undefined,
-      locationRequirementMode: 'optional',
+      locationRequirementMode: 'required',
     });
     expect(input.value).toBe('');
   });
@@ -52,7 +52,7 @@ describe('UploadPanelComponent intake', () => {
       expect(showDirectoryPicker).toHaveBeenCalledWith({ mode: 'read' });
       expect(fakeManager.submitFolder).toHaveBeenCalledWith(dirHandle, {
         projectId: undefined,
-        locationRequirementMode: 'optional',
+        locationRequirementMode: 'required',
       });
     });
     vi.unstubAllGlobals();

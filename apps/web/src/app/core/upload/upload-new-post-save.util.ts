@@ -1,5 +1,9 @@
 import type { UploadJob } from './upload-manager.types';
 import type { ExifCoords } from './upload.types';
+import {
+  exifMetadataCoords,
+  usesTextPlacementSource,
+} from './upload-location-inputs.helpers';
 
 type FinalizeNewUploadPhaseArgs = {
   jobId: string;
@@ -59,14 +63,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     return;
   }
 
-  // Post-save enrichment policy:
-  // Spec context:
-  // - docs/specs/service/media-upload-service/upload-manager-pipeline.md (Action 5 and Action 6)
-  // - docs/specs/service/location-path-parser/location-path-parser.md (soft mismatch handling)
-  // - If we have GPS coords and no title address, do reverse geocoding (coords -> address).
-  // - If we have a title address and no coords, do forward geocoding (address -> coords).
-  // - If both are present, keep existing upload result as-is in this phase.
-  //   Reconciliation/mismatch handling is intentionally separated from this finalization step.
+  // @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
   if (updatedJob.locationRequirementMode === 'optional') {
     setPhase('complete');
     markDone();
@@ -82,34 +79,47 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     return;
   }
 
-  if (updatedJob.coords && !updatedJob.titleAddress) {
-    setPhase('resolving_address');
-    await enrichWithReverseGeocode(updatedJob.mediaId!);
-  } else if (updatedJob.coords && updatedJob.titleAddress) {
-    // Reconciliation branch: compare EXIF coordinates with geocoded title address.
-    // Upload remains successful even on mismatch; we persist audit information only.
-    // 15m tolerance follows the pipeline spec mismatch threshold.
+  const titleAddress = updatedJob.titleAddress?.trim();
+  const textPlacement = usesTextPlacementSource(updatedJob) && !!titleAddress;
+  const exifCoords = exifMetadataCoords(updatedJob);
+
+  if (textPlacement && titleAddress) {
     setPhase('resolving_coordinates');
-    const titleCoords = await geocodeTitleAddress(updatedJob.titleAddress);
-    if (titleCoords) {
-      const distanceMeters = haversineMeters(updatedJob.coords, titleCoords);
-      updateJob({
-        titleAddressCoords: titleCoords,
-        locationMismatchMeters:
-          distanceMeters > mismatchToleranceMeters ? Math.round(distanceMeters) : undefined,
+    const enrichResult = await enrichWithForwardGeocode(updatedJob.mediaId!, titleAddress);
+    if (enrichResult) {
+      updateJob({ coords: enrichResult.coords });
+    } else if (updatedJob.locationRequirementMode === 'required') {
+      await routeUnresolvedAfterFailedGeocode({
+        updatedJob,
+        jobId,
+        setPhase,
+        updateJob,
+        markDone,
+        emitBatchProgress,
+        drainQueue,
       });
-      if (distanceMeters > mismatchToleranceMeters) {
-        console.warn('[upload-new] location source mismatch detected', {
+      return;
+    }
+
+    if (exifCoords) {
+      const placedCoords = findJob()?.coords ?? enrichResult?.coords;
+      if (placedCoords) {
+        await auditTitleExifMismatch({
           jobId,
-          mediaId: updatedJob.mediaId,
-          exifCoords: updatedJob.coords,
-          titleAddress: updatedJob.titleAddress,
-          titleAddressCoords: titleCoords,
-          distanceMeters,
-          toleranceMeters: mismatchToleranceMeters,
+          updatedJob: findJob() ?? updatedJob,
+          placedCoords,
+          exifCoords,
+          titleAddress,
+          geocodeTitleAddress,
+          mismatchToleranceMeters,
+          setPhase,
+          updateJob,
         });
       }
     }
+  } else if (updatedJob.coords && !titleAddress) {
+    setPhase('resolving_address');
+    await enrichWithReverseGeocode(updatedJob.mediaId!);
   } else if (updatedJob.titleAddress && !updatedJob.coords) {
     setPhase('resolving_coordinates');
     const enrichResult = await enrichWithForwardGeocode(
@@ -119,16 +129,15 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     if (enrichResult) {
       updateJob({ coords: enrichResult.coords });
     } else if (updatedJob.locationRequirementMode === 'required') {
-      const mimeType = updatedJob.file.type.toLowerCase();
-      const isDocument = mimeType.startsWith('application/') || mimeType.startsWith('text/');
-      updateJob({
-        issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
-        locationSourceUsed: 'none',
+      await routeUnresolvedAfterFailedGeocode({
+        updatedJob,
+        jobId,
+        setPhase,
+        updateJob,
+        markDone,
+        emitBatchProgress,
+        drainQueue,
       });
-      setPhase('missing_data');
-      markDone();
-      emitBatchProgress(updatedJob.batchId);
-      drainQueue();
       return;
     }
   }
@@ -153,6 +162,74 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     emitBatchProgress,
     drainQueue,
   });
+}
+
+async function auditTitleExifMismatch(args: {
+  jobId: string;
+  updatedJob: UploadJob;
+  placedCoords: ExifCoords;
+  exifCoords: ExifCoords;
+  titleAddress: string;
+  geocodeTitleAddress: (titleAddress: string) => Promise<ExifCoords | undefined>;
+  mismatchToleranceMeters: number;
+  setPhase: FinalizeNewUploadPhaseArgs['setPhase'];
+  updateJob: FinalizeNewUploadPhaseArgs['updateJob'];
+}): Promise<void> {
+  const {
+    jobId,
+    updatedJob,
+    placedCoords,
+    exifCoords,
+    titleAddress,
+    geocodeTitleAddress,
+    mismatchToleranceMeters,
+    setPhase,
+    updateJob,
+  } = args;
+
+  setPhase('resolving_coordinates');
+  const titleCoords = await geocodeTitleAddress(titleAddress);
+  const compareCoords = titleCoords ?? placedCoords;
+  const distanceMeters = haversineMeters(exifCoords, compareCoords);
+  updateJob({
+    titleAddressCoords: compareCoords,
+    locationMismatchMeters:
+      distanceMeters > mismatchToleranceMeters ? Math.round(distanceMeters) : undefined,
+  });
+  if (distanceMeters > mismatchToleranceMeters) {
+    console.warn('[upload-new] location source mismatch detected', {
+      jobId,
+      mediaId: updatedJob.mediaId,
+      exifCoords,
+      titleAddress,
+      titleAddressCoords: compareCoords,
+      distanceMeters,
+      toleranceMeters: mismatchToleranceMeters,
+    });
+  }
+}
+
+async function routeUnresolvedAfterFailedGeocode(args: {
+  updatedJob: UploadJob;
+  jobId: string;
+  setPhase: FinalizeNewUploadPhaseArgs['setPhase'];
+  updateJob: FinalizeNewUploadPhaseArgs['updateJob'];
+  markDone: () => void;
+  emitBatchProgress: (batchId: string) => void;
+  drainQueue: () => void;
+}): Promise<void> {
+  const { updatedJob, jobId, setPhase, updateJob, markDone, emitBatchProgress, drainQueue } =
+    args;
+  const mimeType = updatedJob.file.type.toLowerCase();
+  const isDocument = mimeType.startsWith('application/') || mimeType.startsWith('text/');
+  updateJob({
+    issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
+    locationSourceUsed: 'none',
+  });
+  setPhase('missing_data');
+  markDone();
+  emitBatchProgress(updatedJob.batchId);
+  drainQueue();
 }
 
 export function emitCompletion(args: {

@@ -85,18 +85,16 @@
     z-index: 2;
   }
 
-  &:not(&--busy) {
-    padding: 0;
-    justify-content: center;
-    align-items: center;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
 
-    .map-upload-btn__icon-shell {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .map-upload-btn__icon-shell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &:hover {
@@ -108,12 +106,6 @@
   &--active {
     background: color-mix(in srgb, var(--primary) 22%, var(--card));
     border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
-  }
-
-  &--busy {
-    width: min(13.5rem, calc(100vw - var(--spacing-8)));
-    justify-content: flex-start;
-    padding: 0 var(--spacing-2);
   }
 
   &--issues {
@@ -128,11 +120,6 @@
     justify-content: center;
     flex-shrink: 0;
     z-index: 2;
-  }
-
-  &--busy .map-upload-btn__icon-shell {
-    width: 1.9rem;
-    height: 1.9rem;
   }
 
   &__progress {
@@ -154,27 +141,21 @@
     }
   }
 
-  &__summary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-2);
-    min-width: 0;
-    flex: 1;
-    font-size: var(--font-size-xs);
-    line-height: var(--line-height-solid);
+  &__spinner {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: var(--radius-full);
+    border: 2px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-top-color: var(--primary);
+    animation: upload-btn-spin 700ms linear infinite;
+    position: relative;
+    z-index: 2;
   }
+}
 
-  &__summary-label {
-    color: var(--muted-foreground);
-    white-space: nowrap;
-  }
-
-  &__summary-count {
-    color: var(--primary);
-    font-weight: var(--font-weight-semibold);
-    z-index: 3;
-    white-space: nowrap;
+@keyframes upload-btn-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

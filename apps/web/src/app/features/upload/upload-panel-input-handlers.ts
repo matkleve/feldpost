@@ -12,6 +12,7 @@ import {
 } from './upload-panel-file-accept';
 import { ToastService } from '../../core/toast/toast.service';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { scanFilesFromWebkitDirectory } from '../../core/folder-scan/folder-scan-from-file-list.helpers';
 
 interface DirectoryPickerWindow extends Window {
   showDirectoryPicker?: (options?: {
@@ -135,13 +136,23 @@ export class UploadPanelInputHandlersService {
 
   onFolderInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files), {
-        projectId: this.activeProjectId(),
-        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
-      });
-      input.value = '';
+    if (!input.files || input.files.length === 0) {
+      return;
     }
+
+    const { entries, rootFolderLabel } = scanFilesFromWebkitDirectory(Array.from(input.files));
+    const options = {
+      projectId: this.activeProjectId(),
+      locationRequirementMode: this.uploadSignals.locationRequirementMode(),
+    };
+
+    if (entries.length === 0) {
+      this.uploadManager.submit(Array.from(input.files), options);
+    } else {
+      void this.uploadManager.submitWebkitFolder(entries, rootFolderLabel, options);
+    }
+
+    input.value = '';
   }
 
   private openFolderInputFallback(folderInput: HTMLInputElement): void {

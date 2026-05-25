@@ -18,6 +18,37 @@ function createJob(overrides: Partial<UploadJob> = {}): UploadJob {
 }
 
 describe('finalizeNewUploadPhase', () => {
+  it('forward-geocodes folder title before EXIF mismatch audit', async () => {
+    const phases: string[] = [];
+    const enrichWithForwardGeocode = vi
+      .fn()
+      .mockResolvedValue({ coords: { lat: 48.1372, lng: 11.5756 } });
+    const geocodeTitleAddress = vi.fn().mockResolvedValue({ lat: 48.1372, lng: 11.5756 });
+    let job = createJob({
+      titleAddress: 'Mariahilferstraße 56',
+      locationSourceUsed: 'folder',
+      parsedExif: { coords: { lat: 48.2082, lng: 16.3738 } },
+      coords: undefined,
+    });
+
+    await runFinalize(
+      job,
+      (next) => {
+        job = next;
+      },
+      {
+        setPhase: (phase) => phases.push(phase),
+        enrichWithForwardGeocode,
+        geocodeTitleAddress,
+      },
+    );
+
+    expect(enrichWithForwardGeocode).toHaveBeenCalledWith('media-1', 'Mariahilferstraße 56');
+    expect(geocodeTitleAddress).toHaveBeenCalled();
+    expect(phases[0]).toBe('resolving_coordinates');
+    expect(job.locationMismatchMeters).toBeGreaterThan(15);
+  });
+
   it('records mismatch meters when EXIF and title-geocoded coordinates differ above tolerance', async () => {
     const phases: string[] = [];
     let job = createJobWithMismatch();
@@ -29,6 +60,9 @@ describe('finalizeNewUploadPhase', () => {
       },
       {
         setPhase: (phase) => phases.push(phase),
+        enrichWithForwardGeocode: vi
+          .fn()
+          .mockResolvedValue({ coords: { lat: 48.1372, lng: 11.5756 } }),
         geocodeTitleAddress: vi.fn().mockResolvedValue({ lat: 48.1372, lng: 11.5756 }),
       },
     );
@@ -41,8 +75,10 @@ describe('finalizeNewUploadPhase', () => {
 
   it('does not set mismatch when coordinates are within tolerance', async () => {
     let job = createJob({
-      coords: { lat: 48.2082, lng: 16.3738 },
       titleAddress: 'Test',
+      locationSourceUsed: 'folder',
+      parsedExif: { coords: { lat: 48.2082, lng: 16.3738 } },
+      coords: undefined,
     });
 
     await runFinalize(
@@ -51,6 +87,9 @@ describe('finalizeNewUploadPhase', () => {
         job = next;
       },
       {
+        enrichWithForwardGeocode: vi
+          .fn()
+          .mockResolvedValue({ coords: { lat: 48.2082, lng: 16.3738 } }),
         geocodeTitleAddress: vi.fn().mockResolvedValue({ lat: 48.20820005, lng: 16.37380005 }),
       },
     );
@@ -62,8 +101,10 @@ describe('finalizeNewUploadPhase', () => {
 
 function createJobWithMismatch(): UploadJob {
   return createJob({
-    coords: { lat: 48.2082, lng: 16.3738 },
     titleAddress: 'Marienplatz 1, Muenchen',
+    locationSourceUsed: 'folder',
+    parsedExif: { coords: { lat: 48.2082, lng: 16.3738 } },
+    coords: undefined,
   });
 }
 
@@ -72,6 +113,7 @@ async function runFinalize(
   onUpdate: (job: UploadJob) => void,
   overrides: {
     setPhase?: (phase: 'resolving_address' | 'resolving_coordinates' | 'complete') => void;
+    enrichWithForwardGeocode?: () => Promise<{ coords: { lat: number; lng: number } } | undefined>;
     geocodeTitleAddress?: () => Promise<{ lat: number; lng: number } | undefined>;
   } = {},
 ): Promise<void> {
@@ -89,7 +131,9 @@ async function runFinalize(
     emitBatchProgress: vi.fn(),
     drainQueue: vi.fn(),
     enrichWithReverseGeocode: vi.fn(),
-    enrichWithForwardGeocode: vi.fn(),
+    enrichWithForwardGeocode:
+      overrides.enrichWithForwardGeocode ??
+      vi.fn().mockResolvedValue({ coords: { lat: 48.2082, lng: 16.3738 } }),
     geocodeTitleAddress:
       overrides.geocodeTitleAddress ?? vi.fn().mockResolvedValue({ lat: 48.2082, lng: 16.3738 }),
     mismatchToleranceMeters: 15,

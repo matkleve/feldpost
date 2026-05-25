@@ -356,23 +356,9 @@ export class MapShellComponent implements OnDestroy {
 
     return jobs.slice(0, 3);
   });
-  readonly showExpandedUploadButton = computed(
-    () => !this.uploadPanelOpen() && this.uploadBatchActive(),
-  );
   readonly uploadHasIssues = computed(() =>
     this.uploadManagerService.jobs().some((job) => getLaneForJob(job) === 'issues'),
   );
-  readonly uploadSummaryCurrent = computed(() => {
-    const batch = this.uploadBatch();
-    if (!batch || batch.totalFiles <= 0) {
-      return 0;
-    }
-
-    const doneCount = batch.completedFiles + batch.failedFiles + batch.skippedFiles;
-    const inFlight = this.uploadBatchActive() ? 1 : 0;
-    return Math.min(batch.totalFiles, Math.max(0, doneCount + inFlight));
-  });
-  readonly uploadSummaryTotal = computed(() => this.uploadBatch()?.totalFiles ?? 0);
 
   /**
    * When non-null the map is in "placement mode": the next click places an

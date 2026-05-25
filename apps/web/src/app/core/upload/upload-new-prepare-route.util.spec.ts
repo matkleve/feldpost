@@ -249,5 +249,11 @@ function expectFolderFallbackResult(
   expect(job.locationSourceUsed).toBe('folder');
   expect(job.issueKind).toBeUndefined();
   expect(runUploadPhase).toHaveBeenCalledOnce();
+  expect(runUploadPhase).toHaveBeenCalledWith(
+    job.id,
+    undefined,
+    expect.objectContaining({ coords: undefined }),
+    expect.anything(),
+  );
   expect(ctx.emitMissingData).not.toHaveBeenCalled();
 }

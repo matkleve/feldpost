@@ -9,6 +9,7 @@ import type { UploadQueueService } from './upload-queue.service';
 import type { UploadService } from './upload.service';
 import type { ParsedExif } from './upload.service';
 import type { UploadLocationConfigService } from './upload-location-config.service';
+import { stripPlacementCoordsFromParsedExif } from './upload-location-inputs.helpers';
 
 type NewPrepareRouteDeps = {
   jobState: UploadJobStateService;
@@ -146,7 +147,13 @@ export async function routePreparedNewJob(
     });
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) return;
-    await runUploadPhase(jobId, undefined, parsedExif, ctx);
+    deps.jobState.updateJob(jobId, { coords: undefined });
+    await runUploadPhase(
+      jobId,
+      undefined,
+      stripPlacementCoordsFromParsedExif(parsedExif),
+      ctx,
+    );
     return;
   }
 

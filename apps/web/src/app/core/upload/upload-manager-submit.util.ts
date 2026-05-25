@@ -141,6 +141,58 @@ export async function submitUploadManagerFolder(
   return batchId;
 }
 
+/** Webkitdirectory fallback: same job hints as FSA folder when paths are present. */
+export async function submitUploadManagerWebkitFolder(
+  scannedEntries: ReadonlyArray<ScannedFileEntry>,
+  rootFolderLabel: string | undefined,
+  options: SubmitOptions | undefined,
+  deps: UploadManagerSubmitDeps,
+): Promise<string> {
+  const batchId = crypto.randomUUID();
+  const label = options?.batchLabel ?? rootFolderLabel ?? `${scannedEntries.length} files`;
+  const folderAddressHint = rootFolderLabel
+    ? deps.extractAddressFromFolderName(rootFolderLabel)
+    : undefined;
+
+  deps.addBatch({
+    id: batchId,
+    label,
+    totalFiles: scannedEntries.length,
+    completedFiles: 0,
+    skippedFiles: 0,
+    failedFiles: 0,
+    overallProgress: 0,
+    status: scannedEntries.length > 0 ? 'uploading' : 'complete',
+    startedAt: new Date(),
+  });
+
+  if (scannedEntries.length === 0) {
+    deps.updateBatch(batchId, { finishedAt: new Date() });
+    return batchId;
+  }
+
+  let projectIdFromFolder: string | undefined;
+  if (!options?.projectId && rootFolderLabel) {
+    projectIdFromFolder = await resolveUploadProjectIdFromFolderName(rootFolderLabel, deps);
+  }
+  const resolvedProjectId = options?.projectId ?? projectIdFromFolder;
+
+  const newJobs = createNewUploadJobs(
+    scannedEntries,
+    batchId,
+    resolvedProjectId,
+    deps,
+    folderAddressHint,
+    options?.locationRequirementMode,
+  );
+
+  deps.addJobs(newJobs);
+  deps.hydrateDeferredPreviews(newJobs);
+  deps.drainQueue();
+
+  return batchId;
+}
+
 async function resolveUploadProjectIdFromFolderName(
   folderName: string,
   deps: UploadManagerSubmitDeps,

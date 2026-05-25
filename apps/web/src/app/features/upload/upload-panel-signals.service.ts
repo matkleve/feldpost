@@ -1,5 +1,4 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { ProjectsService } from '../../core/projects/projects.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type { UploadLocationRequirementMode } from '../../core/upload/upload-manager.types';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
@@ -23,7 +22,6 @@ import { UploadPanelStateService } from './upload-panel-state.service';
 @Injectable({ providedIn: 'root' })
 export class UploadPanelSignalsService {
   private readonly uploadManager = inject(UploadManagerService);
-  private readonly projects = inject(ProjectsService);
   private readonly state = inject(UploadPanelStateService);
   private readonly workspaceView = inject(WorkspaceViewService);
 
@@ -48,7 +46,7 @@ export class UploadPanelSignalsService {
   private readonly _selectedLane = signal<UploadLane>('uploading');
   readonly selectedLane = this._selectedLane.asReadonly();
 
-  private readonly _locationRequirementMode = signal<UploadLocationRequirementMode>('optional');
+  private readonly _locationRequirementMode = signal<UploadLocationRequirementMode>('required');
   readonly locationRequirementMode = this._locationRequirementMode.asReadonly();
 
   private readonly sessionLocationModeOverrides = signal<
@@ -75,12 +73,7 @@ export class UploadPanelSignalsService {
       }
 
       const overridden = overrides.get(activeProjectId);
-      if (overridden !== undefined) {
-        this._locationRequirementMode.set(overridden);
-        return;
-      }
-
-      void this.applyProjectDefaultLocationMode(activeProjectId);
+      this._locationRequirementMode.set(overridden ?? 'required');
     });
   }
 
@@ -99,25 +92,5 @@ export class UploadPanelSignalsService {
     }
 
     this._locationRequirementMode.set(mode);
-  }
-
-  private async applyProjectDefaultLocationMode(projectId: string): Promise<void> {
-    const projects = await this.projects.loadProjects();
-    const project = projects.find((item) => item.id === projectId);
-
-    if (!project) {
-      this._locationRequirementMode.set('optional');
-      return;
-    }
-
-    if (this.activeProjectId() !== projectId) {
-      return;
-    }
-
-    if (this.sessionLocationModeOverrides().has(projectId)) {
-      return;
-    }
-
-    this._locationRequirementMode.set(project.locationRequired ? 'required' : 'optional');
   }
 }

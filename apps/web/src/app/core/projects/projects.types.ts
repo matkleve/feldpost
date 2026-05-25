@@ -15,6 +15,7 @@ export interface ProjectRecord {
   id: string;
   name: string;
   colorKey: ProjectColorKey;
+  /** @deprecated Always false; DB column unused — see docs/architecture/deprecated-schema.md */
   locationRequired: boolean;
   archivedAt: string | null;
   createdAt: string;

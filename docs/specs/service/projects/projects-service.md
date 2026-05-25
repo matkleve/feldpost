@@ -40,6 +40,14 @@ SupabaseService
 | --- | --- |
 | `projects`, `media_projects`, `media_items` | As used in service queries |
 
+### Deprecated columns
+
+| Column | Policy |
+| --- | --- |
+| `projects.location_required` | Retained in DB only. **Must not** be read or written by the frontend. Upload location policy is owned by the [upload panel](../../component/upload/upload-panel.md) (`locationRequirementMode`), not projects. See [deprecated-schema.md](../../../architecture/deprecated-schema.md). |
+
+**Out of scope for this service:** upload location routing, geocoding, or Auto location toggle defaults.
+
 ## State
 
 None on facade (async methods + pure helpers).

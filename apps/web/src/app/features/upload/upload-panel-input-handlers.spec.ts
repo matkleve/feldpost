@@ -13,9 +13,10 @@ function setupHandlers() {
   const uploadManager = {
     submit: vi.fn(),
     submitFolder: vi.fn().mockResolvedValue('batch-1'),
+    submitWebkitFolder: vi.fn().mockResolvedValue('batch-webkit'),
   };
   const uploadSignals = {
-    locationRequirementMode: signal('optional' as const),
+    locationRequirementMode: signal('required' as const),
   };
   const workspaceView = {
     selectedProjectIds: vi.fn(() => new Set<string>()),
@@ -90,7 +91,7 @@ describe('UploadPanelInputHandlersService', () => {
       expect(showDirectoryPicker).toHaveBeenCalledWith({ mode: 'read' });
       expect(uploadManager.submitFolder).toHaveBeenCalledWith(dirHandle, {
         projectId: undefined,
-        locationRequirementMode: 'optional',
+        locationRequirementMode: 'required',
       });
     });
     vi.unstubAllGlobals();
@@ -119,20 +120,30 @@ describe('UploadPanelInputHandlersService', () => {
     vi.unstubAllGlobals();
   });
 
-  it('onFolderInputChange submits selected files', () => {
+  it('onFolderInputChange uses submitWebkitFolder when webkitRelativePath is present', () => {
     const { service, uploadManager } = setupHandlers();
-    const files = [
-      new File([new Uint8Array(64)], 'a.jpg', { type: 'image/jpeg' }),
-      new File([new Uint8Array(64)], 'b.jpg', { type: 'image/jpeg' }),
-    ];
-    const input = { files, value: 'placeholder' } as unknown as HTMLInputElement;
+    const file = new File([new Uint8Array(64)], 'a.jpg', { type: 'image/jpeg' });
+    Object.defineProperty(file, 'webkitRelativePath', {
+      value: 'Mariahilferstraße 56/a.jpg',
+    });
+    const input = { files: [file], value: 'placeholder' } as unknown as HTMLInputElement;
 
     service.onFolderInputChange({ target: input } as unknown as Event);
 
-    expect(uploadManager.submit).toHaveBeenCalledWith(files, {
-      projectId: undefined,
-      locationRequirementMode: 'optional',
-    });
+    expect(uploadManager.submitWebkitFolder).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          directorySegments: [],
+          relativePath: expect.stringContaining('a.jpg'),
+        }),
+      ]),
+      'Mariahilferstraße 56',
+      {
+        projectId: undefined,
+        locationRequirementMode: 'required',
+      },
+    );
+    expect(uploadManager.submit).not.toHaveBeenCalled();
     expect(input.value).toBe('');
   });
 });
