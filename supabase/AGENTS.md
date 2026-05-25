@@ -32,6 +32,35 @@ npm run supabase:ensure-edge
 
 `npm start` in `apps/web` runs this automatically before `ng serve`.
 
+## Local Photon (forward/search only)
+
+For fuzzy forward geocoding in local dev (e.g. typo-tolerant Austrian addresses), run Austria Photon on the host:
+
+```bash
+docker compose -f docker-compose.photon.yml up -d
+docker compose -f docker-compose.photon.yml logs -f   # first run: index download ~10–20 min
+```
+
+Until logs show the index import finished and Photon is listening, `curl http://localhost:2322/...` may fail with **connection reset** and `docker ps` may show **unhealthy** — that is normal during the first-run download/extract, not a broken port mapping.
+
+**Curl gate** (required before relying on Photon in the edge function):
+
+```bash
+curl "http://localhost:2322/api?q=Fuchsthalergasse+4&lang=de&limit=3"
+```
+
+Expect GeoJSON `FeatureCollection` with **Fuchsthallergasse**, house **4**, **Wien** / **1090** in the top hit.
+
+**Edge wiring:** `supabase/config.toml` sets `GEOCODER_FORWARD_URL = "http://host.docker.internal:2322"` under `[edge_runtime.secrets]` (dev only — never hosted/production). After changing secrets, restart edge runtime:
+
+```bash
+npm run supabase:ensure-edge
+```
+
+**Linux:** `docker-compose.photon.yml` includes `extra_hosts: host.docker.internal:host-gateway` so the Supabase edge container can reach host Photon.
+
+**Reverse** and **structured-search** stay on public Nominatim regardless of Photon.
+
 ## References
 
 - Schema: `docs/architecture/database-schema.md`

@@ -1,0 +1,16 @@
+services:
+  photon:
+    image: rtuszik/photon-docker:latest
+    environment:
+      - REGION=austria
+    volumes:
+      - photon_data:/photon/data
+    ports:
+      - "2322:2322"
+    restart: unless-stopped
+    # Linux: host gateway so Supabase edge runtime can reach Photon via host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  photon_data:

@@ -1,35 +1,42 @@
 /**
- * geocode — Supabase Edge Function that proxies Nominatim requests.
+ * geocode — Supabase Edge Function that proxies geocoding requests.
  *
- * Eliminates browser CORS issues and enforces server-side rate limiting
- * (1 request/second to Nominatim).
+ * Forward/search: local Photon when GEOCODER_FORWARD_URL is set (dev), else Nominatim.
+ * Reverse and structured-search: always Nominatim.
  *
  * Endpoints:
  *   POST /geocode  { action: "reverse", lat, lng }
- *   POST /geocode  { action: "forward", q }
+ *   POST /geocode  { action: "forward", q, limit?, viewbox?, ... }
  *   POST /geocode  { action: "structured-search", street, city }
  */
+
+import {
+  buildPhotonSearchUrl,
+  photonGeoJsonToNominatimSearch,
+  type PhotonGeoJsonResponse,
+} from "./photon-to-nominatim.ts";
 
 const NOMINATIM_REVERSE_URL = "https://nominatim.openstreetmap.org/reverse";
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
 const MIN_INTERVAL_MS = 1100;
 const USER_AGENT = "Feldpost/1.0 (construction image management)";
-const NOMINATIM_TIMEOUT_MS = 10000;
+const UPSTREAM_TIMEOUT_MS = 10000;
+const GEOCODER_FORWARD_URL = (Deno.env.get("GEOCODER_FORWARD_URL") ?? "").trim();
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
   .split(",")
   .map((origin) => origin.trim())
   .filter((origin) => origin.length > 0);
 
-let lastRequestTime = 0;
+let lastNominatimRequestTime = 0;
 
-/** Simple server-side rate limiter — serializes via await. */
-async function rateLimit(): Promise<void> {
+/** Serializes Nominatim calls only (public API rate limit). */
+async function rateLimitNominatim(): Promise<void> {
   const now = Date.now();
-  const elapsed = now - lastRequestTime;
+  const elapsed = now - lastNominatimRequestTime;
   if (elapsed < MIN_INTERVAL_MS) {
     await new Promise((r) => setTimeout(r, MIN_INTERVAL_MS - elapsed));
   }
-  lastRequestTime = Date.now();
+  lastNominatimRequestTime = Date.now();
 }
 
 function resolveAllowedOrigin(req: Request): string | null {
@@ -39,7 +46,6 @@ function resolveAllowedOrigin(req: Request): string | null {
   }
 
   if (ALLOWED_ORIGINS.length === 0) {
-    // Fail closed in production: if no allow-list is configured, do not allow browser origins.
     return null;
   }
 
@@ -70,10 +76,75 @@ function sanitizeSnippet(input: string): string {
   return input.replace(/\s+/g, " ").trim().slice(0, 500);
 }
 
+function acceptLanguageHeader(body: {
+  acceptLanguage?: string;
+}): string {
+  return typeof body.acceptLanguage === "string" &&
+      body.acceptLanguage.trim()
+    ? body.acceptLanguage.trim()
+    : "de,en";
+}
+
+type GeocodeBody = {
+  action?: string;
+  lat?: number;
+  lng?: number;
+  q?: string;
+  limit?: number;
+  countrycodes?: string;
+  viewbox?: string;
+  bounded?: number;
+  acceptLanguage?: string;
+  addressLayer?: boolean;
+  street?: string;
+  city?: string;
+};
+
+function buildNominatimSearchUrl(body: GeocodeBody): string {
+  const q = typeof body.q === "string" ? body.q.trim() : "";
+  return `${NOMINATIM_SEARCH_URL}?q=${encodeURIComponent(q)}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.addressLayer !== false ? "&layer=address" : ""}${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}${body.viewbox ? `&viewbox=${encodeURIComponent(body.viewbox)}` : ""}${body.bounded != null ? `&bounded=${encodeURIComponent(String(body.bounded))}` : ""}`;
+}
+
+async function fetchUpstream(
+  url: string,
+  acceptLanguage: string,
+  upstream: "nominatim" | "photon",
+): Promise<Response> {
+  const headers: Record<string, string> = {
+    "Accept-Language": acceptLanguage,
+  };
+  if (upstream === "nominatim") {
+    headers["User-Agent"] = USER_AGENT;
+  }
+
+  const resp = await fetch(url, {
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    headers,
+  });
+
+  if (!resp.ok) {
+    const upstreamBody = sanitizeSnippet(await resp.text());
+    return new Response(
+      JSON.stringify({
+        error: `${upstream === "photon" ? "Photon" : "Nominatim"} request failed`,
+        failureType: "upstream_http",
+        upstream,
+        status: resp.status,
+        upstreamBody,
+      }),
+      {
+        status: 502,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+
+  return resp;
+}
+
 Deno.serve(async (req: Request) => {
   const allowedOrigin = resolveAllowedOrigin(req);
 
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     if (req.headers.get("origin") && !allowedOrigin) {
       return new Response(JSON.stringify({ error: "Origin not allowed" }), {
@@ -99,21 +170,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // Parse request body
-  let body: {
-    action?: string;
-    lat?: number;
-    lng?: number;
-    q?: string;
-    limit?: number;
-    countrycodes?: string;
-    viewbox?: string;
-    bounded?: number;
-    acceptLanguage?: string;
-    addressLayer?: boolean;
-    street?: string;
-    city?: string;
-  };
+  let body: GeocodeBody;
   try {
     body = await req.json();
   } catch {
@@ -142,8 +199,13 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // Build Nominatim URL
-  let nominatimUrl: string;
+  const acceptLanguage = acceptLanguageHeader(body);
+  const usePhotonForward =
+    GEOCODER_FORWARD_URL.length > 0 &&
+    (action === "forward");
+
+  let upstreamUrl: string;
+  let upstreamKind: "nominatim" | "photon";
 
   if (action === "reverse") {
     const { lat, lng } = body;
@@ -158,7 +220,6 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    // Validate coordinate ranges
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       return new Response(
         JSON.stringify({ error: "Coordinates out of range" }),
@@ -168,7 +229,9 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    nominatimUrl = `${NOMINATIM_REVERSE_URL}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&format=json&addressdetails=1`;
+    upstreamUrl =
+      `${NOMINATIM_REVERSE_URL}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&format=json&addressdetails=1`;
+    upstreamKind = "nominatim";
   } else if (action === "structured-search") {
     const street =
       typeof body.street === "string" ? body.street.trim() : "";
@@ -184,7 +247,9 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    nominatimUrl = `${NOMINATIM_SEARCH_URL}?street=${encodeURIComponent(street)}&city=${encodeURIComponent(city)}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}`;
+    upstreamUrl =
+      `${NOMINATIM_SEARCH_URL}?street=${encodeURIComponent(street)}&city=${encodeURIComponent(city)}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}`;
+    upstreamKind = "nominatim";
   } else {
     const { q } = body;
     if (typeof q !== "string" || !q.trim()) {
@@ -196,41 +261,49 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    nominatimUrl = `${NOMINATIM_SEARCH_URL}?q=${encodeURIComponent(q.trim())}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.addressLayer !== false ? "&layer=address" : ""}${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}${body.viewbox ? `&viewbox=${encodeURIComponent(body.viewbox)}` : ""}${body.bounded != null ? `&bounded=${encodeURIComponent(String(body.bounded))}` : ""}`;
+    if (usePhotonForward) {
+      upstreamUrl = buildPhotonSearchUrl(GEOCODER_FORWARD_URL, {
+        q,
+        limit: body.limit,
+        acceptLanguage: body.acceptLanguage,
+        viewbox: body.viewbox,
+        bounded: body.bounded,
+      });
+      upstreamKind = "photon";
+    } else {
+      upstreamUrl = buildNominatimSearchUrl(body);
+      upstreamKind = "nominatim";
+    }
   }
 
-  // Rate-limit then fetch from Nominatim
-  await rateLimit();
+  if (upstreamKind === "nominatim") {
+    await rateLimitNominatim();
+  }
 
   try {
-    const nominatimResp = await fetch(nominatimUrl, {
-      signal: AbortSignal.timeout(NOMINATIM_TIMEOUT_MS),
-      headers: {
-        "User-Agent": USER_AGENT,
-        "Accept-Language":
-          typeof body.acceptLanguage === "string" && body.acceptLanguage.trim()
-            ? body.acceptLanguage.trim()
-            : "de,en",
-      },
-    });
-
-    if (!nominatimResp.ok) {
-      const upstreamBody = sanitizeSnippet(await nominatimResp.text());
-      return new Response(
-        JSON.stringify({
-          error: "Nominatim request failed",
-          failureType: "upstream_http",
-          status: nominatimResp.status,
-          upstreamBody,
-        }),
-        {
-          status: 502,
-          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
-        },
-      );
+    const upstreamResp = await fetchUpstream(
+      upstreamUrl,
+      acceptLanguage,
+      upstreamKind,
+    );
+    if (upstreamResp.status !== 200) {
+      const errorJson = await upstreamResp.json();
+      return new Response(JSON.stringify(errorJson), {
+        status: upstreamResp.status,
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+      });
     }
 
-    const data = await nominatimResp.json();
+    if (upstreamKind === "photon") {
+      const geoJson = (await upstreamResp.json()) as PhotonGeoJsonResponse;
+      const rows = photonGeoJsonToNominatimSearch(geoJson);
+      return new Response(JSON.stringify(rows), {
+        status: 200,
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+      });
+    }
+
+    const data = await upstreamResp.json();
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { ...corsHeaders(req), "Content-Type": "application/json" },
@@ -240,8 +313,9 @@ Deno.serve(async (req: Request) => {
       error instanceof Error ? sanitizeSnippet(error.message) : "Unknown error";
     return new Response(
       JSON.stringify({
-        error: "Failed to reach Nominatim",
+        error: `Failed to reach ${upstreamKind === "photon" ? "Photon" : "Nominatim"}`,
         failureType: "network",
+        upstream: upstreamKind,
         message,
       }),
       {

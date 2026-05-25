@@ -368,6 +368,8 @@ deno_version = 2
 [edge_runtime.secrets]
 ALLOWED_ORIGINS = "http://localhost:4200,http://127.0.0.1:4200"
 GOTENBERG_URL = "http://host.docker.internal:3000"
+# Local dev only — Austria Photon via docker-compose.photon.yml (not hosted/production).
+GEOCODER_FORWARD_URL = "http://host.docker.internal:2322"
 
 [analytics]
 enabled = true

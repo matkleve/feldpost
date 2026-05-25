@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Headless facade for **forward**, **reverse**, and **multi-hit search** geocoding. All traffic goes through the Supabase **`geocode`** Edge Function (Nominatim proxy) so the browser never calls Nominatim directly. The service never throws for normal failures: it returns **`null`** or **`[]`**.
+Headless facade for **forward**, **reverse**, and **multi-hit search** geocoding. All traffic goes through the Supabase **`geocode`** Edge Function so the browser never calls geocoders directly. The service never throws for normal failures: it returns **`null`** or **`[]`**.
 
 ## What It Looks Like
 
@@ -32,14 +32,15 @@ GeocodingService (facade)
 |- geocoding.types.ts (public DTOs)
 |- geocoding.helpers.ts (parse/mapping)
 `- adapters/ (reserved)
-Supabase Edge Function `geocode` (proxy + rate limit)
+Supabase Edge Function `geocode` (proxy; Nominatim rate limit on Nominatim paths only)
 ```
 
 ## Data
 
 | Source | Layer | Notes |
 | --- | --- | --- |
-| Nominatim (via Edge) | External | Reverse/forward/search JSON subsets |
+| Nominatim (via Edge) | External | Reverse and structured-search JSON subsets |
+| Photon (via Edge, local dev) | External | Forward/search when `GEOCODER_FORWARD_URL` is set |
 | UploadLocationConfigService | Config | Cache TTL, search default limit |
 
 ## State
@@ -75,6 +76,13 @@ Supabase Edge Function `geocode` (proxy + rate limit)
 ### Supabase / Edge
 
 - Edge Function: `geocode` with `action`: `reverse` | `forward` (search uses forward-shaped body with limit/viewbox/countrycodes).
+- **Upstream routing** (`supabase/functions/geocode/index.ts`):
+  - `forward` (and search-shaped forward bodies): **Photon** `/api` when `GEOCODER_FORWARD_URL` is set (local dev); otherwise **Nominatim** `/search` (production default).
+  - `reverse`: always **Nominatim** `/reverse`.
+  - `structured-search`: always **Nominatim** `/search?street=&city=`.
+- **Viewbox:** clients send Nominatim `viewbox=left,top,right,bottom`; the edge adapter converts to Photon `bbox=minLon,minLat,maxLon,maxLat` (`photon-to-nominatim.ts`, unit-tested).
+- **Response shape:** Photon GeoJSON is mapped to Nominatim search JSON arrays before returning to Angular (`NominatimSearchResponse` subset).
+- **Local Photon:** `docker-compose.photon.yml`, curl gate, and secrets documented in [`supabase/AGENTS.md`](../../../../supabase/AGENTS.md#local-photon-forwardsearch-only). Do not set `GEOCODER_FORWARD_URL` on hosted Supabase.
 
 ### Forbidden
 
