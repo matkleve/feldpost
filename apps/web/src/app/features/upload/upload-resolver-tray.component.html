@@ -1,0 +1,73 @@
+<!-- Stable state: hidden — no batch activity and no open disambiguation groups -->
+<!-- @see docs/specs/component/upload/upload-resolver-tray.md -->
+@if (trayMode() === 'passive') {
+  <p class="upload-resolver-tray__passive" [attr.data-state]="'passive'">
+    {{ passiveStatusLine() }}
+  </p>
+}
+
+<!-- Stable state: active — one or more groups with resolutionGateOpen -->
+@if (trayMode() === 'active' && activeGroup(); as group) {
+  <section class="upload-resolver-tray" [attr.data-state]="'active'">
+    <header class="upload-resolver-tray__header">
+      <span class="upload-resolver-tray__alert material-icons" aria-hidden="true">error_outline</span>
+      <h2 class="upload-resolver-tray__title">
+        {{ t('upload.resolver.title', 'Which address is correct?') }}
+      </h2>
+      @if (pendingGroupCount() > 1) {
+        <label class="upload-resolver-tray__group-picker">
+          <span class="sr-only">{{ t('upload.resolver.groupSelect', 'Address group') }}</span>
+          <select
+            class="upload-resolver-tray__group-select"
+            [value]="group.id"
+            (change)="onGroupSelect($any($event.target).value)"
+          >
+            @for (g of disambiguationGroups(); track g.id) {
+              @if (g.resolutionGateOpen) {
+                <option [value]="g.id">
+                  {{ g.folderDisplayPath || g.titleAddress }}
+                </option>
+              }
+            }
+          </select>
+        </label>
+      }
+    </header>
+
+    <p class="upload-resolver-tray__query">{{ group.titleAddress }}</p>
+    @if (group.folderDisplayPath) {
+      <p class="upload-resolver-tray__folder">{{ group.folderDisplayPath }}</p>
+    }
+
+    <ul class="upload-resolver-tray__options" role="listbox" [attr.aria-label]="t('upload.resolver.options', 'Address options')">
+      @for (row of groupedCandidates(); track row.label) {
+        @for (candidate of row.candidates; track candidate.id) {
+          <li role="presentation">
+            <button
+              type="button"
+              class="upload-resolver-tray__option"
+              role="option"
+              (click)="onSelectCandidate(candidate.id)"
+              (mouseenter)="onPreviewCandidate(candidate)"
+              (focus)="onPreviewCandidate(candidate)"
+            >
+              <span class="upload-resolver-tray__option-label">{{ row.label }}</span>
+              @if (candidate.postcode) {
+                <span class="upload-resolver-tray__option-meta">{{ candidate.postcode }}</span>
+              }
+            </button>
+          </li>
+        }
+      }
+    </ul>
+
+    <p class="upload-resolver-tray__files">
+      {{ group.jobIds.length }}
+      {{ t('upload.resolver.filesAffected', 'files need this address') }}
+    </p>
+
+    <button type="button" class="upload-resolver-tray__defer" (click)="onDefer()">
+      {{ t('upload.resolver.defer', 'Decide later') }}
+    </button>
+  </section>
+}

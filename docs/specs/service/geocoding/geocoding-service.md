@@ -84,9 +84,15 @@ Supabase Edge Function `geocode` (proxy; Nominatim rate limit on Nominatim paths
 - **Response shape:** Photon GeoJSON is mapped to Nominatim search JSON arrays before returning to Angular (`NominatimSearchResponse` subset).
 - **Local Photon:** `docker-compose.photon.yml`, curl gate, and secrets documented in [`supabase/AGENTS.md`](../../../../supabase/AGENTS.md#local-photon-forwardsearch-only). Do not set `GEOCODER_FORWARD_URL` on hosted Supabase.
 
+### Upload disambiguation
+
+- Pre-upload address choice uses **`search()`** (multi-hit) via [`upload-location-resolution.md`](../media-upload-service/upload-location-resolution.md).
+- **`forward()`** remains single-best-effort (post-save enrichment fallback only when coords were not resolved pre-upload).
+
 ### Forbidden
 
 - Components must not call Nominatim or the Edge Function directly; use `GeocodingService` only.
+- Upload disambiguation paths must not use `forward()` for multi-hit classification.
 
 ## Acceptance Criteria
 

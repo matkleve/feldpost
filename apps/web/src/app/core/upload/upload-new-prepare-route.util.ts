@@ -69,9 +69,6 @@ export async function prepareNewJobForUpload(
   const prepared = await prepareExifAndFile(deps, jobId, job);
   job = prepared.job;
 
-  const deduped = await hashAndCheckDedup(deps, jobId, job, prepared.parsedExif, ctx);
-  if (deduped) return null;
-
   return { job: deps.jobState.findJob(jobId)!, parsedExif: prepared.parsedExif };
 }
 
@@ -145,12 +142,35 @@ export async function routePreparedNewJob(
       locationSourceUsed: mergedCandidate.source,
       issueKind: undefined,
     });
+    const routedJob = deps.jobState.findJob(jobId)!;
+    const placementCoords = routedJob.coords ?? routedJob.titleAddressCoords;
+    if (!placementCoords) {
+      if (routedJob.locationRequirementMode === 'optional') {
+        await uploadWithoutAutoLocation(deps, jobId, routedJob, parsedExif, ctx, runUploadPhase);
+        return;
+      }
+      deps.jobState.setPhase(jobId, 'missing_data');
+      deps.jobState.updateJob(jobId, {
+        locationSourceUsed: 'none',
+        issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
+        statusLabel: isDocument ? 'Choose location or project' : 'Missing location',
+      });
+      deps.queue.markDone(jobId);
+      ctx.emitMissingData({
+        jobId,
+        batchId: routedJob.batchId,
+        fileName: routedJob.file.name,
+        reason: 'no_gps_no_address',
+      });
+      ctx.emitBatchProgress(routedJob.batchId);
+      ctx.drainQueue();
+      return;
+    }
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) return;
-    deps.jobState.updateJob(jobId, { coords: undefined });
     await runUploadPhase(
       jobId,
-      undefined,
+      placementCoords,
       stripPlacementCoordsFromParsedExif(parsedExif),
       ctx,
     );
@@ -222,8 +242,8 @@ async function prepareExifAndFile(
   return { job, parsedExif };
 }
 
-async function hashAndCheckDedup(
-  deps: NewPrepareRouteDeps,
+export async function hashAndCheckDedupForNewJob(
+  deps: Pick<NewPrepareRouteDeps, 'jobState' | 'queue' | 'uploadService'>,
   jobId: string,
   job: UploadJob,
   parsedExif: ParsedExif,

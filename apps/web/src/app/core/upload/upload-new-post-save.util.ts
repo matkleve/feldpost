@@ -84,6 +84,22 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
   const exifCoords = exifMetadataCoords(updatedJob);
 
   if (textPlacement && titleAddress) {
+    const preResolvedCoords = updatedJob.coords ?? updatedJob.titleAddressCoords;
+    if (preResolvedCoords) {
+      setPhase('complete');
+      markDone();
+      emitCompletion({
+        jobId,
+        finalJob: { ...updatedJob, coords: preResolvedCoords },
+        setLocalUrl,
+        persistThumbnail,
+        emitImageUploaded,
+        emitBatchProgress,
+        drainQueue,
+      });
+      return;
+    }
+
     setPhase('resolving_coordinates');
     const enrichResult = await enrichWithForwardGeocode(updatedJob.mediaId!, titleAddress);
     if (enrichResult) {

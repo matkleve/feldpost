@@ -44,6 +44,7 @@ const ACTIVE_PHASES: ReadonlySet<UploadPhase> = new Set([
   'hashing',
   'dedup_check',
   'extracting_title',
+  'resolving_location',
   'conflict_check',
   'uploading',
   'saving_record',

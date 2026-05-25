@@ -22,6 +22,7 @@ import { selectQueuedJobsForStart } from './upload-manager-queue.util';
 export interface DrainUploadManagerQueueDeps {
   snapshotJobs: () => ReadonlyArray<UploadJob>;
   availableSlots: () => number;
+  isJobBlocked?: (job: UploadJob) => boolean;
   ensureAbortController: (jobId: string) => void;
   markRunning: (jobId: string) => void;
   runPipeline: (jobId: string) => void;
@@ -41,7 +42,7 @@ export function drainUploadManagerQueue(deps: DrainUploadManagerQueueDeps): void
     return;
   }
 
-  const toStart = selectQueuedJobsForStart(jobs, slotsAvailable);
+  const toStart = selectQueuedJobsForStart(jobs, slotsAvailable, deps.isJobBlocked);
   console.log(
     '[upload-manager] drainQueue: starting',
     toStart.length,

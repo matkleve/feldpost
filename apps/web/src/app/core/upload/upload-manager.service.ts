@@ -74,6 +74,7 @@ import {
   type UploadManagerSubmitDeps,
 } from './upload-manager-submit.util';
 import { UploadLocationConfigService } from './upload-location-config.service';
+import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
 import { UploadNewPipelineService } from './upload-new-pipeline.service';
@@ -143,6 +144,7 @@ export class UploadManagerService {
   private readonly mediaPreview = inject(MediaPreviewService);
   private readonly projects = inject(ProjectsService);
   private readonly locationConfig = inject(UploadLocationConfigService);
+  private readonly locationResolution = inject(UploadLocationResolutionService);
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
@@ -373,7 +375,17 @@ export class UploadManagerService {
    */
   selectAddressCandidate(jobId: string, candidate: UploadAddressCandidate): void {
     const job = this.jobState.findJob(jobId);
-    if (!job || job.phase !== 'missing_data') {
+    if (!job) {
+      return;
+    }
+
+    if (job.phase === 'awaiting_disambiguation' && job.disambiguationGroupId) {
+      this.locationResolution.applyCandidateToGroup(job.disambiguationGroupId, candidate.id);
+      this.drainQueue();
+      return;
+    }
+
+    if (job.phase !== 'missing_data') {
       return;
     }
 
@@ -539,6 +551,7 @@ export class UploadManagerService {
     drainUploadManagerQueue({
       snapshotJobs: () => this.jobState.snapshot(),
       availableSlots: () => this.queue.availableSlots,
+      isJobBlocked: (job) => this.locationResolution.isJobBlockedByGate(job),
       ensureAbortController: (jobId) => {
         this.ensureAbortController(jobId);
       },

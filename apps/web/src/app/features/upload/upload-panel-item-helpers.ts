@@ -15,6 +15,8 @@ const STATUS_TEXT_MAP: Record<string, [string, string]> = {
   parsing_exif: ['upload.status.parsingExif', 'Reading metadata...'],
   converting_format: ['upload.status.convertingFormat', 'Converting format...'],
   extracting_title: ['upload.status.extractingTitle', 'Checking filename...'],
+  resolving_location: ['upload.status.resolvingLocation', 'Resolving location...'],
+  awaiting_disambiguation: ['upload.status.chooseAddress', 'Choose address'],
   hashing: ['upload.status.hashing', 'Computing hash...'],
   dedup_check: ['upload.status.dedupCheck', 'Checking duplicates...'],
   conflict_check: ['upload.status.conflictCheck', 'Checking conflicts...'],

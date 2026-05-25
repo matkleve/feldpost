@@ -1,6 +1,8 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type { UploadLocationRequirementMode } from '../../core/upload/upload-manager.types';
+import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelStateService } from './upload-panel-state.service';
@@ -24,6 +26,8 @@ export class UploadPanelSignalsService {
   private readonly uploadManager = inject(UploadManagerService);
   private readonly state = inject(UploadPanelStateService);
   private readonly workspaceView = inject(WorkspaceViewService);
+  private readonly locationResolution = inject(UploadLocationResolutionService);
+  private readonly i18n = inject(I18nService);
 
   // ── Manager state ──────────────────────────────────────────────────────────
 
@@ -57,6 +61,35 @@ export class UploadPanelSignalsService {
 
   readonly effectiveLane = computed<UploadLane>(() => this._selectedLane());
   readonly laneJobs = computed(() => this.state.laneBuckets()[this._selectedLane()]);
+
+  /** Merges batch progress + pending disambiguation count for map tray passive line (G12). */
+  readonly passiveStatusLine = computed(() => {
+    const t = this.i18n.t.bind(this.i18n);
+    const pendingGroups = this.locationResolution.pendingGroupCount();
+    if (pendingGroups > 0) {
+      return pendingGroups === 1
+        ? t('upload.resolver.passive.oneAddress', '1 address needs your choice')
+        : t('upload.resolver.passive.addresses', '{count} addresses need your choice').replace(
+            '{count}',
+            String(pendingGroups),
+          );
+    }
+
+    const batch = this.activeBatch();
+    if (!batch || batch.status === 'complete' || batch.status === 'cancelled') {
+      return null;
+    }
+
+    const progress = batch.overallProgress ?? 0;
+    if (batch.status === 'scanning') {
+      return this.scanningLabel() || t('upload.resolver.passive.preparing', 'Preparing upload…');
+    }
+
+    return t('upload.resolver.passive.uploading', 'Uploading… {percent}%').replace(
+      '{percent}',
+      String(progress),
+    );
+  });
 
   private readonly activeProjectId = computed<string | undefined>(() => {
     const selected = this.workspaceView.selectedProjectIds();

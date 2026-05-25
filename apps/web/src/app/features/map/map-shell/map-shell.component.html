@@ -39,8 +39,9 @@
     </div>
   </div>
 
-  <!-- Upload button — top-right of map zone, visually over map -->
-  <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
+  <!-- Upload shell — fixed width; button, panel, resolver tray (OD-6) -->
+  <div class="upload-shell" [class.upload-shell--open]="uploadPanelOpen()">
+    <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
     @if (collapsedPreviewItems().length > 0) {
       <div
         class="upload-btn-zone__preview-list"
@@ -107,6 +108,12 @@
         (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       />
     </div>
+    </div>
+
+    <app-upload-resolver-tray
+      [panelOpen]="uploadPanelOpen()"
+      (previewLocation)="onUploadLocationPreviewRequested($event)"
+    />
   </div>
   <!-- Leaflet target -->
   <div

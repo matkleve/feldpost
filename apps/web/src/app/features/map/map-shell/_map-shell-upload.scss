@@ -1,13 +1,22 @@
 @use '../../../../styles/frosted-chrome';
 
-// ── Upload button zone — fixed top-right, expands into panel ─────────────────
-// @see docs/migration/phase-8-global-scss-elimination.md (map-shell partial split)
+// ── Upload shell — width owner for button, panel, resolver tray (OD-6) ───────
+// @see docs/specs/component/upload/upload-shell.md
 
-.upload-btn-zone {
+.upload-shell {
   position: absolute;
   top: var(--spacing-3);
   right: var(--spacing-3);
   z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-2);
+  width: min(420px, calc(100vw - var(--spacing-6)));
+  min-width: 0;
+}
+
+.upload-btn-zone {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -163,7 +172,7 @@
 .upload-expand {
   display: none;
   flex-direction: column;
-  width: min(420px, calc(100vw - var(--spacing-6)));
+  width: 100%;
   max-height: min(82vh, 48rem);
   overflow: visible;
   border-radius: var(--container-radius-panel);

@@ -24,6 +24,8 @@ export const PHASE_TO_STATUS_CLASS: Record<UploadPhase, string> = {
   hashing: 'parsing',
   dedup_check: 'parsing',
   extracting_title: 'parsing',
+  resolving_location: 'parsing',
+  awaiting_disambiguation: 'awaiting_placement',
   conflict_check: 'parsing',
   awaiting_conflict_resolution: 'issue',
   uploading: 'uploading',
@@ -52,6 +54,10 @@ export function getLaneForJob(job: UploadJob): UploadLane {
 }
 
 export function getIssueKind(job: UploadJob): UploadIssueKind {
+  if (job.phase === 'awaiting_disambiguation') {
+    return null;
+  }
+
   if (job.issueKind) {
     return job.issueKind;
   }

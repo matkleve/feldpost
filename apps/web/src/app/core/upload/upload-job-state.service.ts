@@ -44,6 +44,7 @@ const ACTIVE_PHASES: ReadonlySet<UploadPhase> = new Set([
   'hashing',
   'dedup_check',
   'extracting_title',
+  'resolving_location',
   'conflict_check',
   'uploading',
   'saving_record',
@@ -70,6 +71,10 @@ function phaseLabel(phase: UploadPhase): string {
       return 'Already uploaded';
     case 'extracting_title':
       return 'Checking filename…';
+    case 'resolving_location':
+      return 'Resolving location…';
+    case 'awaiting_disambiguation':
+      return 'Choose address';
     case 'conflict_check':
       return 'Checking conflicts…';
     case 'awaiting_conflict_resolution':

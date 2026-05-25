@@ -35,6 +35,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UploadPanelComponent } from '../../upload/upload-panel.component';
+import { UploadResolverTrayComponent } from '../../upload/upload-resolver-tray.component';
 import type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
@@ -204,6 +205,7 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
   selector: 'app-map-shell',
   imports: [
     UploadPanelComponent,
+    UploadResolverTrayComponent,
     SearchBarComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,

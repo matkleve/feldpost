@@ -26,15 +26,33 @@ Normative FSM and persistence matrix for **upload location routing**: panel mode
 | No project filter active | Toggle updates global signal only; no map entry required |
 | Clear project filter | Overrides map is **not** cleared |
 
+## Pre-upload resolution (resolver tray MVP)
+
+Normative order before dedup and upload bytes (OD-4):
+
+1. `extracting_title` — merge filename/folder text  
+2. `resolving_location` — `GeocodingService.search()` when high-confidence text and no EXIF placement  
+3. `awaiting_disambiguation` — multi-hit; Queue lane, “Choose address” (OD-2); group-level gate (OD-3)  
+4. `hashing` / `dedup_check` — only when job not group-blocked  
+5. `conflict_check` → `uploading` when coords resolved  
+
+**Gate:** A job may enter `uploading` only if it has no disambiguation group, or its group has `resolutionGateOpen === false`. Other groups in the same batch may upload in parallel.
+
+**Post-upload:** Tray does not reopen for `complete` jobs (OD-7). Post-save forward is skipped when pre-upload coords exist on the job.
+
 ## Job routing FSM (auto location ON)
 
 ```mermaid
 stateDiagram-v2
   [*] --> extracting_title
-  extracting_title --> text_upload: high_confidence file or folder text
+  extracting_title --> resolving_location: high_confidence text no EXIF
+  resolving_location --> awaiting_disambiguation: ambiguous search
+  resolving_location --> dedup_path: auto or failed search
   extracting_title --> exif_upload: EXIF coords no text
   extracting_title --> missing_data: no text no EXIF
   extracting_title --> optional_upload: mode optional
+  awaiting_disambiguation --> dedup_path: user picks candidate
+  dedup_path --> conflict_check
   text_upload --> conflict_check
   exif_upload --> conflict_check
   optional_upload --> complete_path

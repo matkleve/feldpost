@@ -35,7 +35,11 @@ function createPipelineContext(): PipelineContext {
 
 describe('routePreparedNewJob', () => {
   it('uses inherited folder title address when filename parse is not high confidence', async () => {
-    let job = createJob({ titleAddress: 'Denisgasse 12, Wien', titleAddressSource: 'folder' });
+    let job = createJob({
+      titleAddress: 'Denisgasse 12, Wien',
+      titleAddressSource: 'folder',
+      titleAddressCoords: { lat: 48.2082, lng: 16.3738 },
+    });
 
     const deps = createRouteDeps({
       getJob: () => job,
@@ -86,7 +90,11 @@ describe('routePreparedNewJob source precedence (positive branches)', () => {
   });
 
   it('prefers high-confidence file address over inherited folder hint', async () => {
-    let job = createJob({ titleAddress: 'Denisgasse 12, Wien', titleAddressSource: 'folder' });
+    let job = createJob({
+      titleAddress: 'Denisgasse 12, Wien',
+      titleAddressSource: 'folder',
+      titleAddressCoords: { lat: 48.2082, lng: 16.3738 },
+    });
     const deps = createRouteDeps({
       getJob: () => job,
       setJob: (next) => {
@@ -251,7 +259,7 @@ function expectFolderFallbackResult(
   expect(runUploadPhase).toHaveBeenCalledOnce();
   expect(runUploadPhase).toHaveBeenCalledWith(
     job.id,
-    undefined,
+    job.titleAddressCoords,
     expect.objectContaining({ coords: undefined }),
     expect.anything(),
   );

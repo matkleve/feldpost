@@ -39,11 +39,13 @@ import { UploadEnrichmentService } from './upload-enrichment.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import type { PipelineContext } from './upload-manager.types';
+import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import {
   prepareNewJobForUpload,
   resumeIfAlreadyRoutedNewJob,
   routePreparedNewJob,
 } from './upload-new-prepare-route.util';
+import { runPreUploadLocationResolve } from './upload-new-pre-resolve.util';
 import { runNewUploadPhase } from './upload-new-run-upload-phase.util';
 import { UploadQueueService } from './upload-queue.service';
 import { UploadService } from './upload.service';
@@ -64,6 +66,7 @@ export class UploadNewPipelineService {
   private readonly thumbnailPersistence = inject(MediaThumbnailPersistenceService);
   private readonly previewGeneration = inject(MediaPreviewGenerationService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
+  private readonly locationResolution = inject(UploadLocationResolutionService);
   private readonly supabase = inject(SupabaseService);
 
   /** Run the new-upload pipeline for a single job. */
@@ -78,6 +81,19 @@ export class UploadNewPipelineService {
 
     const prepared = await prepareNewJobForUpload(this.prepareRouteDeps, jobId, ctx);
     if (!prepared) return;
+
+    const preResolve = await runPreUploadLocationResolve(
+      {
+        ...this.prepareRouteDeps,
+        locationResolution: this.locationResolution,
+      },
+      jobId,
+      prepared.parsedExif,
+      ctx,
+    );
+    if (preResolve === 'held' || preResolve === 'dedup_skip') {
+      return;
+    }
 
     await routePreparedNewJob(
       this.prepareRouteDeps,
