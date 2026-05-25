@@ -540,6 +540,11 @@ export class MediaDownloadService {
     }
 
     if (state === 'no-media') {
+      // Cached URL wins over stale no-media store (revisit / race after sign).
+      if (cachedUrl) {
+        return { state: 'loaded', resolvedUrl: cachedUrl, icon };
+      }
+
       return { state: 'no-media', icon, resolvedUrl: cachedUrl };
     }
 

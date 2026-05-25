@@ -112,6 +112,21 @@ describe('MediaDownloadService file preview delivery', () => {
     expect(request?.storagePath).toBe('org/u/photo.jpg');
   });
 
+  it('returns loaded when store is no-media but a cached preview URL exists', async () => {
+    const service = configureMediaDownloadService();
+
+    service.registerPreviewPaths('media-stale', 'org/u/photo.jpg', 'org/u/photo_thumb.jpg');
+    service.getItemState('media-stale', 'small').set('no-media');
+    vi.spyOn(service, 'getCachedUrl').mockReturnValue('https://signed.example/photo_thumb.jpg');
+
+    const delivery = await firstValueFrom(
+      service.getState('media-stale', 10).pipe(take(1)),
+    );
+
+    expect(delivery.state).toBe('loaded');
+    expect(delivery.resolvedUrl).toBe('https://signed.example/photo_thumb.jpg');
+  });
+
   it('returns icon-only when preview_generation_status is failed', async () => {
     const service = configureMediaDownloadService();
 

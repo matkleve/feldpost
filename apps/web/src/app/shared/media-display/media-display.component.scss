@@ -26,7 +26,7 @@
 }
 
 // Viewport fills media-display host; layers stack inside (state-driven opacity).
-// @see docs/specs/component/media/media-display.md#state-rendering-matrix
+// @see docs/specs/component/media/media-display.rendering-matrix.supplement.md#fsm-layer-opacity-matrix
 .media-display__viewport {
   position: relative;
   overflow: hidden;
@@ -34,14 +34,12 @@
   block-size: 100%;
 }
 
-// All layers: absolute, fill viewport, hidden by default (opacity-only, per spec).
-// @see docs/specs/component/media/media-display.md#state-rendering-matrix
+// All layers: absolute, fill viewport; opacity is set only by FSM matrix blocks below.
+// @see docs/specs/component/media/media-display.rendering-matrix.supplement.md#fsm-layer-opacity-matrix
 .media-display__layer {
   position: absolute;
   inset: 0;
-  opacity: 0;
   pointer-events: none;
-  // default fade-out timing
   transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
 }
 
@@ -115,55 +113,127 @@
 }
 
 // -------------------------------------------------------------------
-// State-driven opacity — exactly per spec choreography table.
-// @see docs/specs/component/media/media-display.md#transition-choreography-table-required-before-css
+// FSM layer opacity matrix — every state sets opacity for every layer.
+// No layer visibility outside this table.
+// @see docs/specs/component/media/media-display.rendering-matrix.supplement.md#fsm-layer-opacity-matrix
 // -------------------------------------------------------------------
 
-// loading-surface-visible + ratio-known-contain: pulse stays until content-fade-in.
-// Slot aspect-ratio transition runs in parallel on media-item__slot (parent).
-.media-display__viewport[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
-.media-display__viewport[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
-  opacity: 1;
-  animation: media-display-loading-pulse 1.2s ease-in-out infinite;
+@mixin media-display-fsm-layers(
+  $loading,
+  $staged,
+  $content,
+  $icon,
+  $error,
+  $no-media
+) {
+  .media-display__layer--loading-surface {
+    opacity: $loading;
+  }
+
+  .media-display__layer--staged-content {
+    opacity: $staged;
+  }
+
+  .media-display__layer--content {
+    opacity: $content;
+  }
+
+  .media-display__layer--icon-only {
+    opacity: $icon;
+  }
+
+  .media-display__layer--error {
+    opacity: $error;
+  }
+
+  .media-display__layer--no-media {
+    opacity: $no-media;
+  }
 }
 
-// media-ready: staged layer 0→1.
-// content-fade-in, content-visible: staged layer stays 1 until content-visible clears it.
-.media-display__viewport[data-state='media-ready'] .media-display__layer--staged-content,
-.media-display__viewport[data-state='content-fade-in'] .media-display__layer--staged-content,
-.media-display__viewport[data-state='content-visible'] .media-display__layer--staged-content {
-  opacity: 1;
-  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
+// idle
+.media-display__viewport[data-state='idle'] {
+  @include media-display-fsm-layers(0, 0, 0, 0, 0, 0);
 }
 
-// content-fade-in, content-visible: content layer 0→1, 60ms delay.
-.media-display__viewport[data-state='content-fade-in'] .media-display__layer--content,
-.media-display__viewport[data-state='content-visible'] .media-display__layer--content {
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+// loading-surface-visible
+.media-display__viewport[data-state='loading-surface-visible'] {
+  @include media-display-fsm-layers(1, 0, 0, 0, 0, 0);
+
+  .media-display__layer--loading-surface {
+    animation: media-display-loading-pulse 1.2s ease-in-out infinite;
+  }
 }
 
-// content-visible: staged layer 1→0.
-.media-display__viewport[data-state='content-visible'] .media-display__layer--staged-content {
-  opacity: 0;
-  transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
+// ratio-known-contain
+.media-display__viewport[data-state='ratio-known-contain'] {
+  @include media-display-fsm-layers(1, 0, 0, 0, 0, 0);
+
+  .media-display__layer--loading-surface {
+    animation: media-display-loading-pulse 1.2s ease-in-out infinite;
+  }
 }
 
-// icon-only: icon layer 0→1, 60ms delay.
-.media-display__viewport[data-state='icon-only'] .media-display__layer--icon-only {
-  opacity: 1;
-  transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+// media-ready
+.media-display__viewport[data-state='media-ready'] {
+  @include media-display-fsm-layers(0, 1, 0, 0, 0, 0);
+
+  .media-display__layer--staged-content {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
+  }
 }
 
-// error: error layer 0→1, 60ms delay.
-.media-display__viewport[data-state='error'] .media-display__layer--error {
-  opacity: 1;
-  transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+// content-fade-in
+.media-display__viewport[data-state='content-fade-in'] {
+  @include media-display-fsm-layers(0, 1, 1, 0, 0, 0);
+
+  .media-display__layer--staged-content,
+  .media-display__layer--content {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+
+  .media-display__layer--content {
+    pointer-events: auto;
+  }
 }
 
-// no-media: no-media layer 0→1, 60ms delay.
-.media-display__viewport[data-state='no-media'] .media-display__layer--no-media {
-  opacity: 1;
-  transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+// content-visible
+.media-display__viewport[data-state='content-visible'] {
+  @include media-display-fsm-layers(0, 0, 1, 0, 0, 0);
+
+  .media-display__layer--content {
+    pointer-events: auto;
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+
+  .media-display__layer--staged-content {
+    transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+
+// icon-only
+.media-display__viewport[data-state='icon-only'] {
+  @include media-display-fsm-layers(0, 0, 0, 1, 0, 0);
+
+  .media-display__layer--icon-only {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+}
+
+// error
+.media-display__viewport[data-state='error'] {
+  @include media-display-fsm-layers(0, 0, 0, 0, 1, 0);
+
+  .media-display__layer--error {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+}
+
+// no-media
+.media-display__viewport[data-state='no-media'] {
+  @include media-display-fsm-layers(0, 0, 0, 0, 0, 1);
+
+  .media-display__layer--no-media {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
 }

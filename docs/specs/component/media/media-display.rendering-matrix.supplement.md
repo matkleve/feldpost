@@ -2,6 +2,26 @@
 
 > Parent: [`media-display.md`](./media-display.md)
 
+## FSM layer opacity matrix
+
+Every `data-state` on `.media-display__viewport` MUST set `opacity` for **all six** layers. No layer may rely on a default hidden opacity outside this table.
+
+Columns: `L` loading-surface, `S` staged-content, `C` content, `I` icon-only, `E` error, `N` no-media (`1` = visible, `0` = hidden).
+
+| State                     | L   | S   | C   | I   | E   | N   |
+| ------------------------- | --- | --- | --- | --- | --- | --- |
+| `idle`                    | 0   | 0   | 0   | 0   | 0   | 0   |
+| `loading-surface-visible` | 1   | 0   | 0   | 0   | 0   | 0   |
+| `ratio-known-contain`     | 1   | 0   | 0   | 0   | 0   | 0   |
+| `media-ready`             | 0   | 1   | 0   | 0   | 0   | 0   |
+| `content-fade-in`         | 0   | 1   | 1   | 0   | 0   | 0   |
+| `content-visible`         | 0   | 0   | 1   | 0   | 0   | 0   |
+| `icon-only`               | 0   | 0   | 0   | 1   | 0   | 0   |
+| `error`                   | 0   | 0   | 0   | 0   | 1   | 0   |
+| `no-media`                | 0   | 0   | 0   | 0   | 0   | 1   |
+
+Implementation: `apps/web/src/app/shared/media-display/media-display.component.scss` (`media-display-fsm-layers` mixin).
+
 ## State Rendering Matrix
 
 | State                     | Class        | Primary HTML layer(s)                    | Required CSS selector behavior                                                            | Transition entry/exit notes                           |

@@ -88,9 +88,15 @@ export class MediaDisplayComponent implements AfterViewInit {
   private readonly gridSlotAspectSettled = signal(false);
 
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
-  readonly showSharpContent = computed(
-    () => !!this.resolvedUrl() && this.canRevealGridIntrinsicContent(),
-  );
+  readonly showSharpContent = computed(() => {
+    const state = this.state();
+    const contentLayerVisible = state === 'content-fade-in' || state === 'content-visible';
+    return (
+      contentLayerVisible &&
+      !!this.resolvedUrl() &&
+      this.canRevealGridIntrinsicContent()
+    );
+  });
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
 
   constructor() {
@@ -108,8 +114,23 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     effect(() => {
       if (this.isGridIntrinsicSlot() && this.skipIntrinsicRatioTransition()) {
+        // Warm revisit geometry gate: parent slot already sized when skipIntrinsicRatioTransition is set.
         this.gridSlotAspectSettled.set(true);
       }
+    });
+
+    // Completes reveal when URL + slot gate become ready after an earlier delivery pass stopped at media-ready.
+    effect(() => {
+      if (!this.isGridIntrinsicSlot()) {
+        return;
+      }
+
+      this.state();
+      this.gridSlotAspectSettled();
+      this.resolvedUrl();
+      this.skipIntrinsicRatioTransition();
+
+      untracked(() => this.attemptCompleteGridReveal());
     });
 
     effect((onCleanup) => {
@@ -135,7 +156,9 @@ export class MediaDisplayComponent implements AfterViewInit {
         this.cancelRatioProbe();
         this.lastHandoffKey = handoffKey;
 
-        this.gridSlotAspectSettled.set(false);
+        if (!this.skipIntrinsicRatioTransition()) {
+          this.gridSlotAspectSettled.set(false);
+        }
 
         const sessionRatio = this.aspectRatioCache.get(id);
         if (sessionRatio != null && sessionRatio > 0) {
@@ -301,6 +324,14 @@ export class MediaDisplayComponent implements AfterViewInit {
       case 'loaded': {
         let current = this.state();
 
+        if (
+          (current === 'no-media' || current === 'error' || current === 'icon-only') &&
+          delivery.resolvedUrl
+        ) {
+          this.goTo('loading-surface-visible');
+          current = 'loading-surface-visible';
+        }
+
         if (current === 'content-fade-in' || current === 'content-visible') {
           if (
             this.isGridIntrinsicSlot() &&
@@ -358,10 +389,7 @@ export class MediaDisplayComponent implements AfterViewInit {
           this.goTo('media-ready');
         }
 
-        if (this.state() === 'media-ready') {
-          this.goTo('content-fade-in');
-        }
-
+        this.attemptCompleteGridReveal();
         return;
       }
 
@@ -380,6 +408,11 @@ export class MediaDisplayComponent implements AfterViewInit {
       }
 
       case 'no-media': {
+        if (delivery.resolvedUrl) {
+          this.handleDelivery({ ...delivery, state: 'loaded' });
+          return;
+        }
+
         this.goTo('no-media');
         return;
       }
@@ -454,7 +487,11 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.triggerRatioTransition(ratio);
   }
 
-  /** After registerPreviewPaths: restore cached URL + session ratio without gray stall. */
+  /**
+   * Seeds cached thumb URL and slot ratio after registerPreviewPaths, then runs legal FSM reveal.
+   * Does not call goTo directly — syncGridIntrinsicRevealAfterUrlUpdate advances via delivery path.
+   * @see docs/specs/component/media/media-display.md#intrinsic-grid-warm-revisit
+   */
   private tryWarmIntrinsicGridRevisit(mediaId: string): void {
     const sessionRatio = this.aspectRatioCache.get(mediaId);
     const tier = CONTEXT_DEFAULT_TIER[this.downloadContext()];
@@ -477,8 +514,8 @@ export class MediaDisplayComponent implements AfterViewInit {
       this.commitAspectRatioToSlot(sessionRatio);
     }
 
-    this.gridSlotAspectSettled.set(true);
-    this.goTo('content-visible');
+    // URL alone does not reveal: content layer opacity requires content-fade-in | content-visible.
+    this.syncGridIntrinsicRevealAfterUrlUpdate();
   }
 
   private shouldSkipIntrinsicRatioTransition(): boolean {
@@ -593,6 +630,38 @@ export class MediaDisplayComponent implements AfterViewInit {
    * Completes reveal when URL arrives after an earlier fallThrough stopped at media-ready
    * (session ratio known, signed URL still in flight).
    */
+  /**
+   * Finish reveal when URL is ready but an earlier delivery pass stopped before content-fade-in.
+   * Grid intrinsic: respects gridSlotAspectSettled; fill row: loading → media-ready → content-fade-in.
+   */
+  private attemptCompleteGridReveal(): void {
+    if (!this.resolvedUrl()) {
+      return;
+    }
+
+    const current = this.state();
+
+    if (this.isGridIntrinsicSlot()) {
+      if (this.tryRevealGridIntrinsicWhenReady(current)) {
+        return;
+      }
+
+      if (current === 'loading-surface-visible') {
+        this.syncGridIntrinsicRevealAfterUrlUpdate();
+      }
+
+      return;
+    }
+
+    if (current === 'loading-surface-visible') {
+      this.goTo('media-ready');
+    }
+
+    if (this.state() === 'media-ready') {
+      this.goTo('content-fade-in');
+    }
+  }
+
   private tryRevealGridIntrinsicWhenReady(current: MediaDisplayState): boolean {
     if (!this.isGridIntrinsicSlot() || !this.resolvedUrl()) {
       return false;
@@ -619,9 +688,8 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
-    if (this.skipIntrinsicRatioTransition()) {
-      this.gridSlotAspectSettled.set(true);
-    }
+    // TODO: dedupe with revealWithKnownRatio skip branch — both can set gridSlotAspectSettled
+    // from different delivery call paths; re-check for races if consolidating.
 
     const current = this.state();
     if (this.tryRevealGridIntrinsicWhenReady(current)) {
