@@ -62,6 +62,8 @@ import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { SettingsPaneService } from '../../../core/settings-pane/settings-pane.service';
+import { MapSessionCacheService } from '../../../core/map-session-cache/map-session-cache.service';
+import type { MapViewportMarkerRow } from '../../../core/map-session-cache/map-session-cache.types';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
@@ -257,6 +259,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly mapSessionCache = inject(MapSessionCacheService);
   private readonly state = inject(MapShellState);
   private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
   private readonly markerInteractionService = inject(MarkerInteractionService);
@@ -681,6 +684,8 @@ export class MapShellComponent implements OnDestroy {
    */
   private lastFetchedBounds: MapLatLngBounds | null = null;
   private lastFetchedZoom: number | null = null;
+  /** Last viewport RPC payload — persisted to session cache on destroy. */
+  private lastViewportRpcRows: ViewportMarkerRow[] | null = null;
 
   /** True while a zoom animation is in progress — suppresses moveend queries. */
   private zoomAnimating = false;
@@ -813,6 +818,7 @@ export class MapShellComponent implements OnDestroy {
     this.cleanupMarkerLayersAndCaches();
     this.cleanupUploadManagerSubscriptions();
     this.cleanupMapUiState();
+    this.persistMapSessionCache();
     this.destroyMapInstance();
   }
 
@@ -2213,6 +2219,10 @@ export class MapShellComponent implements OnDestroy {
           if (!this.map) {
             return;
           }
+          if (this.tryRestoreViewportFromSessionCache()) {
+            this.map.invalidateSize();
+            return;
+          }
           void this.queryViewportMarkers();
         }, 120);
       },
@@ -3228,6 +3238,66 @@ export class MapShellComponent implements OnDestroy {
     }
   }
 
+  private persistMapSessionCache(): void {
+    if (!this.map || !this.lastFetchedBounds || this.lastFetchedZoom === null || !this.lastViewportRpcRows) {
+      return;
+    }
+
+    const center = this.map.getCenter();
+    this.mapSessionCache.write({
+      centerLat: center.lat,
+      centerLng: center.lng,
+      zoom: this.map.getZoom() ?? this.lastFetchedZoom,
+      fetchSouth: this.lastFetchedBounds.getSouth(),
+      fetchWest: this.lastFetchedBounds.getWest(),
+      fetchNorth: this.lastFetchedBounds.getNorth(),
+      fetchEast: this.lastFetchedBounds.getEast(),
+      roundedZoom: this.lastFetchedZoom,
+      viewportRows: this.lastViewportRpcRows,
+      cachedAt: Date.now(),
+    });
+  }
+
+  private tryRestoreViewportFromSessionCache(): boolean {
+    const snapshot = this.mapSessionCache.read();
+    if (!snapshot || !this.map) {
+      return false;
+    }
+
+    this.map.setView([snapshot.centerLat, snapshot.centerLng], snapshot.zoom, { animate: false });
+    this.lastFetchedBounds = this.mapLeafletService.createBounds(
+      [snapshot.fetchSouth, snapshot.fetchWest],
+      [snapshot.fetchNorth, snapshot.fetchEast],
+    );
+    this.lastFetchedZoom = snapshot.roundedZoom;
+    this.lastViewportRpcRows = [...snapshot.viewportRows];
+
+    const rows = snapshot.viewportRows as ViewportMarkerRow[];
+    const incoming = this.buildIncomingViewportMarkers(rows);
+    const recyclableKeys = this.collectRecyclableMarkerKeys(incoming);
+    this.mapMarkerReconcileFacade.reconcileIncomingViewportMarkers(
+      incoming as Map<string, ReconcileIncomingRow>,
+      recyclableKeys,
+      this.getReconcileDependencies(),
+    );
+    this.mapMarkerReconcileFacade.removeRecyclableMarkers(
+      recyclableKeys,
+      this.getReconcileDependencies(),
+    );
+
+    this.pruneStaleSelectedMarkerKeys();
+
+    for (const state of this.uploadedPhotoMarkers.values()) {
+      state.optimistic = false;
+    }
+
+    this.maybeLoadThumbnails();
+    this.flushPendingZoomHighlight();
+    this.refreshActiveWorkspaceHoverLink();
+
+    return true;
+  }
+
   /**
    * Viewport-driven marker query.
    * Calls the `viewport_markers` RPC which returns server-side clusters
@@ -3262,6 +3332,8 @@ export class MapShellComponent implements OnDestroy {
       this.flushPendingZoomHighlight();
       return;
     }
+
+    this.lastViewportRpcRows = result.data;
 
     const incoming = this.buildIncomingViewportMarkers(result.data);
     const recyclableKeys = this.collectRecyclableMarkerKeys(incoming);

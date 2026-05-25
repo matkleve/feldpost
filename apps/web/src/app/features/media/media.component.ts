@@ -8,8 +8,6 @@
  */
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import type { OnDestroy } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { auditTime, merge } from 'rxjs';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { VStackComponent } from '../../shared/containers';
@@ -52,6 +50,9 @@ import type { ZoomToLocationEvent } from '../upload/upload-panel-row-handlers';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../core/filter/filter.service';
 import { MetadataService } from '../../core/metadata/metadata.service';
+import { MediaPageStateService } from '../../core/media-page-state/media-page-state.service';
+import { buildMediaGalleryQuerySignature } from '../../core/media-page-state/media-page-state.helpers';
+import type { MediaGalleryQueryInputs } from '../../core/media-page-state/media-page-state.types';
 import type { SortConfig, WorkspaceMedia } from '../../core/workspace-view/workspace-view.types';
 import {
   GroupingDropdownComponent,
@@ -110,12 +111,12 @@ export class MediaComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
   private readonly metadata = inject(MetadataService);
+  private readonly mediaPageState = inject(MediaPageStateService);
 
   readonly loading = signal(false);
   readonly initialLoadSettled = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly rawWorkspaceImages = signal<WorkspaceMedia[]>([]);
-  readonly uploadRefreshTick = signal(0);
   readonly activeDropdown = signal<ToolbarDropdown>(null);
   readonly dropdownAnchor = signal<HTMLElement | null>(null);
   readonly activeGroupings = signal<GroupingProperty[]>(
@@ -297,24 +298,12 @@ export class MediaComponent implements OnDestroy {
       this.cardVariantSettings.setVariant('media', this.cardVariant());
     });
 
-    merge(
-      this.uploadManager.batchComplete$,
-      this.uploadManager.imageUploaded$,
-      this.uploadManager.imageReplaced$,
-      this.uploadManager.imageAttached$,
-    )
-      .pipe(auditTime(300), takeUntilDestroyed())
-      .subscribe(() => {
-        this.uploadRefreshTick.update((n) => n + 1);
-      });
-
     effect(() => {
       const user = this.authService.user();
       void this.viewService.selectedProjectIds();
       void this.viewService.effectiveSorts();
       void this.viewService.activeGroupings();
       void this.filterService.rules();
-      void this.uploadRefreshTick();
 
       if (!user) {
         this.rawWorkspaceImages.set([]);
@@ -324,7 +313,19 @@ export class MediaComponent implements OnDestroy {
         return;
       }
 
-      void this.reloadMediaGallery();
+      const queryInputs = this.buildGalleryQueryInputs(user.id);
+      const cacheLookup = this.mediaPageState.lookup(queryInputs);
+
+      if (cacheLookup.hit) {
+        this.rawWorkspaceImages.set([...cacheLookup.mediaItems]);
+        this.loadError.set(null);
+        this.initialLoadSettled.set(true);
+        this.loading.set(false);
+        this.mediaPageState.scheduleRevalidate(queryInputs);
+        return;
+      }
+
+      void this.loadMediaGallery(queryInputs);
     });
   }
 
@@ -364,7 +365,6 @@ export class MediaComponent implements OnDestroy {
 
   onImageUploaded(event: ImageUploadedEvent): void {
     this.shellHost.onImageUploadedFromWorkspacePane(event);
-    this.uploadRefreshTick.update((n) => n + 1);
   }
 
   openDetailView(mediaId: string): void {
@@ -394,7 +394,12 @@ export class MediaComponent implements OnDestroy {
   onRetryLoad(): void {
     this.loadError.set(null);
     this.initialLoadSettled.set(false);
-    void this.reloadMediaGallery();
+    const user = this.authService.user();
+    if (!user) {
+      return;
+    }
+    this.mediaPageState.invalidateActiveCache();
+    void this.loadMediaGallery(this.buildGalleryQueryInputs(user.id));
   }
 
   projectNameFor(projectId: string | null): string {
@@ -452,11 +457,22 @@ export class MediaComponent implements OnDestroy {
     this.closeDropdown();
   }
 
-  private async reloadMediaGallery(): Promise<void> {
+  private buildGalleryQueryInputs(userId: string): MediaGalleryQueryInputs {
+    return {
+      userId,
+      projectIds: this.viewService.selectedProjectIds(),
+      sorts: this.viewService.effectiveSorts(),
+      groupingIds: this.viewService.activeGroupings().map((group) => group.id),
+      filterRules: this.filterService.rules(),
+    };
+  }
+
+  private async loadMediaGallery(queryInputs: MediaGalleryQueryInputs): Promise<void> {
     if (!this.authService.user()) {
       return;
     }
 
+    const signature = buildMediaGalleryQuerySignature(queryInputs);
     const requestId = ++this.loadRequestId;
     const resetLoadStartedAtMs = Date.now();
     this.loading.set(true);
@@ -467,7 +483,12 @@ export class MediaComponent implements OnDestroy {
         return;
       }
 
+      if (buildMediaGalleryQuerySignature(this.buildGalleryQueryInputs(queryInputs.userId)) !== signature) {
+        return;
+      }
+
       this.rawWorkspaceImages.set(rows);
+      this.mediaPageState.writeCache(queryInputs, rows);
       this.loadError.set(null);
     } catch {
       if (requestId === this.loadRequestId) {
