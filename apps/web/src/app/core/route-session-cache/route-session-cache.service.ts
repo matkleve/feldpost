@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { auditTime, merge } from 'rxjs';
+import { auditTime, map, merge, Subject } from 'rxjs';
+import type { BatchCompleteEvent, ImageUploadedEvent } from '../upload/upload-manager.types';
 import { AuthService } from '../auth/auth.service';
 import { MediaDeleteUndoService } from '../media-delete/media-delete-undo.service';
 import { UploadManagerService } from '../upload/upload-manager.service';
@@ -9,7 +10,11 @@ import type {
   DeletePatchHandler,
   RevalidateHandler,
   RouteCacheEntry,
+  RouteUploadDispatchEvent,
+  ShellRevalidateState,
+  UploadActivityHandler,
 } from './route-session-cache.types';
+import { ROUTE_SESSION_SHELL_KEYS } from './route-session-cache.keys';
 
 const UPLOAD_AUDIT_MS = 300;
 const REVALIDATE_DEBOUNCE_MS = 400;
@@ -23,9 +28,12 @@ export class RouteSessionCacheService {
   private readonly store = new Map<string, RouteCacheEntry<unknown>>();
   private readonly revalidateHandlers = new Map<string, RevalidateHandler>();
   private readonly deletePatchHandlers = new Map<string, DeletePatchHandler>();
+  private readonly uploadActivityHandlers = new Map<string, UploadActivityHandler>();
+  private readonly revalidateStates = new Map<string, ShellRevalidateState>();
 
-  private revalidateTimer: ReturnType<typeof setTimeout> | null = null;
-  private revalidateInFlightSignature: string | null = null;
+  private readonly _shellInvalidated$ = new Subject<string>();
+  /** Fires when a shell cache entry is dropped (e.g. map upload invalidation). */
+  readonly shellInvalidated$ = this._shellInvalidated$.asObservable();
 
   private readonly _revalidating = signal(false);
   readonly revalidating = this._revalidating.asReadonly();
@@ -34,14 +42,22 @@ export class RouteSessionCacheService {
     const destroyRef = inject(DestroyRef);
 
     merge(
-      this.uploadManager.batchComplete$,
-      this.uploadManager.imageUploaded$,
-      this.uploadManager.imageReplaced$,
-      this.uploadManager.imageAttached$,
+      this.uploadManager.batchComplete$.pipe(
+        map((_event: BatchCompleteEvent): RouteUploadDispatchEvent => ({ kind: 'batchComplete' })),
+      ),
+      this.uploadManager.imageUploaded$.pipe(
+        map((event: ImageUploadedEvent): RouteUploadDispatchEvent => ({ kind: 'imageUploaded', event })),
+      ),
+      this.uploadManager.imageReplaced$.pipe(
+        map((): RouteUploadDispatchEvent => ({ kind: 'imageReplaced' })),
+      ),
+      this.uploadManager.imageAttached$.pipe(
+        map((): RouteUploadDispatchEvent => ({ kind: 'imageAttached' })),
+      ),
     )
       .pipe(auditTime(UPLOAD_AUDIT_MS), takeUntilDestroyed(destroyRef))
-      .subscribe(() => {
-        this.dispatchUploadPolicies();
+      .subscribe((event) => {
+        this.dispatchUploadPolicies(event);
       });
 
     this.mediaDeleteUndo.mediaDeleted$
@@ -85,16 +101,16 @@ export class RouteSessionCacheService {
   }
 
   invalidate(shellKey: string): void {
+    const hadEntry = this.store.has(shellKey);
     this.store.delete(shellKey);
+    if (hadEntry) {
+      this._shellInvalidated$.next(shellKey);
+    }
   }
 
   invalidateAll(): void {
     this.store.clear();
-    this.revalidateInFlightSignature = null;
-    if (this.revalidateTimer) {
-      clearTimeout(this.revalidateTimer);
-      this.revalidateTimer = null;
-    }
+    this.clearAllRevalidateState();
     this._revalidating.set(false);
   }
 
@@ -106,6 +122,10 @@ export class RouteSessionCacheService {
     this.deletePatchHandlers.set(shellKey, handler);
   }
 
+  registerUploadActivityHandler(shellKey: string, handler: UploadActivityHandler): void {
+    this.uploadActivityHandlers.set(shellKey, handler);
+  }
+
   scheduleRevalidate(
     shellKey: string,
     signature: string,
@@ -115,14 +135,53 @@ export class RouteSessionCacheService {
       return;
     }
 
-    if (this.revalidateTimer) {
-      clearTimeout(this.revalidateTimer);
+    const state = this.getOrCreateRevalidateState(shellKey);
+    if (state.timer) {
+      clearTimeout(state.timer);
     }
 
-    this.revalidateTimer = setTimeout(() => {
-      this.revalidateTimer = null;
+    state.timer = setTimeout(() => {
+      state.timer = null;
       void this.runRevalidate(shellKey, signature);
     }, debounceMs);
+  }
+
+  private getOrCreateRevalidateState(shellKey: string): ShellRevalidateState {
+    let state = this.revalidateStates.get(shellKey);
+    if (!state) {
+      state = { timer: null, inFlightSignature: null };
+      this.revalidateStates.set(shellKey, state);
+    }
+    return state;
+  }
+
+  private syncRevalidatingSignal(): void {
+    for (const state of this.revalidateStates.values()) {
+      if (state.inFlightSignature !== null) {
+        this._revalidating.set(true);
+        return;
+      }
+    }
+    this._revalidating.set(false);
+  }
+
+  private clearRevalidateState(shellKey: string): void {
+    const state = this.revalidateStates.get(shellKey);
+    if (!state) {
+      return;
+    }
+
+    if (state.timer) {
+      clearTimeout(state.timer);
+    }
+    state.timer = null;
+    state.inFlightSignature = null;
+  }
+
+  private clearAllRevalidateState(): void {
+    for (const shellKey of this.revalidateStates.keys()) {
+      this.clearRevalidateState(shellKey);
+    }
   }
 
   private async runRevalidate(shellKey: string, signature: string): Promise<void> {
@@ -131,24 +190,25 @@ export class RouteSessionCacheService {
       return;
     }
 
-    if (this.revalidateInFlightSignature === signature) {
+    const state = this.getOrCreateRevalidateState(shellKey);
+    if (state.inFlightSignature === signature) {
       return;
     }
 
-    this.revalidateInFlightSignature = signature;
-    this._revalidating.set(true);
+    state.inFlightSignature = signature;
+    this.syncRevalidatingSignal();
 
     try {
       await handler(signature);
     } finally {
-      if (this.revalidateInFlightSignature === signature) {
-        this.revalidateInFlightSignature = null;
-        this._revalidating.set(false);
+      if (state.inFlightSignature === signature) {
+        state.inFlightSignature = null;
+        this.syncRevalidatingSignal();
       }
     }
   }
 
-  private dispatchUploadPolicies(): void {
+  private dispatchUploadPolicies(event: RouteUploadDispatchEvent): void {
     for (const policy of ROUTE_SESSION_SHELL_POLICIES) {
       const entry = this.getEntry(policy.shellKey);
       if (!entry) {
@@ -161,6 +221,11 @@ export class RouteSessionCacheService {
       }
 
       if (policy.onUpload === 'revalidate-active') {
+        const handler = this.uploadActivityHandlers.get(policy.shellKey);
+        if (handler?.(event)) {
+          continue;
+        }
+
         this.scheduleRevalidate(policy.shellKey, entry.querySignature);
       }
     }

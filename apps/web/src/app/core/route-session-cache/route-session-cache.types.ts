@@ -1,3 +1,4 @@
+import type { ImageUploadedEvent } from '../upload/upload-manager.types';
 import type { RouteSessionShellKey } from './route-session-cache.keys';
 
 export interface RouteCacheEntry<T> {
@@ -25,3 +26,16 @@ export interface ShellRouteCachePolicy {
   readonly onDelete: ShellDeletePolicy;
   readonly onRestore: ShellRestorePolicy;
 }
+
+export interface ShellRevalidateState {
+  timer: ReturnType<typeof setTimeout> | null;
+  inFlightSignature: string | null;
+}
+
+export type RouteUploadDispatchEvent =
+  | { readonly kind: 'batchComplete' }
+  | { readonly kind: 'imageUploaded'; readonly event: ImageUploadedEvent }
+  | { readonly kind: 'imageReplaced' }
+  | { readonly kind: 'imageAttached' };
+
+export type UploadActivityHandler = (event: RouteUploadDispatchEvent) => boolean;

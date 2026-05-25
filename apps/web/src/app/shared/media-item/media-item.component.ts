@@ -33,6 +33,10 @@ import { probeImageAspectRatio } from '../../core/media/probe-image-aspect-ratio
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaDisplayComponent } from '../media-display/media-display.component';
 import { ChipComponent, type ChipVariant } from '../components/chip/chip.component';
+import {
+  resolveInitialGridAspectRatioCss,
+  shouldIgnoreGridAspectHandoffReset,
+} from './media-item-grid-aspect.helpers';
 
 export const MEDIA_ITEM_ACTION_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
 
@@ -121,6 +125,11 @@ export class MediaItemComponent {
 
   readonly usesNativeSlotAspect = computed(() => usesNativeAspectRatio(this.fileTypeDefinition()));
 
+  /** True when grid slot aspect was restored from session cache (shell revisit). */
+  readonly gridSessionAspectPrefilled = computed(
+    () => this.showInteractionChrome() && this.aspectRatioCache.get(this.mediaIdentity()) != null,
+  );
+
   readonly fileTypeChipText = computed(() => fileTypeBadge(this.fileIdentity()));
 
   readonly fileTypeChipVariant = computed<ChipVariant>(() =>
@@ -146,11 +155,19 @@ export class MediaItemComponent {
         return;
       }
 
-      // Grid choreography: square slot until media-display commits ratio after load.
+      // Grid: reuse session aspect ratio on shell revisit to avoid 1:1 → native shrink animation.
       // @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
-      this.detailSlotRatioCommitted.set(true);
-      this.mediaAspectRatio.set('1');
+      this.bootstrapGridSlotAspect(mediaId);
     });
+  }
+
+  private bootstrapGridSlotAspect(mediaId: string): void {
+    this.detailSlotRatioCommitted.set(true);
+    const cached = this.aspectRatioCache.get(mediaId);
+    const hint = this.registryAspectRatioHint();
+    this.mediaAspectRatio.set(
+      resolveInitialGridAspectRatioCss(cached, hint, this.usesNativeSlotAspect()),
+    );
   }
 
   /** Detail-only: apply cached or hinted ratio; otherwise probe full-res when already signed. */
@@ -206,6 +223,13 @@ export class MediaItemComponent {
 
   onMediaAspectRatioChange(ratio: number): void {
     if (!Number.isFinite(ratio) || ratio <= 0) {
+      return;
+    }
+
+    if (
+      this.showInteractionChrome() &&
+      shouldIgnoreGridAspectHandoffReset(ratio, this.aspectRatioCache.get(this.mediaIdentity()))
+    ) {
       return;
     }
 

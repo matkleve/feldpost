@@ -63,7 +63,12 @@ import { SearchQueryContext } from '../../../core/search/search.models';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { SettingsPaneService } from '../../../core/settings-pane/settings-pane.service';
 import { MapSessionCacheService } from '../../../core/map-session-cache/map-session-cache.service';
-import type { MapViewportMarkerRow } from '../../../core/map-session-cache/map-session-cache.types';
+import { ROUTE_SESSION_SHELL_KEYS } from '../../../core/route-session-cache/route-session-cache.keys';
+import { RouteSessionCacheService } from '../../../core/route-session-cache/route-session-cache.service';
+import type {
+  MapSessionSnapshot,
+  MapViewportMarkerRow,
+} from '../../../core/map-session-cache/map-session-cache.types';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
@@ -260,6 +265,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly mapSessionCache = inject(MapSessionCacheService);
+  private readonly routeSessionCache = inject(RouteSessionCacheService);
   private readonly state = inject(MapShellState);
   private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
   private readonly markerInteractionService = inject(MarkerInteractionService);
@@ -686,6 +692,9 @@ export class MapShellComponent implements OnDestroy {
   private lastFetchedZoom: number | null = null;
   /** Last viewport RPC payload — persisted to session cache on destroy. */
   private lastViewportRpcRows: ViewportMarkerRow[] | null = null;
+  private isRestoringFromSessionCache = false;
+  /** Set true after first Leaflet init; never cleared on activeShell hide/show. */
+  private mapInitialized = false;
 
   /** True while a zoom animation is in progress — suppresses moveend queries. */
   private zoomAnimating = false;
@@ -791,6 +800,10 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
+      if (this.mapInitialized) {
+        return;
+      }
+
       this.markerMotionPreference.set(
         this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
       );
@@ -798,7 +811,9 @@ export class MapShellComponent implements OnDestroy {
       this.initMap();
       this.subscribeToUploadManagerEvents();
       this.subscribeToMediaDeleteEvents();
+      this.subscribeRouteSessionInvalidation();
       this.scheduleDeferredStartupWork();
+      this.mapInitialized = true;
     });
   }
 
@@ -811,7 +826,6 @@ export class MapShellComponent implements OnDestroy {
       );
       this.workspacePaneMapEffectsRegistration = null;
     }
-    this.workspacePaneObserver.onRouteLeave('map');
     this.cleanupGpsAndTracking();
     this.cleanupDeferredAndQueryState();
     this.detachGlobalListeners();
@@ -883,6 +897,7 @@ export class MapShellComponent implements OnDestroy {
       mapContainer.removeEventListener('contextmenu', this.mapContainerContextMenuHandler, true);
     }
     this.map?.remove();
+    this.mapInitialized = false;
   }
 
   closeContextMenus(): void {
@@ -3069,6 +3084,18 @@ export class MapShellComponent implements OnDestroy {
    * Subscribe to UploadManagerService events for replace/attach photo flows.
    * Updates marker thumbnails without a full viewport refresh.
    */
+  private subscribeRouteSessionInvalidation(): void {
+    this.uploadManagerSubs.push(
+      this.routeSessionCache.shellInvalidated$.subscribe((shellKey) => {
+        if (shellKey !== ROUTE_SESSION_SHELL_KEYS.MAP || !this.map) {
+          return;
+        }
+
+        void this.queryViewportMarkers();
+      }),
+    );
+  }
+
   private subscribeToUploadManagerEvents(): void {
     this.uploadManagerSubs.push(
       this.uploadManagerService.imageReplaced$.subscribe((event: ImageReplacedEvent) => {
@@ -3259,8 +3286,26 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private tryRestoreViewportFromSessionCache(): boolean {
+    if (this.uploadedPhotoMarkers.size > 0) {
+      return true;
+    }
+
     const snapshot = this.mapSessionCache.read();
     if (!snapshot || !this.map) {
+      return false;
+    }
+
+    this.isRestoringFromSessionCache = true;
+
+    try {
+      return this.restoreViewportFromSessionSnapshot(snapshot);
+    } finally {
+      this.isRestoringFromSessionCache = false;
+    }
+  }
+
+  private restoreViewportFromSessionSnapshot(snapshot: MapSessionSnapshot): boolean {
+    if (!this.map) {
       return false;
     }
 
@@ -3441,6 +3486,7 @@ export class MapShellComponent implements OnDestroy {
       animateMarkerPosition: (marker, lat, lng) => this.animateMarkerPosition(marker, lat, lng),
       refreshPhotoMarker: (markerKey) => this.refreshPhotoMarker(markerKey),
       cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+      suppressMarkerFadeIn: this.isRestoringFromSessionCache,
     };
   }
 

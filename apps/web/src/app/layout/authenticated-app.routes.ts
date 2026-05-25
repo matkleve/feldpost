@@ -13,8 +13,8 @@ import {
   projectsShellMatcher,
 } from './authenticated-shell-matchers';
 
-const loadMapShell = () =>
-  import('../features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent);
+const loadShellRoutePlaceholder = () =>
+  import('./shell-route-placeholder.component').then((m) => m.ShellRoutePlaceholderComponent);
 
 const loadMedia = () =>
   import('../features/media/media.component').then((m) => m.MediaComponent);
@@ -29,12 +29,12 @@ export const AUTHENTICATED_APP_ROUTES: Routes = [
     children: [
       {
         path: '',
-        loadComponent: loadMapShell,
+        loadComponent: loadShellRoutePlaceholder,
         pathMatch: 'full',
       },
       {
         matcher: mapShellMatcher,
-        loadComponent: loadMapShell,
+        loadComponent: loadShellRoutePlaceholder,
       },
       {
         matcher: mediaShellMatcher,

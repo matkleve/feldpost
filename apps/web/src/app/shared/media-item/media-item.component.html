@@ -15,6 +15,7 @@
       class="media-item__preview"
       [downloadContext]="downloadContext()"
       [slotGeometry]="usesFillSlotGeometry() ? 'fill' : 'intrinsic'"
+      [skipIntrinsicRatioTransition]="gridSessionAspectPrefilled()"
       [mediaId]="mediaIdentity()"
       [storagePath]="item()?.storage_path ?? null"
       [thumbnailPath]="item()?.thumbnail_path ?? null"

@@ -28,12 +28,42 @@ app-nav {
 }
 
 .authenticated-app-layout__main {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 0;
   min-width: 0;
   min-height: 0;
   height: 100%;
+  position: relative;
   // Clip map tiles in .map-container only — not chrome shadows on .upload-btn-zone etc.
   overflow: visible;
+}
+
+.authenticated-app-layout__map-host {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.authenticated-app-layout__map-host--visible {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.authenticated-app-layout__shell-outlet {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+// Map UI lives in __map-host; outlet only mounts an empty placeholder — must not steal hits.
+.authenticated-app-layout__shell-outlet--map-active {
+  pointer-events: none;
 }
 
 // Split seam: 2px divider flex item + pane width (divider hit zone overflows into map only).

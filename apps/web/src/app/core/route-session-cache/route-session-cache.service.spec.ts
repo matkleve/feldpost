@@ -206,6 +206,24 @@ describe('RouteSessionCacheService', () => {
     expect(service.getEntry(ROUTE_SESSION_SHELL_KEYS.MEDIA)).toBeNull();
   });
 
+  it('scheduleRevalidate for two shells uses independent timers', async () => {
+    vi.useFakeTimers();
+    const mediaHandler = vi.fn().mockResolvedValue(undefined);
+    const otherHandler = vi.fn().mockResolvedValue(undefined);
+
+    service.registerRevalidateHandler(ROUTE_SESSION_SHELL_KEYS.MEDIA, mediaHandler);
+    service.registerRevalidateHandler('testShell', otherHandler);
+
+    service.scheduleRevalidate(ROUTE_SESSION_SHELL_KEYS.MEDIA, mediaSignature);
+    service.scheduleRevalidate('testShell', '{"other":1}');
+
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(mediaHandler).toHaveBeenCalledTimes(1);
+    expect(otherHandler).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
   it('logout clears all entries via session effect', () => {
     service.save(ROUTE_SESSION_SHELL_KEYS.MEDIA, mediaSignature, [sampleMedia('a')]);
     sessionSignal.mockReturnValue(null);

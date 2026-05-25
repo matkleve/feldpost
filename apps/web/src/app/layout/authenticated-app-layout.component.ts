@@ -4,6 +4,7 @@
  */
 import {
   Component,
+  Injector,
   afterNextRender,
   computed,
   DestroyRef,
@@ -11,9 +12,14 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
+import { MapShellComponent } from '../features/map/map-shell/map-shell.component';
+import {
+  resolveAuthenticatedActiveShell,
+  type AuthenticatedActiveShell,
+} from './authenticated-shell-active.helpers';
 import { ShareLinkRestoreService } from '../core/share-set/share-link-restore.service';
 import type { ShareLinkRestoreResult } from '../core/share-set/share-link-restore.types';
 import { ShareUrlSyncService } from '../core/share-set/share-url-sync.service';
@@ -47,6 +53,7 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
   standalone: true,
   imports: [
     RouterOutlet,
+    MapShellComponent,
     NavComponent,
     DragDividerComponent,
     WorkspacePaneComponent,
@@ -72,6 +79,21 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly shareUrlSyncService = inject(ShareUrlSyncService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
+  private readonly injector = inject(Injector);
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  readonly activeShell = computed(() => resolveAuthenticatedActiveShell(this.currentUrl()));
+  readonly mapShellVisible = computed(() => this.activeShell() === 'map');
+
+  private previousActiveShell: AuthenticatedActiveShell | null = null;
 
   private readonly preferredWorkspacePaneWidth = signal<number | null>(null);
 
@@ -91,6 +113,26 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   readonly workspacePaneDefaultWidth = computed(() => this.viewportWidth * 0.618);
 
   constructor() {
+    effect(() => {
+      const shell = this.activeShell();
+      const prev = this.previousActiveShell;
+
+      if (prev === 'map' && shell !== 'map') {
+        this.workspacePaneObserver.onRouteLeave('map');
+      }
+
+      if (prev !== 'map' && shell === 'map') {
+        afterNextRender(
+          () => {
+            this.mapLayoutEffects.getMapEffects()?.invalidateMapSize();
+          },
+          { injector: this.injector },
+        );
+      }
+
+      this.previousActiveShell = shell;
+    });
+
     effect(() => {
       const id = this.workspacePaneObserver.detailImageId$();
       if (this.shellState.detailMediaId() !== id) {

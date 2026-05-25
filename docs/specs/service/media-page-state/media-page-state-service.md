@@ -10,18 +10,22 @@ Root-scoped **facade** for the `/media` gallery: one `WorkspaceMedia[]` snapshot
 
 ## Upload invalidation (cross-shell)
 
-`RouteSessionCacheService` dispatches upload events; this facade registers the revalidate handler and performs `MediaQueryService` fetch:
+`RouteSessionCacheService` dispatches upload events. This facade registers `registerUploadActivityHandler('media', …)` (incremental patch) and `registerRevalidateHandler` (full fetch).
 
 | Stream | Policy |
 |--------|--------|
-| `batchComplete$` | Debounced revalidate for active cache signature |
-| `imageUploaded$` | Same |
-| `imageReplaced$` | Same |
-| `imageAttached$` | Same |
+| `imageUploaded$` | **Incremental patch** when cache entry exists, payload has `mediaId`, and cached `querySignature` has **no** project filter (`projectIds` empty). Handler returns `true` → no `scheduleRevalidate`. Otherwise full revalidate. |
+| `batchComplete$` | Full debounced revalidate |
+| `imageReplaced$` | Full revalidate |
+| `imageAttached$` | Full revalidate |
 
-Uploads on `/map` (or any shell) update or refresh cache **before** the user returns to `/media`, so a cache hit is not stale.
+Patch builds minimal `WorkspaceMedia` via `workspaceMediaFromUploadEvent` / `patchMediaCacheItems` in `media-page-state-upload-patch.helpers.ts` (prepend new id; replace if already present; signature unchanged).
 
-Debounce: ~400ms; `revalidating` (from route cache) prevents parallel revalidates for the same signature.
+**Gate 7:** project-scoped gallery (`projectIds` non-empty in signature) → patch forbidden unless event carries matching `projectId` subset — falls back to `loadAllCurrentUserWorkspaceMedia()`.
+
+Uploads on `/map` (or any shell) update cache **before** the user returns to `/media`.
+
+Debounce: ~400ms per shell; `revalidating` (global OR across shells) reflects any in-flight revalidate.
 
 ## Delete / auth
 
@@ -43,5 +47,7 @@ Debounce: ~400ms; `revalidating` (from route cache) prevents parallel revalidate
 
 ## Acceptance
 
-- [x] Cross-shell upload → revalidate without `MediaComponent` mounted (`media-page-state.service.spec.ts`).
+- [x] Cross-shell `batchComplete$` → revalidate without `MediaComponent` mounted (`media-page-state.service.spec.ts`).
+- [x] Cross-shell `imageUploaded$` → incremental patch without `loadAll` when gate 7 allows.
+- [x] Project-scoped signature + upload without `projectId` → full revalidate (gate 7).
 - [x] `MediaComponent` cache-first wiring with upload invalidation verified.

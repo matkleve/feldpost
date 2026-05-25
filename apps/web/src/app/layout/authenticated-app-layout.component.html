@@ -2,7 +2,18 @@
 <app-nav />
 
 <div class="authenticated-app-layout__main">
-  <router-outlet />
+  <div
+    class="authenticated-app-layout__map-host"
+    [class.authenticated-app-layout__map-host--visible]="mapShellVisible()"
+  >
+    <app-map-shell />
+  </div>
+  <div
+    class="authenticated-app-layout__shell-outlet"
+    [class.authenticated-app-layout__shell-outlet--map-active]="mapShellVisible()"
+  >
+    <router-outlet />
+  </div>
 </div>
 
 @if (photoPanelOpen()) {

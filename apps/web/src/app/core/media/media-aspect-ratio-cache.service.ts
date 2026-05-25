@@ -9,7 +9,7 @@ interface CachedAspectRatio {
 
 /**
  * Session cache of width/height ratio per media id (from display probes or registry hints).
- * Detail embed reads on open; /media grid choreography is unchanged.
+ * Grid and detail embed read on open to skip square-first shrink on shell revisit.
  * @see docs/specs/ui/media-detail/media-detail-media-viewer.md
  */
 @Injectable({ providedIn: 'root' })

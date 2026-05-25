@@ -5,6 +5,7 @@ import {
   unregisterMarkerKeyForMedia,
   type MarkersByMediaIdMap,
 } from './marker-media-index.helpers';
+import { resolveMarkerFadeIn } from './map-marker-fade-in.helpers';
 
 export interface ReconcileIncomingRow {
   cluster_lat: number;
@@ -65,6 +66,7 @@ export interface ReconcileDependencies {
   animateMarkerPosition: (marker: L.Marker, lat: number, lng: number) => void;
   refreshPhotoMarker: (markerKey: string) => void;
   cancelMarkerMoveAnimation: (marker: L.Marker) => void;
+  suppressMarkerFadeIn: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -305,7 +307,11 @@ export class MapMarkerReconcileFacade {
     );
 
     deps.photoMarkerLayer.addLayer(marker);
-    deps.attachMarkerInteractions(key, marker, !spawnOrigin);
+    deps.attachMarkerInteractions(
+      key,
+      marker,
+      resolveMarkerFadeIn(spawnOrigin, deps.suppressMarkerFadeIn),
+    );
 
     if (spawnOrigin) {
       deps.animateMarkerPosition(marker, row.cluster_lat, row.cluster_lng);

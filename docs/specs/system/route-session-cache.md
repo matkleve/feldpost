@@ -2,9 +2,10 @@
 
 Cross-cutting contract for shell revisit caches. Product vocabulary: **media** (not legacy “image” rows in new code).
 
-| Event | Media (`MediaPageStateService`) | Map (`MapSessionCacheService`) |
+| Event | Media (`MediaPageStateService`) | Map (`MapSessionCacheService` + live shell) |
 |-------|--------------------------------|--------------------------------|
-| Upload / replace / attach (any shell) | Debounced revalidate via root `UploadManagerService` | `invalidate()` — next visit refetches viewport |
+| `imageUploaded$` (any shell) | Incremental patch when allowed; else debounced full revalidate | `invalidate()` + live `MapShellComponent` runs `queryViewportMarkers()` via `shellInvalidated$('map')` while hidden |
+| `batchComplete$` / `imageReplaced$` / `imageAttached$` | Debounced full revalidate | `invalidate()` + hidden map refresh as above |
 | Delete / restore undo | Remove ids from snapshot; restore → invalidate | `invalidate()` |
 | Filter / sort / group / project scope | New `querySignature` → cache miss | N/A (viewport-driven) |
 | Logout | `RouteSessionCacheService.invalidateAll()` | Same (all shells) |
@@ -18,4 +19,4 @@ Cross-cutting contract for shell revisit caches. Product vocabulary: **media** (
 
 ## Map revisit
 
-Leaflet re-inits each visit; cache skips viewport RPC when bounds/zoom still match. **`map.invalidateSize()`** after restore is mandatory (pane resize while destroyed).
+`MapShellComponent` stays mounted under `AuthenticatedAppLayoutComponent` (hidden on `/media` / `/projects` via `visibility: hidden`; visible on map routes). Leaflet is not destroyed on shell switch; **`map.invalidateSize()`** on show and after cache restore. Session cache still skips viewport RPC when bounds/zoom match and live markers are empty; restore suppresses marker fade-in (see map-shell reconcile facade). On `invalidate('map')`, hidden shell refreshes markers in the background.

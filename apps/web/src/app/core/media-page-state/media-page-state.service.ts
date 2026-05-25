@@ -1,11 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { MediaQueryService } from '../media-query/media-query.service';
+import type { ImageUploadedEvent } from '../upload/upload-manager.types';
 import { ROUTE_SESSION_SHELL_KEYS } from '../route-session-cache/route-session-cache.keys';
 import { RouteSessionCacheService } from '../route-session-cache/route-session-cache.service';
-import type { RouteCacheEntry } from '../route-session-cache/route-session-cache.types';
+import type {
+  RouteCacheEntry,
+  RouteUploadDispatchEvent,
+} from '../route-session-cache/route-session-cache.types';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 import { buildMediaGalleryQuerySignature } from './media-page-state.helpers';
+import {
+  patchMediaCacheItems,
+  signatureHasProjectFilter,
+  workspaceMediaFromUploadEvent,
+} from './media-page-state-upload-patch.helpers';
 import type {
   MediaGalleryQueryInputs,
   MediaPageCacheLookup,
@@ -25,6 +34,9 @@ export class MediaPageStateService {
     );
     this.routeCache.registerDeletePatchHandler(ROUTE_SESSION_SHELL_KEYS.MEDIA, (ids, entry) =>
       this.patchDelete(ids, entry as RouteCacheEntry<WorkspaceMedia[]>),
+    );
+    this.routeCache.registerUploadActivityHandler(ROUTE_SESSION_SHELL_KEYS.MEDIA, (event) =>
+      this.handleUploadActivity(event),
     );
   }
 
@@ -54,6 +66,30 @@ export class MediaPageStateService {
   scheduleRevalidate(inputs: MediaGalleryQueryInputs): void {
     const signature = buildMediaGalleryQuerySignature(inputs);
     this.routeCache.scheduleRevalidate(ROUTE_SESSION_SHELL_KEYS.MEDIA, signature);
+  }
+
+  private handleUploadActivity(event: RouteUploadDispatchEvent): boolean {
+    if (event.kind !== 'imageUploaded') {
+      return false;
+    }
+
+    return this.tryPatchCacheFromUpload(event.event);
+  }
+
+  private tryPatchCacheFromUpload(event: ImageUploadedEvent): boolean {
+    const entry = this.routeCache.getEntry(ROUTE_SESSION_SHELL_KEYS.MEDIA);
+    if (!entry || !event.mediaId) {
+      return false;
+    }
+
+    if (signatureHasProjectFilter(entry.querySignature)) {
+      return false;
+    }
+
+    const row = workspaceMediaFromUploadEvent(event);
+    const next = patchMediaCacheItems(entry.data as WorkspaceMedia[], row);
+    this.routeCache.save(ROUTE_SESSION_SHELL_KEYS.MEDIA, entry.querySignature, next);
+    return true;
   }
 
   private async runRevalidate(signature: string): Promise<void> {

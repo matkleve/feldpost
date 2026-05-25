@@ -63,6 +63,11 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly contentObjectPosition = input('center center');
   /** `fill` = fixed-slot mode (row); `intrinsic` = height driven by media aspect-ratio (grid). */
   readonly slotGeometry = input<'fill' | 'intrinsic'>('fill');
+  /**
+   * Grid shell revisit: parent slot already has session-cached aspect ratio — skip
+   * ratio-known-contain (no CSS transition → no transitionend) and reveal directly.
+   */
+  readonly skipIntrinsicRatioTransition = input(false);
   /** Drives tier floor and cache registration context in MediaDownloadService. */
   readonly downloadContext = input<MediaContext>('grid');
   /**
@@ -113,8 +118,16 @@ export class MediaDisplayComponent implements AfterViewInit {
       if (isNewHandoff) {
         this.resolvedUrl.set('');
         this.stagedContentUrl.set('');
-        this.resetState();
+        this.cancelRatioProbe();
         this.lastRequestIdentity = id;
+
+        const sessionRatio = this.aspectRatioCache.get(id);
+        if (sessionRatio != null && sessionRatio > 0) {
+          this.metadataAspectRatio.set(sessionRatio);
+        } else {
+          this.resetState();
+        }
+
         this.goTo('loading-surface-visible');
       }
 
@@ -285,7 +298,7 @@ export class MediaDisplayComponent implements AfterViewInit {
           }
 
           if (targetRatio != null) {
-            this.triggerRatioTransition(targetRatio);
+            this.revealIntrinsicGridWithKnownRatio(targetRatio);
             return;
           }
 
@@ -343,7 +356,7 @@ export class MediaDisplayComponent implements AfterViewInit {
     img.onload = () => {
       this.ratioProbeImg = null;
       if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-        this.triggerRatioTransition(img.naturalWidth / img.naturalHeight);
+        this.revealIntrinsicGridWithKnownRatio(img.naturalWidth / img.naturalHeight);
       } else {
         this.fallThroughToReveal();
       }
@@ -370,6 +383,29 @@ export class MediaDisplayComponent implements AfterViewInit {
    * onViewportTransitionEnd → advanceAfterRatioSettled → media-ready → content-fade-in.
    * Spec: loading-surface-visible → ratio-known-contain: slot aspect-ratio 300ms var(--motion-ease-out).
    */
+  /** Grid intrinsic: shrink choreography or direct reveal when parent slot is already sized. */
+  private revealIntrinsicGridWithKnownRatio(ratio: number): void {
+    if (this.shouldSkipIntrinsicRatioTransition()) {
+      this.storeAspectRatio(ratio, false);
+      this.fallThroughToReveal();
+      return;
+    }
+
+    this.triggerRatioTransition(ratio);
+  }
+
+  private shouldSkipIntrinsicRatioTransition(): boolean {
+    if (this.skipIntrinsicRatioTransition()) {
+      return true;
+    }
+
+    if (this.downloadContext() !== 'grid' || this.slotGeometry() !== 'intrinsic') {
+      return false;
+    }
+
+    return this.aspectRatioCache.get(this.mediaId().trim()) != null;
+  }
+
   private triggerRatioTransition(ratio: number): void {
     if (this.state() !== 'loading-surface-visible') {
       return;
@@ -386,6 +422,13 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     if (this.prefersReducedMotion()) {
       queueMicrotask(() => this.advanceAfterRatioSettled());
+      return;
+    }
+
+    // Parent slot may already match session ratio — no transitionend will fire.
+    const sessionRatio = this.aspectRatioCache.get(this.mediaId().trim());
+    if (sessionRatio != null && Math.abs(sessionRatio - ratio) < 0.001) {
+      queueMicrotask(() => this.advanceAfterRatioSettled());
     }
   }
 
@@ -394,6 +437,11 @@ export class MediaDisplayComponent implements AfterViewInit {
     const metadata = this.metadataAspectRatio();
     if (metadata != null && metadata > 0) {
       return metadata;
+    }
+
+    const sessionRatio = this.aspectRatioCache.get(this.mediaId().trim());
+    if (sessionRatio != null && sessionRatio > 0) {
+      return sessionRatio;
     }
 
     const hint = this.aspectRatio();
@@ -420,12 +468,16 @@ export class MediaDisplayComponent implements AfterViewInit {
   private fallThroughToReveal(): void {
     const current = this.state();
 
-    if (current === 'loading-surface-visible') {
+    if (current === 'loading-surface-visible' || current === 'ratio-known-contain') {
       this.goTo('media-ready');
     }
 
+    if (!this.resolvedUrl()) {
+      return;
+    }
+
     if (this.state() === 'media-ready') {
-      this.goTo('content-fade-in');
+      this.goTo(this.shouldSkipIntrinsicRatioTransition() ? 'content-visible' : 'content-fade-in');
     }
   }
 

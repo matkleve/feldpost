@@ -37,7 +37,11 @@ Upload streams: `UploadManagerService` (`batchComplete$`, `imageUploaded$`, `ima
 | `scheduleRevalidate(shellKey, signature)` | Debounced revalidate |
 | `registerDeletePatchHandler(shellKey, fn)` | Partial delete (media) |
 
-`revalidating` signal reflects in-flight revalidate for any shell.
+`revalidating` signal is **global OR**: true when any shell has an in-flight revalidate (per-shell debounce timers underneath).
+
+`shellInvalidated$` emits a `shellKey` when `invalidate(shellKey)` drops an entry (used by live `MapShellComponent` to refresh markers while hidden).
+
+`registerUploadActivityHandler(shellKey, fn)` — return `true` when upload was handled without `scheduleRevalidate` (media incremental patch).
 
 ## Lifecycle / eager construction
 
