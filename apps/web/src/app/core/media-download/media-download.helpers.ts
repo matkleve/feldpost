@@ -251,41 +251,7 @@ function firstNonEmpty(values: Array<string | null | undefined>): string | null 
   return null;
 }
 
+/** @deprecated Preview path uses {@link resolvePreviewTarget} from media-preview-target.helpers — category no longer gates signing. */
 export function isBitmapMediaCategory(category: FileTypeCategory): boolean {
   return category === 'image' || category === 'video';
-}
-
-/**
- * Storage path to sign for grid preview, or null when v1 must not fetch (Office without thumb).
- * @see docs/specs/service/media-download-service/media-download-service.md
- */
-export function resolvePreviewTarget(
-  request: MediaPreviewRequest,
-  tier: MediaTier,
-  fileType: FileTypeDefinition,
-): string | null {
-  if (isBitmapMediaCategory(fileType.category)) {
-    return resolveStoragePathForPreviewTier(request, tier);
-  }
-
-  const thumb = request.thumbnailPath?.trim();
-  return thumb ? thumb : null;
-}
-
-function resolveStoragePathForPreviewTier(
-  request: MediaPreviewRequest,
-  tier: MediaTier,
-): string | null {
-  const storagePath = request.storagePath?.trim();
-  if (!storagePath) {
-    return null;
-  }
-
-  const useThumbnailTier =
-    tier === 'inline' || tier === 'small' || tier === 'mid' || tier === 'mid2';
-  if (useThumbnailTier && request.thumbnailPath?.trim()) {
-    return request.thumbnailPath.trim();
-  }
-
-  return storagePath;
 }

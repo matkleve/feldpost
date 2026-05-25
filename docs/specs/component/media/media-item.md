@@ -376,16 +376,11 @@ Mandatory rule:
 
 ## File-type aspect ratio policy
 
-Registry lookup via `mediaFileIdentityFromRecord` (see [media-file-identity.md](../../service/media-download-service/media-file-identity.md)).
+Grid (`intrinsic` slot): initial slot ratio is **session cache** or square (`1`). After preview loads, `MediaDisplay` probes the signed bitmap URL and emits `aspectRatioChange` — **no registry fixed ratios**.
 
-| Registry `aspectRatio.type` | Slot ratio before bitmap loads | After bitmap loads |
-| --- | --- | --- |
-| `fixed` (PDF, Office families) | `1` (square) | `aspectRatioChange` to registry `width / height` when preview is `loaded` |
-| `native` (photos) | `1` until image metadata | `aspectRatioChange` from probe / `onload` |
-| `free` | `1` (square) | Stays `1` unless type reclassified |
-| `unknown` category | `1` (square) | Stays `1` |
+Detail embed (`media-item--detail-embed`): session cache first; else probe **signed thumbnail URL only** (`getCachedUrl(mediaId, 'small')`) — never full-resolution `storage_path` for layout.
 
-All grid tiles (`intrinsic` slot) share the same choreography: `loading-surface-visible` → `ratio-known-contain` (slot 300ms transition) → `content-fade-in`. `MediaItem` passes `[aspectRatio]` as the **target** hint to `MediaDisplay` (deferred until reveal); non-native types use `object-position: top center` for bitmap paint.
+All grid tiles share one choreography: `loading-surface-visible` → `ratio-known-contain` (when ratio unknown) → `content-fade-in` / `content-visible`. Warm shell revisit may skip gray pulse when session ratio and cached preview URL are both present (after `registerPreviewPaths`).
 
 ## File-type chip (Phase 2)
 

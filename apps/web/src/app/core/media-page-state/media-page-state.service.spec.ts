@@ -154,6 +154,20 @@ describe('MediaPageStateService', () => {
     vi.useRealTimers();
   });
 
+  it('patchMediaItemPreview updates cached row thumbnailPath', () => {
+    service.writeCache(baseInputs, [sampleMedia('cached-1')]);
+
+    const patched = service.patchMediaItemPreview('cached-1', {
+      thumbnailPath: 'org/u/thumb.jpg',
+      previewGenerationStatus: 'ready',
+    });
+
+    expect(patched).toBe(true);
+    const lookup = service.lookup(baseInputs);
+    expect(lookup.mediaItems[0]?.thumbnailPath).toBe('org/u/thumb.jpg');
+    expect(lookup.mediaItems[0]?.previewGenerationStatus).toBe('ready');
+  });
+
   it('map-first: handlers registered in MediaPageState ctor then upload patches cache', async () => {
     vi.useFakeTimers();
 

@@ -19,18 +19,16 @@ import { mediaFileIdentityFromRecord } from '../media/media-file-identity.helper
 import {
   ALL_MEDIA_TIERS,
   CONTEXT_DEFAULT_TIER,
-  NON_IMAGE_ICON_ONLY_MAX_SLOT_REM,
   PIXELS_PER_REM,
   desiredSizeToTier,
-  isBitmapMediaCategory,
   mapExportErrorCode,
   mapFetchErrorCode,
   mapLegacyState,
   mapSigningErrorCode,
   readyStateForTier,
-  resolvePreviewTarget,
   tierToMediaSize,
 } from './media-download.helpers';
+import { resolvePreviewTarget } from './media-preview-target.helpers';
 import type {
   MediaDisplayDeliveryState,
   DownloadBlobResult,
@@ -169,13 +167,7 @@ export class MediaDownloadService {
       return { url: null, resolvedTier: null, source: 'none', state: stateSignal() };
     }
 
-    const fileType = this.resolveFileType(
-      mediaFileIdentityFromRecord({
-        storage_path: request.storagePath,
-        original_filename: null,
-      }),
-    );
-    const targetPath = resolvePreviewTarget(request, resolvedTier, fileType);
+    const targetPath = resolvePreviewTarget(request, resolvedTier);
     if (!targetPath) {
       stateSignal.set('idle');
       return { url: null, resolvedTier, source: 'none', state: stateSignal() };
@@ -531,7 +523,7 @@ export class MediaDownloadService {
   private toDisplayDeliveryState(
     mediaId: string,
     tier: MediaTier,
-    slotSizeRem: number,
+    _slotSizeRem: number,
   ): MediaDisplayDeliveryState {
     const state = this.getItemState(mediaId, tier)();
     const cachedUrl = this.getCachedUrl(mediaId, tierToMediaSize(tier));
@@ -541,7 +533,6 @@ export class MediaDownloadService {
       storage_path: knownRequest?.storagePath ?? null,
       original_filename: null,
     });
-    const fileType = this.resolveFileType(identity);
     const icon = this.resolveIcon(identity);
 
     if (state === 'error') {
@@ -552,45 +543,26 @@ export class MediaDownloadService {
       return { state: 'no-media', icon, resolvedUrl: cachedUrl };
     }
 
-    if (!isBitmapMediaCategory(fileType.category)) {
-      // v2: persisted thumbnail_path wins over small-slot icon-only (see media-download-service.md delivery matrix).
-      if (cachedUrl) {
-        return { state: 'loaded', resolvedUrl: cachedUrl, icon };
-      }
+    if (cachedUrl) {
+      return { state: 'loaded', resolvedUrl: cachedUrl, icon };
+    }
 
-      const previewTarget =
-        knownRequest != null ? resolvePreviewTarget(knownRequest, tier, fileType) : null;
+    const previewTarget =
+      knownRequest != null ? resolvePreviewTarget(knownRequest, tier) : null;
 
-      if (previewTarget) {
-        if (state === 'signing' || state === 'idle') {
-          return { state: 'loading', icon, resolvedUrl: cachedUrl };
-        }
-        if (state === 'ready-low-res' || state === 'ready-high-res' || cachedUrl) {
-          return { state: 'loaded', resolvedUrl: cachedUrl, icon };
-        }
-        return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
-      }
-
+    if (!previewTarget) {
       const genStatus = knownRequest?.previewGenerationStatus ?? 'idle';
       if (genStatus === 'pending') {
         return { state: 'loading', icon, resolvedUrl: cachedUrl };
       }
-
-      if (slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM) {
-        return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
-      }
-
       return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
     }
 
-    if (state === 'ready-low-res' || state === 'ready-high-res') {
-      if (cachedUrl) {
-        return { state: 'loaded', resolvedUrl: cachedUrl, icon };
-      }
-      return { state: 'icon-only', icon };
+    if (state === 'signing' || state === 'idle') {
+      return { state: 'loading', icon, resolvedUrl: cachedUrl };
     }
 
-    if (cachedUrl) {
+    if (state === 'ready-low-res' || state === 'ready-high-res') {
       return { state: 'loaded', resolvedUrl: cachedUrl, icon };
     }
 
@@ -607,16 +579,7 @@ export class MediaDownloadService {
       storage_path: request.storagePath,
       original_filename: null,
     });
-    const fileType = this.resolveFileType(identity);
-    if (!resolvePreviewTarget(request, tier, fileType)) {
-      return;
-    }
-
-    if (
-      slotSizeRem < NON_IMAGE_ICON_ONLY_MAX_SLOT_REM &&
-      !isBitmapMediaCategory(fileType.category) &&
-      !request.thumbnailPath?.trim()
-    ) {
+    if (!resolvePreviewTarget(request, tier)) {
       return;
     }
 

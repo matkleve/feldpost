@@ -21,8 +21,10 @@ import type { PreviewGenerationStatus } from '../../core/media/preview-generatio
 import { MediaAspectRatioCacheService } from '../../core/media/media-aspect-ratio-cache.service';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaPreviewGenerationService } from '../../core/media-thumbnail/media-preview-generation.service';
+import { CONTEXT_DEFAULT_TIER, tierToMediaSize } from '../../core/media-download/media-download.helpers';
 import { type MediaDisplayState, transitionMediaDisplayState } from './media-display-state';
 import { type MediaDisplayDeliveryState } from './media-display.helpers';
+import { canWarmSkipGridLoadingSurface } from './media-display-warm-revisit.helpers';
 
 const DEFAULT_ROOT_FONT_SIZE_PX = 16;
 const SLOT_SIZE_REM_EPSILON = 0.05;
@@ -48,7 +50,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   private readonly i18nService = inject(I18nService);
 
   private resizeObserver: ResizeObserver | null = null;
-  private lastRequestIdentity = '';
+  private lastHandoffKey = '';
   private ratioProbeImg: HTMLImageElement | null = null;
 
   readonly mediaId: InputSignal<string> = input.required<string>();
@@ -82,8 +84,13 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly stagedContentUrl = signal('');
   readonly icon = signal('insert_drive_file');
   readonly metadataAspectRatio = signal<number | null>(null);
+  /** Grid intrinsic: block sharp content until parent slot aspect transition has committed. */
+  private readonly gridSlotAspectSettled = signal(false);
 
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
+  readonly showSharpContent = computed(
+    () => !!this.resolvedUrl() && this.canRevealGridIntrinsicContent(),
+  );
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
 
   constructor() {
@@ -99,27 +106,36 @@ export class MediaDisplayComponent implements AfterViewInit {
       }
     });
 
+    effect(() => {
+      if (this.isGridIntrinsicSlot() && this.skipIntrinsicRatioTransition()) {
+        this.gridSlotAspectSettled.set(true);
+      }
+    });
+
     effect((onCleanup) => {
       const id = this.mediaId().trim();
       const storagePath = this.storagePath();
       const thumbnailPath = this.thumbnailPath();
       const previewStatus = this.previewGenerationStatus();
+      const handoffKey = `${id}|${this.slotGeometry()}|${this.downloadContext()}`;
 
       if (!id) {
         this.resolvedUrl.set('');
         this.stagedContentUrl.set('');
         this.resetState();
-        this.lastRequestIdentity = '';
+        this.lastHandoffKey = '';
         this.goTo('idle');
         return;
       }
 
-      const isNewHandoff = this.lastRequestIdentity !== id;
+      const isNewHandoff = this.lastHandoffKey !== handoffKey;
       if (isNewHandoff) {
         this.resolvedUrl.set('');
         this.stagedContentUrl.set('');
         this.cancelRatioProbe();
-        this.lastRequestIdentity = id;
+        this.lastHandoffKey = handoffKey;
+
+        this.gridSlotAspectSettled.set(false);
 
         const sessionRatio = this.aspectRatioCache.get(id);
         if (sessionRatio != null && sessionRatio > 0) {
@@ -139,6 +155,10 @@ export class MediaDisplayComponent implements AfterViewInit {
           previewStatus,
           this.downloadContext(),
         );
+
+        if (isNewHandoff) {
+          this.tryWarmIntrinsicGridRevisit(id);
+        }
       }
 
       if (storagePath && !thumbnailPath?.trim()) {
@@ -269,17 +289,43 @@ export class MediaDisplayComponent implements AfterViewInit {
           current !== 'loading-surface-visible' &&
           current !== 'idle'
         ) {
+          this.syncGridIntrinsicRevealAfterUrlUpdate();
           return;
         }
 
         this.goTo('loading-surface-visible');
+        this.syncGridIntrinsicRevealAfterUrlUpdate();
         return;
       }
 
       case 'loaded': {
-        const current = this.state();
+        let current = this.state();
 
-        if (current === 'ratio-known-contain' || current === 'content-fade-in' || current === 'content-visible') {
+        if (current === 'content-fade-in' || current === 'content-visible') {
+          if (
+            this.isGridIntrinsicSlot() &&
+            this.resolvedUrl() &&
+            !this.gridSlotAspectSettled() &&
+            this.skipIntrinsicRatioTransition()
+          ) {
+            this.gridSlotAspectSettled.set(true);
+          }
+          return;
+        }
+
+        if (current === 'ratio-known-contain') {
+          if (this.resolvedUrl()) {
+            this.markGridSlotAspectSettledAndAdvance();
+          }
+          return;
+        }
+
+        if (this.isGridIntrinsicSlot() && current === 'idle') {
+          this.goTo('loading-surface-visible');
+          current = 'loading-surface-visible';
+        }
+
+        if (this.isGridIntrinsicSlot() && this.tryRevealGridIntrinsicWhenReady(current)) {
           return;
         }
 
@@ -298,7 +344,7 @@ export class MediaDisplayComponent implements AfterViewInit {
           }
 
           if (targetRatio != null) {
-            this.revealIntrinsicGridWithKnownRatio(targetRatio);
+            this.revealWithKnownRatio(targetRatio);
             return;
           }
 
@@ -341,6 +387,8 @@ export class MediaDisplayComponent implements AfterViewInit {
       default:
         return;
     }
+
+    this.syncGridIntrinsicRevealAfterUrlUpdate();
   }
 
   /**
@@ -356,7 +404,7 @@ export class MediaDisplayComponent implements AfterViewInit {
     img.onload = () => {
       this.ratioProbeImg = null;
       if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-        this.revealIntrinsicGridWithKnownRatio(img.naturalWidth / img.naturalHeight);
+        this.revealWithKnownRatio(img.naturalWidth / img.naturalHeight);
       } else {
         this.fallThroughToReveal();
       }
@@ -383,15 +431,54 @@ export class MediaDisplayComponent implements AfterViewInit {
    * onViewportTransitionEnd → advanceAfterRatioSettled → media-ready → content-fade-in.
    * Spec: loading-surface-visible → ratio-known-contain: slot aspect-ratio 300ms var(--motion-ease-out).
    */
-  /** Grid intrinsic: shrink choreography or direct reveal when parent slot is already sized. */
-  private revealIntrinsicGridWithKnownRatio(ratio: number): void {
-    if (this.shouldSkipIntrinsicRatioTransition()) {
+  /**
+   * Grid/detail intrinsic: shrink choreography or direct reveal when ratio is already known.
+   * Detail uses immediate reveal; grid may skip transition on warm revisit.
+   */
+  private revealWithKnownRatio(ratio: number): void {
+    if (this.downloadContext() === 'detail') {
       this.storeAspectRatio(ratio, false);
       this.fallThroughToReveal();
       return;
     }
 
+    if (this.shouldSkipIntrinsicRatioTransition()) {
+      this.storeAspectRatio(ratio, false);
+      if (this.isGridIntrinsicSlot()) {
+        this.gridSlotAspectSettled.set(true);
+      }
+      this.fallThroughToReveal();
+      return;
+    }
+
     this.triggerRatioTransition(ratio);
+  }
+
+  /** After registerPreviewPaths: restore cached URL + session ratio without gray stall. */
+  private tryWarmIntrinsicGridRevisit(mediaId: string): void {
+    const sessionRatio = this.aspectRatioCache.get(mediaId);
+    const tier = CONTEXT_DEFAULT_TIER[this.downloadContext()];
+    const cachedUrl = this.mediaDownloadService.getCachedUrl(mediaId, tierToMediaSize(tier));
+
+    if (
+      !canWarmSkipGridLoadingSurface({
+        downloadContext: this.downloadContext(),
+        slotGeometry: this.slotGeometry(),
+        sessionAspectRatio: sessionRatio,
+        cachedPreviewUrl: cachedUrl,
+      })
+    ) {
+      return;
+    }
+
+    this.resolvedUrl.set(cachedUrl!);
+    if (sessionRatio != null) {
+      this.metadataAspectRatio.set(sessionRatio);
+      this.commitAspectRatioToSlot(sessionRatio);
+    }
+
+    this.gridSlotAspectSettled.set(true);
+    this.goTo('content-visible');
   }
 
   private shouldSkipIntrinsicRatioTransition(): boolean {
@@ -421,14 +508,20 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.commitAspectRatioToSlot(ratio);
 
     if (this.prefersReducedMotion()) {
-      queueMicrotask(() => this.advanceAfterRatioSettled());
+      queueMicrotask(() => this.markGridSlotAspectSettledAndAdvance());
+      return;
+    }
+
+    // Square tiles: no CSS transition → transitionend may never fire.
+    if (Math.abs(ratio - 1) < 0.001) {
+      queueMicrotask(() => this.markGridSlotAspectSettledAndAdvance());
       return;
     }
 
     // Parent slot may already match session ratio — no transitionend will fire.
     const sessionRatio = this.aspectRatioCache.get(this.mediaId().trim());
     if (sessionRatio != null && Math.abs(sessionRatio - ratio) < 0.001) {
-      queueMicrotask(() => this.advanceAfterRatioSettled());
+      queueMicrotask(() => this.markGridSlotAspectSettledAndAdvance());
     }
   }
 
@@ -444,23 +537,26 @@ export class MediaDisplayComponent implements AfterViewInit {
       return sessionRatio;
     }
 
-    const hint = this.aspectRatio();
-    if (hint != null && hint > 0) {
-      return hint;
-    }
-
     return null;
   }
 
   private advanceAfterRatioSettled(): void {
+    this.markGridSlotAspectSettledAndAdvance();
+  }
+
+  private markGridSlotAspectSettledAndAdvance(): void {
     if (this.state() !== 'ratio-known-contain') {
       return;
+    }
+
+    if (this.isGridIntrinsicSlot()) {
+      this.gridSlotAspectSettled.set(true);
     }
 
     // ratio-known-contain → media-ready → content-fade-in (staged layer optional / may stay empty).
     this.goTo('media-ready');
 
-    if (this.resolvedUrl()) {
+    if (this.resolvedUrl() && this.canRevealGridIntrinsicContent()) {
       this.goTo('content-fade-in');
     }
   }
@@ -472,13 +568,77 @@ export class MediaDisplayComponent implements AfterViewInit {
       this.goTo('media-ready');
     }
 
-    if (!this.resolvedUrl()) {
+    if (!this.resolvedUrl() || !this.canRevealGridIntrinsicContent()) {
       return;
     }
 
     if (this.state() === 'media-ready') {
       this.goTo(this.shouldSkipIntrinsicRatioTransition() ? 'content-visible' : 'content-fade-in');
     }
+  }
+
+  private isGridIntrinsicSlot(): boolean {
+    return this.downloadContext() === 'grid' && this.slotGeometry() === 'intrinsic';
+  }
+
+  private canRevealGridIntrinsicContent(): boolean {
+    if (!this.isGridIntrinsicSlot()) {
+      return true;
+    }
+
+    return this.gridSlotAspectSettled();
+  }
+
+  /**
+   * Completes reveal when URL arrives after an earlier fallThrough stopped at media-ready
+   * (session ratio known, signed URL still in flight).
+   */
+  private tryRevealGridIntrinsicWhenReady(current: MediaDisplayState): boolean {
+    if (!this.isGridIntrinsicSlot() || !this.resolvedUrl()) {
+      return false;
+    }
+
+    if (current === 'content-fade-in' || current === 'content-visible') {
+      return true;
+    }
+
+    if (current === 'media-ready' && this.gridSlotAspectSettled()) {
+      this.fallThroughToReveal();
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Grid revisit: URL can arrive on a `loading` emit while FSM is already `media-ready`.
+   * Row view works because fill mode bypasses this gate — keep grid in sync here.
+   */
+  private syncGridIntrinsicRevealAfterUrlUpdate(): void {
+    if (!this.isGridIntrinsicSlot() || !this.resolvedUrl()) {
+      return;
+    }
+
+    if (this.skipIntrinsicRatioTransition()) {
+      this.gridSlotAspectSettled.set(true);
+    }
+
+    const current = this.state();
+    if (this.tryRevealGridIntrinsicWhenReady(current)) {
+      return;
+    }
+
+    if (current !== 'loading-surface-visible') {
+      return;
+    }
+
+    const targetRatio = this.resolveTargetAspectRatioForTransition();
+    if (targetRatio != null) {
+      this.revealWithKnownRatio(targetRatio);
+      return;
+    }
+
+    this.probeRatioFromUrl(this.resolvedUrl());
   }
 
   private setupResizeObserver(): void {
@@ -569,6 +729,7 @@ export class MediaDisplayComponent implements AfterViewInit {
 
   private resetState(): void {
     this.metadataAspectRatio.set(null);
+    this.gridSlotAspectSettled.set(false);
     this.cancelRatioProbe();
     if (this.downloadContext() !== 'detail') {
       this.aspectRatioChange.emit(1);

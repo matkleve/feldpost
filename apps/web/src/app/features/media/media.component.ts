@@ -6,8 +6,9 @@
  * Flat host-owned layout:
  * app-media host > content-clamp stack > header + content
  */
-import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, computed, effect, inject, signal } from '@angular/core';
 import type { OnDestroy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { VStackComponent } from '../../shared/containers';
@@ -51,6 +52,7 @@ import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.s
 import { FilterService } from '../../core/filter/filter.service';
 import { MetadataService } from '../../core/metadata/metadata.service';
 import { MediaPageStateService } from '../../core/media-page-state/media-page-state.service';
+import { MediaThumbnailRealtimeService } from '../../core/media-thumbnail/media-thumbnail-realtime.service';
 import { buildMediaGalleryQuerySignature } from '../../core/media-page-state/media-page-state.helpers';
 import type { MediaGalleryQueryInputs } from '../../core/media-page-state/media-page-state.types';
 import type { SortConfig, WorkspaceMedia } from '../../core/workspace-view/workspace-view.types';
@@ -112,6 +114,8 @@ export class MediaComponent implements OnDestroy {
   private readonly filterService = inject(FilterService);
   private readonly metadata = inject(MetadataService);
   private readonly mediaPageState = inject(MediaPageStateService);
+  private readonly thumbnailRealtime = inject(MediaThumbnailRealtimeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(false);
   readonly initialLoadSettled = signal(false);
@@ -293,6 +297,27 @@ export class MediaComponent implements OnDestroy {
     };
 
     this.workspacePaneObserver.onContextRebind(mediaSelectedItemsContext);
+
+    this.thumbnailRealtime.updates$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ mediaId, thumbnailPath, previewGenerationStatus }) => {
+        this.mediaPageState.patchMediaItemPreview(mediaId, {
+          thumbnailPath,
+          previewGenerationStatus,
+        });
+
+        this.rawWorkspaceImages.update((items) =>
+          items.map((item) =>
+            item.id === mediaId
+              ? {
+                  ...item,
+                  thumbnailPath: thumbnailPath ?? item.thumbnailPath,
+                  previewGenerationStatus,
+                }
+              : item,
+          ),
+        );
+      });
 
     effect(() => {
       this.cardVariantSettings.setVariant('media', this.cardVariant());

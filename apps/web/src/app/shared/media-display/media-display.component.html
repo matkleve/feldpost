@@ -27,7 +27,7 @@
     class="media-display__layer media-display__layer--content"
     (transitionend)="onLayerTransitionEnd($event, 'content')"
   >
-    @if (resolvedUrl()) {
+    @if (showSharpContent()) {
       <img
         class="media-display__image"
         [src]="resolvedUrl()"

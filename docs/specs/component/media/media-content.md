@@ -41,7 +41,7 @@ Selection and context actions MUST be emitted as typed intents to the parent she
 When `media_items.thumbnail_path` is updated (upload persist or v2 worker), the grid MUST refresh without polling:
 
 - Subscribe to Supabase Realtime `UPDATE` on `media_items` (`MediaThumbnailRealtimeService`).
-- Call `MediaDownloadService.invalidate(mediaId)` and patch the in-memory row `thumbnail_path` for visible items.
+- Call `MediaDownloadService.invalidate(mediaId)`, patch visible rows, and `MediaPageStateService.patchMediaItemPreview` on the active `/media` route-cache entry (no full `loadAll` revalidate).
 
 ## Actions & Interactions
 

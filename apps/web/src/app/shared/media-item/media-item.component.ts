@@ -24,7 +24,6 @@ import type { MediaItemMapZoomEvent } from './media-item-map-action.component';
 import type { MediaItemQuietActionsState } from './media-item-quiet-actions.component';
 import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
 import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
-import { aspectRatioHintFromFileType, usesNativeAspectRatio } from '../../core/media/aspect-ratio-from-file-type.helpers';
 import { chipVariantForFileType } from '../../core/media/file-type-chip-variant';
 import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-registry';
 import { MediaAspectRatioCacheService } from '../../core/media/media-aspect-ratio-cache.service';
@@ -119,12 +118,6 @@ export class MediaItemComponent {
 
   readonly fileCategory = computed(() => this.fileTypeDefinition().category);
 
-  readonly registryAspectRatioHint = computed(() =>
-    aspectRatioHintFromFileType(this.fileTypeDefinition()),
-  );
-
-  readonly usesNativeSlotAspect = computed(() => usesNativeAspectRatio(this.fileTypeDefinition()));
-
   /** True when grid slot aspect was restored from session cache (shell revisit). */
   readonly gridSessionAspectPrefilled = computed(
     () => this.showInteractionChrome() && this.aspectRatioCache.get(this.mediaIdentity()) != null,
@@ -140,9 +133,7 @@ export class MediaItemComponent {
 
   readonly showFileTypeChip = computed(() => (this.fileTypeChipText()?.length ?? 0) > 0);
 
-  readonly slotContentObjectPosition = computed(() =>
-    this.usesNativeSlotAspect() ? 'center center' : 'top center',
-  );
+  readonly slotContentObjectPosition = computed(() => 'center center');
 
   constructor() {
     effect(() => {
@@ -164,13 +155,10 @@ export class MediaItemComponent {
   private bootstrapGridSlotAspect(mediaId: string): void {
     this.detailSlotRatioCommitted.set(true);
     const cached = this.aspectRatioCache.get(mediaId);
-    const hint = this.registryAspectRatioHint();
-    this.mediaAspectRatio.set(
-      resolveInitialGridAspectRatioCss(cached, hint, this.usesNativeSlotAspect()),
-    );
+    this.mediaAspectRatio.set(resolveInitialGridAspectRatioCss(cached));
   }
 
-  /** Detail-only: apply cached or hinted ratio; otherwise probe full-res when already signed. */
+  /** Detail embed: session cache, then signed thumbnail probe — never full-res for layout. */
   private bootstrapDetailSlotAspect(mediaId: string): void {
     this.detailSlotRatioCommitted.set(false);
 
@@ -181,24 +169,16 @@ export class MediaItemComponent {
       return;
     }
 
-    const hint = this.registryAspectRatioHint();
-    if (hint != null && hint > 0) {
-      this.aspectRatioCache.set(mediaId, hint, 'registry');
-      this.mediaAspectRatio.set(String(hint));
-      this.detailSlotRatioCommitted.set(true);
-      return;
-    }
-
-    void this.probeDetailAspectFromFullUrl(mediaId);
+    void this.probeDetailAspectFromThumbnailUrl(mediaId);
   }
 
-  private async probeDetailAspectFromFullUrl(mediaId: string): Promise<void> {
-    const fullUrl = this.mediaDownload.getCachedUrl(mediaId, 'full');
-    if (!fullUrl) {
+  private async probeDetailAspectFromThumbnailUrl(mediaId: string): Promise<void> {
+    const thumbUrl = this.mediaDownload.getCachedUrl(mediaId, 'thumb');
+    if (!thumbUrl) {
       return;
     }
 
-    const ratio = await probeImageAspectRatio(fullUrl);
+    const ratio = await probeImageAspectRatio(thumbUrl);
     if (
       ratio == null ||
       this.showInteractionChrome() ||
@@ -233,13 +213,7 @@ export class MediaItemComponent {
       return;
     }
 
-    // Ignore media-display handoff reset (1) before native image dimensions are known.
-    if (
-      !this.showInteractionChrome() &&
-      !this.detailSlotRatioCommitted() &&
-      this.usesNativeSlotAspect() &&
-      ratio === 1
-    ) {
+    if (!this.showInteractionChrome() && !this.detailSlotRatioCommitted() && ratio === 1) {
       return;
     }
 

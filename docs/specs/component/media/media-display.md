@@ -119,24 +119,17 @@ flowchart TD
 
 Tier thresholds are defined in `MediaDownloadService`, not in `MediaDisplayComponent`.
 
-### Photos and Videos (always bitmap)
+### Preview delivery (file-type agnostic)
 
-| slotSizeRem (short edge) | Requested tier |
-| ------------------------ | -------------- |
-| `< 4rem`                 | `thumbnail-xs` |
-| `4 - 8rem`               | `thumbnail-sm` |
-| `8 - 16rem`              | `thumbnail-md` |
-| `>= 16rem`               | `thumbnail-lg` |
+`MediaDownloadService` signs `thumbnail_path` when present, else image-like `storage_path`, else returns `icon-only` with no sign. Slot size drives **tier** only, not bitmap vs document branches.
 
-### Documents, Audio, and Other Non-Photo/Video Types
+### Intrinsic grid warm revisit
 
-| slotSizeRem (short edge) | Requested tier                                             |
-| ------------------------ | ---------------------------------------------------------- |
-| `< 8rem`                 | `icon-only` (no image request)                             |
-| `8 - 12rem`              | first-page preview if available, else `icon-only`          |
-| `>= 12rem`               | high-res first-page preview if available, else `icon-only` |
+On shell revisit, handoff effect order is mandatory: (1) reset handoff state, (2) **`registerPreviewPaths`**, (3) if session aspect ratio and `getCachedUrl` hit → `content-visible` without waiting for `transitionend`. Never skip registration before warm path (regression: blank tiles).
 
-`icon-only` is a service-level signal, not a component decision. The component may render `icon-only` only when explicitly returned by `MediaDownloadService`.
+Grid intrinsic sharp content (`<img [src]>`) MUST NOT mount until `gridSlotAspectSettled` (parent slot committed final `--media-aspect-ratio`, typically after `ratio-known-contain` `transitionend`). Prevents landscape photos appearing letterboxed in a square slot during the 300ms shrink.
+
+`icon-only` is a service-level signal. The component renders `icon-only` only when explicitly returned by `MediaDownloadService`.
 
 ## Geometry Ownership Between MediaDisplay and Parent
 
@@ -357,8 +350,8 @@ sequenceDiagram
 - [ ] Cover path skips `ratio-known-contain` and continues via `media-ready`.
 - [ ] `content-fade-in` is treated as a transitional state and exits only via `transitionend`.
 - [ ] `icon-only` state is only entered when the service explicitly returns it.
-- [ ] Photos and videos never enter `icon-only` regardless of slot size; they always receive tier-appropriate bitmap previews.
-- [ ] Documents, audio, and other non-photo/video types enter `icon-only` when slot short edge is below `8rem`.
+- [ ] Image-like storage or `thumbnail_path` receives tier-appropriate signed preview; office without thumb stays `icon-only` without signing.
+- [ ] Warm grid revisit shows `content-visible` when session ratio and cached URL exist after `registerPreviewPaths`.
 - [ ] Slot-size threshold changes trigger a fresh service request and smooth transition between tiers/states.
 - [ ] Error rendering in this component has no retry button or other action controls.
 - [ ] Retry behavior is owned by `MediaDownloadService` and/or parent shells.

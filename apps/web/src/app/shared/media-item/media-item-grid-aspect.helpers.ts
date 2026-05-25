@@ -3,18 +3,10 @@
  * @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
  */
 
-/** CSS `aspect-ratio` value for a grid tile before or after media-display handoff. */
-export function resolveInitialGridAspectRatioCss(
-  cachedRatio: number | null,
-  registryHint: number | null,
-  usesNativeSlotAspect: boolean,
-): string {
+/** CSS `aspect-ratio` value for a grid tile: session cache or square until probe. */
+export function resolveInitialGridAspectRatioCss(cachedRatio: number | null): string {
   if (cachedRatio != null && cachedRatio > 0) {
     return String(cachedRatio);
-  }
-
-  if (!usesNativeSlotAspect && registryHint != null && registryHint > 0) {
-    return String(registryHint);
   }
 
   return '1';

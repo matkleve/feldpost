@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
 import type { PreviewGenerationStatus } from '../media/preview-generation-status.types';
 import { MediaDownloadService } from '../media-download/media-download.service';
+import { MediaPageStateService } from '../media-page-state/media-page-state.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { WorkspaceViewService } from '../workspace-view/workspace-view.service';
 
@@ -20,6 +21,7 @@ export type MediaThumbnailRealtimePatch = {
 export class MediaThumbnailRealtimeService {
   private readonly supabase = inject(SupabaseService);
   private readonly mediaDownload = inject(MediaDownloadService);
+  private readonly mediaPageState = inject(MediaPageStateService);
   private readonly workspaceView = inject(WorkspaceViewService);
   private readonly updatesSubject = new Subject<MediaThumbnailRealtimePatch>();
   private subscribed = false;
@@ -65,6 +67,11 @@ export class MediaThumbnailRealtimeService {
                 : img,
             ),
           );
+
+          this.mediaPageState.patchMediaItemPreview(row.id, {
+            thumbnailPath,
+            previewGenerationStatus,
+          });
 
           this.updatesSubject.next({
             mediaId: row.id,

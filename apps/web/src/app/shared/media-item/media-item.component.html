@@ -21,7 +21,6 @@
       [thumbnailPath]="item()?.thumbnail_path ?? null"
       [previewGenerationStatus]="item()?.preview_generation_status ?? null"
       [originalFilename]="item()?.original_filename ?? null"
-      [aspectRatio]="registryAspectRatioHint()"
       [contentObjectPosition]="slotContentObjectPosition()"
       (aspectRatioChange)="onMediaAspectRatioChange($event)"
     />

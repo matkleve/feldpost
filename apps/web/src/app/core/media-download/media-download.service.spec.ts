@@ -88,6 +88,30 @@ describe('MediaDownloadService file preview delivery', () => {
     expect(resolvePreviewSpy).toHaveBeenCalled();
   });
 
+  it('JPEG with thumbnail_path signs thumbnail not storage_path', async () => {
+    const service = configureMediaDownloadService();
+    const resolvePreviewSpy = vi.spyOn(service, 'resolvePreview').mockResolvedValue({
+      url: 'https://signed.example/photo_thumb.jpg',
+      resolvedTier: 'small',
+      source: 'signed',
+      state: 'ready-low-res',
+    });
+
+    service.registerPreviewPaths(
+      'media-jpeg-thumb',
+      'org/u/photo.jpg',
+      'org/u/photo_thumb.jpg',
+      'ready',
+    );
+
+    await firstValueFrom(service.getState('media-jpeg-thumb', 10).pipe(take(1)));
+
+    expect(resolvePreviewSpy).toHaveBeenCalled();
+    const request = resolvePreviewSpy.mock.calls[0]?.[0];
+    expect(request?.thumbnailPath).toBe('org/u/photo_thumb.jpg');
+    expect(request?.storagePath).toBe('org/u/photo.jpg');
+  });
+
   it('returns icon-only when preview_generation_status is failed', async () => {
     const service = configureMediaDownloadService();
 

@@ -6,15 +6,11 @@ import {
 
 describe('resolveInitialGridAspectRatioCss', () => {
   it('prefers session cached ratio', () => {
-    expect(resolveInitialGridAspectRatioCss(1.5, null, true)).toBe('1.5');
+    expect(resolveInitialGridAspectRatioCss(1.5)).toBe('1.5');
   });
 
-  it('uses registry hint for non-native slots when cache is empty', () => {
-    expect(resolveInitialGridAspectRatioCss(null, 1.777, false)).toBe('1.777');
-  });
-
-  it('defaults to square when native and no cache', () => {
-    expect(resolveInitialGridAspectRatioCss(null, 1.777, true)).toBe('1');
+  it('defaults to square when cache is empty', () => {
+    expect(resolveInitialGridAspectRatioCss(null)).toBe('1');
   });
 });
 

@@ -378,28 +378,19 @@ Forbidden shortcuts:
 - `loading-surface-visible -> content-visible`
 - `ratio-known-contain -> content-visible`
 
-### Media-Type Branch Contract
+### Preview target contract (file-type agnostic)
 
-| Branch                                | Small area                | Large area                          | Required behavior                                          |
-| ------------------------------------- | ------------------------- | ----------------------------------- | ---------------------------------------------------------- |
-| image/video                           | Lower tier bitmap allowed | Higher tier bitmap requested        | No geometry jump, deterministic fade sequence              |
-| document-like (`pdf`, `ppt`, similar) | icon-only representation  | first-page thumbnail representation | Deterministic branch selection, no unstable fallback loops |
+Implementation: `apps/web/src/app/core/media-download/media-preview-target.helpers.ts`
 
-### v1 delivery state matrix (`toDisplayDeliveryState`)
-
-Grid tiles in **ItemGrid** only sign **`thumbnail_path`** for non-images (never raw PDF/Office bytes in `<img>`).
-
-| Condition | Delivery `state` | Network |
+| Condition | Sign target | Delivery when no URL yet |
 | --- | --- | --- |
-| `image` / `video` | Existing path | Sign per tier |
-| Non-image, slot &lt; 8rem | `icon-only` | None |
-| Non-image, `thumbnail_path` set, sign in flight | `loading` | Sign thumb only |
-| Non-image, `thumbnail_path` set, cached URL | `loaded` | None |
-| Non-image, no thumb, v1 Office / spreadsheet / presentation / unknown | `icon-only` immediately | None |
-| Non-image, no thumb, PDF + active `setLocalUrl` | `loaded` / brief `loading` | Local / sign |
-| Non-image, no thumb, PDF, no local blob | `icon-only` | None |
+| `thumbnail_path` present | Sign **`thumbnail_path`** (all file types, including JPEG) | `loading` → `loaded` |
+| No thumb + **image-like** `storage_path` (JPEG, PNG, WEBP, HEIC, …) | Sign **`storage_path`** with tier transforms | `loading` → `loaded` |
+| No thumb + storage not image-like (Office, etc.) | **No sign** | `icon-only` (or `loading` while `preview_generation_status === pending`) |
 
 `resolvePreview` / `requestPreviewIfKnown` MUST NOT run when `resolvePreviewTarget` returns `null` (G3 unit test).
+
+Slot size no longer gates icon-only for non-images; only missing preview target gates signing.
 
 v2 rows (`preview_generation_status`): see [media-preview-converter ADR](../../../../architecture/media-preview-converter.md).
 

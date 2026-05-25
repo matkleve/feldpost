@@ -15,6 +15,10 @@ import {
   signatureHasProjectFilter,
   workspaceMediaFromUploadEvent,
 } from './media-page-state-upload-patch.helpers';
+import {
+  patchMediaCacheItemPreview,
+  type MediaItemPreviewPatch,
+} from './media-page-state-preview-patch.helpers';
 import type {
   MediaGalleryQueryInputs,
   MediaPageCacheLookup,
@@ -66,6 +70,25 @@ export class MediaPageStateService {
   scheduleRevalidate(inputs: MediaGalleryQueryInputs): void {
     const signature = buildMediaGalleryQuerySignature(inputs);
     this.routeCache.scheduleRevalidate(ROUTE_SESSION_SHELL_KEYS.MEDIA, signature);
+  }
+
+  /**
+   * Targeted route-cache write when `thumbnail_path` arrives (realtime / background job).
+   * Does not trigger full gallery revalidate.
+   */
+  patchMediaItemPreview(mediaId: string, patch: MediaItemPreviewPatch): boolean {
+    const entry = this.routeCache.getEntry(ROUTE_SESSION_SHELL_KEYS.MEDIA);
+    if (!entry) {
+      return false;
+    }
+
+    const next = patchMediaCacheItemPreview(entry.data as WorkspaceMedia[], mediaId, patch);
+    if (!next) {
+      return false;
+    }
+
+    this.routeCache.save(ROUTE_SESSION_SHELL_KEYS.MEDIA, entry.querySignature, next);
+    return true;
   }
 
   private handleUploadActivity(event: RouteUploadDispatchEvent): boolean {
