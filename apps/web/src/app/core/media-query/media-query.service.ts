@@ -1,4 +1,6 @@
 import { Injectable, inject } from '@angular/core';
+import { galleryCoordsFromDisplayLocation } from '../media-locations/media-locations.helpers';
+import type { MediaItemLocationRow } from '../media-locations/media-locations.types';
 import { MediaLocationsService } from '../media-locations/media-locations.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { MetadataService } from '../metadata/metadata.service';
@@ -192,11 +194,12 @@ export class MediaQueryService {
       }
     }
 
-    const { zoomableCountByMediaId } = await this.mediaLocationsService.hydrateSummariesAndSeedCache(
-      this.supabase.client,
-      mediaItemIds,
-      MediaQueryService.MEMBERSHIP_QUERY_CHUNK,
-    );
+    const { zoomableCountByMediaId, displayLocationByMediaId } =
+      await this.mediaLocationsService.hydrateSummariesAndSeedCache(
+        this.supabase.client,
+        mediaItemIds,
+        MediaQueryService.MEMBERSHIP_QUERY_CHUNK,
+      );
 
     const images: WorkspaceMedia[] = accum.map((row) =>
       mapGalleryRowToWorkspaceMedia(
@@ -204,6 +207,7 @@ export class MediaQueryService {
         membershipByMediaId.get(row.id) ?? [],
         row.created_by ? (profileNameById.get(row.created_by) ?? null) : null,
         zoomableCountByMediaId.get(row.id) ?? 0,
+        displayLocationByMediaId.get(row.id),
       ),
     );
 
@@ -366,14 +370,16 @@ function mapGalleryRowToWorkspaceMedia(
   memberships: Array<{ id: string; name: string | null }>,
   userName: string | null,
   zoomableLocationCount: number,
+  displayLocation?: MediaItemLocationRow,
 ): WorkspaceMedia {
   const projectIds = memberships.map((m) => m.id);
   const projectNames = memberships.map((m) => m.name ?? '').filter((name) => !!name);
+  const coords = galleryCoordsFromDisplayLocation(displayLocation, zoomableLocationCount);
 
   return {
     id: row.id,
-    latitude: 0,
-    longitude: 0,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
     zoomableLocationCount,
     thumbnailPath: row.thumbnail_path,
     previewGenerationStatus: normalizePreviewGenerationStatus(row.preview_generation_status),
@@ -390,10 +396,10 @@ function mapGalleryRowToWorkspaceMedia(
     direction: null,
     exifLatitude: row.exif_latitude,
     exifLongitude: row.exif_longitude,
-    addressLabel: row.address_label,
-    city: row.city,
-    district: row.district,
-    street: row.street,
+    addressLabel: displayLocation?.address_label ?? row.address_label,
+    city: displayLocation?.city ?? row.city,
+    district: displayLocation?.district ?? row.district,
+    street: displayLocation?.street ?? row.street,
     streetNumber: null,
     zip: null,
     country: row.country,

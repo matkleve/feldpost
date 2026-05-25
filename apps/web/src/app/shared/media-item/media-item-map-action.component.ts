@@ -11,20 +11,22 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import {
-  formatLocationDisplayLine,
+  formatLocationPickerLines,
   legacyMediaHasGps,
   locationMatchesQuery,
   locationsWithGps,
 } from '../../core/media-locations/media-locations.helpers';
+import { LocationPickerRowComponent } from '../workspace-pane/media-detail/location-picker-row/location-picker-row.component';
 import { MediaLocationsService } from '../../core/media-locations/media-locations.service';
 import type { MediaItemLocationRow } from '../../core/media-locations/media-locations.types';
 import { DropdownShellComponent } from '../dropdown-trigger/dropdown-shell.component';
 import { StandardDropdownComponent } from '../dropdown-trigger/standard-dropdown.component';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { HlmMenuItemDirective } from '../ui/menu';
-
-/** Show search when location pick list exceeds this count. */
-const MAP_LOCATION_SEARCH_THRESHOLD = 5;
+import {
+  mapPickerShowsSearch,
+  mapZoomAffordanceFromTargetCount,
+} from './media-item-map-action.helpers';
 
 export interface MediaItemMapZoomEvent {
   readonly mediaId: string;
@@ -37,8 +39,8 @@ type MapZoomTarget = {
   readonly locationId?: string;
   readonly lat: number;
   readonly lng: number;
-  readonly label: string;
-  readonly isPrimary: boolean;
+  readonly primary: string;
+  readonly secondary: string;
   readonly searchRow: MediaItemLocationRow | null;
 };
 
@@ -48,6 +50,7 @@ type MapZoomTarget = {
   imports: [
     DropdownShellComponent,
     StandardDropdownComponent,
+    LocationPickerRowComponent,
     HlmMenuItemDirective,
     ...HLM_BUTTON_IMPORTS,
   ],
@@ -80,7 +83,7 @@ export class MediaItemMapActionComponent {
 
   readonly doorLabel = computed(() => this.t('location.door.label', 'Top'));
 
-  readonly showSearch = computed(() => this.targets().length > MAP_LOCATION_SEARCH_THRESHOLD);
+  readonly showSearch = computed(() => mapPickerShowsSearch(this.targets().length));
 
   readonly filteredTargets = computed(() => {
     const query = this.searchTerm().trim();
@@ -92,7 +95,10 @@ export class MediaItemMapActionComponent {
       if (target.searchRow) {
         return locationMatchesQuery(target.searchRow, query);
       }
-      return target.label.toLowerCase().includes(query.toLowerCase());
+      return (
+        target.primary.toLowerCase().includes(query.toLowerCase()) ||
+        target.secondary.toLowerCase().includes(query.toLowerCase())
+      );
     });
   });
 
@@ -118,24 +124,29 @@ export class MediaItemMapActionComponent {
     try {
       const resolved = await this.resolveZoomTargets();
       this.targets.set(resolved);
-      if (resolved.length === 0) {
-        return;
+      switch (mapZoomAffordanceFromTargetCount(resolved.length)) {
+        case 'noop':
+          return;
+        case 'direct-zoom':
+          this.emitZoom(resolved[0]!);
+          return;
+        case 'picker':
+        case 'picker-with-search':
+          this.searchTerm.set('');
+          this.open.set(true);
+          return;
       }
-      if (resolved.length === 1) {
-        this.emitZoom(resolved[0]!);
-        return;
-      }
-      this.searchTerm.set('');
-      this.open.set(true);
     } finally {
       this.loading.set(false);
       this.releasePointerFocus(event);
     }
   }
 
-  selectTarget(target: MapZoomTarget): void {
+  onPickerSelect(target: MapZoomTarget, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
     this.emitZoom(target);
-    this.close();
+    queueMicrotask(() => this.close());
   }
 
   close(): void {
@@ -154,14 +165,17 @@ export class MediaItemMapActionComponent {
 
   private async resolveZoomTargets(): Promise<MapZoomTarget[]> {
     const mediaId = this.mediaItemId();
-    const result = await this.mediaLocationsService.listForMedia(mediaId);
     const doorLabel = this.doorLabel();
 
-    if (result.ok && 'rows' in result) {
-      const gpsRows = locationsWithGps(result.rows);
-      if (gpsRows.length > 0) {
-        return gpsRows.map((row) => this.rowToTarget(row, doorLabel));
-      }
+    const fromList = await this.targetsFromList(mediaId, doorLabel);
+    if (fromList.length > 0) {
+      return fromList;
+    }
+
+    await this.mediaLocationsService.syncListCacheAfterPlacement(mediaId);
+    const retried = await this.targetsFromList(mediaId, doorLabel);
+    if (retried.length > 0) {
+      return retried;
     }
 
     const lat = this.legacyLatitude();
@@ -170,26 +184,40 @@ export class MediaItemMapActionComponent {
       return [];
     }
 
+    const fallback =
+      this.legacyAddressLabel()?.trim() ||
+      this.t('workspace.thumbnailCard.mapLocations.legacyFallback', 'Location');
     return [
       {
         lat: lat!,
         lng: lng!,
-        label:
-          this.legacyAddressLabel()?.trim() ||
-          this.t('workspace.thumbnailCard.mapLocations.legacyFallback', 'Location'),
-        isPrimary: true,
+        primary: fallback,
+        secondary: '',
         searchRow: null,
       },
     ];
   }
 
+  private async targetsFromList(
+    mediaId: string,
+    doorLabel: string,
+  ): Promise<MapZoomTarget[]> {
+    const result = await this.mediaLocationsService.listForMedia(mediaId);
+    if (!result.ok || !('rows' in result)) {
+      return [];
+    }
+    const gpsRows = locationsWithGps(result.rows);
+    return gpsRows.map((row) => this.rowToTarget(row, doorLabel));
+  }
+
   private rowToTarget(row: MediaItemLocationRow, doorLabel: string): MapZoomTarget {
+    const lines = formatLocationPickerLines(row, doorLabel);
     return {
       locationId: row.id,
       lat: row.latitude!,
       lng: row.longitude!,
-      label: formatLocationDisplayLine(row, doorLabel),
-      isPrimary: false,
+      primary: lines.primary,
+      secondary: lines.secondary || row.address_label?.trim() || '',
       searchRow: row,
     };
   }

@@ -35,9 +35,9 @@ The component exposes two compact icon-only buttons: select (top-left) and map (
 | #   | User Action / System Trigger  | System Response                                         | Trigger             |
 | --- | ----------------------------- | ------------------------------------------------------- | ------------------- |
 | 1   | User clicks select action     | Component MUST emit `selectRequested` only when action is enabled. | select button click |
-| 2   | User clicks map action        | Component MUST emit `mapRequested` only when action is enabled and map action is available. | map button click    |
+| 2   | User clicks map action        | Delegates to `app-media-item-map-action` ([spec](media-item-map-action.md)); parent sets `mapDisabled` when not zoomable. | map button click    |
 | 3   | Item is selected              | Component MUST render select control with active selected style. | `selected=true`     |
-| 4   | Map action disabled           | Component MUST render map button as disabled and non-interactive. | `mapDisabled=true`  |
+| 4   | Map action disabled           | Component MUST render map button as disabled when **zoomable count is 0** ([glossary supplement](../../service/media-locations/media-locations.zoomable-map-contract.supplement.md)). | `mapDisabled=true` / `interactive-*-map-disabled` |
 | 5   | Keyboard focus enters actions | Component MUST render focus-visible ring on focused button. | keyboard navigation |
 
 ## Normative Boundary Contract

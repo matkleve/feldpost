@@ -1,6 +1,6 @@
 # media-locations (core service module)
 
-**What it does:** Loads and saves **multiple org-scoped locations per media item** via `locations` + `media_item_location_links`. List order (`sort_order`) defines which row hydrates detail title / flat `media()` address fields (`displayLocationFromRows` → `mergeLocationDisplayIntoMediaRecord`).
+**What it does:** Loads and saves **multiple org-scoped locations per media item** via `locations` + `media_item_location_links`. Glossary and map affordances: [`docs/specs/service/media-locations/media-locations.zoomable-map-contract.supplement.md`](../../../docs/specs/service/media-locations/media-locations.zoomable-map-contract.supplement.md). Display-hydrate uses `displayLocationFromRows` → `mergeLocationDisplayIntoMediaRecord`; tile map uses **zoomable** count only (`countZoomableLinks` / `zoomable_location_count`).
 
 **UI it connects to:**
 

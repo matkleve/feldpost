@@ -126,7 +126,7 @@ flowchart TD
 - [x] `dd-divider` separates destructive actions from normal ones
 - [x] Zoom to location pans & zooms map to media coordinates (flyTo, zoom 18)
 - [x] Zoom to location highlights the target marker with a pulse animation
-- [x] Zoom to location is disabled when media has no coordinates
+- [x] Zoom to location is disabled when media has no **zoomable** coordinates ([supplement](../../service/media-locations/media-locations.zoomable-map-contract.supplement.md))
 - [x] Detail 3-dot menu exposes the full single-marker action contract
 - [x] Right-click on detail thumbnail opens the same action menu as the 3-dot trigger
 - [x] Change location actions (map/address) are available from detail context menu

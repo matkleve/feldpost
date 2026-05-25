@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import type { AfterViewInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { legacyMediaHasGps } from '../../core/media-locations/media-locations.helpers';
 import type { MediaRecord } from '../../core/media-query/media-query.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { MediaErrorComponent } from './media-error.component';
@@ -404,7 +405,7 @@ export class MediaContentComponent implements AfterViewInit {
       this.items().find((row) => row.id === event.itemId);
     const lat = event.lat ?? item?.latitude ?? null;
     const lng = event.lng ?? item?.longitude ?? null;
-    if (!item || lat === null || lng === null) {
+    if (!item || !legacyMediaHasGps(lat, lng) || lat == null || lng == null) {
       return;
     }
 

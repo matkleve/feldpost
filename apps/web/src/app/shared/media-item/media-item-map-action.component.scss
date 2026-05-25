@@ -70,31 +70,16 @@
   max-height: min(40vh, 16rem);
 }
 
+// Picker list uses shared option-menu-list + option-menu-item row chrome.
+// @see docs/specs/component/media/media-item-map-action.md
 .media-item-map-action__list {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
   min-width: 0;
 }
 
-// One zoom target row in the picker list.
-// @see docs/specs/component/media/media-item-quiet-actions.md#state-machine
 .media-item-map-action__option {
-  justify-content: flex-start;
-  gap: var(--spacing-2);
+  align-items: flex-start;
   text-align: start;
-}
-
-.media-item-map-action__primary-icon {
-  flex-shrink: 0;
-  font-size: 1rem;
-  color: var(--primary);
-}
-
-.media-item-map-action__option-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .media-item-map-action__empty {

@@ -6,6 +6,7 @@ import {
   formatGeocoderPickerLines,
   formatLocationPickerLines,
   legacyMediaHasGps,
+  countZoomableLinks,
   locationDisplaySnapshotFromRows,
   mergeLocationDisplayIntoMediaRecord,
   splitStreetAndHouseNumber,
@@ -13,6 +14,8 @@ import {
   type LocationDisplayLineInput,
   mediaHasZoomableLocation,
   displayLocationFromRows,
+  galleryCoordsFromDisplayLocation,
+  zoomableCountMatchesListParity,
 } from './media-locations.helpers';
 import type { MediaItemLocationRow } from './media-locations.types';
 
@@ -41,6 +44,19 @@ const BASE_ROW: MediaItemLocationRow = {
 };
 
 describe('media-locations.helpers', () => {
+  it('galleryCoordsFromDisplayLocation projects zoomable display-hydrate coords', () => {
+    const display = {
+      ...BASE_ROW,
+      latitude: 48.21,
+      longitude: 16.37,
+    };
+    expect(galleryCoordsFromDisplayLocation(display, 1)).toEqual({
+      latitude: 48.21,
+      longitude: 16.37,
+    });
+    expect(galleryCoordsFromDisplayLocation(display, 0)).toEqual({ latitude: 0, longitude: 0 });
+  });
+
   it('mediaHasZoomableLocation uses zoomable_location_count when set', () => {
     expect(mediaHasZoomableLocation({ zoomable_location_count: 2, latitude: null, longitude: null })).toBe(
       true,
@@ -94,6 +110,46 @@ describe('media-locations.helpers', () => {
     expect(snapshot?.displayLocationId).toBe('loc-1');
     expect(snapshot?.fields.address_label).toBe('Main 1');
     expect(snapshot?.fields.location_unresolved).toBe(false);
+  });
+
+  it('address-only links: display-hydrate + snapshot oracle (zero zoomable)', () => {
+    const sort0: MediaItemLocationRow = {
+      ...BASE_ROW,
+      id: 'loc-addr-0',
+      sort_order: 0,
+      latitude: null,
+      longitude: null,
+      street: 'Theatergasse',
+      address_label: 'Theatergasse 13',
+    };
+    const sort1: MediaItemLocationRow = {
+      ...BASE_ROW,
+      id: 'loc-addr-1',
+      sort_order: 1,
+      latitude: null,
+      longitude: null,
+      street: 'Other',
+    };
+    const rows = [sort1, sort0];
+    expect(displayLocationFromRows(rows)?.id).toBe('loc-addr-0');
+    expect(countZoomableLinks(rows)).toBe(0);
+    const snapshot = locationDisplaySnapshotFromRows(rows);
+    expect(snapshot?.fields.latitude).toBeNull();
+    expect(snapshot?.fields.longitude).toBeNull();
+    expect(snapshot?.fields.location_unresolved).toBe(true);
+    expect(
+      mediaHasZoomableLocation({
+        zoomable_location_count: countZoomableLinks(rows),
+        latitude: snapshot?.fields.latitude ?? null,
+        longitude: snapshot?.fields.longitude ?? null,
+      }),
+    ).toBe(false);
+  });
+
+  it('zoomableCountMatchesListParity holds when batch count matches list', () => {
+    const rows = [BASE_ROW];
+    expect(zoomableCountMatchesListParity(1, rows)).toBe(true);
+    expect(zoomableCountMatchesListParity(0, rows)).toBe(false);
   });
 
   it('LocationDisplayFields is not assignable to LocationDisplayLineInput', () => {
@@ -200,6 +256,24 @@ describe('media-locations.helpers', () => {
         'Top',
       ),
     ).toBe('Site gate');
+  });
+
+  it('formatLocationDisplayLine appends district/country when postcode+city missing', () => {
+    expect(
+      formatLocationDisplayLine(
+        {
+          ...BASE_ROW,
+          street: 'Skodagasse',
+          house_number: null,
+          postcode: null,
+          city: null,
+          district: 'Josefstadt',
+          country: 'AT',
+          address_label: null,
+        },
+        'Top',
+      ),
+    ).toBe('Skodagasse, Josefstadt, AT');
   });
 
   it('formatLocationPickerLines splits primary and locality', () => {

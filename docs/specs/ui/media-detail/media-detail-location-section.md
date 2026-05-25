@@ -2,13 +2,14 @@
 
 > **Parent:** [media-detail-view.md](media-detail-view.md)  
 > **Service:** [media-locations-service.md](../../service/media-locations/media-locations-service.md)  
+> **Glossary:** [media-locations.zoomable-map-contract.supplement.md](../../service/media-locations/media-locations.zoomable-map-contract.supplement.md)  
 > **Add/Search dropdown:** [address-search.md](address-search.md) (4-zone variant in location list mode)
 
 ## What It Is
 
 Multi-location editor for one media item: one always-visible **Add/Search Address** row, then a scrollable list of location rows (`0..n`). Each row owns granular address fields on a shared org **`locations`** row (via **`media_item_location_links`**). There is no shared global street/district/country/GPS block on `media_items`.
 
-Canonical persistence: **`locations`** + **`media_item_location_links`**. Detail header title (`address_label`) edits the **first linked row** by `sort_order` (same hydrate as `displayLocationFromRows`). After any location CRUD, `reloadLocations` + `mergeLocationDisplayIntoMediaRecord` patch `media()` from the same list snapshot.
+Canonical persistence: **`locations`** + **`media_item_location_links`**. Detail header title edits the **display-hydrate row** (`displayLocationFromRows` — supplement §4). **Map** actions use **per-row** zoomable coords or the full zoomable list; address-visible-only rows do not zoom. After any location CRUD, `reloadLocations` + `mergeLocationDisplayIntoMediaRecord` patch `media()` from the list snapshot.
 
 ## What It Looks Like
 
@@ -113,9 +114,11 @@ Slot **l2** edit and center address click use the same shared-edit confirm as **
 
 After any location mutation, parent calls `refreshMediaAfterLocationMutation(mediaId)`:
 
-- Re-load `list_locations_for_media` and merge into `MediaRecord` display fields (lat/lng, address_label, street, city, …).
+- Re-load `list_locations_for_media` and merge into `MediaRecord` via **display-hydrate** snapshot.
 - **Must not** read or write dropped `media_items` address/GPS columns.
-- Map actions use `media().latitude` / `longitude` from hydrated first link only.
+- **Show on map** (row `l1`): that row’s paired lat/lng, or valid `media()` coords from display-hydrate when row lacks GPS.
+- **GPS chip:** `hasValidGpsCoordinates(media)` — paired lat/lng only (supplement §5).
+- Tile map affordance elsewhere uses `zoomable_location_count` / `locationsWithGps` — supplement §7 parity.
 
 ## i18n Keys
 

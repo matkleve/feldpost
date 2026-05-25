@@ -409,6 +409,18 @@
 
 ---
 
+### `<app-media-item-map-action>` — Media Item Map Action
+
+- **File**: `apps/web/src/app/shared/media-item/media-item-map-action.component.ts`
+- **Purpose**: Tile map quiet action — zoomable location picker (0 / 1 / 2–5 / 6+ affordances).
+- **Spec**: [`docs/specs/component/media/media-item-map-action.md`](media/media-item-map-action.md)
+- **Glossary**: [`media-locations.zoomable-map-contract.supplement.md`](../service/media-locations/media-locations.zoomable-map-contract.supplement.md)
+- **Composed of**: `app-dropdown-shell`, `app-standard-dropdown`
+- **Used in**: `app-media-item-quiet-actions`
+- **Gaps**: none
+
+---
+
 ### `<app-media-item-upload-overlay>` — Media Item Upload Overlay
 
 - **File**: `apps/web/src/app/shared/media-item/media-item-upload-overlay.component.ts`

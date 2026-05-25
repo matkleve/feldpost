@@ -213,11 +213,21 @@
   pointer-events: auto;
 }
 
-.media-item__slot--selected app-media-item-map-action {
+.media-item__slot--selected:not(.media-item__slot--map-enabled) app-media-item-map-action {
   pointer-events: none;
+}
+
+.media-item__slot--selected.media-item__slot--map-enabled app-media-item-map-action {
+  pointer-events: auto;
 }
 
 .media-item__slot--selected:hover app-media-item-map-action,
 .media-item__slot--selected:focus-within app-media-item-map-action {
+  pointer-events: auto;
+}
+
+.media-item__slot--selected.media-item__slot--map-enabled .media-item-map-action__trigger {
+  opacity: 1;
+  visibility: visible;
   pointer-events: auto;
 }

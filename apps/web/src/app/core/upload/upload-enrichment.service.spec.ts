@@ -27,7 +27,7 @@ describe('UploadEnrichmentService', () => {
       },
     };
     const mediaLocationsMock = {
-      invalidateListCache: vi.fn(),
+      syncListCacheAfterPlacement: vi.fn().mockResolvedValue(1),
     };
 
     TestBed.configureTestingModule({
@@ -53,6 +53,6 @@ describe('UploadEnrichmentService', () => {
       }),
     );
     expect(result).toEqual({ coords: { lat: 47.3769, lng: 8.5417 } });
-    expect(mediaLocationsMock.invalidateListCache).toHaveBeenCalledWith('media-123');
+    expect(mediaLocationsMock.syncListCacheAfterPlacement).toHaveBeenCalledWith('media-123');
   });
 });

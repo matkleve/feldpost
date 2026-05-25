@@ -2,11 +2,14 @@
 
 > **Module:** `apps/web/src/app/core/media-locations/`  
 > **UI:** [media-detail-location-section.md](../../ui/media-detail/media-detail-location-section.md)  
+> **Zoomable map contract (glossary):** [media-locations.zoomable-map-contract.supplement.md](./media-locations.zoomable-map-contract.supplement.md)  
 > **Migrations:** `supabase/migrations/20260524120000_locations_nn_junction.sql`, `supabase/migrations/20260525130000_drop_media_items_location_columns.sql`
 
 ## What It Is
 
-Facade for org-scoped **`locations`** linked to media via **`media_item_location_links`**. No primary row: list order is `sort_order ASC`, then staircase/door sort keys. Detail title and legacy `MediaRecord` address fields are hydrated from the **first zoomable linked row** by `sort_order`, else the lowest `sort_order` row (`displayLocationFromRows`). `resolve_media_location` updates that primary link’s location instead of appending a second link when one already exists.
+Facade for org-scoped **`locations`** linked to media via **`media_item_location_links`**. Multiple links per media are normative. Terminology: [zoomable-map-contract supplement §1](./media-locations.zoomable-map-contract.supplement.md#1-glossary-read-this-first) (**address-visible**, **display-hydrate**, **zoomable**).
+
+**Display-hydrate** (header / `media()` patch): `displayLocationFromRows` — lowest `sort_order` among **zoomable** links, else lowest `sort_order` overall. **Upload placement:** `resolve_media_location` enriches the existing lowest-`sort_order` link via `update_location` instead of appending a second link ([supplement §6](./media-locations.zoomable-map-contract.supplement.md#6-resolve_media_location-upload--attach-placement)).
 
 Upload / map GPS assignment for a whole item uses **`MediaLocationUpdateService`** (`resolve_media_location` + `link_media_to_location`), not this facade.
 
@@ -61,7 +64,7 @@ Unique: `(organization_id, address_dedupe_key)`.
 | `media_item_id` | uuid FK | CASCADE |
 | `location_id` | uuid FK | CASCADE |
 | `organization_id` | uuid | RLS |
-| `sort_order` | integer NOT NULL | List order; first row = display hydrate |
+| `sort_order` | integer NOT NULL | List order; display-hydrate algorithm in supplement §4 |
 
 Unique: `(media_item_id, location_id)`.
 
@@ -132,13 +135,16 @@ Column on `locations`; updated **only** in `link_media_to_location` (not on `fin
 
 ## Map / gallery integration (read paths)
 
+See [zoomable-map-contract supplement](./media-locations.zoomable-map-contract.supplement.md) for affordance table, count parity, and sync matrix.
+
 | Concern | Source |
 | --- | --- |
-| Viewport markers | `viewport_markers` v2 — zoomable links; `location_id` on marker; cluster count = `COUNT(DISTINCT media_item_id)` |
-| Grid map affordance | `zoomable_location_count` on gallery list rows |
-| Marker preview URL | `MediaDownloadService.resolveMarkerPreview(mediaId, path)` — cache key `mediaId` + `marker` tier |
-| Workspace / gallery hydrate | `hydrateSummariesAndSeedCache` (batch summary + `listCache` seed) or `loadLocationSummaryByMediaIds` / `loadDisplayLocationsByMediaIds` without seed |
-| Thumbnail map menu | `listForMedia` reads in-memory cache when warm |
+| Viewport markers | `viewport_markers` v2 — **zoomable** links only (`lat`, `lng`, `geog`) |
+| Grid map affordance | `zoomable_location_count` (batch) — must match `locationsWithGps(listForMedia).length` after invalidate (supplement §7) |
+| Tile map picker | [media-item-map-action.md](../../component/media/media-item-map-action.md) → `locationsWithGps` |
+| Marker preview URL | `MediaDownloadService.resolveMarkerPreview(mediaId, path)` |
+| Workspace / gallery hydrate | `hydrateSummariesAndSeedCache` / `loadLocationSummaryByMediaIds` |
+| Thumbnail map menu | `listForMedia` (cache or RPC) |
 
 ### In-memory list cache (N:N)
 
@@ -197,7 +203,7 @@ Side submenu under overflow **Copy** (full address first, then parts). Hidden wh
 ## Acceptance Criteria
 
 - [x] All CRUD via RPC only (no direct table writes from components)
-- [x] No primary promotion in product UX; list order defines display hydrate
+- [x] No “primary location” promotion; display-hydrate + zoomable glossary in supplement
 - [x] Dedupe key excludes floor and extra_information; includes postcode
 - [x] `media_items` has no latitude/longitude/address_label/street/city/district/country/geog columns after `20260525130000`
 - [x] Upload completion links location via `resolve_media_location` + `link_media_to_location`

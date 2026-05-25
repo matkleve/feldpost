@@ -32,6 +32,7 @@ import {
   MEDIA_ITEM_ACTION_CONTEXT,
   MediaItemComponent,
 } from '../../../shared/media-item/media-item.component';
+import { legacyMediaHasGps } from '../../../core/media-locations/media-locations.helpers';
 import { workspaceMediaToMediaRecord } from '../../../core/workspace-view/workspace-media-mapper';
 import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
@@ -547,7 +548,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     if (event.actionId === 'zoom_house' || event.actionId === 'zoom_street') {
       const lat = event.lat ?? img.latitude;
       const lng = event.lng ?? img.longitude;
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      if (!legacyMediaHasGps(lat, lng)) {
         return;
       }
       this.zoomToLocationRequested.emit({

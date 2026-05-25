@@ -25,8 +25,8 @@ export function workspaceMediaFromUploadEvent(event: ImageUploadedEvent): Worksp
   const hasCoords = event.coords != null;
   return {
     id: event.mediaId,
-    latitude: 0,
-    longitude: 0,
+    latitude: hasCoords ? event.coords!.lat : 0,
+    longitude: hasCoords ? event.coords!.lng : 0,
     zoomableLocationCount: hasCoords ? 1 : 0,
     thumbnailPath: event.thumbnailUrl ?? null,
     storagePath: null,

@@ -22,6 +22,7 @@ import {
   type MediaLocationSummaryMaps,
 } from './media-locations-batch.helpers';
 import {
+  countZoomableLinks,
   describeMediaLocationRpcError,
   splitStreetAndHouseNumber,
 } from './media-locations.helpers';
@@ -151,6 +152,19 @@ export class MediaLocationsService {
     } catch (error) {
       return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
     }
+  }
+
+  /**
+   * After upload placement / forward geocode: drop stale link list, reload from RPC, return zoomable count.
+   * @see docs/specs/service/media-locations/media-locations.zoomable-map-contract.supplement.md §7
+   */
+  async syncListCacheAfterPlacement(mediaItemId: string): Promise<number> {
+    this.invalidateListCache(mediaItemId);
+    const result = await this.listForMedia(mediaItemId);
+    if (!result.ok || !('rows' in result)) {
+      return 0;
+    }
+    return countZoomableLinks(result.rows);
   }
 
   async addLocation(input: MediaLocationAddInput): Promise<MediaLocationResult> {

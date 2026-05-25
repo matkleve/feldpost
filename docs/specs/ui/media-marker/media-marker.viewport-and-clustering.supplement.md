@@ -1,8 +1,11 @@
 # media marker.viewport and clustering.supplement
 
-> Parent: [`media-marker.md`](./media-marker.md)
+> Parent: [`media-marker.md`](./media-marker.md)  
+> **Zoomable links only:** [media-locations.zoomable-map-contract.supplement.md](../../service/media-locations/media-locations.zoomable-map-contract.supplement.md)
 
 ## Viewport-Driven Marker Lifecycle
+
+`viewport_markers` v2 returns only links where `locations.latitude`, `locations.longitude`, and `geog` are set. Address-visible-only media do not appear until forward geocode or EXIF placement creates a zoomable link.
 
 Markers are loaded based on the current map viewport, not once at initialization. This section defines the lifecycle that replaces the current load-once-at-init approach. See `architecture.md` §8 for the canonical viewport query contract.
 

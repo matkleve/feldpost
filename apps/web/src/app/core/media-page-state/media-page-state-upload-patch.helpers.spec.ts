@@ -37,6 +37,8 @@ describe('media-page-state-upload-patch.helpers', () => {
       coords: { lat: 48, lng: 16 },
     });
     expect(withCoords.zoomableLocationCount).toBe(1);
+    expect(withCoords.latitude).toBe(48);
+    expect(withCoords.longitude).toBe(16);
 
     const withoutCoords = workspaceMediaFromUploadEvent({
       jobId: 'j2',

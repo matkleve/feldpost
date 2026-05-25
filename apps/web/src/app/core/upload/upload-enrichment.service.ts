@@ -77,7 +77,7 @@ export class UploadEnrichmentService {
         return undefined;
       }
 
-      this.mediaLocations.invalidateListCache(mediaId);
+      await this.mediaLocations.syncListCacheAfterPlacement(mediaId);
       return { coords: { lat: result.lat, lng: result.lng } };
     } catch {
       await this.markLocationUnresolvable(mediaId);

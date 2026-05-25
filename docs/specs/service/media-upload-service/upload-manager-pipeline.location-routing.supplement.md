@@ -1,7 +1,8 @@
 # Upload Manager Pipeline — Location routing FSM (supplement)
 
 > **Parent:** [upload-manager-pipeline.md](./upload-manager-pipeline.md)  
-> **Related:** [upload-panel.md](../../component/upload/upload-panel.md), [upload-manager-pipeline.data.md](./upload-manager-pipeline.data.md)
+> **Related:** [upload-panel.md](../../component/upload/upload-panel.md), [upload-manager-pipeline.data.md](./upload-manager-pipeline.data.md)  
+> **Glossary:** [media-locations.zoomable-map-contract.supplement.md](../media-locations/media-locations.zoomable-map-contract.supplement.md)
 
 ## What It Is
 
@@ -80,11 +81,15 @@ flowchart TD
 
 ## Persistence matrix
 
+Use glossary columns from [zoomable-map-contract supplement](./media-locations.zoomable-map-contract.supplement.md).
+
 | Field | Text placement wins | EXIF placement wins | Optional mode |
 | --- | --- | --- | --- |
-| `media_items.exif_latitude` | From file EXIF if any | From file EXIF | From file EXIF if any |
-| Linked `locations.latitude` | From forward geocode | From EXIF placement RPC | Usually null |
-| Detail GPS chip | Uses linked latitude | Uses linked latitude | No GPS if no link |
+| **Address-visible** | Forward geocode text on link (may precede coords) | Reverse-derived address on link | May have no link |
+| **Zoomable** | After forward geocode `resolve_media_location` | EXIF coords on link | Usually 0 |
+| **Display-hydrate** | Zoomable row if geocode succeeded; else address-only row | Zoomable EXIF row | Empty / unresolved |
+| `media_items.exif_*` | Metadata only (not placement) | Metadata only | Metadata only |
+| `zoomable_location_count` (gallery) | ≥ 1 when geocode succeeds + parity after invalidate | ≥ 1 when EXIF placed | 0 |
 | Detail EXIF row | Shows exif_* | Shows exif_* | Shows exif_* if parsed |
 
 ## Webkitdirectory fallback (Bug #4 contract)

@@ -39,7 +39,15 @@ export interface LocationDisplaySnapshot {
  */
 export type LocationDisplayLineInput = Pick<
   MediaItemLocationRow,
-  'street' | 'house_number' | 'staircase' | 'door' | 'postcode' | 'city' | 'address_label'
+  | 'street'
+  | 'house_number'
+  | 'staircase'
+  | 'door'
+  | 'postcode'
+  | 'city'
+  | 'district'
+  | 'country'
+  | 'address_label'
 >;
 
 /**
@@ -96,10 +104,14 @@ export function formatLocationDisplayLine(row: LocationDisplayLineInput, _doorLa
   if (postcode && city) {
     return `${access}, ${postcode} ${city}`;
   }
+  const locality = formatLocationDisplayLocalityLine(row);
+  if (locality) {
+    return `${access}, ${locality.replace(/ · /g, ', ')}`;
+  }
   return access;
 }
 
-/** Picker primary line — street/access only (no locality comma tail). */
+/** Picker primary line — street/access only (locality on secondary). */
 export function formatLocationDisplayPrimaryLine(row: LocationDisplayLineInput, _doorLabel: string): string {
   const access = formatLocationStreetAccessSegment(row);
   return access || row.address_label?.trim() || '—';
@@ -204,24 +216,18 @@ export function formatLocationFullAddressCopy(
   doorLabel: string,
 ): string {
   const segments: string[] = [];
-  const line = formatLocationDisplayLine(row, doorLabel);
-  if (line && line !== '—') {
-    segments.push(line);
+  const { primary, secondary } = formatLocationPickerLines(row, doorLabel);
+  if (primary && primary !== '—') {
+    segments.push(primary);
   }
-  if (row.postcode?.trim()) {
-    segments.push(row.postcode.trim());
+  if (secondary) {
+    segments.push(secondary.replace(/ · /g, ', '));
   }
   if (row.floor?.trim()) {
     segments.push(row.floor.trim());
   }
-  if (row.city?.trim()) {
-    segments.push(row.city.trim());
-  }
-  if (row.district?.trim()) {
-    segments.push(row.district.trim());
-  }
-  if (row.country?.trim()) {
-    segments.push(row.country.trim());
+  if (row.postcode?.trim() && !row.city?.trim()) {
+    segments.push(row.postcode.trim());
   }
   return segments.join(', ');
 }
@@ -233,11 +239,25 @@ export function locationGpsDisplay(row: MediaItemLocationRow): string | null {
   return `${row.latitude.toFixed(6)}, ${row.longitude.toFixed(6)}`;
 }
 
-/** Rows that can drive map zoom (paired lat/lng). */
+/** Rows that can drive map zoom (paired lat/lng, not null-island). */
 export function locationsWithGps(rows: readonly MediaItemLocationRow[]): MediaItemLocationRow[] {
-  return rows.filter(
-    (row) => row.latitude != null && row.longitude != null && Number.isFinite(row.latitude) && Number.isFinite(row.longitude),
-  );
+  return rows.filter((row) => legacyMediaHasGps(row.latitude, row.longitude));
+}
+
+/** Count of zoomable links — same rule as batch `zoomable_location_count`. */
+export function countZoomableLinks(rows: readonly MediaItemLocationRow[]): number {
+  return locationsWithGps(rows).length;
+}
+
+/**
+ * Integration gate: batch summary count must match list-derived zoomable count.
+ * @see docs/specs/service/media-locations/media-locations.zoomable-map-contract.supplement.md
+ */
+export function zoomableCountMatchesListParity(
+  batchZoomableCount: number,
+  rows: readonly MediaItemLocationRow[],
+): boolean {
+  return batchZoomableCount === countZoomableLinks(rows);
 }
 
 export function legacyMediaHasGps(latitude: number | null, longitude: number | null): boolean {
@@ -253,7 +273,7 @@ export function legacyMediaHasGps(latitude: number | null, longitude: number | n
 /**
  * Canonical row for detail title / `media()` projection.
  * Prefers the first zoomable row by `sort_order`; otherwise lowest `sort_order`.
- * @see docs/specs/service/media-locations/media-locations-service.md
+ * @see docs/specs/service/media-locations/media-locations.zoomable-map-contract.supplement.md
  */
 export function displayLocationFromRows(
   rows: readonly MediaItemLocationRow[],
@@ -325,6 +345,21 @@ export function mediaHasZoomableLocation(input: {
     return input.zoomable_location_count > 0;
   }
   return legacyMediaHasGps(input.latitude ?? null, input.longitude ?? null);
+}
+
+/** Gallery/workspace flat coords from display-hydrate row (not null-island placeholders). */
+export function galleryCoordsFromDisplayLocation(
+  display: MediaItemLocationRow | null | undefined,
+  zoomableLocationCount: number,
+): { latitude: number; longitude: number } {
+  if (
+    zoomableLocationCount > 0 &&
+    display &&
+    legacyMediaHasGps(display.latitude, display.longitude)
+  ) {
+    return { latitude: display.latitude!, longitude: display.longitude! };
+  }
+  return { latitude: 0, longitude: 0 };
 }
 
 export function locationMatchesQuery(row: MediaItemLocationRow, query: string): boolean {

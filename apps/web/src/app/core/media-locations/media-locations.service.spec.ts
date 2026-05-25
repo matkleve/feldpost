@@ -231,4 +231,17 @@ describe('MediaLocationsService listCache (N:N)', () => {
     await service.listForMedia('media-2');
     expect(listSpy).toHaveBeenCalledWith('media-2');
   });
+
+  it('syncListCacheAfterPlacement invalidates, reloads list, returns zoomable count', async () => {
+    service.seedListCache(new Map([['media-1', [makeRow({ latitude: null, longitude: null })]]]));
+
+    listSpy.mockResolvedValue([makeRow({ id: 'loc-gps', latitude: 48.2, longitude: 16.37 })]);
+
+    const count = await service.syncListCacheAfterPlacement('media-1');
+
+    expect(count).toBe(1);
+    expect(listSpy).toHaveBeenCalledWith('media-1');
+    const listed = await service.listForMedia('media-1');
+    expect(listed.ok && 'rows' in listed && listed.rows[0]?.latitude).toBe(48.2);
+  });
 });

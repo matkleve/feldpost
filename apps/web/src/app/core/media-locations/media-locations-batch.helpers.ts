@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { displayLocationFromRows, legacyMediaHasGps } from './media-locations.helpers';
+import { countZoomableLinks, displayLocationFromRows } from './media-locations.helpers';
 import type { MediaItemLocationRow } from './media-locations.types';
 
 type LinkLocationRow = {
@@ -90,13 +90,7 @@ export async function loadLocationSummaryByMediaIds(
   for (const [mediaId, rows] of snapshot) {
     rowsByMediaId.set(mediaId, rows);
 
-    let zoomable = 0;
-    for (const row of rows) {
-      if (legacyMediaHasGps(row.latitude, row.longitude)) {
-        zoomable += 1;
-      }
-    }
-    zoomableCountByMediaId.set(mediaId, zoomable);
+    zoomableCountByMediaId.set(mediaId, countZoomableLinks(rows));
 
     const display = displayLocationFromRows(rows);
     if (display) {

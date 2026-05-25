@@ -34,7 +34,8 @@ When `item` is `null`, the host renders an icon-free skeleton rectangle in the e
 - Upload overlay dependency: `docs/specs/component/media/media-item-upload-overlay.md`
 - Quiet-actions dependency: `docs/specs/component/media/media-item-quiet-actions.md`
 - Service contract reference: `docs/specs/service/media-download-service/media-download-service.md`
-- Runtime location: `apps/web/src/app/features/media/media-item.component.ts`
+- Runtime location: `apps/web/src/app/shared/media-item/media-item.component.ts`
+- Map picker: [media-item-map-action.md](media-item-map-action.md); glossary: [media-locations.zoomable-map-contract.supplement.md](../../service/media-locations/media-locations.zoomable-map-contract.supplement.md)
 
 ## Actions & Interactions
 
@@ -47,7 +48,7 @@ When `item` is `null`, the host renders an icon-free skeleton rectangle in the e
 | 5   | Parent sets visual state to `error`                     | Component MUST show item-level error treatment for interaction layer. | `state='error'`             |
 | 6   | Parent sets visual state to `idle`                      | Component MUST hide selected/upload/error-only treatments.        | `state='idle'`              |
 | 7   | User hovers/focuses item                                | Component MUST reveal quiet actions in deterministic tokenized timing. | hover/focus                 |
-| 8   | User activates select/map action                        | Component MUST emit canonical item action outputs.                | click/keyboard              |
+| 8   | User activates select/map action                        | Map: `app-media-item-map-action` per [supplement §3](../../service/media-locations/media-locations.zoomable-map-contract.supplement.md#3-tile-map-affordance-table-canonical); gate via `mediaHasZoomableLocation` (zoomable count 0 → map disabled). | click/keyboard              |
 | 9   | `MediaDisplayComponent` changes internal delivery state | Component MUST keep `MediaItemState` unchanged and MUST NOT wait on child delivery state. | child internal state change |
 | 10  | Upload phase updates                                    | Component MUST update overlay content and progress visuals.       | upload stream               |
 

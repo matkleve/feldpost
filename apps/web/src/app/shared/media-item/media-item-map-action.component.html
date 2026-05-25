@@ -27,42 +27,67 @@
     [minWidth]="panelMinWidth()"
     (closeRequested)="close()"
   >
-    <app-standard-dropdown
-      class="media-item-map-action__dropdown"
-      [showSearch]="showSearch()"
-      [searchTerm]="searchTerm()"
-      [searchPlaceholder]="
-        t('workspace.thumbnailCard.mapLocations.search.placeholder', 'Search locations…')
-      "
-      [showDefaultClearAction]="true"
-      [clearSearchAriaLabel]="t('workspace.thumbnailCard.mapLocations.search.clear', 'Clear search')"
-      [itemsClass]="'standard-dropdown__items--scrollbar-gutter-delegate'"
-      (searchTermChange)="searchTerm.set($event)"
-      (clearRequested)="searchTerm.set('')"
-    >
-      <div dropdown-items class="media-item-map-action__list" role="listbox">
-        @for (target of filteredTargets(); track target.locationId ?? target.label) {
+    @if (showSearch()) {
+      <app-standard-dropdown
+        class="media-item-map-action__dropdown"
+        [showSearch]="true"
+        [searchTerm]="searchTerm()"
+        [searchPlaceholder]="
+          t('workspace.thumbnailCard.mapLocations.search.placeholder', 'Search locations…')
+        "
+        [showDefaultClearAction]="true"
+        [clearSearchAriaLabel]="t('workspace.thumbnailCard.mapLocations.search.clear', 'Clear search')"
+        [itemsClass]="'standard-dropdown__items--scrollbar-gutter-delegate'"
+        (searchTermChange)="searchTerm.set($event)"
+        (clearRequested)="searchTerm.set('')"
+      >
+        <div dropdown-items class="media-item-map-action__list option-menu-list" role="listbox">
+          @for (target of filteredTargets(); track target.locationId ?? target.primary) {
+            <button
+              hlmMenuItem
+              type="button"
+              class="option-menu-item media-item-map-action__option w-full"
+              role="option"
+              (mousedown)="$event.preventDefault()"
+              (click)="onPickerSelect(target, $event)"
+            >
+              <app-location-picker-row
+                icon="place"
+                [primary]="target.primary"
+                [secondary]="target.secondary"
+              />
+            </button>
+          } @empty {
+            <p class="media-item-map-action__empty">
+              {{
+                t(
+                  'workspace.thumbnailCard.mapLocations.filterEmpty',
+                  'No locations match your search'
+                )
+              }}
+            </p>
+          }
+        </div>
+      </app-standard-dropdown>
+    } @else {
+      <div class="media-item-map-action__list option-menu-list" role="listbox">
+        @for (target of filteredTargets(); track target.locationId ?? target.primary) {
           <button
             hlmMenuItem
             type="button"
-            class="media-item-map-action__option"
+            class="option-menu-item media-item-map-action__option w-full"
             role="option"
             (mousedown)="$event.preventDefault()"
-            (click)="selectTarget(target)"
+            (click)="onPickerSelect(target, $event)"
           >
-            <span class="media-item-map-action__option-label min-w-0">{{ target.label }}</span>
+            <app-location-picker-row
+              icon="place"
+              [primary]="target.primary"
+              [secondary]="target.secondary"
+            />
           </button>
-        } @empty {
-          <p class="media-item-map-action__empty">
-            {{
-              t(
-                'workspace.thumbnailCard.mapLocations.filterEmpty',
-                'No locations match your search'
-              )
-            }}
-          </p>
         }
       </div>
-    </app-standard-dropdown>
+    }
   </app-dropdown-shell>
 }
