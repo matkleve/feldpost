@@ -89,7 +89,23 @@ Migration: [`20260526140000_resolve_media_location_enrich_primary_link.sql`](../
 
 ---
 
-## 7. Post-mutation sync matrix
+## 7. Map zoom orchestration (all surfaces)
+
+**Entry point:** [`MapZoomOrchestratorService`](../../../../apps/web/src/app/core/map-zoom/map-zoom-orchestrator.service.ts) — `requestZoom()` only; UI MUST NOT call `MapShellComponent.onZoomToLocation` directly.
+
+| Active shell (`resolveAuthenticatedActiveShell`) | Behavior |
+| --- | --- |
+| `map` | Delegate to layout map effects → `onZoomToLocation` (fly + marker highlight) |
+| `media` or `projects` | `router.navigate(['/map'], { state: { mapFocus } })`, then delegate after map host is visible (`afterNextRender`) |
+| Map delegate missing | Navigate with `mapFocus` only |
+
+The map host stays mounted but hidden on `/media`; delegating without navigation was a silent no-op (coords updated off-screen).
+
+Callers: tile `app-media-item-map-action`, detail location row / actions, media page context menu, workspace pane bubble (upload panel).
+
+---
+
+## 8. Post-mutation sync matrix
 
 | Event | Required follow-up |
 | --- | --- |
@@ -122,7 +138,7 @@ Implementation helper: `MediaLocationsService.syncListCacheAfterPlacement(mediaI
 
 ---
 
-## 8. Anti-patterns (must not ship)
+## 9. Anti-patterns (must not ship)
 
 - Using `media.latitude != null` without `longitude` for GPS chip or map gate.
 - Treating gallery `latitude: 0` / `longitude: 0` placeholders as zoomable.
@@ -137,5 +153,5 @@ Implementation helper: `MediaLocationsService.syncListCacheAfterPlacement(mediaI
 - [x] Glossary §1 referenced from [media-locations-service.md](./media-locations-service.md), [media-detail-location-section.md](../../ui/media-detail/media-detail-location-section.md), [media-item-map-action.md](../../component/media/media-item-map-action.md), upload location supplement
 - [x] §3 affordance table exists only in this file; parents link here
 - [x] §5 address-only oracle covered by vitest in `media-locations.helpers.spec.ts`
-- [x] §7 count parity documented for implementation Step H
+- [x] §7 map zoom orchestration documented; §8 count parity documented for implementation Step H
 - [ ] **Manual LIVE CHECK** (product owner) — folder upload, Auto location ON → tile map zoom → detail Show on map → marker in viewport after fly-to; see [agent-communication.md](../../../agent-workflows/agent-communication.md) LIVE VERIFICATION

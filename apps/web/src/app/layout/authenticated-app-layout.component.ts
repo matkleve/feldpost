@@ -31,6 +31,7 @@ import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace
 import { UploadPanelComponent } from '../features/upload/upload-panel.component';
 import { MapShellState } from '../features/map/map-shell/map-shell.state';
 import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';
+import { MapZoomOrchestratorService } from '../core/map-zoom/map-zoom-orchestrator.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import {
   WORKSPACE_PANE_SHELL_HOST,
@@ -72,6 +73,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly mapLayoutEffects = inject(WorkspacePaneLayoutMapEffectsService);
+  private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -241,15 +243,12 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     lng: number;
     zoomMode?: 'house' | 'street';
   }): void {
-    const mapFx = this.mapLayoutEffects.getMapEffects();
-    if (mapFx) {
-      mapFx.onZoomToLocation(event);
-      return;
-    }
-    void this.router.navigate(['/map'], {
-      state: {
-        mapFocus: { mediaId: event.mediaId, lat: event.lat, lng: event.lng },
-      },
+    this.mapZoomOrchestrator.requestZoom({
+      source: 'layout-bubble',
+      mediaId: event.mediaId,
+      lat: event.lat,
+      lng: event.lng,
+      zoomMode: event.zoomMode,
     });
   }
 

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import type { AfterViewInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { legacyMediaHasGps } from '../../core/media-locations/media-locations.helpers';
+import { MapZoomOrchestratorService } from '../../core/map-zoom/map-zoom-orchestrator.service';
 import type { MediaRecord } from '../../core/media-query/media-query.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { MediaErrorComponent } from './media-error.component';
@@ -86,6 +86,7 @@ export class MediaContentComponent implements AfterViewInit {
   private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   private readonly thumbnailRealtime = inject(MediaThumbnailRealtimeService);
+  private readonly mapZoom = inject(MapZoomOrchestratorService);
   private resizeObserver: ResizeObserver | null = null;
   private readonly itemPreviewPatches = signal<ReadonlyMap<string, MediaPreviewPatch>>(new Map());
   private placeholderExitTimer: ReturnType<typeof setTimeout> | null = null;
@@ -346,41 +347,10 @@ export class MediaContentComponent implements AfterViewInit {
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
   }
 
-  private debugInteraction(
-    stage: string,
-    event: MouseEvent | null,
-    extra: Record<string, unknown> = {},
-  ): void {
-    const target = event?.target instanceof Element ? event.target : null;
-    const currentTarget = event?.currentTarget instanceof Element ? event.currentTarget : null;
-
-    console.info('[media-content][interaction]', {
-      stage,
-      contentState: this.state(),
-      itemCount: this.items().length,
-      selectedCount: this.workspaceSelectionService.selectedMediaIds().size,
-      eventType: event?.type ?? null,
-      button: event?.button ?? null,
-      buttons: event?.buttons ?? null,
-      ctrlKey: event?.ctrlKey ?? false,
-      metaKey: event?.metaKey ?? false,
-      shiftKey: event?.shiftKey ?? false,
-      altKey: event?.altKey ?? false,
-      targetTag: target?.tagName ?? null,
-      targetClass: target?.className ?? null,
-      currentTargetTag: currentTarget?.tagName ?? null,
-      currentTargetClass: currentTarget?.className ?? null,
-      timestamp: Date.now(),
-      ...extra,
-    });
-  }
-
   onItemPointerClick(
     mediaId: string,
     modifiers: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean },
   ): void {
-    this.debugInteraction('item.pointerClick.received', null, { mediaId, modifiers });
-
     const result = this.workspaceSelectionService.applyGridPointerSelection(
       this.orderedVisibleMediaIds(),
       mediaId,
@@ -388,14 +358,11 @@ export class MediaContentComponent implements AfterViewInit {
     );
 
     if (result === 'open-item') {
-      this.debugInteraction('item.pointerClick.openItem', null, { mediaId });
       this.itemClicked.emit(mediaId);
     }
   }
 
   onItemContextActionRequested(event: ItemContextActionEvent): void {
-    this.debugInteraction('item.contextActionRequested.received', null, { event });
-
     if (event.actionId !== 'zoom_house' && event.actionId !== 'zoom_street') {
       return;
     }
@@ -403,16 +370,12 @@ export class MediaContentComponent implements AfterViewInit {
     const item =
       this.gridItems().find((row) => row.id === event.itemId) ??
       this.items().find((row) => row.id === event.itemId);
-    const lat = event.lat ?? item?.latitude ?? null;
-    const lng = event.lng ?? item?.longitude ?? null;
-    if (!item || !legacyMediaHasGps(lat, lng) || lat == null || lng == null) {
-      return;
-    }
-
-    this.zoomToLocationRequested.emit({
-      mediaId: item.id,
-      lat,
-      lng,
+    this.mapZoom.requestZoom({
+      source: 'media-page-context-action',
+      mediaId: event.itemId,
+      lat: event.lat ?? item?.latitude,
+      lng: event.lng ?? item?.longitude,
+      zoomMode: event.actionId === 'zoom_street' ? 'street' : 'house',
     });
   }
 
@@ -421,12 +384,6 @@ export class MediaContentComponent implements AfterViewInit {
   }
 
   onSelectionToggled(mediaId: string, selected: boolean): void {
-    this.debugInteraction('selection.toggle.requested', null, {
-      mediaId,
-      selected,
-      selectedBefore: Array.from(this.workspaceSelectionService.selectedMediaIds()),
-    });
-
     const currentlySelected = this.workspaceSelectionService.isSelected(mediaId);
     if (currentlySelected === selected) {
       return;
@@ -434,12 +391,6 @@ export class MediaContentComponent implements AfterViewInit {
 
     this.workspaceSelectionService.toggle(mediaId, { additive: true });
     this.workspaceSelectionService.setRangeAnchor(mediaId);
-
-    this.debugInteraction('selection.toggle.applied', null, {
-      mediaId,
-      selected,
-      selectedAfter: Array.from(this.workspaceSelectionService.selectedMediaIds()),
-    });
   }
 
   isRowHidden(index: number): boolean {
@@ -491,35 +442,25 @@ export class MediaContentComponent implements AfterViewInit {
   }
 
   onDocumentClick(event: MouseEvent): void {
-    this.debugInteraction('document.click.received', event);
-
     if (this.state() !== 'ready') {
-      this.debugInteraction('document.click.ignored.notReady', event);
       return;
     }
 
     const target = event.target;
     if (!(target instanceof Element)) {
-      this.debugInteraction('document.click.ignored.nonElementTarget', event);
       return;
     }
 
     if (target.closest('app-group-header')) {
-      this.debugInteraction('document.click.ignored.groupHeader', event);
       return;
     }
 
     // Grid gaps, placeholder cells, and square-host padding outside the slot clear selection.
     if (target.closest('app-media-item[data-has-item="true"] .media-item__slot')) {
-      this.debugInteraction('document.click.ignored.mediaItemSlot', event);
       return;
     }
 
-    this.debugInteraction('document.click.clearSelection', event, {
-      selectedBefore: Array.from(this.workspaceSelectionService.selectedMediaIds()),
-    });
     this.workspaceSelectionService.clearSelection();
-    this.debugInteraction('document.click.selectionCleared', event);
   }
 
   private readonly updateViewportMetrics = (): void => {

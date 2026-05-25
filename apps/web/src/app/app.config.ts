@@ -21,7 +21,6 @@ import {
   PreloadAllModules,
   provideRouter,
   withComponentInputBinding,
-  withDebugTracing,
   withPreloading,
 } from '@angular/router';
 import { routes } from './app.routes';
@@ -34,10 +33,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
 
     // Router with component-input binding and background preloading enabled.
-    // TEMP: withDebugTracing — remove after diagnosing child-route activation (black main).
     provideRouter(
       routes,
-      withDebugTracing(),
       withComponentInputBinding(),
       withPreloading(PreloadAllModules),
     ),

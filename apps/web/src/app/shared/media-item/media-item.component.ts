@@ -18,6 +18,7 @@ import type {
 } from '../item-grid/item.component';
 import type { MediaRecord } from '../../core/media-query/media-query.types';
 import { mediaHasZoomableLocation } from '../../core/media-locations/media-locations.helpers';
+import { MapZoomOrchestratorService } from '../../core/map-zoom/map-zoom-orchestrator.service';
 import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
 import type { MediaItemMapZoomEvent } from './media-item-map-action.component';
@@ -70,6 +71,7 @@ export class MediaItemComponent {
   private readonly uploadManager = inject(UploadManagerService);
   private readonly aspectRatioCache = inject(MediaAspectRatioCacheService);
   private readonly mediaDownload = inject(MediaDownloadService);
+  private readonly mapZoom = inject(MapZoomOrchestratorService);
 
   readonly itemId = input.required<string>();
   readonly mode = input<ItemDisplayMode>('grid-md');
@@ -262,48 +264,12 @@ export class MediaItemComponent {
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
   }
 
-  private debugInteraction(
-    stage: string,
-    event: MouseEvent | Event | null,
-    extra: Record<string, unknown> = {},
-  ): void {
-    const mouse = event instanceof MouseEvent ? event : null;
-    const target = mouse?.target instanceof Element ? mouse.target : null;
-    const currentTarget = mouse?.currentTarget instanceof Element ? mouse.currentTarget : null;
-
-    console.info('[media-item][interaction]', {
-      stage,
-      itemId: this.itemId(),
-      mediaIdentity: this.mediaIdentity(),
-      selected: this.selected(),
-      state: this.state(),
-      disabled: this.disabled(),
-      hasMapLocation: this.hasMapLocation(),
-      eventType: event?.type ?? null,
-      button: mouse?.button ?? null,
-      buttons: mouse?.buttons ?? null,
-      ctrlKey: mouse?.ctrlKey ?? false,
-      metaKey: mouse?.metaKey ?? false,
-      shiftKey: mouse?.shiftKey ?? false,
-      altKey: mouse?.altKey ?? false,
-      targetTag: target?.tagName ?? null,
-      targetClass: target?.className ?? null,
-      currentTargetTag: currentTarget?.tagName ?? null,
-      currentTargetClass: currentTarget?.className ?? null,
-      timestamp: Date.now(),
-      ...extra,
-    });
-  }
-
   onOpenClick(event: MouseEvent): void {
-    this.debugInteraction('open.click.received', event);
     event.preventDefault();
     event.stopPropagation();
     if (this.disabled()) {
-      this.debugInteraction('open.click.blocked.disabled', event);
       return;
     }
-    this.debugInteraction('open.click.emit.pointerClick', event, { itemId: this.itemId() });
     this.pointerClick.emit({
       shiftKey: event.shiftKey,
       ctrlKey: event.ctrlKey,
@@ -313,40 +279,29 @@ export class MediaItemComponent {
   }
 
   onOpenDoubleClick(event: MouseEvent): void {
-    this.debugInteraction('open.doubleClick.received', event);
     const target = event.target;
     if (!(target instanceof Element) || !target.closest('.media-item__open')) {
-      this.debugInteraction('open.doubleClick.ignored.nonOpenTarget', event);
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
     if (this.disabled() || !this.selected()) {
-      this.debugInteraction('open.doubleClick.blocked', event, {
-        blockedByDisabled: this.disabled(),
-        blockedByUnselected: !this.selected(),
-      });
       return;
     }
 
-    this.debugInteraction('open.doubleClick.emit.deselect', event);
     this.selectedChange.emit(false);
   }
 
   onSelectRequested(): void {
-    this.debugInteraction('quietAction.select.requested', null);
     if (this.disabled()) {
-      this.debugInteraction('quietAction.select.blocked.disabled', null);
       return;
     }
     const nextSelected = !this.selected();
-    this.debugInteraction('quietAction.select.emit', null, { nextSelected });
     this.selectedChange.emit(nextSelected);
   }
 
   onContextMenu(event: MouseEvent): void {
-    this.debugInteraction('contextmenu.received', event);
     event.preventDefault();
     event.stopPropagation();
     if (!this.showInteractionChrome()) {
@@ -354,7 +309,6 @@ export class MediaItemComponent {
       return;
     }
     if (this.disabled()) {
-      this.debugInteraction('contextmenu.blocked.disabled', event);
       return;
     }
     const payload = {
@@ -362,20 +316,17 @@ export class MediaItemComponent {
       actionId: 'open_in_media',
       contextId: this.actionContextId(),
     };
-    this.debugInteraction('contextmenu.emit.contextActionRequested', event, { payload });
     this.contextActionRequested.emit(payload);
   }
 
   onMapZoomRequested(event: MediaItemMapZoomEvent): void {
-    this.debugInteraction('quietAction.map.zoomRequested', null, { event });
-    queueMicrotask(() => {
-      this.contextActionRequested.emit({
-        itemId: event.mediaId,
-        actionId: 'zoom_house',
-        contextId: this.actionContextId(),
-        lat: event.lat,
-        lng: event.lng,
-      });
+    this.mapZoom.requestZoom({
+      source: 'media-item-tile',
+      mediaId: event.mediaId,
+      lat: event.lat,
+      lng: event.lng,
+      locationId: event.locationId,
+      zoomMode: 'house',
     });
   }
 }

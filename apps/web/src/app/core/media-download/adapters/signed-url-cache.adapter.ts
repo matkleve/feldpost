@@ -227,12 +227,12 @@ export class SignedUrlCacheAdapter {
     size: MediaSize,
     results: Map<string, SignedUrlResult>,
   ): Promise<void> {
-    const withoutThumb = pending.filter((item) => !item.thumbnailPath && item.storagePath);
-    if (withoutThumb.length === 0) return;
+    const needsOriginal = pending.filter((item) => item.storagePath && !results.has(item.id));
+    if (needsOriginal.length === 0) return;
 
     const transform = TRANSFORMS[size];
     const signedEntries = await Promise.all(
-      withoutThumb.map(async (item) => {
+      needsOriginal.map(async (item) => {
         const signed = await this.storage.createSignedUrlWithFallback(
           item.storagePath as string,
           SIGN_EXPIRY_SECONDS,

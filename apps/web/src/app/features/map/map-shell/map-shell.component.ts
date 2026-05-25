@@ -126,6 +126,7 @@ import {
   MapLeafletService,
 } from './map-leaflet.service';
 import { MapFocusPayloadService } from './map-focus-payload.service';
+import { MapZoomOrchestratorService } from '../../../core/map-zoom/map-zoom-orchestrator.service';
 import { LocationMapPickNavigationService } from '../../../core/workspace-pane/location-map-pick-navigation.service';
 import { MediaDetailLocationSyncService } from '../../../core/media-detail-data/media-detail-location-sync.service';
 import { MapGeolocationService } from './map-geolocation.service';
@@ -286,6 +287,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
+  private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly locationMapPickNavigationService = inject(LocationMapPickNavigationService);
   private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
   private readonly mapGeolocationService = inject(MapGeolocationService);
@@ -1820,7 +1822,15 @@ export class MapShellComponent implements OnDestroy {
     lng: number;
     zoomMode?: 'house' | 'street';
   }): void {
-    if (!this.map) return;
+    if (!this.map) {
+      this.mapZoomOrchestrator.deferUntilMapReady({
+        mediaId: event.mediaId,
+        lat: event.lat,
+        lng: event.lng,
+        zoomMode: event.zoomMode,
+      });
+      return;
+    }
 
     // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> detail menu supports house/street zoom variants.
     const requestedZoom =
@@ -1848,6 +1858,8 @@ export class MapShellComponent implements OnDestroy {
 
     // Safety flush while waiting for marker query / reconciliation.
     setTimeout(() => this.flushPendingZoomHighlight(), 140);
+
+    void this.mapZoomOrchestrator.consumePending();
   }
 
   onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
@@ -2166,6 +2178,11 @@ export class MapShellComponent implements OnDestroy {
     this.updateSearchViewportBounds();
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
+
+    const pendingZoom = this.mapZoomOrchestrator.consumePending();
+    if (pendingZoom) {
+      this.onZoomToLocation(pendingZoom);
+    }
 
     // Map click handler: closes upload panel and, when active, places images
     // that had no GPS EXIF data.

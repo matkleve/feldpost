@@ -234,24 +234,17 @@ export class LocationResolverService {
     if (!this.auth.user()) return;
 
     this.backgroundRunning = true;
-    console.log('[LocationResolver] Background resolution started');
 
     try {
-      let totalResolved = 0;
       let hasMore = true;
 
       while (hasMore && this.backgroundRunning && this.auth.user()) {
         hasMore = false;
         const resolved = await this.processNextBatch();
         if (resolved > 0) {
-          totalResolved += resolved;
           hasMore = true;
         }
       }
-
-      console.log(
-        `[LocationResolver] Background resolution complete. Total resolved: ${totalResolved}`,
-      );
     } finally {
       this.backgroundRunning = false;
     }

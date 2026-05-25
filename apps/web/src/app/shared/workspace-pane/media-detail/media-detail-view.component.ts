@@ -62,6 +62,7 @@ import {
   coerceLocationCoordinate,
   legacyMediaHasGps,
 } from '../../../core/media-locations/media-locations.helpers';
+import { MapZoomOrchestratorService } from '../../../core/map-zoom/map-zoom-orchestrator.service';
 import {
   buildInfoChips,
   canCreateProjectOption,
@@ -188,6 +189,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly addressReconciliationService = inject(AddressReconciliationService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly mediaLocationsService = inject(MediaLocationsService);
+  private readonly mapZoom = inject(MapZoomOrchestratorService);
   private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly router = inject(Router);
@@ -1180,11 +1182,11 @@ export class MediaDetailViewComponent implements OnDestroy {
   zoomToLocation(zoomMode: 'house' | 'street' = 'street'): void {
     const media = this.media();
     if (!media || !hasValidGpsCoordinates(media)) return;
-    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> separate zoom_house and zoom_street behaviors.
-    this.zoomToLocationRequested.emit({
+    this.mapZoom.requestZoom({
+      source: 'media-detail-actions',
       mediaId: media.id,
-      lat: media.latitude!,
-      lng: media.longitude!,
+      lat: media.latitude,
+      lng: media.longitude,
       zoomMode,
     });
   }
@@ -1675,10 +1677,12 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (!target) {
       return;
     }
-    this.zoomToLocationRequested.emit({
+    this.mapZoom.requestZoom({
+      source: 'media-detail-location-row',
       mediaId: media.id,
       lat: target.lat,
       lng: target.lng,
+      locationId: locationRowId,
       zoomMode: 'house',
     });
   }

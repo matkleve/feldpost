@@ -41,10 +41,10 @@ export class SupabaseStorageAdapter {
     const resultMap = new Map<string, string>();
 
     const assignFromRows = (
-      rows: Array<{ path?: string | null; signedUrl?: string | null }>,
+      rows: Array<{ path?: string | null; signedUrl?: string | null; error?: string | null }>,
     ): void => {
       for (const row of rows) {
-        if (!row?.path || !row.signedUrl) continue;
+        if (!row?.path || row.error || !row.signedUrl) continue;
         resultMap.set(row.path, row.signedUrl);
       }
     };
@@ -56,15 +56,21 @@ export class SupabaseStorageAdapter {
     assignFromRows((mediaRows ?? []) as Array<{ path?: string | null; signedUrl?: string | null }>);
 
     const missing = paths.filter((path) => !resultMap.has(path));
-    if (missing.length === 0) return resultMap;
+    if (missing.length === 0) {
+      return resultMap;
+    }
 
-    const { data: legacyRows } = await this.supabase.client.storage
-      .from('images')
-      .createSignedUrls(missing, expiresInSeconds);
-
-    assignFromRows(
-      (legacyRows ?? []) as Array<{ path?: string | null; signedUrl?: string | null }>,
+    // Per-path fallback (media → images). Avoids a second batch sign on `images` that 400s when
+    // every thumb path is missing from the legacy bucket.
+    await Promise.all(
+      missing.map(async (path) => {
+        const signed = await this.createSignedUrlWithFallback(path, expiresInSeconds);
+        if (signed.data?.signedUrl) {
+          resultMap.set(path, signed.data.signedUrl);
+        }
+      }),
     );
+
     return resultMap;
   }
 }

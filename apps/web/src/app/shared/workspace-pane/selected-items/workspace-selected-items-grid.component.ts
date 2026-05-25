@@ -32,7 +32,7 @@ import {
   MEDIA_ITEM_ACTION_CONTEXT,
   MediaItemComponent,
 } from '../../../shared/media-item/media-item.component';
-import { legacyMediaHasGps } from '../../../core/media-locations/media-locations.helpers';
+import { MapZoomOrchestratorService } from '../../../core/map-zoom/map-zoom-orchestrator.service';
 import { workspaceMediaToMediaRecord } from '../../../core/workspace-view/workspace-media-mapper';
 import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
@@ -265,6 +265,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   private readonly locationResolverService = inject(LocationResolverService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly bulkActions = inject(WorkspaceBulkActionService);
+  private readonly mapZoom = inject(MapZoomOrchestratorService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
 
@@ -546,15 +547,12 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
 
   onMediaItemContextAction(img: WorkspaceImage, event: ItemContextActionEvent): void {
     if (event.actionId === 'zoom_house' || event.actionId === 'zoom_street') {
-      const lat = event.lat ?? img.latitude;
-      const lng = event.lng ?? img.longitude;
-      if (!legacyMediaHasGps(lat, lng)) {
-        return;
-      }
-      this.zoomToLocationRequested.emit({
+      this.mapZoom.requestZoom({
+        source: 'workspace-thumbnail-context-action',
         mediaId: img.id,
-        lat,
-        lng,
+        lat: event.lat ?? img.latitude,
+        lng: event.lng ?? img.longitude,
+        zoomMode: event.actionId === 'zoom_street' ? 'street' : 'house',
       });
       return;
     }
@@ -715,14 +713,12 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     if (!target) {
       return;
     }
-    if (!Number.isFinite(target.latitude) || !Number.isFinite(target.longitude)) {
-      return;
-    }
-
-    this.zoomToLocationRequested.emit({
+    this.mapZoom.requestZoom({
+      source: 'workspace-thumbnail-menu',
       mediaId: target.id,
       lat: target.latitude,
       lng: target.longitude,
+      zoomMode: 'house',
     });
   }
 
