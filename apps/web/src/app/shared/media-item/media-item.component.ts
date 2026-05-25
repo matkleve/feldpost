@@ -30,8 +30,12 @@ import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-regis
 import { MediaAspectRatioCacheService } from '../../core/media/media-aspect-ratio-cache.service';
 import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identity.helpers';
 import { probeImageAspectRatio } from '../../core/media/probe-image-aspect-ratio.helpers';
+import type { MediaPreviewRequest } from '../../core/media-download/media-download.types';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaDisplayComponent } from '../media-display/media-display.component';
+import type { MediaContentResolution } from '../media-display/media-display.component';
+
+export type { MediaContentResolution };
 import { ChipComponent, type ChipVariant } from '../components/chip/chip.component';
 import {
   resolveInitialGridAspectRatioCss,
@@ -82,6 +86,13 @@ export class MediaItemComponent {
   readonly showInteractionChrome = input(true);
   readonly downloadContext = input<MediaContext>('grid');
 
+  readonly previewDesiredSize = computed((): MediaPreviewRequest['desiredSize'] | null => {
+    if (this.showInteractionChrome() && this.mode() === 'grid-lg') {
+      return 'full';
+    }
+    return null;
+  });
+
   readonly selectedChange = output<boolean>();
   /** Primary tile click with modifier keys for range / additive selection. */
   readonly pointerClick = output<{
@@ -92,6 +103,8 @@ export class MediaItemComponent {
   readonly contextActionRequested = output<ItemContextActionEvent>();
   /** Detail pane: right-click on preview (no workspace grid context menu). */
   readonly embedContextMenu = output<void>();
+  /** Sharp content decode size from media-display (detail resolution badge). */
+  readonly contentResolutionChange = output<MediaContentResolution | null>();
 
   readonly item = input<MediaRecord | null>(null);
   readonly selected = computed(() => this.state() === 'selected');

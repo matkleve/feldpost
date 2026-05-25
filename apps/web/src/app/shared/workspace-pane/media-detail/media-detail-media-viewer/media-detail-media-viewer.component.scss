@@ -19,16 +19,45 @@
   }
 }
 
-// Constrained to hero band height; slot shrink-wraps width from aspect-ratio.
-// @see docs/specs/component/media/media-item.md#visual-behavior-contract
-:host app-media-item {
+// Positions resolution badge over the hero preview without affecting slot geometry.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+.detail-media__preview-wrap {
+  position: relative;
   display: block;
   block-size: 100%;
-  max-block-size: 100%;
   min-block-size: 0;
   inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
   max-inline-size: 100%;
   margin-inline: auto;
+}
+
+// Constrained to hero band height; slot shrink-wraps width from aspect-ratio.
+// @see docs/specs/component/media/media-item.md#visual-behavior-contract
+.detail-media__preview-wrap app-media-item {
+  display: block;
+  block-size: 100%;
+  max-block-size: 100%;
+  min-block-size: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+// Shows decoded pixel dimensions of the sharp preview layer (diagnostic).
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+.detail-media__resolution-badge {
+  position: absolute;
+  inset-block-end: var(--spacing-2);
+  inset-inline-end: var(--spacing-2);
+  z-index: 2;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--shadow-color) 72%, transparent);
+  color: var(--card);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  pointer-events: none;
+  user-select: none;
 }
 
 .detail-media__edit-btn {

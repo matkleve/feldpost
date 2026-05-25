@@ -24,7 +24,7 @@ const CONTEXT_MIN_TIER: Readonly<Record<MediaContext, MediaTier>> = {
   map: 'inline',
   grid: 'small',
   upload: 'small',
-  detail: 'mid',
+  detail: 'large',
 };
 
 const SHORT_EDGE_INLINE_MAX_REM = 6;
@@ -59,6 +59,11 @@ export class TierResolverAdapter {
     }
 
     const adaptiveTier = this.tierForShortEdge(slotShortEdgeRem, input.context);
+    if (input.context === 'detail') {
+      const upgraded = this.higherTier(adaptiveTier, input.requestedTier);
+      return this.lowerTier(upgraded, 'large');
+    }
+
     return this.lowerTier(adaptiveTier, input.requestedTier);
   }
 

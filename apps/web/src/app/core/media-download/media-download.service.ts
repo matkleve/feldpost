@@ -126,12 +126,14 @@ export class MediaDownloadService {
     thumbnailPath: string | null | undefined,
     previewGenerationStatus?: MediaPreviewRequest['previewGenerationStatus'],
     context: MediaPreviewRequest['context'] = 'grid',
+    desiredSizeOverride?: MediaPreviewRequest['desiredSize'],
   ): void {
     const existing = this.knownPreviewRequests.get(mediaId);
     const hadThumb = Boolean(existing?.thumbnailPath?.trim());
     const hasThumb = Boolean(thumbnailPath?.trim());
     const desiredSize =
-      context === 'detail' ? 'detail' : context === 'map' ? 'marker' : 'thumb';
+      desiredSizeOverride ??
+      (context === 'detail' ? 'detail' : context === 'map' ? 'marker' : 'thumb');
     this.knownPreviewRequests.set(mediaId, {
       mediaId,
       storagePath,
@@ -218,11 +220,16 @@ export class MediaDownloadService {
         return;
       }
 
+      const known = this.knownPreviewRequests.get(normalizedId);
+      const context = known?.context ?? 'grid';
+      const requestedTier = known?.desiredSize
+        ? desiredSizeToTier(known.desiredSize)
+        : CONTEXT_DEFAULT_TIER[context];
       const tier = this.selectRequestedTierForSlot({
-        requestedTier: 'small',
+        requestedTier,
         slotWidthRem: slotSizeRem,
         slotHeightRem: slotSizeRem,
-        context: this.knownPreviewRequests.get(normalizedId)?.context ?? 'grid',
+        context,
       });
       const size = tierToMediaSize(tier);
 
@@ -548,8 +555,10 @@ export class MediaDownloadService {
       return { state: 'no-media', icon, resolvedUrl: cachedUrl };
     }
 
+    const warmPreviewUrl = this.warmPreviewUrlForTier(mediaId, tier);
+
     if (cachedUrl) {
-      return { state: 'loaded', resolvedUrl: cachedUrl, icon };
+      return { state: 'loaded', resolvedUrl: cachedUrl, icon, warmPreviewUrl };
     }
 
     const previewTarget =
@@ -558,20 +567,20 @@ export class MediaDownloadService {
     if (!previewTarget) {
       const genStatus = knownRequest?.previewGenerationStatus ?? 'idle';
       if (genStatus === 'pending') {
-        return { state: 'loading', icon, resolvedUrl: cachedUrl };
+        return { state: 'loading', icon, resolvedUrl: cachedUrl, warmPreviewUrl };
       }
-      return { state: 'icon-only', icon, resolvedUrl: cachedUrl };
+      return { state: 'icon-only', icon, resolvedUrl: cachedUrl, warmPreviewUrl };
     }
 
     if (state === 'signing' || state === 'idle') {
-      return { state: 'loading', icon, resolvedUrl: cachedUrl };
+      return { state: 'loading', icon, resolvedUrl: cachedUrl, warmPreviewUrl };
     }
 
     if (state === 'ready-low-res' || state === 'ready-high-res') {
-      return { state: 'loaded', resolvedUrl: cachedUrl, icon };
+      return { state: 'loaded', resolvedUrl: cachedUrl, icon, warmPreviewUrl };
     }
 
-    return { state: 'loading', icon };
+    return { state: 'loading', icon, warmPreviewUrl };
   }
 
   private requestPreviewIfKnown(mediaId: string, tier: MediaTier, slotSizeRem: number): void {
@@ -630,9 +639,24 @@ export class MediaDownloadService {
         return 'marker';
       case 'thumb':
         return 'thumb';
+      case 'detail':
+        return 'detail';
       case 'full':
       default:
         return 'full';
     }
+  }
+
+  private warmPreviewUrlForTier(mediaId: string, tier: MediaTier): string | null {
+    const targetSize = tierToMediaSize(tier);
+    if (targetSize === 'marker' || targetSize === 'thumb') {
+      return null;
+    }
+
+    if (this.getCachedUrl(mediaId, targetSize)) {
+      return null;
+    }
+
+    return this.getCachedUrl(mediaId, 'thumb');
   }
 }

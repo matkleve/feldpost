@@ -25,7 +25,7 @@ export const CONTEXT_DEFAULT_TIER: Readonly<Record<MediaContext, MediaTier>> = {
   map: 'inline',
   grid: 'small',
   upload: 'small',
-  detail: 'mid',
+  detail: 'large',
 };
 
 export const ALL_MEDIA_TIERS: readonly MediaTier[] = [
@@ -84,6 +84,7 @@ export function tierToMediaSize(tier: MediaTier): MediaSize {
     case 'mid2':
       return 'thumb';
     case 'large':
+      return 'detail';
     case 'full':
     default:
       return 'full';

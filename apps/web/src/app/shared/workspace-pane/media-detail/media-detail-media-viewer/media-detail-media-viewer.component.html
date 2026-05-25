@@ -8,16 +8,33 @@
 />
 
 @if (hasPhoto() && item(); as record) {
-  <app-media-item
-    [itemId]="mediaId()"
-    [item]="record"
-    mode="grid-md"
-    state="idle"
-    downloadContext="detail"
-    [showInteractionChrome]="false"
-    (pointerClick)="onItemPointerClick($event)"
-    (embedContextMenu)="onEmbedContextMenu()"
-  />
+  <div class="detail-media__preview-wrap">
+    <app-media-item
+      [itemId]="mediaId()"
+      [item]="record"
+      mode="grid-md"
+      state="idle"
+      downloadContext="detail"
+      [showInteractionChrome]="false"
+      (pointerClick)="onItemPointerClick($event)"
+      (embedContextMenu)="onEmbedContextMenu()"
+      (contentResolutionChange)="onContentResolution($event)"
+    />
+
+    @if (displayedResolution(); as resolution) {
+      <span
+        class="detail-media__resolution-badge"
+        [attr.aria-label]="
+          t(
+            'workspace.imageDetail.mediaResolution.aria',
+            'Displayed image resolution'
+          )
+        "
+      >
+        {{ resolution.width }} × {{ resolution.height }}
+      </span>
+    }
+  </div>
 
   <button
     hlmBtn

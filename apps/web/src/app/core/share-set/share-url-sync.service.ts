@@ -112,7 +112,11 @@ export class ShareUrlSyncService {
         this.lastResolvedToken = result.token;
         return result.token;
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+          const message = error instanceof Error ? error.message : String(error);
+          console.warn('[ShareUrlSyncService] create_or_reuse_share_set failed:', message);
+        }
         this.syncStatusSignal.set('error');
         return null;
       })

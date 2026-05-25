@@ -12,15 +12,19 @@ import type {
 } from '../media-download.types';
 import { SupabaseStorageAdapter } from './supabase-storage.adapter';
 
-const TRANSFORMS: Record<MediaSize, { width: number; height: number; resize: 'cover' } | null> = {
+const TRANSFORMS: Record<
+  MediaSize,
+  { width: number; height: number; resize: 'cover' | 'contain' } | null
+> = {
   marker: { width: 80, height: 80, resize: 'cover' },
   thumb: { width: 256, height: 256, resize: 'cover' },
+  detail: { width: 1280, height: 1280, resize: 'contain' },
   full: null,
 };
 
 const STALE_THRESHOLD_MS = 3_000_000; // 50 minutes
 const SIGN_EXPIRY_SECONDS = 3600;
-const SIZES: readonly MediaSize[] = ['marker', 'thumb', 'full'];
+const SIZES: readonly MediaSize[] = ['marker', 'thumb', 'detail', 'full'];
 
 @Injectable({ providedIn: 'root' })
 export class SignedUrlCacheAdapter {

@@ -23,8 +23,14 @@ import { MediaDownloadService } from '../../core/media-download/media-download.s
 import { MediaPreviewGenerationService } from '../../core/media-thumbnail/media-preview-generation.service';
 import { CONTEXT_DEFAULT_TIER, tierToMediaSize } from '../../core/media-download/media-download.helpers';
 import { type MediaDisplayState, transitionMediaDisplayState } from './media-display-state';
+import type { MediaPreviewRequest } from '../../core/media-download/media-download.types';
 import { type MediaDisplayDeliveryState } from './media-display.helpers';
 import { canWarmSkipGridLoadingSurface } from './media-display-warm-revisit.helpers';
+
+export interface MediaContentResolution {
+  width: number;
+  height: number;
+}
 
 const DEFAULT_ROOT_FONT_SIZE_PX = 16;
 const SLOT_SIZE_REM_EPSILON = 0.05;
@@ -72,11 +78,15 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly skipIntrinsicRatioTransition = input(false);
   /** Drives tier floor and cache registration context in MediaDownloadService. */
   readonly downloadContext = input<MediaContext>('grid');
+  /** Optional ceiling (e.g. grid-lg tiles request full-res originals). */
+  readonly previewDesiredSize = input<MediaPreviewRequest['desiredSize'] | null>(null);
   /**
    * Emits the resolved aspect ratio so the parent slot can mirror it.
    * CSS cannot inherit child → parent, so an output is the only spec-compliant channel.
    */
   readonly aspectRatioChange = output<number>();
+  /** Decoded pixel size of the sharp content image (diagnostic / detail overlay). */
+  readonly contentResolutionChange = output<MediaContentResolution | null>();
 
   readonly state = signal<MediaDisplayState>('idle');
   readonly slotSizeRem = signal(1);
@@ -138,7 +148,7 @@ export class MediaDisplayComponent implements AfterViewInit {
       const storagePath = this.storagePath();
       const thumbnailPath = this.thumbnailPath();
       const previewStatus = this.previewGenerationStatus();
-      const handoffKey = `${id}|${this.slotGeometry()}|${this.downloadContext()}`;
+      const handoffKey = `${id}|${this.slotGeometry()}|${this.downloadContext()}|${this.previewDesiredSize() ?? ''}`;
 
       if (!id) {
         this.resolvedUrl.set('');
@@ -154,6 +164,7 @@ export class MediaDisplayComponent implements AfterViewInit {
         this.resolvedUrl.set('');
         this.stagedContentUrl.set('');
         this.cancelRatioProbe();
+        this.contentResolutionChange.emit(null);
         this.lastHandoffKey = handoffKey;
 
         if (!this.skipIntrinsicRatioTransition()) {
@@ -177,6 +188,7 @@ export class MediaDisplayComponent implements AfterViewInit {
           thumbnailPath,
           previewStatus,
           this.downloadContext(),
+          this.previewDesiredSize() ?? undefined,
         );
 
         if (isNewHandoff) {
@@ -264,12 +276,17 @@ export class MediaDisplayComponent implements AfterViewInit {
    * the ratio-known-contain transition before advancing to content-fade-in.
    */
   onContentImageLoad(event: Event): void {
-    if (this.metadataAspectRatio() != null) {
+    const img = event.target;
+    if (!(img instanceof HTMLImageElement) || img.naturalWidth <= 0 || img.naturalHeight <= 0) {
       return;
     }
 
-    const img = event.target;
-    if (!(img instanceof HTMLImageElement) || img.naturalWidth <= 0 || img.naturalHeight <= 0) {
+    this.contentResolutionChange.emit({
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+    });
+
+    if (this.metadataAspectRatio() != null) {
       return;
     }
 

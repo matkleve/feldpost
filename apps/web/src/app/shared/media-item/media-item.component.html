@@ -15,6 +15,7 @@
       #mediaPreview
       class="media-item__preview"
       [downloadContext]="downloadContext()"
+      [previewDesiredSize]="previewDesiredSize()"
       [slotGeometry]="usesFillSlotGeometry() ? 'fill' : 'intrinsic'"
       [skipIntrinsicRatioTransition]="gridSessionAspectPrefilled()"
       [mediaId]="mediaIdentity()"
@@ -24,6 +25,7 @@
       [originalFilename]="item()?.original_filename ?? null"
       [contentObjectPosition]="slotContentObjectPosition()"
       (aspectRatioChange)="onMediaAspectRatioChange($event)"
+      (contentResolutionChange)="contentResolutionChange.emit($event)"
     />
 
     <!-- Renders upload overlay as slot-aligned absolute layer below quiet actions. -->

@@ -15,7 +15,7 @@ export class SupabaseStorageAdapter {
   async createSignedUrlWithFallback(
     path: string,
     expiresInSeconds: number,
-    options?: { transform?: { width: number; height: number; resize: 'cover' } },
+    options?: { transform?: { width: number; height: number; resize: 'cover' | 'contain' } },
   ): Promise<SignedUrlFallbackResult> {
     let lastError: { message?: string } | null = null;
 

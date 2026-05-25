@@ -357,6 +357,10 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     if (explicitSelection.length > 0) {
       return explicitSelection;
     }
+    const detailMediaId = this.workspacePaneObserver.detailImageId$();
+    if (detailMediaId) {
+      return [detailMediaId];
+    }
     return this.workspaceViewService.rawImages().map((image) => image.id);
   }
 

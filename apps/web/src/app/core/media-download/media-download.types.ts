@@ -88,7 +88,7 @@ export interface ExportResult {
 
 export type MediaLoadState = 'idle' | 'loading' | 'loaded' | 'error' | 'no-media';
 
-export type MediaSize = 'marker' | 'thumb' | 'full';
+export type MediaSize = 'marker' | 'thumb' | 'detail' | 'full';
 
 export interface CacheEntry {
   url: string;
