@@ -27,6 +27,13 @@ describe('FilenameParserService', () => {
     expect(parsed).toEqual({ address: 'Linke Wienzeile 26, Wien', confidence: 'high' });
   });
 
+  it('parses Fuchsthalergasse 4 folder label as high-confidence street address', () => {
+    const parsed = service.extractAddress('Fuchsthalergasse 4');
+    expect(parsed?.confidence).toBe('high');
+    expect(parsed?.address.toLowerCase()).toContain('fuchsthalergasse');
+    expect(parsed?.address).toMatch(/\b4\b/);
+  });
+
   it('extracts address from Strasse filename with high confidence (street suffix)', () => {
     const parsed = service.extractAddress('Arsenalstrasse 3, Wien_000123.jpeg');
     expect(parsed).toEqual({ address: 'Arsenalstrasse 3, Wien', confidence: 'high' });

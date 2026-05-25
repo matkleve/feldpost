@@ -15,10 +15,17 @@ describe('splitWebkitRelativePath', () => {
     });
   });
 
-  it('normalizes windows separators', () => {
+  it('normalizes windows separators and keeps single folder segment', () => {
     expect(splitWebkitRelativePath('Mariahilferstraße 56\\IMG.jpg')).toEqual({
-      directorySegments: [],
+      directorySegments: ['Mariahilferstraße 56'],
       inferredRoot: 'Mariahilferstraße 56',
+    });
+  });
+
+  it('keeps address folder segment for Fuchsthalergasse-style paths', () => {
+    expect(splitWebkitRelativePath('Fuchsthalergasse 4/IMG_1283.HEIC')).toEqual({
+      directorySegments: ['Fuchsthalergasse 4'],
+      inferredRoot: 'Fuchsthalergasse 4',
     });
   });
 

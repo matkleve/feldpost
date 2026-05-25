@@ -62,7 +62,7 @@ export function splitWebkitRelativePath(relativePath: string | undefined): {
   const inferredRoot = parts[0];
 
   return {
-    directorySegments: directoryParts.length <= 1 ? [] : directoryParts,
+    directorySegments: directoryParts,
     inferredRoot,
   };
 }

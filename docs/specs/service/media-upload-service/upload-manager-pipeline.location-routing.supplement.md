@@ -101,7 +101,10 @@ When `showDirectoryPicker` is unavailable, `<input webkitdirectory>` builds jobs
 | `webkitRelativePath` = `Folder/sub/file.jpg` | `['Folder','sub']` | First segment after normalize |
 | Path uses `\` | Normalize to `/`; drop empty segments | Same |
 | Missing / empty `webkitRelativePath` | `[]` | None |
-| `Mariahilferstraße 56/IMG.jpg` | `[]` (file at folder root) | `Mariahilferstraße 56` |
+| `Mariahilferstraße 56/IMG.jpg` | `['Mariahilferstraße 56']` | `Mariahilferstraße 56` |
+| `Fuchsthalergasse 4/IMG_1283.HEIC` | `['Fuchsthalergasse 4']` | `Fuchsthalergasse 4` |
+
+Forward geocode retries (folder title): when Nominatim returns no hit for the literal string, `buildForwardGeocodeRetryQueries()` may retry once with a **generic** locality anchor (default `Wien, Österreich`) if the hint has no comma. There is **no** per-street typo table; spelling must be geocoder-resolvable or the job lands in **Issues** (Choose location).
 
 Implementation: [folder-scan-from-file-list.helpers.ts](../../../../apps/web/src/app/core/folder-scan/folder-scan-from-file-list.helpers.ts).
 

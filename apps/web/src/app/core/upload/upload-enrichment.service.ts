@@ -19,6 +19,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { buildForwardGeocodeRetryQueries } from '../geocoding/geocode-forward-retry.helpers';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { MediaLocationsService } from '../media-locations/media-locations.service';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -55,7 +56,7 @@ export class UploadEnrichmentService {
     titleAddress: string,
   ): Promise<ForwardGeocodeResult | undefined> {
     try {
-      const result = await this.geocoding.forward(titleAddress);
+      const result = await this.forwardWithRetries(titleAddress);
       if (!result) {
         await this.markLocationUnresolvable(mediaId);
         return undefined;
@@ -90,12 +91,22 @@ export class UploadEnrichmentService {
    */
   async forwardGeocodeAddress(titleAddress: string): Promise<ExifCoords | undefined> {
     try {
-      const result = await this.geocoding.forward(titleAddress);
+      const result = await this.forwardWithRetries(titleAddress);
       if (!result) return undefined;
       return { lat: result.lat, lng: result.lng };
     } catch {
       return undefined;
     }
+  }
+
+  private async forwardWithRetries(titleAddress: string) {
+    for (const query of buildForwardGeocodeRetryQueries(titleAddress)) {
+      const result = await this.geocoding.forward(query);
+      if (result) {
+        return result;
+      }
+    }
+    return null;
   }
 
   private async markLocationUnresolvable(mediaId: string): Promise<void> {
