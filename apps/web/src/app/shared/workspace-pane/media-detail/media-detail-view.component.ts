@@ -80,6 +80,7 @@ import {
 import { MediaDetailHeaderComponent } from './media-detail-header/media-detail-header.component';
 import { MediaDetailMediaViewerComponent } from './media-detail-media-viewer/media-detail-media-viewer.component';
 import { MediaDetailInlineSectionComponent } from './media-detail-inline-section/media-detail-inline-section.component';
+import type { ExifLocationAddState } from './media-detail-exif-location-add.state';
 import { MediaDetailLocationSectionComponent } from './media-detail-location-section/media-detail-location-section.component';
 import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import { MediaDetailDataFacade } from '../../../core/media-detail-data/media-detail-data.facade';
@@ -235,6 +236,8 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly coordinatesResolving = signal(false);
   /** Location rows that briefly flash primary after a successful update. */
   readonly highlightedLocationFields = signal<ReadonlySet<LocationHighlightField>>(new Set());
+  /** EXIF row → add location pipeline. @see media-detail-inline-section.md */
+  private readonly exifLocationAddResolving = signal(false);
   readonly acceptTypes = Array.from(ALLOWED_MIME_TYPES).join(',');
   private locationHighlightTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly activeJobId = signal<string | null>(null);
@@ -272,6 +275,17 @@ export class MediaDetailViewComponent implements OnDestroy {
   });
 
   readonly hasCoordinates = computed(() => hasValidGpsCoordinates(this.media()));
+
+  readonly exifLocationAddState = computed((): ExifLocationAddState => {
+    if (this.exifLocationAddResolving()) {
+      return 'resolving';
+    }
+    const media = this.media();
+    if (media?.exif_latitude != null && media?.exif_longitude != null) {
+      return 'idle';
+    }
+    return 'hidden';
+  });
 
   readonly hasAddress = computed(() => this.fullAddress().trim().length > 0);
 
@@ -1674,6 +1688,61 @@ export class MediaDetailViewComponent implements OnDestroy {
   /** After row CRUD: one list fetch, then patch `locations` + `media()` from same snapshot. */
   private async refreshMediaAfterLocationMutation(mediaId: string): Promise<void> {
     await this.reloadLocations(mediaId);
+  }
+
+  async onExifToLocationRequested(): Promise<void> {
+    const media = this.media();
+    if (!media || media.exif_latitude == null || media.exif_longitude == null) {
+      return;
+    }
+    if (this.exifLocationAddResolving()) {
+      return;
+    }
+    const previousLocationIds = new Set(this.locations().map((row) => row.id));
+    this.exifLocationAddResolving.set(true);
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.addFromExifCoordinates(media.id, {
+      lat: media.exif_latitude,
+      lng: media.exif_longitude,
+    });
+    this.saving.set(false);
+    this.exifLocationAddResolving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+    const addedRow = result.ok && 'row' in result ? result.row : undefined;
+    const alreadyLinked = addedRow ? previousLocationIds.has(addedRow.id) : false;
+    if (alreadyLinked) {
+      this.toastService.show({
+        message: this.t(
+          'location.picker.already_linked',
+          'This address is already linked to this media.',
+        ),
+        type: 'success',
+        dedupe: true,
+      });
+      return;
+    }
+    if (result.reverseGeocodeFailed) {
+      this.toastService.show({
+        message: this.t(
+          'workspace.imageDetail.toast.exifLocationGeocodeFailed',
+          'Address could not be resolved; location saved with GPS coordinates only',
+        ),
+        type: 'warning',
+        dedupe: true,
+      });
+    }
+    this.toastService.show({
+      message: this.t(
+        'workspace.imageDetail.toast.exifLocationAdded',
+        'Location added from EXIF coordinates',
+      ),
+      type: 'success',
+      dedupe: true,
+    });
   }
 
   async onLocationAddFromText(label: string): Promise<void> {

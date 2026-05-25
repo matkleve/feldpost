@@ -5,6 +5,7 @@ import { ToastService } from '../../core/toast/toast.service';
 import { UploadService } from '../../core/upload/upload.service';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspace-pane-observer.adapter';
+import { WORKSPACE_PANE_SHELL_HOST } from '../../core/workspace-pane/workspace-pane-shell-host.token';
 import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
@@ -25,6 +26,7 @@ export class UploadPanelJobFileActionsService {
   private readonly uploadService = inject(UploadService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   private readonly router = inject(Router);
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
@@ -86,27 +88,23 @@ export class UploadPanelJobFileActionsService {
   }
 
   async openUploadedJobInMedia(job: UploadJob): Promise<void> {
-    if (!job.mediaId) {
+    const mediaId = job.mediaId;
+    if (!mediaId) {
       return;
     }
 
-    this.workspaceSelectionService.setSingle(job.mediaId);
-    this.workspacePaneObserver.setDetailImageId(job.mediaId);
-    this.workspacePaneObserver.setOpen(true);
-
-    await this.router.navigate(['/media']);
+    this.workspaceSelectionService.setSingle(mediaId);
+    this.workspacePaneShellHost.openDetailView(mediaId);
   }
 
   async openExistingDuplicateInMedia(job: UploadJob): Promise<void> {
-    if (!job.existingMediaId) {
+    const mediaId = job.existingMediaId;
+    if (!mediaId) {
       return;
     }
 
-    this.workspaceSelectionService.setSingle(job.existingMediaId);
-    this.workspacePaneObserver.setDetailImageId(job.existingMediaId);
-    this.workspacePaneObserver.setOpen(true);
-
-    await this.router.navigate(['/media']);
+    this.workspaceSelectionService.setSingle(mediaId);
+    this.workspacePaneShellHost.openDetailView(mediaId);
   }
 
   async openUploadedJobProject(job: UploadJob): Promise<void> {

@@ -12,6 +12,7 @@ import {
   type UploadPhase,
 } from '../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import { WORKSPACE_PANE_SHELL_HOST } from '../../core/workspace-pane/workspace-pane-shell-host.token';
 
 export function buildFakeUploadManager() {
   const jobsSignal = signal<ReadonlyArray<UploadJob>>([]);
@@ -78,11 +79,29 @@ export async function setupUploadPanel(): Promise<UploadPanelSetupResult> {
     selectedProjectIds: signal<Set<string>>(new Set()).asReadonly(),
   };
 
+  const fakeShellHost = {
+    openDetailView: vi.fn(),
+    closeDetailView: vi.fn(),
+    closeWorkspacePane: vi.fn(),
+    onWorkspaceWidthChange: vi.fn(),
+    onWorkspacePaneActiveTabChange: vi.fn(),
+    onDetailAddressSearchRequestConsumed: vi.fn(),
+    onZoomToLocationRequested: vi.fn(),
+    onImageUploadedFromWorkspacePane: vi.fn(),
+    enterPlacementModeFromWorkspacePane: vi.fn(),
+    onUploadLocationPreviewRequestedFromWorkspacePane: vi.fn(),
+    onUploadLocationPreviewClearedFromWorkspacePane: vi.fn(),
+    onUploadLocationMapPickRequestedFromWorkspacePane: vi.fn(),
+    onWorkspaceItemHoverStartedFromPane: vi.fn(),
+    onWorkspaceItemHoverEndedFromPane: vi.fn(),
+  };
+
   await TestBed.configureTestingModule({
     imports: [UploadPanelComponent],
     providers: [
       { provide: UploadManagerService, useValue: fakeManager },
       { provide: WorkspaceViewService, useValue: fakeWorkspaceView },
+      { provide: WORKSPACE_PANE_SHELL_HOST, useValue: fakeShellHost },
     ],
   }).compileComponents();
 

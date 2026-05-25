@@ -77,6 +77,25 @@ describe('UploadPanelComponent workspace detail click interactions', () => {
     expect(detailSpy).toHaveBeenCalledWith('img-123');
   });
 
+  it('emits detailRequested when clicking the file name on an uploaded row', async () => {
+    const { fixture, component, fakeManager } = await setupUploadPanel();
+    const detailSpy = vi.spyOn(component.detailRequested, 'emit');
+    const job = makeUploadJob({
+      phase: 'complete',
+      mediaId: 'img-456',
+      coords: undefined,
+    });
+
+    fakeManager._jobsSignal.set([job]);
+    component.laneHandlers.setSelectedLane('uploaded');
+    fixture.detectChanges();
+
+    const fileName = fixture.debugElement.query(By.css('.upload-panel__file-name'));
+    (fileName.nativeElement as HTMLElement).click();
+
+    expect(detailSpy).toHaveBeenCalledWith('img-456');
+  });
+
   it('emits detailRequested when clicking duplicate issue row with existing media', async () => {
     const { fixture, component, fakeManager } = await setupUploadPanel();
     const detailSpy = vi.spyOn(component.detailRequested, 'emit');

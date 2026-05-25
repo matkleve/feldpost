@@ -8,6 +8,7 @@ import {
   legacyMediaHasGps,
   locationDisplaySnapshotFromRows,
   mergeLocationDisplayIntoMediaRecord,
+  splitStreetAndHouseNumber,
   type LocationDisplayFields,
   type LocationDisplayLineInput,
   mediaHasZoomableLocation,
@@ -119,6 +120,20 @@ describe('media-locations.helpers', () => {
     expect(formatLocationFullAddressCopy(BASE_ROW, 'Top')).toBe('Main 1, Vienna, AT');
   });
 
+  it('splitStreetAndHouseNumber strips duplicate house number from combined geocoder street', () => {
+    expect(
+      splitStreetAndHouseNumber('Liechtensteinstraße 135', '135'),
+    ).toEqual({ street: 'Liechtensteinstraße', house_number: '135' });
+    expect(splitStreetAndHouseNumber('Bahnhofstrasse', '12')).toEqual({
+      street: 'Bahnhofstrasse',
+      house_number: '12',
+    });
+    expect(splitStreetAndHouseNumber('Liechtensteinstraße 135', null)).toEqual({
+      street: 'Liechtensteinstraße 135',
+      house_number: null,
+    });
+  });
+
   it('formatLocationDisplayLine uses Stiege/Top suffixes and locality comma', () => {
     const full = {
       ...BASE_ROW,
@@ -133,6 +148,12 @@ describe('media-locations.helpers', () => {
     expect(formatLocationDisplayLine(full, 'Top')).toBe(
       'Liechtensteinstraße 135/Stiege 5/Top 4B, 1090 Wien',
     );
+    expect(
+      formatLocationDisplayLine(
+        { ...full, street: 'Liechtensteinstraße 135', house_number: '135' },
+        'Top',
+      ),
+    ).toBe('Liechtensteinstraße 135/Stiege 5/Top 4B, 1090 Wien');
     expect(formatLocationDisplayLine({ ...full, staircase: null }, 'Top')).toBe(
       'Liechtensteinstraße 135/Top 4B, 1090 Wien',
     );

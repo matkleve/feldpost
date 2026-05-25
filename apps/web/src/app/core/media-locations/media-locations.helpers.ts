@@ -42,9 +42,31 @@ export type LocationDisplayLineInput = Pick<
   'street' | 'house_number' | 'staircase' | 'door' | 'postcode' | 'city' | 'address_label'
 >;
 
+/**
+ * Geocoder `street` often already includes `house_number`; split before DB persist or display join.
+ * @see geocoding.service.ts combineStreet
+ */
+export function splitStreetAndHouseNumber(
+  street: string | null | undefined,
+  houseNumber: string | null | undefined,
+): { street: string | null; house_number: string | null } {
+  const streetTrim = street?.trim() || null;
+  const houseTrim = houseNumber?.trim() || null;
+  if (!streetTrim || !houseTrim) {
+    return { street: streetTrim, house_number: houseTrim };
+  }
+  const suffix = ` ${houseTrim}`;
+  if (streetTrim.endsWith(suffix)) {
+    const road = streetTrim.slice(0, -suffix.length).trim();
+    return { street: road || null, house_number: houseTrim };
+  }
+  return { street: streetTrim, house_number: houseTrim };
+}
+
 /** Building/access segment without postcode/city tail (shared by row + picker primary). */
 function formatLocationStreetAccessSegment(row: LocationDisplayLineInput): string {
-  const streetPart = [row.street, row.house_number].filter(Boolean).join(' ').trim();
+  const normalized = splitStreetAndHouseNumber(row.street, row.house_number);
+  const streetPart = [normalized.street, normalized.house_number].filter(Boolean).join(' ').trim();
   let line = streetPart || row.address_label?.trim() || '';
   if (!line) {
     return '';

@@ -86,6 +86,20 @@
   transition:
     background 80ms ease-out,
     color 80ms ease-out;
+
+  // Let the full-row hit target (`.upload-panel__row-main-action`) receive clicks on name/status/thumbnail.
+  // @see docs/specs/ui/upload/upload-panel-system.md — row opens workspace media detail
+  .upload-panel__file-meta,
+  .upload-panel__thumbnail-helper,
+  .upload-panel__universal-media {
+    pointer-events: none;
+  }
+
+  .upload-panel__selection-input,
+  .upload-panel__row-action,
+  .upload-panel__thumbnail-action-btn--interactive {
+    pointer-events: auto;
+  }
 }
 
 .upload-panel__file-main--interactive:hover {

@@ -14,9 +14,37 @@
   </div>
 
   @if (isImageLike()) {
-    <div class="detail-row detail-row--readonly">
+    <div
+      class="detail-row detail-row--readonly detail-row--exif-location-add"
+      [attr.data-state]="exifLocationAddState()"
+    >
       <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      @if (hasExifCoordinates()) {
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--l1"
+          type="button"
+          [disabled]="exifAddDisabled()"
+          [attr.aria-label]="
+            t(
+              'workspace.imageDetail.action.addExifToLocations.aria',
+              'Add reverse-geocoded address from EXIF coordinates to locations'
+            )
+          "
+          [attr.title]="
+            t('workspace.imageDetail.action.addExifToLocations', 'Add as address to locations')
+          "
+          (click)="exifToLocationRequested.emit()"
+        >
+          <span class="material-icons" aria-hidden="true">{{
+            exifLocationAddState() === 'resolving' ? 'progress_activity' : 'add_location'
+          }}</span>
+        </button>
+      } @else {
+        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      }
       <div class="detail-row__center">
         <span class="material-icons detail-row__icon" aria-hidden="true">photo_camera</span>
         <span class="detail-row__label">{{

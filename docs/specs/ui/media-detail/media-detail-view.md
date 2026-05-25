@@ -17,6 +17,7 @@ Feature-specific behavior is owned by these child specs:
 | ------------------------------------------------------------- | ------------------------------------------------------ |
 | [media-detail-media-viewer](media-detail-media-viewer.md)     | Progressive loading, lightbox, replace/upload media    |
 | [media-detail-inline-editing](media-detail-inline-editing.md) | Click-to-edit fields, address search, property rows    |
+| [media-detail-inline-section](media-detail-inline-section.md) | Details rows (type, EXIF, captured, projects) + EXIF→location |
 | [media-detail-header](media-detail-header.md)                 | Back, title edit, overflow actions                     |
 | [address-search](address-search.md)                           | Address autocomplete control                           |
 | [metadata-section](metadata-section.md)                       | Custom metadata list + add flow                      |

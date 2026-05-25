@@ -21,7 +21,10 @@ import {
   loadLocationSummaryByMediaIds,
   type MediaLocationSummaryMaps,
 } from './media-locations-batch.helpers';
-import { describeMediaLocationRpcError } from './media-locations.helpers';
+import {
+  describeMediaLocationRpcError,
+  splitStreetAndHouseNumber,
+} from './media-locations.helpers';
 import type {
   MediaItemLocationRow,
   MediaLocationAddInput,
@@ -165,10 +168,14 @@ export class MediaLocationsService {
     suggestion: ForwardGeocodeResult,
     extra?: { extra_information?: string | null },
   ): Promise<MediaLocationResult> {
+    const { street, house_number } = splitStreetAndHouseNumber(
+      suggestion.street,
+      suggestion.streetNumber,
+    );
     return this.addLocation({
       mediaItemId,
-      street: suggestion.street,
-      house_number: suggestion.streetNumber,
+      street,
+      house_number,
       postcode: suggestion.zip,
       city: suggestion.city,
       district: suggestion.district,
@@ -178,6 +185,32 @@ export class MediaLocationsService {
       address_label: suggestion.addressLabel,
       ...extra,
     });
+  }
+
+  /**
+   * Reverse-geocode EXIF GPS and add a linked location row (detail EXIF row action).
+   * @see docs/specs/ui/media-detail/media-detail-inline-section.md
+   */
+  async addFromExifCoordinates(
+    mediaItemId: string,
+    coords: { lat: number; lng: number },
+  ): Promise<MediaLocationResult & { reverseGeocodeFailed?: boolean }> {
+    const reverse = await this.geocodingService.reverse(coords.lat, coords.lng);
+    if (reverse) {
+      const result = await this.addFromGeocodeSuggestion(mediaItemId, {
+        ...reverse,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+      return { ...result, reverseGeocodeFailed: false };
+    }
+    const result = await this.addLocation({
+      mediaItemId,
+      latitude: coords.lat,
+      longitude: coords.lng,
+      address_label: `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`,
+    });
+    return { ...result, reverseGeocodeFailed: true };
   }
 
   async addFromFreeText(mediaItemId: string, label: string): Promise<MediaLocationResult> {
@@ -210,13 +243,17 @@ export class MediaLocationsService {
     coords: { lat: number; lng: number },
   ): Promise<MediaLocationResult> {
     const reverse = await this.geocodingService.reverse(coords.lat, coords.lng);
+    const { street, house_number } = splitStreetAndHouseNumber(
+      reverse?.street,
+      reverse?.streetNumber,
+    );
     return this.updateLocation({
       locationId,
       latitude: coords.lat,
       longitude: coords.lng,
       address_label: reverse?.addressLabel ?? null,
-      street: reverse?.street ?? null,
-      house_number: reverse?.streetNumber ?? null,
+      street,
+      house_number,
       postcode: reverse?.zip ?? null,
       city: reverse?.city ?? null,
       district: reverse?.district ?? null,
@@ -386,9 +423,13 @@ function rowToCoreRow(row: MediaItemLocationRow): MediaLocationCoreRow {
 }
 
 function forwardPatchFromGeocode(suggestion: ForwardGeocodeResult): MediaLocationAddressPatch {
+  const { street, house_number } = splitStreetAndHouseNumber(
+    suggestion.street,
+    suggestion.streetNumber,
+  );
   return {
-    street: suggestion.street,
-    house_number: suggestion.streetNumber,
+    street,
+    house_number,
     postcode: suggestion.zip,
     city: suggestion.city,
     district: suggestion.district,

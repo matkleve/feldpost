@@ -40,6 +40,7 @@ Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-t
 | 10  | Opens location section for mixed-source media      | Sees separate rows for active coordinates, address-derived coordinates, and EXIF coordinates | location evidence model          |
 | 11  | EXIF and address-derived coordinates differ (>15m) | Shows mismatch badge with distance and keeps both sources visible                            | reconciliation metadata          |
 | 12  | Address parser kept unresolved fragments           | Sees read-only "Address notes" list in location evidence group                               | parser residual notes            |
+| 13  | Clicks **Add as address to locations** on EXIF row in Details | Reverse-geocodes EXIF GPS and adds/links a location row (see [media-detail-inline-section.md](media-detail-inline-section.md)) | `MediaLocationsService.addFromExifCoordinates` |
 
 ## Inline Editing Flow
 
@@ -90,7 +91,10 @@ At the top of the Location section sits an **Address Search Bar** — a full-wid
 ## Component Hierarchy
 
 ```
-DetailsSection                         ← dd-section-label "Details"
+DetailsSection (`app-media-detail-inline-section`)  ← see [media-detail-inline-section.md](media-detail-inline-section.md)
+├── IconPropertyRow "Type"             ← read-only
+├── IconPropertyRow "EXIF coordinates" ← read-only mono; l2 add-to-locations when GPS present
+├── IconPropertyRow "Original file name"
 ├── IconPropertyRow "Captured"         ← schedule icon, datetime-local on edit
 ├── IconPropertyRow "Projects"         ← folder icon, multi-select checklist on edit
 └── IconPropertyRow "Uploaded"         ← cloud_upload icon, read-only, muted

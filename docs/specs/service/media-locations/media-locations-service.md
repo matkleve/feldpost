@@ -97,6 +97,16 @@ Hash covers: street, house_number, staircase, door, postcode, city, district, co
 
 Does **not** call `update_media_item_location` on the previous location. Helpers: `replaceLocationLinkFromFreeText`, `replaceLocationLinkFromGeocode`.
 
+### Facade: add from EXIF coordinates (detail UI)
+
+`addFromExifCoordinates(mediaItemId, coords: { lat, lng })`:
+
+1. `GeocodingService.reverse(lat, lng)`
+2. On success → `addFromGeocodeSuggestion` with reverse fields and **EXIF** lat/lng (not corrected coords)
+3. On reverse failure → `addLocation` with EXIF lat/lng only (`address_label` optional coord fallback)
+
+Does not mutate `media_items.exif_*`. UI: [media-detail-inline-section.md](../../ui/media-detail/media-detail-inline-section.md).
+
 ### Facade: link existing (picker pre-resolve)
 
 `linkExistingLocation(mediaItemId, locationId)` — `link_media_to_location` only (no `find_or_create`).

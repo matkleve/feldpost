@@ -63,7 +63,7 @@ Host exposes `[attr.data-state]` with the active state. **No** `set_primary` / `
 
 Single-line read format via `formatLocationDisplayLine` (segments omitted when empty):
 
-`[street] [house_number][/Stiege staircase][/Top door], [postcode] [city]`
+`[street] [house_number][/Stiege staircase][/Top door], [postcode] [city]` — when persisting from geocode, `street` MUST NOT repeat `house_number` (see `splitStreetAndHouseNumber` in `media-locations.helpers.ts`).
 
 - Staircase suffix: literal `/Stiege {staircase}`; door: `/Top {door}` (product copy, not i18n-interpolated on this line)
 - Locality tail `, {postcode} {city}` only when **both** postcode and city are set

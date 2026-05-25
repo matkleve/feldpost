@@ -13,6 +13,7 @@ import { CapturedDateEditorComponent } from '../captured-date-editor.component';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { DetailEditingField, MediaRecord, SelectOption } from '../media-detail-view.types';
 import { formatCoordinate } from '../media-detail-view.utils';
+import type { ExifLocationAddState } from '../media-detail-exif-location-add.state';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import {
@@ -52,6 +53,8 @@ export class MediaDetailInlineSectionComponent {
   readonly projectOptions = input<SelectOption[]>([]);
   readonly selectedProjectIds = input<Set<string>>(new Set());
   readonly isImageLike = input(false);
+  readonly saving = input(false);
+  readonly exifLocationAddState = input<ExifLocationAddState>('hidden');
 
   readonly projectsForDropdown = computed((): readonly ProjectsDropdownProject[] =>
     this.projectOptions().map((opt) => ({
@@ -72,7 +75,15 @@ export class MediaDetailInlineSectionComponent {
       this.media().exif_longitude != null,
   );
 
+  readonly exifAddDisabled = computed(
+    () =>
+      !this.hasExifCoordinates() ||
+      this.saving() ||
+      this.exifLocationAddState() === 'resolving',
+  );
+
   readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();
+  readonly exifToLocationRequested = output<void>();
   readonly fieldSaveRequested = output<{ field: string; value: string }>();
   readonly editingCancelled = output<void>();
   readonly capturedAtEditRequested = output<void>();
