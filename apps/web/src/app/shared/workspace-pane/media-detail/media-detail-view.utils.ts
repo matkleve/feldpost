@@ -223,6 +223,10 @@ export function canCreateProjectOption(
   return !options.some((option) => option.label.toLowerCase() === term.toLowerCase());
 }
 
+/**
+ * Detail header / inline address summary from `media()` projection only (`LocationDisplayFields`).
+ * Intentionally not `formatLocationDisplayLine` — no house_number/staircase/door/postcode on `ImageRecord`.
+ */
 export function resolveFullAddress(image: ImageRecord | null): string {
   if (!image) {
     return '';

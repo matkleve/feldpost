@@ -1,17 +1,12 @@
-<!-- Stable state: active — combobox row + optional 4-zone dropdown. @see docs/specs/ui/media-detail/media-detail-location-section.md -->
+<!-- Stable state: active — combobox row + optional dropdown zones. @see docs/specs/ui/media-detail/media-detail-location-section.md -->
 @if (active()) {
   <div class="address-search__stack">
     <div class="detail-row address-search__row detail-row--editing">
       <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
       <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
-      <!-- Anchor for dropdown width/position (#addressCenter → addressAnchorEl). -->
       <div class="detail-row__center address-search__center" #addressCenter>
         <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
         <span class="detail-row__label">{{ t('location.addSearch.label', 'Add or search address') }}</span>
-        <!--
-          Combobox: NO [value]="query()" — browser owns value; (input) copies into query via syncQuery.
-          @see media-location-add-search.component.ts#onInput
-        -->
         <input
           #searchInput
           class="detail-row__field-input detail-row__field-slot address-search__input"
@@ -41,7 +36,6 @@
       <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
     </div>
 
-    <!-- Stable state: dropdown_open — panel when showPanel() and anchor exist. @see media-detail-location-section.md -->
     @if (showPanel() && addressAnchorEl()) {
       <app-dropdown-shell
         class="address-search-shell"
@@ -57,15 +51,31 @@
           role="listbox"
           [attr.aria-label]="t('workspace.addressSearch.aria.results', 'Address suggestions')"
         >
-          @if (resultRows().length > 0) {
-            <div class="address-search__section-label">
-              {{ t('location.dropdown.section.results', 'Results') }}
-            </div>
-            @for (row of resultRows(); track row.id) {
-              <div class="address-search__result-item media-location-add-search__result-item--static" role="presentation">
+          @if (orgLocationSuggestions().length > 0 || loadingOrgLocations()) {
+            <div class="address-search__section-label">{{ orgSectionLabel() }}</div>
+            @if (loadingOrgLocations() && orgLocationSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (row of orgLocationSuggestions(); track row.id) {
+              @let lines = pickerLines(row);
+              @let flatIdx = flatIndexForOrg(row.id);
+              <button
+                class="address-search__result-item media-location-add-search__org-option"
+                [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
+                type="button"
+                role="option"
+                [attr.aria-selected]="preResolvedLocationId() === row.id"
+                (mousedown)="$event.preventDefault()"
+                (click)="onOrgLocationClick(row, $event)"
+              >
                 <span class="material-icons address-search__result-icon" aria-hidden="true">bookmark</span>
-                <span class="address-search__result-label">{{ formatRowLine(row) }}</span>
-              </div>
+                <span class="media-location-add-search__picker-lines">
+                  <span class="address-search__result-label">{{ lines.primary }}</span>
+                  @if (lines.secondary) {
+                    <span class="media-location-add-search__picker-secondary">{{ lines.secondary }}</span>
+                  }
+                </span>
+              </button>
             }
           }
 
@@ -77,8 +87,10 @@
               <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
             }
             @for (c of otherMediaSuggestions(); track c.id) {
+              @let flatIdx = flatSelectable().findIndex((item) => item.kind === 'other' && item.candidate.id === c.id);
               <button
                 class="address-search__result-item"
+                [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
                 type="button"
                 role="option"
                 (mousedown)="$event.preventDefault()"
@@ -128,8 +140,10 @@
               <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
             }
             @for (c of placeSuggestions(); track c.id) {
+              @let flatIdx = flatSelectable().findIndex((item) => item.kind === 'internet' && item.candidate.id === c.id);
               <button
                 class="address-search__result-item"
+                [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
                 [class.media-location-add-search__result-item--pulse]="internetResultsRefreshing()"
                 type="button"
                 role="option"
@@ -142,13 +156,14 @@
             }
           }
 
-          <!-- Zone 4: New address — label from query(); [textContent] forces DOM text sync on each keystroke. -->
           @if (query().trim()) {
+            @let addIdx = flatSelectable().length - 1;
             <div class="address-search__section-label">
               {{ t('location.dropdown.section.addNew', 'New address') }}
             </div>
             <button
               class="address-search__result-item media-location-add-search__add-new-item"
+              [class.address-search__result-item--focused]="isFocusedFlatIndex(addIdx)"
               type="button"
               role="option"
               [attr.aria-label]="addNewAriaLabel()"
@@ -167,7 +182,6 @@
     }
   </div>
 } @else {
-  <!-- Stable state: idle — collapsed “Add or search address” row. @see media-detail-location-section.md -->
   <div
     class="detail-row address-search__row media-location-add-search__collapsed"
     role="button"

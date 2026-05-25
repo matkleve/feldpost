@@ -33,6 +33,12 @@ export interface MediaItemLocationRow {
   updated_at: string;
 }
 
+/** Row from `search_locations` (org picker); `media_item_id` may be null. */
+export interface OrgLocationSearchRow extends Omit<MediaItemLocationRow, 'media_item_id'> {
+  media_item_id: string | null;
+  is_linked_to_media?: boolean;
+}
+
 export interface MediaLocationListResult {
   ok: true;
   rows: MediaItemLocationRow[];

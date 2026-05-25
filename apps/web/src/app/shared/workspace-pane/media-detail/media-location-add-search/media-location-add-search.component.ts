@@ -1,21 +1,10 @@
 /**
  * **Add or search address** row at the top of the Location section.
  *
- * **What it does:**
- * - Collapsed: looks like metadata "Add metadata" row (search icon + label)
- * - Active: combobox + dropdown with 4 zones:
- *   1. Results — rows already on this media (filter only, not selectable to add)
- *   2. Other media — org DB addresses (`SearchBarService` / resolver stack)
- *   3. Internet — Nominatim; click fills input and re-searches (does not create row)
- *   4. Add new Address — always visible; Enter or click creates row via parent
- *
- * **Parent:** `app-media-detail-location-section`. **Persistence:** parent emits
- * `addFromText` / `addFromGeocode` → `MediaDetailViewComponent` → `MediaLocationsService`.
- *
- * Reuses search patterns from legacy `app-address-search` (different product rules).
+ * Org Recent/Results via `search_locations`; other media + Internet via search stack;
+ * pre-resolved pick commits with `link_media_to_location` only when query unchanged.
  *
  * @see docs/specs/ui/media-detail/media-detail-location-section.md
- * @see docs/specs/ui/media-detail/address-search.md (legacy whole-address search)
  */
 import {
   ChangeDetectorRef,
@@ -34,6 +23,7 @@ import {
 import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
 import { SearchOrchestratorService } from '../../../../core/search/search-orchestrator.service';
 import type {
@@ -42,10 +32,25 @@ import type {
   SearchQueryContext,
   SearchResultSet,
 } from '../../../../core/search/search.models';
-import type { MediaItemLocationRow } from '../../../../core/media-locations/media-locations.types';
-import { formatLocationDisplayLine, locationMatchesQuery } from '../../../../core/media-locations/media-locations.helpers';
+import type { OrgLocationSearchRow } from '../../../../core/media-locations/media-locations.types';
+import {
+  formatLocationPickerLines,
+  formatLocationDisplayPrimaryLine,
+} from '../../../../core/media-locations/media-locations.helpers';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
+
+export interface MediaLocationLinkedPayload {
+  locationId: string;
+  /** Set when org row was already linked to this media (idempotent link). */
+  alreadyLinked?: boolean;
+}
+
+type FlatSelectable =
+  | { kind: 'org'; row: OrgLocationSearchRow }
+  | { kind: 'other'; candidate: SearchCandidate }
+  | { kind: 'internet'; candidate: SearchCandidate }
+  | { kind: 'addNew' };
 
 @Component({
   selector: 'app-media-location-add-search',
@@ -66,49 +71,41 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly searchBarService = inject(SearchBarService);
   private readonly searchOrchestrator = inject(SearchOrchestratorService);
+  private readonly mediaLocationsService = inject(MediaLocationsService);
   private readonly i18n = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18n.t(key, fallback);
 
-  readonly locations = input<MediaItemLocationRow[]>([]);
+  readonly mediaItemId = input.required<string>();
   readonly searchContext = input<SearchQueryContext>({});
   readonly disabled = input(false);
 
   readonly addFromText = output<string>();
   readonly addFromGeocode = output<ForwardGeocodeResult>();
+  readonly locationLinked = output<MediaLocationLinkedPayload>();
 
-  // Stable state: idle — collapsed row; active — combobox open; panelState maps to data-state on host.
-  // @see docs/specs/ui/media-detail/media-detail-location-section.md
-  /** Whether the add/search row is expanded (combobox + optional dropdown). */
   readonly active = signal(false);
-
-  /**
-   * Raw combobox text (may include trailing spaces). Drives DB/geocoder search and Results filter.
-   * Updated only in `syncQuery` from the native input — never bound with `[value]` on the input.
-   */
   readonly query = signal('');
-
+  readonly orgLocationSuggestions = signal<OrgLocationSearchRow[]>([]);
+  readonly loadingOrgLocations = signal(false);
   readonly otherMediaSuggestions = signal<SearchCandidate[]>([]);
   readonly placeSuggestions = signal<SearchCandidate[]>([]);
   readonly loadingOther = signal(false);
   readonly loadingPlaces = signal(false);
   readonly focusedIndex = signal(-1);
 
-  /** Prior Internet result sets while dropdown stays open (newest at end). */
+  readonly preResolvedLocationId = signal<string | null>(null);
+  private pickQuerySnapshot = '';
+
   private readonly internetHistoryStack = signal<SearchCandidate[][]>([]);
-  /** Internet sets navigated past via back (newest at end). */
   private readonly internetForwardStack = signal<SearchCandidate[][]>([]);
 
   readonly canGoBackInternet = computed(() => this.internetHistoryStack().length > 0);
   readonly canGoForwardInternet = computed(() => this.internetForwardStack().length > 0);
-
-  /** Pulse Internet rows when refreshing while previous hits remain visible. */
   readonly internetResultsRefreshing = computed(
     () => this.loadingPlaces() && this.placeSuggestions().length > 0,
   );
 
-  /** Template ref `#searchInput` — source of truth for typed text on `(input)`. */
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
-  /** Template ref `#addressCenter` — dropdown anchors to this element’s width/position. */
   private readonly addressCenterRef = viewChild<ElementRef<HTMLElement>>('addressCenter');
   readonly addressAnchorEl = computed(() => this.addressCenterRef()?.nativeElement ?? null);
   readonly addressCenterWidth = computed(
@@ -117,23 +114,36 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
 
   readonly doorLabel = computed(() => this.t('location.door.label', 'Top'));
 
-  readonly resultRows = computed(() => {
-    const q = this.query();
-    return this.locations().filter((row) => locationMatchesQuery(row, q));
+  readonly orgSectionLabel = computed(() =>
+    this.query().trim()
+      ? this.t('location.dropdown.section.results', 'Results')
+      : this.t('location.dropdown.section.recent', 'Recent'),
+  );
+
+  readonly flatSelectable = computed((): FlatSelectable[] => {
+    const items: FlatSelectable[] = [];
+    for (const row of this.orgLocationSuggestions()) {
+      items.push({ kind: 'org', row });
+    }
+    for (const candidate of this.otherMediaSuggestions()) {
+      items.push({ kind: 'other', candidate });
+    }
+    for (const candidate of this.placeSuggestions()) {
+      items.push({ kind: 'internet', candidate });
+    }
+    if (this.query().trim()) {
+      items.push({ kind: 'addNew' });
+    }
+    return items;
   });
 
-  readonly selectableCandidates = computed(() => [
-    ...this.otherMediaSuggestions(),
-    ...this.placeSuggestions(),
-  ]);
-
-  /** True when dropdown should render (any zone has content or user has typed non-empty query). */
   readonly showPanel = computed(
     () =>
       this.active() &&
-      (this.resultRows().length > 0 ||
+      (this.orgLocationSuggestions().length > 0 ||
         this.otherMediaSuggestions().length > 0 ||
         this.placeSuggestions().length > 0 ||
+        this.loadingOrgLocations() ||
         this.loadingOther() ||
         this.loadingPlaces() ||
         this.query().trim().length > 0),
@@ -145,27 +155,33 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     return 'typing';
   });
 
-  /** i18n label for the New address row — derived from `query` only. */
   readonly newAddressRowLabel = computed(() => this.formatNewAddressLabel(this.query().trim()));
-
   readonly addNewAriaLabel = computed(() => this.newAddressRowLabel());
 
-  formatRowLine(row: MediaItemLocationRow): string {
-    return formatLocationDisplayLine(row, this.doorLabel());
+  pickerLines(row: OrgLocationSearchRow): { primary: string; secondary: string } {
+    return formatLocationPickerLines(row, this.doorLabel());
   }
 
-  /** Rx bridge for `SearchOrchestratorService.searchInput` (debounced DB search). */
+  isFocusedFlatIndex(index: number): boolean {
+    return this.focusedIndex() === index;
+  }
+
+  flatIndexForOrg(rowId: string): number {
+    return this.flatSelectable().findIndex(
+      (item) => item.kind === 'org' && item.row.id === rowId,
+    );
+  }
+
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
   private searchSub: Subscription | null = null;
   private geocoderTimer: ReturnType<typeof setTimeout> | null = null;
   private geocoderSub: Subscription | null = null;
+  private orgSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private orgSearchGen = 0;
 
   constructor() {
     effect(() => this.contextChanges.next(this.searchContext()));
-    // Focus combobox once when row opens. MUST NOT read `query` here — that re-ran the effect on
-    // every keystroke and (with setTimeout) overwrote input.value back to a stale character.
-    // @see docs/specs/ui/media-detail/media-detail-location-section.md
     effect(() => {
       if (!this.active()) return;
       setTimeout(() => this.searchInputRef()?.nativeElement?.focus(), 0);
@@ -185,6 +201,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     if (this.disabled()) return;
     this.active.set(true);
     this.query.set('');
+    this.clearPreResolved();
     this.searchOrchestrator.configureOptions(this.searchBarService.orchestratorOptionsFromOrg());
     this.searchOrchestrator.configureSources({
       dbAddressResolver: (q, ctx) =>
@@ -195,33 +212,35 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
       .searchInput(this.queryChanges.asObservable(), this.contextChanges.asObservable())
       .subscribe((r) => this.applyDbResult(r));
     this.queryChanges.next('');
+    void this.loadOrgLocations('');
   }
 
   close(): void {
     this.active.set(false);
     this.query.set('');
+    this.orgLocationSuggestions.set([]);
     this.otherMediaSuggestions.set([]);
     this.placeSuggestions.set([]);
     this.internetHistoryStack.set([]);
     this.internetForwardStack.set([]);
     this.focusedIndex.set(-1);
+    this.clearPreResolved();
     this.clearGeocoder();
+    this.clearOrgSearchTimer();
     this.searchSub?.unsubscribe();
     this.searchSub = null;
   }
 
-  /**
-   * Native `(input)` handler. Reads `event.target.value` synchronously — do not use `[value]="query()"`
-   * on the input; that binding fought the DOM and left `query` stuck on the first character.
-   */
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.syncQuery(value);
   }
 
-  /** Single place that updates `query` and search side effects from combobox text. */
   private syncQuery(value: string): void {
     this.query.set(value);
+    if (this.preResolvedLocationId() && value !== this.pickQuerySnapshot) {
+      this.clearPreResolved();
+    }
     this.focusedIndex.set(-1);
     if (value.trim()) {
       this.loadingOther.set(true);
@@ -230,13 +249,24 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
       this.otherMediaSuggestions.set([]);
     }
     this.queryChanges.next(value);
+    this.scheduleOrgSearch(value);
     this.runGeocoderDebounced(value);
-    // Same as metadata-property-picker: projected dropdown content must be re-checked explicitly.
     this.cdr.detectChanges();
   }
 
-  private formatNewAddressLabel(trimmedQuery: string): string {
-    return this.t('location.dropdown.addNew', 'Add new Address: "{query}"').replace('{query}', trimmedQuery);
+  onOrgLocationClick(row: OrgLocationSearchRow, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const primary = formatLocationDisplayPrimaryLine(row, this.doorLabel());
+    this.preResolvedLocationId.set(row.id);
+    this.pickQuerySnapshot = primary;
+    const input = this.searchInputRef()?.nativeElement;
+    if (input) {
+      input.value = primary;
+    }
+    this.syncQuery(primary);
+    this.preResolvedLocationId.set(row.id);
+    this.pickQuerySnapshot = primary;
   }
 
   onInputKeydown(event: KeyboardEvent): void {
@@ -245,16 +275,29 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
       this.close();
       return;
     }
+    const flat = this.flatSelectable();
+    if (event.key === 'ArrowDown' && flat.length > 0) {
+      event.preventDefault();
+      const next = Math.min(flat.length - 1, this.focusedIndex() + 1);
+      this.focusedIndex.set(next);
+      return;
+    }
+    if (event.key === 'ArrowUp' && flat.length > 0) {
+      event.preventDefault();
+      const next = Math.max(0, this.focusedIndex() - 1);
+      this.focusedIndex.set(next === 0 && this.focusedIndex() === 0 ? -1 : next);
+      return;
+    }
     if (event.key === 'Enter') {
       event.preventDefault();
       void this.commitAddNew();
     }
   }
 
-  /** Internet/DB pick: copy label into combobox and re-run search (does not create a row). */
   onInternetClick(candidate: SearchCandidate, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
+    this.clearPreResolved();
     this.syncQuery(candidate.label);
     const input = this.searchInputRef()?.nativeElement;
     if (input) {
@@ -265,17 +308,41 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   async commitAddNew(): Promise<void> {
     const text = this.query().trim();
     if (!text) return;
-    const candidates = this.selectableCandidates();
-    const idx = this.focusedIndex();
-    if (idx >= 0 && candidates[idx]) {
-      await this.applyInternetCandidate(candidates[idx]!);
+
+    const preId = this.preResolvedLocationId();
+    if (preId && text === this.pickQuerySnapshot) {
+      const row = this.orgLocationSuggestions().find((r) => r.id === preId);
+      this.locationLinked.emit({
+        locationId: preId,
+        alreadyLinked: row?.is_linked_to_media === true,
+      });
+      this.close();
       return;
     }
+
+    const flat = this.flatSelectable();
+    const idx = this.focusedIndex();
+    if (idx >= 0 && flat[idx]) {
+      const item = flat[idx]!;
+      if (item.kind === 'org') {
+        this.onOrgLocationClick(item.row, new Event('click'));
+        return;
+      }
+      if (item.kind === 'other' || item.kind === 'internet') {
+        await this.applyInternetCandidate(item.candidate);
+        return;
+      }
+      if (item.kind === 'addNew') {
+        this.addFromText.emit(text);
+        this.close();
+        return;
+      }
+    }
+
     this.addFromText.emit(text);
     this.close();
   }
 
-  /** Restore the previous Internet result set (stack pop). */
   goBackInternet(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
@@ -288,7 +355,6 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.cdr.detectChanges();
   }
 
-  /** Restore the next Internet result set after back (forward stack pop). */
   goForwardInternet(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
@@ -314,7 +380,46 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.clearGeocoder();
+    this.clearOrgSearchTimer();
     this.searchSub?.unsubscribe();
+  }
+
+  private clearPreResolved(): void {
+    this.preResolvedLocationId.set(null);
+    this.pickQuerySnapshot = '';
+  }
+
+  private scheduleOrgSearch(value: string): void {
+    this.clearOrgSearchTimer();
+    this.orgSearchTimer = setTimeout(() => {
+      this.orgSearchTimer = null;
+      void this.loadOrgLocations(value);
+    }, 280);
+  }
+
+  private clearOrgSearchTimer(): void {
+    if (this.orgSearchTimer) clearTimeout(this.orgSearchTimer);
+    this.orgSearchTimer = null;
+  }
+
+  private async loadOrgLocations(displayQuery: string): Promise<void> {
+    const gen = ++this.orgSearchGen;
+    const trimmed = displayQuery.trim();
+    const limit = trimmed ? 12 : 5;
+    this.loadingOrgLocations.set(true);
+    const result = await this.mediaLocationsService.searchLocations(
+      trimmed || null,
+      limit,
+      this.mediaItemId(),
+    );
+    if (gen !== this.orgSearchGen) return;
+    this.loadingOrgLocations.set(false);
+    if (result.ok) {
+      this.orgLocationSuggestions.set(result.rows);
+    } else {
+      this.orgLocationSuggestions.set([]);
+    }
+    this.cdr.detectChanges();
   }
 
   private applyDbResult(result: SearchResultSet): void {
@@ -363,7 +468,6 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.loadingPlaces.set(false);
   }
 
-  /** True when two Internet snapshots list the same addresses (order/label noise ignored). */
   private areInternetResultListsEquivalent(
     left: SearchCandidate[],
     right: SearchCandidate[],
@@ -416,4 +520,7 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     return head.length >= 3 ? head : trimmed;
   }
 
+  private formatNewAddressLabel(trimmedQuery: string): string {
+    return this.t('location.dropdown.addNew', 'Add new Address: "{query}"').replace('{query}', trimmedQuery);
+  }
 }

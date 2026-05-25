@@ -966,7 +966,10 @@ location.copy.gps,Copy GPS,media-detail location copy menu,Copy GPS,GPS kopieren
 location.addSearch.label,Add or search address,media-detail location add row collapsed label,Add or search address,Adresse hinzufügen oder suchen,Aggiungi o cerca indirizzo
 location.addSearch.placeholder,Search address...,media-detail location add search input placeholder,Search address...,Adresse suchen...,Cerca indirizzo...
 location.addSearch.aria,Add or search for an address,media-detail location add search combobox aria-label,Add or search for an address,Adresse hinzufügen oder suchen,Aggiungi o cerca un indirizzo
+location.dropdown.section.recent,Recent,media-detail location add dropdown section when query empty,Recent,Zuletzt verwendet,Recenti
 location.dropdown.section.results,Results,media-detail location add dropdown section,Results,Ergebnisse,Risultati
+location.picker.already_linked,This address is already linked to this media.,media-detail location picker toast when idempotent link,This address is already linked to this media.,Diese Adresse ist bereits mit diesem Medium verknüpft.,Questo indirizzo è già collegato a questo media.
+location.picker.linked,Location linked,media-detail location picker toast after link,Location linked,Standort verknüpft,Posizione collegata
 location.dropdown.section.otherMedia,Other media,media-detail location add dropdown section,Other media,Andere Medien,Altri media
 location.dropdown.section.internet,Internet,media-detail location add dropdown section,Internet,Internet,Internet
 location.dropdown.internet.back,Back to previous Internet results,media-detail location add search Internet section back button aria-label,Back to previous Internet results,Zurück zu vorherigen Internet-Ergebnissen,Torna ai risultati Internet precedenti

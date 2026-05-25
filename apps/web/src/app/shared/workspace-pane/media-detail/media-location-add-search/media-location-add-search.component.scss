@@ -11,10 +11,23 @@
   pointer-events: none;
 }
 
-// Filter matches on this media — display-only row (same geometry as selectable results).
-.media-location-add-search__result-item--static {
-  cursor: default;
-  pointer-events: none;
+// Org picker two-line block (format D primary + muted locality).
+.media-location-add-search__picker-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.media-location-add-search__picker-secondary {
+  font-size: var(--font-size-2xs);
+  line-height: 1.2;
+  color: var(--muted-foreground);
+}
+
+.media-location-add-search__org-option {
+  align-items: flex-start;
 }
 
 // New-address row label must not clip to one character in narrow flex layout.

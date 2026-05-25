@@ -29980,6 +29980,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.dropdown.section.recent', 'Recent', 'en', 'media-detail location add dropdown section when query empty')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Recent', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.recent'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zuletzt verwendet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.recent'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Recenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.dropdown.section.recent'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'location.dropdown.section.results', 'Results', 'en', 'media-detail location add dropdown section')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -30006,6 +30037,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Risultati', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'location.dropdown.section.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.picker.already_linked', 'This address is already linked to this media.', 'en', 'media-detail location picker toast when idempotent link')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This address is already linked to this media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.picker.already_linked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Diese Adresse ist bereits mit diesem Medium verknüpft.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.picker.already_linked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo indirizzo è già collegato a questo media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.picker.already_linked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'location.picker.linked', 'Location linked', 'en', 'media-detail location picker toast after link')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location linked', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.picker.linked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort verknüpft', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.picker.linked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione collegata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'location.picker.linked'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

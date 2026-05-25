@@ -39,6 +39,17 @@ export interface MediaLocationReplaceFromGeocodePayload {
   suggestion: ForwardGeocodeResult;
 }
 
+export interface MediaLocationLinkedPayload {
+  locationId: string;
+  alreadyLinked?: boolean;
+}
+
+export interface MediaLocationReplaceLinkedPayload {
+  previousLocationId: string;
+  locationId: string;
+  alreadyLinked?: boolean;
+}
+
 @Component({
   selector: 'app-media-detail-location-section',
   standalone: true,
@@ -56,6 +67,8 @@ export class MediaDetailLocationSectionComponent {
 
   readonly addFromText = output<string>();
   readonly addFromGeocode = output<ForwardGeocodeResult>();
+  readonly locationLinked = output<MediaLocationLinkedPayload>();
+  readonly replaceLocationLinked = output<MediaLocationReplaceLinkedPayload>();
   readonly replaceFromText = output<MediaLocationReplaceFromTextPayload>();
   readonly replaceFromGeocode = output<MediaLocationReplaceFromGeocodePayload>();
   readonly rowSaveRequested = output<MediaLocationRowSavePayload>();
@@ -126,6 +139,21 @@ export class MediaDetailLocationSectionComponent {
       return;
     }
     this.addFromGeocode.emit(suggestion);
+  }
+
+  onLocationLinked(payload: MediaLocationLinkedPayload): void {
+    const previousLocationId = this.replaceTargetLocationId();
+    if (previousLocationId) {
+      this.replaceTargetLocationId.set(null);
+      this.addSearchRef()?.close();
+      this.replaceLocationLinked.emit({
+        previousLocationId,
+        locationId: payload.locationId,
+        alreadyLinked: payload.alreadyLinked,
+      });
+      return;
+    }
+    this.locationLinked.emit(payload);
   }
 }
 

@@ -4,11 +4,12 @@
 
   <div class="detail-section__rows">
     <app-media-location-add-search
-      [locations]="locations()"
+      [mediaItemId]="media().id"
       [searchContext]="addressSearchContext()"
       [disabled]="saving()"
       (addFromText)="onAddFromText($event)"
       (addFromGeocode)="onAddFromGeocode($event)"
+      (locationLinked)="onLocationLinked($event)"
     />
 
     @if (showListFilter()) {

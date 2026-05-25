@@ -1,13 +1,20 @@
 /**
  * Pure helpers for location rows (no I/O).
  *
- * Used by: `media-location-row` (read line), `media-location-add-search` (filter Results),
+ * Used by: `media-location-row` (read line), `media-location-add-search` (picker),
  * `media-detail-location-section` (list filter), `media-locations.service` (RPC errors).
  */
 import type { ImageRecord } from '../media-query/media-query.types';
 import type { MediaItemLocationRow } from './media-locations.types';
 
-/** Display fields projected from the first linked location row onto `ImageRecord`. */
+/**
+ * Flat address/GPS fields patched onto the detail `media()` record (`ImageRecord` DTO).
+ *
+ * Intentionally excludes `house_number`, `staircase`, `door`, `postcode` — those exist only on
+ * `MediaItemLocationRow`, not on the gallery/detail media projection. Do **not** pass this type to
+ * `formatLocationDisplayLine`; header/title contexts use `street` + `city` (+ district/country)
+ * via `resolveFullAddress` in `media-detail-view.utils.ts`.
+ */
 export type LocationDisplayFields = Pick<
   ImageRecord,
   | 'address_label'
@@ -25,26 +32,88 @@ export interface LocationDisplaySnapshot {
   fields: LocationDisplayFields;
 }
 
-/** Read-mode single line on a location row. @see docs/specs/ui/media-detail/media-detail-location-section.md */
-export function formatLocationDisplayLine(
-  row: Pick<
-    MediaItemLocationRow,
-    'street' | 'house_number' | 'staircase' | 'door' | 'address_label'
-  >,
-  doorLabel: string,
-): string {
-  const streetPart = [row.street, row.house_number].filter(Boolean).join(' ').trim();
-  const base = streetPart || row.address_label?.trim() || '';
-  const parts: string[] = base ? [base] : [];
+/**
+ * Input for saved-row / picker display formatters (`/Stiege`, `/Top`, postcode+city tail).
+ * Satisfied by `MediaItemLocationRow` — not by `LocationDisplayFields`.
+ */
+export type LocationDisplayLineInput = Pick<
+  MediaItemLocationRow,
+  'street' | 'house_number' | 'staircase' | 'door' | 'postcode' | 'city' | 'address_label'
+>;
 
+/** Building/access segment without postcode/city tail (shared by row + picker primary). */
+function formatLocationStreetAccessSegment(row: LocationDisplayLineInput): string {
+  const streetPart = [row.street, row.house_number].filter(Boolean).join(' ').trim();
+  let line = streetPart || row.address_label?.trim() || '';
+  if (!line) {
+    return '';
+  }
   if (row.staircase?.trim()) {
-    parts.push(row.staircase.trim());
+    line += `/Stiege ${row.staircase.trim()}`;
   }
   if (row.door?.trim()) {
-    parts.push(`${doorLabel} ${row.door.trim()}`);
+    line += `/Top ${row.door.trim()}`;
   }
+  return line;
+}
 
-  return parts.join(', ') || '—';
+/**
+ * Read-mode single line on a linked location row (`app-media-location-row`, map targets).
+ * Requires `LocationDisplayLineInput` / full `MediaItemLocationRow` — not `LocationDisplayFields`.
+ *
+ * @see docs/specs/ui/media-detail/media-detail-location-section.md
+ */
+export function formatLocationDisplayLine(row: LocationDisplayLineInput, _doorLabel: string): string {
+  const access = formatLocationStreetAccessSegment(row);
+  if (!access) {
+    return row.address_label?.trim() || '—';
+  }
+  const postcode = row.postcode?.trim();
+  const city = row.city?.trim();
+  if (postcode && city) {
+    return `${access}, ${postcode} ${city}`;
+  }
+  return access;
+}
+
+/** Picker primary line — street/access only (no locality comma tail). */
+export function formatLocationDisplayPrimaryLine(row: LocationDisplayLineInput, _doorLabel: string): string {
+  const access = formatLocationStreetAccessSegment(row);
+  return access || row.address_label?.trim() || '—';
+}
+
+/** Picker secondary: postcode city · district · country. */
+export function formatLocationDisplayLocalityLine(
+  row: Pick<MediaItemLocationRow, 'postcode' | 'city' | 'district' | 'country'>,
+): string {
+  const parts: string[] = [];
+  const postcode = row.postcode?.trim();
+  const city = row.city?.trim();
+  if (postcode && city) {
+    parts.push(`${postcode} ${city}`);
+  } else if (postcode) {
+    parts.push(postcode);
+  } else if (city) {
+    parts.push(city);
+  }
+  if (row.district?.trim()) {
+    parts.push(row.district.trim());
+  }
+  if (row.country?.trim()) {
+    parts.push(row.country.trim());
+  }
+  return parts.join(' · ');
+}
+
+/** Two-line org picker display (format D). */
+export function formatLocationPickerLines(
+  row: LocationDisplayLineInput & Pick<MediaItemLocationRow, 'district' | 'country'>,
+  doorLabel: string,
+): { primary: string; secondary: string } {
+  return {
+    primary: formatLocationDisplayPrimaryLine(row, doorLabel),
+    secondary: formatLocationDisplayLocalityLine(row),
+  };
 }
 
 /** Clipboard string for “Copy full address” — all populated address parts, comma-separated. */
@@ -111,7 +180,7 @@ export function legacyMediaHasGps(latitude: number | null, longitude: number | n
   );
 }
 
-/** First linked row by sort order — canonical display location for legacy ImageRecord fields. */
+/** First linked row by sort order — canonical row for detail media projection. */
 export function displayLocationFromRows(
   rows: readonly MediaItemLocationRow[],
 ): MediaItemLocationRow | null {
@@ -123,6 +192,7 @@ export function displayLocationFromRows(
 
 /**
  * Snapshot for detail header / map affordances from the current location list.
+ * Projects `LocationDisplayFields` only (no staircase/door/postcode on `media()`).
  * @see docs/specs/ui/media-detail/media-detail-location-section.md
  */
 export function locationDisplaySnapshotFromRows(
@@ -148,8 +218,8 @@ export function locationDisplaySnapshotFromRows(
   };
 }
 
-/** Merge first-link display fields into a loaded `ImageRecord` (pure). */
-export function mergeLocationDisplayIntoImageRecord<T extends ImageRecord>(
+/** Merge first-link display fields into the loaded detail media record (`ImageRecord` DTO). */
+export function mergeLocationDisplayIntoMediaRecord<T extends ImageRecord>(
   media: T,
   snapshot: LocationDisplaySnapshot | null,
 ): T {
@@ -186,15 +256,20 @@ export function locationMatchesQuery(row: MediaItemLocationRow, query: string): 
   if (!q) {
     return true;
   }
+  const displayLine = formatLocationDisplayLine(row, 'Top');
   const haystack = [
+    displayLine,
     row.street,
     row.house_number,
     row.staircase,
     row.door,
+    row.postcode,
     row.address_label,
     row.city,
     row.district,
     row.country,
+    'Stiege',
+    'Top',
   ]
     .filter(Boolean)
     .join(' ')

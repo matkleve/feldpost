@@ -8,7 +8,7 @@ import type { MediaLocationUpdateService } from '../../../core/media-location-up
 import type { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
 import {
   locationDisplaySnapshotFromRows,
-  mergeLocationDisplayIntoImageRecord,
+  mergeLocationDisplayIntoMediaRecord,
 } from '../../../core/media-locations/media-locations.helpers';
 import type { MediaItemLocationRow } from '../../../core/media-locations/media-locations.types';
 import type { MediaLocationAddressPatch } from '../../../core/media-locations/media-locations.types';
@@ -202,7 +202,7 @@ export class MediaDetailFieldsHelper {
     const current = this.deps.signals.media();
     if (current) {
       const snapshot = locationDisplaySnapshotFromRows(rows);
-      this.deps.signals.media.set(mergeLocationDisplayIntoImageRecord(current, snapshot));
+      this.deps.signals.media.set(mergeLocationDisplayIntoMediaRecord(current, snapshot));
     }
   }
 

@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatLocationDisplayLine,
   formatLocationFullAddressCopy,
+  formatLocationPickerLines,
   legacyMediaHasGps,
   locationDisplaySnapshotFromRows,
-  mergeLocationDisplayIntoImageRecord,
+  mergeLocationDisplayIntoMediaRecord,
+  type LocationDisplayFields,
+  type LocationDisplayLineInput,
   mediaHasZoomableLocation,
   displayLocationFromRows,
 } from './media-locations.helpers';
@@ -61,8 +65,25 @@ describe('media-locations.helpers', () => {
     expect(snapshot?.fields.location_unresolved).toBe(false);
   });
 
-  it('mergeLocationDisplayIntoImageRecord clears fields when no locations', () => {
-    const merged = mergeLocationDisplayIntoImageRecord(
+  it('LocationDisplayFields is not assignable to LocationDisplayLineInput', () => {
+    const fields: LocationDisplayFields = {
+      address_label: 'Site',
+      street: 'Main',
+      city: 'Vienna',
+      district: null,
+      country: 'AT',
+      latitude: 48.2,
+      longitude: 16.37,
+      location_unresolved: false,
+    };
+    type AssertNotLineInput = LocationDisplayFields extends LocationDisplayLineInput ? true : false;
+    const notAssignable: AssertNotLineInput = false;
+    expect(notAssignable).toBe(false);
+    expect(fields.street).toBe('Main');
+  });
+
+  it('mergeLocationDisplayIntoMediaRecord clears fields when no locations', () => {
+    const merged = mergeLocationDisplayIntoMediaRecord(
       {
         id: 'm1',
         user_id: 'u',
@@ -94,5 +115,58 @@ describe('media-locations.helpers', () => {
 
   it('formatLocationFullAddressCopy joins populated address segments', () => {
     expect(formatLocationFullAddressCopy(BASE_ROW, 'Top')).toBe('Main 1, Vienna, AT');
+  });
+
+  it('formatLocationDisplayLine uses Stiege/Top suffixes and locality comma', () => {
+    const full = {
+      ...BASE_ROW,
+      street: 'Liechtensteinstraße',
+      house_number: '135',
+      staircase: '5',
+      door: '4B',
+      postcode: '1090',
+      city: 'Wien',
+      address_label: null,
+    };
+    expect(formatLocationDisplayLine(full, 'Top')).toBe(
+      'Liechtensteinstraße 135/Stiege 5/Top 4B, 1090 Wien',
+    );
+    expect(formatLocationDisplayLine({ ...full, staircase: null }, 'Top')).toBe(
+      'Liechtensteinstraße 135/Top 4B, 1090 Wien',
+    );
+    expect(formatLocationDisplayLine({ ...full, door: null }, 'Top')).toBe(
+      'Liechtensteinstraße 135/Stiege 5, 1090 Wien',
+    );
+    expect(
+      formatLocationDisplayLine(
+        { ...full, staircase: null, door: null, postcode: '1090', city: 'Wien' },
+        'Top',
+      ),
+    ).toBe('Liechtensteinstraße 135, 1090 Wien');
+    expect(
+      formatLocationDisplayLine(
+        { street: null, house_number: null, staircase: null, door: null, postcode: null, city: null, address_label: 'Site gate' },
+        'Top',
+      ),
+    ).toBe('Site gate');
+  });
+
+  it('formatLocationPickerLines splits primary and locality', () => {
+    const lines = formatLocationPickerLines(
+      {
+        ...BASE_ROW,
+        street: 'Liechtensteinstraße',
+        house_number: '135',
+        staircase: '5',
+        door: '4B',
+        postcode: '1090',
+        city: 'Wien',
+        district: 'Alsergrund',
+        country: 'AT',
+      },
+      'Top',
+    );
+    expect(lines.primary).toBe('Liechtensteinstraße 135/Stiege 5/Top 4B');
+    expect(lines.secondary).toBe('1090 Wien · Alsergrund · AT');
   });
 });

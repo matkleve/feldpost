@@ -43,7 +43,7 @@ import { MediaLocationUpdateService } from '../../../core/media-location-update/
 import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
 import {
   locationDisplaySnapshotFromRows,
-  mergeLocationDisplayIntoImageRecord,
+  mergeLocationDisplayIntoMediaRecord,
 } from '../../../core/media-locations/media-locations.helpers';
 import type { MediaItemLocationRow } from '../../../core/media-locations/media-locations.types';
 import { buildLocationUpdateFailureToast } from '../../../core/media-location-update/location-update-toast.util';
@@ -111,8 +111,10 @@ import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/works
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import { AddressReconciliationService } from '../../../core/address-reconciliation/address-reconciliation.service';
 import type {
+  MediaLocationLinkedPayload,
   MediaLocationReplaceFromGeocodePayload,
   MediaLocationReplaceFromTextPayload,
+  MediaLocationReplaceLinkedPayload,
 } from './media-detail-location-section/media-detail-location-section.component';
 import type {
   MediaLocationCopyField,
@@ -1666,7 +1668,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (!current) {
       return;
     }
-    this.media.set(mergeLocationDisplayIntoImageRecord(current, snapshot));
+    this.media.set(mergeLocationDisplayIntoMediaRecord(current, snapshot));
   }
 
   /** After row CRUD: one list fetch, then patch `locations` + `media()` from same snapshot. */
@@ -1705,6 +1707,50 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.refreshMediaAfterLocationMutation(media.id);
     this.toastService.show({
       message: this.t('location.toast.added', 'Location added'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
+  async onLocationLinked(payload: MediaLocationLinkedPayload): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.linkExistingLocation(media.id, payload.locationId);
+    this.saving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+    this.toastService.show({
+      message: payload.alreadyLinked
+        ? this.t('location.picker.already_linked', 'This address is already linked to this media.')
+        : this.t('location.picker.linked', 'Location linked'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
+  async onLocationReplaceLinked(payload: MediaLocationReplaceLinkedPayload): Promise<void> {
+    const media = this.media();
+    if (!media) return;
+    this.saving.set(true);
+    const result = await this.mediaLocationsService.replaceWithExistingLocation(
+      media.id,
+      payload.previousLocationId,
+      payload.locationId,
+    );
+    this.saving.set(false);
+    if (!result.ok) {
+      this.toastService.show({ message: result.error, type: 'warning' });
+      return;
+    }
+    await this.refreshMediaAfterLocationMutation(media.id);
+    this.toastService.show({
+      message: payload.alreadyLinked
+        ? this.t('location.picker.already_linked', 'This address is already linked to this media.')
+        : this.t('location.toast.changed', 'Location changed'),
       type: 'success',
       dedupe: true,
     });

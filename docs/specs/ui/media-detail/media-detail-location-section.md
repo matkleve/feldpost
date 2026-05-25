@@ -8,7 +8,7 @@
 
 Multi-location editor for one media item: one always-visible **Add/Search Address** row, then a scrollable list of location rows (`0..n`). Each row owns granular address fields on a shared org **`locations`** row (via **`media_item_location_links`**). There is no shared global street/district/country/GPS block on `media_items`.
 
-Canonical persistence: **`locations`** + **`media_item_location_links`**. Detail header title (`address_label`) edits the **first linked row** by `sort_order` (same hydrate as `displayLocationFromRows`). After any location CRUD, `reloadLocations` + `mergeLocationDisplayIntoImageRecord` patch `media()` from the same list snapshot.
+Canonical persistence: **`locations`** + **`media_item_location_links`**. Detail header title (`address_label`) edits the **first linked row** by `sort_order` (same hydrate as `displayLocationFromRows`). After any location CRUD, `reloadLocations` + `mergeLocationDisplayIntoMediaRecord` patch `media()` from the same list snapshot.
 
 ## What It Looks Like
 
@@ -61,12 +61,16 @@ Host exposes `[attr.data-state]` with the active state. **No** `set_primary` / `
 
 ## Row Display Format
 
-Single-line read format (segments in `[]` omitted when empty):
+Single-line read format via `formatLocationDisplayLine` (segments omitted when empty):
 
-`{street} {house_number}[, {staircase}][, {doorLabel} {door}]`
+`[street] [house_number][/Stiege staircase][/Top door], [postcode] [city]`
 
-- `doorLabel` from i18n `location.door.label` (default `Top`)
-- `extra_information` is **not** in this line; shown only in edit/expanded details
+- Staircase suffix: literal `/Stiege {staircase}`; door: `/Top {door}` (product copy, not i18n-interpolated on this line)
+- Locality tail `, {postcode} {city}` only when **both** postcode and city are set
+- `floor`, `district`, `country`, `extra_information` are **not** on this line
+- Fallback: trimmed `address_label`, else `—`
+
+Detail header / `resolveFullAddress` use `LocationDisplayFields` on `media()` only (`street`, `city`, …) — not this full line. Per-row read UI uses `formatLocationDisplayLine` on `MediaItemLocationRow`.
 
 ## Row Slot Actions
 
@@ -90,10 +94,16 @@ Slot **l2** edit and center address click use the same shared-edit confirm as **
 
 ## Add/Search Dropdown (4 zones)
 
-1. **Results** — current media location rows matching input
-2. **Other media results** — org DB candidates (locations-backed suggest)
-3. **Internet results** — geocoder places; click fills input and re-runs search only
-4. **Add new Address: "{query}"** — always visible; creates row on click or Enter in input
+1. **Recent** (empty query) or **Results** (typed query) — org locations via `search_locations` RPC; two-line format D (`formatLocationPickerLines`); clickable `role="option"` rows populate combobox and set `preResolvedLocationId`
+2. **Other media** — org DB address candidates (`SearchBarService`)
+3. **Internet** — geocoder; click fills input and re-runs search only
+4. **Add new Address: "{query}"** — when query non-empty; Enter or click uses text/geocode path unless pre-resolve commit applies
+
+**Pre-resolved commit:** When query still equals `pickQuerySnapshot` after an org row click, Enter/confirm emits `locationLinked` → `link_media_to_location` only (no `find_or_create`). Any edit after pick clears pre-resolve and falls through to add/replace text flows.
+
+**Keyboard focus order (ArrowUp/Down):** org Recent/Results → other media → internet → add new.
+
+**Replace mode:** `locationLinked` with replace target → parent `unlink` + `linkExistingLocation`.
 
 ## Map Row Target
 

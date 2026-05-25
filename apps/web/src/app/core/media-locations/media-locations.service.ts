@@ -22,9 +22,11 @@ import type {
   MediaLocationAddInput,
   MediaLocationAddressPatch,
   MediaLocationDeleteResult,
+  MediaLocationErrorResult,
   MediaLocationReplaceLinkInput,
   MediaLocationResult,
   MediaLocationUpdateInput,
+  OrgLocationSearchRow,
 } from './media-locations.types';
 
 export type {
@@ -46,6 +48,53 @@ export class MediaLocationsService {
       return;
     }
     this.listCache.clear();
+  }
+
+  async searchLocations(
+    query: string | null,
+    limit: number,
+    mediaItemId?: string,
+  ): Promise<{ ok: true; rows: OrgLocationSearchRow[] } | MediaLocationErrorResult> {
+    try {
+      const rows = await this.adapter.searchLocations(query, limit, mediaItemId);
+      return { ok: true, rows };
+    } catch (error) {
+      return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
+    }
+  }
+
+  /** Link an existing org location without find_or_create (picker pre-resolve path). */
+  async replaceWithExistingLocation(
+    mediaItemId: string,
+    previousLocationId: string,
+    locationId: string,
+  ): Promise<MediaLocationResult> {
+    this.invalidateListCache(mediaItemId);
+    try {
+      await this.adapter.unlink(mediaItemId, previousLocationId);
+      return await this.linkExistingLocation(mediaItemId, locationId);
+    } catch (error) {
+      return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
+    }
+  }
+
+  async linkExistingLocation(
+    mediaItemId: string,
+    locationId: string,
+  ): Promise<MediaLocationResult> {
+    this.invalidateListCache(mediaItemId);
+    try {
+      await this.adapter.link(mediaItemId, locationId);
+      const rows = await this.adapter.list(mediaItemId);
+      const row = rows.find((item) => item.id === locationId) ?? rows[rows.length - 1];
+      if (!row) {
+        return { ok: false, error: 'Location link not found after link.', code: 'unknown' };
+      }
+      this.listCache.set(mediaItemId, rows);
+      return { ok: true, row };
+    } catch (error) {
+      return { ok: false, error: describeMediaLocationRpcError(error as { message?: string }) };
+    }
   }
 
   async listForMedia(mediaItemId: string): Promise<MediaLocationResult> {

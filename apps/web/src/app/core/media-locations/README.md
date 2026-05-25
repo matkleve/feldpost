@@ -1,6 +1,6 @@
 # media-locations (core service module)
 
-**What it does:** Loads and saves **multiple org-scoped locations per media item** via `locations` + `media_item_location_links`. List order (`sort_order`) defines which row hydrates detail title / legacy `ImageRecord` address fields (`displayLocationFromRows`).
+**What it does:** Loads and saves **multiple org-scoped locations per media item** via `locations` + `media_item_location_links`. List order (`sort_order`) defines which row hydrates detail title / flat `media()` address fields (`displayLocationFromRows` → `mergeLocationDisplayIntoMediaRecord`).
 
 **UI it connects to:**
 

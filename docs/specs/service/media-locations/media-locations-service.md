@@ -83,7 +83,8 @@ Hash covers: street, house_number, staircase, door, postcode, city, district, co
 | `delete_media_item_location(p_location_id)` | Unlink; delete location if orphan |
 | `unlink_media_from_location(p_media_item_id, p_location_id)` | Remove one junction row (scoped to media item) |
 | `find_or_create_location(...)` | Insert or return existing by dedupe key |
-| `link_media_to_location(p_media_item_id, p_location_id)` | Idempotent link |
+| `link_media_to_location(p_media_item_id, p_location_id)` | Idempotent link; bumps `locations.last_used_at` |
+| `search_locations(p_query, p_limit, p_media_item_id)` | Org picker: empty query → recent by `last_used_at`; typed → ILIKE rank (street prefix first); optional `is_linked_to_media` hint |
 | `update_location(p_location_id, ...)` | Patch shared location (shared-edit semantics) |
 
 ### Facade: replace link (normative)
@@ -95,6 +96,16 @@ Hash covers: street, house_number, staircase, door, postcode, city, district, co
 3. `link_media_to_location`
 
 Does **not** call `update_media_item_location` on the previous location. Helpers: `replaceLocationLinkFromFreeText`, `replaceLocationLinkFromGeocode`.
+
+### Facade: link existing (picker pre-resolve)
+
+`linkExistingLocation(mediaItemId, locationId)` — `link_media_to_location` only (no `find_or_create`).
+
+`replaceWithExistingLocation(mediaItemId, previousLocationId, locationId)` — unlink previous, then `linkExistingLocation`.
+
+### `last_used_at`
+
+Column on `locations`; updated **only** in `link_media_to_location` (not on `find_or_create` alone). Drives Recent list in add/search picker.
 
 ### Error codes
 
@@ -166,4 +177,4 @@ Side submenu under overflow **Copy** (full address first, then parts). Hidden wh
 - [x] Dedupe key excludes floor and extra_information; includes postcode
 - [x] `media_items` has no latitude/longitude/address_label/street/city/district/country/geog columns after `20260525130000`
 - [x] Upload completion links location via `resolve_media_location` + `link_media_to_location`
-- [x] Detail mutation exit: one `list_locations_for_media` reload + `locationDisplaySnapshotFromRows` patches `media()` (no `media_items` address columns)
+- [x] Detail mutation exit: one `list_locations_for_media` reload + `locationDisplaySnapshotFromRows` + `mergeLocationDisplayIntoMediaRecord` patches `media()` (no `media_items` address columns)

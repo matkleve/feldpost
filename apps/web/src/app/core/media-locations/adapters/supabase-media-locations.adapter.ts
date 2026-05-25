@@ -12,6 +12,7 @@ import type {
   MediaLocationAddInput,
   MediaLocationAddressPatch,
   MediaLocationUpdateInput,
+  OrgLocationSearchRow,
 } from '../media-locations.types';
 
 @Injectable({ providedIn: 'root' })
@@ -93,6 +94,25 @@ export class SupabaseMediaLocationsAdapter {
     if (error) {
       throw error;
     }
+  }
+
+  async searchLocations(
+    query: string | null,
+    limit: number,
+    mediaItemId?: string,
+  ): Promise<OrgLocationSearchRow[]> {
+    const { data, error } = await this.supabase.client.rpc('search_locations', {
+      p_query: query,
+      p_limit: limit,
+      p_media_item_id: mediaItemId ?? null,
+    });
+    if (error) {
+      throw error;
+    }
+    return ((data ?? []) as OrgLocationSearchRow[]).map((row) => ({
+      ...row,
+      media_item_id: row.media_item_id ?? mediaItemId ?? null,
+    }));
   }
 }
 
