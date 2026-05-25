@@ -34,6 +34,9 @@ Symmetry tracker: [service-spec-symmetry-matrix](../../backlog/service-spec-symm
 | media-location-update | [media-location-update/media-location-update-service.md](media-location-update/media-location-update-service.md) |
 | media-preview | [media-preview/media-preview-service.md](media-preview/media-preview-service.md) |
 | media-query | [media-query/media-query-service.md](media-query/media-query-service.md) |
+| media-page-state | [media-page-state/media-page-state-service.md](media-page-state/media-page-state-service.md) |
+| route-session-cache | [route-session-cache/route-session-cache-service.md](route-session-cache/route-session-cache-service.md) |
+| map-session-cache | (facade only; matrix: [../system/route-session-cache.md](../system/route-session-cache.md)) |
 | media-upload | [media-upload-service/README.md](media-upload-service/README.md) |
 | media-detail-data | [media-detail-data/README.md](media-detail-data/README.md) |
 | metadata | [metadata/metadata-service.md](metadata/metadata-service.md) |

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthService } from '../auth/auth.service';
 import { MediaDeleteUndoService } from '../media-delete/media-delete-undo.service';
 import { MediaQueryService } from '../media-query/media-query.service';
+import { RouteSessionCacheService } from '../route-session-cache/route-session-cache.service';
 import { UploadManagerService } from '../upload/upload-manager.service';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 import { buildMediaGalleryQuerySignature } from './media-page-state.helpers';
@@ -52,6 +53,7 @@ describe('MediaPageStateService', () => {
 
     await TestBed.configureTestingModule({
       providers: [
+        RouteSessionCacheService,
         MediaPageStateService,
         {
           provide: AuthService,
@@ -116,6 +118,22 @@ describe('MediaPageStateService', () => {
     await vi.advanceTimersByTimeAsync(800);
 
     expect(loadAllSpy).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('map-first: handlers registered in MediaPageState ctor then upload revalidates cache', async () => {
+    vi.useFakeTimers();
+
+    service.writeCache(baseInputs, [sampleMedia('cached-1')]);
+
+    loadAllSpy.mockClear();
+    imageUploaded$.next({ mediaId: 'from-map' });
+    await vi.advanceTimersByTimeAsync(800);
+
+    expect(loadAllSpy).toHaveBeenCalled();
+    const lookup = service.lookup(baseInputs);
+    expect(lookup.hit).toBe(true);
+    expect(lookup.mediaItems.map((m) => m.id)).toEqual(['fresh-1']);
     vi.useRealTimers();
   });
 });

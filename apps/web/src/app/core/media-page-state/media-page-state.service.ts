@@ -1,10 +1,9 @@
-import { DestroyRef, Injectable, effect, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { auditTime, merge } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-import { MediaDeleteUndoService } from '../media-delete/media-delete-undo.service';
 import { MediaQueryService } from '../media-query/media-query.service';
-import { UploadManagerService } from '../upload/upload-manager.service';
+import { ROUTE_SESSION_SHELL_KEYS } from '../route-session-cache/route-session-cache.keys';
+import { RouteSessionCacheService } from '../route-session-cache/route-session-cache.service';
+import type { RouteCacheEntry } from '../route-session-cache/route-session-cache.types';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 import { buildMediaGalleryQuerySignature } from './media-page-state.helpers';
 import type {
@@ -12,176 +11,67 @@ import type {
   MediaPageCacheLookup,
 } from './media-page-state.types';
 
-const REVALIDATE_DEBOUNCE_MS = 400;
-
 @Injectable({ providedIn: 'root' })
 export class MediaPageStateService {
   private readonly authService = inject(AuthService);
   private readonly mediaQueryService = inject(MediaQueryService);
-  private readonly uploadManager = inject(UploadManagerService);
-  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
+  private readonly routeCache = inject(RouteSessionCacheService);
 
-  private cacheEntry: { querySignature: string; mediaItems: WorkspaceMedia[]; lastSyncedAt: number } | null =
-    null;
-
-  private revalidateTimer: ReturnType<typeof setTimeout> | null = null;
-  private revalidateInFlightSignature: string | null = null;
-  private pendingRevalidateSignature: string | null = null;
-
-  private readonly _revalidating = signal(false);
-  readonly revalidating = this._revalidating.asReadonly();
+  readonly revalidating = this.routeCache.revalidating;
 
   constructor() {
-    const destroyRef = inject(DestroyRef);
-
-    merge(
-      this.uploadManager.batchComplete$,
-      this.uploadManager.imageUploaded$,
-      this.uploadManager.imageReplaced$,
-      this.uploadManager.imageAttached$,
-    )
-      .pipe(auditTime(300), takeUntilDestroyed(destroyRef))
-      .subscribe(() => {
-        this.onUploadActivity();
-      });
-
-    this.mediaDeleteUndo.mediaDeleted$
-      .pipe(takeUntilDestroyed(destroyRef))
-      .subscribe(({ mediaItemIds }) => {
-        this.removeMediaFromCache(mediaItemIds);
-      });
-
-    this.mediaDeleteUndo.mediaRestored$
-      .pipe(takeUntilDestroyed(destroyRef))
-      .subscribe(() => {
-        this.invalidateActiveCache();
-      });
-
-    effect(() => {
-      if (!this.authService.session()) {
-        this.clearAll();
-      }
-    });
+    this.routeCache.registerRevalidateHandler(ROUTE_SESSION_SHELL_KEYS.MEDIA, (signature) =>
+      this.runRevalidate(signature),
+    );
+    this.routeCache.registerDeletePatchHandler(ROUTE_SESSION_SHELL_KEYS.MEDIA, (ids, entry) =>
+      this.patchDelete(ids, entry as RouteCacheEntry<WorkspaceMedia[]>),
+    );
   }
 
   lookup(inputs: MediaGalleryQueryInputs): MediaPageCacheLookup {
     const signature = buildMediaGalleryQuerySignature(inputs);
-    const entry = this.cacheEntry;
+    const mediaItems = this.routeCache.restore<WorkspaceMedia[]>(
+      ROUTE_SESSION_SHELL_KEYS.MEDIA,
+      signature,
+    );
 
-    if (!entry || entry.querySignature !== signature) {
+    if (!mediaItems) {
       return { hit: false, mediaItems: [] };
     }
 
-    return { hit: true, mediaItems: entry.mediaItems };
+    return { hit: true, mediaItems };
   }
 
   writeCache(inputs: MediaGalleryQueryInputs, mediaItems: WorkspaceMedia[]): void {
     const signature = buildMediaGalleryQuerySignature(inputs);
-    this.cacheEntry = {
-      querySignature: signature,
-      mediaItems: [...mediaItems],
-      lastSyncedAt: Date.now(),
-    };
+    this.routeCache.save(ROUTE_SESSION_SHELL_KEYS.MEDIA, signature, [...mediaItems]);
   }
 
   invalidateActiveCache(): void {
-    if (!this.cacheEntry) {
-      return;
-    }
-
-    this.cacheEntry = null;
+    this.routeCache.invalidate(ROUTE_SESSION_SHELL_KEYS.MEDIA);
   }
 
   scheduleRevalidate(inputs: MediaGalleryQueryInputs): void {
     const signature = buildMediaGalleryQuerySignature(inputs);
-    this.pendingRevalidateSignature = signature;
-
-    if (this.revalidateTimer) {
-      clearTimeout(this.revalidateTimer);
-    }
-
-    this.revalidateTimer = setTimeout(() => {
-      this.revalidateTimer = null;
-      void this.runRevalidate(signature);
-    }, REVALIDATE_DEBOUNCE_MS);
+    this.routeCache.scheduleRevalidate(ROUTE_SESSION_SHELL_KEYS.MEDIA, signature);
   }
 
   private async runRevalidate(signature: string): Promise<void> {
-    if (this.revalidateInFlightSignature === signature) {
-      return;
-    }
-
     if (!this.authService.user()) {
       return;
     }
 
-    this.revalidateInFlightSignature = signature;
-    this._revalidating.set(true);
+    const rows = await this.mediaQueryService.loadAllCurrentUserWorkspaceMedia();
+    const entry = this.routeCache.getEntry(ROUTE_SESSION_SHELL_KEYS.MEDIA);
 
-    try {
-      const rows = await this.mediaQueryService.loadAllCurrentUserWorkspaceMedia();
-      if (this.revalidateInFlightSignature !== signature) {
-        return;
-      }
-
-      if (this.cacheEntry?.querySignature === signature) {
-        this.cacheEntry = {
-          querySignature: signature,
-          mediaItems: rows,
-          lastSyncedAt: Date.now(),
-        };
-      }
-    } finally {
-      if (this.revalidateInFlightSignature === signature) {
-        this.revalidateInFlightSignature = null;
-        this._revalidating.set(false);
-      }
+    if (entry?.querySignature === signature) {
+      this.routeCache.save(ROUTE_SESSION_SHELL_KEYS.MEDIA, signature, rows);
     }
   }
 
-  private onUploadActivity(): void {
-    if (!this.cacheEntry) {
-      return;
-    }
-
-    this.scheduleRevalidateForCachedSignature(this.cacheEntry.querySignature);
-  }
-
-  private scheduleRevalidateForCachedSignature(signature: string): void {
-    this.pendingRevalidateSignature = signature;
-
-    if (this.revalidateTimer) {
-      clearTimeout(this.revalidateTimer);
-    }
-
-    this.revalidateTimer = setTimeout(() => {
-      this.revalidateTimer = null;
-      void this.runRevalidate(signature);
-    }, REVALIDATE_DEBOUNCE_MS);
-  }
-
-  private removeMediaFromCache(mediaItemIds: string[]): void {
-    if (!this.cacheEntry || mediaItemIds.length === 0) {
-      return;
-    }
-
+  private patchDelete(mediaItemIds: string[], entry: RouteCacheEntry<WorkspaceMedia[]>): void {
     const deleted = new Set(mediaItemIds);
-    const next = this.cacheEntry.mediaItems.filter((item) => !deleted.has(item.id));
-    this.cacheEntry = {
-      ...this.cacheEntry,
-      mediaItems: next,
-      lastSyncedAt: Date.now(),
-    };
-  }
-
-  clearAll(): void {
-    this.cacheEntry = null;
-    this.revalidateInFlightSignature = null;
-    this.pendingRevalidateSignature = null;
-    if (this.revalidateTimer) {
-      clearTimeout(this.revalidateTimer);
-      this.revalidateTimer = null;
-    }
-    this._revalidating.set(false);
+    const next = entry.data.filter((item) => !deleted.has(item.id));
+    this.routeCache.save(ROUTE_SESSION_SHELL_KEYS.MEDIA, entry.querySignature, next);
   }
 }

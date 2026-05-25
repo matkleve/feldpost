@@ -1,61 +1,27 @@
-import { DestroyRef, Injectable, effect, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { auditTime, merge } from 'rxjs';
-import { AuthService } from '../auth/auth.service';
-import { MediaDeleteUndoService } from '../media-delete/media-delete-undo.service';
-import { UploadManagerService } from '../upload/upload-manager.service';
+import { Injectable, inject } from '@angular/core';
+import {
+  MAP_VIEWPORT_SIGNATURE,
+  ROUTE_SESSION_SHELL_KEYS,
+} from '../route-session-cache/route-session-cache.keys';
+import { RouteSessionCacheService } from '../route-session-cache/route-session-cache.service';
 import type { MapSessionSnapshot } from './map-session-cache.types';
 
 @Injectable({ providedIn: 'root' })
 export class MapSessionCacheService {
-  private readonly authService = inject(AuthService);
-  private readonly uploadManager = inject(UploadManagerService);
-  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
-
-  private snapshot: MapSessionSnapshot | null = null;
-
-  constructor() {
-    const destroyRef = inject(DestroyRef);
-
-    merge(
-      this.uploadManager.batchComplete$,
-      this.uploadManager.imageUploaded$,
-      this.uploadManager.imageReplaced$,
-      this.uploadManager.imageAttached$,
-    )
-      .pipe(auditTime(300), takeUntilDestroyed(destroyRef))
-      .subscribe(() => {
-        this.invalidate();
-      });
-
-    this.mediaDeleteUndo.mediaDeleted$
-      .pipe(takeUntilDestroyed(destroyRef))
-      .subscribe(() => {
-        this.invalidate();
-      });
-
-    this.mediaDeleteUndo.mediaRestored$
-      .pipe(takeUntilDestroyed(destroyRef))
-      .subscribe(() => {
-        this.invalidate();
-      });
-
-    effect(() => {
-      if (!this.authService.session()) {
-        this.invalidate();
-      }
-    });
-  }
+  private readonly routeCache = inject(RouteSessionCacheService);
 
   read(): MapSessionSnapshot | null {
-    return this.snapshot;
+    return this.routeCache.restore<MapSessionSnapshot>(
+      ROUTE_SESSION_SHELL_KEYS.MAP,
+      MAP_VIEWPORT_SIGNATURE,
+    );
   }
 
   write(snapshot: MapSessionSnapshot): void {
-    this.snapshot = snapshot;
+    this.routeCache.save(ROUTE_SESSION_SHELL_KEYS.MAP, MAP_VIEWPORT_SIGNATURE, snapshot);
   }
 
   invalidate(): void {
-    this.snapshot = null;
+    this.routeCache.invalidate(ROUTE_SESSION_SHELL_KEYS.MAP);
   }
 }

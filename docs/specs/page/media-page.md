@@ -256,7 +256,8 @@ export interface WorkspacePaneHostPort {
 | `features/media/media-toolbar.component.html` | Toolbar template (Phase 2)                                                |
 | `features/media/media-toolbar.component.scss` | Toolbar styles (Phase 2)                                                  |
 | `core/media-view.service.ts`                  | Grouping, filtering, sorting logic (or share with workspace service)      |
-| `core/media-page-state.service.ts`            | Route-stable media list snapshot cache + background revalidation metadata |
+| `core/media-page-state/`                      | `/media` gallery session cache facade (delegates to `route-session-cache/`) |
+| `core/route-session-cache/`                   | Shared shell revisit storage + invalidation dispatch |
 | `core/workspace-pane-context.port.ts`         | Shared interface contract for selected-items context provider             |
 | `core/workspace-pane-host.port.ts`            | Host contract for tab and context binding                                 |
 | `core/workspace-pane-observer.adapter.ts`     | Observer lifecycle adapter (route, upload, tab persistence)               |

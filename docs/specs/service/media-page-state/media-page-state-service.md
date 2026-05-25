@@ -6,11 +6,11 @@
 
 ## What It Is
 
-Root-scoped session cache for the `/media` gallery: one `WorkspaceMedia[]` snapshot per `querySignature` (user, project filter, sorts, groupings, filter rules).
+Root-scoped **facade** for the `/media` gallery: one `WorkspaceMedia[]` snapshot per `querySignature` (user, project filter, sorts, groupings, filter rules). Storage and cross-shell event dispatch are delegated to [`RouteSessionCacheService`](route-session-cache-service.md) (`shellKey: 'media'`).
 
 ## Upload invalidation (cross-shell)
 
-`MediaPageStateService` subscribes in its constructor to `UploadManagerService` (`providedIn: 'root'`):
+`RouteSessionCacheService` dispatches upload events; this facade registers the revalidate handler and performs `MediaQueryService` fetch:
 
 | Stream | Policy |
 |--------|--------|
@@ -21,7 +21,7 @@ Root-scoped session cache for the `/media` gallery: one `WorkspaceMedia[]` snaps
 
 Uploads on `/map` (or any shell) update or refresh cache **before** the user returns to `/media`, so a cache hit is not stale.
 
-Debounce: ~400ms; `revalidatingInProgress` prevents parallel revalidates for the same signature.
+Debounce: ~400ms; `revalidating` (from route cache) prevents parallel revalidates for the same signature.
 
 ## Delete / auth
 
@@ -29,7 +29,7 @@ Debounce: ~400ms; `revalidatingInProgress` prevents parallel revalidates for the
 |--------|--------|
 | `MediaDeleteUndoService.mediaDeleted$` | Remove ids from cached snapshot |
 | `MediaDeleteUndoService.mediaRestored$` | Invalidate cache (safe miss) |
-| `AuthService.session` → null | `clearAll()` |
+| `AuthService.session` → null | `RouteSessionCacheService.invalidateAll()` (all shells) |
 
 ## API
 
@@ -38,10 +38,10 @@ Debounce: ~400ms; `revalidatingInProgress` prevents parallel revalidates for the
 | `lookup(inputs)` | Cache hit/miss for current query |
 | `writeCache(inputs, mediaItems)` | Store snapshot after load |
 | `scheduleRevalidate(inputs)` | Background refresh (debounced) |
-| `invalidateActiveCache()` | Force miss |
-| `clearAll()` | Logout |
+| `invalidateActiveCache()` | Force miss for current media shell key |
+| `revalidating` | Readonly signal while background revalidate runs |
 
 ## Acceptance
 
-- [ ] Service spec includes cross-shell upload → revalidate without `MediaComponent` mounted.
-- [ ] `MediaComponent` does not wire cache-first until upload subscription is verified.
+- [x] Cross-shell upload → revalidate without `MediaComponent` mounted (`media-page-state.service.spec.ts`).
+- [x] `MediaComponent` cache-first wiring with upload invalidation verified.

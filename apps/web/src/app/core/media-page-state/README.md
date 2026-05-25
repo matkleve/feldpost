@@ -8,4 +8,6 @@ Session-scoped cache for the `/media` gallery (`WorkspaceMedia[]` per `querySign
 
 If signature at route enter differs from the cached entry, treat as a **cache miss** (never serve stale rows).
 
+Storage and upload/delete/logout dispatch live in `RouteSessionCacheService` (`shellKey: 'media'`). This facade registers revalidate and delete-patch handlers.
+
 Upload invalidation is root-scoped via `UploadManagerService` so uploads on `/map` update cache before return to `/media`.
