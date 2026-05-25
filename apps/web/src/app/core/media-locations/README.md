@@ -44,3 +44,7 @@ MediaDetailViewComponent
   └─ mutations → RPC → refreshMediaAfterLocationMutation()
         └─ re-list links; merge first row into media() display fields
 ```
+
+## List cache (gallery / workspace / map panel)
+
+`loadLocationSummaryByMediaIds` (batch) → `MediaLocationsService.hydrateSummariesAndSeedCache` / `seedListCache` fills `listCache` with **full** link rows (not GPS-only). Thumbnail map menu `listForMedia` then hits cache instead of `list_locations_for_media`. Invalidated on location mutations via `invalidateListCache`. Cluster / selection panel loads seed cache fire-and-forget after `rawImages` is set.

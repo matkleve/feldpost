@@ -14,8 +14,13 @@
  * @see docs/specs/service/media-locations/media-locations-service.md
  */
 import { Injectable, inject } from '@angular/core';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { GeocodingService, type ForwardGeocodeResult } from '../geocoding/geocoding.service';
 import { SupabaseMediaLocationsAdapter } from './adapters/supabase-media-locations.adapter';
+import {
+  loadLocationSummaryByMediaIds,
+  type MediaLocationSummaryMaps,
+} from './media-locations-batch.helpers';
 import { describeMediaLocationRpcError } from './media-locations.helpers';
 import type {
   MediaItemLocationRow,
@@ -48,6 +53,33 @@ export class MediaLocationsService {
       return;
     }
     this.listCache.clear();
+  }
+
+  /**
+   * Writes list rows from a batch hydrate; does not RPC.
+   * Clones each row at write — independent of batch-return clone (different mutation vectors).
+   */
+  seedListCache(rowsByMediaId: ReadonlyMap<string, readonly MediaItemLocationRow[]>): void {
+    for (const [mediaItemId, rows] of rowsByMediaId) {
+      this.listCache.set(
+        mediaItemId,
+        rows.map((row) => ({ ...row })),
+      );
+    }
+  }
+
+  /**
+   * Batch summary load + `listCache` seed (gallery, workspace, projects).
+   * @see docs/specs/service/media-locations/media-locations-service.md
+   */
+  async hydrateSummariesAndSeedCache(
+    client: SupabaseClient,
+    mediaItemIds: string[],
+    chunkSize?: number,
+  ): Promise<MediaLocationSummaryMaps> {
+    const maps = await loadLocationSummaryByMediaIds(client, mediaItemIds, chunkSize);
+    this.seedListCache(maps.rowsByMediaId);
+    return maps;
   }
 
   async searchLocations(

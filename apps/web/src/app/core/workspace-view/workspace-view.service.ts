@@ -7,7 +7,7 @@ import { LocationResolverService } from '../location-resolver/location-resolver.
 import { MetadataService } from '../metadata/metadata.service';
 import { MediaDownloadService } from '../media-download/media-download.service';
 import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
-import { loadDisplayLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
+import { MediaLocationsService } from '../media-locations/media-locations.service';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -28,6 +28,7 @@ export class WorkspaceViewService {
   private readonly metadata = inject(MetadataService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
+  private readonly mediaLocationsService = inject(MediaLocationsService);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -205,6 +206,7 @@ export class WorkspaceViewService {
 
       this._rawImages.set(images);
       if (images.length > 0) {
+        this.seedLocationListCacheForImages(images);
         this.resolveUnresolvedAddresses(images);
         void this.batchSignThumbnails(images);
         void this.loadMetadataValues(images);
@@ -294,6 +296,9 @@ export class WorkspaceViewService {
   setActiveSelectionImages(images: WorkspaceImage[]): void {
     this._selectionActive.set(true);
     this._rawImages.set(images);
+    if (images.length > 0) {
+      this.seedLocationListCacheForImages(images);
+    }
     this.resolveUnresolvedAddresses(images);
     void this.batchSignThumbnails(images);
     void this.loadMetadataValues(images);
@@ -360,10 +365,11 @@ export class WorkspaceViewService {
 
     const membershipByMediaId = new Map<string, Array<{ id: string; name: string | null }>>();
     const mediaItemIds = rows.map((row) => row.id);
-    const primaryLocationByMediaId = await loadDisplayLocationsByMediaIds(
-      this.supabase.client,
-      mediaItemIds,
-    );
+    const { displayLocationByMediaId: primaryLocationByMediaId } =
+      await this.mediaLocationsService.hydrateSummariesAndSeedCache(
+        this.supabase.client,
+        mediaItemIds,
+      );
 
     const { data: membershipsData, error: membershipsError } = await this.supabase.client
       .from('media_projects')
@@ -539,6 +545,15 @@ export class WorkspaceViewService {
   }
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Private helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+  /** Fire-and-forget: seed map-menu list cache for panel thumbnails (cluster / selection). */
+  private seedLocationListCacheForImages(images: WorkspaceImage[]): void {
+    const mediaItemIds = Array.from(new Set(images.map((image) => image.id).filter((id) => !!id)));
+    if (mediaItemIds.length === 0) {
+      return;
+    }
+    void this.mediaLocationsService.hydrateSummariesAndSeedCache(this.supabase.client, mediaItemIds);
+  }
 
   /**
    * Delegate location resolution to LocationResolverService.

@@ -1,5 +1,7 @@
 // MediaDetailViewComponent styles.
 
+@use './detail-row-slots';
+
 :host {
   --detail-row-height: 2rem;
   --detail-row-rail-size: var(--detail-row-height);
@@ -151,6 +153,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
+
+  > app-quick-info-chips {
+    @include detail-row-slots.detail-row-center-width;
+  }
 }
 
 // ─── Reconciliation banner ───

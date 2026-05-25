@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import type { FileTypeCategory } from '../media/media-renderer.types';
-import { loadDisplayLocationsByMediaIds } from '../media-locations/media-locations-batch.helpers';
+import { MediaLocationsService } from '../media-locations/media-locations.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import {
   bumpProjectFileTypeCount,
@@ -111,6 +111,7 @@ const PROJECT_WORKSPACE_CACHE_TTL_MS = 30_000;
 @Injectable({ providedIn: 'root' })
 export class ProjectsService {
   private readonly supabase = inject(SupabaseService);
+  private readonly mediaLocationsService = inject(MediaLocationsService);
   private projectsCache: { value: ProjectListItem[]; expiresAt: number } | null = null;
   private projectsLoadPromise: Promise<ProjectListItem[]> | null = null;
   private readonly groupedSearchCountsCache = new Map<
@@ -380,7 +381,11 @@ export class ProjectsService {
           return media?.id;
         })
         .filter((id): id is string => typeof id === 'string' && id.length > 0);
-      const primaryByMediaId = await loadDisplayLocationsByMediaIds(this.supabase.client, mediaIds);
+      const { displayLocationByMediaId: primaryByMediaId } =
+        await this.mediaLocationsService.hydrateSummariesAndSeedCache(
+          this.supabase.client,
+          mediaIds,
+        );
 
       const mappedPreferred: ProjectScopedWorkspaceImage[] = [];
       for (const row of joinRows) {

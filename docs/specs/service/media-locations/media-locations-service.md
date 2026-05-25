@@ -127,7 +127,8 @@ Column on `locations`; updated **only** in `link_media_to_location` (not on `fin
 | Viewport markers | `viewport_markers` v2 — zoomable links; `location_id` on marker; cluster count = `COUNT(DISTINCT media_item_id)` |
 | Grid map affordance | `zoomable_location_count` on gallery list rows |
 | Marker preview URL | `MediaDownloadService.resolveMarkerPreview(mediaId, path)` — cache key `mediaId` + `marker` tier |
-| Workspace / gallery hydrate | `loadLocationSummaryByMediaIds` or `loadDisplayLocationsByMediaIds` |
+| Workspace / gallery hydrate | `hydrateSummariesAndSeedCache` (batch summary + `listCache` seed) or `loadLocationSummaryByMediaIds` / `loadDisplayLocationsByMediaIds` without seed |
+| Thumbnail map menu | `listForMedia` reads `listCache` when batch hydrate ran for that `media_item_id` |
 
 ## Floor edit rule
 
@@ -178,3 +179,4 @@ Side submenu under overflow **Copy** (full address first, then parts). Hidden wh
 - [x] `media_items` has no latitude/longitude/address_label/street/city/district/country/geog columns after `20260525130000`
 - [x] Upload completion links location via `resolve_media_location` + `link_media_to_location`
 - [x] Detail mutation exit: one `list_locations_for_media` reload + `locationDisplaySnapshotFromRows` + `mergeLocationDisplayIntoMediaRecord` patches `media()` (no `media_items` address columns)
+- [x] `seedListCache` / `hydrateSummariesAndSeedCache`: batch load seeds full row lists; map menu avoids redundant `list_locations_for_media` when cache is warm

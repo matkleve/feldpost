@@ -3,6 +3,8 @@ import { displayLocationFromRows, legacyMediaHasGps } from './media-locations.he
 import type { MediaItemLocationRow } from './media-locations.types';
 
 type LinkLocationRow = {
+  /** Junction row id (`media_item_location_links.id`). */
+  id: string;
   media_item_id: string;
   sort_order: number;
   locations: MediaItemLocationRow | MediaItemLocationRow[] | null;
@@ -11,13 +13,31 @@ type LinkLocationRow = {
 export interface MediaLocationSummaryMaps {
   zoomableCountByMediaId: Map<string, number>;
   displayLocationByMediaId: Map<string, MediaItemLocationRow>;
+  rowsByMediaId: Map<string, MediaItemLocationRow[]>;
 }
 
 const LOCATION_LINK_SELECT =
-  'media_item_id, sort_order, locations(id, street, house_number, staircase, door, floor, postcode, extra_information, city, district, country, latitude, longitude, address_label, organization_id, staircase_sort_key, door_sort_key, created_at, updated_at)';
+  'id, media_item_id, sort_order, locations(id, street, house_number, staircase, door, floor, postcode, extra_information, city, district, country, latitude, longitude, address_label, organization_id, staircase_sort_key, door_sort_key, created_at, updated_at)';
+
+/** Clone row objects for cache/export (batch return layer — see also `seedListCache`). */
+export function cloneLocationRowsForCache(
+  rows: readonly MediaItemLocationRow[],
+): MediaItemLocationRow[] {
+  return rows.map((row) => ({ ...row }));
+}
+
+function buildRowsByMediaIdSnapshot(
+  byMedia: Map<string, MediaItemLocationRow[]>,
+): Map<string, MediaItemLocationRow[]> {
+  const rowsByMediaId = new Map<string, MediaItemLocationRow[]>();
+  for (const [mediaId, rows] of byMedia) {
+    rowsByMediaId.set(mediaId, cloneLocationRowsForCache(rows));
+  }
+  return rowsByMediaId;
+}
 
 /**
- * One pass over links: zoomable count + first-row display location per media.
+ * One pass over links: zoomable count + first-row display location + full row list per media.
  * @see docs/specs/service/media-locations/media-locations-service.md
  */
 export async function loadLocationSummaryByMediaIds(
@@ -27,9 +47,10 @@ export async function loadLocationSummaryByMediaIds(
 ): Promise<MediaLocationSummaryMaps> {
   const zoomableCountByMediaId = new Map<string, number>();
   const displayLocationByMediaId = new Map<string, MediaItemLocationRow>();
+  const rowsByMediaId = new Map<string, MediaItemLocationRow[]>();
 
   if (mediaItemIds.length === 0) {
-    return { zoomableCountByMediaId, displayLocationByMediaId };
+    return { zoomableCountByMediaId, displayLocationByMediaId, rowsByMediaId };
   }
 
   const byMedia = new Map<string, MediaItemLocationRow[]>();
@@ -55,15 +76,20 @@ export async function loadLocationSummaryByMediaIds(
       const bucket = byMedia.get(row.media_item_id) ?? [];
       bucket.push({
         ...loc,
+        id: loc.id,
+        link_id: row.id,
         media_item_id: row.media_item_id,
         sort_order: row.sort_order,
-        link_id: undefined,
       });
       byMedia.set(row.media_item_id, bucket);
     }
   }
 
-  for (const [mediaId, rows] of byMedia) {
+  const snapshot = buildRowsByMediaIdSnapshot(byMedia);
+
+  for (const [mediaId, rows] of snapshot) {
+    rowsByMediaId.set(mediaId, rows);
+
     let zoomable = 0;
     for (const row of rows) {
       if (legacyMediaHasGps(row.latitude, row.longitude)) {
@@ -74,11 +100,11 @@ export async function loadLocationSummaryByMediaIds(
 
     const display = displayLocationFromRows(rows);
     if (display) {
-      displayLocationByMediaId.set(mediaId, display);
+      displayLocationByMediaId.set(mediaId, { ...display });
     }
   }
 
-  return { zoomableCountByMediaId, displayLocationByMediaId };
+  return { zoomableCountByMediaId, displayLocationByMediaId, rowsByMediaId };
 }
 
 /** Display location per media (first link by sort_order). Prefer `loadLocationSummaryByMediaIds` when counts are needed too. */

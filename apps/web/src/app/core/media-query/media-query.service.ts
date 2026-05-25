@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { loadLocationSummaryByMediaIds } from '../media-locations/media-locations-batch.helpers';
+import { MediaLocationsService } from '../media-locations/media-locations.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { MetadataService } from '../metadata/metadata.service';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
@@ -93,6 +93,7 @@ export class MediaQueryService {
   private static readonly MEMBERSHIP_QUERY_CHUNK = 120;
 
   private readonly supabase = inject(SupabaseService);
+  private readonly mediaLocationsService = inject(MediaLocationsService);
   private readonly metadata = inject(MetadataService);
 
   /**
@@ -191,7 +192,7 @@ export class MediaQueryService {
       }
     }
 
-    const { zoomableCountByMediaId } = await loadLocationSummaryByMediaIds(
+    const { zoomableCountByMediaId } = await this.mediaLocationsService.hydrateSummariesAndSeedCache(
       this.supabase.client,
       mediaItemIds,
       MediaQueryService.MEMBERSHIP_QUERY_CHUNK,
