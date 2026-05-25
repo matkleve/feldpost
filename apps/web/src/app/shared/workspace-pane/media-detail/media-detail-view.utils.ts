@@ -380,7 +380,7 @@ export function buildInfoChips(args: {
   } = args;
   if (!media) return [];
 
-  const hasGps = media.latitude != null;
+  const hasGps = hasValidGpsCoordinates(media);
   return [
     {
       icon: 'description',

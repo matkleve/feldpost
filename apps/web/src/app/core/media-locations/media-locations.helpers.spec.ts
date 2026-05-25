@@ -55,10 +55,38 @@ describe('media-locations.helpers', () => {
     expect(legacyMediaHasGps(48.2, 16.37)).toBe(true);
   });
 
-  it('displayLocationFromRows picks lowest sort_order', () => {
-    const second: MediaItemLocationRow = { ...BASE_ROW, id: 'loc-2', sort_order: 1, street: 'Other' };
-    const first = displayLocationFromRows([second, BASE_ROW]);
+  it('displayLocationFromRows picks lowest sort_order when all rows lack GPS', () => {
+    const second: MediaItemLocationRow = {
+      ...BASE_ROW,
+      id: 'loc-2',
+      sort_order: 1,
+      street: 'Other',
+      latitude: null,
+      longitude: null,
+    };
+    const noGps: MediaItemLocationRow = { ...BASE_ROW, latitude: null, longitude: null };
+    const first = displayLocationFromRows([second, noGps]);
     expect(first?.id).toBe('loc-1');
+  });
+
+  it('displayLocationFromRows prefers first zoomable row by sort_order', () => {
+    const addressOnly: MediaItemLocationRow = {
+      ...BASE_ROW,
+      id: 'loc-addr',
+      sort_order: 0,
+      latitude: null,
+      longitude: null,
+      street: 'Text only',
+    };
+    const withGps: MediaItemLocationRow = {
+      ...BASE_ROW,
+      id: 'loc-gps',
+      sort_order: 1,
+      latitude: 49.84,
+      longitude: 24.03,
+      street: 'Theatergasse',
+    };
+    expect(displayLocationFromRows([addressOnly, withGps])?.id).toBe('loc-gps');
   });
 
   it('locationDisplaySnapshotFromRows builds display patch', () => {

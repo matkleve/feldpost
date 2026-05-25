@@ -1997,6 +1997,7 @@ export class MapShellComponent implements OnDestroy {
     if (!this.map) return;
     this.upsertUploadedPhotoMarker(event);
     this.resolveDraftMediaMarkerUpload(event);
+    void this.queryViewportMarkers();
   }
 
   /** Enters placement mode for a file with no GPS EXIF data. */

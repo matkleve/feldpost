@@ -250,14 +250,20 @@ export function legacyMediaHasGps(latitude: number | null, longitude: number | n
   );
 }
 
-/** First linked row by sort order — canonical row for detail media projection. */
+/**
+ * Canonical row for detail title / `media()` projection.
+ * Prefers the first zoomable row by `sort_order`; otherwise lowest `sort_order`.
+ * @see docs/specs/service/media-locations/media-locations-service.md
+ */
 export function displayLocationFromRows(
   rows: readonly MediaItemLocationRow[],
 ): MediaItemLocationRow | null {
   if (rows.length === 0) {
     return null;
   }
-  return [...rows].sort((a, b) => a.sort_order - b.sort_order)[0] ?? null;
+  const sorted = [...rows].sort((a, b) => a.sort_order - b.sort_order);
+  const zoomable = sorted.find((row) => legacyMediaHasGps(row.latitude, row.longitude));
+  return zoomable ?? sorted[0] ?? null;
 }
 
 /**

@@ -20,6 +20,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { GeocodingService } from '../geocoding/geocoding.service';
+import { MediaLocationsService } from '../media-locations/media-locations.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import type { ExifCoords } from './upload.service';
 
@@ -31,6 +32,7 @@ export interface ForwardGeocodeResult {
 export class UploadEnrichmentService {
   private readonly geocoding = inject(GeocodingService);
   private readonly supabase = inject(SupabaseService);
+  private readonly mediaLocations = inject(MediaLocationsService);
 
   /**
    * Path A: reverse-geocode GPS ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ address.
@@ -75,6 +77,7 @@ export class UploadEnrichmentService {
         return undefined;
       }
 
+      this.mediaLocations.invalidateListCache(mediaId);
       return { coords: { lat: result.lat, lng: result.lng } };
     } catch {
       await this.markLocationUnresolvable(mediaId);

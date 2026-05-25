@@ -1175,12 +1175,12 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   zoomToLocation(zoomMode: 'house' | 'street' = 'street'): void {
     const media = this.media();
-    if (!media || media.latitude == null || media.longitude == null) return;
+    if (!media || !hasValidGpsCoordinates(media)) return;
     // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> separate zoom_house and zoom_street behaviors.
     this.zoomToLocationRequested.emit({
       mediaId: media.id,
-      lat: media.latitude,
-      lng: media.longitude,
+      lat: media.latitude!,
+      lng: media.longitude!,
       zoomMode,
     });
   }
@@ -1654,13 +1654,21 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
     const row = this.locations().find((item) => item.id === locationRowId);
-    if (!row || row.latitude == null || row.longitude == null) {
+    const fromRow =
+      row && row.latitude != null && row.longitude != null
+        ? { lat: row.latitude, lng: row.longitude }
+        : null;
+    const fromMedia = hasValidGpsCoordinates(media)
+      ? { lat: media.latitude!, lng: media.longitude! }
+      : null;
+    const target = fromRow ?? fromMedia;
+    if (!target) {
       return;
     }
     this.zoomToLocationRequested.emit({
       mediaId: media.id,
-      lat: row.latitude,
-      lng: row.longitude,
+      lat: target.lat,
+      lng: target.lng,
       zoomMode: 'house',
     });
   }

@@ -6,7 +6,7 @@
 
 ## What It Is
 
-Facade for org-scoped **`locations`** linked to media via **`media_item_location_links`**. No primary row: list order is `sort_order ASC`, then staircase/door sort keys. Detail title and legacy `MediaRecord` address fields are hydrated from the **first linked row** (`displayLocationFromRows` — sort order only).
+Facade for org-scoped **`locations`** linked to media via **`media_item_location_links`**. No primary row: list order is `sort_order ASC`, then staircase/door sort keys. Detail title and legacy `MediaRecord` address fields are hydrated from the **first zoomable linked row** by `sort_order`, else the lowest `sort_order` row (`displayLocationFromRows`). `resolve_media_location` updates that primary link’s location instead of appending a second link when one already exists.
 
 Upload / map GPS assignment for a whole item uses **`MediaLocationUpdateService`** (`resolve_media_location` + `link_media_to_location`), not this facade.
 

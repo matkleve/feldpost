@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { UploadEnrichmentService } from './upload-enrichment.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
+import { MediaLocationsService } from '../media-locations/media-locations.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
 describe('UploadEnrichmentService', () => {
@@ -25,12 +26,16 @@ describe('UploadEnrichmentService', () => {
         rpc: rpcMock,
       },
     };
+    const mediaLocationsMock = {
+      invalidateListCache: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         UploadEnrichmentService,
         { provide: GeocodingService, useValue: geocodingMock },
         { provide: SupabaseService, useValue: supabaseMock },
+        { provide: MediaLocationsService, useValue: mediaLocationsMock },
       ],
     });
 
@@ -48,5 +53,6 @@ describe('UploadEnrichmentService', () => {
       }),
     );
     expect(result).toEqual({ coords: { lat: 47.3769, lng: 8.5417 } });
+    expect(mediaLocationsMock.invalidateListCache).toHaveBeenCalledWith('media-123');
   });
 });
