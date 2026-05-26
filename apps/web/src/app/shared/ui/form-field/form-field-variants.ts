@@ -6,7 +6,7 @@
 import { cva } from 'class-variance-authority';
 
 /** Vertical stack: label, control, optional hint/error. */
-export const formFieldVariants = cva('flex flex-col gap-1.5');
+export const formFieldVariants = cva('flex w-full min-w-0 max-w-full flex-col gap-1.5');
 
 /** Secondary helper copy under the control. */
 export const formFieldHintVariants = cva('text-xs text-muted-foreground');

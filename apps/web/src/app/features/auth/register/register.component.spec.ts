@@ -119,6 +119,19 @@ describe('RegisterComponent', () => {
     expect(fixture.componentInstance['form'].valid).toBe(true);
   });
 
+  it('accepts readable dev invite codes (hashed server-side)', () => {
+    const { fixture } = setup();
+    fillForm(
+      fixture,
+      'Alice',
+      'alice@example.com',
+      'KlevetaKamin',
+      'StrongPass1!',
+      'StrongPass1!',
+    );
+    expect(fixture.componentInstance['form'].valid).toBe(true);
+  });
+
   it('prefills invite code from query parameter', () => {
     const invite = 'ab'.repeat(24);
     const { fixture } = setup(null, invite);

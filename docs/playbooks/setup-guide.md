@@ -169,6 +169,8 @@ npm run supabase:ensure-edge   # after config.toml edge secret changes
 
 Forward geocoding uses shared remote Photon when `GEOCODER_FORWARD_URL` is set in `supabase/config.toml`. See [remote-photon.md](remote-photon.md). Do not run `docker-compose.photon.yml` on your laptop unless you need offline fallback.
 
+Local registration is invite-only. After `supabase db reset` or first start: `node scripts/create-local-dev-user.mjs` then `node scripts/seed-dev-invites.mjs`. See [dev-invite-codes.md](dev-invite-codes.md) for codes like `KlevetaKamin`.
+
 ---
 
 ## 6. Tailwind CSS & Design Tokens

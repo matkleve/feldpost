@@ -3,18 +3,30 @@
  * Ground rule: all auth component SCSS files @use this partial.
  */
 
+// Route hosts (app-login, app-register, …) default to inline and shrink-wrap to control
+// intrinsic width — the card then grows past the viewport and gets clipped by overflow.
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 // Full-viewport centered shell
 // @see docs/specs/page/account-feature.md
 .auth-shell {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  min-width: 0;
   height: 100dvh;
   min-height: 100vh;
   background: var(--background);
   padding: var(--spacing-5);
   position: relative;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: hidden;
 }
 
 // Radial gradient warm-up for login/register map-background variant
@@ -47,9 +59,11 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 400px;
+  min-width: 0;
   max-height: calc(100dvh - (0.25rem * 12));
   z-index: 2;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: clip;
 }
 
 // Subtitle paragraph — secondary color directly below the page h1
@@ -66,7 +80,10 @@
 .auth-card-scroll {
   // 8.25rem = approximate height of h1 + .auth-subtitle + top padding above scroll region
   max-height: calc(100dvh - (0.25rem * 12) - 8.25rem);
+  width: 100%;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   padding-right: var(--spacing-1);
   position: relative;
@@ -83,6 +100,28 @@
     100% 0.9rem,
     100% 0.9rem;
   background-attachment: local, local, scroll, scroll;
+}
+
+// Form and fields must shrink inside the flex card (long placeholders otherwise expand past max-width)
+.auth-card form {
+  width: 100%;
+  min-width: 0;
+}
+
+hlm-form-field.field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+hlm-form-field.field > div {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 // Stacked field wrapper: label above, control below, error below that
@@ -111,6 +150,10 @@
 // Auth controls: calmer density than default h-10 / text-sm Tailwind on hlmInput
 // @see docs/migration/phase-10-visual-qa.md Part 3 login
 .auth-card input[hlmInput] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 2.25rem;
   height: 2.25rem;
   padding-block: var(--spacing-1);

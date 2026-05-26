@@ -6,6 +6,8 @@
   position: relative;
   display: flex;
   align-items: stretch;
+  width: 100%;
+  min-width: 0;
 }
 
 // Right-padding reserves space so typed text clears the toggle button

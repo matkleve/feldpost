@@ -30,7 +30,20 @@ function run(cmd, args, input, options = {}) {
 }
 
 function psql(sql) {
-  return run('docker', ['exec', '-i', container, 'psql', '-U', 'postgres', '-d', 'postgres'], sql);
+  return run('docker', [
+    'exec',
+    '-i',
+    container,
+    'psql',
+    '-U',
+    'postgres',
+    '-d',
+    'postgres',
+    '-t',
+    '-A',
+    '-v',
+    'ON_ERROR_STOP=1',
+  ], sql);
 }
 
 const status = run('supabase', ['status', '-o', 'env'], undefined, { cwd: repoRoot });
@@ -62,8 +75,11 @@ END; $$;
 const existing = psql(
   `SELECT id::text FROM auth.users WHERE lower(email) = lower('${escapedEmail}');`,
 ).trim();
+const existingId = existing.match(
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+)?.[0];
 
-if (existing) {
+if (existingId) {
   console.log(`User already exists: ${email}`);
 } else {
   const res = await fetch('http://127.0.0.1:54321/auth/v1/admin/users', {

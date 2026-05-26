@@ -12,6 +12,20 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+// Map-zone parity — relative stack; upload-shell is absolutely positioned inside.
+// @see apps/web/src/app/features/map/map-shell/_map-shell-layout.scss
+.media-zone {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  overflow: visible;
+}
+
+// Page padding lives on scrollable content only (upload chrome uses map insets).
+// @see docs/specs/page/media-page.md
+.media-page-body {
   padding: var(--spacing-6);
   padding-bottom: calc(var(--spacing-8) * 2);
 }
@@ -26,13 +40,6 @@ app-pane-toolbar.media-toolbar {
 }
 
 @layer components {
-  // Offsets host padding so upload chrome aligns with map route top-right inset.
-  // @see docs/specs/page/media-page.md#actions
-  .upload-btn-zone {
-    top: calc(var(--spacing-3) - var(--spacing-4));
-    right: calc(var(--spacing-3) - var(--spacing-4));
-  }
-
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('media-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('media-toolbar');
 

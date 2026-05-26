@@ -358,6 +358,7 @@ export class MediaDisplayComponent implements AfterViewInit {
           ) {
             this.gridSlotAspectSettled.set(true);
           }
+          // Tier upgrade after resize / grid-lg: keep visible state, swap sharp URL only.
           return;
         }
 

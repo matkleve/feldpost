@@ -6,7 +6,16 @@
  * Flat host-owned layout:
  * app-media host > content-clamp stack > header + content
  */
-import { Component, DestroyRef, HostListener, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import type { OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
@@ -44,6 +53,7 @@ import type {
   UploadLocationPreviewEvent,
 } from '../../core/workspace-pane/workspace-pane-shell-events.types';
 import { UploadPanelComponent } from '../upload/upload-panel.component';
+import { UploadResolverTrayComponent } from '../upload/upload-resolver-tray.component';
 import type { ZoomToLocationEvent } from '../upload/upload-panel-row-handlers';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../core/filter/filter.service';
@@ -85,6 +95,7 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
     SortDropdownComponent,
     ProjectsDropdownComponent,
     UploadPanelComponent,
+    UploadResolverTrayComponent,
   ],
   templateUrl: './media.component.html',
   styleUrl: './media.component.scss',
@@ -113,6 +124,7 @@ export class MediaComponent implements OnDestroy {
   private readonly mediaPageState = inject(MediaPageStateService);
   private readonly thumbnailRealtime = inject(MediaThumbnailRealtimeService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly hostElement = inject(ElementRef<HTMLElement>);
 
   readonly loading = signal(false);
   readonly initialLoadSettled = signal(false);
@@ -250,6 +262,12 @@ export class MediaComponent implements OnDestroy {
     const batch = this.uploadBatch();
     return !!batch && (batch.status === 'uploading' || batch.status === 'scanning');
   });
+  readonly uploadResolverPending = computed(
+    () => this.uploadBatch()?.pendingDisambiguationCount ?? 0,
+  );
+  readonly showUploadDock = computed(
+    () => this.uploadPanelOpen() || this.uploadResolverPending() > 0,
+  );
   readonly uploadHasIssues = computed(() =>
     this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'issues'),
   );
@@ -359,6 +377,10 @@ export class MediaComponent implements OnDestroy {
     this.uploadPanelPinned.update((open) => !open);
   }
 
+  closeUploadPanel(): void {
+    this.uploadPanelPinned.set(false);
+  }
+
   onImageUploaded(event: ImageUploadedEvent): void {
     this.shellHost.onImageUploadedFromWorkspacePane(event);
   }
@@ -448,8 +470,31 @@ export class MediaComponent implements OnDestroy {
     this.dropdownAnchor.set(null);
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.uploadPanelOpen()) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Node)) {
+      return;
+    }
+
+    const uploadShell = this.hostElement.nativeElement.querySelector('.upload-shell');
+    if (uploadShell?.contains(target)) {
+      return;
+    }
+
+    this.closeUploadPanel();
+  }
+
   @HostListener('document:keydown.escape')
   onDocumentEscape(): void {
+    if (this.uploadPanelOpen()) {
+      this.closeUploadPanel();
+      return;
+    }
     this.closeDropdown();
   }
 

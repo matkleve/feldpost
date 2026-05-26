@@ -64,6 +64,11 @@ export class TierResolverAdapter {
       return this.lowerTier(upgraded, 'large');
     }
 
+    // grid-lg (and similar) pass desiredSize/full — must not clamp to 256px thumb.
+    if (input.requestedTier === 'full') {
+      return this.higherTier(adaptiveTier, input.requestedTier);
+    }
+
     return this.lowerTier(adaptiveTier, input.requestedTier);
   }
 

@@ -2,6 +2,7 @@ import { mediaFileIdentityFromRecord } from '../media/media-file-identity.helper
 import type { MediaFileIdentity } from '../media/media-renderer.types';
 import type { MediaPreviewRequest } from './media-download.types';
 import type { MediaTier } from '../media/media-renderer.types';
+import { tierToMediaSize } from './media-download.helpers';
 
 const IMAGE_LIKE_EXTENSIONS = new Set([
   'jpg',
@@ -36,26 +37,27 @@ export function isImageLikeStoragePath(
 }
 
 /**
- * Unified preview signing target: thumbnail wins, else image-like storage with tier ladder.
+ * Preview signing path: low tiers may use pre-generated thumbnail_path; detail/full tiers
+ * must sign storage_path so Supabase transforms apply (thumb files are ~96–256px).
  * @see docs/specs/service/media-download-service/media-download-service.md
  */
 export function resolvePreviewTarget(request: MediaPreviewRequest, tier: MediaTier): string | null {
   const thumb = request.thumbnailPath?.trim();
+  const storagePath = request.storagePath?.trim();
+  const signingSize = tierToMediaSize(tier);
+
+  if (signingSize === 'detail' || signingSize === 'full') {
+    if (storagePath && isImageLikeStoragePath(storagePath)) {
+      return storagePath;
+    }
+    return thumb ?? null;
+  }
+
   if (thumb) {
     return thumb;
   }
 
-  const storagePath = request.storagePath?.trim();
-  if (!storagePath) {
-    return null;
-  }
-
-  const identity = mediaFileIdentityFromRecord({
-    storage_path: storagePath,
-    original_filename: null,
-  });
-
-  if (!isImageLikeStorageIdentity(identity)) {
+  if (!storagePath || !isImageLikeStoragePath(storagePath)) {
     return null;
   }
 

@@ -10,7 +10,7 @@ const baseRequest = (overrides: Partial<MediaPreviewRequest>): MediaPreviewReque
 });
 
 describe('resolvePreviewTarget', () => {
-  it('prefers thumbnail_path over image-like storage', () => {
+  it('prefers thumbnail_path for low tiers', () => {
     const target = resolvePreviewTarget(
       baseRequest({
         storagePath: 'org/u/photo.jpg',
@@ -20,6 +20,30 @@ describe('resolvePreviewTarget', () => {
     );
 
     expect(target).toBe('org/u/photo_thumb.jpg');
+  });
+
+  it('uses storage_path for full tier even when thumbnail_path exists', () => {
+    const target = resolvePreviewTarget(
+      baseRequest({
+        storagePath: 'org/u/photo.jpg',
+        thumbnailPath: 'org/u/photo_thumb.jpg',
+      }),
+      'full',
+    );
+
+    expect(target).toBe('org/u/photo.jpg');
+  });
+
+  it('uses storage_path for large tier (detail signing size)', () => {
+    const target = resolvePreviewTarget(
+      baseRequest({
+        storagePath: 'org/u/photo.jpg',
+        thumbnailPath: 'org/u/photo_thumb.jpg',
+      }),
+      'large',
+    );
+
+    expect(target).toBe('org/u/photo.jpg');
   });
 
   it('uses storage_path for JPEG when no thumbnail', () => {

@@ -37,9 +37,20 @@ describe('TierResolverAdapter', () => {
     expect(tierToMediaSize('mid')).toBe('thumb');
   });
 
-  it('keeps grid context clamped below requested full on small slots', () => {
+  it('honors grid full intent for grid-lg tiles (slot size does not down-tier)', () => {
     const resolved = adapter().selectRequestedTierForSlot({
       requestedTier: 'full',
+      slotWidthRem: 10,
+      slotHeightRem: 10,
+      context: 'grid',
+    });
+
+    expect(resolved).toBe('full');
+  });
+
+  it('still clamps default grid thumb intent to adaptive slot tier', () => {
+    const resolved = adapter().selectRequestedTierForSlot({
+      requestedTier: 'small',
       slotWidthRem: 10,
       slotHeightRem: 10,
       context: 'grid',

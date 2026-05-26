@@ -14,6 +14,9 @@ import { formFieldVariants } from './form-field-variants';
 @Component({
   selector: 'hlm-form-field',
   standalone: true,
+  host: {
+    class: 'block w-full min-w-0 max-w-full box-border',
+  },
   template: `<div [class]="wrapperClass()"><ng-content></ng-content></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

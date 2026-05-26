@@ -1,59 +1,80 @@
-<!-- Upload trigger — fixed top-right, same chrome as map route. -->
-<!-- @see docs/specs/page/media-page.md#actions -->
-<div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
-  <button
-    hlmBtn
-    variant="default"
-    size="icon"
-    class="map-upload-btn"
-    type="button"
-    [attr.aria-label]="
-      uploadBatchActive()
-        ? t('upload.trigger.status.uploading', 'Uploading...')
-        : t('auto.0369.upload_images', 'Upload images')
-    "
-    [attr.title]="
-      uploadBatchActive()
-        ? t('upload.trigger.status.uploading', 'Uploading...')
-        : t('auto.0369.upload_images', 'Upload images')
-    "
-    [class.map-upload-btn--active]="uploadPanelOpen()"
-    [class.map-upload-btn--uploading]="uploadBatchActive()"
-    [class.map-upload-btn--issues]="uploadHasIssues() && !uploadPanelOpen()"
-    (click)="toggleUploadPanel()"
+<!-- Page zone — same upload-shell layout as map route (map-zone parity). -->
+<!-- @see docs/specs/component/upload/upload-shell.md -->
+<div class="media-zone">
+  <div
+    class="upload-shell"
+    [class.upload-shell--open]="uploadPanelOpen()"
+    [class.upload-shell--panel-closed]="!uploadPanelOpen()"
+    [class.upload-shell--resolver-active]="uploadResolverPending() > 0"
   >
-    <span class="map-upload-btn__icon-shell" aria-hidden="true">
-      @if (uploadBatchActive()) {
-        <span
-          class="map-upload-btn__progress"
-          [style.--upload-progress]="uploadBatchProgress() + '%'"
-          aria-hidden="true"
-        ></span>
-        <span class="map-upload-btn__spinner" aria-hidden="true"></span>
-      } @else {
-        <span class="material-icons" aria-hidden="true">cloud_upload</span>
-      }
-    </span>
-  </button>
+    <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
+      <button
+        hlmBtn
+        variant="default"
+        size="icon"
+        class="map-upload-btn"
+        type="button"
+        [attr.aria-label]="
+          uploadBatchActive()
+            ? t('upload.trigger.status.uploading', 'Uploading...')
+            : t('auto.0369.upload_images', 'Upload images')
+        "
+        [attr.title]="
+          uploadBatchActive()
+            ? t('upload.trigger.status.uploading', 'Uploading...')
+            : t('auto.0369.upload_images', 'Upload images')
+        "
+        [class.map-upload-btn--active]="uploadPanelOpen()"
+        [class.map-upload-btn--uploading]="uploadBatchActive()"
+        [class.map-upload-btn--issues]="uploadHasIssues() && !uploadPanelOpen()"
+        (click)="toggleUploadPanel()"
+      >
+        <span class="map-upload-btn__icon-shell" aria-hidden="true">
+          @if (uploadBatchActive()) {
+            <span
+              class="map-upload-btn__progress"
+              [style.--upload-progress]="uploadBatchProgress() + '%'"
+              aria-hidden="true"
+            ></span>
+            <span class="map-upload-btn__spinner" aria-hidden="true"></span>
+          } @else {
+            <span class="material-icons" aria-hidden="true">cloud_upload</span>
+          }
+        </span>
+      </button>
+    </div>
 
-  <div class="upload-expand" [class.upload-expand--visible]="uploadPanelOpen()">
-    <app-upload-panel
-      [visible]="uploadPanelOpen()"
-      (imageUploaded)="onImageUploaded($event)"
-      (detailRequested)="openDetailView($event)"
-      (zoomToLocationRequested)="onZoomToLocation($event)"
-      (placementRequested)="enterPlacementMode($event)"
-      (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
-      (locationPreviewCleared)="onUploadLocationPreviewCleared()"
-      (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
-    />
+    <div
+      class="upload-shell__dock"
+      [class.upload-shell__dock--visible]="showUploadDock()"
+      [class.upload-shell__dock--panel-open]="uploadPanelOpen()"
+      [class.upload-shell__dock--resolver-active]="uploadResolverPending() > 0"
+    >
+      @if (uploadPanelOpen()) {
+        <app-upload-panel
+          [visible]="true"
+          (imageUploaded)="onImageUploaded($event)"
+          (detailRequested)="openDetailView($event)"
+          (zoomToLocationRequested)="onZoomToLocation($event)"
+          (placementRequested)="enterPlacementMode($event)"
+          (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
+          (locationPreviewCleared)="onUploadLocationPreviewCleared()"
+          (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+        />
+      }
+
+      <app-upload-resolver-tray
+        [panelOpen]="uploadPanelOpen()"
+        (previewLocation)="onUploadLocationPreviewRequested($event)"
+      />
+    </div>
   </div>
-</div>
 
 <!-- Renders the /media page content stack in a flat host-owned layout. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md#data -->
 <!-- Stacks header, toolbar, content, and progressive-loading footer with token spacing. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
+  <div class="media-page-body">
 <app-vstack class="content-clamp content-clamp--list" [spacing]="4">
   <!-- Page Header with Breadcrumb -->
   <!-- Renders media title, breadcrumb, and loaded-count summary. -->
@@ -196,3 +217,5 @@
     (retry)="onRetryLoad()"
   />
 </app-vstack>
+  </div>
+</div>

@@ -34,6 +34,21 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   return password === confirm ? null : { passwordsMismatch: true };
 }
 
+/** QR links use 48-char hex; dev/admin codes may be readable words (hashed server-side). */
+function inviteCodeFormat(control: AbstractControl): ValidationErrors | null {
+  const value = typeof control.value === 'string' ? control.value.trim() : '';
+  if (!value) {
+    return null;
+  }
+  if (/^[a-fA-F0-9]{48}$/.test(value)) {
+    return null;
+  }
+  if (/^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$/.test(value)) {
+    return null;
+  }
+  return { inviteCodeFormat: true };
+}
+
 @Component({
   selector: 'app-register',
   imports: [
@@ -57,7 +72,7 @@ export class RegisterComponent {
     {
       fullName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      inviteCode: ['', [Validators.required, Validators.pattern(/^[a-fA-F0-9]{48}$/)]],
+      inviteCode: ['', [Validators.required, inviteCodeFormat]],
       password: ['', passwordStrengthValidators()],
       confirmPassword: ['', Validators.required],
     },

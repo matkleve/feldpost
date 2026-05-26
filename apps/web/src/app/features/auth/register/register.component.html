@@ -63,16 +63,18 @@
               formControlName="inviteCode"
               autocomplete="off"
               spellcheck="false"
-              placeholder="Paste invite code from QR link"
+              placeholder="Paste invite code or enter shared dev code"
             />
             @if (
               form.controls.inviteCode.touched && form.controls.inviteCode.hasError('required')
             ) {
               <span class="field-error">Invite code is required.</span>
             } @else if (
-              form.controls.inviteCode.touched && form.controls.inviteCode.hasError('pattern')
+              form.controls.inviteCode.touched && form.controls.inviteCode.hasError('inviteCodeFormat')
             ) {
-              <span class="field-error">Invite code must be a 48-character hex value.</span>
+              <span class="field-error"
+                >Enter the code from your invite link or a code from your administrator.</span
+              >
             }
           </hlm-form-field>
 
