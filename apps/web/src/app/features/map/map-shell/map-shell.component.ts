@@ -47,7 +47,6 @@ import {
   UploadManagerService,
   ImageReplacedEvent,
   ImageAttachedEvent,
-  type UploadJob,
 } from '../../../core/upload/upload-manager.service';
 import { buildLocationUpdateFailureToast } from '../../../core/media-location-update/location-update-toast.util';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
@@ -355,18 +354,6 @@ export class MapShellComponent implements OnDestroy {
   readonly showUploadDock = computed(
     () => this.uploadPanelOpen() || this.uploadResolverPending() > 0,
   );
-  readonly collapsedPreviewItems = computed(() => {
-    if (this.uploadPanelOpen()) {
-      return [] as UploadJob[];
-    }
-
-    const jobs = this.uploadManagerService
-      .jobs()
-      .filter((job) => getLaneForJob(job) === 'uploading')
-      .sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime());
-
-    return jobs.slice(0, 3);
-  });
   readonly uploadHasIssues = computed(() =>
     this.uploadManagerService.jobs().some((job) => getLaneForJob(job) === 'issues'),
   );

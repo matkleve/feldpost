@@ -38,46 +38,6 @@
   max-width: min(14rem, calc(100vw - var(--spacing-6)));
   min-width: 0;
   flex-shrink: 0;
-
-  &__preview-list {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--spacing-1);
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  &__preview-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    min-height: 1.8rem;
-    max-width: 100%;
-    border-radius: var(--radius-pill);
-    @include frosted-chrome.surface;
-    padding: 0.1rem var(--spacing-2);
-  }
-
-  &__preview-dot {
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: var(--radius-full);
-    background: var(--primary);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent);
-    animation: upload-panel-dot-pulse 1.2s ease-out infinite;
-    flex-shrink: 0;
-  }
-
-  &__preview-name {
-    min-width: 0;
-    font-size: var(--font-size-xs);
-    color: var(--foreground);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 // :host + element raises specificity over hlmBtn Tailwind utilities on the same node.

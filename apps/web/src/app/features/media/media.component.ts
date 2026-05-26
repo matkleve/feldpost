@@ -35,10 +35,7 @@ import {
 import { workspaceMediaToMediaRecord } from '../../core/workspace-view/workspace-media-mapper';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import { AuthService } from '../../core/auth/auth.service';
-import {
-  UploadManagerService,
-  type UploadJob,
-} from '../../core/upload/upload-manager.service';
+import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { getLaneForJob } from '../upload/upload-phase.helpers';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../core/workspace-pane/workspace-pane-shell-host.token';
 import type {
@@ -252,18 +249,6 @@ export class MediaComponent implements OnDestroy {
   readonly uploadBatchActive = computed(() => {
     const batch = this.uploadBatch();
     return !!batch && (batch.status === 'uploading' || batch.status === 'scanning');
-  });
-  readonly collapsedPreviewItems = computed(() => {
-    if (this.uploadPanelOpen()) {
-      return [] as UploadJob[];
-    }
-
-    const jobs = this.uploadManager
-      .jobs()
-      .filter((job) => getLaneForJob(job) === 'uploading')
-      .sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime());
-
-    return jobs.slice(0, 3);
   });
   readonly uploadHasIssues = computed(() =>
     this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'issues'),

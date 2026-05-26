@@ -47,23 +47,6 @@
     [class.upload-shell--resolver-active]="uploadResolverPending() > 0"
   >
     <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
-      @if (collapsedPreviewItems().length > 0) {
-      <div
-        class="upload-btn-zone__preview-list"
-        [attr.aria-label]="t('upload.trigger.preview.aria', 'Uploading previews')"
-        role="list"
-      >
-        @for (job of collapsedPreviewItems(); track job.id) {
-          <div class="upload-btn-zone__preview-item" role="listitem">
-            <span class="upload-btn-zone__preview-dot" aria-hidden="true"></span>
-            <span class="upload-btn-zone__preview-name" [title]="job.file.name">{{
-              job.file.name
-            }}</span>
-          </div>
-        }
-      </div>
-      }
-
       <!-- Icon button (always visible) -->
       <button
       hlmBtn

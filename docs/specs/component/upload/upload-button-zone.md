@@ -8,7 +8,7 @@ The upload trigger and its morph container. A round button fixed in the top-righ
 
 **Closed state:** 2.75rem (44px) circle, `--color-clay` background, white media-upload icon (not photo/camera-specific). Desktop is top-right of map; mobile is 3.5rem (56px) FAB bottom-right.
 
-When the panel is closed and uploads are active, the zone additionally shows up to 3 currently uploading items as compact independent item previews near the trigger. These are live status previews, not full lane rows.
+When the panel is closed and a batch is active, upload progress is shown **only on the trigger** (progress ring + centered spinner). No filename chips or secondary status list beside the button.
 
 **Open state:** the circle morphs into a compact rounded container (`min-width: 20rem`, `max-width: 24rem`) with the drop area and status board handled by Upload Panel. The morph should animate radius, width, and elevation in 180ms using `--motion-standard` timing.
 
@@ -30,9 +30,8 @@ When the panel is closed and uploads are active, the zone additionally shows up 
 | 3   | Upload batch is active                   | Button shell shows aggregate progress ring (0–100%)                     | `activeBatch()` signal       |
 | 4   | Queue empty + no active uploads          | Progress ring hidden; control returns to idle visual                    | `activeBatch() === null`     |
 | 5   | User reopens while uploads run           | Panel restores current intake/progress state                            | `UploadManagerService` state |
-| 6   | Panel is closed while jobs upload        | Zone shows up to 3 currently uploading item previews                    | top-3 from uploading lane    |
-| 7   | Upload batch is active                   | Trigger shows progress ring + centered spinner (no visible label text)  | `uploadBatchActive()`        |
-| 8   | Batch progresses                         | Ring fills clockwise around icon until 100%                             | aggregate batch progress     |
+| 6   | Upload batch is active                   | Trigger shows progress ring + centered spinner (no visible label text)  | `uploadBatchActive()`        |
+| 7   | Batch progresses                         | Ring fills clockwise around icon until 100%                             | aggregate batch progress     |
 
 ## Component Hierarchy
 
@@ -43,8 +42,6 @@ UploadButtonZone                                   ← fixed position container,
 │   │   ├── Icon "upload"                          ← Material Icon, white, media-upload semantics
 │   │   ├── [uploading] ProgressRing               ← circular edge ring (0–100%), token-driven stroke/fill
 │   │   └── [uploading] LoadingSpinner             ← centered indeterminate ring inside progress shell
-│   ├── [closed + uploading] LiveUploadingPreviewList ← max 3 independent preview items
-│   │   └── UploadingPreviewItem × up to 3
 │   └── [open] UploadPanel                         ← integrated content surface (see upload-panel spec)
 ```
 
@@ -67,7 +64,6 @@ flowchart LR
 | Active batch  | `UploadManagerService.activeBatch()` | `Signal<UploadBatch \| null>` |
 | Is busy       | `UploadManagerService.isBusy()`      | `Signal<boolean>`             |
 | Open state    | `MapShellComponent.uploadPanelOpen`  | `WritableSignal<boolean>`     |
-| Live previews | uploading-lane derived projection    | `Signal<UploadJob[]>` (max 3) |
 
 ## State
 
@@ -77,7 +73,6 @@ flowchart LR
 | `batchProgress`            | `number`      | `0`     | Progress ring fill (0–100)                                  |
 | `isMorphing`               | `boolean`     | `false` | Prevents double-tap during transition                       |
 | `uploadBatchActive`        | `boolean`     | `false` | Progress ring + spinner on trigger                          |
-| `collapsedPreviewItems`    | `UploadJob[]` | `[]`    | Closed-state top-right preview list (max 3 uploading items) |
 
 ## File Map
 
@@ -121,7 +116,7 @@ sequenceDiagram
 - [ ] Progress ring fills clockwise around the trigger icon
 - [ ] Progress ring hidden when no batch is active
 - [ ] Reopening while uploads continue shows current panel state
-- [ ] While panel is closed and uploads are active, zone shows up to 3 currently uploading item previews
+- [ ] Panel closed + batch active: no filename chips beside the trigger; progress ring + spinner only
 - [ ] Active batch keeps trigger at fixed icon size (no horizontal text expansion)
 - [ ] Active batch shows centered loading spinner inside the progress ring
 - [ ] Active batch has no visible status text on the trigger (`aria-label` only)
