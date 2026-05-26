@@ -5,7 +5,7 @@
 
 ## What it is
 
-`app-upload-resolver-tray` — passive status line and active address-choice UI at map upload shell width. Sibling of `app-upload-panel`, not a child of the panel body.
+`app-upload-resolver-tray` — active address-choice UI inside `.upload-shell__dock` (same frosted mother container as `app-upload-panel`). Renders below the panel when both are visible; tray-only when the panel is closed.
 
 ## Visual modes
 

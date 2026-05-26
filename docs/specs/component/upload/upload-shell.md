@@ -5,13 +5,14 @@
 
 ## What it is
 
-Map-only meta container (`.upload-shell`) that owns fixed top-right width and stacks three siblings:
+Map-only meta container (`.upload-shell`) anchored top-right, **column stack**:
 
-1. Upload trigger button (`.map-upload-btn`)
-2. Collapsible panel (`.upload-expand` → `app-upload-panel`)
-3. Resolver tray (`app-upload-resolver-tray`)
+1. **Button zone** (`.upload-btn-zone`) — upload trigger + collapsed previews; `width: max-content` (~icon width). Does **not** reserve horizontal space from the centered search bar.
+2. **Dock** (`.upload-shell__dock`) — single frosted mother container (same chrome as `upload-panel`):
+   - `app-upload-panel` when the panel is open
+   - `app-upload-resolver-tray` below the panel when disambiguation is active (or tray-only when panel closed)
 
-Tray and panel both use `width: 100%` of the shell. Tray visibility is independent of panel open/closed (OD-6).
+Tray visibility is independent of panel open/closed (OD-6). Only the button column competes with the search bar top row.
 
 ## Geometry
 

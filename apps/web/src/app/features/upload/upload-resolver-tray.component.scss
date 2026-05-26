@@ -8,6 +8,11 @@
   width: 100%;
   min-width: 0;
   min-height: 0;
+  flex-shrink: 0;
+}
+
+:host(:empty) {
+  display: none;
 }
 
 @layer components {
@@ -20,20 +25,19 @@
     color: var(--muted-foreground);
     text-align: right;
     border-radius: var(--radius-md);
+    max-width: 100%;
     @include frosted-chrome.surface;
   }
 
-  // Active disambiguation strip
+  // Active disambiguation body — chrome owned by upload-shell__dock
   // @see upload-resolver-tray.md#active-mode
   .upload-resolver-tray {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-2);
     width: 100%;
-    padding: var(--spacing-3);
-    border-radius: var(--container-radius-panel);
-    @include frosted-chrome.surface;
-    box-shadow: var(--shadow-md);
+    padding-block: var(--spacing-3) var(--spacing-2);
+    padding-inline: var(--spacing-2);
   }
 
   .upload-resolver-tray__header {

@@ -3,6 +3,8 @@
 // ── Upload shell — width owner for button, panel, resolver tray (OD-6) ───────
 // @see docs/specs/component/upload/upload-shell.md
 
+// Top-right anchor: button zone on top, tray/panel stack downward (no horizontal search overlap)
+// @see docs/specs/component/upload/upload-shell.md
 .upload-shell {
   position: absolute;
   top: var(--spacing-3);
@@ -10,10 +12,21 @@
   z-index: 200;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: flex-end;
   gap: var(--spacing-2);
-  width: min(420px, calc(100vw - var(--spacing-6)));
+  width: max-content;
   min-width: 0;
+  max-width: min(420px, calc(100vw - var(--spacing-6)));
+  pointer-events: none;
+
+  // Re-enable hits on interactive upload chrome only
+  & > * {
+    pointer-events: auto;
+  }
+}
+
+.upload-shell--panel-closed:not(.upload-shell--resolver-active) {
+  gap: var(--spacing-1);
 }
 
 .upload-btn-zone {
@@ -21,19 +34,27 @@
   flex-direction: column;
   align-items: flex-end;
   gap: var(--spacing-2);
+  width: max-content;
+  max-width: min(14rem, calc(100vw - var(--spacing-6)));
+  min-width: 0;
+  flex-shrink: 0;
 
   &__preview-list {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: var(--spacing-1);
-    width: min(14rem, calc(100vw - var(--spacing-8)));
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 
   &__preview-item {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: var(--spacing-2);
     min-height: 1.8rem;
+    max-width: 100%;
     border-radius: var(--radius-pill);
     @include frosted-chrome.surface;
     padding: 0.1rem var(--spacing-2);
@@ -168,20 +189,32 @@
   }
 }
 
-// Expanded panel slides down from upload button.
-.upload-expand {
+// Shared frosted dock — upload panel + resolver tray (one mother container)
+// @see docs/specs/component/upload/upload-shell.md
+.upload-shell__dock {
   display: none;
   flex-direction: column;
-  width: 100%;
+  width: min(420px, calc(100vw - var(--spacing-6)));
+  max-width: calc(100vw - var(--spacing-6));
   max-height: min(82vh, 48rem);
-  overflow: visible;
+  overflow: auto;
   border-radius: var(--container-radius-panel);
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
+  @include frosted-chrome.surface;
 
   &--visible {
     display: flex;
+  }
+
+  // Panel surface is owned by the dock on map (no double chrome)
+  .upload-panel:not(.upload-panel--embedded) {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  &--panel-open.upload-shell__dock--resolver-active .upload-resolver-tray {
+    border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   }
 }

@@ -40,9 +40,14 @@
   </div>
 
   <!-- Upload shell — fixed width; button, panel, resolver tray (OD-6) -->
-  <div class="upload-shell" [class.upload-shell--open]="uploadPanelOpen()">
+  <div
+    class="upload-shell"
+    [class.upload-shell--open]="uploadPanelOpen()"
+    [class.upload-shell--panel-closed]="!uploadPanelOpen()"
+    [class.upload-shell--resolver-active]="uploadResolverPending() > 0"
+  >
     <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
-    @if (collapsedPreviewItems().length > 0) {
+      @if (collapsedPreviewItems().length > 0) {
       <div
         class="upload-btn-zone__preview-list"
         [attr.aria-label]="t('upload.trigger.preview.aria', 'Uploading previews')"
@@ -57,10 +62,10 @@
           </div>
         }
       </div>
-    }
+      }
 
-    <!-- Icon button (always visible) -->
-    <button
+      <!-- Icon button (always visible) -->
+      <button
       hlmBtn
       variant="default"
       size="icon"
@@ -93,27 +98,34 @@
           <span class="material-icons" aria-hidden="true">cloud_upload</span>
         }
       </span>
-    </button>
+      </button>
+    </div>
 
-    <!-- Expanded panel -->
-    <div class="upload-expand" [class.upload-expand--visible]="uploadPanelOpen()">
-      <app-upload-panel
-        [visible]="uploadPanelOpen()"
-        (imageUploaded)="onImageUploaded($event)"
-        (detailRequested)="openDetailView($event)"
-        (zoomToLocationRequested)="onZoomToLocation($event)"
-        (placementRequested)="enterPlacementMode($event)"
-        (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
-        (locationPreviewCleared)="onUploadLocationPreviewCleared()"
-        (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+    <!-- Mother container: same frosted chrome as upload panel (panel + tray stack) -->
+    <div
+      class="upload-shell__dock"
+      [class.upload-shell__dock--visible]="showUploadDock()"
+      [class.upload-shell__dock--panel-open]="uploadPanelOpen()"
+      [class.upload-shell__dock--resolver-active]="uploadResolverPending() > 0"
+    >
+      @if (uploadPanelOpen()) {
+        <app-upload-panel
+          [visible]="true"
+          (imageUploaded)="onImageUploaded($event)"
+          (detailRequested)="openDetailView($event)"
+          (zoomToLocationRequested)="onZoomToLocation($event)"
+          (placementRequested)="enterPlacementMode($event)"
+          (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
+          (locationPreviewCleared)="onUploadLocationPreviewCleared()"
+          (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+        />
+      }
+
+      <app-upload-resolver-tray
+        [panelOpen]="uploadPanelOpen()"
+        (previewLocation)="onUploadLocationPreviewRequested($event)"
       />
     </div>
-    </div>
-
-    <app-upload-resolver-tray
-      [panelOpen]="uploadPanelOpen()"
-      (previewLocation)="onUploadLocationPreviewRequested($event)"
-    />
   </div>
   <!-- Leaflet target -->
   <div

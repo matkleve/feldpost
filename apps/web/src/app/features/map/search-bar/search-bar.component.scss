@@ -1,7 +1,10 @@
 @use '../../../../styles/frosted-chrome';
 
 :host {
-  --search-bar-safe-inline: max(var(--spacing-3), calc(5rem + var(--spacing-1)));
+  --search-bar-safe-inline: max(
+    var(--spacing-3),
+    var(--map-upload-chrome-inline, calc(5rem + var(--spacing-1)))
+  );
   --search-bar-viewport-inset: var(--spacing-3);
 
   position: absolute;

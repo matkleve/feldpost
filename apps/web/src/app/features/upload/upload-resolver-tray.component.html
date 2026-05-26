@@ -8,7 +8,7 @@
 
 <!-- Stable state: active — one or more groups with resolutionGateOpen -->
 @if (trayMode() === 'active' && activeGroup(); as group) {
-  <section class="upload-resolver-tray" [attr.data-state]="'active'">
+  <section class="upload-resolver-tray upload-shell__dock-section" [attr.data-state]="'active'">
     <header class="upload-resolver-tray__header">
       <span class="upload-resolver-tray__alert material-icons" aria-hidden="true">error_outline</span>
       <h2 class="upload-resolver-tray__title">

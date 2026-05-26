@@ -348,6 +348,13 @@ export class MapShellComponent implements OnDestroy {
     const batch = this.uploadBatch();
     return !!batch && (batch.status === 'uploading' || batch.status === 'scanning');
   });
+  readonly uploadResolverPending = computed(
+    () => this.uploadBatch()?.pendingDisambiguationCount ?? 0,
+  );
+  /** Shared frosted dock under the button: panel open and/or resolver tray active (OD-6). */
+  readonly showUploadDock = computed(
+    () => this.uploadPanelOpen() || this.uploadResolverPending() > 0,
+  );
   readonly collapsedPreviewItems = computed(() => {
     if (this.uploadPanelOpen()) {
       return [] as UploadJob[];

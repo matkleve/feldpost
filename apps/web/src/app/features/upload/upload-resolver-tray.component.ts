@@ -46,10 +46,8 @@ export class UploadResolverTrayComponent {
     if (this.pendingGroupCount() > 0) {
       return 'active';
     }
-    const passive = this.passiveStatusLine();
-    if (passive && !this.panelOpen()) {
-      return 'passive';
-    }
+    // Batch progress when panel is closed: upload button + preview chips already show state.
+    // Passive line is reserved for future non-active hints only (no duplicate progress bar).
     return 'hidden';
   });
 
