@@ -15,7 +15,6 @@
       #mediaPreview
       class="media-item__preview"
       [downloadContext]="downloadContext()"
-      [previewDesiredSize]="previewDesiredSize()"
       [slotGeometry]="usesFillSlotGeometry() ? 'fill' : 'intrinsic'"
       [skipIntrinsicRatioTransition]="gridSessionAspectPrefilled()"
       [mediaId]="mediaIdentity()"
@@ -25,8 +24,19 @@
       [originalFilename]="item()?.original_filename ?? null"
       [contentObjectPosition]="slotContentObjectPosition()"
       (aspectRatioChange)="onMediaAspectRatioChange($event)"
-      (contentResolutionChange)="contentResolutionChange.emit($event)"
+      (contentResolutionChange)="onContentResolution($event)"
     />
+
+    @if (!showInteractionChrome() && detailContentResolution(); as resolution) {
+      <span
+        class="media-item__resolution-badge"
+        [attr.aria-label]="
+          t('workspace.imageDetail.mediaResolution.aria', 'Displayed image resolution')
+        "
+      >
+        {{ resolution.width }} × {{ resolution.height }}
+      </span>
+    }
 
     <!-- Renders upload overlay as slot-aligned absolute layer below quiet actions. -->
     <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->

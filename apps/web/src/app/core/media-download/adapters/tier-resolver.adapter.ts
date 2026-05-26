@@ -8,6 +8,11 @@ import type {
   MediaTier,
   MediaTierSelectionInput,
 } from '../../media/media-renderer.types';
+import { PIXELS_PER_REM } from '../media-download.helpers';
+import {
+  remSlotToPixels,
+  tierForMeasuredSlot,
+} from '../media-slot-resolution.helpers';
 
 const FALLBACK_CHAIN_BY_TIER: Readonly<Record<MediaTier, readonly MediaTier[]>> = {
   inline: [],
@@ -17,21 +22,6 @@ const FALLBACK_CHAIN_BY_TIER: Readonly<Record<MediaTier, readonly MediaTier[]>> 
   large: ['mid2', 'mid', 'small', 'inline'],
   full: ['large', 'mid2', 'mid', 'small', 'inline'],
 };
-
-const TIER_ORDER: readonly MediaTier[] = ['inline', 'small', 'mid', 'mid2', 'large', 'full'];
-
-const CONTEXT_MIN_TIER: Readonly<Record<MediaContext, MediaTier>> = {
-  map: 'inline',
-  grid: 'small',
-  upload: 'small',
-  detail: 'large',
-};
-
-const SHORT_EDGE_INLINE_MAX_REM = 6;
-const SHORT_EDGE_SMALL_MAX_REM = 12;
-const SHORT_EDGE_MID_MAX_REM = 20;
-const SHORT_EDGE_MID2_MAX_REM = 32;
-const SHORT_EDGE_LARGE_MAX_REM = 60;
 
 @Injectable({ providedIn: 'root' })
 export class TierResolverAdapter {
@@ -52,24 +42,27 @@ export class TierResolverAdapter {
     return FALLBACK_CHAIN_BY_TIER[tier];
   }
 
+  /**
+   * Picks preview tier from measured slot pixels × DPR, capped at detail unless `allowFull`.
+   * @see media-slot-resolution.helpers.ts
+   */
   selectRequestedTierForSlot(input: MediaTierSelectionInput): MediaTier {
-    const slotShortEdgeRem = this.shortEdge(input.slotWidthRem, input.slotHeightRem);
-    if (slotShortEdgeRem == null) {
-      return input.requestedTier;
+    if (input.requestedTier === 'full' && input.allowFull !== false) {
+      return 'full';
     }
 
-    const adaptiveTier = this.tierForShortEdge(slotShortEdgeRem, input.context);
-    if (input.context === 'detail') {
-      const upgraded = this.higherTier(adaptiveTier, input.requestedTier);
-      return this.lowerTier(upgraded, 'large');
+    const slot = this.resolveSlotPixels(input);
+    if (slot) {
+      return tierForMeasuredSlot({
+        slotWidthPx: slot.widthPx,
+        slotHeightPx: slot.heightPx,
+        devicePixelRatio: input.devicePixelRatio,
+        allowFull: input.allowFull ?? false,
+        context: input.context,
+      });
     }
 
-    // grid-lg (and similar) pass desiredSize/full — must not clamp to 256px thumb.
-    if (input.requestedTier === 'full') {
-      return this.higherTier(adaptiveTier, input.requestedTier);
-    }
-
-    return this.lowerTier(adaptiveTier, input.requestedTier);
+    return input.requestedTier;
   }
 
   resolveBestAvailableTier(
@@ -121,67 +114,35 @@ export class TierResolverAdapter {
     return { status: 'error', reason };
   }
 
-  private shortEdge(width?: number | null, height?: number | null): number | null {
-    const w = width ?? null;
-    const h = height ?? null;
-
-    if (w == null && h == null) {
-      return null;
+  private resolveSlotPixels(
+    input: MediaTierSelectionInput,
+  ): { widthPx: number; heightPx: number } | null {
+    const widthPx = input.slotWidthPx;
+    const heightPx = input.slotHeightPx;
+    if (
+      widthPx != null &&
+      heightPx != null &&
+      Number.isFinite(widthPx) &&
+      Number.isFinite(heightPx) &&
+      widthPx > 0 &&
+      heightPx > 0
+    ) {
+      return { widthPx, heightPx };
     }
 
-    if (w == null) {
-      return h;
+    const widthRem = input.slotWidthRem;
+    const heightRem = input.slotHeightRem;
+    if (
+      widthRem != null &&
+      heightRem != null &&
+      Number.isFinite(widthRem) &&
+      Number.isFinite(heightRem) &&
+      widthRem > 0 &&
+      heightRem > 0
+    ) {
+      return remSlotToPixels(widthRem, heightRem);
     }
 
-    if (h == null) {
-      return w;
-    }
-
-    return Math.min(w, h);
-  }
-
-  private tierForShortEdge(shortEdgeRem: number, context?: MediaContext): MediaTier {
-    if (shortEdgeRem <= SHORT_EDGE_INLINE_MAX_REM) {
-      return this.applyContextFloor('inline', context);
-    }
-
-    if (shortEdgeRem <= SHORT_EDGE_SMALL_MAX_REM) {
-      return this.applyContextFloor('small', context);
-    }
-
-    if (shortEdgeRem <= SHORT_EDGE_MID_MAX_REM) {
-      return this.applyContextFloor('mid', context);
-    }
-
-    if (shortEdgeRem <= SHORT_EDGE_MID2_MAX_REM) {
-      return this.applyContextFloor('mid2', context);
-    }
-
-    if (shortEdgeRem <= SHORT_EDGE_LARGE_MAX_REM) {
-      return this.applyContextFloor('large', context);
-    }
-
-    return this.applyContextFloor('full', context);
-  }
-
-  private applyContextFloor(tier: MediaTier, context?: MediaContext): MediaTier {
-    if (!context) {
-      return tier;
-    }
-
-    const minTier = CONTEXT_MIN_TIER[context];
-    return this.higherTier(tier, minTier);
-  }
-
-  private lowerTier(a: MediaTier, b: MediaTier): MediaTier {
-    return this.rankOf(a) <= this.rankOf(b) ? a : b;
-  }
-
-  private higherTier(a: MediaTier, b: MediaTier): MediaTier {
-    return this.rankOf(a) >= this.rankOf(b) ? a : b;
-  }
-
-  private rankOf(tier: MediaTier): number {
-    return TIER_ORDER.indexOf(tier);
+    return null;
   }
 }

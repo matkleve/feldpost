@@ -29,6 +29,7 @@ import {
   tierToMediaSize,
 } from './media-download.helpers';
 import { resolvePreviewTarget } from './media-preview-target.helpers';
+import type { MediaSlotMeasurement } from './media-slot-resolution.helpers';
 import type {
   MediaDisplayDeliveryState,
   DownloadBlobResult,
@@ -132,8 +133,7 @@ export class MediaDownloadService {
     const hadThumb = Boolean(existing?.thumbnailPath?.trim());
     const hasThumb = Boolean(thumbnailPath?.trim());
     const desiredSize =
-      desiredSizeOverride ??
-      (context === 'detail' ? 'detail' : context === 'map' ? 'marker' : 'thumb');
+      desiredSizeOverride ?? (context === 'map' ? 'marker' : 'thumb');
     this.knownPreviewRequests.set(mediaId, {
       mediaId,
       storagePath,
@@ -210,7 +210,10 @@ export class MediaDownloadService {
     return new Map(entries);
   }
 
-  getState(mediaId: string, slotSizeRem: number): Observable<MediaDisplayDeliveryState> {
+  getState(
+    mediaId: string,
+    slot: MediaSlotMeasurement,
+  ): Observable<MediaDisplayDeliveryState> {
     const normalizedId = mediaId.trim();
 
     return new Observable<MediaDisplayDeliveryState>((subscriber) => {
@@ -222,23 +225,22 @@ export class MediaDownloadService {
 
       const known = this.knownPreviewRequests.get(normalizedId);
       const context = known?.context ?? 'grid';
-      const requestedTier = known?.desiredSize
-        ? desiredSizeToTier(known.desiredSize)
-        : CONTEXT_DEFAULT_TIER[context];
+      const allowFull = known?.desiredSize === 'full';
       const tier = this.selectRequestedTierForSlot({
-        requestedTier,
-        slotWidthRem: slotSizeRem,
-        slotHeightRem: slotSizeRem,
+        requestedTier: CONTEXT_DEFAULT_TIER[context],
+        slotWidthPx: slot.widthPx,
+        slotHeightPx: slot.heightPx,
         context,
+        allowFull,
       });
       const size = tierToMediaSize(tier);
 
       const emit = (): void => {
-        subscriber.next(this.toDisplayDeliveryState(normalizedId, tier, slotSizeRem));
+        subscriber.next(this.toDisplayDeliveryState(normalizedId, tier, slot));
       };
 
       emit();
-      this.requestPreviewIfKnown(normalizedId, tier, slotSizeRem);
+      this.requestPreviewIfKnown(normalizedId, slot);
 
       const stateSubscription = this.stateChanged$.subscribe((event) => {
         if (event.mediaId === normalizedId && event.size === size) {
@@ -256,7 +258,7 @@ export class MediaDownloadService {
         if (id === normalizedId) {
           emit();
           // Thumb path may arrive after first emit (realtime / patch); must sign, not only re-emit.
-          this.requestPreviewIfKnown(normalizedId, tier, slotSizeRem);
+          this.requestPreviewIfKnown(normalizedId, slot);
         }
       });
 
@@ -265,6 +267,22 @@ export class MediaDownloadService {
         urlSubscription.unsubscribe();
         deliverySubscription.unsubscribe();
       };
+    });
+  }
+
+  /** Lightbox / export: sign original when display tier is not enough. */
+  async requestFullPreview(mediaId: string): Promise<MediaPreviewResult | null> {
+    const normalizedId = mediaId.trim();
+    const known = this.knownPreviewRequests.get(normalizedId);
+    if (!known?.storagePath?.trim()) {
+      return null;
+    }
+
+    return this.resolvePreview({
+      ...known,
+      mediaId: normalizedId,
+      desiredSize: 'full',
+      context: known.context ?? 'detail',
     });
   }
 
@@ -499,17 +517,26 @@ export class MediaDownloadService {
   }
 
   private resolveTier(request: MediaPreviewRequest): MediaTier {
-    const requestedTier = request.desiredSize
+    if (request.desiredSize === 'full') {
+      return 'full';
+    }
+
+    const box = request.boxPixels;
+    if (box && box.width > 0 && box.height > 0) {
+      return this.tierResolver.selectRequestedTierForSlot({
+        requestedTier: request.desiredSize
+          ? desiredSizeToTier(request.desiredSize)
+          : CONTEXT_DEFAULT_TIER[request.context],
+        slotWidthPx: box.width,
+        slotHeightPx: box.height,
+        context: request.context,
+        allowFull: false,
+      });
+    }
+
+    return request.desiredSize
       ? desiredSizeToTier(request.desiredSize)
       : CONTEXT_DEFAULT_TIER[request.context];
-    if (!request.boxPixels) return requestedTier;
-
-    return this.tierResolver.selectRequestedTierForSlot({
-      requestedTier,
-      slotWidthRem: request.boxPixels.width / PIXELS_PER_REM,
-      slotHeightRem: request.boxPixels.height / PIXELS_PER_REM,
-      context: request.context,
-    });
   }
 
   private resolveResultSource(
@@ -530,7 +557,7 @@ export class MediaDownloadService {
   private toDisplayDeliveryState(
     mediaId: string,
     tier: MediaTier,
-    _slotSizeRem: number,
+    _slot: MediaSlotMeasurement,
   ): MediaDisplayDeliveryState {
     const state = this.getItemState(mediaId, tier)();
     const cachedUrl = this.getCachedUrl(mediaId, tierToMediaSize(tier));
@@ -583,16 +610,21 @@ export class MediaDownloadService {
     return { state: 'loading', icon, warmPreviewUrl };
   }
 
-  private requestPreviewIfKnown(mediaId: string, tier: MediaTier, slotSizeRem: number): void {
+  private requestPreviewIfKnown(mediaId: string, slot: MediaSlotMeasurement): void {
     const request = this.knownPreviewRequests.get(mediaId);
     if (!request) {
       return;
     }
 
-    const identity = mediaFileIdentityFromRecord({
-      storage_path: request.storagePath,
-      original_filename: null,
+    const context = request.context ?? 'grid';
+    const tier = this.selectRequestedTierForSlot({
+      requestedTier: CONTEXT_DEFAULT_TIER[context],
+      slotWidthPx: slot.widthPx,
+      slotHeightPx: slot.heightPx,
+      context,
+      allowFull: request.desiredSize === 'full',
     });
+
     if (!resolvePreviewTarget(request, tier)) {
       return;
     }
@@ -611,8 +643,8 @@ export class MediaDownloadService {
       mediaId,
       desiredSize: this.tierToDesiredSize(tier),
       boxPixels: {
-        width: slotSizeRem * PIXELS_PER_REM,
-        height: slotSizeRem * PIXELS_PER_REM,
+        width: slot.widthPx,
+        height: slot.heightPx,
       },
     });
   }

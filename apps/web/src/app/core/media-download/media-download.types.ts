@@ -90,6 +90,8 @@ export type MediaLoadState = 'idle' | 'loading' | 'loaded' | 'error' | 'no-media
 
 export type MediaSize = 'marker' | 'thumb' | 'detail' | 'full';
 
+export type { MediaSlotMeasurement } from './media-slot-resolution.helpers';
+
 export interface CacheEntry {
   url: string;
   signedAt: number;

@@ -137,6 +137,24 @@
   pointer-events: none;
 }
 
+// Detail hero: resolution badge inside slot bounds (on the photo, not the preview band).
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+.media-item__resolution-badge {
+  position: absolute;
+  inset-block-end: var(--spacing-2);
+  inset-inline-end: var(--spacing-2);
+  z-index: 6;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--shadow-color) 72%, transparent);
+  color: var(--card);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  pointer-events: none;
+  user-select: none;
+}
+
 :host([data-mode='row']) .media-item__preview {
   block-size: 100%;
 }

@@ -30,7 +30,6 @@ import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-regis
 import { MediaAspectRatioCacheService } from '../../core/media/media-aspect-ratio-cache.service';
 import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identity.helpers';
 import { probeImageAspectRatio } from '../../core/media/probe-image-aspect-ratio.helpers';
-import type { MediaPreviewRequest } from '../../core/media-download/media-download.types';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaDisplayComponent } from '../media-display/media-display.component';
 import type { MediaContentResolution } from '../media-display/media-display.component';
@@ -86,13 +85,6 @@ export class MediaItemComponent {
   readonly showInteractionChrome = input(true);
   readonly downloadContext = input<MediaContext>('grid');
 
-  readonly previewDesiredSize = computed((): MediaPreviewRequest['desiredSize'] | null => {
-    if (this.showInteractionChrome() && this.mode() === 'grid-lg') {
-      return 'full';
-    }
-    return null;
-  });
-
   readonly selectedChange = output<boolean>();
   /** Primary tile click with modifier keys for range / additive selection. */
   readonly pointerClick = output<{
@@ -115,6 +107,8 @@ export class MediaItemComponent {
   readonly detailSlotRatioPending = computed(
     () => !this.showInteractionChrome() && !this.detailSlotRatioCommitted(),
   );
+  /** Detail embed: decoded sharp layer size for in-slot resolution badge. */
+  readonly detailContentResolution = signal<MediaContentResolution | null>(null);
   readonly usesFillSlotGeometry = computed(() => this.mode() === 'row');
   private readonly mediaPreview = viewChild(MediaDisplayComponent);
 
@@ -214,6 +208,13 @@ export class MediaItemComponent {
     }
 
     this.mediaPreview()?.onSlotGeometryTransitionEnd();
+  }
+
+  onContentResolution(resolution: MediaContentResolution | null): void {
+    if (!this.showInteractionChrome()) {
+      this.detailContentResolution.set(resolution);
+    }
+    this.contentResolutionChange.emit(resolution);
   }
 
   onMediaAspectRatioChange(ratio: number): void {

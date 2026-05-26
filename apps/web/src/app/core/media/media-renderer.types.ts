@@ -62,7 +62,14 @@ export interface UploadOverlayState {
 
 export interface MediaTierSelectionInput {
   requestedTier: MediaTier;
+  /** Measured layout box width in CSS pixels (preferred). */
+  slotWidthPx?: number | null;
+  /** Measured layout box height in CSS pixels (preferred). */
+  slotHeightPx?: number | null;
   slotWidthRem?: number | null;
   slotHeightRem?: number | null;
+  devicePixelRatio?: number;
+  /** When true, slot math may select `full`; otherwise capped at detail (~1280px). */
+  allowFull?: boolean;
   context?: MediaContext;
 }

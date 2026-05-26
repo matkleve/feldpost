@@ -76,10 +76,8 @@ export class MediaDisplayComponent implements AfterViewInit {
    * ratio-known-contain (no CSS transition → no transitionend) and reveal directly.
    */
   readonly skipIntrinsicRatioTransition = input(false);
-  /** Drives tier floor and cache registration context in MediaDownloadService. */
+  /** Drives cache registration context in MediaDownloadService. */
   readonly downloadContext = input<MediaContext>('grid');
-  /** Optional ceiling (e.g. grid-lg tiles request full-res originals). */
-  readonly previewDesiredSize = input<MediaPreviewRequest['desiredSize'] | null>(null);
   /**
    * Emits the resolved aspect ratio so the parent slot can mirror it.
    * CSS cannot inherit child → parent, so an output is the only spec-compliant channel.
@@ -90,6 +88,8 @@ export class MediaDisplayComponent implements AfterViewInit {
 
   readonly state = signal<MediaDisplayState>('idle');
   readonly slotSizeRem = signal(1);
+  /** Measured viewport box — drives signing tier via slot × DPR. */
+  readonly slotPixels = signal({ widthPx: 16, heightPx: 16 });
   readonly resolvedUrl = signal('');
   readonly stagedContentUrl = signal('');
   readonly icon = signal('insert_drive_file');
@@ -148,7 +148,8 @@ export class MediaDisplayComponent implements AfterViewInit {
       const storagePath = this.storagePath();
       const thumbnailPath = this.thumbnailPath();
       const previewStatus = this.previewGenerationStatus();
-      const handoffKey = `${id}|${this.slotGeometry()}|${this.downloadContext()}|${this.previewDesiredSize() ?? ''}`;
+      const slot = this.slotPixels();
+      const handoffKey = `${id}|${this.slotGeometry()}|${this.downloadContext()}|${Math.round(slot.widthPx)}x${Math.round(slot.heightPx)}`;
 
       if (!id) {
         this.resolvedUrl.set('');
@@ -188,7 +189,6 @@ export class MediaDisplayComponent implements AfterViewInit {
           thumbnailPath,
           previewStatus,
           this.downloadContext(),
-          this.previewDesiredSize() ?? undefined,
         );
 
         if (isNewHandoff) {
@@ -221,7 +221,7 @@ export class MediaDisplayComponent implements AfterViewInit {
         return;
       }
 
-      const slot = this.slotSizeRem();
+      const slot = this.slotPixels();
       const sub = this.mediaDownloadService
         .getState(id, slot)
         .subscribe((delivery) => this.handleDelivery(delivery));
@@ -740,15 +740,22 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
-    const applyMeasuredSlot = (widthPx: number, heightPx: number): void => {
-      const shortEdgePx = Math.min(widthPx, heightPx);
+    const applyMeasuredSlot = (measuredWidth: number, measuredHeight: number): void => {
+      const shortEdgePx = Math.min(measuredWidth, measuredHeight);
       const rootFontSize = this.readRootFontSize();
       const next = shortEdgePx > 0 ? shortEdgePx / rootFontSize : 1;
 
-      if (Math.abs(this.slotSizeRem() - next) < SLOT_SIZE_REM_EPSILON) {
+      const widthPx = Math.max(1, Math.round(measuredWidth));
+      const heightPx = Math.max(1, Math.round(measuredHeight));
+      const prev = this.slotPixels();
+      const unchanged =
+        Math.abs(prev.widthPx - widthPx) < 1 && Math.abs(prev.heightPx - heightPx) < 1;
+
+      if (unchanged && Math.abs(this.slotSizeRem() - next) < SLOT_SIZE_REM_EPSILON) {
         return;
       }
 
+      this.slotPixels.set({ widthPx, heightPx });
       this.slotSizeRem.set(next);
     };
 

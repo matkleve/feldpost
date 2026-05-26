@@ -11,10 +11,7 @@ import type { MediaRecord } from '../../../../core/media-query/media-query.types
 import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PhotoLightboxComponent } from '../../../photo-lightbox/photo-lightbox.component';
-import {
-  MediaItemComponent,
-  type MediaContentResolution,
-} from '../../../media-item/media-item.component';
+import { MediaItemComponent } from '../../../media-item/media-item.component';
 import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
 
 @Component({
@@ -43,7 +40,6 @@ export class MediaDetailMediaViewerComponent {
   readonly contextMenuRequested = output<void>();
 
   readonly showLightbox = signal(false);
-  readonly displayedResolution = signal<MediaContentResolution | null>(null);
 
   readonly hasPhoto = computed(() => Boolean(this.item()?.storage_path?.trim()));
 
@@ -74,18 +70,22 @@ export class MediaDetailMediaViewerComponent {
   }
 
   openLightbox(): void {
-    if (!this.canOpenLightbox() || !this.lightboxImageUrl()) {
+    if (!this.isImageLike()) {
       return;
     }
-    this.showLightbox.set(true);
+    const id = this.mediaId().trim();
+    if (!id) {
+      return;
+    }
+    void this.mediaDownloadService.requestFullPreview(id).then(() => {
+      if (this.lightboxImageUrl()) {
+        this.showLightbox.set(true);
+      }
+    });
   }
 
   onEmbedContextMenu(): void {
     this.contextMenuRequested.emit();
-  }
-
-  onContentResolution(resolution: MediaContentResolution | null): void {
-    this.displayedResolution.set(resolution);
   }
 
   triggerFileInput(): void {

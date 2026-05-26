@@ -24,7 +24,9 @@ describe('MediaDownloadService file preview delivery', () => {
 
     service.registerPreviewPaths('media-doc-1', 'org/u/file.docx', null);
 
-    const delivery = await firstValueFrom(service.getState('media-doc-1', 10).pipe(take(1)));
+    const delivery = await firstValueFrom(
+      service.getState('media-doc-1', { widthPx: 160, heightPx: 160 }).pipe(take(1)),
+    );
 
     expect(delivery.state).toBe('icon-only');
     expect(resolvePreviewSpy).not.toHaveBeenCalled();
@@ -35,7 +37,9 @@ describe('MediaDownloadService file preview delivery', () => {
 
     service.registerPreviewPaths('media-xlsx', 'org/u/sheet.xlsx', null);
 
-    const delivery = await firstValueFrom(service.getState('media-xlsx', 10).pipe(take(1)));
+    const delivery = await firstValueFrom(
+      service.getState('media-xlsx', { widthPx: 160, heightPx: 160 }).pipe(take(1)),
+    );
 
     expect(delivery.state).toBe('icon-only');
   });
@@ -45,7 +49,9 @@ describe('MediaDownloadService file preview delivery', () => {
 
     service.registerPreviewPaths('media-pptx', 'org/u/deck.pptx', null, 'pending');
 
-    const delivery = await firstValueFrom(service.getState('media-pptx', 10).pipe(take(1)));
+    const delivery = await firstValueFrom(
+      service.getState('media-pptx', { widthPx: 160, heightPx: 160 }).pipe(take(1)),
+    );
 
     expect(delivery.state).toBe('loading');
   });
@@ -57,7 +63,7 @@ describe('MediaDownloadService file preview delivery', () => {
     vi.spyOn(service, 'getCachedUrl').mockReturnValue('https://signed.example/thumb.webp');
 
     const delivery = await firstValueFrom(
-      service.getState('media-pptx-ready', 6.5).pipe(take(1)),
+      service.getState('media-pptx-ready', { widthPx: 104, heightPx: 104 }).pipe(take(1)),
     );
 
     expect(delivery.state).toBe('loaded');
@@ -81,7 +87,7 @@ describe('MediaDownloadService file preview delivery', () => {
     );
 
     const delivery = await firstValueFrom(
-      service.getState('media-pptx-thumb', 6.5).pipe(take(1)),
+      service.getState('media-pptx-thumb', { widthPx: 104, heightPx: 104 }).pipe(take(1)),
     );
 
     expect(delivery.state).toBe('loading');
@@ -104,7 +110,9 @@ describe('MediaDownloadService file preview delivery', () => {
       'ready',
     );
 
-    await firstValueFrom(service.getState('media-jpeg-thumb', 10).pipe(take(1)));
+    await firstValueFrom(
+      service.getState('media-jpeg-thumb', { widthPx: 160, heightPx: 160 }).pipe(take(1)),
+    );
 
     expect(resolvePreviewSpy).toHaveBeenCalled();
     const request = resolvePreviewSpy.mock.calls[0]?.[0];
@@ -120,7 +128,7 @@ describe('MediaDownloadService file preview delivery', () => {
     vi.spyOn(service, 'getCachedUrl').mockReturnValue('https://signed.example/photo_thumb.jpg');
 
     const delivery = await firstValueFrom(
-      service.getState('media-stale', 10).pipe(take(1)),
+      service.getState('media-stale', { widthPx: 160, heightPx: 160 }).pipe(take(1)),
     );
 
     expect(delivery.state).toBe('loaded');
@@ -133,7 +141,7 @@ describe('MediaDownloadService file preview delivery', () => {
     service.registerPreviewPaths('media-pptx-fail', 'org/u/deck.pptx', null, 'failed');
 
     const delivery = await firstValueFrom(
-      service.getState('media-pptx-fail', 10).pipe(take(1)),
+      service.getState('media-pptx-fail', { widthPx: 160, heightPx: 160 }).pipe(take(1)),
     );
 
     expect(delivery.state).toBe('icon-only');

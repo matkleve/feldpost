@@ -18,22 +18,7 @@
       [showInteractionChrome]="false"
       (pointerClick)="onItemPointerClick($event)"
       (embedContextMenu)="onEmbedContextMenu()"
-      (contentResolutionChange)="onContentResolution($event)"
     />
-
-    @if (displayedResolution(); as resolution) {
-      <span
-        class="detail-media__resolution-badge"
-        [attr.aria-label]="
-          t(
-            'workspace.imageDetail.mediaResolution.aria',
-            'Displayed image resolution'
-          )
-        "
-      >
-        {{ resolution.width }} × {{ resolution.height }}
-      </span>
-    }
   </div>
 
   <button
