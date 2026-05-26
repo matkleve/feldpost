@@ -326,19 +326,32 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    console.info(
+      `[geocode] action=${action} upstream=${upstreamKind} status=${upstreamResp.status}`,
+    );
+
+    const responseHeaders: Record<string, string> = {
+      ...corsHeaders(req),
+      "Content-Type": "application/json",
+      "X-Feldpost-Geocoder-Upstream": upstreamKind,
+    };
+
     if (upstreamKind === "photon") {
       const geoJson = (await upstreamResp.json()) as PhotonGeoJsonResponse;
       const rows = photonGeoJsonToNominatimSearch(geoJson);
+      console.info(`[geocode] photon features=${geoJson.features?.length ?? 0} rows=${rows.length}`);
       return new Response(JSON.stringify(rows), {
         status: 200,
-        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+        headers: responseHeaders,
       });
     }
 
     const data = await upstreamResp.json();
+    const rowCount = Array.isArray(data) ? data.length : 1;
+    console.info(`[geocode] nominatim rows=${rowCount}`);
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+      headers: responseHeaders,
     });
   } catch (error) {
     const message =

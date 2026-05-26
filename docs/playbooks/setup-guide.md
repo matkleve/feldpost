@@ -164,7 +164,10 @@ For local Supabase (optional):
 ```bash
 supabase start   # starts local Supabase stack (Postgres, Auth, Storage, etc.)
 supabase status  # shows local URLs and keys
+npm run supabase:ensure-edge   # after config.toml edge secret changes
 ```
+
+Forward geocoding uses shared remote Photon when `GEOCODER_FORWARD_URL` is set in `supabase/config.toml`. See [remote-photon.md](remote-photon.md). Do not run `docker-compose.photon.yml` on your laptop unless you need offline fallback.
 
 ---
 

@@ -22,6 +22,12 @@ import {
   isJobBlocked,
   pickCollapseStage,
 } from './upload-location-resolution.helpers';
+import {
+  summarizeGeocodeHits,
+  summarizeGroupState,
+  summarizeSearchObject,
+  uploadAddressDebug,
+} from './upload-address-resolution.debug';
 import type {
   DisambiguationRequiredEvent,
   DisambiguationResolvedEvent,
@@ -110,8 +116,18 @@ export class UploadLocationResolutionService {
 
     let groupState = this.orchestrator.getGroupState(job.batchId, job.groupingKey);
     if (!groupState) {
+      uploadAddressDebug('pre-resolve', 'no orchestrator cache for job', {
+        jobId,
+        batchId: job.batchId,
+        groupingKey: job.groupingKey,
+      });
       return 'continue';
     }
+
+    uploadAddressDebug('pre-resolve', 'applyPreResolveFromOrchestrator', {
+      jobId,
+      initial: summarizeGroupState(groupState),
+    });
 
     if (groupState.status === 'needsGeocode') {
       groupState = await this.ensureGeocodedGroup(job.batchId, job.groupingKey, groupState);
@@ -309,6 +325,11 @@ export class UploadLocationResolutionService {
     if (!street || !countryCode) {
       const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
       this.orchestrator.patchGroupState(batchId, partial);
+      uploadAddressDebug('geocode', 'skipped — missing street or country', {
+        street,
+        countryCode,
+        searchObject: summarizeSearchObject(so),
+      });
       return partial;
     }
 
@@ -317,21 +338,37 @@ export class UploadLocationResolutionService {
     }
 
     const config = this.locationConfig.getConfig();
-    const hits = await this.geocoding.searchStructuredForward(
-      {
-        street,
-        city: so.city ?? undefined,
-        postcode: so.postcode ?? undefined,
-        countryCode: countryCode ?? undefined,
-      },
-      {
-        limit: config.geocodeSearchDefaultLimit,
-        countrycodes: countryCode ? [countryCode] : undefined,
-      },
-    );
+    const geocodeRequest = {
+      street,
+      city: so.city ?? undefined,
+      postcode: so.postcode ?? undefined,
+      countryCode,
+    };
+    uploadAddressDebug('geocode', 'edge invoke structured-forward', {
+      batchId,
+      groupingKey: group.groupingKey,
+      request: geocodeRequest,
+      limit: config.geocodeSearchDefaultLimit,
+      note: 'Upstream photon vs nominatim is chosen in geocode edge (GEOCODER_FORWARD_URL); see edge logs / X-Feldpost-Geocoder-Upstream header',
+    });
+
+    const hits = await this.geocoding.searchStructuredForward(geocodeRequest, {
+      limit: config.geocodeSearchDefaultLimit,
+      countrycodes: [countryCode],
+    });
+
+    uploadAddressDebug('geocode', 'edge response', {
+      hitCount: hits.length,
+      hits: summarizeGeocodeHits(hits),
+    });
 
     const sampleJob = this.jobState.findJob(group.jobIds[0]);
     const outcome = classifySearchHits(hits, config, sampleJob?.coords);
+
+    uploadAddressDebug('geocode', 'classifySearchHits outcome', {
+      kind: outcome.kind,
+      candidateCount: outcome.kind === 'ambiguous' ? outcome.candidates.length : undefined,
+    });
 
     if (outcome.kind === 'auto') {
       const resolved: UploadGroupResolutionState = {

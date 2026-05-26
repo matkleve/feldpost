@@ -40,7 +40,7 @@ Supabase Edge Function `geocode` (proxy; Nominatim rate limit on Nominatim paths
 | Source | Layer | Notes |
 | --- | --- | --- |
 | Nominatim (via Edge) | External | Reverse and structured-search JSON subsets |
-| Photon (via Edge, local dev) | External | Forward/search when `GEOCODER_FORWARD_URL` is set |
+| Photon (via Edge, when `GEOCODER_FORWARD_URL` set) | External | Forward/search + structured-forward; default is shared Hetzner instance |
 | UploadLocationConfigService | Config | Cache TTL, search default limit |
 
 ## State
@@ -77,12 +77,13 @@ Supabase Edge Function `geocode` (proxy; Nominatim rate limit on Nominatim paths
 
 - Edge Function: `geocode` with `action`: `reverse` | `forward` (search uses forward-shaped body with limit/viewbox/countrycodes).
 - **Upstream routing** (`supabase/functions/geocode/index.ts`):
-  - `forward` (and search-shaped forward bodies): **Photon** `/api` when `GEOCODER_FORWARD_URL` is set (local dev); otherwise **Nominatim** `/search` (production default).
+  - `forward` (and search-shaped forward bodies): **Photon** `/api` when `GEOCODER_FORWARD_URL` is set; otherwise **Nominatim** `/search`.
+  - `structured-forward`: **Photon** `/structured` when `GEOCODER_FORWARD_URL` is set; otherwise **Nominatim** `/search` (requires `city`).
   - `reverse`: always **Nominatim** `/reverse`.
   - `structured-search`: always **Nominatim** `/search?street=&city=`.
 - **Viewbox:** clients send Nominatim `viewbox=left,top,right,bottom`; the edge adapter converts to Photon `bbox=minLon,minLat,maxLon,maxLat` (`photon-to-nominatim.ts`, unit-tested).
 - **Response shape:** Photon GeoJSON is mapped to Nominatim search JSON arrays before returning to Angular (`NominatimSearchResponse` subset).
-- **Local Photon:** `docker-compose.photon.yml`, curl gate, and secrets documented in [`supabase/AGENTS.md`](../../../../supabase/AGENTS.md#local-photon-forwardsearch-only). Do not set `GEOCODER_FORWARD_URL` on hosted Supabase.
+- **Photon hosting:** Default team dev uses shared remote Austria Photon (Hetzner + sslip.io). See [`docs/playbooks/remote-photon.md`](../../../playbooks/remote-photon.md) and [`supabase/AGENTS.md`](../../../../supabase/AGENTS.md#photon-forwardsearch-via-geocoder_forward_url). Optional laptop fallback: `docker-compose.photon.yml` + `http://host.docker.internal:2322`. Hosted Supabase: set `GEOCODER_FORWARD_URL` via project secrets when cloud should use the same instance.
 
 ### Upload disambiguation
 

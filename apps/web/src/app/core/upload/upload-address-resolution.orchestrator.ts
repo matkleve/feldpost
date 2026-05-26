@@ -20,6 +20,11 @@ import type {
   UploadGroupResolutionState,
   UploadSearchObject,
 } from './upload-address-resolution.types';
+import {
+  summarizeGroupState,
+  summarizeSearchObject,
+  uploadAddressDebug,
+} from './upload-address-resolution.debug';
 
 @Injectable({ providedIn: 'root' })
 export class UploadAddressResolutionOrchestrator {
@@ -52,6 +57,11 @@ export class UploadAddressResolutionOrchestrator {
       return;
     }
 
+    uploadAddressDebug('orchestrator', 'classifyBatch start', {
+      batchId,
+      jobCount: jobs.length,
+    });
+
     const geo = await this.loadGeo();
     const leafObjects: Array<{ jobId: string; so: UploadSearchObject }> = [];
 
@@ -63,6 +73,13 @@ export class UploadAddressResolutionOrchestrator {
       });
       so = expandPostcodeOnSearchObject(so, geo.postcodeMap);
       const { folderDisplayPath, titleAddressLabel } = buildGroupPresentation(so);
+
+      uploadAddressDebug('orchestrator', 'search object built', {
+        jobId: job.id,
+        ...summarizeSearchObject(so),
+        folderDisplayPath,
+        titleAddressLabel,
+      });
 
       this.jobState.updateJob(job.id, {
         groupingKey: so.groupingKey,
@@ -90,21 +107,30 @@ export class UploadAddressResolutionOrchestrator {
       const { folderDisplayPath, titleAddressLabel } = buildGroupPresentation(so);
       const local = evaluateLocalResolution(so);
 
+      uploadAddressDebug('orchestrator', 'group evaluate', {
+        groupingKey,
+        jobIds,
+        localGate: local,
+        searchObject: summarizeSearchObject(so),
+      });
+
       if (local === 'incomplete' || local === 'postcode_blocked') {
-        cache.set(groupingKey, {
+        const partialState: UploadGroupResolutionState = {
           status: 'partial',
           groupingKey,
           jobIds,
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-        });
+        };
+        cache.set(groupingKey, partialState);
+        uploadAddressDebug('orchestrator', 'group → partial (local gate)', summarizeGroupState(partialState));
         continue;
       }
 
       const row = await this.lookup.findBySearchObject(so);
       if (row) {
-        cache.set(groupingKey, {
+        const resolvedState: UploadGroupResolutionState = {
           status: 'resolved',
           groupingKey,
           jobIds,
@@ -112,21 +138,34 @@ export class UploadAddressResolutionOrchestrator {
           folderDisplayPath,
           titleAddressLabel,
           candidate: locationRowToCandidate(row),
-        });
+        };
+        cache.set(groupingKey, resolvedState);
+        uploadAddressDebug('orchestrator', 'group → resolved (db)', summarizeGroupState(resolvedState));
         continue;
       }
 
-      cache.set(groupingKey, {
+      const needsGeocodeState: UploadGroupResolutionState = {
         status: 'needsGeocode',
         groupingKey,
         jobIds,
         searchObject: so,
         folderDisplayPath,
         titleAddressLabel,
-      });
+      };
+      cache.set(groupingKey, needsGeocodeState);
+      uploadAddressDebug('orchestrator', 'group → needsGeocode', summarizeGroupState(needsGeocodeState));
     }
 
     this.batchCaches.set(batchId, cache);
+    uploadAddressDebug('orchestrator', 'classifyBatch done', {
+      batchId,
+      groupCount: cache.size,
+      groups: [...cache.entries()].map(([key, state]) => ({
+        groupingKey: key,
+        status: state.status,
+        jobCount: state.jobIds.length,
+      })),
+    });
   }
 
   patchGroupState(batchId: string, state: UploadGroupResolutionState): void {

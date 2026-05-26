@@ -32,34 +32,46 @@ npm run supabase:ensure-edge
 
 `npm start` in `apps/web` runs this automatically before `ng serve`.
 
-## Local Photon (forward/search only)
+## Photon (forward/search via `GEOCODER_FORWARD_URL`)
 
-For fuzzy forward geocoding in local dev (e.g. typo-tolerant Austrian addresses), run Austria Photon on the host:
+Forward search and `structured-forward` use **Photon** when `GEOCODER_FORWARD_URL` is set on the Edge runtime; otherwise the `geocode` function falls back to public Nominatim. **Reverse** and **`structured-search`** always use Nominatim.
+
+### Default: shared remote Photon (Hetzner)
+
+Team dev uses Austria Photon on a Hetzner Cloud VM, exposed over HTTPS via [sslip.io](https://sslip.io) (no purchased domain). Canonical URL is in `supabase/config.toml` → `[edge_runtime.secrets]` → `GEOCODER_FORWARD_URL` (currently `https://178-105-242-74.sslip.io`).
+
+Full setup, curl gates, hosted secrets, and troubleshooting: [`docs/playbooks/remote-photon.md`](../docs/playbooks/remote-photon.md).
+
+**Curl gate** (from your laptop):
+
+```bash
+curl "https://178-105-242-74.sslip.io/api?q=Fuchsthalergasse+4&lang=de&limit=3"
+```
+
+Expect GeoJSON with **Fuchsthallergasse**, house **4**, **Wien** / **1090**.
+
+After changing `GEOCODER_FORWARD_URL` in `config.toml`, reload local edge secrets:
+
+```bash
+npm run supabase:ensure-edge
+```
+
+(`supabase stop && supabase start` if secrets do not apply.)
+
+**Hosted Supabase:** set the same URL with `supabase secrets set GEOCODER_FORWARD_URL=...` and `supabase functions deploy geocode` when cloud environments should use Photon. Omit the secret to keep Nominatim-only forward geocoding in production.
+
+### Optional: local Photon on the host
+
+For offline or isolated experiments only — loads RAM/CPU on the developer machine:
 
 ```bash
 docker compose -f docker-compose.photon.yml up -d
 docker compose -f docker-compose.photon.yml logs -f   # first run: index download ~10–20 min
 ```
 
-Until logs show the index import finished and Photon is listening, `curl http://localhost:2322/...` may fail with **connection reset** and `docker ps` may show **unhealthy** — that is normal during the first-run download/extract, not a broken port mapping.
+Set `GEOCODER_FORWARD_URL = "http://host.docker.internal:2322"` in `config.toml`, then `npm run supabase:ensure-edge`. **Linux:** `docker-compose.photon.yml` includes `extra_hosts: host.docker.internal:host-gateway`.
 
-**Curl gate** (required before relying on Photon in the edge function):
-
-```bash
-curl "http://localhost:2322/api?q=Fuchsthalergasse+4&lang=de&limit=3"
-```
-
-Expect GeoJSON `FeatureCollection` with **Fuchsthallergasse**, house **4**, **Wien** / **1090** in the top hit.
-
-**Edge wiring:** `supabase/config.toml` sets `GEOCODER_FORWARD_URL = "http://host.docker.internal:2322"` under `[edge_runtime.secrets]` (dev only — never hosted/production). After changing secrets, restart edge runtime:
-
-```bash
-npm run supabase:ensure-edge
-```
-
-**Linux:** `docker-compose.photon.yml` includes `extra_hosts: host.docker.internal:host-gateway` so the Supabase edge container can reach host Photon.
-
-**Reverse** and **structured-search** stay on public Nominatim regardless of Photon.
+Local curl gate: `curl "http://localhost:2322/api?q=Fuchsthalergasse+4&lang=de&limit=3"`.
 
 ## References
 

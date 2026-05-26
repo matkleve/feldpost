@@ -24,6 +24,20 @@ Only **ambiguous** multi-hit geocode results create `UploadDisambiguationGroup` 
 
 Completeness fail or 0/low-confidence geocode: no tray; job → `missing_data`; after save `media_items.location_status = 'partial'` when text/path exists without coords.
 
+## Debug logging (browser)
+
+Enable before uploading a folder:
+
+```js
+localStorage.setItem('feldpost:debug:upload-address', '1')
+```
+
+Filter DevTools console by `[upload-address:` — logs Search Object fill, DB RPC, geocode request/response summaries, group status transitions.
+
+Disable: `localStorage.removeItem('feldpost:debug:upload-address')`
+
+**Geocode upstream (Photon vs Nominatim):** chosen in the `geocode` edge function. Local Supabase sets `GEOCODER_FORWARD_URL` in `supabase/config.toml` (self-hosted Photon, not Komoot public cloud). Edge logs `[geocode] action=… upstream=photon|nominatim` and sets response header `X-Feldpost-Geocoder-Upstream` (visible in network tab if your client exposes it).
+
 ## Acceptance criteria
 
 - [ ] Folder and single-file uploads use the same orchestrator entry
