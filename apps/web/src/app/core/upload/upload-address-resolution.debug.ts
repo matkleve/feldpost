@@ -1,10 +1,13 @@
 /**
  * Opt-in debug logging for upload address resolution (Search Object + geocode + DB).
  *
- * Enable in the browser console:
+ * Enable in the browser console (then reload or upload again):
  *   localStorage.setItem('feldpost:debug:upload-address', '1')
  * Disable:
  *   localStorage.removeItem('feldpost:debug:upload-address')
+ *
+ * Placement trace uses console.info (`[upload-placement]`) so it stays visible when
+ * the console filters out "Verbose"/debug. Detailed SO/geocode payloads use console.debug.
  *
  * @see docs/specs/service/media-upload-service/upload-address-resolution-pipeline.md
  */
@@ -39,6 +42,46 @@ export function uploadAddressDebug(
   } else {
     console.debug(label);
   }
+}
+
+/** High-signal placement decision line (phases P0–P6 per location-routing supplement). */
+export function uploadPlacementLog(
+  phase: string,
+  jobId: string,
+  fileName: string,
+  message: string,
+  detail?: Record<string, unknown>,
+): void {
+  if (!isUploadAddressDebugEnabled()) {
+    return;
+  }
+  const shortId = jobId.length > 8 ? jobId.slice(0, 8) : jobId;
+  console.info(`[upload-placement] ${phase} ${shortId} ${fileName} — ${message}`, {
+    ...(detail ?? {}),
+  });
+}
+
+export function summarizeJobPlacement(job: {
+  file: { name: string };
+  titleAddress?: string;
+  titleAddressSource?: string;
+  titleAddressCoords?: { lat: number; lng: number };
+  parsedExif?: { coords?: { lat: number; lng: number } };
+  coords?: { lat: number; lng: number };
+  locationSourceUsed?: string;
+  groupingKey?: string;
+  phase?: string;
+}): Record<string, unknown> {
+  return {
+    phase: job.phase,
+    titleAddress: job.titleAddress,
+    titleAddressSource: job.titleAddressSource,
+    titleAddressCoords: job.titleAddressCoords,
+    exifMetadata: job.parsedExif?.coords,
+    placementCoords: job.coords,
+    locationSourceUsed: job.locationSourceUsed,
+    groupingKey: job.groupingKey,
+  };
 }
 
 /** Compact SO snapshot for logs (avoids huge sources arrays). */

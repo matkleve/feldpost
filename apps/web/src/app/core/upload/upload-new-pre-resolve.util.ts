@@ -6,7 +6,16 @@
 import type { FilenameParserService } from '../filename-parser/filename-parser.service';
 import type { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
 import type { UploadLocationResolutionService } from './upload-location-resolution.service';
-import { hashAndCheckDedupForNewJob } from './upload-new-prepare-route.util';
+import {
+  summarizeJobPlacement,
+  uploadPlacementLog,
+} from './upload-address-resolution.debug';
+import {
+  buildChosenPlacementPatch,
+  getExifMetadataCoords,
+  resolvePlacementWithoutText,
+} from './upload-location-precedence.helpers';
+import { hashAndCheckDedupForNewJob, routeJobToMissingData } from './upload-new-prepare-route.util';
 import type { UploadJobStateService } from './upload-job-state.service';
 import type { PipelineContext, UploadJob } from './upload-manager.types';
 import type { UploadLocationConfigService } from './upload-location-config.service';
@@ -42,6 +51,11 @@ export function mergeTitleCandidateOnJob(
   const inheritedTitleAddress = job.titleAddress?.trim();
   const parsedConfidenceScore = parsed ? (parsed.confidence === 'high' ? 1 : 0.5) : 0;
 
+  // Search Object intake already set titleAddress + groupingKey — do not replace with IMG_* parse.
+  if (job.groupingKey && inheritedTitleAddress) {
+    return { titleAddress: inheritedTitleAddress, highConfidence: true };
+  }
+
   const fileCandidate = parsed
     ? {
         address: parsed.address,
@@ -57,9 +71,21 @@ export function mergeTitleCandidateOnJob(
       }
     : undefined;
 
-  const mergedCandidate = config.filenameAlwaysOverridesFolder
-    ? (fileCandidate ?? folderCandidate)
-    : (folderCandidate ?? fileCandidate);
+  const fileMeetsThreshold =
+    fileCandidate !== undefined && fileCandidate.score >= config.titleConfidenceThreshold;
+
+  const mergedCandidate = (() => {
+    if (!fileCandidate) {
+      return folderCandidate;
+    }
+    if (!folderCandidate) {
+      return fileCandidate;
+    }
+    if (fileMeetsThreshold && config.filenameAlwaysOverridesFolder) {
+      return fileCandidate;
+    }
+    return folderCandidate;
+  })();
 
   if (!mergedCandidate) {
     return { highConfidence: false };
@@ -68,13 +94,147 @@ export function mergeTitleCandidateOnJob(
   deps.jobState.updateJob(jobId, {
     titleAddress: mergedCandidate.address,
     titleAddressSource: mergedCandidate.source,
-    locationSourceUsed: mergedCandidate.source,
   });
 
   return {
     titleAddress: mergedCandidate.address,
     highConfidence: mergedCandidate.score >= config.titleConfidenceThreshold,
   };
+}
+
+async function finishPreResolveDedup(
+  deps: PreResolveDeps,
+  jobId: string,
+  parsedExif: ParsedExif,
+  ctx: PipelineContext,
+): Promise<PreResolveOutcome> {
+  const current = deps.jobState.findJob(jobId);
+  if (!current) {
+    return 'continue';
+  }
+  const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
+  return deduped ? 'dedup_skip' : 'continue';
+}
+
+function applyExifOnlyPlacement(
+  deps: Pick<PreResolveDeps, 'jobState'>,
+  jobId: string,
+  job: UploadJob,
+): void {
+  const exifCoords = getExifMetadataCoords(job);
+  if (!exifCoords) {
+    return;
+  }
+  deps.jobState.updateJob(jobId, buildChosenPlacementPatch(job, 'exif', exifCoords));
+  const after = deps.jobState.findJob(jobId);
+  if (after) {
+    uploadPlacementLog('P4', jobId, job.file.name, 'EXIF-only placement (Branch B)', {
+      ...summarizeJobPlacement(after),
+    });
+  }
+}
+
+/**
+ * Phase 3–4 after orchestrator or legacy geocode: placement, source tray, EXIF-only, or Branch A.
+ * @returns held when job stops in tray or Issues
+ */
+async function completePlacementAfterLocationResolve(
+  deps: PreResolveDeps,
+  jobId: string,
+  job: UploadJob,
+  ctx: PipelineContext,
+): Promise<PreResolveOutcome | null> {
+  let current = deps.jobState.findJob(jobId);
+  if (!current) {
+    return null;
+  }
+
+  uploadPlacementLog('P1', jobId, current.file.name, 'complete placement pass', {
+    ...summarizeJobPlacement(current),
+  });
+
+  if (current.coords) {
+    uploadPlacementLog('P6', jobId, current.file.name, 'skip — placement already set', {
+      locationSourceUsed: current.locationSourceUsed,
+      coords: current.coords,
+    });
+    return null;
+  }
+
+  if (current.phase === 'awaiting_disambiguation') {
+    deps.queue.markDone(jobId);
+    ctx.emitBatchProgress(job.batchId);
+    ctx.drainQueue();
+    return 'held';
+  }
+
+  if (current.titleAddressCoords) {
+    uploadPlacementLog('P3', jobId, current.file.name, 'text coords ready — source agreement', {
+      titleAddressCoords: current.titleAddressCoords,
+      exifMetadata: getExifMetadataCoords(current),
+    });
+    const held = deps.locationResolution.finalizePlacementForJob(jobId);
+    const afterFinalize = deps.jobState.findJob(jobId);
+    if (afterFinalize) {
+      uploadPlacementLog('P4', jobId, current.file.name, held ? 'held — source tray' : 'text placement applied', {
+        ...summarizeJobPlacement(afterFinalize),
+      });
+    }
+    if (held) {
+      deps.queue.markDone(jobId);
+      ctx.emitBatchProgress(job.batchId);
+      ctx.drainQueue();
+      return 'held';
+    }
+    return null;
+  }
+
+  if (current.titleAddress?.trim()) {
+    uploadPlacementLog('P2', jobId, current.file.name, 'forward geocode (text before EXIF)', {
+      titleAddress: current.titleAddress,
+      exifMetadata: getExifMetadataCoords(current),
+    });
+    const resolveOutcome = await deps.locationResolution.resolveJobTitleAddress(jobId);
+    current = deps.jobState.findJob(jobId);
+    if (!current) {
+      return null;
+    }
+    if (resolveOutcome === 'held' || current.phase === 'awaiting_disambiguation') {
+      deps.queue.markDone(jobId);
+      ctx.emitBatchProgress(job.batchId);
+      ctx.drainQueue();
+      return 'held';
+    }
+    if (current.titleAddressCoords) {
+      const held = deps.locationResolution.finalizePlacementForJob(jobId);
+      if (held) {
+        deps.queue.markDone(jobId);
+        ctx.emitBatchProgress(job.batchId);
+        ctx.drainQueue();
+        return 'held';
+      }
+      return null;
+    }
+    uploadPlacementLog('P2', jobId, current.file.name, 'geocode finished without text coords', {
+      resolveOutcome,
+      ...summarizeJobPlacement(current),
+    });
+    if (resolvePlacementWithoutText(current) === 'exif') {
+      applyExifOnlyPlacement(deps, jobId, current);
+      return null;
+    }
+  }
+
+  if (resolvePlacementWithoutText(current) === 'exif') {
+    applyExifOnlyPlacement(deps, jobId, current);
+    return null;
+  }
+
+  uploadPlacementLog('A', jobId, current.file.name, 'Branch A — no text coords, no EXIF', {
+    ...summarizeJobPlacement(current),
+  });
+  routeJobToMissingData(deps, jobId, current, ctx);
+  return 'held';
 }
 
 /**
@@ -93,22 +253,15 @@ export async function runPreUploadLocationResolve(
 
   if (!isAutoLocationEnabled(job)) {
     deps.jobState.updateJob(jobId, { resolutionStatus: 'not_required' });
-    const deduped = await hashAndCheckDedupForNewJob(deps, jobId, job, parsedExif, ctx);
-    return deduped ? 'dedup_skip' : 'continue';
-  }
-
-  if (job.coords) {
-    deps.jobState.updateJob(jobId, {
-      resolutionStatus: 'not_required',
-      locationSourceUsed: 'exif',
-    });
-    const deduped = await hashAndCheckDedupForNewJob(deps, jobId, job, parsedExif, ctx);
-    return deduped ? 'dedup_skip' : 'continue';
+    return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
   }
 
   deps.jobState.setPhase(jobId, 'extracting_title');
 
-  if (job.groupingKey) {
+  const { highConfidence } = mergeTitleCandidateOnJob(deps, jobId, job);
+  const jobAfterMerge = deps.jobState.findJob(jobId)!;
+
+  if (highConfidence && jobAfterMerge.groupingKey) {
     const orchestrated = await deps.locationResolution.applyPreResolveFromOrchestrator(jobId);
     if (orchestrated === 'held') {
       deps.queue.markDone(jobId);
@@ -116,39 +269,35 @@ export async function runPreUploadLocationResolve(
       ctx.drainQueue();
       return 'held';
     }
-    if (orchestrated === 'partial') {
-      const deduped = await hashAndCheckDedupForNewJob(
-        deps,
-        jobId,
-        deps.jobState.findJob(jobId)!,
-        parsedExif,
-        ctx,
-      );
-      return deduped ? 'dedup_skip' : 'continue';
+    const placementHeld = await completePlacementAfterLocationResolve(
+      deps,
+      jobId,
+      deps.jobState.findJob(jobId) ?? job,
+      ctx,
+    );
+    if (placementHeld) {
+      return placementHeld;
     }
-    const current = deps.jobState.findJob(jobId)!;
-    const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
-    return deduped ? 'dedup_skip' : 'continue';
+    return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
   }
 
-  const { titleAddress, highConfidence } = mergeTitleCandidateOnJob(deps, jobId, job);
-
-  if (!highConfidence || !titleAddress?.trim()) {
-    deps.jobState.updateJob(jobId, { resolutionStatus: 'not_required' });
-    const current = deps.jobState.findJob(jobId)!;
-    const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
-    return deduped ? 'dedup_skip' : 'continue';
-  }
-
-  const resolveOutcome = await deps.locationResolution.resolveJobTitleAddress(jobId);
-  if (resolveOutcome === 'held') {
-    deps.queue.markDone(jobId);
-    ctx.emitBatchProgress(job.batchId);
-    ctx.drainQueue();
-    return 'held';
+  if (highConfidence) {
+    const placementHeld = await completePlacementAfterLocationResolve(
+      deps,
+      jobId,
+      deps.jobState.findJob(jobId) ?? job,
+      ctx,
+    );
+    if (placementHeld) {
+      return placementHeld;
+    }
+    return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
   }
 
   const current = deps.jobState.findJob(jobId)!;
-  const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
-  return deduped ? 'dedup_skip' : 'continue';
+  const placementHeld = await completePlacementAfterLocationResolve(deps, jobId, current, ctx);
+  if (placementHeld) {
+    return placementHeld;
+  }
+  return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
 }

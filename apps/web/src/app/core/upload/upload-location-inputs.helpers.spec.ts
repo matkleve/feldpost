@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  resolveUploadPhaseInputs,
-  stripPlacementCoordsFromParsedExif,
-  usesTextPlacementSource,
-} from './upload-location-inputs.helpers';
+import { resolveUploadPhaseInputs, usesTextPlacementSource } from './upload-location-inputs.helpers';
 import type { UploadJob } from './upload-manager.types';
 
 function createJob(overrides: Partial<UploadJob> = {}): UploadJob {
@@ -23,23 +19,16 @@ function createJob(overrides: Partial<UploadJob> = {}): UploadJob {
 }
 
 describe('upload-location-inputs.helpers', () => {
-  it('strips placement coords from parsed EXIF for text placement', () => {
-    const parsed = stripPlacementCoordsFromParsedExif({
-      coords: { lat: 48.2, lng: 16.37 },
-      capturedAt: new Date(),
-    });
-    expect(parsed?.coords).toBeUndefined();
-  });
-
-  it('resolveUploadPhaseInputs clears EXIF placement when folder wins', () => {
+  it('resolveUploadPhaseInputs uses manualCoords for placement and keeps parsedExif intact', () => {
     const job = createJob({ locationSourceUsed: 'folder' });
+    const parsedExif = { coords: { lat: 48.2, lng: 16.37 } };
     const result = resolveUploadPhaseInputs({
       job,
-      manualCoords: undefined,
-      parsedExif: { coords: { lat: 48.2, lng: 16.37 } },
+      manualCoords: { lat: 48.21, lng: 16.38 },
+      parsedExif,
     });
-    expect(result.coords).toBeUndefined();
-    expect(result.parsedExif?.coords).toBeUndefined();
+    expect(result.coords).toEqual({ lat: 48.21, lng: 16.38 });
+    expect(result.parsedExif?.coords).toEqual({ lat: 48.2, lng: 16.37 });
   });
 
   it('usesTextPlacementSource is true for file and folder', () => {

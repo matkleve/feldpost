@@ -16,6 +16,6 @@
 | Condition | Action |
 | --- | --- |
 | `locationRequirementMode === optional` | Skip pipeline |
-| Job has EXIF coords | `resolutionStatus: not_required` |
+| EXIF metadata only (`parsedExif.coords`) | Pipeline still runs when high-confidence text exists; EXIF does not skip geocode |
 | After intake | `classifyBatch(batchId)` |
 | Queue drain | `applyPreResolveFromCache(jobId)` |

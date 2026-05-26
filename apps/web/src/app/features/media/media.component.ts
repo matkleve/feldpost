@@ -273,6 +273,9 @@ export class MediaComponent implements OnDestroy {
   );
 
   private loadRequestId = 0;
+  /** Workspace scope captured on /media entry; restored on route leave. */
+  private workspaceScopeSnapshot: WorkspaceMedia[] | null = null;
+  private workspaceScopeSnapshotSelectionActive = false;
 
   constructor() {
     void this.metadata.refreshMetadataFields();
@@ -286,6 +289,18 @@ export class MediaComponent implements OnDestroy {
     };
 
     this.workspacePaneObserver.onContextRebind(mediaSelectedItemsContext);
+
+    // Mirror /media gallery scope into WorkspaceViewService so the pane Selected Items tab
+    // stays in sync with the main grid and global WorkspaceSelectionService checkmarks.
+    // @see docs/specs/ui/workspace/workspace-pane.md — context-aware selected-items on /media
+    effect(() => {
+      const images = this.rawWorkspaceImages();
+      if (this.workspaceScopeSnapshot === null) {
+        this.workspaceScopeSnapshot = [...this.viewService.rawImages()];
+        this.workspaceScopeSnapshotSelectionActive = this.viewService.selectionActive();
+      }
+      this.viewService.setActiveSelectionImages([...images]);
+    });
 
     this.thumbnailRealtime.updates$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -344,6 +359,14 @@ export class MediaComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.workspaceScopeSnapshot !== null) {
+      const snapshot = this.workspaceScopeSnapshot;
+      if (snapshot.length === 0 && !this.workspaceScopeSnapshotSelectionActive) {
+        this.viewService.clearActiveSelection();
+      } else {
+        this.viewService.setActiveSelectionImages([...snapshot]);
+      }
+    }
     this.workspacePaneObserver.onRouteLeave('media');
   }
 

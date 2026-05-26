@@ -13,6 +13,17 @@ import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import {
+  buildChosenPlacementPatch,
+  buildGeocodeCandidatePatch,
+  buildSourceConflictCandidates,
+  getExifMetadataCoords,
+  haversineMeters,
+  resolvePlacementAfterTextGeocode,
+  resolvePlacementWithoutText,
+  SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
+  SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
+} from './upload-location-precedence.helpers';
+import {
   buildDisambiguationQueryKey,
   buildSearchQuery,
   classifySearchHits,
@@ -25,16 +36,18 @@ import {
 import {
   summarizeGeocodeHits,
   summarizeGroupState,
+  summarizeJobPlacement,
   summarizeSearchObject,
   uploadAddressDebug,
+  uploadPlacementLog,
 } from './upload-address-resolution.debug';
+import type { ExifCoords } from './upload.types';
 import type {
   DisambiguationRequiredEvent,
   DisambiguationResolvedEvent,
   UploadAddressCandidate,
   UploadDisambiguationGroup,
   UploadJob,
-  UploadResolutionStatus,
 } from './upload-manager.types';
 
 @Injectable({ providedIn: 'root' })
@@ -139,13 +152,17 @@ export class UploadLocationResolutionService {
         if (!j) {
           continue;
         }
-        this.applyResolvedCandidate(id, j, groupState.candidate, groupState.folderDisplayPath);
+        this.applyGeocodeCandidateToJob(id, j, groupState.candidate, groupState.folderDisplayPath);
+        const held = this.finalizePlacementForJob(id);
+        if (held) {
+          return 'held';
+        }
       }
       return 'continue';
     }
 
     if (groupState.status === 'partial') {
-      this.applyPartialToJobs(groupState);
+      this.markGroupPartial(groupState);
       return 'partial';
     }
 
@@ -158,11 +175,12 @@ export class UploadLocationResolutionService {
         jobIds: groupState.jobIds,
         candidates: groupState.candidates,
         localityHint: deriveLocalityHint(job.relativePath),
+        disambiguationKind: 'geocode',
       });
       return 'held';
     }
 
-    this.applyPartialToJobs(groupState);
+    this.markGroupPartial(groupState);
     return 'partial';
   }
 
@@ -175,16 +193,22 @@ export class UploadLocationResolutionService {
       return 'continue';
     }
 
-    if (job.groupingKey) {
+    if (!job.titleAddress?.trim()) {
+      return 'continue';
+    }
+
+    if (job.groupingKey && !job.titleAddressCoords) {
       const orchestrated = await this.applyPreResolveFromOrchestrator(jobId);
       if (orchestrated === 'held') {
         return 'held';
       }
-      return 'continue';
-    }
-
-    if (!job.titleAddress?.trim()) {
-      return 'continue';
+      const after = this.jobState.findJob(jobId);
+      if (after?.coords || after?.titleAddressCoords) {
+        return 'continue';
+      }
+      if (after?.phase === 'awaiting_disambiguation') {
+        return 'held';
+      }
     }
 
     const folderDisplayPath =
@@ -204,11 +228,11 @@ export class UploadLocationResolutionService {
       countrycodes: ['at'],
     });
 
-    const outcome = classifySearchHits(hits, config, job.coords);
+    const outcome = classifySearchHits(hits, config, getExifMetadataCoords(job));
 
     if (outcome.kind === 'auto') {
-      this.applyResolvedCandidate(jobId, job, outcome.candidate, folderDisplayPath);
-      return 'continue';
+      this.applyGeocodeCandidateToJob(jobId, job, outcome.candidate, folderDisplayPath);
+      return (await this.finalizePlacementForJobAsync(jobId)) ? 'held' : 'continue';
     }
 
     if (outcome.kind === 'ambiguous') {
@@ -220,6 +244,7 @@ export class UploadLocationResolutionService {
         jobIds: [job.id],
         candidates: outcome.candidates,
         localityHint,
+        disambiguationKind: 'geocode',
       });
       return 'held';
     }
@@ -235,6 +260,85 @@ export class UploadLocationResolutionService {
     return 'continue';
   }
 
+  /**
+   * Phase 3–4: set job.coords after text geocode + optional source tray.
+   * @returns true when job is held for disambiguation
+   */
+  finalizePlacementForJob(jobId: string): boolean {
+    return this.finalizePlacementForJobSync(jobId);
+  }
+
+  private finalizePlacementForJobSync(jobId: string): boolean {
+    const job = this.jobState.findJob(jobId);
+    if (!job) {
+      return false;
+    }
+    const config = this.locationConfig.getConfig();
+
+    if (job.titleAddressCoords) {
+      const exifCoords = getExifMetadataCoords(job);
+      const distanceM =
+        exifCoords != null
+          ? Math.round(haversineMeters(job.titleAddressCoords, exifCoords))
+          : undefined;
+      const outcome = resolvePlacementAfterTextGeocode(job, config);
+      uploadPlacementLog('P3', jobId, job.file.name, `source agreement → ${outcome.kind}`, {
+        distanceM,
+        agreeRadiusM: config.sourceAgreementRadiusMeters,
+        textCoords: job.titleAddressCoords,
+        exifMetadata: exifCoords,
+      });
+      if (outcome.kind === 'held_source_conflict') {
+        const textCoords = job.titleAddressCoords;
+        this.registerSourceConflictGroup(job, textCoords, exifCoords!);
+        return true;
+      }
+      if (outcome.kind === 'missing_data') {
+        return false;
+      }
+      this.jobState.updateJob(
+        jobId,
+        buildChosenPlacementPatch(job, 'text', job.titleAddressCoords),
+      );
+      uploadPlacementLog('P4', jobId, job.file.name, 'placement = folder/file text', {
+        ...summarizeJobPlacement(this.jobState.findJob(jobId)!),
+      });
+      return false;
+    }
+
+    const withoutText = resolvePlacementWithoutText(job);
+    if (withoutText === 'exif') {
+      const exifCoords = getExifMetadataCoords(job)!;
+      this.jobState.updateJob(jobId, buildChosenPlacementPatch(job, 'exif', exifCoords));
+      uploadPlacementLog('P4', jobId, job.file.name, 'placement = EXIF (no text coords)', {
+        ...summarizeJobPlacement(this.jobState.findJob(jobId)!),
+      });
+      return false;
+    }
+    return false;
+  }
+
+  private async finalizePlacementForJobAsync(jobId: string): Promise<boolean> {
+    return this.finalizePlacementForJobSync(jobId);
+  }
+
+  registerSourceConflictGroup(job: UploadJob, textCoords: ExifCoords, exifCoords: ExifCoords): void {
+    const folderDisplayPath =
+      job.folderDisplayPath ?? deriveFolderDisplayPath(job.relativePath);
+    const candidates = buildSourceConflictCandidates(job, textCoords, exifCoords);
+    const queryKey = `source|${buildDisambiguationQueryKey(job.titleAddress ?? '', folderDisplayPath)}`;
+    this.registerDisambiguationGroup({
+      batchId: job.batchId,
+      queryKey,
+      folderDisplayPath,
+      titleAddress: job.titleAddress ?? '',
+      jobIds: [job.id],
+      candidates,
+      localityHint: deriveLocalityHint(job.relativePath),
+      disambiguationKind: 'source',
+    });
+  }
+
   registerDisambiguationGroup(input: {
     batchId: string;
     queryKey: string;
@@ -243,6 +347,7 @@ export class UploadLocationResolutionService {
     jobIds: string[];
     candidates: UploadAddressCandidate[];
     localityHint?: string;
+    disambiguationKind?: UploadDisambiguationGroup['disambiguationKind'];
   }): void {
     const existing = this._groups().find(
       (g) => g.batchId === input.batchId && g.queryKey === input.queryKey && isGroupBlocked(g),
@@ -258,6 +363,7 @@ export class UploadLocationResolutionService {
         localityHint: input.localityHint,
         candidates: input.candidates,
         jobIds: [],
+        disambiguationKind: input.disambiguationKind ?? 'geocode',
       });
 
     const jobIds = [...new Set([...group.jobIds, ...input.jobIds])];
@@ -266,6 +372,7 @@ export class UploadLocationResolutionService {
       jobIds,
       candidates: input.candidates,
       collapseStage: pickCollapseStage(input.candidates, jobIds.length),
+      disambiguationKind: input.disambiguationKind ?? group.disambiguationKind ?? 'geocode',
     };
     this.patchGroup(updated);
 
@@ -363,7 +470,11 @@ export class UploadLocationResolutionService {
     });
 
     const sampleJob = this.jobState.findJob(group.jobIds[0]);
-    const outcome = classifySearchHits(hits, config, sampleJob?.coords);
+    const outcome = classifySearchHits(
+      hits,
+      config,
+      sampleJob ? getExifMetadataCoords(sampleJob) : undefined,
+    );
 
     uploadAddressDebug('geocode', 'classifySearchHits outcome', {
       kind: outcome.kind,
@@ -395,18 +506,12 @@ export class UploadLocationResolutionService {
     return partial;
   }
 
-  private applyPartialToJobs(group: UploadGroupResolutionState): void {
+  /** SO/geocode incomplete — do not send to Issues until EXIF / free-text fallback runs (Branch A/B). */
+  private markGroupPartial(group: UploadGroupResolutionState): void {
     for (const jobId of group.jobIds) {
-      const job = this.jobState.findJob(jobId);
-      if (!job) {
-        continue;
-      }
-      const isDocument = job.file.type.startsWith('application/') || job.file.type === 'text/plain';
-      this.jobState.setPhase(jobId, 'missing_data');
       this.jobState.updateJob(jobId, {
         resolutionStatus: 'failed',
         pendingPartialLocation: true,
-        issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
         disambiguationGroupId: undefined,
       });
     }
@@ -435,7 +540,32 @@ export class UploadLocationResolutionService {
       if (!job) {
         continue;
       }
-      this.applyResolvedCandidate(jobId, job, candidate, group.folderDisplayPath);
+      if (group.disambiguationKind === 'source') {
+        if (candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID) {
+          const exifCoords = getExifMetadataCoords(job);
+          if (exifCoords) {
+            this.jobState.updateJob(
+              jobId,
+              buildChosenPlacementPatch(job, 'exif', exifCoords),
+            );
+          }
+        } else if (candidateId === SOURCE_CONFLICT_TEXT_CANDIDATE_ID && job.titleAddressCoords) {
+          this.jobState.updateJob(
+            jobId,
+            buildChosenPlacementPatch(job, 'text', job.titleAddressCoords),
+          );
+        }
+      } else {
+        this.applyGeocodeCandidateToJob(jobId, job, candidate, group.folderDisplayPath);
+        const j = this.jobState.findJob(jobId)!;
+        this.jobState.updateJob(
+          jobId,
+          buildChosenPlacementPatch(j, 'text', {
+            lat: candidate.lat,
+            lng: candidate.lng,
+          }),
+        );
+      }
       this.jobState.setPhase(jobId, 'queued');
     }
 
@@ -480,6 +610,7 @@ export class UploadLocationResolutionService {
     localityHint?: string;
     candidates: UploadAddressCandidate[];
     jobIds: string[];
+    disambiguationKind?: UploadDisambiguationGroup['disambiguationKind'];
   }): UploadDisambiguationGroup {
     const id = crypto.randomUUID();
     return {
@@ -494,27 +625,17 @@ export class UploadLocationResolutionService {
       resolutionStatus: 'pending',
       resolutionGateOpen: true,
       localityHint: input.localityHint,
+      disambiguationKind: input.disambiguationKind ?? 'geocode',
     };
   }
 
-  private applyResolvedCandidate(
+  private applyGeocodeCandidateToJob(
     jobId: string,
     job: UploadJob,
     candidate: UploadAddressCandidate,
     folderDisplayPath: string,
   ): void {
-    this.jobState.updateJob(jobId, {
-      coords: { lat: candidate.lat, lng: candidate.lng },
-      titleAddressCoords: { lat: candidate.lat, lng: candidate.lng },
-      titleAddress: candidate.addressLabel,
-      locationSourceUsed: job.titleAddressSource ?? 'file',
-      resolutionStatus: 'resolved' as UploadResolutionStatus,
-      issueKind: undefined,
-      addressCandidates: undefined,
-      disambiguationGroupId: undefined,
-      folderDisplayPath,
-      statusLabel: undefined,
-    });
+    this.jobState.updateJob(jobId, buildGeocodeCandidatePatch(candidate, folderDisplayPath));
   }
 
   private patchGroup(group: UploadDisambiguationGroup): void {

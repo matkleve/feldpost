@@ -40,7 +40,8 @@ UploadLocationConfigService
 | ----------------------------------- | --------- | -------------------------------------------------------------------------- |
 | `titleConfidenceThreshold`          | `number`  | Minimum confidence for a parsed text candidate to enter the geocoding path |
 | `disambiguationAutoAssignThreshold` | `number`  | Minimum probability for automatic candidate selection                      |
-| `exifAssistRadiusMeters`            | `number`  | Radius used when EXIF assists textual disambiguation                       |
+| `sourceAgreementRadiusMeters`       | `number`  | Text vs EXIF metadata auto-agree radius (source tray above this)           |
+| `exifAssistRadiusMeters`            | `number`  | Radius used when EXIF assists ambiguous **geocode** hits only              |
 | `folderHintRequireHighConfidence`   | `boolean` | Whether folder hints may only come from high-confidence segment matches    |
 | `folderHintUseRootFallback`         | `boolean` | Whether the root folder hint may be used as fallback only                  |
 | `filenameAlwaysOverridesFolder`     | `boolean` | Whether file-level text always overrides folder-level defaults             |
@@ -54,7 +55,8 @@ Source of truth: `apps/web/src/app/core/upload/upload-location-config.ts`.
 
 | Constant | Type | Default | Purpose |
 | --- | --- | --- | --- |
-| `exifAssistRadiusMeters` | `number` | `300` | EXIF assist radius for narrowing ambiguous geocode candidates. |
+| `sourceAgreementRadiusMeters` | `number` | `150` | Auto-agree text placement when EXIF metadata is within this distance; else `disambiguationKind: source` tray. |
+| `exifAssistRadiusMeters` | `number` | `300` | EXIF assist radius for narrowing ambiguous geocode candidates only (not source conflict). |
 | `minMeaningfulScore` | `number` | `0.55` | Minimum geocode score for a candidate to be considered meaningful. |
 | `minTopGap` | `number` | `0.1` | Minimum score gap between rank 1 and rank 2 for automatic selection. |
 | `titleConfidenceThreshold` | `number` | `0.8` | Minimum parser confidence needed to treat filename/folder text as resolvable location input. |

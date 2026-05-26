@@ -51,10 +51,27 @@ export class UploadResolverTrayComponent {
     return 'hidden';
   });
 
+  readonly resolverTitle = computed(() => {
+    const group = this.activeGroup();
+    if (group?.disambiguationKind === 'source') {
+      return this.t(
+        'upload.resolver.sourceConflict.title',
+        'Folder address or photo GPS?',
+      );
+    }
+    return this.t('upload.resolver.title', 'Which address is correct?');
+  });
+
   readonly groupedCandidates = computed(() => {
     const group = this.activeGroup();
     if (!group) {
       return [];
+    }
+    if (group.disambiguationKind === 'source') {
+      return group.candidates.map((candidate) => ({
+        label: candidate.addressLabel,
+        candidates: [candidate],
+      }));
     }
     if (group.collapseStage === 'city') {
       const byCity = new Map<string, UploadAddressCandidate[]>();

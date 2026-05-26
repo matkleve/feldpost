@@ -9,7 +9,7 @@ import type { UploadQueueService } from './upload-queue.service';
 import type { UploadService } from './upload.service';
 import type { ParsedExif } from './upload.service';
 import type { UploadLocationConfigService } from './upload-location-config.service';
-import { stripPlacementCoordsFromParsedExif } from './upload-location-inputs.helpers';
+import { getExifMetadataCoords } from './upload-location-precedence.helpers';
 
 type NewPrepareRouteDeps = {
   jobState: UploadJobStateService;
@@ -88,6 +88,10 @@ export async function prepareNewJobForUpload(
  *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Confidence gating: Only high-confidence addresses proceed to upload
  *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Conflict check: Run after address resolution
  */
+/**
+ * Phase 6 — placement decided in pre-resolve; upload bytes only when job.coords is set.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
+ */
 export async function routePreparedNewJob(
   deps: NewPrepareRouteDeps,
   jobId: string,
@@ -101,95 +105,39 @@ export async function routePreparedNewJob(
     ctx: PipelineContext,
   ) => Promise<void>,
 ): Promise<void> {
-  const isDocument = deps.uploadService.resolveMediaType(job.file) === 'document';
-  const config = deps.locationConfig.getConfig();
-  type TextSource = 'file' | 'folder';
-  deps.jobState.setPhase(jobId, 'extracting_title');
-
   if (!isAutoLocationEnabled(job)) {
     await uploadWithoutAutoLocation(deps, jobId, job, parsedExif, ctx, runUploadPhase);
     return;
   }
 
-  const parsed = deps.filenameParser.extractAddress(job.file.name);
-  const inheritedTitleAddress = job.titleAddress?.trim();
-  const titleConfidenceThreshold = config.titleConfidenceThreshold;
-  const parsedConfidenceScore = parsed ? (parsed.confidence === 'high' ? 1 : 0.5) : 0;
-
-  const fileCandidate = parsed
-    ? {
-        address: parsed.address,
-        source: 'file' as TextSource,
-        score: parsedConfidenceScore,
-      }
-    : undefined;
-  const folderCandidate = inheritedTitleAddress
-    ? {
-        address: inheritedTitleAddress,
-        source: 'folder' as TextSource,
-        score: 1,
-      }
-    : undefined;
-
-  const mergedCandidate = config.filenameAlwaysOverridesFolder
-    ? (fileCandidate ?? folderCandidate)
-    : (folderCandidate ?? fileCandidate);
-
-  if (mergedCandidate && mergedCandidate.score >= titleConfidenceThreshold) {
-    deps.jobState.updateJob(jobId, {
-      titleAddress: mergedCandidate.address,
-      titleAddressSource: mergedCandidate.source,
-      locationSourceUsed: mergedCandidate.source,
-      issueKind: undefined,
-    });
-    const routedJob = deps.jobState.findJob(jobId)!;
-    const placementCoords = routedJob.coords ?? routedJob.titleAddressCoords;
-    if (!placementCoords) {
-      if (routedJob.locationRequirementMode === 'optional') {
-        await uploadWithoutAutoLocation(deps, jobId, routedJob, parsedExif, ctx, runUploadPhase);
-        return;
-      }
-      deps.jobState.setPhase(jobId, 'missing_data');
-      deps.jobState.updateJob(jobId, {
-        locationSourceUsed: 'none',
-        issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
-        statusLabel: isDocument ? 'Choose location or project' : 'Missing location',
-      });
-      deps.queue.markDone(jobId);
-      ctx.emitMissingData({
-        jobId,
-        batchId: routedJob.batchId,
-        fileName: routedJob.file.name,
-        reason: 'no_gps_no_address',
-      });
-      ctx.emitBatchProgress(routedJob.batchId);
-      ctx.drainQueue();
+  const routedJob = deps.jobState.findJob(jobId)!;
+  if (routedJob.coords) {
+    const conflicted = await runConflictCheck(deps, jobId, ctx);
+    if (conflicted) {
       return;
     }
-    const conflicted = await runConflictCheck(deps, jobId, ctx);
-    if (conflicted) return;
-    await runUploadPhase(
-      jobId,
-      placementCoords,
-      stripPlacementCoordsFromParsedExif(parsedExif),
-      ctx,
-    );
+    await runUploadPhase(jobId, routedJob.coords, parsedExif, ctx);
     return;
   }
 
-  if (job.coords) {
-    deps.jobState.updateJob(jobId, { issueKind: undefined, locationSourceUsed: 'exif' });
-    const conflicted = await runConflictCheck(deps, jobId, ctx);
-    if (conflicted) return;
-    await runUploadPhase(jobId, job.coords, parsedExif, ctx);
+  if (routedJob.phase === 'missing_data' || routedJob.phase === 'awaiting_disambiguation') {
     return;
   }
 
+  routeJobToMissingData(deps, jobId, routedJob, ctx);
+}
+
+/** Branch A — no text coords and no EXIF metadata after geocode failure. */
+export function routeJobToMissingData(
+  deps: Pick<NewPrepareRouteDeps, 'jobState' | 'queue' | 'uploadService'>,
+  jobId: string,
+  job: UploadJob,
+  ctx: PipelineContext,
+): void {
+  const isDocument = deps.uploadService.resolveMediaType(job.file) === 'document';
   if (job.locationRequirementMode === 'optional') {
-    await uploadWithoutAutoLocation(deps, jobId, job, parsedExif, ctx, runUploadPhase);
     return;
   }
-
   deps.jobState.setPhase(jobId, 'missing_data');
   deps.jobState.updateJob(jobId, {
     locationSourceUsed: 'none',
@@ -216,11 +164,8 @@ async function prepareExifAndFile(
   const parsedExif = job.parsedExif ?? (await deps.uploadService.parseExif(job.file));
   deps.jobState.updateJob(jobId, { parsedExif });
 
-  if (parsedExif.coords && isAutoLocationEnabled(job)) {
-    deps.jobState.updateJob(jobId, {
-      coords: parsedExif.coords,
-      direction: parsedExif.direction,
-    });
+  if (parsedExif.direction != null && isAutoLocationEnabled(job)) {
+    deps.jobState.updateJob(jobId, { direction: parsedExif.direction });
   }
 
   if (deps.uploadService.isHeic(job.file)) {

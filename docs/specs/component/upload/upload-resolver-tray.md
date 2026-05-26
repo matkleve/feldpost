@@ -34,6 +34,14 @@
 
 Jobs in `awaiting_disambiguation` stay in **Queue** with label “Choose address”. Tray is the primary resolution path; row `candidate_select` is secondary.
 
+## `disambiguationKind` (tray copy and layout)
+
+| Kind | When | UI |
+| --- | --- | --- |
+| `geocode` (default) | Multiple forward-geocode hits | City-collapsed options |
+| `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | Two flat options (folder/file address vs photo GPS); title key `upload.resolver.sourceConflict.title` |
+| `context_distance` | Placement beyond org `contextDistanceMaxMeters` from nearest project GPS link | **Prompt B** — confirm + embedded location search |
+
 ## MVP scope (OD-7)
 
 Pre-upload gate only. No tray for `phase === 'complete'` or post-upload correction.
@@ -42,4 +50,5 @@ Pre-upload gate only. No tray for `phase === 'complete'` or post-upload correcti
 
 - [ ] Tray mounted inside `upload-shell` on map route
 - [ ] Active mode shows city-collapsed options and group picker when multiple groups
+- [ ] `source` kind shows two candidates without city collapse
 - [ ] Selecting a candidate applies to the whole group and re-queues jobs

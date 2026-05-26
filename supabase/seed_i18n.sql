@@ -23408,6 +23408,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.sourceConflict.title', 'Source conflict tray headline when text coords disagree with EXIF metadata', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverTitle')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Source conflict tray headline when text coords disagree with EXIF metadata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.sourceConflict.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Folder address or photo GPS?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.sourceConflict.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ordneradresse oder Foto-GPS?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.sourceConflict.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.resolver.groupSelect', 'Group dropdown aria context', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

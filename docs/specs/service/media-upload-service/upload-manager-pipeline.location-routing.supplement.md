@@ -26,48 +26,58 @@ Normative FSM and persistence matrix for **upload location routing**: panel mode
 | No project filter active | Toggle updates global signal only; no map entry required |
 | Clear project filter | Overrides map is **not** cleared |
 
-## Pre-upload resolution (resolver tray MVP)
+## Pre-upload resolution (phased pipeline, OD-4)
 
-Normative order before dedup and upload bytes (OD-4):
+Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is raw EXIF metadata (DB `exif_*`); **`job.coords`** is placement only (set via `applyChosenPlacementSource` / tray).
 
-1. `extracting_title` — merge filename/folder text  
-2. `resolving_location` — `GeocodingService.search()` when high-confidence text and no EXIF placement  
-3. `awaiting_disambiguation` — multi-hit; Queue lane, “Choose address” (OD-2); group-level gate (OD-3)  
-4. `hashing` / `dedup_check` — only when job not group-blocked  
-5. `conflict_check` → `uploading` when coords resolved  
+| Phase | Step | Notes |
+| --- | --- | --- |
+| 0 | `prepareExifAndFile` | Sets `parsedExif` only; **does not** set `job.coords` |
+| 1 | `mergeTitleCandidateOnJob` | High-confidence file/folder text → `titleAddress` |
+| 2 | Text geocode (SO or legacy) | Runs when high-confidence text exists **even if** EXIF metadata present |
+| 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray |
+| 4 | `applyChosenPlacementSource` | EXIF-only when geocode failed and no text coords (Branch B) |
+| 5 | Context distance gate | **Prompt B** — org `contextDistanceMaxMeters` ([search-tuning.defaults.md](../search/search-tuning.defaults.md)); **not implemented in Prompt A** |
+| 6 | `routePreparedNewJob` / upload | `finalCoords` from `job.coords`; `exif_*` from `parsedExif.coords` |
 
-**Gate:** A job may enter `uploading` only if it has no disambiguation group, or its group has `resolutionGateOpen === false`. Other groups in the same batch may upload in parallel.
+**Branch A (`missing_data`):** After Phase 2 failure when **no** `titleAddressCoords` and **no** `parsedExif.coords`. Phase 3 source-conflict **does not** run.
+
+**Gate:** Jobs in `awaiting_disambiguation` stay in Queue (“Choose address”) until group `resolutionGateOpen === false`. Dedup/upload only when placement is decided.
 
 **Post-upload:** Tray does not reopen for `complete` jobs (OD-7). Post-save forward is skipped when pre-upload coords exist on the job.
+
+### Distance radii (do not conflate)
+
+| Constant | Home | Default | Used when |
+| --- | --- | --- | --- |
+| `sourceAgreementRadiusMeters` | [upload-location-config.md](./upload-location-config.md) | **150 m** | Text coords vs EXIF metadata disagree |
+| `exifAssistRadiusMeters` | upload-location-config | **300 m** | Multiple geocode hits only (`classifySearchHits`) |
+| `contextDistanceMaxMeters` | Org Search Tuning | **120 km** | Phase 5 project consistency (**Prompt B**) |
+
+`clusterAssistWeight.project` is a **ranking weight**, not a distance radius.
+
+### SPEC GAP — Phase 5 reference points (Prompt B)
+
+Do **not** use `MediaClusterService` / `get_media_clusters` for per-upload distance checks. Use project media whose linked locations satisfy [`locationsWithGps`](../media-locations/media-locations.zoomable-map-contract.supplement.md) (`legacyMediaHasGps`). Adapter: `UploadProjectGpsReferenceAdapter` (document query before implementation).
 
 ## Job routing FSM (auto location ON)
 
 ```mermaid
-stateDiagram-v2
-  [*] --> extracting_title
-  extracting_title --> resolving_location: high_confidence text no EXIF
-  resolving_location --> awaiting_disambiguation: ambiguous search
-  resolving_location --> dedup_path: auto or failed search
-  extracting_title --> exif_upload: EXIF coords no text
-  extracting_title --> missing_data: no text no EXIF
-  extracting_title --> optional_upload: mode optional
-  awaiting_disambiguation --> dedup_path: user picks candidate
-  dedup_path --> conflict_check
-  text_upload --> conflict_check
-  exif_upload --> conflict_check
-  optional_upload --> complete_path
-  conflict_check --> uploading: no conflict
-  conflict_check --> awaiting_conflict: conflict candidate
-  missing_data --> [*]
+flowchart TD
+  P0[Phase0 prepareExif] --> P1[Phase1 mergeTitle]
+  P1 --> P2[Phase2 textGeocode]
+  P2 --> P3[Phase3 sourceAgreement]
+  P3 --> P4[Phase4 placement]
+  P4 --> P5[Phase5 contextGate PromptB]
+  P5 --> P6[Phase6 upload]
 ```
 
-**Text wins (file or folder):**
+**Text placement (file or folder):**
 
-- `locationSourceUsed` = `'file'` | `'folder'`
-- **Placement:** no GPS on upload (`manualCoords` undefined; `parsedExif.coords` stripped for `finalCoords`)
-- **Metadata:** `exif_latitude` / `exif_longitude` still populated from raw EXIF when present
+- `locationSourceUsed` = `'file'` | `'folder'`; **`job.coords`** = geocoded text
+- **`exif_latitude` / `exif_longitude`** still from `parsedExif.coords` when present (metadata ≠ placement)
 
-**EXIF placement fallback:** only when no high-confidence text candidate (per [upload-manager-pipeline.data.md](./upload-manager-pipeline.data.md) step 12 — placement fallback, not metadata loss).
+**EXIF placement:** When no text coords after Phase 2; `job.coords` = `parsedExif.coords`, `locationSourceUsed` = `'exif'`.
 
 ## Post-save enrichment FSM (required mode)
 

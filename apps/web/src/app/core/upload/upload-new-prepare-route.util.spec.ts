@@ -39,6 +39,8 @@ describe('routePreparedNewJob', () => {
       titleAddress: 'Denisgasse 12, Wien',
       titleAddressSource: 'folder',
       titleAddressCoords: { lat: 48.2082, lng: 16.3738 },
+      coords: { lat: 48.2082, lng: 16.3738 },
+      locationSourceUsed: 'folder',
     });
 
     const deps = createRouteDeps({
@@ -67,7 +69,10 @@ describe('routePreparedNewJob', () => {
 
 describe('routePreparedNewJob source precedence (positive branches)', () => {
   it('uses exif source when coordinates are already available', async () => {
-    let job = createJob({ coords: { lat: 48.2082, lng: 16.3738 } });
+    let job = createJob({
+      coords: { lat: 48.2082, lng: 16.3738 },
+      locationSourceUsed: 'exif',
+    });
     const deps = createRouteDeps({
       getJob: () => job,
       setJob: (next) => {
@@ -89,18 +94,19 @@ describe('routePreparedNewJob source precedence (positive branches)', () => {
     expect(runUploadPhase).toHaveBeenCalledOnce();
   });
 
-  it('prefers high-confidence file address over inherited folder hint', async () => {
+  it('uploads when placement coords were set in pre-resolve', async () => {
     let job = createJob({
-      titleAddress: 'Denisgasse 12, Wien',
-      titleAddressSource: 'folder',
+      titleAddress: 'Arsenalstrasse 3, Wien',
+      titleAddressSource: 'file',
       titleAddressCoords: { lat: 48.2082, lng: 16.3738 },
+      coords: { lat: 48.2082, lng: 16.3738 },
+      locationSourceUsed: 'file',
     });
     const deps = createRouteDeps({
       getJob: () => job,
       setJob: (next) => {
         job = next;
       },
-      parsedAddress: { address: 'Arsenalstrasse 3, Wien', confidence: 'high' },
     });
 
     const ctx = createPipelineContext();
@@ -110,15 +116,19 @@ describe('routePreparedNewJob source precedence (positive branches)', () => {
       deps as Parameters<typeof routePreparedNewJob>[0],
       job.id,
       job,
-      {},
+      { coords: { lat: 48.2, lng: 16.37 } },
       ctx,
       runUploadPhase,
     );
 
-    expect(job.titleAddress).toBe('Arsenalstrasse 3, Wien');
-    expect(job.titleAddressSource).toBe('file');
     expect(job.locationSourceUsed).toBe('file');
     expect(runUploadPhase).toHaveBeenCalledOnce();
+    expect(runUploadPhase).toHaveBeenCalledWith(
+      job.id,
+      job.coords,
+      expect.objectContaining({ coords: { lat: 48.2, lng: 16.37 } }),
+      expect.anything(),
+    );
   });
 });
 
@@ -257,11 +267,6 @@ function expectFolderFallbackResult(
   expect(job.locationSourceUsed).toBe('folder');
   expect(job.issueKind).toBeUndefined();
   expect(runUploadPhase).toHaveBeenCalledOnce();
-  expect(runUploadPhase).toHaveBeenCalledWith(
-    job.id,
-    job.titleAddressCoords,
-    expect.objectContaining({ coords: undefined }),
-    expect.anything(),
-  );
+  expect(runUploadPhase).toHaveBeenCalledWith(job.id, job.coords, expect.anything(), expect.anything());
   expect(ctx.emitMissingData).not.toHaveBeenCalled();
 }

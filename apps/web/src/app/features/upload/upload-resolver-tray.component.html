@@ -12,7 +12,7 @@
     <header class="upload-resolver-tray__header">
       <span class="upload-resolver-tray__alert material-icons" aria-hidden="true">error_outline</span>
       <h2 class="upload-resolver-tray__title">
-        {{ t('upload.resolver.title', 'Which address is correct?') }}
+        {{ resolverTitle() }}
       </h2>
       @if (pendingGroupCount() > 1) {
         <label class="upload-resolver-tray__group-picker">

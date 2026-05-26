@@ -1,4 +1,6 @@
 export interface UploadLocationConfig {
+  /** Text vs EXIF source auto-agree when both exist (meters). @see upload-manager-pipeline.location-routing.supplement.md */
+  sourceAgreementRadiusMeters: number;
   exifAssistRadiusMeters: number;
   minMeaningfulScore: number;
   minTopGap: number;
@@ -33,6 +35,7 @@ export interface UploadLocationConfig {
 }
 
 export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
+  sourceAgreementRadiusMeters: 150,
   exifAssistRadiusMeters: 300,
   minMeaningfulScore: 0.55,
   minTopGap: 0.1,

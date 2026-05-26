@@ -1,0 +1,144 @@
+/**
+ * Upload placement precedence: text geocode before EXIF placement; coordinate ownership.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
+ */
+
+import type { ExifCoords } from './upload.types';
+import type { UploadLocationConfig } from './upload-location-config';
+import type {
+  UploadAddressCandidate,
+  UploadJob,
+} from './upload-manager.types';
+
+export const SOURCE_CONFLICT_TEXT_CANDIDATE_ID = 'source-text';
+export const SOURCE_CONFLICT_EXIF_CANDIDATE_ID = 'source-exif';
+
+/** Raw EXIF GPS from parse — never use job.coords for assist/conflict before placement decision. */
+export function getExifMetadataCoords(job: UploadJob): ExifCoords | undefined {
+  return job.parsedExif?.coords;
+}
+
+export function haversineMeters(a: ExifCoords, b: ExifCoords): number {
+  const toRad = (deg: number): number => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const sinLat = Math.sin(dLat / 2);
+  const sinLng = Math.sin(dLng / 2);
+  const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLng * sinLng;
+  return 2 * 6371000 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+export function shouldHoldForSourceConflict(
+  textCoords: ExifCoords,
+  exifCoords: ExifCoords,
+  config: UploadLocationConfig,
+): boolean {
+  return haversineMeters(textCoords, exifCoords) > config.sourceAgreementRadiusMeters;
+}
+
+export type PlacementSourceKind = 'text' | 'exif';
+
+export type ApplyChosenPlacementPatch = Pick<
+  UploadJob,
+  'coords' | 'locationSourceUsed' | 'titleAddressCoords' | 'issueKind'
+>;
+
+/** Sole writer for job.coords during new-upload routing (Prompt A). */
+export function buildChosenPlacementPatch(
+  job: UploadJob,
+  source: PlacementSourceKind,
+  placementCoords: ExifCoords,
+): ApplyChosenPlacementPatch {
+  if (source === 'exif') {
+    return {
+      coords: placementCoords,
+      locationSourceUsed: 'exif',
+      titleAddressCoords: job.titleAddressCoords,
+      issueKind: undefined,
+    };
+  }
+  return {
+    coords: placementCoords,
+    locationSourceUsed: job.titleAddressSource ?? 'folder',
+    titleAddressCoords: placementCoords,
+    issueKind: undefined,
+  };
+}
+
+/** After forward geocode — stores text coords only; does not set job.coords. */
+export function buildGeocodeCandidatePatch(
+  candidate: UploadAddressCandidate,
+  folderDisplayPath: string,
+): Partial<UploadJob> {
+  return {
+    titleAddress: candidate.addressLabel,
+    titleAddressCoords: { lat: candidate.lat, lng: candidate.lng },
+    folderDisplayPath,
+    resolutionStatus: 'resolved',
+    issueKind: undefined,
+    addressCandidates: undefined,
+    disambiguationGroupId: undefined,
+    statusLabel: undefined,
+  };
+}
+
+export function buildSourceConflictCandidates(
+  job: UploadJob,
+  textCoords: ExifCoords,
+  exifCoords: ExifCoords,
+): UploadAddressCandidate[] {
+  const textLabel = job.titleAddress?.trim() || 'Folder or file address';
+  return [
+    {
+      id: SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
+      addressLabel: textLabel,
+      displayName: textLabel,
+      lat: textCoords.lat,
+      lng: textCoords.lng,
+      score: 1,
+    },
+    {
+      id: SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
+      addressLabel: 'GPS from photo',
+      displayName: 'GPS from photo',
+      lat: exifCoords.lat,
+      lng: exifCoords.lng,
+      score: 1,
+    },
+  ];
+}
+
+export type PlacementResolutionOutcome =
+  | { kind: 'placed' }
+  | { kind: 'held_source_conflict' }
+  | { kind: 'missing_data' };
+
+export function resolvePlacementAfterTextGeocode(
+  job: UploadJob,
+  config: UploadLocationConfig,
+): PlacementResolutionOutcome {
+  const textCoords = job.titleAddressCoords;
+  const exifCoords = getExifMetadataCoords(job);
+
+  if (!textCoords) {
+    return { kind: 'missing_data' };
+  }
+
+  if (!exifCoords) {
+    return { kind: 'placed' };
+  }
+
+  if (!shouldHoldForSourceConflict(textCoords, exifCoords, config)) {
+    return { kind: 'placed' };
+  }
+
+  return { kind: 'held_source_conflict' };
+}
+
+export function resolvePlacementWithoutText(
+  job: UploadJob,
+): 'exif' | 'missing_data' {
+  return getExifMetadataCoords(job) ? 'exif' : 'missing_data';
+}

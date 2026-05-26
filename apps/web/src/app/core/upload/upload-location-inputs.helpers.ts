@@ -6,16 +6,6 @@ export function usesTextPlacementSource(job: UploadJob): boolean {
   return job.locationSourceUsed === 'file' || job.locationSourceUsed === 'folder';
 }
 
-/** Strips GPS used for map placement while keeping EXIF metadata for insert columns. */
-export function stripPlacementCoordsFromParsedExif(
-  parsedExif: ParsedExif | undefined,
-): ParsedExif | undefined {
-  if (!parsedExif) {
-    return parsedExif;
-  }
-  return { ...parsedExif, coords: undefined };
-}
-
 export function resolveUploadPhaseInputs(args: {
   job: UploadJob;
   manualCoords: ParsedExif['coords'];
@@ -24,17 +14,7 @@ export function resolveUploadPhaseInputs(args: {
   const { job, manualCoords, parsedExif } = args;
 
   if (job.locationRequirementMode === 'optional') {
-    return {
-      coords: undefined,
-      parsedExif: stripPlacementCoordsFromParsedExif(parsedExif),
-    };
-  }
-
-  if (usesTextPlacementSource(job)) {
-    return {
-      coords: manualCoords,
-      parsedExif: stripPlacementCoordsFromParsedExif(parsedExif),
-    };
+    return { coords: undefined, parsedExif };
   }
 
   return { coords: manualCoords, parsedExif };

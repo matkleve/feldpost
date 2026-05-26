@@ -184,13 +184,13 @@ export class UploadService {
       return { error: 'Upload cancelled by user.' };
     }
 
-    const {
-      coords: exifCoords,
-      capturedAt,
-      direction,
-    } = parsedExif ?? (await this.parseExif(file));
+    const parsed =
+      parsedExif ?? (await this.parseExif(file));
+    const metadataExifCoords = parsed.coords;
+    const { capturedAt, direction } = parsed;
 
-    const finalCoords: ExifCoords | undefined = exifCoords ?? manualCoords;
+    /** Placement from job.coords (manualCoords); EXIF columns always from raw metadata. */
+    const finalCoords: ExifCoords | undefined = manualCoords;
 
     const mediaType = this.resolveMediaType(file);
     const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords, {
@@ -210,9 +210,9 @@ export class UploadService {
         relative_path: relativePath ?? null,
         file_size_bytes: file.size,
         captured_at: capturedAt ?? null,
-        exif_latitude: exifCoords?.lat ?? null,
-        exif_longitude: exifCoords?.lng ?? null,
-        exif_raw: parsedExif?.exifRaw ?? null,
+        exif_latitude: metadataExifCoords?.lat ?? null,
+        exif_longitude: metadataExifCoords?.lng ?? null,
+        exif_raw: parsed.exifRaw ?? null,
         location_status: locationStatus,
         gps_assignment_allowed: gpsAssignmentAllowed,
       })
