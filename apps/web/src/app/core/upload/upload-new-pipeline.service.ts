@@ -39,6 +39,7 @@ import { UploadEnrichmentService } from './upload-enrichment.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import type { PipelineContext } from './upload-manager.types';
+import { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import {
   prepareNewJobForUpload,
@@ -67,6 +68,7 @@ export class UploadNewPipelineService {
   private readonly previewGeneration = inject(MediaPreviewGenerationService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
   private readonly locationResolution = inject(UploadLocationResolutionService);
+  private readonly addressOrchestrator = inject(UploadAddressResolutionOrchestrator);
   private readonly supabase = inject(SupabaseService);
 
   /** Run the new-upload pipeline for a single job. */
@@ -86,6 +88,7 @@ export class UploadNewPipelineService {
       {
         ...this.prepareRouteDeps,
         locationResolution: this.locationResolution,
+        addressOrchestrator: this.addressOrchestrator,
       },
       jobId,
       prepared.parsedExif,

@@ -25,6 +25,7 @@ interface MediaItemRow {
     | 'pending'
     | 'resolved'
     | 'unresolvable'
+    | 'partial'
     | 'gps'
     | 'no_gps'
     | 'unresolved'
@@ -49,6 +50,7 @@ interface MediaGalleryDbRow {
     | 'pending'
     | 'resolved'
     | 'unresolvable'
+    | 'partial'
     | 'gps'
     | 'no_gps'
     | 'unresolved'
@@ -306,7 +308,10 @@ export class MediaQueryService {
   }
 
   private toMediaRecord(row: MediaItemRow): MediaRecord {
-    const unresolved = row.location_status === 'pending' || row.location_status === 'no_gps';
+    const unresolved =
+      row.location_status === 'pending' ||
+      row.location_status === 'no_gps' ||
+      row.location_status === 'partial';
 
     return {
       id: row.id,

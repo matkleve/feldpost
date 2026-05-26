@@ -61,6 +61,15 @@ export interface PhotonForwardSearchParams {
   bounded?: number;
 }
 
+export interface PhotonStructuredSearchParams {
+  street: string;
+  city?: string;
+  postcode?: string;
+  countryCode?: string;
+  limit?: number;
+  acceptLanguage?: string;
+}
+
 /**
  * Nominatim viewbox: west,north,east,south (minLon,maxLat,maxLon,minLat).
  * Photon bbox: minLon,minLat,maxLon,maxLat.
@@ -187,5 +196,30 @@ export function buildPhotonSearchUrl(
     url.searchParams.set("bbox", bbox);
   }
 
+  return url.toString();
+}
+
+/** Build Photon `/structured` URL for component-based forward geocoding. */
+export function buildPhotonStructuredUrl(
+  baseUrl: string,
+  params: PhotonStructuredSearchParams,
+): string {
+  const trimmedBase = baseUrl.replace(/\/+$/, "");
+  const url = new URL(`${trimmedBase}/structured`);
+  url.searchParams.set("street", params.street.trim());
+  if (params.city?.trim()) {
+    url.searchParams.set("city", params.city.trim());
+  }
+  if (params.postcode?.trim()) {
+    url.searchParams.set("postcode", params.postcode.trim());
+  }
+  if (params.countryCode?.trim()) {
+    url.searchParams.set(
+      "countrycode",
+      params.countryCode.trim().toLowerCase(),
+    );
+  }
+  url.searchParams.set("limit", String(params.limit ?? 5));
+  url.searchParams.set("lang", photonLangFromAcceptLanguage(params.acceptLanguage));
   return url.toString();
 }

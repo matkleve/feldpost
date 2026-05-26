@@ -7,9 +7,11 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { GeocodingService } from '../geocoding/geocoding.service';
+import { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
 import { UploadBatchService } from './upload-batch.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
+import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import {
   buildDisambiguationQueryKey,
   buildSearchQuery,
@@ -32,9 +34,12 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class UploadLocationResolutionService {
   private readonly geocoding = inject(GeocodingService);
+  private readonly orchestrator = inject(UploadAddressResolutionOrchestrator);
   private readonly jobState = inject(UploadJobStateService);
   private readonly batchService = inject(UploadBatchService);
   private readonly locationConfig = inject(UploadLocationConfigService);
+
+  private readonly geocodeInFlight = new Map<string, Promise<UploadGroupResolutionState>>();
 
   private readonly _groups = signal<UploadDisambiguationGroup[]>([]);
   private readonly _selectedGroupId = signal<string | null>(null);
@@ -88,15 +93,81 @@ export class UploadLocationResolutionService {
 
   clearBatch(batchId: string): void {
     this._groups.update((prev) => prev.filter((g) => g.batchId !== batchId));
+    this.orchestrator.clearBatch(batchId);
     this.syncBatchDisambiguationAggregates(batchId);
   }
 
   /**
-   * Run GeocodingService.search for a title address; returns whether job may proceed to dedup/route.
+   * Apply orchestrator cache for a job (Search Object pipeline).
+   */
+  async applyPreResolveFromOrchestrator(
+    jobId: string,
+  ): Promise<'continue' | 'held' | 'partial'> {
+    const job = this.jobState.findJob(jobId);
+    if (!job?.groupingKey) {
+      return 'continue';
+    }
+
+    let groupState = this.orchestrator.getGroupState(job.batchId, job.groupingKey);
+    if (!groupState) {
+      return 'continue';
+    }
+
+    if (groupState.status === 'needsGeocode') {
+      groupState = await this.ensureGeocodedGroup(job.batchId, job.groupingKey, groupState);
+    }
+
+    if (groupState.status === 'resolved' && groupState.candidate) {
+      for (const id of groupState.jobIds) {
+        const j = this.jobState.findJob(id);
+        if (!j) {
+          continue;
+        }
+        this.applyResolvedCandidate(id, j, groupState.candidate, groupState.folderDisplayPath);
+      }
+      return 'continue';
+    }
+
+    if (groupState.status === 'partial') {
+      this.applyPartialToJobs(groupState);
+      return 'partial';
+    }
+
+    if (groupState.status === 'ambiguous' && groupState.candidates?.length) {
+      this.registerDisambiguationGroup({
+        batchId: job.batchId,
+        queryKey: buildDisambiguationQueryKey(job.groupingKey),
+        folderDisplayPath: groupState.folderDisplayPath,
+        titleAddress: groupState.titleAddressLabel,
+        jobIds: groupState.jobIds,
+        candidates: groupState.candidates,
+        localityHint: deriveLocalityHint(job.relativePath),
+      });
+      return 'held';
+    }
+
+    this.applyPartialToJobs(groupState);
+    return 'partial';
+  }
+
+  /**
+   * Legacy free-text search when no grouping key on job.
    */
   async resolveJobTitleAddress(jobId: string): Promise<'continue' | 'held' | 'failed'> {
     const job = this.jobState.findJob(jobId);
-    if (!job?.titleAddress?.trim()) {
+    if (!job) {
+      return 'continue';
+    }
+
+    if (job.groupingKey) {
+      const orchestrated = await this.applyPreResolveFromOrchestrator(jobId);
+      if (orchestrated === 'held') {
+        return 'held';
+      }
+      return 'continue';
+    }
+
+    if (!job.titleAddress?.trim()) {
       return 'continue';
     }
 
@@ -125,7 +196,15 @@ export class UploadLocationResolutionService {
     }
 
     if (outcome.kind === 'ambiguous') {
-      this.holdJobForDisambiguation(job, folderDisplayPath, localityHint, outcome.candidates);
+      this.registerDisambiguationGroup({
+        batchId: job.batchId,
+        queryKey: buildDisambiguationQueryKey(job.titleAddress!, folderDisplayPath),
+        folderDisplayPath,
+        titleAddress: job.titleAddress!,
+        jobIds: [job.id],
+        candidates: outcome.candidates,
+        localityHint,
+      });
       return 'held';
     }
 
@@ -138,6 +217,162 @@ export class UploadLocationResolutionService {
     }
 
     return 'continue';
+  }
+
+  registerDisambiguationGroup(input: {
+    batchId: string;
+    queryKey: string;
+    folderDisplayPath: string;
+    titleAddress: string;
+    jobIds: string[];
+    candidates: UploadAddressCandidate[];
+    localityHint?: string;
+  }): void {
+    const existing = this._groups().find(
+      (g) => g.batchId === input.batchId && g.queryKey === input.queryKey && isGroupBlocked(g),
+    );
+
+    const group =
+      existing ??
+      this.createGroup({
+        batchId: input.batchId,
+        queryKey: input.queryKey,
+        folderDisplayPath: input.folderDisplayPath,
+        titleAddress: input.titleAddress,
+        localityHint: input.localityHint,
+        candidates: input.candidates,
+        jobIds: [],
+      });
+
+    const jobIds = [...new Set([...group.jobIds, ...input.jobIds])];
+    const updated: UploadDisambiguationGroup = {
+      ...group,
+      jobIds,
+      candidates: input.candidates,
+      collapseStage: pickCollapseStage(input.candidates, jobIds.length),
+    };
+    this.patchGroup(updated);
+
+    for (const jobId of input.jobIds) {
+      this.jobState.setPhase(jobId, 'awaiting_disambiguation');
+      this.jobState.updateJob(jobId, {
+        disambiguationGroupId: updated.id,
+        resolutionStatus: 'pending',
+        issueKind: 'address_ambiguous',
+        addressCandidates: input.candidates,
+        folderDisplayPath: input.folderDisplayPath,
+        statusLabel: 'Choose address',
+      });
+    }
+
+    if (!existing) {
+      this._disambiguationRequired$.next({
+        batchId: input.batchId,
+        groupId: updated.id,
+        queryKey: input.queryKey,
+        jobIds,
+        candidateCount: input.candidates.length,
+      });
+    }
+
+    this._selectedGroupId.set(updated.id);
+    this.syncBatchDisambiguationAggregates(input.batchId);
+  }
+
+  private async ensureGeocodedGroup(
+    batchId: string,
+    groupingKey: string,
+    initial: UploadGroupResolutionState,
+  ): Promise<UploadGroupResolutionState> {
+    const inflightKey = `${batchId}|${groupingKey}`;
+    const existing = this.geocodeInFlight.get(inflightKey);
+    if (existing) {
+      return existing;
+    }
+
+    const promise = this.runGeocodeForGroup(batchId, initial);
+    this.geocodeInFlight.set(inflightKey, promise);
+    try {
+      return await promise;
+    } finally {
+      this.geocodeInFlight.delete(inflightKey);
+    }
+  }
+
+  private async runGeocodeForGroup(
+    batchId: string,
+    group: UploadGroupResolutionState,
+  ): Promise<UploadGroupResolutionState> {
+    const so = group.searchObject;
+    const street = [so.street, so.houseNumber].filter(Boolean).join(' ').trim();
+    const countryCode = so.country?.trim().toLowerCase();
+    if (!street || !countryCode) {
+      const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
+      this.orchestrator.patchGroupState(batchId, partial);
+      return partial;
+    }
+
+    for (const jobId of group.jobIds) {
+      this.jobState.setPhase(jobId, 'resolving_location');
+    }
+
+    const config = this.locationConfig.getConfig();
+    const hits = await this.geocoding.searchStructuredForward(
+      {
+        street,
+        city: so.city ?? undefined,
+        postcode: so.postcode ?? undefined,
+        countryCode: countryCode ?? undefined,
+      },
+      {
+        limit: config.geocodeSearchDefaultLimit,
+        countrycodes: countryCode ? [countryCode] : undefined,
+      },
+    );
+
+    const sampleJob = this.jobState.findJob(group.jobIds[0]);
+    const outcome = classifySearchHits(hits, config, sampleJob?.coords);
+
+    if (outcome.kind === 'auto') {
+      const resolved: UploadGroupResolutionState = {
+        ...group,
+        status: 'resolved',
+        candidate: outcome.candidate,
+      };
+      this.orchestrator.patchGroupState(batchId, resolved);
+      return resolved;
+    }
+
+    if (outcome.kind === 'ambiguous') {
+      const ambiguous: UploadGroupResolutionState = {
+        ...group,
+        status: 'ambiguous',
+        candidates: outcome.candidates,
+      };
+      this.orchestrator.patchGroupState(batchId, ambiguous);
+      return ambiguous;
+    }
+
+    const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
+    this.orchestrator.patchGroupState(batchId, partial);
+    return partial;
+  }
+
+  private applyPartialToJobs(group: UploadGroupResolutionState): void {
+    for (const jobId of group.jobIds) {
+      const job = this.jobState.findJob(jobId);
+      if (!job) {
+        continue;
+      }
+      const isDocument = job.file.type.startsWith('application/') || job.file.type === 'text/plain';
+      this.jobState.setPhase(jobId, 'missing_data');
+      this.jobState.updateJob(jobId, {
+        resolutionStatus: 'failed',
+        pendingPartialLocation: true,
+        issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
+        disambiguationGroupId: undefined,
+      });
+    }
   }
 
   applyCandidateToGroup(groupId: string, candidateId: string): void {
@@ -198,62 +433,6 @@ export class UploadLocationResolutionService {
     }
     this.syncBatchDisambiguationAggregates(group.batchId);
     this.pickNextActiveGroup(group.batchId);
-  }
-
-  private holdJobForDisambiguation(
-    job: UploadJob,
-    folderDisplayPath: string,
-    localityHint: string | undefined,
-    candidates: UploadAddressCandidate[],
-  ): void {
-    const queryKey = buildDisambiguationQueryKey(job.titleAddress!, folderDisplayPath);
-    const existing = this._groups().find(
-      (g) => g.batchId === job.batchId && g.queryKey === queryKey && isGroupBlocked(g),
-    );
-
-    const group =
-      existing ??
-      this.createGroup({
-        batchId: job.batchId,
-        queryKey,
-        folderDisplayPath,
-        titleAddress: job.titleAddress!,
-        localityHint,
-        candidates,
-        jobIds: [],
-      });
-
-    const jobIds = group.jobIds.includes(job.id) ? group.jobIds : [...group.jobIds, job.id];
-    const updated: UploadDisambiguationGroup = {
-      ...group,
-      jobIds,
-      candidates,
-      collapseStage: pickCollapseStage(candidates, jobIds.length),
-    };
-    this.patchGroup(updated);
-
-    this.jobState.setPhase(job.id, 'awaiting_disambiguation');
-    this.jobState.updateJob(job.id, {
-      disambiguationGroupId: updated.id,
-      resolutionStatus: 'pending',
-      issueKind: 'address_ambiguous',
-      addressCandidates: candidates,
-      folderDisplayPath,
-      statusLabel: 'Choose address',
-    });
-
-    if (!existing) {
-      this._disambiguationRequired$.next({
-        batchId: job.batchId,
-        groupId: updated.id,
-        queryKey,
-        jobIds,
-        candidateCount: candidates.length,
-      });
-    }
-
-    this._selectedGroupId.set(updated.id);
-    this.syncBatchDisambiguationAggregates(job.batchId);
   }
 
   private createGroup(input: {

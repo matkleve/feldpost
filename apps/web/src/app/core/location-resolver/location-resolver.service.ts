@@ -22,7 +22,7 @@ import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
 
 const BATCH_SIZE = 50;
 
-export type CanonicalLocationStatus = 'pending' | 'resolved' | 'unresolvable';
+export type CanonicalLocationStatus = 'pending' | 'resolved' | 'unresolvable' | 'partial';
 
 export interface ResolvePendingMediaItemResult {
   status: CanonicalLocationStatus;
@@ -46,6 +46,7 @@ export class LocationResolverService {
       case 'pending':
       case 'resolved':
       case 'unresolvable':
+      case 'partial':
         return status;
       case 'gps':
         return 'resolved';

@@ -1,22 +1,24 @@
 # Upload location resolution service
 
 > **Parent:** [upload-manager-pipeline.md](./upload-manager-pipeline.md)  
+> **Pipeline:** [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md)  
 > **UI:** [upload-resolver-tray.md](../../component/upload/upload-resolver-tray.md)
 
 ## What it is
 
-`UploadLocationResolutionService` — pre-upload `GeocodingService.search()` disambiguation, grouping (OD-1), and group-level upload gate (OD-3).
+`UploadLocationResolutionService` — pre-upload resolution, disambiguation groups (OD-1), group-level upload gate (OD-3). Fed by [upload-address-resolution-pipeline](./upload-address-resolution-pipeline.md).
 
 ## Geocoding contract
 
-- **Multi-hit:** `GeocodingService.search()` only — never `forward()` for disambiguation paths.
+- **Complete SO:** `GeocodingService.searchStructuredForward()` (Photon structured → Nominatim fallback).
+- **Legacy fallback:** `GeocodingService.search()` when no SO on job.
 - **Locality (OD-5):** Optional `localityHint` from folder path segments only; no unconditional `, Wien, Österreich` append.
 
 ## Grouping (OD-1)
 
-`queryKey = normalize(titleAddress) + '|' + folderDisplayPath` where `folderDisplayPath` is the parent path of `relativePath` (no filename).
+`queryKey = grouping_key` from Search Object (`country|state|postcode|city|street|houseNumber` normalized).
 
-Same street in different folder trees → separate groups.
+`registerDisambiguationGroup` attaches **all** `jobIds` sharing the key when geocode is ambiguous.
 
 ## Gate (OD-3)
 
@@ -39,7 +41,9 @@ MVP excludes tray for uploaded rows. Post-save forward skipped when `coords` or 
 
 | Method | Purpose |
 | --- | --- |
-| `resolveJobTitleAddress` | Search + classify + auto-assign or hold |
+| `resolveJobTitleAddress` | Cache / SO geocode + classify + auto-assign or hold |
+| `registerDisambiguationGroup` | Tray group with full `jobIds[]` |
+| `resolveGroupingKey` | One structured geocode per `grouping_key` |
 | `applyCandidateToGroup` | User pick; closes gate; sets job coords; `phase → queued` |
 | `deferGroup` | Close gate; jobs → `missing_data` |
 | `isJobBlockedByGate` | Queue drain filter |

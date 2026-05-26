@@ -23,13 +23,15 @@ export interface UploadManagerSubmitDeps {
   loadProjects: () => Promise<ReadonlyArray<ProjectListItem>>;
   createProject: (name: string) => Promise<string | undefined>;
   queuedLabel: string;
+  /** Runs Search Object pipeline after jobs are enqueued. */
+  classifyBatch?: (batchId: string) => Promise<void>;
 }
 
-export function submitUploadManagerFiles(
+export async function submitUploadManagerFiles(
   files: File[],
   options: SubmitOptions | undefined,
   deps: UploadManagerSubmitDeps,
-): string {
+): Promise<string> {
   const batchId = crypto.randomUUID();
   const label = options?.batchLabel ?? `${files.length} file${files.length === 1 ? '' : 's'}`;
 
@@ -62,6 +64,9 @@ export function submitUploadManagerFiles(
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
+  if (deps.classifyBatch) {
+    await deps.classifyBatch(batchId);
+  }
   deps.drainQueue();
 
   return batchId;
@@ -136,6 +141,9 @@ export async function submitUploadManagerFolder(
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
+  if (deps.classifyBatch) {
+    await deps.classifyBatch(batchId);
+  }
   deps.drainQueue();
 
   return batchId;
@@ -188,6 +196,9 @@ export async function submitUploadManagerWebkitFolder(
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
+  if (deps.classifyBatch) {
+    await deps.classifyBatch(batchId);
+  }
   deps.drainQueue();
 
   return batchId;

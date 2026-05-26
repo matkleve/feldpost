@@ -9,6 +9,11 @@ import type {
   UploadAddressCandidate,
   UploadDisambiguationCollapseStage,
 } from './upload-manager.types';
+import {
+  formatSearchObjectLabel,
+  isSearchObjectComplete,
+} from '../location-path-parser/upload-search-object.builder';
+import type { UploadLocationRowHit, UploadSearchObject } from './upload-address-resolution.types';
 import type { ExifCoords } from './upload.service';
 
 export type ClassifySearchOutcome =
@@ -38,12 +43,72 @@ export function normalizeAddressForGrouping(address: string): string {
     .replace(/\s+/g, ' ');
 }
 
-/** Stable group key: normalized address + folder prefix. */
+/**
+ * Stable tray group key. Prefer Search Object `groupingKey`; legacy fallback uses title + folder.
+ * @see docs/specs/service/media-upload-service/upload-search-object.md
+ */
 export function buildDisambiguationQueryKey(
-  titleAddress: string,
-  folderDisplayPath: string,
+  groupingKeyOrTitle: string,
+  folderDisplayPath?: string,
 ): string {
-  return `${normalizeAddressForGrouping(titleAddress)}|${folderDisplayPath.toLowerCase()}`;
+  const key = groupingKeyOrTitle.trim().toLowerCase();
+  if (!folderDisplayPath?.trim()) {
+    return key;
+  }
+  return `${normalizeAddressForGrouping(groupingKeyOrTitle)}|${folderDisplayPath.toLowerCase()}`;
+}
+
+export function searchObjectToRpcParams(so: UploadSearchObject): Record<string, string | null> {
+  return {
+    p_street: so.street,
+    p_house_number: so.houseNumber,
+    p_staircase: so.staircase,
+    p_door: null,
+    p_postcode: so.postcode,
+    p_city: so.city,
+    p_district: null,
+    p_country: so.country,
+  };
+}
+
+export function locationRowToCandidate(row: UploadLocationRowHit): UploadAddressCandidate {
+  const lat = Number(row.latitude);
+  const lng = Number(row.longitude);
+  const street = [row.street, row.house_number].filter(Boolean).join(' ');
+  const city =
+    row.postcode && row.city ? `${row.postcode} ${row.city}` : (row.city ?? row.postcode ?? '');
+  const addressLabel = row.address_label?.trim() || (street && city ? `${street}, ${city}` : street || city || 'Address');
+  return {
+    id: `db-${row.id}`,
+    addressLabel,
+    lat,
+    lng,
+    city: row.city,
+    postcode: row.postcode,
+    score: 1,
+  };
+}
+
+export function buildGroupPresentation(so: UploadSearchObject): {
+  folderDisplayPath: string;
+  titleAddressLabel: string;
+} {
+  return {
+    folderDisplayPath: deriveFolderDisplayPath(so.relativePath),
+    titleAddressLabel: formatSearchObjectLabel(so),
+  };
+}
+
+export function evaluateLocalResolution(
+  so: UploadSearchObject,
+): 'complete' | 'incomplete' | 'postcode_blocked' {
+  if (so.postcodeCandidates.length > 1 && !so.city) {
+    return 'postcode_blocked';
+  }
+  if (!isSearchObjectComplete(so)) {
+    return 'incomplete';
+  }
+  return 'complete';
 }
 
 /**

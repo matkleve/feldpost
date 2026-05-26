@@ -1,9 +1,10 @@
 /**
- * Pre-upload title extraction + GeocodingService.search disambiguation (OD-4: before dedup).
+ * Pre-upload title extraction + address resolution (OD-4: before dedup).
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
  */
 
 import type { FilenameParserService } from '../filename-parser/filename-parser.service';
+import type { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
 import type { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { hashAndCheckDedupForNewJob } from './upload-new-prepare-route.util';
 import type { UploadJobStateService } from './upload-job-state.service';
@@ -20,6 +21,7 @@ export type PreResolveDeps = {
   filenameParser: FilenameParserService;
   locationConfig: UploadLocationConfigService;
   locationResolution: UploadLocationResolutionService;
+  addressOrchestrator: UploadAddressResolutionOrchestrator;
 };
 
 export type PreResolveOutcome = 'continue' | 'held' | 'dedup_skip';
@@ -28,7 +30,7 @@ function isAutoLocationEnabled(job: UploadJob): boolean {
   return job.locationRequirementMode !== 'optional';
 }
 
-/** Merge filename/folder title candidates onto the job (same rules as routePreparedNewJob). */
+/** Merge filename/folder title candidates onto the job (legacy fallback). */
 export function mergeTitleCandidateOnJob(
   deps: Pick<PreResolveDeps, 'jobState' | 'filenameParser' | 'locationConfig'>,
   jobId: string,
@@ -76,7 +78,7 @@ export function mergeTitleCandidateOnJob(
 }
 
 /**
- * Extract title, pre-upload search when needed, then dedup (OD-4).
+ * Extract title, pre-upload resolution when needed, then dedup (OD-4).
  */
 export async function runPreUploadLocationResolve(
   deps: PreResolveDeps,
@@ -105,6 +107,30 @@ export async function runPreUploadLocationResolve(
   }
 
   deps.jobState.setPhase(jobId, 'extracting_title');
+
+  if (job.groupingKey) {
+    const orchestrated = await deps.locationResolution.applyPreResolveFromOrchestrator(jobId);
+    if (orchestrated === 'held') {
+      deps.queue.markDone(jobId);
+      ctx.emitBatchProgress(job.batchId);
+      ctx.drainQueue();
+      return 'held';
+    }
+    if (orchestrated === 'partial') {
+      const deduped = await hashAndCheckDedupForNewJob(
+        deps,
+        jobId,
+        deps.jobState.findJob(jobId)!,
+        parsedExif,
+        ctx,
+      );
+      return deduped ? 'dedup_skip' : 'continue';
+    }
+    const current = deps.jobState.findJob(jobId)!;
+    const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
+    return deduped ? 'dedup_skip' : 'continue';
+  }
+
   const { titleAddress, highConfidence } = mergeTitleCandidateOnJob(deps, jobId, job);
 
   if (!highConfidence || !titleAddress?.trim()) {

@@ -219,8 +219,14 @@ export function resolveUploadMediaType(mimeType: string): MediaType {
 export function resolveUploadLocationStatus(
   mediaType: MediaType,
   coords?: ExifCoords,
+  options?: { pendingPartial?: boolean },
 ): LocationStatus {
   void mediaType;
-  void coords;
+  if (coords) {
+    return 'resolved';
+  }
+  if (options?.pendingPartial) {
+    return 'partial';
+  }
   return 'pending';
 }

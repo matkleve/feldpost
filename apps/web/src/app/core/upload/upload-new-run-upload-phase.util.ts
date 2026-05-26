@@ -146,6 +146,7 @@ async function runUploadCall(args: {
       job.projectId,
       abortSignal,
       job.relativePath,
+      { pendingPartialLocation: job.pendingPartialLocation },
     ),
     timeoutMs,
     'Upload timed out. Please retry.',

@@ -22,7 +22,9 @@
     "supabase:cli:version": "node scripts/run-supabase-cli.mjs --version",
     "supabase:db:push": "node scripts/run-supabase-cli.mjs db push",
     "supabase:migration:list": "node scripts/run-supabase-cli.mjs migration list",
-    "diagnose:geocoder": "node --experimental-strip-types scripts/diagnose-geocoder.ts"
+    "diagnose:geocoder": "node --experimental-strip-types scripts/diagnose-geocoder.ts",
+    "geo:build-gemeinden": "node scripts/build-at-gemeinden-bev.mjs",
+    "geo:build-gemeinden:fast": "node scripts/build-at-gemeinden-bev.mjs --source=github"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

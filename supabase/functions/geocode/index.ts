@@ -12,6 +12,7 @@
 
 import {
   buildPhotonSearchUrl,
+  buildPhotonStructuredUrl,
   photonGeoJsonToNominatimSearch,
   type PhotonGeoJsonResponse,
 } from "./photon-to-nominatim.ts";
@@ -98,6 +99,8 @@ type GeocodeBody = {
   addressLayer?: boolean;
   street?: string;
   city?: string;
+  postcode?: string;
+  countryCode?: string;
 };
 
 function buildNominatimSearchUrl(body: GeocodeBody): string {
@@ -185,12 +188,13 @@ Deno.serve(async (req: Request) => {
   if (
     action !== "reverse" &&
     action !== "forward" &&
-    action !== "structured-search"
+    action !== "structured-search" &&
+    action !== "structured-forward"
   ) {
     return new Response(
       JSON.stringify({
         error:
-          'Invalid action. Use "reverse", "forward", or "structured-search".',
+          'Invalid action. Use "reverse", "forward", "structured-search", or "structured-forward".',
       }),
       {
         status: 400,
@@ -202,7 +206,7 @@ Deno.serve(async (req: Request) => {
   const acceptLanguage = acceptLanguageHeader(body);
   const usePhotonForward =
     GEOCODER_FORWARD_URL.length > 0 &&
-    (action === "forward");
+    (action === "forward" || action === "structured-forward");
 
   let upstreamUrl: string;
   let upstreamKind: "nominatim" | "photon";
@@ -232,14 +236,16 @@ Deno.serve(async (req: Request) => {
     upstreamUrl =
       `${NOMINATIM_REVERSE_URL}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&format=json&addressdetails=1`;
     upstreamKind = "nominatim";
-  } else if (action === "structured-search") {
+  } else if (action === "structured-search" || action === "structured-forward") {
     const street =
       typeof body.street === "string" ? body.street.trim() : "";
     const city = typeof body.city === "string" ? body.city.trim() : "";
-    if (!street || !city) {
+    const postcode =
+      typeof body.postcode === "string" ? body.postcode.trim() : "";
+    if (!street) {
       return new Response(
         JSON.stringify({
-          error: "street and city are required for structured-search",
+          error: "street is required for structured geocoding",
         }),
         {
           status: 400,
@@ -247,9 +253,35 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    upstreamUrl =
-      `${NOMINATIM_SEARCH_URL}?street=${encodeURIComponent(street)}&city=${encodeURIComponent(city)}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}`;
-    upstreamKind = "nominatim";
+    if (action === "structured-forward" && usePhotonForward) {
+      upstreamUrl = buildPhotonStructuredUrl(GEOCODER_FORWARD_URL, {
+        street,
+        city: city || undefined,
+        postcode: postcode || undefined,
+        countryCode:
+          typeof body.countryCode === "string"
+            ? body.countryCode
+            : body.countrycodes?.split(",")[0],
+        limit: body.limit,
+        acceptLanguage: body.acceptLanguage,
+      });
+      upstreamKind = "photon";
+    } else {
+      if (!city) {
+        return new Response(
+          JSON.stringify({
+            error: "city is required for structured-search when Photon is unavailable",
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+          },
+        );
+      }
+      upstreamUrl =
+        `${NOMINATIM_SEARCH_URL}?street=${encodeURIComponent(street)}&city=${encodeURIComponent(city)}&format=json&limit=${encodeURIComponent(String(body.limit ?? 5))}&addressdetails=1${body.countrycodes ? `&countrycodes=${encodeURIComponent(body.countrycodes)}` : ""}${postcode ? `&postalcode=${encodeURIComponent(postcode)}` : ""}`;
+      upstreamKind = "nominatim";
+    }
   } else {
     const { q } = body;
     if (typeof q !== "string" || !q.trim()) {

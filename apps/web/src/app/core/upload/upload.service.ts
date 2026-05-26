@@ -127,6 +127,7 @@ export class UploadService {
     projectId?: string,
     abortSignal?: AbortSignal,
     relativePath?: string,
+    options?: { pendingPartialLocation?: boolean },
   ): Promise<UploadResult> {
     const user = this.auth.user();
     if (!user) {
@@ -192,7 +193,9 @@ export class UploadService {
     const finalCoords: ExifCoords | undefined = exifCoords ?? manualCoords;
 
     const mediaType = this.resolveMediaType(file);
-    const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords);
+    const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords, {
+      pendingPartial: options?.pendingPartialLocation,
+    });
     const gpsAssignmentAllowed = mediaType !== 'document' || finalCoords != null;
 
     const mediaInsertQuery = this.supabase.client
