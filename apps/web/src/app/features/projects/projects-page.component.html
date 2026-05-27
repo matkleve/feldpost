@@ -26,6 +26,10 @@
       (statusFilterChange)="onStatusFilterChange($event)"
     />
 
+    @if (currentProjectId(); as pid) {
+      <app-project-location-picker [projectId]="pid" />
+    }
+
     @if (loading()) {
       <section
         class="projects-loading"

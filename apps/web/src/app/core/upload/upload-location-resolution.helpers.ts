@@ -11,8 +11,11 @@ import type {
 } from './upload-manager.types';
 import {
   formatSearchObjectLabel,
-  isSearchObjectComplete,
 } from '../location-path-parser/upload-search-object.builder';
+import {
+  classifySearchObjectCompleteness,
+  type ProjectGeocodeCentroid,
+} from '../location-path-parser/upload-search-object.completeness.helpers';
 import type { UploadLocationRowHit, UploadSearchObject } from './upload-address-resolution.types';
 import type { ExifCoords } from './upload.service';
 
@@ -99,16 +102,26 @@ export function buildGroupPresentation(so: UploadSearchObject): {
   };
 }
 
+export type LocalResolutionGate =
+  | 'branch_a'
+  | 'branch_b'
+  | 'branch_c'
+  | 'metadata_only'
+  | 'postcode_blocked'
+  | 'incomplete';
+
 export function evaluateLocalResolution(
   so: UploadSearchObject,
-): 'complete' | 'incomplete' | 'postcode_blocked' {
+  projectCentroid?: ProjectGeocodeCentroid | null,
+): LocalResolutionGate {
   if (so.postcodeCandidates.length > 1 && !so.city) {
     return 'postcode_blocked';
   }
-  if (!isSearchObjectComplete(so)) {
+  const branch = classifySearchObjectCompleteness(so, projectCentroid);
+  if (branch === 'incomplete') {
     return 'incomplete';
   }
-  return 'complete';
+  return branch;
 }
 
 /**

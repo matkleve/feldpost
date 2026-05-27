@@ -24152,37 +24152,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.resolver.options', 'Options listbox label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Options listbox label', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.options'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Address options', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.options'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Adressoptionen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.options'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.resolver.filesCount', 'Deprecated alias for mediaCount', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

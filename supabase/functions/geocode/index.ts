@@ -101,6 +101,10 @@ type GeocodeBody = {
   city?: string;
   postcode?: string;
   countryCode?: string;
+  lat?: number;
+  lng?: number;
+  lon?: number;
+  zoom?: number;
 };
 
 function buildNominatimSearchUrl(body: GeocodeBody): string {
@@ -236,7 +240,12 @@ Deno.serve(async (req: Request) => {
     upstreamUrl =
       `${NOMINATIM_REVERSE_URL}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&format=json&addressdetails=1`;
     upstreamKind = "nominatim";
-  } else if (action === "structured-search" || action === "structured-forward") {
+  } else if (
+    action === "structured-search" ||
+    action === "structured-forward" ||
+    action === "structured-forward-bias" ||
+    action === "street-house-numbers"
+  ) {
     const street =
       typeof body.street === "string" ? body.street.trim() : "";
     const city = typeof body.city === "string" ? body.city.trim() : "";
@@ -253,7 +262,19 @@ Deno.serve(async (req: Request) => {
         },
       );
     }
-    if (action === "structured-forward" && usePhotonForward) {
+    const isBias = action === "structured-forward-bias";
+    const isHouseEnum = action === "street-house-numbers";
+    const usePhotonStructured =
+      usePhotonForward &&
+      (action === "structured-forward" || isBias || isHouseEnum);
+    if (usePhotonStructured) {
+      const lat = typeof body.lat === "number" ? body.lat : undefined;
+      const lon =
+        typeof body.lon === "number"
+          ? body.lon
+          : typeof body.lng === "number"
+            ? body.lng
+            : undefined;
       upstreamUrl = buildPhotonStructuredUrl(GEOCODER_FORWARD_URL, {
         street,
         city: city || undefined,
@@ -262,11 +283,25 @@ Deno.serve(async (req: Request) => {
           typeof body.countryCode === "string"
             ? body.countryCode
             : body.countrycodes?.split(",")[0],
-        limit: body.limit,
+        limit: isHouseEnum ? (body.limit ?? 50) : body.limit,
         acceptLanguage: body.acceptLanguage,
+        lat: isBias ? lat : isHouseEnum ? lat : undefined,
+        lon: isBias ? lon : isHouseEnum ? lon : undefined,
+        zoom: isBias || isHouseEnum ? body.zoom : undefined,
       });
       upstreamKind = "photon";
     } else {
+      if (!city && (isBias || isHouseEnum)) {
+        return new Response(
+          JSON.stringify({
+            error: "Photon bias/house-number actions require GEOCODER_FORWARD_URL",
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+          },
+        );
+      }
       if (!city) {
         return new Response(
           JSON.stringify({

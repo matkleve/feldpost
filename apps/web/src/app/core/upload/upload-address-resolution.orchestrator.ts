@@ -10,6 +10,7 @@ import {
   expandPostcodeOnSearchObject,
 } from '../location-path-parser/upload-search-object.builder';
 import { UploadLocationLookupAdapter } from './adapters/upload-location-lookup.adapter';
+import { UploadProjectLocationsAdapter } from './adapters/upload-project-locations.adapter';
 import {
   buildGroupPresentation,
   evaluateLocalResolution,
@@ -30,6 +31,7 @@ import {
 export class UploadAddressResolutionOrchestrator {
   private readonly geoData = inject(LocalGeoDataAdapter);
   private readonly lookup = inject(UploadLocationLookupAdapter);
+  private readonly projectLocations = inject(UploadProjectLocationsAdapter);
   private readonly jobState = inject(UploadJobStateService);
 
   private readonly batchCaches = new Map<string, Map<string, UploadGroupResolutionState>>();
@@ -102,19 +104,27 @@ export class UploadAddressResolutionOrchestrator {
     }
 
     const cache = new Map<string, UploadGroupResolutionState>();
+    const sampleJob = jobs[0];
+    const projectId = sampleJob?.projectId;
+    let projectCentroid = null as ReturnType<UploadProjectLocationsAdapter['pickCentroid']>;
+    if (projectId) {
+      const rows = await this.projectLocations.listProjectLocations(projectId);
+      projectCentroid = this.projectLocations.pickCentroid(rows);
+    }
 
     for (const [groupingKey, { so, jobIds }] of byKey) {
       const { folderDisplayPath, titleAddressLabel } = buildGroupPresentation(so);
-      const local = evaluateLocalResolution(so);
+      const local = evaluateLocalResolution(so, projectCentroid);
 
       uploadAddressDebug('orchestrator', 'group evaluate', {
         groupingKey,
         jobIds,
         localGate: local,
+        projectCentroid,
         searchObject: summarizeSearchObject(so),
       });
 
-      if (local === 'incomplete' || local === 'postcode_blocked') {
+      if (local === 'postcode_blocked' || local === 'incomplete') {
         const partialState: UploadGroupResolutionState = {
           status: 'partial',
           groupingKey,
@@ -122,9 +132,40 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
+          geocodeBranch: local === 'incomplete' ? undefined : undefined,
         };
         cache.set(groupingKey, partialState);
         uploadAddressDebug('orchestrator', 'group → partial (local gate)', summarizeGroupState(partialState));
+        continue;
+      }
+
+      if (local === 'branch_c') {
+        const trayState: UploadGroupResolutionState = {
+          status: 'needsTray',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: 'branch_c',
+          trayStep: '1a',
+        };
+        cache.set(groupingKey, trayState);
+        uploadAddressDebug('orchestrator', 'group → needsTray 1a (branch C)', summarizeGroupState(trayState));
+        continue;
+      }
+
+      if (local === 'metadata_only') {
+        const metaState: UploadGroupResolutionState = {
+          status: 'partial',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: 'metadata_only',
+        };
+        cache.set(groupingKey, metaState);
         continue;
       }
 
@@ -137,6 +178,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
+          geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
           candidate: locationRowToCandidate(row),
         };
         cache.set(groupingKey, resolvedState);
@@ -145,12 +187,14 @@ export class UploadAddressResolutionOrchestrator {
       }
 
       const needsGeocodeState: UploadGroupResolutionState = {
-        status: 'needsGeocode',
+        status: local === 'branch_b' ? 'needsGeocode' : 'needsGeocode',
         groupingKey,
         jobIds,
         searchObject: so,
         folderDisplayPath,
         titleAddressLabel,
+        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+        projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
       };
       cache.set(groupingKey, needsGeocodeState);
       uploadAddressDebug('orchestrator', 'group → needsGeocode', summarizeGroupState(needsGeocodeState));

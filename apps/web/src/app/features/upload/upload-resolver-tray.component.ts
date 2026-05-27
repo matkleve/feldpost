@@ -81,6 +81,9 @@ export class UploadResolverTrayComponent {
   /** Explicit carousel fraction so total updates even when page index is unchanged (e.g. 1/3 → 1/4). */
   private readonly carouselDisplay = signal({ current: 1, total: 1 });
   private readonly selectedCandidateId = signal<string | null>(null);
+  readonly cityDraft = signal('');
+  readonly manualHouseDraft = signal('');
+  readonly manualHouseValidation = signal<'idle' | 'valid' | 'warn' | 'invalid'>('idle');
   readonly mediaMenuOpen = signal(false);
   readonly mediaMenuAnchor = signal<HTMLElement | null>(null);
 
@@ -180,6 +183,21 @@ export class UploadResolverTrayComponent {
     return null;
   });
 
+  readonly isCityStep = computed(() => {
+    const group = this.activeGroup();
+    return group?.disambiguationKind === 'city_step' || group?.trayStep === '1a';
+  });
+
+  readonly isHouseStep = computed(() => {
+    const group = this.activeGroup();
+    return group?.disambiguationKind === 'house_step' || group?.trayStep === '1b';
+  });
+
+  readonly houseStepActive = computed(() => {
+    const group = this.activeGroup();
+    return this.isHouseStep() && group?.step1bGate === 'active';
+  });
+
   readonly resolverQuestion = computed(() => {
     const group = this.activeGroup();
     if (!group) {
@@ -189,7 +207,12 @@ export class UploadResolverTrayComponent {
     const fallbacks: Record<string, string> = {
       'upload.resolver.question.source': 'Use the folder address or the photo GPS?',
       'upload.resolver.question.contextDistance': 'Is this photo in the right project area?',
-      'upload.resolver.question.city': 'Which city is {street} in?',
+      'upload.resolver.question.cityStep': 'Which city is {street} in?',
+      'upload.resolver.question.houseStep': 'No house number for {street} — what would you like?',
+      'upload.resolver.question.projectAddressA':
+        'Files without their own address found. Use project location or resolve yourself?',
+      'upload.resolver.question.projectAddressB':
+        'Use project address or file/folder address?',
       'upload.resolver.question.door': "What's the door number for {street}?",
       'upload.resolver.question.address': 'Which {address} do you mean?',
     };
@@ -205,6 +228,12 @@ export class UploadResolverTrayComponent {
     const group = this.activeGroup();
     if (!group) {
       return [];
+    }
+    if (this.isHouseStep() && group.houseNumberCandidates?.length) {
+      return group.houseNumberCandidates.map((candidate) => ({
+        label: candidate.addressLabel,
+        candidates: [candidate],
+      }));
     }
     if (group.disambiguationKind === 'source') {
       return group.candidates.map((candidate) => ({
@@ -357,11 +386,35 @@ export class UploadResolverTrayComponent {
   }
 
   confirmSelection(): void {
+    const group = this.activeGroup();
+    if (group && this.isCityStep()) {
+      void this.onConfirmCity();
+      return;
+    }
     const candidateId = this.selectedCandidateId();
     if (!candidateId) {
       return;
     }
     this.onSelectCandidate(candidateId);
+  }
+
+  async onConfirmCity(): Promise<void> {
+    const group = this.activeGroup();
+    const city = this.cityDraft().trim();
+    if (!group || !city) {
+      return;
+    }
+    await this.resolution.confirmTrayCity(group.id, city);
+    this.cityDraft.set('');
+    this.selectedCandidateId.set(null);
+  }
+
+  onStreetCentroid(): void {
+    const group = this.activeGroup();
+    if (!group) {
+      return;
+    }
+    this.resolution.applyTrayHouseSelection(group.id, null, true);
   }
 
   onSelectCandidate(candidateId: string): void {

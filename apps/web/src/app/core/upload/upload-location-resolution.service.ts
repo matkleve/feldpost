@@ -11,6 +11,8 @@ import { UploadAddressResolutionOrchestrator } from './upload-address-resolution
 import { UploadBatchService } from './upload-batch.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
+import { UploadProjectLocationsAdapter } from './adapters/upload-project-locations.adapter';
+import { detectProjectAddressTrayScenario } from './upload-batch-project-tray.helpers';
 import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import {
   buildChosenPlacementPatch,
@@ -57,6 +59,9 @@ export class UploadLocationResolutionService {
   private readonly jobState = inject(UploadJobStateService);
   private readonly batchService = inject(UploadBatchService);
   private readonly locationConfig = inject(UploadLocationConfigService);
+  private readonly projectLocations = inject(UploadProjectLocationsAdapter);
+
+  private readonly batchProjectTrayRegistered = new Set<string>();
 
   private readonly geocodeInFlight = new Map<string, Promise<UploadGroupResolutionState>>();
 
@@ -113,7 +118,47 @@ export class UploadLocationResolutionService {
   clearBatch(batchId: string): void {
     this._groups.update((prev) => prev.filter((g) => g.batchId !== batchId));
     this.orchestrator.clearBatch(batchId);
+    this.batchProjectTrayRegistered.delete(batchId);
     this.syncBatchDisambiguationAggregates(batchId);
+  }
+
+  /** Step 2 — project address precedence once per batch. */
+  async registerBatchProjectTrayIfNeeded(batchId: string): Promise<void> {
+    if (this.batchProjectTrayRegistered.has(batchId)) {
+      return;
+    }
+    const jobs = this.jobState.jobs().filter((j) => j.batchId === batchId);
+    const projectId = jobs[0]?.projectId;
+    if (!projectId) {
+      return;
+    }
+    const rows = await this.projectLocations.listProjectLocations(projectId);
+    const scenario = detectProjectAddressTrayScenario(jobs, rows);
+    if (!scenario) {
+      return;
+    }
+    this.batchProjectTrayRegistered.add(batchId);
+    const kind = scenario === 'a' ? 'project_address_a' : 'project_address_b';
+    const candidates: UploadAddressCandidate[] = rows
+      .filter((r) => r.latitude != null && r.longitude != null)
+      .map((r) => ({
+        id: `proj-loc-${r.locationId}`,
+        addressLabel: r.addressLabel ?? [r.street, r.city].filter(Boolean).join(', '),
+        lat: r.latitude!,
+        lng: r.longitude!,
+        city: r.city,
+        score: 1,
+      }));
+    this.registerDisambiguationGroup({
+      batchId,
+      queryKey: `project-address|${projectId}|${scenario}`,
+      folderDisplayPath: '',
+      titleAddress: candidates[0]?.addressLabel ?? 'Project location',
+      jobIds: jobs.map((j) => j.id),
+      candidates,
+      disambiguationKind: kind,
+      trayStep: '2',
+    });
   }
 
   /**
@@ -146,6 +191,11 @@ export class UploadLocationResolutionService {
       groupState = await this.ensureGeocodedGroup(job.batchId, job.groupingKey, groupState);
     }
 
+    if (groupState.status === 'needsTray') {
+      this.registerTrayStepGroup(job.batchId, groupState);
+      return 'held';
+    }
+
     if (groupState.status === 'resolved' && groupState.candidate) {
       for (const id of groupState.jobIds) {
         const j = this.jobState.findJob(id);
@@ -176,6 +226,7 @@ export class UploadLocationResolutionService {
         candidates: groupState.candidates,
         localityHint: deriveLocalityHint(job.relativePath),
         disambiguationKind: 'geocode',
+        trayStep: '3',
       });
       return 'held';
     }
@@ -339,6 +390,79 @@ export class UploadLocationResolutionService {
     });
   }
 
+  /** Register Step 1A/1B tray for Branch C or B→C fallback. */
+  private registerTrayStepGroup(batchId: string, groupState: UploadGroupResolutionState): void {
+    const step = groupState.trayStep ?? '1a';
+    const kind = step === '1b' ? 'house_step' : 'city_step';
+    this.registerDisambiguationGroup({
+      batchId,
+      queryKey: buildDisambiguationQueryKey(groupState.groupingKey),
+      folderDisplayPath: groupState.folderDisplayPath,
+      titleAddress: groupState.titleAddressLabel,
+      jobIds: groupState.jobIds,
+      candidates: [],
+      disambiguationKind: kind,
+      trayStep: step,
+      confirmedCity: groupState.confirmedCity ?? null,
+      step1bGate: step === '1b' ? 'active' : 'disabled',
+      projectCentroid: groupState.projectCentroid,
+    });
+  }
+
+  /** Step 1A: user confirmed city → unlock 1B and load house numbers. */
+  async confirmTrayCity(groupId: string, city: string): Promise<void> {
+    const group = this._groups().find((g) => g.id === groupId);
+    if (!group) {
+      return;
+    }
+    const trimmed = city.trim();
+    if (!trimmed) {
+      return;
+    }
+    const job = this.jobState.findJob(group.jobIds[0]);
+    const so = job?.groupingKey
+      ? this.orchestrator.getGroupState(group.batchId, job.groupingKey)?.searchObject
+      : undefined;
+    const street = so?.street?.trim() ?? group.titleAddress.split(/\s+/)[0] ?? '';
+    const countryCode = so?.country?.trim().toLowerCase() ?? 'at';
+    const hits = await this.geocoding.searchStreetHouseNumbers(
+      { street, city: trimmed, countryCode },
+      { limit: 50, countrycodes: [countryCode] },
+    );
+    const houseCandidates: UploadAddressCandidate[] = hits.map((h, i) => ({
+      id: `hn-${i}-${h.address?.house_number ?? i}`,
+      addressLabel: h.displayName,
+      lat: h.lat,
+      lng: h.lng,
+      city: trimmed,
+      score: h.importance,
+    }));
+    this.patchGroup({
+      ...group,
+      trayStep: '1b',
+      confirmedCity: trimmed,
+      step1bGate: 'active',
+      disambiguationKind: 'house_step',
+      houseNumberCandidates: houseCandidates,
+      candidates: houseCandidates,
+    });
+  }
+
+  /** Step 1B: apply selected house number or street centroid. */
+  applyTrayHouseSelection(groupId: string, candidateId: string | null, streetCentroid = false): void {
+    const group = this._groups().find((g) => g.id === groupId);
+    if (!group) {
+      return;
+    }
+    if (streetCentroid) {
+      this.deferGroup(groupId);
+      return;
+    }
+    if (candidateId) {
+      this.applyCandidateToGroup(groupId, candidateId);
+    }
+  }
+
   registerDisambiguationGroup(
     input: {
       batchId: string;
@@ -349,6 +473,12 @@ export class UploadLocationResolutionService {
       candidates: UploadAddressCandidate[];
       localityHint?: string;
       disambiguationKind?: UploadDisambiguationGroup['disambiguationKind'];
+      trayStep?: UploadDisambiguationGroup['trayStep'];
+      confirmedCity?: string | null;
+      step1bGate?: UploadDisambiguationGroup['step1bGate'];
+      projectCentroid?: UploadDisambiguationGroup['projectCentroid'];
+      citySuggestions?: string[];
+      houseNumberCandidates?: UploadAddressCandidate[];
     },
     options?: { activateTray?: boolean },
   ): void {
@@ -367,15 +497,30 @@ export class UploadLocationResolutionService {
         candidates: input.candidates,
         jobIds: [],
         disambiguationKind: input.disambiguationKind ?? 'geocode',
+        trayStep: input.trayStep,
+        confirmedCity: input.confirmedCity,
+        step1bGate: input.step1bGate,
+        projectCentroid: input.projectCentroid,
+        citySuggestions: input.citySuggestions,
+        houseNumberCandidates: input.houseNumberCandidates,
       });
 
     const jobIds = [...new Set([...group.jobIds, ...input.jobIds])];
     const updated: UploadDisambiguationGroup = {
       ...group,
       jobIds,
-      candidates: input.candidates,
-      collapseStage: pickCollapseStage(input.candidates, jobIds.length),
+      candidates: input.candidates.length ? input.candidates : group.candidates,
+      collapseStage: pickCollapseStage(
+        input.candidates.length ? input.candidates : group.candidates,
+        jobIds.length,
+      ),
       disambiguationKind: input.disambiguationKind ?? group.disambiguationKind ?? 'geocode',
+      trayStep: input.trayStep ?? group.trayStep,
+      confirmedCity: input.confirmedCity ?? group.confirmedCity,
+      step1bGate: input.step1bGate ?? group.step1bGate,
+      projectCentroid: input.projectCentroid ?? group.projectCentroid,
+      citySuggestions: input.citySuggestions ?? group.citySuggestions,
+      houseNumberCandidates: input.houseNumberCandidates ?? group.houseNumberCandidates,
     };
     this.patchGroup(updated);
 
@@ -452,22 +597,43 @@ export class UploadLocationResolutionService {
     const config = this.locationConfig.getConfig();
     const geocodeRequest = {
       street,
-      city: so.city ?? undefined,
+      city: so.city ?? group.projectCentroid?.city ?? undefined,
       postcode: so.postcode ?? undefined,
       countryCode,
     };
-    uploadAddressDebug('geocode', 'edge invoke structured-forward', {
-      batchId,
-      groupingKey: group.groupingKey,
-      request: geocodeRequest,
-      limit: config.geocodeSearchDefaultLimit,
-      note: 'Upstream photon vs nominatim is chosen in geocode edge (GEOCODER_FORWARD_URL); see edge logs / X-Feldpost-Geocoder-Upstream header',
-    });
 
-    const hits = await this.geocoding.searchStructuredForward(geocodeRequest, {
-      limit: config.geocodeSearchDefaultLimit,
-      countrycodes: [countryCode],
-    });
+    let hits;
+    if (group.geocodeBranch === 'branch_b' && group.projectCentroid) {
+      uploadAddressDebug('geocode', 'edge invoke structured-forward-bias', {
+        batchId,
+        groupingKey: group.groupingKey,
+        request: geocodeRequest,
+        bias: group.projectCentroid,
+      });
+      hits = await this.geocoding.searchStructuredForwardBias(
+        {
+          ...geocodeRequest,
+          lat: group.projectCentroid.lat,
+          lng: group.projectCentroid.lng,
+          zoom: group.projectCentroid.zoom,
+        },
+        {
+          limit: config.geocodeSearchDefaultLimit,
+          countrycodes: [countryCode],
+        },
+      );
+    } else {
+      uploadAddressDebug('geocode', 'edge invoke structured-forward', {
+        batchId,
+        groupingKey: group.groupingKey,
+        request: geocodeRequest,
+        limit: config.geocodeSearchDefaultLimit,
+      });
+      hits = await this.geocoding.searchStructuredForward(geocodeRequest, {
+        limit: config.geocodeSearchDefaultLimit,
+        countrycodes: [countryCode],
+      });
+    }
 
     uploadAddressDebug('geocode', 'edge response', {
       hitCount: hits.length,
@@ -501,9 +667,21 @@ export class UploadLocationResolutionService {
         ...group,
         status: 'ambiguous',
         candidates: outcome.candidates,
+        trayStep: '3',
       };
       this.orchestrator.patchGroupState(batchId, ambiguous);
       return ambiguous;
+    }
+
+    if (group.geocodeBranch === 'branch_b') {
+      const fallbackTray: UploadGroupResolutionState = {
+        ...group,
+        status: 'needsTray',
+        trayStep: '1a',
+        geocodeBranch: 'branch_c',
+      };
+      this.orchestrator.patchGroupState(batchId, fallbackTray);
+      return fallbackTray;
     }
 
     const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
@@ -664,6 +842,12 @@ export class UploadLocationResolutionService {
     candidates: UploadAddressCandidate[];
     jobIds: string[];
     disambiguationKind?: UploadDisambiguationGroup['disambiguationKind'];
+    trayStep?: UploadDisambiguationGroup['trayStep'];
+    confirmedCity?: string | null;
+    step1bGate?: UploadDisambiguationGroup['step1bGate'];
+    projectCentroid?: UploadDisambiguationGroup['projectCentroid'];
+    citySuggestions?: string[];
+    houseNumberCandidates?: UploadAddressCandidate[];
   }): UploadDisambiguationGroup {
     const id = crypto.randomUUID();
     return {
@@ -679,6 +863,12 @@ export class UploadLocationResolutionService {
       resolutionGateOpen: true,
       localityHint: input.localityHint,
       disambiguationKind: input.disambiguationKind ?? 'geocode',
+      trayStep: input.trayStep,
+      confirmedCity: input.confirmedCity,
+      step1bGate: input.step1bGate,
+      projectCentroid: input.projectCentroid,
+      citySuggestions: input.citySuggestions,
+      houseNumberCandidates: input.houseNumberCandidates,
     };
   }
 

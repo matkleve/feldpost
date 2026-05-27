@@ -44,7 +44,19 @@ export type UploadGroupResolutionStatus =
   | 'resolved'
   | 'partial'
   | 'needsGeocode'
+  | 'needsTray'
   | 'ambiguous';
+
+export type UploadGeocodeBranch = 'branch_a' | 'branch_b' | 'branch_c' | 'metadata_only';
+
+export type UploadTrayStep = '1a' | '1b' | '2' | '3';
+
+export interface UploadProjectCentroid {
+  lat: number;
+  lng: number;
+  city?: string | null;
+  zoom?: number;
+}
 
 export interface UploadLocationRowHit {
   id: string;
@@ -66,6 +78,10 @@ export interface UploadGroupResolutionState {
   searchObject: UploadSearchObject;
   folderDisplayPath: string;
   titleAddressLabel: string;
+  geocodeBranch?: UploadGeocodeBranch;
+  projectCentroid?: UploadProjectCentroid;
+  trayStep?: UploadTrayStep;
+  confirmedCity?: string | null;
   candidate?: UploadAddressCandidate;
   candidates?: UploadAddressCandidate[];
 }

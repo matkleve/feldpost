@@ -94,6 +94,13 @@ export interface GeocoderStructuredForwardParams {
   countryCode?: string;
 }
 
+/** Bias structured forward (Photon lat/lon/zoom). */
+export interface GeocoderStructuredBiasParams extends GeocoderStructuredForwardParams {
+  lat: number;
+  lng: number;
+  zoom?: number;
+}
+
 /** A single result from a multi-result geocoder search. */
 export interface GeocoderSearchResult {
   lat: number;
@@ -437,6 +444,99 @@ export class GeocodingService {
   }
 
   /**
+   * Structured forward with geographic bias (Branch B).
+   * Returns empty array when edge/Photon unavailable — never throws.
+   */
+  async searchStructuredForwardBias(
+    params: GeocoderStructuredBiasParams,
+    options?: GeocoderStructuredSearchOptions,
+  ): Promise<GeocoderSearchResult[]> {
+    const trimmedStreet = params.street.trim();
+    const countryCode = params.countryCode?.trim().toLowerCase() ?? '';
+    if (!trimmedStreet || !countryCode) {
+      return [];
+    }
+    if (!Number.isFinite(params.lat) || !Number.isFinite(params.lng)) {
+      return [];
+    }
+
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
+
+    return this.enqueue(async () => {
+      try {
+        const body: Record<string, unknown> = {
+          action: 'structured-forward-bias',
+          street: trimmedStreet,
+          city: params.city?.trim() || undefined,
+          postcode: params.postcode?.trim() || undefined,
+          countryCode,
+          lat: params.lat,
+          lon: params.lng,
+          zoom: params.zoom ?? 14,
+          limit,
+          acceptLanguage,
+        };
+        const results = await this.callProxy<NominatimSearchResponse[]>(body, 'structured-forward-bias');
+        if (!results?.length) {
+          return [];
+        }
+        return results
+          .map((hit) => this.parseSearchHit(hit))
+          .filter((r): r is GeocoderSearchResult => r !== null);
+      } catch {
+        return [];
+      }
+    });
+  }
+
+  /**
+   * Enumerate house numbers on a street (Step 1B). Photon structured multi-hit.
+   */
+  async searchStreetHouseNumbers(
+    params: GeocoderStructuredForwardParams & { lat?: number; lng?: number; zoom?: number },
+    options?: GeocoderStructuredSearchOptions,
+  ): Promise<GeocoderSearchResult[]> {
+    const trimmedStreet = params.street.trim();
+    const city = params.city?.trim() ?? '';
+    const countryCode = params.countryCode?.trim().toLowerCase() ?? '';
+    if (!trimmedStreet || !city || !countryCode) {
+      return [];
+    }
+
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? 50;
+
+    return this.enqueue(async () => {
+      try {
+        const body: Record<string, unknown> = {
+          action: 'street-house-numbers',
+          street: trimmedStreet,
+          city,
+          postcode: params.postcode?.trim() || undefined,
+          countryCode,
+          limit,
+          acceptLanguage,
+        };
+        if (params.lat != null && params.lng != null) {
+          body['lat'] = params.lat;
+          body['lon'] = params.lng;
+          body['zoom'] = params.zoom ?? 14;
+        }
+        const results = await this.callProxy<NominatimSearchResponse[]>(body, 'street-house-numbers');
+        if (!results?.length) {
+          return [];
+        }
+        return results
+          .map((hit) => this.parseSearchHit(hit))
+          .filter((r): r is GeocoderSearchResult => r !== null);
+      } catch {
+        return [];
+      }
+    });
+  }
+
+  /**
    * Structured Nominatim search (`street` + `city`). No viewbox/layer.
    * Returns an empty array on failure — never throws.
    */
@@ -514,7 +614,7 @@ export class GeocodingService {
   /** Call the `geocode` Supabase Edge Function with bounded retry/backoff. */
   private async callProxy<T>(
     body: Record<string, unknown>,
-    operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward',
+    operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward' | 'structured-forward-bias' | 'street-house-numbers',
   ): Promise<T> {
     if (this.isGeocodeBlocked()) {
       throw new Error('Geocoding temporarily unavailable');
@@ -677,7 +777,7 @@ export class GeocodingService {
   }
 
   private logProxyFailure(
-    operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward',
+    operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward' | 'structured-forward-bias' | 'street-house-numbers',
     attempt: number,
     details: GeocodeFailureDetails,
     retryable: boolean,

@@ -857,4 +857,52 @@ export class ProjectsService {
   private escapeIlike(value: string): string {
     return value.replace(/[%_]/g, (match) => `\\${match}`);
   }
+
+  /** Linked locations for upload Branch B / project address tier. */
+  async loadProjectLocations(projectId: string): Promise<
+    Array<{
+      linkId: string;
+      locationId: string;
+      sortOrder: number;
+      addressLabel: string;
+      street: string | null;
+      city: string | null;
+      latitude: number | null;
+      longitude: number | null;
+    }>
+  > {
+    const { data, error } = await this.supabase.client.rpc('list_project_locations', {
+      p_project_id: projectId,
+    });
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+    return (data as Record<string, unknown>[]).map((row) => ({
+      linkId: String(row['link_id']),
+      locationId: String(row['location_id']),
+      sortOrder: Number(row['sort_order'] ?? 0),
+      addressLabel: String(row['address_label'] ?? row['street'] ?? ''),
+      street: (row['street'] as string | null) ?? null,
+      city: (row['city'] as string | null) ?? null,
+      latitude: row['latitude'] != null ? Number(row['latitude']) : null,
+      longitude: row['longitude'] != null ? Number(row['longitude']) : null,
+    }));
+  }
+
+  async linkProjectLocation(projectId: string, locationId: string, sortOrder = 0): Promise<boolean> {
+    const { error } = await this.supabase.client.rpc('link_project_location', {
+      p_project_id: projectId,
+      p_location_id: locationId,
+      p_sort_order: sortOrder,
+    });
+    return !error;
+  }
+
+  async unlinkProjectLocation(projectId: string, locationId: string): Promise<boolean> {
+    const { data, error } = await this.supabase.client.rpc('unlink_project_location', {
+      p_project_id: projectId,
+      p_location_id: locationId,
+    });
+    return !error && !!data;
+  }
 }

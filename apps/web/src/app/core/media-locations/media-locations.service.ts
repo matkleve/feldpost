@@ -346,6 +346,18 @@ export class MediaLocationsService {
     });
   }
 
+  /** Org-scoped find_or_create for project location picker (no media link). */
+  async findOrCreateFromAddressLabel(label: string): Promise<string | null> {
+    const trimmed = label.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const forward = await this.geocodingService.forward(trimmed);
+    const patch = forward ? forwardPatchFromGeocode(forward) : { address_label: trimmed };
+    const created = await this.adapter.findOrCreate(patch);
+    return created.id;
+  }
+
   private applyRowsToCache(mediaItemId: string, rows: readonly MediaItemLocationRow[]): void {
     const refs: MediaLocationLinkRef[] = [];
     for (const row of rows) {

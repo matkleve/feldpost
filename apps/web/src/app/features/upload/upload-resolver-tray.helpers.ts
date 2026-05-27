@@ -21,7 +21,11 @@ export type ResolverQuestionKey =
   | 'upload.resolver.question.contextDistance'
   | 'upload.resolver.question.city'
   | 'upload.resolver.question.door'
-  | 'upload.resolver.question.address';
+  | 'upload.resolver.question.address'
+  | 'upload.resolver.question.cityStep'
+  | 'upload.resolver.question.houseStep'
+  | 'upload.resolver.question.projectAddressA'
+  | 'upload.resolver.question.projectAddressB';
 
 export function resolverQuestionKeyForGroup(
   group: UploadDisambiguationGroup,
@@ -31,6 +35,18 @@ export function resolverQuestionKeyForGroup(
   }
   if (group.disambiguationKind === 'context_distance') {
     return 'upload.resolver.question.contextDistance';
+  }
+  if (group.disambiguationKind === 'city_step' || group.trayStep === '1a') {
+    return 'upload.resolver.question.cityStep';
+  }
+  if (group.disambiguationKind === 'house_step' || group.trayStep === '1b') {
+    return 'upload.resolver.question.houseStep';
+  }
+  if (group.disambiguationKind === 'project_address_a') {
+    return 'upload.resolver.question.projectAddressA';
+  }
+  if (group.disambiguationKind === 'project_address_b') {
+    return 'upload.resolver.question.projectAddressB';
   }
   if (group.collapseStage === 'city') {
     return 'upload.resolver.question.city';

@@ -66,6 +66,50 @@
       </p>
     }
 
+    @if (isCityStep()) {
+      <div class="upload-resolver-tray__city-step">
+        <label class="upload-resolver-tray__city-label" for="upload-resolver-city-input">
+          {{ t('upload.resolver.cityStep.label', 'City') }}
+        </label>
+        <input
+          id="upload-resolver-city-input"
+          class="upload-resolver-tray__city-input"
+          type="text"
+          [value]="cityDraft()"
+          (input)="cityDraft.set($any($event.target).value)"
+          [attr.placeholder]="t('upload.resolver.cityStep.placeholder', 'e.g. Wien')"
+        />
+      </div>
+    } @else if (houseStepActive()) {
+      <ol
+        class="upload-resolver-tray__choices"
+        role="listbox"
+        aria-labelledby="upload-resolver-question"
+        [attr.aria-label]="t('upload.resolver.options', 'Choose one answer')"
+      >
+        @for (item of numberedOptions(); track item.candidate.id) {
+          <li class="upload-resolver-tray__choice-item" role="presentation">
+            <button
+              type="button"
+              class="upload-resolver-tray__choice"
+              role="option"
+              [class.upload-resolver-tray__choice--selected]="selectedOptionId() === item.candidate.id"
+              [attr.aria-selected]="selectedOptionId() === item.candidate.id"
+              [attr.aria-label]="optionAriaLabel(item)"
+              (click)="selectOption(item.candidate.id)"
+              (mouseenter)="onPreviewCandidate(item.candidate)"
+              (focus)="onPreviewCandidate(item.candidate)"
+            >
+              <span class="upload-resolver-tray__choice-index" aria-hidden="true">{{ item.index }}</span>
+              <span class="upload-resolver-tray__choice-label">{{ item.label }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+      <button type="button" class="upload-resolver-tray__street-centroid" (click)="onStreetCentroid()">
+        {{ t('upload.resolver.houseStep.noNumber', 'No number needed') }}
+      </button>
+    } @else if (!isHouseStep()) {
     <ol
       class="upload-resolver-tray__choices"
       role="listbox"
@@ -106,6 +150,7 @@
         </li>
       }
     </ol>
+    }
 
     @if (affectedMedia().length > 0) {
       <div class="upload-resolver-tray__media-chip-host">

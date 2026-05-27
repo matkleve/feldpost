@@ -40,7 +40,9 @@ Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is ra
 | 5 | Context distance gate | **Prompt B** — org `contextDistanceMaxMeters` ([search-tuning.defaults.md](../search/search-tuning.defaults.md)); **not implemented in Prompt A** |
 | 6 | `routePreparedNewJob` / upload | `finalCoords` from `job.coords`; `exif_*` from `parsedExif.coords` |
 
-**Branch A (`missing_data`):** After Phase 2 failure when **no** `titleAddressCoords` and **no** `parsedExif.coords`. Phase 3 source-conflict **does not** run.
+**Branch A (`missing_data_route`):** After Phase 2 failure when **no** `titleAddressCoords` and **no** `parsedExif.coords`. Phase 3 source-conflict **does not** run.
+
+**EXIF-only route (`exif_only_route`):** Phase 4 applies EXIF when no text coords after geocode fail.
 
 **Gate:** Jobs in `awaiting_disambiguation` stay in Queue (“Choose address”) until group `resolutionGateOpen === false`. Dedup/upload only when placement is decided.
 

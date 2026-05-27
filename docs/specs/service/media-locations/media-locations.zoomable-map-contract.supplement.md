@@ -15,7 +15,7 @@ Normative glossary and cross-pipeline rules for **address-visible**, **display-h
 | Term | Definition | Forbidden synonyms |
 | --- | --- | --- |
 | **Address-visible link** | A `media_item_location_links` row whose joined `locations` row has display text (e.g. `address_label`, `street`) whether or not coords exist | “has location”, “resolved”, “on the map” |
-| **Zoomable link** | A link whose `latitude` and `longitude` pass `legacyMediaHasGps` in [`media-locations.helpers.ts`](../../../../apps/web/src/app/core/media-locations/media-locations.helpers.ts); DB row also has `geog` for [`viewport_markers`](../../../../supabase/migrations/20260524120000_locations_nn_junction.sql) | “GPS chip”, “address-visible”, `location_status = resolved` alone |
+| **Zoomable link** | A link whose `street` is present **and** `latitude`/`longitude` pass `legacyMediaHasGps` (`locationPinEligible`); DB row also has `geog` for viewport_markers | “GPS chip”, “address-visible”, `location_status = resolved` alone |
 | **Display-hydrate row** | The single `MediaItemLocationRow` chosen to fill detail header fields and `mergeLocationDisplayIntoMediaRecord` on `media()` | “primary location”, “the location”, “only location” |
 | **Zoomable location count** | Count of zoomable links for one `media_item_id`; exposed as `zoomable_location_count` on gallery/workspace DTOs and as `locationsWithGps(rows).length` on list reads | `media.latitude != null` alone; address row count |
 

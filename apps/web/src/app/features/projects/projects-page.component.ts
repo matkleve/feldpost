@@ -42,6 +42,7 @@ import { CardVariantSettingsService } from '../../shared/ui-primitives/card-vari
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { TextInputDialogComponent } from '../../shared/text-input-dialog/text-input-dialog.component';
+import { ProjectLocationPickerComponent } from './project-location-picker.component';
 
 import {
   FILTER_OPTIONS,
@@ -63,6 +64,7 @@ import {
     ProjectsTableViewComponent,
     ProjectsToolbarComponent,
     TextInputDialogComponent,
+    ProjectLocationPickerComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-page.component.html',

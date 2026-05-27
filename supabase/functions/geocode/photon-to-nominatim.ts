@@ -68,6 +68,9 @@ export interface PhotonStructuredSearchParams {
   countryCode?: string;
   limit?: number;
   acceptLanguage?: string;
+  lat?: number;
+  lon?: number;
+  zoom?: number;
 }
 
 /**
@@ -218,6 +221,15 @@ export function buildPhotonStructuredUrl(
       "countrycode",
       params.countryCode.trim().toLowerCase(),
     );
+  }
+  if (params.lat != null && Number.isFinite(params.lat)) {
+    url.searchParams.set("lat", String(params.lat));
+  }
+  if (params.lon != null && Number.isFinite(params.lon)) {
+    url.searchParams.set("lon", String(params.lon));
+  }
+  if (params.zoom != null && Number.isFinite(params.zoom)) {
+    url.searchParams.set("zoom", String(params.zoom));
   }
   url.searchParams.set("limit", String(params.limit ?? 5));
   url.searchParams.set("lang", photonLangFromAcceptLanguage(params.acceptLanguage));

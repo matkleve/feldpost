@@ -239,9 +239,17 @@ export function locationGpsDisplay(row: MediaItemLocationRow): string | null {
   return `${row.latitude.toFixed(6)}, ${row.longitude.toFixed(6)}`;
 }
 
-/** Rows that can drive map zoom (paired lat/lng, not null-island). */
+/** Map pin eligible: valid coords AND street present (derived precision). */
+export function locationPinEligible(row: Pick<MediaItemLocationRow, 'street' | 'latitude' | 'longitude'>): boolean {
+  if (!row.street?.trim()) {
+    return false;
+  }
+  return legacyMediaHasGps(row.latitude, row.longitude);
+}
+
+/** Rows that can drive map zoom (street-level+ with coords). */
 export function locationsWithGps(rows: readonly MediaItemLocationRow[]): MediaItemLocationRow[] {
-  return rows.filter((row) => legacyMediaHasGps(row.latitude, row.longitude));
+  return rows.filter((row) => locationPinEligible(row));
 }
 
 /** Count of zoomable links — same rule as batch `zoomable_location_count`. */
@@ -293,7 +301,7 @@ export function displayLocationFromRows(
     return null;
   }
   const sorted = [...rows].sort((a, b) => a.sort_order - b.sort_order);
-  const zoomable = sorted.find((row) => legacyMediaHasGps(row.latitude, row.longitude));
+  const zoomable = sorted.find((row) => locationPinEligible(row));
   return zoomable ?? sorted[0] ?? null;
 }
 

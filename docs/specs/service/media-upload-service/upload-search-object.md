@@ -59,11 +59,20 @@ Other countries: path parsing and geocoding use country code; gazetteer Fuse is 
 
 Filename segment overrides folder for the same field; log deviation in `sourceDeviations`.
 
-## Completeness (geocode gate)
+## Completeness (geocode branches)
 
-`(city OR postcode) AND (street OR houseNumber)` — else Nachbearbeitung, no API.
+`houseNumber` is **never** a gate criterion — it only improves geocode precision when `street` is present.
 
-Geocode requires a known `country` on the SO.
+| Branch | Gate | Geocode | Tray |
+| --- | --- | --- | --- |
+| **A** | `street` AND (`city` OR `postcode`) | structured-forward | Step 3 if multiple hits |
+| **B** | `street`, no locality, project centroid | structured-forward-bias | Step 3 if multiple; 0 hits → Branch C (Step 1A) |
+| **C** | `street`, no locality, no centroid | after Step 1A+1B | Step 1A → 1B |
+| **Below street** | admin fields only | none (admin centroid stored) | none |
+
+Legacy helper `isSearchObjectComplete()` remains true only for Branch A.
+
+Implementation: [`upload-search-object.completeness.helpers.ts`](../../../../apps/web/src/app/core/location-path-parser/upload-search-object.completeness.helpers.ts).
 
 ## Confidence thresholds
 

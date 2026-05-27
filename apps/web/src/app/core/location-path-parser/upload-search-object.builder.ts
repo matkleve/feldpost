@@ -201,7 +201,7 @@ export function expandPostcodeOnSearchObject(
 
 export function isSearchObjectComplete(so: UploadSearchObject): boolean {
   const hasLocality = !!(so.city?.trim() || so.postcode?.trim());
-  const hasStreet = !!(so.street?.trim() || so.houseNumber?.trim());
+  const hasStreet = !!so.street?.trim();
   return hasLocality && hasStreet;
 }
 
