@@ -1,9 +1,16 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
+/** Quiet control hover/focus/active — primary ink + wash (@see docs/design/state-visuals.md § Interaction emphasis). */
+const quietInteractionEmphasis =
+  'text-muted-foreground hover:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] hover:text-primary focus-visible:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] focus-visible:text-primary active:bg-[color:color-mix(in_srgb,var(--primary)_15%,transparent)] active:text-primary';
+
+/** Outline quiet control — bordered rest + primary-tinted border on hover. */
+const outlineInteractionEmphasis = `border border-input bg-background hover:border-[color:color-mix(in_srgb,var(--primary)_42%,var(--border))] focus-visible:border-[color:color-mix(in_srgb,var(--primary)_42%,var(--border))] ${quietInteractionEmphasis}`;
+
 /**
  * Tailwind + shadcn-style button classes; colors resolve via tweakcn tokens (--primary, --ring, etc.).
  * Horizontal padding is locked to spacing-2 (`ps-2` / `pe-2`) for all labeled sizes; logical ps/pe keeps RTL correct.
- * @see docs/MIGRATION_PLAN.md
+ * @see docs/design/state-visuals.md § Interaction emphasis
  */
 export const buttonVariants = cva(
   // Base row: flex row + gap between icon and label; inline padding uses spacing-2 only (design kernel).
@@ -14,9 +21,9 @@ export const buttonVariants = cva(
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        outline: outlineInteractionEmphasis,
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        ghost: quietInteractionEmphasis,
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

@@ -74,9 +74,8 @@ export class UploadResolverTrayComponent {
   private readonly mockGroups = signal<UploadDisambiguationGroup[]>(
     structuredClone(UPLOAD_RESOLVER_TRAY_MOCK_GROUPS),
   );
-  private readonly mockSelectedGroupId = signal<string | null>(
-    UPLOAD_RESOLVER_TRAY_MOCK_GROUPS[0]?.id ?? null,
-  );
+  /** Mock carousel page (0-based); stable across ask-later when new cards are appended. */
+  private readonly mockCarouselIndex = signal(0);
   private readonly selectedCandidateId = signal<string | null>(null);
   readonly mediaMenuOpen = signal(false);
   readonly mediaMenuAnchor = signal<HTMLElement | null>(null);
@@ -117,8 +116,8 @@ export class UploadResolverTrayComponent {
       return null;
     }
     if (this.useMockTray) {
-      const selectedId = this.mockSelectedGroupId();
-      return groups.find((g) => g.id === selectedId) ?? groups[0];
+      const idx = Math.min(Math.max(this.mockCarouselIndex(), 0), groups.length - 1);
+      return groups[idx] ?? null;
     }
     return this.resolution.activeGroup();
   });
@@ -140,6 +139,22 @@ export class UploadResolverTrayComponent {
   readonly canGoToNextGroup = computed(
     () => this.activeGroupIndex() < this.openGroups().length - 1,
   );
+
+  /** Visible carousel index between chevrons, e.g. `1/4`. */
+  readonly carouselIndicator = computed(() => {
+    if (this.useMockTray) {
+      this.mockGroups();
+    }
+    const groups = this.openGroups();
+    const total = groups.length;
+    if (total < 2) {
+      return null;
+    }
+    const index = this.useMockTray
+      ? Math.min(this.mockCarouselIndex(), total - 1)
+      : this.activeGroupIndex();
+    return `${index + 1}/${total}`;
+  });
 
   readonly trayMode = computed<UploadResolverTrayMode>(() => {
     if (this.embeddedInPane()) {
@@ -257,6 +272,15 @@ export class UploadResolverTrayComponent {
         this.mediaMenuAnchor.set(this.mediaChipTrigger()?.nativeElement ?? null);
       }
     });
+    effect(() => {
+      if (!this.useMockTray) {
+        return;
+      }
+      const max = Math.max(0, this.openGroups().length - 1);
+      if (this.mockCarouselIndex() > max) {
+        this.mockCarouselIndex.set(max);
+      }
+    });
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -321,7 +345,7 @@ export class UploadResolverTrayComponent {
     }
     const next = groups[nextIndex];
     if (this.useMockTray) {
-      this.mockSelectedGroupId.set(next.id);
+      this.mockCarouselIndex.set(nextIndex);
     } else {
       this.resolution.setSelectedGroupId(next.id);
     }
@@ -380,8 +404,8 @@ export class UploadResolverTrayComponent {
     if (groups.length < 2) {
       return;
     }
-    const nextIndex = (this.activeGroupIndex() + 1) % groups.length;
-    this.mockSelectedGroupId.set(groups[nextIndex].id);
+    const nextIndex = (this.mockCarouselIndex() + 1) % groups.length;
+    this.mockCarouselIndex.set(nextIndex);
   }
 
   onPreviewCandidate(candidate: UploadAddressCandidate): void {
@@ -415,34 +439,41 @@ export class UploadResolverTrayComponent {
   }
 
   private isolateMockJob(groupId: string, jobId: string): void {
+    const group = this.mockGroups().find((entry) => entry.id === groupId);
+    if (!group) {
+      return;
+    }
+    const stayIndex = this.mockCarouselIndex();
+    const remaining = group.jobIds.filter((id) => id !== jobId);
+
     this.mockGroups.update((groups) => {
       const next = structuredClone(groups);
       const index = next.findIndex((entry) => entry.id === groupId);
       if (index < 0) {
         return groups;
       }
-      const group = next[index];
-      const remaining = group.jobIds.filter((id) => id !== jobId);
+      const current = next[index];
       if (remaining.length > 0) {
         next[index] = {
-          ...group,
+          ...current,
           jobIds: remaining,
-          collapseStage: pickCollapseStage(group.candidates, remaining.length),
+          collapseStage: pickCollapseStage(current.candidates, remaining.length),
         };
       } else {
         next.splice(index, 1);
       }
-      const isolatedId = `mock-isolate-${jobId}`;
       next.push({
-        ...group,
-        id: isolatedId,
-        queryKey: `${group.queryKey}::${jobId}`,
+        ...current,
+        id: `mock-isolate-${jobId}`,
+        queryKey: `${current.queryKey}::${jobId}`,
         jobIds: [jobId],
-        collapseStage: pickCollapseStage(group.candidates, 1),
+        collapseStage: pickCollapseStage(current.candidates, 1),
       });
       return next;
     });
-    this.mockSelectedGroupId.set(`mock-isolate-${jobId}`);
+
+    const maxIndex = Math.max(0, this.openGroups().length - 1);
+    this.mockCarouselIndex.set(Math.min(stayIndex, maxIndex));
   }
 
   folderPathTitle(path: string): string {

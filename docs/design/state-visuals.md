@@ -53,6 +53,44 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 ---
 
+## Interaction emphasis (hover / selected)
+
+**Rule:** Quiet interactive controls (nav links, `hlmBtn` `outline`/`ghost`, toggle items, menu rows) use this recipe unless a **dedicated element spec** documents an exception with a test oracle.
+
+**Canonical tokens:** `--primary` (hover / attention), `--interaction-selected-ink` (persistent selected/on), `--muted-foreground` (idle ink). Mix recipe: `color-mix(in srgb, <ink> 10%, transparent)` for fills; outline borders may use `color-mix(in srgb, <ink> 42%, var(--border))`.
+
+| State | Ink | Background | Border (outline hosts) |
+| ----- | --- | ------------ | ---------------------- |
+| **Idle** | `--muted-foreground` | transparent or `--background` | `--input` / `--border` |
+| **Hover / focus-visible** | `--primary` | primary 10% mix | primary ~42% + border mix |
+| **Pressed (`:active`)** | `--primary` | primary ~15% mix | — |
+| **Selected / on** (`routerLinkActive`, `data-state=on`, `aria-pressed`) | `--interaction-selected-ink` | selected-ink 10% mix | selected ~42% + border mix (when bordered) |
+| **Selected + hover** | `--primary` (wins) | primary 10% mix | same as hover |
+| **Destructive quiet row** | `--destructive` | destructive 10% mix (hover) / 15% (`:active`) | — |
+
+**Implementation owners:**
+
+- `apps/web/src/app/shared/ui/button/button-variants.ts` — `outline`, `ghost`
+- `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts` — lane items
+- `apps/web/src/features/nav/nav.component.scss` — route links
+- `apps/web/src/app/features/map/map-shell/_map-shell-upload.scss` — map/media upload trigger (`.map-upload-btn`)
+- `apps/web/src/styles/_option-menu-item-states.scss` — menu rows (hover already primary; destructive branch unchanged)
+
+**Filled CTAs (exception):** `hlmBtn` `variant="default"` and `variant="destructive"` stay solid fills — not this table.
+
+**Documented exceptions:**
+
+| Surface | Why |
+| ------- | --- |
+| File-type chips (`app-chip` `--filetype-*`) | Category semantics, not interaction emphasis |
+| Switches (`data-[state=checked]:bg-primary`) | On/off control, not selection vs hover |
+| Map upload progress ring (`.map-upload-btn--uploading`) | Batch progress uses `--primary` on the ring/spinner only |
+| Media selection rings / tile FSM | Domain selection chrome — per media specs |
+
+**Test oracle:** Idle row is muted; hovering any enabled row tints orange; current route / selected toggle segment is cool blue at rest and orange on hover.
+
+---
+
 ## Loading and error (placeholder)
 
 **Loading** and **error** shells that are **not** button-based belong in the owning **element spec** until a second control repeats the same pattern; then extend this file with a new subsection and link from `docs/design/README.md`.
@@ -61,4 +99,5 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 ## Changelog
 
+- **2026-05-27** — **Interaction emphasis** contract for quiet controls (hover primary, selected `--interaction-selected-ink`).
 - **2026-05-05** — Initial publication: **disabled** contract for native buttons and **Panel Trigger**; closes SPEC GAP referenced in `specs/panel-trigger.spec.md`.

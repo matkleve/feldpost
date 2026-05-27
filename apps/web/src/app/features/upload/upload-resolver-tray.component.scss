@@ -70,8 +70,20 @@
   .upload-resolver-tray__nav {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: var(--spacing-1);
     flex-shrink: 0;
+  }
+
+  // Current/total between carousel chevrons (e.g. 1/4)
+  // @see upload-resolver-tray.md#carousel
+  .upload-resolver-tray__nav-position {
+    min-width: 2rem;
+    font-size: var(--font-size-2xs);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+    text-align: center;
+    user-select: none;
   }
 
   // Compact icon-only carousel control

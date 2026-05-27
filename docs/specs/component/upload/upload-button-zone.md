@@ -6,7 +6,7 @@ The upload trigger and its morph container. A round button fixed in the top-righ
 
 ## What It Looks Like
 
-**Closed state:** 2.75rem (44px) circle, `--color-clay` background, white media-upload icon (not photo/camera-specific). Desktop is top-right of map; mobile is 3.5rem (56px) FAB bottom-right.
+**Closed state:** 2.75rem (44px) circle, bordered quiet surface (`hlmBtn` `outline`), muted cloud icon. **Interaction emphasis:** idle muted; hover primary wash; panel open (`--active`) uses `--interaction-selected-ink`; uploading shows primary progress ring + spinner only. Desktop is top-right of map; mobile is 3.5rem (56px) FAB bottom-right.
 
 When the panel is closed and a batch is active, upload progress is shown **only on the trigger** (progress ring + centered spinner). No filename chips or secondary status list beside the button.
 
@@ -20,6 +20,11 @@ When the panel is closed and a batch is active, upload progress is shown **only 
 
 - **Parent**: Map Zone area of `MapShellComponent`
 - **Always visible** when on the map page
+
+## Interaction emphasis
+
+- Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
+- [x] Implements contract via `.map-upload-btn` in [`_map-shell-upload.scss`](../../../../apps/web/src/app/features/map/map-shell/_map-shell-upload.scss) (uploading progress ring uses primary — documented exception)
 
 ## Actions
 

@@ -1,72 +1,76 @@
-# UI Primitives — Button
+# UI Primitives — Button (`hlmBtn`)
 
 ## What It Is
 
-One **Button** primitive on native `<button>`: emphasis, size, layout, and loading differ only by inputs. Ghost toolbar icons are a **density preset**, not a second primitive type.
+Native `<button>` / `<a>` styling via **`hlmBtn`** directive and **`buttonVariants`** CVA ([`button-variants.ts`](../../../../apps/web/src/app/shared/ui/button/button-variants.ts)). One primitive; behavior differs by `variant` and `size` inputs only.
 
 ## What It Looks Like
 
-Token borders and fills; hover/active/focus-visible; sizes `sm` / `md` / `lg`; emphasis `primary` / `secondary` / `neutral` / `ghost` / `danger`; layouts `text` / `icon-text` / `icon-only` / `text-icon` / `icon-text-icon`; optional loading spinner on host.
+Token borders and fills from tweakcn semantics (`--primary`, `--border`, `--muted-foreground`, …). Quiet variants follow **Interaction emphasis** ([`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis). Commit actions use solid primary or destructive fills.
 
-- **neutral** — transparent bg, pure `--color-border` border (no brand tint), `--color-text-secondary` text. Used for low-prominence toolbar utility actions.
-- **text-icon** — label + trailing icon (chevron, arrow). Dropdown trigger pattern.
-- **icon-text-icon** — leading icon + label + trailing icon. Dropdown trigger with category icon.
+| `variant` | Rest | Hover / focus | Selected / on (when applicable) |
+| --------- | ---- | ------------- | -------------------------------- |
+| `default` | Solid `--primary`, light foreground | Darker primary (`primary/90`) | — |
+| `destructive` | Solid destructive | Darker destructive | — |
+| `outline` | Muted text, border, background | Primary ink + 10% primary wash | Selected ink via host state / parent (not CVA alone) |
+| `ghost` | Muted text, transparent | Same as outline hover | Same as outline |
+| `secondary` | Solid `--secondary` (olive light) | Darker secondary | Rare — prefer `outline` for new work |
+| `link` | Primary text | Underline | — |
 
 ## Where It Lives
 
-- **Styles:** `apps/web/src/styles/primitives/button.scss`
-- **Integration:** ~~`apps/web/src/app/shared/ui-primitives/ui-primitives.directive.ts`~~ **removed (2026-05-16)** — prefer **`hlmBtn`** / **`HLM_BUTTON_IMPORTS`**; legacy **`ui-button`** chrome remains in **`button.scss`** until Phase 8.
+- **CVA:** `apps/web/src/app/shared/ui/button/button-variants.ts`
+- **Directive:** `apps/web/src/app/shared/ui/button/hlm-button.directive.ts`
+- **Legacy:** `apps/web/src/styles/primitives/button.scss` (`ui-button`) — do not extend; migrate callsites to `hlmBtn`
 
 ## Actions
 
 | # | User action | System response |
 | - | ----------- | ---------------- |
 | 1 | Click enabled button | Native click; parent handler runs |
-| 2 | Focus button | Focus-visible ring per tokens |
-| 3 | Activate loading state | Spinner; pointer events disabled |
+| 2 | Focus button | Focus-visible ring (`--interactive-focus-ring`) + interaction emphasis hover colors on quiet variants |
+| 3 | Activate loading state | `disabled:opacity-50`; no hover chrome |
 
 ## Component Hierarchy
 
 ```text
-button (host)
+button[hlmBtn] (host)
 └── projected label / icon content
 ```
+
+## Interaction emphasis
+
+- Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
+- [x] This component implements the contract (`outline`, `ghost` in CVA; `default`/`destructive` documented filled exception)
 
 ## Visual Behavior Contract
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | -------- | --------------------- | ---------------------- | --------------------------- | ------------- | ----- | ----------- |
-| Chrome | host `button` | parent | host | `.ui-button*` | content | modifiers match inputs |
-| Loading | host (`::after`) | host | none when loading | `.ui-button--loading::after` | overlay | spinner visible |
+| Chrome | host `button` | parent | host | `button[hlmBtn]` | content | variant classes on host |
+| Quiet hover | host | host | host | `hover:` / `focus-visible:` utilities | states | primary ink + wash |
+| Filled CTA | host | host | host | `bg-primary` / `bg-destructive` | states | solid fill |
 
-## API (normative target)
+## API
 
 | Input | Type | Default |
 | ----- | ---- | ------- |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` |
-| `emphasis` | `'primary' \| 'secondary' \| 'neutral' \| 'ghost' \| 'danger'` | `'secondary'` |
-| `layout` | `'text' \| 'icon-text' \| 'icon-only' \| 'text-icon' \| 'icon-text-icon'` | `'text'` |
-| `loading` | `boolean` | `false` |
-| `density` | `'default' \| 'toolbar'` | `'default'` |
-
-When `density === 'toolbar'` and `layout === 'icon-only'`, implementation MAY apply `icon-btn-ghost*` metrics until merged into `ui-button`.
-
-## Today vs target
-
-| Phase | Integration |
-| ----- | ----------- |
-| Today | Stacked directives + global SCSS |
-| Target | Typed host(s) with inputs above; scoped SCSS |
+| `variant` | `'default' \| 'destructive' \| 'outline' \| 'secondary' \| 'ghost' \| 'link'` | `'default'` |
+| `size` | `'default' \| 'sm' \| 'lg' \| 'icon' \| 'icon-sm' \| 'icon-md'` | `'default'` |
+| `iconPlacement` | `'start' \| 'end'` | balanced (padding semantics) |
 
 ## File Map
 
 | File | Purpose |
 | ---- | ------- |
-| `styles/primitives/button.scss` | Canonical chrome |
-| ~~`ui-primitives.directive.ts`~~ (removed) | Replaced by **`hlmBtn`** at callsites |
+| `shared/ui/button/button-variants.ts` | Canonical Tailwind/CVA classes |
+| `shared/ui/button/hlm-button.directive.ts` | Host directive |
+| `styles/primitives/button.scss` | Legacy `ui-button` (frozen) |
 
 ## Acceptance Criteria
 
-- [ ] No nested `<button>` inside `<button>`.
-- [ ] Icon-only buttons have an accessible name (`aria-label` or visible text).
-- [ ] Token-first styling (no stray hex outside tokens).
+- [x] No nested `<button>` inside `<button>`.
+- [x] Icon-only buttons have an accessible name (`aria-label` or visible text).
+- [x] `outline` / `ghost` use interaction emphasis (not `--accent` hover).
+- [x] `default` / `destructive` remain filled CTAs.
+- [ ] All legacy `ui-button` / `btn-primary` callsites migrated to `hlmBtn` variants (see [`interaction-emphasis-rollout.md`](../../system/interaction-emphasis-rollout.md)).

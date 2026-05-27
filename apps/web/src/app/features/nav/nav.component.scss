@@ -44,10 +44,6 @@
   --sidebar-row-height: calc(var(--spacing-6) + (var(--spacing-1) * 2));
   --sidebar-media-size: var(--spacing-6);
   --sidebar-icon-size: 1.25rem;
-  // Sidebar-only selection ink (royal/document blue); global light --secondary is olive-brown.
-  // @see docs/design/tokens.md — --filetype-document, --primary
-  --nav-selected-ink: var(--filetype-document);
-
   position: fixed;
   z-index: 201;
   pointer-events: auto;
@@ -230,13 +226,14 @@
     box-shadow: var(--interactive-focus-ring);
   }
 
-  // Active route — cool secondary selection (sidebar token)
+  // Active route — cool selection ink (global token)
+  // @see docs/design/state-visuals.md § Interaction emphasis
   &--active {
-    color: var(--nav-selected-ink);
-    background: color-mix(in srgb, var(--nav-selected-ink) 10%, transparent);
+    color: var(--interaction-selected-ink);
+    background: color-mix(in srgb, var(--interaction-selected-ink) 10%, transparent);
 
     .nav__icon {
-      color: var(--nav-selected-ink);
+      color: var(--interaction-selected-ink);
     }
   }
 

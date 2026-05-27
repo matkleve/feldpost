@@ -38,6 +38,8 @@
   flex-shrink: 0;
 }
 
+// Map upload trigger — quiet outline icon + interaction emphasis (panel open = selected ink).
+// @see docs/design/state-visuals.md § Interaction emphasis
 // :host + element raises specificity over hlmBtn Tailwind utilities on the same node.
 :host button.map-upload-btn {
   --upload-progress: 0%;
@@ -45,10 +47,10 @@
   width: 2.75rem;
   min-width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--primary) 14%, var(--card));
-  color: var(--primary);
+  background: var(--background);
+  color: var(--muted-foreground);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -57,6 +59,8 @@
   box-shadow: var(--shadow-md);
   transition:
     background 120ms ease-out,
+    border-color 120ms ease-out,
+    color 120ms ease-out,
     transform 120ms ease-out,
     width 180ms var(--motion-standard);
   flex-shrink: 0;
@@ -68,7 +72,7 @@
     justify-content: center;
     font-size: var(--font-size-xl);
     line-height: var(--line-height-solid);
-    color: var(--primary);
+    color: inherit;
     position: relative;
     z-index: 2;
   }
@@ -85,18 +89,40 @@
     justify-content: center;
   }
 
-  &:hover {
-    background: color-mix(in srgb, var(--primary) 22%, var(--card));
-    border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
+  &:hover,
+  &:focus-visible {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, var(--background));
+    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
     transform: scale(1.04);
+
+    .material-icons {
+      color: var(--primary);
+    }
   }
 
   &--active {
-    background: color-mix(in srgb, var(--primary) 22%, var(--card));
-    border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
+    color: var(--interaction-selected-ink);
+    background: color-mix(in srgb, var(--interaction-selected-ink) 10%, var(--background));
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
+
+    .material-icons {
+      color: var(--interaction-selected-ink);
+    }
   }
 
-  &--issues {
+  &--active:hover,
+  &--active:focus-visible {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, var(--background));
+    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+
+    .material-icons {
+      color: var(--primary);
+    }
+  }
+
+  &--issues:not(&--active) {
     border: 2px solid color-mix(in srgb, var(--destructive) 72%, var(--card));
   }
 
@@ -125,7 +151,7 @@
       position: absolute;
       inset: 2px;
       border-radius: var(--radius-full);
-      background: color-mix(in srgb, var(--primary) 14%, var(--card));
+      background: var(--background);
     }
   }
 

@@ -143,9 +143,9 @@ $toolbar-view-toggle-compact-max: 23.75rem;
 // @see docs/specs/ui/workspace/workspace-pane.md
 @mixin toolbar-menu-trigger-active-states($block) {
   button.#{$block}__menu-trigger[data-active='true'] {
-    background-color: color-mix(in srgb, var(--primary) 10%, transparent);
-    color: var(--primary);
-    border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
+    background-color: color-mix(in srgb, var(--interaction-selected-ink) 10%, transparent);
+    color: var(--interaction-selected-ink);
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 24%, var(--border));
   }
 
   .#{$block}__menu-trigger--open .#{$block}__menu-trigger-chevron {

@@ -101,6 +101,8 @@
   --filetype-pdf: oklch(0.72 0.14 25);
   --filetype-video: oklch(0.62 0.14 25);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 75%, var(--foreground));
+  --filetype-document: oklch(0.62 0.12 245);
+  --interaction-selected-ink: var(--filetype-document);
   --app-violet-accent: oklch(0.72 0.14 290);
   --map-marker-user: var(--chart-1);
   --map-marker-search: var(--primary);
@@ -194,6 +196,9 @@
   --filetype-pdf: oklch(0.52 0.17 25);
   --filetype-video: oklch(0.52 0.16 25);
   --filetype-document: oklch(0.5 0.1 245);
+  // Cool selection ink for quiet controls (nav active, toggle on) — not tweakcn --secondary (olive in light).
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  --interaction-selected-ink: var(--filetype-document);
   --filetype-spreadsheet: var(--success);
   --filetype-presentation: oklch(0.56 0.15 42);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));

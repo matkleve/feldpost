@@ -47,7 +47,7 @@ Door-number UX is specified here so product copy (`question.door`) and engineeri
 - Chip text: `upload.resolver.mediaCount` → `{count} media`.
 - Chip `title` / `aria-label`: `upload.resolver.media.chip.title` (native hover tooltip + screen readers).
 - Dropdown: scrollable list of job file names; each row has **Ask later**.
-- **Ask later** calls `UploadLocationResolutionService.isolateJobFromGroup(groupId, jobId)` — removes job from current group and opens a **dedicated tray card** for that job only.
+- **Ask later** calls `isolateJobFromGroup` — removes the job from the current group, registers a dedicated card for later, and **keeps the tray on the current question** (no carousel jump).
 
 ## Accessibility
 

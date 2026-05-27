@@ -227,8 +227,14 @@ Applies to all controls that open selectable options: dropdowns, context menus, 
 
 2. Toolbar and button standard second
 
-- Normalize thin-border button variants and active states across toolbars.
+- **Done (2026-05-27):** `hlmBtn` `outline`/`ghost` + toggle lanes implement **Interaction emphasis** (`docs/design/state-visuals.md`).
+- Normalize toolbar trigger open/selected states to `--interaction-selected-ink`; remove duplicate `color-mix(primary)` on `hlmBtn` hosts.
 - Reduce nested borders where visual weight is too high.
+
+**Grep gates (quiet buttons):**
+
+- `button-variants.ts` must not use `hover:bg-accent` on `outline`/`ghost`.
+- New feature SCSS must not reintroduce per-button primary hover mixes on plain `hlmBtn` hosts — use variants instead.
 
 3. Toggle and chips third
 

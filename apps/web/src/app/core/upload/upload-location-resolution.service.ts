@@ -339,16 +339,19 @@ export class UploadLocationResolutionService {
     });
   }
 
-  registerDisambiguationGroup(input: {
-    batchId: string;
-    queryKey: string;
-    folderDisplayPath: string;
-    titleAddress: string;
-    jobIds: string[];
-    candidates: UploadAddressCandidate[];
-    localityHint?: string;
-    disambiguationKind?: UploadDisambiguationGroup['disambiguationKind'];
-  }): void {
+  registerDisambiguationGroup(
+    input: {
+      batchId: string;
+      queryKey: string;
+      folderDisplayPath: string;
+      titleAddress: string;
+      jobIds: string[];
+      candidates: UploadAddressCandidate[];
+      localityHint?: string;
+      disambiguationKind?: UploadDisambiguationGroup['disambiguationKind'];
+    },
+    options?: { activateTray?: boolean },
+  ): void {
     const existing = this._groups().find(
       (g) => g.batchId === input.batchId && g.queryKey === input.queryKey && isGroupBlocked(g),
     );
@@ -398,7 +401,9 @@ export class UploadLocationResolutionService {
       });
     }
 
-    this._selectedGroupId.set(updated.id);
+    if (options?.activateTray !== false) {
+      this._selectedGroupId.set(updated.id);
+    }
     this.syncBatchDisambiguationAggregates(input.batchId);
   }
 
@@ -589,6 +594,8 @@ export class UploadLocationResolutionService {
     if (!group?.jobIds.includes(jobId)) {
       return;
     }
+    const openBefore = this._groups().filter((g) => isGroupBlocked(g));
+    const stayIndex = Math.max(0, openBefore.findIndex((g) => g.id === groupId));
     const remaining = group.jobIds.filter((id) => id !== jobId);
     if (remaining.length > 0) {
       this.patchGroup({
@@ -600,16 +607,30 @@ export class UploadLocationResolutionService {
       this._groups.update((prev) => prev.filter((g) => g.id !== groupId));
     }
 
-    this.registerDisambiguationGroup({
-      batchId: group.batchId,
-      queryKey: `${group.queryKey}::isolate:${jobId}`,
-      folderDisplayPath: group.folderDisplayPath,
-      titleAddress: group.titleAddress,
-      jobIds: [jobId],
-      candidates: [...group.candidates],
-      localityHint: group.localityHint,
-      disambiguationKind: group.disambiguationKind,
-    });
+    this.registerDisambiguationGroup(
+      {
+        batchId: group.batchId,
+        queryKey: `${group.queryKey}::isolate:${jobId}`,
+        folderDisplayPath: group.folderDisplayPath,
+        titleAddress: group.titleAddress,
+        jobIds: [jobId],
+        candidates: [...group.candidates],
+        localityHint: group.localityHint,
+        disambiguationKind: group.disambiguationKind,
+      },
+      { activateTray: false },
+    );
+
+    if (remaining.length > 0) {
+      this._selectedGroupId.set(groupId);
+      return;
+    }
+
+    const open = this._groups().filter((g) => isGroupBlocked(g));
+    const isolated = open.find((g) => g.jobIds.length === 1 && g.jobIds[0] === jobId);
+    const withoutIsolated = open.filter((g) => g.id !== isolated?.id);
+    const nextIndex = Math.min(stayIndex, Math.max(0, withoutIsolated.length - 1));
+    this._selectedGroupId.set(withoutIsolated[nextIndex]?.id ?? null);
   }
 
   deferGroup(groupId: string): void {

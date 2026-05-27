@@ -35,6 +35,9 @@
           >
             <span class="material-icons" aria-hidden="true">chevron_left</span>
           </button>
+          @if (carouselIndicator(); as indicator) {
+            <span class="upload-resolver-tray__nav-position" aria-hidden="true">{{ indicator }}</span>
+          }
           <button
             type="button"
             class="upload-resolver-tray__nav-btn"

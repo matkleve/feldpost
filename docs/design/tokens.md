@@ -84,6 +84,15 @@ The v2 color system follows the Material Design 3 tonal architecture with the Fe
 - **Tailwind `dark:` utilities** (for example `dark:bg-muted`): **`@custom-variant dark`** in **`apps/web/src/styles.scss`** is **`&:is([data-theme="dark"] *)`** only, so **`dark:`** classes **do not** activate for **system + OS dark** unless **`data-theme="dark"`** is present.
 - **Why `dark:` is not extended in `styles.scss`:** A long-form variant that also matches system dark would use Tailwind **`@slot`** in a way Angular’s Sass pass rejects (`Top-level selectors may not contain the parent selector "&"`). Inline comment above **`@custom-variant dark`** in **`styles.scss`**; mitigations and manual QA matrix in [`phase-7-token-migration.md`](../migration/phase-7-token-migration.md) § **Risks / QA**.
 
+#### Interaction emphasis (product semantic — `styles.scss` `:root`)
+
+| Token | Value | Use |
+| ----- | ----- | --- |
+| `--interaction-selected-ink` | `var(--filetype-document)` | Persistent **selected/on** ink for quiet controls (nav active route, toggle `data-state=on`). **Not** the same as tweakcn `--secondary` (olive filled button in light mode). |
+| Hover / attention ink | `var(--primary)` | Quiet control hover/focus; see `docs/design/state-visuals.md` § Interaction emphasis |
+
+Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette` (dark redefines `--filetype-document` for contrast).
+
 #### Reference palette — primary (gold-amber, seed `#c9a84c` @ stop 70)
 
 | Stop | Hex |

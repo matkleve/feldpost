@@ -27,6 +27,10 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 - docs/specs/system/README.md
 - docs/specs/ui/README.md
 
+## Cross-cutting UI contracts
+
+- **Interaction emphasis** (hover primary, selected cool ink): [`docs/design/state-visuals.md`](../design/state-visuals.md) § Interaction emphasis — rollout tracker [`docs/specs/system/interaction-emphasis-rollout.md`](system/interaction-emphasis-rollout.md)
+
 ## Governance Artifacts
 
 - docs/specs/GOVERNANCE-MODULE-REGISTRY.json

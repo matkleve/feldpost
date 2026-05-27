@@ -104,6 +104,18 @@ Parent integration, imports, injections, and cross-component wiring.
 
 Each criterion is testable.
 
+### 11. Interaction emphasis (interactive components only)
+
+Skip for passive/display-only components. Required when the spec describes buttons, links, toggles, menu rows, or other actionable controls.
+
+```markdown
+## Interaction emphasis
+- Canonical: docs/design/state-visuals.md § Interaction emphasis
+- [ ] This component implements the contract (or documented exception below)
+```
+
+When implemented, check the box and add any exception to the table in [`docs/specs/system/interaction-emphasis-rollout.md`](../specs/system/interaction-emphasis-rollout.md). Remove the row’s **pending** note there.
+
 ---
 
 ## Writing Notes

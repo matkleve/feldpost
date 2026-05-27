@@ -7,13 +7,13 @@
 
 `app-upload-resolver-tray` — active address-choice UI inside `.upload-shell__dock` (layout-only column; tray owns its own frosted card). Renders below the panel when both are visible; tray-only when the panel is closed.
 
-**Active layout (Cursor Questions–inspired):** section label **Address resolver**, optional carousel, **`h2` question** (scenario-specific — see [question copy contract](./upload-resolver-tray.question-copy.md)), folder path (tooltip only), numbered answers, **affected-media chip** (`{count} media` + dropdown), footer **Skip** + **Continue**.
+**Active layout (Cursor Questions–inspired):** section label **Address resolver**, optional carousel (`‹` **1/4** `›` when multiple groups), **`h2` question** (scenario-specific — see [question copy contract](./upload-resolver-tray.question-copy.md)), folder path (tooltip only), numbered answers, **affected-media chip** (`{count} media` + dropdown), footer **Skip** + **Continue**.
 
 ## Affected-media chip
 
 - Neutral `app-chip` on a button; label `{count} media`.
 - Click → `app-dropdown-shell` list of upload job file names (scroll when long).
-- Row action **Ask later** → `isolateJobFromGroup` (single-job tray card).
+- Row action **Ask later** → `isolateJobFromGroup` (queues a single-job tray card in the carousel **without** switching the active card).
 - Folder path uses `title` / `aria-label`, not a visible “Folder” prefix.
 
 **Question copy (normative):** [upload-resolver-tray.question-copy.md](./upload-resolver-tray.question-copy.md) — city vs address vs door vs source; door-number grid/input is planned, not MVP.
