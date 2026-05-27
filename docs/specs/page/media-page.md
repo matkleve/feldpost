@@ -95,7 +95,7 @@ AuthenticatedAppLayout (split host)
 | 5 | User navigates between `/media` and `/map` | Pane host MUST preserve upload continuity and tab state across route transitions. | Layout host + pane |
 | 6 | User invokes grouping/sorting/filtering via toolbar | `MediaComponent` command methods; toolbar intent-only. | Page + layout |
 | 7 | Child emits selection/detail intents | Forward through selected-items context ports to **Workspace Pane**. | Page + pane host |
-| 8 | User opens route upload chrome on `/media` | `MediaComponent` MUST render `.upload-shell` (button + optional dock) as an **out-of-flow overlay** on the main column (`position: absolute` inside a zero-height `.media-zone` anchor). Opening the panel or resolver dock MUST NOT reflow header, toolbar, or grid. Workspace pane **Upload** tab remains a separate embed in the layout host. | `media.component` |
+| 8 | User opens upload chrome on `/media` | `app-upload-shell` in the layout main column (absolute top-right of page area) provides button + dock; MUST NOT overlap workspace pane. Opening panel/tray MUST NOT reflow header, toolbar, or grid. Workspace pane **Upload** tab remains a separate embed in the layout host. | `authenticated-app-layout` + `upload-shell` |
 
 Page contract note:
 

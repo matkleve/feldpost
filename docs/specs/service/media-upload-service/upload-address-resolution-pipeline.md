@@ -18,7 +18,15 @@ Pre-upload pipeline: folder/filename paths → **Search Object (SO)** → dedup 
 
 ## Tray contract
 
-Only **ambiguous** multi-hit geocode results create `UploadDisambiguationGroup` with **all** `jobIds` for that `grouping_key`. Tray reads `UploadLocationResolutionService` signals only.
+Only **ambiguous** multi-hit geocode (or **source conflict**) creates `UploadDisambiguationGroup` with **all** `jobIds` for that `grouping_key` (merged on repeated `registerDisambiguationGroup`).
+
+| Stage | Owner | Effect |
+| --- | --- | --- |
+| Batch intake | `UploadAddressResolutionOrchestrator.classifyBatch` | Jobs get `groupingKey`, `titleAddress`, orchestrator cache (`needsGeocode` / `resolved` / `ambiguous` / `partial`) |
+| Per job | `runPreUploadLocationResolve` → `applyPreResolveFromOrchestrator` or `resolveJobTitleAddress` | Geocode + `classifySearchHits`; ambiguous → `registerDisambiguationGroup` |
+| UI | `app-upload-resolver-tray` | Reads `disambiguationGroups`, `activeGroup`, `UploadManagerService.jobs`; writes via `selectAddressCandidate`, `deferGroup`, `isolateJobFromGroup` |
+
+Tray does **not** call geocoders. Placement trace: `[upload-placement] P1–P6` in `upload-address-resolution.debug.ts` (enable via `feldpost:debug:upload-address`). Detail: [upload-resolver-tray.md](../../component/upload/upload-resolver-tray.md#data-pipeline-read--write).
 
 ## Nachbearbeitung
 
@@ -40,7 +48,7 @@ Disable: `localStorage.removeItem('feldpost:debug:upload-address')`
 
 ## Acceptance criteria
 
-- [ ] Folder and single-file uploads use the same orchestrator entry
-- [ ] One structured geocode per `grouping_key` per batch
-- [ ] Tray shows correct file count per group
-- [ ] EXIF and `relative_path` preserved on jobs and DB insert
+- [x] Folder and single-file uploads use the same orchestrator entry (`classifyBatch` on submit)
+- [x] One structured geocode per `grouping_key` per batch (`ensureGeocodedGroup` inflight dedupe)
+- [x] Tray shows correct file count per group (`jobIds` on group + media chip)
+- [x] EXIF and `relative_path` preserved on jobs and DB insert

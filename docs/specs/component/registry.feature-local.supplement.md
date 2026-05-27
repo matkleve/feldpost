@@ -198,6 +198,32 @@
 
 ### Upload Feature
 
+#### `<app-upload-shell>` — Upload Shell
+
+- **File**: `apps/web/src/app/features/upload/upload-shell.component.ts`
+- **Purpose**: Fixed top-right shell: upload trigger, dock column for panel + resolver tray on all authenticated routes.
+- **Spec**: [`docs/specs/component/upload/upload-shell.md`](upload/upload-shell.md)
+- **Variant axes**: none (panel open/closed via shell state)
+- **Composed of**: `app-upload-panel`, `app-upload-resolver-tray`, upload trigger
+- **Used in**: `authenticated-app-layout`
+- **Gaps**: none
+
+---
+
+#### `<app-upload-resolver-tray>` — Upload Resolver Tray
+
+- **File**: `apps/web/src/app/features/upload/upload-resolver-tray.component.ts`
+- **Purpose**: Pre-upload address disambiguation card (questions, numbered options, media chip, carousel).
+- **Spec**: [`docs/specs/component/upload/upload-resolver-tray.md`](upload/upload-resolver-tray.md), [`upload-resolver-tray.question-copy.md`](upload/upload-resolver-tray.question-copy.md)
+- **Variant axes**: `data-state` (`passive` | `active`); programmatic `trayMode` includes `hidden`
+- **Other inputs**: `panelOpen`, `embeddedInPane`
+- **Outputs**: `previewLocation`, `candidateSelected`, `groupChanged`, `deferRequested`
+- **Composed of**: `app-chip`, `app-dropdown-shell`, `hlm` button
+- **Used in**: `app-upload-shell`
+- **Gaps**: `context_distance` (Prompt B) UI not implemented
+
+---
+
 #### `<app-upload-panel>` — Upload Panel
 
 - **File**: `apps/web/src/app/features/upload/upload-panel.component.ts`
@@ -205,7 +231,7 @@
 - **Spec**: [`docs/specs/component/upload/upload-panel.md`](upload/upload-panel.md)
 - **Variant axes**: none
 - **Composed of**: `app-upload-panel-item`, `app-panel-trigger`
-- **Used in**: `app-map-shell`
+- **Used in**: `app-upload-shell` (and workspace pane embed without shell tray)
 - **Gaps**: none
 
 ---

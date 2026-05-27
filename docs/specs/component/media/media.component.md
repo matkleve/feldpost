@@ -26,7 +26,7 @@ It MUST delegate content rendering behavior to `MediaContentComponent`.
 The component MUST render a stable shell structure with page header, optional `MediaToolbar`, and a content region.
 The shell MUST project deterministic lifecycle states (`boot`, `initial-loading`, `ready`, `loading-more`, `append-error`, `error`, `revalidating`) to child boundaries.
 Card-variant switching and operator/query command writes MUST remain shell-owned.
-**Upload chrome:** `.media-zone` + `.upload-shell` (see [upload-shell.md](../upload/upload-shell.md)) anchor top-right of the route main column; chrome is out of document flow so list/header layout does not shift when the dock opens. Scroll the `:host` to move chrome with page content (map route keeps chrome fixed in the map viewport).
+**Upload chrome:** Global `app-upload-shell` (see [upload-shell.md](../upload/upload-shell.md)) lives in the layout **main column** (top-right of the page area, not over the workspace pane). List/header layout does not shift when the dock opens. Workspace pane **Upload** tab remains a separate embed in the layout host.
 Visual geometry details MAY evolve independently as long as the behavior contract in this spec remains unchanged.
 
 ## Where It Lives

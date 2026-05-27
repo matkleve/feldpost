@@ -28,6 +28,7 @@ import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { MarkerInteractionService } from './marker-interaction.service';
+import { UploadShellUiService } from '../../upload/upload-shell-ui.service';
 
 function createMarkerStub() {
   return {
@@ -98,6 +99,7 @@ function buildTestBed() {
     imports: [MapShellComponent],
     providers: [
       MapShellState,
+      UploadShellUiService,
       {
         provide: WORKSPACE_PANE_SHELL_HOST,
         useFactory: (state: MapShellState) => createWorkspacePaneShellHostStub(state),
@@ -1535,13 +1537,11 @@ describe('MapShellComponent', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    const placeFile = vi.fn();
+    const uploadShellUi = TestBed.inject(UploadShellUiService);
+    const placeFile = vi.spyOn(uploadShellUi, 'placeFile');
     const component = fixture.componentInstance as unknown as {
       draftMediaMarker: {
         set: (value: { lat: number; lng: number; uploadCount: number } | null) => void;
-      };
-      uploadPanelChild: () => {
-        placeFile: (key: string, coords: { lat: number; lng: number }) => void;
       };
       placementActive: { (): boolean };
       enterPlacementMode: (key: string) => void;
@@ -1552,7 +1552,6 @@ describe('MapShellComponent', () => {
       lng: 16.37,
       uploadCount: 0,
     });
-    component.uploadPanelChild = () => ({ placeFile });
 
     component.enterPlacementMode('job-1');
 

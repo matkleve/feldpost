@@ -1,0 +1,192 @@
+@use '../../../styles/frosted-chrome';
+
+// Top-right of layout main column — not viewport-fixed (avoids covering workspace pane).
+// @see docs/specs/component/upload/upload-shell.md
+:host {
+  display: block;
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  z-index: 200;
+  pointer-events: none;
+}
+
+.upload-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-2);
+  width: max-content;
+  min-width: 0;
+  max-width: min(420px, calc(100vw - var(--spacing-6)));
+  pointer-events: auto;
+}
+
+.upload-shell--panel-closed:not(.upload-shell--resolver-active) {
+  gap: var(--spacing-1);
+}
+
+.upload-btn-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-2);
+  width: max-content;
+  max-width: min(14rem, calc(100vw - var(--spacing-6)));
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+// Map upload trigger — quiet outline icon + interaction emphasis (panel open = selected ink).
+// @see docs/design/state-visuals.md § Interaction emphasis
+button.map-upload-btn {
+  --upload-progress: 0%;
+
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  @include frosted-chrome.outline-control;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  box-shadow: var(--shadow-md);
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out,
+    color 120ms ease-out,
+    transform 120ms ease-out,
+    width 180ms var(--motion-standard);
+  flex-shrink: 0;
+  position: relative;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+
+  .material-icons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-solid);
+    color: inherit;
+    position: relative;
+    z-index: 2;
+  }
+
+  .map-upload-btn__icon-shell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--primary);
+    @include frosted-chrome.outline-control-hover;
+    transform: scale(1.04);
+
+    .material-icons {
+      color: var(--primary);
+    }
+  }
+
+  &--active {
+    color: var(--interaction-selected-ink);
+    background: color-mix(in srgb, var(--interaction-selected-ink) 12%, color-mix(in srgb, var(--card) 55%, transparent));
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
+    backdrop-filter: blur(12px) saturate(1.15);
+    -webkit-backdrop-filter: blur(12px) saturate(1.15);
+
+    .material-icons {
+      color: var(--interaction-selected-ink);
+    }
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    color: var(--primary);
+    @include frosted-chrome.outline-control-hover;
+
+    .material-icons {
+      color: var(--primary);
+    }
+  }
+
+  &--issues:not(&--active) {
+    border: 2px solid color-mix(in srgb, var(--destructive) 72%, var(--card));
+  }
+
+  .map-upload-btn__icon-shell {
+    position: relative;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  .map-upload-btn__progress {
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--radius-full);
+    background: conic-gradient(
+      var(--primary) 0 var(--upload-progress),
+      color-mix(in srgb, var(--card) 50%, transparent) var(--upload-progress) 100%
+    );
+    z-index: 1;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: var(--radius-full);
+      background: var(--background);
+    }
+  }
+
+  .map-upload-btn__spinner {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: var(--radius-full);
+    border: 2px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-top-color: var(--primary);
+    animation: upload-btn-spin 700ms linear infinite;
+    position: relative;
+    z-index: 2;
+  }
+}
+
+@keyframes upload-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Dock — width + vertical gap only; each child owns its own frosted surface
+// @see docs/specs/component/upload/upload-shell.md
+.upload-shell__dock {
+  display: none;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  width: min(420px, calc(100vw - var(--spacing-6)));
+  max-width: calc(100vw - var(--spacing-6));
+  min-width: 0;
+
+  &--visible {
+    display: flex;
+  }
+
+  & > app-upload-panel,
+  & > app-upload-resolver-tray {
+    width: 100%;
+    min-width: 0;
+  }
+}

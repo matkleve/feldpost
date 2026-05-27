@@ -775,11 +775,9 @@ upload.resolver.title,Which {address} do you mean?,apps/web/src/app/features/upl
 upload.resolver.sourceConflict.title,Use the folder address or the photo GPS?,apps/web/src/app/features/upload/upload-resolver-tray.component.ts,Deprecated alias for question.source,Use the folder address or the photo GPS?,Ordneradresse oder Foto-GPS verwenden?,Usare l'indirizzo della cartella o il GPS della foto?
 upload.resolver.options,Choose one answer,apps/web/src/app/features/upload/upload-resolver-tray.component.html,Options listbox label,Choose one answer,Eine Antwort wählen,Scegli una risposta
 upload.resolver.tray.aria,Address resolver,apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label,Active tray region label,Address resolver,Adressauflösung,Risoluzione indirizzo
-upload.resolver.tray.aria,Address clarification,apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label,Active tray region label,Address clarification,Adressklärung,Chiarimento indirizzo
 upload.resolver.carousel.aria,Switch address issue,apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label,Carousel control group label,Switch address issue,Adressfall wechseln,Cambia problema indirizzo
 upload.resolver.carousel.prev,Previous address,apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label,Carousel previous button,Previous address,Vorherige Adresse,Indirizzo precedente
 upload.resolver.carousel.next,Next address,apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label,Carousel next button,Next address,Nächste Adresse,Indirizzo successivo
-upload.resolver.options,Address options,apps/web/src/app/features/upload/upload-resolver-tray.component.html,Options listbox label,Address options,Adressoptionen,Opzioni indirizzo
 upload.resolver.filesCount,{count} media,apps/web/src/app/features/upload/upload-resolver-tray.component.html,Deprecated alias for mediaCount,{count} media,{count} Medien,{count} media
 upload.resolver.skip,Skip,apps/web/src/app/features/upload/upload-resolver-tray.component.html,Defer disambiguation (footer),Skip,Überspringen,Salta
 upload.resolver.continue,Continue,apps/web/src/app/features/upload/upload-resolver-tray.component.html,Apply selected candidate,Continue,Weiter,Continua

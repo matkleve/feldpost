@@ -58,6 +58,6 @@ Door-number UX is specified here so product copy (`question.door`) and engineeri
 
 ## Acceptance criteria
 
-- [ ] Mock group 1 (`city`) shows question “Which city is Musterstrasse 12 in?” and city options.
-- [ ] No tray copy loaded from stale DB context strings for catalog keys.
-- [ ] Spec matrix above matches `upload-resolver-tray.helpers.ts` + catalog.
+- [x] Mock group 1 (`city`) shows question “Which city is Musterstrasse 12 in?” and city options (`mockResolverTray` dev flag).
+- [x] Resolver UI copy uses `upload-resolver-translation.catalog.ts` for catalog keys (not stale DB context strings).
+- [x] Spec matrix above matches `upload-resolver-tray.helpers.ts` + catalog.

@@ -28,6 +28,39 @@
 
 `passiveStatusLine` comes from `UploadPanelSignalsService` (G12), not the resolution service.
 
+## Mounting
+
+- **Host:** `app-upload-shell` → `.upload-shell__dock` (see [upload-shell.md](./upload-shell.md)).
+- **Layout:** `authenticated-app-layout.component.html` mounts one shell on **every authenticated route** (map, media, projects, …).
+- **Map preview:** `(previewLocation)` wired in `upload-shell` to pan/zoom the map when the user hovers or focuses an option.
+- **`embeddedInPane`:** when `true`, tray returns `trayMode: hidden` (workspace-embedded panel must not duplicate the shell tray).
+
+## Data pipeline (read / write)
+
+Tray is a **view** over resolution + job state; it does not call geocoders or Supabase.
+
+| Direction | Source / sink | Data |
+| --- | --- | --- |
+| **Read** | `UploadLocationResolutionService.disambiguationGroups()` | Open groups (`resolutionGateOpen`), `candidates`, `titleAddress`, `folderDisplayPath`, `collapseStage`, `disambiguationKind` |
+| **Read** | `resolution.activeGroup()` / `selectedGroupId` | Carousel selection (production) |
+| **Read** | `UploadManagerService.jobs()` | File names for `affectedMedia` chip rows |
+| **Read** | `UploadPanelSignalsService.passiveStatusLine` | Passive dock line when panel closed |
+| **Write** | `UploadManagerService.selectAddressCandidate` → `applyCandidateToGroup` | Continue — coords on all `jobIds`, gate closed, queue drain |
+| **Write** | `resolution.deferGroup` | Skip — gate closed, jobs → `missing_data` |
+| **Write** | `resolution.setSelectedGroupId` | Carousel prev/next |
+| **Write** | `resolution.isolateJobFromGroup` | Ask later — split one job to its own card (`activateTray: false`) |
+
+**Upstream (before tray):** `UploadNewPipelineService` → `runPreUploadLocationResolve` → geocode / orchestrator → `registerDisambiguationGroup`. See [upload-address-resolution-pipeline.md](../../service/media-upload-service/upload-address-resolution-pipeline.md#tray-contract).
+
+**Debug:** `localStorage.setItem('feldpost:debug:upload-address', '1')` → `[upload-placement] P1–P6` and `[upload-address:*]` (see pipeline doc).
+
+## Carousel
+
+- Shown when `openGroups().length > 1`: `‹` **{current}/{total}** `›` between chevrons.
+- **Production:** `setSelectedGroupId` selects the page; `activeGroup` follows service selection.
+- **Ask later:** `isolateJobFromGroup` registers a new group with `{ activateTray: false }` so the **active question stays on the same page index** while **total** increases (e.g. **1/3** → **1/4**). Tray keeps an explicit `carouselDisplay` signal so the denominator updates even when the page index is unchanged.
+- **Mock (`mockResolverTray`):** `mockCarouselIndex` + `mockGroups` signal; Skip/Continue advance mock pages only.
+
 ## Ownership matrix
 
 | Behavior | Geometry | State | Visual |
@@ -82,10 +115,10 @@ Jobs in `awaiting_disambiguation` stay in **Queue** with label “Choose address
 
 ## Dev QA (local only)
 
-`upload-dev-flags.ts`:
+`upload-dev-flags.ts` (defaults **false** in repo; set `true` locally for QA):
 
-- `mockResolverTray: true` — three static groups in `upload-resolver-tray.mock.ts`; tray stays **active** with carousel; Skip/Continue advance cards without touching upload jobs.
-- Set both `mockResolverTray` and `dockAlwaysVisible` to **false** before merge.
+- `mockResolverTray` — three static groups in `upload-resolver-tray.mock.ts`; tray stays **active** with carousel; Skip/Continue advance cards without touching upload jobs.
+- `dockAlwaysVisible` — passive dock line when idle (no real disambiguation).
 
 ## MVP scope (OD-7)
 
@@ -93,7 +126,9 @@ Pre-upload gate only. No tray for `phase === 'complete'` or post-upload correcti
 
 ## Acceptance criteria
 
-- [ ] Tray mounted inside `upload-shell` on map route
-- [ ] Active mode shows numbered choices, carousel when multiple groups, Skip + Continue footer
-- [ ] `source` kind shows two candidates without city collapse
-- [ ] Selecting a candidate applies to the whole group and re-queues jobs
+- [x] Tray mounted inside `app-upload-shell` on all authenticated routes (not a map-only duplicate)
+- [x] Active mode: numbered choices (1–9), score micro-bar, carousel when multiple groups, Skip + Continue footer
+- [x] Affected-media chip: dropdown file list, Ask later without carousel jump; denominator updates (e.g. 1/3 → 1/4)
+- [x] `source` kind shows two candidates without city collapse
+- [x] Continue applies candidate to whole group via `applyCandidateToGroup` and re-queues jobs
+- [ ] `context_distance` (Prompt B) — not MVP; numbered list not used

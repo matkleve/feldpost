@@ -2,6 +2,9 @@
 <app-nav />
 
 <div class="authenticated-app-layout__main">
+  <!-- Upload chrome — top-right of main column only (does not cover workspace pane). -->
+  <app-upload-shell />
+
   <div
     class="authenticated-app-layout__map-host"
     [class.authenticated-app-layout__map-host--visible]="mapShellVisible()"

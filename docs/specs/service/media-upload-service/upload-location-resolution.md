@@ -41,15 +41,20 @@ MVP excludes tray for uploaded rows. Post-save forward skipped when `coords` or 
 
 | Method | Purpose |
 | --- | --- |
-| `resolveJobTitleAddress` | Cache / SO geocode + classify + auto-assign or hold |
-| `registerDisambiguationGroup` | Tray group with full `jobIds[]` |
-| `resolveGroupingKey` | One structured geocode per `grouping_key` |
+| `resolveJobTitleAddress` | Legacy free-text geocode + classify + auto-assign or hold |
+| `applyPreResolveFromOrchestrator` | SO cache: geocode group, auto-resolve, or register tray |
+| `registerDisambiguationGroup(input, options?)` | Upsert tray group; merge `jobIds` by `batchId` + `queryKey`; set jobs `awaiting_disambiguation`. Options: `{ activateTray?: boolean }` — default `true` selects group; **`false`** for Ask-later split (stay on current carousel page) |
+| `isolateJobFromGroup(groupId, jobId)` | Remove job from group; register isolated single-job group with `activateTray: false`; preserve carousel page index |
 | `applyCandidateToGroup` | User pick; closes gate; sets job coords; `phase → queued` |
 | `deferGroup` | Close gate; jobs → `missing_data` |
+| `setSelectedGroupId` | Carousel / active group selection |
 | `isJobBlockedByGate` | Queue drain filter |
+
+**Signals (tray reads):** `disambiguationGroups`, `selectedGroupId`, `activeGroup`, `pendingGroupCount`.
 
 ## Acceptance criteria
 
-- [ ] Ambiguous multi-hit jobs enter `awaiting_disambiguation` with `addressCandidates`
-- [ ] Unambiguous or EXIF-assisted jobs get coords before dedup
-- [ ] Non-blocked jobs in other groups continue uploading while one group is held
+- [x] Ambiguous multi-hit jobs enter `awaiting_disambiguation` with `addressCandidates`
+- [x] Unambiguous or EXIF-assisted jobs get coords before dedup
+- [x] Non-blocked jobs in other groups continue uploading while one group is held
+- [x] `isolateJobFromGroup` splits one job without changing the active carousel question index

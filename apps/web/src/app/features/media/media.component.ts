@@ -9,7 +9,6 @@
 import {
   Component,
   DestroyRef,
-  ElementRef,
   HostListener,
   computed,
   effect,
@@ -44,17 +43,7 @@ import {
 import { workspaceMediaToMediaRecord } from '../../core/workspace-view/workspace-media-mapper';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import { AuthService } from '../../core/auth/auth.service';
-import { UploadManagerService } from '../../core/upload/upload-manager.service';
-import { getLaneForJob } from '../upload/upload-phase.helpers';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../core/workspace-pane/workspace-pane-shell-host.token';
-import type {
-  ImageUploadedEvent,
-  UploadLocationMapPickRequest,
-  UploadLocationPreviewEvent,
-} from '../../core/workspace-pane/workspace-pane-shell-events.types';
-import { UPLOAD_DEV_FLAGS } from '../upload/upload-dev-flags';
-import { UploadPanelComponent } from '../upload/upload-panel.component';
-import { UploadResolverTrayComponent } from '../upload/upload-resolver-tray.component';
 import type { ZoomToLocationEvent } from '../upload/upload-panel-row-handlers';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../core/filter/filter.service';
@@ -95,8 +84,6 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsDropdownComponent,
-    UploadPanelComponent,
-    UploadResolverTrayComponent,
   ],
   templateUrl: './media.component.html',
   styleUrl: './media.component.scss',
@@ -117,7 +104,6 @@ export class MediaComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
   private readonly cardVariantSettings = inject(CardVariantSettingsService);
   private readonly authService = inject(AuthService);
-  private readonly uploadManager = inject(UploadManagerService);
   private readonly shellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   protected readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
@@ -125,7 +111,6 @@ export class MediaComponent implements OnDestroy {
   private readonly mediaPageState = inject(MediaPageStateService);
   private readonly thumbnailRealtime = inject(MediaThumbnailRealtimeService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly hostElement = inject(ElementRef<HTMLElement>);
 
   readonly loading = signal(false);
   readonly initialLoadSettled = signal(false);
@@ -255,29 +240,6 @@ export class MediaComponent implements OnDestroy {
     ];
   });
   readonly isDragging = signal(false);
-  readonly uploadPanelPinned = signal(false);
-  readonly uploadPanelOpen = this.uploadPanelPinned.asReadonly();
-  readonly uploadBatch = this.uploadManager.activeBatch;
-  readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
-  readonly uploadBatchActive = computed(() => {
-    const batch = this.uploadBatch();
-    return !!batch && (batch.status === 'uploading' || batch.status === 'scanning');
-  });
-  readonly uploadResolverPending = computed(
-    () => this.uploadBatch()?.pendingDisambiguationCount ?? 0,
-  );
-  readonly showUploadDock = computed(
-    () =>
-      UPLOAD_DEV_FLAGS.dockAlwaysVisible ||
-      this.uploadPanelOpen() ||
-      this.uploadResolverPending() > 0,
-  );
-  readonly uploadResolverTrayActive = computed(
-    () => UPLOAD_DEV_FLAGS.dockAlwaysVisible || this.uploadResolverPending() > 0,
-  );
-  readonly uploadHasIssues = computed(() =>
-    this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'issues'),
-  );
 
   private loadRequestId = 0;
 
@@ -380,40 +342,8 @@ export class MediaComponent implements OnDestroy {
     this.workspacePaneObserver.setDetailImageId(mediaId);
   }
 
-  toggleUploadPanel(): void {
-    this.uploadPanelPinned.update((open) => !open);
-  }
-
-  closeUploadPanel(): void {
-    this.uploadPanelPinned.set(false);
-  }
-
-  onImageUploaded(event: ImageUploadedEvent): void {
-    this.shellHost.onImageUploadedFromWorkspacePane(event);
-  }
-
-  openDetailView(mediaId: string): void {
-    this.shellHost.openDetailView(mediaId);
-  }
-
   onZoomToLocation(event: ZoomToLocationEvent): void {
     this.shellHost.onZoomToLocationRequested(event);
-  }
-
-  enterPlacementMode(key: string): void {
-    this.shellHost.enterPlacementModeFromWorkspacePane(key);
-  }
-
-  onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
-    this.shellHost.onUploadLocationPreviewRequestedFromWorkspacePane(event);
-  }
-
-  onUploadLocationPreviewCleared(): void {
-    this.shellHost.onUploadLocationPreviewClearedFromWorkspacePane();
-  }
-
-  onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
-    this.shellHost.onUploadLocationMapPickRequestedFromWorkspacePane(event);
   }
 
   onRetryLoad(): void {
@@ -477,31 +407,8 @@ export class MediaComponent implements OnDestroy {
     this.dropdownAnchor.set(null);
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (!this.uploadPanelOpen()) {
-      return;
-    }
-
-    const target = event.target;
-    if (!(target instanceof Node)) {
-      return;
-    }
-
-    const uploadShell = this.hostElement.nativeElement.querySelector('.upload-shell');
-    if (uploadShell?.contains(target)) {
-      return;
-    }
-
-    this.closeUploadPanel();
-  }
-
   @HostListener('document:keydown.escape')
   onDocumentEscape(): void {
-    if (this.uploadPanelOpen()) {
-      this.closeUploadPanel();
-      return;
-    }
     this.closeDropdown();
   }
 

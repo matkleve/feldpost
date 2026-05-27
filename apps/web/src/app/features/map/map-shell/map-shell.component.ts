@@ -34,9 +34,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UPLOAD_DEV_FLAGS } from '../../upload/upload-dev-flags';
-import { UploadPanelComponent } from '../../upload/upload-panel.component';
-import { UploadResolverTrayComponent } from '../../upload/upload-resolver-tray.component';
+import { UploadShellUiService } from '../../upload/upload-shell-ui.service';
 import type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
@@ -148,7 +146,6 @@ import type { SelectedItemsContextPort } from '../../../core/workspace-pane/work
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane/workspace-pane-shell-host.token';
 import type { WorkspacePaneLayoutMapEffects } from '../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
-import { getLaneForJob } from '../../upload/upload-phase.helpers';
 import {
   MAP_MENU_ACTION_DEFINITIONS,
   MARKER_MENU_ACTION_DEFINITIONS,
@@ -204,8 +201,6 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
 @Component({
   selector: 'app-map-shell',
   imports: [
-    UploadPanelComponent,
-    UploadResolverTrayComponent,
     SearchBarComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
@@ -311,8 +306,6 @@ export class MapShellComponent implements OnDestroy {
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
 
-  /** Reference to the UploadPanelComponent child (for placeFile calls). */
-  private readonly uploadPanelChild = viewChild(UploadPanelComponent);
   private readonly pendingMapFocus = signal<{ mediaId: string; lat: number; lng: number } | null>(
     this.mapFocusPayloadService.readMapFocusPayload(this.router),
   );
@@ -337,33 +330,11 @@ export class MapShellComponent implements OnDestroy {
 
   // ── Upload / placement state ─────────────────────────────────────────────
 
-  /** True when user explicitly opened the upload panel via click. */
-  readonly uploadPanelPinned = signal(false);
+  private readonly uploadShellUi = inject(UploadShellUiService);
 
-  /** Final visibility state: click-pinned open only. */
-  readonly uploadPanelOpen = this.uploadPanelPinned;
-  readonly uploadBatch = this.uploadManagerService.activeBatch;
-  readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
-  readonly uploadBatchActive = computed(() => {
-    const batch = this.uploadBatch();
-    return !!batch && (batch.status === 'uploading' || batch.status === 'scanning');
-  });
-  readonly uploadResolverPending = computed(
-    () => this.uploadBatch()?.pendingDisambiguationCount ?? 0,
-  );
-  /** Shared frosted dock under the button: panel open and/or resolver tray active (OD-6). */
-  readonly showUploadDock = computed(
-    () =>
-      UPLOAD_DEV_FLAGS.dockAlwaysVisible ||
-      this.uploadPanelOpen() ||
-      this.uploadResolverPending() > 0,
-  );
-  readonly uploadResolverTrayActive = computed(
-    () => UPLOAD_DEV_FLAGS.dockAlwaysVisible || this.uploadResolverPending() > 0,
-  );
-  readonly uploadHasIssues = computed(() =>
-    this.uploadManagerService.jobs().some((job) => getLaneForJob(job) === 'issues'),
-  );
+  /** Global upload shell (layout); map shell toggles panel for placement flows. */
+  readonly uploadPanelPinned = this.uploadShellUi.uploadPanelPinned;
+  readonly uploadPanelOpen = this.uploadShellUi.uploadPanelOpen;
 
   /**
    * When non-null the map is in "placement mode": the next click places an
@@ -963,7 +934,7 @@ export class MapShellComponent implements OnDestroy {
     this.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
-    this.uploadPanelPinned.set(true);
+    this.uploadShellUi.openUploadPanel();
     this.map?.getContainer().classList.remove('map-container--placing');
     this.toastService.show({
       message: 'Media Marker erstellt. Upload starten.',
@@ -2001,7 +1972,7 @@ export class MapShellComponent implements OnDestroy {
   // ── Upload panel ──────────────────────────────────────────────────────────
 
   toggleUploadPanel(): void {
-    this.uploadPanelPinned.update((v) => !v);
+    this.uploadShellUi.toggleUploadPanel();
   }
 
   /**
@@ -2019,11 +1990,8 @@ export class MapShellComponent implements OnDestroy {
   enterPlacementMode(key: string): void {
     const draft = this.draftMediaMarker();
     if (draft) {
-      const panel = this.uploadPanelChild();
-      if (panel) {
-        panel.placeFile(key, { lat: draft.lat, lng: draft.lng });
-        return;
-      }
+      this.uploadShellUi.placeFile(key, { lat: draft.lat, lng: draft.lng });
+      return;
     }
 
     this.pendingPlacementKey = key;
@@ -2415,7 +2383,7 @@ export class MapShellComponent implements OnDestroy {
       return false;
     }
 
-    this.uploadPanelPinned.set(false);
+    this.uploadShellUi.closeUploadPanel();
     this.removeDraftMediaMarker();
     this.workspacePaneShellHost.closeWorkspacePane();
     return true;
@@ -2432,10 +2400,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     const coords: ExifCoords = { lat: latlng.lat, lng: latlng.lng };
-    const panel = this.uploadPanelChild();
-    if (panel) {
-      panel.placeFile(this.pendingPlacementKey, coords);
-    }
+    this.uploadShellUi.placeFile(this.pendingPlacementKey, coords);
 
     this.pendingPlacementKey = null;
     this.placementActive.set(false);
@@ -2444,7 +2409,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private clearMapSelectionState(): void {
-    this.uploadPanelPinned.set(false);
+    this.uploadShellUi.closeUploadPanel();
     // Deselect the active marker but keep the workspace pane open.
     // The pane is closed only via its own close button.
     this.setSelectedMarker(null);
