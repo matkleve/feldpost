@@ -7,6 +7,7 @@ import {
   formatLocationPickerLines,
   coerceLocationCoordinate,
   legacyMediaHasGps,
+  locationPinEligible,
   countZoomableLinks,
   locationDisplaySnapshotFromRows,
   mergeLocationDisplayIntoMediaRecord,
@@ -75,6 +76,16 @@ describe('media-locations.helpers', () => {
   it('legacyMediaHasGps rejects 0,0 placeholder', () => {
     expect(legacyMediaHasGps(0, 0)).toBe(false);
     expect(legacyMediaHasGps(48.2, 16.37)).toBe(true);
+  });
+
+  it('locationPinEligible requires street even when coords exist', () => {
+    expect(
+      locationPinEligible({ street: 'Main', latitude: 48.2, longitude: 16.37 }),
+    ).toBe(true);
+    expect(
+      locationPinEligible({ street: null, latitude: 48.2, longitude: 16.37 }),
+    ).toBe(false);
+    expect(countZoomableLinks([{ ...BASE_ROW, street: null }])).toBe(0);
   });
 
   it('displayLocationFromRows picks lowest sort_order when all rows lack GPS', () => {

@@ -5,9 +5,32 @@ import {
   classifySearchHits,
   deriveFolderDisplayPath,
   deriveLocalityHint,
+  evaluateLocalResolution,
   normalizeAddressForGrouping,
 } from './upload-location-resolution.helpers';
 import { DEFAULT_UPLOAD_LOCATION_CONFIG } from './upload-location-config';
+import type { UploadSearchObject } from './upload-address-resolution.types';
+
+function so(partial: Partial<UploadSearchObject>): UploadSearchObject {
+  return {
+    country: 'AT',
+    state: null,
+    postcode: null,
+    city: null,
+    street: null,
+    houseNumber: null,
+    staircase: null,
+    project: null,
+    sources: [],
+    sourceDeviations: [],
+    postcodeCandidates: [],
+    uncertainFields: [],
+    groupingKey: 'k',
+    relativePath: 'x',
+    fileName: 'x.jpg',
+    ...partial,
+  };
+}
 
 describe('upload-location-resolution.helpers', () => {
   it('deriveFolderDisplayPath strips filename', () => {
@@ -72,5 +95,22 @@ describe('upload-location-resolution.helpers', () => {
       DEFAULT_UPLOAD_LOCATION_CONFIG,
     );
     expect(outcome.kind).toBe('ambiguous');
+  });
+
+  it('evaluateLocalResolution Branch A with street + city', () => {
+    expect(evaluateLocalResolution(so({ street: 'Thaliastraße', city: 'Wien' }))).toBe('branch_a');
+  });
+
+  it('evaluateLocalResolution Branch B with project centroid', () => {
+    expect(
+      evaluateLocalResolution(so({ street: 'Thaliastraße', houseNumber: '4' }), {
+        lat: 48.2,
+        lng: 16.3,
+      }),
+    ).toBe('branch_b');
+  });
+
+  it('evaluateLocalResolution Branch C without centroid', () => {
+    expect(evaluateLocalResolution(so({ street: 'Thaliastraße' }))).toBe('branch_c');
   });
 });

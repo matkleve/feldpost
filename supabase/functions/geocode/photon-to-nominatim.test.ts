@@ -1,5 +1,6 @@
 import {
   buildPhotonSearchUrl,
+  buildPhotonStructuredUrl,
   nominatimViewboxToPhotonBbox,
   photonFeatureToNominatimRow,
   photonGeoJsonToNominatimSearch,
@@ -84,6 +85,21 @@ Deno.test("photonFeatureToNominatimRow returns null for bad geometry", () => {
     ),
     null,
   );
+});
+
+Deno.test("buildPhotonStructuredUrl includes lat lon zoom for bias", () => {
+  const url = buildPhotonStructuredUrl("http://localhost:2322", {
+    street: "Thaliastraße 4",
+    countryCode: "at",
+    lat: 48.19,
+    lon: 16.34,
+    zoom: 14,
+    limit: 50,
+  });
+  assertEquals(url.includes("lat=48.19"), true);
+  assertEquals(url.includes("lon=16.34"), true);
+  assertEquals(url.includes("zoom=14"), true);
+  assertEquals(url.includes("limit=50"), true);
 });
 
 Deno.test("photonGeoJsonToNominatimSearch empty features", () => {
