@@ -13,3 +13,20 @@
     var(--shadow-md),
     0 0 0 1px color-mix(in srgb, var(--foreground) 22%, transparent);
 }
+
+// Toolbar scroll list — upload-resolver-tray__choices rhythm (2px); beats Tailwind utilities on the host.
+// @see apps/web/src/app/features/upload/upload-resolver-tray.component.scss
+.option-menu-surface .standard-dropdown__items {
+  gap: 2px;
+  scroll-padding-block-end: var(--spacing-2);
+}
+
+// Projected list body: column gap between sections/rows inside the scroll host.
+.option-menu-surface .standard-dropdown__items > [dropdown-items] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 0;
+}

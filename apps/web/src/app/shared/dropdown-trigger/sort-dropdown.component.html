@@ -4,116 +4,123 @@
   [searchPlaceholder]="t('workspace.sort.search.placeholder', 'Search properties...')"
   [showDefaultClearAction]="true"
   [reserveProjectedSearchActionSlot]="false"
+  [itemsClass]="'standard-dropdown__items--scroll-split'"
   (searchTermChange)="searchTerm.set($event)"
   (clearRequested)="searchTerm.set('')"
 >
-  <div dropdown-items>
+  <div dropdown-items class="sort-dropdown__body">
     @if (groupedOptions().length > 0) {
-      <div class="sort-dropdown__section">
-        <div class="sort-dropdown__section-header">
-          <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">
-            {{ t('workspace.sort.section.groupedBy', 'Sorted by grouping') }}
-          </span>
-          @if (hasCustomSort()) {
+      <div class="sort-dropdown__pinned">
+        <div class="sort-dropdown__section">
+          <div class="sort-dropdown__section-header">
+            <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">
+              {{ t('workspace.sort.section.groupedBy', 'Sorted by grouping') }}
+            </span>
+            @if (hasCustomSort()) {
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                class="sort-toolbar-sort-reset shrink-0 text-muted-foreground"
+                type="button"
+                data-fp-dropdown-sort-reset="true"
+                (click)="resetSort()"
+                [attr.aria-label]="t('workspace.sort.search.resetDefault', 'Reset to default')"
+              >
+                <span
+                  class="sort-toolbar-sort-reset__icon material-icons inline-block"
+                  data-fp-dropdown-sort-reset-icon="true"
+                  aria-hidden="true"
+                  >restart_alt</span>
+              </button>
+            }
+          </div>
+          @for (opt of groupedOptions(); track opt.id) {
             <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              class="sort-toolbar-sort-reset shrink-0 text-muted-foreground"
+              hlmMenuItem
+              class="sort-dropdown__option"
               type="button"
-              data-fp-dropdown-sort-reset="true"
-              (click)="resetSort()"
-              [attr.aria-label]="t('workspace.sort.search.resetDefault', 'Reset to default')"
+              [class.sort-dropdown__option--active]="isSortActive(opt.id)"
+              [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
+              (mouseenter)="setHoveredSort(opt.id)"
+              (mouseleave)="clearHoveredSort(opt.id)"
+              (focus)="setHoveredSort(opt.id)"
+              (blur)="clearHoveredSort(opt.id)"
+              (click)="toggleSort(opt.id); $event.stopPropagation()"
             >
+              <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ opt.icon }}</span>
+              <span class="min-w-0 flex-1 text-left">{{ opt.label }}</span>
               <span
-                class="sort-toolbar-sort-reset__icon material-icons inline-block"
-                data-fp-dropdown-sort-reset-icon="true"
+                class="sort-direction"
+                [class.sort-direction--visible]="isSortActive(opt.id)"
+                [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
+                [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
+                [class.sort-direction--preview]="isRowHovered(opt.id)"
                 aria-hidden="true"
-                >restart_alt</span>
+                [textContent]="getDisplayedDirectionSymbol(opt.id)"
+              ></span>
             </button>
           }
         </div>
-        @for (opt of groupedOptions(); track opt.id) {
+        <div hlmMenuSeparator aria-hidden="true"></div>
+      </div>
+    }
+    <div class="sort-dropdown__scroll">
+      @if (groupedOptions().length === 0 && hasCustomSort()) {
+        <div class="sort-dropdown__section-header">
+          <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">{{
+            t('workspace.sort.section.primary', 'Sort')
+          }}</span>
           <button
-            hlmMenuItem
-            class="sort-dropdown__option"
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            class="sort-toolbar-sort-reset shrink-0 text-muted-foreground"
             type="button"
-            [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
-            (mouseenter)="setHoveredSort(opt.id)"
-            (mouseleave)="clearHoveredSort(opt.id)"
-            (focus)="setHoveredSort(opt.id)"
-            (blur)="clearHoveredSort(opt.id)"
-            (click)="toggleSort(opt.id); $event.stopPropagation()"
+            data-fp-dropdown-sort-reset="true"
+            (click)="resetSort()"
+            [attr.aria-label]="t('workspace.sort.search.resetDefault', 'Reset to default')"
           >
-            <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ opt.icon }}</span>
-            <span class="min-w-0 flex-1 text-left">{{ opt.label }}</span>
             <span
-              class="sort-direction sort-direction--visible"
-              [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
-              [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
-              [class.sort-direction--preview]="isRowHovered(opt.id)"
+              class="sort-toolbar-sort-reset__icon material-icons inline-block"
+              data-fp-dropdown-sort-reset-icon="true"
               aria-hidden="true"
-              [textContent]="getDisplayedDirectionSymbol(opt.id)"
-            ></span>
+              >restart_alt</span>
           </button>
-        }
-      </div>
-      <div hlmMenuSeparator aria-hidden="true"></div>
-    }
-    @if (groupedOptions().length === 0 && hasCustomSort()) {
-      <div class="sort-dropdown__section-header">
-        <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">{{
-          t('workspace.sort.section.primary', 'Sort')
-        }}</span>
+        </div>
+        <div hlmMenuSeparator aria-hidden="true"></div>
+      }
+      @for (opt of filteredOptions(); track opt.id) {
         <button
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          class="sort-toolbar-sort-reset shrink-0 text-muted-foreground"
+          hlmMenuItem
+          class="sort-dropdown__option"
           type="button"
-          data-fp-dropdown-sort-reset="true"
-          (click)="resetSort()"
-          [attr.aria-label]="t('workspace.sort.search.resetDefault', 'Reset to default')"
+          [class.sort-dropdown__option--active]="isSortActive(opt.id)"
+          [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
+          (mouseenter)="setHoveredSort(opt.id)"
+          (mouseleave)="clearHoveredSort(opt.id)"
+          (focus)="setHoveredSort(opt.id)"
+          (blur)="clearHoveredSort(opt.id)"
+          (click)="toggleSort(opt.id); $event.stopPropagation()"
         >
+          <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ opt.icon }}</span>
+          <span class="min-w-0 flex-1 text-left">{{ opt.label }}</span>
           <span
-            class="sort-toolbar-sort-reset__icon material-icons inline-block"
-            data-fp-dropdown-sort-reset-icon="true"
+            class="sort-direction"
+            [class.sort-direction--visible]="isSortActive(opt.id)"
+            [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
+            [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
+            [class.sort-direction--preview]="isRowHovered(opt.id)"
             aria-hidden="true"
-            >restart_alt</span>
+            [textContent]="getDisplayedDirectionSymbol(opt.id)"
+          ></span>
         </button>
-      </div>
-      <div hlmMenuSeparator aria-hidden="true"></div>
-    }
-    @for (opt of filteredOptions(); track opt.id) {
-      <button
-        hlmMenuItem
-        class="sort-dropdown__option"
-        type="button"
-        [class.sort-dropdown__option--active]="isSortActive(opt.id)"
-        [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
-        (mouseenter)="setHoveredSort(opt.id)"
-        (mouseleave)="clearHoveredSort(opt.id)"
-        (focus)="setHoveredSort(opt.id)"
-        (blur)="clearHoveredSort(opt.id)"
-        (click)="toggleSort(opt.id); $event.stopPropagation()"
-      >
-        <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ opt.icon }}</span>
-        <span class="min-w-0 flex-1 text-left">{{ opt.label }}</span>
-        <span
-          class="sort-direction"
-          [class.sort-direction--visible]="isSortActive(opt.id)"
-          [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
-          [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
-          [class.sort-direction--preview]="isRowHovered(opt.id)"
-          aria-hidden="true"
-          [textContent]="getDisplayedDirectionSymbol(opt.id)"
-        ></span>
-      </button>
-    }
-    @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
-      <div class="px-2 py-3 text-center text-sm text-muted-foreground">
-        {{ t('workspace.sort.empty.noMatchingProperties', 'No matching properties') }}
-      </div>
-    }
+      }
+      @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
+        <div class="px-2 py-3 text-center text-sm text-muted-foreground">
+          {{ t('workspace.sort.empty.noMatchingProperties', 'No matching properties') }}
+        </div>
+      }
+    </div>
   </div>
 </app-standard-dropdown>

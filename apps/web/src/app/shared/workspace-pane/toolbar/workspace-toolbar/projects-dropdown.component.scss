@@ -1,14 +1,13 @@
 @use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../../../../shared/dropdown-trigger/dropdown-panel-flex-chain' as panel-flex;
 
 // Projects dropdown — project-specific: checkbox, count, "All" separator
 // Generic search/items/item/action-row styles come from global dd-* classes.
 
-// Reserves loaded chrome height (search floor + list viewport + footer) so the shell does not step taller after fetch.
+// Flex child of shell; height floor owned by `app-standard-dropdown` + `.projects-list` scroll band.
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host {
-  display: block;
-  box-sizing: border-box;
-  min-height: var(--std-dropdown-min-height, calc(18rem + 3rem + 3.5rem));
+  @include panel-flex.panel-flex-child;
 }
 
 // Media detail: list height follows content (cap only), no toolbar search/footer chrome.
@@ -82,13 +81,14 @@
 }
 
 .projects-list {
-  // Locks the checklist scroll viewport so async load and search filtering do not change panel height (empty tail is OK).
+  // Single scroll owner when `standard-dropdown__items--scrollbar-gutter-delegate` is set.
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  height: 18rem;
+  flex: 1 1 auto;
+  min-height: 0;
   max-height: min(18rem, 50vh);
   overflow-y: auto;
   // Scrollbar track reserved by gutter only — no extra `padding-inline-end` (avoids asymmetric gap vs host padding).

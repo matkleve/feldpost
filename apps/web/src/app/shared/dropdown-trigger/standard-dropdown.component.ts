@@ -38,10 +38,13 @@ export class StandardDropdownComponent {
 
   itemsHostClass(): string {
     const extra = this.itemsClass().trim();
-    // Scroll list: no vertical padding — `gap-y-2` on `:host` separates this band from search/footer; avoids asymmetric `pt`/`pb` splits.
+    const delegateScroll = extra.includes('scrollbar-gutter-delegate');
+    // Scroll list: one owner — items host, or inner band (e.g. `.projects-list`) when delegate modifier is set.
     // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-    const base =
-      'standard-dropdown__items flex flex-1 flex-col gap-0 py-0 min-h-0 overflow-y-auto overflow-x-hidden';
+    const overflow = delegateScroll
+      ? 'overflow-x-hidden overflow-y-hidden'
+      : 'overflow-y-auto overflow-x-hidden';
+    const base = `standard-dropdown__items flex flex-1 flex-col py-0 min-h-0 ${overflow}`;
     return extra ? `${base} ${extra}` : base;
   }
 }

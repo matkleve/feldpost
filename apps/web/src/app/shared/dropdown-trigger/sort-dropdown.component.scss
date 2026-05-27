@@ -1,16 +1,38 @@
 @use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use './dropdown-panel-flex-chain' as panel-flex;
+@use './toolbar-dropdown-list-scroll' as list-scroll;
 
 // Sort dropdown — component-specific styles.
 // @see docs/specs/component/filters/dropdown-system.md
 
-// Fills toolbar shell width; min-width 0 avoids flex intrinsic min widening the shell vs grouping.
+// Fills toolbar shell width; flex child of `app-dropdown-shell` (scroll owned by StandardDropdown).
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
+  @include panel-flex.panel-flex-child;
   max-width: 100%;
+}
+
+// Pinned grouped section + scrollable primary list (upload-resolver-tray 2px gap).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.sort-dropdown__body {
+  @include list-scroll.toolbar-dropdown-list-body;
+}
+
+.sort-dropdown__pinned {
+  @include list-scroll.toolbar-dropdown-list-pinned;
+}
+
+.sort-dropdown__scroll {
+  @include list-scroll.toolbar-dropdown-list-scroll;
+}
+
+// Section stack — upload-resolver-tray__choices rhythm between header + option rows.
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.sort-dropdown__section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 // Section label + trailing reset (same row rhythm as grouping dropdown header).
@@ -77,6 +99,19 @@
 
   &--visible {
     opacity: 1;
+    color: var(--primary);
+  }
+
+  .sort-dropdown__option--active &--visible {
+    color: var(--interaction-selected-ink);
+  }
+
+  .sort-dropdown__option--active:hover &,
+  .sort-dropdown__option--active:focus-visible &,
+  .sort-dropdown__option--active.sort-dropdown__option--hovered &,
+  .sort-dropdown__option--active:hover &--visible,
+  .sort-dropdown__option--active:focus-visible &--visible,
+  .sort-dropdown__option--active.sort-dropdown__option--hovered &--visible {
     color: var(--primary);
   }
 

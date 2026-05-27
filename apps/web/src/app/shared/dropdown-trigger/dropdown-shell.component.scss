@@ -1,3 +1,5 @@
+@use './dropdown-panel-flex-chain' as panel-flex;
+
 @layer components {
   // OWNERSHIP: Toolbar menu width / height floors live ONLY on `:host.toolbar-dropdown` below — not on `app-standard-dropdown` or feature panels.
   // TEST GEOMETRY (revert before ship): non-filter panels **18rem** wide, max height **18rem×1.6**; **filter** keeps a **32rem** floor with **40rem** cap — keep `toolbar-menu-panel-layout.ts` px in sync.
@@ -7,11 +9,24 @@
   :host {
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    min-height: 0;
     overscroll-behavior: contain;
   }
 
+  // Frosted shell: one scroll owner inside (StandardDropdown or `.option-menu-list`), never on the shell host.
+  // @see docs/specs/component/upload/upload-resolver-tray.md
+  :host.option-menu-surface {
+    overflow: hidden;
+  }
+
+  // Direct body (context menu list, address results) — child fills shell and scrolls locally.
+  // @see docs/specs/component/filters/dropdown-system.md
+  :host.option-menu-surface > * {
+    @include panel-flex.panel-flex-child;
+  }
+
   // Locks toolbar menu width (test: 18rem) and max height (test: 18rem×1.6) to the viewport clamp.
+  // Scroll lives on `.standard-dropdown__items` so shell `spacing-2` padding stays visible at the bottom.
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   :host.toolbar-dropdown {
     box-sizing: border-box;
@@ -19,6 +34,8 @@
     max-width: min(18rem, calc(100vw - 2rem));
     min-width: min(18rem, calc(100vw - 2rem));
     max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
+    min-height: min(calc(8rem + 2 * var(--spacing-2)), calc(18rem * 1.6));
+    overflow: hidden;
   }
 
   // Filter: **wider floor** (32rem) for rule-row content — not the same width as sort/grouping/projects (see `toolbarDropdownPositionWidthPx`).

@@ -1,11 +1,13 @@
 :host {
   // Menu body geometry (single owner — no inner `.standard-dropdown` wrapper; flex from `host.class` Tailwind).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-  max-height: inherit;
   box-sizing: border-box;
-  // Default vertical floor for toolbar menus; filter overrides via `[style.--std-dropdown-min-height]` (see dropdown-system.md).
+  width: 100%;
+  max-height: 100%;
+  // Open floor for empty panels — shell `min-height` also uses this token; do not exceed shell (flex child).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   --std-dropdown-min-height: 8rem;
+  min-height: min(var(--std-dropdown-min-height, 0rem), 100%);
   // Matches `hlmBtn` `size="icon"` (`h-10` / `w-10`) so reserved search-row slots do not jump layout.
   // @see docs/specs/component/filters/dropdown-system.md
   --std-dropdown-search-icon-slot-size: 2.5rem;
@@ -13,8 +15,6 @@
   // @see docs/specs/component/upload/upload-resolver-tray.md
   padding: 0;
   border-radius: 0;
-  width: 100%;
-  min-height: var(--std-dropdown-min-height);
 }
 
 // Media-detail project picker: shorter floor; shell carries spacing-2 inset.
@@ -37,12 +37,23 @@
 // @see docs/specs/component/filters/dropdown-system.md
 .standard-dropdown__items {
   scrollbar-gutter: stable;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 // Inner band (e.g. `.projects-list`) owns scroll + `scrollbar-gutter: stable` — this wrapper must not stack a second gutter.
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 .standard-dropdown__items.standard-dropdown__items--scrollbar-gutter-delegate {
   scrollbar-gutter: auto;
+  overflow: hidden;
+}
+
+// Pinned header + inner scroll band (grouping / sort); outer items host does not scroll.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__items.standard-dropdown__items--scroll-split {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 // Filter toolbar: cap rules band here so one scroll host owns `scrollbar-gutter: stable` (see `.standard-dropdown__items`).
@@ -116,10 +127,9 @@
   transform: none !important;
 }
 
-// Shared toolbar menu chrome for sort + grouping (same shell floor; identical body width contract).
-// TEST: max body height matches shell `max-height: calc(18rem * 1.6)` so scroll stays inside shell.
+// Width / height cap owned by `app-dropdown-shell.toolbar-dropdown` — no duplicate max-height here.
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host.workspace-toolbar-menu-panel {
-  max-height: calc(18rem * 1.6);
+  min-height: 0;
 }
 

@@ -1,8 +1,9 @@
 @use '../../../styles/frosted-chrome';
 @use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use './dropdown-panel-flex-chain' as panel-flex;
 
 :host {
-  display: block;
+  @include panel-flex.panel-flex-child;
 }
 
 // Constrains host width when nested under toolbar menu shell.

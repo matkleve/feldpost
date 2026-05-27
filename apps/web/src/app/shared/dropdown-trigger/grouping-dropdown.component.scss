@@ -1,20 +1,20 @@
 @use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use './dropdown-panel-flex-chain' as panel-flex;
+@use './toolbar-dropdown-list-scroll' as list-scroll;
 
 // Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button.
 // @see docs/specs/component/filters/dropdown-system.md
-// Fills toolbar shell width; matches sort-dropdown host flex / width contract.
+// Fills toolbar shell width; flex child of `app-dropdown-shell` (scroll owned by StandardDropdown).
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
 :host {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
+  @include panel-flex.panel-flex-child;
   max-width: 100%;
 }
 
 // --- Sections (grouping-specific layout) ---
 .grouping-section {
   padding-inline: 0;
+  min-width: 0;
 }
 
 .grouping-section__header {
@@ -39,8 +39,33 @@
     color 80ms ease-out;
 }
 
+// List body — pinned “Grouped by” + scrollable “Available” (upload-resolver-tray 2px gap).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.grouping-dropdown__body {
+  @include list-scroll.toolbar-dropdown-list-body;
+}
+
+.grouping-dropdown__pinned {
+  @include list-scroll.toolbar-dropdown-list-pinned;
+}
+
+.grouping-dropdown__scroll {
+  @include list-scroll.toolbar-dropdown-list-scroll;
+}
+
+// Section stack — same 2px rhythm as upload-resolver-tray__choices.
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.grouping-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 // --- Drop zones (CDK drag-drop targets) ---
 .grouping-drop-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-height: 0.25rem;
   position: relative;
 

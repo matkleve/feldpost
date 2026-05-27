@@ -1,0 +1,30 @@
+// Pinned header band + scrollable list body (grouping “Grouped by”, sort “Sorted by grouping”).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+
+@mixin toolbar-dropdown-list-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+@mixin toolbar-dropdown-list-pinned {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+@mixin toolbar-dropdown-list-scroll {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}

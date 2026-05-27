@@ -7,6 +7,7 @@ import {
   CdkDragHandle,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
+import { filterByToolbarDropdownSearch } from './dropdown-search-filter.helpers';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
@@ -59,12 +60,9 @@ export class GroupingDropdownComponent {
   readonly hasGroupingSearch = computed(() => this.searchTerm().trim().length > 0);
 
   /** Drop list + list UI: full available when no search; label filter when searching (active list stays unfiltered). */
-  readonly availableDropListData = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-    const all = this.availableProperties();
-    if (!term) return all;
-    return all.filter((p) => p.label.toLowerCase().includes(term));
-  });
+  readonly availableDropListData = computed(() =>
+    filterByToolbarDropdownSearch(this.availableProperties(), this.searchTerm(), (p) => p.label),
+  );
 
   onDragStart(): void {
     this.isDragging.set(true);

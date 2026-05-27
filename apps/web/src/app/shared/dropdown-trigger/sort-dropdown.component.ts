@@ -5,6 +5,7 @@ import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
+import { filterByToolbarDropdownSearch } from './dropdown-search-filter.helpers';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 
 export type SortDropdownOption = {
@@ -66,20 +67,17 @@ export class SortDropdownComponent {
 
   readonly groupedOptions = computed(() => {
     const ids = this.groupingIds();
-    const term = this.searchTerm().toLowerCase();
     const opts = this.options();
-    return ids
+    const grouped = ids
       .map((id) => opts.find((o) => o.id === id))
-      .filter((o): o is SortDropdownOption => !!o)
-      .filter((o) => !term || o.label.toLowerCase().includes(term));
+      .filter((o): o is SortDropdownOption => !!o);
+    return filterByToolbarDropdownSearch(grouped, this.searchTerm(), (o) => o.label);
   });
 
   readonly filteredOptions = computed(() => {
     const groupedIds = new Set(this.groupingIds());
-    const term = this.searchTerm().toLowerCase();
-    return this.options()
-      .filter((o) => !groupedIds.has(o.id))
-      .filter((o) => !term || o.label.toLowerCase().includes(term));
+    const pool = this.options().filter((o) => !groupedIds.has(o.id));
+    return filterByToolbarDropdownSearch(pool, this.searchTerm(), (o) => o.label);
   });
 
   readonly hasCustomSort = computed(() => {

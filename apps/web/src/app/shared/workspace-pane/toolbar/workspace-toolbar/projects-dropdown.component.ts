@@ -2,6 +2,7 @@ import { Component, computed, effect, ElementRef, inject, input, output, signal 
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../../core/projects/projects.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
+import { filterByToolbarDropdownSearch } from '../../../../shared/dropdown-trigger/dropdown-search-filter.helpers';
 import { StandardDropdownComponent } from '../../../../shared/dropdown-trigger/standard-dropdown.component';
 import { HlmMenuItemDirective } from '../../../../shared/ui/menu';
 
@@ -125,12 +126,9 @@ export class ProjectsDropdownComponent {
       : 'calc(12rem + 2.5rem)',
   );
 
-  readonly filteredProjects = computed(() => {
-    const term = this.searchTerm().toLowerCase().trim();
-    const all = this.projects();
-    if (!term) return all;
-    return all.filter((p) => p.name.toLowerCase().includes(term));
-  });
+  readonly filteredProjects = computed(() =>
+    filterByToolbarDropdownSearch(this.projects(), this.searchTerm(), (p) => p.name),
+  );
 
   readonly allSelected = computed(() => {
     const all = this.projects();
