@@ -37,7 +37,7 @@
         "
         [showDefaultClearAction]="true"
         [clearSearchAriaLabel]="t('workspace.thumbnailCard.mapLocations.search.clear', 'Clear search')"
-        [itemsClass]="'standard-dropdown__items--scrollbar-gutter-delegate'"
+        [scrollMode]="'delegate'"
         (searchTermChange)="searchTerm.set($event)"
         (clearRequested)="searchTerm.set('')"
       >

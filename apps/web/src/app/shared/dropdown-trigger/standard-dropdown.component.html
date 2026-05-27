@@ -1,68 +1,29 @@
 @if (showSearch()) {
-  <div
-    class="standard-dropdown__search min-h-tap-lg min-w-0 shrink-0 border-b border-border px-0 py-2 md:min-h-tap"
+  <app-menu-panel-search-row
+    [searchTerm]="searchTerm()"
+    [searchPlaceholder]="searchPlaceholder()"
+    [showDefaultClearAction]="showDefaultClearAction()"
+    [clearSearchAriaLabel]="clearSearchAriaLabel()"
+    [reserveProjectedSearchActionSlot]="reserveProjectedSearchActionSlot()"
+    (searchTermChange)="searchTermChange.emit($event)"
+    (clearRequested)="clearRequested.emit()"
   >
-    <input
-      class="standard-dropdown__search-field min-w-0 border-0 bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-      type="text"
-      [placeholder]="searchPlaceholder()"
-      [value]="searchTerm()"
-      (input)="searchTermChange.emit($any($event.target).value)"
-    />
-
-    <div class="standard-dropdown__search-trailing">
-      @if (showDefaultClearAction()) {
-        <div class="standard-dropdown__search-action-slot">
-          @if (searchTerm()) {
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              class="standard-dropdown__search-icon-btn text-muted-foreground"
-              type="button"
-              data-fp-dropdown-search-clear="true"
-              [attr.aria-label]="clearSearchAriaLabel()"
-              (click)="clearRequested.emit()"
-            >
-              <span
-                class="material-icons text-current"
-                data-fp-dropdown-search-clear-icon="true"
-                aria-hidden="true"
-                >close</span>
-            </button>
-          } @else {
-            <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>
-          }
-        </div>
-      }
-
-      @if (reserveProjectedSearchActionSlot() || projectedSearchActions().length > 0) {
-        <div class="standard-dropdown__search-action-slot">
-          <ng-content select="[dropdown-search-action]" />
-          @if (reserveProjectedSearchActionSlot() && projectedSearchActions().length === 0) {
-            <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>
-          }
-        </div>
-      }
-    </div>
-  </div>
+    <ng-content select="[dropdown-search-action]" />
+  </app-menu-panel-search-row>
 }
 
-<div [class]="itemsHostClass()" (scroll)="itemsScroll.emit()">
+<app-menu-panel-scroll-region
+  [scrollMode]="scrollMode()"
+  [itemsClass]="itemsClass()"
+  (itemsScroll)="itemsScroll.emit()"
+>
   <ng-content select="[dropdown-items]" />
-</div>
+</app-menu-panel-scroll-region>
+
 @if (actionLabel()) {
-  <div
-    class="flex w-full min-w-0 shrink-0 flex-col items-stretch justify-stretch [&>button]:w-full"
-  >
-    <button
-      hlmMenuItem
-      class="flex min-w-0 shrink-0 items-center justify-start text-muted-foreground"
-      type="button"
-      (click)="actionRequested.emit()"
-    >
-      <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ actionIcon() }}</span>
-      {{ actionLabel() }}
-    </button>
-  </div>
+  <app-menu-panel-footer-action
+    [actionLabel]="actionLabel()!"
+    [actionIcon]="actionIcon()"
+    (actionRequested)="actionRequested.emit()"
+  />
 }

@@ -2,7 +2,7 @@
 
 @layer components {
   // OWNERSHIP: Toolbar menu width / height floors live ONLY on `:host.toolbar-dropdown` below — not on `app-standard-dropdown` or feature panels.
-  // TEST GEOMETRY (revert before ship): non-filter panels **18rem** wide, max height **18rem×1.6**; **filter** keeps a **32rem** floor with **40rem** cap — keep `toolbar-menu-panel-layout.ts` px in sync.
+  // Standard panels **18rem** wide; filter **32rem** floor / **40rem** cap — keep `toolbar-menu-panel-layout.ts` px in sync.
   // @see docs/specs/component/filters/dropdown-system.md — Ownership matrix
   // Flex column + scroll; panel chrome comes from `[hlmMenuContent]` (Tailwind + tweakcn tokens).
   // @see docs/specs/component/filters/dropdown-system.md

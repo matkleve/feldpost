@@ -2,7 +2,7 @@
 @use '../../../../shared/dropdown-trigger/dropdown-panel-flex-chain' as panel-flex;
 
 // Projects dropdown — project-specific: checkbox, count, "All" separator
-// Generic search/items/item/action-row styles come from global dd-* classes.
+// Search/footer/list chrome from `app-standard-dropdown` + menu-panel primitives + option-menu globals.
 
 // Flex child of shell; height floor owned by `app-standard-dropdown` + `.projects-list` scroll band.
 // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui

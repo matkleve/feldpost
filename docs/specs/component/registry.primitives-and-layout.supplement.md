@@ -81,6 +81,43 @@
 
 ---
 
+### `<app-menu-panel-search-row>` — Menu panel search row
+
+- **File**: `apps/web/src/app/shared/menu-panel/menu-panel-search-row.component.ts`
+- **Purpose**: Search field + clear + projected search-action slots for menu panels.
+- **Spec**: [`docs/specs/component/ui-primitives/menu-panel-search-row.md`](ui-primitives/menu-panel-search-row.md)
+- **Composed of**: `hlmBtn` for clear; projects `[dropdown-search-action]`
+- **Used in**: `app-standard-dropdown` (sort, grouping, projects)
+
+---
+
+### `<app-menu-panel-scroll-region>` — Menu panel scroll region
+
+- **File**: `apps/web/src/app/shared/menu-panel/menu-panel-scroll-region.component.ts`
+- **Purpose**: Scroll host for `[dropdown-items]` with `scrollMode` contract.
+- **Spec**: [`docs/specs/component/ui-primitives/menu-panel-scroll-region.md`](ui-primitives/menu-panel-scroll-region.md)
+- **Used in**: `app-standard-dropdown`
+
+---
+
+### `<app-menu-panel-footer-action>` — Menu panel footer action
+
+- **File**: `apps/web/src/app/shared/menu-panel/menu-panel-footer-action.component.ts`
+- **Purpose**: Full-width footer add action row.
+- **Spec**: [`docs/specs/component/ui-primitives/menu-panel-footer-action.md`](ui-primitives/menu-panel-footer-action.md)
+- **Used in**: `app-standard-dropdown` (filter, projects)
+
+---
+
+### `<app-toolbar-dropdown-stack>` — Toolbar dropdown stack
+
+- **File**: `apps/web/src/app/shared/dropdown-trigger/toolbar-dropdown-stack.component.ts`
+- **Purpose**: DRY `app-dropdown-shell` wiring for workspace/projects/media toolbars.
+- **Spec**: [`docs/specs/component/filters/dropdown-system.md`](filters/dropdown-system.md)
+- **Used in**: `workspace-toolbar`, `projects-toolbar`, `media.component`
+
+---
+
 ### `<app-popover>` — Popover
 
 - **File**: `apps/web/src/app/shared/popover/popover.component.ts`

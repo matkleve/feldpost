@@ -3,7 +3,7 @@
     class="filter-dropdown"
     [style.--std-dropdown-min-height]="'7rem'"
     [showSearch]="false"
-    [itemsClass]="'standard-dropdown__items--filter-rules-band'"
+    [scrollMode]="'none'"
     [actionLabel]="t('workspace.filter.action.add', 'Add a filter')"
     (actionRequested)="filterService.addRule()"
     (itemsScroll)="onRulesScroll()"

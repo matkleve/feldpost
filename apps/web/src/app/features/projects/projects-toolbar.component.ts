@@ -2,11 +2,7 @@ import { Component, computed, effect, inject, input, output, signal } from '@ang
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
-import {
-  toolbarDropdownPanelClass,
-  toolbarDropdownPositionWidthPx,
-} from '../../shared/dropdown-trigger/toolbar-menu-panel-layout';
+import { ToolbarDropdownStackComponent } from '../../shared/dropdown-trigger/toolbar-dropdown-stack.component';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
@@ -43,7 +39,7 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
   imports: [
     ...BrnToggleGroupImports,
     ...HLM_TOGGLE_GROUP_IMPORTS,
-    DropdownShellComponent,
+    ToolbarDropdownStackComponent,
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
@@ -55,9 +51,6 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 })
 export class ProjectsToolbarComponent {
   /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
-  protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
-  protected readonly toolbarDropdownPositionWidthPx = toolbarDropdownPositionWidthPx;
-
   /** Template helper: icon/text layout for status pill options. */
   readonly optLayout = toggleOptionLayout;
 

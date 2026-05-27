@@ -1,6 +1,8 @@
+import { DROPDOWN_VIEWPORT_MARGIN_PX } from './dropdown-viewport-clamp';
+
 /**
- * Toolbar menu width for `left` clamp — keep in sync with `dropdown-shell.component.scss` `:host.toolbar-dropdown`.
- * TEST (non-filter): **18rem === 288px** at 16px root. **Filter** uses **32rem === 512px** floor, **40rem === 640px** cap.
+ * Toolbar menu width — keep in sync with `dropdown-shell.component.scss` `:host.toolbar-dropdown`.
+ * Standard panels: **18rem === 288px** at 16px root. Filter: **32rem === 512px** floor, **40rem === 640px** cap.
  * @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
  */
 export const TOOLBAR_MENU_PANEL_MIN_PX = 288;
@@ -29,4 +31,24 @@ export function toolbarDropdownPanelClass(activePanelId: string | null): string 
 /** Horizontal width used to clamp `left` when opening a toolbar menu (match shell width for fixed menus, cap width for filter). */
 export function toolbarDropdownPositionWidthPx(activePanelId: string | null): number {
   return activePanelId === 'filter' ? TOOLBAR_MENU_FILTER_PANEL_MAX_PX : TOOLBAR_MENU_SHELL_MIN_PX;
+}
+
+export interface ClampToolbarDropdownLeftParams {
+  desiredLeft: number;
+  panelWidthPx: number;
+  viewportWidth?: number;
+  margin?: number;
+}
+
+/** Clamps horizontal `left` for a fixed toolbar menu panel inside the viewport. */
+export function clampToolbarDropdownLeft(params: ClampToolbarDropdownLeftParams): number {
+  const margin = params.margin ?? DROPDOWN_VIEWPORT_MARGIN_PX;
+  const viewportWidth =
+    params.viewportWidth ?? (typeof window !== 'undefined' ? window.innerWidth : params.desiredLeft + params.panelWidthPx);
+  const maxRight = viewportWidth - margin;
+  let left = params.desiredLeft;
+  if (left + params.panelWidthPx > maxRight) {
+    left = maxRight - params.panelWidthPx;
+  }
+  return Math.max(margin, left);
 }

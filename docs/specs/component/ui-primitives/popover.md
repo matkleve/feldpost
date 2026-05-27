@@ -11,12 +11,12 @@ A **presentational** floating surface: background, border, corner radius, box sh
 
 ## What It Looks Like
 
-Matches the existing elevated dropdown surfaces in the app (`app-dropdown-shell`, filter/sort dropdown specs): warm white / dark-elevation surface using **`--color-bg-elevated`**, **1px** border **`--color-border`**, corner radius **`--radius-lg`**, shadow **`var(--shadow-lg)`**, **`z-index: 300`** (dropdown plane). **Authors:** align names and stacking with [`docs/design/tokens.md`](../../../design/tokens.md), layer ownership in [`docs/design/token-layers.md`](../../../design/token-layers.md), and the shell contract in [`docs/specs/component/filters/dropdown-system.md`](../filters/dropdown-system.md). No default padding — inner spacing belongs to slotted content components.
+Matches **`app-dropdown-shell`** and upload-resolver-tray chrome: **`@include floating-panel-shell`** on `.popover` (`padding: var(--spacing-2)`, **`var(--container-radius-panel)`**, frosted card fill, **`var(--shadow-md)`**, border 80%), **`z-index: 300`**. **Authors:** [`docs/design/tokens.md`](../../../design/tokens.md), [`dropdown-system.md`](../filters/dropdown-system.md). Inner list/search spacing belongs to slotted content (`app-standard-dropdown`, menu-panel primitives).
 
 ## Where It Lives
 
 - **Code:** `apps/web/src/app/shared/popover/popover.component.ts` (+ `.html`, `.scss`).
-- **Use:** Wrapper for toolbar-attached panels (filter builder, grouping, sort, projects) and any feature that needs the same elevated shell without importing feature logic into the shell.
+- **Use:** Chrome-only wrapper when the parent owns positioning. **Toolbar menus** use **`app-dropdown-shell`**, not `app-popover` — same mixin, different component (shell adds anchor, outside-click, Escape).
 
 ## Angular component
 
@@ -91,10 +91,10 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 
 | Concern | Token(s) |
 | --- | --- |
-| Surface background | `--color-bg-elevated` |
-| Border | `1px solid var(--color-border)` |
-| Radius | `--radius-lg` |
-| Elevation | `var(--shadow-lg)` — tweakcn shadow ladder in [`docs/design/tokens.md`](../../../design/tokens.md) §3.5; elevated menu shells also align with [`dropdown-system.md`](../filters/dropdown-system.md) |
+| Surface background | `floating-panel-shell` fill (`color-mix` card + blur) |
+| Border | `1px solid color-mix(border 80%, transparent)` |
+| Radius | `var(--container-radius-panel)` |
+| Elevation | `var(--shadow-md)` — see [`dropdown-system.md`](../filters/dropdown-system.md) |
 | Z-index | literal **`300`** (`docs/design/tokens.md` §3.5) |
 
 ## Visual Behavior Contract
@@ -128,7 +128,7 @@ No domain data. `top` / `left` / `position` and overlay attachment are **parent-
 
 ## Acceptance Criteria
 
-- [ ] Host applies **`--color-bg-elevated`**, **`var(--shadow-lg)`** (tweakcn **`--shadow-*`**), **`--radius-lg`**, **`z-index: 300`**, and **`--color-border`** — no hex/rgb literals in SCSS.
+- [x] Host `.popover` applies **`floating-panel-shell`** + **`z-index: 300`** — no hex/rgb literals in SCSS.
 - [ ] No default padding on the host.
 - [ ] Slotted content can be any component tree; `PopoverComponent` imports no feature modules.
 - [ ] SCSS uses `@layer fp-components`; no `@layer fp-states` until a normative state is specified.

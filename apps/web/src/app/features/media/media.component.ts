@@ -9,7 +9,6 @@
 import {
   Component,
   DestroyRef,
-  HostListener,
   computed,
   effect,
   inject,
@@ -60,11 +59,7 @@ import {
 import { FilterDropdownComponent } from '../../shared/dropdown-trigger/filter-dropdown.component';
 import { SortDropdownComponent } from '../../shared/dropdown-trigger/sort-dropdown.component';
 import { ProjectsDropdownComponent } from '../../shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
-import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
-import {
-  toolbarDropdownPanelClass,
-  toolbarDropdownPositionWidthPx,
-} from '../../shared/dropdown-trigger/toolbar-menu-panel-layout';
+import { ToolbarDropdownStackComponent } from '../../shared/dropdown-trigger/toolbar-dropdown-stack.component';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 
@@ -78,7 +73,7 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
     ...BrnToggleGroupImports,
     ...HLM_TOGGLE_GROUP_IMPORTS,
     PaneToolbarComponent,
-    DropdownShellComponent,
+    ToolbarDropdownStackComponent,
     ...HLM_BUTTON_IMPORTS,
     GroupingDropdownComponent,
     FilterDropdownComponent,
@@ -93,10 +88,6 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
 })
 export class MediaComponent implements OnDestroy {
   private static readonly MIN_RESET_LOADING_MS = 220;
-
-  /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
-  protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
-  protected readonly toolbarDropdownPositionWidthPx = toolbarDropdownPositionWidthPx;
 
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   protected readonly workspaceSelectionService = inject(WorkspaceSelectionService);
@@ -405,11 +396,6 @@ export class MediaComponent implements OnDestroy {
   closeDropdown(): void {
     this.activeDropdown.set(null);
     this.dropdownAnchor.set(null);
-  }
-
-  @HostListener('document:keydown.escape')
-  onDocumentEscape(): void {
-    this.closeDropdown();
   }
 
   private buildGalleryQueryInputs(userId: string): MediaGalleryQueryInputs {

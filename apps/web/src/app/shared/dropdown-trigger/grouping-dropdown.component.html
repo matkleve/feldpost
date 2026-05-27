@@ -4,7 +4,7 @@
   [searchPlaceholder]="t('workspace.grouping.search.placeholder', 'Search properties…')"
   [showDefaultClearAction]="true"
   [reserveProjectedSearchActionSlot]="false"
-  [itemsClass]="'standard-dropdown__items--scroll-split'"
+  [scrollMode]="'split'"
   (searchTermChange)="searchTerm.set($event)"
   (clearRequested)="searchTerm.set('')"
 >

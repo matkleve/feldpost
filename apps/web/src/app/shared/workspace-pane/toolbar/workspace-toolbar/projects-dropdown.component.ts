@@ -24,7 +24,7 @@ export type ProjectsDropdownVariant = 'workspace' | 'media-detail';
       class="projects-dropdown"
       [class.projects-dropdown__shell--media-detail]="variant() === 'media-detail'"
       [style.--std-dropdown-min-height]="minPanelHeight()"
-      [itemsClass]="'standard-dropdown__items--scrollbar-gutter-delegate'"
+      [scrollMode]="'delegate'"
       [showSearch]="showSearch()"
       [searchTerm]="searchTerm()"
       [searchPlaceholder]="searchPlaceholder()"

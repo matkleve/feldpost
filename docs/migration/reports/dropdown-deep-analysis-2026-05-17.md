@@ -1,6 +1,7 @@
 # Toolbar menu / anchored UI stack — deep analysis
 
 **Date:** 2026-05-17  
+**Update (2026-05-27):** Toolbar standard width reconciled to **18rem / 288px** in code and [`dropdown-system.md`](../../specs/component/filters/dropdown-system.md); `dd-*` spec retired in favor of option-menu + menu-panel primitives.  
 **Repo:** `/home/matthias/Projects/feldpost`  
 **Scope:** Shared `apps/web/src/app/shared/dropdown-trigger/*`, workspace + projects toolbar wiring, normative specs.  
 **Baseline:** [`dropdown-component-structure-audit-2026-05-17.md`](./dropdown-component-structure-audit-2026-05-17.md) — verified against current code; discrepancies are listed under **Documentation drift**.

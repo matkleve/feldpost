@@ -4,8 +4,16 @@
 
 ## What It Is
 
-A composable CSS class system (`dd-*`) for all floating dropdown/menu surfaces in Feldpost. Every dropdown picks the pieces it needs — search, items, drag handles, section labels, action rows — from a shared global class library in `styles.scss`. Component SCSS only contains what's truly unique to that dropdown.
-Shared project-selector and upload-row menus MUST reuse this primitive system instead of feature-local dropdown variants.
+A **layered menu system** for floating panels in Feldpost:
+
+1. **Shell** — `app-dropdown-shell` + `.option-menu-surface` (`floating-panel-shell` mixin in [`_frosted-chrome.scss`](../../../../apps/web/src/styles/_frosted-chrome.scss)).
+2. **Menu body** — `app-standard-dropdown` composing **`app-menu-panel-*`** primitives (search row, scroll region, footer action).
+3. **Rows** — `hlmMenuItem` → `.option-menu-item` (global list rhythm in [`_option-menu-list.scss`](../../../../apps/web/src/styles/_option-menu-list.scss)).
+4. **Domain panels** — sort, grouping, filter, projects (and other callers) project `[dropdown-items]` only; feature SCSS owns exceptions (CDK drag, filter rules, sort direction).
+
+Legacy **`dd-*`** names are **not** defined in `styles.scss`; see [class-library supplement](./dropdown-system.class-library.supplement.md) for mapping.
+
+Shared project-selector and upload-row menus MUST reuse **shell + option-menu** contracts, not feature-local shell chrome.
 
 ## Global CSS / token emission
 
@@ -19,8 +27,8 @@ Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:r
 
 | Panel group | CSS `min-width` (viewport clamp) | TS / positioning px (aligned to **16px** rem grid per [`docs/design/tokens.md`](../../../design/tokens.md)) |
 | --- | --- | --- |
-| Sort, grouping, projects | `min(26rem, calc(100vw - 2rem))` on `:host.toolbar-dropdown` | **`TOOLBAR_MENU_PANEL_MIN_PX`** / **`TOOLBAR_MENU_SHELL_MIN_PX`** = **416** |
-| Filter | `min(32rem, calc(100vw - 2rem))` on `:host.toolbar-dropdown.toolbar-dropdown--filter` | **`TOOLBAR_MENU_FILTER_PANEL_MIN_PX`** = **512**; **`TOOLBAR_MENU_FILTER_CLAMP_PX`** aliases **512** (legacy name) |
+| Sort, grouping, projects | `min(18rem, calc(100vw - 2rem))` on `:host.toolbar-dropdown` | **`TOOLBAR_MENU_PANEL_MIN_PX`** / **`TOOLBAR_MENU_SHELL_MIN_PX`** = **288** |
+| Filter | `min(32rem, calc(100vw - 2rem))` floor, `max(40rem, …)` cap on `:host.toolbar-dropdown.toolbar-dropdown--filter` | **`TOOLBAR_MENU_FILTER_PANEL_MIN_PX`** = **512**; clamp uses **`TOOLBAR_MENU_FILTER_PANEL_MAX_PX`** = **640** |
 
 Keep **`rem`**, **`min(..., calc(100vw - 2rem))`**, **`toolbar-menu-panel-layout.ts`**, and this section aligned. Px constants are for **JS layout math** only; CSS **`rem`** is authoritative for rendering.
 
@@ -30,16 +38,18 @@ Keep **`rem`**, **`min(..., calc(100vw - 2rem))`**, **`toolbar-menu-panel-layout
 
 **Row chrome:** List rows use **`hlmMenuItem`** (+ `hlmMenuLabel` / `hlmMenuSeparator` where applicable) with variants from `menu-variants.ts` until brain `BrnMenu` ships.
 
-**Menu body (toolbar `app-standard-dropdown`):** The **component host** sets **`width: 100%`**, **`padding-inline`**, **`padding-bottom: var(--spacing-2)`** (single inset below the last flex child vs shell chrome), and **`min-height: var(--std-dropdown-min-height)`** (default **8rem**, filter **7rem** via host style override); **`max-height`** remains owned by menu chrome / scroll regions. Layout uses **`host.class`** flex utilities (`flex flex-1 flex-col min-h-0 gap-y-2`) — **no** inner `.standard-dropdown` wrapper. **Vertical rhythm:** **`gap-y-2`** on the host separates search row, scroll list, and footer (no asymmetric **`pt-2` / `pb-0`** on `.standard-dropdown__items`). The **search row** keeps **`py-2`** for tap-row internal rhythm only. **`.standard-dropdown__items`** uses **`py-0`**; spacing to neighbors is entirely **`gap-y-2`**.
+**Menu body (toolbar `app-standard-dropdown`):** The **component host** sets **`width: 100%`**, **`padding: 0`**, and **`min-height: var(--std-dropdown-min-height)`** (default **8rem**, filter **7rem** via host style override). **Shell inset** (`var(--spacing-2)`) lives on **`.option-menu-surface`** only — do not duplicate on the body host or feature panels. Layout uses **`host.class`** flex utilities (`flex flex-1 flex-col min-h-0 gap-y-2`). **Vertical rhythm:** **`gap-y-2`** separates search row, scroll region, and footer. **Search row** internal tap rhythm: **`py-2`** on `.standard-dropdown__search` only. **`.standard-dropdown__items`** uses **`padding: 0`**; list gap **2px** from `_option-menu-surface.scss`. See [Padding ownership](#padding-ownership-normative).
+
+**Scroll modes (`scrollMode` input):** `host` (default) | `delegate` (inner list scrolls) | `split` (pinned header + inner scroll) | `none` (capped band, outer host does not scroll). Maps to `standard-dropdown__items--*` modifiers; prefer `scrollMode` over raw `itemsClass` strings.
 
 ### Toolbar menu interaction inventory
 
 | Panel | `app-standard-dropdown` | Search row | Reset / clear affordance | Footer action (`actionLabel`) | Scroll gutter on scroll list | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | **Sort** | Yes | Yes | Search slot: clear term **or** reset sort defaults (restart icon); motion uses token **`--motion-duration-slow`** for active icon tilt | No | `scrollbar-gutter: stable` on `.standard-dropdown__items` | Grouped-by block toggles with grouping state |
-| **Grouping** | Yes | No | Header **restart_alt** clears active groupings when any exist; same slow active motion | No | `scrollbar-gutter: stable` | CDK drag rows |
+| **Grouping** | Yes | Yes | Search clear + header **restart_alt** clears active groupings when any exist | No | `scroll-split`; gutter on inner `.grouping-dropdown__scroll` | CDK drag rows; pinned “Grouped by” band |
 | **Filter** | Yes | No | No “reset all” control in-panel | Yes (`filter-dropdown` wires add-rule) | **`scrollbar-gutter: stable`** on **`.standard-dropdown__items`** via **`standard-dropdown__items--filter-rules-band`** (`max-height` cap only; no nested rule-stack gutter) | **32rem** shell floor (`toolbar-dropdown--filter`); **`7rem`** content min-height; rules band **`max-height: min(18rem, 50vh)`** on items host |
-| **Projects** | Yes | Yes | **No** sort/grouping-style reset — search row only clears text (`showDefaultClearAction`); selection via checkboxes + “All” | Yes (**New project**) | `scrollbar-gutter: stable` | **26rem** floor; `.projects-list` **`height: 18rem`** + **`max-height: min(18rem, 50vh)`** stable band (load + search) |
+| **Projects** | Yes | Yes | Search row only clears text (`showDefaultClearAction`); selection via checkboxes + “All” | Yes (**New project**) | `scrollMode: delegate`; gutter on `.projects-list` | **18rem** shell floor; `.projects-list` **`height: 18rem`** + **`max-height: min(18rem, 50vh)`** |
 
 **Non-toolbar `app-dropdown-shell` callers** (map context, upload row, detail tags, etc.) pass explicit **`[minWidth]`** / **`panelClass`** as needed; they are **not** covered by the `toolbar-dropdown` width floor unless those classes are reused.
 
@@ -49,10 +59,11 @@ Implicit ownership caused “edit the wrong layer, no visible change.” The tab
 
 | Concern | Owner | Forbidden elsewhere | Test oracle |
 | --- | --- | --- | --- |
-| **Toolbar panel width floor** (26rem / 32rem, `100vw - 2rem`) | `DropdownShellComponent` SCSS (`:host.toolbar-dropdown`, `.toolbar-dropdown--filter`) + `panelClass` from **`toolbarDropdownPanelClass`** | Feature panel SCSS must not redefine the shell width floor as “the menu width” | Widen filter → change **shell SCSS** + **`toolbarDropdownPositionWidthPx`** only |
+| **Toolbar panel width floor** (18rem / 32rem, `100vw - 2rem`) | `DropdownShellComponent` SCSS (`:host.toolbar-dropdown`, `.toolbar-dropdown--filter`) + `panelClass` from **`toolbarDropdownPanelClass`** | Feature panel SCSS must not redefine the shell width floor as “the menu width” | Widen filter → change **shell SCSS** + **`toolbarDropdownPositionWidthPx`** only |
 | **Map / context shell width** | `DropdownShellComponent` **`[minWidth]`** / **`[maxWidth]`** / `panelClass` per callsite (e.g. map context menu) | Do not assume toolbar `rem` floors apply — map uses **px inputs** when needed | Map menu width → callsite bindings + map shell SCSS, not `toolbar-menu-panel-layout.ts` |
-| **Horizontal `left` clamp** | Toolbar TS: **`toolbarDropdownPositionWidthPx(activeId)`** in `toolbar-menu-panel-layout.ts` | `app-standard-dropdown` and feature panels must not compute viewport `left` | Clamp matches active panel width (416 vs 512) |
-| **Inner fill + horizontal padding** | `StandardDropdownComponent` (`width: 100%`, `padding-inline`, host CSS vars) | Shell must not duplicate body padding | Body fills shell; no double horizontal inset on shell |
+| **Horizontal `left` clamp** | Toolbar TS: **`clampToolbarDropdownLeft`** + **`toolbarDropdownPositionWidthPx(activeId)`** in `toolbar-menu-panel-layout.ts` | `app-standard-dropdown` and feature panels must not compute viewport `left` | Clamp matches active panel width (288 vs 640) |
+| **Shell padding (inset)** | `.option-menu-surface` via **`floating-panel-shell`** (`padding: var(--spacing-2)`) | Body host, `.standard-dropdown__items`, feature panels must not add shell-level inset | Bottom padding visible when list scrolls |
+| **Inner fill** | `StandardDropdownComponent` (`width: 100%`, `padding: 0`, host CSS vars) | Shell must not duplicate body padding | Body fills shell content box |
 | **Max height / scroll band (toolbar body)** | `standard-dropdown.component.scss` (e.g. `.workspace-toolbar-menu-panel`, `standard-dropdown__items--filter-rules-band`) | Shell `:host` stays generic flex/overflow only | Filter rules: one scroll host owns `scrollbar-gutter` per inventory table above |
 | **Outside-close + Escape for mounted shell** | **`DropdownShellComponent` only** (`document:click` with `contains`, `document:keydown.escape` → `closeRequested`) | Parents that wrap `app-dropdown-shell` must **not** duplicate Escape — see [Escape (keyboard)](#escape-keyboard) | Escape closes menu once; no duplicate listeners on workspace toolbar |
 | **Stacking for shell host** | Inline **`z-index: 300`** on `DropdownShellComponent` host — **authoritative** — see [Stacking (z-index)](#stacking-z-index) | Do not remove inline `z-index` thinking CVA handles elevation | Shell stacks above map/workspace layers per [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 |
@@ -108,32 +119,66 @@ Feldpost accumulated **two** document-level click paths when toolbar menus and f
 
 The filter flyout remains **inside** the shell DOM so shell **`contains()`** still treats clicks on the flyout as inside the shell (no accidental whole-menu close from flyout interaction). Filter’s listener only shrinks the **picker** state.
 
+### Shell width variants (non-exhaustive)
+
+| Variant | CSS / binding | Typical callers |
+| --- | --- | --- |
+| Toolbar standard | `:host.toolbar-dropdown` **18rem** | Sort, grouping, projects (workspace / projects / media toolbars) |
+| Toolbar filter | `.toolbar-dropdown--filter` **32rem** min, **40rem** max | Filter panel |
+| Media-detail projects | `.media-detail-projects-panel` max **20rem** | `media-detail-inline-section` |
+| Arbitrary px floor | `[minWidth]` on `app-dropdown-shell` | Address search, comboboxes, context menu (**176**), location row (**220**), map shells, upload row menu |
+| Content-sized | No `toolbar-dropdown` class; `option-menu-surface` only | Metadata picker, add-metadata suggestions |
+
+### Padding ownership (normative)
+
+| Property | Owner file | Selector / component |
+| --- | --- | --- |
+| Shell inset (all edges) | `_frosted-chrome.scss` | `@mixin floating-panel-shell` on `.option-menu-surface` |
+| Body host padding | `standard-dropdown.component.scss` | `:host { padding: 0 }` |
+| Items host padding | `_option-menu-list.scss` | `.option-menu-surface .standard-dropdown__items { padding: 0 }` |
+| Row padding | `_option-menu-list.scss` | `.option-menu-item` |
+| Search row internal padding | `standard-dropdown.component.scss` / `menu-panel-search-row` | `.standard-dropdown__search` `py-2`; field `px-2 py-1` |
+| Section label padding | `_option-menu-list.scss` | `.option-menu-label` |
+| Filter rules band (vertical only) | `filter-dropdown.component.scss` | `.filter-dropdown-host` `padding-block` only |
+
+### Row interaction states
+
+| State | Visual | Owner |
+| --- | --- | --- |
+| Menu row hover / focus | Primary fill + text | [`_option-menu-item-states.scss`](../../../../apps/web/src/styles/_option-menu-item-states.scss) |
+| Active sort row | Selected-ink background/text; direction chip primary on hover | `sort-dropdown.component.scss` |
+| Grouping multi-select | Selected-ink border/fill | `grouping-dropdown.component.scss` `.grouping-row--selected` |
+| Destructive row | Destructive token | `.option-menu-item.text-destructive` |
+
+See [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis.
+
 ## What It Looks Like
 
-All dropdowns share a warm, clay-tinted hover and the same item geometry. The grouping dropdown is the reference for hover color and item height.
+Floating menus share **frosted panel chrome** (upload-resolver-tray reference) and **option-menu row geometry**. Default row hover uses **primary**; persistent sort selection uses **interaction-selected-ink**.
 
-### Container Shell
+### Container shell (canonical)
 
-Set by the host component (or toolbar wrapper). Not part of `dd-*` — each dropdown positions itself.
+Applied via **`.option-menu-surface`** → `@include floating-panel-shell`:
 
 ```
-background:    --color-bg-elevated
-border:        1px solid --color-border
-border-radius: --radius-lg  (8px)
-box-shadow:    var(--shadow-lg)
+padding:       var(--spacing-2)
+border-radius: var(--container-radius-panel)
+background:    color-mix(card 85%, transparent) + backdrop blur
+border:        1px solid color-mix(border 80%, transparent)
+box-shadow:    var(--shadow-md)
 ```
 
-**Shadow ladder:** **`--shadow-*`** (including **`var(--shadow-lg)`** on this shell) are defined on **tweakcn `:root` / theme** — see [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 (*Focus stacks* and shadow ladder). **Authors:** follow that ladder only; do not invent parallel `--shadow-*` names or reintroduce deprecated shadow shortcuts; combine with this spec’s shell table above.
-
-Composable class table, hover token, and item geometry: **[dropdown-system.class-library.supplement.md](./dropdown-system.class-library.supplement.md)**.
+**Authors:** [`docs/design/tokens.md`](../../../design/tokens.md), [`upload-resolver-tray.md`](../upload/upload-resolver-tray.md). Legacy `dd-*` mapping: **[dropdown-system.class-library.supplement.md](./dropdown-system.class-library.supplement.md)**.
 
 **Map / Leaflet pierced DOM:** CSS for Leaflet-injected marker and overlay nodes is **not** part of the **`dd-*`** class library in `styles.scss`. It ships from **`apps/web/src/styles/_map-shell-leaflet-global.scss`** under **`app-map-shell { … }`** (`@use` from `styles.scss`, Phase 8 Path A). See [`phase-10-visual-qa.md`](../../../migration/phase-10-visual-qa.md#stacking-sanity) and [`media-marker.md`](../../ui/media-marker/media-marker.md) file map.
 
 ## Where It Lives
 
-- **Global classes**: `apps/web/src/styles.scss` — the `dd-*` block after `.ui-spacer`
-- **Map / Leaflet pierced marker + overlay CSS:** `apps/web/src/styles/_map-shell-leaflet-global.scss` — **`app-map-shell`** scope (same `styles.scss` `@use` chain; not the `dd-*` block)
-- **Anchored shell + shared menu body (toolbar and other callers)**: `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts` + `.scss`, `standard-dropdown.component.ts` + `.html` + `.scss`
+- **Shell chrome**: `apps/web/src/styles/_frosted-chrome.scss`, `apps/web/src/styles/_option-menu-surface.scss`
+- **List + row rhythm**: `apps/web/src/styles/_option-menu-list.scss`, `apps/web/src/styles/_option-menu-item-states.scss`
+- **Menu panel primitives**: `apps/web/src/app/shared/menu-panel/`
+- **Anchored shell + toolbar panels**: `apps/web/src/app/shared/dropdown-trigger/`
+- **Map / Leaflet pierced CSS:** `apps/web/src/styles/_map-shell-leaflet-global.scss`
 - **Sort / grouping / filter (feature panels)**: `apps/web/src/app/shared/dropdown-trigger/` — `sort-dropdown`, `grouping-dropdown`, `filter-dropdown` (`.ts` + `.html` + `.scss` as applicable)
 - **Projects (workspace toolbar only)**: `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts` + `.scss` (inline template)
 - **Context menu**: `apps/web/src/app/shared/workspace-pane/media-detail-view.component.html` + `.scss`
@@ -144,22 +189,20 @@ Composable class table, hover token, and item geometry: **[dropdown-system.class
 | #   | Trigger                         | System Response                                             | Surface                          |
 | --- | ------------------------------- | ----------------------------------------------------------- | -------------------------------- |
 | 1   | Opens any toolbar dropdown      | Container shell renders with shared elevated surface tokens | Sort, Grouping, Projects, Filter |
-| 2   | Hovers an actionable row        | Warm clay hover tint appears with no geometry shift         | Any `dd-item` consumer           |
-| 3   | Navigates item list via pointer | Label/icon/trailing align to `dd-item` layout contract      | Any `dd-item` consumer           |
-| 4   | Opens dropdown with search      | Search row uses `dd-search` and input/action primitives     | Sort, Projects                   |
-| 5   | Dropdown has no rows            | Empty state uses `dd-empty` style primitive                 | Sort, Filter, future consumers   |
-| 6   | Renders destructive menu action | Row uses `dd-item--danger` styling on icon and label        | Media detail context menu        |
+| 2   | Hovers an actionable row        | Primary hover on `.option-menu-item` (no geometry shift)    | Toolbar + context menus          |
+| 3   | Navigates item list via pointer | Icon/label/trailing align per `menu-variants` / option-menu-list | `hlmMenuItem` consumers     |
+| 4   | Opens dropdown with search      | `app-menu-panel-search-row` / `app-standard-dropdown`       | Sort, grouping, projects         |
+| 5   | Dropdown has no rows            | Empty copy in feature template                              | Sort, filter                     |
+| 6   | Renders destructive menu action | `.option-menu-item.text-destructive`                      | Media detail context menu        |
 
 ## Dropdown Inventory
 
-Toolbar **behavior** (search, reset, footer, gutter, width policy) is normative in [Toolbar menu panels (anchored UI)](#toolbar-menu-panels-anchored-ui). The table below remains the **`dd-*` primitive composition** index.
+Toolbar **behavior** (search, reset, footer, gutter, width policy) is normative in [Toolbar menu panels (anchored UI)](#toolbar-menu-panels-anchored-ui).
 
-Every floating menu surface in Feldpost and which `dd-*` pieces it uses:
-
-| #   | Surface                       | Search | Items | Section labels | Dividers | Drag | Action row | Empty | Component-specific                                 |
-| --- | ----------------------------- | ------ | ----- | -------------- | -------- | ---- | ---------- | ----- | -------------------------------------------------- |
-| 1   | **Sort Dropdown**             | ✅     | ✅    | ✅             | ✅       | —    | —          | ✅    | Direction toggle                                   |
-| 2   | **Grouping Dropdown**         | —      | ✅    | ✅             | ✅       | ✅   | —          | —     | Drop zones, selected state, CDK drag, clear button |
+| #   | Surface                       | Search | Items | Section labels | Dividers | Drag | Footer action | Empty | Component-specific                                 |
+| --- | ----------------------------- | ------ | ----- | -------------- | -------- | ---- | ------------- | ----- | -------------------------------------------------- |
+| 1   | **Sort Dropdown**             | ✅     | ✅    | ✅             | ✅       | —    | —             | ✅    | Direction toggle; scroll-split when grouped sorts  |
+| 2   | **Grouping Dropdown**         | ✅     | ✅    | ✅             | ✅       | ✅   | —             | —     | CDK drag; scroll-split; pinned “Grouped by”      |
 | 3   | **Projects Dropdown**         | ✅     | ✅    | —              | —        | —    | ✅         | —     | Checkbox column, count trailing, "All" separator   |
 | 4   | **Filter Dropdown**           | —      | —     | —              | —        | —    | ✅         | ✅    | Notion-style filter rules (form rows)              |
 | 5   | **Media Detail Context Menu** | —      | ✅    | —              | —        | —    | —          | —     | Danger item, positioning                           |
@@ -168,41 +211,25 @@ Every floating menu surface in Feldpost and which `dd-*` pieces it uses:
 
 ### Surface details
 
-**Sort Dropdown** — `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts`
-Uses: `dd-search`, `dd-search__input`, `dd-search__action`, `dd-items`, `dd-item`, `dd-item--active`, `dd-item__icon`, `dd-item__label`, `dd-section-label`, `dd-divider`, `dd-empty`.
-Component-specific: `.sort-direction` toggle (tri-state asc/desc/none).
+**Sort / grouping / projects / filter** — `app-standard-dropdown` + `app-menu-panel-*`; domain markup in `sort-dropdown`, `grouping-dropdown`, `filter-dropdown`, `projects-dropdown`. Filter rules remain form-specific (exception).
 
-**Grouping Dropdown** — `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts`
-Uses: `dd-item`, `dd-item--active`, `dd-item--muted`, `dd-item__icon`, `dd-item__label`, `dd-drag-handle`, `dd-section-label`, `dd-divider`.
-Component-specific: CDK drop zones, selected state (multi-select), clear button, empty drop slot.
+**Media detail context menu** — `option-menu-list` + `hlmMenuItem` inside `app-dropdown-shell`.
 
-**Projects Dropdown** — `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts`
-Uses: `dd-search`, `dd-search__input`, `dd-search__action`, `dd-items`, `dd-item`, `dd-item__label`, `dd-item__trailing`, `dd-action-row`.
-Component-specific: Checkbox column, count badge, "All projects" separator row.
-
-**Filter Dropdown** — `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts`
-Uses: `dd-empty`, `dd-action-row`.
-Component-specific: Notion-style compound filter rules (form rows with **`hlmBtn` + fixed flyout lists** + inputs — justified exception; **no** native `<select>` in-panel).
-
-**Media Detail Context Menu** — `media-detail-view.component.html`
-Uses: `dd-items`, `dd-item`, `dd-item--danger`, `dd-item__icon`, `dd-item__label`.
-Component-specific: Absolute positioning, click-outside overlay.
-
-**Search Bar Dropdown** — Separate system. Uses `.ui-item` grid with taller rows (`3rem`) and larger font (`0.9375rem`). Not a menu surface — not required to use `dd-*`.
+**Map search bar** — separate `.ui-item` system; not option-menu.
 
 ## Component Hierarchy
 
-No new components. The `dd-*` classes are a shared CSS layer consumed by existing components.
+```
+app-dropdown-shell (option-menu-surface)
+└── [domain panel] e.g. app-sort-dropdown
+    └── app-standard-dropdown
+        ├── app-menu-panel-search-row (optional)
+        ├── app-menu-panel-scroll-region
+        │     └── [dropdown-items] projected content
+        └── app-menu-panel-footer-action (optional)
+```
 
-```
-Global dd-* classes (styles.scss)
-├── sort-dropdown          ← search, items, section labels, dividers, empty
-├── grouping-dropdown      ← items with drag handles, section labels, dividers
-├── projects-dropdown      ← search, items with checkboxes, action row
-├── filter-dropdown        ← empty state, action row (rules are form-specific)
-├── media-detail context   ← items container, danger item
-└── [future] any new menu  ← pick and compose from dd-* classes
-```
+Toolbar wiring may use **`app-toolbar-dropdown-stack`** (shell + `@switch`) — see `toolbar-dropdown-stack.component.ts`.
 
 ## Data
 
@@ -210,17 +237,19 @@ Not applicable - visual style system only. No direct domain data model or Supaba
 
 ## State
 
-Not applicable - state is owned by consuming dropdown components (sort/grouping/projects/filter/media-detail), not by the shared `dd-*` class contract itself.
+Not applicable - state is owned by consuming dropdown components (sort/grouping/projects/filter/media-detail), not by the shared menu shell contract.
 
 ## File Map
 
 | File                                                                                              | Purpose                                                   |
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `docs/specs/component/filters/dropdown-system.md`                                                         | Shared dropdown visual + **toolbar menu panel** contract |
-| `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
-| `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts` / `.scss`                      | Anchored shell: fixed position, outside click, Escape, `HlmMenuContentDirective`; toolbar `min-width` floors (`.toolbar-dropdown`) |
-| `apps/web/src/app/shared/dropdown-trigger/standard-dropdown.component.ts` / `.html` / `.scss`         | Shared toolbar menu body (search row, `[dropdown-items]` projection, footer, `itemsScroll`) |
-| `apps/web/src/app/shared/dropdown-trigger/toolbar-menu-panel-layout.ts`                               | **`TOOLBAR_MENU_PANEL_MIN_PX` (416)**, **`TOOLBAR_MENU_FILTER_PANEL_MIN_PX` (512)**, **`toolbarDropdownPanelClass`**, **`toolbarDropdownPositionWidthPx`** |
+| `apps/web/src/styles/_frosted-chrome.scss`, `_option-menu-surface.scss`, `_option-menu-list.scss` | Shell chrome + list/row rhythm |
+| `apps/web/src/app/shared/menu-panel/`                                                             | Search row, scroll region, footer action primitives |
+| `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts` / `.scss`                  | Anchored shell; toolbar width floors |
+| `apps/web/src/app/shared/dropdown-trigger/standard-dropdown.component.ts` / `.html` / `.scss`       | Menu body composer |
+| `apps/web/src/app/shared/dropdown-trigger/toolbar-menu-panel-layout.ts`                           | **288** / **512** / **640** px constants, **`clampToolbarDropdownLeft`**, panel class helpers |
+| `apps/web/src/app/shared/dropdown-trigger/toolbar-dropdown-stack.component.ts`                    | Shared toolbar shell + panel switch |
 | `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts` / `.html`                       | Sort panel feature wiring |
 | `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts` / `.html`                   | Grouping panel + CDK drag |
 | `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts` / `.html`                     | Filter rules + picker flyout |
@@ -252,13 +281,12 @@ None - delegated to consumer feature services.
 
 ## Acceptance Criteria
 
-- [x] All item hover states use `color-mix(in srgb, var(--color-clay) 8%, transparent)` — no grey hover
-- [x] All items use `0.8125rem` font, `--spacing-1`/`--spacing-2` padding, `--radius-sm`
-- [x] Sort dropdown uses global `dd-*` classes, SCSS only has direction toggle
-- [x] Grouping dropdown uses global `dd-*` classes, SCSS only has drop zones + CDK + selected
-- [x] Projects dropdown uses global `dd-*` classes, SCSS only has checkbox + count + "All" separator
-- [x] Filter dropdown uses `dd-empty` and `dd-action-row`, form rules stay component-specific
-- [x] Media detail context menu uses `dd-items` and `dd-item`/`dd-item--danger`
-- [x] Danger items preserve `--color-danger` on both label and icon
-- [ ] Shared project-selector flows reuse the same `dd-*` action-row and search primitives as toolbar dropdowns
-- [ ] Metadata Key Suggestion dropdown uses `dd-item` + type badge (future)
+- [x] Toolbar shells use **`floating-panel-shell`** inset on `.option-menu-surface` only (no double padding on body)
+- [x] Toolbar standard width **18rem**; filter **32rem** floor; TS clamp matches **`toolbarDropdownPositionWidthPx`**
+- [x] List rows use **`hlmMenuItem`** / `.option-menu-item` geometry from `_option-menu-list.scss`
+- [x] Sort/grouping/projects compose **`app-standard-dropdown`** + menu-panel primitives
+- [x] Sort active rows use **`interaction-selected-ink`**; hover uses primary (including direction chip on hover)
+- [x] Filter form rules stay component-specific; footer uses menu-panel footer action
+- [x] Media detail context menu uses option-menu list + destructive variant
+- [ ] Shared project-selector flows reuse menu-panel search/footer primitives (media-detail inline section partial)
+- [ ] Metadata key suggestion fully on option-menu primitives (future)

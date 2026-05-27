@@ -96,15 +96,13 @@
     </div>
   </app-pane-toolbar>
 
-  @if (activeDropdown()) {
-    <app-dropdown-shell
-      [panelClass]="toolbarDropdownPanelClass(activeDropdown())"
-      [anchor]="dropdownAnchor()"
-      [minWidth]="toolbarDropdownPositionWidthPx(activeDropdown())"
-      [outsideCloseEnabled]="!isDragging()"
-      (closeRequested)="closeDropdown()"
-    >
-      @switch (activeDropdown()) {
+  <app-toolbar-dropdown-stack
+    [activePanelId]="activeDropdown()"
+    [anchor]="dropdownAnchor()"
+    [outsideCloseEnabled]="!isDragging()"
+    (closeRequested)="closeDropdown()"
+  >
+    @switch (activeDropdown()) {
         @case ('grouping') {
           <app-grouping-dropdown
             [activeGroupings]="activeGroupings()"
@@ -127,8 +125,7 @@
           <app-projects-dropdown (projectsChanged)="onProjectsChanged($event)" />
         }
       }
-    </app-dropdown-shell>
-  }
+  </app-toolbar-dropdown-stack>
 
   <!-- Renders media content state machine and forwards item/retry events to page controller. -->
   <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->

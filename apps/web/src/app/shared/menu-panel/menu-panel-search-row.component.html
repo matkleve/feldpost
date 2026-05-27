@@ -1,0 +1,44 @@
+<input
+  class="standard-dropdown__search-field min-w-0 border-0 bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+  type="text"
+  [placeholder]="searchPlaceholder()"
+  [value]="searchTerm()"
+  (input)="searchTermChange.emit($any($event.target).value)"
+/>
+
+<div class="standard-dropdown__search-trailing">
+  @if (showDefaultClearAction()) {
+    <div class="standard-dropdown__search-action-slot">
+      @if (searchTerm()) {
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="standard-dropdown__search-icon-btn text-muted-foreground"
+          type="button"
+          data-fp-dropdown-search-clear="true"
+          [attr.aria-label]="clearSearchAriaLabel()"
+          (click)="clearRequested.emit()"
+        >
+          <span
+            class="material-icons text-current"
+            data-fp-dropdown-search-clear-icon="true"
+            aria-hidden="true"
+            >close</span
+          >
+        </button>
+      } @else {
+        <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>
+      }
+    </div>
+  }
+
+  @if (reserveProjectedSearchActionSlot() || projectedSearchActions().length > 0) {
+    <div class="standard-dropdown__search-action-slot">
+      <ng-content select="[dropdown-search-action]" />
+      @if (reserveProjectedSearchActionSlot() && projectedSearchActions().length === 0) {
+        <div class="standard-dropdown__search-slot-spacer" aria-hidden="true"></div>
+      }
+    </div>
+  }
+</div>

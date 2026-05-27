@@ -18,11 +18,7 @@ import type {
   SortConfig,
   ThumbnailSizePreset,
 } from '../../../../core/workspace-view/workspace-view.types';
-import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
-import {
-  toolbarDropdownPanelClass,
-  toolbarDropdownPositionWidthPx,
-} from '../../../../shared/dropdown-trigger/toolbar-menu-panel-layout';
+import { ToolbarDropdownStackComponent } from '../../../../shared/dropdown-trigger/toolbar-dropdown-stack.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import {
   buildCardVariantToggleOptions,
@@ -43,7 +39,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
   templateUrl: './workspace-toolbar.component.html',
   styleUrl: './workspace-toolbar.component.scss',
   imports: [
-    DropdownShellComponent,
+    ToolbarDropdownStackComponent,
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
@@ -54,9 +50,6 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
   ],
 })
 export class WorkspaceToolbarComponent implements OnInit {
-  /** Bound to `app-dropdown-shell` `panelClass` (filter adds wider shell modifier). */
-  protected readonly toolbarDropdownPanelClass = toolbarDropdownPanelClass;
-  protected readonly toolbarDropdownPositionWidthPx = toolbarDropdownPositionWidthPx;
 
   private readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);

@@ -8,8 +8,8 @@
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   --std-dropdown-min-height: 8rem;
   min-height: min(var(--std-dropdown-min-height, 0rem), 100%);
-  // Matches `hlmBtn` `size="icon"` (`h-10` / `w-10`) so reserved search-row slots do not jump layout.
-  // @see docs/specs/component/filters/dropdown-system.md
+  // Shared with `app-menu-panel-search-row` for fixed icon slots.
+  // @see docs/specs/component/ui-primitives/menu-panel-search-row.md
   --std-dropdown-search-icon-slot-size: 2.5rem;
   // Shell inset lives on `.option-menu-surface` (upload-resolver-tray contract) — no inner card radius/padding.
   // @see docs/specs/component/upload/upload-resolver-tray.md
@@ -60,56 +60,6 @@
 // @see docs/specs/component/filters/dropdown-system.md
 .standard-dropdown__items.standard-dropdown__items--filter-rules-band {
   max-height: min(18rem, 50vh);
-}
-
-// Search row: field fills remaining width; trailing cluster uses fixed icon slots (clear + projected actions).
-// @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__search {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: var(--spacing-2, 0.5rem);
-  align-items: center;
-}
-
-// Search text field spans the fluid column only; geometry owned here (not on a flex wrapper).
-// @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__search-field {
-  min-width: 0;
-}
-
-// Hosts optional clear + projected `[dropdown-search-action]` controls with stable total width.
-// @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__search-trailing {
-  display: flex;
-  flex-direction: row;
-  flex-shrink: 0;
-  align-items: center;
-  column-gap: var(--spacing-2, 0.5rem);
-}
-
-// Fixed square footprint for one icon control or spacer (prevents input width jumping).
-// @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__search-action-slot {
-  display: flex;
-  box-sizing: border-box;
-  width: var(--std-dropdown-search-icon-slot-size);
-  min-width: var(--std-dropdown-search-icon-slot-size);
-  align-items: center;
-  justify-content: center;
-}
-
-// Invisible block matching the icon button hit box when the real control is not shown.
-// @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__search-slot-spacer {
-  box-sizing: border-box;
-  width: 100%;
-  height: var(--std-dropdown-search-icon-slot-size);
-}
-
-// Icon control fills the fixed slot without changing outer slot geometry.
-// @see docs/specs/component/filters/dropdown-system.md
-.standard-dropdown__search-icon-btn {
-  flex-shrink: 0;
 }
 
 // Search clear: never `transform` (hlmBtn `[class]` can drop template hooks; `data-*` + `!important` wins over stray utilities).

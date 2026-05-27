@@ -1,12 +1,13 @@
-import { Component, contentChildren, input, output } from '@angular/core';
-import { HlmMenuItemDirective } from '../ui/menu';
-import { HLM_BUTTON_IMPORTS } from '../ui/button';
-import { DropdownSearchActionAnchorDirective } from './dropdown-search-action-anchor.directive';
+import { Component, input, output } from '@angular/core';
+import { MenuPanelFooterActionComponent } from '../menu-panel/menu-panel-footer-action.component';
+import { MenuPanelSearchRowComponent } from '../menu-panel/menu-panel-search-row.component';
+import { MenuPanelScrollRegionComponent } from '../menu-panel/menu-panel-scroll-region.component';
+import type { MenuPanelScrollMode } from '../menu-panel/menu-panel-scroll-mode';
 
 @Component({
   selector: 'app-standard-dropdown',
   standalone: true,
-  imports: [...HLM_BUTTON_IMPORTS, HlmMenuItemDirective],
+  imports: [MenuPanelSearchRowComponent, MenuPanelScrollRegionComponent, MenuPanelFooterActionComponent],
   templateUrl: './standard-dropdown.component.html',
   styleUrl: './standard-dropdown.component.scss',
   host: {
@@ -17,14 +18,15 @@ export class StandardDropdownComponent {
   /** When true, keeps a trailing icon slot when no `[dropdown-search-action]` is projected (e.g. sort reset). */
   readonly reserveProjectedSearchActionSlot = input(false);
 
-  /** Projected `[dropdown-search-action]` anchors — exposed for template slot layout. */
-  readonly projectedSearchActions = contentChildren(DropdownSearchActionAnchorDirective);
-
   readonly showSearch = input(true);
   readonly searchPlaceholder = input('Search...');
   readonly searchTerm = input('');
   readonly showDefaultClearAction = input(true);
   readonly clearSearchAriaLabel = input('Clear search');
+
+  /** Prefer over raw `itemsClass` scroll modifier strings. */
+  readonly scrollMode = input<MenuPanelScrollMode>('host');
+  /** Extra classes on the scroll host (non-scroll concerns only). */
   readonly itemsClass = input('');
 
   readonly actionLabel = input<string | null>(null);
@@ -35,16 +37,4 @@ export class StandardDropdownComponent {
   readonly actionRequested = output<void>();
   /** Emits when the items host scrolls (toolbar filter uses this to dismiss inline pickers). */
   readonly itemsScroll = output<void>();
-
-  itemsHostClass(): string {
-    const extra = this.itemsClass().trim();
-    const delegateScroll = extra.includes('scrollbar-gutter-delegate');
-    // Scroll list: one owner — items host, or inner band (e.g. `.projects-list`) when delegate modifier is set.
-    // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-    const overflow = delegateScroll
-      ? 'overflow-x-hidden overflow-y-hidden'
-      : 'overflow-y-auto overflow-x-hidden';
-    const base = `standard-dropdown__items flex flex-1 flex-col py-0 min-h-0 ${overflow}`;
-    return extra ? `${base} ${extra}` : base;
-  }
 }
