@@ -39,6 +39,7 @@ import {
 } from '../core/workspace-pane/workspace-pane-shell-host.token';
 import { WorkspaceViewService } from '../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../core/workspace-selection/workspace-selection.service';
+import { WorkspaceSelectedItemsSyncService } from '../core/workspace-selection/workspace-selected-items-sync.service';
 import type { WorkspacePaneTab } from '../core/workspace-pane/workspace-pane-host.port';
 import type {
   ImageUploadedEvent,
@@ -115,6 +116,9 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   readonly workspacePaneDefaultWidth = computed(() => this.viewportWidth * 0.618);
 
   constructor() {
+    // Side-effect: keeps workspace pane rawImages aligned with global selection.
+    inject(WorkspaceSelectedItemsSyncService);
+
     effect(() => {
       const shell = this.activeShell();
       const prev = this.previousActiveShell;

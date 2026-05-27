@@ -8652,6 +8652,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.thumbnailGrid.empty.noSelection', 'No items selected. Select media on the map or in Media to add them here.', 'en', 'apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.html empty no-selection hint')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No items selected. Select media on the map or in Media to add them here.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailGrid.empty.noSelection'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Elemente ausgewählt. Wähle Medien auf der Karte oder unter Medien aus um sie hier anzuzeigen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailGrid.empty.noSelection'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun elemento selezionato. Seleziona media sulla mappa o in Media per aggiungerli qui.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.thumbnailGrid.empty.noSelection'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'workspace.thumbnailGrid.emptySelection.title', 'No media at this location', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty-selection title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

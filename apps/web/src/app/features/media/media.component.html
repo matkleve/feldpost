@@ -5,7 +5,7 @@
     class="upload-shell"
     [class.upload-shell--open]="uploadPanelOpen()"
     [class.upload-shell--panel-closed]="!uploadPanelOpen()"
-    [class.upload-shell--resolver-active]="uploadResolverPending() > 0"
+    [class.upload-shell--resolver-active]="uploadResolverTrayActive()"
   >
     <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
       <button
@@ -48,7 +48,7 @@
       class="upload-shell__dock"
       [class.upload-shell__dock--visible]="showUploadDock()"
       [class.upload-shell__dock--panel-open]="uploadPanelOpen()"
-      [class.upload-shell__dock--resolver-active]="uploadResolverPending() > 0"
+      [class.upload-shell__dock--resolver-active]="uploadResolverTrayActive()"
     >
       @if (uploadPanelOpen()) {
         <app-upload-panel

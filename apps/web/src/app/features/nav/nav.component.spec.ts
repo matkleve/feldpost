@@ -78,6 +78,7 @@ function buildTestBed(emailOverride: string | null = null, metadata: Record<stri
     providers: [
       provideRouter([
         { path: '', component: NavComponent },
+        { path: 'map', component: NavComponent },
         { path: 'media', component: NavComponent },
         { path: 'groups', component: NavComponent },
         { path: 'settings', component: NavComponent },
@@ -134,6 +135,21 @@ describe('NavComponent', () => {
     );
     const mapLink = allLinks.find((l) => l.getAttribute('href') === '/');
     expect(mapLink).not.toBeNull();
+    expect(mapLink?.classList).toContain('nav__link--active');
+  });
+
+  it('highlights Map nav item when router is at /map', async () => {
+    const router = TestBed.inject(Router);
+    const fixture = TestBed.createComponent(NavComponent);
+    fixture.detectChanges();
+
+    await router.navigate(['/map']);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const mapLink = Array.from<HTMLAnchorElement>(
+      fixture.nativeElement.querySelectorAll('a.nav__link'),
+    ).find((l) => l.getAttribute('href') === '/');
     expect(mapLink?.classList).toContain('nav__link--active');
   });
 

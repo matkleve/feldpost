@@ -34,6 +34,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { UPLOAD_DEV_FLAGS } from '../../upload/upload-dev-flags';
 import { UploadPanelComponent } from '../../upload/upload-panel.component';
 import { UploadResolverTrayComponent } from '../../upload/upload-resolver-tray.component';
 import type {
@@ -352,7 +353,13 @@ export class MapShellComponent implements OnDestroy {
   );
   /** Shared frosted dock under the button: panel open and/or resolver tray active (OD-6). */
   readonly showUploadDock = computed(
-    () => this.uploadPanelOpen() || this.uploadResolverPending() > 0,
+    () =>
+      UPLOAD_DEV_FLAGS.dockAlwaysVisible ||
+      this.uploadPanelOpen() ||
+      this.uploadResolverPending() > 0,
+  );
+  readonly uploadResolverTrayActive = computed(
+    () => UPLOAD_DEV_FLAGS.dockAlwaysVisible || this.uploadResolverPending() > 0,
   );
   readonly uploadHasIssues = computed(() =>
     this.uploadManagerService.jobs().some((job) => getLaneForJob(job) === 'issues'),
@@ -2919,9 +2926,14 @@ export class MapShellComponent implements OnDestroy {
     });
 
     this.setSelectedMarkerKeys(result.selectedMarkerKeys);
-    this.workspaceViewService.setActiveSelectionImages(result.images);
-    if (!additive) {
-      this.workspaceSelectionService.clearSelection();
+    const imageIds = result.images.map((image) => image.id);
+    if (additive) {
+      const mergedIds = Array.from(
+        new Set([...this.workspaceSelectionService.selectedMediaIds(), ...imageIds]),
+      );
+      this.workspaceSelectionService.selectAllInScope(mergedIds);
+    } else {
+      this.workspaceSelectionService.selectAllInScope(imageIds);
     }
 
     if (!this.photoPanelOpen()) {
@@ -3603,18 +3615,24 @@ export class MapShellComponent implements OnDestroy {
     cells: Array<{ lat: number; lng: number }>,
     zoom: number,
   ): void {
-    this.workspaceSelectionService.clearSelection();
     this.setSelectedMarkerKeys(new Set([markerKey]));
-    void this.workspaceViewService.loadMultiClusterImages(cells, zoom);
 
-    // Single-image marker: also jump directly to detail view.
     if (markerCount === 1 && mediaId) {
+      this.workspaceSelectionService.setSingle(mediaId);
       this.openDetailView(mediaId);
       return;
     }
 
-    // Cluster click: ensure detail view is dismissed so thumbnail grid shows.
+    void this.selectClusterImages(cells, zoom);
     this.patchDetailMediaId(null);
+  }
+
+  private async selectClusterImages(
+    cells: Array<{ lat: number; lng: number }>,
+    zoom: number,
+  ): Promise<void> {
+    const images = await this.workspaceViewService.fetchClusterImages(cells, zoom);
+    this.workspaceSelectionService.selectAllInScope(images.map((image) => image.id));
   }
 
   /** Attach click + touch long-press interactions consistently for each new marker. */
@@ -3711,11 +3729,13 @@ export class MapShellComponent implements OnDestroy {
     zoom: number,
   ): Promise<void> {
     const incoming = await this.workspaceViewService.fetchClusterImages(cells, zoom);
-    const merged = this.radiusSelectionService.mergeWorkspaceImages(
-      this.workspaceViewService.rawImages(),
-      incoming,
+    const mergedIds = Array.from(
+      new Set([
+        ...this.workspaceSelectionService.selectedMediaIds(),
+        ...incoming.map((image) => image.id),
+      ]),
     );
-    this.workspaceViewService.setActiveSelectionImages(merged);
+    this.workspaceSelectionService.selectAllInScope(mergedIds);
   }
 
   /** Fade in newly added marker elements for smoother cluster reconciliation. */

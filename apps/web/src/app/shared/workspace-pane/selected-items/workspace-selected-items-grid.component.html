@@ -30,6 +30,15 @@
         }}
       </p>
     </div>
+  } @else if (selectionService.selectedCount() === 0) {
+    <p class="thumbnail-grid__empty">
+      {{
+        t(
+          'workspace.thumbnailGrid.empty.noSelection',
+          'No items selected. Select media on the map or in Media to add them here.'
+        )
+      }}
+    </p>
   } @else if (viewService.rawImages().length === 0) {
     <p class="thumbnail-grid__empty">
       {{

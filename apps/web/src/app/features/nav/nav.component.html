@@ -34,9 +34,8 @@
             <a
               class="nav__link"
               [routerLink]="item.route"
-              routerLinkActive="nav__link--active"
-              [routerLinkActiveOptions]="item.route === '/' ? { exact: true } : { exact: false }"
-              [attr.aria-current]="null"
+              [class.nav__link--active]="isNavItemActive(item)"
+              [attr.aria-current]="isNavItemActive(item) ? 'page' : null"
               [title]="item.label"
             >
               <span class="nav__media" aria-hidden="true">

@@ -61,8 +61,6 @@ export class ShareLinkRestoreService {
       }
 
       this.workspaceViewService.clearActiveSelectionAndSettings();
-      this.workspaceViewService.setActiveSelectionImages(images);
-
       const loadedIds = new Set(images.map((image) => image.id));
       const selectionIds = orderedIds.filter((id) => loadedIds.has(id));
       this.workspaceSelectionService.selectAllInScope(selectionIds);

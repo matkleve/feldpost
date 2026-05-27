@@ -8,6 +8,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type { UploadAddressCandidate } from '../../core/upload/upload-manager.types';
+import { UPLOAD_DEV_FLAGS } from './upload-dev-flags';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
 
 export type UploadResolverTrayMode = 'passive' | 'active' | 'hidden';
@@ -46,9 +47,24 @@ export class UploadResolverTrayComponent {
     if (this.pendingGroupCount() > 0) {
       return 'active';
     }
+    if (UPLOAD_DEV_FLAGS.dockAlwaysVisible) {
+      return 'passive';
+    }
     // Batch progress when panel is closed: upload button + preview chips already show state.
     // Passive line is reserved for future non-active hints only (no duplicate progress bar).
     return 'hidden';
+  });
+
+  /** Passive line, or dev placeholder when `UPLOAD_DEV_FLAGS.dockAlwaysVisible`. */
+  readonly passiveDisplayLine = computed(() => {
+    const line = this.passiveStatusLine();
+    if (line) {
+      return line;
+    }
+    if (UPLOAD_DEV_FLAGS.dockAlwaysVisible) {
+      return this.t('upload.resolver.passive.devPreview', 'Upload tray visible (dev)');
+    }
+    return null;
   });
 
   readonly resolverTitle = computed(() => {

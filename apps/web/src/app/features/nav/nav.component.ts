@@ -18,7 +18,9 @@
  */
 
 import { Component, HostListener, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
@@ -28,6 +30,9 @@ import {
   resolveShellSegmentsFromUrl,
   stripSettingsSuffix,
 } from '../../core/settings-pane/settings-url.helpers';
+import {
+  resolveAuthenticatedActiveShell,
+} from '../../layout/authenticated-shell-active.helpers';
 
 export interface NavItem {
   /** Google Material Icon ligature name (e.g. 'map', 'perm_media'). */
@@ -40,7 +45,7 @@ export interface NavItem {
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
 })
@@ -51,6 +56,17 @@ export class NavComponent {
   private readonly settingsPaneService = inject(SettingsPaneService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  private readonly activeShell = computed(() => resolveAuthenticatedActiveShell(this.currentUrl()));
+
   /** Nav items in display order. Items with disabled: true are visually greyed
    *  out and non-interactive — reserved for future features. */
   readonly navItems = computed<NavItem[]>(() => [
@@ -58,6 +74,21 @@ export class NavComponent {
     { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
     { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
   ]);
+
+  /** Map shell uses `/`, `/map`, and `/map/settings/...` — not only `/`. */
+  isNavItemActive(item: NavItem): boolean {
+    const shell = this.activeShell();
+    if (item.route === '/') {
+      return shell === 'map';
+    }
+    if (item.route === '/media') {
+      return shell === 'media';
+    }
+    if (item.route === '/projects') {
+      return shell === 'projects';
+    }
+    return false;
+  }
 
   readonly settingsOverlayOpen = this.settingsPaneService.open;
 
