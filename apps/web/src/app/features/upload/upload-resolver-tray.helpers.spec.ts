@@ -3,6 +3,8 @@ import type { UploadDisambiguationGroup } from '../../core/upload/upload-manager
 import {
   extractStreetFromTitleAddress,
   resolverQuestionKeyForGroup,
+  resolverScoreBand,
+  resolverScoreFillPercent,
 } from './upload-resolver-tray.helpers';
 
 function group(
@@ -40,5 +42,19 @@ describe('upload-resolver-tray.helpers', () => {
     expect(
       resolverQuestionKeyForGroup(group({ collapseStage: 'per_file' })),
     ).toBe('upload.resolver.question.door');
+  });
+
+  it('resolverScoreBand maps low, okay, and strong thresholds', () => {
+    expect(resolverScoreBand(0.69)).toBe('low');
+    expect(resolverScoreBand(0.7)).toBe('okay');
+    expect(resolverScoreBand(0.979)).toBe('okay');
+    expect(resolverScoreBand(0.98)).toBe('strong');
+    expect(resolverScoreBand(undefined)).toBeNull();
+  });
+
+  it('resolverScoreFillPercent clamps to 0–100', () => {
+    expect(resolverScoreFillPercent(0.456)).toBe(46);
+    expect(resolverScoreFillPercent(1.2)).toBe(100);
+    expect(resolverScoreFillPercent(-0.1)).toBe(0);
   });
 });

@@ -1,3 +1,5 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button.
 // @see docs/specs/component/filters/dropdown-system.md
 // Fills toolbar shell width; matches sort-dropdown host flex / width contract.
@@ -73,12 +75,14 @@
 }
 
 // --- Selected row (multi-select via Ctrl+Click) ---
+// @see docs/design/state-visuals.md § Interaction emphasis
 .grouping-row--selected {
-  background: color-mix(in srgb, var(--primary) 14%, transparent);
-  border-left: 2px solid var(--primary);
+  background: color-mix(in srgb, var(--interaction-selected-ink) 14%, transparent);
+  border-left: 2px solid var(--interaction-selected-ink);
 
   &:hover {
-    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    @include emphasis.selected-hover(18%);
+    border-left-color: var(--primary);
   }
 }
 

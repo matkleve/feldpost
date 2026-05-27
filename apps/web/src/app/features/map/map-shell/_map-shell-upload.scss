@@ -1,3 +1,5 @@
+@use '../../../../styles/frosted-chrome';
+
 // ── Upload shell — width owner for button, panel, resolver tray (OD-6) ───────
 // @see docs/specs/component/upload/upload-shell.md
 
@@ -49,7 +51,7 @@
   height: 2.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--background);
+  @include frosted-chrome.outline-control;
   color: var(--muted-foreground);
   cursor: pointer;
   display: flex;
@@ -92,8 +94,7 @@
   &:hover,
   &:focus-visible {
     color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 10%, var(--background));
-    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+    @include frosted-chrome.outline-control-hover;
     transform: scale(1.04);
 
     .material-icons {
@@ -103,8 +104,10 @@
 
   &--active {
     color: var(--interaction-selected-ink);
-    background: color-mix(in srgb, var(--interaction-selected-ink) 10%, var(--background));
+    background: color-mix(in srgb, var(--interaction-selected-ink) 12%, color-mix(in srgb, var(--card) 55%, transparent));
     border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
+    backdrop-filter: blur(12px) saturate(1.15);
+    -webkit-backdrop-filter: blur(12px) saturate(1.15);
 
     .material-icons {
       color: var(--interaction-selected-ink);
@@ -114,8 +117,7 @@
   &--active:hover,
   &--active:focus-visible {
     color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 10%, var(--background));
-    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+    @include frosted-chrome.outline-control-hover;
 
     .material-icons {
       color: var(--primary);

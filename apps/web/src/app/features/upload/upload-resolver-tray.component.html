@@ -89,7 +89,17 @@
             <span class="upload-resolver-tray__choice-body">
               <span class="upload-resolver-tray__choice-label">{{ item.label }}</span>
               @if (formatScorePercent(item.candidate.score); as percent) {
-                <span class="upload-resolver-tray__choice-score" aria-hidden="true">{{ percent }}</span>
+                <span
+                  class="upload-resolver-tray__choice-score-col"
+                  aria-hidden="true"
+                  [attr.data-score-band]="scoreBand(item.candidate.score)"
+                  [style.--score-fill]="scoreFillPercent(item.candidate.score)"
+                >
+                  <span class="upload-resolver-tray__choice-score">{{ percent }}</span>
+                  <span class="upload-resolver-tray__choice-score-bar">
+                    <span class="upload-resolver-tray__choice-score-bar__fill"></span>
+                  </span>
+                </span>
               }
             </span>
           </button>

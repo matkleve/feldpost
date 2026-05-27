@@ -73,7 +73,14 @@
   pointer-events: auto;
 }
 
+// Stable state: batch-selected file row — selected ink; primary on hover
+// @see docs/design/state-visuals.md § Interaction emphasis
 .upload-panel__file-main--selectable.upload-panel__file-main--selected {
+  background: color-mix(in srgb, var(--interaction-selected-ink) 10%, transparent);
+}
+
+.upload-panel__file-main--selectable.upload-panel__file-main--selected:hover,
+.upload-panel__file-main--selectable.upload-panel__file-main--selected:focus-within {
   background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 

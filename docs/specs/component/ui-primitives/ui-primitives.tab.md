@@ -8,7 +8,7 @@ Tab strip chrome: list container (`[brnTabsList][hlmTabsList]`) and tab triggers
 
 ## What It Looks Like
 
-Muted-rail list (`bg-muted rounded-md p-1`); active trigger: `data-[state=active]:bg-background data-[state=active]:shadow-sm`. Focus ring via `focus-visible:ring-ring`. Composition owner (`app-group-tab-bar`) may override geometry and active accent independently.
+Muted-rail list (`bg-muted rounded-md p-1`) or line underline row. Active trigger uses **interaction-selected-ink** (blue) at rest; hover uses **primary** (orange). Focus ring via `focus-visible:ring-ring`. See [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis.
 
 ## Where It Lives
 
@@ -38,12 +38,13 @@ Tab state is managed by `BrnTabs`; active trigger receives `data-state="active"`
 
 | Behavior | Geometry Owner | State Owner | Visual Owner | Same element? |
 | -------- | -------------- | ----------- | ------------ | ------------- |
-| Active tab | `button[brnTabsTrigger]` | `data-[state=active]` (BrnTabs) | `data-[state=active]:bg-background data-[state=active]:shadow-sm` | ✅ |
+| Active tab | `button[brnTabsTrigger]` | `data-[state=active]` (BrnTabs) | selected-ink text/underline (`line`) or selected-ink fill mix (`default`) | ✅ |
+| Tab hover | `button[brnTabsTrigger]` | `:hover` | `hover:text-primary` | ✅ |
 | Focus ring | `button[brnTabsTrigger]` | `:focus-visible` | `focus-visible:ring-ring` | ✅ |
 
 ## Acceptance Criteria
 
-- [ ] Tab list renders with `bg-muted` rail; active trigger gets `bg-background` + `shadow-sm` (tweakcn tokens, no hardcoded values).
+- [ ] Tab list renders with `bg-muted` rail (`default`) or line underline (`line`); active trigger uses `--interaction-selected-ink`; hover uses `--primary`.
 - [ ] `app-group-tab-bar` stays the composition owner for workspace tabs.
 - [ ] `BrnTabs` manages active state; no boolean `@Input()` for visual state.
 - [ ] Focus ring visible on all three themes (light / dark / sandstone).

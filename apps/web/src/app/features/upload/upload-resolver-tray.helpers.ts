@@ -41,6 +41,33 @@ export function resolverQuestionKeyForGroup(
   return 'upload.resolver.question.address';
 }
 
+/** Geocoder confidence bands for option score micro-bar. @see upload-resolver-tray.md */
+export type ResolverScoreBand = 'low' | 'okay' | 'strong';
+
+export const RESOLVER_SCORE_BAND_LOW_MAX = 0.7;
+export const RESOLVER_SCORE_BAND_STRONG_MIN = 0.98;
+
+export function resolverScoreBand(score: number | undefined): ResolverScoreBand | null {
+  if (score === undefined || Number.isNaN(score)) {
+    return null;
+  }
+  const normalized = Math.min(1, Math.max(0, score));
+  if (normalized >= RESOLVER_SCORE_BAND_STRONG_MIN) {
+    return 'strong';
+  }
+  if (normalized >= RESOLVER_SCORE_BAND_LOW_MAX) {
+    return 'okay';
+  }
+  return 'low';
+}
+
+export function resolverScoreFillPercent(score: number | undefined): number {
+  if (score === undefined || Number.isNaN(score)) {
+    return 0;
+  }
+  return Math.round(Math.min(1, Math.max(0, score)) * 100);
+}
+
 export function optionDisplayLabel(
   group: UploadDisambiguationGroup,
   rowLabel: string,

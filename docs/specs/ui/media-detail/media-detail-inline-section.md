@@ -25,6 +25,10 @@ When EXIF GPS is absent, `l2` stays an empty spacer; no button.
 - **Parent template:** `media-detail-view.component.html` (above Location section)
 - **Appears when:** Media detail is open and `isImageLike()` is true
 
+## Interaction emphasis
+
+Dropdown picker rows (`.media-detail-inline-section__option--selected`) use [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis (selected ink at rest, primary on hover). **Tag chips** (`.projects-picker__chip`, file-type surfaces) keep domain colors — not this contract.
+
 ## Visual Behavior Contract
 
 ### Ownership matrix

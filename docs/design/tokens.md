@@ -54,8 +54,12 @@ Canonical **frosted floating chrome** (nav sidebar panel, map style switch, sear
 | --- | --- |
 | `frosted-chrome.fill` | `var(--card)` at **85%** + `backdrop-filter: blur(16px) saturate(1.2)` |
 | `frosted-chrome.surface` | `fill` + border `color-mix(var(--border) 50%)` + `var(--shadow-md)` |
+| `frosted-chrome.outline-control` | Semi-transparent fill + lighter blur for **`hlmBtn` `variant="outline"`** on frosted shells (upload intake rows, map upload FAB) |
+| `frosted-chrome.outline-control-hover` | Primary-tinted hover/focus wash while keeping blur |
 
 Component SCSS must `@use '../../../styles/frosted-chrome'` (adjust depth) and `@include` — do not duplicate `%` / blur literals on map-overlay surfaces.
+
+**Outline on frosted chrome:** Global `hlmBtn` outline uses opaque `bg-background` on solid surfaces. On map/upload frosted panels only, override with `outline-control` mixins — do **not** apply app-wide to every outline button.
 
 ## 3.1 Color Tokens
 

@@ -1,3 +1,5 @@
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Projects dropdown — project-specific: checkbox, count, "All" separator
 // Generic search/items/item/action-row styles come from global dd-* classes.
 
@@ -51,9 +53,16 @@
   cursor: pointer;
   transition: background 80ms ease-out;
 
-  &:hover,
+  &:hover:not(.projects-picker__option--selected) {
+    @include emphasis.hover(8%);
+  }
+
   &.projects-picker__option--selected {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    @include emphasis.selected(8%);
+  }
+
+  &.projects-picker__option--selected:hover {
+    @include emphasis.selected-hover(8%);
   }
 }
 

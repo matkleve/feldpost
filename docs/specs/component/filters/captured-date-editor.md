@@ -14,6 +14,10 @@ The control renders as a compact `.ui-item` row with a date value label and an e
 - Parent: `MediaDetailViewComponent` metadata area
 - Appears when: Media Detail View is open and metadata rows are rendered
 
+## Interaction emphasis
+
+Calendar day cells (`.captured-date-editor__day--selected`) follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis: selected ink at rest, primary on hover. Today ring (unselected) may still use `--primary`.
+
 ## Actions
 
 | #   | User Action              | System Response                            | Notes                                          |

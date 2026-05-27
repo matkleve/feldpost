@@ -1,4 +1,5 @@
 @use '../../../styles/frosted-chrome';
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 // Upload resolver tray — compact Cursor Questions card; passive + active modes
 // @see docs/specs/component/upload/upload-resolver-tray.md
@@ -187,8 +188,25 @@
       }
     }
 
+    // Stable state: selected choice — cool selection ink at rest; primary on hover
+    // @see docs/design/state-visuals.md § Interaction emphasis
     &--selected {
-      background: color-mix(in srgb, var(--primary) 10%, transparent);
+      @include emphasis.selected(10%);
+
+      .upload-resolver-tray__choice-label,
+      .upload-resolver-tray__choice-score {
+        color: var(--interaction-selected-ink);
+      }
+    }
+
+    &--selected:hover,
+    &--selected:focus-visible {
+      @include emphasis.selected-hover(8%);
+
+      .upload-resolver-tray__choice-label,
+      .upload-resolver-tray__choice-score {
+        color: var(--primary);
+      }
     }
   }
 
@@ -214,8 +232,13 @@
   }
 
   .upload-resolver-tray__choice--selected .upload-resolver-tray__choice-index {
-    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 35%, var(--border));
     color: var(--foreground);
+  }
+
+  .upload-resolver-tray__choice--selected:hover .upload-resolver-tray__choice-index,
+  .upload-resolver-tray__choice--selected:focus-visible .upload-resolver-tray__choice-index {
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
   }
 
   // Label + score on one row
@@ -240,14 +263,56 @@
     transition: color 80ms ease-out;
   }
 
-  // Geocoder confidence — trailing meta
-  // @see upload-resolver-tray.md#active-mode
-  .upload-resolver-tray__choice-score {
+  // Trailing score column — percent centered over confidence micro-bar
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col {
+    --score-bar-width: 1.5rem;
+    // Neutral greys (no muted-foreground hue) for percent + low-confidence bar
+    // @see upload-resolver-tray.md#score-micro-bar
+    --score-track: color-mix(in oklch, var(--foreground) 8%, var(--background));
+    --score-ink-neutral: color-mix(in oklch, var(--foreground) 34%, var(--background));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
     flex-shrink: 0;
+    width: var(--score-bar-width);
+    min-width: var(--score-bar-width);
+  }
+
+  // Geocoder confidence percent label
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score {
+    width: 100%;
     font-size: var(--font-size-2xs);
-    line-height: 1.4;
-    color: var(--muted-foreground);
+    line-height: 1;
+    text-align: center;
+    color: var(--score-ink-neutral);
     transition: color 80ms ease-out;
+  }
+
+  // Neutral track for confidence fill (width via --score-fill custom property)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-bar {
+    width: 100%;
+    height: 3px;
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--score-track);
+  }
+
+  // Filled portion of confidence bar
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-bar__fill {
+    display: block;
+    height: 100%;
+    width: calc(var(--score-fill, 0) * 1%);
+    min-width: 0;
+    border-radius: inherit;
+    background: var(--score-ink-neutral);
+    transition:
+      width var(--motion-duration-fast) var(--motion-ease-out),
+      background-color 80ms ease-out;
   }
 
   // Affected files count
@@ -344,5 +409,28 @@
   // @see upload-resolver-tray.md#active-mode
   .upload-resolver-tray__continue {
     flex-shrink: 0;
+  }
+}
+
+@layer states {
+  // Stable state: low confidence — muted bar fill (<70%)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col[data-score-band='low']
+    .upload-resolver-tray__choice-score-bar__fill {
+    background: var(--score-ink-neutral);
+  }
+
+  // Stable state: okay confidence — primary bar fill (70–97.9%)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col[data-score-band='okay']
+    .upload-resolver-tray__choice-score-bar__fill {
+    background: var(--primary);
+  }
+
+  // Stable state: strong confidence — chart-1 bar fill (≥98%, high-trust readout)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col[data-score-band='strong']
+    .upload-resolver-tray__choice-score-bar__fill {
+    background: var(--chart-1);
   }
 }

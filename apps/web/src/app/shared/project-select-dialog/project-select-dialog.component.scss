@@ -1,3 +1,5 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 @layer components {
   // Host participates in parent layout without creating an extra box.
   // @see docs/specs/component/project-select-dialog/project-select-dialog.md
@@ -68,10 +70,15 @@
   }
 
   // Highlights the row that matches the current selection signal.
-  // @see docs/specs/component/project-select-dialog/project-select-dialog.md
+  // @see docs/design/state-visuals.md § Interaction emphasis
   .project-select-dialog__option--active {
-    background: color-mix(in srgb, var(--primary) 10%, transparent);
-    border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+    @include emphasis.selected-bordered(10%, 40%);
+  }
+
+  .project-select-dialog__option--active:hover,
+  .project-select-dialog__option--active:focus-visible {
+    @include emphasis.selected-hover(8%);
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
   }
 
   // Leading radio icon sizing for the option row.

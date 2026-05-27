@@ -43,6 +43,10 @@ button[hlmBtn] (host)
 - Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
 - [x] This component implements the contract (`outline`, `ghost` in CVA; `default`/`destructive` documented filled exception)
 
+### Frosted chrome hosts (outline only)
+
+On map/upload **frosted** shells (`frosted-chrome.surface`), `variant="outline"` keeps the same interaction emphasis but the **fill** is overridden in feature SCSS via `frosted-chrome.outline-control` (semi-transparent card + blur). Examples: upload panel intake rows (map overlay), map upload FAB. Embedded workspace upload tab and solid surfaces keep the default opaque `bg-background` from CVA.
+
 ## Visual Behavior Contract
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |

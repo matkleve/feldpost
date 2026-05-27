@@ -18,6 +18,19 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 
 **Detail surface (inline + TOC):** Inline preference sections use **one** flat body on the detail column surface (`.settings-overlay__detail-body` / `.settings-overlay__detail-group`) with **top rules between groups** — not a per-section bordered inner card. A **table-of-contents** row (`.settings-overlay__detail-toc`) may appear under the section lead when **`SETTINGS_SECTION_ANCHORS`** defines anchors for that section; TOC entries are `type="button"` and scroll to stable element ids `settings-{sectionId}-{subsectionSlug}`. Deep links use the same slugs via `SettingsPaneService.subsectionRequest` / `/settings/:section/:subsection` (see [settings-routes.md](../../page/settings-routes.md)). Anchor metadata lives only in [`settings-section-anchors.const.ts`](../../../../apps/web/src/app/features/settings-overlay/settings-section-anchors.const.ts), **not** on the rail `SettingsSection` model. **Invite:** TOC is suppressed while the invite section reports **`panelMode === 'error'`**. **Scroll timing:** subsection navigation uses **`afterNextRender`** plus reactive reads on **account `loading`** and **invite `panelMode`**; optional short **rAF** retry only mitigates paint races. **Sticky TOC** in the detail column is an explicit future enhancement, not part of the shipped contract.
 
+## Interaction emphasis
+
+Left **section rail** rows and detail **TOC chips** follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis:
+
+| Surface | Selected / active | Hover |
+| ------- | ----------------- | ----- |
+| `.settings-overlay__section-item--active` | `--interaction-selected-ink` + 10% mix | `--primary` wins |
+| `.settings-overlay__section-item` (idle) | — | `--primary` |
+| `.settings-overlay__section-media` icon | selected ink when parent active; muted when idle | primary when parent active + hovered |
+| `.settings-overlay__detail-toc-item` | — | primary (no `accent` wash) |
+
+Segmented controls (`hlmToggleGroup`) inherit global toggle-group CVA (selected ink when on).
+
 ## Where It Lives
 
 - **Route / URL:** Optional `/settings` and `/settings/:section/:subsection` paths (see [settings-routes.md](../../page/settings-routes.md)) sync **`SettingsPaneService`** (`openFromRoute`) with the same overlay shell rendered from **`AppComponent`** (`ss-settings-overlay` sibling of **`app-nav`**). **Open** is also toggled from the nav avatar row without requiring a URL change.

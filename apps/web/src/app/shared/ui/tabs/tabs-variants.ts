@@ -31,9 +31,9 @@ export const tabsTriggerVariants = cva(
     variants: {
       variant: {
         default:
-          'rounded-sm px-3 py-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+          'rounded-sm px-3 py-1.5 text-muted-foreground hover:text-primary data-[state=active]:bg-[color-mix(in_srgb,var(--interaction-selected-ink)_10%,transparent)] data-[state=active]:text-[var(--interaction-selected-ink)] data-[state=active]:shadow-sm data-[state=active]:hover:text-primary',
         line:
-          'relative rounded-none border border-transparent px-4 pb-3 pt-2 text-foreground/60 hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100',
+          'relative rounded-none border border-transparent px-4 pb-3 pt-2 text-muted-foreground hover:text-primary data-[state=active]:bg-transparent data-[state=active]:text-[var(--interaction-selected-ink)] data-[state=active]:shadow-none data-[state=active]:hover:text-primary after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-[var(--interaction-selected-ink)] after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100',
       },
     },
     defaultVariants: {

@@ -254,7 +254,14 @@
     flex-shrink: 0;
   }
 
+  // Stable state: picker option already linked — selected ink (not tag chip semantics)
+  // @see docs/design/state-visuals.md § Interaction emphasis
   &__option--selected {
+    color: var(--interaction-selected-ink);
+    background: color-mix(in srgb, var(--interaction-selected-ink) 12%, transparent);
+  }
+
+  &__option--selected:hover {
     color: var(--primary);
     background: color-mix(in srgb, var(--primary) 12%, transparent);
   }

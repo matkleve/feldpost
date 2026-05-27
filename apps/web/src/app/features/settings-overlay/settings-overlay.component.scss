@@ -1,4 +1,5 @@
 @use '../../../styles/frosted-chrome';
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 :host {
   display: contents;
@@ -188,32 +189,50 @@
     transition: var(--settings-interactive-transition);
   }
 
-  // Hover affordance for rail section buttons
-  // @see docs/specs/ui/settings-overlay
-  .settings-overlay__section-item:hover {
-    background: var(--settings-hover-focus);
+  // Hover affordance for rail section buttons (non-active rows)
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  .settings-overlay__section-item:hover:not(.settings-overlay__section-item--active) {
+    @include emphasis.hover(10%);
   }
 
-  // Selected section emphasis on the rail row
-  // @see docs/specs/ui/settings-overlay
+  // Selected section emphasis on the rail row — cool selection ink
+  // @see docs/design/state-visuals.md § Interaction emphasis
   .settings-overlay__section-item--active {
-    border-color: color-mix(in srgb, var(--primary) 42%, transparent);
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    @include emphasis.selected-bordered(10%, 42%);
   }
 
-  // Focus ring for keyboard navigation on rail rows
-  // @see docs/specs/ui/settings-overlay
-  .settings-overlay__section-item:focus-visible {
+  // Selected rail row hover — primary wins
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  .settings-overlay__section-item--active:hover,
+  .settings-overlay__section-item--active:focus-visible {
+    @include emphasis.selected-hover(10%);
     border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
     box-shadow: var(--settings-focus-ring);
     outline: none;
   }
 
-  // Clay-tinted icon cell in the rail row (20px box; layout utilities on host in template)
+  // Focus ring for keyboard navigation on rail rows (non-active)
   // @see docs/specs/ui/settings-overlay
+  .settings-overlay__section-item:not(.settings-overlay__section-item--active):focus-visible {
+    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
+    box-shadow: var(--settings-focus-ring);
+    outline: none;
+  }
+
+  // Icon cell in the rail row — muted idle; selected ink when section active
+  // @see docs/design/state-visuals.md § Interaction emphasis
   .settings-overlay__section-media {
-    color: var(--primary);
+    color: var(--muted-foreground);
     align-self: center;
+  }
+
+  .settings-overlay__section-item--active .settings-overlay__section-media {
+    color: var(--interaction-selected-ink);
+  }
+
+  .settings-overlay__section-item--active:hover .settings-overlay__section-media,
+  .settings-overlay__section-item--active:focus-visible .settings-overlay__section-media {
+    color: var(--primary);
   }
 
   // Section title line in the rail list (two-line clamp for long locale strings)
@@ -307,11 +326,10 @@
     transition: var(--settings-interactive-transition);
   }
 
-  // Hover affordance for TOC jumps
-  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  // Hover affordance for TOC jumps — primary attention (no accent olive)
+  // @see docs/design/state-visuals.md § Interaction emphasis
   .settings-overlay__detail-toc-item:hover {
-    background: var(--accent);
-    color: var(--accent-foreground);
+    @include emphasis.hover(10%);
   }
 
   // Focus ring for keyboard users on TOC jumps

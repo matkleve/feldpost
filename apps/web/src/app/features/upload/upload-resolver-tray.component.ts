@@ -30,6 +30,8 @@ import {
   extractStreetFromTitleAddress,
   optionDisplayLabel,
   resolverQuestionKeyForGroup,
+  resolverScoreBand,
+  resolverScoreFillPercent,
 } from './upload-resolver-tray.helpers';
 import { UPLOAD_DEV_FLAGS } from './upload-dev-flags';
 import {
@@ -76,6 +78,8 @@ export class UploadResolverTrayComponent {
   );
   /** Mock carousel page (0-based); stable across ask-later when new cards are appended. */
   private readonly mockCarouselIndex = signal(0);
+  /** Explicit carousel fraction so total updates even when page index is unchanged (e.g. 1/3 → 1/4). */
+  private readonly carouselDisplay = signal({ current: 1, total: 1 });
   private readonly selectedCandidateId = signal<string | null>(null);
   readonly mediaMenuOpen = signal(false);
   readonly mediaMenuAnchor = signal<HTMLElement | null>(null);
@@ -142,18 +146,11 @@ export class UploadResolverTrayComponent {
 
   /** Visible carousel index between chevrons, e.g. `1/4`. */
   readonly carouselIndicator = computed(() => {
-    if (this.useMockTray) {
-      this.mockGroups();
-    }
-    const groups = this.openGroups();
-    const total = groups.length;
+    const { current, total } = this.carouselDisplay();
     if (total < 2) {
       return null;
     }
-    const index = this.useMockTray
-      ? Math.min(this.mockCarouselIndex(), total - 1)
-      : this.activeGroupIndex();
-    return `${index + 1}/${total}`;
+    return `${current}/${total}`;
   });
 
   readonly trayMode = computed<UploadResolverTrayMode>(() => {
@@ -273,13 +270,14 @@ export class UploadResolverTrayComponent {
       }
     });
     effect(() => {
-      if (!this.useMockTray) {
-        return;
+      if (this.useMockTray) {
+        this.mockGroups();
+        this.mockCarouselIndex();
+      } else {
+        this.resolution.disambiguationGroups();
+        this.resolution.selectedGroupId();
       }
-      const max = Math.max(0, this.openGroups().length - 1);
-      if (this.mockCarouselIndex() > max) {
-        this.mockCarouselIndex.set(max);
-      }
+      this.refreshCarouselDisplay();
     });
   }
 
@@ -339,7 +337,8 @@ export class UploadResolverTrayComponent {
     if (groups.length < 2) {
       return;
     }
-    const nextIndex = this.activeGroupIndex() + delta;
+    const pageIndex = this.useMockTray ? this.mockCarouselIndex() : this.activeGroupIndex();
+    const nextIndex = pageIndex + delta;
     if (nextIndex < 0 || nextIndex >= groups.length) {
       return;
     }
@@ -349,6 +348,7 @@ export class UploadResolverTrayComponent {
     } else {
       this.resolution.setSelectedGroupId(next.id);
     }
+    this.refreshCarouselDisplay();
     this.groupChanged.emit(next.id);
   }
 
@@ -431,26 +431,44 @@ export class UploadResolverTrayComponent {
       return;
     }
     this.closeMediaMenu();
+    const stayIndex = this.useMockTray ? this.mockCarouselIndex() : this.activeGroupIndex();
     if (this.useMockTray) {
-      this.isolateMockJob(group.id, jobId);
+      this.isolateMockJob(group.id, jobId, stayIndex);
       return;
     }
     this.resolution.isolateJobFromGroup(group.id, jobId);
+    this.refreshCarouselDisplay(stayIndex);
   }
 
-  private isolateMockJob(groupId: string, jobId: string): void {
+  private refreshCarouselDisplay(pinnedIndex?: number): void {
+    const groups = this.openGroups();
+    const total = groups.length;
+    if (total < 2) {
+      this.carouselDisplay.set({ current: 1, total });
+      return;
+    }
+    const pageIndex =
+      pinnedIndex ??
+      (this.useMockTray ? this.mockCarouselIndex() : this.activeGroupIndex());
+    const index = Math.min(Math.max(pageIndex, 0), total - 1);
+    if (this.useMockTray) {
+      this.mockCarouselIndex.set(index);
+    }
+    this.carouselDisplay.set({ current: index + 1, total });
+  }
+
+  private isolateMockJob(groupId: string, jobId: string, stayIndex: number): void {
     const group = this.mockGroups().find((entry) => entry.id === groupId);
     if (!group) {
       return;
     }
-    const stayIndex = this.mockCarouselIndex();
     const remaining = group.jobIds.filter((id) => id !== jobId);
 
     this.mockGroups.update((groups) => {
       const next = structuredClone(groups);
       const index = next.findIndex((entry) => entry.id === groupId);
       if (index < 0) {
-        return groups;
+        return next;
       }
       const current = next[index];
       if (remaining.length > 0) {
@@ -472,8 +490,7 @@ export class UploadResolverTrayComponent {
       return next;
     });
 
-    const maxIndex = Math.max(0, this.openGroups().length - 1);
-    this.mockCarouselIndex.set(Math.min(stayIndex, maxIndex));
+    this.refreshCarouselDisplay(stayIndex);
   }
 
   folderPathTitle(path: string): string {
@@ -514,6 +531,14 @@ export class UploadResolverTrayComponent {
       return null;
     }
     return `${Math.round(Math.min(1, Math.max(0, score)) * 100)}%`;
+  }
+
+  scoreBand(score: number | undefined) {
+    return resolverScoreBand(score);
+  }
+
+  scoreFillPercent(score: number | undefined): number {
+    return resolverScoreFillPercent(score);
   }
 
   carouselPositionAria(): string | null {

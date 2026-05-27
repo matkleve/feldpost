@@ -305,7 +305,7 @@
     display: flex;
   }
 
-  // Intake row geometry — colors/hover from `hlmBtn` variant="outline".
+  // Intake row geometry; frosted outline fill on map overlay panel only.
   // @see apps/web/src/app/shared/ui/button/button-variants.ts
   &__intake-btn {
     display: flex;
@@ -344,6 +344,19 @@
 
       @media (max-width: 47.9375rem) {
         display: inline-flex;
+      }
+    }
+  }
+
+  // Map-overlay panel: outline intake buttons match frosted shell (not opaque bg-background).
+  // @see docs/design/tokens.md § Frosted chrome
+  &:not(.upload-panel--embedded) {
+    button.upload-panel__intake-btn {
+      @include frosted-chrome.outline-control;
+
+      &:hover:not(:disabled),
+      &:focus-visible:not(:disabled) {
+        @include frosted-chrome.outline-control-hover;
       }
     }
   }

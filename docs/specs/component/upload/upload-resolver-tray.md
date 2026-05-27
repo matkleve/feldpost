@@ -34,8 +34,34 @@
 | --- | --- | --- | --- |
 | Passive line | `:host` | `data-state=passive` | `.upload-resolver-tray__passive` |
 | Active card | `.upload-resolver-tray` | `data-state=active` | `.upload-resolver-tray` |
-| Choice row | `.upload-resolver-tray__choice` | `__choice--selected` | number badge (1–9) + label; keyboard digits select, Enter continues, Escape skips |
+| Choice row | `.upload-resolver-tray__choice` | `__choice--selected` | number badge (1–9) + label; keyboard digits select, Enter continues, Escape skips; interaction emphasis on row |
+| Score micro-bar | `.upload-resolver-tray__choice-score-col` | `data-score-band` (`low` / `okay` / `strong`) | centered percent + 3px track (`--score-bar-width` 1.5rem); fill width = score |
 | Footer actions | `.upload-resolver-tray__footer` | — | skip text + continue primary |
+
+## Score micro-bar
+
+Decorative confidence readout under each option’s percent (not announced separately; score stays in `optionAriaLabel`).
+
+| Band | Score range | Fill color |
+| --- | --- | --- |
+| `low` | &lt; 0.70 | `--score-ink-neutral` on column (`foreground`/`background` mix, achromatic) |
+| `okay` | 0.70 – 0.979 | `--primary` |
+| `strong` | ≥ 0.98 | `--chart-1` (high-trust / near-certain) |
+
+Fill width: `calc(var(--score-fill) * 1%)` where `--score-fill` is 0–100 from normalized candidate score. Column: percent centered above track; hosts `--score-track` (light neutral) and `--score-ink-neutral` (percent + low fill) — **not** `--muted-foreground` / `--border` (cool hue). Track: `height: 3px`, `width: 1.5rem` (`--score-bar-width`), `border-radius: var(--radius-full)`.
+
+## Interaction emphasis
+
+Choice rows follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis:
+
+| State | Ink | Background |
+| ----- | --- | ------------ |
+| Idle | `--foreground` | transparent |
+| Hover / focus (unselected) | `--primary` | primary 8% mix |
+| Selected (`__choice--selected`) | `--interaction-selected-ink` | selected-ink 10% mix |
+| Selected + hover | `--primary` (wins) | primary 8% mix |
+
+**Test oracle:** Selected answer is blue at rest; hovering it turns orange; unselected rows only orange on hover.
 
 ## Inputs / outputs
 

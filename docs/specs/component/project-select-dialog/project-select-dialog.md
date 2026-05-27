@@ -13,6 +13,10 @@ Title, optional message, scrollable option list with radio-like selection afford
 - **Code:** `apps/web/src/app/shared/project-select-dialog/`
 - **Consumers:** Upload and workspace flows that must bind media to a project.
 
+## Interaction emphasis
+
+Option rows (`.project-select-dialog__option--active`) use [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis: selected ink at rest, primary on hover. Transient hover on non-active rows uses primary only.
+
 ## Actions
 
 | #   | User Action | System Response | Triggers |
