@@ -8,9 +8,9 @@
 Map-only meta container (`.upload-shell`) anchored top-right, **column stack**:
 
 1. **Button zone** (`.upload-btn-zone`) — upload trigger only; `width: max-content` (~icon width). Does **not** reserve horizontal space from the centered search bar. Closed-state batch feedback is the trigger progress ring + spinner (see [upload-button-zone.md](./upload-button-zone.md)).
-2. **Dock** (`.upload-shell__dock`) — single frosted mother container (same chrome as `upload-panel`):
-   - `app-upload-panel` when the panel is open
-   - `app-upload-resolver-tray` below the panel when disambiguation is active (or tray-only when panel closed)
+2. **Dock** (`.upload-shell__dock`) — layout-only column (`width` + `gap` between children; no background/border/shadow on the dock itself):
+   - `app-upload-panel` when the panel is open (owns frosted chrome)
+   - `app-upload-resolver-tray` below the panel when disambiguation is active (or tray-only when panel closed; each surface owns its own chrome)
 
 Tray visibility is independent of panel open/closed (OD-6). Only the button column competes with the search bar top row.
 

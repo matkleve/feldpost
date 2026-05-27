@@ -6,8 +6,9 @@
 //   collapsed  → 48px (3rem) icon rail, icons centred
 //   expanded   → 240px (15rem) panel, icon + label
 //   Frosted glass: surface at 85% opacity + 16px blur
-//   Active link: primary accent
-//   Ghost buttons: transparent bg, fill on hover (Notion pattern)
+//   Active link: cool selection ink (--nav-selected-ink → --filetype-document)
+//   Hover (any link): brand primary wash; selected + hover upgrades to primary
+//   Ghost buttons: transparent bg at rest (Notion pattern)
 //
 // Mobile: fixed full-width bottom tab bar, icons only, 56px tall.
 
@@ -43,6 +44,9 @@
   --sidebar-row-height: calc(var(--spacing-6) + (var(--spacing-1) * 2));
   --sidebar-media-size: var(--spacing-6);
   --sidebar-icon-size: 1.25rem;
+  // Sidebar-only selection ink (royal/document blue); global light --secondary is olive-brown.
+  // @see docs/design/tokens.md — --filetype-document, --primary
+  --nav-selected-ink: var(--filetype-document);
 
   position: fixed;
   z-index: 201;
@@ -210,14 +214,9 @@
     gap: 0.125rem;
   }
 
-  // Ghost hover — transparent fill appears
-  &:hover {
-    background: color-mix(in srgb, var(--foreground) 6%, transparent);
-    color: var(--foreground);
-  }
-
-  // Active route — primary accent
-  &--active {
+  // Hover — brand primary (attention), including over the active route
+  &:hover,
+  &:focus-visible {
     color: var(--primary);
     background: color-mix(in srgb, var(--primary) 10%, transparent);
 
@@ -226,12 +225,29 @@
     }
   }
 
-  &--active:hover {
-    background: color-mix(in srgb, var(--primary) 14%, transparent);
-    color: var(--foreground);
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--interactive-focus-ring);
+  }
+
+  // Active route — cool secondary selection (sidebar token)
+  &--active {
+    color: var(--nav-selected-ink);
+    background: color-mix(in srgb, var(--nav-selected-ink) 10%, transparent);
 
     .nav__icon {
-      color: var(--foreground);
+      color: var(--nav-selected-ink);
+    }
+  }
+
+  // Selected row still uses primary on hover/focus (wins over --active)
+  &--active:hover,
+  &--active:focus-visible {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+
+    .nav__icon {
+      color: var(--primary);
     }
   }
 

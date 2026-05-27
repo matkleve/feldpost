@@ -1,4 +1,5 @@
 import { UPLOAD_PANEL_TRANSLATION_CATALOG } from './upload-panel-translation.catalog';
+import { UPLOAD_RESOLVER_TRANSLATION_CATALOG } from './upload-resolver-translation.catalog';
 
 export type LanguageCode = 'en' | 'de' | 'it';
 
@@ -4578,6 +4579,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Vista schede',
   },
   ...UPLOAD_PANEL_TRANSLATION_CATALOG,
+  ...UPLOAD_RESOLVER_TRANSLATION_CATALOG,
 ];
 
 export const TRANSLATION_BY_KEY: Readonly<Record<string, TranslationEntry>> = Object.freeze(

@@ -305,8 +305,8 @@
     display: flex;
   }
 
-  // Ghost row — matches nav `.nav__link` (Notion pattern).
-  // @see apps/web/src/app/features/nav/nav.component.scss
+  // Intake row geometry — colors/hover from `hlmBtn` variant="outline".
+  // @see apps/web/src/app/shared/ui/button/button-variants.ts
   &__intake-btn {
     display: flex;
     width: 100%;
@@ -315,36 +315,10 @@
     gap: var(--upload-panel-row-gap);
     padding-block: var(--upload-panel-row-padding-block);
     padding-inline: var(--upload-panel-row-padding-inline);
-    border: 0;
     border-radius: var(--container-radius-control);
-    background: transparent;
-    box-shadow: none;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-solid);
-    letter-spacing: 0.01em;
-    color: var(--muted-foreground);
-    transition:
-      background 80ms ease-out,
-      color 80ms ease-out;
-
-    &:hover:not(:disabled),
-    &:focus-visible:not(:disabled) {
-      background: color-mix(in srgb, var(--primary) 10%, transparent);
-      color: var(--primary);
-    }
 
     &--folder {
       justify-content: center;
-      border: 1px solid var(--border);
-      background: var(--background);
-
-      &:hover:not(:disabled),
-      &:focus-visible:not(:disabled) {
-        border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
-        background: color-mix(in srgb, var(--primary) 10%, transparent);
-        color: var(--primary);
-      }
     }
 
     &-icon {
@@ -355,13 +329,11 @@
       justify-content: center;
       font-size: var(--upload-panel-icon-size);
       line-height: var(--line-height-solid);
-      color: inherit;
     }
 
     &-label {
       flex: 0 1 auto;
       min-width: 0;
-      color: var(--foreground);
       white-space: nowrap;
     }
 

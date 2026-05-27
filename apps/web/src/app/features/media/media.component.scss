@@ -14,13 +14,22 @@
   overscroll-behavior: contain;
 }
 
-// Map-zone parity — relative stack; upload-shell is absolutely positioned inside.
-// @see apps/web/src/app/features/map/map-shell/_map-shell-layout.scss
+// Out-of-flow overlay anchor — upload chrome does not reflow page content when dock opens.
+// @see docs/specs/page/media-page.md#actions
 .media-zone {
   position: relative;
   width: 100%;
-  min-height: 100%;
+  height: 0;
+  min-height: 0;
   overflow: visible;
+  z-index: 200;
+  pointer-events: none;
+
+  // Re-enable hits on upload shell only (parity with map .upload-shell)
+  // @see apps/web/src/app/features/map/map-shell/_map-shell-upload.scss
+  > .upload-shell {
+    pointer-events: auto;
+  }
 }
 
 // Page padding lives on scrollable content only (upload chrome uses map insets).

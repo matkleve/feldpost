@@ -1,0 +1,63 @@
+# Upload resolver tray — question copy contract
+
+> **Parent:** [upload-resolver-tray.md](./upload-resolver-tray.md)
+
+## Principle
+
+The tray is a **questionnaire**, not a settings panel. Every active card has:
+
+1. **Section chrome** — `Address resolver` (what system is asking).
+2. **One `h2` question** — natural language, typed by resolution scenario.
+3. **Optional folder path** — icon + path only; meaning via **`title` / `aria-label`** (e.g. “Upload folder: …”) — **no** visible “Folder” caption.
+4. **Numbered answers** — options that complete the question (keyboard `1`–`9`).
+5. **Affected-media chip** — `{count} media` (not “photos” / “files”); click opens dropdown; native tooltip on chip.
+6. **Footer** — Skip (defer) + Continue (apply).
+
+Product vocabulary: **media** (upload jobs), not “photos”, unless the file type is literally a photo in copy elsewhere.
+
+Generic headlines (“Resolver tray active headline”, “Which address is correct?” without context) are **forbidden**.
+
+## Question matrix (normative)
+
+| Trigger | Question key | English template | Option labels |
+| --- | --- | --- | --- |
+| `collapseStage: city` | `upload.resolver.question.city` | Which city is **{street}** in? | City names (`candidate.city`) |
+| `collapseStage: partial` (default geocode) | `upload.resolver.question.address` | Which **{address}** do you mean? | Full `addressLabel` |
+| `collapseStage: per_file` | `upload.resolver.question.door` | What's the door number for **{street}**? | Door/unit labels — see [Answer UI variants](#answer-ui-variants) |
+| `disambiguationKind: source` | `upload.resolver.question.source` | Use the folder address or the photo GPS? | Two source candidates |
+| `disambiguationKind: context_distance` | `upload.resolver.question.contextDistance` | Is this photo in the right project area? | Prompt B (search + confirm) — not numbered list MVP |
+
+`{street}` = first comma-separated segment of `titleAddress` (e.g. `Musterstrasse 12` from `Musterstrasse 12, 8001 Zürich`).
+
+`{address}` = full `titleAddress` for the group.
+
+Implementation: `resolverQuestionKeyForGroup()` + `upload-resolver-translation.catalog.ts` (catalog wins over DB for EN/DE).
+
+## Answer UI variants
+
+| Scenario | MVP tray | Planned |
+| --- | --- | --- |
+| City / full address / source | Numbered list (Cursor-style) | — |
+| Door / unit (`per_file`) | Numbered list of candidate labels | **Grid of door numbers** or **compact numeric input** when candidates are not a flat list |
+
+Door-number UX is specified here so product copy (`question.door`) and engineering stay aligned; grid/input is **not** MVP in `upload-resolver-tray.md` acceptance criteria.
+
+## Affected-media chip
+
+- Chip text: `upload.resolver.mediaCount` → `{count} media`.
+- Chip `title` / `aria-label`: `upload.resolver.media.chip.title` (native hover tooltip + screen readers).
+- Dropdown: scrollable list of job file names; each row has **Ask later**.
+- **Ask later** calls `UploadLocationResolutionService.isolateJobFromGroup(groupId, jobId)` — removes job from current group and opens a **dedicated tray card** for that job only.
+
+## Accessibility
+
+- Region: `aria-labelledby` → section label id + question `h2` id.
+- Folder row: `title` + `aria-label` only (no visible prefix).
+- Media chip: `aria-expanded`, `aria-haspopup="menu"`, menu `aria-label`.
+- Each option: `aria-label` = `Option {n}: {label}[, {score} match]`.
+
+## Acceptance criteria
+
+- [ ] Mock group 1 (`city`) shows question “Which city is Musterstrasse 12 in?” and city options.
+- [ ] No tray copy loaded from stale DB context strings for catalog keys.
+- [ ] Spec matrix above matches `upload-resolver-tray.helpers.ts` + catalog.

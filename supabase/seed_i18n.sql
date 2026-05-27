@@ -23408,14 +23408,541 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.resolver.title', 'Resolver tray active headline', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+values (null, 'upload.resolver.sectionLabel', 'Tray toolbar section label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Resolver tray active headline', 'published'
+select t.id, 'en', 'Tray toolbar section label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.sectionLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Address resolver', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.sectionLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Adressauflösung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.sectionLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.address', 'Which {address} do you mean?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Which {address} do you mean?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Welche {address} meinst du?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Quale {address} intendi?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.city', 'Which city is {street} in?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Which city is {street} in?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.city'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'In welcher Stadt liegt {street}?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.city'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In quale città si trova {street}?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.city'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.door', 'What''s the door number for {street}?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'What''s the door number for {street}?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.door'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Welche Türnummer hat {street}?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.door'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Qual è il numero civico di {street}?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.door'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.source', 'Use the folder address or the photo GPS?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Use the folder address or the photo GPS?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.source'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ordneradresse oder Foto-GPS verwenden?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.source'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Usare l''indirizzo della cartella o il GPS della foto?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.source'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.contextDistance', 'Is this photo in the right project area?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Is this photo in the right project area?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.contextDistance'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Liegt dieses Foto im richtigen Projektgebiet?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.contextDistance'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questa foto è nell''area di progetto corretta?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.contextDistance'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.title.fallbackAddress', 'this address', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'this address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.title.fallbackAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'diese Adresse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.title.fallbackAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'questo indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.title.fallbackAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.folder.aria', 'Upload folder: {path}', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload folder: {path}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.folder.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Upload-Ordner: {path}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.folder.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cartella di caricamento: {path}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.folder.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.mediaCount', 'Affected-media chip label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Affected-media chip label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.mediaCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.mediaCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.mediaCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.media.chip.title', '{count} media in this group — open list', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} media in this group — open list', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.chip.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Medien in dieser Gruppe — Liste öffnen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.chip.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} media in questo gruppo — apri elenco', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.chip.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.media.list.aria', 'Media dropdown menu label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media dropdown menu label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.list.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Media in this address group', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.list.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Medien in dieser Adressgruppe', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.list.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.media.askLater', 'Per-media defer in chip dropdown', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Per-media defer in chip dropdown', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.askLater'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ask later', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.askLater'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Später fragen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.askLater'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.media.askLater.aria', 'Resolve {name} in its own question', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:askLaterAria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolve {name} in its own question', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.askLater.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{name} in einer eigenen Frage klären', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.askLater.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risolvi {name} con una domanda dedicata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.media.askLater.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.files.aria', 'Deprecated alias', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Deprecated alias', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.files.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} media share this address choice', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.files.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} Medien teilen diese Adresswahl', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.files.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.option.aria', 'Option {index}: {label}', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:optionAriaLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Option {index}: {label}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.option.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Option {index}: {label}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.option.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Opzione {index}: {label}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.option.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.option.ariaWithScore', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:optionAriaLabel', 'en', '{score} match')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:optionAriaLabel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.option.ariaWithScore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Option {index}: {label}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.option.ariaWithScore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{score} match', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.option.ariaWithScore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.carousel.position', 'Address issue {current} of {total}', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address issue {current} of {total}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.position'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressfall {current} von {total}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.position'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Problema indirizzo {current} di {total}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.position'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.title', 'Deprecated alias for question.address', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Deprecated alias for question.address', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.title'
 on conflict (app_text_id, lang) do update set
@@ -23423,7 +23950,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Which address is correct?', 'published'
+select t.id, 'de', 'Which {address} do you mean?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.title'
 on conflict (app_text_id, lang) do update set
@@ -23431,7 +23958,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Welche Adresse ist richtig?', 'published'
+select t.id, 'it', 'Welche {address} meinst du?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.title'
 on conflict (app_text_id, lang) do update set
@@ -23439,14 +23966,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.resolver.sourceConflict.title', 'Source conflict tray headline when text coords disagree with EXIF metadata', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverTitle')
+values (null, 'upload.resolver.sourceConflict.title', 'Deprecated alias for question.source', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Source conflict tray headline when text coords disagree with EXIF metadata', 'published'
+select t.id, 'en', 'Deprecated alias for question.source', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.sourceConflict.title'
 on conflict (app_text_id, lang) do update set
@@ -23454,7 +23981,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Folder address or photo GPS?', 'published'
+select t.id, 'de', 'Use the folder address or the photo GPS?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.sourceConflict.title'
 on conflict (app_text_id, lang) do update set
@@ -23462,7 +23989,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ordneradresse oder Foto-GPS?', 'published'
+select t.id, 'it', 'Ordneradresse oder Foto-GPS verwenden?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.sourceConflict.title'
 on conflict (app_text_id, lang) do update set
@@ -23470,32 +23997,187 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.resolver.groupSelect', 'Group dropdown aria context', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+values (null, 'upload.resolver.options', 'Options listbox label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Group dropdown aria context', 'published'
+select t.id, 'en', 'Options listbox label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.groupSelect'
+where t.organization_id is null and t.key = 'upload.resolver.options'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Address group', 'published'
+select t.id, 'de', 'Choose one answer', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.groupSelect'
+where t.organization_id is null and t.key = 'upload.resolver.options'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Adressgruppe', 'published'
+select t.id, 'it', 'Eine Antwort wählen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.groupSelect'
+where t.organization_id is null and t.key = 'upload.resolver.options'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.tray.aria', 'Active tray region label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Active tray region label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.tray.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Address resolver', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.tray.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Adressauflösung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.tray.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.tray.aria', 'Active tray region label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Active tray region label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.tray.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Address clarification', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.tray.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Adressklärung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.tray.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.carousel.aria', 'Carousel control group label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Carousel control group label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Switch address issue', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Adressfall wechseln', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.carousel.prev', 'Carousel previous button', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Carousel previous button', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.prev'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Previous address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.prev'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Vorherige Adresse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.prev'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.carousel.next', 'Carousel next button', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Carousel next button', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.next'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Next address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.next'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nächste Adresse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.carousel.next'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -23532,32 +24214,94 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.resolver.filesAffected', 'Affected file count suffix', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+values (null, 'upload.resolver.filesCount', 'Deprecated alias for mediaCount', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Affected file count suffix', 'published'
+select t.id, 'en', 'Deprecated alias for mediaCount', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.filesAffected'
+where t.organization_id is null and t.key = 'upload.resolver.filesCount'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'files need this address', 'published'
+select t.id, 'de', '{count} media', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.filesAffected'
+where t.organization_id is null and t.key = 'upload.resolver.filesCount'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Dateien betreffen diese Adresse', 'published'
+select t.id, 'it', '{count} Medien', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.filesAffected'
+where t.organization_id is null and t.key = 'upload.resolver.filesCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.skip', 'Defer disambiguation (footer)', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Defer disambiguation (footer)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.skip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Skip', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.skip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Überspringen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.skip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.continue', 'Apply selected candidate', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Apply selected candidate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.continue'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Continue', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.continue'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Weiter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.continue'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

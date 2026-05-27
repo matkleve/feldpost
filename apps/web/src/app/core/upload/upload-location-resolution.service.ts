@@ -580,6 +580,38 @@ export class UploadLocationResolutionService {
     this.pickNextActiveGroup(group.batchId);
   }
 
+  /**
+   * Remove one job from a group and open a dedicated tray card for it (ask later).
+   * @see docs/specs/component/upload/upload-resolver-tray.md#affected-media-chip
+   */
+  isolateJobFromGroup(groupId: string, jobId: string): void {
+    const group = this._groups().find((g) => g.id === groupId);
+    if (!group?.jobIds.includes(jobId)) {
+      return;
+    }
+    const remaining = group.jobIds.filter((id) => id !== jobId);
+    if (remaining.length > 0) {
+      this.patchGroup({
+        ...group,
+        jobIds: remaining,
+        collapseStage: pickCollapseStage(group.candidates, remaining.length),
+      });
+    } else {
+      this._groups.update((prev) => prev.filter((g) => g.id !== groupId));
+    }
+
+    this.registerDisambiguationGroup({
+      batchId: group.batchId,
+      queryKey: `${group.queryKey}::isolate:${jobId}`,
+      folderDisplayPath: group.folderDisplayPath,
+      titleAddress: group.titleAddress,
+      jobIds: [jobId],
+      candidates: [...group.candidates],
+      localityHint: group.localityHint,
+      disambiguationKind: group.disambiguationKind,
+    });
+  }
+
   deferGroup(groupId: string): void {
     const group = this._groups().find((g) => g.id === groupId);
     if (!group) {

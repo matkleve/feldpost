@@ -5,7 +5,18 @@
 
 ## What it is
 
-`app-upload-resolver-tray` — active address-choice UI inside `.upload-shell__dock` (same frosted mother container as `app-upload-panel`). Renders below the panel when both are visible; tray-only when the panel is closed.
+`app-upload-resolver-tray` — active address-choice UI inside `.upload-shell__dock` (layout-only column; tray owns its own frosted card). Renders below the panel when both are visible; tray-only when the panel is closed.
+
+**Active layout (Cursor Questions–inspired):** section label **Address resolver**, optional carousel, **`h2` question** (scenario-specific — see [question copy contract](./upload-resolver-tray.question-copy.md)), folder path (tooltip only), numbered answers, **affected-media chip** (`{count} media` + dropdown), footer **Skip** + **Continue**.
+
+## Affected-media chip
+
+- Neutral `app-chip` on a button; label `{count} media`.
+- Click → `app-dropdown-shell` list of upload job file names (scroll when long).
+- Row action **Ask later** → `isolateJobFromGroup` (single-job tray card).
+- Folder path uses `title` / `aria-label`, not a visible “Folder” prefix.
+
+**Question copy (normative):** [upload-resolver-tray.question-copy.md](./upload-resolver-tray.question-copy.md) — city vs address vs door vs source; door-number grid/input is planned, not MVP.
 
 ## Visual modes
 
@@ -22,8 +33,9 @@
 | Behavior | Geometry | State | Visual |
 | --- | --- | --- | --- |
 | Passive line | `:host` | `data-state=passive` | `.upload-resolver-tray__passive` |
-| Active strip | `.upload-resolver-tray` | `data-state=active` | `.upload-resolver-tray` |
-| Option row | `.upload-resolver-tray__option` | — | border, hover via component |
+| Active card | `.upload-resolver-tray` | `data-state=active` | `.upload-resolver-tray` |
+| Choice row | `.upload-resolver-tray__choice` | `__choice--selected` | number badge (1–9) + label; keyboard digits select, Enter continues, Escape skips |
+| Footer actions | `.upload-resolver-tray__footer` | — | skip text + continue primary |
 
 ## Inputs / outputs
 
@@ -38,9 +50,16 @@ Jobs in `awaiting_disambiguation` stay in **Queue** with label “Choose address
 
 | Kind | When | UI |
 | --- | --- | --- |
-| `geocode` (default) | Multiple forward-geocode hits | City-collapsed options |
-| `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | Two flat options (folder/file address vs photo GPS); title key `upload.resolver.sourceConflict.title` |
+| `geocode` (default) | Multiple forward-geocode hits | Question + options per [question-copy](./upload-resolver-tray.question-copy.md#question-matrix-normative) (`city` / `address` / `door`) |
+| `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + two options |
 | `context_distance` | Placement beyond org `contextDistanceMaxMeters` from nearest project GPS link | **Prompt B** — confirm + embedded location search |
+
+## Dev QA (local only)
+
+`upload-dev-flags.ts`:
+
+- `mockResolverTray: true` — three static groups in `upload-resolver-tray.mock.ts`; tray stays **active** with carousel; Skip/Continue advance cards without touching upload jobs.
+- Set both `mockResolverTray` and `dockAlwaysVisible` to **false** before merge.
 
 ## MVP scope (OD-7)
 
@@ -49,6 +68,6 @@ Pre-upload gate only. No tray for `phase === 'complete'` or post-upload correcti
 ## Acceptance criteria
 
 - [ ] Tray mounted inside `upload-shell` on map route
-- [ ] Active mode shows city-collapsed options and group picker when multiple groups
+- [ ] Active mode shows numbered choices, carousel when multiple groups, Skip + Continue footer
 - [ ] `source` kind shows two candidates without city collapse
 - [ ] Selecting a candidate applies to the whole group and re-queues jobs
