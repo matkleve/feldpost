@@ -42,12 +42,18 @@ export const UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS: EnqueueTrayItemInput[
     producerId: 'mock',
     batchId: MOCK_ORCHESTRATOR_BATCH_ID,
     questionKey: 'upload.resolver.question.source',
-    questionParams: { street: 'Via Roma 7', address: 'Via Roma 7, Milano' },
+    questionParams: {
+      street: 'Via Roma 7',
+      address: 'Via Roma 7, Milano',
+      distance: '1.2 km',
+    },
     jobIds: ['mock-job-4', 'mock-job-5'],
     folderDisplayPath: '2025-05 / Cantiere Sud',
     options: [
-      { id: 'mock-c2-folder', label: 'Via Roma 7, 20121 Milano (from folder name)', lat: 45.4642, lng: 9.19, score: 1 },
-      { id: 'mock-c2-exif', label: 'Via Garibaldi 3, 20121 Milano (from photo GPS)', lat: 45.4721, lng: 9.1853, score: 1 },
+      { id: 'source-text', label: 'Via Roma 7, 20121 Milano', lat: 45.4642, lng: 9.19 },
+      { id: 'source-exif', label: 'Via Garibaldi 3, 20121 Milano', lat: 45.4721, lng: 9.1853 },
+      { id: 'source-both', label: 'Via Roma 7, 20121 Milano', lat: 45.4721, lng: 9.1853 },
+      { id: 'source-none', label: '', lat: 45.4642, lng: 9.19 },
     ],
   },
   {

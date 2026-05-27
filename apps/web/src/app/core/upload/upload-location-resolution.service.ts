@@ -21,7 +21,9 @@ import {
   haversineMeters,
   resolvePlacementAfterTextGeocode,
   resolvePlacementWithoutText,
+  SOURCE_CONFLICT_BOTH_CANDIDATE_ID,
   SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
+  SOURCE_CONFLICT_NONE_CANDIDATE_ID,
   SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
 } from './upload-location-precedence.helpers';
 import {
@@ -370,9 +372,34 @@ export class UploadLocationResolutionService {
   }
 
   registerSourceConflictGroup(job: UploadJob, textCoords: ExifCoords, exifCoords: ExifCoords): void {
+    void this.registerSourceConflictGroupAsync(job, textCoords, exifCoords);
+  }
+
+  private async registerSourceConflictGroupAsync(
+    job: UploadJob,
+    textCoords: ExifCoords,
+    exifCoords: ExifCoords,
+  ): Promise<void> {
     const folderDisplayPath =
       job.folderDisplayPath ?? deriveFolderDisplayPath(job.relativePath);
-    const candidates = buildSourceConflictCandidates(job, textCoords, exifCoords);
+    const folderName = job.titleAddress?.trim() ?? '';
+    const [folderRev, photoRev] = await Promise.all([
+      this.geocoding.reverse(textCoords.lat, textCoords.lng),
+      this.geocoding.reverse(exifCoords.lat, exifCoords.lng),
+    ]);
+    const folderAddress =
+      folderRev?.addressLabel?.trim() ||
+      folderName ||
+      `${textCoords.lat.toFixed(4)}, ${textCoords.lng.toFixed(4)}`;
+    const photoAddress =
+      photoRev?.addressLabel?.trim() ||
+      `${exifCoords.lat.toFixed(4)}, ${exifCoords.lng.toFixed(4)}`;
+    const candidates = buildSourceConflictCandidates({
+      folderAddress,
+      photoAddress,
+      textCoords,
+      exifCoords,
+    });
     const queryKey = `source|${buildDisambiguationQueryKey(job.titleAddress ?? '', folderDisplayPath)}`;
     this.registerDisambiguationGroup({
       batchId: job.batchId,
@@ -798,6 +825,13 @@ export class UploadLocationResolutionService {
     if (!candidate) {
       return;
     }
+    if (
+      group.disambiguationKind === 'source' &&
+      candidateId === SOURCE_CONFLICT_NONE_CANDIDATE_ID
+    ) {
+      this.deferGroup(groupId);
+      return;
+    }
 
     const resolvedGroup: UploadDisambiguationGroup = {
       ...group,
@@ -813,7 +847,10 @@ export class UploadLocationResolutionService {
         continue;
       }
       if (group.disambiguationKind === 'source') {
-        if (candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID) {
+        if (
+          candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID ||
+          candidateId === SOURCE_CONFLICT_BOTH_CANDIDATE_ID
+        ) {
           const exifCoords = getExifMetadataCoords(job);
           if (exifCoords) {
             this.jobState.updateJob(

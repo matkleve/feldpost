@@ -10,6 +10,12 @@ import {
   discriminatingFieldValue,
   pickDiscriminatingField,
 } from '../../upload/upload-location-resolution.helpers';
+import {
+  formatSourceConflictDistance,
+  haversineMeters,
+  SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
+  SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
+} from '../../upload/upload-location-precedence.helpers';
 import type {
   UploadAddressCandidate,
   UploadDiscriminatingField,
@@ -204,6 +210,18 @@ function groupToEnqueueInput(
     street,
     address: group.titleAddress,
   };
+  if (group.disambiguationKind === 'source') {
+    const textCand = group.candidates.find((c) => c.id === SOURCE_CONFLICT_TEXT_CANDIDATE_ID);
+    const exifCand = group.candidates.find((c) => c.id === SOURCE_CONFLICT_EXIF_CANDIDATE_ID);
+    if (textCand && exifCand) {
+      questionParams['distance'] = formatSourceConflictDistance(
+        haversineMeters(
+          { lat: textCand.lat, lng: textCand.lng },
+          { lat: exifCand.lat, lng: exifCand.lng },
+        ),
+      );
+    }
+  }
 
   let trayStepLabel: '1a' | '1b' | undefined;
   if (group.trayStep === '1a') {
@@ -258,6 +276,15 @@ function candidatesToOptions(
   candidates: UploadAddressCandidate[],
   group: UploadDisambiguationGroup,
 ): TrayResolveOption[] {
+  if (group.disambiguationKind === 'source') {
+    return candidates.map((c) => ({
+      id: c.id,
+      label: c.addressLabel,
+      lat: c.lat,
+      lng: c.lng,
+      city: c.city,
+    }));
+  }
   if (group.collapseStage === 'city' || group.trayStep === '1a') {
     const field: UploadDiscriminatingField =
       group.discriminatingField ?? pickDiscriminatingField(candidates) ?? 'city';

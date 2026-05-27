@@ -24,7 +24,7 @@ Generic headlines (“Resolver tray active headline”, “Which address is corr
 | `collapseStage: city` / Step **1A** | `upload.resolver.question.city` or `upload.resolver.question.cityStep` | Which city is **{street}** in? | **2–5 numbered city names** (`candidate.city` or `citySuggestions`); free-text input only when no options (`answerKind: text`, rare) |
 | `collapseStage: partial` (default geocode) | `upload.resolver.question.address` | Which **{address}** do you mean? | Full `addressLabel` |
 | `collapseStage: per_file` | `upload.resolver.question.door` | What's the door number for **{street}**? | Door/unit labels — see [Answer UI variants](#answer-ui-variants) |
-| `disambiguationKind: source` | `upload.resolver.question.source` | Use the folder address or the photo GPS? | Two source candidates |
+| `disambiguationKind: source` | `upload.resolver.question.source` | Photo GPS is far from the folder name ({distance}). Which location should we use? | Folder / photo location / both / none (no score bars) |
 | `disambiguationKind: context_distance` | `upload.resolver.question.contextDistance` | Is this photo in the right project area? | Prompt B (search + confirm) — not numbered list MVP |
 
 `{street}` = first comma-separated segment of `titleAddress` (e.g. `Musterstrasse 12` from `Musterstrasse 12, 8001 Zürich`).

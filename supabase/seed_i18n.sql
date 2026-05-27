@@ -23904,14 +23904,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.resolver.question.source', 'Use the folder address or the photo GPS?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+values (null, 'upload.resolver.question.source', 'Photo GPS is far from the folder name ({distance}). Which location should we use?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Use the folder address or the photo GPS?', 'published'
+select t.id, 'en', 'Photo GPS is far from the folder name ({distance}). Which location should we use?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.question.source'
 on conflict (app_text_id, lang) do update set
@@ -23919,7 +23919,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ordneradresse oder Foto-GPS verwenden?', 'published'
+select t.id, 'de', 'Foto-GPS liegt weit vom Ordnernamen entfernt ({distance}). Welchen Standort sollen wir verwenden?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.question.source'
 on conflict (app_text_id, lang) do update set
@@ -23927,9 +23927,195 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Usare l''indirizzo della cartella o il GPS della foto?', 'published'
+select t.id, 'it', 'Il GPS della foto è lontano dal nome della cartella ({distance}). Quale posizione usare?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.question.source'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.source.option.folder', 'Folder: {address}', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:sourceOptionLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Folder: {address}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.folder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ordner: {address}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.folder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cartella: {address}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.folder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.source.option.photo', 'Photo location: {address}', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:sourceOptionLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Photo location: {address}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.photo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fotostandort: {address}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.photo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione foto: {address}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.photo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.source.option.both', 'Use folder name and photo GPS', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:sourceOptionLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Use folder name and photo GPS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.both'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ordnername und Foto-GPS verwenden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.both'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Usa nome cartella e GPS della foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.both'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.source.option.none', 'Set in file details', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:sourceOptionLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Set in file details', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.none'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'In Dateidetails festlegen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.none'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Imposta nei dettagli file', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.source.option.none'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.next', 'Footer when more questions remain', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Footer when more questions remain', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.next'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Next', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.next'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Weiter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.next'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.done', 'Footer on last question', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Footer on last question', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.done'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Done', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.done'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fertig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.done'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

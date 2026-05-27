@@ -156,7 +156,10 @@ export class UploadResolverTrayComponent implements OnInit {
     }
     return item.options.map((option, index) => ({
       index: index + 1,
-      label: option.label,
+      label:
+        item.questionKey === 'upload.resolver.question.source'
+          ? this.sourceOptionLabel(option)
+          : option.label,
       option,
     }));
   });
@@ -199,15 +202,14 @@ export class UploadResolverTrayComponent implements OnInit {
     if (!this.useOrchestrator) {
       return this.t('upload.resolver.continue', 'Continue');
     }
-    const progress = this.orchestrator.bundleProgress();
-    const isLastInBundle =
-      progress.total > 0 && this.orchestrator.activeItemIndex() >= progress.total - 1;
-    if (isLastInBundle && progress.allTerminal === false && progress.done === progress.total - 1) {
-      if (this.orchestrator.hasQueuedBundles()) {
-        return this.t('upload.resolver.nextBundle', 'Next questions');
-      }
+    const items = this.bundleItems();
+    const index = this.orchestrator.activeItemIndex();
+    const hasMoreInBundle = index < items.length - 1;
+    const hasMoreBundles = this.orchestrator.hasQueuedBundles();
+    if (hasMoreInBundle || hasMoreBundles) {
+      return this.t('upload.resolver.next', 'Next');
     }
-    return this.t('upload.resolver.continue', 'Continue');
+    return this.t('upload.resolver.done', 'Done');
   });
 
   readonly trayMode = computed<UploadResolverTrayMode>(() => {
@@ -482,9 +484,35 @@ export class UploadResolverTrayComponent implements OnInit {
     return item ? { option: item.option } : null;
   }
 
+  sourceOptionLabel(option: TrayResolveOption): string {
+    const address = option.label.trim();
+    switch (option.id) {
+      case 'source-text':
+        return this.t('upload.resolver.source.option.folder', 'Folder: {address}').replace(
+          '{address}',
+          address,
+        );
+      case 'source-exif':
+        return this.t('upload.resolver.source.option.photo', 'Photo location: {address}').replace(
+          '{address}',
+          address,
+        );
+      case 'source-both':
+        return this.t(
+          'upload.resolver.source.option.both',
+          'Use folder name and photo GPS',
+        );
+      case 'source-none':
+        return this.t('upload.resolver.source.option.none', 'Set in file details');
+      default:
+        return option.label;
+    }
+  }
+
   private questionForItem(item: TrayResolveItem): string {
     const fallbacks: Record<string, string> = {
-      'upload.resolver.question.source': 'Use the folder address or the photo GPS?',
+      'upload.resolver.question.source':
+        'Photo GPS is far from the folder name ({distance}). Which location should we use?',
       'upload.resolver.question.contextDistance': 'Is this photo in the right project area?',
       'upload.resolver.question.cityStep': 'Which city is {street} in?',
       'upload.resolver.question.houseStep': 'No house number for {street} — what would you like?',
@@ -499,7 +527,8 @@ export class UploadResolverTrayComponent implements OnInit {
     const template = this.t(item.questionKey, fallbacks[item.questionKey] ?? '');
     return template
       .replace('{street}', item.questionParams['street'] ?? '')
-      .replace('{address}', item.questionParams['address'] ?? '');
+      .replace('{address}', item.questionParams['address'] ?? '')
+      .replace('{distance}', item.questionParams['distance'] ?? '');
   }
 
 }

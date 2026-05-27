@@ -12,6 +12,18 @@ import type {
 
 export const SOURCE_CONFLICT_TEXT_CANDIDATE_ID = 'source-text';
 export const SOURCE_CONFLICT_EXIF_CANDIDATE_ID = 'source-exif';
+export const SOURCE_CONFLICT_BOTH_CANDIDATE_ID = 'source-both';
+export const SOURCE_CONFLICT_NONE_CANDIDATE_ID = 'source-none';
+
+/** Human-readable distance for source-conflict tray copy ({distance} param). */
+export function formatSourceConflictDistance(meters: number): string {
+  const m = Math.max(0, Math.round(meters));
+  if (m < 1000) {
+    return `${m} m`;
+  }
+  const km = m / 1000;
+  return km >= 10 ? `${Math.round(km)} km` : `${km.toFixed(1)} km`;
+}
 
 /** Raw EXIF GPS from parse — never use job.coords for assist/conflict before placement decision. */
 export function getExifMetadataCoords(job: UploadJob): ExifCoords | undefined {
@@ -84,28 +96,41 @@ export function buildGeocodeCandidatePatch(
   };
 }
 
-export function buildSourceConflictCandidates(
-  job: UploadJob,
-  textCoords: ExifCoords,
-  exifCoords: ExifCoords,
-): UploadAddressCandidate[] {
-  const textLabel = job.titleAddress?.trim() || 'Folder or file address';
+export function buildSourceConflictCandidates(input: {
+  folderAddress: string;
+  photoAddress: string;
+  textCoords: ExifCoords;
+  exifCoords: ExifCoords;
+}): UploadAddressCandidate[] {
+  const { folderAddress, photoAddress, textCoords, exifCoords } = input;
   return [
     {
       id: SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
-      addressLabel: textLabel,
-      displayName: textLabel,
+      addressLabel: folderAddress,
+      displayName: folderAddress,
       lat: textCoords.lat,
       lng: textCoords.lng,
-      score: 1,
     },
     {
       id: SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
-      addressLabel: 'GPS from photo',
-      displayName: 'GPS from photo',
+      addressLabel: photoAddress,
+      displayName: photoAddress,
       lat: exifCoords.lat,
       lng: exifCoords.lng,
-      score: 1,
+    },
+    {
+      id: SOURCE_CONFLICT_BOTH_CANDIDATE_ID,
+      addressLabel: folderAddress,
+      displayName: folderAddress,
+      lat: exifCoords.lat,
+      lng: exifCoords.lng,
+    },
+    {
+      id: SOURCE_CONFLICT_NONE_CANDIDATE_ID,
+      addressLabel: '',
+      displayName: '',
+      lat: textCoords.lat,
+      lng: textCoords.lng,
     },
   ];
 }
