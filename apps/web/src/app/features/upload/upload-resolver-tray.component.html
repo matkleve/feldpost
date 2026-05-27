@@ -6,8 +6,8 @@
   </p>
 }
 
-<!-- Stable state: active — one issue card (Cursor Questions–style) -->
-@if (trayMode() === 'active' && displayedGroup(); as group) {
+<!-- Stable state: active — one dialogue turn per bundle (orchestrator) -->
+@if (trayMode() === 'active' && activeItem(); as item) {
   <section
     class="upload-resolver-tray"
     [attr.data-state]="'active'"
@@ -20,7 +20,7 @@
       <span id="upload-resolver-section" class="upload-resolver-tray__section-label">
         {{ t('upload.resolver.sectionLabel', 'Address resolver') }}
       </span>
-      @if (openGroups().length > 1) {
+      @if (bundleItems().length > 1) {
         <div
           class="upload-resolver-tray__nav"
           role="group"
@@ -55,18 +55,22 @@
       {{ resolverQuestion() }}
     </h2>
 
-    @if (group.folderDisplayPath) {
+    @if (item.folderDisplayPath) {
       <p
         class="upload-resolver-tray__context upload-resolver-tray__context--folder"
-        [attr.title]="folderPathTitle(group.folderDisplayPath)"
-        [attr.aria-label]="folderPathTitle(group.folderDisplayPath)"
+        [attr.title]="folderPathTitle(item.folderDisplayPath)"
+        [attr.aria-label]="folderPathTitle(item.folderDisplayPath)"
       >
         <span class="material-icons" aria-hidden="true">folder</span>
-        <span>{{ group.folderDisplayPath }}</span>
+        <span>{{ item.folderDisplayPath }}</span>
       </p>
     }
 
-    @if (isCityStep()) {
+    @if (isItemBlocked()) {
+      <p class="upload-resolver-tray__blocked-hint" [attr.data-state]="'blocked'">
+        {{ t('upload.resolver.dependsOnPrior', 'Answer the previous question first.') }}
+      </p>
+    } @else if (showTextAnswer()) {
       <div class="upload-resolver-tray__city-step">
         <label class="upload-resolver-tray__city-label" for="upload-resolver-city-input">
           {{ t('upload.resolver.cityStep.label', 'City') }}
@@ -80,76 +84,52 @@
           [attr.placeholder]="t('upload.resolver.cityStep.placeholder', 'e.g. Wien')"
         />
       </div>
-    } @else if (houseStepActive()) {
+    } @else {
       <ol
         class="upload-resolver-tray__choices"
         role="listbox"
         aria-labelledby="upload-resolver-question"
         [attr.aria-label]="t('upload.resolver.options', 'Choose one answer')"
       >
-        @for (item of numberedOptions(); track item.candidate.id) {
+        @for (entry of numberedOptions(); track entry.option.id) {
           <li class="upload-resolver-tray__choice-item" role="presentation">
             <button
               type="button"
               class="upload-resolver-tray__choice"
               role="option"
-              [class.upload-resolver-tray__choice--selected]="selectedOptionId() === item.candidate.id"
-              [attr.aria-selected]="selectedOptionId() === item.candidate.id"
-              [attr.aria-label]="optionAriaLabel(item)"
-              (click)="selectOption(item.candidate.id)"
-              (mouseenter)="onPreviewCandidate(item.candidate)"
-              (focus)="onPreviewCandidate(item.candidate)"
+              [class.upload-resolver-tray__choice--selected]="selectedOptionId() === entry.option.id"
+              [attr.aria-selected]="selectedOptionId() === entry.option.id"
+              [attr.aria-label]="optionAriaLabel(entry)"
+              (click)="selectOption(entry.option.id)"
+              (mouseenter)="onPreviewOption(entry.option)"
+              (focus)="onPreviewOption(entry.option)"
             >
-              <span class="upload-resolver-tray__choice-index" aria-hidden="true">{{ item.index }}</span>
-              <span class="upload-resolver-tray__choice-label">{{ item.label }}</span>
+              <span class="upload-resolver-tray__choice-index" aria-hidden="true">{{ entry.index }}</span>
+              <span class="upload-resolver-tray__choice-body">
+                <span class="upload-resolver-tray__choice-label">{{ entry.label }}</span>
+                @if (formatScorePercent(entry.option.score); as percent) {
+                  <span
+                    class="upload-resolver-tray__choice-score-col"
+                    aria-hidden="true"
+                    [attr.data-score-band]="scoreBand(entry.option.score)"
+                    [style.--score-fill]="scoreFillPercent(entry.option.score)"
+                  >
+                    <span class="upload-resolver-tray__choice-score">{{ percent }}</span>
+                    <span class="upload-resolver-tray__choice-score-bar">
+                      <span class="upload-resolver-tray__choice-score-bar__fill"></span>
+                    </span>
+                  </span>
+                }
+              </span>
             </button>
           </li>
         }
       </ol>
-      <button type="button" class="upload-resolver-tray__street-centroid" (click)="onStreetCentroid()">
-        {{ t('upload.resolver.houseStep.noNumber', 'No number needed') }}
-      </button>
-    } @else if (!isHouseStep()) {
-    <ol
-      class="upload-resolver-tray__choices"
-      role="listbox"
-      aria-labelledby="upload-resolver-question"
-      [attr.aria-label]="t('upload.resolver.options', 'Choose one answer')"
-    >
-      @for (item of numberedOptions(); track item.candidate.id) {
-        <li class="upload-resolver-tray__choice-item" role="presentation">
-          <button
-            type="button"
-            class="upload-resolver-tray__choice"
-            role="option"
-            [class.upload-resolver-tray__choice--selected]="selectedOptionId() === item.candidate.id"
-            [attr.aria-selected]="selectedOptionId() === item.candidate.id"
-            [attr.aria-label]="optionAriaLabel(item)"
-            (click)="selectOption(item.candidate.id)"
-            (mouseenter)="onPreviewCandidate(item.candidate)"
-            (focus)="onPreviewCandidate(item.candidate)"
-          >
-            <span class="upload-resolver-tray__choice-index" aria-hidden="true">{{ item.index }}</span>
-            <span class="upload-resolver-tray__choice-body">
-              <span class="upload-resolver-tray__choice-label">{{ item.label }}</span>
-              @if (formatScorePercent(item.candidate.score); as percent) {
-                <span
-                  class="upload-resolver-tray__choice-score-col"
-                  aria-hidden="true"
-                  [attr.data-score-band]="scoreBand(item.candidate.score)"
-                  [style.--score-fill]="scoreFillPercent(item.candidate.score)"
-                >
-                  <span class="upload-resolver-tray__choice-score">{{ percent }}</span>
-                  <span class="upload-resolver-tray__choice-score-bar">
-                    <span class="upload-resolver-tray__choice-score-bar__fill"></span>
-                  </span>
-                </span>
-              }
-            </span>
-          </button>
-        </li>
+      @if (showHouseNoNumber()) {
+        <button type="button" class="upload-resolver-tray__street-centroid" (click)="onStreetCentroid()">
+          {{ t('upload.resolver.houseStep.noNumber', 'No number needed') }}
+        </button>
       }
-    </ol>
     }
 
     @if (affectedMedia().length > 0) {
@@ -217,7 +197,7 @@
         [disabled]="!canConfirmContinue()"
         (click)="confirmSelection()"
       >
-        {{ t('upload.resolver.continue', 'Continue') }}
+        {{ continueLabel() }}
       </button>
     </footer>
   </section>

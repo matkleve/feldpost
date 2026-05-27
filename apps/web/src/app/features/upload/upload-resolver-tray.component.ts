@@ -1,6 +1,7 @@
 /**
  * Passive + active address disambiguation tray (shell sibling, OD-6).
  * @see docs/specs/component/upload/upload-resolver-tray.md
+ * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md
  */
 
 import {
@@ -11,6 +12,7 @@ import {
   ElementRef,
   inject,
   input,
+  OnInit,
   output,
   signal,
   viewChild,
@@ -19,31 +21,29 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
-import { pickCollapseStage } from '../../core/upload/upload-location-resolution.helpers';
+import { formatBundleCarouselIndicator } from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.helpers';
+import { UploadResolverTrayOrchestratorService } from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import type {
-  UploadAddressCandidate,
-  UploadDisambiguationGroup,
-} from '../../core/upload/upload-manager.types';
+  TrayResolveItem,
+  TrayResolveOption,
+} from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
+import { USE_TRAY_ORCHESTRATOR } from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import {
-  extractStreetFromTitleAddress,
-  formatCarouselIndicator,
-  optionDisplayLabel,
-  resolverQuestionKeyForGroup,
   resolverScoreBand,
   resolverScoreFillPercent,
 } from './upload-resolver-tray.helpers';
 import { UPLOAD_DEV_FLAGS } from './upload-dev-flags';
 import {
-  UPLOAD_RESOLVER_TRAY_MOCK_1B_CANDIDATES,
-  UPLOAD_RESOLVER_TRAY_MOCK_GROUPS,
+  MOCK_ORCHESTRATOR_BATCH_ID,
   UPLOAD_RESOLVER_TRAY_MOCK_MEDIA_NAMES,
-} from './upload-resolver-tray.mock';
+  UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS,
+} from './upload-resolver-tray.mock-orchestrator';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
+import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
 
 export interface AffectedMediaRow {
   jobId: string;
@@ -59,10 +59,11 @@ export type UploadResolverTrayMode = 'passive' | 'active' | 'hidden';
   templateUrl: './upload-resolver-tray.component.html',
   styleUrl: './upload-resolver-tray.component.scss',
 })
-export class UploadResolverTrayComponent {
+export class UploadResolverTrayComponent implements OnInit {
   private readonly i18n = inject(I18nService);
-  private readonly resolution = inject(UploadLocationResolutionService);
+  private readonly orchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly resolution = inject(UploadLocationResolutionService);
   private readonly panelSignals = inject(UploadPanelSignalsService);
 
   readonly panelOpen = input(false);
@@ -77,132 +78,150 @@ export class UploadResolverTrayComponent {
 
   readonly passiveStatusLine = this.panelSignals.passiveStatusLine;
 
-  private readonly useMockTray = UPLOAD_DEV_FLAGS.mockResolverTray;
-  private readonly mockGroups = signal<UploadDisambiguationGroup[]>(
-    structuredClone(UPLOAD_RESOLVER_TRAY_MOCK_GROUPS),
-  );
-  /** Mock carousel page (0-based); stable across ask-later when new cards are appended. */
-  private readonly mockCarouselIndex = signal(0);
-  /**
-   * Pins carousel numerator when total grows but the active question stays (Ask later).
-   * Cleared when the user moves to another card.
-   */
-  private readonly carouselPagePin = signal<number | null>(null);
-  private readonly selectedCandidateId = signal<string | null>(null);
+  private readonly useOrchestrator =
+    USE_TRAY_ORCHESTRATOR ||
+    UPLOAD_DEV_FLAGS.useTrayOrchestrator ||
+    UPLOAD_DEV_FLAGS.mockResolverTray;
+
+  private readonly _selectedOptionId = signal<string | null>(null);
   readonly cityDraft = signal('');
-  readonly manualHouseDraft = signal('');
-  readonly manualHouseValidation = signal<'idle' | 'valid' | 'warn' | 'invalid'>('idle');
   readonly mediaMenuOpen = signal(false);
   readonly mediaMenuAnchor = signal<HTMLElement | null>(null);
 
   private readonly mediaChipTrigger = viewChild<ElementRef<HTMLElement>>('mediaChipTrigger');
 
-  readonly openGroups = computed(() => {
-    const groups = this.useMockTray
-      ? this.mockGroups()
-      : this.resolution.disambiguationGroups();
-    return groups.filter((group) => group.resolutionGateOpen);
+  readonly activeItem = computed(() =>
+    this.useOrchestrator ? this.orchestrator.activeItem() : null,
+  );
+
+  readonly bundleItems = computed(() =>
+    this.useOrchestrator ? this.orchestrator.activeItems() : [],
+  );
+
+  readonly activeItemStatus = computed(() => {
+    const item = this.activeItem();
+    if (!item || !this.useOrchestrator) {
+      return 'ready' as const;
+    }
+    return this.orchestrator.itemStatuses().get(item.id) ?? 'ready';
   });
 
+  readonly isItemBlocked = computed(() => this.activeItemStatus() === 'blocked');
+
+  readonly carouselIndicator = computed(() => {
+    if (!this.useOrchestrator) {
+      return null;
+    }
+    const items = this.bundleItems();
+    const item = this.activeItem();
+    if (!items.length || !item) {
+      return null;
+    }
+    const index = this.orchestrator.activeItemIndex();
+    return formatBundleCarouselIndicator(index, items.length, item.trayStepLabel);
+  });
+
+  readonly canGoToPreviousGroup = computed(() => {
+    if (!this.useOrchestrator) {
+      return false;
+    }
+    return this.orchestrator.activeItemIndex() > 0;
+  });
+
+  readonly canGoToNextGroup = computed(() => {
+    if (!this.useOrchestrator) {
+      return false;
+    }
+    const items = this.bundleItems();
+    return this.orchestrator.activeItemIndex() < items.length - 1;
+  });
+
+  readonly resolverQuestion = computed(() => {
+    const item = this.activeItem();
+    if (!item) {
+      return '';
+    }
+    return this.questionForItem(item);
+  });
+
+  readonly numberedOptions = computed(() => {
+    const item = this.activeItem();
+    if (!item?.options.length) {
+      return [] as { index: number; label: string; option: TrayResolveOption }[];
+    }
+    return item.options.map((option, index) => ({
+      index: index + 1,
+      label: option.label,
+      option,
+    }));
+  });
+
+  readonly showTextAnswer = computed(() => this.activeItem()?.answerKind === 'text');
+
+  readonly showHouseNoNumber = computed(
+    () => this.activeItem()?.trayStepLabel === '1b' && !this.isItemBlocked(),
+  );
+
   readonly affectedMedia = computed((): AffectedMediaRow[] => {
-    const group = this.activeGroup();
-    if (!group) {
+    const item = this.activeItem();
+    if (!item) {
       return [];
     }
-    if (this.useMockTray) {
-      return group.jobIds.map((jobId) => ({
+    if (UPLOAD_DEV_FLAGS.mockResolverTray) {
+      return item.jobIds.map((jobId) => ({
         jobId,
         label: UPLOAD_RESOLVER_TRAY_MOCK_MEDIA_NAMES[jobId] ?? jobId,
       }));
     }
     const jobs = this.uploadManager.jobs();
-    return group.jobIds.map((jobId) => {
+    return item.jobIds.map((jobId) => {
       const job = jobs.find((entry) => entry.id === jobId);
-      return {
-        jobId,
-        label: job?.file.name ?? jobId,
-      };
+      return { jobId, label: job?.file.name ?? jobId };
     });
   });
 
-  /** 0-based carousel page; tracks mock index, service selection, or Ask-later pin. */
-  readonly carouselPageIndex = computed(() => {
-    const groups = this.openGroups();
-    if (!groups.length) {
-      return 0;
-    }
-    const pin = this.carouselPagePin();
-    if (pin !== null) {
-      return Math.min(Math.max(pin, 0), groups.length - 1);
-    }
-    if (this.useMockTray) {
-      return Math.min(Math.max(this.mockCarouselIndex(), 0), groups.length - 1);
-    }
-    const selectedId = this.resolution.selectedGroupId();
-    if (selectedId) {
-      const selectedIndex = groups.findIndex((entry) => entry.id === selectedId);
-      if (selectedIndex >= 0) {
-        return selectedIndex;
-      }
-    }
-    return 0;
-  });
-
-  /**
-   * Single source of truth for tray UI (question, folder, options, media).
-   * Always derived from `carouselPageIndex` so the header cannot desync from the card body.
-   */
-  readonly displayedGroup = computed(() => {
-    const groups = this.openGroups();
-    if (!groups.length) {
-      return null;
-    }
-    return groups[this.carouselPageIndex()] ?? null;
-  });
-
-  /** @deprecated Alias — use `displayedGroup` for tray rendering. */
-  readonly activeGroup = this.displayedGroup;
-
-  readonly pendingGroupCount = computed(() =>
-    this.useMockTray ? this.openGroups().length : this.resolution.pendingGroupCount(),
-  );
-
-  readonly activeGroupIndex = computed(() => this.carouselPageIndex());
-
-  readonly canGoToPreviousGroup = computed(() => this.carouselPageIndex() > 0);
-  readonly canGoToNextGroup = computed(
-    () => this.carouselPageIndex() < this.openGroups().length - 1,
-  );
-
-  /** Visible label between chevrons, e.g. `1A/3`, `1B/3`, `2/3`. */
-  readonly carouselIndicator = computed(() => {
-    const groups = this.openGroups();
-    const group = this.displayedGroup();
-    return formatCarouselIndicator(
-      this.carouselPageIndex(),
-      groups.length,
-      group?.trayStep,
-    );
-  });
-
   readonly canConfirmContinue = computed(() => {
-    if (this.isCityStep()) {
+    if (this.isItemBlocked()) {
+      return false;
+    }
+    if (this.showTextAnswer()) {
       return this.cityDraft().trim().length > 0;
     }
-    if (this.houseStepActive()) {
-      return !!this.selectedOptionId();
+    return !!this._selectedOptionId();
+  });
+
+  readonly continueLabel = computed(() => {
+    if (!this.useOrchestrator) {
+      return this.t('upload.resolver.continue', 'Continue');
     }
-    return !!this.selectedOptionId();
+    const progress = this.orchestrator.bundleProgress();
+    const isLastInBundle =
+      progress.total > 0 && this.orchestrator.activeItemIndex() >= progress.total - 1;
+    if (isLastInBundle && progress.allTerminal === false && progress.done === progress.total - 1) {
+      if (this.orchestrator.hasQueuedBundles()) {
+        return this.t('upload.resolver.nextBundle', 'Next questions');
+      }
+    }
+    return this.t('upload.resolver.continue', 'Continue');
   });
 
   readonly trayMode = computed<UploadResolverTrayMode>(() => {
     if (this.embeddedInPane()) {
       return 'hidden';
     }
-    if (this.useMockTray && this.openGroups().length > 0) {
-      return 'active';
+    if (this.useOrchestrator) {
+      if (this.orchestrator.hasActivePresentation()) {
+        return 'active';
+      }
+      if (UPLOAD_DEV_FLAGS.mockResolverTray) {
+        return 'hidden';
+      }
+      if (UPLOAD_DEV_FLAGS.dockAlwaysVisible) {
+        return 'passive';
+      }
+      return 'hidden';
     }
-    if (this.pendingGroupCount() > 0) {
+    if (this.resolution.pendingGroupCount() > 0) {
       return 'active';
     }
     if (UPLOAD_DEV_FLAGS.dockAlwaysVisible) {
@@ -222,119 +241,18 @@ export class UploadResolverTrayComponent {
     return null;
   });
 
-  readonly isCityStep = computed(() => {
-    const group = this.activeGroup();
-    return group?.disambiguationKind === 'city_step' || group?.trayStep === '1a';
-  });
-
-  readonly isHouseStep = computed(() => {
-    const group = this.activeGroup();
-    return group?.disambiguationKind === 'house_step' || group?.trayStep === '1b';
-  });
-
-  readonly houseStepActive = computed(() => {
-    const group = this.activeGroup();
-    return this.isHouseStep() && group?.step1bGate === 'active';
-  });
-
-  readonly resolverQuestion = computed(() => {
-    const group = this.activeGroup();
-    if (!group) {
-      return '';
-    }
-    const key = resolverQuestionKeyForGroup(group);
-    const fallbacks: Record<string, string> = {
-      'upload.resolver.question.source': 'Use the folder address or the photo GPS?',
-      'upload.resolver.question.contextDistance': 'Is this photo in the right project area?',
-      'upload.resolver.question.cityStep': 'Which city is {street} in?',
-      'upload.resolver.question.houseStep': 'No house number for {street} — what would you like?',
-      'upload.resolver.question.projectAddressA':
-        'Files without their own address found. Use project location or resolve yourself?',
-      'upload.resolver.question.projectAddressB':
-        'Use project address or file/folder address?',
-      'upload.resolver.question.door': "What's the door number for {street}?",
-      'upload.resolver.question.address': 'Which {address} do you mean?',
-    };
-    const template = this.t(key, fallbacks[key] ?? '');
-    const street = extractStreetFromTitleAddress(group.titleAddress);
-    const address =
-      group.titleAddress.trim() ||
-      this.t('upload.resolver.title.fallbackAddress', 'this address');
-    return template.replace('{street}', street).replace('{address}', address);
-  });
-
-  readonly groupedCandidates = computed(() => {
-    const group = this.activeGroup();
-    if (!group) {
-      return [];
-    }
-    if (this.isHouseStep() && group.houseNumberCandidates?.length) {
-      return group.houseNumberCandidates.map((candidate) => ({
-        label: candidate.addressLabel,
-        candidates: [candidate],
-      }));
-    }
-    if (group.disambiguationKind === 'source') {
-      return group.candidates.map((candidate) => ({
-        label: candidate.addressLabel,
-        candidates: [candidate],
-      }));
-    }
-    if (group.collapseStage === 'city') {
-      const byCity = new Map<string, UploadAddressCandidate[]>();
-      for (const candidate of group.candidates) {
-        const key = (candidate.city ?? candidate.addressLabel).trim();
-        const list = byCity.get(key) ?? [];
-        list.push(candidate);
-        byCity.set(key, list);
-      }
-      return Array.from(byCity.entries()).map(([label, candidates]) => ({
-        label,
-        candidates: candidates.slice(0, 1),
-      }));
-    }
-    return group.candidates.map((candidate) => ({
-      label: candidate.addressLabel,
-      candidates: [candidate],
-    }));
-  });
-
-  readonly numberedOptions = computed(() => {
-    const group = this.activeGroup();
-    const items: {
-      index: number;
-      label: string;
-      candidate: UploadAddressCandidate;
-    }[] = [];
-    if (!group) {
-      return items;
-    }
-    let index = 0;
-    for (const row of this.groupedCandidates()) {
-      for (const candidate of row.candidates) {
-        index += 1;
-        items.push({
-          index,
-          label: optionDisplayLabel(group, row.label, candidate),
-          candidate,
-        });
-      }
-    }
-    return items;
-  });
-
-  readonly selectedOptionId = this.selectedCandidateId.asReadonly();
+  readonly selectedOptionId = this._selectedOptionId.asReadonly();
 
   constructor() {
     const destroyRef = inject(DestroyRef);
 
     effect(() => {
-      this.carouselPageIndex();
-      this.displayedGroup()?.id;
-      const first = this.numberedOptions()[0]?.candidate.id ?? null;
-      this.selectedCandidateId.set(first);
+      this.activeItem()?.id;
+      const first = this.numberedOptions()[0]?.option.id ?? null;
+      this._selectedOptionId.set(first);
       this.mediaMenuOpen.set(false);
     });
+
     effect(() => {
       if (this.mediaMenuOpen()) {
         this.mediaMenuAnchor.set(this.mediaChipTrigger()?.nativeElement ?? null);
@@ -351,7 +269,16 @@ export class UploadResolverTrayComponent {
     }
   }
 
-  /** Capture-phase listener so map pan does not swallow ←/→ while the tray is active. */
+  ngOnInit(): void {
+    if (UPLOAD_DEV_FLAGS.mockResolverTray) {
+      this.orchestrator.resetAll();
+      this.orchestrator.presentBundleImmediately(
+        MOCK_ORCHESTRATOR_BATCH_ID,
+        structuredClone(UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS),
+      );
+    }
+  }
+
   onTrayKeydown(event: KeyboardEvent): void {
     const target = event.target;
     if (
@@ -386,225 +313,88 @@ export class UploadResolverTrayComponent {
     const option = this.optionForDigitKey(event.key);
     if (option) {
       event.preventDefault();
-      this.selectOption(option.candidate.id);
-      this.onPreviewCandidate(option.candidate);
+      this.selectOption(option.option.id);
+      this.onPreviewOption(option.option);
     }
-  }
-
-  /** Digit keys 1–9 map to visible options (Cursor Questions shortcut). */
-  private optionForDigitKey(key: string): { candidate: UploadAddressCandidate } | null {
-    if (key.length !== 1 || key < '1' || key > '9') {
-      return null;
-    }
-    const index = Number.parseInt(key, 10) - 1;
-    const item = this.numberedOptions()[index];
-    return item ?? null;
   }
 
   goToAdjacentGroup(delta: -1 | 1): void {
-    const groups = this.openGroups();
-    if (groups.length < 2) {
+    if (!this.useOrchestrator) {
       return;
     }
-    const nextIndex = this.carouselPageIndex() + delta;
-    if (nextIndex < 0 || nextIndex >= groups.length) {
-      return;
+    this.orchestrator.goToAdjacentItem(delta);
+    const item = this.orchestrator.activeItem();
+    if (item) {
+      this.groupChanged.emit(item.id);
     }
-    const next = groups[nextIndex];
-    this.carouselPagePin.set(null);
-    if (this.useMockTray) {
-      this.mockCarouselIndex.set(nextIndex);
-    } else {
-      this.resolution.setSelectedGroupId(next.id);
-    }
-    this.groupChanged.emit(next.id);
   }
 
-  selectOption(candidateId: string): void {
-    this.selectedCandidateId.set(candidateId);
+  selectOption(optionId: string): void {
+    this._selectedOptionId.set(optionId);
   }
 
   confirmSelection(): void {
-    const group = this.activeGroup();
-    if (group && this.isCityStep()) {
-      void this.onConfirmCity();
+    if (this.isItemBlocked()) {
       return;
     }
-    const candidateId = this.selectedCandidateId();
-    if (!candidateId) {
-      return;
-    }
-    this.onSelectCandidate(candidateId);
-  }
-
-  async onConfirmCity(): Promise<void> {
-    const group = this.activeGroup();
-    const city = this.cityDraft().trim();
-    if (!group || !city) {
-      return;
-    }
-    if (this.useMockTray) {
-      this.advanceMockGroup1aTo1b(group.id, city);
+    if (this.showTextAnswer()) {
+      const city = this.cityDraft().trim();
+      if (!city) {
+        return;
+      }
+      this.orchestrator.resolveActiveItem({ text: city });
       this.cityDraft.set('');
       return;
     }
-    await this.resolution.confirmTrayCity(group.id, city);
-    this.cityDraft.set('');
-    this.selectedCandidateId.set(null);
-  }
-
-  onStreetCentroid(): void {
-    const group = this.activeGroup();
-    if (!group) {
+    const optionId = this._selectedOptionId();
+    if (!optionId) {
       return;
     }
-    if (this.useMockTray) {
-      this.advanceMockCarousel();
+    if (this.useOrchestrator) {
+      this.orchestrator.resolveActiveItem({ optionId });
+      const payload = this.activeItem()?.payloadRef as { disambiguationGroupId?: string } | undefined;
+      if (payload?.disambiguationGroupId) {
+        this.candidateSelected.emit({
+          groupId: payload.disambiguationGroupId,
+          candidateId: optionId,
+        });
+      }
       return;
     }
-    this.resolution.applyTrayHouseSelection(group.id, null, true);
-  }
-
-  onSelectCandidate(candidateId: string): void {
-    const group = this.activeGroup();
-    if (!group) {
-      return;
-    }
-    const candidate = group.candidates.find((c) => c.id === candidateId);
-    if (!candidate) {
-      return;
-    }
-    this.candidateSelected.emit({ groupId: group.id, candidateId });
-    if (this.useMockTray) {
-      this.advanceMockCarousel();
-      return;
-    }
-    const jobId = group.jobIds[0];
-    if (!jobId) {
-      return;
-    }
-    this.uploadManager.selectAddressCandidate(jobId, candidate);
   }
 
   onDefer(): void {
-    const group = this.activeGroup();
-    if (!group) {
+    if (this.useOrchestrator) {
+      const item = this.activeItem();
+      this.orchestrator.skipActiveItem();
+      if (item) {
+        this.deferRequested.emit(item.id);
+      }
       return;
     }
-    this.deferRequested.emit(group.id);
-    if (this.useMockTray) {
-      this.advanceMockCarousel();
-      return;
+  }
+
+  onStreetCentroid(): void {
+    this.onDefer();
+  }
+
+  onPreviewOption(option: TrayResolveOption): void {
+    if (option.lat !== undefined && option.lng !== undefined) {
+      this.previewLocation.emit({ lat: option.lat, lng: option.lng });
     }
-    this.resolution.deferGroup(group.id);
-  }
-
-  /** Dev mock: move to next card after Skip / Continue (wraps to first). */
-  private advanceMockCarousel(): void {
-    const groups = this.openGroups();
-    if (groups.length < 2) {
-      return;
-    }
-    const nextIndex = (this.carouselPageIndex() + 1) % groups.length;
-    this.carouselPagePin.set(null);
-    this.mockCarouselIndex.set(nextIndex);
-  }
-
-  /** Dev mock: Step 1A city confirm → 1B house list on the same carousel card. */
-  private advanceMockGroup1aTo1b(groupId: string, city: string): void {
-    const houseCandidates = UPLOAD_RESOLVER_TRAY_MOCK_1B_CANDIDATES.map(
-      (entry: UploadAddressCandidate) => ({
-        ...entry,
-        city,
-      }),
-    );
-    this.mockGroups.update((groups) =>
-      groups.map((entry) =>
-        entry.id === groupId
-          ? {
-              ...entry,
-              trayStep: '1b' as const,
-              disambiguationKind: 'house_step' as const,
-              step1bGate: 'active' as const,
-              confirmedCity: city,
-              candidates: houseCandidates,
-              houseNumberCandidates: houseCandidates,
-              collapseStage: pickCollapseStage(houseCandidates, entry.jobIds.length),
-            }
-          : entry,
-      ),
-    );
-    const first = houseCandidates[0]?.id ?? null;
-    this.selectedCandidateId.set(first);
-  }
-
-  onPreviewCandidate(candidate: UploadAddressCandidate): void {
-    this.previewLocation.emit({ lat: candidate.lat, lng: candidate.lng });
   }
 
   toggleMediaMenu(): void {
     this.mediaMenuOpen.update((open) => !open);
   }
 
-  openMediaMenu(): void {
-    this.mediaMenuOpen.set(true);
-  }
-
   closeMediaMenu(): void {
     this.mediaMenuOpen.set(false);
   }
 
-  onAskLater(jobId: string, event: Event): void {
+  onAskLater(_jobId: string, event: Event): void {
     event.stopPropagation();
-    const group = this.activeGroup();
-    if (!group) {
-      return;
-    }
     this.closeMediaMenu();
-    const stayIndex = this.carouselPageIndex();
-    if (this.useMockTray) {
-      this.isolateMockJob(group.id, jobId, stayIndex);
-      return;
-    }
-    this.resolution.isolateJobFromGroup(group.id, jobId);
-    this.carouselPagePin.set(stayIndex);
-  }
-
-  private isolateMockJob(groupId: string, jobId: string, stayIndex: number): void {
-    const group = this.mockGroups().find((entry) => entry.id === groupId);
-    if (!group) {
-      return;
-    }
-    const remaining = group.jobIds.filter((id) => id !== jobId);
-
-    this.mockGroups.update((groups) => {
-      const next = structuredClone(groups);
-      const index = next.findIndex((entry) => entry.id === groupId);
-      if (index < 0) {
-        return next;
-      }
-      const current = next[index];
-      if (remaining.length > 0) {
-        next[index] = {
-          ...current,
-          jobIds: remaining,
-          collapseStage: pickCollapseStage(current.candidates, remaining.length),
-        };
-      } else {
-        next.splice(index, 1);
-      }
-      next.push({
-        ...current,
-        id: `mock-isolate-${jobId}`,
-        queryKey: `${current.queryKey}::${jobId}`,
-        jobIds: [jobId],
-        collapseStage: pickCollapseStage(current.candidates, 1),
-      });
-      return next;
-    });
-
-    this.carouselPagePin.set(stayIndex);
-    this.mockCarouselIndex.set(stayIndex);
   }
 
   folderPathTitle(path: string): string {
@@ -612,17 +402,12 @@ export class UploadResolverTrayComponent {
   }
 
   mediaCountLabel(count: number): string {
-    return this.t('upload.resolver.mediaCount', '{count} media').replace(
-      '{count}',
-      String(count),
-    );
+    return this.t('upload.resolver.mediaCount', '{count} media').replace('{count}', String(count));
   }
 
   mediaChipTitle(count: number): string {
-    return this.t(
-      'upload.resolver.media.chip.title',
-      '{count} media in this group — open list',
-    ).replace('{count}', String(count));
+    return this.t('upload.resolver.media.chip.title', '{count} media in this group — open list')
+      .replace('{count}', String(count));
   }
 
   mediaChipAria(count: number): string {
@@ -634,10 +419,10 @@ export class UploadResolverTrayComponent {
   }
 
   askLaterAria(label: string): string {
-    return this.t(
-      'upload.resolver.media.askLater.aria',
-      'Resolve {name} in its own question',
-    ).replace('{name}', label);
+    return this.t('upload.resolver.media.askLater.aria', 'Resolve {name} in its own question').replace(
+      '{name}',
+      label,
+    );
   }
 
   formatScorePercent(score: number | undefined): string | null {
@@ -669,9 +454,9 @@ export class UploadResolverTrayComponent {
   optionAriaLabel(item: {
     index: number;
     label: string;
-    candidate: UploadAddressCandidate;
+    option: TrayResolveOption;
   }): string {
-    const percent = this.formatScorePercent(item.candidate.score);
+    const percent = this.formatScorePercent(item.option.score);
     if (percent) {
       return this.t('upload.resolver.option.ariaWithScore', 'Option {index}: {label}, {score} match')
         .replace('{index}', String(item.index))
@@ -682,4 +467,34 @@ export class UploadResolverTrayComponent {
       .replace('{index}', String(item.index))
       .replace('{label}', item.label);
   }
+
+  private optionForDigitKey(key: string): { option: TrayResolveOption } | null {
+    if (key.length !== 1 || key < '1' || key > '9') {
+      return null;
+    }
+    const index = Number.parseInt(key, 10) - 1;
+    const item = this.numberedOptions()[index];
+    return item ? { option: item.option } : null;
+  }
+
+  private questionForItem(item: TrayResolveItem): string {
+    const fallbacks: Record<string, string> = {
+      'upload.resolver.question.source': 'Use the folder address or the photo GPS?',
+      'upload.resolver.question.contextDistance': 'Is this photo in the right project area?',
+      'upload.resolver.question.cityStep': 'Which city is {street} in?',
+      'upload.resolver.question.houseStep': 'No house number for {street} — what would you like?',
+      'upload.resolver.question.projectAddressA':
+        'Files without their own address found. Use project location or resolve yourself?',
+      'upload.resolver.question.projectAddressB':
+        'Use project address or file/folder address?',
+      'upload.resolver.question.door': "What's the door number for {street}?",
+      'upload.resolver.question.address': 'Which {address} do you mean?',
+      'upload.resolver.question.city': 'Which city is {street} in?',
+    };
+    const template = this.t(item.questionKey, fallbacks[item.questionKey] ?? '');
+    return template
+      .replace('{street}', item.questionParams['street'] ?? '')
+      .replace('{address}', item.questionParams['address'] ?? '');
+  }
+
 }

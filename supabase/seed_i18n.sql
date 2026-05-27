@@ -23501,6 +23501,378 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.cityStep', 'Which city is {street} in?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Which city is {street} in?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.cityStep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'In welcher Stadt liegt {street}?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.cityStep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In quale città si trova {street}?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.cityStep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.houseStep', 'No house number for {street} — what would you like?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No house number for {street} — what would you like?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.houseStep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Hausnummer für {street} — was möchtest du?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.houseStep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun numero civico per {street} — cosa preferisci?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.houseStep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.cityStep.label', 'Step 1A city input label', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Step 1A city input label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.cityStep.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'City', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.cityStep.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Stadt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.cityStep.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.cityStep.placeholder', 'Step 1A city placeholder', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Step 1A city placeholder', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.cityStep.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'e.g. Wien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.cityStep.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'z. B. Wien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.cityStep.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.houseStep.noNumber', 'Step 1B street centroid option', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Step 1B street centroid option', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.houseStep.noNumber'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'No number needed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.houseStep.noNumber'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Keine Nummer nötig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.houseStep.noNumber'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'project.location.picker.title', 'Project location picker heading', 'en', 'apps/web/src/app/features/projects/project-location-picker.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project location picker heading', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Project locations', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Projektstandorte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'project.location.picker.empty', 'Empty state', 'en', 'apps/web/src/app/features/projects/project-location-picker.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Empty state', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'No locations linked yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Noch keine Standorte verknüpft.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'project.location.picker.noPin', 'Non-street hint', 'en', 'apps/web/src/app/features/projects/project-location-picker.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Non-street hint', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.noPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'No map pin', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.noPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Kein Karten-Pin', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.noPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'project.location.picker.remove', 'Unlink button', 'en', 'apps/web/src/app/features/projects/project-location-picker.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Unlink button', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Remove', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'project.location.picker.add', 'Add button', 'en', 'apps/web/src/app/features/projects/project-location-picker.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add button', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Add location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Standort hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'project.location.picker.prompt', 'Add prompt', 'en', 'apps/web/src/app/features/projects/project-location-picker.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add prompt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.prompt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Enter address (e.g. Mariahilf Wien)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.prompt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Adresse eingeben (z. B. Mariahilf Wien)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.prompt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'project.location.picker.aria', 'Region aria', 'en', 'apps/web/src/app/features/projects/project-location-picker.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Region aria', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Project locations', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Projektstandorte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'project.location.picker.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.resolver.question.door', 'What''s the door number for {street}?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -24240,6 +24612,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Weiter', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.resolver.continue'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.nextBundle', 'Footer when bundle done and another bundle waits', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Footer when bundle done and another bundle waits', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.nextBundle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Next questions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.nextBundle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nächste Fragen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.nextBundle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.dependsOnPrior', 'Blocked dependent item hint (1B after 1A)', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Blocked dependent item hint (1B after 1A)', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.dependsOnPrior'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Answer the previous question first.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.dependsOnPrior'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Beantworte zuerst die vorherige Frage.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.dependsOnPrior'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

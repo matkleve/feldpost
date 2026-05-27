@@ -6,8 +6,11 @@ import {
   deriveFolderDisplayPath,
   deriveLocalityHint,
   evaluateLocalResolution,
+  isExifAuthoritativeOverWeakFilenameStreet,
   normalizeAddressForGrouping,
 } from './upload-location-resolution.helpers';
+import type { UploadGroupResolutionState } from './upload-address-resolution.types';
+import type { UploadJob } from './upload-manager.types';
 import { DEFAULT_UPLOAD_LOCATION_CONFIG } from './upload-location-config';
 import type { UploadSearchObject } from './upload-address-resolution.types';
 
@@ -112,5 +115,53 @@ describe('upload-location-resolution.helpers', () => {
 
   it('evaluateLocalResolution Branch C without centroid', () => {
     expect(evaluateLocalResolution(so({ street: 'Thaliastraße' }))).toBe('branch_c');
+  });
+
+  it('isExifAuthoritativeOverWeakFilenameStreet for IMG_1121-style EXIF-only upload', () => {
+    const groupState: UploadGroupResolutionState = {
+      status: 'needsTray',
+      groupingKey: 'at|||img',
+      jobIds: ['job-1'],
+      searchObject: so({
+        street: 'IMG',
+        fileName: 'IMG_1121.jpg',
+        relativePath: 'IMG_1121.jpg',
+        sources: [{ field: 'street', value: 'IMG', source: 'filename', confidence: 0.5 }],
+      }),
+      folderDisplayPath: '',
+      titleAddressLabel: 'IMG',
+      geocodeBranch: 'branch_c',
+      trayStep: '1a',
+    };
+    const job = {
+      id: 'job-1',
+      parsedExif: { coords: { lat: 48.170953, lng: 16.379047 } },
+    } as UploadJob;
+    expect(
+      isExifAuthoritativeOverWeakFilenameStreet(groupState, () => job),
+    ).toBe(true);
+  });
+
+  it('isExifAuthoritativeOverWeakFilenameStreet false when folder path present', () => {
+    const groupState: UploadGroupResolutionState = {
+      status: 'needsTray',
+      groupingKey: 'k',
+      jobIds: ['job-1'],
+      searchObject: so({
+        street: 'Musterstrasse',
+        sources: [{ field: 'street', value: 'Musterstrasse', source: 'folder', confidence: 1 }],
+      }),
+      folderDisplayPath: 'Baustelle',
+      titleAddressLabel: 'Musterstrasse',
+      geocodeBranch: 'branch_c',
+      trayStep: '1a',
+    };
+    const job = {
+      id: 'job-1',
+      parsedExif: { coords: { lat: 48.17, lng: 16.37 } },
+    } as UploadJob;
+    expect(
+      isExifAuthoritativeOverWeakFilenameStreet(groupState, () => job),
+    ).toBe(false);
   });
 });

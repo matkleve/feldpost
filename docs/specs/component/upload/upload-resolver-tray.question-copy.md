@@ -21,7 +21,7 @@ Generic headlines (“Resolver tray active headline”, “Which address is corr
 
 | Trigger | Question key | English template | Option labels |
 | --- | --- | --- | --- |
-| `collapseStage: city` | `upload.resolver.question.city` | Which city is **{street}** in? | City names (`candidate.city`) |
+| `collapseStage: city` / Step **1A** | `upload.resolver.question.city` or `upload.resolver.question.cityStep` | Which city is **{street}** in? | **2–5 numbered city names** (`candidate.city` or `citySuggestions`); free-text input only when no options (`answerKind: text`, rare) |
 | `collapseStage: partial` (default geocode) | `upload.resolver.question.address` | Which **{address}** do you mean? | Full `addressLabel` |
 | `collapseStage: per_file` | `upload.resolver.question.door` | What's the door number for **{street}**? | Door/unit labels — see [Answer UI variants](#answer-ui-variants) |
 | `disambiguationKind: source` | `upload.resolver.question.source` | Use the folder address or the photo GPS? | Two source candidates |

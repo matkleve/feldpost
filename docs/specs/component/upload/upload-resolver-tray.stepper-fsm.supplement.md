@@ -15,6 +15,8 @@
 
 Step 1B is **hidden/disabled** until `confirmedCity` is set on the group.
 
+**Orchestrator:** Step 1A and 1B are separate `enqueueItem` rows in the same presentation bundle; 1B has `dependsOnItemId` → UI `blocked` until 1A resolves. Producer enqueues 1B after `confirmTrayCity`.
+
 Branch B skips 1A when project centroid supplies city context for the first bias attempt.
 
 ## B → C fallback

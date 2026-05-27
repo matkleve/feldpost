@@ -52,6 +52,8 @@ MVP excludes tray for uploaded rows. Post-save forward skipped when `coords` or 
 
 **Signals (tray reads):** `disambiguationGroups`, `selectedGroupId`, `activeGroup`, `pendingGroupCount`.
 
+**Orchestrator (production):** When `USE_TRAY_ORCHESTRATOR` is true, `registerDisambiguationGroup` calls `UploadLocationTrayProducerAdapter.syncGroupToOrchestrator`. The tray UI reads `UploadResolverTrayOrchestratorService`, not `disambiguationGroups` directly. After `classifyBatch`, `UploadManagerService` calls `notifyScanIdle(batchId)`. See [upload-resolver-tray-orchestrator.md](./upload-resolver-tray-orchestrator.md).
+
 ## Acceptance criteria
 
 - [x] Ambiguous multi-hit jobs enter `awaiting_disambiguation` with `addressCandidates`

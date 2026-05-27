@@ -37,18 +37,17 @@
 
 ## Data pipeline (read / write)
 
-Tray is a **view** over resolution + job state; it does not call geocoders or Supabase.
+Tray is a **view** over the [upload resolver tray orchestrator](../../service/media-upload-service/upload-resolver-tray-orchestrator.md); it does not call geocoders or Supabase.
 
 | Direction | Source / sink | Data |
 | --- | --- | --- |
-| **Read** | `UploadLocationResolutionService.disambiguationGroups()` | Open groups (`resolutionGateOpen`), `candidates`, `titleAddress`, `folderDisplayPath`, `collapseStage`, `disambiguationKind` |
-| **Read** | `resolution.activeGroup()` / `selectedGroupId` | Carousel selection (production) |
+| **Read** | `UploadResolverTrayOrchestratorService` | `activeItem`, `activeItems`, `itemStatuses`, `hasActivePresentation` |
 | **Read** | `UploadManagerService.jobs()` | File names for `affectedMedia` chip rows |
 | **Read** | `UploadPanelSignalsService.passiveStatusLine` | Passive dock line when panel closed |
-| **Write** | `UploadManagerService.selectAddressCandidate` → `applyCandidateToGroup` | Continue — coords on all `jobIds`, gate closed, queue drain |
-| **Write** | `resolution.deferGroup` | Skip — gate closed, jobs → `missing_data` |
-| **Write** | `resolution.setSelectedGroupId` | Carousel prev/next |
-| **Write** | `resolution.isolateJobFromGroup` | Ask later — split one job to its own card (`activateTray: false`) |
+| **Write** | `orchestrator.resolveActiveItem` / `skipActiveItem` | Per-item Continue / Skip → `itemResolved$` |
+| **Write** | `UploadLocationTrayProducerAdapter` (subscriber) | Applies answers to `UploadLocationResolutionService` / `UploadManagerService` |
+
+**Carousel:** index within the **current presentation bundle** only (`1A/4`, `2/4`), not across all open disambiguation groups in the batch.
 
 **Upstream (before tray):** `UploadNewPipelineService` → `runPreUploadLocationResolve` → geocode / orchestrator → `registerDisambiguationGroup`. See [upload-address-resolution-pipeline.md](../../service/media-upload-service/upload-address-resolution-pipeline.md#tray-contract).
 
@@ -56,10 +55,9 @@ Tray is a **view** over resolution + job state; it does not call geocoders or Su
 
 ## Carousel
 
-- Shown when `openGroups().length > 1`: `‹` **{current}/{total}** `›` between chevrons.
-- **Production:** `setSelectedGroupId` selects the page; `activeGroup` follows service selection.
-- **Ask later:** `isolateJobFromGroup` registers a new group with `{ activateTray: false }` so the **active question stays on the same page index** while **total** increases (e.g. **1/3** → **1/4**). Tray keeps an explicit `carouselDisplay` signal so the denominator updates even when the page index is unchanged.
-- **Mock (`mockResolverTray`):** `mockCarouselIndex` + `mockGroups` signal; card 1 is Step **1A** (city input) → confirm city → **1B** (house list) on the same carousel index (`1A/3` then `1B/3`); cards 2–3 are source + geocode. Skip/Continue advance mock pages. Carousel label is a **computed** from page index + `trayStep` (not a separate stale signal).
+- Shown when `activeItems().length > 1` in the current bundle: `‹` **{current}/{total}** `›` (optional **1A** / **1B** sub-label).
+- **Production:** `goToAdjacentItem` changes index within the bundle only.
+- **Mock (`mockResolverTray`):** `presentBundleImmediately` with fixture items — city options (1A), dependent house step (1B), source, geocode.
 
 ## Ownership matrix
 

@@ -18,6 +18,7 @@ import type {
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { UploadPanelComponent } from './upload-panel.component';
 import { UploadResolverTrayComponent } from './upload-resolver-tray.component';
+import { UploadLocationTrayProducerAdapter } from '../../core/upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter';
 import { UploadShellUiService } from './upload-shell-ui.service';
 import type { ZoomToLocationEvent } from './upload-panel-row-handlers';
 
@@ -30,6 +31,9 @@ import type { ZoomToLocationEvent } from './upload-panel-row-handlers';
   styleUrl: './upload-shell.component.scss',
 })
 export class UploadShellComponent {
+  /** Eager-init: wires orchestrator `itemResolved$` without ULR ↔ adapter constructor cycle. */
+  private readonly trayProducerWire = inject(UploadLocationTrayProducerAdapter);
+
   private readonly shellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   private readonly i18nService = inject(I18nService);
   private readonly uploadShellUi = inject(UploadShellUiService);

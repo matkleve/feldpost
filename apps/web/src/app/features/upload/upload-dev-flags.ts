@@ -4,7 +4,9 @@
  */
 export const UPLOAD_DEV_FLAGS = {
   /** Map + /media: frosted dock and resolver tray stay visible (passive line when idle). */
-  dockAlwaysVisible: true,
-  /** Show three mock address cards in the resolver tray (no real upload batch). Set false before merge. */
-  mockResolverTray: true,
+  dockAlwaysVisible: false,
+  /** Seed orchestrator with fixture bundle (no real upload). */
+  mockResolverTray: false,
+  /** Route tray through UploadResolverTrayOrchestratorService (production default). */
+  useTrayOrchestrator: true,
 } as const;

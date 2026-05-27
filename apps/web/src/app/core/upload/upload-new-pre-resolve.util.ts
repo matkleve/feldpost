@@ -15,6 +15,7 @@ import {
   getExifMetadataCoords,
   resolvePlacementWithoutText,
 } from './upload-location-precedence.helpers';
+import { isExifAuthoritativeOverWeakFilenameStreet } from './upload-location-resolution.helpers';
 import { hashAndCheckDedupForNewJob, routeJobToMissingData } from './upload-new-prepare-route.util';
 import type { UploadJobStateService } from './upload-job-state.service';
 import type { PipelineContext, UploadJob } from './upload-manager.types';
@@ -41,7 +42,9 @@ function isAutoLocationEnabled(job: UploadJob): boolean {
 
 /** Merge filename/folder title candidates onto the job (legacy fallback). */
 export function mergeTitleCandidateOnJob(
-  deps: Pick<PreResolveDeps, 'jobState' | 'filenameParser' | 'locationConfig'>,
+  deps: Pick<PreResolveDeps, 'jobState' | 'filenameParser' | 'locationConfig'> & {
+    addressOrchestrator?: PreResolveDeps['addressOrchestrator'];
+  },
   jobId: string,
   job: UploadJob,
 ): { titleAddress?: string; highConfidence: boolean } {
@@ -53,6 +56,13 @@ export function mergeTitleCandidateOnJob(
 
   // Search Object intake already set titleAddress + groupingKey — do not replace with IMG_* parse.
   if (job.groupingKey && inheritedTitleAddress) {
+    const groupState = deps.addressOrchestrator?.getGroupState(job.batchId, job.groupingKey);
+    if (
+      groupState &&
+      isExifAuthoritativeOverWeakFilenameStreet(groupState, (id) => deps.jobState.findJob(id))
+    ) {
+      return { titleAddress: inheritedTitleAddress, highConfidence: false };
+    }
     return { titleAddress: inheritedTitleAddress, highConfidence: true };
   }
 

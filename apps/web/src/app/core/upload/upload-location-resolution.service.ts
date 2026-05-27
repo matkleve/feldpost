@@ -3,7 +3,7 @@
  * @see docs/specs/service/media-upload-service/upload-location-resolution.md
  */
 
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, computed, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { GeocodingService } from '../geocoding/geocoding.service';
@@ -34,6 +34,7 @@ import {
   isGroupBlocked,
   isJobBlocked,
   pickCollapseStage,
+  isExifAuthoritativeOverWeakFilenameStreet,
 } from './upload-location-resolution.helpers';
 import {
   summarizeGeocodeHits,
@@ -44,6 +45,8 @@ import {
   uploadPlacementLog,
 } from './upload-address-resolution.debug';
 import type { ExifCoords } from './upload.types';
+import { UploadLocationTrayProducerAdapter } from '../upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter';
+import { USE_TRAY_ORCHESTRATOR } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import type {
   DisambiguationRequiredEvent,
   DisambiguationResolvedEvent,
@@ -60,6 +63,7 @@ export class UploadLocationResolutionService {
   private readonly batchService = inject(UploadBatchService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly projectLocations = inject(UploadProjectLocationsAdapter);
+  private readonly injector = inject(Injector);
 
   private readonly batchProjectTrayRegistered = new Set<string>();
 
@@ -192,6 +196,9 @@ export class UploadLocationResolutionService {
     }
 
     if (groupState.status === 'needsTray') {
+      if (this.tryApplyExifPlacementForWeakBranchC(groupState)) {
+        return 'continue';
+      }
       this.registerTrayStepGroup(job.batchId, groupState);
       return 'held';
     }
@@ -390,6 +397,35 @@ export class UploadLocationResolutionService {
     });
   }
 
+  /**
+   * Branch C from filename-only street (e.g. IMG_1121 → "IMG") must not open city tray when EXIF exists.
+   * @see upload-manager-pipeline.location-routing.supplement.md — EXIF before weak text
+   */
+  private tryApplyExifPlacementForWeakBranchC(
+    groupState: UploadGroupResolutionState,
+  ): boolean {
+    if (
+      !isExifAuthoritativeOverWeakFilenameStreet(groupState, (id) =>
+        this.jobState.findJob(id),
+      )
+    ) {
+      return false;
+    }
+    for (const jobId of groupState.jobIds) {
+      const job = this.jobState.findJob(jobId);
+      const exif = job ? getExifMetadataCoords(job) : undefined;
+      if (!job || !exif) {
+        return false;
+      }
+      this.jobState.updateJob(jobId, buildChosenPlacementPatch(job, 'exif', exif));
+    }
+    uploadAddressDebug('pre-resolve', 'EXIF overrides weak Branch C tray', {
+      groupingKey: groupState.groupingKey,
+      jobIds: groupState.jobIds,
+    });
+    return true;
+  }
+
   /** Register Step 1A/1B tray for Branch C or B→C fallback. */
   private registerTrayStepGroup(batchId: string, groupState: UploadGroupResolutionState): void {
     const step = groupState.trayStep ?? '1a';
@@ -548,6 +584,11 @@ export class UploadLocationResolutionService {
 
     if (options?.activateTray !== false) {
       this._selectedGroupId.set(updated.id);
+    }
+    if (USE_TRAY_ORCHESTRATOR && isGroupBlocked(updated)) {
+      this.injector
+        .get(UploadLocationTrayProducerAdapter)
+        .syncGroupToOrchestrator(updated);
     }
     this.syncBatchDisambiguationAggregates(input.batchId);
   }

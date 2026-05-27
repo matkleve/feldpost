@@ -111,6 +111,15 @@
     }
   }
 
+  // Dependent item waiting on parent answer (1B after 1A)
+  // @see upload-resolver-tray-orchestrator.md#dependencies
+  .upload-resolver-tray__blocked-hint {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    color: var(--muted-foreground);
+  }
+
   // Primary question — compact sm, semibold
   // @see upload-resolver-tray.md#active-mode
   .upload-resolver-tray__question {

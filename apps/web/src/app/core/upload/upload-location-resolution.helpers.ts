@@ -14,9 +14,16 @@ import {
 } from '../location-path-parser/upload-search-object.builder';
 import {
   classifySearchObjectCompleteness,
+  searchObjectHasLocality,
   type ProjectGeocodeCentroid,
 } from '../location-path-parser/upload-search-object.completeness.helpers';
-import type { UploadLocationRowHit, UploadSearchObject } from './upload-address-resolution.types';
+import type {
+  UploadGroupResolutionState,
+  UploadLocationRowHit,
+  UploadSearchObject,
+} from './upload-address-resolution.types';
+import { getExifMetadataCoords } from './upload-location-precedence.helpers';
+import type { UploadJob } from './upload-manager.types';
 import type { ExifCoords } from './upload.service';
 
 export type ClassifySearchOutcome =
@@ -109,6 +116,50 @@ export type LocalResolutionGate =
   | 'metadata_only'
   | 'postcode_blocked'
   | 'incomplete';
+
+/**
+ * EXIF GPS wins over Branch C tray when "street" is only a weak filename token (e.g. IMG from IMG_1121.jpg).
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
+ */
+export function isExifAuthoritativeOverWeakFilenameStreet(
+  groupState: UploadGroupResolutionState,
+  findJob: (jobId: string) => UploadJob | undefined,
+): boolean {
+  if (groupState.geocodeBranch !== 'branch_c' || groupState.trayStep !== '1a') {
+    return false;
+  }
+  const so = groupState.searchObject;
+  if (!so.street?.trim() || searchObjectHasLocality(so)) {
+    return false;
+  }
+  if (groupState.folderDisplayPath?.trim()) {
+    return false;
+  }
+  const hasFolderAddressSource = so.sources.some(
+    (entry) =>
+      entry.source === 'folder' &&
+      (entry.field === 'street' ||
+        entry.field === 'houseNumber' ||
+        entry.field === 'city' ||
+        entry.field === 'postcode'),
+  );
+  if (hasFolderAddressSource) {
+    return false;
+  }
+  const streetSources = so.sources.filter(
+    (entry) => entry.field === 'street' || entry.field === 'houseNumber',
+  );
+  if (
+    streetSources.length > 0 &&
+    !streetSources.every((entry) => entry.source === 'filename')
+  ) {
+    return false;
+  }
+  return groupState.jobIds.every((jobId) => {
+    const job = findJob(jobId);
+    return !!job && !!getExifMetadataCoords(job);
+  });
+}
 
 export function evaluateLocalResolution(
   so: UploadSearchObject,

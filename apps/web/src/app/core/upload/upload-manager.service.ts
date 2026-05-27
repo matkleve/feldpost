@@ -75,6 +75,8 @@ import {
 } from './upload-manager-submit.util';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
+import { UploadResolverTrayOrchestratorService } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
+import { USE_TRAY_ORCHESTRATOR } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
@@ -146,6 +148,7 @@ export class UploadManagerService {
   private readonly projects = inject(ProjectsService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly locationResolution = inject(UploadLocationResolutionService);
+  private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly addressOrchestrator = inject(UploadAddressResolutionOrchestrator);
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
@@ -219,6 +222,9 @@ export class UploadManagerService {
     classifyBatch: async (batchId) => {
       await this.addressOrchestrator.classifyBatch(batchId);
       await this.locationResolution.registerBatchProjectTrayIfNeeded(batchId);
+      if (USE_TRAY_ORCHESTRATOR) {
+        this.trayOrchestrator.notifyScanIdle(batchId);
+      }
     },
   };
 
