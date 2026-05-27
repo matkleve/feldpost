@@ -59,7 +59,7 @@ Tray is a **view** over resolution + job state; it does not call geocoders or Su
 - Shown when `openGroups().length > 1`: `‹` **{current}/{total}** `›` between chevrons.
 - **Production:** `setSelectedGroupId` selects the page; `activeGroup` follows service selection.
 - **Ask later:** `isolateJobFromGroup` registers a new group with `{ activateTray: false }` so the **active question stays on the same page index** while **total** increases (e.g. **1/3** → **1/4**). Tray keeps an explicit `carouselDisplay` signal so the denominator updates even when the page index is unchanged.
-- **Mock (`mockResolverTray`):** `mockCarouselIndex` + `mockGroups` signal; Skip/Continue advance mock pages only.
+- **Mock (`mockResolverTray`):** `mockCarouselIndex` + `mockGroups` signal; card 1 is Step **1A** (city input) → confirm city → **1B** (house list) on the same carousel index (`1A/3` then `1B/3`); cards 2–3 are source + geocode. Skip/Continue advance mock pages. Carousel label is a **computed** from page index + `trayStep` (not a separate stale signal).
 
 ## Ownership matrix
 

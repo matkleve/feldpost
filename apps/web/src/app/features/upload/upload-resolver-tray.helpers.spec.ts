@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { UploadDisambiguationGroup } from '../../core/upload/upload-manager.types';
 import {
   extractStreetFromTitleAddress,
+  formatCarouselIndicator,
   resolverQuestionKeyForGroup,
   resolverScoreBand,
   resolverScoreFillPercent,
@@ -56,5 +57,11 @@ describe('upload-resolver-tray.helpers', () => {
     expect(resolverScoreFillPercent(0.456)).toBe(46);
     expect(resolverScoreFillPercent(1.2)).toBe(100);
     expect(resolverScoreFillPercent(-0.1)).toBe(0);
+  });
+
+  it('formatCarouselIndicator uses 1A/1B labels for stepper substeps', () => {
+    expect(formatCarouselIndicator(0, 3, '1a')).toBe('1A/3');
+    expect(formatCarouselIndicator(0, 3, '1b')).toBe('1B/3');
+    expect(formatCarouselIndicator(1, 3)).toBe('2/3');
   });
 });

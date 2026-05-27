@@ -1,4 +1,7 @@
-import type { UploadDisambiguationGroup } from '../../core/upload/upload-manager.types';
+import type {
+  UploadDisambiguationGroup,
+  UploadTrayStep,
+} from '../../core/upload/upload-manager.types';
 
 /** Street line without trailing postcode/city (for city-level questions). */
 export function extractStreetFromTitleAddress(titleAddress: string): string {
@@ -26,6 +29,28 @@ export type ResolverQuestionKey =
   | 'upload.resolver.question.houseStep'
   | 'upload.resolver.question.projectAddressA'
   | 'upload.resolver.question.projectAddressB';
+
+/**
+ * Carousel label between chevrons (e.g. `1A/3`, `2/3`).
+ * @see docs/specs/component/upload/upload-resolver-tray.md#carousel
+ */
+export function formatCarouselIndicator(
+  pageIndex: number,
+  total: number,
+  trayStep?: UploadTrayStep,
+): string | null {
+  if (total < 2) {
+    return null;
+  }
+  const index = Math.min(Math.max(pageIndex, 0), total - 1);
+  if (trayStep === '1a') {
+    return `1A/${total}`;
+  }
+  if (trayStep === '1b') {
+    return `1B/${total}`;
+  }
+  return `${index + 1}/${total}`;
+}
 
 export function resolverQuestionKeyForGroup(
   group: UploadDisambiguationGroup,

@@ -65,16 +65,16 @@ Component SCSS must `@use '../../../styles/frosted-chrome'` (adjust depth) and `
 
 Design tokens are CSS custom properties. All components use tokens — never raw hex or Tailwind arbitrary values in design-sensitive contexts.
 
-### §3.1a — Feldpost v2 `--fp-*` Color System
+### §3.1a — Tonal palettes (design reference)
 
-The v2 color system follows the Material Design 3 tonal architecture with the Feldpost `--fp-` prefix. **`--fp-sys-color-*` names in the tables below are a design reference only** — they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 16** (2026-05-17); use **tweakcn** semantics (`--primary`, `--background`, `--muted`, …) in implementation. **Reference tonal ladders are not emitted as `--fp-ref-*` on `:root`** (Batch 5b) — canonical hex for every stop lives in the tables below. Figma paths such as `fp/ref/primary/95` correspond to **stop 95** in the primary ladder.
+MD3-style **tonal stop tables** below are the design authority for hex values when tuning tweakcn or Figma. They are **not** emitted as CSS custom properties on `:root` (Phase 7 Batch 5b / 16). **Implementation:** tweakcn semantics in `apps/web/src/styles.scss` (`--primary`, `--background`, `--muted`, …). Retired reference-variable naming is archived in [`docs/archive/design-retired-md3-reference-tokens.md`](../archive/design-retired-md3-reference-tokens.md).
 
 #### Two-layer structure
 
-| Layer | Prefix | Purpose | Use in components? |
-|-------|--------|---------|-------------------|
-| Reference palette (logical) | `fp/ref/…` in Figma; stops **0–100** below | Raw MD3 tonal stops. | **No** — do not use removed `--fp-ref-*` CSS vars; use tweakcn / semantic tokens in implementation |
-| System roles (logical) | `--fp-sys-color-*` (tables only) | Semantic role per surface/role pair. | **No** — not on `:root` after Batch 16; map to tweakcn or add named roles in `styles.scss` when needed |
+| Layer | What | Purpose | Use in components? |
+|-------|------|---------|-------------------|
+| Tonal stops **0–100** (tables below) | Hex per stop | Pick brand / surface colors; map Figma stop labels to a row | **No** as `var(--…)` — use tweakcn semantics or `color-mix` |
+| System roles (`--fp-sys-color-*` labels in tables only) | Semantic MD3 role names | Document surface/on-surface pairs | **No** on `:root` — map to tweakcn or add named roles in `styles.scss` when needed |
 
 #### Phase 7 handoff — deferred MD3 rows (tweakcn)
 
@@ -380,7 +380,7 @@ Note: elevation tokens are skipped by `sync-tokens.mjs` (complex multi-value sho
 
 #### Typefaces
 
-Google Fonts load from **`apps/web/src/styles.scss`** (global). **These are canonical design names** — they are **not** exported as `--fp-ref-typeface-*` on `:root` after Phase 7 Batch 5b.
+Google Fonts load from **`apps/web/src/styles.scss`** (global). **These are canonical design names** — typeface tokens are not separate `:root` CSS variables (see [`docs/archive/design-retired-md3-reference-tokens.md`](../archive/design-retired-md3-reference-tokens.md)).
 
 | Name | Value | Role |
 |------|-------|------|

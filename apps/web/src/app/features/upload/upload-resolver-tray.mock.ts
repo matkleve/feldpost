@@ -20,24 +20,33 @@ function candidate(
   return { id, addressLabel, lat, lng, score, city };
 }
 
-/** Three open groups — carousel + numbered choices without a real upload batch. */
+/** House-number options for mock 1B (after city confirm on card 1). */
+export const UPLOAD_RESOLVER_TRAY_MOCK_1B_CANDIDATES: UploadAddressCandidate[] = [
+  candidate('mock-hn-4', 'Musterstrasse 4, 3018 Bern', 46.9472, 7.3954, 0.91, 'Bern'),
+  candidate('mock-hn-12', 'Musterstrasse 12, 3018 Bern', 46.9481, 7.3978, 0.88, 'Bern'),
+  candidate('mock-hn-22', 'Musterstrasse 22, 3018 Bern', 46.9495, 7.4015, 0.74, 'Bern'),
+];
+
+/**
+ * Three open groups — carousel + step 1A/1B on card 1 (branch C style).
+ * Use arrow keys or chevrons: `1A/3` → `2/3` → `3/3`; confirm city on card 1 → `1B/3`.
+ */
 export const UPLOAD_RESOLVER_TRAY_MOCK_GROUPS: UploadDisambiguationGroup[] = [
   {
-    id: 'mock-resolver-group-1',
+    id: 'mock-resolver-group-1a',
     batchId: MOCK_BATCH_ID,
-    queryKey: 'musterstrasse-12-zurich',
+    queryKey: 'musterstrasse-12-bern',
     folderDisplayPath: '2025-05 / Baustelle Nord / Fundamente',
-    titleAddress: 'Musterstrasse 12, 8001 Zürich',
+    titleAddress: 'Musterstrasse 12',
     jobIds: ['mock-job-1', 'mock-job-2', 'mock-job-3'],
-    collapseStage: 'city',
+    collapseStage: 'partial',
     resolutionStatus: 'pending',
     resolutionGateOpen: true,
-    disambiguationKind: 'geocode',
-    candidates: [
-      candidate('mock-c1-a', 'Musterstrasse 12, 8001 Zürich', 47.3769, 8.5417, 0.92, 'Zürich'),
-      candidate('mock-c1-b', 'Musterstrasse 12, 8400 Winterthur', 47.3851, 8.4922, 0.71, 'Winterthur'),
-      candidate('mock-c1-c', 'Musterstrasse 12, 3018 Bern', 47.3772, 8.5398, 0.54, 'Bern'),
-    ],
+    disambiguationKind: 'city_step',
+    trayStep: '1a',
+    step1bGate: 'disabled',
+    confirmedCity: null,
+    candidates: [],
   },
   {
     id: 'mock-resolver-group-2',
@@ -78,6 +87,7 @@ export const UPLOAD_RESOLVER_TRAY_MOCK_GROUPS: UploadDisambiguationGroup[] = [
     resolutionStatus: 'pending',
     resolutionGateOpen: true,
     disambiguationKind: 'geocode',
+    trayStep: '3',
     localityHint: 'Bern',
     candidates: [
       candidate('mock-c3-a', 'Industriestrasse 4, 3018 Bern', 46.9472, 7.3954, 0.88, 'Bern'),

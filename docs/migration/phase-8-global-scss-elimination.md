@@ -9,7 +9,7 @@
 ## Preconditions
 
 - Phase 6: zero `ui-*` in templates; `ui-primitives.directive.ts` removed.
-- Phase 7: **closed (2026-05-19)** — `tokens.scss` / **`_legacy-design-tokens.scss`** absent from **`apps/web`**; consumer gates **`rg 'var\(--fp-'`**, **`rg 'var\(--color-|var\(--fp-sys-|var\(--fp-ref-'`**, **`rg 'legacy-design-tokens|_legacy-design-tokens'`** → **0**; **`cd apps/web && npx ng build`** exit **0** — proof [phase-7 § Closure verification (2026-05-19)](./phase-7-token-migration.md#closure-verification-2026-05-19).
+- Phase 7: **closed (2026-05-19)** — `tokens.scss` / **`_legacy-design-tokens.scss`** absent from **`apps/web`**; consumer gates **`rg 'var\(--fp-'`**, **`rg 'var\(--color-|var\(--fp-'`**, **`rg 'legacy-design-tokens|_legacy-design-tokens'`** → **0**; **`cd apps/web && npx ng build`** exit **0** — proof [phase-7 § Closure verification (2026-05-19)](./phase-7-token-migration.md#closure-verification-2026-05-19).
 
 **Related (anchored toolbar UI)**
 

@@ -180,7 +180,7 @@ export class UploadAreaComponent {
 
 ### Default Variant
 
-- **Background (default variant):** `color-mix(in srgb, var(--primary) 10%, var(--background))` (Figma `fp/ref/primary/95` warm cream ≈ **`#ffefce`** — see **`docs/design/tokens.md` §3.1a**; dark: `color-mix` with **`var(--card)`** per `chip.component.scss`)
+- **Background (default variant):** `color-mix(in srgb, var(--primary) 10%, var(--background))` (aligns with primary tonal stop **95** warm cream **`#ffefce`** — **`docs/design/tokens.md` §3.1a**; dark: `color-mix` with **`var(--card)`** per `chip.component.scss`)
 - **Text / icon label color (default variant):** `var(--foreground)` (tweakcn semantic on-surface ink — [`docs/design/tokens.md`](../../../design/tokens.md); bucket ownership [`docs/design/token-layers.md`](../../../design/token-layers.md))
 - **Border**: transparent (no visible border on default chips)
 - **Dark mode**: tinted surface via `color-mix(in srgb, var(--primary) 26%, var(--card))` (hover 34%)

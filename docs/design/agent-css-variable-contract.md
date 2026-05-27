@@ -19,7 +19,7 @@
 | `@include meta.load-css('styles/legacy-design-tokens')` in `styles.scss` | **Removed** — only `meta.load-css('styles/typography-baseline')` remains |
 | `--overlay-rail-*` | **Removed** (Batch 34) → `--settings-overlay-*` on settings overlay `:host` |
 | `--layout-sidebar-*` | **Removed** (Batch 33) → `--sidebar-width-*` on nav `:host` |
-| `--fp-*`, `var(--fp-sys-*)`, `var(--fp-ref-*)` in runtime SCSS | **Forbidden** — MD3 tables in `tokens.md` are **reference only** |
+| `var(--fp-*)` (retired Feldpost MD3 prefixes) in runtime SCSS | **Forbidden** — tonal tables in `tokens.md` §3.1a are **design reference only**; retired names: [`docs/archive/design-retired-md3-reference-tokens.md`](../archive/design-retired-md3-reference-tokens.md) |
 | Feldpost v1 `var(--color-bg-base)`, `var(--color-clay)`, … in **component** SCSS | **Forbidden** — use tweakcn semantics (`--primary`, `--background`, …) |
 | New ad-hoc `--shell-*` on `:root` or layout hosts | **Forbidden** without spec row + ownership matrix |
 | Copying removed bridge names (`--menu-*`, `--action-*`, `--field-*`, `--interactive-transition-standard`, …) | **Forbidden** — see [token-layers.md](./token-layers.md) Layer C notes |
@@ -94,7 +94,7 @@ test ! -f apps/web/src/styles/tokens.scss && echo 'tokens.scss absent OK'
 
 # Feldpost v1 / fp in app SCSS — expect 0
 rg 'var\(--color-' apps/web/src/app --glob '*.scss'
-rg 'var\(--fp-sys-|var\(--fp-ref-|var\(--fp-' apps/web/src
+rg 'var\(--fp-' apps/web/src
 
 # Removed bridge name prefixes — expect 0 in apps/web
 rg '--overlay-rail-|--layout-sidebar-' apps/web

@@ -6,15 +6,18 @@
 import {
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
-  HostListener,
   inject,
   input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { fromEvent } from 'rxjs';
+import { filter } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
@@ -28,6 +31,7 @@ import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-s
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import {
   extractStreetFromTitleAddress,
+  formatCarouselIndicator,
   optionDisplayLabel,
   resolverQuestionKeyForGroup,
   resolverScoreBand,
@@ -35,6 +39,7 @@ import {
 } from './upload-resolver-tray.helpers';
 import { UPLOAD_DEV_FLAGS } from './upload-dev-flags';
 import {
+  UPLOAD_RESOLVER_TRAY_MOCK_1B_CANDIDATES,
   UPLOAD_RESOLVER_TRAY_MOCK_GROUPS,
   UPLOAD_RESOLVER_TRAY_MOCK_MEDIA_NAMES,
 } from './upload-resolver-tray.mock';
@@ -78,8 +83,11 @@ export class UploadResolverTrayComponent {
   );
   /** Mock carousel page (0-based); stable across ask-later when new cards are appended. */
   private readonly mockCarouselIndex = signal(0);
-  /** Explicit carousel fraction so total updates even when page index is unchanged (e.g. 1/3 → 1/4). */
-  private readonly carouselDisplay = signal({ current: 1, total: 1 });
+  /**
+   * Pins carousel numerator when total grows but the active question stays (Ask later).
+   * Cleared when the user moves to another card.
+   */
+  private readonly carouselPagePin = signal<number | null>(null);
   private readonly selectedCandidateId = signal<string | null>(null);
   readonly cityDraft = signal('');
   readonly manualHouseDraft = signal('');
@@ -117,43 +125,74 @@ export class UploadResolverTrayComponent {
     });
   });
 
-  readonly activeGroup = computed(() => {
+  /** 0-based carousel page; tracks mock index, service selection, or Ask-later pin. */
+  readonly carouselPageIndex = computed(() => {
+    const groups = this.openGroups();
+    if (!groups.length) {
+      return 0;
+    }
+    const pin = this.carouselPagePin();
+    if (pin !== null) {
+      return Math.min(Math.max(pin, 0), groups.length - 1);
+    }
+    if (this.useMockTray) {
+      return Math.min(Math.max(this.mockCarouselIndex(), 0), groups.length - 1);
+    }
+    const selectedId = this.resolution.selectedGroupId();
+    if (selectedId) {
+      const selectedIndex = groups.findIndex((entry) => entry.id === selectedId);
+      if (selectedIndex >= 0) {
+        return selectedIndex;
+      }
+    }
+    return 0;
+  });
+
+  /**
+   * Single source of truth for tray UI (question, folder, options, media).
+   * Always derived from `carouselPageIndex` so the header cannot desync from the card body.
+   */
+  readonly displayedGroup = computed(() => {
     const groups = this.openGroups();
     if (!groups.length) {
       return null;
     }
-    if (this.useMockTray) {
-      const idx = Math.min(Math.max(this.mockCarouselIndex(), 0), groups.length - 1);
-      return groups[idx] ?? null;
-    }
-    return this.resolution.activeGroup();
+    return groups[this.carouselPageIndex()] ?? null;
   });
+
+  /** @deprecated Alias — use `displayedGroup` for tray rendering. */
+  readonly activeGroup = this.displayedGroup;
 
   readonly pendingGroupCount = computed(() =>
     this.useMockTray ? this.openGroups().length : this.resolution.pendingGroupCount(),
   );
 
-  readonly activeGroupIndex = computed(() => {
-    const group = this.activeGroup();
-    if (!group) {
-      return 0;
-    }
-    const index = this.openGroups().findIndex((entry) => entry.id === group.id);
-    return index >= 0 ? index : 0;
-  });
+  readonly activeGroupIndex = computed(() => this.carouselPageIndex());
 
-  readonly canGoToPreviousGroup = computed(() => this.activeGroupIndex() > 0);
+  readonly canGoToPreviousGroup = computed(() => this.carouselPageIndex() > 0);
   readonly canGoToNextGroup = computed(
-    () => this.activeGroupIndex() < this.openGroups().length - 1,
+    () => this.carouselPageIndex() < this.openGroups().length - 1,
   );
 
-  /** Visible carousel index between chevrons, e.g. `1/4`. */
+  /** Visible label between chevrons, e.g. `1A/3`, `1B/3`, `2/3`. */
   readonly carouselIndicator = computed(() => {
-    const { current, total } = this.carouselDisplay();
-    if (total < 2) {
-      return null;
+    const groups = this.openGroups();
+    const group = this.displayedGroup();
+    return formatCarouselIndicator(
+      this.carouselPageIndex(),
+      groups.length,
+      group?.trayStep,
+    );
+  });
+
+  readonly canConfirmContinue = computed(() => {
+    if (this.isCityStep()) {
+      return this.cityDraft().trim().length > 0;
     }
-    return `${current}/${total}`;
+    if (this.houseStepActive()) {
+      return !!this.selectedOptionId();
+    }
+    return !!this.selectedOptionId();
   });
 
   readonly trayMode = computed<UploadResolverTrayMode>(() => {
@@ -287,8 +326,11 @@ export class UploadResolverTrayComponent {
   readonly selectedOptionId = this.selectedCandidateId.asReadonly();
 
   constructor() {
+    const destroyRef = inject(DestroyRef);
+
     effect(() => {
-      this.activeGroup()?.id;
+      this.carouselPageIndex();
+      this.displayedGroup()?.id;
       const first = this.numberedOptions()[0]?.candidate.id ?? null;
       this.selectedCandidateId.set(first);
       this.mediaMenuOpen.set(false);
@@ -298,23 +340,19 @@ export class UploadResolverTrayComponent {
         this.mediaMenuAnchor.set(this.mediaChipTrigger()?.nativeElement ?? null);
       }
     });
-    effect(() => {
-      if (this.useMockTray) {
-        this.mockGroups();
-        this.mockCarouselIndex();
-      } else {
-        this.resolution.disambiguationGroups();
-        this.resolution.selectedGroupId();
-      }
-      this.refreshCarouselDisplay();
-    });
+
+    if (typeof document !== 'undefined') {
+      fromEvent<KeyboardEvent>(document, 'keydown', { capture: true })
+        .pipe(
+          filter(() => this.trayMode() === 'active'),
+          takeUntilDestroyed(destroyRef),
+        )
+        .subscribe((event) => this.onTrayKeydown(event));
+    }
   }
 
-  @HostListener('document:keydown', ['$event'])
-  onDocumentKeydown(event: KeyboardEvent): void {
-    if (this.trayMode() !== 'active') {
-      return;
-    }
+  /** Capture-phase listener so map pan does not swallow ←/→ while the tray is active. */
+  onTrayKeydown(event: KeyboardEvent): void {
     const target = event.target;
     if (
       target instanceof HTMLInputElement ||
@@ -325,11 +363,13 @@ export class UploadResolverTrayComponent {
     }
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
+      event.stopPropagation();
       this.goToAdjacentGroup(-1);
       return;
     }
     if (event.key === 'ArrowRight') {
       event.preventDefault();
+      event.stopPropagation();
       this.goToAdjacentGroup(1);
       return;
     }
@@ -366,18 +406,17 @@ export class UploadResolverTrayComponent {
     if (groups.length < 2) {
       return;
     }
-    const pageIndex = this.useMockTray ? this.mockCarouselIndex() : this.activeGroupIndex();
-    const nextIndex = pageIndex + delta;
+    const nextIndex = this.carouselPageIndex() + delta;
     if (nextIndex < 0 || nextIndex >= groups.length) {
       return;
     }
     const next = groups[nextIndex];
+    this.carouselPagePin.set(null);
     if (this.useMockTray) {
       this.mockCarouselIndex.set(nextIndex);
     } else {
       this.resolution.setSelectedGroupId(next.id);
     }
-    this.refreshCarouselDisplay();
     this.groupChanged.emit(next.id);
   }
 
@@ -404,6 +443,11 @@ export class UploadResolverTrayComponent {
     if (!group || !city) {
       return;
     }
+    if (this.useMockTray) {
+      this.advanceMockGroup1aTo1b(group.id, city);
+      this.cityDraft.set('');
+      return;
+    }
     await this.resolution.confirmTrayCity(group.id, city);
     this.cityDraft.set('');
     this.selectedCandidateId.set(null);
@@ -412,6 +456,10 @@ export class UploadResolverTrayComponent {
   onStreetCentroid(): void {
     const group = this.activeGroup();
     if (!group) {
+      return;
+    }
+    if (this.useMockTray) {
+      this.advanceMockCarousel();
       return;
     }
     this.resolution.applyTrayHouseSelection(group.id, null, true);
@@ -457,8 +505,37 @@ export class UploadResolverTrayComponent {
     if (groups.length < 2) {
       return;
     }
-    const nextIndex = (this.mockCarouselIndex() + 1) % groups.length;
+    const nextIndex = (this.carouselPageIndex() + 1) % groups.length;
+    this.carouselPagePin.set(null);
     this.mockCarouselIndex.set(nextIndex);
+  }
+
+  /** Dev mock: Step 1A city confirm → 1B house list on the same carousel card. */
+  private advanceMockGroup1aTo1b(groupId: string, city: string): void {
+    const houseCandidates = UPLOAD_RESOLVER_TRAY_MOCK_1B_CANDIDATES.map(
+      (entry: UploadAddressCandidate) => ({
+        ...entry,
+        city,
+      }),
+    );
+    this.mockGroups.update((groups) =>
+      groups.map((entry) =>
+        entry.id === groupId
+          ? {
+              ...entry,
+              trayStep: '1b' as const,
+              disambiguationKind: 'house_step' as const,
+              step1bGate: 'active' as const,
+              confirmedCity: city,
+              candidates: houseCandidates,
+              houseNumberCandidates: houseCandidates,
+              collapseStage: pickCollapseStage(houseCandidates, entry.jobIds.length),
+            }
+          : entry,
+      ),
+    );
+    const first = houseCandidates[0]?.id ?? null;
+    this.selectedCandidateId.set(first);
   }
 
   onPreviewCandidate(candidate: UploadAddressCandidate): void {
@@ -484,30 +561,13 @@ export class UploadResolverTrayComponent {
       return;
     }
     this.closeMediaMenu();
-    const stayIndex = this.useMockTray ? this.mockCarouselIndex() : this.activeGroupIndex();
+    const stayIndex = this.carouselPageIndex();
     if (this.useMockTray) {
       this.isolateMockJob(group.id, jobId, stayIndex);
       return;
     }
     this.resolution.isolateJobFromGroup(group.id, jobId);
-    this.refreshCarouselDisplay(stayIndex);
-  }
-
-  private refreshCarouselDisplay(pinnedIndex?: number): void {
-    const groups = this.openGroups();
-    const total = groups.length;
-    if (total < 2) {
-      this.carouselDisplay.set({ current: 1, total });
-      return;
-    }
-    const pageIndex =
-      pinnedIndex ??
-      (this.useMockTray ? this.mockCarouselIndex() : this.activeGroupIndex());
-    const index = Math.min(Math.max(pageIndex, 0), total - 1);
-    if (this.useMockTray) {
-      this.mockCarouselIndex.set(index);
-    }
-    this.carouselDisplay.set({ current: index + 1, total });
+    this.carouselPagePin.set(stayIndex);
   }
 
   private isolateMockJob(groupId: string, jobId: string, stayIndex: number): void {
@@ -543,7 +603,8 @@ export class UploadResolverTrayComponent {
       return next;
     });
 
-    this.refreshCarouselDisplay(stayIndex);
+    this.carouselPagePin.set(stayIndex);
+    this.mockCarouselIndex.set(stayIndex);
   }
 
   folderPathTitle(path: string): string {
@@ -595,14 +656,14 @@ export class UploadResolverTrayComponent {
   }
 
   carouselPositionAria(): string | null {
-    const total = this.openGroups().length;
-    if (total < 2) {
+    const indicator = this.carouselIndicator();
+    if (!indicator) {
       return null;
     }
-    const current = this.activeGroupIndex() + 1;
+    const [current, total] = indicator.split('/');
     return this.t('upload.resolver.carousel.position', 'Address issue {current} of {total}')
-      .replace('{current}', String(current))
-      .replace('{total}', String(total));
+      .replace('{current}', current ?? '')
+      .replace('{total}', total ?? '');
   }
 
   optionAriaLabel(item: {

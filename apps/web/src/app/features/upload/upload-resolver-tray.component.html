@@ -7,7 +7,7 @@
 }
 
 <!-- Stable state: active — one issue card (Cursor Questions–style) -->
-@if (trayMode() === 'active' && activeGroup(); as group) {
+@if (trayMode() === 'active' && displayedGroup(); as group) {
   <section
     class="upload-resolver-tray"
     [attr.data-state]="'active'"
@@ -214,7 +214,7 @@
         type="button"
         size="sm"
         class="upload-resolver-tray__continue"
-        [disabled]="!selectedOptionId()"
+        [disabled]="!canConfirmContinue()"
         (click)="confirmSelection()"
       >
         {{ t('upload.resolver.continue', 'Continue') }}
