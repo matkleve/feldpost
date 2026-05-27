@@ -26,6 +26,10 @@ import { type MediaDisplayState, transitionMediaDisplayState } from './media-dis
 import type { MediaPreviewRequest } from '../../core/media-download/media-download.types';
 import { type MediaDisplayDeliveryState } from './media-display.helpers';
 import { canWarmSkipGridLoadingSurface } from './media-display-warm-revisit.helpers';
+import {
+  isContentRevealFsmState,
+  shouldMountSharpContentLayer,
+} from './media-display-sharp-content-gate.helpers';
 
 export interface MediaContentResolution {
   width: number;
@@ -100,12 +104,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly showSharpContent = computed(() => {
     const state = this.state();
-    const contentLayerVisible = state === 'content-fade-in' || state === 'content-visible';
-    return (
-      contentLayerVisible &&
-      !!this.resolvedUrl() &&
-      this.canRevealGridIntrinsicContent()
-    );
+    return isContentRevealFsmState(state) && this.canMountSharpContent();
   });
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
 
@@ -143,13 +142,22 @@ export class MediaDisplayComponent implements AfterViewInit {
       untracked(() => this.attemptCompleteGridReveal());
     });
 
+    // FSM content-reveal states must not outrun DOM mount gates (warm-revisit races).
+    effect(() => {
+      this.state();
+      this.resolvedUrl();
+      this.gridSlotAspectSettled();
+      untracked(() => this.reconcileContentRevealState());
+    });
+
     effect((onCleanup) => {
       const id = this.mediaId().trim();
       const storagePath = this.storagePath();
       const thumbnailPath = this.thumbnailPath();
       const previewStatus = this.previewGenerationStatus();
-      const slot = this.slotPixels();
-      const handoffKey = `${id}|${this.slotGeometry()}|${this.downloadContext()}|${Math.round(slot.widthPx)}x${Math.round(slot.heightPx)}`;
+      // Identity-only handoff: slot pixel changes come from aspect-ratio animation and
+      // ResizeObserver — must not clear resolvedUrl (tier refresh uses slotPixels subscription below).
+      const handoffKey = `${id}|${this.slotGeometry()}|${this.downloadContext()}`;
 
       if (!id) {
         this.resolvedUrl.set('');
@@ -162,24 +170,41 @@ export class MediaDisplayComponent implements AfterViewInit {
 
       const isNewHandoff = this.lastHandoffKey !== handoffKey;
       if (isNewHandoff) {
-        this.resolvedUrl.set('');
-        this.stagedContentUrl.set('');
-        this.cancelRatioProbe();
-        this.contentResolutionChange.emit(null);
         this.lastHandoffKey = handoffKey;
 
-        if (!this.skipIntrinsicRatioTransition()) {
-          this.gridSlotAspectSettled.set(false);
-        }
+        const warmGridRevisit =
+          this.isGridIntrinsicSlot() &&
+          canWarmSkipGridLoadingSurface({
+            downloadContext: this.downloadContext(),
+            slotGeometry: this.slotGeometry(),
+            sessionAspectRatio: this.aspectRatioCache.get(id),
+            cachedPreviewUrl: this.mediaDownloadService.getCachedUrl(
+              id,
+              tierToMediaSize(CONTEXT_DEFAULT_TIER[this.downloadContext()]),
+            ),
+          });
 
-        const sessionRatio = this.aspectRatioCache.get(id);
-        if (sessionRatio != null && sessionRatio > 0) {
-          this.metadataAspectRatio.set(sessionRatio);
-        } else {
-          this.resetState();
-        }
+        if (!warmGridRevisit) {
+          this.resolvedUrl.set('');
+          this.stagedContentUrl.set('');
+          this.cancelRatioProbe();
+          this.contentResolutionChange.emit(null);
 
-        this.goTo('loading-surface-visible');
+          if (!this.skipIntrinsicRatioTransition()) {
+            this.gridSlotAspectSettled.set(false);
+          }
+
+          const sessionRatio = this.aspectRatioCache.get(id);
+          if (sessionRatio != null && sessionRatio > 0) {
+            this.metadataAspectRatio.set(sessionRatio);
+          } else {
+            this.resetState();
+          }
+
+          this.goTo('loading-surface-visible');
+        } else if (this.skipIntrinsicRatioTransition()) {
+          this.gridSlotAspectSettled.set(true);
+        }
       }
 
       if (storagePath) {
@@ -261,6 +286,10 @@ export class MediaDisplayComponent implements AfterViewInit {
     }
 
     if (layer === 'content' && this.state() === 'content-fade-in') {
+      if (!this.canMountSharpContent()) {
+        this.regressFromInvalidContentState();
+        return;
+      }
       this.goTo('content-visible');
       return;
     }
@@ -329,6 +358,7 @@ export class MediaDisplayComponent implements AfterViewInit {
           current !== 'loading-surface-visible' &&
           current !== 'idle'
         ) {
+          this.reconcileContentRevealState();
           this.syncGridIntrinsicRevealAfterUrlUpdate();
           return;
         }
@@ -350,14 +380,19 @@ export class MediaDisplayComponent implements AfterViewInit {
         }
 
         if (current === 'content-fade-in' || current === 'content-visible') {
+          if (!this.resolvedUrl().trim()) {
+            this.regressFromInvalidContentState();
+            return;
+          }
+
           if (
             this.isGridIntrinsicSlot() &&
-            this.resolvedUrl() &&
             !this.gridSlotAspectSettled() &&
             this.skipIntrinsicRatioTransition()
           ) {
             this.gridSlotAspectSettled.set(true);
           }
+
           // Tier upgrade after resize / grid-lg: keep visible state, swap sharp URL only.
           return;
         }
@@ -644,6 +679,53 @@ export class MediaDisplayComponent implements AfterViewInit {
     return this.gridSlotAspectSettled();
   }
 
+  private canMountSharpContent(): boolean {
+    return shouldMountSharpContentLayer({
+      resolvedUrl: this.resolvedUrl(),
+      isGridIntrinsicSlot: this.isGridIntrinsicSlot(),
+      gridSlotAspectSettled: this.gridSlotAspectSettled(),
+    });
+  }
+
+  /**
+   * Downgrades content-reveal FSM when URL or grid slot gate cannot mount `<img>`.
+   * @see docs/migration/reports/media-grid-warm-revisit-regression-2026-05-27.md
+   */
+  private reconcileContentRevealState(): void {
+    if (!isContentRevealFsmState(this.state())) {
+      return;
+    }
+
+    // Missing URL is always invalid; unsettled slot alone is handled by reveal paths (avoid
+    // stripping a mounted <img> during the 300ms parent aspect-ratio transition).
+    if (this.resolvedUrl().trim()) {
+      return;
+    }
+
+    this.regressFromInvalidContentState();
+  }
+
+  private regressFromInvalidContentState(): void {
+    if (!isContentRevealFsmState(this.state()) || this.canMountSharpContent()) {
+      return;
+    }
+
+    if (this.resolvedUrl().trim()) {
+      this.goTo('media-ready');
+      if (this.isGridIntrinsicSlot()) {
+        this.attemptCompleteGridReveal();
+      } else {
+        this.fallThroughToReveal();
+      }
+      return;
+    }
+
+    this.goTo('loading-surface-visible');
+    if (this.isGridIntrinsicSlot()) {
+      this.syncGridIntrinsicRevealAfterUrlUpdate();
+    }
+  }
+
   /**
    * Completes reveal when URL arrives after an earlier fallThrough stopped at media-ready
    * (session ratio known, signed URL still in flight).
@@ -686,7 +768,7 @@ export class MediaDisplayComponent implements AfterViewInit {
     }
 
     if (current === 'content-fade-in' || current === 'content-visible') {
-      return true;
+      return !!this.resolvedUrl().trim();
     }
 
     if (current === 'media-ready' && this.gridSlotAspectSettled()) {
@@ -839,7 +921,13 @@ export class MediaDisplayComponent implements AfterViewInit {
 
   private goTo(next: MediaDisplayState): void {
     const current = untracked(() => this.state());
-    const target = transitionMediaDisplayState(current, next);
+    let requested = next;
+
+    if (isContentRevealFsmState(requested) && !this.canMountSharpContent()) {
+      requested = this.resolvedUrl().trim() ? 'media-ready' : 'loading-surface-visible';
+    }
+
+    const target = transitionMediaDisplayState(current, requested);
 
     if (target !== current) {
       this.state.set(target);

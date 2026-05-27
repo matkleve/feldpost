@@ -1,3 +1,5 @@
+@use '../../../styles/frosted-chrome';
+
 // Top-right map affordance inside the quiet-actions overlay (geometry owner).
 // @see docs/specs/component/media/media-item-quiet-actions.md#state-machine
 :host {
@@ -40,6 +42,19 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+
+// Frosted outline on thumbnail — overrides hlmBtn outline transparent hover wash.
+// @see docs/design/tokens.md § Frosted chrome
+// @see docs/specs/component/ui-primitives/ui-primitives.button.md
+button.media-item-map-action__trigger {
+  @include frosted-chrome.outline-control;
+  box-shadow: var(--shadow-md);
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    @include frosted-chrome.outline-control-hover;
+  }
 }
 
 .media-item-map-action__icon {
