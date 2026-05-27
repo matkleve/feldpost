@@ -878,7 +878,4 @@ flowchart TD
     Browse --> SaveGroup --> SwitchTab
     SwitchTab -->|"switch back"| Browse
 
-    style Explore fill:#e3f2fd
-    style Curate fill:#fff3e0
-    style Persist fill:#e8f5e9
 ```

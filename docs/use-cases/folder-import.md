@@ -19,12 +19,6 @@ flowchart TD
     D --> E["Phase 4: IMPORT\nConfirmed files enter\ningestion pipeline"]
     E --> F["Markers on map\ngreen pulse animation"]
 
-    style A fill:#2563eb,color:#fff
-    style B fill:#f59e0b,color:#000
-    style C fill:#f59e0b,color:#000
-    style D fill:#7c3aed,color:#fff
-    style E fill:#16a34a,color:#fff
-    style F fill:#16a34a,color:#fff
 ```
 
 Phases 1–3 happen entirely client-side before any data is sent to Supabase.

@@ -47,7 +47,7 @@ A rounded-corner media surface (`--radius-lg`) centered with side margins (`--sp
 ## Component Hierarchy
 
 ```
-MediaViewer                                ← object-fit: contain, background: #111
+MediaViewer                                ← object-fit: contain, dark neutral letterbox background (implementation detail; not a product token)
 ├── [not loaded] Placeholder               ← neutral surface placeholder
 ├── [tier 2] ThumbnailPreview              ← 256×256 signed URL (blurred via CSS filter)
 ├── [tier 3] FullResPreview                ← original res, crossfades over thumbnail
@@ -129,7 +129,7 @@ Tier narrative, sequence diagrams, and PL references: **[media-detail-media-view
 
 | Layout | Rule                                                                                                    |
 | ------ | ------------------------------------------------------------------------------------------------------- |
-| Wide   | `height: 100%`, `max-height: calc(100vh - 60px)`, `object-fit: contain`, `background: #111` (letterbox) |
+| Wide   | `height: 100%`, `max-height: calc(100vh - 60px)`, `object-fit: contain`, dark letterbox background (not a named design token) |
 | Narrow | `width: 100%`, `max-height: 55vw`, `object-fit: contain`                                                |
 
 ## Lightbox

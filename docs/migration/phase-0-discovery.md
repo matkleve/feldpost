@@ -19,7 +19,7 @@
 - **Global style notes:**
   - `src/styles.scss` loads: tokens → reset → layout → 8 primitive sheets → 3 pattern sheets → Tailwind directives
   - `@angular/cdk/overlay-prebuilt.css` is imported at the top of `tokens.scss` — this must be kept or replaced when spartan's CDK-backed overlay CSS takes over
-  - Feldpost runs **tweakcn + Tailwind v4** in **`apps/web/src/styles.scss`**. The historical **`tokens.scss`** successor **`_legacy-design-tokens.scss`** was drained across Phase **7** and **removed from the `apps/web` tree** (see **`docs/migration/phase-7-token-migration.md`**). Tonal stop hex and MD3 role tables live in **`docs/design/tokens.md`** §3.1a (design reference only — not `:root` CSS). Implementation uses tweakcn semantics (`var(--primary)`, …). Retired MD3 reference palette CSS variables: [`docs/archive/design-retired-md3-reference-tokens.md`](../archive/design-retired-md3-reference-tokens.md).
+  - Feldpost runs **tweakcn + Tailwind v4** in **`apps/web/src/styles.scss`**. The historical **`tokens.scss`** successor **`_legacy-design-tokens.scss`** was drained across Phase **7** and **removed from the `apps/web` tree** (see **`docs/migration/phase-7-token-migration.md`**). Tonal stop hex lives in **`docs/design/tokens.md`** §3.1a (design reference only — not `:root` CSS). Implementation uses tweakcn semantics (`var(--primary)`, …). Retired Figma reference variables: [`docs/archive/design-retired-reference-tokens.md`](../archive/design-retired-reference-tokens.md).
   - Dark-mode is controlled by `[data-theme="dark"]` on `<html>`, with a `@media (prefers-color-scheme: dark)` system-preference fallback. Tailwind `darkMode: ['class', '[data-theme="dark"]']` is already wired.
   - Three theme profiles exist: `light` (default), `dark`, `sandstone`. spartan theming must not break these.
   - A "sandstone" custom theme profile exists as a test. spartan variable overrides need to remain under `[data-theme]` wrappers.
@@ -224,7 +224,7 @@ spartan/ui uses shadcn-style CSS variables (`--background`, `--foreground`, `--p
 | `--color-primary` | `var(--color-accent-brand)` | `--ring` |
 | `--radius-md` | `0.5rem` | `--radius` |
 
-> **Decision needed:** Feldpost currently has two competing primary color definitions — the legacy warm orange `--color-accent-brand: #cc7a4a` and the new MD3 gold `--fp-sys-color-primary: #745b0c`. The migration must pick one as the single `--primary` → spartan `--primary` mapping before Phase 2 begins.
+> **Decision (2026-05-27):** Brand primary = golden stop **70** `#c9a84c` as tweakcn **`--primary`** in `styles.scss`. Legacy v1 `--color-accent-brand` rows in `tokens.md` updated for traceability only.
 
 ### Hardcoded values found (bypass tokens)
 

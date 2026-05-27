@@ -19,7 +19,7 @@
 | `@include meta.load-css('styles/legacy-design-tokens')` in `styles.scss` | **Removed** — only `meta.load-css('styles/typography-baseline')` remains |
 | `--overlay-rail-*` | **Removed** (Batch 34) → `--settings-overlay-*` on settings overlay `:host` |
 | `--layout-sidebar-*` | **Removed** (Batch 33) → `--sidebar-width-*` on nav `:host` |
-| `var(--fp-*)` (retired Feldpost MD3 prefixes) in runtime SCSS | **Forbidden** — tonal tables in `tokens.md` §3.1a are **design reference only**; retired names: [`docs/archive/design-retired-md3-reference-tokens.md`](../archive/design-retired-md3-reference-tokens.md) |
+| `var(--fp-*)` (retired Figma prefixes) in runtime SCSS | **Forbidden** — tonal tables in `tokens.md` §3.1a are **design reference only**; retired names: [`docs/archive/design-retired-reference-tokens.md`](../archive/design-retired-reference-tokens.md) |
 | Feldpost v1 `var(--color-bg-base)`, `var(--color-clay)`, … in **component** SCSS | **Forbidden** — use tweakcn semantics (`--primary`, `--background`, …) |
 | New ad-hoc `--shell-*` on `:root` or layout hosts | **Forbidden** without spec row + ownership matrix |
 | Copying removed bridge names (`--menu-*`, `--action-*`, `--field-*`, `--interactive-transition-standard`, …) | **Forbidden** — see [token-layers.md](./token-layers.md) Layer C notes |
@@ -123,6 +123,6 @@ If SCSS changed: `cd apps/web && npx ng build` (exit **0**). Phase 7 closure tab
 | ---- | ---- |
 | **Any** `var(--*)` / SCSS token edit in `apps/web` | **This file** (first) |
 | Shell / nav / settings overlay / workspace column geometry | [shell-layout-tokens.md](./shell-layout-tokens.md) + [agent-handoff-authenticated-shell-layout-ownership.md](../migration/reports/agent-handoff-authenticated-shell-layout-ownership.md) |
-| Concrete hex / MD3 reference tables | [tokens.md](./tokens.md) |
+| Concrete hex / tonal reference tables | [tokens.md](./tokens.md) |
 | Layer A/B/C ownership | [token-layers.md](./token-layers.md) |
 | Bridge deletion inventory | [legacy-token-deletion-status-2026-05-19.md](../migration/reports/legacy-token-deletion-status-2026-05-19.md) |

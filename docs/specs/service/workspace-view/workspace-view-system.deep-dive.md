@@ -347,11 +347,6 @@ flowchart TD
     ReGroup --> ReRender
     ReSort --> ReRender
 
-    style LoadImages fill:#e3f2fd
-    style ReFilter fill:#fff3e0
-    style ReSort fill:#fff3e0
-    style ReGroup fill:#fff3e0
-    style ReRender fill:#e8f5e9
 ```
 
 ---

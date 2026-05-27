@@ -167,8 +167,8 @@ export class UploadAreaComponent {
 | **Border radius** | `var(--radius-full)` |
 | **Horizontal padding** | `var(--spacing-2)` (8px); avatar-text: `padding-inline-end` `var(--spacing-2)` |
 | **Gap** | `var(--spacing-1)` (icon/text); avatar-text: `var(--spacing-1)` between avatar and label |
-| **Default fills** | Rest: `color-mix(in srgb, var(--primary) 10%, var(--background))`; hover: `color-mix(in srgb, var(--primary) 16%, var(--background))` (Figma ref stops **95 / 90** for warm cream / tint: **`#ffefce`** / **`#ffe08f`** — `docs/design/tokens.md` §3.1a) |
-| **Label** | `--fp-sys-typescale-label-small-*`, color `--fp-sys-color-on-surface` |
+| **Default fills** | Rest: `color-mix(in srgb, var(--primary) 10%, var(--background))`; hover: `color-mix(in srgb, var(--primary) 16%, var(--background))` (Figma primary ladder stops **95 / 90** — hex in `docs/design/tokens.md` §3.1a) |
+| **Label** | `var(--font-size-2xs)`, color `var(--foreground)` |
 
 ### Examples
 
@@ -180,7 +180,7 @@ export class UploadAreaComponent {
 
 ### Default Variant
 
-- **Background (default variant):** `color-mix(in srgb, var(--primary) 10%, var(--background))` (aligns with primary tonal stop **95** warm cream **`#ffefce`** — **`docs/design/tokens.md` §3.1a**; dark: `color-mix` with **`var(--card)`** per `chip.component.scss`)
+- **Background (default variant):** `color-mix(in srgb, var(--primary) 10%, var(--background))` (aligns with primary tonal stop **95** — **`docs/design/tokens.md` §3.1a**; dark: `color-mix` with **`var(--card)`** per `chip.component.scss`)
 - **Text / icon label color (default variant):** `var(--foreground)` (tweakcn semantic on-surface ink — [`docs/design/tokens.md`](../../../design/tokens.md); bucket ownership [`docs/design/token-layers.md`](../../../design/token-layers.md))
 - **Border**: transparent (no visible border on default chips)
 - **Dark mode**: tinted surface via `color-mix(in srgb, var(--primary) 26%, var(--card))` (hover 34%)

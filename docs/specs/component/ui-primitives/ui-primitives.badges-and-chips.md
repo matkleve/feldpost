@@ -39,7 +39,7 @@ Primitives (no single Angular host)
 
 ## Canonical geometry — `app-chip` vs other primitives
 
-**`app-chip` (semantic chip component):** Figma component set **`96:74`** is the source of truth for default chrome. Chip body height **`var(--spacing-4)` (16px)**, pill radius, **primary ladder stops 95 / 90** (default / hover fills — `docs/design/tokens.md` §3.1a), and label typography **`--fp-sys-typescale-label-small-*`** (`docs/design/tokens.md` §3.1e) with text color **`--fp-sys-color-on-surface`**. `ChipComponent` has **no** `size` input — one geometry scale.
+**`app-chip` (semantic chip component):** Figma component set **`96:74`** is the source of truth for default chrome. Chip body height **`var(--spacing-4)` (16px)**, pill radius, **primary ladder stops 95 / 90** (default / hover fills — `docs/design/tokens.md` §3.1a), label **`var(--font-size-2xs)`** with **`var(--foreground)`**. `ChipComponent` has **no** `size` input — one geometry scale.
 
 **`ui-chip` (directive primitive + quick-info chips):** Uses [chip.scss](apps/web/src/styles/primitives/chip.scss) sizing (`ui-chip--sm` / `md` / `lg`) and interaction emphasis — **different** host and contracts from `app-chip`. Do not assume the same pixel height as Figma `app-chip` without checking that primitive’s spec.
 

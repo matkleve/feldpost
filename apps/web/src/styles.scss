@@ -5,7 +5,7 @@
 // 2) CDK prebuilt, then @import "tailwindcss" (Preflight + @source / @config).
 // 3) tweakcn :root / html[data-theme] blocks (semantic variables; @theme inline maps them in step 4).
 // 4) @theme inline, @layer base (border/body) in this file.
-// 5) meta.load-css('styles/typography-baseline') last — h1–h6 + anchors after Preflight (top @use would break that).
+// 5) meta.load-css after @layer base — shared menu/scrollbar/switch chrome, then typography-baseline (h1–h6 + anchors after Preflight; top @use would break that order).
 @use 'sass:meta';
 @use './styles/map-leaflet-host';
 @use './styles/reset';
@@ -46,7 +46,7 @@
   --card-foreground: oklch(0.8109 0 0);
   --popover: var(--background);
   --popover-foreground: oklch(0.8109 0 0);
-  --primary: oklch(0.7214 0.1337 49.9802);
+  --primary: oklch(0.796 0.134 80);
   --primary-foreground: var(--background);
   --secondary: oklch(0.5940 0.0443 196.0233);
   --secondary-foreground: var(--background);
@@ -58,20 +58,20 @@
   --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.2520 0 0);
   --input: oklch(0.2520 0 0);
-  --ring: oklch(0.7214 0.1337 49.9802);
+  --ring: oklch(0.796 0.134 80);
   --chart-1: oklch(0.5940 0.0443 196.0233);
-  --chart-2: oklch(0.7214 0.1337 49.9802);
+  --chart-2: oklch(0.796 0.134 80);
   --chart-3: oklch(0.8721 0.0864 68.5474);
   --chart-4: oklch(0.6268 0 0);
   --chart-5: oklch(0.6830 0 0);
   --sidebar: oklch(0.1822 0 0);
   --sidebar-foreground: oklch(0.8109 0 0);
-  --sidebar-primary: oklch(0.7214 0.1337 49.9802);
+  --sidebar-primary: oklch(0.796 0.134 80);
   --sidebar-primary-foreground: var(--background);
   --sidebar-accent: oklch(0.3211 0 0);
   --sidebar-accent-foreground: oklch(0.8109 0 0);
   --sidebar-border: oklch(0.2520 0 0);
-  --sidebar-ring: oklch(0.7214 0.1337 49.9802);
+  --sidebar-ring: oklch(0.796 0.134 80);
   --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Playfair Display, ui-serif, serif;
   --font-mono: JetBrains Mono, monospace;
@@ -127,8 +127,8 @@
 
 // ── tweakcn design token foundation — light mode ───────────────────────────────
 // Single CSS variable foundation for spartan/ui.
-// --primary = oklch(0.6716 0.1368 48.5130) ≈ Feldpost warm orange #cc7a4a.
-// @see docs/migration/phase-2-foundation.md
+// --primary = oklch(0.748 0.128 84.6) ≈ Feldpost brand gold #c9a84c (tonal stop 70).
+// @see docs/design/tokens.md §3.1a
 :root {
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0.2101 0.0318 264.6645);
@@ -136,7 +136,7 @@
   --card-foreground: oklch(0.2101 0.0318 264.6645);
   --popover: oklch(1.0000 0 0);
   --popover-foreground: oklch(0.2101 0.0318 264.6645);
-  --primary: oklch(0.6716 0.1368 48.5130);
+  --primary: oklch(0.748 0.128 84.6);
   --primary-foreground: oklch(1.0000 0 0);
   --secondary: oklch(0.4716 0.0393 65.1728);
   --secondary-foreground: oklch(1.0000 0 0);
@@ -148,20 +148,20 @@
   --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.9276 0.0058 264.5313);
   --input: oklch(0.9276 0.0058 264.5313);
-  --ring: oklch(0.6716 0.1368 48.5130);
+  --ring: oklch(0.748 0.128 84.6);
   --chart-1: oklch(0.5940 0.0443 196.0233);
-  --chart-2: oklch(0.7214 0.1337 49.9802);
+  --chart-2: oklch(0.748 0.128 84.6);
   --chart-3: oklch(0.8721 0.0864 68.5474);
   --chart-4: oklch(0.6268 0 0);
   --chart-5: oklch(0.6830 0 0);
   --sidebar: oklch(0.9670 0.0029 264.5419);
   --sidebar-foreground: oklch(0.2101 0.0318 264.6645);
-  --sidebar-primary: oklch(0.6716 0.1368 48.5130);
+  --sidebar-primary: oklch(0.748 0.128 84.6);
   --sidebar-primary-foreground: oklch(1.0000 0 0);
   --sidebar-accent: oklch(1.0000 0 0);
   --sidebar-accent-foreground: oklch(0.2101 0.0318 264.6645);
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
-  --sidebar-ring: oklch(0.6716 0.1368 48.5130);
+  --sidebar-ring: oklch(0.748 0.128 84.6);
   --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Playfair Display, ui-serif, serif;
   --font-mono: JetBrains Mono, monospace;

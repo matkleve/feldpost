@@ -9,7 +9,8 @@
 | 2026-05-13 | Dual token system (v1 `--color-*` + v2 `--fp-sys-color-*`) must be reconciled before Phase 2 begins | spartan theming requires a single consistent set of `--primary`, `--background`, `--border` etc.; the dual system creates ambiguity |
 | 2026-05-13 | Dialog stack: confirm dialog migrated to `BrnDialog` (CDK-backed); remaining custom dialogs follow the same pattern | Confirm pilot done; other overlays still custom until migrated |
 | 2026-05-13 | Workspace pane, map shell, and nav remain custom — no spartan primitive covers these patterns | Map-adjacent resizable pane, Leaflet map frame, and app sidebar/bottom-nav are too app-specific |
-| 2026-05-13 | **--primary** = `oklch(0.6716 0.1368 48.5130)` (≈ warm orange #cc7a4a) — warm orange wins as single brand primary | Resolves Phase 1 blocker; MD3 gold `--fp-sys-color-primary: #745b0c` is kept as alias only |
+| 2026-05-27 | **--primary** = golden stop 70 `#c9a84c` → light `oklch(0.748 0.128 84.6)`; dark `oklch(0.796 0.134 80)` | Product chose golden over warm orange; single tweakcn `--primary` in `styles.scss` |
+| 2026-05-13 | ~~**--primary** = warm orange~~ | Superseded by 2026-05-27 golden decision |
 | 2026-05-13 | Tailwind v3 → v4 upgraded; single tweakcn CSS variable foundation installed | Phase 2 complete; tweakcn vars drive spartan/ui, legacy aliases keep existing components intact |
 | 2026-05-13 | **Phase 3 start:** `@spartan-ng/brain` + CVA (`buttonVariants`) + `UiButtonDirective` shim; published `@spartan-ng/ui-*-helm` names mostly absent or Tailwind3-peered (`ui-core`) | npm reality + Tailwind v4; local `shared/ui/button` until helm install policy is set |
 | 2026-05-13 | Normalized hardcoded overlay z-index values and legacy token names to the `--z-*` token scale | Precondition for Brn overlay migration (modals, dialogs, map chrome, dropdowns); intra-component stacking still uses small integer offsets inside parent stacking contexts |

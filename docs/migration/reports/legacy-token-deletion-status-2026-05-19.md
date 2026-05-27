@@ -12,7 +12,7 @@
 | ----- | ------------------- | ----------- |
 | **On-disk bridge** (`_legacy-design-tokens.scss`, `tokens.scss`, `load-css('styles/legacy-design-tokens')`) | **Deleted** | **Already done** (Phase 7 Batch 50, 2026-05-18) |
 | **Runtime `var(--color-*)` Feldpost v1** in `apps/web/src/app/**/*.scss` | **0** call sites | **Already done** (Phase 7) |
-| **Runtime `var(--fp-*)`** (retired MD3 prefixes) in `apps/web/src` | **0** | **Already done** (Phase 7) |
+| **Runtime `var(--fp-*)`** (retired Figma prefixes) in `apps/web/src` | **0** | **Already done** (Phase 7) |
 | **Tailwind `tailwind.config.js` legacy utility names** (`bg-surface`, `text-text-primary`, …) | **Deleted (2026-05-19, commit 97a454f)** — 11 zero-callsite color/spacing/radius/font/shadow/z aliases removed; 4 active retained (`border`, `success`, `warning`, `accent`) | **Done — Phase 5 tail complete** |
 | **`styles.scss` `@theme inline` `--color-*`** (shadcn/Tailwind v4) | **Still present** — **not** Feldpost v1; required for utilities | **Phase 9** upstream / Tailwind v4 peer work — do not delete as “legacy” |
 | **Docs/specs** mentioning bridge path or `--fp-*` tables | **Historical strings remain** in `tokens.md`, phase-7 batch history, some specs | **Phase 11** hygiene on edit; **Phase 1 Wave P5** inventory audit |
@@ -62,7 +62,7 @@ ls apps/web/src/styles/
 | `@include meta.load-css('styles/legacy-design-tokens')` in `styles.scss` | Yes (2026-05-18) | No | Phase 7 **Done** | — |
 | `styles/primitives/*.scss`, `styles/patterns/*.scss` | Yes (Phase 5 SCSS removal) | No | Phase 5 | — |
 | `var(--color-bg-base)`, `var(--color-clay)`, … in component SCSS | Yes (Phase 7 batches) | No in `src/app` | Phase 7 **Done** | — |
-| Retired `var(--fp-*)` MD3 prefixes in runtime SCSS | Yes | No in `apps/web/src` | Phase 7 **Done** | — |
+| Retired `var(--fp-*)` Figma prefixes in runtime SCSS | Yes | No in `apps/web/src` | Phase 7 **Done** | — |
 | `--fp-*` / bridge path in **docs** (`tokens.md`, phase-7, specs) | N/A (documentation) | Yes (historical tables + `@see`) | Phase 11 / Phase 1 P5 | **4** — scrub when touching specs |
 | `tailwind.config.js` `extend.colors` legacy **names** (`bg-surface`, `text-text-primary`, …) | **Yes — deleted 2026-05-19 (commit 97a454f)** — 11 zero-callsite aliases removed; `border`/`success`/`warning`/`accent` retained (active callsites) | No | Phase 5 **Done** | — |
 | `styles.scss` `@theme inline` `--color-primary`, … | N/A (shadcn/Tailwind v4) | Yes | Phase 2 foundation + Phase 9 | **Do not delete** as legacy |
@@ -76,7 +76,7 @@ ls apps/web/src/styles/
 
 1. **`--color-*` in `styles.scss` `@theme inline`** — Tailwind v4 maps semantic tweakcn vars (`--primary`, `--card`, …) to utility color keys. This is **current** stack, not Feldpost v1 `var(--color-clay)`.
 2. **`tailwind.config.js` comments** mentioning “legacy utility names” — documents that **`bg-surface`** etc. now resolve to **`var(--card)`**, not that a bridge file exists.
-3. **`docs/design/tokens.md` `--fp-sys-color-*` tables** — **reference hex** for MD3 roles without on-disk `--fp-*` definitions (Phase 7 Batch 16+).
+3. **`docs/archive/design-legacy-fp-sys-reference-tables.md`** — archived Figma system-role hex (not on `:root`; Phase 7 Batch 16+).
 
 ---
 

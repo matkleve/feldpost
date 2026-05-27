@@ -285,9 +285,6 @@ flowchart TD
     SaveGroup --> GroupTab
     GroupTab -->|"switch tab"| Browse2
 
-    style Populate fill:#e3f2fd
-    style Curate fill:#fff3e0
-    style Persist fill:#e8f5e9
 ```
 
 ## Marker Click → Grid Flow
@@ -308,10 +305,6 @@ flowchart TD
     IsSingle -->|"yes"| DetailView["Also open detail view\n(grid populated in background\nfor back-navigation)"]
     IsSingle -->|"no"| GridOnly["Grid view only"]
 
-    style Click fill:#e3f2fd
-    style NoPhotos fill:#fff3e0
-    style SetImages fill:#e8f5e9
-    style DetailView fill:#e8f5e9
 ```
 
 ## File Map

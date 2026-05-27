@@ -1,6 +1,6 @@
 # Phase 8 — Global SCSS Elimination
 
-**Status:** **Wave P3** ([migration README](./README.md#next-wave-post-recovery-queue--2026-05-18)) — In progress (2026-05-17) — **§6 shipped:** global **`hlm-toggle-group.scss`** retired (**`pillToggleVariants`** + **`[hlmPillToggle]`** / **`HlmPillToggleDirective`**; no toggle-group **`@use`** in **`styles.scss`**). **§7 Path A shipped:** pierced Leaflet map rules in **`_map-shell-leaflet-global.scss`** (**`app-map-shell`** scope). **§7 `styles/` tree inventory closed (2026-05-18)** — **six** top **`@use`** lines + **`meta.load-css('styles/typography-baseline')`** only (**seven** partials on disk under **`apps/web/src/styles/`**; see §7 **Inventory** paragraph). **§8 gates** green on last doc slice (`ng build`, `design-system:check`; no map-shell **`anyComponentStyle`** warning). **Still open:** **`styles`** initial-chunk monitoring + dead-selector hygiene (map-shell SCSS when touched); Phase **10** “global SCSS risk” sign-off (DoD). **`::ng-deep`** in **`apps/web/src/app/**/*.scss`** — **0** matches after **2026-05-18** hygiene slice (was **4** in **3** files; see §Open proof). **`@include meta.load-css('styles/legacy-design-tokens')`** **removed (2026-05-18)** — **`apps/web/src/styles/_legacy-design-tokens.scss` deleted from tree** (Batch 50 zero-emit gate + follow-up removal; verify **`apps/web/src/styles/`** partial list). **`typography-baseline`** still uses **`meta.load-css`** after **`@layer base`** (Sass order constraint unchanged).
+**Status:** **Wave P3** — **Code complete (2026-05-27).** **§6–§8 shipped** (toggle-group global SCSS retired; Path A Leaflet hoist; **`::ng-deep`** → **0** active pierces in app SCSS). **§7 global stack** documented below (six top **`@use`** + post-**`@layer base`** **`meta.load-css`** for shared menu/scrollbar/switch chrome + typography). **Closure verification (2026-05-27):** pre-flight gates green; **`ng build`** + **`design-system:check`** exit **0**; map-shell **`anyComponentStyle`** quiet — per-component budget warnings remain on **media-detail** / **upload** SCSS (Phase **10** / future SCSS diet, not Phase 8 blockers). **Only DoD gap:** Phase **10** manual “global SCSS risk” sign-off (human checklist). **`styles`** initial-chunk baseline logged in § **Closure verification** (**`95.70 kB`** raw, 2026-05-27).
 
 **Goal:** `apps/web/src/styles.scss` contains only the **minimal global stack**: Tailwind v4 entry (`@import "tailwindcss"`), **CDK overlay** import (relocated in Phase 7), **tweakcn** `:root` / `[data-theme="dark"]` / `[data-theme="sandstone"]` variable blocks, **`@theme inline`**, **`@layer base`** reset/body rules, **`@layer utilities`** small additions, and **typography baseline** for headings/links as required by project rules. **No** global BEM primitives for removed `ui-*` patterns. **No** global **`hlm-toggle-group.scss`** — segmented pill **row/column shell**, **`--hlm-toggle-item-*`** density, and reduced-motion clamps for the shell live in **`toggle-group-variants.ts`** (`pillToggleVariants`, `toggleGroupVariants`) and **`HlmPillToggleDirective`** (`hlmPillToggle` on caller wrappers); map-shell vertical chrome that pierces **`[hlmToggleGroup*]`** stays in **`_map-shell-style-switch.scss`**.
 
@@ -150,14 +150,14 @@ npm run design-system:check
 | Gate | Condition |
 |------|-----------|
 | `styles/primitives/` | **Empty** or directory **deleted** |
-| `styles.scss` `@use` block | **`map-leaflet-host`** (Leaflet map chrome), **`reset`**, **`layout/app`**, **`layout/clamp`**, **`map-shell-keyframes`** (hoisted map-shell animations), **`map-shell-leaflet-global`** (Path A — pierced Leaflet marker/overlay rules, **`app-map-shell`** scope), **`meta`** for **`load-css`** (**`typography-baseline`** only) — **no** `primitives/*`, **no** `tokens`, **no** `hlm-toggle-group` |
+| `styles.scss` global stack | Top **`@use`:** **`map-leaflet-host`**, **`reset`**, **`layout/app`**, **`layout/clamp`**, **`map-shell-keyframes`**, **`map-shell-leaflet-global`**. Post-**`@layer base`** **`meta.load-css`:** **`subtle-scrollbar`**, **`option-menu-surface`**, **`option-menu-list`**, **`option-menu-item-states`**, **`switch-thumb-hover`**, **`typography-baseline`**. **No** `primitives/*`, **no** `tokens`, **no** `hlm-toggle-group`, **no** legacy bridge **`load-css`**. Component-only partials (**`frosted-chrome`**, **`interaction-emphasis-quiet-row`**) are **`@use`**’d from feature SCSS — not global emits. |
 | `hlm-toggle-group.scss` | **Deleted** — pill shell + density + reduced-motion live in **`toggle-group-variants.ts`** + **`HlmPillToggleDirective`**; segment states remain **CVA** on **`hlmToggleGroup`** / **`hlmToggleGroupItem`** |
 | Build / DS | `ng build` and `npm run design-system:check` → **0** |
 
 **Acceptance checklist (DoD mirror, 2026-05-17):**
 
 - [x] `styles/primitives/` absent or deleted
-- [x] `styles.scss` top `@use` matches table (incl. **`map-shell-leaflet-global`**); no `primitives/*`, `tokens`, or `hlm-toggle-group` `@use`; no **`meta.load-css('styles/legacy-design-tokens')`**
+- [x] `styles.scss` top `@use` + post-base **`load-css`** match acceptance table; no `primitives/*`, `tokens`, or `hlm-toggle-group` `@use`; no **`meta.load-css('styles/legacy-design-tokens')`**
 - [x] `hlm-toggle-group.scss` deleted; pill shell + density + motion-safe transitions in **`toggle-group-variants.ts`** + **`[hlmPillToggle]`**
 - [x] Build / design-system gates → exit 0 (post–Path A slice in §8)
 
@@ -183,8 +183,9 @@ npm run design-system:check
   | **`workspace-selected-items-grid`** pierce to **`.map-context-menu .map-context-menu__items`** | **`rg 'map-context-menu' apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.html`** → **`app-dropdown-shell`** + inner **`div.map-context-menu__items`** in **same** template; **`DropdownShellComponent`** template is **`<ng-content />`** only — projected nodes keep **parent** encapsulation attributes. | **`:host .map-context-menu .map-context-menu__items`** without **`::ng-deep`**. |
   | **`styles`** initial-chunk row (P3 gate run **2026-05-18**) | **`cd apps/web && npx ng build 2>&1 \| rg 'styles-[A-Z0-9]+\.css \| styles'`** | **`styles-3OGI4DEA.css | styles | 80.87 kB | 11.64 kB`** (raw **−0.57 kB** / transfer **−0.19 kB** vs prior §Open row **`81.44 kB` / `11.83 kB`**; hash drift only). |
   | **`styles`** initial-chunk row (2026-05-19 re-run) | same command | **`styles-5XVSRT65.css | styles | 80.75 kB | 11.60 kB`** (raw **−0.12 kB** / transfer **−0.04 kB** vs 2026-05-18 baseline; hash drift + tab-bar SCSS fix minor change). |
-  | **`::ng-deep` audit (2026-05-19)** | **`rg '::ng-deep' apps/web/src --glob '*.scss'`** | **1 comment-only hit** in `_map-shell-leaflet-global.scss:1` (`// … was :host ::ng-deep …`); **0 active pierce rules**. Gate confirmed green. |
-  **Dead selectors:** **deferred** this slice — no **`map-shell*.scss`** / global map partial edits; orphan **`rg`** proof stays on the §7 runbook hook when map SCSS is next touched. **`apps/web/src/styles/_map-shell-leaflet-global.scss`** line **1** — comment text **`was :host ::ng-deep`** only (not a pierce).
+  | **`styles`** initial-chunk row (2026-05-27 closure) | same command | **`styles-LWWPNIWX.css | styles | 95.70 kB | 12.96 kB`** (+shared menu globals / product growth since 2026-05-19 — monitor; not a Phase 8 regression signal alone). |
+  | **`::ng-deep` audit (2026-05-27)** | **`rg '::ng-deep' apps/web/src/app --glob '*.scss'`** | **0** active pierce rules. **`rg '::ng-deep' apps/web/src/styles`** → comment-only in `_map-shell-leaflet-global.scss:1`. |
+  **Dead selectors (2026-05-27 spot-check):** Major **`_map-shell-leaflet-global.scss`** classes (`map-photo-marker*`, `map-radius-label*`, `map-user-location-marker*`, `map-search-location-marker`) have TS/HTML producers under **`map-shell/`** — no orphan removal this slice.
 - **Phase 7 legacy bridge file** — **`apps/web/src/styles/_legacy-design-tokens.scss`** **removed from tree**; inventory + proof live in **`docs/migration/phase-7-token-migration.md`**, **`tokens.md`**, **`token-layers.md`**. **`typography-baseline`** **`load-css`** ordering constraints unchanged (**`phase-7-token-migration.md`** § **Legacy bridge `meta.load-css` — historical constraints**; **`apps/web/src/styles.scss`** header).
 - **Phase 10** — unchecked DoD sign-off line above.
 
@@ -193,4 +194,41 @@ npm run design-system:check
 - ~~Drop **`@include meta.load-css('styles/legacy-design-tokens')`**~~ **Done (2026-05-18)** — bridge partial **deleted** from **`apps/web`** (no on-disk stub).
 - Keep **`styles`** initial-chunk size + dead-selector hygiene under review after hoists (§7 runbook).
 - Close Phase 10 “global SCSS risk” sign-off when the team is ready.
+
+---
+
+## Closure verification (2026-05-27)
+
+Run from repository root:
+
+```bash
+# Phase 6 / Phase 8 pre-flight
+rg 'class="[^"]*ui-' apps/web/src/app --glob "*.html" -l          # → 0
+rg '\.ui-container|\.ui-item|\.ui-row-shell|\.ui-card-shell' apps/web/src/styles --glob "*.scss"  # → 0
+test ! -d apps/web/src/styles/primitives && echo "primitives absent OK"
+rg "@use '\./styles/primitives/" apps/web/src/styles.scss          # → 0
+rg "hlm-toggle-group" apps/web/src/styles.scss                     # → 0
+rg 'legacy-design-tokens|_legacy-design-tokens' apps/web            # → 0
+rg '::ng-deep' apps/web/src/app --glob '*.scss'                    # → 0
+
+# Build + design system
+cd apps/web && npx ng build
+npm run design-system:check
+
+# Global styles chunk (log baseline — no dedicated angular.json budget)
+cd apps/web && npx ng build 2>&1 | rg 'styles-[A-Z0-9]+\.css \| styles'
+```
+
+| Gate | Expected (2026-05-27) | Actual |
+|------|------------------------|--------|
+| `ui-*` in templates | 0 files | **0** |
+| `styles/primitives/` | absent | **absent** |
+| `hlm-toggle-group` in `styles.scss` | 0 | **0** |
+| Legacy bridge | absent | **absent** |
+| `::ng-deep` in app SCSS | 0 active | **0** |
+| `ng build` | exit 0 | **0** (CommonJS + **anyComponentStyle** warnings on media-detail/upload — not map-shell) |
+| `design-system:check` | exit 0 | **0** |
+| `styles` initial chunk | log only | **`95.70 kB` raw / `12.96 kB` transfer** |
+
+**Phase 8 code closure:** all rows above except Phase **10** human sign-off. **`anyComponentStyle`** over **12 kB** on workspace media-detail partials and **`upload-panel`** is tracked under Phase **10** visual QA / future SCSS reduction — outside Phase 8 global-stack DoD.
 

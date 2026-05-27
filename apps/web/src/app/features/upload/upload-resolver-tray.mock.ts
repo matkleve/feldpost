@@ -20,7 +20,7 @@ function candidate(
   return { id, addressLabel, lat, lng, score, city };
 }
 
-/** House-number options for mock 1B (after city confirm on card 1). */
+/** House-number options for mock Step 1B (after city confirm on carousel card 1). */
 export const UPLOAD_RESOLVER_TRAY_MOCK_1B_CANDIDATES: UploadAddressCandidate[] = [
   candidate('mock-hn-4', 'Musterstrasse 4, 3018 Bern', 46.9472, 7.3954, 0.91, 'Bern'),
   candidate('mock-hn-12', 'Musterstrasse 12, 3018 Bern', 46.9481, 7.3978, 0.88, 'Bern'),

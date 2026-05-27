@@ -118,10 +118,6 @@ graph TB
     Show --> Items
     Items --> Stack
     Dismiss --> Items
-
-    style Toast fill:#1a1917,stroke:#CC7A4A,color:#EDEBE7
-    style Consumers fill:#1a1917,stroke:#2E2B27,color:#EDEBE7
-    style Render fill:#0F0E0C,stroke:#3D3830,color:#EDEBE7
 ```
 
 ## Component Hierarchy

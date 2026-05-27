@@ -5,6 +5,8 @@
 
 See also: `architecture/database-schema.md`, `security-boundaries.md`.
 
+**Product colors:** Not specified here. Canonical palette and semantics: [`docs/design/tokens.md`](design/tokens.md) and `apps/web/src/styles.scss`. Mermaid diagrams below use default styling only (not UI swatches).
+
 ---
 
 ## 1. System Overview
@@ -69,10 +71,6 @@ graph TB
   Services --> MapAdapter
   Services --> GeoAdapter
   GeoAdapter -->|"via Edge Function"| EdgeFn
-
-  style Client fill:#1a1917,stroke:#2E2B27,color:#EDEBE7
-  style Supabase fill:#0F0E0C,stroke:#3D3830,color:#EDEBE7
-  style External fill:#0F0E0C,stroke:#3D3830,color:#EDEBE7
 ```
 
 ### Architectural Layer Stack
@@ -87,11 +85,6 @@ graph TD
   L1 --> L2
   L2 --> L3
   L3 --> L4
-
-  style L1 fill:#2563EB,stroke:#1D4ED8,color:#fff
-  style L2 fill:#7C3AED,stroke:#6D28D9,color:#fff
-  style L3 fill:#CC7A4A,stroke:#B86B3E,color:#fff
-  style L4 fill:#16A34A,stroke:#15803D,color:#fff
 ```
 
 ### Adapter Pattern Overview
@@ -735,10 +728,6 @@ graph LR
 
   T1 -->|"Zoom in / expand cluster"| T2
   T2 -->|"Click image → detail view"| T3
-
-  style T1 fill:#2563EB,stroke:#1D4ED8,color:#fff
-  style T2 fill:#7C3AED,stroke:#6D28D9,color:#fff
-  style T3 fill:#CC7A4A,stroke:#B86B3E,color:#fff
 ```
 
 ### Tier 1 — Marker Only (Zero Image Bytes)

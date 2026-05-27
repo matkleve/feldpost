@@ -232,7 +232,7 @@ if (dsPage) {
 
   // Header
   const headerText = makeText('Feldpost Design System — Token Overview', 24, true);
-  const subText = makeText('--fp-* system  •  v2  •  MD3 architecture', 13, false, { r: 0.5, g: 0.38, b: 0.3 });
+  const subText = makeText('--fp-* system  •  v2  •  tweakcn + tonal reference', 13, false, { r: 0.5, g: 0.38, b: 0.3 });
   root.appendChild(headerText);
   root.appendChild(subText);
 

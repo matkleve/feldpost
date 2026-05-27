@@ -1,4 +1,4 @@
-# Archived — Retired MD3 reference palette CSS variables (Phase 7 Batch 5b)
+# Archived — Retired Figma reference palette CSS variables (Phase 7 Batch 5b)
 
 **Status:** Historical record only. **Do not** reintroduce these names in `apps/web` or active specs.
 
@@ -10,7 +10,7 @@
 
 ## What was retired
 
-Material Design 3 **reference** tonal ladders were once emitted on `:root` under a Feldpost-prefixed naming scheme, for example:
+Figma **reference** tonal ladders were once emitted on `:root` under a Feldpost-prefixed naming scheme, for example:
 
 - Primary / secondary / tertiary / neutral / neutral-variant stops `0`–`100`
 - Typeface weight lines paired with those ladders
@@ -57,4 +57,4 @@ rg 'var\(--fp-' apps/web/src/app --glob '*.scss'
 
 ## Related migration narrative
 
-Full Phase 7 batch index: [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md) (active doc uses neutral wording; this archive holds retired **token name** literals for archaeology).
+Full Phase 7 batch index: [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md). Legacy system-role tables: [`design-legacy-fp-sys-reference-tables.md`](./design-legacy-fp-sys-reference-tables.md).

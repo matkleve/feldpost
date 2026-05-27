@@ -72,7 +72,7 @@ app-panel-trigger [data-state=closed|open] [data-layout=...]
 
 ## Token Map (Figma parity → implementation)
 
-Reference fills: **neutral-variant stop 95** (rest), **primary stop 95** (hover / pressed) — hex in **`docs/design/tokens.md` §3.1a**; implementation uses tweakcn / `color-mix`, not retired MD3 reference CSS variables.
+Reference fills: **neutral-variant stop 95** (rest), **primary stop 95** (hover / pressed) — hex in **`docs/design/tokens.md` §3.1a**; implementation uses tweakcn / `color-mix`, not retired Figma reference CSS variables.
 
 | Concern | CSS token |
 | --- | --- |

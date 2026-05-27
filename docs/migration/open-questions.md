@@ -2,7 +2,7 @@
 
 **Phase 6 / `tokens.scss`:** **N/A for Phase 7 closure (2026-05-19)** — monolithic **`tokens.scss`** successor **`_legacy-design-tokens.scss`** is **removed from `apps/web`**; component SCSS has **no** `var(--color-*)` / `var(--fp-*)` consumer hand-offs per [phase-7 § Closure verification](./phase-7-token-migration.md#closure-verification-2026-05-19). Any future **`tokens.scss`** work is Phase 8 global-SCSS scope, not a Phase 7 blocker.
 
-1. ~~**Primary color decision (Phase 1 blocker):**~~ **RESOLVED (2026-05-13)**: `--primary = oklch(0.6716 0.1368 48.5130)` ≈ warm orange `#cc7a4a`. MD3 gold `#745b0c` kept only as `--fp-sys-color-primary` alias.
+1. ~~**Primary color decision (Phase 1 blocker):**~~ **RESOLVED (2026-05-27)**: brand primary = golden stop **70** `#c9a84c` → light `--primary = oklch(0.748 0.128 84.6)`; dark `--primary = oklch(0.796 0.134 80)` (`#e6c364`). Supersedes 2026-05-13 warm-orange choice.
 
 2. **spartan version pin:** spartan is under active development. Phase 3 pins `@spartan-ng/brain` to `^0.0.1-alpha.691` (verify Angular 21 + Tailwind v4 on each bump).
 

@@ -7,7 +7,7 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 ## Legacy bridge (retired — `_legacy-design-tokens.scss`)
 
-**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge (retired)* (keep both in lockstep). **Shipped tree (verify):** **`apps/web/src/styles/_legacy-design-tokens.scss` does not exist**; **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0** matches; **`styles.scss`** has **no** **`@include meta.load-css('styles/legacy-design-tokens')`** (removed **2026-05-18**). **Batch 50** removed the last **`:root`** scaffold (zero **`--*`** emit), dropped legacy **`load-css`**, then **deleted** the partial from **`apps/web`** — migration history and token names live in **`docs/migration/phase-7-token-migration.md`** and the tables below, not on disk. **`--interactive-focus-ring`** + dark overrides: **`_typography-baseline.scss`** (**Batch 47**). **`--shadow-md|lg|xl`**, tweakcn semantics, and MD3 **`--fp-sys-*`** labels in §3.1 are **not** sourced from a bridge partial in **`apps/web`**.
+**Code is canonical** — this section mirrors **`docs/design/token-layers.md`** § *Legacy bridge (retired)* (keep both in lockstep). **Shipped tree (verify):** **`apps/web/src/styles/_legacy-design-tokens.scss` does not exist**; **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0** matches; **`styles.scss`** has **no** **`@include meta.load-css('styles/legacy-design-tokens')`** (removed **2026-05-18**). **Batch 50** removed the last **`:root`** scaffold (zero **`--*`** emit), dropped legacy **`load-css`**, then **deleted** the partial from **`apps/web`** — migration history and token names live in **`docs/migration/phase-7-token-migration.md`** and the tables below, not on disk. **`--interactive-focus-ring`** + dark overrides: **`_typography-baseline.scss`** (**Batch 47**). **`--shadow-md|lg|xl`** and tweakcn semantics in §3.1 are **not** sourced from a bridge partial in **`apps/web`**.
 
 ### Typography baseline (`_typography-baseline.scss`)
 
@@ -65,22 +65,19 @@ Component SCSS must `@use '../../../styles/frosted-chrome'` (adjust depth) and `
 
 Design tokens are CSS custom properties. All components use tokens — never raw hex or Tailwind arbitrary values in design-sensitive contexts.
 
-### §3.1a — Tonal palettes (design reference)
+### §3.1a — Brand colors and tonal palettes
 
-MD3-style **tonal stop tables** below are the design authority for hex values when tuning tweakcn or Figma. They are **not** emitted as CSS custom properties on `:root` (Phase 7 Batch 5b / 16). **Implementation:** tweakcn semantics in `apps/web/src/styles.scss` (`--primary`, `--background`, `--muted`, …). Retired reference-variable naming is archived in [`docs/archive/design-retired-md3-reference-tokens.md`](../archive/design-retired-md3-reference-tokens.md).
+**Runtime:** tweakcn semantics in `apps/web/src/styles.scss` on `:root` (light), `@mixin tweakcn-dark-semantic-palette` (dark / system dark). **Tailwind v4** `@theme inline` maps `--color-primary` → `var(--primary)` (`bg-primary`, `ring-ring`, etc.).
 
-#### Two-layer structure
+| Tweakcn token | Role | Light (2026-05-27) | Dark |
+|---------------|------|--------------------|------|
+| `--primary` | Brand CTA, links, focus, charts | `#c9a84c` → `oklch(0.748 0.128 84.6)` | `#e6c364` → `oklch(0.796 0.134 80)` |
+| `--primary-foreground` | Text on filled primary | white | `var(--background)` |
+| `--ring` | Focus rings | matches `--primary` | matches `--primary` |
+| `--destructive` | Errors | see `styles.scss` | see dark mixin |
+| `--secondary` / `--muted` / `--accent` | Surfaces, chips, quiet fills | see `styles.scss` | see dark mixin |
 
-| Layer | What | Purpose | Use in components? |
-|-------|------|---------|-------------------|
-| Tonal stops **0–100** (tables below) | Hex per stop | Pick brand / surface colors; map Figma stop labels to a row | **No** as `var(--…)` — use tweakcn semantics or `color-mix` |
-| System roles (`--fp-sys-color-*` labels in tables only) | Semantic MD3 role names | Document surface/on-surface pairs | **No** on `:root` — map to tweakcn or add named roles in `styles.scss` when needed |
-
-#### Phase 7 handoff — deferred MD3 rows (tweakcn)
-
-- **tweakcn** must add **named roles** for MD3-only semantics (container / tertiary / error-container / outline-variant / inverse ladders and their *on-* pairs) **or** **approve explicit aliases** to existing tweakcn vars; without that, use the **hex tables below** as the authority (no unapproved Batch 4b-style mapping to `--accent` / `--card` / `--muted`).
-- **Batch 16 (2026-05-17):** **`--fp-sys-color-*` custom property definitions** were **removed** from **`apps/web/src/styles/_legacy-design-tokens.scss`** (light `:root` + **`@mixin dark-theme-overrides`**) — `rg -l 'var\\(--fp-sys-color' apps/web` → **0** before edit; no runtime consumers.
-- **Rationale + history:** [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md) — **Batch 16**, **Batch 3 continuation — deferred MD3 roles**, **Batch 4** (4a vs 4b).
+**Tonal stop tables** below are hex design reference only (not emitted on `:root`). Use **`var(--primary)`**, **`color-mix(in srgb, var(--primary) …)`**, or a stop hex when Figma labels a ladder step. Retired Figma CSS names: [`docs/archive/design-retired-reference-tokens.md`](../archive/design-retired-reference-tokens.md), [`docs/archive/design-legacy-fp-sys-reference-tables.md`](../archive/design-legacy-fp-sys-reference-tables.md).
 
 #### Phase 7 handoff — Tailwind `dark:` vs semantic CSS variables
 
@@ -212,43 +209,9 @@ Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette` (dark red
 | 99 | `#fffbff` |
 | 100 | `#ffffff` |
 
-#### System color roles
-
-| Token | Light | Dark | Role |
-|-------|-------|------|------|
-| `--fp-sys-color-primary` | `#974811` | `#ffb68e` | Primary action fill |
-| `--fp-sys-color-on-primary` | `#ffffff` | `#542200` | Text/icon on primary |
-| `--fp-sys-color-primary-container` | `#ffdbca` | `#773300` | Tinted surface (chips, selected) |
-| `--fp-sys-color-on-primary-container` | `#331200` | `#ffdbca` | Text on primary container |
-| `--fp-sys-color-secondary` | `#765848` | `#e6beab` | Secondary action fill |
-| `--fp-sys-color-on-secondary` | `#ffffff` | `#432b1d` | Text/icon on secondary |
-| `--fp-sys-color-secondary-container` | `#ffdbca` | `#5c4132` | Tinted surface (secondary) |
-| `--fp-sys-color-on-secondary-container` | `#2b160a` | `#ffdbca` | Text on secondary container |
-| `--fp-sys-color-tertiary` | `#636032` | `#cec991` | Tertiary / accent fill |
-| `--fp-sys-color-on-tertiary` | `#ffffff` | `#343208` | Text/icon on tertiary |
-| `--fp-sys-color-tertiary-container` | `#eae5ab` | `#4b481d` | Tinted surface (tertiary) |
-| `--fp-sys-color-on-tertiary-container` | `#1e1c00` | `#eae5ab` | Text on tertiary container |
-| `--fp-sys-color-error` | `#ba1a1a` | `#ffb4ab` | Error / destructive fill |
-| `--fp-sys-color-on-error` | `#ffffff` | `#690005` | Text/icon on error |
-| `--fp-sys-color-error-container` | `#ffdad6` | `#93000a` | Tinted surface (error) |
-| `--fp-sys-color-on-error-container` | `#410002` | `#ffb4ab` | Text on error container |
-| `--fp-sys-color-background` | `#fffbff` | `#201a17` | App / page background |
-| `--fp-sys-color-on-background` | `#201a17` | `#ece0db` | Text on background |
-| `--fp-sys-color-surface` | `#fffbff` | `#201a17` | Panel / card surface |
-| `--fp-sys-color-on-surface` | `#201a17` | `#ece0db` | Text on surface |
-| `--fp-sys-color-surface-variant` | `#f4ded4` | `#52443c` | Lower-contrast tinted surface |
-| `--fp-sys-color-on-surface-variant` | `#52443c` | `#d7c2b9` | Text on surface-variant |
-| `--fp-sys-color-outline` | `#85746b` | `#9f8d84` | Low-emphasis strokes, dividers |
-| `--fp-sys-color-outline-variant` | `#d7c2b9` | `#52443c` | Hairline dividers |
-| `--fp-sys-color-shadow` | `#000000` | `#000000` | Drop-shadow tint |
-| `--fp-sys-color-scrim` | `#000000` | `#000000` | Sheet / modal scrim |
-| `--fp-sys-color-inverse-surface` | `#362f2c` | `#ece0db` | Snackbar / toast surface |
-| `--fp-sys-color-inverse-on-surface` | `#fbeee9` | `#362f2c` | Text on inverse surface |
-| `--fp-sys-color-inverse-primary` | `#ffb68e` | `#974811` | CTA on inverse surface |
-
 #### Migration rule
 
-**New work:** use **tweakcn** semantics (`--primary`, `--background`, `--foreground`, `--muted`, `--border`, …) and shipped layout/typography/motion primitives (`--radius-*`, `--spacing-*`, `--font-size-*`, `--motion-*`, and the **`--shadow-*`** ladder for elevation / depth). **`--shadow-sm`…`--shadow-2xl`** are **tweakcn-owned** on **`:root`** / dark palette (**Phase 7 Batch 45** removed warm bridge **`--shadow-sm` / `--shadow-focus`** from **`_legacy-design-tokens.scss`**). Do not treat **`--fp-sys-color-*`** or other **`--fp-sys-*`** names as runtime CSS (those exist in §3.1a–g tables as **MD3 design reference only**; see Phase 7 **Batches 16–17** in [`docs/migration/phase-7-token-migration.md`](../migration/phase-7-token-migration.md)). **Legacy:** the v1 **`--color-*`** story below is historical palette documentation; do not add new `var(--color-*)` in component SCSS (Phase 7 consumer gate).
+**New work:** use **tweakcn** semantics (`--primary`, `--background`, `--foreground`, `--muted`, `--border`, …) and shipped layout/typography/motion primitives (`--radius-*`, `--spacing-*`, `--font-size-*`, `--motion-*`, **`--shadow-sm`…`--shadow-2xl`**). Do **not** use retired **`--fp-sys-*`** or **`--fp-ref-*`** names (archived tables only). **Legacy:** the v1 **`--color-*`** story below is historical; do not add new `var(--color-*)` in component SCSS.
 
 ---
 
@@ -265,10 +228,10 @@ Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette` (dark red
 | `--color-text-primary`       | `#1A1714`   | `#EDEBE7`  | Headlines, body, labels — warm near-black / warm near-white   |
 | `--color-text-secondary`     | `#6B6259`   | `#908880`  | Subtext, timestamps, metadata labels                          |
 | `--color-text-disabled`      | `#A89E95`   | `#4A4540`  | Disabled states                                               |
-| `--color-primary`            | `#CC7A4A`   | `#D9895A`  | Primary actions, active markers, focus rings                  |
-| `--color-primary-hover`      | `#B8663A`   | `#E89A6E`  | Hover state for primary                                       |
-| `--color-accent-brand`       | `#CC7A4A`   | `#D9895A`  | Canonical warm brand accent for CTA/selection intent          |
-| `--color-accent-brand-hover` | `#B8663A`   | `#E89A6E`  | Hover variant of brand accent                                 |
+| `--color-primary`            | `#C9A84C`   | `#E6C364`  | Primary actions, active markers, focus rings (superseded by `--primary`) |
+| `--color-primary-hover`      | `#AC8D34`   | `#E6C364`  | Hover state for primary                                       |
+| `--color-accent-brand`       | `#C9A84C`   | `#E6C364`  | Canonical brand accent for CTA/selection intent               |
+| `--color-accent-brand-hover` | `#AC8D34`   | `#E6C364`  | Hover variant of brand accent                                 |
 | `--color-success`            | `#16A34A`   | `#22C55E`  | Upload success, confirmed correction                          |
 | `--color-warning`            | `#C2610A`   | `#F59E0B`  | Missing GPS, low-confidence EXIF                              |
 | `--color-danger`             | `#DC2626`   | `#EF4444`  | Upload error, deletion confirmation                           |
@@ -315,148 +278,7 @@ For MVP: use CartoDB Light (Positron) in light mode — already significantly cl
 
 The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes when `ThemeService` emits a theme change event.
 
----
-
-#### Phase 7 — MD3 system tokens §3.1b–g (documentation only)
-
-**`--fp-sys-shape-*`**, **`--fp-sys-spacing-*`**, **`--fp-sys-elevation-*`**, **`--fp-sys-typescale-*`**, **`--fp-sys-state-*`**, and **`--fp-sys-motion-*`** in the tables below follow the same rule as **`--fp-sys-color-*`** in §3.1a: they are **not** emitted as custom properties on `:root` after Phase 7 **Batch 17** (2026-05-17). Use **`--radius-*`**, **`--spacing-*`** (§3.3), **`--shadow-*`** (§3.5; **Batch 37** removed product **`--elevation-*`** bridge aliases — bind **`box-shadow`** to **`var(--shadow-sm|md|lg|xl)`**; **Batch 39** removed duplicate **`--shadow-md|lg|xl`** from **`_legacy-design-tokens.scss`**; **Batch 45** removed bridge **`--shadow-sm` / `--shadow-focus`** — all physical shadow names resolve from **tweakcn `styles.scss`**), the **`--font-size-*`** scale (§3.2; **`apps/web/src/styles/_typography-baseline.scss`** `:root` after **Batch 42**), and **`--motion-duration-fast`** / **`--motion-ease-out`** (§3.6; same file after **Batch 42**) in implementation.
-
----
-
-### §3.1b — Shape (`--fp-sys-shape-*`)
-
-Border-radius reference scale (logical MD3 names; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** immediately above). In code prefer **`var(--radius-*)`** and Tailwind radius utilities; avoid ad hoc `px` / `rem` for radii.
-
-| Token | Value | Pixels | Usage |
-|-------|-------|--------|-------|
-| `--fp-sys-shape-none` | `0` | 0 | Sharp corners (inputs that hug content) |
-| `--fp-sys-shape-extra-small` | `0.25rem` | 4px | Chips, badges, small tags |
-| `--fp-sys-shape-small` | `0.5rem` | 8px | Buttons, inputs, dropdowns |
-| `--fp-sys-shape-medium` | `0.75rem` | 12px | Cards, thumbnails |
-| `--fp-sys-shape-large` | `1rem` | 16px | Panels, sidebar, workspace pane |
-| `--fp-sys-shape-extra-large` | `1.75rem` | 28px | Modals, dialogs, bottom sheets |
-| `--fp-sys-shape-full` | `9999px` | — | Pills, avatar circles, FAB |
-
----
-
-### §3.1c — Spacing (`--fp-sys-spacing-*`)
-
-4px base grid (reference table; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Shipped spacing: **`--spacing-*`** (§3.3) and the Tailwind spacing scale.
-
-| Token | Value | Pixels |
-|-------|-------|--------|
-| `--fp-sys-spacing-0` | `0` | 0 |
-| `--fp-sys-spacing-1` | `0.25rem` | 4px |
-| `--fp-sys-spacing-2` | `0.5rem` | 8px |
-| `--fp-sys-spacing-3` | `0.75rem` | 12px |
-| `--fp-sys-spacing-4` | `1rem` | 16px |
-| `--fp-sys-spacing-5` | `1.25rem` | 20px |
-| `--fp-sys-spacing-6` | `1.5rem` | 24px |
-| `--fp-sys-spacing-8` | `2rem` | 32px |
-| `--fp-sys-spacing-10` | `2.5rem` | 40px |
-| `--fp-sys-spacing-12` | `3rem` | 48px |
-| `--fp-sys-spacing-16` | `4rem` | 64px |
-
----
-
-### §3.1d — Elevation (`--fp-sys-elevation-*`)
-
-MD3 box-shadow elevation levels 0–5 (reference; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Shadow offsets and blur use `px` (project convention: `px` only for sub-pixel and shadow geometry values). Product code uses **`--shadow-*`** only (**Batch 37** removed **`--elevation-subtle`**, **`--elevation-overlay`**, **`--elevation-dropdown`**; **Batch 35** removed **`--elevation-modal`** — §3.5).
-
-| Token | Level | Usage |
-|-------|-------|-------|
-| `--fp-sys-elevation-0` | `none` | Flush surfaces, page background |
-| `--fp-sys-elevation-1` | `0px 1px 2px … 0px 1px 3px 1px …` | Raised card resting state |
-| `--fp-sys-elevation-2` | `0px 1px 2px … 0px 2px 6px 2px …` | Navigation rail, FAB resting |
-| `--fp-sys-elevation-3` | `0px 1px 3px … 0px 4px 8px 3px …` | FAB hovered, navigation drawer |
-| `--fp-sys-elevation-4` | `0px 2px 3px … 0px 6px 10px 4px …` | Navigation bar, bottom sheet |
-| `--fp-sys-elevation-5` | `0px 4px 4px … 0px 8px 12px 6px …` | Modal dialog, full-screen overlay |
-
-Note: elevation tokens are skipped by `sync-tokens.mjs` (complex multi-value shorthand). Set Figma elevation effects manually.
-
----
-
-### §3.1e — Typeface & Typescale (canonical names + MD3 `--fp-sys-typescale-*` labels)
-
-#### Typefaces
-
-Google Fonts load from **`apps/web/src/styles.scss`** (global). **These are canonical design names** — typeface tokens are not separate `:root` CSS variables (see [`docs/archive/design-retired-md3-reference-tokens.md`](../archive/design-retired-md3-reference-tokens.md)).
-
-| Name | Value | Role |
-|------|-------|------|
-| Brand / display | `'Cormorant Garamond'` | Display, headlines, editorial emphasis |
-| Plain / UI | `'DM Sans'` | Body, labels, UI copy |
-| Weight regular | `400` | |
-| Weight medium | `500` | |
-| Weight bold | `700` | |
-
-#### Type scale
-
-Token name format (documentation labels only — **not** on `:root` after Batch 17): `--fp-sys-typescale-{role}-{size|line-height|weight|tracking}`. Map roles to **`--font-size-*`** and global heading rules in **`apps/web/src/styles.scss`** for shipped UI.
-
-| Role | Size | Line-height | Weight | Tracking |
-|------|------|-------------|--------|---------|
-| `display-large` | `3.5625rem` | `4rem` | `400` | `-0.015625rem` |
-| `display-medium` | `2.8125rem` | `3.25rem` | `400` | `0rem` |
-| `display-small` | `2.25rem` | `2.75rem` | `400` | `0rem` |
-| `headline-large` | `2rem` | `2.5rem` | `400` | `0rem` |
-| `headline-medium` | `1.75rem` | `2.25rem` | `400` | `0rem` |
-| `headline-small` | `1.5rem` | `2rem` | `400` | `0rem` |
-| `title-large` | `1.375rem` | `1.75rem` | `400` | `0rem` |
-| `title-medium` | `1rem` | `1.5rem` | `500` | `0.009375rem` |
-| `title-small` | `0.875rem` | `1.25rem` | `500` | `0.00625rem` |
-| `body-large` | `1rem` | `1.5rem` | `400` | `0.03125rem` |
-| `body-medium` | `0.875rem` | `1.25rem` | `400` | `0.015625rem` |
-| `body-small` | `0.75rem` | `1rem` | `400` | `0.025rem` |
-| `label-large` | `0.875rem` | `1.25rem` | `500` | `0.00625rem` |
-| `label-medium` | `0.75rem` | `1rem` | `500` | `0.03125rem` |
-| `label-small` | `0.6875rem` | `0.75rem` | `500` | `0.03125rem` |
-
----
-
-### §3.1f — State Layers (`--fp-sys-state-*`)
-
-Opacity multipliers for interactive state surfaces (reference; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Apply overlay opacity in components using the design-system patterns and tokens in use for that surface—do not assume a **`var(--fp-sys-state-*)`** custom property exists.
-
-| Token | Value | State |
-|-------|-------|-------|
-| `--fp-sys-state-hover` | `0.08` | Pointer enters |
-| `--fp-sys-state-focus` | `0.12` | Keyboard focus |
-| `--fp-sys-state-pressed` | `0.12` | Active / pressed |
-| `--fp-sys-state-dragged` | `0.16` | Drag in progress |
-| `--fp-sys-state-disabled` | `0.38` | Disabled content opacity |
-
----
-
-### §3.1g — Motion (`--fp-sys-motion-*`)
-
-MD3 motion reference (logical names; **not** on `:root` — see **§Phase 7 — MD3 system tokens §3.1b–g** above). Shipped timing and easing: **`--motion-*`** (§3.6).
-
-#### Durations
-
-| Token | Value |
-|-------|-------|
-| `--fp-sys-motion-duration-short1` | `50ms` |
-| `--fp-sys-motion-duration-short2` | `100ms` |
-| `--fp-sys-motion-duration-short3` | `150ms` |
-| `--fp-sys-motion-duration-short4` | `200ms` |
-| `--fp-sys-motion-duration-medium1` | `250ms` |
-| `--fp-sys-motion-duration-medium2` | `300ms` |
-| `--fp-sys-motion-duration-medium3` | `350ms` |
-| `--fp-sys-motion-duration-medium4` | `400ms` |
-| `--fp-sys-motion-duration-long1` | `450ms` |
-| `--fp-sys-motion-duration-long2` | `500ms` |
-
-#### Easings
-
-| Token | Curve | Use |
-|-------|-------|-----|
-| `--fp-sys-motion-easing-standard` | `cubic-bezier(0.2, 0, 0, 1)` | Default UI transitions |
-| `--fp-sys-motion-easing-standard-decelerate` | `cubic-bezier(0, 0, 0, 1)` | Elements entering the screen |
-| `--fp-sys-motion-easing-standard-accelerate` | `cubic-bezier(0.3, 0, 1, 1)` | Elements leaving the screen |
-| `--fp-sys-motion-easing-emphasized` | `cubic-bezier(0.2, 0, 0, 1)` | High-attention transitions |
-| `--fp-sys-motion-easing-emphasized-decelerate` | `cubic-bezier(0.05, 0.7, 0.1, 1)` | Emphasized elements entering |
-| `--fp-sys-motion-easing-emphasized-accelerate` | `cubic-bezier(0.3, 0, 0.8, 0.15)` | Emphasized elements leaving |
+**Retired Figma system-role tables** (shape, spacing, elevation, typescale labels, state, motion): [`docs/archive/design-legacy-fp-sys-reference-tables.md`](../archive/design-legacy-fp-sys-reference-tables.md). **Shipped primitives:** §§3.2–3.6 below.
 
 ---
 
