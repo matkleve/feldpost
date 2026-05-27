@@ -16,7 +16,7 @@ export const OPTION_MENU_ITEM_ICON_CLASS = 'option-menu-item__icon';
 
 /** Menu panel surface (positioning remains caller-owned, e.g. DropdownShell). */
 export const menuContentVariants = cva(
-  'z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-0 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+  'z-50 min-w-[8rem] overflow-hidden rounded-lg p-0 text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
 );
 
 /** Single selectable row inside a menu / dropdown list. */

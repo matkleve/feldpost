@@ -66,7 +66,6 @@ app-pane-toolbar.media-toolbar {
 
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('media-toolbar');
-  @include fp-toolbar-breakpoints.toolbar-menu-trigger-active-states('media-toolbar');
 }
 
 @include fp-toolbar-breakpoints.toolbar-size-control-responsive('media-toolbar', media-toolbar);

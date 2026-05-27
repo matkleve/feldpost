@@ -1,5 +1,7 @@
-// Elevated menu/dropdown shell — tweakcn semantic tokens; no feature content styling.
+// Elevated menu/dropdown shell — upload-resolver-tray frosted chrome; no feature content styling.
 // @see docs/specs/component/ui-primitives/popover.md §Token references
+
+@use '../../../styles/frosted-chrome';
 
 @layer fp-components {
   // Host is a transparent projection frame only (panel carries chrome).
@@ -13,12 +15,8 @@
   .popover {
     display: block;
     position: relative;
-    background-color: var(--popover);
-    color: var(--popover-foreground);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
     z-index: 300;
+    @include frosted-chrome.floating-panel-shell;
   }
 
   // Optional scroll containment for tall panels

@@ -19,6 +19,17 @@
   box-shadow: var(--shadow-md);
 }
 
+// Upload-resolver-tray card + dropdown / popover shells (spacing-2 inset, panel radius, 80% border).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+@mixin floating-panel-shell {
+  box-sizing: border-box;
+  padding: var(--spacing-2);
+  border-radius: var(--container-radius-panel);
+  color: var(--popover-foreground);
+  @include surface;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
 // Quiet outline control on an already-frosted panel (hlmBtn outline on map upload shell)
 // @see docs/design/tokens.md § Frosted chrome
 @mixin outline-control {

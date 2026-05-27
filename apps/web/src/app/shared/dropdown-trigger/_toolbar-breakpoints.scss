@@ -139,16 +139,3 @@ $toolbar-view-toggle-compact-max: 23.75rem;
   }
 }
 
-// Active and open-state visuals aligned with workspace toolbar.
-// @see docs/specs/ui/workspace/workspace-pane.md
-@mixin toolbar-menu-trigger-active-states($block) {
-  button.#{$block}__menu-trigger[data-active='true'] {
-    background-color: color-mix(in srgb, var(--interaction-selected-ink) 10%, transparent);
-    color: var(--interaction-selected-ink);
-    border-color: color-mix(in srgb, var(--interaction-selected-ink) 24%, var(--border));
-  }
-
-  .#{$block}__menu-trigger--open .#{$block}__menu-trigger-chevron {
-    transform: rotate(180deg);
-  }
-}

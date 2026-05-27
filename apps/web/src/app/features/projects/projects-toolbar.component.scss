@@ -82,7 +82,6 @@
 
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('projects-toolbar');
-  @include fp-toolbar-breakpoints.toolbar-menu-trigger-active-states('projects-toolbar');
 }
 
 @include fp-toolbar-breakpoints.toolbar-size-control-responsive('projects-toolbar', projects-toolbar);

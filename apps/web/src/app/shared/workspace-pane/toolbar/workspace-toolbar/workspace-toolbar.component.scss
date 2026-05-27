@@ -45,7 +45,6 @@
 
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('workspace-toolbar');
-  @include fp-toolbar-breakpoints.toolbar-menu-trigger-active-states('workspace-toolbar');
 }
 
 @include fp-toolbar-breakpoints.toolbar-size-control-responsive('workspace-toolbar', workspace-toolbar);

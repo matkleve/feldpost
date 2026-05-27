@@ -1,0 +1,15 @@
+// Floating dropdown / menu shell — upload-resolver-tray chrome (unlayered beats Tailwind `bg-popover` on shell hosts).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+// @see docs/design/tokens.md § option-menu-surface
+
+@use 'frosted-chrome';
+
+.option-menu-surface {
+  @include frosted-chrome.floating-panel-shell;
+}
+
+[data-theme='dark'] .option-menu-surface {
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 1px color-mix(in srgb, var(--foreground) 22%, transparent);
+}

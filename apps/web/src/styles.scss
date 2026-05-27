@@ -340,25 +340,7 @@ html[data-theme="sandstone"] {
 
 @include meta.load-css('styles/subtle-scrollbar');
 
-// ── Shared floating panel surface ─────────────────────────────────────────────
-// Used on bare <div> / <section> overlay panels that lack HlmMenuContentDirective
-// (e.g. .add-metadata-suggestions, upload-panel modals, project-color-picker).
-// app-dropdown-shell panels already get these tokens from HlmMenuContentDirective
-// (bg-popover / border-border / rounded-md / shadow-md in @layer utilities), so
-// utilities still win there — this class only fills the gap for un-wired elements.
-// All values resolve through semantic CSS variables so every theme (light, dark,
-// sandstone) cascades automatically from html[data-theme].
-// @see docs/design/tokens.md § option-menu-surface
-@layer components {
-  .option-menu-surface {
-    background: var(--popover);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    color: var(--popover-foreground);
-  }
-}
-
+@include meta.load-css('styles/option-menu-surface');
 @include meta.load-css('styles/option-menu-list');
 @include meta.load-css('styles/option-menu-item-states');
 @include meta.load-css('styles/switch-thumb-hover');

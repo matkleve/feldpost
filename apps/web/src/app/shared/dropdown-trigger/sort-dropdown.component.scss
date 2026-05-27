@@ -1,3 +1,5 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Sort dropdown — component-specific styles.
 // @see docs/specs/component/filters/dropdown-system.md
 
@@ -17,6 +19,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+// Stable state: active sort row — selected ink (not primary button fill).
+// @see docs/design/state-visuals.md § Interaction emphasis
+.sort-dropdown__option--active {
+  @include emphasis.selected(10%);
+
+  > .option-menu-item__icon {
+    color: var(--interaction-selected-ink);
+  }
+}
+
+.sort-dropdown__option--active:hover,
+.sort-dropdown__option--active:focus-visible {
+  @include emphasis.selected-hover(10%);
+
+  > .option-menu-item__icon {
+    color: var(--primary);
+  }
 }
 
 // ── Direction toggle (sort-specific) ────────────────────────────────────────
@@ -44,9 +65,9 @@
     color: var(--primary);
   }
 
-  .text-primary & {
+  .sort-dropdown__option--active & {
     opacity: 1;
-    color: var(--primary);
+    color: var(--interaction-selected-ink);
   }
 
   .sort-dropdown__option--hovered & {

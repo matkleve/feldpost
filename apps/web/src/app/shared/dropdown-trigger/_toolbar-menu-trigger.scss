@@ -1,3 +1,5 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Defines shared closed-trigger layout for `hlmBtn` + `*__menu-trigger` toolbar anchors (label + trailing chevron).
 // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
 // @see docs/specs/ui/workspace/workspace-view-system.md
@@ -24,14 +26,22 @@
   }
 }
 
-// Applies accent fill when filter/grouping is active and rotates chevron when shell is open.
+// Applies selected-ink when filter/grouping is active and rotates chevron when shell is open.
 // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
+// @see docs/design/state-visuals.md § Interaction emphasis
 @mixin toolbar-menu-trigger-states($block) {
   // Active state indicator for toolbar trigger buttons when a filter/grouping is applied.
   // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
-  button.#{$block}__menu-trigger[data-state='on'] {
-    background-color: var(--accent);
-    color: var(--accent-foreground);
+  button.#{$block}__menu-trigger[data-active='true'] {
+    @include emphasis.selected-bordered(10%, 24%);
+  }
+
+  // Selected trigger on hover/focus — primary wins (same contract as toggle `data-[state=on]:hover`).
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  button.#{$block}__menu-trigger[data-active='true']:hover:not(:disabled),
+  button.#{$block}__menu-trigger[data-active='true']:focus-visible:not(:disabled) {
+    @include emphasis.selected-hover(10%);
+    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
   }
 
   // Open shell: rotate trailing chevron.

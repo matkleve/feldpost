@@ -8,5 +8,5 @@ import { cva } from 'class-variance-authority';
 // Floating popover shell — position and anchor are owner's responsibility
 // @see docs/specs/component/filters/dropdown-system.md
 export const popoverVariants = cva(
-  'rounded-lg border border-border bg-popover text-popover-foreground shadow-md outline-none',
+  'rounded-lg border border-border bg-popover p-0 text-popover-foreground shadow-md outline-none',
 );

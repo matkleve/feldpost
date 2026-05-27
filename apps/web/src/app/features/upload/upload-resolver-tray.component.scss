@@ -22,28 +22,22 @@
   // @see upload-resolver-tray.md#passive-mode
   .upload-resolver-tray__passive {
     margin: 0;
-    padding: var(--spacing-2);
+    max-width: 100%;
     font-size: var(--font-size-xs);
     line-height: 1.4;
     color: var(--muted-foreground);
     text-align: left;
-    border-radius: var(--container-radius-panel);
-    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-    max-width: 100%;
-    @include frosted-chrome.surface;
+    @include frosted-chrome.floating-panel-shell;
   }
 
-  // Active card — spacing-2 padding; metadata-compose icon size for choices
+  // Active card — same shell chrome as `.option-menu-surface` on dropdown hosts.
   // @see upload-resolver-tray.md#active-mode
   .upload-resolver-tray {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-2);
     width: 100%;
-    padding: var(--spacing-2);
-    border-radius: var(--container-radius-panel);
-    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-    @include frosted-chrome.surface;
+    @include frosted-chrome.floating-panel-shell;
   }
 
   // Top row — section label + carousel chevrons
@@ -338,7 +332,7 @@
     max-height: min(40vh, 12rem);
     overflow-y: auto;
     margin: 0;
-    padding: var(--spacing-1);
+    padding: 0;
     list-style: none;
   }
 

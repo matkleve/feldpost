@@ -2,7 +2,7 @@
 
 ## Migration status (2026-05-16)
 
-The **`UiDropdownTriggerDirective`** and **`apps/web/src/styles/primitives/dropdown-trigger.scss`** were **removed** (Phase 5 Group D). Toolbar anchors use **`hlmBtn`** (`variant="outline"`, `size="sm"`) plus per-component classes **`media-toolbar__menu-trigger`**, **`projects-toolbar__menu-trigger`**, **`workspace-toolbar__menu-trigger`** with **`--open`** for chevron rotation; **`[data-dd-part]`** on inner spans is unchanged. **Shared trigger chrome** (horizontal inset overriding CVA `ps-2`/`pe-2`, chevron flex + transition, **`[data-state='on']`** tint, open chevron rotation) lives in **`apps/web/src/app/shared/dropdown-trigger/_toolbar-menu-trigger.scss`** and is **`@include`d** from each toolbar’s `*.component.scss` inside `@layer components` / `@layer states`. **`DropdownShellComponent`** / **`StandardDropdownComponent`** remain the floating shell and list chrome. **Tokens / menu shell:** [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/token-layers.md`](../../../design/token-layers.md), [`dropdown-system.md`](../filters/dropdown-system.md).
+The **`UiDropdownTriggerDirective`** and **`apps/web/src/styles/primitives/dropdown-trigger.scss`** were **removed** (Phase 5 Group D). Toolbar anchors use **`hlmBtn`** (`variant="outline"`, `size="sm"`) plus per-component classes **`media-toolbar__menu-trigger`**, **`projects-toolbar__menu-trigger`**, **`workspace-toolbar__menu-trigger`** with **`--open`** for chevron rotation; **`[data-dd-part]`** on inner spans is unchanged. **Shared trigger chrome** (horizontal inset overriding CVA `ps-2`/`pe-2`, chevron flex + transition, **`[data-active='true']`** selected-ink tint, open chevron rotation) lives in **`apps/web/src/app/shared/dropdown-trigger/_toolbar-menu-trigger.scss`** and is **`@include`d** from each toolbar’s `*.component.scss` inside `@layer components` / `@layer states`. **`DropdownShellComponent`** / **`StandardDropdownComponent`** remain the floating shell and list chrome. **Tokens / menu shell:** [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/token-layers.md`](../../../design/token-layers.md), [`dropdown-system.md`](../filters/dropdown-system.md).
 
 The remainder of this file documents the **removed** directive contract for archive comparison until **`BrnMenu` / `BrnMenuTrigger`** replace **`DropdownShellComponent`**.
 
@@ -64,7 +64,7 @@ button [hlmBtn] + toolbar menu-trigger BEM class   ← hlmBtn outline + _toolbar
 | Behavior | Visual geometry owner | Stacking context owner | Interaction hit-area owner | Selector(s) | Layer | Test oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Open chevron rotation | `[data-dd-part='chevron']` | host (`button`) | host | `.*__menu-trigger--open [data-dd-part='chevron']` | content | Chevron rotates 180° when dropdown shell open |
-| Active filter/grouping tint | host (`button`) | host | host | `button.*__menu-trigger[data-state='on']` | — | Accent fill when grouping/filter active |
+| Active filter/grouping tint | host (`button`) | host | host | `button.*__menu-trigger[data-active='true']` | — | Selected-ink wash when grouping/filter active |
 
 ### Ownership matrix (archived: `ui-dropdown-trigger*`)
 

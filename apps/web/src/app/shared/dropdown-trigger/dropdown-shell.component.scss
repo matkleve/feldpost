@@ -19,7 +19,6 @@
     max-width: min(18rem, calc(100vw - 2rem));
     min-width: min(18rem, calc(100vw - 2rem));
     max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
-    box-shadow: var(--shadow-md);
   }
 
   // Filter: **wider floor** (32rem) for rule-row content — not the same width as sort/grouping/projects (see `toolbarDropdownPositionWidthPx`).
@@ -29,12 +28,6 @@
     max-width: min(40rem, calc(100vw - 2rem));
     min-width: min(32rem, calc(100vw - 2rem));
     max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
-  }
-
-  :host-context([data-theme='dark']):host.toolbar-dropdown {
-    box-shadow:
-      var(--shadow-md),
-      0 0 0 1px color-mix(in srgb, var(--foreground) 22%, transparent);
   }
 
   // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).

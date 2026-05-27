@@ -89,7 +89,7 @@
         hlmMenuItem
         class="sort-dropdown__option"
         type="button"
-        [class.text-primary]="isSortActive(opt.id)"
+        [class.sort-dropdown__option--active]="isSortActive(opt.id)"
         [class.sort-dropdown__option--hovered]="isRowHovered(opt.id)"
         (mouseenter)="setHoveredSort(opt.id)"
         (mouseleave)="clearHoveredSort(opt.id)"

@@ -6,28 +6,22 @@
   // Default vertical floor for toolbar menus; filter overrides via `[style.--std-dropdown-min-height]` (see dropdown-system.md).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   --std-dropdown-min-height: 8rem;
-  // Token for symmetric body inset (shell menu CVA uses `p-0` — inset lives on this host, not on feature `padding-block: 0`).
-  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-  --std-dropdown-padding-inline: var(--spacing-2, 0.5rem);
   // Matches `hlmBtn` `size="icon"` (`h-10` / `w-10`) so reserved search-row slots do not jump layout.
   // @see docs/specs/component/filters/dropdown-system.md
   --std-dropdown-search-icon-slot-size: 2.5rem;
-  // Symmetric inset on all sides (same token as former horizontal-only — avoids flush edges when shell has `p-0`).
-  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-  padding: var(--std-dropdown-padding-inline);
-  border-radius: calc(var(--radius) - 4px);
+  // Shell inset lives on `.option-menu-surface` (upload-resolver-tray contract) — no inner card radius/padding.
+  // @see docs/specs/component/upload/upload-resolver-tray.md
+  padding: 0;
+  border-radius: 0;
   width: 100%;
   min-height: var(--std-dropdown-min-height);
 }
 
-// Media-detail project picker: spacing-2 inset on standard-dropdown host (shell stays p-0).
+// Media-detail project picker: shorter floor; shell carries spacing-2 inset.
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 :host.projects-dropdown__shell--media-detail {
-  --std-dropdown-padding-inline: var(--spacing-2);
   --std-dropdown-min-height: 0;
   min-height: 0;
-  padding: var(--spacing-2);
-  gap: var(--spacing-2);
 }
 
 :host.projects-dropdown__shell--media-detail .standard-dropdown__search {
@@ -36,10 +30,6 @@
 }
 
 :host.projects-dropdown__shell--media-detail .standard-dropdown__search-field {
-  padding: 0;
-}
-
-:host.projects-dropdown__shell--media-detail .standard-dropdown__items {
   padding: 0;
 }
 
