@@ -12,7 +12,7 @@ app-toolbar-dropdown-stack          ← workspace / projects / media toolbars
         └── app-*-dropdown          ← sort | grouping | filter | projects
               └── app-standard-dropdown
                     ├── app-menu-panel-search-row (optional)
-                    ├── app-menu-panel-scroll-region → [dropdown-items]
+                    ├── `.standard-dropdown__items` host → `[dropdown-items]` (single `ng-content`; do not nest `app-menu-panel-scroll-region` — breaks projection)
                     └── app-menu-panel-footer-action (optional)
 ```
 

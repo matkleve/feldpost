@@ -1,13 +1,16 @@
 import { Component, input, output } from '@angular/core';
 import { MenuPanelFooterActionComponent } from '../menu-panel/menu-panel-footer-action.component';
 import { MenuPanelSearchRowComponent } from '../menu-panel/menu-panel-search-row.component';
-import { MenuPanelScrollRegionComponent } from '../menu-panel/menu-panel-scroll-region.component';
-import type { MenuPanelScrollMode } from '../menu-panel/menu-panel-scroll-mode';
+import {
+  menuPanelScrollHostClasses,
+  menuPanelScrollOverflowClasses,
+  type MenuPanelScrollMode,
+} from '../menu-panel/menu-panel-scroll-mode';
 
 @Component({
   selector: 'app-standard-dropdown',
   standalone: true,
-  imports: [MenuPanelSearchRowComponent, MenuPanelScrollRegionComponent, MenuPanelFooterActionComponent],
+  imports: [MenuPanelSearchRowComponent, MenuPanelFooterActionComponent],
   templateUrl: './standard-dropdown.component.html',
   styleUrl: './standard-dropdown.component.scss',
   host: {
@@ -37,4 +40,12 @@ export class StandardDropdownComponent {
   readonly actionRequested = output<void>();
   /** Emits when the items host scrolls (toolbar filter uses this to dismiss inline pickers). */
   readonly itemsScroll = output<void>();
+
+  /** Scroll host for `[dropdown-items]` — single ng-content site (no nested re-projection). */
+  itemsHostClass(): string {
+    const mode = this.scrollMode();
+    const host = menuPanelScrollHostClasses(mode, this.itemsClass().trim());
+    const overflow = menuPanelScrollOverflowClasses(mode);
+    return `${host} ${overflow}`.replace(/\s+/g, ' ').trim();
+  }
 }

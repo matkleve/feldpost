@@ -12,13 +12,9 @@
   </app-menu-panel-search-row>
 }
 
-<app-menu-panel-scroll-region
-  [scrollMode]="scrollMode()"
-  [itemsClass]="itemsClass()"
-  (itemsScroll)="itemsScroll.emit()"
->
+<div [class]="itemsHostClass()" (scroll)="itemsScroll.emit()">
   <ng-content select="[dropdown-items]" />
-</app-menu-panel-scroll-region>
+</div>
 
 @if (actionLabel()) {
   <app-menu-panel-footer-action

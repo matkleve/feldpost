@@ -77,9 +77,3 @@
   transform: none !important;
 }
 
-// Width / height cap owned by `app-dropdown-shell.toolbar-dropdown` — no duplicate max-height here.
-// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
-:host.workspace-toolbar-menu-panel {
-  min-height: 0;
-}
-

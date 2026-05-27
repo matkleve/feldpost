@@ -144,12 +144,13 @@ describe('ShareUrlSyncService', () => {
     });
   });
 
-  it('skips sync while route already carries share param', async () => {
+  it('skips outbound sync while suppressed after share restore', async () => {
     const { service, shareSet, router } = setup();
     const mediaId = '550e8400-e29b-41d4-a716-446655440000';
 
+    service.suppressOutboundSyncAfterRestore();
     service.scheduleSync({
-      routeSnapshot: routeSnapshot({ share: 'ss_existing' }),
+      routeSnapshot: routeSnapshot({ share: 'ss_existing', media: mediaId }),
       scopeMediaIds: [mediaId],
       detailMediaId: mediaId,
     });
@@ -158,5 +159,38 @@ describe('ShareUrlSyncService', () => {
 
     expect(shareSet.createOrReuseShareSet).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('clears params and resumes when scope empties while suppressed', async () => {
+    const { service, shareSet, router } = setup();
+
+    service.suppressOutboundSyncAfterRestore();
+    service.scheduleSync({
+      routeSnapshot: routeSnapshot({ share: 'ss_existing', media: '550e8400-e29b-41d4-a716-446655440000' }),
+      scopeMediaIds: [],
+      detailMediaId: null,
+    });
+
+    await flushDebounce();
+
+    expect(shareSet.createOrReuseShareSet).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith([], {
+      queryParams: { share: null, media: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+      state: { shareUrlSync: true },
+    });
+
+    service.resumeOutboundSync();
+    const mediaId = '550e8400-e29b-41d4-a716-446655440000';
+    shareSet.createOrReuseShareSet.mockResolvedValue({ token: 'ss_after_resume' });
+    service.scheduleSync({
+      routeSnapshot: routeSnapshot({}),
+      scopeMediaIds: [mediaId],
+      detailMediaId: null,
+    });
+    await flushDebounce();
+
+    expect(shareSet.createOrReuseShareSet).toHaveBeenCalled();
   });
 });

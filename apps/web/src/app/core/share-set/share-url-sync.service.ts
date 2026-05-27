@@ -27,6 +27,19 @@ export class ShareUrlSyncService {
   private inFlightFingerprint: string | null = null;
   private inFlightTokenPromise: Promise<string | null> | null = null;
 
+  /** Blocks auto-publishing share params until scope clears or {@link resumeOutboundSync}. */
+  private outboundSyncSuppressed = false;
+
+  /** Call before consuming an inbound `?share=` restore so hydration does not re-write the URL. */
+  suppressOutboundSyncAfterRestore(): void {
+    this.outboundSyncSuppressed = true;
+  }
+
+  /** Re-enables live URL sync after the user changes post-restore selection scope. */
+  resumeOutboundSync(): void {
+    this.outboundSyncSuppressed = false;
+  }
+
   scheduleSync(request: ShareUrlSyncRequest): void {
     this.latestRequest = request;
     this.scheduleVersion += 1;
@@ -47,12 +60,19 @@ export class ShareUrlSyncService {
     }
 
     const request = this.latestRequest;
-    if (this.hasShareParam(request)) {
-      this.syncStatusSignal.set('idle');
+    const scopeMediaIds = request.scopeMediaIds.filter((id) => id.length > 0);
+
+    if (this.outboundSyncSuppressed) {
+      if (scopeMediaIds.length === 0) {
+        await this.applyParams(request, null, null);
+        this.outboundSyncSuppressed = false;
+        this.syncStatusSignal.set('applied');
+      } else {
+        this.syncStatusSignal.set('idle');
+      }
       return;
     }
 
-    const scopeMediaIds = request.scopeMediaIds.filter((id) => id.length > 0);
     if (scopeMediaIds.length === 0) {
       await this.applyParams(request, null, null);
       this.syncStatusSignal.set('applied');
@@ -77,10 +97,6 @@ export class ShareUrlSyncService {
     const detailMediaId = this.resolveDetailMediaId(this.latestRequest);
     await this.applyParams(this.latestRequest, token, detailMediaId);
     this.syncStatusSignal.set('applied');
-  }
-
-  private hasShareParam(request: ShareUrlSyncRequest): boolean {
-    return (request.routeSnapshot.queryParamMap.get('share')?.trim() ?? '').length > 0;
   }
 
   private resolveDetailMediaId(request: ShareUrlSyncRequest): string | null {

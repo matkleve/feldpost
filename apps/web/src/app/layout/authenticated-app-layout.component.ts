@@ -102,6 +102,9 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
 
   private previousActiveShell: AuthenticatedActiveShell | null = null;
 
+  /** Selection fingerprint after inbound share restore; used to resume live URL sync on user change. */
+  private postRestoreScopeFingerprint: string | null = null;
+
   private readonly preferredWorkspacePaneWidth = signal<number | null>(null);
 
   readonly photoPanelOpen = this.shellState.photoPanelOpen;
@@ -161,6 +164,14 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     effect(() => {
       const scopeMediaIds = this.getOrderedScopeMediaIds();
       const detailMediaId = this.workspacePaneObserver.detailImageId$();
+      const fingerprint = scopeMediaIds.join('|');
+      if (
+        this.postRestoreScopeFingerprint !== null &&
+        fingerprint !== this.postRestoreScopeFingerprint
+      ) {
+        this.shareUrlSyncService.resumeOutboundSync();
+        this.postRestoreScopeFingerprint = null;
+      }
       this.shareUrlSyncService.scheduleSync({
         routeSnapshot: this.route.snapshot,
         scopeMediaIds,
@@ -207,6 +218,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   closeDetailView(): void {
     this.shellState.setDetailMediaId(null);
     this.workspacePaneObserver.setDetailImageId(null);
+    void this.stripShareLinkQueryParams();
   }
 
   closeWorkspacePane(): void {
@@ -348,8 +360,16 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
 
   /** @see docs/specs/service/share-set/share-link-restore.md */
   private async tryRestoreShareLinkFromRoute(): Promise<void> {
+    const inboundShare = this.route.snapshot.queryParamMap.get('share')?.trim() ?? '';
+    if (inboundShare) {
+      this.shareUrlSyncService.suppressOutboundSyncAfterRestore();
+    }
+
     const result = await this.shareLinkRestoreService.restoreFromRoute(this.route.snapshot, this);
     this.applyShareLinkRestoreResult(result);
+    if (result.status === 'success') {
+      this.postRestoreScopeFingerprint = result.selectionIds.join('|');
+    }
     if (result.shouldStripQueryParams) {
       await this.stripShareLinkQueryParams();
     }
