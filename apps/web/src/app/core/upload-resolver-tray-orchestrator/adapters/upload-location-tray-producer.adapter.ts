@@ -6,8 +6,13 @@
 import { Injectable, Injector, inject } from '@angular/core';
 import { UploadLocationResolutionService } from '../../upload/upload-location-resolution.service';
 import { UploadManagerService } from '../../upload/upload-manager.service';
+import {
+  discriminatingFieldValue,
+  pickDiscriminatingField,
+} from '../../upload/upload-location-resolution.helpers';
 import type {
   UploadAddressCandidate,
+  UploadDiscriminatingField,
   UploadDisambiguationGroup,
 } from '../../upload/upload-manager.types';
 import { UploadResolverTrayOrchestratorService } from '../upload-resolver-tray-orchestrator.service';
@@ -27,6 +32,8 @@ export class UploadLocationTrayProducerAdapter {
 
   /** Maps disambiguation group id → orchestrator item id (per tray step). */
   private readonly groupStepToItemId = new Map<string, string>();
+  /** Stable dialogue unit per disambiguation group (1A+1B share). */
+  private readonly groupDialogueUnitIds = new Map<string, string>();
 
   constructor() {
     this.orchestrator.itemResolved$.subscribe((event) => {
@@ -62,10 +69,13 @@ export class UploadLocationTrayProducerAdapter {
         group.trayStep === '1a' ||
         group.disambiguationKind === 'city_step'
       ) {
+        const picked = group.candidates.find((c) => c.id === event.answer?.optionId);
+        const field = group.discriminatingField ?? pickDiscriminatingField(group.candidates);
         const city =
           event.answer?.text?.trim() ??
-          group.candidates.find((c) => c.id === event.answer?.optionId)?.city ??
-          group.candidates.find((c) => c.id === event.answer?.optionId)?.addressLabel;
+          (picked && field ? discriminatingFieldValue(picked, field) : undefined) ??
+          picked?.city ??
+          picked?.addressLabel;
         if (!city) {
           return;
         }
@@ -94,7 +104,8 @@ export class UploadLocationTrayProducerAdapter {
     if (existing) {
       return existing;
     }
-    const input = groupToEnqueueInput(group);
+    const unitId = this.dialogueUnitIdForGroup(group.id);
+    const input = groupToEnqueueInput(group, unitId);
     const itemId = this.orchestrator.enqueueItem(input);
     this.groupStepToItemId.set(stepKey, itemId);
     return itemId;
@@ -105,7 +116,8 @@ export class UploadLocationTrayProducerAdapter {
     if (this.groupStepToItemId.has(stepKey)) {
       return this.groupStepToItemId.get(stepKey)!;
     }
-    const input = groupToEnqueueInput(group, dependsOnItemId);
+    const unitId = this.dialogueUnitIdForGroup(group.id);
+    const input = groupToEnqueueInput(group, unitId, dependsOnItemId);
     const itemId = this.orchestrator.enqueueItem(input);
     this.groupStepToItemId.set(stepKey, itemId);
     return itemId;
@@ -125,6 +137,17 @@ export class UploadLocationTrayProducerAdapter {
         this.groupStepToItemId.delete(key);
       }
     }
+    this.groupDialogueUnitIds.delete(groupId);
+  }
+
+  private dialogueUnitIdForGroup(groupId: string): string {
+    const existing = this.groupDialogueUnitIds.get(groupId);
+    if (existing) {
+      return existing;
+    }
+    const id = crypto.randomUUID();
+    this.groupDialogueUnitIds.set(groupId, id);
+    return id;
   }
 }
 
@@ -137,6 +160,19 @@ function questionKeyForGroup(group: UploadDisambiguationGroup): string {
     return 'upload.resolver.question.source';
   }
   if (group.disambiguationKind === 'city_step' || group.trayStep === '1a') {
+    const field = group.discriminatingField ?? pickDiscriminatingField(group.candidates);
+    if (field === 'municipality') {
+      return 'upload.resolver.question.municipalityStep';
+    }
+    if (field === 'district') {
+      return 'upload.resolver.question.districtStep';
+    }
+    if (field === 'state') {
+      return 'upload.resolver.question.stateStep';
+    }
+    if (field === 'postcode') {
+      return 'upload.resolver.question.postcodeStep';
+    }
     return 'upload.resolver.question.cityStep';
   }
   if (group.disambiguationKind === 'house_step' || group.trayStep === '1b') {
@@ -159,6 +195,7 @@ function questionKeyForGroup(group: UploadDisambiguationGroup): string {
 
 function groupToEnqueueInput(
   group: UploadDisambiguationGroup,
+  dialogueUnitId: string,
   dependsOnItemId?: string,
 ): EnqueueTrayItemInput {
   const questionKey = questionKeyForGroup(group);
@@ -180,6 +217,7 @@ function groupToEnqueueInput(
     group.disambiguationKind === 'city_step' && !options.length ? 'text' : 'single_choice';
 
   return {
+    dialogueUnitId,
     producerId: PRODUCER_ID,
     batchId: group.batchId,
     questionKey,
@@ -221,18 +259,23 @@ function candidatesToOptions(
   group: UploadDisambiguationGroup,
 ): TrayResolveOption[] {
   if (group.collapseStage === 'city' || group.trayStep === '1a') {
-    const byCity = new Map<string, UploadAddressCandidate>();
+    const field: UploadDiscriminatingField =
+      group.discriminatingField ?? pickDiscriminatingField(candidates) ?? 'city';
+    const byField = new Map<string, UploadAddressCandidate>();
     for (const candidate of candidates) {
-      const key = (candidate.city ?? candidate.addressLabel).trim();
-      if (!byCity.has(key)) {
-        byCity.set(key, candidate);
+      const key = discriminatingFieldValue(candidate, field).trim();
+      const fallback = (candidate.city ?? candidate.addressLabel).trim();
+      const labelKey = (key || fallback).toLowerCase();
+      if (!labelKey || byField.has(labelKey)) {
+        continue;
       }
+      byField.set(labelKey, candidate);
     }
-    return Array.from(byCity.values())
+    return Array.from(byField.values())
       .slice(0, 5)
       .map((c) => ({
         id: c.id,
-        label: (c.city ?? c.addressLabel).trim(),
+        label: discriminatingFieldValue(c, field).trim() || (c.city ?? c.addressLabel).trim(),
         lat: c.lat,
         lng: c.lng,
         score: c.score,

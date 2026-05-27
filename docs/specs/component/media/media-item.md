@@ -381,7 +381,9 @@ Grid (`intrinsic` slot): initial slot ratio is **session cache** or square (`1`)
 
 Detail embed (`media-item--detail-embed`): session cache first; else probe **signed thumbnail URL only** (`getCachedUrl(mediaId, 'small')`) — never full-resolution `storage_path` for layout.
 
-All grid tiles share one choreography: `loading-surface-visible` → `ratio-known-contain` (when ratio unknown) → `content-fade-in` / `content-visible`. Warm shell revisit may skip gray pulse when session ratio and cached preview URL are both present (after `registerPreviewPaths`).
+All grid tiles share one choreography: `loading-surface-visible` → `ratio-known-contain` (when ratio unknown) → `content-fade-in` / `content-visible`. Warm shell revisit may skip gray pulse and 300ms shrink when session ratio and cached preview URL are both present (after `registerPreviewPaths`); parent passes `[skipIntrinsicRatioTransition]="gridSessionAspectPrefilled()"`.
+
+**Cross-component invariant:** `MediaDisplay` identity handoff must not include slot pixels — parent slot resize during shrink must not clear the child preview URL (see [`media-display.md`](./media-display.md) § Intrinsic grid warm revisit). A visible JPEG chip with an empty content layer is a display FSM/DOM bug, not missing list data.
 
 ## File-type chip (Phase 2)
 

@@ -1,5 +1,6 @@
 # Upload resolver tray orchestrator
 
+> **Parent:** [address-resolution-model.md](./address-resolution-model.md)  
 > **UI:** [upload-resolver-tray.md](../../component/upload/upload-resolver-tray.md)  
 > **Producer:** [upload-location-resolution.md](./upload-location-resolution.md) via `UploadLocationTrayProducerAdapter`  
 > **Code:** `apps/web/src/app/core/upload-resolver-tray-orchestrator/`
@@ -41,7 +42,19 @@ For a given `batchId`, all of:
 
 1. Upload batch **`status` leaves `scanning`** and folder intake for that batch is complete (jobs created).
 2. `UploadAddressResolutionOrchestrator.classifyBatch(batchId)` has completed for the current scan wave.
-3. Emitter: `UploadManagerService` submit pipeline after `classifyBatch` resolves → `UploadLocationTrayProducerAdapter.notifyScanIdle(batchId)`.
+3. First **pre-resolve wave** for the batch finished (`UploadPreResolveWaveService` after each `runPreUploadLocationResolve`).
+
+### Tray enqueue contract
+
+`enqueueItem` only after `classifySearchHits` in `runGeocodeForGroup`. `classifyBatch` / `evaluateLocalResolution` never enqueue tray items.
+
+### Dialogue units
+
+| Constant | Default |
+| --- | --- |
+| `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS` | **5** |
+
+One `dialogueUnitId` per user-facing question; **1A+1B** share one id. Carousel counts **units**, not raw items.
 
 ### FSM
 

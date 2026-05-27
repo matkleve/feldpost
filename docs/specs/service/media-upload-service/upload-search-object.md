@@ -1,6 +1,6 @@
 # Upload search object (SO)
 
-> **Parent:** [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md)
+> **Parent:** [address-resolution-model.md](./address-resolution-model.md) · [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md)
 
 All **field names are English** (internal model). **Values** use locale-appropriate place names (e.g. `Wien`, `AT`). UI copy is translated separately via i18n.
 
@@ -67,7 +67,9 @@ Filename segment overrides folder for the same field; log deviation in `sourceDe
 | --- | --- | --- | --- |
 | **A** | `street` AND (`city` OR `postcode`) | structured-forward | Step 3 if multiple hits |
 | **B** | `street`, no locality, project centroid | structured-forward-bias | Step 3 if multiple; 0 hits → Branch C (Step 1A) |
-| **C** | `street`, no locality, no centroid | after Step 1A+1B | Step 1A → 1B |
+| **C** | `street`, no locality, no centroid | `street` + `country=AT` (Photon first) | **5b** numbered discriminating field; **5c** house; 0 hits → 1A text only |
+
+See [address-resolution-model.md § Branch C](./address-resolution-model.md#branch-c--street-only-countryat).
 | **Below street** | admin fields only | none (admin centroid stored) | none |
 
 Legacy helper `isSearchObjectComplete()` remains true only for Branch A.

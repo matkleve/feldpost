@@ -78,6 +78,7 @@ import { UploadAddressResolutionOrchestrator } from './upload-address-resolution
 import { UploadResolverTrayOrchestratorService } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { USE_TRAY_ORCHESTRATOR } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
+import { UploadPreResolveWaveService } from './upload-pre-resolve-wave.service';
 import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
 import { UploadNewPipelineService } from './upload-new-pipeline.service';
@@ -150,6 +151,7 @@ export class UploadManagerService {
   private readonly locationResolution = inject(UploadLocationResolutionService);
   private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly addressOrchestrator = inject(UploadAddressResolutionOrchestrator);
+  private readonly preResolveWave = inject(UploadPreResolveWaveService);
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
@@ -221,10 +223,8 @@ export class UploadManagerService {
     queuedLabel: phaseLabel('queued'),
     classifyBatch: async (batchId) => {
       await this.addressOrchestrator.classifyBatch(batchId);
-      await this.locationResolution.registerBatchProjectTrayIfNeeded(batchId);
-      if (USE_TRAY_ORCHESTRATOR) {
-        this.trayOrchestrator.notifyScanIdle(batchId);
-      }
+      const jobCount = this.jobState.jobs().filter((j) => j.batchId === batchId).length;
+      this.preResolveWave.resetWave(batchId, jobCount);
     },
   };
 

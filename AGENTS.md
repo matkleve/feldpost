@@ -236,7 +236,7 @@ Authoring and governance rules belong in AGENTS/instructions. `docs/specs/README
 ## Spec split and organization policy
 
 - **Single entry point:** Each feature or service module has **one** canonical contract parent (`docs/specs/service/<module>/` facade spec, or per-component spec under `component/` / `ui/`). Child files hold detail; the parent summarizes and links (plain Markdown links, no duplicate normative bodies across folders).
-- **Lint gate:** Run `node scripts/lint-specs.mjs`. Default caps: warn **400** lines, error **600**; oversized specs must be split (see `scripts/lint-specs.mjs`). Settings and `docs/settings-registry.md` stay in sync when specs expose `## Settings`.
+- **Lint gate:** Run `node scripts/lint-specs.mjs`. Default caps: warn **150** lines, error **180** on parent specs; oversized parents must be split into linked children (`*.supplement.md`, `*.acceptance-criteria.md`, or `parent-name.slice.md` — see `scripts/lint-specs.mjs`). Settings and `docs/settings-registry.md` stay in sync when specs expose `## Settings`.
 - **When to split (if / then):**
   - **Adapter boundaries** match `apps/web/src/app/core/<module>/adapters/` → add `docs/specs/service/<module>/adapters/<name>.adapter.md` and link from the facade spec (structural mirror).
   - **Bloat is** long acceptance criteria, FSM, transition map, or Visual Behavior / ownership tables → add concern slices in the same folder, e.g. `<name>.acceptance-criteria.md` or `<name>.visual-behavior.md`; do not duplicate checkbox lists in both parent and child.

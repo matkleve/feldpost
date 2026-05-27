@@ -1,6 +1,6 @@
 # Upload address resolution pipeline
 
-> **Parent:** [upload-manager-pipeline.md](./upload-manager-pipeline.md)  
+> **Parent:** [address-resolution-model.md](./address-resolution-model.md) · [upload-manager-pipeline.md](./upload-manager-pipeline.md)  
 > **Children:** [upload-search-object.md](./upload-search-object.md), [upload-address-resolution.local-geo.md](./upload-address-resolution.local-geo.md), [upload-address-resolution.phases.md](./upload-address-resolution.phases.md)  
 > **Resolution service:** [upload-location-resolution.md](./upload-location-resolution.md)  
 > **Tray:** [../../component/upload/upload-resolver-tray.md](../../component/upload/upload-resolver-tray.md)

@@ -1,7 +1,16 @@
 export interface UploadLocationConfig {
   /** Text vs EXIF source auto-agree when both exist (meters). @see upload-manager-pipeline.location-routing.supplement.md */
   sourceAgreementRadiusMeters: number;
+  /** Step 7: EXIF fine alignment vs geocode placement (meters). @see address-resolution-model.md */
   exifAssistRadiusMeters: number;
+  /** Step 4: EXIF reverse superset check enabled. */
+  exifContextCheck: boolean;
+  /** Branch C default country code (ISO). */
+  defaultGeocodeCountry: string;
+  /** Token normalizer fuzzy match minimum score. */
+  tokenNormalizerFuzzyThreshold: number;
+  /** Max dialogue units per resolver tray presentation bundle. */
+  presentationBundleMaxDialogueUnits: number;
   minMeaningfulScore: number;
   minTopGap: number;
   titleConfidenceThreshold: number;
@@ -36,7 +45,11 @@ export interface UploadLocationConfig {
 
 export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   sourceAgreementRadiusMeters: 150,
-  exifAssistRadiusMeters: 300,
+  exifAssistRadiusMeters: 80,
+  exifContextCheck: true,
+  defaultGeocodeCountry: 'AT',
+  tokenNormalizerFuzzyThreshold: 0.85,
+  presentationBundleMaxDialogueUnits: 5,
   minMeaningfulScore: 0.55,
   minTopGap: 0.1,
   titleConfidenceThreshold: 0.8,

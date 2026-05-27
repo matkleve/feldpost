@@ -53,23 +53,45 @@ export function firstActionableIndex(
   return readyIndex >= 0 ? readyIndex : 0;
 }
 
+export function countDialogueUnits(items: readonly TrayResolveItem[]): number {
+  return new Set(items.map((item) => item.dialogueUnitId)).size;
+}
+
+export function unitIndexForItem(
+  items: readonly TrayResolveItem[],
+  itemId: string,
+): number {
+  const item = items.find((entry) => entry.id === itemId);
+  if (!item) {
+    return 0;
+  }
+  const order: string[] = [];
+  for (const entry of items) {
+    if (!order.includes(entry.dialogueUnitId)) {
+      order.push(entry.dialogueUnitId);
+    }
+  }
+  const index = order.indexOf(item.dialogueUnitId);
+  return index >= 0 ? index : 0;
+}
+
 /**
- * Carousel label within a presentation bundle (e.g. 1A/3, 2/3).
+ * Carousel label within a presentation bundle by dialogue unit (e.g. 1A/3).
  */
 export function formatBundleCarouselIndicator(
-  pageIndex: number,
-  total: number,
+  unitIndex: number,
+  unitTotal: number,
   trayStepLabel?: '1a' | '1b',
 ): string | null {
-  if (total < 2) {
+  if (unitTotal < 2) {
     return null;
   }
-  const index = Math.min(Math.max(pageIndex, 0), total - 1);
+  const index = Math.min(Math.max(unitIndex, 0), unitTotal - 1);
   if (trayStepLabel === '1a') {
-    return `1A/${total}`;
+    return `1A/${unitTotal}`;
   }
   if (trayStepLabel === '1b') {
-    return `1B/${total}`;
+    return `1B/${unitTotal}`;
   }
-  return `${index + 1}/${total}`;
+  return `${index + 1}/${unitTotal}`;
 }

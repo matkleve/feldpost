@@ -7,6 +7,7 @@ import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
 import type { UploadLocationConfig } from './upload-location-config';
 import type {
   UploadAddressCandidate,
+  UploadDiscriminatingField,
   UploadDisambiguationCollapseStage,
 } from './upload-manager.types';
 import {
@@ -203,14 +204,60 @@ export function buildSearchQuery(titleAddress: string, localityHint?: string): s
   return `${base}, ${hint}`;
 }
 
+const DISCRIMINATING_FIELD_ORDER: readonly UploadDiscriminatingField[] = [
+  'city',
+  'municipality',
+  'district',
+  'state',
+  'postcode',
+];
+
+export function discriminatingFieldValue(
+  candidate: UploadAddressCandidate,
+  field: UploadDiscriminatingField,
+): string {
+  switch (field) {
+    case 'city':
+      return (candidate.city ?? '').trim();
+    case 'municipality':
+      return (candidate.municipality ?? '').trim();
+    case 'district':
+      return (candidate.district ?? '').trim();
+    case 'state':
+      return (candidate.state ?? '').trim();
+    case 'postcode':
+      return (candidate.postcode ?? '').trim();
+    default:
+      return '';
+  }
+}
+
+/** Branch C 5a: first ranked field that differs between Photon candidates. */
+export function pickDiscriminatingField(
+  candidates: UploadAddressCandidate[],
+): UploadDiscriminatingField | null {
+  for (const field of DISCRIMINATING_FIELD_ORDER) {
+    const values = new Set(
+      candidates
+        .map((c) => discriminatingFieldValue(c, field).toLowerCase())
+        .filter(Boolean),
+    );
+    if (values.size > 1) {
+      return field;
+    }
+  }
+  return null;
+}
+
 export function mapGeocoderHitsToCandidates(hits: GeocoderSearchResult[]): UploadAddressCandidate[] {
   return hits.map((hit, index) => {
     const city =
       hit.address?.city ??
       hit.address?.town ??
       hit.address?.village ??
-      hit.address?.municipality ??
       null;
+    const addr = hit.address as Record<string, string | undefined> | undefined;
+    const municipality = hit.address?.municipality ?? addr?.['county'] ?? null;
     return {
       id: `cand-${index}-${hit.lat.toFixed(5)}-${hit.lng.toFixed(5)}`,
       addressLabel: hit.name?.trim() || hit.displayName,
@@ -218,6 +265,9 @@ export function mapGeocoderHitsToCandidates(hits: GeocoderSearchResult[]): Uploa
       lat: hit.lat,
       lng: hit.lng,
       city,
+      municipality,
+      district: hit.address?.suburb ?? hit.address?.city_district ?? null,
+      state: addr?.['state'] ?? null,
       postcode: hit.address?.postcode ?? null,
       score: Math.min(1, Math.max(0, hit.importance)),
     };
@@ -312,16 +362,17 @@ export function classifySearchHits(
   return { kind: 'auto', candidate: top };
 }
 
-/** Pick UI collapse stage from candidate spread (city-first). */
+/** Pick UI collapse stage from candidate spread (Branch C 5a ranking). */
 export function pickCollapseStage(
   candidates: UploadAddressCandidate[],
   jobCount: number,
 ): UploadDisambiguationCollapseStage {
-  const cities = new Set(
-    candidates.map((c) => (c.city ?? '').trim().toLowerCase()).filter(Boolean),
-  );
-  if (cities.size > 1) {
+  const field = pickDiscriminatingField(candidates);
+  if (field === 'city') {
     return 'city';
+  }
+  if (field) {
+    return 'partial';
   }
   const labels = new Set(candidates.map((c) => c.addressLabel.trim().toLowerCase()));
   if (labels.size > 1) {

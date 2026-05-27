@@ -23,6 +23,8 @@ import type { UploadLocationConfigService } from './upload-location-config.servi
 import type { UploadQueueService } from './upload-queue.service';
 import type { UploadService } from './upload.service';
 import type { ParsedExif } from './upload.service';
+import type { UploadPreResolveWaveService } from './upload-pre-resolve-wave.service';
+import { computeContentHash, readFileHead } from './content-hash.util';
 
 export type PreResolveDeps = {
   jobState: UploadJobStateService;
@@ -32,6 +34,7 @@ export type PreResolveDeps = {
   locationConfig: UploadLocationConfigService;
   locationResolution: UploadLocationResolutionService;
   addressOrchestrator: UploadAddressResolutionOrchestrator;
+  preResolveWave?: UploadPreResolveWaveService;
 };
 
 export type PreResolveOutcome = 'continue' | 'held' | 'dedup_skip';
@@ -112,6 +115,39 @@ export function mergeTitleCandidateOnJob(
   };
 }
 
+/** Step 3: hash + tag duplicate before geocode; job continues. */
+async function tagDedupBeforeGeocode(
+  deps: PreResolveDeps,
+  jobId: string,
+  job: UploadJob,
+  parsedExif: ParsedExif,
+  ctx: PipelineContext,
+): Promise<void> {
+  if (!deps.uploadService.isPhotoFile(job.file) || job.forceDuplicateUpload) {
+    return;
+  }
+  if (job.contentHash) {
+    return;
+  }
+  deps.jobState.setPhase(jobId, 'hashing');
+  const fileHead = await readFileHead(job.file);
+  const contentHash = await computeContentHash({
+    fileHeadBytes: fileHead,
+    fileSize: job.file.size,
+    gpsCoords: parsedExif.coords
+      ? { lat: parsedExif.coords.lat, lng: parsedExif.coords.lng }
+      : undefined,
+    capturedAt: parsedExif.capturedAt?.toISOString(),
+    direction: parsedExif.direction,
+  });
+  deps.jobState.updateJob(jobId, { contentHash });
+  deps.jobState.setPhase(jobId, 'dedup_check');
+  const existingId = await ctx.checkDedupHash(contentHash);
+  if (existingId) {
+    deps.jobState.updateJob(jobId, { duplicateOfMediaId: existingId });
+  }
+}
+
 async function finishPreResolveDedup(
   deps: PreResolveDeps,
   jobId: string,
@@ -120,6 +156,9 @@ async function finishPreResolveDedup(
 ): Promise<PreResolveOutcome> {
   const current = deps.jobState.findJob(jobId);
   if (!current) {
+    return 'continue';
+  }
+  if (current.duplicateOfMediaId && !current.forceDuplicateUpload) {
     return 'continue';
   }
   const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
@@ -261,6 +300,20 @@ export async function runPreUploadLocationResolve(
     return 'continue';
   }
 
+  try {
+    return await runPreUploadLocationResolveInner(deps, jobId, parsedExif, ctx, job);
+  } finally {
+    deps.preResolveWave?.completeJob(job.batchId);
+  }
+}
+
+async function runPreUploadLocationResolveInner(
+  deps: PreResolveDeps,
+  jobId: string,
+  parsedExif: ParsedExif,
+  ctx: PipelineContext,
+  job: UploadJob,
+): Promise<PreResolveOutcome> {
   if (!isAutoLocationEnabled(job)) {
     deps.jobState.updateJob(jobId, { resolutionStatus: 'not_required' });
     return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
@@ -270,6 +323,8 @@ export async function runPreUploadLocationResolve(
 
   const { highConfidence } = mergeTitleCandidateOnJob(deps, jobId, job);
   const jobAfterMerge = deps.jobState.findJob(jobId)!;
+
+  await tagDedupBeforeGeocode(deps, jobId, jobAfterMerge, parsedExif, ctx);
 
   if (highConfidence && jobAfterMerge.groupingKey) {
     const orchestrated = await deps.locationResolution.applyPreResolveFromOrchestrator(jobId);

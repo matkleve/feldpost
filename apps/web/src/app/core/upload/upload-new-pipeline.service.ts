@@ -49,6 +49,7 @@ import {
 import { runPreUploadLocationResolve } from './upload-new-pre-resolve.util';
 import { runNewUploadPhase } from './upload-new-run-upload-phase.util';
 import { UploadQueueService } from './upload-queue.service';
+import { UploadPreResolveWaveService } from './upload-pre-resolve-wave.service';
 import { UploadService } from './upload.service';
 import type { ExifCoords, ParsedExif } from './upload.service';
 
@@ -69,6 +70,7 @@ export class UploadNewPipelineService {
   private readonly attachPipeline = inject(UploadAttachPipelineService);
   private readonly locationResolution = inject(UploadLocationResolutionService);
   private readonly addressOrchestrator = inject(UploadAddressResolutionOrchestrator);
+  private readonly preResolveWave = inject(UploadPreResolveWaveService);
   private readonly supabase = inject(SupabaseService);
 
   /** Run the new-upload pipeline for a single job. */
@@ -89,6 +91,7 @@ export class UploadNewPipelineService {
         ...this.prepareRouteDeps,
         locationResolution: this.locationResolution,
         addressOrchestrator: this.addressOrchestrator,
+        preResolveWave: this.preResolveWave,
       },
       jobId,
       prepared.parsedExif,

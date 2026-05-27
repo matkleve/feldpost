@@ -3,7 +3,10 @@
  * @see docs/specs/service/media-upload-service/upload-search-object.md
  */
 
-import type { UploadAddressCandidate } from './upload-manager.types';
+import type {
+  UploadAddressCandidate,
+  UploadDiscriminatingField,
+} from './upload-manager.types';
 
 export type UploadAddressFieldSource = 'folder' | 'filename';
 
@@ -84,4 +87,5 @@ export interface UploadGroupResolutionState {
   confirmedCity?: string | null;
   candidate?: UploadAddressCandidate;
   candidates?: UploadAddressCandidate[];
+  discriminatingField?: UploadDiscriminatingField;
 }

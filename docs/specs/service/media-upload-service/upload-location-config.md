@@ -56,7 +56,11 @@ Source of truth: `apps/web/src/app/core/upload/upload-location-config.ts`.
 | Constant | Type | Default | Purpose |
 | --- | --- | --- | --- |
 | `sourceAgreementRadiusMeters` | `number` | `150` | Auto-agree text placement when EXIF metadata is within this distance; else `disambiguationKind: source` tray. |
-| `exifAssistRadiusMeters` | `number` | `300` | EXIF assist radius for narrowing ambiguous geocode candidates only (not source conflict). |
+| `exifAssistRadiusMeters` | `number` | `80` | Step 7 fine alignment: EXIF vs geocode placement (meters). |
+| `exifContextCheck` | `boolean` | `true` | Enable step 4 EXIF reverse superset check (`lang=en`). |
+| `defaultGeocodeCountry` | `string` | `AT` | Branch C Photon default country code. |
+| `tokenNormalizerFuzzyThreshold` | `number` | `0.85` | Minimum confidence for fuzzy token-normalizer matches. |
+| `presentationBundleMaxDialogueUnits` | `number` | `5` | Max dialogue units per resolver tray bundle. |
 | `minMeaningfulScore` | `number` | `0.55` | Minimum geocode score for a candidate to be considered meaningful. |
 | `minTopGap` | `number` | `0.1` | Minimum score gap between rank 1 and rank 2 for automatic selection. |
 | `titleConfidenceThreshold` | `number` | `0.8` | Minimum parser confidence needed to treat filename/folder text as resolvable location input. |

@@ -38,6 +38,13 @@ export type UploadResolutionStatus = 'pending' | 'resolved' | 'failed' | 'not_re
 /** UI collapse stage for grouped address candidates. @see upload-resolver-tray.md */
 export type UploadDisambiguationCollapseStage = 'city' | 'partial' | 'per_file';
 
+export type UploadDiscriminatingField =
+  | 'city'
+  | 'municipality'
+  | 'district'
+  | 'state'
+  | 'postcode';
+
 export interface UploadAddressCandidate {
   id: string;
   addressLabel: string;
@@ -45,6 +52,9 @@ export interface UploadAddressCandidate {
   lng: number;
   displayName?: string;
   city?: string | null;
+  municipality?: string | null;
+  district?: string | null;
+  state?: string | null;
   postcode?: string | null;
   /** Relative score within a search result set (0–1). */
   score?: number;
@@ -80,6 +90,8 @@ export interface UploadDisambiguationGroup {
   citySuggestions?: string[];
   /** House number candidates for Step 1B. */
   houseNumberCandidates?: UploadAddressCandidate[];
+  /** Branch C 5a: which field differs between Photon candidates. */
+  discriminatingField?: UploadDiscriminatingField;
 }
 
 export type UploadJobMode = 'new' | 'replace' | 'attach';
@@ -139,6 +151,8 @@ export interface UploadJob {
   contentHash?: string;
   /** If phase === 'skipped', the existing media row id that matched. */
   existingMediaId?: string;
+  /** Step 3: duplicate tag before geocode — upload may still proceed. */
+  duplicateOfMediaId?: string;
   /** Optional UI issue classification derived by pipeline decisions. */
   issueKind?: UploadJobIssueKind;
   /** Candidate addresses used when title-derived location cannot be auto-disambiguated. */

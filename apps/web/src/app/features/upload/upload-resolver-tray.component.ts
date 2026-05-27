@@ -22,7 +22,11 @@ import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
-import { formatBundleCarouselIndicator } from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.helpers';
+import {
+  countDialogueUnits,
+  formatBundleCarouselIndicator,
+  unitIndexForItem,
+} from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.helpers';
 import { UploadResolverTrayOrchestratorService } from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import type {
   TrayResolveItem,
@@ -117,8 +121,9 @@ export class UploadResolverTrayComponent implements OnInit {
     if (!items.length || !item) {
       return null;
     }
-    const index = this.orchestrator.activeItemIndex();
-    return formatBundleCarouselIndicator(index, items.length, item.trayStepLabel);
+    const unitTotal = countDialogueUnits(items);
+    const unitIndex = unitIndexForItem(items, item.id);
+    return formatBundleCarouselIndicator(unitIndex, unitTotal, item.trayStepLabel);
   });
 
   readonly canGoToPreviousGroup = computed(() => {

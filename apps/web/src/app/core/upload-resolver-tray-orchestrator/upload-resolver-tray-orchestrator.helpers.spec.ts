@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   bundleAllTerminal,
+  countDialogueUnits,
   formatBundleCarouselIndicator,
   firstActionableIndex,
   itemStatus,
@@ -9,6 +10,7 @@ import type { TrayResolveItem } from './upload-resolver-tray-orchestrator.types'
 
 function item(partial: Partial<TrayResolveItem> & Pick<TrayResolveItem, 'id'>): TrayResolveItem {
   return {
+    dialogueUnitId: 'unit-1',
     producerId: 'test',
     batchId: 'batch-1',
     questionKey: 'q',
@@ -43,6 +45,15 @@ describe('upload-resolver-tray-orchestrator.helpers', () => {
     ];
     expect(firstActionableIndex(items, new Set(), new Set())).toBe(0);
     expect(firstActionableIndex(items, new Set(['a']), new Set())).toBe(1);
+  });
+
+  it('countDialogueUnits counts distinct dialogueUnitId values', () => {
+    const items = [
+      item({ id: 'a', dialogueUnitId: 'u1' }),
+      item({ id: 'b', dialogueUnitId: 'u1', dependsOnItemId: 'a' }),
+      item({ id: 'c', dialogueUnitId: 'u2' }),
+    ];
+    expect(countDialogueUnits(items)).toBe(2);
   });
 
   it('bundleAllTerminal when all resolved or skipped', () => {

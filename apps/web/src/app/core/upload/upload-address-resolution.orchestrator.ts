@@ -140,18 +140,20 @@ export class UploadAddressResolutionOrchestrator {
       }
 
       if (local === 'branch_c') {
-        const trayState: UploadGroupResolutionState = {
-          status: 'needsTray',
+        const branchCState: UploadGroupResolutionState = {
+          status: 'needsGeocode',
           groupingKey,
           jobIds,
-          searchObject: so,
+          searchObject: {
+            ...so,
+            country: so.country ?? 'AT',
+          },
           folderDisplayPath,
           titleAddressLabel,
           geocodeBranch: 'branch_c',
-          trayStep: '1a',
         };
-        cache.set(groupingKey, trayState);
-        uploadAddressDebug('orchestrator', 'group → needsTray 1a (branch C)', summarizeGroupState(trayState));
+        cache.set(groupingKey, branchCState);
+        uploadAddressDebug('orchestrator', 'group → needsGeocode (branch C)', summarizeGroupState(branchCState));
         continue;
       }
 
@@ -187,13 +189,14 @@ export class UploadAddressResolutionOrchestrator {
       }
 
       const needsGeocodeState: UploadGroupResolutionState = {
-        status: local === 'branch_b' ? 'needsGeocode' : 'needsGeocode',
+        status: 'needsGeocode',
         groupingKey,
         jobIds,
         searchObject: so,
         folderDisplayPath,
         titleAddressLabel,
-        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+        geocodeBranch:
+          local === 'branch_b' ? 'branch_b' : local === 'branch_a' ? 'branch_a' : 'branch_a',
         projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
       };
       cache.set(groupingKey, needsGeocodeState);

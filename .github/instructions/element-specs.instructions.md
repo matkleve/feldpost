@@ -39,7 +39,7 @@ Every UI element must have a spec before implementation. Follow the template exa
 
 ## Spec size and splits
 
-- Run `node scripts/lint-specs.mjs` before merge; default **error** at 600 lines, **warn** at 400.
+- Run `node scripts/lint-specs.mjs` before merge; default **error** at **180** lines, **warn** at **150** (parent specs only; split children are excluded).
 - If a spec exceeds limits: **structural mirror** for `adapters/` → add `adapters/<name>.adapter.md` under `docs/specs/service/<module>/`; for long **Acceptance Criteria**, **FSM**, or **Visual Behavior** tables, add **concern slices** in the same folder (e.g. `<name>.acceptance-criteria.md`) and keep the parent as the index.
 - **Do not** copy the same contract into both `docs/specs/ui/` and `docs/specs/service/`; the service (or the single owner) is canonical, the other file is a **linking stub** if a second path is needed for navigation.
 - Full policy: root `AGENTS.md` → **Spec split and organization policy**.

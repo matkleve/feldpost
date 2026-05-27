@@ -8,13 +8,13 @@ export function iconForCardVariant(variant: CardVariant): string {
     case 'row':
       return 'view_headline';
     case 'small':
-      return 'grid_view';
-    case 'medium':
       return 'apps';
+    case 'medium':
+      return 'grid_view';
     case 'large':
       return 'view_agenda';
     default:
-      return 'apps';
+      return 'grid_view';
   }
 }
 

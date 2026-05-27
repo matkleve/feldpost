@@ -8,6 +8,7 @@ import {
   evaluateLocalResolution,
   isExifAuthoritativeOverWeakFilenameStreet,
   normalizeAddressForGrouping,
+  pickDiscriminatingField,
 } from './upload-location-resolution.helpers';
 import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import type { UploadJob } from './upload-manager.types';
@@ -115,6 +116,26 @@ describe('upload-location-resolution.helpers', () => {
 
   it('evaluateLocalResolution Branch C without centroid', () => {
     expect(evaluateLocalResolution(so({ street: 'Thaliastraße' }))).toBe('branch_c');
+  });
+
+  it('pickDiscriminatingField prefers city when cities differ', () => {
+    const field = pickDiscriminatingField([
+      {
+        id: 'a',
+        addressLabel: 'A',
+        lat: 1,
+        lng: 1,
+        city: 'Vienna',
+      },
+      {
+        id: 'b',
+        addressLabel: 'B',
+        lat: 2,
+        lng: 2,
+        city: 'Graz',
+      },
+    ]);
+    expect(field).toBe('city');
   });
 
   it('isExifAuthoritativeOverWeakFilenameStreet for IMG_1121-style EXIF-only upload', () => {

@@ -125,11 +125,34 @@ Tier thresholds are defined in `MediaDownloadService`, not in `MediaDisplayCompo
 
 ### Intrinsic grid warm revisit
 
-On shell revisit, handoff effect order is mandatory: (1) reset handoff state, (2) **`registerPreviewPaths`**, (3) optional warm seed of cached thumb URL (no FSM jump). Never skip registration before warm path (regression: blank tiles).
+On shell revisit, handoff effect order is mandatory: (1) identity handoff bookkeeping, (2) **`registerPreviewPaths`**, (3) optional warm seed of cached thumb URL (no illegal FSM jump). Never skip registration before warm path (regression: blank tiles).
 
-Warm revisit: set `gridSlotAspectSettled` up front when `skipIntrinsicRatioTransition` is true (geometry ready); honor that flag to suppress slot-shrink animation; complete reveal via the legal delivery path (`media-ready` → `content-fade-in` → `content-visible`, or `media-ready` → `content-visible` when skip-fade is allowed). **Never** transition `loading-surface-visible` → `content-visible`.
+**Identity handoff vs slot resize (mandatory):**
 
-Grid intrinsic sharp content (`<img [src]>`) MUST NOT mount until `gridSlotAspectSettled` (parent slot committed final `--media-aspect-ratio`, typically after `ratio-known-contain` `transitionend`, or immediately on warm revisit when session aspect is prefilled). Prevents landscape photos appearing letterboxed in a square slot during the 300ms shrink.
+- **Identity handoff key** = `mediaId | slotGeometry | downloadContext` only. It MUST NOT include measured slot pixels.
+- **Slot pixel changes** (including during the parent’s 300ms `aspect-ratio` transition) MUST NOT clear `resolvedUrl` or force `loading-surface-visible`. Tier refresh uses the separate `getState(mediaId, slotPixels)` subscription.
+- **Cold identity handoff** (new `mediaId` or geometry/context change): clear preview URLs, enter `loading-surface-visible`, reset `gridSlotAspectSettled` unless warm skip applies (below).
+- **Warm identity handoff** (grid intrinsic + session aspect + cached preview URL after `registerPreviewPaths`): MUST NOT clear `resolvedUrl` or regress to `loading-surface-visible`; set `gridSlotAspectSettled` when `skipIntrinsicRatioTransition` is true.
+
+Warm revisit: honor `skipIntrinsicRatioTransition` to suppress slot-shrink animation; complete reveal via the legal delivery path (`media-ready` → `content-fade-in` → `content-visible`, or `media-ready` → `content-visible` when skip-fade is allowed). **Never** transition `loading-surface-visible` → `content-visible`.
+
+### Sharp content DOM gate (FSM ≠ `<img>` mount)
+
+Layer opacity follows `[attr.data-state]` on `.media-display__viewport`. The sharp `<img>` is mounted only when `showSharpContent()` is true (template `@if`).
+
+| Gate | Rule |
+| --- | --- |
+| FSM | `content-fade-in` or `content-visible` for content-layer opacity choreography |
+| URL | `resolvedUrl` non-empty |
+| Grid intrinsic | `gridSlotAspectSettled` true before first mount (after `ratio-known-contain` `transitionend`, or immediately on warm revisit when session aspect is prefilled) |
+
+**Invariants (regression 2026-05-27):**
+
+- `data-state` MUST NOT remain `content-fade-in` / `content-visible` while `resolvedUrl` is empty — regress to `media-ready` or `loading-surface-visible` and re-reveal via delivery.
+- Reconcile logic MUST NOT unmount a mounted `<img>` solely because `gridSlotAspectSettled` is temporarily false during an in-flight parent aspect transition (URL loss only).
+- `goTo('content-fade-in' \| 'content-visible')` MUST be rejected when the DOM gate is not satisfied (redirect to `media-ready` or `loading-surface-visible`).
+
+Implementation: `media-display-sharp-content-gate.helpers.ts`, `shouldMountSharpContentLayer()`. Report: [`docs/migration/reports/media-grid-warm-revisit-regression-2026-05-27.md`](../../../migration/reports/media-grid-warm-revisit-regression-2026-05-27.md).
 
 `icon-only` is a service-level signal. The component renders `icon-only` only when explicitly returned by `MediaDownloadService`.
 
@@ -354,7 +377,10 @@ sequenceDiagram
 - [ ] `icon-only` state is only entered when the service explicitly returns it.
 - [ ] Image-like storage or `thumbnail_path` receives tier-appropriate signed preview; office without thumb stays `icon-only` without signing.
 - [ ] Warm grid revisit shows sharp content (ends in `content-visible`) when session ratio and cached URL exist after `registerPreviewPaths`, without `loading-surface-visible` → `content-visible` shortcut.
-- [ ] Slot-size threshold changes trigger a fresh service request and smooth transition between tiers/states.
+- [ ] Warm identity handoff does not clear `resolvedUrl` or force `loading-surface-visible` when session ratio and cached preview URL are present.
+- [ ] Resize during grid slot aspect animation does not clear `resolvedUrl` (identity handoff excludes slot pixels; tier refresh via `getState(mediaId, slotPixels)` only).
+- [ ] Every tile in `content-fade-in` or `content-visible` with a signed preview has a sharp `<img [src]>` in `.media-display__layer--content` (FSM and DOM gate aligned).
+- [ ] Slot-size threshold changes trigger a fresh service request and smooth transition between tiers/states without blanking an already-visible sharp image.
 - [ ] Error rendering in this component has no retry button or other action controls.
 - [ ] Retry behavior is owned by `MediaDownloadService` and/or parent shells.
 - [ ] Upload state is not represented in `MediaDisplayState` and is not accepted as a visual-state input.

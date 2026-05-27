@@ -44,7 +44,8 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 
 - One **canonical entry** per module/feature (parent spec); children are linked, not duplicated across `ui/` vs `service/`.
 - Line limits and required sections are enforced by `node scripts/lint-specs.mjs` (see `scripts/lint-specs.mjs` for caps).
-- **Lint scope:** Element-spec rules apply only to contract markdown under `docs/specs/` that pass `shouldIncludeSpecFile()` in `scripts/lint-specs.mjs`. **Excluded:** `GOVERNANCE-*.md`, files under `system/security/`, named technical annexes (e.g. address-resolver algorithm docs), `*.supplement.md` slices, and other paths documented in that function — those stay in-repo but are not held to the element-spec template.
+- **Parent spec line cap:** **180** lines (error), **150** (warn). Parents over the cap must be split; normative detail moves to child files with plain Markdown links (no duplicate bodies).
+- **Lint scope:** Element-spec rules apply only to contract markdown under `docs/specs/` that pass `shouldIncludeSpecFile()` in `scripts/lint-specs.mjs`. **Excluded from parent cap / element-spec skeleton:** `GOVERNANCE-*.md`, files under `system/security/`, named technical annexes, **split children** (`*.supplement.md`, `*.acceptance-criteria.md`, `parent-name.*.md` slices), and other paths documented in `isSplitChildSpec()` / `shouldIncludeSpecFile()` in `scripts/lint-specs.mjs`.
 - **Split strategy:** adapter-shaped → `service/<module>/adapters/*.adapter.md`; AC/FSM/visual tables → concern slices in the same folder (e.g. `.acceptance-criteria.md`). Authoritative rules: root `AGENTS.md` (**Spec split and organization policy**).
 
 ## References

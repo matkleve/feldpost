@@ -12,7 +12,6 @@ import { UploadBatchService } from './upload-batch.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import { UploadProjectLocationsAdapter } from './adapters/upload-project-locations.adapter';
-import { detectProjectAddressTrayScenario } from './upload-batch-project-tray.helpers';
 import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import {
   buildChosenPlacementPatch,
@@ -34,6 +33,7 @@ import {
   isGroupBlocked,
   isJobBlocked,
   pickCollapseStage,
+  pickDiscriminatingField,
   isExifAuthoritativeOverWeakFilenameStreet,
 } from './upload-location-resolution.helpers';
 import {
@@ -126,43 +126,12 @@ export class UploadLocationResolutionService {
     this.syncBatchDisambiguationAggregates(batchId);
   }
 
-  /** Step 2 — project address precedence once per batch. */
-  async registerBatchProjectTrayIfNeeded(batchId: string): Promise<void> {
-    if (this.batchProjectTrayRegistered.has(batchId)) {
-      return;
-    }
-    const jobs = this.jobState.jobs().filter((j) => j.batchId === batchId);
-    const projectId = jobs[0]?.projectId;
-    if (!projectId) {
-      return;
-    }
-    const rows = await this.projectLocations.listProjectLocations(projectId);
-    const scenario = detectProjectAddressTrayScenario(jobs, rows);
-    if (!scenario) {
-      return;
-    }
-    this.batchProjectTrayRegistered.add(batchId);
-    const kind = scenario === 'a' ? 'project_address_a' : 'project_address_b';
-    const candidates: UploadAddressCandidate[] = rows
-      .filter((r) => r.latitude != null && r.longitude != null)
-      .map((r) => ({
-        id: `proj-loc-${r.locationId}`,
-        addressLabel: r.addressLabel ?? [r.street, r.city].filter(Boolean).join(', '),
-        lat: r.latitude!,
-        lng: r.longitude!,
-        city: r.city,
-        score: 1,
-      }));
-    this.registerDisambiguationGroup({
-      batchId,
-      queryKey: `project-address|${projectId}|${scenario}`,
-      folderDisplayPath: '',
-      titleAddress: candidates[0]?.addressLabel ?? 'Project location',
-      jobIds: jobs.map((j) => j.id),
-      candidates,
-      disambiguationKind: kind,
-      trayStep: '2',
-    });
+  /**
+   * @deprecated Removed — project location is bias-only (Branch B), not an address fallback.
+   * @see docs/specs/service/media-upload-service/address-resolution-model.md
+   */
+  async registerBatchProjectTrayIfNeeded(_batchId: string): Promise<void> {
+    return;
   }
 
   /**
@@ -224,6 +193,26 @@ export class UploadLocationResolutionService {
     }
 
     if (groupState.status === 'ambiguous' && groupState.candidates?.length) {
+      if (groupState.geocodeBranch === 'branch_c') {
+        const discriminatingField =
+          groupState.discriminatingField ??
+          pickDiscriminatingField(groupState.candidates) ??
+          undefined;
+        this.registerDisambiguationGroup({
+          batchId: job.batchId,
+          queryKey: buildDisambiguationQueryKey(job.groupingKey),
+          folderDisplayPath: groupState.folderDisplayPath,
+          titleAddress: groupState.titleAddressLabel,
+          jobIds: groupState.jobIds,
+          candidates: groupState.candidates,
+          localityHint: deriveLocalityHint(job.relativePath),
+          disambiguationKind: 'city_step',
+          trayStep: '1a',
+          discriminatingField,
+          collapseStage: pickCollapseStage(groupState.candidates, groupState.jobIds.length),
+        });
+        return 'held';
+      }
       this.registerDisambiguationGroup({
         batchId: job.batchId,
         queryKey: buildDisambiguationQueryKey(job.groupingKey),
@@ -430,19 +419,47 @@ export class UploadLocationResolutionService {
   private registerTrayStepGroup(batchId: string, groupState: UploadGroupResolutionState): void {
     const step = groupState.trayStep ?? '1a';
     const kind = step === '1b' ? 'house_step' : 'city_step';
+    const candidates = groupState.candidates ?? [];
+    const discriminatingField =
+      groupState.discriminatingField ??
+      (candidates.length ? pickDiscriminatingField(candidates) ?? undefined : undefined);
     this.registerDisambiguationGroup({
       batchId,
       queryKey: buildDisambiguationQueryKey(groupState.groupingKey),
       folderDisplayPath: groupState.folderDisplayPath,
       titleAddress: groupState.titleAddressLabel,
       jobIds: groupState.jobIds,
-      candidates: [],
+      candidates,
       disambiguationKind: kind,
       trayStep: step,
-      confirmedCity: groupState.confirmedCity ?? null,
+      confirmedCity: groupState.confirmedCity ?? groupState.candidate?.city ?? null,
       step1bGate: step === '1b' ? 'active' : 'disabled',
       projectCentroid: groupState.projectCentroid,
+      discriminatingField,
+      collapseStage: candidates.length
+        ? pickCollapseStage(candidates, groupState.jobIds.length)
+        : undefined,
     });
+    if (step === '1b' && groupState.confirmedCity) {
+      void this.loadHouseNumbersForGroup(
+        this._groups().find(
+          (g) =>
+            g.batchId === batchId &&
+            g.queryKey === buildDisambiguationQueryKey(groupState.groupingKey),
+        )?.id,
+      );
+    }
+  }
+
+  private async loadHouseNumbersForGroup(groupId: string | undefined): Promise<void> {
+    if (!groupId) {
+      return;
+    }
+    const group = this._groups().find((g) => g.id === groupId);
+    if (!group?.confirmedCity?.trim()) {
+      return;
+    }
+    await this.confirmTrayCity(groupId, group.confirmedCity);
   }
 
   /** Step 1A: user confirmed city → unlock 1B and load house numbers. */
@@ -515,6 +532,8 @@ export class UploadLocationResolutionService {
       projectCentroid?: UploadDisambiguationGroup['projectCentroid'];
       citySuggestions?: string[];
       houseNumberCandidates?: UploadAddressCandidate[];
+      discriminatingField?: UploadDisambiguationGroup['discriminatingField'];
+      collapseStage?: UploadDisambiguationGroup['collapseStage'];
     },
     options?: { activateTray?: boolean },
   ): void {
@@ -546,10 +565,13 @@ export class UploadLocationResolutionService {
       ...group,
       jobIds,
       candidates: input.candidates.length ? input.candidates : group.candidates,
-      collapseStage: pickCollapseStage(
-        input.candidates.length ? input.candidates : group.candidates,
-        jobIds.length,
-      ),
+      collapseStage:
+        input.collapseStage ??
+        pickCollapseStage(
+          input.candidates.length ? input.candidates : group.candidates,
+          jobIds.length,
+        ),
+      discriminatingField: input.discriminatingField ?? group.discriminatingField,
       disambiguationKind: input.disambiguationKind ?? group.disambiguationKind ?? 'geocode',
       trayStep: input.trayStep ?? group.trayStep,
       confirmedCity: input.confirmedCity ?? group.confirmedCity,
@@ -618,8 +640,13 @@ export class UploadLocationResolutionService {
     group: UploadGroupResolutionState,
   ): Promise<UploadGroupResolutionState> {
     const so = group.searchObject;
-    const street = [so.street, so.houseNumber].filter(Boolean).join(' ').trim();
-    const countryCode = so.country?.trim().toLowerCase();
+    const config = this.locationConfig.getConfig();
+    const street = so.street?.trim() ?? '';
+    const countryCode = (
+      so.country?.trim() ||
+      config.defaultGeocodeCountry ||
+      'AT'
+    ).toLowerCase();
     if (!street || !countryCode) {
       const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
       this.orchestrator.patchGroupState(batchId, partial);
@@ -635,13 +662,18 @@ export class UploadLocationResolutionService {
       this.jobState.setPhase(jobId, 'resolving_location');
     }
 
-    const config = this.locationConfig.getConfig();
-    const geocodeRequest = {
-      street,
-      city: so.city ?? group.projectCentroid?.city ?? undefined,
-      postcode: so.postcode ?? undefined,
-      countryCode,
-    };
+    const geocodeRequest =
+      group.geocodeBranch === 'branch_c'
+        ? {
+            street,
+            countryCode,
+          }
+        : {
+            street: [so.street, so.houseNumber].filter(Boolean).join(' ').trim(),
+            city: so.city ?? group.projectCentroid?.city ?? undefined,
+            postcode: so.postcode ?? undefined,
+            countryCode,
+          };
 
     let hits;
     if (group.geocodeBranch === 'branch_b' && group.projectCentroid) {
@@ -694,32 +726,48 @@ export class UploadLocationResolutionService {
     });
 
     if (outcome.kind === 'auto') {
+      const autoCandidate = outcome.candidate;
+      if (group.geocodeBranch === 'branch_c' && !so.houseNumber?.trim()) {
+        const needsHouse: UploadGroupResolutionState = {
+          ...group,
+          status: 'needsTray',
+          trayStep: '1b',
+          candidate: autoCandidate,
+          confirmedCity: autoCandidate.city ?? null,
+          candidates: [autoCandidate],
+        };
+        this.orchestrator.patchGroupState(batchId, needsHouse);
+        return needsHouse;
+      }
       const resolved: UploadGroupResolutionState = {
         ...group,
         status: 'resolved',
-        candidate: outcome.candidate,
+        candidate: autoCandidate,
       };
       this.orchestrator.patchGroupState(batchId, resolved);
       return resolved;
     }
 
     if (outcome.kind === 'ambiguous') {
+      const discriminatingField = pickDiscriminatingField(outcome.candidates);
       const ambiguous: UploadGroupResolutionState = {
         ...group,
         status: 'ambiguous',
         candidates: outcome.candidates,
-        trayStep: '3',
+        trayStep: group.geocodeBranch === 'branch_c' ? '1a' : '3',
+        discriminatingField: discriminatingField ?? undefined,
       };
       this.orchestrator.patchGroupState(batchId, ambiguous);
       return ambiguous;
     }
 
-    if (group.geocodeBranch === 'branch_b') {
+    if (group.geocodeBranch === 'branch_c' || group.geocodeBranch === 'branch_b') {
       const fallbackTray: UploadGroupResolutionState = {
         ...group,
         status: 'needsTray',
         trayStep: '1a',
-        geocodeBranch: 'branch_c',
+        geocodeBranch: group.geocodeBranch,
+        candidates: [],
       };
       this.orchestrator.patchGroupState(batchId, fallbackTray);
       return fallbackTray;

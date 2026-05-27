@@ -8,6 +8,7 @@ export const MOCK_ORCHESTRATOR_BATCH_ID = 'dev-mock-batch';
 
 export const UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS: EnqueueTrayItemInput[] = [
   {
+    dialogueUnitId: 'mock-unit-city-house',
     producerId: 'mock',
     batchId: MOCK_ORCHESTRATOR_BATCH_ID,
     questionKey: 'upload.resolver.question.city',
@@ -22,6 +23,7 @@ export const UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS: EnqueueTrayItemInput[
     ],
   },
   {
+    dialogueUnitId: 'mock-unit-city-house',
     producerId: 'mock',
     batchId: MOCK_ORCHESTRATOR_BATCH_ID,
     questionKey: 'upload.resolver.question.houseStep',
@@ -36,6 +38,7 @@ export const UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS: EnqueueTrayItemInput[
     ],
   },
   {
+    dialogueUnitId: 'mock-unit-source',
     producerId: 'mock',
     batchId: MOCK_ORCHESTRATOR_BATCH_ID,
     questionKey: 'upload.resolver.question.source',
@@ -48,6 +51,7 @@ export const UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS: EnqueueTrayItemInput[
     ],
   },
   {
+    dialogueUnitId: 'mock-unit-address',
     producerId: 'mock',
     batchId: MOCK_ORCHESTRATOR_BATCH_ID,
     questionKey: 'upload.resolver.question.address',

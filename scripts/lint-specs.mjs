@@ -4,7 +4,7 @@
  * Element Spec Lint — validates markdown specs under docs/specs recursively
  *
  * Rules:
- *   spec-max-lines        Max total lines per spec (default: 250, warn: 200)
+ *   spec-max-lines        Max total lines per parent spec (default: 180, warn: 150)
  *   spec-required-sections Required sections present in every spec
  *   spec-section-order     Sections appear in the canonical order
  *   what-it-is-length      "What It Is" section max lines (default: 5)
@@ -31,8 +31,8 @@ import { join, basename, resolve, relative } from "node:path";
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
-const DEFAULT_MAX_LINES = 600;
-const DEFAULT_WARN_LINES = 400;
+const DEFAULT_MAX_LINES = 180;
+const DEFAULT_WARN_LINES = 150;
 const DEFAULT_MAX_WHAT_IT_IS = 5;
 const DEFAULT_MAX_WHAT_IT_LOOKS_LIKE = 40;
 
@@ -245,7 +245,7 @@ function ruleMaxLines(parsed, config) {
     diagnostics.push({
       severity: "error",
       rule: "spec-max-lines",
-      message: `Spec has ${parsed.totalLines} lines (max: ${config.maxLines}). Split into child specs with cross-references.`,
+      message: `Spec has ${parsed.totalLines} lines (max: ${config.maxLines}). Split into child specs (*.supplement.md, *.acceptance-criteria.md, or parent-name.slice.md) and link from the parent.`,
       line: 1,
     });
   } else if (parsed.totalLines > config.warnLines) {
@@ -413,6 +413,20 @@ function parseArgs(argv) {
   return config;
 }
 
+/** Split slices (linked from parent) — not subject to parent line cap. */
+function isSplitChildSpec(filePath) {
+  const base = basename(filePath).toLowerCase();
+  if (base.endsWith(".supplement.md") || base.endsWith(".acceptance-criteria.md")) {
+    return true;
+  }
+  const stem = base.slice(0, -".md".length);
+  const dotIndex = stem.indexOf(".");
+  if (dotIndex <= 0) {
+    return false;
+  }
+  return stem.length > dotIndex + 1;
+}
+
 function shouldIncludeSpecFile(filePath, specRootDir) {
   const lowerName = basename(filePath).toLowerCase();
   if (!lowerName.endsWith(".md")) {
@@ -461,7 +475,7 @@ function shouldIncludeSpecFile(filePath, specRootDir) {
       return false;
     }
     // Split-out reference bodies (linked from parent specs; avoid duplicate element-spec skeleton).
-    if (relLower.endsWith(".supplement.md")) {
+    if (isSplitChildSpec(filePath)) {
       return false;
     }
   }

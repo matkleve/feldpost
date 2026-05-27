@@ -8,6 +8,7 @@ import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import {
   bundleAllTerminal,
+  countDialogueUnits,
   firstActionableIndex,
   itemStatus,
 } from './upload-resolver-tray-orchestrator.helpers';
@@ -20,7 +21,10 @@ import type {
   TrayItemStatus,
   TrayResolveItem,
 } from './upload-resolver-tray-orchestrator.types';
-import { PRESENTATION_BUNDLE_WINDOW_MS } from './upload-resolver-tray-orchestrator.types';
+import {
+  PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS,
+  PRESENTATION_BUNDLE_WINDOW_MS,
+} from './upload-resolver-tray-orchestrator.types';
 
 @Injectable({ providedIn: 'root' })
 export class UploadResolverTrayOrchestratorService {
@@ -109,6 +113,7 @@ export class UploadResolverTrayOrchestratorService {
   enqueueItem(input: EnqueueTrayItemInput): string {
     const item: TrayResolveItem = {
       id: crypto.randomUUID(),
+      dialogueUnitId: input.dialogueUnitId,
       producerId: input.producerId,
       batchId: input.batchId,
       questionKey: input.questionKey,
@@ -131,7 +136,7 @@ export class UploadResolverTrayOrchestratorService {
     }
 
     this.ensureCollecting(input.batchId);
-    this.appendToCollecting(item);
+    this.appendToCollectingWithUnitCap(item);
 
     if (this.scanIdleBatches.has(input.batchId)) {
       this.closeCollectingWindow();
@@ -260,6 +265,7 @@ export class UploadResolverTrayOrchestratorService {
     this.clearCollectTimer();
     const created: TrayResolveItem[] = items.map((input) => ({
       id: crypto.randomUUID(),
+      dialogueUnitId: input.dialogueUnitId,
       producerId: input.producerId,
       batchId: input.batchId,
       questionKey: input.questionKey,
@@ -319,6 +325,24 @@ export class UploadResolverTrayOrchestratorService {
     this._collectingBundle.set(bundle);
     this.collectStartedAt = Date.now();
     this.scheduleCollectTimer();
+  }
+
+  private appendToCollectingWithUnitCap(item: TrayResolveItem): void {
+    const collecting = this._collectingBundle();
+    if (collecting?.batchId === item.batchId) {
+      const prospective = [...collecting.items, item];
+      const isNewUnit = !collecting.items.some(
+        (entry) => entry.dialogueUnitId === item.dialogueUnitId,
+      );
+      if (
+        isNewUnit &&
+        countDialogueUnits(prospective) > PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS
+      ) {
+        this.closeCollectingWindow();
+        this.ensureCollecting(item.batchId);
+      }
+    }
+    this.appendToCollecting(item);
   }
 
   private appendToCollecting(item: TrayResolveItem): void {

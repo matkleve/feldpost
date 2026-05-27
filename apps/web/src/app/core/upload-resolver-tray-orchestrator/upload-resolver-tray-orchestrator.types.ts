@@ -4,6 +4,7 @@
  */
 
 export const PRESENTATION_BUNDLE_WINDOW_MS = 5000;
+export const PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS = 5;
 
 /** When true, tray and upload-location-resolution route through the orchestrator. */
 export const USE_TRAY_ORCHESTRATOR = true;
@@ -25,6 +26,8 @@ export interface TrayResolveOption {
 
 export interface TrayResolveItem {
   id: string;
+  /** One user-facing question in the bundle (1A+1B share one id). */
+  dialogueUnitId: string;
   producerId: string;
   batchId: string;
   questionKey: string;
@@ -69,6 +72,7 @@ export interface TrayBundleCompletedEvent {
 }
 
 export interface EnqueueTrayItemInput {
+  dialogueUnitId: string;
   producerId: string;
   batchId: string;
   questionKey: string;

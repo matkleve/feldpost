@@ -24,6 +24,19 @@ Columns: `L` loading-surface, `S` staged-content, `C` content, `I` icon-only, `E
 
 Implementation: `apps/web/src/app/shared/media-display/media-display.component.scss` (`media-display-fsm-layers` mixin).
 
+## Sharp content DOM gate matrix
+
+> **Agent contract:** Opacity follows `data-state` below. The sharp `<img>` mounts only when `shouldMountSharpContentLayer()` is true. See `media-display.md` § Sharp content DOM gate.
+
+| `data-state` | Content layer opacity (SCSS) | `<img>` in `.media-display__layer--content` |
+| --- | --- | --- |
+| `content-fade-in` | 1 | Yes iff `resolvedUrl` + grid gate satisfied |
+| `content-visible` | 1 | Yes iff `resolvedUrl` + grid gate satisfied |
+| `media-ready` | 0 (staged may be 1) | No |
+| `loading-surface-visible` / `ratio-known-contain` | 0 | No |
+
+**Forbidden:** `content-visible` (or `content-fade-in`) with empty content layer and empty `resolvedUrl` — indicates FSM/DOM desync; fix in `media-display.component.ts` reconcile/handoff, not CSS.
+
 ## State Rendering Matrix
 
 | State                     | Class        | Primary HTML layer(s)                    | Required CSS selector behavior                                                            | Transition entry/exit notes                           |
@@ -77,9 +90,10 @@ No triad divergence is required for this component.
 
 ## Internal Behavior
 
-- On `mediaId` change: transition to `loading-surface-visible`, then subscribe to `MediaDownloadService.getState(mediaId, slotSizeRem)`.
+- On **identity handoff** (`mediaId`, `slotGeometry`, or `downloadContext` change): cold path clears URLs and enters `loading-surface-visible`; warm grid path preserves URL when session ratio + cached preview exist.
+- On `mediaId` change: transition to `loading-surface-visible` (unless warm grid skip), then subscribe to `MediaDownloadService.getState(mediaId, slotPixels)`.
 - On `maxWidth` / `maxHeight` change: set `--media-display-max-width` / `--media-display-max-height` on host.
-- On host resize: measure short edge via `ResizeObserver`, convert px to `rem` using computed root font-size, and pass `slotSizeRem` to `MediaDownloadService`.
+- On host resize: measure viewport via `ResizeObserver`, update `slotPixels` / `slotSizeRem`, and re-subscribe `getState` for tier — MUST NOT treat pixel delta alone as identity handoff.
 - On contain-path ratio confirmation: transition to `ratio-known-contain`.
 - On staged asset readiness: transition to `media-ready`.
 - On reveal start: transition to `content-fade-in`.
