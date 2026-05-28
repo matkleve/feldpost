@@ -135,7 +135,7 @@ export const toggleGroupItemVariants = cva(
     '[&_.material-icons]:text-[1.125rem] [&_.material-icons]:leading-none',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
-    'data-[state=on]:bg-[color:color-mix(in_srgb,var(--interaction-selected-ink)_10%,transparent)] data-[state=on]:text-[color:var(--interaction-selected-ink)] data-[state=on]:shadow-none',
+    'data-[state=on]:bg-[color:color-mix(in_srgb,var(--interaction-selected-ink)_10%,transparent)] data-[state=on]:text-[color:var(--interaction-selected-ink)] data-[state=on]:[&_.material-icons]:text-[color:var(--interaction-selected-ink)] data-[state=on]:shadow-none',
     'data-[state=on]:hover:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=on]:hover:text-primary data-[state=on]:hover:[&_.material-icons]:text-primary',
     'data-[state=off]:hover:text-primary data-[state=off]:hover:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=off]:hover:[&_.material-icons]:text-primary',
     'data-[attention=true]:data-[state=off]:text-[color:var(--warning)] data-[attention=true]:data-[state=off]:shadow-[0_0_0_1px_color-mix(in_srgb,var(--warning)_38%,transparent)]',

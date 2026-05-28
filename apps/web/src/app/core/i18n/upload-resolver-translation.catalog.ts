@@ -85,10 +85,10 @@ export const UPLOAD_RESOLVER_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry
     it: 'Avanti',
   },
   {
-    key: 'upload.resolver.done',
-    original: 'Done',
+    key: 'upload.resolver.finish',
+    original: 'Finish',
     context: 'Tray footer on the last question in the queue.',
-    en: 'Done',
+    en: 'Finish',
     de: 'Fertig',
     it: 'Fine',
   },

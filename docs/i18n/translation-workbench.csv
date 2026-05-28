@@ -776,7 +776,7 @@ upload.resolver.source.option.photo,Photo location: {address},apps/web/src/app/f
 upload.resolver.source.option.both,Use folder name and photo GPS,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:sourceOptionLabel,Use folder name and photo GPS,Ordnername und Foto-GPS verwenden,Usa nome cartella e GPS della foto
 upload.resolver.source.option.none,Set in file details,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:sourceOptionLabel,Set in file details,In Dateidetails festlegen,Imposta nei dettagli file
 upload.resolver.next,Next,apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel,Footer when more questions remain,Next,Weiter,Avanti
-upload.resolver.done,Done,apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel,Footer on last question,Done,Fertig,Fine
+upload.resolver.finish,Finish,apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel,Footer on last question in queue,Finish,Fertig,Fine
 upload.resolver.question.contextDistance,Is this photo in the right project area?,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion,Is this photo in the right project area?,Liegt dieses Foto im richtigen Projektgebiet?,Questa foto è nell'area di progetto corretta?
 upload.resolver.title.fallbackAddress,this address,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion,this address,diese Adresse,questo indirizzo
 upload.resolver.folder.aria,Upload folder: {path},apps/web/src/app/features/upload/upload-resolver-tray.component.html attr:title,Upload folder: {path},Upload-Ordner: {path},Cartella di caricamento: {path}

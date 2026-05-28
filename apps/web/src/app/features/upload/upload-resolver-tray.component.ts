@@ -209,7 +209,7 @@ export class UploadResolverTrayComponent implements OnInit {
     if (hasMoreInBundle || hasMoreBundles) {
       return this.t('upload.resolver.next', 'Next');
     }
-    return this.t('upload.resolver.done', 'Done');
+    return this.t('upload.resolver.finish', 'Finish');
   });
 
   readonly trayMode = computed<UploadResolverTrayMode>(() => {

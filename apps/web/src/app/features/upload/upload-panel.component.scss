@@ -16,7 +16,8 @@
   --upload-panel-row-gap: var(--spacing-3);
   --upload-panel-icon-size: 1.25rem;
   --upload-area-gap: var(--upload-panel-inset);
-  --upload-row-height: calc(var(--spacing-6) + (var(--spacing-1) * 2));
+  // Stride per file row (thumb + vertical inset); must match `upload-panel-item` geometry.
+  --upload-row-height: calc(var(--spacing-5) + var(--spacing-1) * 2);
   --upload-visible-rows: 5;
 
   display: flex;
@@ -457,14 +458,6 @@
       transition:
         background 80ms ease-out,
         color 80ms ease-out;
-
-      &[data-state='on']:not([data-destructive-hint='true']) .material-icons {
-        color: var(--primary);
-      }
-
-      &[data-state='on']:not([data-destructive-hint='true']):hover:not(:disabled) .material-icons {
-        color: var(--foreground);
-      }
     }
 
     [hlmToggleGroupItem][data-destructive-hint='true'] {
@@ -574,13 +567,19 @@
     padding: 0;
     margin: 0;
     min-height: 0;
-    max-height: calc(
-      var(--upload-row-height) * var(--upload-visible-rows) + var(--upload-panel-inset) *
-        (var(--upload-visible-rows) - 1)
-    );
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
+    max-height: none;
+    overflow-y: visible;
+
+    // Scroll only when more than five rows; cap height to exactly five visible strides.
+    // @see docs/specs/component/upload/upload-panel.md — lane overflow wrapper
+    &--scrollable {
+      max-height: calc(
+        var(--upload-row-height) * var(--upload-visible-rows) + var(--upload-panel-inset) *
+          (var(--upload-visible-rows) - 1)
+      );
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
   }
 
   // ── File list ──────────────────────────────────────────────────────────────

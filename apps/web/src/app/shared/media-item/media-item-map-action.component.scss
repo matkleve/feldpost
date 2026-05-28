@@ -67,8 +67,8 @@ button.media-item-map-action__trigger {
 .media-item-map-action__spinner {
   width: 1rem;
   height: 1rem;
-  border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
-  border-top-color: var(--primary);
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
   border-radius: var(--radius-full);
   animation: media-item-map-action-spin 0.7s linear infinite;
 }

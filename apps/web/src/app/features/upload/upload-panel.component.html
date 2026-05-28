@@ -281,7 +281,10 @@
 
   <!-- Per-file progress list -->
   @if (visibleLaneJobs().length > 0) {
-    <div class="upload-panel__lane-overflow">
+    <div
+      class="upload-panel__lane-overflow"
+      [class.upload-panel__lane-overflow--scrollable]="visibleLaneJobs().length > 5"
+    >
       <ul class="upload-panel__file-list" aria-label="Upload queue">
         @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
           <app-upload-panel-item

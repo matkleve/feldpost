@@ -11,20 +11,59 @@
 // Ghost list row — matches nav `.nav__link` surface (frosted panel context).
 // @see apps/web/src/app/features/nav/nav.component.scss
 .upload-panel__file-main {
+  --upload-item-thumb-size: var(--spacing-5);
+  --upload-item-menu-hit: 1.75rem;
+  --upload-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --upload-item-row-height: var(
+    --upload-row-height,
+    calc(var(--upload-item-thumb-size) + var(--spacing-1) * 2)
+  );
+
   display: grid;
-  grid-template-columns: var(--spacing-6) minmax(0, 1fr);
+  grid-template-columns: var(--upload-item-thumb-size) minmax(0, 1fr);
   align-items: center;
-  column-gap: var(--spacing-3);
-  min-height: calc(var(--spacing-6) + (var(--spacing-1) * 2));
-  padding-block: var(--spacing-1);
+  column-gap: var(--spacing-2);
+  min-height: var(--upload-item-row-height);
+  padding-block: calc(var(--spacing-1) * 0.5);
   padding-inline-start: var(--spacing-1);
-  padding-inline-end: calc(var(--spacing-1) + 2rem + var(--spacing-2));
+  padding-inline-end: calc(var(--spacing-1) + var(--upload-item-menu-hit) + var(--spacing-2));
   background: transparent;
   border: 0;
   box-shadow: none;
-  transition: background 80ms ease-out;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
   position: relative;
   border-radius: var(--container-radius-control);
+
+  // Row hover — matches media-detail `.detail-row` center tint + primary ink.
+  // @see apps/web/src/app/shared/workspace-pane/media-detail/_detail-row-slots.scss
+  &:hover:not(.upload-panel__file-main--selected),
+  &:focus-within:not(.upload-panel__file-main--selected) {
+    background: var(--upload-item-hover-bg);
+
+    .upload-panel__file-name,
+    .upload-panel__file-status,
+    .upload-panel__file-status .material-icons,
+    .upload-panel__success-indicator {
+      color: var(--primary);
+    }
+
+    .upload-panel__row-action--menu {
+      color: var(--primary);
+    }
+
+    .upload-panel__filetype-chip ::ng-deep .chip,
+    .upload-panel__filetype-chip ::ng-deep .chip__icon {
+      --chip-ink: var(--primary);
+      color: var(--primary);
+    }
+
+    .upload-panel__filetype-chip ::ng-deep .chip {
+      border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+      background: color-mix(in srgb, var(--primary) 14%, var(--background));
+    }
+  }
 }
 
 .upload-panel__row-main-action {
@@ -82,10 +121,21 @@
 .upload-panel__file-main--selectable.upload-panel__file-main--selected:hover,
 .upload-panel__file-main--selectable.upload-panel__file-main--selected:focus-within {
   background: color-mix(in srgb, var(--primary) 10%, transparent);
+
+  .upload-panel__file-name,
+  .upload-panel__file-status,
+  .upload-panel__file-status .material-icons,
+  .upload-panel__success-indicator {
+    color: var(--primary);
+  }
+
+  .upload-panel__row-action--menu {
+    color: var(--primary);
+  }
 }
 
 .upload-panel__file-main--has-menu .upload-panel__file-meta {
-  padding-inline-end: calc(2rem + var(--spacing-2));
+  padding-inline-end: calc(var(--upload-item-menu-hit) + var(--spacing-2));
 }
 
 .upload-panel__file-main--interactive {
@@ -109,9 +159,8 @@
   }
 }
 
-.upload-panel__file-main--interactive:hover {
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
-
+.upload-panel__file-main--interactive:hover,
+.upload-panel__file-main--interactive:focus-within {
   .upload-panel__thumbnail-helper {
     opacity: 0;
   }
@@ -123,10 +172,6 @@
   .upload-panel__row-action--right {
     opacity: 1;
   }
-}
-
-.upload-panel__file-main--interactive:hover .upload-panel__file-name {
-  color: var(--primary);
 }
 
 .upload-panel__file-main--interactive:focus-visible {
@@ -142,8 +187,8 @@
 .upload-panel__thumbnail-container {
   position: relative;
   z-index: 2;
-  width: var(--spacing-6);
-  height: var(--spacing-6);
+  width: var(--upload-item-thumb-size);
+  height: var(--upload-item-thumb-size);
 }
 
 .upload-panel__thumbnail-helper {
@@ -178,7 +223,7 @@
   color: var(--primary);
 
   .material-icons {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     line-height: var(--line-height-solid);
   }
 }
@@ -199,8 +244,8 @@
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--card) 35%, transparent);
-  border-top-color: var(--primary);
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
   animation: upload-item-spin 700ms linear infinite;
   z-index: 1;
   pointer-events: none;
@@ -218,10 +263,10 @@
 // Matches upload-panel location-mode row / intake ghost hover (primary tint).
 // @see upload-panel.component.scss — &__location-mode-row, &__intake-btn
 .upload-panel__row-action--menu {
-  width: 2rem;
-  height: 2rem;
-  min-width: 2rem;
-  min-height: 2rem;
+  width: var(--upload-item-menu-hit);
+  height: var(--upload-item-menu-hit);
+  min-width: var(--upload-item-menu-hit);
+  min-height: var(--upload-item-menu-hit);
   padding: 0;
   border: 0;
   border-radius: var(--container-radius-control);
@@ -243,7 +288,7 @@
   }
 
   .material-icons {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     line-height: var(--line-height-solid);
   }
 }
@@ -252,7 +297,7 @@
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  gap: 2px;
+  gap: 0;
   min-width: 0;
   position: relative;
   z-index: 2;
@@ -269,16 +314,32 @@
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
   color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 80ms ease-out;
 }
 
 .upload-panel__filetype-chip {
   flex-shrink: 0;
+}
+
+// Compact file-type badge in dense upload rows (chip default is intake/dropzone scale).
+// @see docs/specs/component/filters/chip.md
+.upload-panel__filetype-chip ::ng-deep .chip {
+  --chip-height: var(--spacing-3);
+  --chip-padding-inline: var(--spacing-1);
+  --chip-icon-size: calc(var(--spacing-2) + var(--spacing-1) * 0.5);
+  font-size: calc(var(--font-size-2xs) * 0.92);
+  letter-spacing: 0.02em;
+  transition:
+    background 80ms ease-out,
+    border-color 80ms ease-out,
+    color 80ms ease-out;
 }
 
 .upload-panel__file-main--has-menu .upload-panel__filetype-chip {
@@ -288,8 +349,8 @@
 .upload-panel__status-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  margin-top: 2px;
+  gap: var(--spacing-1);
+  margin-top: 0;
   flex-wrap: nowrap;
   min-width: 0;
 }
@@ -297,14 +358,20 @@
 .upload-panel__file-status {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-1);
   margin: 0;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-tight);
   color: var(--muted-foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+  transition: color 80ms ease-out;
+
+  .material-icons {
+    transition: color 80ms ease-out;
+  }
 }
 
 .upload-panel__file-status--awaiting_placement {
@@ -312,8 +379,8 @@
 }
 
 .upload-panel__file-status .material-icons {
-  font-size: 0.875rem;
-  line-height: 1;
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-solid);
 }
 
 .upload-panel__file-status--complete {
@@ -329,7 +396,7 @@
 }
 
 .upload-panel__success-indicator {
-  font-size: 1rem;
+  font-size: var(--font-size-xs);
   vertical-align: middle;
 }
 
