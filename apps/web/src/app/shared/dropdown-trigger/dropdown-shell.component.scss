@@ -26,7 +26,7 @@
   }
 
   // Locks toolbar menu width (test: 18rem) and max height (test: 18rem×1.6) to the viewport clamp.
-  // Scroll lives on `.standard-dropdown__items` so shell `spacing-2` padding stays visible at the bottom.
+  // Scroll lives on `.standard-dropdown__items` so shell padding stays visible at the bottom (min-height floor independent of inset token).
   // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
   :host.toolbar-dropdown {
     box-sizing: border-box;

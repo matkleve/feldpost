@@ -13,7 +13,7 @@ import { DropdownSearchActionAnchorDirective } from '../dropdown-trigger/dropdow
   templateUrl: './menu-panel-search-row.component.html',
   styleUrl: './menu-panel-search-row.component.scss',
   host: {
-    class: 'standard-dropdown__search min-h-tap-lg min-w-0 shrink-0 border-b border-border px-0 py-2 md:min-h-tap',
+    class: 'standard-dropdown__search min-h-tap-lg min-w-0 shrink-0 border-b border-border px-0 py-1 md:min-h-tap',
   },
 })
 export class MenuPanelSearchRowComponent {

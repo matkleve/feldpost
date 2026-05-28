@@ -17,7 +17,7 @@
   border-radius: 0;
 }
 
-// Media-detail project picker: shorter floor; shell carries spacing-2 inset.
+// Media-detail project picker: shorter floor; shell carries spacing-1 inset.
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 :host.projects-dropdown__shell--media-detail {
   --std-dropdown-min-height: 0;

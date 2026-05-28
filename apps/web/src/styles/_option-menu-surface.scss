@@ -6,6 +6,9 @@
 
 .option-menu-surface {
   @include frosted-chrome.floating-panel-shell;
+  // Toolbar / context menus — tighter inset than upload-resolver cards (tray keeps mixin spacing-2).
+  // @see docs/specs/component/filters/dropdown-system.md#padding-ownership-normative
+  padding: var(--spacing-1);
 }
 
 [data-theme='dark'] .option-menu-surface {
@@ -18,7 +21,7 @@
 // @see apps/web/src/app/features/upload/upload-resolver-tray.component.scss
 .option-menu-surface .standard-dropdown__items {
   gap: 2px;
-  scroll-padding-block-end: var(--spacing-2);
+  scroll-padding-block-end: var(--spacing-1);
 }
 
 // Projected list body: column gap between sections/rows inside the scroll host.

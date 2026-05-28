@@ -220,7 +220,7 @@ describe('NavComponent', () => {
     expect(avatar?.textContent?.trim()).toBe('?');
   });
 
-  it('shows Settings as the expanded avatar-row label', async () => {
+  it('shows Settings as the expanded avatar-row label even when full name is set', async () => {
     TestBed.resetTestingModule();
     await buildTestBed('john@example.com', { full_name: 'John Doe' });
 
@@ -228,7 +228,7 @@ describe('NavComponent', () => {
     fixture.detectChanges();
 
     const accountName = fixture.nativeElement.querySelector('.nav__account-name') as HTMLElement;
-    expect(accountName?.textContent?.trim()).toBe('John Doe');
+    expect(accountName?.textContent?.trim()).toBe('Settings');
   });
 
   it('uses the full name for the avatar initial when available', async () => {

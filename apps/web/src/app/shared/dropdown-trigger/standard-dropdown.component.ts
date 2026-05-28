@@ -14,7 +14,7 @@ import {
   templateUrl: './standard-dropdown.component.html',
   styleUrl: './standard-dropdown.component.scss',
   host: {
-    class: 'standard-dropdown flex min-h-0 flex-1 flex-col gap-y-2',
+    class: 'standard-dropdown flex min-h-0 flex-1 flex-col gap-y-1',
   },
 })
 export class StandardDropdownComponent {
