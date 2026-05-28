@@ -31,7 +31,9 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Map Basemap | component/map/map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
 | Map Marker Motion | ui/media-marker/media-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |
 | Map Preferences | ui/settings-overlay/settings-overlay.md | map tile and map-behavior defaults. |
+| Max distance for internet results (km) | ui/search-bar/search-tuning-settings.md | `contextDistanceMaxMeters`; realism cap from search anchor — also normative for upload forward-geocode far-hit rejection ([distance radii contract](../../service/search/search-tuning.distance-radii-contract.md)). |
 | Notifications | ui/settings-overlay/settings-overlay.md | preference defaults for in-app feedback and alerts. |
+| Org Search Tuning (`contextDistanceMaxMeters`) | service/media-upload-service/address-resolution-model.md | km cap for unrealistic Internet/upload geocode distance from anchor ([distance radii contract](../search/search-tuning.distance-radii-contract.md)). |
 | Password Recovery | ui/settings-overlay/account-page.md | reset email behavior and redirect target. |
 | Password Recovery | ui/settings-overlay/account-settings-section.md | reset email trigger behavior and redirect target handling. |
 | Password Security | ui/settings-overlay/account-page.md | policy messaging and re-auth requirement handling. |
@@ -48,4 +50,5 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Session | ui/settings-overlay/account-page.md | logout confirmation and scope behavior. |
 | Session | ui/settings-overlay/account-settings-section.md | explicit sign-out behavior and confirmation requirements. |
 | Theme | ui/settings-overlay/settings-overlay.md | active theme mode and persistence behavior. |
+| Upload location config (`exifAssistRadiusMeters`, `sourceAgreementRadiusMeters`) | service/media-upload-service/address-resolution-model.md | meter radii for EXIF fine-tune and text-vs-EXIF tray — not the org km slider ([upload-location-config.md](./upload-location-config.md)). |
 | Workspace Sort Defaults | ui/settings-overlay/settings-overlay.md | default sorting and ordering preferences. |

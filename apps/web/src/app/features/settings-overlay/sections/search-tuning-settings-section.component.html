@@ -99,6 +99,7 @@
     <div class="search-tuning-settings__control">
       <input
         id="search-tuning-debounce-range"
+        fpRangeProgress
         class="search-tuning-settings__range"
         type="range"
         min="100"
@@ -150,6 +151,7 @@
     <div class="search-tuning-settings__control">
       <input
         id="search-tuning-max-results-range"
+        fpRangeProgress
         class="search-tuning-settings__range"
         type="range"
         min="1"
@@ -201,6 +203,7 @@
     <div class="search-tuning-settings__control">
       <input
         id="search-tuning-street-min-range"
+        fpRangeProgress
         class="search-tuning-settings__range"
         type="range"
         min="3"
@@ -254,6 +257,7 @@
       <div class="search-tuning-settings__control">
         <input
           id="search-tuning-min-query-range"
+          fpRangeProgress
           class="search-tuning-settings__range"
           type="range"
           min="2"
@@ -277,7 +281,8 @@
       </div>
     </div>
 
-    <!-- Context distance (km, exponential) -->
+    <!-- Org realism cap: contextDistanceMaxMeters (m in DB, km in UI). Not exifAssistRadiusMeters (upload m). -->
+    <!-- @see docs/specs/service/search/search-tuning.distance-radii-contract.md -->
     <div class="search-tuning-settings__field">
       <div class="search-tuning-settings__field-header">
         <label hlmLabel for="search-tuning-context-distance">{{
@@ -298,13 +303,14 @@
         {{
           t(
             'settings.search_tuning.help.context_distance_km',
-            'When an internet result has no country code, it must be within this distance (km) of your search anchor — usually this photo\'s GPS, otherwise the map view or project center. It is not based on other media in the org (that would need a heavy query each search). Lower = stricter; higher = allow farther matches.'
+            'Max distance (km) from the search anchor — usually this photo\'s GPS, else map view or project center. Drops unrealistic Internet and upload geocode hits beyond this radius (stored as meters in org settings). Not other media in the org. Separate from upload EXIF fine-tuning (meters, which candidate matches GPS).'
           )
         }}
       </p>
       <div class="search-tuning-settings__control">
         <input
           id="search-tuning-context-distance-range"
+          fpRangeProgress
           class="search-tuning-settings__range"
           type="range"
           min="0"
@@ -356,6 +362,7 @@
       <div class="search-tuning-settings__control">
         <input
           id="search-tuning-weak-top-range"
+          fpRangeProgress
           class="search-tuning-settings__range"
           type="range"
           min="0"

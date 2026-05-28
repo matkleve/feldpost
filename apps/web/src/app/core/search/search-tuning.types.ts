@@ -27,6 +27,14 @@ export interface SearchTuningResolverConfig {
   maxDbContentResults: number;
   constrainedLimitMultiplier: number;
   shortPrefixLimitFloor: number;
+  /**
+   * Max distance from geographic search anchor (meters). UI: Settings → Search Tuning →
+   * "Max distance for internet results (km)" — slider shows km, persistence is always meters.
+   * Drops unrealistic Internet/search hits without country when beyond cap; normative for
+   * upload forward-geocode far-hit rejection (same org merged config).
+   * NOT `exifAssistRadiusMeters` (upload-local meters, fine-pick among candidates).
+   * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
+   */
   contextDistanceMaxMeters: number;
   remoteTopDistanceMeters: number;
   weakTopScoreThreshold: number;

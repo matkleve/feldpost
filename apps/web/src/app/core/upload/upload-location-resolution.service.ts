@@ -45,6 +45,9 @@ import {
   summarizeSearchObject,
   uploadAddressDebug,
   uploadPlacementLog,
+  uploadTraceDecision,
+  uploadTraceEnter,
+  uploadTraceExit,
 } from './upload-address-resolution.debug';
 import type { ExifCoords } from './upload.types';
 import { UploadLocationTrayProducerAdapter } from '../upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter';
@@ -142,8 +145,11 @@ export class UploadLocationResolutionService {
   async applyPreResolveFromOrchestrator(
     jobId: string,
   ): Promise<'continue' | 'held' | 'partial'> {
+    uploadTraceEnter('ulr', 'applyPreResolveFromOrchestrator', { jobId });
     const job = this.jobState.findJob(jobId);
     if (!job?.groupingKey) {
+      uploadTraceDecision('ulr', 'continue — job has no groupingKey', { jobId });
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue');
       return 'continue';
     }
 
@@ -154,6 +160,11 @@ export class UploadLocationResolutionService {
         batchId: job.batchId,
         groupingKey: job.groupingKey,
       });
+      uploadTraceDecision('ulr', 'continue — no orchestrator cache', {
+        batchId: job.batchId,
+        groupingKey: job.groupingKey,
+      });
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue');
       return 'continue';
     }
 
@@ -161,20 +172,35 @@ export class UploadLocationResolutionService {
       jobId,
       initial: summarizeGroupState(groupState),
     });
+    uploadTraceDecision('ulr', `orchestrator group status=${groupState.status}`, {
+      ...summarizeGroupState(groupState),
+    });
 
     if (groupState.status === 'needsGeocode') {
+      uploadTraceDecision('ulr', 'ensureGeocodedGroup — group needs geocode first');
       groupState = await this.ensureGeocodedGroup(job.batchId, job.groupingKey, groupState);
+      uploadTraceDecision('ulr', `after geocode status=${groupState.status}`, summarizeGroupState(groupState));
     }
 
     if (groupState.status === 'needsTray') {
       if (this.tryApplyExifPlacementForWeakBranchC(groupState)) {
+        uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue (exif weak branch c)');
         return 'continue';
       }
+      uploadTraceDecision('ulr', 'held — register tray step', {
+        trayStep: groupState.trayStep,
+        geocodeBranch: groupState.geocodeBranch,
+      });
       this.registerTrayStepGroup(job.batchId, groupState);
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held');
       return 'held';
     }
 
     if (groupState.status === 'resolved' && groupState.candidate) {
+      uploadTraceDecision('ulr', 'resolved — apply candidate to jobs', {
+        candidateId: groupState.candidate.id,
+        addressLabel: groupState.candidate.addressLabel,
+      });
       for (const id of groupState.jobIds) {
         const j = this.jobState.findJob(id);
         if (!j) {
@@ -183,19 +209,27 @@ export class UploadLocationResolutionService {
         this.applyGeocodeCandidateToJob(id, j, groupState.candidate, groupState.folderDisplayPath);
         const held = this.finalizePlacementForJob(id);
         if (held) {
+          uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held (source conflict)');
           return 'held';
         }
       }
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue');
       return 'continue';
     }
 
     if (groupState.status === 'partial') {
+      uploadTraceDecision('ulr', 'partial — markGroupPartial', { groupingKey: groupState.groupingKey });
       this.markGroupPartial(groupState);
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'partial');
       return 'partial';
     }
 
     if (groupState.status === 'ambiguous' && groupState.candidates?.length) {
       if (groupState.geocodeBranch === 'branch_c') {
+        uploadTraceDecision('ulr', 'held — branch_c ambiguous → city_step tray 1a', {
+          candidateCount: groupState.candidates.length,
+          discriminatingField: groupState.discriminatingField,
+        });
         const discriminatingField =
           groupState.discriminatingField ??
           pickDiscriminatingField(groupState.candidates) ??
@@ -213,8 +247,12 @@ export class UploadLocationResolutionService {
           discriminatingField,
           collapseStage: pickCollapseStage(groupState.candidates, groupState.jobIds.length),
         });
+        uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held');
         return 'held';
       }
+      uploadTraceDecision('ulr', 'held — ambiguous geocode tray step 3', {
+        candidateCount: groupState.candidates.length,
+      });
       this.registerDisambiguationGroup({
         batchId: job.batchId,
         queryKey: buildDisambiguationQueryKey(job.groupingKey),
@@ -226,10 +264,13 @@ export class UploadLocationResolutionService {
         disambiguationKind: 'geocode',
         trayStep: '3',
       });
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held');
       return 'held';
     }
 
+    uploadTraceDecision('ulr', 'partial — fallback markGroupPartial', summarizeGroupState(groupState));
     this.markGroupPartial(groupState);
+    uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'partial');
     return 'partial';
   }
 
@@ -237,12 +278,16 @@ export class UploadLocationResolutionService {
    * Legacy free-text search when no grouping key on job.
    */
   async resolveJobTitleAddress(jobId: string): Promise<'continue' | 'held' | 'failed'> {
+    uploadTraceEnter('ulr', 'resolveJobTitleAddress', { jobId });
     const job = this.jobState.findJob(jobId);
     if (!job) {
+      uploadTraceExit('ulr', 'resolveJobTitleAddress', 'continue (no job)');
       return 'continue';
     }
 
     if (!job.titleAddress?.trim()) {
+      uploadTraceDecision('ulr', 'continue — empty titleAddress');
+      uploadTraceExit('ulr', 'resolveJobTitleAddress', 'continue');
       return 'continue';
     }
 
@@ -564,6 +609,15 @@ export class UploadLocationResolutionService {
     },
     options?: { activateTray?: boolean },
   ): void {
+    uploadTraceEnter('tray', 'registerDisambiguationGroup', {
+      batchId: input.batchId,
+      queryKey: input.queryKey,
+      jobIds: input.jobIds,
+      disambiguationKind: input.disambiguationKind,
+      trayStep: input.trayStep,
+      candidateCount: input.candidates.length,
+      titleAddress: input.titleAddress,
+    });
     const existing = this._groups().find(
       (g) => g.batchId === input.batchId && g.queryKey === input.queryKey && isGroupBlocked(g),
     );
@@ -631,6 +685,12 @@ export class UploadLocationResolutionService {
       });
     }
 
+    uploadTraceDecision('tray', existing ? 'merged into existing group' : 'created new group', {
+      groupId: updated.id,
+      jobCount: jobIds.length,
+      disambiguationKind: updated.disambiguationKind,
+      trayStep: updated.trayStep,
+    });
     if (options?.activateTray !== false) {
       this._selectedGroupId.set(updated.id);
     }
@@ -666,6 +726,13 @@ export class UploadLocationResolutionService {
     batchId: string,
     group: UploadGroupResolutionState,
   ): Promise<UploadGroupResolutionState> {
+    uploadTraceEnter('geocode', 'runGeocodeForGroup', {
+      batchId,
+      groupingKey: group.groupingKey,
+      geocodeBranch: group.geocodeBranch,
+      jobIds: group.jobIds,
+      searchObject: summarizeSearchObject(group.searchObject),
+    });
     const so = group.searchObject;
     const config = this.locationConfig.getConfig();
     const street = so.street?.trim() ?? '';
@@ -677,11 +744,13 @@ export class UploadLocationResolutionService {
     if (!street || !countryCode) {
       const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
       this.orchestrator.patchGroupState(batchId, partial);
+      uploadTraceDecision('geocode', 'partial — missing street or country', { street, countryCode });
       uploadAddressDebug('geocode', 'skipped — missing street or country', {
         street,
         countryCode,
         searchObject: summarizeSearchObject(so),
       });
+      uploadTraceExit('geocode', 'runGeocodeForGroup', 'partial');
       return partial;
     }
 
@@ -741,6 +810,7 @@ export class UploadLocationResolutionService {
     });
 
     const sampleJob = this.jobState.findJob(group.jobIds[0]);
+    // TODO: filter hits by org contextDistanceMaxMeters from job anchor before classify — see distance-radii-contract.md
     const outcome = classifySearchHits(
       hits,
       config,
@@ -755,6 +825,11 @@ export class UploadLocationResolutionService {
     if (outcome.kind === 'auto') {
       const autoCandidate = outcome.candidate;
       if (group.geocodeBranch === 'branch_c' && !so.houseNumber?.trim()) {
+        uploadTraceDecision('geocode', 'needsTray 1b — branch_c auto hit but no houseNumber on SO', {
+          street: so.street,
+          autoCity: autoCandidate.city,
+          autoLabel: autoCandidate.addressLabel,
+        });
         const needsHouse: UploadGroupResolutionState = {
           ...group,
           status: 'needsTray',
@@ -764,18 +839,28 @@ export class UploadLocationResolutionService {
           candidates: [autoCandidate],
         };
         this.orchestrator.patchGroupState(batchId, needsHouse);
+        uploadTraceExit('geocode', 'runGeocodeForGroup', 'needsTray/1b');
         return needsHouse;
       }
+      uploadTraceDecision('geocode', 'resolved — auto candidate', {
+        candidateId: autoCandidate.id,
+        addressLabel: autoCandidate.addressLabel,
+      });
       const resolved: UploadGroupResolutionState = {
         ...group,
         status: 'resolved',
         candidate: autoCandidate,
       };
       this.orchestrator.patchGroupState(batchId, resolved);
+      uploadTraceExit('geocode', 'runGeocodeForGroup', 'resolved');
       return resolved;
     }
 
     if (outcome.kind === 'ambiguous') {
+      uploadTraceDecision('geocode', 'ambiguous — register tray', {
+        trayStep: group.geocodeBranch === 'branch_c' ? '1a' : '3',
+        candidateCount: outcome.candidates.length,
+      });
       const discriminatingField = pickDiscriminatingField(outcome.candidates);
       const ambiguous: UploadGroupResolutionState = {
         ...group,
@@ -785,10 +870,14 @@ export class UploadLocationResolutionService {
         discriminatingField: discriminatingField ?? undefined,
       };
       this.orchestrator.patchGroupState(batchId, ambiguous);
+      uploadTraceExit('geocode', 'runGeocodeForGroup', 'ambiguous');
       return ambiguous;
     }
 
     if (group.geocodeBranch === 'branch_c' || group.geocodeBranch === 'branch_b') {
+      uploadTraceDecision('geocode', 'needsTray 1a — geocode failed, branch b/c fallback', {
+        geocodeBranch: group.geocodeBranch,
+      });
       const fallbackTray: UploadGroupResolutionState = {
         ...group,
         status: 'needsTray',
@@ -797,11 +886,14 @@ export class UploadLocationResolutionService {
         candidates: [],
       };
       this.orchestrator.patchGroupState(batchId, fallbackTray);
+      uploadTraceExit('geocode', 'runGeocodeForGroup', 'needsTray/1a');
       return fallbackTray;
     }
 
+    uploadTraceDecision('geocode', 'partial — classify failed, not branch b/c');
     const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
     this.orchestrator.patchGroupState(batchId, partial);
+    uploadTraceExit('geocode', 'runGeocodeForGroup', 'partial');
     return partial;
   }
 

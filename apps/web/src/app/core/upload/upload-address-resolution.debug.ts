@@ -3,11 +3,14 @@
  *
  * Enable in the browser console (then reload or upload again):
  *   localStorage.setItem('feldpost:debug:upload-address', '1')
+ *   localStorage.setItem('feldpost:debug:upload-process', '1')  // verbose fn/decision trace
  * Disable:
  *   localStorage.removeItem('feldpost:debug:upload-address')
+ *   localStorage.removeItem('feldpost:debug:upload-process')
  *
  * Placement trace uses console.info (`[upload-placement]`) so it stays visible when
  * the console filters out "Verbose"/debug. Detailed SO/geocode payloads use console.debug.
+ * Process trace uses console.info (`[upload-process]`) for branch decisions.
  *
  * @see docs/specs/service/media-upload-service/upload-address-resolution-pipeline.md
  */
@@ -19,12 +22,74 @@ import type {
 } from './upload-address-resolution.types';
 
 const STORAGE_KEY = 'feldpost:debug:upload-address';
+const PROCESS_STORAGE_KEY = 'feldpost:debug:upload-process';
 
 export function isUploadAddressDebugEnabled(): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY) === '1';
+    return (
+      localStorage.getItem(STORAGE_KEY) === '1' ||
+      localStorage.getItem(PROCESS_STORAGE_KEY) === '1'
+    );
   } catch {
     return false;
+  }
+}
+
+/** Verbose function enter/decision/exit trace (upload-process flag or upload-address flag). */
+export function isUploadProcessTraceEnabled(): boolean {
+  return isUploadAddressDebugEnabled();
+}
+
+/** `→ functionName` with optional context values. */
+export function uploadTraceEnter(
+  scope: string,
+  fn: string,
+  detail?: Record<string, unknown>,
+): void {
+  if (!isUploadProcessTraceEnabled()) {
+    return;
+  }
+  const label = `[upload-process:${scope}] → ${fn}`;
+  if (detail && Object.keys(detail).length > 0) {
+    console.info(label, detail);
+  } else {
+    console.info(label);
+  }
+}
+
+/** `decision: … because …` with structured fields. */
+export function uploadTraceDecision(
+  scope: string,
+  because: string,
+  detail?: Record<string, unknown>,
+): void {
+  if (!isUploadProcessTraceEnabled()) {
+    return;
+  }
+  const label = `[upload-process:${scope}] decision: ${because}`;
+  if (detail && Object.keys(detail).length > 0) {
+    console.info(label, detail);
+  } else {
+    console.info(label);
+  }
+}
+
+/** `← functionName` with optional result summary. */
+export function uploadTraceExit(
+  scope: string,
+  fn: string,
+  result?: string,
+  detail?: Record<string, unknown>,
+): void {
+  if (!isUploadProcessTraceEnabled()) {
+    return;
+  }
+  const suffix = result ? ` → ${result}` : '';
+  const label = `[upload-process:${scope}] ← ${fn}${suffix}`;
+  if (detail && Object.keys(detail).length > 0) {
+    console.info(label, detail);
+  } else {
+    console.info(label);
   }
 }
 

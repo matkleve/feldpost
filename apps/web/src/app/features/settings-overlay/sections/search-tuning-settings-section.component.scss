@@ -1,3 +1,5 @@
+@use '../../../../styles/range-input-accent';
+
 // Column layout for search tuning admin form and sticky actions
 // @see docs/specs/ui/search-bar/search-tuning-settings.md
 :host {
@@ -143,7 +145,7 @@ button.search-tuning-settings__toggle-row {
 // @see docs/specs/ui/search-bar/search-tuning-settings.md
 .search-tuning-settings__range {
   width: 100%;
-  accent-color: var(--primary);
+  @include range-input-accent.range-accent-states();
 }
 
 // Compact numeric readout beside slider — no native spinners (user preference)

@@ -657,6 +657,8 @@ function matchesCountryConstraint(
       return true;
     }
 
+    // Org km cap (stored as meters): unrealistic Internet hit vs search anchor — not exifAssistRadiusMeters.
+    // @see docs/specs/service/search/search-tuning.distance-radii-contract.md
     const contextDistance = distanceFromContextMeters(result.lat, result.lng, context);
     return contextDistance <= tuning.resolver.contextDistanceMaxMeters;
   }

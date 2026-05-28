@@ -1,6 +1,7 @@
 # Search service spec index
 
-**Canonical contract:** [search-bar-service.md](search-bar-service.md)
+**Canonical contract:** [search-bar-service.md](search-bar-service.md)  
+**Distance radii (km cap vs upload meters):** [search-tuning.distance-radii-contract.md](search-tuning.distance-radii-contract.md)
 
 Code module: `apps/web/src/app/core/search/`
 

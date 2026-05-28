@@ -24090,24 +24090,24 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.resolver.done', 'Footer on last question', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel')
+values (null, 'upload.resolver.finish', 'Footer on last question in queue', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Footer on last question', 'published'
+select t.id, 'en', 'Footer on last question in queue', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.done'
+where t.organization_id is null and t.key = 'upload.resolver.finish'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Done', 'published'
+select t.id, 'de', 'Finish', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.done'
+where t.organization_id is null and t.key = 'upload.resolver.finish'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -24115,7 +24115,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Fertig', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.resolver.done'
+where t.organization_id is null and t.key = 'upload.resolver.finish'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -32894,14 +32894,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.help.context_distance_km', 'When an internet result has no country code, it must be within this distance (km) of your search anchor — usually this photo''s GPS, otherwise the map view or project center. It is not based on other media in the org (that would need a heavy query each search). Lower = stricter; higher = allow farther matches.', 'en', 'org admin search tuning field help')
+values (null, 'settings.search_tuning.help.context_distance_km', 'Max distance (km) from the search anchor — usually this photo''s GPS, else map view or project center. Drops unrealistic Internet and upload geocode hits beyond this radius (stored as meters in org settings). Not other media in the org. Separate from upload EXIF fine-tuning (meters, which candidate matches GPS).', 'en', 'org admin search tuning field help')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'When an internet result has no country code, it must be within this distance (km) of your search anchor — usually this photo''s GPS, otherwise the map view or project center. It is not based on other media in the org (that would need a heavy query each search). Lower = stricter; higher = allow farther matches.', 'published'
+select t.id, 'en', 'Max distance (km) from the search anchor — usually this photo''s GPS, else map view or project center. Drops unrealistic Internet and upload geocode hits beyond this radius (stored as meters in org settings). Not other media in the org. Separate from upload EXIF fine-tuning (meters, which candidate matches GPS).', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
 on conflict (app_text_id, lang) do update set
@@ -32909,7 +32909,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ohne Ländercode muss ein Internetergebnis innerhalb dieser Distanz (km) zum Suchanker liegen — meist GPS dieses Fotos, sonst Kartenansicht oder Projektzentrum. Nicht basierend auf anderen Medien der Organisation (wäre eine schwere Abfrage pro Suche). Niedriger = strenger; höher = weiter entfernte Treffer.', 'published'
+select t.id, 'de', 'Maximale Distanz (km) vom Suchanker — meist GPS dieses Fotos, sonst Kartenansicht oder Projektzentrum. Verwirft unrealistische Internet- und Upload-Geocode-Treffer außerhalb dieses Radius (in den Einstellungen als Meter gespeichert). Nicht andere Medien der Organisation. Getrennt von Upload-EXIF-Feinabstimmung (Meter, welcher Treffer zur GPS passt).', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
 on conflict (app_text_id, lang) do update set
@@ -32917,505 +32917,9 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Se un risultato Internet non ha codice paese, deve essere entro questa distanza (km) dall''ancora di ricerca — di solito il GPS di questa foto, altrimenti vista mappa o centro progetto. Non si basa su altri media dell''organizzazione (richiederebbe una query pesante per ogni ricerca). Più basso = più rigido; più alto = corrispondenze più lontane.', 'published'
+select t.id, 'it', 'Distanza massima (km) dall''ancora di ricerca — di solito GPS di questa foto, altrimenti vista mappa o centro progetto. Scarta risultati geocode Internet/upload irrealistici oltre questo raggio (salvato in metri nelle impostazioni org). Non altri media nell''organizzazione. Separata dalla messa a punto EXIF upload (metri, quale candidato corrisponde al GPS). weiter entfernte Treffer.,Se un risultato Internet non ha codice paese', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_km'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.field.weak_top_score', 'Weak top score threshold', 'en', 'org admin search tuning advanced field')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Weak top score threshold', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.field.weak_top_score'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Schwellwert schwache Top-Bewertung', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.field.weak_top_score'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Soglia punteggio top debole', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.field.weak_top_score'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.help.debounce_ms', 'How long to wait after typing before running a search. Higher values reduce API calls but feel slower.', 'en', 'org admin search tuning field help')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'How long to wait after typing before running a search. Higher values reduce API calls but feel slower.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.debounce_ms'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wartezeit nach der Eingabe bis zur Suche. Höhere Werte sparen API-Aufrufe wirken aber träger.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.debounce_ms'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Attesa dopo la digitazione prima della ricerca. Valori alti riducono le chiamate API ma rallentano la risposta.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.debounce_ms'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.help.max_geocoder_results', 'Maximum Internet address suggestions shown per search. Lower keeps the list focused; higher shows more alternatives.', 'en', 'org admin search tuning field help')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Maximum Internet address suggestions shown per search. Lower keeps the list focused; higher shows more alternatives.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Maximale Internet-Adressvorschlaege pro Suche. Niedriger hält die Liste fokussiert; höher zeigt mehr Alternativen.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Numero massimo di suggerimenti Internet per ricerca. Più basso = lista più mirata; più alto = più alternative.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.max_geocoder_results'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.help.specific_street_min', 'Single-word queries at least this long are treated as a deliberate street search (e.g. Denisgasse), not a vague map-area prefix.', 'en', 'org admin search tuning field help')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Single-word queries at least this long are treated as a deliberate street search (e.g. Denisgasse), not a vague map-area prefix.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.specific_street_min'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einwort-Suchen ab dieser Laenge gelten als gezielte Straßensuche (z. B. Denisgasse), nicht als vager Kartenbereich.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.specific_street_min'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Query a parola singola di almeno questa lunghezza sono trattate come ricerca strada mirata (es. Denisgasse), non come prefisso generico sulla mappa.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.specific_street_min'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.help.min_query_length', 'Shortest query length before geocoding runs. Increase to avoid noisy one- and two-letter lookups.', 'en', 'org admin search tuning field help')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Shortest query length before geocoding runs. Increase to avoid noisy one- and two-letter lookups.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.min_query_length'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Mindestlänge der Anfrage vor dem Geocoding. Erhöhen vermeidet laute Ein- und Zweibuchstaben-Suchen.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.min_query_length'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Lunghezza minima della query prima del geocoding. Aumentarla evita ricerche rumorose con una o due lettere.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.min_query_length'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.help.context_distance_m', 'How far from the map or project center an Internet result may still appear when the country code is missing. Larger values include more distant matches.', 'en', 'org admin search tuning field help')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'How far from the map or project center an Internet result may still appear when the country code is missing. Larger values include more distant matches.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wie weit vom Karten- oder Projektzentrum ein Internetergebnis ohne Ländercode noch erscheinen darf. Großere Werte zeigen entferntere Treffer.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Distanza massima dal centro mappa o progetto per risultati Internet senza codice paese. Valori maggiori includono corrispondenze più lontane.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.context_distance_m'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.help.weak_top_score', 'When the best short-prefix match scores below this value search retries without map bounds. Lower triggers retry more often.', 'en', 'org admin search tuning field help')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'When the best short-prefix match scores below this value search retries without map bounds. Lower triggers retry more often.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Liegt die beste Kurzprefix-Bewertung darunter wird ohne Kartenrahmen erneut gesucht. Niedriger löst oefter einen Retry aus.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Se il miglior punteggio con prefisso corto e sotto questa soglia la ricerca ripete senza limiti mappa. Più basso = più retry.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.help.weak_top_score'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.readout.distance_km', '{km} km', 'en', 'org admin search tuning distance readout')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{km} km', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.readout.distance_km'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{km} km', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.readout.distance_km'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{km} km', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.readout.distance_km'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'settings.search_tuning.readonly.notice', 'Only org admins can change search tuning. You can view the current org settings below.', 'en', 'org search tuning read-only banner')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Only org admins can change search tuning. You can view the current org settings below.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Nur Organisations-Admins können die Such-Tuning-Einstellungen ändern. Die aktuellen Werte kannst du unten einsehen.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Solo gli admin dell''organizzazione possono modificare l''ottimizzazione ricerca. Puoi consultare le impostazioni correnti qui sotto.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'settings.search_tuning.readonly.notice'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailCard.mapLocations.search.placeholder', 'Search locations…', 'en', 'media grid map location picker search')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Search locations…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.placeholder'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standorte suchen…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.placeholder'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Cerca ubicazioni…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.placeholder'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailCard.mapLocations.search.clear', 'Clear search', 'en', 'media grid map location picker search')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Clear search', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.clear'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Suche löschen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.clear'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Cancella ricerca', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.search.clear'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailCard.mapLocations.filterEmpty', 'No locations match your search', 'en', 'media grid map location picker empty filter')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'No locations match your search', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.filterEmpty'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Standorte passen zur Suche', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.filterEmpty'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessuna ubicazione corrisponde alla ricerca', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.filterEmpty'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailCard.mapLocations.legacyFallback', 'Location', 'en', 'media grid map location picker legacy label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Location', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.legacyFallback'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.legacyFallback'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ubicazione', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.thumbnailCard.mapLocations.legacyFallback'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'location.dropdown.addNew.hint', 'Creates a new org location', 'en', 'media detail location picker new-address row secondary line')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Creates a new org location', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.dropdown.addNew.hint'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Erstellt einen neuen Organisationsstandort', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.dropdown.addNew.hint'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Crea una nuova ubicazione organizzazione', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'location.dropdown.addNew.hint'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'geocoding.toast.unavailable.title', 'Address search unavailable', 'en', 'toast when geocode edge function is down (503/boot)')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Address search unavailable', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'geocoding.toast.unavailable.title'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresssuche nicht verfügbar', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'geocoding.toast.unavailable.title'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ricerca indirizzi non disponibile', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'geocoding.toast.unavailable.title'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'geocoding.toast.unavailable.body', 'Internet address search is temporarily unavailable. Try again in a few minutes.', 'en', 'toast when geocode edge function is down')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Internet address search is temporarily unavailable. Try again in a few minutes.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'geocoding.toast.unavailable.body'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Die Internet-Adresssuche ist vorübergehend nicht verfügbar. Versuchen Sie es in einigen Minuten erneut.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'geocoding.toast.unavailable.body'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'La ricerca indirizzi su Internet non è temporaneamente disponibile. Riprovare tra qualche minuto.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'geocoding.toast.unavailable.body'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

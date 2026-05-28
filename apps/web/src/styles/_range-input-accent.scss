@@ -1,0 +1,114 @@
+// Native range chrome — light `--input` trough; tinted progress; solid thumb ink.
+// WebKit fill needs `--range-fill-percent` (set by `fpRangeProgress` directive).
+// @see docs/design/state-visuals.md § Interaction emphasis
+// @see apps/web/src/app/shared/ui/switch/switch-variants.ts (unchecked track = bg-input)
+@mixin range-accent-states() {
+  --range-track-height: calc(var(--spacing-1) + 2px);
+  --range-thumb-size: calc(0.25rem * 4);
+  --range-fill-percent: 0%;
+  // Same 10% ink wash as quiet selected controls (state-visuals interaction emphasis)
+  --range-progress-ink: color-mix(in srgb, var(--interaction-selected-ink) 10%, var(--input));
+  --range-thumb-ink: var(--interaction-selected-ink);
+
+  width: 100%;
+  height: var(--range-thumb-size);
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+
+  // Filled + unfilled track (WebKit — accent-color does not paint when track is custom)
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  &::-webkit-slider-runnable-track {
+    height: var(--range-track-height);
+    border-radius: var(--radius-full);
+    background: linear-gradient(
+      to right,
+      var(--range-progress-ink) 0%,
+      var(--range-progress-ink) var(--range-fill-percent),
+      var(--input) var(--range-fill-percent),
+      var(--input) 100%
+    );
+    cursor: pointer;
+    transition: background var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    margin-top: calc((var(--range-track-height) - var(--range-thumb-size)) / 2);
+    border: none;
+    border-radius: var(--radius-full);
+    background-color: var(--range-thumb-ink);
+    cursor: pointer;
+    transition:
+      background-color var(--motion-duration-fast) var(--motion-ease-out),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+  &::-moz-range-track {
+    height: var(--range-track-height);
+    border: none;
+    border-radius: var(--radius-full);
+    background-color: var(--input);
+    cursor: pointer;
+  }
+
+  &::-moz-range-progress {
+    height: var(--range-track-height);
+    border-radius: var(--radius-full);
+    background-color: var(--range-progress-ink);
+    cursor: pointer;
+    transition: background-color var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+  &::-moz-range-thumb {
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    border: none;
+    border-radius: var(--radius-full);
+    background-color: var(--range-thumb-ink);
+    cursor: pointer;
+    transition:
+      background-color var(--motion-duration-fast) var(--motion-ease-out),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+  &:active {
+    cursor: grabbing;
+
+    &::-webkit-slider-runnable-track,
+    &::-webkit-slider-thumb,
+    &::-moz-range-track,
+    &::-moz-range-progress,
+    &::-moz-range-thumb {
+      cursor: grabbing;
+    }
+  }
+
+  // Primary emphasis only while pointing / dragging — not on keyboard focus alone
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  &:hover,
+  &:active {
+    --range-progress-ink: color-mix(in srgb, var(--primary) 10%, var(--input));
+    --range-thumb-ink: var(--primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::-webkit-slider-thumb,
+    &::-moz-range-thumb {
+      box-shadow: var(--interactive-focus-ring);
+    }
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.66;
+  }
+}

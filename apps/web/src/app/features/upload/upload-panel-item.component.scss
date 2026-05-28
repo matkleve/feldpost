@@ -13,6 +13,7 @@
 .upload-panel__file-main {
   --upload-item-thumb-size: var(--spacing-5);
   --upload-item-menu-hit: 1.75rem;
+  --upload-item-row-inset: calc(var(--spacing-1) * 0.5);
   --upload-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
   --upload-item-row-height: var(
     --upload-row-height,
@@ -24,9 +25,11 @@
   align-items: center;
   column-gap: var(--spacing-2);
   min-height: var(--upload-item-row-height);
-  padding-block: calc(var(--spacing-1) * 0.5);
+  padding-block: var(--upload-item-row-inset);
   padding-inline-start: var(--spacing-1);
-  padding-inline-end: calc(var(--spacing-1) + var(--upload-item-menu-hit) + var(--spacing-2));
+  padding-inline-end: calc(
+    var(--upload-item-row-inset) + var(--upload-item-menu-hit) + var(--upload-item-row-inset)
+  );
   background: transparent;
   border: 0;
   box-shadow: none;
@@ -135,7 +138,7 @@
 }
 
 .upload-panel__file-main--has-menu .upload-panel__file-meta {
-  padding-inline-end: calc(var(--upload-item-menu-hit) + var(--spacing-2));
+  padding-inline-end: calc(var(--upload-item-menu-hit) + var(--upload-item-row-inset));
 }
 
 .upload-panel__file-main--interactive {
@@ -254,7 +257,7 @@
 .upload-panel__row-action {
   position: absolute;
   top: 50%;
-  right: var(--spacing-3);
+  right: var(--upload-item-row-inset, calc(var(--spacing-1) * 0.5));
   transform: translateY(-50%);
   z-index: 3;
   pointer-events: auto;

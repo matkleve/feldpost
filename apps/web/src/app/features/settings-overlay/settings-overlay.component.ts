@@ -35,6 +35,7 @@ import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import { HLM_LABEL_IMPORTS } from '../../shared/ui/label';
 import { HLM_SELECT_IMPORTS } from '../../shared/ui/select';
 import { HLM_SWITCH_IMPORTS } from '../../shared/ui/switch';
+import { RangeProgressStyleDirective } from '../../shared/ui/range/range-progress-style.directive';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 import { SearchTuningSettingsSectionComponent } from './sections/search-tuning-settings-section.component';
 import { AccountComponent } from '../../shared/account/account.component';
@@ -106,6 +107,7 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
     ...HLM_LABEL_IMPORTS,
     ...HLM_SELECT_IMPORTS,
     ...HLM_SWITCH_IMPORTS,
+    RangeProgressStyleDirective,
   ],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',

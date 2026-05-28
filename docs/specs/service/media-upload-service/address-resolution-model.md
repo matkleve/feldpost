@@ -43,7 +43,7 @@ Gaps are allowed only at **higher** tiers, never below without the parent tier.
 | 2 | EXIF lat/lon/date locally → `exifCoords`; not sent to Photon | — |
 | 3 | Content hash → tag duplicate; **job continues** | — |
 | 4 | EXIF reverse `lang=en`; superset vs SO or EXIF-only | — |
-| 5 | Photon when `street`; branches A/B/C | See Branch C + enqueue contract |
+| 5 | Photon when `street`; branches A/B/C; drop hits **> `contextDistanceMaxMeters`** from job anchor (org Search Tuning km cap) | See Branch C + enqueue contract |
 | 6 | No street or tier-only SO → admin centroid; `locationPinEligible=false` | — |
 | 7 | Placement + EXIF within `exifAssistRadiusMeters` (default **80 m**) → EXIF refines | — |
 | 8 | `placementResolvedBy` → upload bytes | — |
@@ -80,16 +80,20 @@ Implemented via `pickDiscriminatingField` / `pickCollapseStage` in `upload-locat
 - **5b (1A):** numbered options — **not** a default city text field.  
 - **5c (1B):** only if `houseNumber` missing; second Photon `street` + locality; same `dialogueUnitId` as 5b when both run.
 
+## Distance radii (two systems)
+
+| Radius | Config | Unit | Role |
+| --- | --- | --- | --- |
+| Internet / geocode realism | `resolver.contextDistanceMaxMeters` | km in UI, m in DB | Org Search Tuning — anchor distance; search bar + **upload Step 5** far-hit rejection |
+| EXIF fine-tune | `exifAssistRadiusMeters` | m | Upload config — pick/nudge among close geocode candidates |
+| Text vs EXIF | `sourceAgreementRadiusMeters` | m | Upload config — source-conflict tray |
+
+Normative detail: [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md).
+
 ## Settings
 
-| Key | Default |
-| --- | --- |
-| `exifAssistRadiusMeters` | `80` |
-| `exifContextCheck` | `true` |
-| `defaultGeocodeCountry` | `AT` |
-| `tokenNormalizerFuzzyThreshold` | `0.85` |
-| `presentationBundleWindowMs` | `5000` |
-| `presentationBundleMaxDialogueUnits` | `5` |
+- **Upload location config (`exifAssistRadiusMeters`, `sourceAgreementRadiusMeters`)**: meter radii for EXIF fine-tune and text-vs-EXIF tray — not the org km slider ([upload-location-config.md](./upload-location-config.md)).
+- **Org Search Tuning (`contextDistanceMaxMeters`)**: km cap for unrealistic Internet/upload geocode distance from anchor ([distance radii contract](../search/search-tuning.distance-radii-contract.md)).
 
 ## Open points
 

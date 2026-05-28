@@ -4,6 +4,11 @@
  */
 
 import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
+import {
+  uploadTraceDecision,
+  uploadTraceEnter,
+  uploadTraceExit,
+} from './upload-address-resolution.debug';
 import type { UploadLocationConfig } from './upload-location-config';
 import type {
   UploadAddressCandidate,
@@ -126,14 +131,35 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
   groupState: UploadGroupResolutionState,
   findJob: (jobId: string) => UploadJob | undefined,
 ): boolean {
+  const so = groupState.searchObject;
+  uploadTraceEnter('weak-exif', 'isExifAuthoritativeOverWeakFilenameStreet', {
+    geocodeBranch: groupState.geocodeBranch,
+    trayStep: groupState.trayStep,
+    street: so.street,
+    city: so.city,
+    houseNumber: so.houseNumber,
+    folderDisplayPath: groupState.folderDisplayPath,
+    jobIds: groupState.jobIds,
+  });
   if (groupState.geocodeBranch !== 'branch_c' || groupState.trayStep !== '1a') {
+    uploadTraceDecision('weak-exif', 'skip EXIF override — need branch_c and trayStep 1a', {
+      geocodeBranch: groupState.geocodeBranch,
+      trayStep: groupState.trayStep,
+    });
     return false;
   }
-  const so = groupState.searchObject;
   if (!so.street?.trim() || searchObjectHasLocality(so)) {
+    uploadTraceDecision('weak-exif', 'skip — no street or SO already has locality', {
+      street: so.street,
+      city: so.city,
+      postcode: so.postcode,
+    });
     return false;
   }
   if (groupState.folderDisplayPath?.trim()) {
+    uploadTraceDecision('weak-exif', 'skip — folder path present', {
+      folderDisplayPath: groupState.folderDisplayPath,
+    });
     return false;
   }
   const hasFolderAddressSource = so.sources.some(
@@ -145,6 +171,9 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
         entry.field === 'postcode'),
   );
   if (hasFolderAddressSource) {
+    uploadTraceDecision('weak-exif', 'skip — folder contributed address fields', {
+      sources: so.sources.map((s) => `${s.source}:${s.field}`),
+    });
     return false;
   }
   const streetSources = so.sources.filter(
@@ -154,25 +183,68 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
     streetSources.length > 0 &&
     !streetSources.every((entry) => entry.source === 'filename')
   ) {
+    uploadTraceDecision('weak-exif', 'skip — street not filename-only', {
+      streetSources: streetSources.map((s) => `${s.source}:${s.field}=${s.value}`),
+    });
     return false;
   }
-  return groupState.jobIds.every((jobId) => {
+  const allHaveExif = groupState.jobIds.every((jobId) => {
     const job = findJob(jobId);
     return !!job && !!getExifMetadataCoords(job);
   });
+  if (allHaveExif) {
+    uploadTraceDecision('weak-exif', 'EXIF wins — weak filename street, all jobs have EXIF', {
+      street: so.street,
+      jobIds: groupState.jobIds,
+    });
+  } else {
+    uploadTraceDecision('weak-exif', 'skip — not every job has EXIF metadata', {
+      jobIds: groupState.jobIds,
+    });
+  }
+  return allHaveExif;
 }
 
 export function evaluateLocalResolution(
   so: UploadSearchObject,
   projectCentroid?: ProjectGeocodeCentroid | null,
 ): LocalResolutionGate {
+  uploadTraceEnter('local-gate', 'evaluateLocalResolution', {
+    country: so.country,
+    street: so.street,
+    houseNumber: so.houseNumber,
+    city: so.city,
+    postcode: so.postcode,
+    groupingKey: so.groupingKey,
+    hasProjectCentroid: !!projectCentroid,
+  });
   if (so.postcodeCandidates.length > 1 && !so.city) {
+    uploadTraceDecision('local-gate', 'postcode_blocked — multiple postcode candidates, no city', {
+      postcodeCandidates: so.postcodeCandidates,
+      city: so.city,
+    });
+    uploadTraceExit('local-gate', 'evaluateLocalResolution', 'postcode_blocked');
     return 'postcode_blocked';
   }
   const branch = classifySearchObjectCompleteness(so, projectCentroid);
   if (branch === 'incomplete') {
+    uploadTraceDecision('local-gate', 'incomplete — SO missing required tiers for any branch', {
+      street: so.street,
+      city: so.city,
+      houseNumber: so.houseNumber,
+      country: so.country,
+    });
+    uploadTraceExit('local-gate', 'evaluateLocalResolution', 'incomplete');
     return 'incomplete';
   }
+  uploadTraceDecision('local-gate', `gate = ${branch}`, {
+    street: so.street,
+    houseNumber: so.houseNumber,
+    city: so.city,
+    country: so.country,
+    hasProjectCentroid: !!projectCentroid,
+  });
+  uploadTraceExit('local-gate', 'evaluateLocalResolution', branch);
   return branch;
 }
 
@@ -312,12 +384,30 @@ function pickExifAssistCandidate(
   return best;
 }
 
+/**
+ * Classify forward-geocode hits for upload placement.
+ *
+ * Distance rules (do not conflate):
+ * - `config.exifAssistRadiusMeters` (m): pick which candidate matches EXIF when several exist.
+ * - Org `resolver.contextDistanceMaxMeters` (km in UI, m in DB): drop hits unrealistically far from
+ *   job search anchor before classify — same as Search Tuning “Max distance for internet results”.
+ *   **Wire-up:** filter hits using merged org config + anchor before this function runs.
+ * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
+ */
 export function classifySearchHits(
   hits: GeocoderSearchResult[],
   config: UploadLocationConfig,
   exifCoords?: ExifCoords,
 ): ClassifySearchOutcome {
+  uploadTraceEnter('classify-hits', 'classifySearchHits', {
+    hitCount: hits.length,
+    exifCoords,
+    exifAssistRadiusMeters: config.exifAssistRadiusMeters,
+    minMeaningfulScore: config.minMeaningfulScore,
+  });
   if (!hits.length) {
+    uploadTraceDecision('classify-hits', 'failed — zero geocoder hits');
+    uploadTraceExit('classify-hits', 'classifySearchHits', 'failed');
     return { kind: 'failed' };
   }
 
@@ -329,8 +419,18 @@ export function classifySearchHits(
       config.exifAssistRadiusMeters,
     );
     if (assisted) {
+      uploadTraceDecision('classify-hits', 'auto — EXIF within exifAssistRadiusMeters', {
+        candidateId: assisted.id,
+        addressLabel: assisted.addressLabel,
+        radiusM: config.exifAssistRadiusMeters,
+      });
+      uploadTraceExit('classify-hits', 'classifySearchHits', 'auto (exif-assist)');
       return { kind: 'auto', candidate: assisted };
     }
+    uploadTraceDecision('classify-hits', 'no EXIF-assist match within radius', {
+      candidateCount: candidates.length,
+      radiusM: config.exifAssistRadiusMeters,
+    });
   }
 
   const sorted = [...candidates].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
@@ -339,10 +439,22 @@ export function classifySearchHits(
   const topScore = top.score ?? 0;
 
   if (topScore < config.minMeaningfulScore) {
+    uploadTraceDecision('classify-hits', 'failed — top score below minMeaningfulScore', {
+      topScore,
+      minMeaningfulScore: config.minMeaningfulScore,
+      topLabel: top.addressLabel,
+    });
+    uploadTraceExit('classify-hits', 'classifySearchHits', 'failed');
     return { kind: 'failed' };
   }
 
   if (topScore >= config.disambiguationAutoAssignThreshold) {
+    uploadTraceDecision('classify-hits', 'auto — top score >= disambiguationAutoAssignThreshold', {
+      topScore,
+      threshold: config.disambiguationAutoAssignThreshold,
+      topLabel: top.addressLabel,
+    });
+    uploadTraceExit('classify-hits', 'classifySearchHits', 'auto');
     return { kind: 'auto', candidate: top };
   }
 
@@ -352,13 +464,32 @@ export function classifySearchHits(
       topScore - (second.score ?? 0) >= config.minTopGap &&
       topScore >= config.disambiguationReviewLowerBound)
   ) {
+    uploadTraceDecision('classify-hits', 'auto — single hit or clear top gap', {
+      hitCount: sorted.length,
+      topScore,
+      secondScore: second?.score,
+      minTopGap: config.minTopGap,
+      topLabel: top.addressLabel,
+    });
+    uploadTraceExit('classify-hits', 'classifySearchHits', 'auto');
     return { kind: 'auto', candidate: top };
   }
 
   if (sorted.length > 1 && topScore >= config.disambiguationReviewLowerBound) {
+    uploadTraceDecision('classify-hits', 'ambiguous — multiple hits above review lower bound', {
+      hitCount: sorted.length,
+      topScore,
+      reviewLowerBound: config.disambiguationReviewLowerBound,
+    });
+    uploadTraceExit('classify-hits', 'classifySearchHits', 'ambiguous');
     return { kind: 'ambiguous', candidates: sorted };
   }
 
+  uploadTraceDecision('classify-hits', 'auto — fallback to top candidate', {
+    topScore,
+    topLabel: top.addressLabel,
+  });
+  uploadTraceExit('classify-hits', 'classifySearchHits', 'auto (fallback)');
   return { kind: 'auto', candidate: top };
 }
 

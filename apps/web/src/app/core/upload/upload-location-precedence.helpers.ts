@@ -3,6 +3,11 @@
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
  */
 
+import {
+  uploadTraceDecision,
+  uploadTraceEnter,
+  uploadTraceExit,
+} from './upload-address-resolution.debug';
 import type { ExifCoords } from './upload.types';
 import type { UploadLocationConfig } from './upload-location-config';
 import type {
@@ -47,7 +52,15 @@ export function shouldHoldForSourceConflict(
   exifCoords: ExifCoords,
   config: UploadLocationConfig,
 ): boolean {
-  return haversineMeters(textCoords, exifCoords) > config.sourceAgreementRadiusMeters;
+  const distanceM = Math.round(haversineMeters(textCoords, exifCoords));
+  const hold = distanceM > config.sourceAgreementRadiusMeters;
+  uploadTraceDecision('source-agree', hold ? 'hold — text vs EXIF beyond agree radius' : 'agree — within radius', {
+    distanceM,
+    sourceAgreementRadiusMeters: config.sourceAgreementRadiusMeters,
+    textCoords,
+    exifCoords,
+  });
+  return hold;
 }
 
 export type PlacementSourceKind = 'text' | 'exif';
@@ -147,23 +160,45 @@ export function resolvePlacementAfterTextGeocode(
   const textCoords = job.titleAddressCoords;
   const exifCoords = getExifMetadataCoords(job);
 
+  uploadTraceEnter('placement', 'resolvePlacementAfterTextGeocode', {
+    jobId: job.id,
+    fileName: job.file.name,
+    titleAddress: job.titleAddress,
+    textCoords,
+    exifCoords,
+  });
+
   if (!textCoords) {
+    uploadTraceDecision('placement', 'missing_data — no titleAddressCoords after geocode');
+    uploadTraceExit('placement', 'resolvePlacementAfterTextGeocode', 'missing_data');
     return { kind: 'missing_data' };
   }
 
   if (!exifCoords) {
+    uploadTraceDecision('placement', 'placed — text coords only, no EXIF metadata');
+    uploadTraceExit('placement', 'resolvePlacementAfterTextGeocode', 'placed');
     return { kind: 'placed' };
   }
 
   if (!shouldHoldForSourceConflict(textCoords, exifCoords, config)) {
+    uploadTraceExit('placement', 'resolvePlacementAfterTextGeocode', 'placed');
     return { kind: 'placed' };
   }
 
+  uploadTraceDecision('placement', 'held_source_conflict — opening source tray');
+  uploadTraceExit('placement', 'resolvePlacementAfterTextGeocode', 'held_source_conflict');
   return { kind: 'held_source_conflict' };
 }
 
 export function resolvePlacementWithoutText(
   job: UploadJob,
 ): 'exif' | 'missing_data' {
-  return getExifMetadataCoords(job) ? 'exif' : 'missing_data';
+  const exif = getExifMetadataCoords(job);
+  const outcome = exif ? 'exif' : 'missing_data';
+  uploadTraceDecision('placement', `resolvePlacementWithoutText → ${outcome}`, {
+    jobId: job.id,
+    fileName: job.file.name,
+    exifCoords: exif,
+  });
+  return outcome;
 }

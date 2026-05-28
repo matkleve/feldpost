@@ -1,7 +1,15 @@
 export interface UploadLocationConfig {
-  /** Text vs EXIF source auto-agree when both exist (meters). @see upload-manager-pipeline.location-routing.supplement.md */
+  /**
+   * Meters: folder/file text geocode vs EXIF metadata — auto-agree or `source` tray.
+   * Not the org km cap (`contextDistanceMaxMeters` in Search Tuning).
+   * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
+   */
   sourceAgreementRadiusMeters: number;
-  /** Step 7: EXIF fine alignment vs geocode placement (meters). @see address-resolution-model.md */
+  /**
+   * Meters: among multiple geocode hits, prefer candidate within this distance of EXIF;
+   * Step 7 pin nudge. Not the org km “internet results” realism cap.
+   * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
+   */
   exifAssistRadiusMeters: number;
   /** Step 4: EXIF reverse superset check enabled. */
   exifContextCheck: boolean;

@@ -40,8 +40,8 @@ UploadLocationConfigService
 | ----------------------------------- | --------- | -------------------------------------------------------------------------- |
 | `titleConfidenceThreshold`          | `number`  | Minimum confidence for a parsed text candidate to enter the geocoding path |
 | `disambiguationAutoAssignThreshold` | `number`  | Minimum probability for automatic candidate selection                      |
-| `sourceAgreementRadiusMeters`       | `number`  | Text vs EXIF metadata auto-agree radius (source tray above this)           |
-| `exifAssistRadiusMeters`            | `number`  | Radius used when EXIF assists ambiguous **geocode** hits only              |
+| `sourceAgreementRadiusMeters`       | `number`  | **Meters.** Text geocode vs EXIF metadata; source tray above this (not km Search Tuning) |
+| `exifAssistRadiusMeters`            | `number`  | **Meters.** Pick among ambiguous geocode hits near EXIF; Step 7 pin nudge (not km cap) |
 | `folderHintRequireHighConfidence`   | `boolean` | Whether folder hints may only come from high-confidence segment matches    |
 | `folderHintUseRootFallback`         | `boolean` | Whether the root folder hint may be used as fallback only                  |
 | `filenameAlwaysOverridesFolder`     | `boolean` | Whether file-level text always overrides folder-level defaults             |
@@ -55,8 +55,8 @@ Source of truth: `apps/web/src/app/core/upload/upload-location-config.ts`.
 
 | Constant | Type | Default | Purpose |
 | --- | --- | --- | --- |
-| `sourceAgreementRadiusMeters` | `number` | `150` | Auto-agree text placement when EXIF metadata is within this distance; else `disambiguationKind: source` tray. |
-| `exifAssistRadiusMeters` | `number` | `80` | Step 7 fine alignment: EXIF vs geocode placement (meters). |
+| `sourceAgreementRadiusMeters` | `number` | `150` | **Meters.** Text vs EXIF metadata agree → auto placement; else `disambiguationKind: source` tray. Not the org km “internet results” cap. |
+| `exifAssistRadiusMeters` | `number` | `80` | **Meters.** Among multiple geocode hits, prefer candidate within this distance of EXIF; Step 7 pin nudge. Not the org km realism cap — see [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md). |
 | `exifContextCheck` | `boolean` | `true` | Enable step 4 EXIF reverse superset check (`lang=en`). |
 | `defaultGeocodeCountry` | `string` | `AT` | Branch C Photon default country code. |
 | `tokenNormalizerFuzzyThreshold` | `number` | `0.85` | Minimum confidence for fuzzy token-normalizer matches. |
@@ -122,6 +122,10 @@ None.
 ### Supabase Calls
 
 None.
+
+## Org-level distance cap (not in this file)
+
+Upload forward-geocode must reject hits farther than org **`resolver.contextDistanceMaxMeters`** from the job search anchor (EXIF → project). Configured in **Settings → Search Tuning → Max distance for internet results (km)**. See [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md).
 
 ## Acceptance Criteria
 

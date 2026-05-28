@@ -148,6 +148,17 @@ SearchTuningSettingsSection
 - [ ] All search/geocoder callsites use merged config from `OrgSearchTuningService`.
 - [ ] Cross-org isolation enforced by RLS + `user_org_id()`.
 
+## Distance radii (must read)
+
+Org Search Tuning exposes **one** distance control in the UI (kilometers). Upload uses **two separate meter radii** in code. Full matrix: [search-tuning.distance-radii-contract.md](../../service/search/search-tuning.distance-radii-contract.md).
+
+| User-facing control | Stored key | Unit in UI | Purpose |
+| --- | --- | --- | --- |
+| Max distance for internet results (km) | `resolver.contextDistanceMaxMeters` | km (stored as m) | Drop unrealistic **Internet + upload geocode** hits too far from **search anchor** (photo GPS → map → project). |
+| *(not in this overlay today)* | `exifAssistRadiusMeters` | m (upload config) | Fine-tune **which** geocode candidate matches EXIF among close scores. |
+| *(not in this overlay today)* | `sourceAgreementRadiusMeters` | m (upload config) | **Text geocode vs EXIF** agree or source-conflict tray. |
+
 ## Settings
 
 - **Search Tuning**: org-level geocoder/search filters, weights, penalties, orchestrator timing, provider limits.
+- **Max distance for internet results (km)**: `contextDistanceMaxMeters`; realism cap from search anchor — also normative for upload forward-geocode far-hit rejection ([distance radii contract](../../service/search/search-tuning.distance-radii-contract.md)).

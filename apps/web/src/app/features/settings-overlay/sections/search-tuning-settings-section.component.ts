@@ -20,6 +20,7 @@ import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
 import { HLM_SWITCH_IMPORTS } from '../../../shared/ui/switch';
+import { RangeProgressStyleDirective } from '../../../shared/ui/range/range-progress-style.directive';
 
 export type SearchTuningEditorMode = 'basic' | 'advanced';
 export type SearchTuningSaveUiState = 'idle' | 'dirty' | 'saving' | 'saved' | 'save_error';
@@ -63,6 +64,7 @@ function ctxKmToSlider(km: number): number {
     ...HLM_INPUT_IMPORTS,
     ...HLM_LABEL_IMPORTS,
     ...HLM_SWITCH_IMPORTS,
+    RangeProgressStyleDirective,
   ],
   templateUrl: './search-tuning-settings-section.component.html',
   styleUrl: './search-tuning-settings-section.component.scss',

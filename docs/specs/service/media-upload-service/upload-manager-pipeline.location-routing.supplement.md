@@ -37,7 +37,7 @@ Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is ra
 | 2 | Text geocode (SO or legacy) | Runs when high-confidence text exists **even if** EXIF metadata present |
 | 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray |
 | 4 | `applyChosenPlacementSource` | EXIF-only when geocode failed and no text coords (Branch B) |
-| 5 | Context distance gate | **Prompt B** — org `contextDistanceMaxMeters` ([search-tuning.defaults.md](../search/search-tuning.defaults.md)); **not implemented in Prompt A** |
+| 5 | Geocode far-hit filter | Org `contextDistanceMaxMeters` (Settings → **Max distance for internet results (km)**) — drop Photon hits farther than cap from **job anchor** (EXIF → project) before trays; same key as search bar |
 | 6 | `routePreparedNewJob` / upload | `finalCoords` from `job.coords`; `exif_*` from `parsedExif.coords` |
 
 **Branch A (`missing_data_route`):** After Phase 2 failure when **no** `titleAddressCoords` and **no** `parsedExif.coords`. Phase 3 source-conflict **does not** run.
@@ -50,11 +50,13 @@ Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is ra
 
 ### Distance radii (do not conflate)
 
-| Constant | Home | Default | Used when |
-| --- | --- | --- | --- |
-| `sourceAgreementRadiusMeters` | [upload-location-config.md](./upload-location-config.md) | **150 m** | Text coords vs EXIF metadata disagree |
-| `exifAssistRadiusMeters` | upload-location-config | **300 m** | Multiple geocode hits only (`classifySearchHits`) |
-| `contextDistanceMaxMeters` | Org Search Tuning | **120 km** | Phase 5 project consistency (**Prompt B**) |
+Canonical matrix: [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md).
+
+| Constant | Home | Default | Unit in UI | Used when |
+| --- | --- | --- | --- | --- |
+| `contextDistanceMaxMeters` | Org Search Tuning (`resolver`) | **120 000 m** | **km** slider | Unrealistic **Internet + upload geocode** hits vs **search anchor** (photo GPS → map → project) |
+| `exifAssistRadiusMeters` | [upload-location-config.md](./upload-location-config.md) | **80 m** | *(not in Search Tuning UI)* | Among **multiple** geocode hits, pick/nudge candidate near **EXIF** |
+| `sourceAgreementRadiusMeters` | upload-location-config | **150 m** | *(not in Search Tuning UI)* | **Text geocode coords** vs **EXIF metadata** → agree or source tray |
 
 `clusterAssistWeight.project` is a **ranking weight**, not a distance radius.
 

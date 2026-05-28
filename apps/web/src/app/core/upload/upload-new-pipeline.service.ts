@@ -52,6 +52,11 @@ import { UploadQueueService } from './upload-queue.service';
 import { UploadPreResolveWaveService } from './upload-pre-resolve-wave.service';
 import { UploadService } from './upload.service';
 import type { ExifCoords, ParsedExif } from './upload.service';
+import {
+  uploadTraceDecision,
+  uploadTraceEnter,
+  uploadTraceExit,
+} from './upload-address-resolution.debug';
 
 @Injectable({ providedIn: 'root' })
 export class UploadNewPipelineService {
@@ -75,16 +80,28 @@ export class UploadNewPipelineService {
 
   /** Run the new-upload pipeline for a single job. */
   async run(jobId: string, ctx: PipelineContext): Promise<void> {
+    const job = this.jobState.findJob(jobId);
+    uploadTraceEnter('pipeline', 'UploadNewPipelineService.run', {
+      jobId,
+      fileName: job?.file.name,
+      batchId: job?.batchId,
+    });
     const resumed = await resumeIfAlreadyRoutedNewJob(
       this.prepareRouteDeps,
       jobId,
       ctx,
       this.runUploadPhase.bind(this),
     );
-    if (resumed) return;
+    if (resumed) {
+      uploadTraceExit('pipeline', 'UploadNewPipelineService.run', 'resumed');
+      return;
+    }
 
     const prepared = await prepareNewJobForUpload(this.prepareRouteDeps, jobId, ctx);
-    if (!prepared) return;
+    if (!prepared) {
+      uploadTraceExit('pipeline', 'UploadNewPipelineService.run', 'prepare failed');
+      return;
+    }
 
     const preResolve = await runPreUploadLocationResolve(
       {
@@ -98,9 +115,11 @@ export class UploadNewPipelineService {
       ctx,
     );
     if (preResolve === 'held' || preResolve === 'dedup_skip') {
+      uploadTraceExit('pipeline', 'UploadNewPipelineService.run', preResolve);
       return;
     }
 
+    uploadTraceDecision('pipeline', 'pre-resolve done — route to upload');
     await routePreparedNewJob(
       this.prepareRouteDeps,
       jobId,
@@ -109,6 +128,7 @@ export class UploadNewPipelineService {
       ctx,
       this.runUploadPhase.bind(this),
     );
+    uploadTraceExit('pipeline', 'UploadNewPipelineService.run', 'routed');
   }
 
   private isCancelled(jobId: string): boolean {

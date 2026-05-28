@@ -112,7 +112,7 @@ Jobs in `awaiting_disambiguation` stay in **Queue** with label “Choose address
 | `house_step` | Step 1B after city confirmed | House number list + “No number needed” |
 | `project_address_a` / `project_address_b` | Batch project precedence (Step 2) | See [stepper FSM supplement](./upload-resolver-tray.stepper-fsm.supplement.md) |
 | `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + two options |
-| `context_distance` | Placement beyond org `contextDistanceMaxMeters` from nearest project GPS link | **Prompt B** — confirm + embedded location search |
+| `context_distance` | Placement beyond org `contextDistanceMaxMeters` (Settings km cap) from project GPS anchor | **Prompt B** — confirm; not the same as `exifAssistRadiusMeters` (m) |
 
 ## Dev QA (local only)
 

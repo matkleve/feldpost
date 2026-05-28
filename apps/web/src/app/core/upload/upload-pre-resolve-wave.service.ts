@@ -6,6 +6,7 @@
 import { Injectable, inject } from '@angular/core';
 import { UploadResolverTrayOrchestratorService } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { USE_TRAY_ORCHESTRATOR } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
+import { uploadTraceDecision, uploadTraceEnter } from './upload-address-resolution.debug';
 
 @Injectable({ providedIn: 'root' })
 export class UploadPreResolveWaveService {
@@ -14,6 +15,7 @@ export class UploadPreResolveWaveService {
 
   /** Call after classifyBatch with the number of jobs that will pre-resolve. */
   resetWave(batchId: string, jobCount: number): void {
+    uploadTraceEnter('wave', 'resetWave', { batchId, jobCount });
     if (jobCount <= 0) {
       this.pendingByBatch.delete(batchId);
       return;
@@ -30,6 +32,7 @@ export class UploadPreResolveWaveService {
     const next = pending - 1;
     if (next <= 0) {
       this.pendingByBatch.delete(batchId);
+      uploadTraceDecision('wave', 'scanIdle — pre-resolve wave complete', { batchId });
       if (USE_TRAY_ORCHESTRATOR) {
         this.trayOrchestrator.notifyScanIdle(batchId);
       }

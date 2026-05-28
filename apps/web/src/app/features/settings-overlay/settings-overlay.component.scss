@@ -1,5 +1,6 @@
 @use '../../../styles/frosted-chrome';
 @use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../../../styles/range-input-accent';
 
 :host {
   display: contents;
@@ -491,7 +492,7 @@
   // @see docs/specs/ui/settings-overlay
   .settings-overlay__range {
     width: 100%;
-    accent-color: var(--primary);
+    @include range-input-accent.range-accent-states();
   }
 
   // Identity / profile summary card (legacy detail layout hook)

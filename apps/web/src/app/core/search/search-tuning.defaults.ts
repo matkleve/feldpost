@@ -24,6 +24,7 @@ export const SEARCH_TUNING_SYSTEM_DEFAULTS: SearchTuningConfig = {
     maxDbContentResults: 6,
     constrainedLimitMultiplier: 4,
     shortPrefixLimitFloor: 12,
+    // 120 km default — see search-tuning.distance-radii-contract.md (not exifAssistRadiusMeters).
     contextDistanceMaxMeters: 120_000,
     remoteTopDistanceMeters: 60_000,
     weakTopScoreThreshold: 0.75,
