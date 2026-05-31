@@ -205,13 +205,14 @@ export default tseslint.config(
     },
   },
 
-  // ── Upload orchestrator exception ─────────────────────────────────────────
+  // ── Upload core services — enforce split-friendly file size ───────────────
+  // Counts code lines only (blank lines and comments excluded).
+  // @see docs/agent-workflows/upload-core-services-split-prompt.md
   {
-    files: ['src/app/core/upload/upload-manager.service.ts'],
+    files: ['src/app/core/upload/**/*.service.ts'],
     rules: {
-      // Singleton orchestrator coordinates many pipelines and delegated streams.
-      // Keep max-lines rule active globally; disable only for this service file.
-      'max-lines': 'off',
+      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['error', { max: 80, skipBlankLines: true, skipComments: true }],
     },
   },
 

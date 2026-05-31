@@ -29,7 +29,8 @@ N/A (headless service). Consumers render rows per [media-detail-location-section
 | `list_locations_for_media` | Detail open / after mutation / batch primary hydrate |
 | `add_media_item_location` | Add new Address |
 | `update_media_item_location` | Row save / map GPS on row / detail title field save |
-| `delete_media_item_location` | Row delete confirm |
+| `delete_media_item_location` | Row delete confirm (detail row) |
+| `unlink_media_from_location` | Bulk footer **delete locations**; row replace-link step 1 |
 | `link_media_to_location` | Upload resolve, `resolve_media_location` completion; row **Change to different address** (via facade) |
 | `find_or_create_location` | Deduped org location create; add flow and replace-link flow |
 | `unlink_media_from_location` | Row **Change to different address** (via facade `replaceMediaItemLocationLink`) |
@@ -156,7 +157,8 @@ See [zoomable-map-contract supplement](./media-locations.zoomable-map-contract.s
 - **Seed:** `seedListCache` / `hydrateSummariesAndSeedCache` — always `locationToRow.set` (overwrite; latest batch wins).
 - **Read:** assemble + sort by link `sort_order`. If `refs.length !==` count of resolved cores → **cache miss** (data integrity; never return partial list).
 - **Update:** `updateLocation` → `updateCachedLocation` only (no full clear).
-- **Delete:** `deleteLocation` → `invalidateByLocationId`.
+- **Delete (single location id):** `deleteLocation` → `invalidateByLocationId`.
+- **Bulk unlink (workspace footer):** `WorkspaceBulkActionService.deleteLocationsForSelection` loops `listForMedia` + `unlink` per selected media item — see [workspace-pane-footer.destructive-actions.supplement.md](../../component/workspace/workspace-pane-footer.destructive-actions.supplement.md).
 - **Per-media invalidate:** `invalidateListCache(mediaItemId)` removes `mediaToLinks` entry only.
 
 ## Floor edit rule

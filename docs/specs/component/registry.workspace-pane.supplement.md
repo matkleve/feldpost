@@ -124,8 +124,8 @@
 ### `<app-workspace-pane-footer>` — Workspace Pane Footer
 
 - **File**: `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts`
-- **Purpose**: Footer action bar for the workspace pane; handles export, share, project assignment, and bulk actions for the current scope.
-- **Spec**: [`docs/specs/component/workspace/pane-footer.md`](workspace/pane-footer.md)
+- **Purpose**: Footer action bar for the workspace pane; compact toolbar for selection, export/share, bulk location delete, and bulk media delete.
+- **Spec**: [`docs/specs/component/workspace/workspace-pane-footer.md`](workspace/workspace-pane-footer.md)
 - **Variant axes**: none
 - **Other inputs**: `scopeIds: string[]` (required), `images: WorkspaceImage[]` (required)
 - **Composed of**: `app-project-select-dialog`, `app-share-link-audience-dialog`, `app-confirm-dialog`

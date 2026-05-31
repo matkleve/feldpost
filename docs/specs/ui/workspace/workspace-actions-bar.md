@@ -1,15 +1,17 @@
 # Workspace Actions Bar
 
-> **Service contracts:** [upload-manager](../../service/media-upload-service/upload-manager.md), [upload-manager-pipeline](../../service/media-upload-service/upload-manager-pipeline.md)
+> **Implementation contract:** [workspace-pane-footer.md](../../component/workspace/workspace-pane-footer.md)  
+> **Destructive bulk actions:** [workspace-pane-footer.destructive-actions.supplement.md](../../component/workspace/workspace-pane-footer.destructive-actions.supplement.md)  
+> **Service contracts:** [upload-manager](../../service/media-upload-service/upload-manager.md), [upload-manager-pipeline](../../service/media-upload-service/upload-manager-pipeline.md)  
 > **Use cases:** [use-cases/workspace-export.md](../../../use-cases/workspace-export.md)
 
 ## What It Is
 
-Selection bar at the bottom of the Workspace Pane when at least one item is selected: scope, curation (project, address, delete), and export (share, copy, ZIP). **ws_footer_multi** in the action-context-matrix; primary first, export next, delete last.
+Selection bar at the bottom of the Workspace Pane when at least one item is selected: selection controls, export (share, copy, ZIP), and **two destructive bulk actions** — **location delete** (unlink all location associations; keep media) and **media delete** (remove media + storage, undo toast). **ws_footer_multi** in the action-context-matrix; compact **`icon-sm`** toolbar tier per footer component spec.
 
 ## What It Looks Like
 
-The bar is anchored to the bottom edge of the Workspace Pane content area and spans full pane width. Height is 3.5rem (56px) minimum touch target, with horizontal padding 0.75rem (12px) and control gap 0.5rem. Background uses `--color-bg-elevated`, top border `1px` in `--color-border-subtle`, and a soft shadow token used by elevated overlays. It enters with a vertical translate and opacity transition from `docs/design/motion.md` timing tokens. Primary actions are left-to-right: selection controls, count summary, curation actions, then export actions.
+The bar is anchored to the bottom edge of the Workspace Pane content area and spans full pane width. Horizontal padding `0.75rem` (12px); control gap `var(--spacing-2)`. Icon-only footer controls use **`hlmBtn` `size="icon-sm"`** (2rem × 2rem); labeled ZIP uses **`size="sm"`**. Background and border follow pane chrome tokens via `app-pane-footer` projection. Primary actions are left-to-right: selection controls, count summary, export/share, then destructive location delete + media delete (see supplement).
 
 Each media card in the thumbnail grid shows a quiet checkbox affordance at top-left on hover/focus, and always-visible when selected. On desktop, multi-select follows common patterns: checkbox click, Ctrl-click on Windows/Linux, Cmd-click on macOS; Shift-range selection is optional but reserved in state model.
 
@@ -33,22 +35,24 @@ Each media card in the thumbnail grid shows a quiet checkbox affordance at top-l
 | 8   | Confirms add to existing project                      | Upserts project memberships for all selected media IDs                            | `bulkAddToProject(ids, projectId)`  |
 | 9   | Clicks `Change address`                               | Opens bulk address editor with preview count                                      | `changeAddressDialogOpen = true`    |
 | 10  | Confirms address change                               | Updates selected media rows with normalized address value                         | `bulkChangeAddress(ids, address)`   |
-| 11  | Clicks `Delete`                                       | Opens destructive confirmation with selected count                                | `deleteDialogOpen = true`           |
-| 12  | Confirms deletion                                     | Deletes selected media rows and related storage references, then clears selection | `bulkDeleteMedia(ids)`              |
-| 13  | Clicks `Share link`                                   | Opens Share Dialog with count and visibility summary                              | `shareDialogOpen = true`            |
-| 14  | Confirms link generation                              | Creates or fetches stable share-set token mapped to normalized selected IDs       | `createShareSetToken(ids)`          |
-| 15  | Clicks `Copy link` (`Link kopieren` in de locale)     | Writes resolved URL to clipboard and shows toast                                  | `navigator.clipboard.writeText`     |
-| 16  | Clicks `Share` on supported device                    | Invokes native share sheet with URL/title/text                                    | `navigator.share`                   |
-| 17  | Clicks `Download ZIP`                                 | Opens Download Dialog with prefilled filename/title                               | `downloadDialogOpen = true`         |
-| 18  | Confirms ZIP download                                 | Fetches binaries, packages ZIP, starts browser download                           | `startZipExport()`                  |
-| 19  | Edits filename/title                                  | Validates and normalizes safe filename                                            | `exportTitle` validation            |
-| 20  | Presses `Ctrl/Cmd + A` while workspace has focus      | Selects all items in current scope                                                | keyboard selection shortcut         |
-| 21  | Presses `Escape` while export bar is active           | Clears selection and closes bar                                                   | keyboard cancel shortcut            |
-| 22  | Changes sorting/filtering/grouping while items chosen | Keeps selected IDs by identity; selected count includes hidden-but-selected IDs   | resilient selection state           |
-| 23  | Opens shared link URL                                 | Resolves token to exact media ID set and renders same set in workspace context    | token resolve flow                  |
-| 24  | Opens shared link from unauthorized org               | Shows access denied state; no media payload returned                              | RLS + org checks                    |
-| 25  | Opens expired shared link                             | Shows expired-link state with retry/request guidance                              | token TTL validation                |
-| 26  | Export encounters partial fetch failures              | Shows recoverable error with retry and "download available only" fallback         | ZIP error path                      |
+| 11  | Clicks `Remove locations` (`delete_locations`)      | Opens location-delete confirmation (count in copy)                                | `deleteLocationsDialogOpen = true`  |
+| 12  | Confirms location delete                              | Unlinks all location rows per selected media; patches grid address fields         | `deleteLocationsForSelection()`     |
+| 13  | Clicks `Delete media` (`delete_media`)                | Opens media-delete confirmation                                                   | `deleteMediaDialogOpen = true`      |
+| 14  | Confirms media deletion                               | Deletes selected media + storage; undo toast; clears selection                    | `deleteSelectedWithUndo()`          |
+| 15  | Clicks `Share link`                                   | Opens Share Dialog with count and visibility summary                              | `shareDialogOpen = true`            |
+| 16  | Confirms link generation                              | Creates or fetches stable share-set token mapped to normalized selected IDs       | `createShareSetToken(ids)`          |
+| 17  | Clicks `Copy link`                                    | Writes resolved URL to clipboard and shows toast                                  | `navigator.clipboard.writeText`     |
+| 18  | Clicks `Share` on supported device                    | Invokes native share sheet with URL/title/text                                    | `navigator.share`                   |
+| 19  | Clicks `Download ZIP`                                 | Opens Download Dialog with prefilled filename/title                               | `downloadDialogOpen = true`         |
+| 20  | Confirms ZIP download                                 | Fetches binaries, packages ZIP, starts browser download                           | `startZipExport()`                  |
+| 21  | Edits filename/title                                  | Validates and normalizes safe filename                                            | `exportTitle` validation            |
+| 22  | Presses `Ctrl/Cmd + A` while workspace has focus      | Selects all items in current scope                                                | keyboard selection shortcut         |
+| 23  | Presses `Escape` while export bar is active           | Clears selection and closes bar                                                   | keyboard cancel shortcut            |
+| 24  | Changes sorting/filtering/grouping while items chosen | Keeps selected IDs by identity; selected count includes hidden-but-selected IDs   | resilient selection state           |
+| 25  | Opens shared link URL                                 | Resolves token to exact media ID set and renders same set in workspace context    | token resolve flow                  |
+| 26  | Opens shared link from unauthorized org               | Shows access denied state; no media payload returned                              | RLS + org checks                    |
+| 27  | Opens expired shared link                             | Shows expired-link state with retry/request guidance                              | token TTL validation                |
+| 28  | Export encounters partial fetch failures              | Shows recoverable error with retry and "download available only" fallback         | ZIP error path                      |
 
 ## Component Hierarchy
 
@@ -64,10 +68,9 @@ WorkspacePane
 │   │   └── Button: Select all
 │   ├── SelectionSummary
 │   │   └── Label: "X selected"
-│   ├── CurationActions
-│   │   ├── Button: Assign project
-│   │   ├── Button: Change address
-│   │   └── Button: Delete (danger)
+│   ├── DestructiveActions (icon-sm)
+│   │   ├── Button: Remove locations (`delete_locations`)
+│   │   └── Button: Delete media (`delete_media`)
 │   ├── ExportActions
 │   │   ├── Button: Share link
 │   │   ├── Button: Copy link
@@ -81,10 +84,8 @@ WorkspacePane
 │   ├── AddressInput
 │   ├── SelectionScopeSummary
 │   └── Confirm/CancelButtons
-├── [deleteDialogOpen] DeleteSelectionDialog
-│   ├── WarningCopy
-│   ├── SelectionScopeSummary
-│   └── Confirm/CancelButtons
+├── [deleteLocationsDialogOpen] DeleteLocationsDialog
+├── [deleteMediaDialogOpen] DeleteMediaDialog
 ├── [shareDialogOpen] ShareSelectionDialog
 │   ├── ScopeSummary
 │   ├── LinkField
@@ -124,7 +125,8 @@ flowchart LR
 | Selection scope IDs   | `WorkspaceViewService.groupedSections()`    | `string[]`      | Used by `Select all` for current filtered/grouped scope    |
 | Project membership    | `MediaBulkActionsService.bulkAddToProject`  | mutation result | Upserts selected IDs into `media_projects` for a project   |
 | Address field update  | `MediaBulkActionsService.bulkChangeAddress` | mutation result | Updates selected media address fields in one batch         |
-| Bulk delete mutation  | `MediaBulkActionsService.bulkDeleteMedia`   | mutation result | Deletes selected media records with storage cleanup        |
+| Bulk media delete     | `WorkspaceBulkActionService.deleteSelectedWithUndo` | mutation + undo | Deletes selected media records with storage cleanup |
+| Bulk location unlink  | `WorkspaceBulkActionService.deleteLocationsForSelection` | per-item unlink | Removes all location links per selected media; keeps files |
 | Share token           | `ShareSetService`                           | `string`        | URL-safe token, high entropy, deterministic mapping policy |
 | Share-set fingerprint | Backend function                            | `string`        | Hash of sorted media IDs + org context for dedup/lookup    |
 | Share-set rows        | `share_sets`, `share_set_items`             | relational rows | New schema to persist stable shared groups                 |
@@ -143,9 +145,9 @@ Share-set SQL, RLS, RPC stubs, and ER diagram (after Schema notes table): **[wor
 | `exportBarVisible`        | `Signal<boolean>`                                                       | `false`              | Derived from `selectedMediaIds.size > 0`         |
 | `addToProjectDialogOpen`  | `WritableSignal<boolean>`                                               | `false`              | Add-to-project dialog visibility                 |
 | `changeAddressDialogOpen` | `WritableSignal<boolean>`                                               | `false`              | Change-address dialog visibility                 |
-| `deleteDialogOpen`        | `WritableSignal<boolean>`                                               | `false`              | Delete confirmation dialog visibility            |
-| `bulkActionStatus`        | `WritableSignal<'idle' \| 'running' \| 'error'>`                        | `'idle'`             | Batch curation action lifecycle state            |
-| `busyBulkAction`          | `WritableSignal<'add-project' \| 'change-address' \| 'delete' \| null>` | `null`               | Prevents duplicate destructive/slow actions      |
+| `deleteMediaDialogOpen`   | `WritableSignal<boolean>`                                               | `false`              | Media delete confirmation                        |
+| `deleteLocationsDialogOpen` | `WritableSignal<boolean>`                                             | `false`              | Location delete confirmation                     |
+| `hasLocationInSelection`  | `Signal<boolean>`                                                       | `false`              | Enables `delete_locations` toolbar action      |
 | `shareDialogOpen`         | `WritableSignal<boolean>`                                               | `false`              | Share dialog visibility                          |
 | `downloadDialogOpen`      | `WritableSignal<boolean>`                                               | `false`              | Download dialog visibility                       |
 | `shareUrl`                | `WritableSignal<string \| null>`                                        | `null`               | Generated/loaded share URL                       |
@@ -219,10 +221,10 @@ sequenceDiagram
 - [x] Ctrl-click (Windows/Linux) and Cmd-click (macOS) toggle selection on media cards.
 - [ ] First selection opens export bar with transition; zero selection closes it.
 - [x] Export bar always includes `Select none` and `Select all` actions.
-- [ ] Export bar includes `Assign project`, `Change address`, and `Delete` actions for selected media.
-- [ ] `Assign project` applies to every currently selected ID and reports per-item failures non-destructively.
-- [ ] `Change address` updates every selected media row and refreshes both grid labels and marker tooltip/address surfaces.
-- [ ] `Delete` requires explicit confirmation and removes all selected media while clearing stale selection IDs.
+- [ ] Footer exposes `Remove locations` and `Delete media` as separate destructive icon actions (`icon-sm`).
+- [ ] Location delete requires confirmation; removes links only; grid/map address surfaces clear; media tiles remain.
+- [ ] Media delete requires confirmation; removes selected media; undo toast; clears selection on success.
+- [ ] `delete_locations` disabled when no selected item has location links.
 - [ ] `Select all` targets current workspace scope (active filters/grouping/tab), not entire dataset.
 - [ ] Selection survives sort, filter, grouping, and fullscreen transitions.
 - [x] Share link creation returns a stable tokenized URL for the selected set.

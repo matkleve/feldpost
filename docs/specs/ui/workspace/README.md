@@ -9,7 +9,7 @@ Module index for workspace UI contracts.
 - workspace-selected-items-grid.md
 - pane-header.md
 - workspace-toolbar.md
-- workspace-actions-bar.md
+- workspace-actions-bar.md — feature index; implementation → [workspace-pane-footer.md](../../component/workspace/workspace-pane-footer.md)
 - workspace-view-system.md — **UI overview stub (links only)** → [service workspace-view-system](../../service/workspace-view/workspace-view-system.md) (canonical contract; do not duplicate)
 
 Folder-specific rules:
