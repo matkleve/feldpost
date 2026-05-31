@@ -6,7 +6,7 @@
 
 ## What it is
 
-`UploadLocationResolutionService` — pre-upload resolution, disambiguation groups (OD-1), group-level upload gate (OD-3). Fed by [upload-address-resolution-pipeline](./upload-address-resolution-pipeline.md).
+`UploadLocationResolutionService` — pre-upload resolution, disambiguation groups (OD-1), group-level upload gate (OD-3). Fed by [upload-address-resolution-pipeline](./upload-address-resolution-pipeline.md). Group signal state: `UploadLocationDisambiguationStoreService` (`upload-location-disambiguation-store.service.ts`). Source-conflict record/registration: `UploadLocationSourceConflictService` (`upload-location-source-conflict.service.ts`). Placement / Phase 3–4: `UploadLocationPlacementService` (`upload-location-placement.service.ts`). Geocode group: `UploadLocationGeocodeGroupService`. Tray flows: `UploadLocationTrayFlowService`.
 
 ## Geocoding contract
 

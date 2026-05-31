@@ -7,14 +7,12 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
-import { resolveUploadAddress } from './upload-address-resolve.util';
+import { persistUploadFile, type UploadFilePersistDeps } from './upload-file-persist.util';
 import {
   convertHeicToJpegUploadFile,
-  describeUploadPersistError,
   isHeicUploadFile,
   mapUploadStorageError,
   parseUploadExif,
-  resolveUploadLocationStatus,
   resolveUploadMediaType,
   resolveUploadMimeType,
   validateUploadFile,
@@ -119,6 +117,7 @@ export class UploadService {
   /**
    * Upload pipeline: auth -> validate -> org lookup -> storage upload -> DB write
    * -> optional mixed-media shadow write -> async address resolve.
+   * @see upload-file-persist.util.ts persistUploadFile
    */
   async uploadFile(
     file: File,
@@ -129,131 +128,23 @@ export class UploadService {
     relativePath?: string,
     options?: { pendingPartialLocation?: boolean },
   ): Promise<UploadResult> {
-    const user = this.auth.user();
-    if (!user) {
-      return { error: 'Not authenticated.' };
-    }
+    return persistUploadFile(
+      { file, manualCoords, parsedExif, projectId, abortSignal, relativePath, options },
+      this.uploadFilePersistDeps(),
+    );
+  }
 
-    const validation = this.validateFile(file);
-    if (!validation.valid) {
-      return { error: validation.error! };
-    }
-
-    if (abortSignal?.aborted) {
-      return { error: 'Upload cancelled by user.' };
-    }
-
-    const profileQuery = this.supabase.client
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', user.id);
-
-    const { data: profile, error: profileError } = await this.withAbort(
-      profileQuery,
-      abortSignal,
-    ).single();
-
-    if (profileError || !profile) {
-      return { error: profileError ?? new Error('Profile not found.') };
-    }
-
-    const orgId: string = profile.organization_id;
-
-    const uuid = crypto.randomUUID();
-    const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
-    const storagePath = `${orgId}/${user.id}/${uuid}.${ext}`;
-
-    if (abortSignal?.aborted) {
-      return { error: 'Upload cancelled by user.' };
-    }
-
-    const contentType = this.resolveMimeType(file);
-    const { error: storageError } = await this.supabase.client.storage
-      .from('media')
-      .upload(storagePath, file, {
-        contentType,
-        upsert: false,
-        ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
-      });
-
-    if (storageError) {
-      return { error: mapUploadStorageError(storageError) };
-    }
-
-    if (abortSignal?.aborted) {
-      await this.supabase.client.storage.from('media').remove([storagePath]);
-      return { error: 'Upload cancelled by user.' };
-    }
-
-    const parsed =
-      parsedExif ?? (await this.parseExif(file));
-    const metadataExifCoords = parsed.coords;
-    const { capturedAt, direction } = parsed;
-
-    /** Placement from job.coords (manualCoords); EXIF columns always from raw metadata. */
-    const finalCoords: ExifCoords | undefined = manualCoords;
-
-    const mediaType = this.resolveMediaType(file);
-    const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords, {
-      pendingPartial: options?.pendingPartialLocation,
-    });
-    const gpsAssignmentAllowed = mediaType !== 'document' || finalCoords != null;
-
-    const mediaInsertQuery = this.supabase.client
-      .from('media_items')
-      .insert({
-        organization_id: orgId,
-        created_by: user.id,
-        media_type: mediaType,
-        mime_type: file.type,
-        storage_path: storagePath,
-        original_filename: file.name,
-        relative_path: relativePath ?? null,
-        file_size_bytes: file.size,
-        captured_at: capturedAt ?? null,
-        exif_latitude: metadataExifCoords?.lat ?? null,
-        exif_longitude: metadataExifCoords?.lng ?? null,
-        exif_raw: parsed.exifRaw ?? null,
-        location_status: locationStatus,
-        gps_assignment_allowed: gpsAssignmentAllowed,
-      })
-      .select('id');
-
-    const { data: mediaRow, error: dbError } = await this.withAbort(
-      mediaInsertQuery,
-      abortSignal,
-    ).single();
-
-    if (dbError) {
-      return { error: dbError };
-    }
-
-    if (abortSignal?.aborted) {
-      await this.supabase.client.storage.from('media').remove([storagePath]);
-      await this.supabase.client
-        .from('media_items')
-        .delete()
-        .eq('id', mediaRow.id as string);
-      return { error: 'Upload cancelled by user.' };
-    }
-
-    if (finalCoords) {
-      resolveUploadAddress({
-        mediaItemId: mediaRow.id as string,
-        lat: finalCoords.lat,
-        lng: finalCoords.lng,
-        geocoding: this.geocoding,
-        supabaseClient: this.supabase.client,
-        describePersistError: describeUploadPersistError,
-      });
-    }
-
+  /** @see upload-file-persist.util.ts UploadFilePersistDeps */
+  private uploadFilePersistDeps(): UploadFilePersistDeps {
     return {
-      id: mediaRow.id as string,
-      storagePath,
-      coords: finalCoords,
-      direction,
-      error: null,
+      getUser: () => this.auth.user(),
+      validateFile: (f) => this.validateFile(f),
+      resolveMimeType: (f) => this.resolveMimeType(f),
+      resolveMediaType: (f) => this.resolveMediaType(f),
+      parseExif: (f) => this.parseExif(f),
+      withAbort: (builder, signal) => this.withAbort(builder, signal),
+      supabaseClient: this.supabase.client,
+      geocoding: this.geocoding,
     };
   }
 

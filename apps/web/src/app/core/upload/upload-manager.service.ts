@@ -27,15 +27,7 @@ import { FilenameParserService } from '../filename-parser/filename-parser.servic
 import { FolderScanService } from '../folder-scan/folder-scan.service';
 import { MediaPreviewService } from '../media-preview/media-preview.service';
 import { ProjectsService } from '../projects/projects.service';
-import {
-  describeLocationUpdateRpcError,
-  LOCATION_UPDATE_NOT_FOUND_ERROR,
-} from '../media-location-update/media-location-update.helpers';
 import { SupabaseService } from '../supabase/supabase.service';
-import {
-  formatUploadFailureMessage,
-  uploadFailureMessageToToastText,
-} from './upload-error-messages.util';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadBatchService } from './upload-batch.service';
 import {
@@ -53,19 +45,16 @@ import {
   retryUploadManagerJob,
   type UploadManagerActionsDeps,
 } from './upload-manager-actions.util';
-import { cancelAllActiveUploads } from './upload-manager-cancel-active.util';
 import { checkUploadDedupHash } from './upload-manager-dedup.util';
+import { selectUploadManagerAddressCandidate } from './upload-manager-select-address.util';
 import { registerUploadManagerEffects } from './upload-manager-effects.util';
-import { drainUploadManagerQueue } from './upload-manager-drain.util';
-import { handleUploadPipelineError } from './upload-manager-error.util';
-import { failUploadManagerJob } from './upload-manager-fail.util';
+import { emitUploadManagerBatchProgress } from './upload-manager-lifecycle.util';
+import { UploadManagerMissingDataService } from './upload-manager-missing-data.service';
+import { UploadManagerPipelineHostService } from './upload-manager-pipeline-host.service';
 import {
-  abortUploadManagerJobRequest,
-  clearUploadAbortController,
-  emitUploadManagerBatchProgress,
-  ensureUploadAbortController,
-} from './upload-manager-lifecycle.util';
-import { runUploadPipelineByMode } from './upload-manager-run-route.util';
+  buildUploadManagerActionDeps,
+  buildUploadManagerSubmitDeps,
+} from './upload-manager-facade-deps.util';
 import { createUploadManagerPipelineContext } from './upload-manager-runtime.util';
 import {
   submitUploadManagerFiles,
@@ -76,10 +65,9 @@ import {
 import { UploadLocationConfigService } from './upload-location-config.service';
 import { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
 import { UploadResolverTrayOrchestratorService } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
-import { USE_TRAY_ORCHESTRATOR } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { UploadPreResolveWaveService } from './upload-pre-resolve-wave.service';
-import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';
+import { UploadJobStateService } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
 import { UploadNewPipelineService } from './upload-new-pipeline.service';
 import { UploadQueueService } from './upload-queue.service';
@@ -110,7 +98,6 @@ export type {
 } from './upload-manager.types';
 
 import type {
-  UploadPhase,
   UploadAddressCandidate,
   UploadJob,
   SubmitOptions,
@@ -155,79 +142,36 @@ export class UploadManagerService {
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
-  private readonly abortControllers = new Map<string, AbortController>();
+  private readonly missingData = inject(UploadManagerMissingDataService);
+  private readonly pipelineHost = inject(UploadManagerPipelineHostService);
 
-  private readonly actionDeps: UploadManagerActionsDeps = {
-    findJob: (jobId) => this.jobState.findJob(jobId) ?? undefined,
-    snapshotJobs: () => this.jobState.snapshot(),
-    updateJob: (jobId, patch) => this.jobState.updateJob(jobId, patch),
-    addJobs: (jobs) => this.jobState.addJobs(jobs),
-    removeJob: (jobId) => this.jobState.removeJob(jobId),
-    removeTerminalJobs: () => this.jobState.removeTerminalJobs(),
-    addBatch: (batch) => this.batchService.addBatch(batch),
-    updateBatch: (batchId, patch) => this.batchService.updateBatch(batchId, patch),
-    createImmediatePreviewUrl: (file) => this.mediaPreview.createImmediatePreviewUrl(file),
-    createDeferredPreviewUrl: (file) => this.mediaPreview.createDeferredPreviewUrl(file),
-    revokeObjectUrl: (url) => URL.revokeObjectURL(url),
-    isTerminalPhase: (phase) => TERMINAL_PHASES.has(phase),
-    queuedLabel: phaseLabel('queued'),
-    abortJobRequest: (jobId) => this.abortJobRequest(jobId),
-    markDone: (jobId) => this.queue.markDone(jobId),
-    removeStoragePath: (storagePath) => {
+  private readonly facadeDepsInput = {
+    jobState: this.jobState,
+    batchService: this.batchService,
+    queue: this.queue,
+    folderScan: this.folderScan,
+    filenameParser: this.filenameParser,
+    mediaPreview: this.mediaPreview,
+    projects: this.projects,
+    locationConfig: this.locationConfig,
+    locationResolution: this.locationResolution,
+    addressOrchestrator: this.addressOrchestrator,
+    preResolveWave: this.preResolveWave,
+    pipelineHost: this.pipelineHost,
+    getPipelineCtx: () => this.pipelineCtx,
+    supabaseRemove: (storagePath: string) => {
       this.supabase.client.storage.from('media').remove([storagePath]);
     },
-    drainQueue: () => this.drainQueue(),
+    hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => this.hydrateDeferredPreviews(jobs),
   };
 
-  private readonly submitDeps: UploadManagerSubmitDeps = {
-    addBatch: (batch) => this.batchService.addBatch(batch),
-    updateBatch: (batchId, patch) => this.batchService.updateBatch(batchId, patch),
-    addJobs: (jobs) => this.jobState.addJobs(jobs),
-    createImmediatePreviewUrl: (file) => this.mediaPreview.createImmediatePreviewUrl(file),
-    hydrateDeferredPreviews: (jobs) => this.hydrateDeferredPreviews(jobs),
-    drainQueue: () => this.drainQueue(),
-    scanDirectory: (dirHandle) => this.folderScan.scanDirectory(dirHandle),
-    scanProgress$: this.folderScan.scanProgress$,
-    extractAddressFromFolderName: (folderName) => {
-      const parsed = this.filenameParser.extractAddress(folderName);
-      if (!parsed || parsed.confidence !== 'high') {
-        return undefined;
-      }
-      return parsed.address;
-    },
-    extractAddressFromFolderPathSegments: (segments, traversalOrder, requireHighConfidence) => {
-      const orderedSegments =
-        traversalOrder === 'root-to-leaf' ? [...segments] : [...segments].reverse();
+  private readonly actionDeps: UploadManagerActionsDeps = buildUploadManagerActionDeps(
+    this.facadeDepsInput,
+  );
 
-      for (const segment of orderedSegments) {
-        const parsed = this.filenameParser.extractAddress(segment);
-        if (!parsed) {
-          continue;
-        }
-        if (!requireHighConfidence || parsed.confidence === 'high') {
-          return parsed.address;
-        }
-      }
-      return undefined;
-    },
-    getLocationConfig: () => this.locationConfig.getConfig(),
-    loadProjects: () => this.projects.loadProjects(),
-    createProject: async (name: string) => {
-      const draftProject = await this.projects.createDraftProject();
-      if (!draftProject) {
-        return undefined;
-      }
-      const renamed = await this.projects.renameProject(draftProject.id, name);
-      return renamed ? draftProject.id : undefined;
-    },
-    queuedLabel: phaseLabel('queued'),
-    classifyBatch: async (batchId) => {
-      await this.addressOrchestrator.classifyBatch(batchId);
-      this.locationResolution.registerLayerPackageGroupsAfterClassify(batchId);
-      const jobCount = this.jobState.jobs().filter((j) => j.batchId === batchId).length;
-      this.preResolveWave.resetWave(batchId, jobCount);
-    },
-  };
+  private readonly submitDeps: UploadManagerSubmitDeps = buildUploadManagerSubmitDeps(
+    this.facadeDepsInput,
+  );
 
   // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Delegated state ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
@@ -266,10 +210,11 @@ export class UploadManagerService {
 
   /** Shared context passed to pipeline services for manager-owned operations. */
   private readonly pipelineCtx: PipelineContext = createUploadManagerPipelineContext({
-    failJob: (jobId, failedAt, error) => this.failJob(jobId, failedAt, error),
+    failJob: (jobId, failedAt, error) =>
+      this.pipelineHost.failJob(jobId, failedAt, error, this.pipelineCtx),
     emitBatchProgress: (batchId) => this.emitBatchProgress(batchId),
-    drainQueue: () => this.drainQueue(),
-    getAbortSignal: (jobId) => this.abortControllers.get(jobId)?.signal,
+    drainQueue: () => this.pipelineHost.drainQueue(this.pipelineCtx),
+    getAbortSignal: (jobId) => this.pipelineHost.getAbortSignal(jobId),
     checkDedupHash: (hash) => this.checkDedupHash(hash),
     emitUploadSkipped: (event) => this._uploadSkipped$.next(event),
     emitImageUploaded: (event) => this._imageUploaded$.next(event),
@@ -290,7 +235,7 @@ export class UploadManagerService {
       },
       getUser: () => this.auth.user(),
       hasRunning: () => this.queue.hasRunning(),
-      cancelAllActive: () => this.cancelAllActive(),
+      cancelAllActive: () => this.pipelineHost.cancelAllActive(),
       isBusy: () => this.isBusy(),
       addBeforeUnloadListener: (handler) => {
         window.addEventListener('beforeunload', handler);
@@ -376,7 +321,12 @@ export class UploadManagerService {
   placeJob(jobId: string, coords: ExifCoords): void {
     const job = this.jobState.findJob(jobId);
     if (job?.phase === 'missing_data' && job.mediaId) {
-      void this.resolvePersistedMissingDataLocation(jobId, job.mediaId, coords);
+      void this.missingData.resolvePersistedMissingDataLocation(
+        jobId,
+        job.mediaId,
+        coords,
+        (batchId) => this.emitBatchProgress(batchId),
+      );
       return;
     }
 
@@ -389,47 +339,17 @@ export class UploadManagerService {
    */
   /** After batch location gate (e.g. source-conflict Save), drain queued siblings. */
   kickQueueAfterLocationGate(): void {
-    this.drainQueue();
+    this.pipelineHost.kickQueueAfterLocationGate(this.pipelineCtx);
   }
 
   selectAddressCandidate(jobId: string, candidate: UploadAddressCandidate): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job) {
-      return;
-    }
-
-    if (job.phase === 'awaiting_disambiguation' && job.disambiguationGroupId) {
-      this.locationResolution.applyCandidateToGroup(job.disambiguationGroupId, candidate.id);
-      return;
-    }
-
-    if (job.phase !== 'missing_data') {
-      return;
-    }
-
-    if (job.mediaId) {
-      this.jobState.updateJob(jobId, {
-        titleAddress: candidate.addressLabel,
-        titleAddressSource: 'file',
-        locationSourceUsed: 'file',
-        issueKind: undefined,
-        addressCandidates: undefined,
-      });
-      void this.resolvePersistedMissingDataLocation(jobId, job.mediaId, {
-        lat: candidate.lat,
-        lng: candidate.lng,
-      });
-      return;
-    }
-
-    this.jobState.updateJob(jobId, {
-      titleAddress: candidate.addressLabel,
-      titleAddressSource: 'file',
-      locationSourceUsed: 'file',
-      issueKind: undefined,
-      addressCandidates: undefined,
+    selectUploadManagerAddressCandidate(jobId, candidate, {
+      jobState: this.jobState,
+      locationResolution: this.locationResolution,
+      missingData: this.missingData,
+      actionDeps: this.actionDeps,
+      emitBatchProgress: (batchId) => this.emitBatchProgress(batchId),
     });
-    placeUploadManagerJob(jobId, { lat: candidate.lat, lng: candidate.lng }, this.actionDeps);
   }
 
   /**
@@ -439,79 +359,16 @@ export class UploadManagerService {
   assignJobToProject(jobId: string, projectId: string): void {
     const job = this.jobState.findJob(jobId);
     if (job?.phase === 'missing_data' && job.mediaId) {
-      void this.resolvePersistedMissingDataProject(jobId, job.mediaId, projectId);
+      void this.missingData.resolvePersistedMissingDataProject(
+        jobId,
+        job.mediaId,
+        projectId,
+        (batchId) => this.emitBatchProgress(batchId),
+      );
       return;
     }
 
     assignUploadManagerJobToProject(jobId, projectId, this.actionDeps);
-  }
-
-  private async resolvePersistedMissingDataLocation(
-    jobId: string,
-    mediaId: string,
-    coords: ExifCoords,
-  ): Promise<void> {
-    const { data, error } = await this.supabase.client.rpc('resolve_media_location', {
-      p_media_item_id: mediaId,
-      p_latitude: coords.lat,
-      p_longitude: coords.lng,
-    });
-
-    if (error || data !== true) {
-      const failureMessage = uploadFailureMessageToToastText(
-        formatUploadFailureMessage(
-          error ? describeLocationUpdateRpcError(error) : LOCATION_UPDATE_NOT_FOUND_ERROR,
-        ),
-      );
-      this.jobState.updateJob(jobId, {
-        phase: 'error',
-        issueKind: 'upload_error',
-        error: failureMessage,
-        statusLabel: failureMessage,
-      });
-      return;
-    }
-
-    this.jobState.updateJob(jobId, {
-      phase: 'complete',
-      statusLabel: phaseLabel('complete'),
-      coords,
-      issueKind: undefined,
-      locationSourceUsed: 'exif',
-    });
-    const job = this.jobState.findJob(jobId);
-    if (job) {
-      this.emitBatchProgress(job.batchId);
-    }
-  }
-
-  private async resolvePersistedMissingDataProject(
-    jobId: string,
-    mediaId: string,
-    projectId: string,
-  ): Promise<void> {
-    const ok = await this.projects.addMediaToProject(mediaId, projectId);
-    if (!ok) {
-      const errorLabel = phaseLabel('error');
-      this.jobState.updateJob(jobId, {
-        phase: 'error',
-        issueKind: 'upload_error',
-        error: errorLabel,
-        statusLabel: errorLabel,
-      });
-      return;
-    }
-
-    this.jobState.updateJob(jobId, {
-      phase: 'complete',
-      statusLabel: phaseLabel('complete'),
-      projectId,
-      issueKind: undefined,
-    });
-    const job = this.jobState.findJob(jobId);
-    if (job) {
-      this.emitBatchProgress(job.batchId);
-    }
   }
 
   /**
@@ -557,137 +414,6 @@ export class UploadManagerService {
    */
   forceDuplicateUpload(jobId: string): void {
     forceUploadManagerDuplicateUpload(jobId, this.actionDeps);
-  }
-
-  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Pipeline orchestration ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-
-  /**
-   * Start uploads for queued jobs, respecting the MAX_CONCURRENT cap.
-   * Called after enqueuing and after each pipeline completion.
-   */
-  private drainQueue(): void {
-    drainUploadManagerQueue({
-      snapshotJobs: () => this.jobState.snapshot(),
-      availableSlots: () => this.queue.availableSlots,
-      isJobBlocked: (job) => this.locationResolution.isJobBlockedByGate(job),
-      isJobRunning: (jobId) => this.queue.isRunning(jobId),
-      ensureAbortController: (jobId) => {
-        this.ensureAbortController(jobId);
-      },
-      markRunning: (jobId) => {
-        this.queue.markRunning(jobId);
-      },
-      runPipeline: (jobId) => {
-        void this.runPipeline(jobId);
-      },
-      logJobIdPrefixLen: UploadManagerService.LOG_JOB_ID_PREFIX_LEN,
-    });
-  }
-
-  /** Runs the full pipeline for one job. Routes by mode. */
-  private async runPipeline(jobId: string): Promise<void> {
-    try {
-      const job = this.jobState.findJob(jobId);
-      if (!job) {
-        console.error('[upload-manager] runPipeline: job not found for', jobId);
-        return;
-      }
-      if (job.mediaId) {
-        if (job.phase === 'queued') {
-          this.jobState.setPhase(jobId, 'complete');
-        }
-        return;
-      }
-
-      await runUploadPipelineByMode(job, {
-        runReplace: (id) => this.replacePipeline.run(id, this.pipelineCtx),
-        runAttach: (id) => this.attachPipeline.run(id, this.pipelineCtx),
-        runNew: (id) => this.newPipeline.run(id, this.pipelineCtx),
-        logJobIdPrefixLen: UploadManagerService.LOG_JOB_ID_PREFIX_LEN,
-      });
-
-      console.log(
-        `[upload-manager] runPipeline: job ${jobId.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)} pipeline finished`,
-      );
-    } catch (err) {
-      handleUploadPipelineError(jobId, err, {
-        findJob: (id) => this.jobState.findJob(id) ?? undefined,
-        markDone: (id) => {
-          this.queue.markDone(id);
-        },
-        emitBatchProgress: (batchId) => {
-          this.emitBatchProgress(batchId);
-        },
-        drainQueue: () => {
-          this.drainQueue();
-        },
-        failJob: (id, failedAt, error) => {
-          this.failJob(id, failedAt, error);
-        },
-        logJobIdPrefixLen: UploadManagerService.LOG_JOB_ID_PREFIX_LEN,
-      });
-    } finally {
-      clearUploadAbortController(this.abortControllers, jobId);
-      if (this.queue.isRunning(jobId)) {
-        this.queue.markDone(jobId);
-        this.drainQueue();
-      }
-    }
-  }
-
-  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Internal helpers ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-
-  private failJob(jobId: string, failedAt: UploadPhase, error: string): void {
-    failUploadManagerJob(jobId, failedAt, error, {
-      abortJobRequest: (id) => {
-        this.abortJobRequest(id);
-      },
-      markDone: (id) => {
-        this.queue.markDone(id);
-      },
-      failJobState: (id, phase, message) => {
-        this.jobState.failJob(id, phase, message);
-      },
-      findJob: (id) => this.jobState.findJob(id) ?? undefined,
-      emitBatchProgress: (batchId) => {
-        this.emitBatchProgress(batchId);
-      },
-      drainQueue: () => {
-        this.drainQueue();
-      },
-    });
-  }
-
-  private cancelAllActive(): void {
-    cancelAllActiveUploads({
-      snapshotJobs: () => this.jobState.snapshot(),
-      isTerminalPhase: (phase) => TERMINAL_PHASES.has(phase),
-      abortJobRequest: (jobId) => {
-        this.abortJobRequest(jobId);
-      },
-      markDone: (jobId) => {
-        this.queue.markDone(jobId);
-      },
-      removeStoragePath: (storagePath) => {
-        this.supabase.client.storage.from('media').remove([storagePath]);
-      },
-      markCancelledSignedOut: (jobId, failedAt) => {
-        this.jobState.updateJob(jobId, {
-          phase: 'error',
-          statusLabel: 'Cancelled',
-          error: 'Upload cancelled \u2014 user signed out.',
-          failedAt,
-        });
-      },
-    });
-  }
-
-  private ensureAbortController(jobId: string): AbortController {
-    return ensureUploadAbortController(this.abortControllers, jobId);
-  }
-
-  private abortJobRequest(jobId: string): void {
-    abortUploadManagerJobRequest(this.abortControllers, jobId);
   }
 
   /** Emit batch progress and check for batch completion. */
