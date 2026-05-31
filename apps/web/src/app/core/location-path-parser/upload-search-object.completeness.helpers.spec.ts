@@ -15,6 +15,7 @@ function baseSo(overrides: Partial<UploadSearchObject> = {}): UploadSearchObject
     street: null,
     houseNumber: null,
     staircase: null,
+    door: null,
     project: null,
     sources: [],
     sourceDeviations: [],

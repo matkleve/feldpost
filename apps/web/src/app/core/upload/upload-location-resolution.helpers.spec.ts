@@ -9,6 +9,7 @@ import {
   isExifAuthoritativeOverWeakFilenameStreet,
   normalizeAddressForGrouping,
   pickDiscriminatingField,
+  shouldSplitGroupByPhotonUnitCoords,
 } from './upload-location-resolution.helpers';
 import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import type { UploadJob } from './upload-manager.types';
@@ -24,6 +25,7 @@ function so(partial: Partial<UploadSearchObject>): UploadSearchObject {
     street: null,
     houseNumber: null,
     staircase: null,
+    door: null,
     project: null,
     sources: [],
     sourceDeviations: [],
@@ -116,6 +118,26 @@ describe('upload-location-resolution.helpers', () => {
 
   it('evaluateLocalResolution Branch C without centroid', () => {
     expect(evaluateLocalResolution(so({ street: 'Thaliastraße' }))).toBe('branch_c');
+  });
+
+  it('shouldSplitGroupByPhotonUnitCoords when units on SO and hits far apart', () => {
+    expect(
+      shouldSplitGroupByPhotonUnitCoords(
+        { staircase: null, door: '12' },
+        [
+          { id: 'a', addressLabel: 'A', lat: 48.2, lng: 16.37 },
+          { id: 'b', addressLabel: 'B', lat: 48.21, lng: 16.39 },
+        ],
+        25,
+      ),
+    ).toBe(true);
+    expect(
+      shouldSplitGroupByPhotonUnitCoords(
+        { staircase: null, door: '12' },
+        [{ id: 'a', addressLabel: 'A', lat: 48.2, lng: 16.37 }],
+        25,
+      ),
+    ).toBe(false);
   });
 
   it('pickDiscriminatingField prefers city when cities differ', () => {

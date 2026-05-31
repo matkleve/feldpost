@@ -7,6 +7,15 @@ import { Injectable, Injector, computed, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { GeocodingService } from '../geocoding/geocoding.service';
+import { LocalGeoDataAdapter } from '../location-path-parser/local-geo-data.adapter';
+import {
+  detectPackageConflicts,
+  formatPackageLabel,
+  layerKeyToCandidateId,
+  resolveLayersForJob,
+  resolveSOWithChosenLayer,
+} from '../location-path-parser/upload-search-object.layer-map';
+import { OrgSearchTuningService } from '../search/org-search-tuning.service';
 import { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
 import { UploadBatchService } from './upload-batch.service';
 import { UploadJobStateService } from './upload-job-state.service';
@@ -28,6 +37,7 @@ import {
 } from './upload-location-precedence.helpers';
 import {
   buildDisambiguationQueryKey,
+  buildGroupPresentation,
   buildSearchQuery,
   classifySearchHits,
   deriveFolderDisplayPath,
@@ -37,6 +47,9 @@ import {
   pickCollapseStage,
   pickDiscriminatingField,
   isExifAuthoritativeOverWeakFilenameStreet,
+  shouldForceBranchCCityTray,
+  shouldSplitGroupByPhotonUnitCoords,
+  filterGeocodeHitsByContextDistance,
 } from './upload-location-resolution.helpers';
 import {
   summarizeGeocodeHits,
@@ -68,7 +81,30 @@ export class UploadLocationResolutionService {
   private readonly batchService = inject(UploadBatchService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly projectLocations = inject(UploadProjectLocationsAdapter);
+  private readonly geoData = inject(LocalGeoDataAdapter);
+  private readonly orgSearchTuning = inject(OrgSearchTuningService);
   private readonly injector = inject(Injector);
+
+  private geoLoaded: Promise<{
+    states: Awaited<ReturnType<LocalGeoDataAdapter['getBundeslaender']>>;
+    municipalities: Awaited<ReturnType<LocalGeoDataAdapter['getGemeinden']>>;
+    postcodeMap: Awaited<ReturnType<LocalGeoDataAdapter['getPlzMap']>>;
+  }> | null = null;
+
+  private loadGeoData() {
+    if (!this.geoLoaded) {
+      this.geoLoaded = Promise.all([
+        this.geoData.getBundeslaender(),
+        this.geoData.getGemeinden(),
+        this.geoData.getPlzMap(),
+      ]).then(([states, municipalities, postcodeMap]) => ({
+        states,
+        municipalities,
+        postcodeMap,
+      }));
+    }
+    return this.geoLoaded;
+  }
 
   private readonly batchProjectTrayRegistered = new Set<string>();
 
@@ -140,6 +176,52 @@ export class UploadLocationResolutionService {
   }
 
   /**
+   * Register layer_package trays after classifyBatch — before Photon.
+   * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#tray-registration
+   */
+  registerLayerPackageGroupsAfterClassify(batchId: string): void {
+    const states = this.orchestrator
+      .listGroupStates(batchId)
+      .filter((s) => s.status === 'needsLayerResolution');
+    for (const state of states) {
+      this.registerLayerPackageGroup(batchId, state);
+    }
+  }
+
+  /**
+   * Package conflict tray — one option per conflicting layer entry.
+   * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#package-conflict-detection
+   */
+  private registerLayerPackageGroup(
+    batchId: string,
+    state: UploadGroupResolutionState,
+  ): void {
+    const queryKey = state.layerConflictQueryKey ?? state.groupingKey;
+    const layers = state.addressLayers ?? [];
+    const conflict = detectPackageConflicts(layers, state.folderDisplayPath);
+    const entries = conflict?.conflictingEntries ?? layers.filter((e) =>
+      [e.parsed.street, e.parsed.houseNumber, e.parsed.staircase, e.parsed.door].some(
+        (v) => !!v?.trim(),
+      ),
+    );
+    const candidates: UploadAddressCandidate[] = entries.map((entry) => ({
+      id: layerKeyToCandidateId(entry.layerKey),
+      addressLabel: formatPackageLabel(entry),
+      lat: 0,
+      lng: 0,
+    }));
+    this.registerDisambiguationGroup({
+      batchId,
+      queryKey,
+      folderDisplayPath: state.folderDisplayPath,
+      titleAddress: state.titleAddressLabel,
+      jobIds: state.jobIds,
+      candidates,
+      disambiguationKind: 'layer_package',
+    });
+  }
+
+  /**
    * Apply orchestrator cache for a job (Search Object pipeline).
    */
   async applyPreResolveFromOrchestrator(
@@ -175,6 +257,15 @@ export class UploadLocationResolutionService {
     uploadTraceDecision('ulr', `orchestrator group status=${groupState.status}`, {
       ...summarizeGroupState(groupState),
     });
+
+    if (groupState.status === 'needsLayerResolution') {
+      uploadTraceDecision('ulr', 'held — layer_package tray before geocode', {
+        layerConflictQueryKey: groupState.layerConflictQueryKey,
+      });
+      this.registerLayerPackageGroup(job.batchId, groupState);
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held (layer_package)');
+      return 'held';
+    }
 
     if (groupState.status === 'needsGeocode') {
       uploadTraceDecision('ulr', 'ensureGeocodedGroup — group needs geocode first');
@@ -445,13 +536,18 @@ export class UploadLocationResolutionService {
       textCoords,
       exifCoords,
     });
-    const queryKey = `source|${buildDisambiguationQueryKey(job.titleAddress ?? '', folderDisplayPath)}`;
+    const groupingKey = job.groupingKey ?? buildDisambiguationQueryKey(job.titleAddress ?? '', folderDisplayPath);
+    const queryKey = `source|${groupingKey}`;
+    const jobIds = this.jobState
+      .jobs()
+      .filter((j) => j.batchId === job.batchId && j.groupingKey === groupingKey)
+      .map((j) => j.id);
     this.registerDisambiguationGroup({
       batchId: job.batchId,
       queryKey,
       folderDisplayPath,
       titleAddress: job.titleAddress ?? '',
-      jobIds: [job.id],
+      jobIds: jobIds.length ? jobIds : [job.id],
       candidates,
       localityHint: deriveLocalityHint(job.relativePath),
       disambiguationKind: 'source',
@@ -814,12 +910,41 @@ export class UploadLocationResolutionService {
     });
 
     const sampleJob = this.jobState.findJob(group.jobIds[0]);
-    // TODO: filter hits by org contextDistanceMaxMeters from job anchor before classify — see distance-radii-contract.md
-    const outcome = classifySearchHits(
+    const exifCoords = sampleJob ? getExifMetadataCoords(sampleJob) : undefined;
+    const contextDistanceMaxMeters =
+      this.orgSearchTuning.orgSearchConfig().resolver.contextDistanceMaxMeters;
+    const filteredHits = filterGeocodeHitsByContextDistance(
       hits,
-      config,
-      sampleJob ? getExifMetadataCoords(sampleJob) : undefined,
+      exifCoords,
+      group.projectCentroid ?? undefined,
+      contextDistanceMaxMeters,
     );
+    if (filteredHits.length !== hits.length) {
+      uploadTraceDecision('geocode', 'filtered hits by contextDistanceMaxMeters', {
+        before: hits.length,
+        after: filteredHits.length,
+        contextDistanceMaxMeters,
+      });
+    }
+
+    let outcome = classifySearchHits(filteredHits, config, exifCoords);
+
+    if (
+      outcome.kind === 'auto' &&
+      shouldForceBranchCCityTray(group, outcome, exifCoords, config.sourceAgreementRadiusMeters)
+    ) {
+      uploadTraceDecision('geocode', 'branch_c CITY-01 — EXIF far from auto, force city_step', {
+        distanceM: exifCoords
+          ? Math.round(
+              haversineMeters(exifCoords, {
+                lat: outcome.candidate.lat,
+                lng: outcome.candidate.lng,
+              }),
+            )
+          : undefined,
+      });
+      outcome = { kind: 'ambiguous', candidates: [outcome.candidate] };
+    }
 
     uploadAddressDebug('geocode', 'classifySearchHits outcome', {
       kind: outcome.kind,
@@ -861,9 +986,15 @@ export class UploadLocationResolutionService {
     }
 
     if (outcome.kind === 'ambiguous') {
+      const unitSplit = shouldSplitGroupByPhotonUnitCoords(
+        group.searchObject,
+        outcome.candidates,
+        config.unitGeocodeSplitMinMeters,
+      );
       uploadTraceDecision('geocode', 'ambiguous — register tray', {
         trayStep: group.geocodeBranch === 'branch_c' ? '1a' : '3',
         candidateCount: outcome.candidates.length,
+        unitPhotonSplit: unitSplit,
       });
       const discriminatingField = pickDiscriminatingField(outcome.candidates);
       const ambiguous: UploadGroupResolutionState = {
@@ -901,6 +1032,117 @@ export class UploadLocationResolutionService {
     return partial;
   }
 
+  /**
+   * Collapse layer packages to flat SO and re-enter orchestrator as needsGeocode groups.
+   * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#resolveSOWithChosenLayer
+   */
+  private async applyLayerPackageChoice(
+    group: UploadDisambiguationGroup,
+    candidateId: string,
+  ): Promise<void> {
+    const prefix = 'layer-pkg|';
+    const chosenLayerKey = candidateId.startsWith(prefix)
+      ? candidateId.slice(prefix.length)
+      : candidateId;
+    const geo = await this.loadGeoData();
+    const geoFull = { ...geo, postcodeMap: geo.postcodeMap };
+    const oldKey = group.queryKey;
+
+    const resolvedJobs: Array<{
+      jobId: string;
+      searchObject: UploadGroupResolutionState['searchObject'];
+      folderDisplayPath: string;
+      titleAddressLabel: string;
+    }> = [];
+
+    for (const jobId of group.jobIds) {
+      const job = this.jobState.findJob(jobId);
+      if (!job) {
+        continue;
+      }
+      const relativePath = job.relativePath ?? job.file.name;
+      const folderDisplayPath = job.folderDisplayPath ?? deriveFolderDisplayPath(relativePath);
+      const layerResult = resolveLayersForJob(
+        relativePath,
+        job.file.name,
+        geoFull,
+        folderDisplayPath,
+      );
+      const searchObject = resolveSOWithChosenLayer(
+        layerResult.layers,
+        chosenLayerKey,
+        relativePath,
+        job.file.name,
+        geoFull,
+      );
+      const { titleAddressLabel } = buildGroupPresentation(searchObject);
+      this.jobState.updateJob(jobId, {
+        groupingKey: searchObject.groupingKey,
+        folderDisplayPath,
+        titleAddress: titleAddressLabel,
+        titleAddressSource: job.titleAddressSource ?? 'folder',
+        disambiguationGroupId: undefined,
+        resolutionStatus: 'pending',
+      });
+      resolvedJobs.push({ jobId, searchObject, folderDisplayPath, titleAddressLabel });
+    }
+
+    const byKey = new Map<
+      string,
+      {
+        jobIds: string[];
+        searchObject: UploadGroupResolutionState['searchObject'];
+        folderDisplayPath: string;
+        titleAddressLabel: string;
+      }
+    >();
+    for (const row of resolvedJobs) {
+      const key = row.searchObject.groupingKey;
+      const existing = byKey.get(key);
+      if (existing) {
+        existing.jobIds.push(row.jobId);
+      } else {
+        byKey.set(key, {
+          jobIds: [row.jobId],
+          searchObject: row.searchObject,
+          folderDisplayPath: row.folderDisplayPath,
+          titleAddressLabel: row.titleAddressLabel,
+        });
+      }
+    }
+
+    await this.orchestrator.integrateResolvedLayerGroups(
+      group.batchId,
+      oldKey,
+      [...byKey.entries()].map(([groupingKey, value]) => ({
+        groupingKey,
+        ...value,
+      })),
+    );
+
+    this.patchGroup({
+      ...group,
+      resolutionStatus: 'resolved',
+      resolutionGateOpen: false,
+      selectedCandidateId: candidateId,
+    });
+
+    this._disambiguationResolved$.next({
+      batchId: group.batchId,
+      groupId: group.id,
+      jobIds: [...group.jobIds],
+      selectedCandidateId: candidateId,
+    });
+
+    for (const jobId of group.jobIds) {
+      this.jobState.setPhase(jobId, 'resolving_location');
+      void this.applyPreResolveFromOrchestrator(jobId);
+    }
+
+    this.syncBatchDisambiguationAggregates(group.batchId);
+    this.pickNextActiveGroup(group.batchId);
+  }
+
   /** SO/geocode incomplete — do not send to Issues until EXIF / free-text fallback runs (Branch A/B). */
   private markGroupPartial(group: UploadGroupResolutionState): void {
     for (const jobId of group.jobIds) {
@@ -919,6 +1161,10 @@ export class UploadLocationResolutionService {
     }
     const candidate = group.candidates.find((c) => c.id === candidateId);
     if (!candidate) {
+      return;
+    }
+    if (group.disambiguationKind === 'layer_package') {
+      void this.applyLayerPackageChoice(group, candidateId);
       return;
     }
     if (

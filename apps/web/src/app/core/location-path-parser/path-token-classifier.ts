@@ -14,6 +14,7 @@ export type ClassifiedTokenKind =
   | 'postcode'
   | 'houseNumber'
   | 'staircase'
+  | 'door'
   | 'project'
   | 'country'
   | 'state'
@@ -32,7 +33,8 @@ export interface TokenClassificationContext {
 }
 
 const HOUSE_NUMBER_RE = /^\d{1,4}[a-zA-Z]?$/;
-const STIEGE_RE = /^(stiege?|stg|top)/i;
+const STIEGE_RE = /^(stiege?|stg)/i;
+const DOOR_RE = /^(tür|top)/i;
 const PROJEKT_RE = /^projekt[:\s]/i;
 
 const UNCERTAIN_LOW = 0.9;
@@ -101,6 +103,9 @@ function classifyNonNumericToken(
 ): ClassifiedToken | null {
   if (PROJEKT_RE.test(token)) {
     return { raw: token, kind: 'project', value: token, confidence: 1 };
+  }
+  if (DOOR_RE.test(token)) {
+    return { raw: token, kind: 'door', value: token, confidence: 1 };
   }
   if (STIEGE_RE.test(token)) {
     return { raw: token, kind: 'staircase', value: token, confidence: 1 };

@@ -1,5 +1,7 @@
 # Location Path Parser Service
 
+> **Normative upload parsing** lives under [upload-search-object.md](../media-upload-service/upload-search-object.md) and children (layer map, [unit parsing AT](../media-upload-service/upload-search-object.unit-parsing.at.md)). This document is a **service narrative** for folder-scan integration; do not add new token rules here.
+
 ## What It Is
 
 A utility service that reconstructs valid address data from hierarchical folder and file structures. It extracts and validates location components (country, city, postal code, street, house number, unit) from directory paths and filenames, following an descending hierarchy (Land > PLZ/Stadt > Straße > Hausnummer > Stiege/Tür > Dateiname).

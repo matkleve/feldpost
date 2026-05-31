@@ -18,6 +18,11 @@ import {
 } from './path-token-classifier';
 import { splitPathSegments, stripFileExtension } from './location-path-parser.util';
 import type { BundeslandRecord } from './local-geo-data.adapter';
+import {
+  collapseAtSlashPathSegments,
+  parseAtSegmentUnits,
+} from './upload-search-object.unit-parsing.at';
+import { normalizeCountryCode } from './postcode-patterns';
 
 type SoFields = Pick<
   UploadSearchObject,
@@ -28,6 +33,7 @@ type SoFields = Pick<
   | 'street'
   | 'houseNumber'
   | 'staircase'
+  | 'door'
   | 'project'
 >;
 
@@ -40,6 +46,7 @@ function emptyFields(): SoFields {
     street: null,
     houseNumber: null,
     staircase: null,
+    door: null,
     project: null,
   };
 }
@@ -52,6 +59,8 @@ function fieldKeyForKind(kind: ClassifiedToken['kind']): keyof SoFields | null {
       return 'houseNumber';
     case 'staircase':
       return 'staircase';
+    case 'door':
+      return 'door';
     case 'project':
       return 'project';
     case 'country':
@@ -113,6 +122,41 @@ function applyTokenToFields(
   }
 }
 
+function applyPresetUnits(
+  fields: SoFields,
+  preset: { houseNumber?: string | null; staircase?: string | null; door?: string | null },
+  source: 'folder' | 'filename',
+  sources: UploadAddressSourceEntry[],
+): void {
+  if (preset.houseNumber?.trim()) {
+    fields.houseNumber = preset.houseNumber.trim();
+    sources.push({
+      field: 'houseNumber',
+      value: preset.houseNumber.trim(),
+      source,
+      confidence: 1,
+    });
+  }
+  if (preset.staircase?.trim()) {
+    fields.staircase = preset.staircase.trim();
+    sources.push({
+      field: 'staircase',
+      value: preset.staircase.trim(),
+      source,
+      confidence: 1,
+    });
+  }
+  if (preset.door?.trim()) {
+    fields.door = preset.door.trim();
+    sources.push({
+      field: 'door',
+      value: preset.door.trim(),
+      source,
+      confidence: 1,
+    });
+  }
+}
+
 function applySegment(
   fields: SoFields,
   segment: string,
@@ -124,7 +168,10 @@ function applySegment(
   deviations: UploadAddressSourceDeviation[],
   filenameOverride: boolean,
 ): void {
-  const tokens = tokenizeSegment(segment);
+  const countryCode = normalizeCountryCode(context.country);
+  const atUnits = parseAtSegmentUnits(segment, countryCode);
+  applyPresetUnits(fields, atUnits, source, sources);
+  const tokens = tokenizeSegment(atUnits.workingSegment);
   const classified = classifyTokensInSegment(tokens, geo, context);
   const folderSnapshot = filenameOverride ? { ...fields } : undefined;
 
@@ -221,7 +268,7 @@ export function buildSearchObjectFromRelativePath(
   geo: { states: BundeslandRecord[]; municipalities: GemeindeRecord[] },
 ): UploadSearchObject {
   const normalizedPath = relativePath.replace(/\\/g, '/');
-  const segments = splitPathSegments(normalizedPath);
+  const segments = collapseAtSlashPathSegments(splitPathSegments(normalizedPath));
   const fileBase = stripFileExtension(fileName);
   const folderSegments =
     segments.length > 0 && segments[segments.length - 1] === fileName

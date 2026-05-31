@@ -5,10 +5,8 @@
 
 import { Injectable, inject } from '@angular/core';
 import { LocalGeoDataAdapter } from '../location-path-parser/local-geo-data.adapter';
-import {
-  buildSearchObjectFromRelativePath,
-  expandPostcodeOnSearchObject,
-} from '../location-path-parser/upload-search-object.builder';
+import { resolveLayersForJob } from '../location-path-parser/upload-search-object.layer-map';
+import { deriveFolderDisplayPath } from './upload-location-resolution.helpers';
 import { UploadLocationLookupAdapter } from './adapters/upload-location-lookup.adapter';
 import { UploadProjectLocationsAdapter } from './adapters/upload-project-locations.adapter';
 import {
@@ -52,6 +50,25 @@ export class UploadAddressResolutionOrchestrator {
     return this.batchCaches.get(batchId)?.get(groupingKey);
   }
 
+  /** Find orchestrator cache entry containing jobId (layer_package uses layerConflictQueryKey as key). */
+  getGroupStateForJob(batchId: string, jobId: string): UploadGroupResolutionState | undefined {
+    const cache = this.batchCaches.get(batchId);
+    if (!cache) {
+      return undefined;
+    }
+    for (const state of cache.values()) {
+      if (state.jobIds.includes(jobId)) {
+        return state;
+      }
+    }
+    return undefined;
+  }
+
+  listGroupStates(batchId: string): UploadGroupResolutionState[] {
+    const cache = this.batchCaches.get(batchId);
+    return cache ? [...cache.values()] : [];
+  }
+
   getGroupingKeyForJob(jobId: string): string | undefined {
     return this.jobState.findJob(jobId)?.groupingKey;
   }
@@ -71,23 +88,65 @@ export class UploadAddressResolutionOrchestrator {
     });
 
     const geo = await this.loadGeo();
+    const geoFull = { ...geo, postcodeMap: geo.postcodeMap };
     const leafObjects: Array<{ jobId: string; so: UploadSearchObject }> = [];
+    const layerConflictAccum = new Map<
+      string,
+      {
+        jobIds: string[];
+        searchObject: UploadSearchObject;
+        addressLayers: UploadGroupResolutionState['addressLayers'];
+        conflictingEntries: NonNullable<UploadGroupResolutionState['addressLayers']>;
+        folderDisplayPath: string;
+        titleAddressLabel: string;
+      }
+    >();
 
     for (const job of jobs) {
       const relativePath = job.relativePath ?? job.file.name;
-      let so = buildSearchObjectFromRelativePath(relativePath, job.file.name, {
-        states: geo.states,
-        municipalities: geo.municipalities,
-      });
-      so = expandPostcodeOnSearchObject(so, geo.postcodeMap);
-      const { folderDisplayPath, titleAddressLabel } = buildGroupPresentation(so);
+      const folderDisplayPath = deriveFolderDisplayPath(relativePath);
+      const layerResult = resolveLayersForJob(
+        relativePath,
+        job.file.name,
+        geoFull,
+        folderDisplayPath,
+      );
+      const so = layerResult.searchObject;
+      const { titleAddressLabel } = buildGroupPresentation(so);
 
       uploadAddressDebug('orchestrator', 'search object built', {
         jobId: job.id,
         ...summarizeSearchObject(so),
         folderDisplayPath,
         titleAddressLabel,
+        packageConflict: !!layerResult.packageConflict,
       });
+
+      if (layerResult.packageConflict) {
+        const key = layerResult.packageConflict.layerConflictQueryKey;
+        const existing = layerConflictAccum.get(key);
+        if (existing) {
+          if (!existing.jobIds.includes(job.id)) {
+            existing.jobIds.push(job.id);
+          }
+        } else {
+          layerConflictAccum.set(key, {
+            jobIds: [job.id],
+            searchObject: so,
+            addressLayers: layerResult.layers,
+            conflictingEntries: layerResult.packageConflict.conflictingEntries,
+            folderDisplayPath,
+            titleAddressLabel,
+          });
+        }
+        this.jobState.updateJob(job.id, {
+          groupingKey: key,
+          folderDisplayPath,
+          titleAddress: titleAddressLabel,
+          titleAddressSource: job.titleAddressSource ?? 'folder',
+        });
+        continue;
+      }
 
       this.jobState.updateJob(job.id, {
         groupingKey: so.groupingKey,
@@ -110,6 +169,25 @@ export class UploadAddressResolutionOrchestrator {
     }
 
     const cache = new Map<string, UploadGroupResolutionState>();
+
+    for (const [layerConflictQueryKey, accum] of layerConflictAccum) {
+      const layerState: UploadGroupResolutionState = {
+        status: 'needsLayerResolution',
+        groupingKey: layerConflictQueryKey,
+        jobIds: accum.jobIds,
+        searchObject: accum.searchObject,
+        folderDisplayPath: accum.folderDisplayPath,
+        titleAddressLabel: accum.titleAddressLabel,
+        addressLayers: accum.addressLayers,
+        layerConflictQueryKey,
+      };
+      cache.set(layerConflictQueryKey, layerState);
+      uploadTraceDecision('orchestrator', 'needsLayerResolution — package conflict before geocode', {
+        layerConflictQueryKey,
+        jobIds: accum.jobIds,
+      });
+    }
+
     const sampleJob = jobs[0];
     const projectId = sampleJob?.projectId;
     let projectCentroid = null as ReturnType<UploadProjectLocationsAdapter['pickCentroid']>;
@@ -247,6 +325,108 @@ export class UploadAddressResolutionOrchestrator {
       return;
     }
     cache.set(state.groupingKey, state);
+  }
+
+  /** Drop layer-conflict cache entry after user picks a package. */
+  removeGroupState(batchId: string, groupingKey: string): void {
+    this.batchCaches.get(batchId)?.delete(groupingKey);
+  }
+
+  /**
+   * Re-classify flat SO groups after layer_package tray (no second conflict detect).
+   * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#orchestrator-status
+   */
+  async integrateResolvedLayerGroups(
+    batchId: string,
+    oldLayerConflictKey: string,
+    groups: Array<{
+      groupingKey: string;
+      jobIds: string[];
+      searchObject: UploadSearchObject;
+      folderDisplayPath: string;
+      titleAddressLabel: string;
+    }>,
+  ): Promise<void> {
+    const cache = this.batchCaches.get(batchId) ?? new Map<string, UploadGroupResolutionState>();
+    cache.delete(oldLayerConflictKey);
+
+    const sampleJob = this.jobState.findJob(groups[0]?.jobIds[0] ?? '');
+    let projectCentroid = null as ReturnType<UploadProjectLocationsAdapter['pickCentroid']>;
+    if (sampleJob?.projectId) {
+      const rows = await this.projectLocations.listProjectLocations(sampleJob.projectId);
+      projectCentroid = this.projectLocations.pickCentroid(rows);
+    }
+
+    for (const g of groups) {
+      const { groupingKey, jobIds, searchObject: so, folderDisplayPath, titleAddressLabel } = g;
+      const local = evaluateLocalResolution(so, projectCentroid);
+
+      if (local === 'postcode_blocked' || local === 'incomplete') {
+        cache.set(groupingKey, {
+          status: 'partial',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+        });
+        continue;
+      }
+
+      if (local === 'branch_c') {
+        cache.set(groupingKey, {
+          status: 'needsGeocode',
+          groupingKey,
+          jobIds,
+          searchObject: { ...so, country: so.country ?? 'AT' },
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: 'branch_c',
+        });
+        continue;
+      }
+
+      if (local === 'metadata_only') {
+        cache.set(groupingKey, {
+          status: 'partial',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: 'metadata_only',
+        });
+        continue;
+      }
+
+      const row = await this.lookup.findBySearchObject(so);
+      if (row) {
+        cache.set(groupingKey, {
+          status: 'resolved',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+          candidate: locationRowToCandidate(row),
+        });
+        continue;
+      }
+
+      cache.set(groupingKey, {
+        status: 'needsGeocode',
+        groupingKey,
+        jobIds,
+        searchObject: so,
+        folderDisplayPath,
+        titleAddressLabel,
+        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+        projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
+      });
+    }
+
+    this.batchCaches.set(batchId, cache);
   }
 
   private loadGeo() {

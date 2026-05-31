@@ -223,6 +223,7 @@ export class UploadManagerService {
     queuedLabel: phaseLabel('queued'),
     classifyBatch: async (batchId) => {
       await this.addressOrchestrator.classifyBatch(batchId);
+      this.locationResolution.registerLayerPackageGroupsAfterClassify(batchId);
       const jobCount = this.jobState.jobs().filter((j) => j.batchId === batchId).length;
       this.preResolveWave.resetWave(batchId, jobCount);
     },

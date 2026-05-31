@@ -7,22 +7,31 @@
 
 ## What it is
 
-Pre-upload pipeline: folder/filename paths → **Search Object (SO)** → dedup by `grouping_key` → local PLZ → read-only DB lookup → completeness gate → Photon/Nominatim structured geocode → tray or Nachbearbeitung.
+Pre-upload pipeline: folder/filename paths → **layer packages** → flat **Search Object (SO)** → dedup by `grouping_key` → local PLZ → read-only DB lookup → completeness gate → Photon/Nominatim structured geocode → tray or Nachbearbeitung.
+
+Layer packages: [upload-search-object.layer-map.md](./upload-search-object.layer-map.md).
 
 ## Keys (do not conflate)
 
-| Key | Purpose |
-| --- | --- |
-| `grouping_key` | Normalized `country\|state\|postcode\|city\|street\|houseNumber` — batch dedup, tray `queryKey`, one geocode call per key |
-| `address_dedupe_key` | SHA256 from `compute_location_address_dedupe_key` — `public.locations` uniqueness |
+| Key | Includes units? | Purpose |
+| --- | --- | --- |
+| `grouping_key` | **No** (`staircase` / `door` excluded) | Batch dedup, one forward-geocode per building; tray `queryKey` for geocode/source |
+| `address_dedupe_key` | **Yes** | SHA256 from `compute_location_address_dedupe_key` — `public.locations` uniqueness |
+
+Rationale: path folders do not provide independent GPS per Tür/Stiege; Photon resolves the building. Units are on the SO and DB row ([upload-search-object.md § Keys philosophy](./upload-search-object.md#keys-philosophy)). Single Photon hit → one `grouping_key` even when SO has units.
 
 ## Tray contract
 
-Only **ambiguous** multi-hit geocode (or **source conflict**) creates `UploadDisambiguationGroup` with **all** `jobIds` for that `grouping_key` (merged on repeated `registerDisambiguationGroup`).
+| Kind | `jobIds` merge key |
+| --- | --- |
+| `layer_package` | `layerConflictQueryKey` — all jobs in batch with same signature |
+| Geocode / source | `grouping_key` (or `source\|{groupingKey}` for source) |
+
+`registerDisambiguationGroup` merges `jobIds` on repeated registration with the same `queryKey`.
 
 | Stage | Owner | Effect |
 | --- | --- | --- |
-| Batch intake | `UploadAddressResolutionOrchestrator.classifyBatch` | Jobs get `groupingKey`, `titleAddress`, orchestrator cache (`needsGeocode` / `resolved` / `ambiguous` / `partial`) |
+| Batch intake | `UploadAddressResolutionOrchestrator.classifyBatch` | Layer packages → flat SO; cache `needsLayerResolution` / `needsGeocode` / `resolved` / `ambiguous` / `partial` |
 | Per job | `runPreUploadLocationResolve` → `applyPreResolveFromOrchestrator` or `resolveJobTitleAddress` | Geocode + `classifySearchHits`; ambiguous → `registerDisambiguationGroup` |
 | UI | `app-upload-resolver-tray` | Reads `disambiguationGroups`, `activeGroup`, `UploadManagerService.jobs`; writes via `selectAddressCandidate`, `deferGroup`, `isolateJobFromGroup` |
 

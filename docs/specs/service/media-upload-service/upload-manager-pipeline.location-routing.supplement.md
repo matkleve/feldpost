@@ -60,9 +60,9 @@ Canonical matrix: [search-tuning.distance-radii-contract.md](../search/search-tu
 
 `clusterAssistWeight.project` is a **ranking weight**, not a distance radius.
 
-### SPEC GAP — Phase 5 reference points (Prompt B)
+### Phase 5 reference points (Prompt B)
 
-Do **not** use `MediaClusterService` / `get_media_clusters` for per-upload distance checks. Use project media whose linked locations satisfy [`locationsWithGps`](../media-locations/media-locations.zoomable-map-contract.supplement.md) (`legacyMediaHasGps`). Adapter: `UploadProjectGpsReferenceAdapter` (document query before implementation).
+Do **not** use `MediaClusterService` / `get_media_clusters` for per-upload distance checks. Use project media whose linked locations satisfy [`locationsWithGps`](../media-locations/media-locations.zoomable-map-contract.supplement.md) (`legacyMediaHasGps`). Adapter contract: [upload-project-gps-reference.adapter.md](./adapters/upload-project-gps-reference.adapter.md) — implement `registerContextDistanceGroup` only after adapter ships.
 
 ## Job routing FSM (auto location ON)
 

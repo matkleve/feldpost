@@ -14,6 +14,7 @@ Child specs hold detail; this document is the index and cross-cutting rules.
 | Topic | Spec |
 | --- | --- |
 | Search Object | [upload-search-object.md](./upload-search-object.md) |
+| Layer packages | [upload-search-object.layer-map.md](./upload-search-object.layer-map.md) |
 | Pipeline steps | [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md) |
 | Job routing | [upload-manager-pipeline.location-routing.supplement.md](./upload-manager-pipeline.location-routing.supplement.md) |
 | Config | [upload-location-config.md](./upload-location-config.md) |
@@ -26,7 +27,7 @@ Child specs hold detail; this document is the index and cross-cutting rules.
 
 Every `locations` row must be complete **upward**:
 
-`doorNumber` / `stair` / `houseNumber` → `street` → (`city` OR `municipality`) → `state` → `country`.
+`door` / `staircase` / `houseNumber` → `street` → (`city` OR `municipality`) → `state` → `country` (nullable at each tier).
 
 Gaps are allowed only at **higher** tiers, never below without the parent tier.
 
@@ -39,7 +40,7 @@ Gaps are allowed only at **higher** tiers, never below without the parent tier.
 
 | Step | Action | Tray |
 | --- | --- | --- |
-| 1 | Parse folder/filename → SO; Token Normalizer (canonical); `grouping_key`; filename wins | — |
+| 1 | Parse folder/filename → **layer packages**; resolve conflicts → flat SO; `grouping_key` | `layer_package` when competing path interpretations — **before** Step 5 |
 | 2 | EXIF lat/lon/date locally → `exifCoords`; not sent to Photon | — |
 | 3 | Content hash → tag duplicate; **job continues** | — |
 | 4 | EXIF reverse `lang=en`; superset vs SO or EXIF-only | — |
@@ -50,8 +51,13 @@ Gaps are allowed only at **higher** tiers, never below without the parent tier.
 
 ## Tray enqueue contract (hard)
 
-> `enqueueItem` may only be called **after** `classifySearchHits` in `runGeocodeForGroup`.  
-> `classifyBatch` and `evaluateLocalResolution` set only `needsGeocode` or `metadata_only` — **never** `needsTray`.
+| Tray kind | When enqueued |
+| --- | --- |
+| `layer_package` | End of `classifyBatch` when `detectPackageConflicts` — **before** Photon |
+| Geocode / city / house | **After** `classifySearchHits` in `runGeocodeForGroup` |
+| `source` | After text geocode + `finalizePlacementForJob` ([location-routing supplement](./upload-manager-pipeline.location-routing.supplement.md)) |
+
+`classifyBatch` MUST NOT set `needsGeocode` while package conflicts are unresolved (`needsLayerResolution`).
 
 ## Branch C — street only (`country=AT`)
 

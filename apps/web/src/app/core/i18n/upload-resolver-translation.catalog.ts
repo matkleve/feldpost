@@ -35,6 +35,14 @@ export const UPLOAD_RESOLVER_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry
     it: 'Qual è il numero civico di {street}?',
   },
   {
+    key: 'upload.resolver.question.layerPackage',
+    original: 'Which address information should we use?',
+    context: 'Layer package tray — competing folder vs filename interpretations.',
+    en: 'Which address information should we use?',
+    de: 'Welche Adressinformationen sollen wir verwenden?',
+    it: 'Quali informazioni sull’indirizzo dobbiamo usare?',
+  },
+  {
     key: 'upload.resolver.question.source',
     original:
       'Photo GPS is far from the folder name ({distance}). Which location should we use?',

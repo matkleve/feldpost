@@ -79,7 +79,7 @@ export function searchObjectToRpcParams(so: UploadSearchObject): Record<string, 
     p_street: so.street,
     p_house_number: so.houseNumber,
     p_staircase: so.staircase,
-    p_door: null,
+    p_door: so.door,
     p_postcode: so.postcode,
     p_city: so.city,
     p_district: null,
@@ -386,6 +386,79 @@ function pickExifAssistCandidate(
     }
   }
   return best;
+}
+
+/**
+ * Drop Photon hits farther than org contextDistanceMaxMeters from anchor (EXIF → project centroid).
+ * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
+ */
+export function filterGeocodeHitsByContextDistance(
+  hits: GeocoderSearchResult[],
+  anchor: ExifCoords | undefined,
+  projectCentroid: { lat: number; lng: number } | undefined,
+  contextDistanceMaxMeters: number,
+): GeocoderSearchResult[] {
+  const point = anchor ?? projectCentroid;
+  if (!point || contextDistanceMaxMeters <= 0) {
+    return hits;
+  }
+  return hits.filter((h) => {
+    const lat = Number(h.lat);
+    const lng = Number(h.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return false;
+    }
+    return haversineMeters(point.lat, point.lng, lat, lng) <= contextDistanceMaxMeters;
+  });
+}
+
+/**
+ * When SO has units and Photon returns multiple hits far apart, keep ambiguous tray.
+ * @see docs/specs/service/media-upload-service/upload-search-object.md#photon-multi-hit-gate
+ */
+export function shouldSplitGroupByPhotonUnitCoords(
+  searchObject: Pick<UploadSearchObject, 'staircase' | 'door'>,
+  candidates: UploadAddressCandidate[],
+  unitGeocodeSplitMinMeters: number,
+): boolean {
+  const hasUnit = !!(searchObject.staircase?.trim() || searchObject.door?.trim());
+  if (!hasUnit || candidates.length < 2 || unitGeocodeSplitMinMeters <= 0) {
+    return false;
+  }
+  let maxDist = 0;
+  for (let i = 0; i < candidates.length; i++) {
+    for (let j = i + 1; j < candidates.length; j++) {
+      const a = candidates[i];
+      const b = candidates[j];
+      const dist = haversineMeters(a.lat, a.lng, b.lat, b.lng);
+      if (dist > maxDist) {
+        maxDist = dist;
+      }
+    }
+  }
+  return maxDist > unitGeocodeSplitMinMeters;
+}
+
+/**
+ * Branch C auto-assign blocked — force city_step when EXIF disagrees with Photon auto city.
+ * @see docs/specs/service/media-upload-service/upload-address-resolution.branch-c-city-tray.md#city-01
+ */
+export function shouldForceBranchCCityTray(
+  group: Pick<UploadGroupResolutionState, 'geocodeBranch' | 'searchObject'>,
+  outcome: ClassifySearchOutcome,
+  exifCoords: ExifCoords | undefined,
+  sourceAgreementRadiusMeters: number,
+): boolean {
+  if (group.geocodeBranch !== 'branch_c' || outcome.kind !== 'auto' || !exifCoords) {
+    return false;
+  }
+  const so = group.searchObject;
+  if (so.city?.trim() || so.houseNumber?.trim()) {
+    return false;
+  }
+  const auto = outcome.candidate;
+  const dist = haversineMeters(exifCoords.lat, exifCoords.lng, auto.lat, auto.lng);
+  return dist > sourceAgreementRadiusMeters;
 }
 
 /**

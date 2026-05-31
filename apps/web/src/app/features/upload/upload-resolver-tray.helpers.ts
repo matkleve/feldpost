@@ -20,6 +20,7 @@ export function extractStreetFromTitleAddress(titleAddress: string): string {
 }
 
 export type ResolverQuestionKey =
+  | 'upload.resolver.question.layerPackage'
   | 'upload.resolver.question.source'
   | 'upload.resolver.question.contextDistance'
   | 'upload.resolver.question.city'
@@ -55,6 +56,9 @@ export function formatCarouselIndicator(
 export function resolverQuestionKeyForGroup(
   group: UploadDisambiguationGroup,
 ): ResolverQuestionKey {
+  if (group.disambiguationKind === 'layer_package') {
+    return 'upload.resolver.question.layerPackage';
+  }
   if (group.disambiguationKind === 'source') {
     return 'upload.resolver.question.source';
   }

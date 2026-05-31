@@ -4,6 +4,17 @@
 
 All **field names are English** (internal model). **Values** use locale-appropriate place names (e.g. `Wien`, `AT`). UI copy is translated separately via i18n.
 
+## Normative index
+
+| Topic | Spec |
+| --- | --- |
+| Fields, tokens, keys | **This file** |
+| Layer packages (folder vs filename) | [upload-search-object.layer-map.md](./upload-search-object.layer-map.md) |
+| AT unit / slash / Tür / Top | [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsing.at.md) |
+| Worked layer examples | [upload-search-object.layer-map.examples.md](./upload-search-object.layer-map.examples.md) |
+| Pipeline keys + trays | [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md) |
+| Legacy narrative parser | [location-path-parser.md](../location-path-parser/location-path-parser.md) — **non-normative**; use SO specs above |
+
 ## Fields
 
 | Field | Type | Notes |
@@ -14,27 +25,51 @@ All **field names are English** (internal model). **Values** use locale-appropri
 | `city` | string \| null | Municipality / city |
 | `street` | string \| null | Street name (joined fragments) |
 | `houseNumber` | string \| null | House number |
-| `staircase` | string \| null | Staircase / unit (folder token) |
+| `staircase` | string \| null | Stiege / stairwell (`locations.staircase`) |
+| `door` | string \| null | Top / Tür / unit door (`locations.door`) |
 | `project` | string \| null | Project prefix token |
 | `sources` | `UploadAddressSourceEntry[]` | Provenance per field write |
 | `sourceDeviations` | deviation[] | Folder vs filename conflict log |
 | `postcodeCandidates` | string[] | Multiple cities for one postcode |
 | `uncertainFields` | string[] | Field names with 0.90–0.97 confidence |
-| `groupingKey` | string | Dedup + tray key |
+| `groupingKey` | string | Batch geocode dedup key (building-level; see [Keys philosophy](#keys-philosophy)) |
 | `relativePath` | string | Immutable job path |
 | `fileName` | string | Leaf file name |
 
+## Keys philosophy
+
+Folder paths encode **text addresses**, not GPS per Tür/Stiege. Geocoders return one building point per query. Therefore keys split by purpose:
+
+| Key | `staircase` / `door` | GPS in key | Purpose |
+| --- | --- | --- | --- |
+| **`groupingKey`** | **Excluded** | No | One Photon call per building (`country` … `houseNumber`); batch upload dedup |
+| **`address_dedupe_key`** (DB) | **Included** (`coalesce` to empty) | Optional lat/lng in hash | Org-unique `public.locations` row |
+| **`layerConflictQueryKey`** | N/A | No | Package tray merge |
+
+Units are still parsed into the SO and persisted via `p_staircase` / `p_door` on resolve. They affect display, sort keys, and DB uniqueness — not default batch geocode grouping.
+
+### Photon multi-hit gate
+
+When SO has `staircase` and/or `door`, Photon returns **≥2** candidates, and pairwise max distance between candidates **> `unitGeocodeSplitMinMeters`** ([upload-location-config.md](./upload-location-config.md)), use existing ambiguous / city_step trays to let the user pick a coordinate — **do not** add units to the forward-geocode request.
+
+When Photon returns **one** hit: keep a single `groupingKey`; store units on SO only.
+
+See [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsing.at.md) and [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md).
+
 ## Token classification order
+
+Per [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsing.at.md): apply AT slash expansion on a segment **before** tokenization when `country === 'AT'`.
 
 Per path segment, split tokens with `/[\s\-\_\.\,]+/`, then **two passes**:
 
 **Pass 1 — non-numeric tokens (in path order):**
 
 1. Project prefix `^projekt[:\s]/i`  
-2. Staircase `^(stiege?\|stg\|top)/i`  
-3. **Country** — alias list (`COUNTRY_NAMES`)  
-4. State / city — Fuse (**AT gazetteer only when `country === 'AT'`**)  
-5. Remaining text → `street` fragments  
+2. Door `^(tür\|top)/i` → `door`  
+3. Staircase `^(stiege?\|stg)/i` → `staircase` (**not** `top`)  
+4. **Country** — alias list (`COUNTRY_NAMES`)  
+5. State / city — Fuse (**AT gazetteer only when `country === 'AT'`**)  
+6. Remaining text → `street` fragments  
 
 **Pass 2 — numeric tokens last** (`^\d+[a-zA-Z]?$`):
 
@@ -57,7 +92,9 @@ Other countries: path parsing and geocoding use country code; gazetteer Fuse is 
 
 ## Conflict rule
 
-Filename segment overrides folder for the same field; log deviation in `sourceDeviations`.
+**Layer packages (normative):** [upload-search-object.layer-map.md](./upload-search-object.layer-map.md) — competing path interpretations resolve via `layer_package` tray **before** geocode.
+
+**Legacy flat builder:** filename segment overrides folder for the same field; log deviation in `sourceDeviations` (superseded at runtime once layer map is active in `classifyBatch`).
 
 ## Completeness (geocode branches)
 

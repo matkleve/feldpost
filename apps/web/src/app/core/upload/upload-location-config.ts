@@ -17,6 +17,12 @@ export interface UploadLocationConfig {
    * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
    */
   exifAssistRadiusMeters: number;
+  /**
+   * Meters: when SO has units and Photon returns multiple hits, pairwise distance above this
+   * keeps ambiguous tray (units are not added to grouping_key).
+   * @see docs/specs/service/media-upload-service/upload-search-object.md#photon-multi-hit-gate
+   */
+  unitGeocodeSplitMinMeters: number;
   /** Step 4: EXIF reverse superset check enabled. */
   exifContextCheck: boolean;
   /** Branch C default country code (ISO). */
@@ -61,6 +67,7 @@ export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   sourceAgreementRadiusMeters: 150,
   mismatchToleranceMeters: 15,
   exifAssistRadiusMeters: 80,
+  unitGeocodeSplitMinMeters: 25,
   exifContextCheck: true,
   defaultGeocodeCountry: 'AT',
   tokenNormalizerFuzzyThreshold: 0.85,

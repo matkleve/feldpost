@@ -162,6 +162,9 @@ function itemKeyForGroup(group: UploadDisambiguationGroup): string {
 }
 
 function questionKeyForGroup(group: UploadDisambiguationGroup): string {
+  if (group.disambiguationKind === 'layer_package') {
+    return 'upload.resolver.question.layerPackage';
+  }
   if (group.disambiguationKind === 'source') {
     return 'upload.resolver.question.source';
   }

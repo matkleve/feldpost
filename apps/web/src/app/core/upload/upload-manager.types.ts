@@ -109,6 +109,7 @@ export type UploadDisambiguationKind =
   | 'geocode'
   | 'source'
   | 'context_distance'
+  | 'layer_package'
   | 'city_step'
   | 'house_step'
   | 'project_address_a'

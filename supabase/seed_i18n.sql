@@ -23904,6 +23904,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.layerPackage', 'Which address information should we use?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Which address information should we use?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.layerPackage'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Welche Adressinformationen sollen wir verwenden?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.layerPackage'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Quali informazioni sull''indirizzo dobbiamo usare?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.layerPackage'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.resolver.question.source', 'Photo GPS is far from the folder name ({distance}). Which location should we use?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

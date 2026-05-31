@@ -3,6 +3,7 @@
  * @see docs/specs/service/media-upload-service/upload-search-object.md
  */
 
+import type { AddressLayerEntry } from '../location-path-parser/upload-search-object.layer-map';
 import type {
   UploadAddressCandidate,
   UploadDiscriminatingField,
@@ -33,6 +34,7 @@ export interface UploadSearchObject {
   street: string | null;
   houseNumber: string | null;
   staircase: string | null;
+  door: string | null;
   project: string | null;
   sources: UploadAddressSourceEntry[];
   sourceDeviations: UploadAddressSourceDeviation[];
@@ -47,6 +49,7 @@ export type UploadGroupResolutionStatus =
   | 'resolved'
   | 'partial'
   | 'needsGeocode'
+  | 'needsLayerResolution'
   | 'needsTray'
   | 'ambiguous';
 
@@ -88,4 +91,8 @@ export interface UploadGroupResolutionState {
   candidate?: UploadAddressCandidate;
   candidates?: UploadAddressCandidate[];
   discriminatingField?: UploadDiscriminatingField;
+  /** Raw layer packages for audit — @see upload-search-object.layer-map.md */
+  addressLayers?: AddressLayerEntry[];
+  /** Tray merge key for layer_package groups. */
+  layerConflictQueryKey?: string;
 }

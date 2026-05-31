@@ -46,6 +46,17 @@ describe('buildSearchObjectFromRelativePath', () => {
     expect(so.postcode).toBeNull();
   });
 
+  it('parses AT slash house/top from folder path (EX-09)', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Wien/Neustiftgasse 25/14/photo.jpg',
+      'photo.jpg',
+      geo,
+    );
+    expect(so.houseNumber).toBe('25');
+    expect(so.door).toBe('14');
+    expect(so.staircase).toBeNull();
+  });
+
   it('classifies AT postcode when country segment is present', () => {
     const so = buildSearchObjectFromRelativePath(
       'AT/Wien/1090/Neustiftgasse-43/photo.jpg',
@@ -77,6 +88,7 @@ describe('buildGroupingKey', () => {
       street: 'Neustiftgasse',
       houseNumber: '43',
       staircase: null,
+      door: null,
       project: null,
     });
     const b = buildGroupingKey({
@@ -87,9 +99,36 @@ describe('buildGroupingKey', () => {
       street: 'Neustiftgasse',
       houseNumber: '43',
       staircase: null,
+      door: null,
       project: null,
     });
     expect(a).toBe(b);
+  });
+
+  it('excludes door and staircase from grouping key', () => {
+    const base = buildGroupingKey({
+      country: 'AT',
+      state: null,
+      postcode: null,
+      city: 'Wien',
+      street: 'Neustiftgasse',
+      houseNumber: '25',
+      staircase: null,
+      door: null,
+      project: null,
+    });
+    const withUnits = buildGroupingKey({
+      country: 'AT',
+      state: null,
+      postcode: null,
+      city: 'Wien',
+      street: 'Neustiftgasse',
+      houseNumber: '25',
+      staircase: '4',
+      door: '14',
+      project: null,
+    });
+    expect(base).toBe(withUnits);
   });
 });
 
@@ -104,6 +143,7 @@ describe('isSearchObjectComplete', () => {
         street: 'Neustiftgasse',
         houseNumber: '43',
         staircase: null,
+        door: null,
         project: null,
         sources: [],
         sourceDeviations: [],
@@ -124,6 +164,7 @@ describe('isSearchObjectComplete', () => {
         street: 'Neustiftgasse',
         houseNumber: '43',
         staircase: null,
+        door: null,
         project: null,
         sources: [],
         sourceDeviations: [],
