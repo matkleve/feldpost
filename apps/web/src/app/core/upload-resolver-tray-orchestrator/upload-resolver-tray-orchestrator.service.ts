@@ -110,6 +110,14 @@ export class UploadResolverTrayOrchestratorService {
       this._inbox().length > 0,
   );
 
+  /** More presentation bundles or collecting window after current bundle. */
+  readonly hasPresentationBacklog = computed(
+    () =>
+      this._pendingBundles().length > 0 ||
+      this._collectingBundle() !== null ||
+      this._inbox().length > 0,
+  );
+
   enqueueItem(input: EnqueueTrayItemInput): string {
     const item: TrayResolveItem = {
       id: crypto.randomUUID(),

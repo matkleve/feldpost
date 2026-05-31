@@ -77,6 +77,7 @@ export class UploadResolverTrayComponent implements OnInit {
   readonly groupChanged = output<string>();
   readonly deferRequested = output<string>();
   readonly previewLocation = output<{ lat: number; lng: number }>();
+  readonly previewLocationCleared = output<void>();
 
   readonly t = this.i18n.t.bind(this.i18n);
 
@@ -122,6 +123,9 @@ export class UploadResolverTrayComponent implements OnInit {
       return null;
     }
     const unitTotal = countDialogueUnits(items);
+    if (unitTotal < 2) {
+      return null;
+    }
     const unitIndex = unitIndexForItem(items, item.id);
     return formatBundleCarouselIndicator(unitIndex, unitTotal, item.trayStepLabel);
   });
@@ -203,13 +207,31 @@ export class UploadResolverTrayComponent implements OnInit {
       return this.t('upload.resolver.continue', 'Continue');
     }
     const items = this.bundleItems();
-    const index = this.orchestrator.activeItemIndex();
-    const hasMoreInBundle = index < items.length - 1;
-    const hasMoreBundles = this.orchestrator.hasQueuedBundles();
-    if (hasMoreInBundle || hasMoreBundles) {
+    const item = this.activeItem();
+    if (!item || !items.length) {
       return this.t('upload.resolver.next', 'Next');
     }
-    return this.t('upload.resolver.finish', 'Finish');
+    const unitTotal = countDialogueUnits(items);
+    const unitIndex = unitIndexForItem(items, item.id) + 1;
+    const hasMoreInBundle = unitIndex < unitTotal;
+    if (hasMoreInBundle || this.orchestrator.hasPresentationBacklog()) {
+      return this.t('upload.resolver.next', 'Next');
+    }
+    return this.t('upload.resolver.save', 'Save');
+  });
+
+  readonly folderParsedSubtitle = computed(() => {
+    const item = this.activeItem();
+    if (item?.questionKey !== 'upload.resolver.question.source') {
+      return null;
+    }
+    const parsed = item.questionParams['parsedAddress']?.trim();
+    return parsed
+      ? this.t('upload.resolver.folder.parsed', 'Parsed from folder: {address}').replace(
+          '{address}',
+          parsed,
+        )
+      : null;
   });
 
   readonly trayMode = computed<UploadResolverTrayMode>(() => {
@@ -391,6 +413,10 @@ export class UploadResolverTrayComponent implements OnInit {
     }
   }
 
+  onOptionHoverEnd(): void {
+    this.previewLocationCleared.emit();
+  }
+
   toggleMediaMenu(): void {
     this.mediaMenuOpen.update((open) => !open);
   }
@@ -488,7 +514,7 @@ export class UploadResolverTrayComponent implements OnInit {
     const address = option.label.trim();
     switch (option.id) {
       case 'source-text':
-        return this.t('upload.resolver.source.option.folder', 'Folder: {address}').replace(
+        return this.t('upload.resolver.source.option.folder', 'Folder address: {address}').replace(
           '{address}',
           address,
         );
@@ -498,12 +524,9 @@ export class UploadResolverTrayComponent implements OnInit {
           address,
         );
       case 'source-both':
-        return this.t(
-          'upload.resolver.source.option.both',
-          'Use folder name and photo GPS',
-        );
+        return this.t('upload.resolver.source.option.both', 'Add both locations to file');
       case 'source-none':
-        return this.t('upload.resolver.source.option.none', 'Set in file details');
+        return this.t('upload.resolver.source.option.none', 'Set later in file details');
       default:
         return option.label;
     }

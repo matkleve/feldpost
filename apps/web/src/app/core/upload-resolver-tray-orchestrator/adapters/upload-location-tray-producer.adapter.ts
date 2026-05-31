@@ -212,6 +212,7 @@ function groupToEnqueueInput(
   const questionParams: Record<string, string> = {
     street,
     address: group.titleAddress,
+    parsedAddress: group.titleAddress,
   };
   if (group.disambiguationKind === 'source') {
     const textCand = group.candidates.find((c) => c.id === SOURCE_CONFLICT_TEXT_CANDIDATE_ID);

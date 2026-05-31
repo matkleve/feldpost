@@ -26,6 +26,8 @@ import {
   buildChosenPlacementPatch,
   buildGeocodeCandidatePatch,
   buildSourceConflictCandidates,
+  buildSourceConflictQueryKey,
+  clearDisambiguationJobFields,
   getExifMetadataCoords,
   haversineMeters,
   resolvePlacementAfterTextGeocode,
@@ -110,6 +112,11 @@ export class UploadLocationResolutionService {
 
   private readonly geocodeInFlight = new Map<string, Promise<UploadGroupResolutionState>>();
 
+  /** Resolved `source|{groupingKey}` per batch — no re-register after user answers. */
+  private readonly resolvedSourceQueryKeys = new Map<string, Set<string>>();
+
+  private readonly sourceConflictInflight = new Map<string, Promise<void>>();
+
   private readonly _groups = signal<UploadDisambiguationGroup[]>([]);
   private readonly _selectedGroupId = signal<string | null>(null);
 
@@ -164,7 +171,34 @@ export class UploadLocationResolutionService {
     this._groups.update((prev) => prev.filter((g) => g.batchId !== batchId));
     this.orchestrator.clearBatch(batchId);
     this.batchProjectTrayRegistered.delete(batchId);
+    this.resolvedSourceQueryKeys.delete(batchId);
+    for (const key of [...this.sourceConflictInflight.keys()]) {
+      if (key.startsWith(`${batchId}|`)) {
+        this.sourceConflictInflight.delete(key);
+      }
+    }
     this.syncBatchDisambiguationAggregates(batchId);
+  }
+
+  isSourceConflictResolved(batchId: string, groupingKey: string | undefined | null): boolean {
+    if (!groupingKey?.trim()) {
+      return false;
+    }
+    const queryKey = buildSourceConflictQueryKey(groupingKey);
+    return this.resolvedSourceQueryKeys.get(batchId)?.has(queryKey) ?? false;
+  }
+
+  private markSourceConflictResolved(batchId: string, queryKey: string): void {
+    let set = this.resolvedSourceQueryKeys.get(batchId);
+    if (!set) {
+      set = new Set();
+      this.resolvedSourceQueryKeys.set(batchId, set);
+    }
+    set.add(queryKey);
+  }
+
+  private sourceConflictInflightKey(batchId: string, queryKey: string): string {
+    return `${batchId}|${queryKey}`;
   }
 
   /**
@@ -474,6 +508,19 @@ export class UploadLocationResolutionService {
         exifMetadata: exifCoords,
       });
       if (outcome.kind === 'held_source_conflict') {
+        const groupingKey = job.groupingKey;
+        if (groupingKey && this.isSourceConflictResolved(job.batchId, groupingKey)) {
+          uploadTraceDecision('placement', 'skip source tray — already resolved for groupingKey', {
+            jobId,
+            groupingKey,
+          });
+          const textCoords = job.titleAddressCoords!;
+          this.jobState.updateJob(
+            jobId,
+            buildChosenPlacementPatch(job, 'text', textCoords),
+          );
+          return false;
+        }
         const textCoords = job.titleAddressCoords;
         this.registerSourceConflictGroup(job, textCoords, exifCoords!);
         return true;
@@ -518,40 +565,95 @@ export class UploadLocationResolutionService {
   ): Promise<void> {
     const folderDisplayPath =
       job.folderDisplayPath ?? deriveFolderDisplayPath(job.relativePath);
-    const folderName = job.titleAddress?.trim() ?? '';
-    const [folderRev, photoRev] = await Promise.all([
-      this.geocoding.reverse(textCoords.lat, textCoords.lng),
-      this.geocoding.reverse(exifCoords.lat, exifCoords.lng),
-    ]);
-    const folderAddress =
-      folderRev?.addressLabel?.trim() ||
-      folderName ||
-      `${textCoords.lat.toFixed(4)}, ${textCoords.lng.toFixed(4)}`;
-    const photoAddress =
-      photoRev?.addressLabel?.trim() ||
-      `${exifCoords.lat.toFixed(4)}, ${exifCoords.lng.toFixed(4)}`;
-    const candidates = buildSourceConflictCandidates({
-      folderAddress,
-      photoAddress,
-      textCoords,
-      exifCoords,
+    const groupingKey =
+      job.groupingKey ?? buildDisambiguationQueryKey(job.titleAddress ?? '', folderDisplayPath);
+    const queryKey = buildSourceConflictQueryKey(groupingKey);
+
+    if (this.isSourceConflictResolved(job.batchId, groupingKey)) {
+      uploadTraceDecision('ulr', 'registerSourceConflict skipped — already resolved', {
+        batchId: job.batchId,
+        queryKey,
+      });
+      return;
+    }
+
+    const inflightKey = this.sourceConflictInflightKey(job.batchId, queryKey);
+    const existingInflight = this.sourceConflictInflight.get(inflightKey);
+    if (existingInflight) {
+      await existingInflight;
+      return;
+    }
+
+    const run = async (): Promise<void> => {
+      if (this.isSourceConflictResolved(job.batchId, groupingKey)) {
+        return;
+      }
+
+      const blocked = this._groups().find(
+        (g) =>
+          g.batchId === job.batchId &&
+          g.queryKey === queryKey &&
+          isGroupBlocked(g),
+      );
+      if (blocked) {
+        const jobIds = this.jobState
+          .jobs()
+          .filter((j) => j.batchId === job.batchId && j.groupingKey === groupingKey)
+          .map((j) => j.id);
+        if (jobIds.length) {
+          this.registerDisambiguationGroup({
+            batchId: job.batchId,
+            queryKey,
+            folderDisplayPath,
+            titleAddress: job.titleAddress ?? '',
+            jobIds,
+            candidates: blocked.candidates,
+            localityHint: deriveLocalityHint(job.relativePath),
+            disambiguationKind: 'source',
+          });
+        }
+        return;
+      }
+
+      const folderName = job.titleAddress?.trim() ?? '';
+      const [folderRev, photoRev] = await Promise.all([
+        this.geocoding.reverse(textCoords.lat, textCoords.lng),
+        this.geocoding.reverse(exifCoords.lat, exifCoords.lng),
+      ]);
+      const folderAddress =
+        folderRev?.addressLabel?.trim() ||
+        folderName ||
+        `${textCoords.lat.toFixed(4)}, ${textCoords.lng.toFixed(4)}`;
+      const photoAddress =
+        photoRev?.addressLabel?.trim() ||
+        `${exifCoords.lat.toFixed(4)}, ${exifCoords.lng.toFixed(4)}`;
+      const candidates = buildSourceConflictCandidates({
+        folderAddress,
+        photoAddress,
+        textCoords,
+        exifCoords,
+      });
+      const jobIds = this.jobState
+        .jobs()
+        .filter((j) => j.batchId === job.batchId && j.groupingKey === groupingKey)
+        .map((j) => j.id);
+      this.registerDisambiguationGroup({
+        batchId: job.batchId,
+        queryKey,
+        folderDisplayPath,
+        titleAddress: job.titleAddress ?? '',
+        jobIds: jobIds.length ? jobIds : [job.id],
+        candidates,
+        localityHint: deriveLocalityHint(job.relativePath),
+        disambiguationKind: 'source',
+      });
+    };
+
+    const inflight = run().finally(() => {
+      this.sourceConflictInflight.delete(inflightKey);
     });
-    const groupingKey = job.groupingKey ?? buildDisambiguationQueryKey(job.titleAddress ?? '', folderDisplayPath);
-    const queryKey = `source|${groupingKey}`;
-    const jobIds = this.jobState
-      .jobs()
-      .filter((j) => j.batchId === job.batchId && j.groupingKey === groupingKey)
-      .map((j) => j.id);
-    this.registerDisambiguationGroup({
-      batchId: job.batchId,
-      queryKey,
-      folderDisplayPath,
-      titleAddress: job.titleAddress ?? '',
-      jobIds: jobIds.length ? jobIds : [job.id],
-      candidates,
-      localityHint: deriveLocalityHint(job.relativePath),
-      disambiguationKind: 'source',
-    });
+    this.sourceConflictInflight.set(inflightKey, inflight);
+    await inflight;
   }
 
   /**
@@ -1183,39 +1285,48 @@ export class UploadLocationResolutionService {
     };
     this.patchGroup(resolvedGroup);
 
+    if (group.disambiguationKind === 'source') {
+      this.markSourceConflictResolved(group.batchId, group.queryKey);
+    }
+
     for (const jobId of group.jobIds) {
       const job = this.jobState.findJob(jobId);
       if (!job) {
         continue;
       }
       if (group.disambiguationKind === 'source') {
+        const cleared = clearDisambiguationJobFields();
         if (
           candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID ||
           candidateId === SOURCE_CONFLICT_BOTH_CANDIDATE_ID
         ) {
           const exifCoords = getExifMetadataCoords(job);
           if (exifCoords) {
-            this.jobState.updateJob(
-              jobId,
-              buildChosenPlacementPatch(job, 'exif', exifCoords),
-            );
+            this.jobState.updateJob(jobId, {
+              ...buildChosenPlacementPatch(job, 'exif', exifCoords),
+              ...cleared,
+            });
           }
-        } else if (candidateId === SOURCE_CONFLICT_TEXT_CANDIDATE_ID && job.titleAddressCoords) {
-          this.jobState.updateJob(
-            jobId,
-            buildChosenPlacementPatch(job, 'text', job.titleAddressCoords),
-          );
+        } else if (candidateId === SOURCE_CONFLICT_TEXT_CANDIDATE_ID) {
+          const textCoords = job.titleAddressCoords ?? {
+            lat: candidate.lat,
+            lng: candidate.lng,
+          };
+          this.jobState.updateJob(jobId, {
+            ...buildChosenPlacementPatch(job, 'text', textCoords),
+            ...cleared,
+          });
         }
       } else {
         this.applyGeocodeCandidateToJob(jobId, job, candidate, group.folderDisplayPath);
         const j = this.jobState.findJob(jobId)!;
-        this.jobState.updateJob(
-          jobId,
-          buildChosenPlacementPatch(j, 'text', {
+        this.jobState.updateJob(jobId, {
+          ...buildChosenPlacementPatch(j, 'text', {
             lat: candidate.lat,
             lng: candidate.lng,
           }),
-        );
+          ...clearDisambiguationJobFields(),
+        });
       }
       this.jobState.setPhase(jobId, 'queued');
     }

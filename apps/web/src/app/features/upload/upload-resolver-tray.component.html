@@ -64,6 +64,11 @@
         <span class="material-icons" aria-hidden="true">folder</span>
         <span>{{ item.folderDisplayPath }}</span>
       </p>
+      @if (folderParsedSubtitle(); as parsedLine) {
+        <p class="upload-resolver-tray__context upload-resolver-tray__context--parsed">
+          {{ parsedLine }}
+        </p>
+      }
     }
 
     @if (isItemBlocked()) {
@@ -102,6 +107,7 @@
               [attr.aria-label]="optionAriaLabel(entry)"
               (click)="selectOption(entry.option.id)"
               (mouseenter)="onPreviewOption(entry.option)"
+              (mouseleave)="onOptionHoverEnd()"
               (focus)="onPreviewOption(entry.option)"
             >
               <span class="upload-resolver-tray__choice-index" aria-hidden="true">{{ entry.index }}</span>

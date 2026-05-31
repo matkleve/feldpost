@@ -28,12 +28,16 @@
     >
       <span class="map-upload-btn__icon-shell" aria-hidden="true">
         @if (uploadBatchActive()) {
+          <span class="map-upload-btn__spinner" aria-hidden="true"></span>
           <span
-            class="map-upload-btn__progress"
+            class="map-upload-btn__progress-bar"
             [style.--upload-progress]="uploadBatchProgress() + '%'"
+            role="progressbar"
+            [attr.aria-valuenow]="uploadBatchProgress()"
+            aria-valuemin="0"
+            aria-valuemax="100"
             aria-hidden="true"
           ></span>
-          <span class="map-upload-btn__spinner" aria-hidden="true"></span>
         } @else {
           <span class="material-icons" aria-hidden="true">cloud_upload</span>
         }
@@ -63,6 +67,7 @@
     <app-upload-resolver-tray
       [panelOpen]="uploadPanelOpen()"
       (previewLocation)="onUploadLocationPreviewRequested($event)"
+      (previewLocationCleared)="onUploadLocationPreviewCleared()"
     />
   </div>
 </div>

@@ -109,6 +109,24 @@ export function buildGeocodeCandidatePatch(
   };
 }
 
+/** Clears tray gate fields after user resolves a disambiguation group. */
+export function clearDisambiguationJobFields(): Pick<
+  UploadJob,
+  'disambiguationGroupId' | 'issueKind' | 'addressCandidates' | 'statusLabel' | 'resolutionStatus'
+> {
+  return {
+    disambiguationGroupId: undefined,
+    issueKind: undefined,
+    addressCandidates: undefined,
+    statusLabel: '',
+    resolutionStatus: 'resolved',
+  };
+}
+
+export function buildSourceConflictQueryKey(groupingKey: string): string {
+  return `source|${groupingKey}`;
+}
+
 export function buildSourceConflictCandidates(input: {
   folderAddress: string;
   photoAddress: string;

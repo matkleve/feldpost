@@ -7,7 +7,9 @@
 
 `app-upload-resolver-tray` — active address-choice UI inside `.upload-shell__dock` (layout-only column; tray owns its own frosted card). Renders below the panel when both are visible; tray-only when the panel is closed.
 
-**Active layout (Cursor Questions–inspired):** section label **Address resolver**, optional carousel (`‹` **1/4** `›` when multiple groups), **compact semibold question** (`p`, `--font-size-md` ~1rem — see [question copy contract](./upload-resolver-tray.question-copy.md)), folder path (tooltip only), numbered answers, **affected-media chip** (`{count} media` + dropdown), footer **Skip** + compact primary (**Next** / **Finish**).
+**One generic tray component** — scenarios (city, address, source, layer package) differ by `questionKey` and `options[]` from producers, not separate components.
+
+**Active layout (Cursor Questions–inspired):** section label **Address resolver**, optional carousel (`‹` **1/4** `›` when **≥2 dialogue units** in bundle), **compact semibold question** (`p`, `--font-size-md` ~1rem — see [question copy contract](./upload-resolver-tray.question-copy.md)), folder path (tooltip only; source tray may show parsed address subtitle), numbered answers, **affected-media chip** (`{count} media` + dropdown), footer **Skip** + compact primary (**Next** / **Save** on last unit).
 
 ## Affected-media chip
 
@@ -111,7 +113,7 @@ Jobs in `awaiting_disambiguation` stay in **Queue** with label “Choose address
 | `city_step` | Branch C / B→C fallback (Step 1A) | City input + Continue |
 | `house_step` | Step 1B after city confirmed | House number list + “No number needed” |
 | `project_address_a` / `project_address_b` | Batch project precedence (Step 2) | See [stepper FSM supplement](./upload-resolver-tray.stepper-fsm.supplement.md) |
-| `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + two options |
+| `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + **four** placement options (folder address / photo / both / set later) |
 | `context_distance` | Placement beyond org `contextDistanceMaxMeters` (Settings km cap) from project GPS anchor | **Prompt B** — confirm; not the same as `exifAssistRadiusMeters` (m) |
 
 ## Dev QA (local only)
@@ -132,4 +134,7 @@ Pre-upload gate only. No tray for `phase === 'complete'` or post-upload correcti
 - [x] Affected-media chip: dropdown file list, Ask later without carousel jump; denominator updates (e.g. 1/3 → 1/4)
 - [x] `source` kind shows two candidates without city collapse
 - [x] Continue applies candidate to whole group via `applyCandidateToGroup` and re-queues jobs
+- [ ] Last dialogue unit in bundle shows **Save** (not Next when alone)
+- [ ] Map preview on option hover (before Continue)
+- [ ] HEIC conversion may appear in queue before first tray when workers start early (concurrency 3) — expected
 - [ ] `context_distance` (Prompt B) — not MVP; numbered list not used

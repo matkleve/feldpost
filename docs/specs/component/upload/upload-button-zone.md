@@ -8,11 +8,11 @@ The upload trigger and its morph container. A round button fixed in the top-righ
 
 **Closed state:** 2.75rem (44px) circle, bordered quiet surface (`hlmBtn` `outline`), muted cloud icon. **Interaction emphasis:** idle muted; hover primary wash; panel open (`--active`) uses `--interaction-selected-ink`; uploading shows primary progress ring + spinner only. Desktop is top-right of map; mobile is 3.5rem (56px) FAB bottom-right.
 
-When the panel is closed and a batch is active, upload progress is shown **only on the trigger** (progress ring + centered spinner). No filename chips or secondary status list beside the button.
+When the panel is closed and a batch is active, upload progress is shown **only on the trigger** (centered spinner + horizontal progress bar beneath the icon). No filename chips or secondary status list beside the button.
 
 **Open state:** the circle morphs into a compact rounded container (`min-width: 20rem`, `max-width: 24rem`) with the drop area and status board handled by Upload Panel. The morph should animate radius, width, and elevation in 180ms using `--motion-standard` timing.
 
-**Uploading trigger state (active batch):** the trigger stays the same compact icon size. The cloud icon is replaced by a centered loading spinner inside the progress ring. No visible status text on the button; screen readers get `Uploading...` via `aria-label` / `title` only.
+**Uploading trigger state (active batch):** the trigger stays the same compact icon size. The cloud icon is replaced by a centered loading spinner with a **3px-tall horizontal bar** directly below it (fills left-to-right 0–100% via `--upload-progress`). No conic ring around the icon. No visible status text on the button; screen readers get `Uploading...` via `aria-label` / `title` only.
 
 **Zone:** fixed-position stack container with a single visual surface in open state so it feels like one control, not a floating button plus separate card.
 
@@ -35,8 +35,8 @@ When the panel is closed and a batch is active, upload progress is shown **only 
 | 3   | Upload batch is active                   | Button shell shows aggregate progress ring (0–100%)                     | `activeBatch()` signal       |
 | 4   | Queue empty + no active uploads          | Progress ring hidden; control returns to idle visual                    | `activeBatch() === null`     |
 | 5   | User reopens while uploads run           | Panel restores current intake/progress state                            | `UploadManagerService` state |
-| 6   | Upload batch is active                   | Trigger shows progress ring + centered spinner (no visible label text)  | `uploadBatchActive()`        |
-| 7   | Batch progresses                         | Ring fills clockwise around icon until 100%                             | aggregate batch progress     |
+| 6   | Upload batch is active                   | Trigger shows spinner + horizontal progress bar (no visible label text) | `uploadBatchActive()`        |
+| 7   | Batch progresses                         | Bar width tracks aggregate batch progress until 100%                      | aggregate batch progress     |
 
 ## Component Hierarchy
 
@@ -45,12 +45,12 @@ UploadButtonZone                                   ← fixed position container,
 ├── MorphShell                                     ← transitions circle → rounded panel shell
 │   ├── UploadButton                               ← closed state: 44px desktop / 56px mobile
 │   │   ├── Icon "upload"                          ← Material Icon, white, media-upload semantics
-│   │   ├── [uploading] ProgressRing               ← circular edge ring (0–100%), token-driven stroke/fill
-│   │   └── [uploading] LoadingSpinner             ← centered indeterminate ring inside progress shell
+│   │   ├── [uploading] LoadingSpinner             ← centered indeterminate ring
+│   │   └── [uploading] ProgressBar                ← horizontal bar under spinner (0–100%)
 │   └── [open] UploadPanel                         ← integrated content surface (see upload-panel spec)
 ```
 
-The `ProgressRing` is a thin (2px) circular edge overlay around the trigger. It fills clockwise from 0–100% as the active batch progresses. When no batch is active, it is hidden.
+The `ProgressBar` is a short horizontal track under the spinner (`width` driven by `--upload-progress`). When no batch is active, spinner and bar are hidden.
 
 ## Data
 

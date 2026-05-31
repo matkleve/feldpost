@@ -35,7 +35,7 @@ Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is ra
 | 0 | `prepareExifAndFile` | Sets `parsedExif` only; **does not** set `job.coords` |
 | 1 | `mergeTitleCandidateOnJob` | High-confidence file/folder text → `titleAddress` |
 | 2 | Text geocode (SO or legacy) | Runs when high-confidence text exists **even if** EXIF metadata present |
-| 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray |
+| 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray. **Idempotent:** at most one open group per `(batchId, queryKey)` where `queryKey = source\|{groupingKey}`; after user resolves, no re-register; concurrent `finalizePlacement` singleflight shares one reverse-geocode. Candidate IDs: `source-text`, `source-exif`, `source-both`, `source-none`. |
 | 4 | `applyChosenPlacementSource` | EXIF-only when geocode failed and no text coords (Branch B) |
 | 5 | Geocode far-hit filter | Org `contextDistanceMaxMeters` (Settings → **Max distance for internet results (km)**) — drop Photon hits farther than cap from **job anchor** (EXIF → project) before trays; same key as search bar |
 | 6 | `routePreparedNewJob` / upload | `finalCoords` from `job.coords`; `exif_*` from `parsedExif.coords` |

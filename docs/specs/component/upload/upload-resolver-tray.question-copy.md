@@ -11,11 +11,24 @@ The tray is a **questionnaire**, not a settings panel. Every active card has:
 3. **Optional folder path** — icon + path only; meaning via **`title` / `aria-label`** (e.g. “Upload folder: …”) — **no** visible “Folder” caption.
 4. **Numbered answers** — options that complete the question (keyboard `1`–`9`).
 5. **Affected-media chip** — `{count} media` (not “photos” / “files”); click opens dropdown; native tooltip on chip.
-6. **Footer** — Skip (defer) + Continue (apply).
+6. **Footer** — Skip (defer) + primary (**Next** / **Save** on last dialogue unit in bundle).
 
 Product vocabulary: **media** (upload jobs), not “photos”, unless the file type is literally a photo in copy elsewhere.
 
 Generic headlines (“Resolver tray active headline”, “Which address is correct?” without context) are **forbidden**.
+
+## Tray scenarios (one generic UI, many fills)
+
+The tray is **one component** filled by producers (`TrayResolveItem`). “Tray type” in docs means **scenario**, not a separate Angular component.
+
+| Scenario | When | Options (example) |
+| --- | --- | --- |
+| **Geocode — city** | Photon ambiguous by municipality | **Wien**, **St. Pölten**, **Krems** (2–5 city names) |
+| **Geocode — address** | Several full-address hits | Full `addressLabel` per hit |
+| **Source conflict** | Text/folder geocode done; EXIF far | **Four** fixed choices (folder address / photo / both / set later) — not cities |
+| **Layer package** | Conflicting folder packages | Package labels |
+
+**Folder path vs folder address (source tray):** `folderDisplayPath` = upload path (e.g. `Thaliastraße 14`). Option 1 = reverse-geocode of the **folder/text geocode pin** (may be `Thaliastraße 65` if Photon placed another house). Optional subtitle shows parsed `titleAddress` from Search Object.
 
 ## Question matrix (normative)
 
@@ -25,7 +38,7 @@ Generic headlines (“Resolver tray active headline”, “Which address is corr
 | `collapseStage: partial` (default geocode) | `upload.resolver.question.address` | Which **{address}** do you mean? | Full `addressLabel` |
 | `collapseStage: per_file` | `upload.resolver.question.door` | What's the door number for **{street}**? | Door/unit labels — see [Answer UI variants](#answer-ui-variants) |
 | `disambiguationKind: layer_package` | `upload.resolver.question.layerPackage` | Which address information should we use? | `{packageLabel}` per option (Folder: … / Filename: …) |
-| `disambiguationKind: source` | `upload.resolver.question.source` | Photo GPS is far from the resolved address ({distance}). Which location should we use? | Folder / photo location / both / none (no score bars) |
+| `disambiguationKind: source` | `upload.resolver.question.source` | Photo GPS is far from the folder address ({distance}). Which location should we use? | **Four:** `upload.resolver.source.option.folder` (geocoded pin), `photo`, `both` (add both locations), `none` (set later in file details) — no score bars |
 | `disambiguationKind: context_distance` | `upload.resolver.question.contextDistance` | Is this photo in the right project area? | Prompt B (search + confirm) — not numbered list MVP |
 
 `{street}` = first comma-separated segment of `titleAddress` (e.g. `Musterstrasse 12` from `Musterstrasse 12, 8001 Zürich`).

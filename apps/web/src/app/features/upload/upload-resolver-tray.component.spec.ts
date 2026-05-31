@@ -67,12 +67,12 @@ describe('UploadResolverTrayComponent', () => {
     const position = fixture.nativeElement.querySelector(
       '.upload-resolver-tray__nav-position',
     );
-    expect(position?.textContent?.trim()).toBe('1B/4');
+    expect(position?.textContent?.trim()).toBe('1B/3');
     fixture.componentInstance.goToAdjacentGroup(1);
     fixture.detectChanges();
     expect(
       fixture.nativeElement.querySelector('.upload-resolver-tray__nav-position')?.textContent?.trim(),
-    ).toBe('3/4');
+    ).toBe('2/3');
   });
 
   it('resolves active item on Continue and advances dialogue', () => {
@@ -81,5 +81,29 @@ describe('UploadResolverTrayComponent', () => {
     fixture.detectChanges();
     const active = orchestrator.activeItem();
     expect(active?.trayStepLabel).toBe('1b');
+  });
+
+  it('shows Save on last dialogue unit when no presentation backlog', () => {
+    orchestrator.resetAll();
+    orchestrator.presentBundleImmediately(MOCK_ORCHESTRATOR_BATCH_ID, [
+      {
+        dialogueUnitId: 'only-source',
+        producerId: 'mock',
+        batchId: MOCK_ORCHESTRATOR_BATCH_ID,
+        questionKey: 'upload.resolver.question.source',
+        questionParams: { distance: '5 km', address: 'Test' },
+        jobIds: ['mock-job-4'],
+        folderDisplayPath: 'Folder/Path',
+        options: [{ id: 'source-text', label: 'Folder addr', lat: 48, lng: 16 }],
+      },
+    ]);
+    fixture.detectChanges();
+    const footer = fixture.nativeElement.querySelector(
+      '.upload-resolver-tray__continue',
+    );
+    expect(footer?.textContent?.trim()).toBe('Save');
+    expect(
+      fixture.nativeElement.querySelector('.upload-resolver-tray__nav-position'),
+    ).toBeNull();
   });
 });

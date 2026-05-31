@@ -127,25 +127,34 @@ button.map-upload-btn {
     position: relative;
     border-radius: var(--radius-full);
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.2rem;
     flex-shrink: 0;
     z-index: 2;
   }
 
-  // Ring-only conic fill — no inner ::after disc (that read as a solid white circle behind the spinner).
+  // Batch completion bar under spinner (replaces conic ring).
   // @see docs/specs/component/upload/upload-button-zone.md
-  .map-upload-btn__progress {
-    position: absolute;
-    inset: -2px;
+  .map-upload-btn__progress-bar {
+    display: block;
+    width: 1.35rem;
+    height: 3px;
     border-radius: var(--radius-full);
-    background: conic-gradient(
-      var(--primary) 0 var(--upload-progress),
-      transparent var(--upload-progress) 100%
-    );
-    z-index: 1;
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+    overflow: hidden;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--upload-progress);
+      border-radius: inherit;
+      background: var(--primary);
+      transition: width 200ms var(--motion-standard, ease);
+    }
   }
 
   .map-upload-btn__spinner {
