@@ -22,4 +22,13 @@ describe('selectQueuedJobsForStart', () => {
     );
     expect(selected.map((entry) => entry.id)).toEqual(['pending']);
   });
+
+  it('skips queued jobs that are already running in the upload queue', () => {
+    const selected = selectQueuedJobsForStart(
+      [job({ id: 'in-flight' }), job({ id: 'pending' })],
+      3,
+      { isJobRunning: (id) => id === 'in-flight' },
+    );
+    expect(selected.map((entry) => entry.id)).toEqual(['pending']);
+  });
 });

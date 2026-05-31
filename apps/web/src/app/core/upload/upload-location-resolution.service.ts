@@ -18,6 +18,7 @@ import {
 import { OrgSearchTuningService } from '../search/org-search-tuning.service';
 import { UploadAddressResolutionOrchestrator } from './upload-address-resolution.orchestrator';
 import { UploadBatchService } from './upload-batch.service';
+import { UploadManagerService } from './upload-manager.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import { UploadProjectLocationsAdapter } from './adapters/upload-project-locations.adapter';
@@ -29,6 +30,8 @@ import {
   buildSourceConflictCandidates,
   buildSourceConflictQueryKey,
   clearDisambiguationJobFields,
+  collectSourceConflictJobIds,
+  isJobEligibleForSourceConflictGroup,
   labelFromFolderDisplayPath,
   resolveFolderSourceOptionLabel,
   getExifMetadataCoords,
@@ -543,7 +546,11 @@ export class UploadLocationResolutionService {
           textCoords: job.titleAddressCoords,
           exifMetadata: exifCoords,
         });
-        if (groupingKey && this.isSourceConflictResolved(job.batchId, groupingKey)) {
+        if (
+          groupingKey &&
+          this.isSourceConflictResolved(job.batchId, groupingKey) &&
+          isJobEligibleForSourceConflictGroup(job)
+        ) {
           const choice = this.getSourceConflictChoice(job.batchId, groupingKey)!;
           uploadTrayGate('replay stored source-conflict choice', {
             jobId,
@@ -586,8 +593,12 @@ export class UploadLocationResolutionService {
     return this.finalizePlacementForJobSync(jobId);
   }
 
-  registerSourceConflictGroup(job: UploadJob, textCoords: ExifCoords, exifCoords: ExifCoords): void {
-    void this.registerSourceConflictGroupAsync(job, textCoords, exifCoords);
+  registerSourceConflictGroup(
+    job: UploadJob,
+    textCoords: ExifCoords,
+    exifCoords: ExifCoords,
+  ): Promise<void> {
+    return this.registerSourceConflictGroupAsync(job, textCoords, exifCoords);
   }
 
   private async registerSourceConflictGroupAsync(
@@ -629,10 +640,11 @@ export class UploadLocationResolutionService {
           isGroupBlocked(g),
       );
       if (blocked) {
-        const jobIds = this.jobState
-          .jobs()
-          .filter((j) => j.batchId === job.batchId && j.groupingKey === groupingKey)
-          .map((j) => j.id);
+        const jobIds = collectSourceConflictJobIds(
+          this.jobState.jobs(),
+          job.batchId,
+          groupingKey,
+        );
         if (jobIds.length) {
           const mergeTitle =
             labelFromFolderDisplayPath(folderDisplayPath) ?? job.titleAddress?.trim() ?? '';
@@ -688,16 +700,25 @@ export class UploadLocationResolutionService {
         textCoords,
         exifCoords,
       });
-      const jobIds = this.jobState
-        .jobs()
-        .filter((j) => j.batchId === job.batchId && j.groupingKey === groupingKey)
-        .map((j) => j.id);
+      const jobIds = collectSourceConflictJobIds(
+        this.jobState.jobs(),
+        job.batchId,
+        groupingKey,
+      );
+      const eligibleIds = jobIds.length
+        ? jobIds
+        : isJobEligibleForSourceConflictGroup(job)
+          ? [job.id]
+          : [];
+      if (!eligibleIds.length) {
+        return;
+      }
       this.registerDisambiguationGroup({
         batchId: job.batchId,
         queryKey,
         folderDisplayPath,
         titleAddress: trayTitleAddress,
-        jobIds: jobIds.length ? jobIds : [job.id],
+        jobIds: eligibleIds,
         candidates,
         localityHint: deriveLocalityHint(job.relativePath),
         disambiguationKind: 'source',
@@ -1018,9 +1039,8 @@ export class UploadLocationResolutionService {
       return partial;
     }
 
-    for (const jobId of group.jobIds) {
-      this.jobState.setPhase(jobId, 'resolving_location');
-    }
+    // Do not set resolving_location on every job in the batch — only queued jobs enter the
+    // pipeline; bulk phase changes strand siblings until a later drain (see groupingKey kick).
 
     const geocodeRequest =
       group.geocodeBranch === 'branch_c'
@@ -1328,7 +1348,7 @@ export class UploadLocationResolutionService {
     candidate?: UploadAddressCandidate,
   ): void {
     const job = this.jobState.findJob(jobId);
-    if (!job) {
+    if (!job || job.mediaId || job.phase === 'complete') {
       return;
     }
     const result = applySourceConflictChoiceToJob(job, candidateId, candidate);
@@ -1411,6 +1431,39 @@ export class UploadLocationResolutionService {
 
     this.syncBatchDisambiguationAggregates(group.batchId);
     this.pickNextActiveGroup(group.batchId);
+
+    if (group.disambiguationKind === 'source') {
+      this.unblockSiblingsAfterSourceConflictSave(group.batchId, group.queryKey);
+    }
+  }
+
+  private groupingKeyFromSourceQueryKey(queryKey: string): string {
+    const prefix = 'source|';
+    return queryKey.startsWith(prefix) ? queryKey.slice(prefix.length) : queryKey;
+  }
+
+  /** Finalize / queue folder siblings that never joined the tray card (no batch EXIF inheritance). */
+  private unblockSiblingsAfterSourceConflictSave(batchId: string, queryKey: string): void {
+    const groupingKey = this.groupingKeyFromSourceQueryKey(queryKey);
+    for (const job of this.jobState.jobs()) {
+      if (job.batchId !== batchId || job.groupingKey !== groupingKey) {
+        continue;
+      }
+      if (job.mediaId) {
+        continue;
+      }
+      if (job.coords && job.phase === 'resolving_location') {
+        this.jobState.setPhase(job.id, 'queued');
+      }
+      if (!job.coords && job.phase === 'resolving_location') {
+        const held = this.finalizePlacementForJobSync(job.id);
+        const after = this.jobState.findJob(job.id);
+        if (!held && after?.coords) {
+          this.jobState.setPhase(job.id, 'queued');
+        }
+      }
+    }
+    this.injector.get(UploadManagerService).kickQueueAfterLocationGate();
   }
 
   /**

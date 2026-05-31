@@ -13,6 +13,7 @@ import {
 import {
   formatSourceConflictDistance,
   haversineMeters,
+  labelFromFolderDisplayPath,
   SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
   SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
 } from '../../upload/upload-location-precedence.helpers';
@@ -164,6 +165,10 @@ function itemKeyForGroup(group: UploadDisambiguationGroup): string {
   return `${group.id}:${group.trayStep ?? 'default'}`;
 }
 
+function normalizeTrayAddressLabel(value: string): string {
+  return value.replace(/_/g, ' ').trim().toLocaleLowerCase();
+}
+
 function questionKeyForGroup(group: UploadDisambiguationGroup): string {
   if (group.disambiguationKind === 'layer_package') {
     return 'upload.resolver.question.layerPackage';
@@ -215,9 +220,14 @@ function groupToEnqueueInput(
   const questionParams: Record<string, string> = {
     street,
     address: group.titleAddress,
-    parsedAddress: group.titleAddress,
   };
   if (group.disambiguationKind === 'source') {
+    const pathLeaf = labelFromFolderDisplayPath(group.folderDisplayPath);
+    const parsed = group.titleAddress.trim();
+    // Subtitle only when parser output differs from the folder row (e.g. street without house).
+    if (parsed && pathLeaf && normalizeTrayAddressLabel(parsed) !== normalizeTrayAddressLabel(pathLeaf)) {
+      questionParams['parsedAddress'] = parsed;
+    }
     const textCand = group.candidates.find((c) => c.id === SOURCE_CONFLICT_TEXT_CANDIDATE_ID);
     const exifCand = group.candidates.find((c) => c.id === SOURCE_CONFLICT_EXIF_CANDIDATE_ID);
     if (textCand && exifCand) {
@@ -228,6 +238,8 @@ function groupToEnqueueInput(
         ),
       );
     }
+  } else {
+    questionParams['parsedAddress'] = group.titleAddress;
   }
 
   let trayStepLabel: '1a' | '1b' | undefined;

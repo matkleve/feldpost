@@ -35,7 +35,7 @@ Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is ra
 | 0 | `prepareExifAndFile` | Sets `parsedExif` only; **does not** set `job.coords`. HEIC/HEIF: If `convertHeicToJpegUploadFile` fails, the job MUST transition to a terminal error phase with a user-visible message. Upload MUST NOT send the original `.heic` blob or `application/octet-stream` to Storage. |
 | 1 | `mergeTitleCandidateOnJob` | High-confidence file/folder text → `titleAddress` |
 | 2 | Text geocode (SO or legacy) | Runs when high-confidence text exists **even if** EXIF metadata present |
-| 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray. **Idempotent:** at most one open group per `(batchId, queryKey)` where `queryKey = source\|{groupingKey}`; after user resolves, no re-register; concurrent `finalizePlacement` singleflight shares one reverse-geocode. Candidate IDs: `source-text`, `source-exif`, `source-both`, `source-none`. |
+| 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray. **Tray membership:** `jobIds` on a source group MUST be jobs in the same `groupingKey` that each have **both** `titleAddressCoords` and `parsedExif.coords` (same folder batch is not enough). Media chip count = `jobIds.length`. **Idempotent:** at most one open group per `(batchId, queryKey)` where `queryKey = source\|{groupingKey}`; after user resolves, no re-register; concurrent `finalizePlacement` singleflight shares one reverse-geocode. Candidate IDs: `source-text`, `source-exif`, `source-both`, `source-none`. |
 | 4 | `applyChosenPlacementSource` | EXIF-only when geocode failed and no text coords (Branch B) |
 
 ### Phase 3 — source-conflict resolution record
@@ -45,7 +45,7 @@ When the user resolves `disambiguationKind: 'source'`, the app MUST persist the 
 | `selectedCandidateId` | Effect on each job in `groupingKey` (including jobs that enter Phase 3 later) |
 | --- | --- |
 | `source-text` | `buildChosenPlacementPatch(job, 'text', job.titleAddressCoords ?? candidate pin)` |
-| `source-exif` | `buildChosenPlacementPatch(job, 'exif', parsedExif.coords)` when EXIF present; else job stays without placement until Issues |
+| `source-exif` | `buildChosenPlacementPatch(job, 'exif', …)` when EXIF (or tray photo pin) present; else **folder text** when `titleAddressCoords` present; else Issues |
 | `source-both` | Same as `source-exif` for placement; product “both” semantics unchanged from code |
 | `source-none` | `deferGroup` semantics: `phase: missing_data`, `issueKind: missing_gps`, no `job.coords` |
 

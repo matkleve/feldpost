@@ -5,6 +5,8 @@ import {
   buildSourceConflictCandidates,
   formatSourceConflictDistance,
   haversineMeters,
+  collectSourceConflictJobIds,
+  isJobEligibleForSourceConflictGroup,
   labelFromFolderDisplayPath,
   resolveFolderSourceOptionLabel,
   resolvePlacementAfterTextGeocode,
@@ -94,16 +96,48 @@ describe('upload-location-precedence.helpers', () => {
     expect(labelFromFolderDisplayPath('Projects/Bau/Thaliastraße 14')).toBe('Thaliastraße 14');
   });
 
-  it('applySourceConflictChoiceToJob uses tray candidate coords when job has no parsedExif', () => {
+  it('collectSourceConflictJobIds only includes jobs with folder pin and EXIF metadata', () => {
+    const withBoth = job({
+      id: 'with-gps',
+      batchId: 'batch-1',
+      titleAddressCoords: { lat: 1, lng: 2 },
+      parsedExif: { coords: { lat: 3, lng: 4 } },
+      groupingKey: 'gk-folder',
+    });
+    const noExif = job({
+      id: 'no-exif',
+      batchId: 'batch-1',
+      titleAddressCoords: { lat: 1, lng: 2 },
+      parsedExif: undefined,
+      groupingKey: 'gk-folder',
+    });
+    const ids = collectSourceConflictJobIds([withBoth, noExif], 'batch-1', 'gk-folder');
+    expect(ids).toEqual(['with-gps']);
+    expect(isJobEligibleForSourceConflictGroup(noExif)).toBe(false);
+  });
+
+  it('applySourceConflictChoiceToJob uses folder text when photo choice but job has no EXIF', () => {
     const result = applySourceConflictChoiceToJob(
-      job({ parsedExif: undefined }),
+      job({
+        parsedExif: undefined,
+        titleAddressCoords: { lat: 48.19, lng: 16.34 },
+      }),
       SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
-      { lat: 48.2, lng: 16.37 },
     );
     expect(result.kind).toBe('placement');
     if (result.kind === 'placement') {
-      expect(result.patch.coords).toEqual({ lat: 48.2, lng: 16.37 });
+      expect(result.patch.coords).toEqual({ lat: 48.19, lng: 16.34 });
+      expect(result.patch.locationSourceUsed).not.toBe('exif');
     }
+  });
+
+  it('applySourceConflictChoiceToJob defers EXIF choice when job has no parsedExif', () => {
+    const result = applySourceConflictChoiceToJob(
+      job({ parsedExif: undefined, titleAddressCoords: undefined }),
+      SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
+      { lat: 48.2, lng: 16.37 },
+    );
+    expect(result.kind).toBe('skipped_no_exif');
   });
 
   it('resolveFolderSourceOptionLabel prefers folder path over SO with IMG house number', () => {

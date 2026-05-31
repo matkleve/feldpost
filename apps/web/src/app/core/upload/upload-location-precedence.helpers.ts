@@ -131,6 +131,30 @@ export function buildSourceConflictQueryKey(groupingKey: string): string {
 }
 
 /**
+ * Source-conflict tray applies only when folder text geocode and EXIF metadata both exist on the job.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3
+ */
+export function isJobEligibleForSourceConflictGroup(job: UploadJob): boolean {
+  return job.titleAddressCoords != null && getExifMetadataCoords(job) != null;
+}
+
+/** Job ids in one folder grouping that actually have both pins (tray media count / apply scope). */
+export function collectSourceConflictJobIds(
+  jobs: readonly UploadJob[],
+  batchId: string,
+  groupingKey: string,
+): string[] {
+  return jobs
+    .filter(
+      (j) =>
+        j.batchId === batchId &&
+        j.groupingKey === groupingKey &&
+        isJobEligibleForSourceConflictGroup(j),
+    )
+    .map((j) => j.id);
+}
+
+/**
  * Leaf folder segment for tray copy (e.g. `Thaliastraße 14`), not camera filename tokens.
  * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md — Folder path vs folder address
  */
@@ -220,10 +244,18 @@ export function applySourceConflictChoiceToJob(
     candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID ||
     candidateId === SOURCE_CONFLICT_BOTH_CANDIDATE_ID
   ) {
-    const exifCoords =
-      getExifMetadataCoords(job) ??
-      (candidate != null ? { lat: candidate.lat, lng: candidate.lng } : undefined);
+    const exifCoords = getExifMetadataCoords(job);
     if (!exifCoords) {
+      const textCoords = job.titleAddressCoords;
+      if (textCoords) {
+        return {
+          kind: 'placement',
+          patch: {
+            ...buildChosenPlacementPatch(job, 'text', textCoords),
+            ...cleared,
+          },
+        };
+      }
       return { kind: 'skipped_no_exif' };
     }
     return {

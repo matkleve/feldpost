@@ -387,6 +387,11 @@ export class UploadManagerService {
    * Resolve an address-ambiguous issue using a concrete candidate.
    * Persists the selected textual label and re-queues the job with chosen coordinates.
    */
+  /** After batch location gate (e.g. source-conflict Save), drain queued siblings. */
+  kickQueueAfterLocationGate(): void {
+    this.drainQueue();
+  }
+
   selectAddressCandidate(jobId: string, candidate: UploadAddressCandidate): void {
     const job = this.jobState.findJob(jobId);
     if (!job) {
@@ -395,7 +400,6 @@ export class UploadManagerService {
 
     if (job.phase === 'awaiting_disambiguation' && job.disambiguationGroupId) {
       this.locationResolution.applyCandidateToGroup(job.disambiguationGroupId, candidate.id);
-      this.drainQueue();
       return;
     }
 
@@ -566,6 +570,7 @@ export class UploadManagerService {
       snapshotJobs: () => this.jobState.snapshot(),
       availableSlots: () => this.queue.availableSlots,
       isJobBlocked: (job) => this.locationResolution.isJobBlockedByGate(job),
+      isJobRunning: (jobId) => this.queue.isRunning(jobId),
       ensureAbortController: (jobId) => {
         this.ensureAbortController(jobId);
       },
@@ -585,6 +590,12 @@ export class UploadManagerService {
       const job = this.jobState.findJob(jobId);
       if (!job) {
         console.error('[upload-manager] runPipeline: job not found for', jobId);
+        return;
+      }
+      if (job.mediaId) {
+        if (job.phase === 'queued') {
+          this.jobState.setPhase(jobId, 'complete');
+        }
         return;
       }
 

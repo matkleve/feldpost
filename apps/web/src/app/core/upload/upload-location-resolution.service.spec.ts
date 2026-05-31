@@ -113,6 +113,63 @@ describe('UploadLocationResolutionService — source conflict', () => {
     expect(reverseCalls).toBe(2);
   });
 
+  it('source conflict group excludes same-folder jobs without EXIF metadata', async () => {
+    const text = { lat: 48.198, lng: 16.335 };
+    const exif = { lat: 48.21, lng: 16.37 };
+    const withGps = buildJob({ id: 'job-gps' });
+    const noGps = buildJob({
+      id: 'job-no-gps',
+      parsedExif: undefined,
+    });
+    jobState.addJobs([withGps, noGps]);
+
+    await service.registerSourceConflictGroup(withGps, text, exif);
+
+    const blocked = service
+      .disambiguationGroups()
+      .find((g) => g.disambiguationKind === 'source' && isGroupBlocked(g))!;
+    expect(blocked.jobIds).toEqual(['job-gps']);
+  });
+
+  it('applyCandidateToGroup source-exif applies only to tray jobIds, not folder siblings without EXIF', () => {
+    const text = { lat: 48.198, lng: 16.335 };
+    const exif = { lat: 48.21, lng: 16.37 };
+    const onTray = buildJob({ id: 'job-tray' });
+    const sibling = buildJob({
+      id: 'job-sibling',
+      parsedExif: undefined,
+      coords: undefined,
+      phase: 'resolving_location',
+      disambiguationGroupId: undefined,
+    });
+    jobState.addJobs([onTray, sibling]);
+
+    service.registerDisambiguationGroup({
+      batchId: 'batch-1',
+      queryKey: buildSourceConflictQueryKey('gk-thaliastrasse'),
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
+      jobIds: [onTray.id],
+      candidates: buildSourceConflictCandidates({
+        folderAddress: 'Thaliastraße 14, Wien',
+        photoAddress: 'Antonsplatz, Wien',
+        textCoords: text,
+        exifCoords: exif,
+      }),
+      disambiguationKind: 'source',
+    });
+    const group = service
+      .disambiguationGroups()
+      .find((g) => g.disambiguationKind === 'source' && isGroupBlocked(g))!;
+    service.applyCandidateToGroup(group.id, SOURCE_CONFLICT_EXIF_CANDIDATE_ID);
+
+    expect(jobState.findJob(onTray.id)!.coords).toEqual(exif);
+    expect(jobState.findJob(onTray.id)!.locationSourceUsed).toBe('exif');
+    const siblingAfter = jobState.findJob(sibling.id)!;
+    expect(siblingAfter.coords).toEqual(text);
+    expect(siblingAfter.locationSourceUsed).toBe('folder');
+  });
+
   it('applyCandidateToGroup source-text sets coords without titleAddressCoords', () => {
     const text = { lat: 48.198, lng: 16.335 };
     const exif = { lat: 48.21, lng: 16.37 };
