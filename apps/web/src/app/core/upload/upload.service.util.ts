@@ -78,7 +78,7 @@ export function validateUploadFile(file: File): FileValidation {
   if (!ALLOWED_MIME_TYPES.has(mimeType)) {
     return {
       valid: false,
-      error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, PDF, DOC, DOCX, ODT, ODG, XLS, XLSX, ODS, PPT, PPTX, ODP, TXT, or CSV.`,
+      error: `"${file.name}" has unsupported type "${mimeType || file.type || 'unknown'}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, PDF, DOC, DOCX, ODT, ODG, XLS, XLSX, ODS, PPT, PPTX, ODP, TXT, or CSV.`,
     };
   }
   return { valid: true };
@@ -122,6 +122,9 @@ export async function parseUploadExif(file: File): Promise<ParsedExif> {
   }
 }
 
+/** Thrown when heic2any cannot produce JPEG bytes — upload must not proceed with raw HEIC. */
+export const HEIC_CONVERSION_FAILED = 'HEIC_CONVERSION_FAILED';
+
 export function isHeicUploadFile(file: File): boolean {
   const type = resolveUploadMimeType(file);
   return type === 'image/heic' || type === 'image/heif';
@@ -146,8 +149,8 @@ export async function convertHeicToJpegUploadFile(file: File): Promise<File> {
 
     return new File([convertedBlob], newName, { type: 'image/jpeg' });
   } catch (err) {
-    console.warn('HEIC to JPEG conversion failed, returning original file', err);
-    return file;
+    console.warn('HEIC to JPEG conversion failed', err);
+    throw new Error(HEIC_CONVERSION_FAILED);
   }
 }
 

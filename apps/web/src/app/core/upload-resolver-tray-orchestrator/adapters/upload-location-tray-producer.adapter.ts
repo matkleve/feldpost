@@ -95,6 +95,9 @@ export class UploadLocationTrayProducerAdapter {
         return;
       }
 
+      // Tray Continue gate ensures jobs are awaiting_disambiguation before resolveActiveItem.
+      // selectAddressCandidate → applyCandidateToGroup for the whole disambiguation group.
+      // @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Tray Continue gate
       const jobId = event.item.jobIds[0];
       const candidate = group.candidates.find((c) => c.id === event.answer?.optionId);
       if (jobId && candidate) {

@@ -1,7 +1,11 @@
+@use '../../../../styles/frosted-chrome';
+
 // GPS locate control and placement-mode banner anchored to the map zone.
 // @see docs/migration/phase-8-global-scss-elimination.md (map-shell partial split)
 
-.map-gps-btn {
+// Map GPS trigger — quiet outline icon + interaction emphasis (tracking on = selected ink).
+// @see docs/design/state-visuals.md § Interaction emphasis
+:host button.map-gps-btn {
   --touch-target-base: 2.75rem; // ≈44px desktop
   --touch-target-mobile: 3rem; // ≈48px mobile
 
@@ -11,10 +15,10 @@
   z-index: 200;
   width: var(--touch-target-base);
   height: var(--touch-target-base);
-  border: none;
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  background: var(--card);
-  color: var(--foreground);
+  @include frosted-chrome.outline-control;
+  color: var(--muted-foreground);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -22,17 +26,24 @@
   box-shadow: var(--shadow-md);
   transition:
     background 120ms ease-out,
+    border-color 120ms ease-out,
     color 120ms ease-out,
     transform 120ms ease-out;
 
   .material-icons {
     font-size: var(--font-size-xl);
+    color: inherit;
   }
 
-  &:hover {
-    background: var(--popover);
-    color: var(--foreground);
+  &:hover,
+  &:focus-visible {
+    color: var(--primary);
+    @include frosted-chrome.outline-control-hover;
     transform: scale(1.04);
+
+    .material-icons {
+      color: var(--primary);
+    }
   }
 
   &__spinner {
@@ -44,7 +55,28 @@
     animation: gps-btn-spin 700ms linear infinite;
   }
 
-  &--active,
+  &--active {
+    color: var(--interaction-selected-ink);
+    background: color-mix(in srgb, var(--interaction-selected-ink) 12%, color-mix(in srgb, var(--card) 55%, transparent));
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
+    backdrop-filter: blur(12px) saturate(1.15);
+    -webkit-backdrop-filter: blur(12px) saturate(1.15);
+
+    .material-icons {
+      color: var(--interaction-selected-ink);
+    }
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    color: var(--primary);
+    @include frosted-chrome.outline-control-hover;
+
+    .material-icons {
+      color: var(--primary);
+    }
+  }
+
   &--locating {
     color: var(--primary);
   }

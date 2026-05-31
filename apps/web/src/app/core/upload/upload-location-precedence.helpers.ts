@@ -8,6 +8,8 @@ import {
   uploadTraceEnter,
   uploadTraceExit,
 } from './upload-address-resolution.debug';
+import { formatSearchObjectLabel } from '../location-path-parser/upload-search-object.builder';
+import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import type { ExifCoords } from './upload.types';
 import type { UploadLocationConfig } from './upload-location-config';
 import type {
@@ -125,6 +127,89 @@ export function clearDisambiguationJobFields(): Pick<
 
 export function buildSourceConflictQueryKey(groupingKey: string): string {
   return `source|${groupingKey}`;
+}
+
+/**
+ * Option 1 label for source-conflict tray (parsed SO beats street-only titleAddress).
+ * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md — Folder path vs folder address
+ */
+export function resolveFolderSourceOptionLabel(input: {
+  job: UploadJob;
+  groupState?: UploadGroupResolutionState;
+  reverseGeocodeLabel?: string;
+}): string {
+  if (input.groupState?.searchObject) {
+    return formatSearchObjectLabel(input.groupState.searchObject);
+  }
+  const title = input.job.titleAddress?.trim();
+  if (title) {
+    return title;
+  }
+  return input.reverseGeocodeLabel?.trim() ?? '';
+}
+
+/**
+ * Outcome of applying one source-conflict candidate to a single job.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record
+ */
+export type SourceConflictApplyResult =
+  | {
+      kind: 'placement';
+      patch: ApplyChosenPlacementPatch & ReturnType<typeof clearDisambiguationJobFields>;
+    }
+  | { kind: 'defer' }
+  | { kind: 'skipped_no_exif' };
+
+/**
+ * Single writer for source-text | source-exif | source-both | source-none on one job.
+ * @param candidate — group candidate for text pin fallback when titleAddressCoords missing
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record
+ */
+export function applySourceConflictChoiceToJob(
+  job: UploadJob,
+  candidateId: string,
+  candidate?: Pick<UploadAddressCandidate, 'lat' | 'lng'>,
+): SourceConflictApplyResult {
+  if (candidateId === SOURCE_CONFLICT_NONE_CANDIDATE_ID) {
+    return { kind: 'defer' };
+  }
+
+  const cleared = clearDisambiguationJobFields();
+
+  if (
+    candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID ||
+    candidateId === SOURCE_CONFLICT_BOTH_CANDIDATE_ID
+  ) {
+    const exifCoords = getExifMetadataCoords(job);
+    if (!exifCoords) {
+      return { kind: 'skipped_no_exif' };
+    }
+    return {
+      kind: 'placement',
+      patch: {
+        ...buildChosenPlacementPatch(job, 'exif', exifCoords),
+        ...cleared,
+      },
+    };
+  }
+
+  if (candidateId === SOURCE_CONFLICT_TEXT_CANDIDATE_ID) {
+    const textCoords =
+      job.titleAddressCoords ??
+      (candidate != null ? { lat: candidate.lat, lng: candidate.lng } : undefined);
+    if (!textCoords) {
+      return { kind: 'skipped_no_exif' };
+    }
+    return {
+      kind: 'placement',
+      patch: {
+        ...buildChosenPlacementPatch(job, 'text', textCoords),
+        ...cleared,
+      },
+    };
+  }
+
+  return { kind: 'skipped_no_exif' };
 }
 
 export function buildSourceConflictCandidates(input: {

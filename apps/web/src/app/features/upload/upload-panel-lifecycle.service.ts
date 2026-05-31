@@ -1,4 +1,5 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   UploadManagerService,
   type ImageUploadedEvent as ManagerImageUploadedEvent,
@@ -28,7 +29,6 @@ export class UploadPanelLifecycleService {
   readonly issueAttentionPulse = this._issueAttentionPulse.asReadonly();
 
   private issueAttentionTimer: ReturnType<typeof setTimeout> | null = null;
-  private subscriptionsInitialized = false;
 
   // ── Public API callback for component to emit events ─────────────────────
 
@@ -58,35 +58,38 @@ export class UploadPanelLifecycleService {
 
   // ── Initialize subscriptions ───────────────────────────────────────────────
 
-  initializeSubscriptions(): void {
-    if (this.subscriptionsInitialized) {
-      return;
-    }
-    this.subscriptionsInitialized = true;
+  /**
+   * Scoped to the hosting panel — torn down when the panel is destroyed (avoids NG0953 on outputs).
+   * @see docs/specs/ui/upload/upload-panel-system.md
+   */
+  initializeSubscriptions(destroyRef: DestroyRef): void {
+    this.uploadManager.imageUploaded$
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe((event: ManagerImageUploadedEvent) => {
+        if (event.coords && this.imageUploadedCallback) {
+          this.imageUploadedCallback({
+            id: event.mediaId,
+            lat: event.coords.lat,
+            lng: event.coords.lng,
+            direction: event.direction,
+            thumbnailUrl: event.thumbnailUrl,
+          });
+        }
+      });
 
-    this.uploadManager.imageUploaded$.subscribe((event: ManagerImageUploadedEvent) => {
-      if (event.coords && this.imageUploadedCallback) {
-        this.imageUploadedCallback({
-          id: event.mediaId,
-          lat: event.coords.lat,
-          lng: event.coords.lng,
-          direction: event.direction,
-          thumbnailUrl: event.thumbnailUrl,
-        });
-      }
-    });
-
-    this.uploadManager.jobPhaseChanged$.subscribe((event) => {
-      // Stable state: pulse only when a job newly enters issue-class phases (not on every phase tick).
-      // @see docs/specs/ui/upload/upload-panel-system.md — State / Panel UI transition choreography
-      const becameIssue =
-        (event.currentPhase === 'error' || event.currentPhase === 'missing_data') &&
-        event.previousPhase !== 'error' &&
-        event.previousPhase !== 'missing_data';
-      if (becameIssue) {
-        this.triggerIssueAttentionPulse();
-      }
-    });
+    this.uploadManager.jobPhaseChanged$
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe((event) => {
+        // Stable state: pulse only when a job newly enters issue-class phases (not on every phase tick).
+        // @see docs/specs/ui/upload/upload-panel-system.md — State / Panel UI transition choreography
+        const becameIssue =
+          (event.currentPhase === 'error' || event.currentPhase === 'missing_data') &&
+          event.previousPhase !== 'error' &&
+          event.previousPhase !== 'missing_data';
+        if (becameIssue) {
+          this.triggerIssueAttentionPulse();
+        }
+      });
   }
 
   // ── Private ────────────────────────────────────────────────────────────────

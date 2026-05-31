@@ -23,11 +23,13 @@ import { UploadLocationConfigService } from './upload-location-config.service';
 import { UploadProjectLocationsAdapter } from './adapters/upload-project-locations.adapter';
 import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import {
+  applySourceConflictChoiceToJob,
   buildChosenPlacementPatch,
   buildGeocodeCandidatePatch,
   buildSourceConflictCandidates,
   buildSourceConflictQueryKey,
   clearDisambiguationJobFields,
+  resolveFolderSourceOptionLabel,
   getExifMetadataCoords,
   haversineMeters,
   resolvePlacementAfterTextGeocode,
@@ -115,8 +117,11 @@ export class UploadLocationResolutionService {
 
   private readonly geocodeInFlight = new Map<string, Promise<UploadGroupResolutionState>>();
 
-  /** Resolved `source|{groupingKey}` per batch — no re-register after user answers. */
-  private readonly resolvedSourceQueryKeys = new Map<string, Set<string>>();
+  /**
+   * Stored tray choice per `queryKey` (`source|{groupingKey}`) for late-job replay.
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record
+   */
+  private readonly resolvedSourceChoices = new Map<string, Map<string, string>>();
 
   private readonly sourceConflictInflight = new Map<string, Promise<void>>();
 
@@ -174,7 +179,7 @@ export class UploadLocationResolutionService {
     this._groups.update((prev) => prev.filter((g) => g.batchId !== batchId));
     this.orchestrator.clearBatch(batchId);
     this.batchProjectTrayRegistered.delete(batchId);
-    this.resolvedSourceQueryKeys.delete(batchId);
+    this.resolvedSourceChoices.delete(batchId);
     for (const key of [...this.sourceConflictInflight.keys()]) {
       if (key.startsWith(`${batchId}|`)) {
         this.sourceConflictInflight.delete(key);
@@ -183,21 +188,37 @@ export class UploadLocationResolutionService {
     this.syncBatchDisambiguationAggregates(batchId);
   }
 
+  /**
+   * Whether the user already answered source-conflict for this folder grouping.
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3
+   */
   isSourceConflictResolved(batchId: string, groupingKey: string | undefined | null): boolean {
-    if (!groupingKey?.trim()) {
-      return false;
-    }
-    const queryKey = buildSourceConflictQueryKey(groupingKey);
-    return this.resolvedSourceQueryKeys.get(batchId)?.has(queryKey) ?? false;
+    return this.getSourceConflictChoice(batchId, groupingKey) !== undefined;
   }
 
-  private markSourceConflictResolved(batchId: string, queryKey: string): void {
-    let set = this.resolvedSourceQueryKeys.get(batchId);
-    if (!set) {
-      set = new Set();
-      this.resolvedSourceQueryKeys.set(batchId, set);
+  /** Stored `selectedCandidateId` for replay when a late job hits Phase 3. */
+  getSourceConflictChoice(
+    batchId: string,
+    groupingKey: string | undefined | null,
+  ): string | undefined {
+    if (!groupingKey?.trim()) {
+      return undefined;
     }
-    set.add(queryKey);
+    const queryKey = buildSourceConflictQueryKey(groupingKey);
+    return this.resolvedSourceChoices.get(batchId)?.get(queryKey);
+  }
+
+  private markSourceConflictResolved(
+    batchId: string,
+    queryKey: string,
+    candidateId: string,
+  ): void {
+    let byQuery = this.resolvedSourceChoices.get(batchId);
+    if (!byQuery) {
+      byQuery = new Map();
+      this.resolvedSourceChoices.set(batchId, byQuery);
+    }
+    byQuery.set(queryKey, candidateId);
   }
 
   private sourceConflictInflightKey(batchId: string, queryKey: string): string {
@@ -522,15 +543,13 @@ export class UploadLocationResolutionService {
           exifMetadata: exifCoords,
         });
         if (groupingKey && this.isSourceConflictResolved(job.batchId, groupingKey)) {
-          uploadTrayGate('skip source tray — user already resolved this groupingKey', {
+          const choice = this.getSourceConflictChoice(job.batchId, groupingKey)!;
+          uploadTrayGate('replay stored source-conflict choice', {
             jobId,
             groupingKey,
+            replayedChoice: choice,
           });
-          const textCoords = job.titleAddressCoords!;
-          this.jobState.updateJob(
-            jobId,
-            buildChosenPlacementPatch(job, 'text', textCoords),
-          );
+          this.applySourceConflictChoiceToJobId(jobId, choice);
           return false;
         }
         const textCoords = job.titleAddressCoords;
@@ -628,27 +647,29 @@ export class UploadLocationResolutionService {
         return;
       }
 
-      const folderName = job.titleAddress?.trim() ?? '';
       const [folderRev, photoRev] = await Promise.all([
         this.geocoding.reverse(textCoords.lat, textCoords.lng),
         this.geocoding.reverse(exifCoords.lat, exifCoords.lng),
       ]);
       const reverseLabel = folderRev?.addressLabel?.trim() ?? '';
+      const groupState = groupingKey
+        ? this.orchestrator.getGroupState(job.batchId, groupingKey)
+        : undefined;
       const folderAddress =
-        folderName ||
-        reverseLabel ||
+        resolveFolderSourceOptionLabel({ job, groupState, reverseGeocodeLabel: reverseLabel }) ||
         `${textCoords.lat.toFixed(4)}, ${textCoords.lng.toFixed(4)}`;
       uploadAddressDebug('ulr', 'source conflict folder option label', {
         batchId: job.batchId,
         groupingKey,
         folderDisplayPath,
-        parsedFolderTitle: folderName,
+        parsedFolderTitle: job.titleAddress,
         reverseGeocodeOfTextPin: reverseLabel,
         chosenFolderOptionLabel: folderAddress,
         textCoords,
-        labelSource:
-          folderName && folderName !== reverseLabel
-            ? 'parsed_title_preferred_over_reverse'
+        labelSource: groupState?.searchObject
+          ? 'search_object_label'
+          : job.titleAddress?.trim()
+            ? 'title_address'
             : reverseLabel
               ? 'reverse_geocode'
               : 'coords_fallback',
@@ -1292,6 +1313,35 @@ export class UploadLocationResolutionService {
     }
   }
 
+  /**
+   * Applies a stored or fresh source-conflict choice to one job (placement, Issues, or queue).
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record
+   */
+  private applySourceConflictChoiceToJobId(
+    jobId: string,
+    candidateId: string,
+    candidate?: UploadAddressCandidate,
+  ): void {
+    const job = this.jobState.findJob(jobId);
+    if (!job) {
+      return;
+    }
+    const result = applySourceConflictChoiceToJob(job, candidateId, candidate);
+    if (result.kind === 'placement') {
+      this.jobState.updateJob(jobId, result.patch);
+      this.jobState.setPhase(jobId, 'queued');
+      return;
+    }
+    if (result.kind === 'skipped_no_exif' || result.kind === 'defer') {
+      this.jobState.updateJob(jobId, {
+        ...clearDisambiguationJobFields(),
+        resolutionStatus: 'failed',
+        issueKind: 'missing_gps',
+      });
+      this.jobState.setPhase(jobId, 'missing_data');
+    }
+  }
+
   applyCandidateToGroup(groupId: string, candidateId: string): void {
     const group = this._groups().find((g) => g.id === groupId);
     if (!group) {
@@ -1309,6 +1359,7 @@ export class UploadLocationResolutionService {
       group.disambiguationKind === 'source' &&
       candidateId === SOURCE_CONFLICT_NONE_CANDIDATE_ID
     ) {
+      this.markSourceConflictResolved(group.batchId, group.queryKey, candidateId);
       this.deferGroup(groupId);
       return;
     }
@@ -1322,7 +1373,7 @@ export class UploadLocationResolutionService {
     this.patchGroup(resolvedGroup);
 
     if (group.disambiguationKind === 'source') {
-      this.markSourceConflictResolved(group.batchId, group.queryKey);
+      this.markSourceConflictResolved(group.batchId, group.queryKey, candidateId);
     }
 
     for (const jobId of group.jobIds) {
@@ -1331,28 +1382,7 @@ export class UploadLocationResolutionService {
         continue;
       }
       if (group.disambiguationKind === 'source') {
-        const cleared = clearDisambiguationJobFields();
-        if (
-          candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID ||
-          candidateId === SOURCE_CONFLICT_BOTH_CANDIDATE_ID
-        ) {
-          const exifCoords = getExifMetadataCoords(job);
-          if (exifCoords) {
-            this.jobState.updateJob(jobId, {
-              ...buildChosenPlacementPatch(job, 'exif', exifCoords),
-              ...cleared,
-            });
-          }
-        } else if (candidateId === SOURCE_CONFLICT_TEXT_CANDIDATE_ID) {
-          const textCoords = job.titleAddressCoords ?? {
-            lat: candidate.lat,
-            lng: candidate.lng,
-          };
-          this.jobState.updateJob(jobId, {
-            ...buildChosenPlacementPatch(job, 'text', textCoords),
-            ...cleared,
-          });
-        }
+        this.applySourceConflictChoiceToJobId(jobId, candidateId, candidate);
       } else {
         this.applyGeocodeCandidateToJob(jobId, job, candidate, group.folderDisplayPath);
         const j = this.jobState.findJob(jobId)!;
@@ -1363,8 +1393,8 @@ export class UploadLocationResolutionService {
           }),
           ...clearDisambiguationJobFields(),
         });
+        this.jobState.setPhase(jobId, 'queued');
       }
-      this.jobState.setPhase(jobId, 'queued');
     }
 
     this._disambiguationResolved$.next({

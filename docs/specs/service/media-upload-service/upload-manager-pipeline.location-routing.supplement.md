@@ -32,11 +32,37 @@ Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is ra
 
 | Phase | Step | Notes |
 | --- | --- | --- |
-| 0 | `prepareExifAndFile` | Sets `parsedExif` only; **does not** set `job.coords` |
+| 0 | `prepareExifAndFile` | Sets `parsedExif` only; **does not** set `job.coords`. HEIC/HEIF: If `convertHeicToJpegUploadFile` fails, the job MUST transition to a terminal error phase with a user-visible message. Upload MUST NOT send the original `.heic` blob or `application/octet-stream` to Storage. |
 | 1 | `mergeTitleCandidateOnJob` | High-confidence file/folder text → `titleAddress` |
 | 2 | Text geocode (SO or legacy) | Runs when high-confidence text exists **even if** EXIF metadata present |
 | 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray. **Idempotent:** at most one open group per `(batchId, queryKey)` where `queryKey = source\|{groupingKey}`; after user resolves, no re-register; concurrent `finalizePlacement` singleflight shares one reverse-geocode. Candidate IDs: `source-text`, `source-exif`, `source-both`, `source-none`. |
 | 4 | `applyChosenPlacementSource` | EXIF-only when geocode failed and no text coords (Branch B) |
+
+### Phase 3 — source-conflict resolution record
+
+When the user resolves `disambiguationKind: 'source'`, the app MUST persist the chosen tray option id per `(batchId, queryKey)` where `queryKey = source|{groupingKey}`.
+
+| `selectedCandidateId` | Effect on each job in `groupingKey` (including jobs that enter Phase 3 later) |
+| --- | --- |
+| `source-text` | `buildChosenPlacementPatch(job, 'text', job.titleAddressCoords ?? candidate pin)` |
+| `source-exif` | `buildChosenPlacementPatch(job, 'exif', parsedExif.coords)` when EXIF present; else job stays without placement until Issues |
+| `source-both` | Same as `source-exif` for placement; product “both” semantics unchanged from code |
+| `source-none` | `deferGroup` semantics: `phase: missing_data`, `issueKind: missing_gps`, no `job.coords` |
+
+**Forbidden:** After resolve, late jobs MUST NOT default to text placement via a “skip tray” shortcut.
+
+**Replay hook:** `finalizePlacementForJob` when `held_source_conflict` and `getSourceConflictChoice(batchId, groupingKey)` is set → apply the same row as above, then continue Phase 4–6 without re-opening the tray.
+
+### Tray Continue gate (orchestrator path)
+
+While `UploadResolverTrayOrchestratorService.hasActivePresentation()` is true, the primary footer control MUST be disabled until **every** `jobId` on `activeItem` satisfies:
+
+1. `job.phase === 'awaiting_disambiguation'`, and
+2. `UploadService.isHeic(job.file) === false` (JPEG replacement applied in Phase 0).
+
+Exception: `answerKind: 'text'` city step (no file prepare dependency on option list).
+
+UI MAY show `upload.resolver.waitingPrepare` while disabled.
 | 5 | Geocode far-hit filter | Org `contextDistanceMaxMeters` (Settings → **Max distance for internet results (km)**) — drop Photon hits farther than cap from **job anchor** (EXIF → project) before trays; same key as search bar |
 | 6 | `routePreparedNewJob` / upload | `finalCoords` from `job.coords`; `exif_*` from `parsedExif.coords` |
 

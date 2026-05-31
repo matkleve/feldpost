@@ -7,6 +7,8 @@ import { UploadBatchService } from './upload-batch.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import {
+  SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
+  SOURCE_CONFLICT_NONE_CANDIDATE_ID,
   SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
   buildSourceConflictCandidates,
   buildSourceConflictQueryKey,
@@ -192,5 +194,128 @@ describe('UploadLocationResolutionService — source conflict', () => {
       .filter((g) => g.disambiguationKind === 'source' && isGroupBlocked(g)).length;
     expect(blockedAfter).toBe(blockedBefore);
     expect(blockedAfter).toBe(0);
+  });
+
+  /** @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record */
+  it('late job replays EXIF choice', () => {
+    const text = { lat: 48.198, lng: 16.335 };
+    const exif = { lat: 48.21, lng: 16.37 };
+    const jobFirst = buildJob({ id: 'job-first' });
+    jobState.addJobs([jobFirst]);
+
+    const queryKey = buildSourceConflictQueryKey('gk-thaliastrasse');
+    service.registerDisambiguationGroup({
+      batchId: 'batch-1',
+      queryKey,
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
+      jobIds: [jobFirst.id],
+      candidates: buildSourceConflictCandidates({
+        folderAddress: 'Thaliastraße 14, Wien',
+        photoAddress: 'Antonsplatz, Wien',
+        textCoords: text,
+        exifCoords: exif,
+      }),
+      disambiguationKind: 'source',
+    });
+    const group = service
+      .disambiguationGroups()
+      .find((g) => g.disambiguationKind === 'source' && isGroupBlocked(g))!;
+    service.applyCandidateToGroup(group.id, SOURCE_CONFLICT_EXIF_CANDIDATE_ID);
+
+    const jobLate = buildJob({
+      id: 'job-late',
+      phase: 'resolving_location',
+      coords: undefined,
+      disambiguationGroupId: undefined,
+    });
+    jobState.addJobs([jobLate]);
+
+    const held = service.finalizePlacementForJob(jobLate.id);
+    expect(held).toBe(false);
+    const updated = jobState.findJob(jobLate.id)!;
+    expect(updated.locationSourceUsed).toBe('exif');
+    expect(updated.coords).toEqual(exif);
+  });
+
+  /** @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record */
+  it('late job replays text choice', () => {
+    const text = { lat: 48.198, lng: 16.335 };
+    const exif = { lat: 48.21, lng: 16.37 };
+    const jobFirst = buildJob({ id: 'job-first' });
+    jobState.addJobs([jobFirst]);
+
+    const queryKey = buildSourceConflictQueryKey('gk-thaliastrasse');
+    service.registerDisambiguationGroup({
+      batchId: 'batch-1',
+      queryKey,
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
+      jobIds: [jobFirst.id],
+      candidates: buildSourceConflictCandidates({
+        folderAddress: 'Thaliastraße 14, Wien',
+        photoAddress: 'Antonsplatz, Wien',
+        textCoords: text,
+        exifCoords: exif,
+      }),
+      disambiguationKind: 'source',
+    });
+    const group = service
+      .disambiguationGroups()
+      .find((g) => g.disambiguationKind === 'source' && isGroupBlocked(g))!;
+    service.applyCandidateToGroup(group.id, SOURCE_CONFLICT_TEXT_CANDIDATE_ID);
+
+    const jobLate = buildJob({
+      id: 'job-late',
+      phase: 'resolving_location',
+      coords: undefined,
+    });
+    jobState.addJobs([jobLate]);
+
+    service.finalizePlacementForJob(jobLate.id);
+    const updated = jobState.findJob(jobLate.id)!;
+    expect(updated.coords).toEqual(text);
+    expect(updated.locationSourceUsed).toBe('folder');
+  });
+
+  /** @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record */
+  it('late job replays set-later choice', () => {
+    const text = { lat: 48.198, lng: 16.335 };
+    const exif = { lat: 48.21, lng: 16.37 };
+    const jobFirst = buildJob({ id: 'job-first' });
+    jobState.addJobs([jobFirst]);
+
+    const queryKey = buildSourceConflictQueryKey('gk-thaliastrasse');
+    service.registerDisambiguationGroup({
+      batchId: 'batch-1',
+      queryKey,
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
+      jobIds: [jobFirst.id],
+      candidates: buildSourceConflictCandidates({
+        folderAddress: 'Thaliastraße 14, Wien',
+        photoAddress: 'Antonsplatz, Wien',
+        textCoords: text,
+        exifCoords: exif,
+      }),
+      disambiguationKind: 'source',
+    });
+    const group = service
+      .disambiguationGroups()
+      .find((g) => g.disambiguationKind === 'source' && isGroupBlocked(g))!;
+    service.applyCandidateToGroup(group.id, SOURCE_CONFLICT_NONE_CANDIDATE_ID);
+
+    const jobLate = buildJob({
+      id: 'job-late',
+      phase: 'resolving_location',
+      coords: undefined,
+    });
+    jobState.addJobs([jobLate]);
+
+    service.finalizePlacementForJob(jobLate.id);
+    const updated = jobState.findJob(jobLate.id)!;
+    expect(updated.phase).toBe('missing_data');
+    expect(updated.coords).toBeUndefined();
+    expect(updated.issueKind).toBe('missing_gps');
   });
 });

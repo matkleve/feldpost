@@ -11,6 +11,7 @@
 import {
   Component,
   computed,
+  DestroyRef,
   effect,
   HostListener,
   inject,
@@ -144,6 +145,7 @@ export class UploadPanelComponent implements OnDestroy {
   private readonly bulkActions = inject(UploadPanelBulkActionsService);
   private readonly viewModel = inject(UploadPanelViewModelService);
   private readonly setup = inject(UploadPanelSetupService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly rowInteractions = inject(UploadPanelRowInteractionsService);
   readonly actionHandlers = this.jobActions;
   readonly inputHandlers = this.inputs;
@@ -246,6 +248,7 @@ export class UploadPanelComponent implements OnDestroy {
     });
 
     this.setup.initialize({
+      destroyRef: this.destroyRef,
       imageUploaded: (event) => this.imageUploaded.emit(event),
       placementRequested: (jobId) => this.placementRequested.emit(jobId),
       detailRequested: (mediaId) => this.detailRequested.emit(mediaId),

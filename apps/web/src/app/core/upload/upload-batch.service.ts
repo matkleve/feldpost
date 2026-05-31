@@ -19,7 +19,8 @@
  *  - activeBatch: Signal<UploadBatch | null> — current batch or null if none
  */
 
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { UploadResolverTrayOrchestratorService } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { Subject } from 'rxjs';
 import type { Signal } from '@angular/core';
 import type { Observable } from 'rxjs';
@@ -55,6 +56,7 @@ const ACTIVE_PHASES: ReadonlySet<UploadPhase> = new Set([
 
 @Injectable({ providedIn: 'root' })
 export class UploadBatchService {
+  private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly _batches = signal<UploadBatch[]>([]);
 
   readonly batches: Signal<ReadonlyArray<UploadBatch>> = this._batches.asReadonly();
@@ -124,6 +126,14 @@ export class UploadBatchService {
     });
   }
 
+  /**
+   * Clears orchestrator scanIdle for a terminal batch.
+   * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+   */
+  releaseTrayOrchestratorForBatch(batchId: string): void {
+    this.trayOrchestrator.clearScanIdle(batchId);
+  }
+
   /** Check whether all jobs in a batch have reached a terminal state. */
   checkBatchComplete(batchId: string, jobs: ReadonlyArray<UploadJob>): void {
     const batch = this._batches().find((b) => b.id === batchId);
@@ -151,6 +161,10 @@ export class UploadBatchService {
       failedFiles: failed,
       overallProgress: 100,
     });
+
+    // Release scanIdle so the next batch does not inherit stale orchestrator idle state.
+    // @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+    this.releaseTrayOrchestratorForBatch(batchId);
 
     this._batchComplete$.next({
       batchId,

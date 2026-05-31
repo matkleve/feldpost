@@ -24152,6 +24152,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.waitingPrepare', 'Tray Continue disabled until all jobs pass Phase 0 gate', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Tray Continue disabled until all jobs pass Phase 0 gate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.waitingPrepare'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Still preparing files…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.waitingPrepare'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Dateien werden noch vorbereitet…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.waitingPrepare'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.resolver.next', 'Footer when more questions remain', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:continueLabel')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

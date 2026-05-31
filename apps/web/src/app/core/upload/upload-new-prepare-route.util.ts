@@ -125,8 +125,10 @@ export async function prepareNewJobForUpload(
     return null;
   }
 
-  const prepared = await prepareExifAndFile(deps, jobId, job);
-  job = prepared.job;
+  const prepared = await prepareExifAndFile(deps, jobId, job, ctx);
+  if (!prepared) {
+    return null;
+  }
 
   return { job: deps.jobState.findJob(jobId)!, parsedExif: prepared.parsedExif };
 }
@@ -223,7 +225,8 @@ async function prepareExifAndFile(
   deps: NewPrepareRouteDeps,
   jobId: string,
   job: UploadJob,
-): Promise<{ job: UploadJob; parsedExif: ParsedExif }> {
+  ctx: PipelineContext,
+): Promise<{ job: UploadJob; parsedExif: ParsedExif } | null> {
   const isHeic = deps.uploadService.isHeic(job.file);
 
   // Fire both immediately — EXIF parse and HEIC→JPEG conversion are independent of each other.
@@ -247,8 +250,19 @@ async function prepareExifAndFile(
 
   if (isHeic) {
     const conversion = (async (): Promise<void> => {
-      const convertedFile = await convertPromise!;
-      applyConvertedFileToJob(deps, jobId, convertedFile);
+      try {
+        const convertedFile = await convertPromise!;
+        applyConvertedFileToJob(deps, jobId, convertedFile);
+      } catch (err) {
+        const message =
+          err instanceof Error && err.message === 'HEIC_CONVERSION_FAILED'
+            ? `Could not convert "${job.file.name}" to JPEG. Try exporting as JPEG and upload again.`
+            : err instanceof Error
+              ? err.message
+              : 'HEIC conversion failed.';
+        ctx.failJob(jobId, 'converting_format', message);
+        throw err;
+      }
     })();
     heicConversionByJobId.set(
       jobId,
@@ -257,6 +271,9 @@ async function prepareExifAndFile(
       }),
     );
     job = deps.jobState.findJob(jobId)!;
+    if (job.phase === 'error') {
+      return null;
+    }
     return { job, parsedExif };
   }
 

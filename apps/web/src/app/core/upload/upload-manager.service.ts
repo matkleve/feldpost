@@ -366,6 +366,7 @@ export class UploadManagerService {
   /** Cancel all non-terminal jobs in a batch. */
   cancelBatch(batchId: string): void {
     cancelUploadManagerBatch(batchId, this.actionDeps, (jobId) => this.cancelJob(jobId));
+    this.batchService.releaseTrayOrchestratorForBatch(batchId);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Injectable, inject, type WritableSignal } from '@angular/core';
+import { DestroyRef, Injectable, inject, type WritableSignal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';
 import { UploadPanelLifecycleService } from './upload-panel-lifecycle.service';
@@ -19,6 +19,7 @@ import type {
 } from './upload-panel.types';
 
 export interface UploadPanelSetupOptions {
+  destroyRef: DestroyRef;
   imageUploaded: (event: ImageUploadedEvent) => void;
   placementRequested: (jobId: string) => void;
   detailRequested: UploadPanelRowInteractionsRegisterOptions['detailRequested'];
@@ -57,7 +58,7 @@ export class UploadPanelSetupService {
   initialize(options: UploadPanelSetupOptions): void {
     this.lifecycle.setImageUploadedCallback((event) => options.imageUploaded(event));
     this.lifecycle.setPlacementRequestedCallback((jobId) => options.placementRequested(jobId));
-    this.lifecycle.initializeSubscriptions();
+    this.lifecycle.initializeSubscriptions(options.destroyRef);
 
     this.rowInteractions.register({
       placementRequested: options.placementRequested,

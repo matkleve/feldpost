@@ -22,6 +22,11 @@ import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
+import { UploadService } from '../../core/upload/upload.service';
+import {
+  areAllJobsReadyForTrayResolution,
+  isJobReadyForTrayResolution,
+} from '../../core/upload/upload-tray-resolution-gate.helpers';
 import {
   countDialogueUnits,
   formatBundleCarouselIndicator,
@@ -67,6 +72,7 @@ export class UploadResolverTrayComponent implements OnInit {
   private readonly i18n = inject(I18nService);
   private readonly orchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly uploadService = inject(UploadService);
   private readonly resolution = inject(UploadLocationResolutionService);
   private readonly panelSignals = inject(UploadPanelSignalsService);
 
@@ -196,6 +202,25 @@ export class UploadResolverTrayComponent implements OnInit {
     });
   });
 
+  /**
+   * Stable state: footer disabled while any affected job is still in Phase 0 (HEIC convert) or not yet awaiting tray.
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Tray Continue gate
+   */
+  readonly jobsAwaitingPrepare = computed(() => {
+    const item = this.activeItem();
+    if (!item?.jobIds.length || this.showTextAnswer()) {
+      return [] as string[];
+    }
+    const isHeic = (file: File) => this.uploadService.isHeic(file);
+    const findJob = (id: string) => this.uploadManager.jobs().find((entry) => entry.id === id);
+    return item.jobIds.filter((jobId) => {
+      const job = findJob(jobId);
+      return job == null || !isJobReadyForTrayResolution(job, isHeic);
+    });
+  });
+
+  readonly waitingPrepareHint = computed(() => this.jobsAwaitingPrepare().length > 0);
+
   readonly canConfirmContinue = computed(() => {
     if (this.isItemBlocked()) {
       return false;
@@ -203,7 +228,18 @@ export class UploadResolverTrayComponent implements OnInit {
     if (this.showTextAnswer()) {
       return this.cityDraft().trim().length > 0;
     }
-    return !!this._selectedOptionId();
+    if (!this._selectedOptionId()) {
+      return false;
+    }
+    const item = this.activeItem();
+    if (!item?.jobIds.length || !this.useOrchestrator) {
+      return true;
+    }
+    return areAllJobsReadyForTrayResolution(
+      item.jobIds,
+      (id) => this.uploadManager.jobs().find((entry) => entry.id === id),
+      (file) => this.uploadService.isHeic(file),
+    );
   });
 
   readonly continueLabel = computed(() => {
@@ -219,6 +255,7 @@ export class UploadResolverTrayComponent implements OnInit {
     const unitIndex = unitIndexForItem(items, item.id) + 1;
     const hasMoreInBundle = unitIndex < unitTotal;
     const moreCarouselSteps = this.orchestrator.activeItemIndex() < items.length - 1;
+    // Next while more bundles queued; Save on last dialogue unit — @see upload-resolver-tray.question-copy.md § Footer
     if (hasMoreInBundle || moreCarouselSteps || this.orchestrator.pendingBundleCount() > 0) {
       return this.t('upload.resolver.next', 'Next');
     }
@@ -246,6 +283,9 @@ export class UploadResolverTrayComponent implements OnInit {
     if (this.useOrchestrator) {
       if (this.orchestrator.hasActivePresentation()) {
         return 'active';
+      }
+      if (this.orchestrator.hasPresentationBacklog() && !this.panelOpen()) {
+        return 'passive';
       }
       if (UPLOAD_DEV_FLAGS.mockResolverTray) {
         return 'hidden';

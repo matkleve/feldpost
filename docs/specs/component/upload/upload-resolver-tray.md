@@ -24,9 +24,9 @@
 
 | Mode | `data-state` | When |
 | --- | --- | --- |
-| passive | `passive` | Batch active, panel closed, no open disambiguation groups |
-| active | `active` | One or more groups with `resolutionGateOpen` |
-| hidden | (unmounted branch) | Idle |
+| `active` | `active` | `hasActivePresentation()` |
+| `passive` | `passive` | `!panelOpen && hasPresentationBacklog()` (inbox, collecting, or pending bundles) |
+| `hidden` | (unmounted branch) | `embeddedInPane` OR idle with no backlog |
 
 `passiveStatusLine` comes from `UploadPanelSignalsService` (G12), not the resolution service.
 
@@ -136,5 +136,8 @@ Pre-upload gate only. No tray for `phase === 'complete'` or post-upload correcti
 - [x] Continue applies candidate to whole group via `applyCandidateToGroup` and re-queues jobs
 - [ ] Last dialogue unit in bundle shows **Save** (not Next when alone)
 - [ ] Map preview on option hover (before Continue)
+- [ ] Continue disabled until all `activeItem.jobIds` pass tray prepare gate (location-routing supplement)
+- [ ] Late source-conflict jobs replay stored `selectedCandidateId`
+- [ ] Dock visible when `hasPresentationBacklog()` even if panel closed
 - [ ] HEIC conversion may appear in queue before first tray when workers start early (concurrency 3) — expected
 - [ ] `context_distance` (Prompt B) — not MVP; numbered list not used

@@ -44,6 +44,15 @@ For a given `batchId`, all of:
 2. `UploadAddressResolutionOrchestrator.classifyBatch(batchId)` has completed for the current scan wave.
 3. First **pre-resolve wave** for the batch finished (`UploadPreResolveWaveService` after each `runPreUploadLocationResolve`).
 
+### Early vs final `notifyScanIdle`
+
+| Call site | When | Effect |
+| --- | --- | --- |
+| `UploadPreResolveWaveService.notifyFirstTrayReady` | First `registerDisambiguationGroup` for `batchId` | Adds `batchId` to `scanIdleBatches`; may present first bundle while pre-resolve wave still running |
+| `UploadPreResolveWaveService.completeJob` (pending → 0) | Last job finished `runPreUploadLocationResolve` | Second `notifyScanIdle` — idempotent if batch already in set |
+
+`clearScanIdle(batchId)` MUST run when the upload batch reaches terminal status (`complete` or `cancelled`) so a future scan wave on a new batch does not inherit stale idle state.
+
 ### Tray enqueue contract
 
 `enqueueItem` only after `classifySearchHits` in `runGeocodeForGroup`. `classifyBatch` / `evaluateLocalResolution` never enqueue tray items.

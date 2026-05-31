@@ -25,6 +25,8 @@ Tray visibility is independent of panel open/closed (OD-6). Only the button colu
 
 Embedded workspace upload tab still hosts `app-upload-panel` inside the workspace pane only (no second shell).
 
+**Map placement bridge:** `UploadShellUiService.bindUploadPanel` targets the shell-mounted `app-upload-panel` only. Map placement from the workspace upload tab is out of scope until a second bind is added in layout.
+
 ## Acceptance criteria
 
 - [x] Layout mounts `app-upload-shell` for all authenticated routes (`authenticated-app-layout`)

@@ -26,18 +26,24 @@ export class UploadShellUiService {
   readonly uploadResolverPending = computed(
     () => this.uploadBatch()?.pendingDisambiguationCount ?? 0,
   );
+  /**
+   * Dock stays visible while the orchestrator still has inbox/collecting/pending bundles.
+   * @see docs/specs/component/upload/upload-resolver-tray.md — Visual modes
+   */
   readonly showUploadDock = computed(
     () =>
       UPLOAD_DEV_FLAGS.dockAlwaysVisible ||
       this.uploadPanelOpen() ||
       this.uploadResolverPending() > 0 ||
-      this.trayOrchestrator.hasActivePresentation(),
+      this.trayOrchestrator.hasActivePresentation() ||
+      this.trayOrchestrator.hasPresentationBacklog(),
   );
   readonly uploadResolverTrayActive = computed(
     () =>
       UPLOAD_DEV_FLAGS.dockAlwaysVisible ||
       this.uploadResolverPending() > 0 ||
-      this.trayOrchestrator.hasActivePresentation(),
+      this.trayOrchestrator.hasActivePresentation() ||
+      this.trayOrchestrator.hasPresentationBacklog(),
   );
   readonly uploadHasIssues = computed(() =>
     this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'issues'),

@@ -4,6 +4,7 @@ import {
   buildSourceConflictCandidates,
   formatSourceConflictDistance,
   haversineMeters,
+  resolveFolderSourceOptionLabel,
   resolvePlacementAfterTextGeocode,
   resolvePlacementWithoutText,
   shouldHoldForSourceConflict,
@@ -84,5 +85,32 @@ describe('upload-location-precedence.helpers', () => {
       resolvePlacementWithoutText(job({ parsedExif: { coords: { lat: 1, lng: 2 } } })),
     ).toBe('exif');
     expect(resolvePlacementWithoutText(job())).toBe('missing_data');
+  });
+
+  /** @see docs/specs/component/upload/upload-resolver-tray.question-copy.md */
+  it('resolveFolderSourceOptionLabel prefers Search Object street + house number', () => {
+    const label = resolveFolderSourceOptionLabel({
+      job: job({ titleAddress: 'Thaliastraße' }),
+      groupState: {
+        searchObject: {
+          street: 'Thaliastraße',
+          houseNumber: '14',
+          city: 'Wien',
+          postcode: null,
+          country: null,
+          state: null,
+          municipality: null,
+          staircase: null,
+          door: null,
+          relativePath: 'Thaliastraße 14',
+          fileName: 'photo.jpg',
+          sources: [],
+          deviations: [],
+          uncertainFields: [],
+        },
+      } as never,
+    });
+    expect(label).toContain('14');
+    expect(label).toContain('Thaliastraße');
   });
 });

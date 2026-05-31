@@ -384,6 +384,16 @@
     }
   }
 
+  // Phase 0 gate hint — muted status while HEIC/prepare finishes
+  // @see upload-manager-pipeline.location-routing.supplement.md § Tray Continue gate
+  .upload-resolver-tray__prepare-hint {
+    margin: 0;
+    padding: 0 var(--spacing-1);
+    font-size: var(--font-size-xs);
+    line-height: 1.35;
+    color: var(--muted-foreground);
+  }
+
   // Skip + Continue — compact footer (Cursor Questions rhythm)
   // @see upload-resolver-tray.md#active-mode
   .upload-resolver-tray__footer {

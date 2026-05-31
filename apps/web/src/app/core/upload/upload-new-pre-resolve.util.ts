@@ -18,6 +18,7 @@ import {
   getExifMetadataCoords,
   resolvePlacementWithoutText,
 } from './upload-location-precedence.helpers';
+import { formatSearchObjectLabel } from '../location-path-parser/upload-search-object.builder';
 import { isExifAuthoritativeOverWeakFilenameStreet } from './upload-location-resolution.helpers';
 import { hashAndCheckDedupForNewJob, routeJobToMissingData } from './upload-new-prepare-route.util';
 import type { UploadJobStateService } from './upload-job-state.service';
@@ -63,23 +64,29 @@ export function mergeTitleCandidateOnJob(
   // Search Object intake already set titleAddress + groupingKey — do not replace with IMG_* parse.
   if (job.groupingKey && inheritedTitleAddress) {
     const groupState = deps.addressOrchestrator?.getGroupState(job.batchId, job.groupingKey);
+    const soLabel =
+      groupState?.searchObject != null
+        ? formatSearchObjectLabel(groupState.searchObject)
+        : inheritedTitleAddress;
     if (
       groupState &&
       isExifAuthoritativeOverWeakFilenameStreet(groupState, (id) => deps.jobState.findJob(id))
     ) {
       uploadTraceDecision('pre-resolve', 'mergeTitle — keep SO title, low confidence (weak filename + EXIF)', {
         jobId,
-        titleAddress: inheritedTitleAddress,
+        titleAddress: soLabel,
         groupingKey: job.groupingKey,
       });
-      return { titleAddress: inheritedTitleAddress, highConfidence: false };
+      deps.jobState.updateJob(jobId, { titleAddress: soLabel, titleAddressSource: 'folder' });
+      return { titleAddress: soLabel, highConfidence: false };
     }
     uploadTraceDecision('pre-resolve', 'mergeTitle — SO intake title, high confidence', {
       jobId,
-      titleAddress: inheritedTitleAddress,
+      titleAddress: soLabel,
       groupingKey: job.groupingKey,
     });
-    return { titleAddress: inheritedTitleAddress, highConfidence: true };
+    deps.jobState.updateJob(jobId, { titleAddress: soLabel, titleAddressSource: 'folder' });
+    return { titleAddress: soLabel, highConfidence: true };
   }
 
   const fileCandidate = parsed

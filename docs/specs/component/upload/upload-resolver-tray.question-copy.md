@@ -28,7 +28,7 @@ The tray is **one component** filled by producers (`TrayResolveItem`). “Tray t
 | **Source conflict** | Text/folder geocode done; EXIF far | **Four** fixed choices (folder address / photo / both / set later) — not cities |
 | **Layer package** | Conflicting folder packages | Package labels |
 
-**Folder path vs folder address (source tray):** `folderDisplayPath` = upload path (e.g. `Thaliastraße 14`). Option 1 = reverse-geocode of the **folder/text geocode pin** (may be `Thaliastraße 65` if Photon placed another house). Optional subtitle shows parsed `titleAddress` from Search Object.
+**Folder path vs folder address (source tray):** `folderDisplayPath` = upload path (e.g. `Thaliastraße 14`) — path tooltip only. Option 1 label (`upload.resolver.source.option.folder`): Prefer **parsed building label** from Search Object (`formatSearchObjectLabel`: street + houseNumber + city) when available; else `titleAddress`; else reverse-geocode of the text pin. Optional subtitle shows parsed `titleAddress` from Search Object.
 
 ## Question matrix (normative)
 
