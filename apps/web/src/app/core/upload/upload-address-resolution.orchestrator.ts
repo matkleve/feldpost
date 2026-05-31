@@ -23,6 +23,7 @@ import {
   summarizeGroupState,
   summarizeSearchObject,
   uploadAddressDebug,
+  uploadSoMutation,
   uploadTraceDecision,
   uploadTraceEnter,
   uploadTraceExit,
@@ -153,6 +154,12 @@ export class UploadAddressResolutionOrchestrator {
         folderDisplayPath,
         titleAddress: titleAddressLabel,
         titleAddressSource: job.titleAddressSource ?? 'folder',
+      });
+      uploadSoMutation('classifyBatch', 'job wired from leaf search object', {
+        jobId: job.id,
+        groupingKey: so.groupingKey,
+        after: summarizeSearchObject(so),
+        patch: { folderDisplayPath, titleAddress: titleAddressLabel },
       });
 
       leafObjects.push({ jobId: job.id, so });

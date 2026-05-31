@@ -167,10 +167,11 @@ export class UploadService {
       return { error: 'Upload cancelled by user.' };
     }
 
+    const contentType = this.resolveMimeType(file);
     const { error: storageError } = await this.supabase.client.storage
       .from('media')
       .upload(storagePath, file, {
-        contentType: file.type,
+        contentType,
         upsert: false,
         ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
       });

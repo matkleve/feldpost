@@ -17,6 +17,7 @@ import {
   uploadFailureMessageToToastText,
 } from './upload-error-messages.util';
 import { resolveUploadPhaseInputs } from './upload-location-inputs.helpers';
+import { awaitHeicConversionForUpload } from './upload-new-prepare-route.util';
 
 type RunNewUploadPhaseArgs = {
   jobId: string;
@@ -61,7 +62,13 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
   if (!job) return;
   if (isCancelled()) return;
 
-  const locationInputs = resolveUploadPhaseInputs({ job, manualCoords: coords, parsedExif });
+  await awaitHeicConversionForUpload({ jobState, uploadService }, jobId);
+
+  const locationInputs = resolveUploadPhaseInputs({
+    job: jobState.findJob(jobId)!,
+    manualCoords: coords,
+    parsedExif,
+  });
 
   const result = await runUploadCall({
     job,

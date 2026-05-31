@@ -50,6 +50,12 @@ export class UploadPanelLifecycleService {
     this.autoSwitchCallback = cb;
   }
 
+  /** Panel destroyed — stop emitting to torn-down @Output() refs. */
+  clearHostCallbacks(): void {
+    this.imageUploadedCallback = undefined;
+    this.placementRequestedCallback = undefined;
+  }
+
   // ── Initialize subscriptions ───────────────────────────────────────────────
 
   initializeSubscriptions(): void {

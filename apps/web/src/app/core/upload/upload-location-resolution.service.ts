@@ -60,12 +60,15 @@ import {
   summarizeSearchObject,
   uploadAddressDebug,
   uploadPlacementLog,
+  uploadSoMutation,
+  uploadTrayGate,
   uploadTraceDecision,
   uploadTraceEnter,
   uploadTraceExit,
 } from './upload-address-resolution.debug';
 import type { ExifCoords } from './upload.types';
 import { UploadLocationTrayProducerAdapter } from '../upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter';
+import { UploadPreResolveWaveService } from './upload-pre-resolve-wave.service';
 import { USE_TRAY_ORCHESTRATOR } from '../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import type {
   DisambiguationRequiredEvent,
@@ -509,8 +512,17 @@ export class UploadLocationResolutionService {
       });
       if (outcome.kind === 'held_source_conflict') {
         const groupingKey = job.groupingKey;
+        uploadTrayGate('held for source conflict tray — EXIF far from text geocode pin', {
+          jobId,
+          groupingKey,
+          distanceM,
+          titleAddress: job.titleAddress,
+          folderDisplayPath: job.folderDisplayPath,
+          textCoords: job.titleAddressCoords,
+          exifMetadata: exifCoords,
+        });
         if (groupingKey && this.isSourceConflictResolved(job.batchId, groupingKey)) {
-          uploadTraceDecision('placement', 'skip source tray — already resolved for groupingKey', {
+          uploadTrayGate('skip source tray — user already resolved this groupingKey', {
             jobId,
             groupingKey,
           });
@@ -570,9 +582,10 @@ export class UploadLocationResolutionService {
     const queryKey = buildSourceConflictQueryKey(groupingKey);
 
     if (this.isSourceConflictResolved(job.batchId, groupingKey)) {
-      uploadTraceDecision('ulr', 'registerSourceConflict skipped — already resolved', {
+      uploadTrayGate('registerSourceConflict skipped — queryKey already resolved', {
         batchId: job.batchId,
         queryKey,
+        groupingKey,
       });
       return;
     }
@@ -620,10 +633,26 @@ export class UploadLocationResolutionService {
         this.geocoding.reverse(textCoords.lat, textCoords.lng),
         this.geocoding.reverse(exifCoords.lat, exifCoords.lng),
       ]);
+      const reverseLabel = folderRev?.addressLabel?.trim() ?? '';
       const folderAddress =
-        folderRev?.addressLabel?.trim() ||
         folderName ||
+        reverseLabel ||
         `${textCoords.lat.toFixed(4)}, ${textCoords.lng.toFixed(4)}`;
+      uploadAddressDebug('ulr', 'source conflict folder option label', {
+        batchId: job.batchId,
+        groupingKey,
+        folderDisplayPath,
+        parsedFolderTitle: folderName,
+        reverseGeocodeOfTextPin: reverseLabel,
+        chosenFolderOptionLabel: folderAddress,
+        textCoords,
+        labelSource:
+          folderName && folderName !== reverseLabel
+            ? 'parsed_title_preferred_over_reverse'
+            : reverseLabel
+              ? 'reverse_geocode'
+              : 'coords_fallback',
+      });
       const photoAddress =
         photoRev?.addressLabel?.trim() ||
         `${exifCoords.lat.toFixed(4)}, ${exifCoords.lng.toFixed(4)}`;
@@ -896,6 +925,13 @@ export class UploadLocationResolutionService {
       this.injector
         .get(UploadLocationTrayProducerAdapter)
         .syncGroupToOrchestrator(updated);
+      if (!existing) {
+        this.injector.get(UploadPreResolveWaveService).notifyFirstTrayReady(input.batchId, {
+          groupId: updated.id,
+          queryKey: input.queryKey,
+          disambiguationKind: updated.disambiguationKind,
+        });
+      }
     }
     this.syncBatchDisambiguationAggregates(input.batchId);
   }
@@ -1457,7 +1493,17 @@ export class UploadLocationResolutionService {
     candidate: UploadAddressCandidate,
     folderDisplayPath: string,
   ): void {
-    this.jobState.updateJob(jobId, buildGeocodeCandidatePatch(candidate, folderDisplayPath));
+    const patch = buildGeocodeCandidatePatch(candidate, folderDisplayPath);
+    uploadSoMutation('geocode', 'titleAddressCoords from Photon candidate (not job.coords yet)', {
+      jobId,
+      groupingKey: job.groupingKey,
+      before: summarizeJobPlacement(job),
+      patch: {
+        titleAddressCoords: patch.titleAddressCoords,
+        addressLabel: candidate.addressLabel,
+      },
+    });
+    this.jobState.updateJob(jobId, patch);
   }
 
   private patchGroup(group: UploadDisambiguationGroup): void {

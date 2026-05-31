@@ -15,6 +15,7 @@ import {
   HostListener,
   inject,
   input,
+  OnDestroy,
   output,
   signal,
 } from '@angular/core';
@@ -127,7 +128,7 @@ export type {
  * Re-evaluate when the map zone overlay contract is redesigned.
  * @see docs/MIGRATION_PLAN.md — Upload panel decision 2026-05-13
  */
-export class UploadPanelComponent {
+export class UploadPanelComponent implements OnDestroy {
   /** Template helper: icon/text layout for lane and location toggles. */
   readonly optLayout = toggleOptionLayout;
 
@@ -256,6 +257,10 @@ export class UploadPanelComponent {
       prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
       dismissFile: (jobId) => this.dismissFile(jobId),
     });
+  }
+
+  ngOnDestroy(): void {
+    this.setup.clearHostCallbacks();
   }
 
   // Public API used by map-shell pending-placement flow.

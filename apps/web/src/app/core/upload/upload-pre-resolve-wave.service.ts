@@ -12,15 +12,34 @@ import { uploadTraceDecision, uploadTraceEnter } from './upload-address-resoluti
 export class UploadPreResolveWaveService {
   private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly pendingByBatch = new Map<string, number>();
+  /** Batches that already received early tray presentation (first disambiguation). */
+  private readonly earlyTrayPresented = new Set<string>();
 
   /** Call after classifyBatch with the number of jobs that will pre-resolve. */
   resetWave(batchId: string, jobCount: number): void {
     uploadTraceEnter('wave', 'resetWave', { batchId, jobCount });
+    this.earlyTrayPresented.delete(batchId);
     if (jobCount <= 0) {
       this.pendingByBatch.delete(batchId);
       return;
     }
     this.pendingByBatch.set(batchId, jobCount);
+  }
+
+  /**
+   * Present resolver tray as soon as the first question exists — do not wait for
+   * every job to finish HEIC conversion / pre-resolve.
+   */
+  notifyFirstTrayReady(batchId: string, detail?: Record<string, unknown>): void {
+    if (!USE_TRAY_ORCHESTRATOR || this.earlyTrayPresented.has(batchId)) {
+      return;
+    }
+    this.earlyTrayPresented.add(batchId);
+    uploadTraceDecision('wave', 'early tray — first disambiguation registered', {
+      batchId,
+      ...detail,
+    });
+    this.trayOrchestrator.notifyScanIdle(batchId);
   }
 
   /** One job finished pre-resolve (any outcome). */

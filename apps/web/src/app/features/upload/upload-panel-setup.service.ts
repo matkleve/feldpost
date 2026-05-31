@@ -102,4 +102,8 @@ export class UploadPanelSetupService {
       },
     });
   }
+
+  clearHostCallbacks(): void {
+    this.lifecycle.clearHostCallbacks();
+  }
 }

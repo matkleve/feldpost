@@ -4,6 +4,9 @@
  * Enable in the browser console (then reload or upload again):
  *   localStorage.setItem('feldpost:debug:upload-address', '1')
  *   localStorage.setItem('feldpost:debug:upload-process', '1')  // verbose fn/decision trace
+ *
+ * Filter DevTools console by `[upload-address` or `[upload-process` or `[upload-placement]`.
+ * SO field mutations: `[upload-address:so-mutation]`; tray gates: `[upload-process:tray]`.
  * Disable:
  *   localStorage.removeItem('feldpost:debug:upload-address')
  *   localStorage.removeItem('feldpost:debug:upload-process')
@@ -159,6 +162,7 @@ export function summarizeSearchObject(so: UploadSearchObject): Record<string, un
     street: so.street,
     houseNumber: so.houseNumber,
     staircase: so.staircase,
+    door: so.door,
     project: so.project,
     groupingKey: so.groupingKey,
     postcodeCandidates: so.postcodeCandidates,
@@ -168,6 +172,32 @@ export function summarizeSearchObject(so: UploadSearchObject): Record<string, un
     relativePath: so.relativePath,
     fileName: so.fileName,
   };
+}
+
+/** Log SO snapshot when fields change during classify / geocode / tray apply. */
+export function uploadSoMutation(
+  scope: string,
+  reason: string,
+  detail: {
+    jobId?: string;
+    groupingKey?: string;
+    before?: Record<string, unknown>;
+    after?: Record<string, unknown>;
+    patch?: Record<string, unknown>;
+  },
+): void {
+  if (!isUploadAddressDebugEnabled()) {
+    return;
+  }
+  console.debug(`[upload-address:so-mutation:${scope}] ${reason}`, detail);
+}
+
+/** Why a resolver tray question was opened (producer / ULR). */
+export function uploadTrayGate(
+  because: string,
+  detail?: Record<string, unknown>,
+): void {
+  uploadTraceDecision('tray', because, detail);
 }
 
 export function summarizeGroupState(
