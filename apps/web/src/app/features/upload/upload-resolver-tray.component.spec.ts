@@ -101,7 +101,7 @@ describe('UploadResolverTrayComponent', () => {
     const footer = fixture.nativeElement.querySelector(
       '.upload-resolver-tray__continue',
     );
-    expect(footer?.textContent?.trim()).toBe('Save');
+    expect(footer?.textContent?.trim()).toMatch(/^Save$/);
     expect(
       fixture.nativeElement.querySelector('.upload-resolver-tray__nav-position'),
     ).toBeNull();

@@ -12,9 +12,16 @@ export interface ImageUploadedEvent {
   thumbnailUrl?: string;
 }
 
+export interface UploadLocationPreviewPoint {
+  lat: number;
+  lng: number;
+}
+
 export interface UploadLocationPreviewEvent {
   lat: number;
   lng: number;
+  /** When set, map shows all pins (e.g. source-both). Otherwise uses lat/lng. */
+  points?: ReadonlyArray<UploadLocationPreviewPoint>;
 }
 
 /** Map placement request from detail row overflow or header action. Consumed by MapShell. */

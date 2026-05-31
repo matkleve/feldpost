@@ -62,16 +62,28 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
   if (!job) return;
   if (isCancelled()) return;
 
-  await awaitHeicConversionForUpload({ jobState, uploadService }, jobId);
+  try {
+    await awaitHeicConversionForUpload({ jobState, uploadService }, jobId);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : 'HEIC conversion failed before upload.';
+    ctx.failJob(jobId, 'converting_format', message);
+    return;
+  }
+
+  const jobForUpload = jobState.findJob(jobId);
+  if (!jobForUpload) {
+    return;
+  }
 
   const locationInputs = resolveUploadPhaseInputs({
-    job: jobState.findJob(jobId)!,
+    job: jobForUpload,
     manualCoords: coords,
     parsedExif,
   });
 
   const result = await runUploadCall({
-    job,
+    job: jobForUpload,
     coords: locationInputs.coords,
     parsedExif: locationInputs.parsedExif,
     uploadService,

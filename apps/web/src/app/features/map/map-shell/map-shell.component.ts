@@ -591,6 +591,7 @@ export class MapShellComponent implements OnDestroy {
 
   private userLocationMarker: MapMarker | null = null;
   private searchLocationMarker: MapMarker | null = null;
+  private searchLocationPreviewMarkers: MapMarker[] = [];
   private draftMediaMarkerLeaflet: MapMarker | null = null;
   private readonly uploadedPhotoMarkers = new Map<
     string,
@@ -2100,14 +2101,18 @@ export class MapShellComponent implements OnDestroy {
   }
 
   onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
-    this.renderOrUpdateSearchLocationMarker([event.lat, event.lng]);
+    const points =
+      event.points?.length && event.points.length > 0
+        ? event.points
+        : [{ lat: event.lat, lng: event.lng }];
+    this.renderSearchLocationPreviewMarkers(points);
   }
 
   onUploadLocationPreviewCleared(): void {
     if (this.searchPlacementActive()) {
       return;
     }
-    this.clearSearchLocationMarker();
+    this.clearSearchLocationPreviewMarkers();
   }
 
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
@@ -3036,6 +3041,36 @@ export class MapShellComponent implements OnDestroy {
   private clearSearchLocationMarker(): void {
     this.searchLocationMarker?.remove();
     this.searchLocationMarker = null;
+  }
+
+  private renderSearchLocationPreviewMarkers(
+    points: ReadonlyArray<{ lat: number; lng: number }>,
+  ): void {
+    if (!this.map) {
+      return;
+    }
+    this.clearSearchLocationPreviewMarkers();
+    if (points.length === 1) {
+      this.renderOrUpdateSearchLocationMarker([points[0]!.lat, points[0]!.lng]);
+      return;
+    }
+    for (const point of points) {
+      const marker = this.mapLeafletService.createSearchLocationMarker([point.lat, point.lng]);
+      try {
+        marker.addTo(this.map);
+        this.searchLocationPreviewMarkers.push(marker);
+      } catch {
+        marker.remove();
+      }
+    }
+  }
+
+  private clearSearchLocationPreviewMarkers(): void {
+    for (const marker of this.searchLocationPreviewMarkers) {
+      marker.remove();
+    }
+    this.searchLocationPreviewMarkers = [];
+    this.clearSearchLocationMarker();
   }
 
   private async refreshSearchCountryCode(lat: number, lng: number): Promise<void> {

@@ -160,8 +160,9 @@ export function buildSourceConflictCandidates(input: {
       id: SOURCE_CONFLICT_NONE_CANDIDATE_ID,
       addressLabel: '',
       displayName: '',
-      lat: textCoords.lat,
-      lng: textCoords.lng,
+      // Placeholder coords — tray must not preview (no placement for "set later").
+      lat: 0,
+      lng: 0,
     },
   ];
 }

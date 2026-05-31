@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { UploadResolverTrayOrchestratorService } from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type { ExifCoords } from '../../core/upload/upload.types';
 import { UPLOAD_DEV_FLAGS } from './upload-dev-flags';
@@ -9,6 +10,7 @@ import type { UploadPanelComponent } from './upload-panel.component';
 @Injectable()
 export class UploadShellUiService {
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
 
   private placementPanel: UploadPanelComponent | null = null;
 
@@ -28,10 +30,14 @@ export class UploadShellUiService {
     () =>
       UPLOAD_DEV_FLAGS.dockAlwaysVisible ||
       this.uploadPanelOpen() ||
-      this.uploadResolverPending() > 0,
+      this.uploadResolverPending() > 0 ||
+      this.trayOrchestrator.hasActivePresentation(),
   );
   readonly uploadResolverTrayActive = computed(
-    () => UPLOAD_DEV_FLAGS.dockAlwaysVisible || this.uploadResolverPending() > 0,
+    () =>
+      UPLOAD_DEV_FLAGS.dockAlwaysVisible ||
+      this.uploadResolverPending() > 0 ||
+      this.trayOrchestrator.hasActivePresentation(),
   );
   readonly uploadHasIssues = computed(() =>
     this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'issues'),

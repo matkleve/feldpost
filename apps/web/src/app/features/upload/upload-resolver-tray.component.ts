@@ -76,7 +76,11 @@ export class UploadResolverTrayComponent implements OnInit {
   readonly candidateSelected = output<{ groupId: string; candidateId: string }>();
   readonly groupChanged = output<string>();
   readonly deferRequested = output<string>();
-  readonly previewLocation = output<{ lat: number; lng: number }>();
+  readonly previewLocation = output<{
+    lat: number;
+    lng: number;
+    points?: ReadonlyArray<{ lat: number; lng: number }>;
+  }>();
   readonly previewLocationCleared = output<void>();
 
   readonly t = this.i18n.t.bind(this.i18n);
@@ -214,7 +218,8 @@ export class UploadResolverTrayComponent implements OnInit {
     const unitTotal = countDialogueUnits(items);
     const unitIndex = unitIndexForItem(items, item.id) + 1;
     const hasMoreInBundle = unitIndex < unitTotal;
-    if (hasMoreInBundle || this.orchestrator.hasPresentationBacklog()) {
+    const moreCarouselSteps = this.orchestrator.activeItemIndex() < items.length - 1;
+    if (hasMoreInBundle || moreCarouselSteps || this.orchestrator.pendingBundleCount() > 0) {
       return this.t('upload.resolver.next', 'Next');
     }
     return this.t('upload.resolver.save', 'Save');
@@ -408,9 +413,37 @@ export class UploadResolverTrayComponent implements OnInit {
   }
 
   onPreviewOption(option: TrayResolveOption): void {
-    if (option.lat !== undefined && option.lng !== undefined) {
-      this.previewLocation.emit({ lat: option.lat, lng: option.lng });
+    if (option.id === 'source-none') {
+      this.previewLocationCleared.emit();
+      return;
     }
+    const item = this.activeItem();
+    if (option.id === 'source-both' && item?.questionKey === 'upload.resolver.question.source') {
+      const text = item.options.find((o) => o.id === 'source-text');
+      const exif = item.options.find((o) => o.id === 'source-exif');
+      const points = [text, exif]
+        .filter((o): o is TrayResolveOption => !!o && this.optionHasPreviewCoords(o))
+        .map((o) => ({ lat: o.lat!, lng: o.lng! }));
+      if (points.length) {
+        this.previewLocation.emit({ lat: points[0]!.lat, lng: points[0]!.lng, points });
+        return;
+      }
+    }
+    if (this.optionHasPreviewCoords(option)) {
+      this.previewLocation.emit({ lat: option.lat!, lng: option.lng! });
+    } else {
+      this.previewLocationCleared.emit();
+    }
+  }
+
+  private optionHasPreviewCoords(option: TrayResolveOption): boolean {
+    return (
+      option.id !== 'source-none' &&
+      option.lat !== undefined &&
+      option.lng !== undefined &&
+      Number.isFinite(option.lat) &&
+      Number.isFinite(option.lng)
+    );
   }
 
   onOptionHoverEnd(): void {

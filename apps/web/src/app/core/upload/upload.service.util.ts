@@ -9,7 +9,11 @@ import type { LocationStatus, MediaType } from './upload-file-types';
 import type { ExifCoords, FileValidation, ParsedExif } from './upload.types';
 
 export function resolveUploadMimeType(file: File): string {
-  if (file.type) return file.type;
+  const rawType = file.type?.trim() ?? '';
+  // Browsers often label camera files application/octet-stream — sniff by extension.
+  if (rawType && rawType !== 'application/octet-stream') {
+    return rawType;
+  }
 
   const ext = file.name.split('.').pop()?.toLowerCase();
   switch (ext) {
