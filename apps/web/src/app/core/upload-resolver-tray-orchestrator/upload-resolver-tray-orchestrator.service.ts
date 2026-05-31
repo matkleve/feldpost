@@ -119,6 +119,14 @@ export class UploadResolverTrayOrchestratorService {
   );
 
   enqueueItem(input: EnqueueTrayItemInput): string {
+    const groupId = disambiguationGroupIdFromPayload(input.payloadRef);
+    if (groupId) {
+      const existingId = this.findExistingItemIdForGroup(input.batchId, groupId);
+      if (existingId) {
+        return existingId;
+      }
+    }
+
     const item: TrayResolveItem = {
       id: crypto.randomUUID(),
       dialogueUnitId: input.dialogueUnitId,
@@ -318,6 +326,41 @@ export class UploadResolverTrayOrchestratorService {
     this.scanIdleBatches.clear();
   }
 
+  /** One tray card per disambiguation group — ignore duplicate producer syncs. */
+  private findExistingItemIdForGroup(batchId: string, groupId: string): string | undefined {
+    const match = (items: readonly TrayResolveItem[]): string | undefined =>
+      items.find(
+        (entry) =>
+          entry.batchId === batchId &&
+          disambiguationGroupIdFromPayload(entry.payloadRef) === groupId,
+      )?.id;
+
+    const presenting = this._presentingBundle();
+    if (presenting?.batchId === batchId) {
+      const id = match(presenting.items);
+      if (id) {
+        return id;
+      }
+    }
+    const collecting = this._collectingBundle();
+    if (collecting?.batchId === batchId) {
+      const id = match(collecting.items);
+      if (id) {
+        return id;
+      }
+    }
+    for (const bundle of this._pendingBundles()) {
+      if (bundle.batchId !== batchId) {
+        continue;
+      }
+      const id = match(bundle.items);
+      if (id) {
+        return id;
+      }
+    }
+    return match(this._inbox());
+  }
+
   private ensureCollecting(batchId: string): void {
     const existing = this._collectingBundle();
     if (existing) {
@@ -509,4 +552,8 @@ export class UploadResolverTrayOrchestratorService {
     };
     this.startPresenting(presenting);
   }
+}
+
+function disambiguationGroupIdFromPayload(payloadRef: unknown): string | undefined {
+  return (payloadRef as { disambiguationGroupId?: string } | undefined)?.disambiguationGroupId;
 }

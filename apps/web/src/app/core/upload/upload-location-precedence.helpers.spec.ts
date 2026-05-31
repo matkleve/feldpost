@@ -4,6 +4,7 @@ import {
   buildSourceConflictCandidates,
   formatSourceConflictDistance,
   haversineMeters,
+  labelFromFolderDisplayPath,
   resolveFolderSourceOptionLabel,
   resolvePlacementAfterTextGeocode,
   resolvePlacementWithoutText,
@@ -88,13 +89,20 @@ describe('upload-location-precedence.helpers', () => {
   });
 
   /** @see docs/specs/component/upload/upload-resolver-tray.question-copy.md */
-  it('resolveFolderSourceOptionLabel prefers Search Object street + house number', () => {
+  it('labelFromFolderDisplayPath uses leaf folder segment for tray copy', () => {
+    expect(labelFromFolderDisplayPath('Projects/Bau/Thaliastraße 14')).toBe('Thaliastraße 14');
+  });
+
+  it('resolveFolderSourceOptionLabel prefers folder path over SO with IMG house number', () => {
     const label = resolveFolderSourceOptionLabel({
-      job: job({ titleAddress: 'Thaliastraße' }),
+      job: job({
+        titleAddress: 'Thaliastraße',
+        folderDisplayPath: 'Thaliastraße 14',
+      }),
       groupState: {
         searchObject: {
           street: 'Thaliastraße',
-          houseNumber: '14',
+          houseNumber: 'IMG 14',
           city: 'Wien',
           postcode: null,
           country: null,
@@ -110,7 +118,7 @@ describe('upload-location-precedence.helpers', () => {
         },
       } as never,
     });
-    expect(label).toContain('14');
-    expect(label).toContain('Thaliastraße');
+    expect(label).toBe('Thaliastraße 14');
+    expect(label).not.toMatch(/\bIMG\b/i);
   });
 });

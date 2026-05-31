@@ -9,6 +9,7 @@ import {
   uploadTraceExit,
 } from './upload-address-resolution.debug';
 import { formatSearchObjectLabel } from '../location-path-parser/upload-search-object.builder';
+import { parseStreetAndHouse } from '../location-path-parser/location-path-parser.util';
 import type { UploadGroupResolutionState } from './upload-address-resolution.types';
 import type { ExifCoords } from './upload.types';
 import type { UploadLocationConfig } from './upload-location-config';
@@ -130,7 +131,33 @@ export function buildSourceConflictQueryKey(groupingKey: string): string {
 }
 
 /**
- * Option 1 label for source-conflict tray (parsed SO beats street-only titleAddress).
+ * Leaf folder segment for tray copy (e.g. `Thaliastraße 14`), not camera filename tokens.
+ * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md — Folder path vs folder address
+ */
+export function labelFromFolderDisplayPath(folderDisplayPath?: string): string | null {
+  if (!folderDisplayPath?.trim()) {
+    return null;
+  }
+  const segments = folderDisplayPath.replace(/\\/g, '/').split('/').filter(Boolean);
+  const leaf = segments[segments.length - 1]?.trim();
+  if (!leaf) {
+    return null;
+  }
+  const cleaned = leaf.replace(/_/g, ' ').trim();
+  const { street, houseNumber } = parseStreetAndHouse(cleaned);
+  if (street && houseNumber) {
+    return `${street} ${houseNumber}`;
+  }
+  return cleaned;
+}
+
+function houseNumberLooksLikeCameraToken(houseNumber: string | null | undefined): boolean {
+  const hn = houseNumber?.trim() ?? '';
+  return /^IMG\b/i.test(hn) || /^IMG\s+\d/i.test(hn);
+}
+
+/**
+ * Option 1 label for source-conflict tray — folder path wins over SO when filename merged `IMG` noise.
  * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md — Folder path vs folder address
  */
 export function resolveFolderSourceOptionLabel(input: {
@@ -138,9 +165,22 @@ export function resolveFolderSourceOptionLabel(input: {
   groupState?: UploadGroupResolutionState;
   reverseGeocodeLabel?: string;
 }): string {
-  if (input.groupState?.searchObject) {
-    return formatSearchObjectLabel(input.groupState.searchObject);
+  const fromPath = labelFromFolderDisplayPath(input.job.folderDisplayPath);
+  if (fromPath) {
+    return fromPath;
   }
+
+  if (input.groupState?.searchObject) {
+    const so = input.groupState.searchObject;
+    if (houseNumberLooksLikeCameraToken(so.houseNumber)) {
+      const title = input.job.titleAddress?.trim();
+      if (title && !/\bIMG\b/i.test(title)) {
+        return title;
+      }
+    }
+    return formatSearchObjectLabel(so);
+  }
+
   const title = input.job.titleAddress?.trim();
   if (title) {
     return title;

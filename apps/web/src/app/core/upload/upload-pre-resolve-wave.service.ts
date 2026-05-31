@@ -54,8 +54,13 @@ export class UploadPreResolveWaveService {
     const next = pending - 1;
     if (next <= 0) {
       this.pendingByBatch.delete(batchId);
-      uploadTraceDecision('wave', 'scanIdle — pre-resolve wave complete', { batchId });
-      if (USE_TRAY_ORCHESTRATOR) {
+      uploadTraceDecision('wave', 'scanIdle — pre-resolve wave complete', {
+        batchId,
+        skippedFinalScanIdle: this.earlyTrayPresented.has(batchId),
+      });
+      // Early tray already closed the collecting window — avoid presenting the same bundle twice.
+      // @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+      if (USE_TRAY_ORCHESTRATOR && !this.earlyTrayPresented.has(batchId)) {
         this.trayOrchestrator.notifyScanIdle(batchId);
       }
       return;

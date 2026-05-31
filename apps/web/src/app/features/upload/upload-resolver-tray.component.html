@@ -191,12 +191,6 @@
       </div>
     }
 
-    @if (waitingPrepareHint()) {
-      <p class="upload-resolver-tray__prepare-hint" role="status">
-        {{ t('upload.resolver.waitingPrepare', 'Still preparing files…') }}
-      </p>
-    }
-
     <footer class="upload-resolver-tray__footer">
       <button type="button" class="upload-resolver-tray__skip" (click)="onDefer()">
         {{ t('upload.resolver.skip', 'Skip') }}

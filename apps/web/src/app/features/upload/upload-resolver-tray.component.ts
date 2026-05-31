@@ -202,25 +202,6 @@ export class UploadResolverTrayComponent implements OnInit {
     });
   });
 
-  /**
-   * Stable state: footer disabled while any affected job is still in Phase 0 (HEIC convert) or not yet awaiting tray.
-   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Tray Continue gate
-   */
-  readonly jobsAwaitingPrepare = computed(() => {
-    const item = this.activeItem();
-    if (!item?.jobIds.length || this.showTextAnswer()) {
-      return [] as string[];
-    }
-    const isHeic = (file: File) => this.uploadService.isHeic(file);
-    const findJob = (id: string) => this.uploadManager.jobs().find((entry) => entry.id === id);
-    return item.jobIds.filter((jobId) => {
-      const job = findJob(jobId);
-      return job == null || !isJobReadyForTrayResolution(job, isHeic);
-    });
-  });
-
-  readonly waitingPrepareHint = computed(() => this.jobsAwaitingPrepare().length > 0);
-
   readonly canConfirmContinue = computed(() => {
     if (this.isItemBlocked()) {
       return false;
@@ -235,11 +216,25 @@ export class UploadResolverTrayComponent implements OnInit {
     if (!item?.jobIds.length || !this.useOrchestrator) {
       return true;
     }
-    return areAllJobsReadyForTrayResolution(
-      item.jobIds,
-      (id) => this.uploadManager.jobs().find((entry) => entry.id === id),
-      (file) => this.uploadService.isHeic(file),
-    );
+    if (
+      !areAllJobsReadyForTrayResolution(
+        item.jobIds,
+        (id) => this.uploadManager.jobs().find((entry) => entry.id === id),
+        (file) => this.uploadService.isHeic(file),
+      )
+    ) {
+      return false;
+    }
+    if (item.questionKey === 'upload.resolver.question.source') {
+      return item.jobIds.every((jobId) => {
+        const job = this.uploadManager.jobs().find((entry) => entry.id === jobId);
+        return (
+          job != null &&
+          (job.titleAddressCoords != null || job.parsedExif?.coords != null)
+        );
+      });
+    }
+    return true;
   });
 
   readonly continueLabel = computed(() => {
@@ -426,13 +421,6 @@ export class UploadResolverTrayComponent implements OnInit {
     }
     if (this.useOrchestrator) {
       this.orchestrator.resolveActiveItem({ optionId });
-      const payload = this.activeItem()?.payloadRef as { disambiguationGroupId?: string } | undefined;
-      if (payload?.disambiguationGroupId) {
-        this.candidateSelected.emit({
-          groupId: payload.disambiguationGroupId,
-          candidateId: optionId,
-        });
-      }
       return;
     }
   }

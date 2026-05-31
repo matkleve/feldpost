@@ -29,6 +29,7 @@ import {
   buildSourceConflictCandidates,
   buildSourceConflictQueryKey,
   clearDisambiguationJobFields,
+  labelFromFolderDisplayPath,
   resolveFolderSourceOptionLabel,
   getExifMetadataCoords,
   haversineMeters,
@@ -633,11 +634,13 @@ export class UploadLocationResolutionService {
           .filter((j) => j.batchId === job.batchId && j.groupingKey === groupingKey)
           .map((j) => j.id);
         if (jobIds.length) {
+          const mergeTitle =
+            labelFromFolderDisplayPath(folderDisplayPath) ?? job.titleAddress?.trim() ?? '';
           this.registerDisambiguationGroup({
             batchId: job.batchId,
             queryKey,
             folderDisplayPath,
-            titleAddress: job.titleAddress ?? '',
+            titleAddress: mergeTitle,
             jobIds,
             candidates: blocked.candidates,
             localityHint: deriveLocalityHint(job.relativePath),
@@ -655,9 +658,11 @@ export class UploadLocationResolutionService {
       const groupState = groupingKey
         ? this.orchestrator.getGroupState(job.batchId, groupingKey)
         : undefined;
+      const folderPathLabel = labelFromFolderDisplayPath(folderDisplayPath);
       const folderAddress =
         resolveFolderSourceOptionLabel({ job, groupState, reverseGeocodeLabel: reverseLabel }) ||
         `${textCoords.lat.toFixed(4)}, ${textCoords.lng.toFixed(4)}`;
+      const trayTitleAddress = folderPathLabel ?? job.titleAddress?.trim() ?? '';
       uploadAddressDebug('ulr', 'source conflict folder option label', {
         batchId: job.batchId,
         groupingKey,
@@ -691,7 +696,7 @@ export class UploadLocationResolutionService {
         batchId: job.batchId,
         queryKey,
         folderDisplayPath,
-        titleAddress: job.titleAddress ?? '',
+        titleAddress: trayTitleAddress,
         jobIds: jobIds.length ? jobIds : [job.id],
         candidates,
         localityHint: deriveLocalityHint(job.relativePath),
