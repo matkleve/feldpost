@@ -722,6 +722,10 @@ export class UploadLocationResolutionService {
     }
   }
 
+  /**
+   * Geocode a group via Branch A (street+city), B (project centroid bias), or C (street only).
+   * @see docs/specs/service/media-upload-service/address-resolution-model.md § Step 5 (Photon + branches A/B/C)
+   */
   private async runGeocodeForGroup(
     batchId: string,
     group: UploadGroupResolutionState,

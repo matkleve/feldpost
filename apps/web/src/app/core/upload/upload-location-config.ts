@@ -6,6 +6,12 @@ export interface UploadLocationConfig {
    */
   sourceAgreementRadiusMeters: number;
   /**
+   * Meters: post-upload mismatch audit tolerance (title-geocode coords vs EXIF coords).
+   * Differences within this radius are treated as the same location.
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
+   */
+  mismatchToleranceMeters: number;
+  /**
    * Meters: among multiple geocode hits, prefer candidate within this distance of EXIF;
    * Step 7 pin nudge. Not the org km “internet results” realism cap.
    * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
@@ -53,6 +59,7 @@ export interface UploadLocationConfig {
 
 export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   sourceAgreementRadiusMeters: 150,
+  mismatchToleranceMeters: 15,
   exifAssistRadiusMeters: 80,
   exifContextCheck: true,
   defaultGeocodeCountry: 'AT',

@@ -205,6 +205,10 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
   return allHaveExif;
 }
 
+/**
+ * Classify SO completeness into a local resolution gate (branch_a/b/c, incomplete, postcode_blocked, metadata_only).
+ * @see docs/specs/service/media-upload-service/upload-search-object.md § Completeness gates (Branch A/B/C)
+ */
 export function evaluateLocalResolution(
   so: UploadSearchObject,
   projectCentroid?: ProjectGeocodeCentroid | null,

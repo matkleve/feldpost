@@ -9,7 +9,6 @@ import type { UploadQueueService } from './upload-queue.service';
 import type { UploadService } from './upload.service';
 import type { ParsedExif } from './upload.service';
 import type { UploadLocationConfigService } from './upload-location-config.service';
-import { getExifMetadataCoords } from './upload-location-precedence.helpers';
 
 type NewPrepareRouteDeps = {
   jobState: UploadJobStateService;
@@ -106,7 +105,7 @@ export async function routePreparedNewJob(
   ) => Promise<void>,
 ): Promise<void> {
   if (!isAutoLocationEnabled(job)) {
-    await uploadWithoutAutoLocation(deps, jobId, job, parsedExif, ctx, runUploadPhase);
+    await uploadWithoutAutoLocation(deps, jobId, parsedExif, ctx, runUploadPhase);
     return;
   }
 
@@ -155,38 +154,55 @@ export function routeJobToMissingData(
   ctx.drainQueue();
 }
 
+/**
+ * Phase 0 — EXIF parse and HEIC conversion run in parallel (both work on the original file).
+ * Upload gate (Phase B) waits for conversion; geocode starts as soon as EXIF + SO are ready.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 0 prepareExif
+ */
 async function prepareExifAndFile(
   deps: NewPrepareRouteDeps,
   jobId: string,
   job: UploadJob,
 ): Promise<{ job: UploadJob; parsedExif: ParsedExif }> {
-  deps.jobState.setPhase(jobId, 'parsing_exif');
-  const parsedExif = job.parsedExif ?? (await deps.uploadService.parseExif(job.file));
-  deps.jobState.updateJob(jobId, { parsedExif });
+  const isHeic = deps.uploadService.isHeic(job.file);
 
+  // Fire both immediately — EXIF parse and HEIC→JPEG conversion are independent of each other.
+  deps.jobState.setPhase(jobId, 'parsing_exif');
+  const exifPromise: Promise<ParsedExif> = job.parsedExif
+    ? Promise.resolve(job.parsedExif)
+    : deps.uploadService.parseExif(job.file);
+  const convertPromise: Promise<File | null> = isHeic
+    ? deps.uploadService.convertToJpeg(job.file)
+    : Promise.resolve(null);
+
+  // Await EXIF first (usually fast); switch phase label to converting_format once it's done.
+  const parsedExif = await exifPromise;
+  if (isHeic) {
+    deps.jobState.setPhase(jobId, 'converting_format');
+  }
+  deps.jobState.updateJob(jobId, { parsedExif });
   if (parsedExif.direction != null && isAutoLocationEnabled(job)) {
     deps.jobState.updateJob(jobId, { direction: parsedExif.direction });
   }
 
-  if (deps.uploadService.isHeic(job.file)) {
-    deps.jobState.setPhase(jobId, 'converting_format');
-    const convertedFile = await deps.uploadService.convertToJpeg(job.file);
+  const convertedFile = await convertPromise;
+  if (convertedFile) {
     let newThumbnailUrl = job.thumbnailUrl;
     if (newThumbnailUrl) {
       URL.revokeObjectURL(newThumbnailUrl);
     }
     newThumbnailUrl = URL.createObjectURL(convertedFile);
-
-    deps.jobState.updateJob(jobId, {
-      file: convertedFile,
-      thumbnailUrl: newThumbnailUrl,
-    });
+    deps.jobState.updateJob(jobId, { file: convertedFile, thumbnailUrl: newThumbnailUrl });
     job = deps.jobState.findJob(jobId)!;
   }
 
   return { job, parsedExif };
 }
 
+/**
+ * Hash + dedup check after placement; shows modal or marks skip.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md § Actions 7–9
+ */
 export async function hashAndCheckDedupForNewJob(
   deps: Pick<NewPrepareRouteDeps, 'jobState' | 'queue' | 'uploadService'>,
   jobId: string,
@@ -243,7 +259,6 @@ function isAutoLocationEnabled(job: UploadJob): boolean {
 async function uploadWithoutAutoLocation(
   deps: NewPrepareRouteDeps,
   jobId: string,
-  job: UploadJob,
   parsedExif: ParsedExif,
   ctx: PipelineContext,
   runUploadPhase: (

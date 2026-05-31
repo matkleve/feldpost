@@ -24,6 +24,7 @@ type RunNewUploadPhaseArgs = {
   parsedExif: ParsedExif | undefined;
   ctx: PipelineContext;
   uploadPhaseTimeoutMs: number;
+  mismatchToleranceMeters: number;
   isCancelled: () => boolean;
   jobState: UploadJobStateService;
   queue: UploadQueueService;
@@ -43,6 +44,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     parsedExif,
     ctx,
     uploadPhaseTimeoutMs,
+    mismatchToleranceMeters,
     isCancelled,
     jobState,
     queue,
@@ -96,7 +98,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     enrichWithForwardGeocode: (mediaId, titleAddress) =>
       enrich.enrichWithForwardGeocode(mediaId, titleAddress),
     geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
-    mismatchToleranceMeters: 15,
+    mismatchToleranceMeters,
     setLocalUrl: (mediaId, localUrl) => mediaDownloadService.setLocalUrl(mediaId, localUrl),
     persistThumbnail: async (job: UploadJob) => {
       const userId = getUserId();

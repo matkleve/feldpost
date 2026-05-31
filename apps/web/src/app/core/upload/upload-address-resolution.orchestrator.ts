@@ -142,7 +142,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: local === 'incomplete' ? undefined : undefined,
+          geocodeBranch: undefined,
         };
         cache.set(groupingKey, partialState);
         uploadAddressDebug('orchestrator', 'group → partial (local gate)', summarizeGroupState(partialState));
@@ -216,8 +216,7 @@ export class UploadAddressResolutionOrchestrator {
         searchObject: so,
         folderDisplayPath,
         titleAddressLabel,
-        geocodeBranch:
-          local === 'branch_b' ? 'branch_b' : local === 'branch_a' ? 'branch_a' : 'branch_a',
+        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
         projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
       };
       cache.set(groupingKey, needsGeocodeState);

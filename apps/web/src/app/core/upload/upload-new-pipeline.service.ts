@@ -153,6 +153,7 @@ export class UploadNewPipelineService {
       parsedExif,
       ctx,
       uploadPhaseTimeoutMs: UploadNewPipelineService.UPLOAD_PHASE_TIMEOUT_MS,
+      mismatchToleranceMeters: this.locationConfig.getConfig().mismatchToleranceMeters,
       isCancelled: () => this.isCancelled(jobId),
       jobState: this.jobState,
       queue: this.queue,

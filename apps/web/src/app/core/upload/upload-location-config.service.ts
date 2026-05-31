@@ -1,3 +1,7 @@
+/**
+ * Runtime access to upload location config; all tunable constants centralised here.
+ * @see docs/specs/service/media-upload-service/upload-location-config.md
+ */
 import { Injectable } from '@angular/core';
 import {
   DEFAULT_UPLOAD_LOCATION_CONFIG,
