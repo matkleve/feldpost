@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_UPLOAD_LOCATION_CONFIG } from './upload-location-config';
 import {
+  applySourceConflictChoiceToJob,
   buildSourceConflictCandidates,
   formatSourceConflictDistance,
   haversineMeters,
@@ -91,6 +92,18 @@ describe('upload-location-precedence.helpers', () => {
   /** @see docs/specs/component/upload/upload-resolver-tray.question-copy.md */
   it('labelFromFolderDisplayPath uses leaf folder segment for tray copy', () => {
     expect(labelFromFolderDisplayPath('Projects/Bau/Thaliastraße 14')).toBe('Thaliastraße 14');
+  });
+
+  it('applySourceConflictChoiceToJob uses tray candidate coords when job has no parsedExif', () => {
+    const result = applySourceConflictChoiceToJob(
+      job({ parsedExif: undefined }),
+      SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
+      { lat: 48.2, lng: 16.37 },
+    );
+    expect(result.kind).toBe('placement');
+    if (result.kind === 'placement') {
+      expect(result.patch.coords).toEqual({ lat: 48.2, lng: 16.37 });
+    }
   });
 
   it('resolveFolderSourceOptionLabel prefers folder path over SO with IMG house number', () => {

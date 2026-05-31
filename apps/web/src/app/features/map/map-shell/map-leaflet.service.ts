@@ -85,6 +85,8 @@ export class MapLeafletService {
       }),
       interactive: false,
       keyboard: false,
+      // Above photo markers/clusters and user-location pin (2000) during tray preview.
+      zIndexOffset: 2500,
     });
   }
 

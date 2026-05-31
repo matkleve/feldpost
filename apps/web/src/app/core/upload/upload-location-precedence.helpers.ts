@@ -220,7 +220,9 @@ export function applySourceConflictChoiceToJob(
     candidateId === SOURCE_CONFLICT_EXIF_CANDIDATE_ID ||
     candidateId === SOURCE_CONFLICT_BOTH_CANDIDATE_ID
   ) {
-    const exifCoords = getExifMetadataCoords(job);
+    const exifCoords =
+      getExifMetadataCoords(job) ??
+      (candidate != null ? { lat: candidate.lat, lng: candidate.lng } : undefined);
     if (!exifCoords) {
       return { kind: 'skipped_no_exif' };
     }

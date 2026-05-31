@@ -10,6 +10,8 @@ export function selectQueuedJobsForStart(
   }
   return jobs
     .filter((job) => job.phase === 'queued')
+    // Already saved to storage — phase can lag behind mediaId if the pipeline re-enters.
+    .filter((job) => !job.mediaId)
     .filter((job) => !(isJobBlocked?.(job) ?? false))
     .slice(0, slotsAvailable);
 }

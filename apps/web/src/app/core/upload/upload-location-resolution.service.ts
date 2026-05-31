@@ -1383,7 +1383,7 @@ export class UploadLocationResolutionService {
 
     for (const jobId of group.jobIds) {
       const job = this.jobState.findJob(jobId);
-      if (!job) {
+      if (!job || job.mediaId) {
         continue;
       }
       if (group.disambiguationKind === 'source') {

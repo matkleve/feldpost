@@ -1,10 +1,10 @@
-// Fixed notification stack: bottom-right desktop, centered on narrow viewports.
+// Fixed notification stack: bottom-left on all viewports.
 // @see docs/specs/service/toast/toast-system.md
 :host {
   position: fixed;
   bottom: 1rem;
-  right: 1rem;
-  left: auto;
+  left: 1rem;
+  right: auto;
   z-index: 600;
   display: flex;
   flex-direction: column;
@@ -16,10 +16,9 @@
 
 @media (max-width: 48rem) {
   :host {
+    left: 1rem;
     right: auto;
-    left: 50%;
     bottom: 1rem;
-    transform: translateX(-50%);
     width: min(400px, calc(100% - 2rem));
   }
 }

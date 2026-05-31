@@ -617,6 +617,10 @@ export class UploadManagerService {
       });
     } finally {
       clearUploadAbortController(this.abortControllers, jobId);
+      if (this.queue.isRunning(jobId)) {
+        this.queue.markDone(jobId);
+        this.drainQueue();
+      }
     }
   }
 
