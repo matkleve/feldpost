@@ -139,8 +139,8 @@ export function buildAddressLayers(
   const entries: AddressLayerEntry[] = [];
 
   for (let i = 0; i < folderSegments.length; i++) {
-    const prefixPath = [...folderSegments.slice(0, i + 1), fileName].join('/');
-    const so = buildSearchObjectFromRelativePath(prefixPath, fileName, geoInput);
+    const prefixPath = folderSegments.slice(0, i + 1).join('/');
+    const so = buildSearchObjectFromRelativePath(prefixPath, '', geoInput);
     const parsed = extractStreetLevel(so);
     if (hasAnyStreetLevel(parsed)) {
       entries.push({
