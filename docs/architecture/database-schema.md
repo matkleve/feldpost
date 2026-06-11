@@ -242,13 +242,17 @@ Unique: `(media_item_id, location_id)`.
 
 ### public.dedup_hashes
 
-| column        | type        | null/default                       | spec reference(s)                                                  |
-| ------------- | ----------- | ---------------------------------- | ------------------------------------------------------------------ |
-| id            | uuid        | not null/default gen_random_uuid() | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
-| user_id       | uuid        | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
-| media_item_id | uuid        | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
-| content_hash  | text        | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
-| created_at    | timestamptz | not null/default now()             | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| column          | type        | null/default                       | spec reference(s)                                                                                  |
+| --------------- | ----------- | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
+| id              | uuid        | not null/default gen_random_uuid() | docs/specs/service/media-upload-service/upload-manager-pipeline.md                               |
+| user_id         | uuid        | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.dedup-scope.supplement.md (audit) |
+| media_item_id   | uuid        | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                               |
+| content_hash    | text        | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.dedup-scope.supplement.md        |
+| created_at      | timestamptz | not null/default now()             | docs/specs/service/media-upload-service/upload-manager-pipeline.md                               |
+| organization_id | uuid        | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.dedup-scope.supplement.md        |
+| hash_algo       | text        | not null/default `photo_v1`        | docs/specs/service/media-upload-service/upload-manager-pipeline.dedup-scope.supplement.md        |
+
+Unique: `(organization_id, content_hash)`. `user_id` is audit-only (first registrant).
 
 ### public.share_sets
 

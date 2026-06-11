@@ -37,6 +37,15 @@ describe('mergeTitleCandidateOnJob', () => {
           filenameAlwaysOverridesFolder: true,
         }),
       },
+      addressOrchestrator: {
+        getGroupState: vi.fn().mockReturnValue({
+          searchObject: {
+            street: 'Fuchsthalergasse',
+            houseNumber: '4',
+            city: 'Wien',
+          },
+        }),
+      },
     };
 
     const result = mergeTitleCandidateOnJob(
@@ -47,7 +56,13 @@ describe('mergeTitleCandidateOnJob', () => {
 
     expect(result.highConfidence).toBe(true);
     expect(result.titleAddress).toBe('Fuchsthalergasse 4, Wien');
-    expect(updateJob).not.toHaveBeenCalled();
+    expect(updateJob).toHaveBeenCalledWith(
+      job.id,
+      expect.objectContaining({
+        titleAddress: 'Fuchsthalergasse 4, Wien',
+        titleAddressSource: 'folder',
+      }),
+    );
   });
 
   it('prefers high-confidence folder over low-confidence filename parse', () => {
@@ -145,6 +160,8 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       emitLocationConflict: vi.fn(),
       getAbortSignal: vi.fn(),
       checkDedupHash: vi.fn().mockResolvedValue(null),
+      getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      emitDuplicateDetected: vi.fn(),
     };
 
     await runPreUploadLocationResolve(deps as never, job.id, job.parsedExif ?? {}, ctx as never);
@@ -199,7 +216,12 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       emitImageAttached: vi.fn(),
       emitLocationConflict: vi.fn(),
       getAbortSignal: vi.fn(),
-      checkDedupHash: vi.fn().mockResolvedValue('existing-media-id'),
+      checkDedupHash: vi.fn().mockResolvedValue({
+        mediaItemId: 'existing-media-id',
+        registeredByUserId: 'user-1',
+      }),
+      getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      emitDuplicateDetected: vi.fn(),
     };
 
     const outcome = await runPreUploadLocationResolve(
@@ -210,7 +232,7 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
     );
 
     expect(outcome).toBe('dedup_skip');
-    expect(job.duplicateOfMediaId).toBe('existing-media-id');
+    expect(job.existingMediaId).toBe('existing-media-id');
     expect(job.phase).toBe('skipped');
     expect(deps.queue.markDone).toHaveBeenCalledWith(job.id);
     expect(ctx.emitUploadSkipped).toHaveBeenCalledWith(
@@ -264,7 +286,12 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       emitImageAttached: vi.fn(),
       emitLocationConflict: vi.fn(),
       getAbortSignal: vi.fn(),
-      checkDedupHash: vi.fn().mockResolvedValue('existing-media-id'),
+      checkDedupHash: vi.fn().mockResolvedValue({
+        mediaItemId: 'existing-media-id',
+        registeredByUserId: 'user-1',
+      }),
+      getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      emitDuplicateDetected: vi.fn(),
     };
 
     const outcome = await runPreUploadLocationResolve(

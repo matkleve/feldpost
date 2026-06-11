@@ -1,7 +1,6 @@
-import { computeContentHash, readFileHead } from '../../support/content-hash.util';
 import type { FilenameParserService } from '../../../filename-parser/filename-parser.service';
 import type { UploadAttachPipelineService } from '../attach/upload-attach-pipeline.service';
-import { handleDedupSkip } from '../../support/upload-dedup-skip.util';
+import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
 import type { UploadConflictService } from '../../support/upload-conflict.service';
 import type { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
@@ -291,45 +290,8 @@ export async function hashAndCheckDedupForNewJob(
   parsedExif: ParsedExif,
   ctx: PipelineContext,
 ): Promise<boolean> {
-  if (!deps.uploadService.isPhotoFile(job.file)) {
-    return false;
-  }
-
-  if (job.forceDuplicateUpload) {
-    deps.jobState.updateJob(jobId, { forceDuplicateUpload: false });
-    return false;
-  }
-
-  deps.jobState.setPhase(jobId, 'hashing');
-  const fileHead = await readFileHead(job.file);
-  const contentHash = await computeContentHash({
-    fileHeadBytes: fileHead,
-    fileSize: job.file.size,
-    gpsCoords: parsedExif.coords
-      ? { lat: parsedExif.coords.lat, lng: parsedExif.coords.lng }
-      : undefined,
-    capturedAt: parsedExif.capturedAt?.toISOString(),
-    direction: parsedExif.direction,
-  });
-  deps.jobState.updateJob(jobId, { contentHash });
-
-  deps.jobState.setPhase(jobId, 'dedup_check');
-  const dedupResult = await ctx.checkDedupHash(contentHash);
-  if (!dedupResult) {
-    return false;
-  }
-
-  handleDedupSkip({
-    jobId,
-    job,
-    contentHash,
-    existingMediaId: dedupResult,
-    setPhase: (id, phase) => deps.jobState.setPhase(id, phase),
-    updateJob: (id, patch) => deps.jobState.updateJob(id, patch),
-    markDone: (id) => deps.queue.markDone(id),
-    ctx,
-  });
-  return true;
+  const outcome = await runUploadDedupCheck(deps, jobId, job, parsedExif, ctx);
+  return outcome === 'skipped' || outcome === 'issue';
 }
 
 /** Panel "No auto location" — only explicit optional disables GPS/filename routing. */

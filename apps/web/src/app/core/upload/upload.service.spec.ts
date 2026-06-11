@@ -420,7 +420,7 @@ describe('UploadService', () => {
       expect(result.error).toBeTruthy();
     });
 
-    it('returns id and coords on a successful upload with EXIF GPS', async () => {
+    it('returns id on a successful upload with EXIF GPS (coords resolve later)', async () => {
       const { service } = setup();
 
       const result = await service.uploadFile(makeFile());
@@ -428,7 +428,7 @@ describe('UploadService', () => {
       expect(result.error).toBeNull();
       if (result.error === null) {
         expect(result.id).toBe('img-uuid');
-        expect(result.coords).toEqual({ lat: 51.5074, lng: -0.1278 });
+        expect(result.coords).toBeUndefined();
       }
     });
 
@@ -596,11 +596,10 @@ describe('UploadService', () => {
       vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: new Date('2025-06-01') });
     });
 
-    it('calls GeocodingService.reverse() with EXIF coordinates after successful upload', async () => {
+    it('calls GeocodingService.reverse() with placement coordinates after successful upload', async () => {
       const { service, fakeGeocoding } = setup();
 
-      await service.uploadFile(makeFile());
-      // Allow the fire-and-forget to complete.
+      await service.uploadFile(makeFile(), { lat: 47.3769, lng: 8.5417 });
       await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
       expect(fakeGeocoding.reverse).toHaveBeenCalledWith(47.3769, 8.5417);
@@ -609,15 +608,17 @@ describe('UploadService', () => {
     it('updates the DB row with resolved address fields via RPC', async () => {
       const { service, fakeSupabase, fakeGeocoding } = setup();
 
-      await service.uploadFile(makeFile());
+      await service.uploadFile(makeFile(), { lat: 47.3769, lng: 8.5417 });
       await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
       const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
-        (c: string[]) => c[0] === 'bulk_update_media_addresses',
+        (c: string[]) => c[0] === 'resolve_media_location',
       )!;
       expect(rpcCall).toBeDefined();
       expect(rpcCall[1]).toMatchObject({
-        p_media_item_ids: ['img-uuid'],
+        p_media_item_id: 'img-uuid',
+        p_latitude: 47.3769,
+        p_longitude: 8.5417,
         p_address_label: 'BurgstraÃƒÆ’Ã…Â¸e 7, 8001 ZÃƒÆ’Ã‚Â¼rich, Switzerland',
         p_city: 'ZÃƒÆ’Ã‚Â¼rich',
         p_district: 'Altstadt',
@@ -666,7 +667,7 @@ describe('UploadService', () => {
 
       const mediaInsertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(mediaInsertCall.media_type).toBe('photo');
-      expect(mediaInsertCall.location_status).toBe('gps');
+      expect(mediaInsertCall.location_status).toBe('pending');
     });
   });
 });

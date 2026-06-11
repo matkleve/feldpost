@@ -25485,6 +25485,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.missingData.duplicate', 'File already in workspace', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'File already in workspace', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Datei bereits im Arbeitsbereich', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File già nell''area di lavoro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.status.skipped.duplicate', 'Already uploaded', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

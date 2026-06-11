@@ -101,6 +101,7 @@ export type UploadJobMode = 'new' | 'replace' | 'attach';
 export type UploadLocationRequirementMode = 'required' | 'optional';
 
 export type UploadJobIssueKind =
+  | 'duplicate_file'
   | 'duplicate_photo'
   | 'missing_gps'
   | 'address_ambiguous'
@@ -154,6 +155,8 @@ export interface UploadJob {
   parsedExif?: ParsedExif;
   /** Dedup content hash (set after 'hashing' phase). */
   contentHash?: string;
+  /** Hash algorithm used for `contentHash` (`photo_v1` | `binary_v1`). */
+  contentHashAlgo?: 'photo_v1' | 'binary_v1';
   /** If phase === 'skipped', the existing media row id that matched. */
   existingMediaId?: string;
   /** Step 3: duplicate tag before geocode — upload may still proceed. */
@@ -251,6 +254,19 @@ export interface UploadSkippedEvent {
   fileName: string;
   contentHash: string;
   existingMediaId: string;
+}
+
+export interface DuplicateDetectedEvent {
+  jobId: string;
+  batchId: string;
+  fileName: string;
+  contentHash: string;
+  existingMediaId: string;
+}
+
+export interface DedupHashMatch {
+  mediaItemId: string;
+  registeredByUserId: string;
 }
 
 export interface JobPhaseChangedEvent {
@@ -362,8 +378,10 @@ export interface PipelineContext {
   emitBatchProgress(batchId: string): void;
   drainQueue(): void;
   getAbortSignal(jobId: string): AbortSignal | undefined;
-  checkDedupHash(contentHash: string): Promise<string | null>;
+  checkDedupHash(contentHash: string): Promise<DedupHashMatch | null>;
+  getCurrentUserId(): string | undefined;
   emitUploadSkipped(event: UploadSkippedEvent): void;
+  emitDuplicateDetected(event: DuplicateDetectedEvent): void;
   emitImageUploaded(event: ImageUploadedEvent): void;
   emitImageReplaced(event: ImageReplacedEvent): void;
   emitImageAttached(event: ImageAttachedEvent): void;

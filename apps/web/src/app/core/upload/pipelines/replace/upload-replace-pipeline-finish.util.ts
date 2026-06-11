@@ -4,7 +4,10 @@
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md § Replace Upload Pipeline
  */
 
-import { insertDedupHashFireAndForget } from '../../support/upload-db-postwrite.util';
+import {
+  insertDedupHashFireAndForget,
+  organizationIdFromStoragePath,
+} from '../../support/upload-db-postwrite.util';
 import type { PipelineContext } from '../../upload-manager.types';
 import { buildReplaceUpdateData } from './upload-replace-update-data.util';
 import type {
@@ -84,6 +87,8 @@ export async function finishReplacePipelineJob(
     contentHash: updatedJob.contentHash,
     mediaItemId: targetMediaItemId,
     userId: deps.getUser()?.id,
+    organizationId: organizationIdFromStoragePath(updatedJob.storagePath),
+    hashAlgo: updatedJob.contentHashAlgo,
     insert: (payload) => deps.supabaseClient.from('dedup_hashes').insert(payload),
   });
 

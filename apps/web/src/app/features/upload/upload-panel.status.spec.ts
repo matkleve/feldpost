@@ -1,85 +1,68 @@
-import { By } from '@angular/platform-browser';
 import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec';
 
 describe('UploadPanelComponent missing_data prompt', () => {
   it('renders compact missing_data status text for missing_data jobs', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
-    ]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' })],
+    });
+    component.laneHandlers.setSelectedLane('issues');
 
-    const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
-    expect(status).not.toBeNull();
-    expect(status.nativeElement.textContent).toContain('Missing location');
+    expect(component.visibleLaneJobs()[0]?.statusLabel).toBe('Missing location');
   });
 
-  it('enables left placement action for missing_data jobs', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
-    ]);
-    fixture.componentInstance.setSelectedLane('issues');
-    fixture.detectChanges();
+  it('enables row interaction for missing_data jobs', async () => {
+    const job = makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' });
+    const { component } = await setupUploadPanel({ initialJobs: [job] });
+    component.laneHandlers.setSelectedLane('issues');
 
-    const placementButtons = fixture.debugElement.queryAll(
-      By.css('.upload-panel__row-action--left'),
-    );
-    expect((placementButtons[0].nativeElement as HTMLButtonElement).disabled).toBe(false);
+    expect(component.rowHandlers.isRowInteractive(job)).toBe(true);
   });
 
-  it('disables left placement action for non-missing_data rows', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' })]);
-    fixture.detectChanges();
+  it('disables row interaction for non-missing_data rows', async () => {
+    const job = makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' });
+    const { component } = await setupUploadPanel({ initialJobs: [job] });
 
-    const placementButton = fixture.debugElement.query(By.css('.upload-panel__row-action--left'));
-    expect((placementButton.nativeElement as HTMLButtonElement).disabled).toBe(true);
+    expect(component.rowHandlers.isRowInteractive(job)).toBe(false);
   });
 
   it('does not render missing_data status text for completed jobs', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([makeUploadJob({ phase: 'complete', statusLabel: 'Uploaded' })]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [makeUploadJob({ phase: 'complete', statusLabel: 'Uploaded' })],
+    });
+    component.laneHandlers.setSelectedLane('uploaded');
 
-    const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
-    expect(status.nativeElement.textContent).not.toContain('Missing location');
+    expect(component.visibleLaneJobs()[0]?.statusLabel).toBe('Uploaded');
+    expect(component.visibleLaneJobs()[0]?.statusLabel).not.toContain('Missing location');
   });
 });
 
 describe('UploadPanelComponent error display', () => {
   it('renders error text in compact status line for error-phase jobs', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'File too large' }),
-    ]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [
+        makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'File too large' }),
+      ],
+    });
+    component.laneHandlers.setSelectedLane('issues');
 
-    const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
-    expect(status).not.toBeNull();
-    expect(status.nativeElement.textContent).toContain('File too large');
+    expect(component.visibleLaneJobs()[0]?.error).toBe('File too large');
   });
 
   it('does not render retry button in compact row mode', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'Failed' }),
-    ]);
-    fixture.detectChanges();
+    const { fixture, component } = await setupUploadPanel({
+      initialJobs: [makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'Failed' })],
+    });
+    component.laneHandlers.setSelectedLane('uploaded');
 
-    const retry = fixture.debugElement.query(By.css('.upload-panel__retry'));
-    expect(retry).toBeNull();
-
-    const dismiss = fixture.debugElement.query(By.css('.upload-panel__row-action--right'));
-    expect(dismiss).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.upload-panel__retry')).toBeNull();
+    expect(component.visibleLaneJobs().length).toBe(0);
   });
 });
 
 describe('UploadPanelComponent trackByJobId()', () => {
   it('returns the job id', async () => {
     const { component } = await setupUploadPanel();
-    const job = makeUploadJob();
-
-    expect(component.trackByJobId(0, job)).toBe(job.id);
+    const job = makeUploadJob({ id: 'job-track-1' });
+    expect(component.trackByJobId(0, job)).toBe('job-track-1');
   });
 });

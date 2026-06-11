@@ -4,7 +4,7 @@
 
 ## What It Is
 
-A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, **per-file hash deduplication scoped to comparable media types** (camera-still / raster-centric paths per policy), duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
+A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, **org-scoped per-file hash deduplication** (photo / document / video — see [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)), duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
 
 Queue management and concurrency are implemented inside `UploadManagerService` through `UploadQueueService` and pipeline services under `core/upload/`.
 
@@ -16,6 +16,7 @@ This parent spec owns the top-level contract. Deep pipeline behavior is split in
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [upload-location-config](upload-location-config.md)   | Canonical upload location thresholds, confidence gates, and disambiguation parameters                  |
 | [upload-manager-pipeline](upload-manager-pipeline.md) | Folder upload flow, deduplication, location-conflict detection, and replace/attach event orchestration |
+| [upload-manager-pipeline.dedup-scope](upload-manager-pipeline.dedup-scope.supplement.md) | Org-scoped content-hash dedup, resume vs colleague duplicate behavior |
 
 ## What It Looks Like
 
@@ -37,7 +38,7 @@ Canonical document/office upload catalog for this manager contract is: `DOC`, `D
 | 2   | A job starts processing                            | Runs validation, EXIF parse, dedup, upload, DB write           | Max 3 concurrent active jobs       |
 | 3   | Folder/file title provides address text            | Resolves textual location source with precedence rules         | File title overrides folder title  |
 | 4   | EXIF and textual location both exist               | Performs tolerance-based reconciliation (15m)                  | Keeps both coordinate sources      |
-| 5   | Duplicate hash match for photo/image               | Opens duplicate-resolution flow and moves item to issues       | Supports batch-wide decision apply |
+| 5   | Duplicate hash match for photo/image               | Opens duplicate-resolution flow and moves item to issues       | Org-scoped lookup ([dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)); same-user resume may auto-skip |
 | 5a  | User chooses `upload anyway` on duplicate issue    | Resumes pipeline with force-upload semantics                   | Only valid for duplicate review    |
 | 5b  | User chooses `use existing` on duplicate issue     | Completes without creating duplicate persisted media           | Existing media reference retained  |
 | 6   | Geocoding enrichment needed                        | Runs reverse or forward enrichment as non-blocking phase       | Failure remains non-fatal          |
@@ -259,7 +260,7 @@ sequenceDiagram
 - [ ] File-level title addresses override folder-level defaults.
 - [ ] EXIF GPS is preserved even when textual location is present.
 - [ ] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
-- [ ] Hash dedupe runs only for photos/images (never for videos, `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`).
+- [x] Hash dedupe runs for photo, document, and video (`photo_v1` / `binary_v1` per [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
 - [ ] Duplicate hash matches are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`) rather than auto-skip.
 - [ ] Duplicate resolution supports a batch apply option for matching items.
 - [ ] Duplicate issue rows expose navigation to the existing placed media.

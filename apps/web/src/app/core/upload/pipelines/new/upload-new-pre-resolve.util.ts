@@ -20,8 +20,8 @@ import {
 } from '../../location/upload-location-precedence.helpers';
 import { formatSearchObjectLabel } from '../../../location-path-parser/upload-search-object.builder';
 import { isExifAuthoritativeOverWeakFilenameStreet } from '../../location/upload-location-resolution.helpers';
-import { hashAndCheckDedupForNewJob, routeJobToMissingData } from './upload-new-prepare-route.util';
-import { handleDedupSkip } from '../../support/upload-dedup-skip.util';
+import { routeJobToMissingData } from './upload-new-prepare-route.util';
+import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
 import type { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
 import type { UploadLocationConfigService } from '../../location/upload-location-config.service';
@@ -29,7 +29,6 @@ import type { UploadQueueService } from '../../support/upload-queue.service';
 import type { UploadService } from '../../upload.service';
 import type { ParsedExif } from '../../upload.service';
 import type { UploadPreResolveWaveService } from '../../support/upload-pre-resolve-wave.service';
-import { computeContentHash, readFileHead } from '../../support/content-hash.util';
 
 export type PreResolveDeps = {
   jobState: UploadJobStateService;
@@ -136,39 +135,7 @@ export function mergeTitleCandidateOnJob(
   };
 }
 
-/** Step 3: hash + tag duplicate before geocode; job continues. */
-async function tagDedupBeforeGeocode(
-  deps: PreResolveDeps,
-  jobId: string,
-  job: UploadJob,
-  parsedExif: ParsedExif,
-  ctx: PipelineContext,
-): Promise<void> {
-  if (!deps.uploadService.isPhotoFile(job.file) || job.forceDuplicateUpload) {
-    return;
-  }
-  if (job.contentHash) {
-    return;
-  }
-  deps.jobState.setPhase(jobId, 'hashing');
-  const fileHead = await readFileHead(job.file);
-  const contentHash = await computeContentHash({
-    fileHeadBytes: fileHead,
-    fileSize: job.file.size,
-    gpsCoords: parsedExif.coords
-      ? { lat: parsedExif.coords.lat, lng: parsedExif.coords.lng }
-      : undefined,
-    capturedAt: parsedExif.capturedAt?.toISOString(),
-    direction: parsedExif.direction,
-  });
-  deps.jobState.updateJob(jobId, { contentHash });
-  deps.jobState.setPhase(jobId, 'dedup_check');
-  const existingId = await ctx.checkDedupHash(contentHash);
-  if (existingId) {
-    deps.jobState.updateJob(jobId, { duplicateOfMediaId: existingId });
-  }
-}
-
+/** Step 3: org dedup before geocode — same-user skip or colleague issue. */
 async function finishPreResolveDedup(
   deps: PreResolveDeps,
   jobId: string,
@@ -179,21 +146,8 @@ async function finishPreResolveDedup(
   if (!current) {
     return 'continue';
   }
-  if (current.duplicateOfMediaId && !current.forceDuplicateUpload) {
-    handleDedupSkip({
-      jobId,
-      job: current,
-      contentHash: current.contentHash!,
-      existingMediaId: current.duplicateOfMediaId,
-      setPhase: (id, phase) => deps.jobState.setPhase(id, phase),
-      updateJob: (id, patch) => deps.jobState.updateJob(id, patch),
-      markDone: (id) => deps.queue.markDone(id),
-      ctx,
-    });
-    return 'dedup_skip';
-  }
-  const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
-  return deduped ? 'dedup_skip' : 'continue';
+  const outcome = await runUploadDedupCheck(deps, jobId, current, parsedExif, ctx);
+  return outcome === 'skipped' || outcome === 'issue' ? 'dedup_skip' : 'continue';
 }
 
 function applyExifOnlyPlacement(
@@ -367,13 +321,11 @@ async function runPreUploadLocationResolveInner(
     groupingKey: jobAfterMerge.groupingKey,
   });
 
-  await tagDedupBeforeGeocode(deps, jobId, jobAfterMerge, parsedExif, ctx);
-
-  const jobAfterDedupTag = deps.jobState.findJob(jobId)!;
-  if (jobAfterDedupTag.duplicateOfMediaId && !jobAfterDedupTag.forceDuplicateUpload) {
-    uploadTraceDecision('pipeline', 'duplicate content detected — skip without resolving placement');
+  const dedupGate = await finishPreResolveDedup(deps, jobId, parsedExif, ctx);
+  if (dedupGate === 'dedup_skip') {
+    uploadTraceDecision('pipeline', 'duplicate content detected — dedup gate');
     uploadTraceExit('pipeline', 'runPreUploadLocationResolve', 'dedup_skip');
-    return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
+    return 'dedup_skip';
   }
 
   if (highConfidence && jobAfterMerge.groupingKey) {

@@ -30,7 +30,7 @@ describe('resolveUploadLocationInputs', () => {
   it('strips assignment coords when panel mode is optional', () => {
     const result = resolveUploadLocationInputs(createJob('optional'), coords, parsedExif);
     expect(result.coords).toBeUndefined();
-    expect(result.parsedExif?.coords).toBeUndefined();
+    expect(result.parsedExif?.coords).toEqual(coords);
     expect(result.parsedExif?.capturedAt).toEqual(parsedExif.capturedAt);
   });
 });

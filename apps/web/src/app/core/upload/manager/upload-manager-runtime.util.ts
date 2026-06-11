@@ -5,6 +5,8 @@
  */
 
 import type {
+  DedupHashMatch,
+  DuplicateDetectedEvent,
   ImageAttachedEvent,
   ImageReplacedEvent,
   ImageUploadedEvent,
@@ -20,8 +22,10 @@ export interface UploadManagerPipelineContextDeps {
   emitBatchProgress: (batchId: string) => void;
   drainQueue: () => void;
   getAbortSignal: (jobId: string) => AbortSignal | undefined;
-  checkDedupHash: (hash: string) => Promise<string | null>;
+  checkDedupHash: (hash: string) => Promise<DedupHashMatch | null>;
+  getCurrentUserId: () => string | undefined;
   emitUploadSkipped: (event: UploadSkippedEvent) => void;
+  emitDuplicateDetected: (event: DuplicateDetectedEvent) => void;
   emitImageUploaded: (event: ImageUploadedEvent) => void;
   emitImageReplaced: (event: ImageReplacedEvent) => void;
   emitImageAttached: (event: ImageAttachedEvent) => void;
@@ -38,7 +42,9 @@ export function createUploadManagerPipelineContext(
     drainQueue: () => deps.drainQueue(),
     getAbortSignal: (jobId) => deps.getAbortSignal(jobId),
     checkDedupHash: (hash) => deps.checkDedupHash(hash),
+    getCurrentUserId: () => deps.getCurrentUserId(),
     emitUploadSkipped: (event) => deps.emitUploadSkipped(event),
+    emitDuplicateDetected: (event) => deps.emitDuplicateDetected(event),
     emitImageUploaded: (event) => deps.emitImageUploaded(event),
     emitImageReplaced: (event) => deps.emitImageReplaced(event),
     emitImageAttached: (event) => deps.emitImageAttached(event),

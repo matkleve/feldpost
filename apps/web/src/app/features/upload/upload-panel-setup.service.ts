@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, inject, type WritableSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';
 import { UploadPanelLifecycleService } from './upload-panel-lifecycle.service';
@@ -11,6 +12,7 @@ import { UploadPanelLaneHandlersService } from './upload-panel-lane-handlers';
 import { UploadPanelRowHandlersService } from './upload-panel-row-handlers';
 import { UploadPanelJobActionsService } from './upload-panel-job-actions.service';
 import { UploadPanelViewModelService } from './upload-panel-view-model.service';
+import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
 import type {
   ImageUploadedEvent,
@@ -47,6 +49,7 @@ export class UploadPanelSetupService {
   private readonly rows = inject(UploadPanelRowHandlersService);
   private readonly jobActions = inject(UploadPanelJobActionsService);
   private readonly viewModel = inject(UploadPanelViewModelService);
+  private readonly dialogActions = inject(UploadPanelDialogActionsService);
 
   private readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
@@ -59,6 +62,15 @@ export class UploadPanelSetupService {
     this.lifecycle.setImageUploadedCallback((event) => options.imageUploaded(event));
     this.lifecycle.setPlacementRequestedCallback((jobId) => options.placementRequested(jobId));
     this.lifecycle.initializeSubscriptions(options.destroyRef);
+
+    this.uploadManager.duplicateDetected$
+      .pipe(takeUntilDestroyed(options.destroyRef))
+      .subscribe((event) => {
+        const job = this.uploadManager.jobs().find((entry) => entry.id === event.jobId);
+        if (job) {
+          this.dialogActions.openDuplicateResolutionDialog(job);
+        }
+      });
 
     this.rowInteractions.register({
       placementRequested: options.placementRequested,

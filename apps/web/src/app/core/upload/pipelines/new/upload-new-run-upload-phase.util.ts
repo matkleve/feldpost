@@ -1,4 +1,7 @@
-import { insertDedupHashFireAndForget } from '../../support/upload-db-postwrite.util';
+import {
+  insertDedupHashFireAndForget,
+  organizationIdFromStoragePath,
+} from '../../support/upload-db-postwrite.util';
 import { finalizeNewUploadPhase } from './upload-new-post-save.util';
 import type { UploadEnrichmentService } from '../../support/upload-enrichment.service';
 import type { UploadJobStateService } from '../../support/upload-job-state.service';
@@ -229,6 +232,8 @@ async function handleUploadResult(args: {
       contentHash: savedJob.contentHash,
       mediaItemId: savedJob.mediaId,
       userId: getUserId(),
+      organizationId: organizationIdFromStoragePath(savedJob.storagePath),
+      hashAlgo: savedJob.contentHashAlgo,
       insert: (payload) => supabaseClient.from('dedup_hashes').insert(payload),
     });
   }

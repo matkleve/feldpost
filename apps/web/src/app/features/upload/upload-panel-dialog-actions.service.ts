@@ -426,9 +426,16 @@ export class UploadPanelDialogActionsService {
       return [seed];
     }
 
-    return this.uploadManager
-      .jobs()
-      .filter((job) => job.phase === 'skipped' && job.existingMediaId === seed.existingMediaId);
+    return this.uploadManager.jobs().filter((job) => {
+      if (job.existingMediaId !== seed.existingMediaId) {
+        return false;
+      }
+      return (
+        job.phase === 'skipped' ||
+        (job.phase === 'missing_data' &&
+          (job.issueKind === 'duplicate_file' || job.issueKind === 'duplicate_photo'))
+      );
+    });
   }
 
   private prioritizeBoundProjectOptions(

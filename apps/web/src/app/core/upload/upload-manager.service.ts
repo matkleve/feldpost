@@ -85,6 +85,8 @@ export type {
   UploadFailedEvent,
   MissingDataEvent,
   UploadSkippedEvent,
+  DuplicateDetectedEvent,
+  DedupHashMatch,
   JobPhaseChangedEvent,
   BatchProgressEvent,
   BatchCompleteEvent,
@@ -104,6 +106,7 @@ import type {
   ImageUploadedEvent,
   MissingDataEvent,
   UploadSkippedEvent,
+  DuplicateDetectedEvent,
   LocationConflictEvent,
   ImageReplacedEvent,
   ImageAttachedEvent,
@@ -190,6 +193,7 @@ export class UploadManagerService {
   private readonly _imageUploaded$ = new Subject<ImageUploadedEvent>();
   private readonly _missingData$ = new Subject<MissingDataEvent>();
   private readonly _uploadSkipped$ = new Subject<UploadSkippedEvent>();
+  private readonly _duplicateDetected$ = new Subject<DuplicateDetectedEvent>();
   private readonly _locationConflict$ = new Subject<LocationConflictEvent>();
   private readonly _imageReplaced$ = new Subject<ImageReplacedEvent>();
   private readonly _imageAttached$ = new Subject<ImageAttachedEvent>();
@@ -198,6 +202,8 @@ export class UploadManagerService {
   readonly uploadFailed$: Observable<UploadFailedEvent> = this.jobState.uploadFailed$;
   readonly missingData$: Observable<MissingDataEvent> = this._missingData$.asObservable();
   readonly uploadSkipped$: Observable<UploadSkippedEvent> = this._uploadSkipped$.asObservable();
+  readonly duplicateDetected$: Observable<DuplicateDetectedEvent> =
+    this._duplicateDetected$.asObservable();
   readonly jobPhaseChanged$: Observable<JobPhaseChangedEvent> = this.jobState.jobPhaseChanged$;
   readonly batchProgress$: Observable<BatchProgressEvent> = this.batchService.batchProgress$;
   readonly batchComplete$: Observable<BatchCompleteEvent> = this.batchService.batchComplete$;
@@ -216,7 +222,9 @@ export class UploadManagerService {
     drainQueue: () => this.pipelineHost.drainQueue(this.pipelineCtx),
     getAbortSignal: (jobId) => this.pipelineHost.getAbortSignal(jobId),
     checkDedupHash: (hash) => this.checkDedupHash(hash),
+    getCurrentUserId: () => this.auth.user()?.id,
     emitUploadSkipped: (event) => this._uploadSkipped$.next(event),
+    emitDuplicateDetected: (event) => this._duplicateDetected$.next(event),
     emitImageUploaded: (event) => this._imageUploaded$.next(event),
     emitImageReplaced: (event) => this._imageReplaced$.next(event),
     emitImageAttached: (event) => this._imageAttached$.next(event),
@@ -429,7 +437,7 @@ export class UploadManagerService {
    * Check a single content hash against the server.
    * Returns the existing image ID if found, or null.
    */
-  private async checkDedupHash(contentHash: string): Promise<string | null> {
+  private async checkDedupHash(contentHash: string) {
     return checkUploadDedupHash(this.supabase.client, contentHash);
   }
 }

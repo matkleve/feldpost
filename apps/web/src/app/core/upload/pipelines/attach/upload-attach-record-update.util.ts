@@ -1,6 +1,10 @@
 import { fetchAttachExistingRow } from './upload-attach-existing-row.util';
 import { buildAttachUpdateData } from './upload-attach-update-data.util';
-import { insertDedupHashFireAndForget, verifyStoragePathWrite } from '../../support/upload-db-postwrite.util';
+import {
+  insertDedupHashFireAndForget,
+  organizationIdFromStoragePath,
+  verifyStoragePathWrite,
+} from '../../support/upload-db-postwrite.util';
 import type { ConflictResolution, UploadPhase } from '../../upload-manager.types';
 import type { ExifCoords, ParsedExif } from '../../upload.service';
 
@@ -23,6 +27,7 @@ type AttachRecordUpdateArgs = {
   parsedExif: ParsedExif;
   conflictResolution: ConflictResolution | undefined;
   contentHash: string | undefined;
+  contentHashAlgo: string | undefined;
   userId: string | undefined;
   fetchExistingRow: () => Promise<{ data: ExistingRow | null; error: unknown }>;
   updateImageRow: (
@@ -87,6 +92,8 @@ export async function performAttachRecordUpdate(
     contentHash: args.contentHash,
     mediaItemId: args.targetMediaId,
     userId: args.userId,
+    organizationId: organizationIdFromStoragePath(args.storagePath),
+    hashAlgo: args.contentHashAlgo,
     insert: args.insertDedupHash,
   });
 

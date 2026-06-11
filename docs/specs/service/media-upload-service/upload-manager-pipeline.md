@@ -31,7 +31,9 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 | 4b  | Street+house resolves to multiple cities                         | Runs disambiguation algorithm and computes ranked candidate probabilities                                       | Auto-assign only above threshold                                                                        |
 | 5   | EXIF GPS and text-derived address both available                 | Geocodes text address and compares distance to EXIF GPS using 15m tolerance                                     | Keeps both coordinate sources                                                                           |
 | 6   | Distance between text-derived and EXIF coordinates > 15m         | Marks location source mismatch for detail UI and audit fields                                                   | Upload still continues                                                                                  |
-| 7   | Job media type is photo/image                                    | Computes content hash and checks server for duplicate content                                                   | Hash dedupe does not run for videos or documents                                                        |
+| 7   | Job media type is photo, document, or video                        | Computes content hash (`photo_v1` or `binary_v1`) and checks org dedup index                                      | See [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md) |
+| 7a  | Same user re-selects folder after partial upload                 | Skips files whose hash already exists for the org with valid storage                                            | Silent resume — no duplicate modal                                                                        |
+| 7b  | Different org member uploads same fingerprint                    | Treats as org duplicate                                                                                         | Duplicate issue + modal (`use_existing` / `upload_anyway` / `reject`)                                     |
 | 8   | Job media type is video                                          | Skips dedupe check and continues normal upload path                                                             | Video uploads are never hash-blocked                                                                    |
 | 8a  | Job media type is document with GPS or parseable address         | Skips dedupe check and continues normal upload path                                                             | Applies to `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF` |
 | 8a2 | Document upload persists successfully                            | Enqueues first-page thumbnail generation job (provider-backed) and stores preview path when generation succeeds | Applies to `PDF`, `DOC`, `DOCX`, `PPT`, `PPTX`, `ODT`, `ODP`                                            |
@@ -44,7 +46,7 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 | 8f  | User changes GPS/address on persisted uploaded media             | Updates location fields for existing media only                                                                 | MUST NOT create a new upload job or re-enter upload queue                                               |
 | 8g  | User resolves issue item (GPS/address/project)                   | Job moves lane classification but selected lane stays unchanged                                                 | UI never auto-switches tabs/lane on single-item resolution                                              |
 | 8h  | User resolves ambiguous address prompt                           | Shows `candidate_select`, `manual_location_entry`, or `cancel_location_prompt` only                             | Upload-internal `address_ambiguous` flow; no map/workspace exposure                                     |
-| 9   | Duplicate hash found (photo/image)                               | Moves job to issues lane and opens duplicate-resolution modal                                                   | Not auto-skipped                                                                                        |
+| 9   | Duplicate hash found (colleague / other uploader)                  | Moves job to issues (`duplicate_file`) and opens duplicate-resolution modal                                     | Same-user match auto-skips (Action 7a)                                                                  |
 | 10  | User clicks secondary GPS button in duplicate issue row          | Opens/focuses already placed existing media item                                                                | Uses existing media reference                                                                           |
 | 11  | User resolves duplicate modal                                    | Chooses `use_existing`, `upload_anyway`, or `reject`                                                            | Optional "apply to all in batch"                                                                        |
 | 11a | Duplicate issue is resolved as `upload_anyway`                   | Resumes upload path with force-upload semantics                                                                 | Only duplicate review supports force-upload                                                             |
@@ -116,6 +118,7 @@ Full field matrices, location-resolution algorithm, duplicate/issue contracts, a
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for deep operational behavior         |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.data.md` | Data matrices / location algorithm (lint: supplement only) |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md` | Location routing FSM, persistence matrix, webkit fallback |
+| `docs/specs/service/media-upload-service/upload-manager-pipeline.dedup-scope.supplement.md` | Content-hash dedup scope (org vs user), resume vs colleague behavior |
 | `docs/specs/service/location-path-parser/location-path-parser.md`    | Address extraction from path hierarchy           |
 | `docs/specs/service/folder-scan/folder-scan.md`                      | Folder scanning and per-file aggregation         |
 | `docs/specs/service/filename-parser/filename-parser.md`              | Per-file metadata extraction (address, date)     |
@@ -252,9 +255,8 @@ sequenceDiagram
 - [x] EXIF GPS is never discarded when title/folder addresses exist.
 - [ ] Text-derived coordinates and EXIF coordinates are compared with a 15m tolerance.
 - [ ] Mismatches beyond 15m are persisted as structured location mismatch state and surfaced to detail UI.
-- [x] Hash deduplication runs only for photo/image media types.
-- [x] Videos bypass hash dedupe and stay on normal upload path.
-- [x] Documents with GPS or parseable textual address bypass hash dedupe and stay on normal upload path.
+- [x] Hash deduplication runs for photo, document, and video (`photo_v1` / `binary_v1`).
+- [x] Org-scoped dedup lookup via `check_dedup_hashes` ([dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
 - [x] Documents without GPS and without parseable textual address enter issues as `document_unresolved` with status `Choose location or project`, even when submitted with project context.
 - [x] `document_unresolved` items can be resolved either by assigning a project or by setting GPS/address, then continue to Uploaded lane.
 - [ ] Resolving one item from Issues does not auto-switch the selected lane/tab.
@@ -269,7 +271,9 @@ sequenceDiagram
 - [ ] Choosing `upload_anyway` creates a new media item even with matching hash.
 - [ ] Choosing `reject` marks the item as skipped/rejected and keeps audit trace.
 - [ ] Parser residual fragments are preserved in `addressNotes[]` and carried into media detail evidence.
-- [x] Dedup behavior is resume-safe when a folder is re-selected after interruption.
+- [x] Dedup behavior is resume-safe when a folder is re-selected after interruption (same user).
+- [x] Dedup lookup is scoped to `organization_id` ([dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
+- [x] Cross-user org duplicate matches surface as `duplicate_file` issues; same-user resume auto-skips.
 - [x] Replace flow emits `imageReplaced$` so media surfaces refresh immediately.
 - [x] Attach flow emits `imageAttached$` so photoless surfaces upgrade immediately.
 - [x] Conflict handling pauses the job and emits `locationConflict$` instead of silently choosing a row.

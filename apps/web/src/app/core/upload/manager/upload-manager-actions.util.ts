@@ -280,7 +280,12 @@ export function forceUploadManagerDuplicateUpload(
   deps: UploadManagerActionsDeps,
 ): void {
   const job = deps.findJob(jobId);
-  if (!job || job.phase !== 'skipped' || !job.existingMediaId) return;
+  const isDuplicateResume =
+    !!job?.existingMediaId &&
+    (job.phase === 'skipped' ||
+      (job.phase === 'missing_data' &&
+        (job.issueKind === 'duplicate_file' || job.issueKind === 'duplicate_photo')));
+  if (!job || !isDuplicateResume) return;
 
   deps.updateJob(jobId, {
     forceDuplicateUpload: true,
@@ -289,6 +294,8 @@ export function forceUploadManagerDuplicateUpload(
     error: undefined,
     failedAt: undefined,
     existingMediaId: undefined,
+    duplicateOfMediaId: undefined,
+    issueKind: undefined,
   });
 
   deps.drainQueue();

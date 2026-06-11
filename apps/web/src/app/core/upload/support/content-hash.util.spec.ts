@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeContentHash, readFileHead, ContentHashInput } from './content-hash.util';
+import {
+  computeBinaryContentHash,
+  computeContentHash,
+  computeUploadContentHash,
+  readFileHead,
+  ContentHashInput,
+} from './content-hash.util';
 
 /** Helper: create a minimal File from bytes. */
 function makeFile(bytes: Uint8Array, name = 'photo.jpg'): File {
@@ -90,5 +96,47 @@ describe('computeContentHash', () => {
       gpsCoords: { lat: 0, lng: 0 },
     });
     expect(noGps).not.toBe(zeroGps);
+  });
+});
+
+describe('computeBinaryContentHash', () => {
+  it('returns a 64-character hex string', async () => {
+    const hash = await computeBinaryContentHash({
+      fileHeadBytes: new Uint8Array([1, 2, 3]).buffer,
+      fileSize: 500,
+    });
+    expect(hash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('differs from photo_v1 when EXIF would change photo hash', async () => {
+    const binary = await computeBinaryContentHash({
+      fileHeadBytes: new Uint8Array([1, 2, 3]).buffer,
+      fileSize: 500,
+    });
+    const photo = await computeContentHash({
+      fileHeadBytes: new Uint8Array([1, 2, 3]).buffer,
+      fileSize: 500,
+      gpsCoords: { lat: 48.1, lng: 11.5 },
+    });
+    expect(binary).not.toBe(photo);
+  });
+});
+
+describe('computeUploadContentHash', () => {
+  it('uses binary_v1 for document media type', async () => {
+    const file = makeFile(new Uint8Array([9, 8, 7]), 'plan.pdf');
+    const result = await computeUploadContentHash(file, undefined, 'document');
+    expect(result.hashAlgo).toBe('binary_v1');
+    expect(result.contentHash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('uses photo_v1 for photo media type', async () => {
+    const file = makeFile(new Uint8Array([9, 8, 7]), 'photo.jpg');
+    const result = await computeUploadContentHash(
+      file,
+      { coords: { lat: 1, lng: 2 }, capturedAt: new Date('2026-01-01') },
+      'photo',
+    );
+    expect(result.hashAlgo).toBe('photo_v1');
   });
 });

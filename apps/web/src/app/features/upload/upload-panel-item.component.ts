@@ -112,7 +112,10 @@ export class UploadPanelItemComponent implements OnDestroy {
   readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
   readonly showDuplicateExistingMediaShortcut = computed(() => {
     const job = this.job();
-    return getIssueKind(job) === 'duplicate_photo' && !!job.existingMediaId;
+    return (
+      (getIssueKind(job) === 'duplicate_file' || getIssueKind(job) === 'duplicate_photo') &&
+      !!job.existingMediaId
+    );
   });
   readonly showThumbnailSpinner = computed(() => this.showsUploadOverlay(this.job().phase));
   /** Location / open hint over thumbnail on interactive rows (workspace detail / placement). */
@@ -184,12 +187,19 @@ export class UploadPanelItemComponent implements OnDestroy {
     if (getLaneForJob(job) === 'uploaded' && !!job.mediaId) {
       return true;
     }
-    return getIssueKind(job) === 'duplicate_photo' && !!job.existingMediaId;
+    return (
+      (getIssueKind(job) === 'duplicate_file' || getIssueKind(job) === 'duplicate_photo') &&
+      !!job.existingMediaId
+    );
   }
 
   rowMainActionAriaLabel(): string | null {
     const name = this.job().file.name;
-    if (this.job().phase === 'missing_data') {
+    if (
+      this.job().phase === 'missing_data' &&
+      getIssueKind(this.job()) !== 'duplicate_file' &&
+      getIssueKind(this.job()) !== 'duplicate_photo'
+    ) {
       return `Place ${name} on map`;
     }
     if (this.canOpenInWorkspacePane() || this.showDuplicateExistingMediaShortcut()) {
@@ -202,7 +212,12 @@ export class UploadPanelItemComponent implements OnDestroy {
   }
 
   thumbnailHintIcon(): string {
-    if (this.job().phase === 'missing_data') {
+    const issueKind = getIssueKind(this.job());
+    if (
+      this.job().phase === 'missing_data' &&
+      issueKind !== 'duplicate_file' &&
+      issueKind !== 'duplicate_photo'
+    ) {
       return 'add_location_alt';
     }
     if (this.canZoomToJob()) {
@@ -229,7 +244,7 @@ export class UploadPanelItemComponent implements OnDestroy {
 
     if (lane === 'issues') {
       const issueKind = getIssueKind(job);
-      if (issueKind === 'duplicate_photo') {
+      if (issueKind === 'duplicate_file' || issueKind === 'duplicate_photo') {
         if (job.existingMediaId) {
           actions.push('open_existing_media');
         }

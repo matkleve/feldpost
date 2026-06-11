@@ -21,6 +21,7 @@ export function buildFakeUploadManager() {
   const imageUploaded$ = new Subject<ManagerImageUploadedEvent>();
   const missingData$ = new Subject<MissingDataEvent>();
   const jobPhaseChanged$ = new Subject<JobPhaseChangedEvent>();
+  const duplicateDetected$ = new Subject<unknown>();
 
   return {
     jobs: jobsSignal.asReadonly(),
@@ -34,6 +35,7 @@ export function buildFakeUploadManager() {
     jobPhaseChanged$: jobPhaseChanged$.asObservable(),
     uploadFailed$: new Subject().asObservable(),
     missingData$: missingData$.asObservable(),
+    duplicateDetected$: duplicateDetected$.asObservable(),
     submit: vi.fn().mockReturnValue([]),
     submitFolder: vi.fn().mockResolvedValue('batch-1'),
     submitWebkitFolder: vi.fn().mockResolvedValue('batch-webkit'),
@@ -48,6 +50,7 @@ export function buildFakeUploadManager() {
     _imageUploaded$: imageUploaded$,
     _missingData$: missingData$,
     _jobPhaseChanged$: jobPhaseChanged$,
+    _duplicateDetected$: duplicateDetected$,
   };
 }
 
@@ -74,7 +77,11 @@ export type UploadPanelSetupResult = {
   fakeManager: FakeUploadManager;
 };
 
-export async function setupUploadPanel(): Promise<UploadPanelSetupResult> {
+export async function setupUploadPanel(
+  options: {
+    initialJobs?: ReadonlyArray<UploadJob>;
+  } = {},
+): Promise<UploadPanelSetupResult> {
   const fakeManager = buildFakeUploadManager();
   const fakeWorkspaceView = {
     selectedProjectIds: signal<Set<string>>(new Set()).asReadonly(),
@@ -109,7 +116,12 @@ export async function setupUploadPanel(): Promise<UploadPanelSetupResult> {
   const fixture = TestBed.createComponent(UploadPanelComponent);
   const component = fixture.componentInstance;
   const ref = fixture.componentRef;
-  fixture.detectChanges();
+
+  if (options.initialJobs?.length) {
+    fakeManager._jobsSignal.set(options.initialJobs);
+  } else {
+    fixture.detectChanges();
+  }
 
   return {
     fixture,

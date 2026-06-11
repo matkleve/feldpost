@@ -6,9 +6,8 @@
 
 import type { User } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { computeContentHash, readFileHead } from '../../support/content-hash.util';
+import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
 import type { MediaDownloadService } from '../../../media-download/media-download.service';
-import { handleDedupSkip } from '../../support/upload-dedup-skip.util';
 import type { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
 import type { UploadQueueService } from '../../support/upload-queue.service';
@@ -117,32 +116,17 @@ export async function prepareReplacePipelineJob(
     return null;
   }
 
-  deps.jobState.setPhase(jobId, 'hashing');
-  const fileHead = await readFileHead(job.file);
-  const contentHash = await computeContentHash({
-    fileHeadBytes: fileHead,
-    fileSize: job.file.size,
-  });
-  deps.jobState.updateJob(jobId, { contentHash });
-
-  deps.jobState.setPhase(jobId, 'dedup_check');
-  const dedupResult = job.forceDuplicateUpload ? null : await ctx.checkDedupHash(contentHash);
-  if (job.forceDuplicateUpload) {
-    deps.jobState.updateJob(jobId, { forceDuplicateUpload: false });
-  }
-  if (dedupResult) {
-    handleDedupSkip({
-      jobId,
-      job,
-      contentHash,
-      existingMediaId: dedupResult,
-      setPhase: (id, phase) => deps.jobState.setPhase(id, phase),
-      updateJob: (id, patch) => deps.jobState.updateJob(id, patch),
-      markDone: (id) => deps.queue.markDone(id),
-      ctx,
-    });
+  const dedupOutcome = await runUploadDedupCheck(
+    { jobState: deps.jobState, queue: deps.queue, uploadService: deps.uploadService },
+    jobId,
+    job,
+    parsedExif,
+    ctx,
+  );
+  if (dedupOutcome === 'skipped' || dedupOutcome === 'issue') {
     return null;
   }
 
-  return { job, targetMediaItemId, parsedExif, contentHash };
+  const updated = deps.jobState.findJob(jobId)!;
+  return { job: updated, targetMediaItemId, parsedExif, contentHash: updated.contentHash! };
 }

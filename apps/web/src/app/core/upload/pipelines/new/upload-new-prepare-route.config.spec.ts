@@ -65,8 +65,13 @@ describe('routePreparedNewJob config overrides', () => {
 
     await routePreparedNewJob(deps, job.id, job, {}, ctx as PipelineContext, runUploadPhase);
 
-    expect(job.locationSourceUsed).toBe('folder');
-    expect(runUploadPhase).toHaveBeenCalledWith(job.id, undefined, {}, expect.anything());
+    expect(job.locationSourceUsed).toBeUndefined();
+    expect(runUploadPhase).toHaveBeenCalledWith(
+      job.id,
+      { lat: 48.2082, lng: 16.3738 },
+      {},
+      expect.anything(),
+    );
   });
 });
 
@@ -132,6 +137,8 @@ function createPipelineContextMock() {
     drainQueue: vi.fn(),
     getAbortSignal: vi.fn().mockReturnValue(undefined),
     checkDedupHash: vi.fn().mockResolvedValue(null),
+    getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+    emitDuplicateDetected: vi.fn(),
     emitUploadSkipped: vi.fn(),
     emitImageUploaded: vi.fn(),
     emitImageReplaced: vi.fn(),

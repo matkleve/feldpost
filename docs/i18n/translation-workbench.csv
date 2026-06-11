@@ -821,6 +821,7 @@ upload.status.resolvingAddress,Resolving address...,apps/web/src/app/features/up
 upload.status.resolvingCoordinates,Resolving location...,apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText,Resolving location...,Ermittle Standort...,Risoluzione posizione...
 upload.status.missingData.gps,Choose location,apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText,Choose location,Standort wählen,Scegli posizione
 upload.status.missingData.document,Choose location or project,apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText,Choose location or project,Standort oder Projekt wählen,Scegli posizione o progetto
+upload.status.missingData.duplicate,File already in workspace,apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText,File already in workspace,Datei bereits im Arbeitsbereich,File già nell'area di lavoro
 upload.status.skipped.duplicate,Already uploaded,apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText,Already uploaded,Bereits hochgeladen,Già caricato
 upload.status.skipped,Skipped,apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText,Skipped,Übersprungen,Saltato
 upload.status.error,Upload failed,apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText,Upload failed,Upload fehlgeschlagen,Caricamento non riuscito

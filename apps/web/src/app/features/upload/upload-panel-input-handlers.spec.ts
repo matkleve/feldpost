@@ -133,7 +133,7 @@ describe('UploadPanelInputHandlersService', () => {
     expect(uploadManager.submitWebkitFolder).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          directorySegments: [],
+          directorySegments: ['Mariahilferstraße 56'],
           relativePath: expect.stringContaining('a.jpg'),
         }),
       ]),

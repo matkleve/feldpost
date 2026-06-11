@@ -7,6 +7,7 @@
  *  - All existing tests preserved + new tests for GPS, search, photo panel.
  */
 
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MapShellComponent } from './map-shell.component';
@@ -116,9 +117,9 @@ function buildTestBed() {
       {
         provide: AuthService,
         useValue: {
-          user: vi.fn().mockReturnValue(null),
-          session: { set: vi.fn() },
-          loading: { set: vi.fn() },
+          user: signal(null).asReadonly(),
+          session: signal(null).asReadonly(),
+          loading: signal(false).asReadonly(),
           initialize: vi.fn().mockResolvedValue(undefined),
         },
       },
@@ -215,12 +216,11 @@ describe('MapShellComponent', () => {
     expect(container).not.toBeNull();
   });
 
-  it('renders the floating upload button', () => {
+  it('does not mount the floating upload button (hosted by AuthenticatedAppLayout)', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
     const btn = (fixture.nativeElement as HTMLElement).querySelector('.map-upload-btn');
-    expect(btn).not.toBeNull();
-    expect((btn as HTMLButtonElement)?.getAttribute('aria-label')).toBe('Upload images');
+    expect(btn).toBeNull();
   });
 
   // ── Upload panel state ─────────────────────────────────────────────────────
@@ -398,11 +398,11 @@ describe('MapShellComponent', () => {
     expect(component.selectedMarkerKeys().size).toBe(0);
   });
 
-  it('renders the app-upload-panel element', () => {
+  it('does not mount app-upload-panel (hosted by AuthenticatedAppLayout)', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
     const panel = (fixture.nativeElement as HTMLElement).querySelector('app-upload-panel');
-    expect(panel).not.toBeNull();
+    expect(panel).toBeNull();
   });
 
   // ── Placement mode ─────────────────────────────────────────────────────────

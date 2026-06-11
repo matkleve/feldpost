@@ -59,6 +59,7 @@ export async function runAttachRecordUpdate(
     parsedExif,
     conflictResolution: job.conflictResolution,
     contentHash,
+    contentHashAlgo: job.contentHashAlgo,
     userId,
     fetchExistingRow: async () => {
       const { data: countData, error: countError } = await supabaseClient.rpc(

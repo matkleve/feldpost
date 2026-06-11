@@ -248,7 +248,10 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
         if (dedupCalls === 1) {
           return { data: [], error: null };
         }
-        return { data: [{ media_item_id: 'img-123' }], error: null };
+        return {
+          data: [{ media_item_id: 'img-123', registered_by_user_id: 'user-1' }],
+          error: null,
+        };
       },
     });
 

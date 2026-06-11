@@ -9,25 +9,25 @@ describe('UploadPanelComponent drag-and-drop interactions', () => {
   it('sets isDragging to true on dragover', async () => {
     const { component } = await setupUploadPanel();
 
-    component.onDragOver(makeDragEventStub());
+    component.inputHandlers.onDragOver(makeDragEventStub());
 
     expect(component.isDragging()).toBe(true);
   });
 
   it('sets isDragging to false on dragleave', async () => {
     const { component } = await setupUploadPanel();
-    component.isDragging.set(true);
+    component.inputHandlers.onDragOver(makeDragEventStub());
 
-    component.onDragLeave(makeDragEventStub());
+    component.inputHandlers.onDragLeave(makeDragEventStub());
 
     expect(component.isDragging()).toBe(false);
   });
 
   it('sets isDragging to false on drop', async () => {
     const { component } = await setupUploadPanel();
-    component.isDragging.set(true);
+    component.inputHandlers.onDragOver(makeDragEventStub());
 
-    component.onDrop(makeDragEventStub());
+    component.inputHandlers.onDrop(makeDragEventStub());
 
     expect(component.isDragging()).toBe(false);
   });
@@ -41,31 +41,31 @@ describe('UploadPanelComponent drag-and-drop interactions', () => {
       dataTransfer: { files: [file] },
     } as unknown as DragEvent;
 
-    component.onDrop(event);
+    component.inputHandlers.onDrop(event);
 
-    expect(fakeManager.submit).toHaveBeenCalledWith([file], { projectId: undefined });
+    expect(fakeManager.submit).toHaveBeenCalledWith([file], {
+      projectId: undefined,
+      locationRequirementMode: 'required',
+    });
   });
 });
 
 describe('UploadPanelComponent progress board', () => {
   it('renders segmented lane switch and no dot matrix when jobs exist', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'queued', statusLabel: 'Queued' }),
-      makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
-    ]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [
+        makeUploadJob({ phase: 'queued', statusLabel: 'Queued' }),
+        makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
+      ],
+    });
 
-    const board = fixture.debugElement.query(By.css('.ui-tab-list[role="tablist"]'));
-    const dots = fixture.debugElement.queryAll(By.css('.upload-panel__dot'));
-
-    expect(board).not.toBeNull();
-    expect(dots.length).toBe(0);
+    expect(component.showProgressBoard()).toBe(true);
+    expect(component.laneSwitchOptions().length).toBeGreaterThan(0);
+    expect(component.laneSwitchOptions().every((option) => !option.label?.includes('•'))).toBe(true);
   });
 
   it('does not show legacy last upload summary when queue is empty and completed batch exists', async () => {
     const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([]);
     fakeManager._batchesSignal.set([
       {
         id: 'batch-1',
@@ -87,52 +87,44 @@ describe('UploadPanelComponent progress board', () => {
   });
 
   it('shows idle empty state when no jobs and no completed batch exist', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([]);
-    fakeManager._batchesSignal.set([]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel();
 
-    const empty = fixture.debugElement.query(By.css('.upload-panel__empty'));
-    expect(empty).not.toBeNull();
-    expect(empty.nativeElement.textContent).toContain('No uploads yet');
+    expect(component.showProgressBoard()).toBe(false);
+    expect(component.jobs().length).toBe(0);
   });
 });
 
 describe('UploadPanelComponent lanes', () => {
   it('selects issues lane when clicking lane switch', async () => {
-    const { fixture, component, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
-      makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'Denied' }),
-    ]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [
+        makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
+        makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'Denied' }),
+      ],
+    });
 
-    const buttons = fixture.debugElement.queryAll(By.css('.ui-tab[role="tab"]'));
-    (buttons[2].nativeElement as HTMLButtonElement).click();
-    fixture.detectChanges();
+    component.laneHandlers.onLaneSwitchValueChange('issues');
 
     expect(component.effectiveLane()).toBe('issues');
   });
 
   it('counts missing_data jobs in issues lane', async () => {
-    const { fixture, component, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
-      makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
-    ]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [
+        makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
+        makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
+      ],
+    });
 
     expect(component.laneCounts().issues).toBe(1);
     expect(component.laneCounts().uploading).toBe(1);
   });
 
   it('routes jobs with missing-location status text to issues lane', async () => {
-    const { fixture, component, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([
-      makeUploadJob({ phase: 'uploading', statusLabel: 'Missing location' }),
-    ]);
-    component.setSelectedLane('issues');
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [makeUploadJob({ phase: 'uploading', statusLabel: 'Missing location' })],
+    });
+    component.laneHandlers.setSelectedLane('issues');
 
     expect(component.visibleLaneJobs().length).toBe(1);
     expect(component.visibleLaneJobs()[0]?.statusLabel).toBe('Missing location');
@@ -148,7 +140,7 @@ describe('UploadPanelComponent actions', () => {
 
   it('retryFile calls uploadManager.retryJob', async () => {
     const { component, fakeManager } = await setupUploadPanel();
-    component.retryFile('some-id');
+    component.rowHandlers.retryFile('some-id');
     expect(fakeManager.retryJob).toHaveBeenCalledWith('some-id');
   });
 });

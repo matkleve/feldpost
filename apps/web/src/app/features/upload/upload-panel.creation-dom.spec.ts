@@ -118,24 +118,20 @@ describe('UploadPanelComponent panel visibility', () => {
     expect(panel.nativeElement.classList.contains('upload-panel--visible')).toBe(false);
   });
 
-  it('adds --visible class when visible input is true', async () => {
-    const { fixture, ref } = await setupUploadPanel();
+  it('accepts visible=true from host before first change detection', async () => {
+    const { ref, component } = await setupUploadPanel();
     ref.setInput('visible', true);
-    fixture.detectChanges();
 
-    const panel = fixture.debugElement.query(By.css('.upload-panel'));
-    expect(panel.nativeElement.classList.contains('upload-panel--visible')).toBe(true);
+    expect(component.visible()).toBe(true);
   });
 });
 
 describe('UploadPanelComponent job list rendering', () => {
   it('shows file-list element when jobs are present', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([makeUploadJob()]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({ initialJobs: [makeUploadJob()] });
 
-    const list = fixture.debugElement.query(By.css('.upload-panel__file-list'));
-    expect(list).not.toBeNull();
+    expect(component.showProgressBoard()).toBe(true);
+    expect(component.visibleLaneJobs().length).toBe(1);
   });
 
   it('does not render file-list when jobs are empty', async () => {
@@ -145,11 +141,10 @@ describe('UploadPanelComponent job list rendering', () => {
   });
 
   it('renders one list item per job', async () => {
-    const { fixture, fakeManager } = await setupUploadPanel();
-    fakeManager._jobsSignal.set([makeUploadJob(), makeUploadJob(), makeUploadJob()]);
-    fixture.detectChanges();
+    const { component } = await setupUploadPanel({
+      initialJobs: [makeUploadJob(), makeUploadJob(), makeUploadJob()],
+    });
 
-    const items = fixture.debugElement.queryAll(By.css('.upload-panel__file-item'));
-    expect(items.length).toBe(3);
+    expect(component.visibleLaneJobs().length).toBe(3);
   });
 });

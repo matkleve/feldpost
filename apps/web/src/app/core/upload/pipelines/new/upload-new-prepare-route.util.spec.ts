@@ -24,6 +24,8 @@ function createPipelineContext(): PipelineContext {
     drainQueue: vi.fn(),
     getAbortSignal: vi.fn().mockReturnValue(undefined),
     checkDedupHash: vi.fn().mockResolvedValue(null),
+    getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+    emitDuplicateDetected: vi.fn(),
     emitUploadSkipped: vi.fn(),
     emitImageUploaded: vi.fn(),
     emitImageReplaced: vi.fn(),

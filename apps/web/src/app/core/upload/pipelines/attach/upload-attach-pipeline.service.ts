@@ -27,12 +27,11 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../../auth/auth.service';
 import { MediaDownloadService } from '../../../media-download/media-download.service';
 import { SupabaseService } from '../../../supabase/supabase.service';
-import { computeAttachContentHash } from './upload-attach-hash.util';
 import { runAttachPostUpdate } from './upload-attach-post-update.util';
 import { runAttachRecordUpdate } from './upload-attach-record-update-runner.util';
 import { isCancelledUploadJob } from '../../support/upload-cancelled.util';
 import { handleCancelledStorageCleanup } from '../../support/upload-cancelled-storage-cleanup.util';
-import { handleDedupSkip } from '../../support/upload-dedup-skip.util';
+import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
 import { UploadEnrichmentService } from '../../support/upload-enrichment.service';
 import { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { UploadJob } from '../../upload-manager.types';
@@ -178,31 +177,19 @@ export class UploadAttachPipelineService {
       return null;
     }
 
-    this.jobState.setPhase(jobId, 'hashing');
-    const contentHash = await computeAttachContentHash(currentJob.file, parsedExif);
-    this.jobState.updateJob(jobId, { contentHash });
-    this.jobState.setPhase(jobId, 'dedup_check');
-    const dedupResult = currentJob.forceDuplicateUpload
-      ? null
-      : await ctx.checkDedupHash(contentHash);
-    if (currentJob.forceDuplicateUpload) {
-      this.jobState.updateJob(jobId, { forceDuplicateUpload: false });
-    }
-    if (dedupResult) {
-      handleDedupSkip({
-        jobId,
-        job: currentJob,
-        contentHash,
-        existingMediaId: dedupResult,
-        setPhase: (id, phase) => this.jobState.setPhase(id, phase),
-        updateJob: (id, patch) => this.jobState.updateJob(id, patch),
-        markDone: (id) => this.queue.markDone(id),
-        ctx,
-      });
+    const dedupOutcome = await runUploadDedupCheck(
+      { jobState: this.jobState, queue: this.queue, uploadService: this.uploadService },
+      jobId,
+      currentJob,
+      parsedExif,
+      ctx,
+    );
+    if (dedupOutcome === 'skipped' || dedupOutcome === 'issue') {
       return null;
     }
 
-    return { job: currentJob, parsedExif, contentHash };
+    const updated = this.jobState.findJob(jobId)!;
+    return { job: updated, parsedExif, contentHash: updated.contentHash! };
   }
 
   private async uploadAttachFile(
