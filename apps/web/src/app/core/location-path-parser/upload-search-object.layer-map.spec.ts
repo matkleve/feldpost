@@ -113,6 +113,31 @@ describe('upload-search-object.layer-map', () => {
     expect(soFilename.street).toBe('Gumpendorfstraße');
   });
 
+  it('EX-05: locality-only intermediate segment is excluded from conflict', () => {
+    const localityOnly: AddressLayerEntry = {
+      layerKey: 'wien/floridsdorf',
+      source: 'folder',
+      parsed: {},
+    };
+    const folderThaliastrasse: AddressLayerEntry = {
+      layerKey: 'wien/floridsdorf/thaliastraße',
+      source: 'folder',
+      parsed: { street: 'Thaliastraße', houseNumber: null, staircase: null, door: null },
+    };
+    const filenameNeustiftgasse: AddressLayerEntry = {
+      layerKey: FILENAME_LAYER_KEY,
+      source: 'filename',
+      parsed: { street: 'Neustiftgasse', houseNumber: '11', staircase: null, door: null },
+    };
+    const layers = [localityOnly, folderThaliastrasse, filenameNeustiftgasse];
+    const conflict = detectPackageConflicts(layers, 'wien/floridsdorf/thaliastraße');
+    expect(conflict).not.toBeNull();
+    expect(conflict!.conflictingEntries).toHaveLength(2);
+    expect(conflict!.conflictingEntries).not.toContain(localityOnly);
+    expect(conflict!.conflictingEntries).toContain(folderThaliastrasse);
+    expect(conflict!.conflictingEntries).toContain(filenameNeustiftgasse);
+  });
+
   it('EX-06: single street-level layer — no package conflict', () => {
     const layers = [folderNeustift];
     expect(detectPackageConflicts(layers, 'wien/neustiftgasse 34')).toBeNull();

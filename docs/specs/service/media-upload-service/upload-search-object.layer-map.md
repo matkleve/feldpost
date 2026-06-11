@@ -115,8 +115,8 @@ Emit `groupingKey` via existing `buildGroupingKey` on merged flat fields.
 
 ## Acceptance criteria
 
-- [ ] Package conflict tray appears before any `runGeocodeForGroup` for that job group.
-- [ ] Choosing a package sets flat SO street-level fields from that package only (Option A).
-- [ ] Administrative `city` unchanged when filename package selected (EX-04).
-- [ ] Enrich door when street/house agree (EX-02).
-- [ ] Vitest covers EX-01…EX-08 in examples doc.
+- [x] Package conflict tray appears before any `runGeocodeForGroup` for that job group — `needsLayerResolution` groups are held via `holdLayerPackagePreResolve` (`upload-location-pre-resolve-orchestrator.service.ts`) before `ensureGeocodedGroup` ever runs.
+- [x] Choosing a package sets flat SO street-level fields from that package only (Option A) — `resolveSOWithChosenLayer`; covered by EX-03.
+- [x] Administrative `city` unchanged when filename package selected (EX-04) — `resolveAdministrativeContext` always derives from `relativePath`, independent of `chosenLayerKey`; covered by EX-04.
+- [x] Enrich door when street/house agree (EX-02) — `mergeLayersWithoutConflict`; covered by EX-02.
+- [x] Vitest covers EX-01…EX-08 in examples doc — EX-05 added in `upload-search-object.layer-map.spec.ts` ("EX-05: locality-only intermediate segment is excluded from conflict").

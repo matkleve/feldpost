@@ -53,7 +53,7 @@ MVP excludes tray for uploaded rows. Post-save forward skipped when `coords` or 
 
 **Signals (tray reads):** `disambiguationGroups`, `selectedGroupId`, `activeGroup`, `pendingGroupCount`.
 
-**Orchestrator (production):** When `USE_TRAY_ORCHESTRATOR` is true, `registerDisambiguationGroup` calls `UploadLocationTrayProducerAdapter.syncGroupToOrchestrator`. The tray UI reads `UploadResolverTrayOrchestratorService`, not `disambiguationGroups` directly. After `classifyBatch`, `UploadManagerService` calls `notifyScanIdle(batchId)`. See [upload-resolver-tray-orchestrator.md](./upload-resolver-tray-orchestrator.md).
+**Orchestrator (production):** When `USE_TRAY_ORCHESTRATOR` is true, `registerDisambiguationGroup` calls `UploadLocationTrayProducerAdapter.syncGroupToOrchestrator`. The tray UI reads `UploadResolverTrayOrchestratorService`, not `disambiguationGroups` directly. After `classifyBatch`, `UploadManagerService` calls `UploadPreResolveWaveService.resetWave(batchId, jobCount)` — **not** `notifyScanIdle` directly; `notifyScanIdle` fires later via the early/final triggers (`notifyFirstTrayReady` / `completeJob`). See [upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle](./upload-resolver-tray-orchestrator.md).
 
 ## Source-conflict lifecycle
 
@@ -64,8 +64,8 @@ MVP excludes tray for uploaded rows. Post-save forward skipped when `coords` or 
 ## Acceptance criteria
 
 - [x] Ambiguous multi-hit jobs enter `awaiting_disambiguation` with `addressCandidates`
-- [ ] Source conflict registers once per `source|{groupingKey}` per batch under parallel pre-resolve
-- [ ] Folder source pick sets `coords` and leaves `awaiting_disambiguation`
+- [x] Source conflict registers once per `source|{groupingKey}` per batch under parallel pre-resolve — `UploadLocationSourceConflictService` singleflight via `sourceConflictInflight`; covered by `upload-location-resolution.service.spec.ts` ("singleflight: parallel registerSourceConflictGroup creates one blocked group")
+- [x] Folder (`source-text`) pick sets `job.coords` from `titleAddressCoords`/candidate and **opens the gate** (`phase` → `queued`, disambiguation fields cleared) — matches [location-routing supplement § Gate](./upload-manager-pipeline.location-routing.supplement.md); covered by `upload-location-resolution.service.spec.ts` ("applyCandidateToGroup source-text sets coords without titleAddressCoords"). Superseded wording: this AC previously read "...and leaves `awaiting_disambiguation`", which contradicted the Gate contract and the test — corrected here.
 - [x] Unambiguous or EXIF-assisted jobs get coords before dedup
 - [x] Non-blocked jobs in other groups continue uploading while one group is held
 - [x] `isolateJobFromGroup` splits one job without changing the active carousel question index

@@ -59,6 +59,19 @@ Gaps are allowed only at **higher** tiers, never below without the parent tier.
 
 `classifyBatch` MUST NOT set `needsGeocode` while package conflicts are unresolved (`needsLayerResolution`).
 
+## Cross-batch same-address dedup (open)
+
+Disambiguation dedup (`groupingKey` → tray group) is currently scoped **per `batchId`** (`upload-address-resolution.orchestrator.ts` keeps one `batchCaches` map per batch; `upload-location-disambiguation-registration.service.ts` matches groups via `g.batchId === input.batchId && g.queryKey === input.queryKey`).
+
+**Symptom:** If a second batch (e.g. a folder added shortly after the first, "nachschieben") contains jobs with the **same `groupingKey`** as a still-unresolved group in an earlier batch, the second batch's `classifyBatch` finds no `locations` row yet, runs its **own** Photon call and registers its **own** tray for the same physical address — the user can be asked the same address question twice, sometimes with different candidate text/order ("falscher Text wird gefragt").
+
+**Required (not yet implemented):**
+
+- Before registering a Branch B/C tray (`needsTray` / `ambiguous` / `city_step`) or a `layer_package` tray, `classifyBatch` / `runGeocodeForGroup` MUST check **other active batches** for an existing group with the same `groupingKey` (or `layerConflictQueryKey`).
+- If found and **resolved** → reuse the resolved candidate/placement directly (no second Photon call, no tray).
+- If found and **still open** (`needsLayerResolution` / `needsTray` / `ambiguous`) → merge the new `jobIds` into that existing group instead of opening a second tray; the existing tray's `candidates`/`discriminatingField`/title text apply to both batches.
+- Implementation note: requires a session-scoped index `groupingKey → groupState` in addition to (or instead of) the per-`batchId` `batchCaches` map.
+
 ## Branch C — street only (`country=AT`)
 
 Photon input: `street` + `country=AT` (no city in SO).
@@ -109,8 +122,9 @@ Normative detail: [search-tuning.distance-radii-contract.md](../search/search-tu
 
 ## Acceptance criteria
 
-- [ ] Branch C never opens tray from `classifyBatch` without Photon.
-- [ ] Wolzeile-style folder: numbered city (or discriminating field) options after Photon.
-- [ ] Project tray Step 2 removed; centroid bias only on Branch B.
-- [ ] `notifyScanIdle` after pre-resolve wave, not immediately after `classifyBatch`.
-- [ ] Bundle caps: 5 s max window, 5 dialogue units max; 1A+1B = one unit.
+- [x] Branch C never opens tray from `classifyBatch` without Photon — `classifyBatch` only sets `needsGeocode`/`needsLayerResolution`/`partial`/`resolved`; tray registration happens only in `runGeocodeForGroup` (`upload-location-geocode-group.service.ts`).
+- [x] Wolzeile-style folder: numbered city (or discriminating field) options after Photon — `pickDiscriminatingField` + `trayStep: '1a'` in `patchAmbiguousGeocodeOutcome` (`upload-location-geocode-outcome.util.ts`).
+- [x] Project tray Step 2 removed; centroid bias only on Branch B — `classifyBatch` passes `projectCentroid` only when `local === 'branch_b'` (`upload-address-resolution.orchestrator.ts`).
+- [x] `notifyScanIdle` after pre-resolve wave, not immediately after `classifyBatch` — `classifyBatch` is followed by `preResolveWave.resetWave(...)`; `notifyScanIdle` fires only via `notifyFirstTrayReady`/`completeJob` (`upload-pre-resolve-wave.service.ts`). See corrected wording in [upload-location-resolution.md](./upload-location-resolution.md).
+- [x] Bundle caps: 5 s max window, 5 dialogue units max; 1A+1B = one unit — `PRESENTATION_BUNDLE_WINDOW_MS=5000`, `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS=5`, shared `dialogueUnitId` via `dialogueUnitIdForGroup` (`upload-location-tray-producer.adapter.ts`).
+- [ ] Same `groupingKey` across concurrent batches reuses one disambiguation group/result instead of opening a second tray (see "Cross-batch same-address dedup" above).
