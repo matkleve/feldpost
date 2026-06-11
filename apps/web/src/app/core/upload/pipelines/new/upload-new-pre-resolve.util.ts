@@ -369,6 +369,13 @@ async function runPreUploadLocationResolveInner(
 
   await tagDedupBeforeGeocode(deps, jobId, jobAfterMerge, parsedExif, ctx);
 
+  const jobAfterDedupTag = deps.jobState.findJob(jobId)!;
+  if (jobAfterDedupTag.duplicateOfMediaId && !jobAfterDedupTag.forceDuplicateUpload) {
+    uploadTraceDecision('pipeline', 'duplicate content detected — skip without resolving placement');
+    uploadTraceExit('pipeline', 'runPreUploadLocationResolve', 'dedup_skip');
+    return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
+  }
+
   if (highConfidence && jobAfterMerge.groupingKey) {
     uploadTraceDecision('pipeline', 'path — orchestrator pre-resolve (groupingKey)');
     const orchestrated = await deps.locationResolution.applyPreResolveFromOrchestrator(jobId);
