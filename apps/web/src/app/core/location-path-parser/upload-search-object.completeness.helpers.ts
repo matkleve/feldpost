@@ -3,7 +3,7 @@
  * @see docs/specs/service/media-upload-service/upload-search-object.md
  */
 
-import type { UploadSearchObject } from '../upload/upload-address-resolution.types';
+import type { UploadSearchObject } from '../upload/address-resolution/upload-address-resolution.types';
 
 export type GeocodeCompletenessBranch =
   | 'branch_a'

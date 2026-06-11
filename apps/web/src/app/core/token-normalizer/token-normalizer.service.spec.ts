@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { LocalGeoDataAdapter } from '../location-path-parser/local-geo-data.adapter';
-import { UploadLocationConfigService } from '../upload/upload-location-config.service';
-import { DEFAULT_UPLOAD_LOCATION_CONFIG } from '../upload/upload-location-config';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
+import { DEFAULT_UPLOAD_LOCATION_CONFIG } from '../upload/location/upload-location-config';
 import { TokenNormalizerService } from './token-normalizer.service';
 
 describe('TokenNormalizerService', () => {

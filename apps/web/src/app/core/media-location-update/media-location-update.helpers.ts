@@ -1,4 +1,4 @@
-import { describeUploadPersistError } from '../upload/upload.service.util';
+import { describeUploadPersistError } from '../upload/support/upload.service.util';
 import { truncateToastTechnicalDetail } from '../toast/toast.helpers';
 
 /** User-facing location update failure with optional remediation hint. */

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
 import { LocationPathParserService } from './location-path-parser.service';
 
 function provideService(config = new UploadLocationConfigService()): LocationPathParserService {

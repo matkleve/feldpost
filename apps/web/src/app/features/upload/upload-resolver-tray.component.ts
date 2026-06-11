@@ -26,7 +26,7 @@ import { UploadService } from '../../core/upload/upload.service';
 import {
   areAllJobsReadyForTrayResolution,
   isJobReadyForTrayResolution,
-} from '../../core/upload/upload-tray-resolution-gate.helpers';
+} from '../../core/upload/address-resolution/upload-tray-resolution-gate.helpers';
 import {
   countDialogueUnits,
   formatBundleCarouselIndicator,
@@ -52,7 +52,7 @@ import {
   UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS,
 } from './upload-resolver-tray.mock-orchestrator';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
-import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
+import { UploadLocationResolutionService } from '../../core/upload/location/upload-location-resolution.service';
 
 export interface AffectedMediaRow {
   jobId: string;

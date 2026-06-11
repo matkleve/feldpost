@@ -15,8 +15,8 @@ import { SupabaseService } from '../supabase/supabase.service';
 import {
   DEFAULT_UPLOAD_LOCATION_CONFIG,
   type UploadLocationConfig,
-} from '../upload/upload-location-config';
-import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+} from '../upload/location/upload-location-config';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 

@@ -7,7 +7,7 @@ import type {
 import {
   formatUploadFailureMessage,
   uploadFailureMessageToToastText,
-} from '../../../core/upload/upload-error-messages.util';
+} from '../../../core/upload/support/upload-error-messages.util';
 import type { MediaRecord } from './media-detail-view.types';
 
 interface MediaDetailUploadHelperDeps {

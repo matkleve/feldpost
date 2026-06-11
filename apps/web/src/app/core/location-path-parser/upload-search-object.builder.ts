@@ -7,7 +7,7 @@ import type {
   UploadAddressSourceDeviation,
   UploadAddressSourceEntry,
   UploadSearchObject,
-} from '../upload/upload-address-resolution.types';
+} from '../upload/address-resolution/upload-address-resolution.types';
 import type { GemeindeRecord, PlzMap } from './local-geo-data.adapter';
 import {
   classifyTokensInSegment,

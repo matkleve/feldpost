@@ -16,7 +16,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { I18nService } from '../i18n/i18n.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { ToastService } from '../toast/toast.service';
-import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
 import { isGeocodeInfrastructureFailure } from './geocoding.helpers';
 
 // ── Types ──────────────────────────────────────────────────────────────────────

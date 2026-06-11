@@ -4,7 +4,7 @@ import {
   isSearchObjectComplete,
   searchObjectHasStreet,
 } from './upload-search-object.completeness.helpers';
-import type { UploadSearchObject } from '../upload/upload-address-resolution.types';
+import type { UploadSearchObject } from '../upload/address-resolution/upload-address-resolution.types';
 
 function baseSo(overrides: Partial<UploadSearchObject> = {}): UploadSearchObject {
   return {

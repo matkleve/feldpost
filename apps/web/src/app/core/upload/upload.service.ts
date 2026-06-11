@@ -7,7 +7,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
-import { persistUploadFile, type UploadFilePersistDeps } from './upload-file-persist.util';
+import { persistUploadFile, type UploadFilePersistDeps } from './support/upload-file-persist.util';
 import {
   convertHeicToJpegUploadFile,
   isHeicUploadFile,
@@ -16,11 +16,11 @@ import {
   resolveUploadMediaType,
   resolveUploadMimeType,
   validateUploadFile,
-} from './upload.service.util';
-import type { MediaType } from './upload-file-types';
+} from './support/upload.service.util';
+import type { MediaType } from './support/upload-file-types';
 import type { ExifCoords, FileValidation, ParsedExif, UploadResult } from './upload.types';
 
-export { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './upload-file-types';
+export { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './support/upload-file-types';
 export type {
   ExifCoords,
   FileValidation,

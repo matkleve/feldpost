@@ -4,19 +4,19 @@
  */
 
 import { Injectable, Injector, inject } from '@angular/core';
-import { UploadLocationResolutionService } from '../../upload/upload-location-resolution.service';
+import { UploadLocationResolutionService } from '../../upload/location/upload-location-resolution.service';
 import { UploadManagerService } from '../../upload/upload-manager.service';
 import {
   discriminatingFieldValue,
   pickDiscriminatingField,
-} from '../../upload/upload-location-resolution.helpers';
+} from '../../upload/location/upload-location-resolution.helpers';
 import {
   formatSourceConflictDistance,
   haversineMeters,
   labelFromFolderDisplayPath,
   SOURCE_CONFLICT_EXIF_CANDIDATE_ID,
   SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
-} from '../../upload/upload-location-precedence.helpers';
+} from '../../upload/location/upload-location-precedence.helpers';
 import type {
   UploadAddressCandidate,
   UploadDiscriminatingField,

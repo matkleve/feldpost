@@ -14,7 +14,7 @@
 
 import { inject, Injectable } from '@angular/core';
 import { LocationPathParserService } from '../location-path-parser/location-path-parser.service';
-import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
 
 /** Camera-generated filename prefixes that carry no address information. */
 const CAMERA_PREFIXES = /^(IMG|DSC|DCIM|P|PXL|MVIMG|PANO|VID|MOV|Screenshot)[\s_-]/i;
