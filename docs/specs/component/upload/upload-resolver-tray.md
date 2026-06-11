@@ -114,6 +114,8 @@ Jobs in `awaiting_disambiguation` stay in **Queue** with label “Choose address
 | `house_step` | Step 1B after city confirmed | House number list + “No number needed” |
 | `project_address_a` / `project_address_b` | Batch project precedence (Step 2) | See [stepper FSM supplement](./upload-resolver-tray.stepper-fsm.supplement.md) |
 | `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + **four** placement options (folder address / photo / both / set later) |
+| `layer_package` | Competing folder vs filename street packages | `upload.resolver.question.layerPackage` — package labels per layer |
+| `admin_level_conflict` | Admin fields disagree across folder levels or AT gazetteer | `upload.resolver.question.adminLevelConflict` — per-field `Level N: {value}` options |
 | `context_distance` | Placement beyond org `contextDistanceMaxMeters` (Settings km cap) from project GPS anchor | **Prompt B** — confirm; not the same as `exifAssistRadiusMeters` (m) |
 
 ## Dev QA (local only)

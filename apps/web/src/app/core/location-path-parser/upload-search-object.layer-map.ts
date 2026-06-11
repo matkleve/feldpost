@@ -266,19 +266,32 @@ export function resolveAdministrativeContext(
     municipalities: GemeindeRecord[];
     postcodeMap: PlzMap;
   },
-): Pick<UploadSearchObject, 'country' | 'state' | 'postcode' | 'city' | 'postcodeCandidates' | 'sources'> {
-  let so = buildSearchObjectFromRelativePath(relativePath, fileName, {
+): Pick<
+  UploadSearchObject,
+  | 'country'
+  | 'state'
+  | 'postcode'
+  | 'city'
+  | 'postcodeCandidates'
+  | 'sources'
+  | 'adminLevelMap'
+  | 'adminLevelConflicts'
+> {
+  const so = buildSearchObjectFromRelativePath(relativePath, fileName, {
     states: geo.states,
     municipalities: geo.municipalities,
+    postcodeMap: geo.postcodeMap,
   });
-  so = expandPostcodeOnSearchObject(so, geo.postcodeMap);
+  const expanded = expandPostcodeOnSearchObject(so, geo.postcodeMap);
   return {
-    country: so.country,
-    state: so.state,
-    postcode: so.postcode,
-    city: so.city,
-    postcodeCandidates: so.postcodeCandidates,
-    sources: so.sources,
+    country: expanded.country,
+    state: expanded.state,
+    postcode: expanded.postcode,
+    city: expanded.city,
+    postcodeCandidates: expanded.postcodeCandidates,
+    sources: expanded.sources,
+    adminLevelMap: so.adminLevelMap,
+    adminLevelConflicts: so.adminLevelConflicts,
   };
 }
 
@@ -341,6 +354,8 @@ function assembleFlatSearchObject(
     groupingKey: buildGroupingKey(fields),
     relativePath: relativePath.replace(/\\/g, '/'),
     fileName,
+    adminLevelMap: admin.adminLevelMap,
+    adminLevelConflicts: admin.adminLevelConflicts,
   };
 }
 

@@ -5,6 +5,11 @@
 
 import type { AddressLayerEntry } from '../../location-path-parser/upload-search-object.layer-map';
 import type {
+  AdminLevelConflict,
+  FieldLevelEntry,
+  AdminFieldKey,
+} from './upload-address-level-map.types';
+import type {
   UploadAddressCandidate,
   UploadDiscriminatingField,
 } from '../upload-manager.types';
@@ -43,6 +48,8 @@ export interface UploadSearchObject {
   groupingKey: string;
   relativePath: string;
   fileName: string;
+  adminLevelMap?: Partial<Record<AdminFieldKey, FieldLevelEntry[]>>;
+  adminLevelConflicts?: AdminLevelConflict[];
 }
 
 export type UploadGroupResolutionStatus =
@@ -50,6 +57,7 @@ export type UploadGroupResolutionStatus =
   | 'partial'
   | 'needsGeocode'
   | 'needsLayerResolution'
+  | 'needsAdminLevelResolution'
   | 'needsTray'
   | 'ambiguous';
 
@@ -95,4 +103,7 @@ export interface UploadGroupResolutionState {
   addressLayers?: AddressLayerEntry[];
   /** Tray merge key for layer_package groups. */
   layerConflictQueryKey?: string;
+  /** Tray merge key for admin_level_conflict groups. */
+  adminConflictQueryKey?: string;
+  adminLevelConflicts?: AdminLevelConflict[];
 }

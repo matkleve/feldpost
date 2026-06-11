@@ -20,6 +20,7 @@ export function extractStreetFromTitleAddress(titleAddress: string): string {
 }
 
 export type ResolverQuestionKey =
+  | 'upload.resolver.question.adminLevelConflict'
   | 'upload.resolver.question.layerPackage'
   | 'upload.resolver.question.source'
   | 'upload.resolver.question.contextDistance'
@@ -58,6 +59,9 @@ export function resolverQuestionKeyForGroup(
 ): ResolverQuestionKey {
   if (group.disambiguationKind === 'layer_package') {
     return 'upload.resolver.question.layerPackage';
+  }
+  if (group.disambiguationKind === 'admin_level_conflict') {
+    return 'upload.resolver.question.adminLevelConflict';
   }
   if (group.disambiguationKind === 'source') {
     return 'upload.resolver.question.source';

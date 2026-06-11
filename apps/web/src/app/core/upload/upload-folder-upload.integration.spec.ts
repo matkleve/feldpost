@@ -18,7 +18,13 @@ import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { LocalGeoDataAdapter } from '../location-path-parser/local-geo-data.adapter';
 import type { BundeslandRecord, GemeindeRecord, PlzMap } from '../location-path-parser/local-geo-data.adapter';
+import { UploadAddressResolutionOrchestrator } from './address-resolution/upload-address-resolution.orchestrator';
 import { UploadLocationResolutionService } from './location/upload-location-resolution.service';
+import {
+  adminLevelManualCandidateId,
+} from './location/upload-location-admin-level-choice.util';
+import { UploadLocationPreResolveOrchestratorService } from './location/upload-location-pre-resolve-orchestrator.service';
+import { UploadLocationTrayFlowService } from './location/upload-location-tray-flow.service';
 import type { ScannedFileEntry } from '../folder-scan/folder-scan.service';
 import { signal } from '@angular/core';
 
@@ -161,7 +167,18 @@ async function setup(rpcHandlers: Record<string, RpcHandler> = {}) {
 
   const service = TestBed.inject(UploadManagerService);
   const locationResolution = TestBed.inject(UploadLocationResolutionService);
-  return { service, fakeUpload, fakeGeocoding, fakeAuth, fakeSupabase, locationResolution };
+  const orchestrator = TestBed.inject(UploadAddressResolutionOrchestrator);
+  const trayFlow = TestBed.inject(UploadLocationTrayFlowService);
+  return {
+    service,
+    fakeUpload,
+    fakeGeocoding,
+    fakeAuth,
+    fakeSupabase,
+    locationResolution,
+    orchestrator,
+    trayFlow,
+  };
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────
@@ -326,6 +343,158 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
       .find((g) => g.disambiguationKind === 'city_step')!;
     expect(group.trayStep).toBe('1a');
     expect(group.candidates.length).toBe(2);
+  });
+
+  it('(d1) admin level conflict (Wien/Innsbruck) → admin_level_conflict tray before geocode', async () => {
+    const { service, fakeGeocoding, locationResolution } = await setup();
+
+    const entries: ScannedFileEntry[] = [
+      {
+        file: makeFile('photo.jpg'),
+        relativePath: 'AT/Wien/Innsbruck/photo.jpg',
+        directorySegments: ['AT', 'Wien', 'Innsbruck'],
+      },
+    ];
+
+    await service.submitWebkitFolder(entries, 'Innsbruck');
+
+    await vi.waitFor(() => {
+      const groups = locationResolution
+        .disambiguationGroups()
+        .filter((g) => g.disambiguationKind === 'admin_level_conflict');
+      expect(groups.length).toBe(1);
+    });
+
+    expect(fakeGeocoding.searchStructuredForward).not.toHaveBeenCalled();
+    expect(fakeGeocoding.searchStructuredForwardBias).not.toHaveBeenCalled();
+
+    const group = locationResolution
+      .disambiguationGroups()
+      .find((g) => g.disambiguationKind === 'admin_level_conflict')!;
+    expect(group.adminLevelConflicts?.length).toBeGreaterThan(0);
+    expect(group.candidates.length).toBeGreaterThanOrEqual(2);
+    expect(group.candidates.some((c) => c.addressLabel.toLowerCase().includes('innsbruck'))).toBe(
+      true,
+    );
+  });
+
+  it(
+    '(d3) resolving admin_level_conflict choice clears gate and continues pre-resolve',
+    async () => {
+    const { service, fakeGeocoding, locationResolution, orchestrator, trayFlow } =
+      await setup();
+    const preResolve = TestBed.inject(UploadLocationPreResolveOrchestratorService);
+
+    fakeGeocoding.searchStructuredForward.mockResolvedValue([
+      {
+        lat: 47.2692,
+        lng: 11.4041,
+        displayName: 'Hauptstraße 5, Wien, Österreich',
+        name: 'Hauptstraße 5',
+        importance: 0.9,
+        address: {
+          road: 'Hauptstraße',
+          house_number: '5',
+          postcode: '1010',
+          city: 'Wien',
+          country: 'Österreich',
+          country_code: 'at',
+        },
+      },
+    ]);
+
+    const entries: ScannedFileEntry[] = [
+      {
+        file: makeFile('photo.jpg'),
+        relativePath: 'AT/Wien/Innsbruck/Hauptstraße 5/photo.jpg',
+        directorySegments: ['AT', 'Wien', 'Innsbruck', 'Hauptstraße 5'],
+      },
+    ];
+
+    await service.submitWebkitFolder(entries, 'Hauptstraße 5');
+
+    await vi.waitFor(() => {
+      const groups = locationResolution
+        .disambiguationGroups()
+        .filter((g) => g.disambiguationKind === 'admin_level_conflict');
+      expect(groups.length).toBe(1);
+    });
+
+    expect(fakeGeocoding.searchStructuredForward).not.toHaveBeenCalled();
+    expect(fakeGeocoding.searchStructuredForwardBias).not.toHaveBeenCalled();
+
+    const group = locationResolution
+      .disambiguationGroups()
+      .find((g) => g.disambiguationKind === 'admin_level_conflict')!;
+    await trayFlow.applyAdminLevelConflictChoice(
+      group,
+      adminLevelManualCandidateId('city'),
+      'Wien',
+    );
+
+    const batchId = service.jobs()[0]!.batchId;
+    await vi.waitFor(
+      () => {
+        const states = orchestrator.listGroupStates(batchId);
+        expect(states.some((s) => s.status === 'needsAdminLevelResolution')).toBe(false);
+        const job = service.jobs()[0];
+        expect(job?.phase).not.toBe('awaiting_disambiguation');
+      },
+      { timeout: 5000 },
+    );
+
+    const openAdminGroups = locationResolution
+      .disambiguationGroups()
+      .filter((g) => g.disambiguationKind === 'admin_level_conflict' && g.resolutionGateOpen);
+    expect(openAdminGroups).toHaveLength(0);
+
+    const preResolveResult = await preResolve.applyPreResolveFromOrchestrator(
+      service.jobs()[0]!.id,
+    );
+    expect(preResolveResult).not.toBe('held');
+
+    const states = orchestrator.listGroupStates(batchId);
+    expect(states.some((s) => s.status === 'needsAdminLevelResolution')).toBe(false);
+    expect(
+      states.some((s) =>
+        ['needsGeocode', 'needsTray', 'resolved', 'partial'].includes(s.status),
+      ),
+    ).toBe(true);
+    },
+    15_000,
+  );
+
+  it('(d2) two files with same admin conflict merge into one tray group', async () => {
+    const { service, locationResolution } = await setup();
+
+    const entries: ScannedFileEntry[] = [
+      {
+        file: makeFile('a.jpg'),
+        relativePath: 'AT/Wien/Innsbruck/a.jpg',
+        directorySegments: ['AT', 'Wien', 'Innsbruck'],
+      },
+      {
+        file: makeFile('b.jpg'),
+        relativePath: 'AT/Wien/Innsbruck/b.jpg',
+        directorySegments: ['AT', 'Wien', 'Innsbruck'],
+      },
+    ];
+
+    await service.submitWebkitFolder(entries, 'Innsbruck');
+
+    await vi.waitFor(() => {
+      const groups = locationResolution
+        .disambiguationGroups()
+        .filter((g) => g.disambiguationKind === 'admin_level_conflict');
+      const coveredJobs = groups.reduce((sum, g) => sum + g.jobIds.length, 0);
+      expect(coveredJobs).toBe(2);
+    });
+
+    const groups = locationResolution
+      .disambiguationGroups()
+      .filter((g) => g.disambiguationKind === 'admin_level_conflict');
+    expect(groups.length).toBeGreaterThanOrEqual(1);
+    expect(groups.every((g) => g.candidates.length >= 2)).toBe(true);
   });
 
   it('(d) folder/filename layer-package conflict → layer_package tray before geocode', async () => {

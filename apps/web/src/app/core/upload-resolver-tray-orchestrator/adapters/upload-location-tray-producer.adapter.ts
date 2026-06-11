@@ -173,6 +173,9 @@ function questionKeyForGroup(group: UploadDisambiguationGroup): string {
   if (group.disambiguationKind === 'layer_package') {
     return 'upload.resolver.question.layerPackage';
   }
+  if (group.disambiguationKind === 'admin_level_conflict') {
+    return 'upload.resolver.question.adminLevelConflict';
+  }
   if (group.disambiguationKind === 'source') {
     return 'upload.resolver.question.source';
   }

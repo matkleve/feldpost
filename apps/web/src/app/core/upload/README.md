@@ -16,6 +16,8 @@ as the normative contract name.
 
 External callsites should import from these root files only.
 
+Root-level spec files (`upload.service.spec.ts`, `upload-manager.service.spec.ts`, `upload-folder-upload.integration.spec.ts`) test the public facades and the cross-pipeline folder-upload integration flow.
+
 ## Domain layout
 
 ```
@@ -25,6 +27,9 @@ core/upload/
 ├── upload.types.ts
 ├── upload-manager.types.ts
 ├── upload.helpers.ts
+├── upload.service.spec.ts         # facade unit tests
+├── upload-manager.service.spec.ts
+├── upload-folder-upload.integration.spec.ts
 │
 ├── manager/                       # upload-manager-* orchestration internals
 ├── location/                      # upload-location-* resolution & placement
@@ -47,7 +52,7 @@ core/upload/
 | `pipelines/new/` | [upload-manager-pipeline.md](../../../../../../docs/specs/service/media-upload-service/upload-manager-pipeline.md) | New-upload route, pre-resolve, run phase, post-save |
 | `pipelines/attach/` | upload-manager-pipeline (attach lane) | Attach record update, enrichment, finalize |
 | `pipelines/replace/` | upload-manager-pipeline (replace lane) | Replace pipeline run/finish |
-| `support/` | — | `UploadQueueService`, `UploadBatchService`, `UploadJobStateService`, storage, conflict, enrichment, error messages, content hash |
+| `support/` | — | `UploadQueueService`, `UploadBatchService`, `UploadJobStateService`, `UploadStorageService`, `UploadConflictService`, `UploadEnrichmentService`, `UploadNotificationService`, `UploadPreResolveWaveService`; utils: content-hash, file-persist, thumbnail-persist, db-postwrite, dedup-skip, cancelled, cancelled-storage-cleanup, timeout, file-types, error-messages, batch-project-tray helpers |
 | `adapters/` | `adapters/*.adapter.md` | Location lookup, project locations |
 
 ## Conventions

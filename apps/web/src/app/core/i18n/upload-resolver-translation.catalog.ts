@@ -43,6 +43,14 @@ export const UPLOAD_RESOLVER_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry
     it: 'Quali informazioni sull’indirizzo dobbiamo usare?',
   },
   {
+    key: 'upload.resolver.question.adminLevelConflict',
+    original: 'Folder levels disagree on region or city. Which value should we use?',
+    context: 'Admin level-map tray — competing admin field values across folder levels.',
+    en: 'Folder levels disagree on region or city. Which value should we use?',
+    de: 'Ordner-Ebenen widersprechen sich bei Region oder Stadt. Welchen Wert sollen wir verwenden?',
+    it: 'I livelli delle cartelle non concordano su regione o città. Quale valore usare?',
+  },
+  {
     key: 'upload.resolver.question.source',
     original:
       'Photo GPS is far from the folder address ({distance}). Which location should we use?',

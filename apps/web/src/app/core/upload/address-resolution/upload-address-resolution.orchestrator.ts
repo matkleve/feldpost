@@ -20,6 +20,10 @@ import type {
   UploadSearchObject,
 } from './upload-address-resolution.types';
 import {
+  buildAdminConflictQueryKey,
+  buildAdminConflictSignature,
+} from '../../location-path-parser/upload-address-level-map.helpers';
+import {
   summarizeGroupState,
   summarizeSearchObject,
   uploadAddressDebug,
@@ -102,6 +106,16 @@ export class UploadAddressResolutionOrchestrator {
         titleAddressLabel: string;
       }
     >();
+    const adminConflictAccum = new Map<
+      string,
+      {
+        jobIds: string[];
+        searchObject: UploadSearchObject;
+        adminLevelConflicts: NonNullable<UploadSearchObject['adminLevelConflicts']>;
+        folderDisplayPath: string;
+        titleAddressLabel: string;
+      }
+    >();
 
     for (const job of jobs) {
       const relativePath = job.relativePath ?? job.file.name;
@@ -122,6 +136,32 @@ export class UploadAddressResolutionOrchestrator {
         titleAddressLabel,
         packageConflict: !!layerResult.packageConflict,
       });
+
+      if (so.adminLevelConflicts?.length) {
+        const signature = buildAdminConflictSignature(so.adminLevelConflicts);
+        const key = buildAdminConflictQueryKey(signature);
+        const existing = adminConflictAccum.get(key);
+        if (existing) {
+          if (!existing.jobIds.includes(job.id)) {
+            existing.jobIds.push(job.id);
+          }
+        } else {
+          adminConflictAccum.set(key, {
+            jobIds: [job.id],
+            searchObject: so,
+            adminLevelConflicts: so.adminLevelConflicts,
+            folderDisplayPath,
+            titleAddressLabel,
+          });
+        }
+        this.jobState.updateJob(job.id, {
+          groupingKey: key,
+          folderDisplayPath,
+          titleAddress: titleAddressLabel,
+          titleAddressSource: job.titleAddressSource ?? 'folder',
+        });
+        continue;
+      }
 
       if (layerResult.packageConflict) {
         const key = layerResult.packageConflict.layerConflictQueryKey;
@@ -176,6 +216,24 @@ export class UploadAddressResolutionOrchestrator {
     }
 
     const cache = new Map<string, UploadGroupResolutionState>();
+
+    for (const [adminConflictQueryKey, accum] of adminConflictAccum) {
+      const adminState: UploadGroupResolutionState = {
+        status: 'needsAdminLevelResolution',
+        groupingKey: adminConflictQueryKey,
+        jobIds: accum.jobIds,
+        searchObject: accum.searchObject,
+        folderDisplayPath: accum.folderDisplayPath,
+        titleAddressLabel: accum.titleAddressLabel,
+        adminConflictQueryKey,
+        adminLevelConflicts: accum.adminLevelConflicts,
+      };
+      cache.set(adminConflictQueryKey, adminState);
+      uploadTraceDecision('orchestrator', 'needsAdminLevelResolution — admin field conflict', {
+        adminConflictQueryKey,
+        jobIds: accum.jobIds,
+      });
+    }
 
     for (const [layerConflictQueryKey, accum] of layerConflictAccum) {
       const layerState: UploadGroupResolutionState = {
@@ -337,6 +395,102 @@ export class UploadAddressResolutionOrchestrator {
   /** Drop layer-conflict cache entry after user picks a package. */
   removeGroupState(batchId: string, groupingKey: string): void {
     this.batchCaches.get(batchId)?.delete(groupingKey);
+  }
+
+  /**
+   * Re-classify flat SO groups after admin_level_conflict tray.
+   */
+  async integrateResolvedAdminGroups(
+    batchId: string,
+    oldAdminConflictKey: string,
+    groups: Array<{
+      groupingKey: string;
+      jobIds: string[];
+      searchObject: UploadSearchObject;
+      folderDisplayPath: string;
+      titleAddressLabel: string;
+    }>,
+  ): Promise<void> {
+    const cache = this.batchCaches.get(batchId) ?? new Map<string, UploadGroupResolutionState>();
+    cache.delete(oldAdminConflictKey);
+
+    const sampleJob = this.jobState.findJob(groups[0]?.jobIds[0] ?? '');
+    let projectCentroid = null as ReturnType<UploadProjectLocationsAdapter['pickCentroid']>;
+    if (sampleJob?.projectId) {
+      const rows = await this.projectLocations.listProjectLocations(sampleJob.projectId);
+      projectCentroid = this.projectLocations.pickCentroid(rows);
+    }
+
+    for (const g of groups) {
+      const { groupingKey, jobIds, searchObject: so, folderDisplayPath, titleAddressLabel } = g;
+      const local = evaluateLocalResolution(so, projectCentroid);
+
+      if (local === 'postcode_blocked' || local === 'incomplete') {
+        cache.set(groupingKey, {
+          status: 'partial',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+        });
+        continue;
+      }
+
+      if (local === 'branch_c') {
+        cache.set(groupingKey, {
+          status: 'needsGeocode',
+          groupingKey,
+          jobIds,
+          searchObject: { ...so, country: so.country ?? 'AT' },
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: 'branch_c',
+        });
+        continue;
+      }
+
+      if (local === 'metadata_only') {
+        cache.set(groupingKey, {
+          status: 'partial',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: 'metadata_only',
+        });
+        continue;
+      }
+
+      const row = await this.lookup.findBySearchObject(so);
+      if (row) {
+        cache.set(groupingKey, {
+          status: 'resolved',
+          groupingKey,
+          jobIds,
+          searchObject: so,
+          folderDisplayPath,
+          titleAddressLabel,
+          geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+          candidate: locationRowToCandidate(row),
+        });
+        continue;
+      }
+
+      cache.set(groupingKey, {
+        status: 'needsGeocode',
+        groupingKey,
+        jobIds,
+        searchObject: so,
+        folderDisplayPath,
+        titleAddressLabel,
+        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+        projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
+      });
+    }
+
+    this.batchCaches.set(batchId, cache);
   }
 
   /**

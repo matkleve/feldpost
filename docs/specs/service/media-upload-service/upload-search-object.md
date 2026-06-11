@@ -35,6 +35,23 @@ All **field names are English** (internal model). **Values** use locale-appropri
 | `groupingKey` | string | Batch geocode dedup key (building-level; see [Keys philosophy](#keys-philosophy)) |
 | `relativePath` | string | Immutable job path |
 | `fileName` | string | Leaf file name |
+| `adminLevelMap` | `Partial<Record<AdminFieldKey, FieldLevelEntry[]>>` | Admin fields per folder level (see [Admin level map](#admin-level-map)) |
+| `adminLevelConflicts` | `AdminLevelConflict[]` | Admin fields with level or gazetteer mismatch |
+
+## Admin level map
+
+Admin fields (`country`, `state`, `city`, `postcode`) **MUST** record every write with folder level in `adminLevelMap`.
+
+| Rule | Requirement |
+| --- | --- |
+| Level index | `0` = filename; `1` = direct parent folder; higher = ancestors (root = highest) |
+| Flat fields | **MUST** collapse to the entry with the **lowest** level index (most specific folder) for `groupingKey` |
+| Conflict detect order | PLZ→city lookup (no SO mutation) → AT `GemeindeRecord.b` city∈state → Salzburg (`state` name === `city` name) → same-field value compare |
+| Cross-field | When `city` and `state` are semantically incompatible (e.g. `Wien` + `Innsbruck`), **MUST** populate `adminLevelConflicts` |
+| Tray | Non-empty `adminLevelConflicts` → `needsAdminLevelResolution` before geocode |
+| Street fields | Layer packages remain normative for `street` / `houseNumber` / units — **not** in `adminLevelMap |
+
+Types: `apps/web/src/app/core/upload/address-resolution/upload-address-level-map.types.ts`.
 
 ## Keys philosophy
 

@@ -22,9 +22,15 @@ import {
   pickDiscriminatingField,
 } from './upload-location-resolution.helpers';
 import {
+  applyAdminLevelSelectionsToSearchObject,
+  buildAdminConflictCandidates,
+  parseAdminLevelCandidateId,
+} from './upload-location-admin-level-choice.util';
+import {
   bucketLayerPackageJobsByGroupingKey,
   resolveLayerPackageJobs,
 } from './upload-location-layer-package-choice.util';
+import type { AdminFieldKey } from '../address-resolution/upload-address-level-map.types';
 import type {
   DisambiguationResolvedEvent,
   UploadAddressCandidate,
@@ -83,12 +89,43 @@ export class UploadLocationTrayFlowService {
    * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#tray-registration
    */
   registerLayerPackageGroupsAfterClassify(batchId: string): void {
+    this.registerAdminLevelConflictGroupsAfterClassify(batchId);
     const states = this.orchestrator
       .listGroupStates(batchId)
       .filter((s) => s.status === 'needsLayerResolution');
     for (const state of states) {
       this.registerLayerPackageGroup(batchId, state);
     }
+  }
+
+  registerAdminLevelConflictGroupsAfterClassify(batchId: string): void {
+    const states = this.orchestrator
+      .listGroupStates(batchId)
+      .filter((s) => s.status === 'needsAdminLevelResolution');
+    for (const state of states) {
+      this.registerAdminLevelConflictGroup(batchId, state);
+    }
+  }
+
+  registerAdminLevelConflictGroup(batchId: string, state: UploadGroupResolutionState): void {
+    const queryKey = state.adminConflictQueryKey ?? state.groupingKey;
+    const conflicts = state.adminLevelConflicts ?? state.searchObject.adminLevelConflicts ?? [];
+    const candidates = buildAdminConflictCandidates(conflicts).map((c) => ({
+      id: c.id,
+      addressLabel: c.addressLabel,
+      lat: 0,
+      lng: 0,
+    }));
+    this.resolution().registerDisambiguationGroup({
+      batchId,
+      queryKey,
+      folderDisplayPath: state.folderDisplayPath,
+      titleAddress: state.titleAddressLabel,
+      jobIds: state.jobIds,
+      candidates,
+      disambiguationKind: 'admin_level_conflict',
+      adminLevelConflicts: conflicts,
+    });
   }
 
   registerLayerPackageGroup(batchId: string, state: UploadGroupResolutionState): void {
@@ -215,6 +252,154 @@ export class UploadLocationTrayFlowService {
     if (candidateId) {
       this.resolution().applyCandidateToGroup(groupId, candidateId);
     }
+  }
+
+  async applyAdminLevelConflictChoice(
+    group: UploadDisambiguationGroup,
+    candidateId: string,
+    manualValue?: string,
+  ): Promise<void> {
+    const parsed = parseAdminLevelCandidateId(candidateId);
+    const field = parsed?.field ?? (candidateId.split('|')[1] as AdminFieldKey | undefined);
+    const value = parsed?.value ?? manualValue?.trim();
+    if (!field || !value) {
+      return;
+    }
+
+    const geo = await this.loadGeoData();
+    const geoFull = { ...geo, postcodeMap: geo.postcodeMap };
+    const oldKey = group.queryKey;
+    const selections: Partial<Record<AdminFieldKey, string>> = { [field]: value };
+
+    const resolvedJobs: Array<{
+      jobId: string;
+      groupingKey: string;
+      searchObject: UploadGroupResolutionState['searchObject'];
+      folderDisplayPath: string;
+      titleAddressLabel: string;
+    }> = [];
+
+    for (const jobId of group.jobIds) {
+      const job = this.jobState.findJob(jobId);
+      if (!job) {
+        continue;
+      }
+      const groupState = this.orchestrator.getGroupStateForJob(group.batchId, jobId);
+      const baseSo = groupState?.searchObject;
+      if (!baseSo) {
+        continue;
+      }
+      const resolvedSo = applyAdminLevelSelectionsToSearchObject(baseSo, selections, geoFull);
+      const { folderDisplayPath, titleAddressLabel } = {
+        folderDisplayPath: job.folderDisplayPath ?? group.folderDisplayPath,
+        titleAddressLabel: job.titleAddress ?? group.titleAddress,
+      };
+      this.jobState.updateJob(jobId, {
+        groupingKey: resolvedSo.groupingKey,
+        folderDisplayPath,
+        titleAddress: titleAddressLabel,
+      });
+      resolvedJobs.push({
+        jobId,
+        groupingKey: resolvedSo.groupingKey,
+        searchObject: resolvedSo,
+        folderDisplayPath,
+        titleAddressLabel,
+      });
+    }
+
+    const stillConflicted = resolvedJobs.some(
+      (row) => (row.searchObject.adminLevelConflicts?.length ?? 0) > 0,
+    );
+
+    if (stillConflicted) {
+      const sample = resolvedJobs[0];
+      if (sample) {
+        const nextConflicts = sample.searchObject.adminLevelConflicts ?? [];
+        const nextKey = `adminConflict|${nextConflicts.map((c) => c.field).join(',')}`;
+        this.orchestrator.patchGroupState(group.batchId, {
+          status: 'needsAdminLevelResolution',
+          groupingKey: nextKey,
+          jobIds: [...group.jobIds],
+          searchObject: sample.searchObject,
+          folderDisplayPath: sample.folderDisplayPath,
+          titleAddressLabel: sample.titleAddressLabel,
+          adminConflictQueryKey: nextKey,
+          adminLevelConflicts: nextConflicts,
+        });
+        for (const row of resolvedJobs) {
+          this.jobState.updateJob(row.jobId, { groupingKey: nextKey });
+        }
+        this.disambiguationStore.removeGroupById(group.id);
+        this.registerAdminLevelConflictGroup(group.batchId, {
+          status: 'needsAdminLevelResolution',
+          groupingKey: nextKey,
+          jobIds: [...group.jobIds],
+          searchObject: sample.searchObject,
+          folderDisplayPath: sample.folderDisplayPath,
+          titleAddressLabel: sample.titleAddressLabel,
+          adminConflictQueryKey: nextKey,
+          adminLevelConflicts: nextConflicts,
+        });
+      }
+      this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
+      return;
+    }
+
+    const byKey = new Map<
+      string,
+      {
+        jobIds: string[];
+        searchObject: UploadGroupResolutionState['searchObject'];
+        folderDisplayPath: string;
+        titleAddressLabel: string;
+      }
+    >();
+    for (const row of resolvedJobs) {
+      const existing = byKey.get(row.groupingKey);
+      if (existing) {
+        existing.jobIds.push(row.jobId);
+      } else {
+        byKey.set(row.groupingKey, {
+          jobIds: [row.jobId],
+          searchObject: row.searchObject,
+          folderDisplayPath: row.folderDisplayPath,
+          titleAddressLabel: row.titleAddressLabel,
+        });
+      }
+    }
+
+    await this.orchestrator.integrateResolvedAdminGroups(
+      group.batchId,
+      oldKey,
+      [...byKey.entries()].map(([groupingKey, value]) => ({
+        groupingKey,
+        ...value,
+      })),
+    );
+
+    this.disambiguationStore.patchGroup({
+      ...group,
+      resolutionStatus: 'resolved',
+      resolutionGateOpen: false,
+      selectedCandidateId: candidateId,
+    });
+
+    const resolvedEvent: DisambiguationResolvedEvent = {
+      batchId: group.batchId,
+      groupId: group.id,
+      jobIds: [...group.jobIds],
+      selectedCandidateId: candidateId,
+    };
+    this.resolution().notifyDisambiguationResolved(resolvedEvent);
+
+    for (const jobId of group.jobIds) {
+      this.jobState.setPhase(jobId, 'resolving_location');
+      void this.resolution().applyPreResolveFromOrchestrator(jobId);
+    }
+
+    this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
+    this.disambiguationStore.pickNextActiveGroup(group.batchId);
   }
 
   async applyLayerPackageChoice(

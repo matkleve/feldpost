@@ -13,6 +13,7 @@ import { UploadLocationSourceConflictService } from './upload-location-source-co
 import { UploadLocationPlacementService } from './upload-location-placement.service';
 import { UploadLocationTrayFlowService } from './upload-location-tray-flow.service';
 import { UploadLocationDisambiguationRegistrationService } from './upload-location-disambiguation-registration.service';
+import type { DisambiguationRegistrationInput } from './upload-location-disambiguation-registration.helpers';
 import { UploadLocationPreResolveOrchestratorService } from './upload-location-pre-resolve-orchestrator.service';
 import { UploadLocationCandidateApplyService } from './upload-location-candidate-apply.service';
 import { isJobBlocked } from './upload-location-resolution.helpers';
@@ -139,24 +140,7 @@ export class UploadLocationResolutionService {
   }
 
   registerDisambiguationGroup(
-    input: {
-      batchId: string;
-      queryKey: string;
-      folderDisplayPath: string;
-      titleAddress: string;
-      jobIds: string[];
-      candidates: UploadAddressCandidate[];
-      localityHint?: string;
-      disambiguationKind?: UploadDisambiguationGroup['disambiguationKind'];
-      trayStep?: UploadDisambiguationGroup['trayStep'];
-      confirmedCity?: string | null;
-      step1bGate?: UploadDisambiguationGroup['step1bGate'];
-      projectCentroid?: UploadDisambiguationGroup['projectCentroid'];
-      citySuggestions?: string[];
-      houseNumberCandidates?: UploadAddressCandidate[];
-      discriminatingField?: UploadDisambiguationGroup['discriminatingField'];
-      collapseStage?: UploadDisambiguationGroup['collapseStage'];
-    },
+    input: DisambiguationRegistrationInput,
     options?: { activateTray?: boolean },
   ): void {
     this.disambiguationRegistration.registerDisambiguationGroup(input, options);

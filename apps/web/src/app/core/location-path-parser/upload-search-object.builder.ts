@@ -8,6 +8,14 @@ import type {
   UploadAddressSourceEntry,
   UploadSearchObject,
 } from '../upload/address-resolution/upload-address-resolution.types';
+import type {
+  AdminFieldKey,
+  FieldLevelEntry,
+} from '../upload/address-resolution/upload-address-level-map.types';
+import {
+  collapseAdminFlatFields,
+  detectAdminLevelConflicts,
+} from './upload-address-level-map.helpers';
 import type { GemeindeRecord, PlzMap } from './local-geo-data.adapter';
 import {
   classifyTokensInSegment,
@@ -76,6 +84,8 @@ function fieldKeyForKind(kind: ClassifiedToken['kind']): keyof SoFields | null {
   }
 }
 
+const ADMIN_FIELD_KEYS: AdminFieldKey[] = ['country', 'state', 'city', 'postcode'];
+
 function applyTokenToFields(
   fields: SoFields,
   token: ClassifiedToken,
@@ -84,6 +94,8 @@ function applyTokenToFields(
   uncertainFields: Set<string>,
   filenameOverride: boolean,
   deviations: UploadAddressSourceDeviation[],
+  level: number,
+  adminLevelMap: Partial<Record<AdminFieldKey, FieldLevelEntry[]>>,
   previousFolderValue?: string,
 ): void {
   const key = fieldKeyForKind(token.kind);
@@ -119,6 +131,13 @@ function applyTokenToFields(
 
   if (isUncertainConfidence(token.confidence)) {
     uncertainFields.add(key);
+  }
+
+  if (ADMIN_FIELD_KEYS.includes(key as AdminFieldKey) && token.value) {
+    const adminKey = key as AdminFieldKey;
+    const bucket = adminLevelMap[adminKey] ?? [];
+    bucket.push({ level, value: token.value, source, field: adminKey });
+    adminLevelMap[adminKey] = bucket;
   }
 }
 
@@ -167,6 +186,8 @@ function applySegment(
   uncertainFields: Set<string>,
   deviations: UploadAddressSourceDeviation[],
   filenameOverride: boolean,
+  level: number,
+  adminLevelMap: Partial<Record<AdminFieldKey, FieldLevelEntry[]>>,
 ): void {
   const countryCode = normalizeCountryCode(context.country);
   const atUnits = parseAtSegmentUnits(segment, countryCode);
@@ -187,6 +208,8 @@ function applySegment(
       uncertainFields,
       filenameOverride,
       deviations,
+      level,
+      adminLevelMap,
       prev ?? undefined,
     );
     if (token.kind === 'country') {
@@ -262,10 +285,16 @@ export function formatSearchObjectLabel(so: UploadSearchObject): string {
   return streetPart || cityPart || so.fileName;
 }
 
+export interface BuildSearchObjectGeo {
+  states: BundeslandRecord[];
+  municipalities: GemeindeRecord[];
+  postcodeMap?: PlzMap;
+}
+
 export function buildSearchObjectFromRelativePath(
   relativePath: string,
   fileName: string,
-  geo: { states: BundeslandRecord[]; municipalities: GemeindeRecord[] },
+  geo: BuildSearchObjectGeo,
 ): UploadSearchObject {
   const normalizedPath = relativePath.replace(/\\/g, '/');
   const segments = collapseAtSlashPathSegments(splitPathSegments(normalizedPath));
@@ -279,12 +308,14 @@ export function buildSearchObjectFromRelativePath(
   const sources: UploadAddressSourceEntry[] = [];
   const deviations: UploadAddressSourceDeviation[] = [];
   const uncertainFields = new Set<string>();
+  const adminLevelMap: Partial<Record<AdminFieldKey, FieldLevelEntry[]>> = {};
   const context: TokenClassificationContext = { country: null };
 
-  for (const segment of folderSegments) {
+  for (let segIdx = 0; segIdx < folderSegments.length; segIdx++) {
+    const level = folderSegments.length - segIdx;
     applySegment(
       fields,
-      segment,
+      folderSegments[segIdx],
       'folder',
       geo,
       context,
@@ -292,6 +323,8 @@ export function buildSearchObjectFromRelativePath(
       uncertainFields,
       deviations,
       false,
+      level,
+      adminLevelMap,
     );
   }
 
@@ -306,8 +339,18 @@ export function buildSearchObjectFromRelativePath(
       uncertainFields,
       deviations,
       true,
+      0,
+      adminLevelMap,
     );
   }
+
+  const adminLevelConflicts = detectAdminLevelConflicts(adminLevelMap, {
+    municipalities: geo.municipalities,
+    postcodeMap: geo.postcodeMap,
+    country: fields.country ?? context.country,
+  });
+
+  collapseAdminFlatFields(fields, adminLevelMap);
 
   const groupingKey = buildGroupingKey(fields);
 
@@ -320,5 +363,7 @@ export function buildSearchObjectFromRelativePath(
     groupingKey,
     relativePath: normalizedPath,
     fileName,
+    adminLevelMap,
+    adminLevelConflicts,
   };
 }

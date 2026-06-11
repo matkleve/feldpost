@@ -45,6 +45,18 @@ describe('upload-resolver-tray.helpers', () => {
     ).toBe('upload.resolver.question.door');
   });
 
+  it('resolverQuestionKeyForGroup picks admin level conflict question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'admin_level_conflict' })),
+    ).toBe('upload.resolver.question.adminLevelConflict');
+  });
+
+  it('resolverQuestionKeyForGroup picks layer package question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'layer_package' })),
+    ).toBe('upload.resolver.question.layerPackage');
+  });
+
   it('resolverScoreBand maps low, okay, and strong thresholds', () => {
     expect(resolverScoreBand(0.69)).toBe('low');
     expect(resolverScoreBand(0.7)).toBe('okay');

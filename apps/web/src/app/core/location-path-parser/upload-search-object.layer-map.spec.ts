@@ -8,16 +8,21 @@ import {
   isWeakFilenameStreetLevel,
   mergeLayersWithoutConflict,
   resolveAdministrativeContext,
+  resolveLayersForJob,
   resolveSOWithChosenLayer,
 } from './upload-search-object.layer-map';
 
 const geo = {
-  states: [{ n: 'Wien', a: ['vienna'] }],
+  states: [
+    { n: 'Wien', a: ['vienna'] },
+    { n: 'Tirol', a: [] },
+  ],
   municipalities: [
     { n: 'Wien', b: 'Wien', a: ['vienna'] },
     { n: 'Graz', b: 'Steiermark', a: [] },
+    { n: 'Innsbruck', b: 'Tirol', a: [] },
   ],
-  postcodeMap: new Map<string, string[]>(),
+  postcodeMap: { '1090': ['Wien'] },
 };
 
 const geoFull = { ...geo, postcodeMap: geo.postcodeMap };
@@ -167,5 +172,25 @@ describe('upload-search-object.layer-map', () => {
     const relativePath = 'Wien/Neustiftgasse 34/IMG_1274.jpg';
     const layers = buildAddressLayers(relativePath, 'IMG_1274.jpg', geoFull);
     expect(layers.find((e) => e.layerKey === FILENAME_LAYER_KEY)).toBeUndefined();
+  });
+
+  it('resolveAdministrativeContext surfaces adminLevelConflicts for Wien/Innsbruck', () => {
+    const admin = resolveAdministrativeContext(
+      'AT/Wien/Innsbruck/photo.jpg',
+      'photo.jpg',
+      geoFull,
+    );
+    expect(admin.adminLevelConflicts?.length).toBeGreaterThan(0);
+    expect(admin.adminLevelMap?.city?.some((e) => e.value === 'Innsbruck')).toBe(true);
+  });
+
+  it('resolveLayersForJob attaches admin conflicts to flat search object', () => {
+    const result = resolveLayersForJob(
+      'AT/Wien/Innsbruck/photo.jpg',
+      'photo.jpg',
+      geoFull,
+      'Wien/Innsbruck',
+    );
+    expect(result.searchObject.adminLevelConflicts?.length).toBeGreaterThan(0);
   });
 });

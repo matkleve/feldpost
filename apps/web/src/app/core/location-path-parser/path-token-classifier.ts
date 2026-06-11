@@ -39,6 +39,20 @@ const PROJEKT_RE = /^projekt[:\s]/i;
 
 const UNCERTAIN_LOW = 0.9;
 
+const STREET_SUFFIX_RE = /(?:straße|gasse|weg|platz|ring|allee|gürtel|zeile|steig)$/i;
+
+const STREET_KEYWORDS = new Set([
+  'straße',
+  'gasse',
+  'weg',
+  'platz',
+  'ring',
+  'allee',
+  'gürtel',
+  'zeile',
+  'steig',
+]);
+
 /** Numeric tokens are classified after country/city/street tokens in the same segment. */
 function isDeferredNumericToken(token: string): boolean {
   return /^\d+[a-zA-Z]?$/i.test(token);
@@ -100,45 +114,54 @@ function classifyNonNumericToken(
   geo: { states: BundeslandRecord[]; municipalities: GemeindeRecord[] },
   context: TokenClassificationContext,
   useAtGeo: boolean,
-): ClassifiedToken | null {
+): ClassifiedToken[] {
   if (PROJEKT_RE.test(token)) {
-    return { raw: token, kind: 'project', value: token, confidence: 1 };
+    return [{ raw: token, kind: 'project', value: token, confidence: 1 }];
   }
   if (DOOR_RE.test(token)) {
-    return { raw: token, kind: 'door', value: token, confidence: 1 };
+    return [{ raw: token, kind: 'door', value: token, confidence: 1 }];
   }
   if (STIEGE_RE.test(token)) {
-    return { raw: token, kind: 'staircase', value: token, confidence: 1 };
+    return [{ raw: token, kind: 'staircase', value: token, confidence: 1 }];
+  }
+
+  if (STREET_SUFFIX_RE.test(token)) {
+    return [{ raw: token, kind: 'street', value: token, confidence: 1 }];
   }
 
   const country = classifyCountry(token);
   if (country) {
     context.country = country.value;
-    return country;
+    return [country];
   }
 
   if (useAtGeo) {
+    const results: ClassifiedToken[] = [];
     const state = classifyWithFuse(token, geo.states, 'state');
     if (state) {
-      return state;
+      results.push(state);
     }
-
     const city = classifyWithFuse(token, geo.municipalities, 'city');
     if (city) {
-      return city;
+      results.push(city);
+    }
+    if (results.length) {
+      return results;
     }
   }
 
   if (token.length >= 2) {
-    return {
-      raw: token,
-      kind: 'street',
-      value: token,
-      confidence: 0.5,
-    };
+    return [
+      {
+        raw: token,
+        kind: 'street',
+        value: token,
+        confidence: 0.5,
+      },
+    ];
   }
 
-  return null;
+  return [];
 }
 
 /**
@@ -197,11 +220,23 @@ export function classifyTokensInSegment(
     }
   }
 
-  for (const token of nonNumeric) {
-    const hit = classifyNonNumericToken(token, geo, context, useAtGeo);
-    if (hit) {
-      classified.push(hit);
+  const mergedNonNumeric: string[] = [];
+  let mergeIndex = 0;
+  while (mergeIndex < nonNumeric.length) {
+    const current = nonNumeric[mergeIndex];
+    const next = nonNumeric[mergeIndex + 1];
+    if (next && STREET_KEYWORDS.has(next.toLowerCase())) {
+      mergedNonNumeric.push(`${current} ${next}`);
+      mergeIndex += 2;
+    } else {
+      mergedNonNumeric.push(current);
+      mergeIndex += 1;
     }
+  }
+
+  for (const token of mergedNonNumeric) {
+    const hits = classifyNonNumericToken(token, geo, context, useAtGeo);
+    classified.push(...hits);
   }
 
   for (const token of deferredNumeric) {

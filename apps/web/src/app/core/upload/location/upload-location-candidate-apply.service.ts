@@ -45,6 +45,10 @@ export class UploadLocationCandidateApplyService {
       void this.trayFlow.applyLayerPackageChoice(group, candidateId);
       return;
     }
+    if (group.disambiguationKind === 'admin_level_conflict') {
+      void this.trayFlow.applyAdminLevelConflictChoice(group, candidateId);
+      return;
+    }
     if (
       group.disambiguationKind === 'source' &&
       candidateId === SOURCE_CONFLICT_NONE_CANDIDATE_ID
