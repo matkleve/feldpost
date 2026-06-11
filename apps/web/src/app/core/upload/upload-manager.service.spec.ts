@@ -14,6 +14,7 @@ import { UploadService } from './upload.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { LocalGeoDataAdapter } from '../location-path-parser/local-geo-data.adapter';
 
 // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Fakes ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
@@ -54,6 +55,10 @@ function buildFakeGeocodingService() {
       street: 'Test St',
       country: 'Austria',
     }),
+    search: vi.fn().mockResolvedValue([]),
+    searchStructuredForward: vi.fn().mockResolvedValue([]),
+    searchStructuredForwardBias: vi.fn().mockResolvedValue([]),
+    searchStreetHouseNumbers: vi.fn().mockResolvedValue([]),
   };
 }
 
@@ -120,6 +125,14 @@ async function setup() {
       { provide: GeocodingService, useValue: fakeGeocoding },
       { provide: AuthService, useValue: fakeAuth },
       { provide: SupabaseService, useValue: fakeSupabase },
+      {
+        provide: LocalGeoDataAdapter,
+        useValue: {
+          getBundeslaender: vi.fn().mockResolvedValue([]),
+          getGemeinden: vi.fn().mockResolvedValue([]),
+          getPlzMap: vi.fn().mockResolvedValue({}),
+        },
+      },
     ],
   });
 
@@ -155,7 +168,7 @@ describe('UploadManagerService', () => {
   describe('submit()', () => {
     it('returns a batch ID and creates job IDs', async () => {
       const { service } = await setup();
-      const batchId = service.submit([makeFile(), makeFile()]);
+      const batchId = await service.submit([makeFile(), makeFile()]);
       expect(typeof batchId).toBe('string');
       const jobIds = service.jobs().map((j) => j.id);
       expect(jobIds).toHaveLength(2);
@@ -213,6 +226,24 @@ describe('UploadManagerService', () => {
         direction: undefined,
         error: null,
       });
+      // Single high-confidence Photon hit for the filename address — auto-resolves.
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([
+        {
+          lat: 48.2,
+          lng: 16.37,
+          displayName: 'Burgstraße 7, Wien, Österreich',
+          name: 'Burgstraße 7',
+          importance: 0.97,
+          address: {
+            road: 'Burgstraße',
+            house_number: '7',
+            postcode: '1010',
+            city: 'Wien',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ]);
 
       const events: { mediaId: string }[] = [];
       service.imageUploaded$.subscribe((e) => events.push(e));
@@ -224,7 +255,7 @@ describe('UploadManagerService', () => {
         expect(events.length).toBe(1);
       });
 
-      expect(fakeGeocoding.forward).toHaveBeenCalled();
+      expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalled();
       expect(events[0].mediaId).toBe('img-456');
     });
   });
@@ -432,7 +463,7 @@ describe('UploadManagerService', () => {
       service.missingData$.subscribe((e) => missingEvents.push(e.jobId));
 
       // Camera filename ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no address
-      service.submit([makeFile('DSC_0001.jpg')]);
+      service.submit([makeFile('IMG_20260311_143022.jpg')]);
       const jobId = service.jobs()[0].id;
 
       await vi.waitFor(() => {
@@ -480,7 +511,7 @@ describe('UploadManagerService', () => {
 
   describe('title extraction', () => {
     it('detects German street address in filename', async () => {
-      const { service, fakeUpload } = await setup();
+      const { service, fakeUpload, fakeGeocoding } = await setup();
       fakeUpload.parseExif.mockResolvedValue({});
       fakeUpload.uploadFile.mockResolvedValue({
         id: 'img-title',
@@ -492,14 +523,33 @@ describe('UploadManagerService', () => {
       const events: string[] = [];
       service.imageUploaded$.subscribe((e) => events.push(e.jobId));
 
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([
+        {
+          lat: 48.2,
+          lng: 16.37,
+          displayName: 'Hauptstraße 12, Wien, Österreich',
+          name: 'Hauptstraße 12',
+          importance: 0.97,
+          address: {
+            road: 'Hauptstraße',
+            house_number: '12',
+            postcode: '1010',
+            city: 'Wien',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ]);
+
       service.submit([makeFile('HauptstraÃƒÆ’Ã…Â¸e_12_front.jpg')]);
 
       await vi.waitFor(() => {
         expect(events.length).toBe(1);
       });
 
+      expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalled();
       const job = service.jobs().find((j) => j.id === events[0]);
-      expect(job?.titleAddress).toContain('HauptstraÃƒÆ’Ã…Â¸e');
+      expect(job?.titleAddress).toContain('Hauptstraße');
     });
 
     it('rejects camera-generated filenames', async () => {
