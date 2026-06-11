@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadResolverTrayOrchestratorService } from '../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
-import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
+import { UploadLocationResolutionService } from '../../core/upload/location/upload-location-resolution.service';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
 import { UploadResolverTrayComponent } from './upload-resolver-tray.component';
 import {

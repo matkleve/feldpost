@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { inject, Injectable } from '@angular/core';
-import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
 import { CITY_REGISTRY } from './city-registry.const';
 import { POSTAL_CODE_PATTERNS } from './postal-code-patterns.const';
 import { runDisambiguation } from './disambiguation-algorithms';

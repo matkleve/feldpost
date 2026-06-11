@@ -5,9 +5,9 @@
 
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';
-import type { UploadLocationRowHit, UploadSearchObject } from '../upload-address-resolution.types';
-import { searchObjectToRpcParams } from '../upload-location-resolution.helpers';
-import { summarizeSearchObject, uploadAddressDebug } from '../upload-address-resolution.debug';
+import type { UploadLocationRowHit, UploadSearchObject } from '../address-resolution/upload-address-resolution.types';
+import { searchObjectToRpcParams } from '../location/upload-location-resolution.helpers';
+import { summarizeSearchObject, uploadAddressDebug } from '../address-resolution/upload-address-resolution.debug';
 
 @Injectable({ providedIn: 'root' })
 export class UploadLocationLookupAdapter {

@@ -5,7 +5,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';
-import type { UploadProjectCentroid } from '../upload-address-resolution.types';
+import type { UploadProjectCentroid } from '../address-resolution/upload-address-resolution.types';
 
 export interface ProjectLocationRow {
   linkId: string;

@@ -2,7 +2,7 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type { UploadLocationRequirementMode } from '../../core/upload/upload-manager.types';
-import { UploadLocationResolutionService } from '../../core/upload/upload-location-resolution.service';
+import { UploadLocationResolutionService } from '../../core/upload/location/upload-location-resolution.service';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelStateService } from './upload-panel-state.service';

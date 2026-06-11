@@ -12,7 +12,7 @@ import {
   parseSettingsUrl,
   stripSettingsSuffix,
 } from './core/settings-pane/settings-url.helpers';
-import { UploadNotificationService } from './core/upload/upload-notification.service';
+import { UploadNotificationService } from './core/upload/support/upload-notification.service';
 import { DbTranslationService } from './core/i18n/db-translation.service';
 import { DomTranslationService } from './core/i18n/dom-translation.service';
 import { environment } from '../environments/environment';

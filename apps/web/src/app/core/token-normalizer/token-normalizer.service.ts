@@ -5,7 +5,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { LocalGeoDataAdapter } from '../location-path-parser/local-geo-data.adapter';
-import { UploadLocationConfigService } from '../upload/upload-location-config.service';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
 import type { UploadDiscriminatingField } from '../upload/upload-manager.types';
 
 export interface TokenNormalizeResult {
