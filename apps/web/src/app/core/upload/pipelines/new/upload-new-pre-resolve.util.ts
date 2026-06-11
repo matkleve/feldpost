@@ -21,6 +21,7 @@ import {
 import { formatSearchObjectLabel } from '../../../location-path-parser/upload-search-object.builder';
 import { isExifAuthoritativeOverWeakFilenameStreet } from '../../location/upload-location-resolution.helpers';
 import { hashAndCheckDedupForNewJob, routeJobToMissingData } from './upload-new-prepare-route.util';
+import { handleDedupSkip } from '../../support/upload-dedup-skip.util';
 import type { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
 import type { UploadLocationConfigService } from '../../location/upload-location-config.service';
@@ -179,7 +180,17 @@ async function finishPreResolveDedup(
     return 'continue';
   }
   if (current.duplicateOfMediaId && !current.forceDuplicateUpload) {
-    return 'continue';
+    handleDedupSkip({
+      jobId,
+      job: current,
+      contentHash: current.contentHash!,
+      existingMediaId: current.duplicateOfMediaId,
+      setPhase: (id, phase) => deps.jobState.setPhase(id, phase),
+      updateJob: (id, patch) => deps.jobState.updateJob(id, patch),
+      markDone: (id) => deps.queue.markDone(id),
+      ctx,
+    });
+    return 'dedup_skip';
   }
   const deduped = await hashAndCheckDedupForNewJob(deps, jobId, current, parsedExif, ctx);
   return deduped ? 'dedup_skip' : 'continue';

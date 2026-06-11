@@ -153,4 +153,68 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
     expect(job.locationSourceUsed).toBe('folder');
     expect(job.coords).toEqual({ lat: 48.199, lng: 16.35 });
   });
+
+  it('skips upload when content-hash dedup finds a match in required (non-optional) mode', async () => {
+    let job = createJob({
+      groupingKey: undefined,
+      titleAddress: undefined,
+      titleAddressSource: undefined,
+      coords: { lat: 48.2, lng: 16.37 },
+    });
+
+    const { runPreUploadLocationResolve } = await import('./upload-new-pre-resolve.util');
+    const deps = {
+      jobState: {
+        findJob: vi.fn(() => job),
+        updateJob: vi.fn((_id: string, patch: Partial<typeof job>) => {
+          job = { ...job, ...patch };
+        }),
+        setPhase: vi.fn((_id: string, phase: typeof job.phase) => {
+          job = { ...job, phase };
+        }),
+      },
+      queue: { markDone: vi.fn() },
+      uploadService: {
+        resolveMediaType: vi.fn().mockReturnValue('photo'),
+        isPhotoFile: vi.fn().mockReturnValue(true),
+      },
+      filenameParser: { extractAddress: vi.fn().mockReturnValue(undefined) },
+      locationConfig: {
+        getConfig: vi.fn().mockReturnValue({
+          titleConfidenceThreshold: 0.8,
+          filenameAlwaysOverridesFolder: true,
+        }),
+      },
+      locationResolution: {},
+      addressOrchestrator: {},
+    };
+    const ctx = {
+      emitBatchProgress: vi.fn(),
+      drainQueue: vi.fn(),
+      emitMissingData: vi.fn(),
+      failJob: vi.fn(),
+      emitUploadSkipped: vi.fn(),
+      emitImageUploaded: vi.fn(),
+      emitImageReplaced: vi.fn(),
+      emitImageAttached: vi.fn(),
+      emitLocationConflict: vi.fn(),
+      getAbortSignal: vi.fn(),
+      checkDedupHash: vi.fn().mockResolvedValue('existing-media-id'),
+    };
+
+    const outcome = await runPreUploadLocationResolve(
+      deps as never,
+      job.id,
+      job.parsedExif ?? {},
+      ctx as never,
+    );
+
+    expect(outcome).toBe('dedup_skip');
+    expect(job.duplicateOfMediaId).toBe('existing-media-id');
+    expect(job.phase).toBe('skipped');
+    expect(deps.queue.markDone).toHaveBeenCalledWith(job.id);
+    expect(ctx.emitUploadSkipped).toHaveBeenCalledWith(
+      expect.objectContaining({ jobId: job.id, existingMediaId: 'existing-media-id' }),
+    );
+  });
 });
