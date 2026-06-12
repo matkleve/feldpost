@@ -35,7 +35,7 @@ import {
 import { MapZoomOrchestratorService } from '../../../core/map-zoom/map-zoom-orchestrator.service';
 import { workspaceMediaToMediaRecord } from '../../../core/workspace-view/workspace-media-mapper';
 import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
-import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
 import {
   ProjectSelectDialogComponent,

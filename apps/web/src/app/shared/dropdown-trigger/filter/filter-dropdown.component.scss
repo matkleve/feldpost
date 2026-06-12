@@ -1,6 +1,6 @@
-@use '../../../styles/frosted-chrome';
-@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
-@use './dropdown-panel-flex-chain' as panel-flex;
+@use '../../../../styles/frosted-chrome';
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../scss/dropdown-panel-flex-chain' as panel-flex;
 
 :host {
   @include panel-flex.panel-flex-child;

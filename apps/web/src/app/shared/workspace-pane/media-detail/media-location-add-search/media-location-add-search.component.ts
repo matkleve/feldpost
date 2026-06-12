@@ -20,7 +20,7 @@ import {
   viewChild,
   OnDestroy,
 } from '@angular/core';
-import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { LocationPickerRowComponent } from '../location-picker-row/location-picker-row.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { I18nService } from '../../../../core/i18n/i18n.service';

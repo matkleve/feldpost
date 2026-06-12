@@ -94,7 +94,7 @@ Implementations must keep highlight class, `aria-activedescendant`, and scroll-i
 
 #### Open-time stacking owner (normative)
 
-**Single owner:** While a toolbar (or other) menu is open, **stacking for the anchored surface** is owned **only** by the **`DropdownShellComponent` host** — [`apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts`](../../../../apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts) + **`.scss`** — via the host’s inline **`z-index: 300`** binding. No other element in the shell subtree is a co-owner of product elevation for that surface.
+**Single owner:** While a toolbar (or other) menu is open, **stacking for the anchored surface** is owned **only** by the **`DropdownShellComponent` host** — [`apps/web/src/app/shared/dropdown-trigger/shell/dropdown-shell.component.ts`](../../../../apps/web/src/app/shared/dropdown-trigger/shell/dropdown-shell.component.ts) + **`.scss`** — via the host’s inline **`z-index: 300`** binding. No other element in the shell subtree is a co-owner of product elevation for that surface.
 
 **`hlmMenu` / `HlmMenuContentDirective` CVA (`z-50` in [`menu-variants.ts`](../../../../apps/web/src/app/shared/ui/menu/menu-variants.ts)):** May apply on the same host; it does **not** establish a parallel stacking contract. On **`app-dropdown-shell`**, the **inline `z-index: 300` wins** for `z-index`; CVA `z-50` is **subordinate** (see cascade below).
 
@@ -246,19 +246,19 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 | `docs/specs/component/filters/dropdown-system.md`                                                         | Shared dropdown visual + **toolbar menu panel** contract |
 | `apps/web/src/styles/_frosted-chrome.scss`, `_option-menu-surface.scss`, `_option-menu-list.scss` | Shell chrome + list/row rhythm |
 | `apps/web/src/app/shared/menu-panel/`                                                             | Search row, scroll region, footer action primitives |
-| `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts` / `.scss`                  | Anchored shell; toolbar width floors |
-| `apps/web/src/app/shared/dropdown-trigger/standard-dropdown.component.ts` / `.html` / `.scss`       | Menu body composer |
-| `apps/web/src/app/shared/dropdown-trigger/toolbar-menu-panel-layout.ts`                           | **288** / **512** / **640** px constants, **`clampToolbarDropdownLeft`**, panel class helpers |
-| `apps/web/src/app/shared/dropdown-trigger/toolbar-dropdown-stack.component.ts`                    | Shared toolbar shell + panel switch |
-| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts` / `.html`                       | Sort panel feature wiring |
-| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts` / `.html`                   | Grouping panel + CDK drag |
-| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts` / `.html`                     | Filter rules + picker flyout |
+| `apps/web/src/app/shared/dropdown-trigger/shell/dropdown-shell.component.ts` / `.scss`                  | Anchored shell; toolbar width floors |
+| `apps/web/src/app/shared/dropdown-trigger/standard/standard-dropdown.component.ts` / `.html` / `.scss`       | Menu body composer |
+| `apps/web/src/app/shared/dropdown-trigger/toolbar/toolbar-menu-panel-layout.ts`                           | **288** / **512** / **640** px constants, **`clampToolbarDropdownLeft`**, panel class helpers |
+| `apps/web/src/app/shared/dropdown-trigger/toolbar/toolbar-dropdown-stack.component.ts`                    | Shared toolbar shell + panel switch |
+| `apps/web/src/app/shared/dropdown-trigger/sort/sort-dropdown.component.ts` / `.html`                       | Sort panel feature wiring |
+| `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.ts` / `.html`                   | Grouping panel + CDK drag |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.ts` / `.html`                     | Filter rules + picker flyout |
 | `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts`     | Projects checklist panel |
-| `apps/web/src/app/shared/dropdown-trigger/dropdown-search-action-anchor.directive.ts`                  | Attribute hook for `[dropdown-search-action]` (search-row slot detection) |
-| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
-| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
+| `apps/web/src/app/shared/dropdown-trigger/shell/dropdown-search-action-anchor.directive.ts`                  | Attribute hook for `[dropdown-search-action]` (search-row slot detection) |
+| `apps/web/src/app/shared/dropdown-trigger/sort/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
+| `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
 | `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.scss` | Project-specific checkbox/count exceptions                |
-| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.scss`   | Filter-rule form-specific exceptions                      |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.scss`   | Filter-rule form-specific exceptions                      |
 | `apps/web/src/app/shared/workspace-pane/media-detail-view.component.scss`                   | Media detail context-menu positioning/ownership           |
 
 ## Wiring

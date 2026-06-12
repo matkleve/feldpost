@@ -5,9 +5,9 @@ import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
-} from '../../../../shared/dropdown-trigger/grouping-dropdown.component';
-import { FilterDropdownComponent } from '../../../../shared/dropdown-trigger/filter-dropdown.component';
-import { SortDropdownComponent } from '../../../../shared/dropdown-trigger/sort-dropdown.component';
+} from '../../../dropdown-trigger/grouping/grouping-dropdown.component';
+import { FilterDropdownComponent } from '../../../dropdown-trigger/filter/filter-dropdown.component';
+import { SortDropdownComponent } from '../../../dropdown-trigger/sort/sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../../../core/filter/filter.service';
@@ -18,7 +18,7 @@ import type {
   SortConfig,
   ThumbnailSizePreset,
 } from '../../../../core/workspace-view/workspace-view.types';
-import { ToolbarDropdownStackComponent } from '../../../../shared/dropdown-trigger/toolbar-dropdown-stack.component';
+import { ToolbarDropdownStackComponent } from '../../../dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import {
   buildCardVariantToggleOptions,

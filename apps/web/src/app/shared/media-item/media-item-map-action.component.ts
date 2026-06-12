@@ -20,8 +20,8 @@ import {
 import { LocationPickerRowComponent } from '../workspace-pane/media-detail/location-picker-row/location-picker-row.component';
 import { MediaLocationsService } from '../../core/media-locations/media-locations.service';
 import type { MediaItemLocationRow } from '../../core/media-locations/media-locations.types';
-import { DropdownShellComponent } from '../dropdown-trigger/dropdown-shell.component';
-import { StandardDropdownComponent } from '../dropdown-trigger/standard-dropdown.component';
+import { DropdownShellComponent } from '../dropdown-trigger/shell/dropdown-shell.component';
+import { StandardDropdownComponent } from '../dropdown-trigger/standard/standard-dropdown.component';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { HlmMenuItemDirective } from '../ui/menu';
 import {

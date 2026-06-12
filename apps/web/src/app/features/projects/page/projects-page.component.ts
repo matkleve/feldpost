@@ -17,7 +17,7 @@ import type {
   ProjectsViewMode,
 } from '../../../core/projects/projects.types';
 import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
-import { type GroupingProperty } from '../../../shared/dropdown-trigger/grouping-dropdown.component';
+import { type GroupingProperty } from '../../../shared/dropdown-trigger/grouping/grouping-dropdown.component';
 import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
 import { ProjectsConfirmDialogComponent } from '../dialogs/projects-confirm-dialog.component';
 import { ProjectsGridViewComponent } from '../views/projects-grid-view.component';

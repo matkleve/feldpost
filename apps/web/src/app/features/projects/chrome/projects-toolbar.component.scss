@@ -1,5 +1,5 @@
-@use '../../../shared/dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
-@use '../../../shared/dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
+@use '../../../shared/dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../../../shared/dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
 
 // Container query root: toolbar width drives icon-only menu triggers and compact view toggle.
 // @see docs/specs/page/projects-page.md

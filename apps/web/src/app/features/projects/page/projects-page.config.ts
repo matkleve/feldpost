@@ -1,6 +1,6 @@
-import type { GroupingProperty } from '../../../shared/dropdown-trigger/grouping-dropdown.component';
-import type { FilterDropdownPropertyOption } from '../../../shared/dropdown-trigger/filter-dropdown.component';
-import type { SortDropdownOption } from '../../../shared/dropdown-trigger/sort-dropdown.component';
+import type { GroupingProperty } from '../../../shared/dropdown-trigger/grouping/grouping-dropdown.component';
+import type { FilterDropdownPropertyOption } from '../../../shared/dropdown-trigger/filter/filter-dropdown.component';
+import type { SortDropdownOption } from '../../../shared/dropdown-trigger/sort/sort-dropdown.component';
 import type { ProjectListItem } from '../../../core/projects/projects.types';
 
 export interface ProjectGroupedSection {

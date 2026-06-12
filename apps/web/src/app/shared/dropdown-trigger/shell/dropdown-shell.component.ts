@@ -25,9 +25,9 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { computeAnchorPlacementForElement } from './dropdown-anchor-placement';
-import { clampDropdownPanelToViewport } from './dropdown-viewport-clamp';
-import { HlmMenuContentDirective } from '../ui/menu';
+import { computeAnchorPlacementForElement } from '../geometry/dropdown-anchor-placement';
+import { clampDropdownPanelToViewport } from '../geometry/dropdown-viewport-clamp';
+import { HlmMenuContentDirective } from '../../ui/menu';
 
 const PLACEMENT_GAP_PX = 4;
 const PLACEMENT_MARGIN_PX = 8;

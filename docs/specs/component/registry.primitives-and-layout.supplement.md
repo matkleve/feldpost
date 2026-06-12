@@ -111,7 +111,7 @@
 
 ### `<app-toolbar-dropdown-stack>` — Toolbar dropdown stack
 
-- **File**: `apps/web/src/app/shared/dropdown-trigger/toolbar-dropdown-stack.component.ts`
+- **File**: `apps/web/src/app/shared/dropdown-trigger/toolbar/toolbar-dropdown-stack.component.ts`
 - **Purpose**: DRY `app-dropdown-shell` wiring for workspace/projects/media toolbars.
 - **Spec**: [`docs/specs/component/filters/dropdown-system.md`](filters/dropdown-system.md)
 - **Used in**: `workspace-toolbar`, `projects-toolbar`, `media.component`
@@ -272,7 +272,7 @@
 
 ### `<app-dropdown-shell>` — Dropdown Shell
 
-- **File**: `apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.ts`
+- **File**: `apps/web/src/app/shared/dropdown-trigger/shell/dropdown-shell.component.ts`
 - **Purpose**: Absolutely-positioned floating container that houses any dropdown panel; parent sets `top`/`left`.
 - **Spec**: [`docs/specs/component/filters/dropdown-system.md`](filters/dropdown-system.md)
 - **Variant axes**: none (visual geometry is fixed)
@@ -285,7 +285,7 @@
 
 ### `<app-standard-dropdown>` — Standard Dropdown
 
-- **File**: `apps/web/src/app/shared/dropdown-trigger/standard-dropdown.component.ts`
+- **File**: `apps/web/src/app/shared/dropdown-trigger/standard/standard-dropdown.component.ts`
 - **Purpose**: Generic searchable list dropdown with optional action button; used wherever a filtered list selection is needed.
 - **Spec**: [`docs/specs/component/filters/dropdown-system.md`](filters/dropdown-system.md)
 - **Variant axes**: none (behaviour flags only)
@@ -298,7 +298,7 @@
 
 ### `<app-filter-dropdown>` — Filter Dropdown
 
-- **File**: `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts`
+- **File**: `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.ts`
 - **Purpose**: Domain-aware filter builder dropdown with property + operator + value selection.
 - **Spec**: [`docs/specs/component/filters/filter-dropdown.md`](filters/filter-dropdown.md)
 - **Variant axes**: none
@@ -310,7 +310,7 @@
 
 ### `<app-grouping-dropdown>` — Grouping Dropdown
 
-- **File**: `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts`
+- **File**: `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.ts`
 - **Purpose**: Drag-reorderable grouping property selector dropdown.
 - **Spec**: [`docs/specs/component/filters/grouping-dropdown.md`](filters/grouping-dropdown.md)
 - **Variant axes**: none
@@ -322,7 +322,7 @@
 
 ### `<app-sort-dropdown>` — Sort Dropdown
 
-- **File**: `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts`
+- **File**: `apps/web/src/app/shared/dropdown-trigger/sort/sort-dropdown.component.ts`
 - **Purpose**: Multi-sort configuration dropdown; supports asc/desc direction per property.
 - **Spec**: [`docs/specs/component/filters/sort-dropdown.md`](filters/sort-dropdown.md)
 - **Variant axes**: none

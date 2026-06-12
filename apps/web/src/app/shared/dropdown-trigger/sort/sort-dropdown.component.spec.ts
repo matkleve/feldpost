@@ -1,9 +1,9 @@
 ﻿import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { SortDropdownComponent } from './sort-dropdown.component';
-import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
-import { MetadataService } from '../../core/metadata/metadata.service';
-import type { SortConfig, MetadataFieldRef } from '../../core/workspace-view/workspace-view.types';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { MetadataService } from '../../../core/metadata/metadata.service';
+import type { SortConfig, MetadataFieldRef } from '../../../core/workspace-view/workspace-view.types';
 
 function buildFakeViewService() {
   return {

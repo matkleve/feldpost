@@ -1,5 +1,5 @@
-@use '../../../dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
-@use '../../../dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
+@use '../../../dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../../../dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
 
 // Flex child of .workspace-pane — owns its own padding, replaces workspace-pane-toolbar wrapper
 // @see docs/specs/ui/workspace/workspace-pane.md

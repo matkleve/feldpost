@@ -55,11 +55,11 @@ import type { SortConfig, WorkspaceMedia } from '../../core/workspace-view/works
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
-} from '../../shared/dropdown-trigger/grouping-dropdown.component';
-import { FilterDropdownComponent } from '../../shared/dropdown-trigger/filter-dropdown.component';
-import { SortDropdownComponent } from '../../shared/dropdown-trigger/sort-dropdown.component';
+} from '../../shared/dropdown-trigger/grouping/grouping-dropdown.component';
+import { FilterDropdownComponent } from '../../shared/dropdown-trigger/filter/filter-dropdown.component';
+import { SortDropdownComponent } from '../../shared/dropdown-trigger/sort/sort-dropdown.component';
 import { ProjectsDropdownComponent } from '../../shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
-import { ToolbarDropdownStackComponent } from '../../shared/dropdown-trigger/toolbar-dropdown-stack.component';
+import { ToolbarDropdownStackComponent } from '../../shared/dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
 import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
 import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 

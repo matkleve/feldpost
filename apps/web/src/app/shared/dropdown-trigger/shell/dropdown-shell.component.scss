@@ -1,4 +1,4 @@
-@use './dropdown-panel-flex-chain' as panel-flex;
+@use '../scss/dropdown-panel-flex-chain' as panel-flex;
 
 @layer components {
   // OWNERSHIP: Toolbar menu width / height floors live ONLY on `:host.toolbar-dropdown` below — not on `app-standard-dropdown` or feature panels.

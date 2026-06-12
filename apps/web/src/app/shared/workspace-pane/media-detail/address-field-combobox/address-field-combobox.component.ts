@@ -21,7 +21,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { AddressFieldSuggestService } from '../../../../core/address-field-suggest/address-field-suggest.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { AddressFieldKind, AddressFieldContext, AddressFieldSuggestion } from '../../../../core/address-field-suggest/address-field-suggest.types';

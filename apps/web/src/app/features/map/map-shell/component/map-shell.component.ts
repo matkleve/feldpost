@@ -74,7 +74,7 @@ import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggl
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
 import type { ToggleGroupOption } from '../../../../shared/ui/toggle-group/toggle-group-option.types';
 import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
-import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ResolvedAction } from '../../../../core/action/action-types';

@@ -1,6 +1,6 @@
-@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
-@use './dropdown-panel-flex-chain' as panel-flex;
-@use './toolbar-dropdown-list-scroll' as list-scroll;
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../scss/dropdown-panel-flex-chain' as panel-flex;
+@use '../scss/toolbar-dropdown-list-scroll' as list-scroll;
 
 // Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button.
 // @see docs/specs/component/filters/dropdown-system.md

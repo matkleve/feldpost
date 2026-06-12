@@ -26,7 +26,7 @@ import {
   computeLocationCopySubmenuGeom,
   type LocationCopySubmenuGeom,
 } from './media-location-copy-submenu-geometry';
-import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
 import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';

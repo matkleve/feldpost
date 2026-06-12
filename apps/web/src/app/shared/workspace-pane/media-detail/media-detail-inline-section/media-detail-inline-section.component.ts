@@ -14,7 +14,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { DetailEditingField, MediaRecord, SelectOption } from '../media-detail-view.types';
 import { formatCoordinate } from '../media-detail-view.utils';
 import type { ExifLocationAddState } from '../media-detail-exif-location-add.state';
-import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import {
   ProjectsDropdownComponent,

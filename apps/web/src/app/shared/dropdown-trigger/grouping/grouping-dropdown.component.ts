@@ -7,11 +7,11 @@ import {
   CdkDragHandle,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
-import { filterByToolbarDropdownSearch } from './dropdown-search-filter.helpers';
-import { StandardDropdownComponent } from './standard-dropdown.component';
-import { I18nService } from '../../core/i18n/i18n.service';
-import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../ui/menu';
-import { HLM_BUTTON_IMPORTS } from '../ui/button';
+import { filterByToolbarDropdownSearch } from '../helpers/dropdown-search-filter.helpers';
+import { StandardDropdownComponent } from '../standard/standard-dropdown.component';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { HlmMenuItemDirective, HlmMenuLabelDirective, HlmMenuSeparatorDirective } from '../../ui/menu';
+import { HLM_BUTTON_IMPORTS } from '../../ui/button';
 
 export interface GroupingProperty {
   id: string;

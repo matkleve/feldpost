@@ -39,7 +39,7 @@ import type {
 } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { USE_TRAY_ORCHESTRATOR } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { ChipComponent } from '../../../shared/components/chip/chip.component';
-import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import {
   resolverScoreBand,

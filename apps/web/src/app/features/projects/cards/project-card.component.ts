@@ -12,7 +12,7 @@ import type { ProjectColorKey, ProjectSummary } from '../../../core/projects/pro
 import type { ChipVariant } from '../../../shared/components/chip/chip.component';
 import { formatRelativeDate } from '../logic/projects-formatters.logic';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
-import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';

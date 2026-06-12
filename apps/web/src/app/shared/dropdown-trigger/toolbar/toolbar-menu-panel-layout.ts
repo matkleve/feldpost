@@ -1,4 +1,4 @@
-import { DROPDOWN_VIEWPORT_MARGIN_PX } from './dropdown-viewport-clamp';
+import { DROPDOWN_VIEWPORT_MARGIN_PX } from '../geometry/dropdown-viewport-clamp';
 
 /**
  * Toolbar menu width — keep in sync with `dropdown-shell.component.scss` `:host.toolbar-dropdown`.

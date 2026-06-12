@@ -1,5 +1,5 @@
-@use '../../shared/dropdown-trigger/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
-@use '../../shared/dropdown-trigger/toolbar-breakpoints' as fp-toolbar-breakpoints;
+@use '../../shared/dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../../shared/dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
 // Scroll owner for /media (parent chain: router-outlet child height 100% + layout min-height 0).
 // @see apps/web/src/styles/layout/app.scss
 :host {

@@ -1,5 +1,5 @@
 @use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
-@use '../../../../shared/dropdown-trigger/dropdown-panel-flex-chain' as panel-flex;
+@use '../../../../shared/dropdown-trigger/scss/dropdown-panel-flex-chain' as panel-flex;
 
 // Projects dropdown — project-specific: checkbox, count, "All" separator
 // Search/footer/list chrome from `app-standard-dropdown` + menu-panel primitives + option-menu globals.

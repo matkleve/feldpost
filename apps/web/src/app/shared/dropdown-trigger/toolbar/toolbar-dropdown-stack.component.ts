@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { DropdownShellComponent } from './dropdown-shell.component';
+import { DropdownShellComponent } from '../shell/dropdown-shell.component';
 import {
   toolbarDropdownPanelClass,
   toolbarDropdownPositionWidthPx,

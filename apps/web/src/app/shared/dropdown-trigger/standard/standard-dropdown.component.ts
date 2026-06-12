@@ -1,11 +1,11 @@
 import { Component, input, output } from '@angular/core';
-import { MenuPanelFooterActionComponent } from '../menu-panel/menu-panel-footer-action.component';
-import { MenuPanelSearchRowComponent } from '../menu-panel/menu-panel-search-row.component';
+import { MenuPanelFooterActionComponent } from '../../menu-panel/menu-panel-footer-action.component';
+import { MenuPanelSearchRowComponent } from '../../menu-panel/menu-panel-search-row.component';
 import {
   menuPanelScrollHostClasses,
   menuPanelScrollOverflowClasses,
   type MenuPanelScrollMode,
-} from '../menu-panel/menu-panel-scroll-mode';
+} from '../../menu-panel/menu-panel-scroll-mode';
 
 @Component({
   selector: 'app-standard-dropdown',

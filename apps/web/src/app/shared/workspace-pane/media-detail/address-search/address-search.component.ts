@@ -11,7 +11,7 @@ import {
   viewChild,
   OnDestroy,
 } from '@angular/core';
-import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
 import { HlmSpinnerComponent } from '../../../../shared/ui/spinner';
 import { HLM_BUTTON_IMPORTS } from '../../../ui/button';

@@ -1,17 +1,17 @@
 import { Component, HostListener, computed, effect, inject, input, signal } from '@angular/core';
-import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../core/filter/filter-rule-evaluator';
-import { FilterService } from '../../core/filter/filter.service';
-import { I18nService } from '../../core/i18n/i18n.service';
-import { MetadataService } from '../../core/metadata/metadata.service';
-import type { FilterRule } from '../../core/filter/filter.types';
-import type { MetadataValueType } from '../../core/metadata/metadata.types';
-import { StandardDropdownComponent } from './standard-dropdown.component';
+import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../../core/filter/filter-rule-evaluator';
+import { FilterService } from '../../../core/filter/filter.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { MetadataService } from '../../../core/metadata/metadata.service';
+import type { FilterRule } from '../../../core/filter/filter.types';
+import type { MetadataValueType } from '../../../core/metadata/metadata.types';
+import { StandardDropdownComponent } from '../standard/standard-dropdown.component';
 import { filterDropdownOperatorLabel } from './filter-dropdown-operator-labels';
 import { computeFilterPickerFlyoutGeom } from './filter-dropdown-picker-geometry';
 import type { FilterRulePickerField, OpenFilterRulePicker, PickerFlyoutGeom } from './filter-dropdown.types';
-import { HlmMenuItemDirective } from '../ui/menu';
-import { HLM_INPUT_IMPORTS } from '../ui/input';
-import { HLM_BUTTON_IMPORTS } from '../ui/button';
+import { HlmMenuItemDirective } from '../../ui/menu';
+import { HLM_INPUT_IMPORTS } from '../../ui/input';
+import { HLM_BUTTON_IMPORTS } from '../../ui/button';
 
 export interface FilterDropdownPropertyOption {
   id: string;

@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { DropdownShellComponent } from '../../../dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
 import type { MetadataComposeValueType } from '../../../../core/metadata/metadata-validation.helpers';
 import {

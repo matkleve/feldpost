@@ -1,6 +1,6 @@
 import { Component, contentChildren, input, output } from '@angular/core';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
-import { DropdownSearchActionAnchorDirective } from '../dropdown-trigger/dropdown-search-action-anchor.directive';
+import { DropdownSearchActionAnchorDirective } from '../dropdown-trigger/shell/dropdown-search-action-anchor.directive';
 
 /**
  * Toolbar menu search row — field + fixed icon slots (clear + projected actions).

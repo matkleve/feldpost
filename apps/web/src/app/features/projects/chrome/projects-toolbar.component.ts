@@ -2,19 +2,19 @@ import { Component, computed, effect, inject, input, output, signal } from '@ang
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { ToolbarDropdownStackComponent } from '../../../shared/dropdown-trigger/toolbar-dropdown-stack.component';
+import { ToolbarDropdownStackComponent } from '../../../shared/dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
-} from '../../../shared/dropdown-trigger/grouping-dropdown.component';
+} from '../../../shared/dropdown-trigger/grouping/grouping-dropdown.component';
 import {
   FilterDropdownComponent,
   type FilterDropdownPropertyOption,
-} from '../../../shared/dropdown-trigger/filter-dropdown.component';
+} from '../../../shared/dropdown-trigger/filter/filter-dropdown.component';
 import {
   SortDropdownComponent,
   type SortDropdownOption,
-} from '../../../shared/dropdown-trigger/sort-dropdown.component';
+} from '../../../shared/dropdown-trigger/sort/sort-dropdown.component';
 import type { ToggleGroupOption } from '../../../shared/ui/toggle-group/toggle-group-option.types';
 import {
   toggleOptionLayout,

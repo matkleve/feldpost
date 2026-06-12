@@ -12,7 +12,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { MediaDownloadService } from '../../../core/media-download/media-download.service';
 import { UniversalMediaComponent } from '../../../shared/media/universal-media.component';
 import type { MediaRenderState, UploadOverlayState } from '../../../core/media/media-renderer.types';
-import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
 
