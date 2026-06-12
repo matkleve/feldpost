@@ -8,12 +8,14 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | 2FA | account-page.md | enrollment defaults, factor visibility, and removal safeguards. |
 | 2FA | account-settings-section.md | allowed factor types, enrollment flow defaults, assurance indicator display, and removal constraints. |
 | Account & Session | settings-overlay.md | profile identity, email/password security, password recovery, 2FA setup/management, and session termination controls. |
+| Activity Log | org-administration-section.md | audit event visibility, pagination size, and action-type filters (admin-only). |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
 | Email Change Security | account-page.md | verification requirements and pending-state copy. |
 | Email Change Security | account-settings-section.md | whether dual-email confirmation is required and how pending verification is shown. |
 | Export & Sharing | workspace-export-bar.md | default share-link expiration, allow token reuse vs forced regeneration, and whether native-share action is enabled on supported devices. |
 | File Type Visibility | project-mixed-media-pre-spec.md | default selected media families in map/workspace/project views. |
+| Filter Toolbar | filter-toolbar.md | chip overflow behavior (wrap vs horizontal scroll on mobile) and the chip-count threshold at which "Clear all" appears. |
 | Fullscreen Project Mode | project-mixed-media-pre-spec.md | default entry behavior for project detail (inline pane vs fullscreen). |
 | Identity Profile | account-page.md | display name edit behavior and validation. |
 | Identity Profile | account-settings-section.md | display name edit policy, formatting, and save behavior. |
@@ -26,7 +28,9 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Map Basemap | map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
 | Map Marker Motion | photo-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |
 | Map Preferences | settings-overlay.md | map tile and map-behavior defaults. |
+| Members & Roles | org-administration-section.md | member list visibility, role assignment, and member removal controls (admin-only). |
 | Notifications | settings-overlay.md | preference defaults for in-app feedback and alerts. |
+| Organization Profile | org-administration-section.md | organization rename and identity metadata display (admin-only). |
 | Password Recovery | account-page.md | reset email behavior and redirect target. |
 | Password Recovery | account-settings-section.md | reset email trigger behavior and redirect target handling. |
 | Password Security | account-page.md | policy messaging and re-auth requirement handling. |
@@ -43,5 +47,6 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Selection Bulk Actions | workspace-export-bar.md | default delete confirmation behavior, whether address-change requires non-empty validation, and which project targets are shown first (recent vs alphabetical). |
 | Session | account-page.md | logout confirmation and scope behavior. |
 | Session | account-settings-section.md | explicit sign-out behavior and confirmation requirements. |
+| Sharing Administration | org-administration-section.md | org-wide share-link listing and revocation, including inactive-link visibility (admin-only). |
 | Theme | settings-overlay.md | active theme mode and persistence behavior. |
 | Workspace Sort Defaults | settings-overlay.md | default sorting and ordering preferences. |

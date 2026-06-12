@@ -1,5 +1,6 @@
 # Active Filter Chips
 
+> **Superseded by:** [filter-toolbar.md](filter-toolbar.md) — the reusable Filter Toolbar absorbs this element's acceptance criteria and adds keyword-operator integration. Do not implement this spec; it is retained for historical context.
 > **Blueprint:** [implementation-blueprints/active-filter-chips.md](../implementation-blueprints/active-filter-chips.md)
 
 ## What It Is

@@ -14,6 +14,7 @@ This parent spec defines the implementation contract for the search surface UI a
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | [search-bar-query-behavior](search-bar-query-behavior.md)     | Address label formatting, ghost completion, forgiving matching, search/filter integration rules   |
 | [search-bar-data-and-service](search-bar-data-and-service.md) | Data pipeline phases, geocoder biasing, ranking formulas, service responsibilities and interfaces |
+| [filter-toolbar](filter-toolbar.md)                           | Docked filter chip row below the search bar; `#`/`+`/`-` keyword operators and provider scoping are planned in the [Universal Search Provider System blueprint](../implementation-blueprints/universal-search-provider-system.md) |
 
 ## What It Looks Like
 

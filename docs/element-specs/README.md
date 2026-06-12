@@ -208,7 +208,8 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `filter-panel.md` — Filter Panel (accordion filters)
 - ✅ `filter-dropdown.md` — Filter Dropdown (shared dropdown primitive)
 - ✅ `projects-dropdown.md` — Projects Dropdown (project selection filter)
-- ✅ `active-filter-chips.md` — Active Filter Chips Strip
+- ✅ `active-filter-chips.md` — Active Filter Chips Strip (superseded by `filter-toolbar.md`)
+- ✅ `filter-toolbar.md` — Filter Toolbar (reusable docked filter chip row below search bars)
 - ✅ `image-detail-view.md` — Image Detail View (parent: layout, nav, quick info)
   - ✅ `image-detail-photo-viewer.md` — Photo Viewer (progressive loading, lightbox, replace/upload)
   - ✅ `image-detail-inline-editing.md` — Inline Editing (property rows, address search)
@@ -238,12 +239,13 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `custom-properties.md` — Custom Properties (user-defined metadata schema)
 - ✅ `language-locale-settings.md` — Language & Locale Settings (English/German switch with persistence and formatting context)
 - ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
+- ✅ `org-administration-section.md` — Org Administration Section (admin-only members, sharing, activity, and org settings in Settings Overlay)
 
 ### Planned / Missing Specs
 
 - ✅ `qr-invite-flow.md` — QR invite and join flow (invite creation, scan/join, failure states)
-- 🔲 `role-system.md` — Role and permission system UI (owner/admin/member permissions)
-- 🔲 `slash-commands.md` — Slash command palette and action execution UX
+- ✅ `org-administration-section.md` — Role and permission system UI (covers the former `role-system.md` placeholder; see `docs/org-administration-audit.md` for the phased plan)
+- 🔲 `slash-commands.md` — Slash command palette and action execution UX (operator groundwork planned in `implementation-blueprints/universal-search-provider-system.md`)
 
 ## Priority
 
