@@ -3,7 +3,7 @@ import { MediaLocationAddSearchComponent } from './media-location-add-search.com
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
-import { SearchOrchestratorService } from '../../../../core/search/search-orchestrator.service';
+import { provideOrgSearchTuningTestDouble } from '../../../../core/search/search-test.providers';
 import { formatLocationDisplayLine } from '../../../../core/media-locations/media-locations.helpers';
 import type { OrgLocationSearchRow } from '../../../../core/media-locations/media-locations.types';
 
@@ -53,14 +53,7 @@ describe('MediaLocationAddSearchComponent', () => {
             resolveGeocoderCandidates: () => ({ pipe: () => ({ subscribe: () => ({ unsubscribe: () => {} }) }) }),
           },
         },
-        {
-          provide: SearchOrchestratorService,
-          useValue: {
-            configureOptions: vi.fn(),
-            configureSources: vi.fn(),
-            searchInput: () => ({ subscribe: () => ({ unsubscribe: () => {} }) }),
-          },
-        },
+        provideOrgSearchTuningTestDouble(),
       ],
     });
   });

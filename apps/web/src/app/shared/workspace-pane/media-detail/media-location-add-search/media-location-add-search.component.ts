@@ -26,7 +26,13 @@ import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
-import { SearchOrchestratorService } from '../../../../core/search/search-orchestrator.service';
+import { SearchEngine } from '../../../../core/search/engine/search-engine';
+import {
+  createCustomSearchEngine,
+  engineOptionsFromOrgTuning,
+} from '../../../../core/search/engine/search-engine.factory';
+import { DbAddressProvider } from '../../../../core/search/providers/db-address.provider';
+import { OrgSearchTuningService } from '../../../../core/search/org-search-tuning.service';
 import type {
   SearchAddressCandidate,
   SearchCandidate,
@@ -67,12 +73,32 @@ type FlatSelectable =
   host: {
     '[attr.data-state]': 'panelState()',
   },
+  providers: [
+    {
+      provide: SearchEngine,
+      useFactory: () => {
+        const dbAddress = inject(DbAddressProvider);
+        dbAddress.configure({
+          termTransform: (displayQuery: string) => {
+            const trimmed = displayQuery.trim();
+            if (!trimmed) return '';
+            const head = trimmed.split(',')[0]?.trim() ?? trimmed;
+            return head.length >= 3 ? head : trimmed;
+          },
+        });
+        return createCustomSearchEngine(
+          [dbAddress],
+          engineOptionsFromOrgTuning(inject(OrgSearchTuningService)),
+        );
+      },
+    },
+  ],
 })
 export class MediaLocationAddSearchComponent implements OnDestroy {
   private readonly elementRef = inject(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly searchBarService = inject(SearchBarService);
-  private readonly searchOrchestrator = inject(SearchOrchestratorService);
+  private readonly searchEngine = inject(SearchEngine);
   private readonly mediaLocationsService = inject(MediaLocationsService);
   private readonly i18n = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18n.t(key, fallback);
@@ -219,13 +245,8 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     this.active.set(true);
     this.query.set('');
     this.clearPreResolved();
-    this.searchOrchestrator.configureOptions(this.searchBarService.orchestratorOptionsFromOrg());
-    this.searchOrchestrator.configureSources({
-      dbAddressResolver: (q, ctx) =>
-        this.searchBarService.resolveDbAddressCandidates(this.dbSearchTerm(q), ctx),
-    });
     this.searchSub?.unsubscribe();
-    this.searchSub = this.searchOrchestrator
+    this.searchSub = this.searchEngine
       .searchInput(this.queryChanges.asObservable(), this.contextChanges.asObservable())
       .subscribe((r) => this.applyDbResult(r));
     this.queryChanges.next('');
@@ -438,9 +459,16 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
   }
 
   private applyDbResult(result: SearchResultSet): void {
+    if (result.query !== this.query()) {
+      return;
+    }
+
     const section = result.sections.find((s) => s.family === 'db-address');
     this.otherMediaSuggestions.set(section?.items ?? []);
-    this.loadingOther.set(false);
+    this.loadingOther.set(result.state === 'typing' && !!this.query().trim());
+    if (result.state === 'results-complete' || result.state === 'focused-empty') {
+      this.loadingOther.set(false);
+    }
   }
 
   private runGeocoderDebounced(q: string): void {

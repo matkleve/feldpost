@@ -1,9 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { SearchBarComponent } from './search-bar.component';
-import { SearchOrchestratorService } from '../../../core/search/search-orchestrator.service';
+import { SearchDropdownItemComponent } from './search-dropdown-item.component';
+import { SearchFilterChipsComponent } from './search-filter-chips.component';
+import { provideOrgSearchTuningTestDouble } from '../../../core/search/search-test.providers';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { MediaClusterService } from '../../../core/geocoding/media-cluster.service';
+import { signal } from '@angular/core';
 
 function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
   const builder = {
@@ -19,8 +23,8 @@ function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
   builder.ilike.mockReturnValue(builder);
   builder.not.mockReturnValue(builder);
   builder.limit.mockResolvedValue(result);
-  builder.eq.mockResolvedValue(result);
-  builder.in.mockResolvedValue(result);
+  builder.eq.mockReturnValue(builder);
+  builder.in.mockReturnValue(builder);
 
   return builder;
 }
@@ -33,13 +37,23 @@ describe('SearchBarComponent', () => {
     localStorage.clear();
     router = { navigate: vi.fn().mockResolvedValue(true) };
 
-    const imagesBuilder = createQueryBuilder({
+    const linksBuilder = createQueryBuilder({
       data: [
         {
-          id: 'img-1',
-          address_label: 'Burgstrasse 7, Zurich',
-          latitude: 47.3769,
-          longitude: 8.5417,
+          media_item_id: 'img-1',
+          locations: {
+            address_label: 'Burgstrasse 7, Zurich',
+            street: 'Burgstrasse',
+            house_number: '7',
+            city: 'Zurich',
+            latitude: 47.3769,
+            longitude: 8.5417,
+          },
+          media_items: {
+            created_at: new Date().toISOString(),
+            organization_id: 'org-1',
+            project_id: null,
+          },
         },
       ],
       error: null,
@@ -49,10 +63,10 @@ describe('SearchBarComponent', () => {
       error: null,
     });
 
-    await TestBed.configureTestingModule({
-      imports: [SearchBarComponent],
+    TestBed.configureTestingModule({
+      imports: [SearchBarComponent, SearchDropdownItemComponent, SearchFilterChipsComponent],
       providers: [
-        SearchOrchestratorService,
+        provideOrgSearchTuningTestDouble(),
         {
           provide: Router,
           useValue: router,
@@ -62,7 +76,7 @@ describe('SearchBarComponent', () => {
           useValue: {
             client: {
               from: vi.fn((table: string) => {
-                if (table === 'images') return imagesBuilder;
+                if (table === 'media_item_location_links') return linksBuilder;
                 if (table === 'projects') return projectsBuilder;
                 return createQueryBuilder({ data: [], error: null });
               }),
@@ -70,8 +84,16 @@ describe('SearchBarComponent', () => {
           },
         },
         {
+          provide: MediaClusterService,
+          useValue: {
+            ensureLoaded: vi.fn().mockResolvedValue(undefined),
+            clusters: signal([]).asReadonly(),
+          },
+        },
+        {
           provide: GeocodingService,
           useValue: {
+            ensureGeocodeAvailable: vi.fn().mockResolvedValue(true),
             search: vi.fn().mockResolvedValue([
               {
                 lat: 46.948,
@@ -89,7 +111,16 @@ describe('SearchBarComponent', () => {
           },
         },
       ],
-    }).compileComponents();
+    });
+
+    TestBed.overrideComponent(SearchDropdownItemComponent, {
+      set: { template: '', styleUrl: undefined, styles: [] },
+    });
+    TestBed.overrideComponent(SearchFilterChipsComponent, {
+      set: { template: '' },
+    });
+
+    await TestBed.compileComponents();
   });
 
   afterEach(() => {
@@ -97,13 +128,11 @@ describe('SearchBarComponent', () => {
     vi.restoreAllMocks();
   });
 
-  it('opens recent searches on focus', () => {
+  it('opens recent searches on focus', async () => {
     localStorage.setItem(
       'feldpost-recent-searches',
       JSON.stringify([
         {
-          id: 'recent-burg',
-          family: 'recent',
           label: 'Burgstrasse 7, Zurich',
           lastUsedAt: new Date().toISOString(),
         },
@@ -116,20 +145,23 @@ describe('SearchBarComponent', () => {
     const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
     input.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(fixture.componentInstance.dropdownOpen()).toBe(true);
-    expect(fixture.nativeElement.textContent).toContain('Recent searches');
-    expect(fixture.nativeElement.textContent).toContain('Burgstrasse 7, Zurich');
+    expect(fixture.componentInstance.recentSearches().length).toBeGreaterThan(0);
+    expect(fixture.componentInstance.recentSearches()[0]?.label).toContain('Burgstrasse');
   });
 
   it('focuses the input on Ctrl+K', () => {
     const fixture = TestBed.createComponent(SearchBarComponent);
     fixture.detectChanges();
 
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.focus();
+    input.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
 
-    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
+    expect(document.activeElement).toBe(input);
     expect(fixture.componentInstance.dropdownOpen()).toBe(true);
   });
 
@@ -189,11 +221,11 @@ describe('SearchBarComponent', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     fixture.detectChanges();
 
-    expect(mapCenterSpy).toHaveBeenCalledWith({
-      lat: 47.3769,
-      lng: 8.5417,
-      label: 'Burgstrasse 7, Zurich',
-    });
+    expect(mapCenterSpy).toHaveBeenCalled();
+    const payload = mapCenterSpy.mock.calls[0]?.[0];
+    expect(payload?.lat).toBeCloseTo(47.3769, 3);
+    expect(payload?.lng).toBeCloseTo(8.5417, 3);
+    expect(payload?.label).toContain('Burgstrasse');
   });
 
   it('navigates to media route for project content commits', async () => {

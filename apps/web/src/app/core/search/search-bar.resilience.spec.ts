@@ -21,8 +21,8 @@ function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
   builder.ilike.mockReturnValue(builder);
   builder.not.mockReturnValue(builder);
   builder.limit.mockResolvedValue(result);
-  builder.eq.mockResolvedValue(result);
-  builder.in.mockResolvedValue(result);
+  builder.eq.mockReturnValue(builder);
+  builder.in.mockReturnValue(builder);
 
   return builder;
 }
@@ -35,7 +35,7 @@ describe('SearchBarService resilience', () => {
   it('returns empty results and emits one structured db-address error event for REST 400', async () => {
     window.localStorage.setItem('feldpost-search-debug', '1');
 
-    const failingMediaItemsBuilder = createQueryBuilder({
+    const failingLinksBuilder = createQueryBuilder({
       data: [],
       error: {
         code: 'PGRST204',
@@ -50,7 +50,7 @@ describe('SearchBarService resilience', () => {
     const supabaseMock = {
       client: {
         from: vi.fn((table: string) =>
-          table === 'media_items' ? failingMediaItemsBuilder : fallbackBuilder,
+          table === 'media_item_location_links' ? failingLinksBuilder : fallbackBuilder,
         ),
       },
     };

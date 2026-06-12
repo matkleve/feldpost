@@ -32,8 +32,13 @@ export function formatGeocoderAddressLabel(result: GeocoderSearchResult): string
 
   const city = addr.city || addr.town || addr.village || addr.municipality;
   const district = extractGeocoderDistrict(addr);
+  const road =
+    addr.road?.trim() ||
+    (!addr.house_number
+      ? undefined
+      : addr.village?.trim() || addr.hamlet?.trim() || addr.suburb?.trim() || undefined);
   const parts = buildAddressParts(
-    addr.road,
+    road,
     addr.house_number,
     addr.postcode,
     city,
@@ -63,7 +68,10 @@ export function formatLabelFromGeocoderDisplayName(
     .filter(Boolean);
   if (parts.length < 2) return null;
 
-  const streetPart = road?.trim() || parts[0];
+  let streetPart = road?.trim() || parts[0];
+  if (!road?.trim() && /^\d+[a-z]?$/i.test(parts[0] ?? '') && parts[1]) {
+    streetPart = `${parts[1]} ${parts[0]}`;
+  }
   const country = parts[parts.length - 1];
   const middle = parts.slice(1, -1);
   const postcodeCity =

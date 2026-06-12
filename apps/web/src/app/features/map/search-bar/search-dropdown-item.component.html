@@ -1,24 +1,26 @@
-<button
-  class="search-dropdown-item"
-  type="button"
-  role="option"
-  [id]="optionId()"
-  [class.search-dropdown-item--active]="active()"
-  [attr.aria-selected]="active()"
-  (mousedown)="$event.preventDefault()"
-  (click)="selected.emit(candidate())"
->
-  <span class="search-dropdown-item__media" aria-hidden="true">
-    <span class="material-icons search-dropdown-item__icon">{{ iconName() }}</span>
-  </span>
+@if (candidate(); as item) {
+  <button
+    class="search-dropdown-item"
+    type="button"
+    role="option"
+    [id]="optionId()"
+    [class.search-dropdown-item--active]="active()"
+    [attr.aria-selected]="active()"
+    (mousedown)="$event.preventDefault()"
+    (click)="selected.emit(item)"
+  >
+    <span class="search-dropdown-item__media" aria-hidden="true">
+      <span class="material-icons search-dropdown-item__icon">{{ iconName(item) }}</span>
+    </span>
 
-  <span class="search-dropdown-item__content">
-    <span class="search-dropdown-item__label">{{ candidate().label }}</span>
+    <span class="search-dropdown-item__content">
+      <span class="search-dropdown-item__label">{{ item.label }}</span>
 
-    @if (candidate().secondaryLabel) {
-      <span class="search-dropdown-item__secondary">{{ candidate().secondaryLabel }}</span>
-    } @else if (metaText()) {
-      <span class="search-dropdown-item__meta">{{ metaText() }}</span>
-    }
-  </span>
-</button>
+      @if (item.secondaryLabel) {
+        <span class="search-dropdown-item__secondary">{{ item.secondaryLabel }}</span>
+      } @else if (metaText(item)) {
+        <span class="search-dropdown-item__meta">{{ metaText(item) }}</span>
+      }
+    </span>
+  </button>
+}

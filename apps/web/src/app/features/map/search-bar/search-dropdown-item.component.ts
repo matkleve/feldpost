@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import type { SearchCandidate } from '../../../core/search/search.models';
 
 @Component({
@@ -12,12 +12,10 @@ import type { SearchCandidate } from '../../../core/search/search.models';
 export class SearchDropdownItemComponent {
   readonly candidate = input.required<SearchCandidate>();
   readonly active = input(false);
-  readonly optionId = input.required<string>();
+  readonly optionId = input<string>('search-option');
   readonly selected = output<SearchCandidate>();
 
-  readonly iconName = computed(() => {
-    const candidate = this.candidate();
-
+  iconName(candidate: SearchCandidate): string {
     switch (candidate.family) {
       case 'db-address':
         return 'location_on';
@@ -37,14 +35,14 @@ export class SearchDropdownItemComponent {
         return 'history';
       case 'command':
         return 'terminal';
+      case 'operator-suggestion':
+        return 'tag';
       default:
         return 'search';
     }
-  });
+  }
 
-  readonly metaText = computed(() => {
-    const candidate = this.candidate();
-
+  metaText(candidate: SearchCandidate): string {
     switch (candidate.family) {
       case 'db-address':
         return typeof candidate.imageCount === 'number'
@@ -56,8 +54,10 @@ export class SearchDropdownItemComponent {
         return 'External result';
       case 'recent':
         return 'Recent search';
+      case 'operator-suggestion':
+        return candidate.secondaryLabel ?? '';
       default:
         return '';
     }
-  });
+  }
 }

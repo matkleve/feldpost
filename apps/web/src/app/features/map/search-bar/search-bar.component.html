@@ -58,6 +58,10 @@
   </div>
 
   @if (!isProjectsMode()) {
+    <ss-search-filter-chips [chips]="filterChips()" (removeChip)="onFilterChipRemove($event)" />
+  }
+
+  @if (!isProjectsMode()) {
     <div
       class="search-bar__dropdown"
       [attr.aria-hidden]="!dropdownOpen()"
@@ -81,12 +85,26 @@
             }
           }
         } @else {
+          @if (operatorSection(); as operators) {
+            @if (operators.items.length > 0) {
+              <div class="search-bar__section-label" role="presentation">{{ operators.title }}</div>
+              @for (candidate of operators.items; track candidate.id; let index = $index) {
+                <ss-search-dropdown-item
+                  [candidate]="candidate"
+                  [active]="activeIndex() === index"
+                  [optionId]="optionIdFor(index)"
+                  (selected)="onCandidateSelected($event)"
+                />
+              }
+            }
+          }
+
           @if (matchingRecents().length > 0) {
             @for (candidate of matchingRecents(); track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"
-                [active]="activeIndex() === index"
-                [optionId]="optionIdFor(index)"
+                [active]="activeIndex() === recentMatchOptionIndex(index)"
+                [optionId]="optionIdFor(recentMatchOptionIndex(index))"
                 (selected)="onCandidateSelected($event)"
               />
             }
@@ -105,7 +123,7 @@
           }
 
           @if (sections().dbContent.items.length > 0) {
-            <div class="search-bar__section-label" role="presentation">Projects &amp; Groups</div>
+            <div class="search-bar__section-label" role="presentation">Projects</div>
             @for (candidate of sections().dbContent.items; track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"

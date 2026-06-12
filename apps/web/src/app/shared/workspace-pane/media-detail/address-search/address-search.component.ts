@@ -18,14 +18,19 @@ import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarService } from '../../../../core/search/search-bar.service';
-import { SearchOrchestratorService } from '../../../../core/search/search-orchestrator.service';
+import { SearchEngine } from '../../../../core/search/engine/search-engine';
+import { createAddressSearchEngine } from '../../../../core/search/engine/search-engine.factory';
+import { RecentsProvider } from '../../../../core/search/providers/recents.provider';
+import { DbAddressProvider } from '../../../../core/search/providers/db-address.provider';
+import { GeocoderProvider } from '../../../../core/search/providers/geocoder.provider';
+import { OrgSearchTuningService } from '../../../../core/search/org-search-tuning.service';
 import type {
   SearchAddressCandidate,
   SearchCandidate,
   SearchQueryContext,
   SearchResultSet,
 } from '../../../../core/search/search.models';
-import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-address-search',
@@ -41,11 +46,35 @@ import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
   host: {
     '[attr.data-detail-active-editor]': 'active() ? "address_search" : null',
   },
+  providers: [
+    {
+      provide: SearchEngine,
+      useFactory: () => {
+        const dbAddress = inject(DbAddressProvider);
+        dbAddress.configure({
+          termTransform: (displayQuery: string) => {
+            const trimmed = displayQuery.trim();
+            if (!trimmed) return '';
+            const head = trimmed.split(',')[0]?.trim() ?? trimmed;
+            return head.length >= 3 ? head : trimmed;
+          },
+        });
+        return createAddressSearchEngine(
+          {
+            recents: inject(RecentsProvider),
+            dbAddress,
+            geocoder: inject(GeocoderProvider),
+          },
+          inject(OrgSearchTuningService),
+        );
+      },
+    },
+  ],
 })
 export class AddressSearchComponent implements OnDestroy {
   private readonly elementRef = inject(ElementRef);
   private readonly searchBarService = inject(SearchBarService);
-  private readonly searchOrchestrator = inject(SearchOrchestratorService);
+  private readonly searchEngine = inject(SearchEngine);
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -108,8 +137,6 @@ export class AddressSearchComponent implements OnDestroy {
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
   private searchSubscription: Subscription | null = null;
-  private geocoderDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-  private geocoderSubscription: Subscription | null = null;
   private ignoreOutsideCloseUntil = 0;
 
   constructor() {
@@ -157,26 +184,12 @@ export class AddressSearchComponent implements OnDestroy {
     this.query.set(current);
     this.active.set(true);
 
-    // Geocoder is bypassed here to avoid shared-singleton adapter conflicts with the map search bar.
-    // resolveGeocoderCandidates is called directly in runGeocoderDebounced instead.
-    // @see docs/specs/ui/workspace/workspace-pane.md
-    this.searchOrchestrator.configureOptions(this.searchBarService.orchestratorOptionsFromOrg());
-    this.searchOrchestrator.configureSources({
-      dbAddressResolver: (q, ctx) =>
-        this.searchBarService.resolveDbAddressCandidates(this.dbSearchTerm(q), ctx),
-    });
-
     this.searchSubscription?.unsubscribe();
-    this.searchSubscription = this.searchOrchestrator
+    this.searchSubscription = this.searchEngine
       .searchInput(this.queryChanges.asObservable(), this.contextChanges.asObservable())
       .subscribe((result) => this.applySearchResult(result));
 
-    if (current.trim()) {
-      this.queryChanges.next(current);
-      this.runGeocoderDebounced(current);
-    } else {
-      this.queryChanges.next('');
-    }
+    this.queryChanges.next(current.trim() ? current : '');
   }
 
   cancel(): void {
@@ -187,7 +200,6 @@ export class AddressSearchComponent implements OnDestroy {
     this.loadingSaved.set(false);
     this.loadingPlaces.set(false);
     this.focusedIndex.set(-1);
-    this.clearGeocoderDebounce();
     this.searchSubscription?.unsubscribe();
     this.searchSubscription = null;
     this.deactivated.emit();
@@ -200,8 +212,8 @@ export class AddressSearchComponent implements OnDestroy {
       this.savedSuggestions.set([]);
       this.placeSuggestions.set([]);
     }
+    this.loadingPlaces.set(!!q.trim());
     this.queryChanges.next(q);
-    this.runGeocoderDebounced(q);
   }
 
   onInputKeydown(event: KeyboardEvent): void {
@@ -291,7 +303,6 @@ export class AddressSearchComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.clearGeocoderDebounce();
     this.searchSubscription?.unsubscribe();
   }
 
@@ -314,59 +325,25 @@ export class AddressSearchComponent implements OnDestroy {
     });
   }
 
-  /** Saved-location ilike works best on the street segment, not the full comma-separated label. */
-  private dbSearchTerm(displayQuery: string): string {
-    const trimmed = displayQuery.trim();
-    if (!trimmed) return '';
-    const head = trimmed.split(',')[0]?.trim() ?? trimmed;
-    return head.length >= 3 ? head : trimmed;
-  }
-
   private applySearchResult(result: SearchResultSet): void {
-    const dbAddressSection = result.sections.find((s) => s.family === 'db-address');
-    const items = dbAddressSection?.items ?? [];
-    this.savedSuggestions.set(this.filterSuggestionsByQuery(items, this.query()));
-    // DB address results arrive with the partial result — loading is false by the time items appear
-    this.loadingSaved.set(false);
-    // placeSuggestions and loadingPlaces are managed by runGeocoderDebounced (direct geocoder path)
-  }
-
-  private runGeocoderDebounced(q: string): void {
-    if (this.geocoderDebounceTimer !== null) {
-      clearTimeout(this.geocoderDebounceTimer);
-      this.geocoderDebounceTimer = null;
-    }
-    if (!q.trim()) {
-      this.geocoderSubscription?.unsubscribe();
-      this.geocoderSubscription = null;
-      this.placeSuggestions.set([]);
-      this.loadingPlaces.set(false);
+    if (result.query !== this.query()) {
       return;
     }
 
-    this.placeSuggestions.set([]);
-    this.loadingPlaces.set(true);
-    this.geocoderDebounceTimer = setTimeout(() => {
-      this.geocoderDebounceTimer = null;
-      this.geocoderSubscription?.unsubscribe();
-      this.geocoderSubscription = this.searchBarService
-        .resolveGeocoderCandidates(q.trim(), this.searchContext())
-        .pipe(
-          take(1),
-          finalize(() => this.loadingPlaces.set(false)),
-        )
-        .subscribe({
-          next: (candidates) => {
-            // Geocoder labels may omit the query token (e.g. "Stephansplatz, Vienna"); ranking is server-side.
-            this.placeSuggestions.set(candidates);
-            this.loadingPlaces.set(false);
-          },
-          error: () => {
-            this.placeSuggestions.set([]);
-            this.loadingPlaces.set(false);
-          },
-        });
-    }, this.searchBarService.orchestratorOptionsFromOrg().debounceMs);
+    const dbAddressSection = result.sections.find((s) => s.family === 'db-address');
+    const geocoderSection = result.sections.find((s) => s.family === 'geocoder');
+    const items = dbAddressSection?.items ?? [];
+    this.savedSuggestions.set(this.filterSuggestionsByQuery(items, this.query()));
+    this.loadingSaved.set(result.state === 'typing' && !!this.query().trim());
+    this.placeSuggestions.set(geocoderSection?.items ?? []);
+    this.loadingPlaces.set(
+      geocoderSection?.loading === true || result.state === 'typing' || result.state === 'results-partial',
+    );
+
+    if (result.state === 'results-complete' || result.state === 'focused-empty') {
+      this.loadingSaved.set(false);
+      this.loadingPlaces.set(false);
+    }
   }
 
   private moveHighlight(delta: 1 | -1, maxIndex: number): void {
@@ -403,13 +380,4 @@ export class AddressSearchComponent implements OnDestroy {
     });
   }
 
-  private clearGeocoderDebounce(): void {
-    if (this.geocoderDebounceTimer !== null) {
-      clearTimeout(this.geocoderDebounceTimer);
-      this.geocoderDebounceTimer = null;
-    }
-    this.geocoderSubscription?.unsubscribe();
-    this.geocoderSubscription = null;
-    this.loadingPlaces.set(false);
-  }
 }

@@ -14,6 +14,7 @@ describe('OrgSearchTuningService', () => {
   let maybeSingleMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     maybeSingleMock = vi.fn().mockResolvedValue({
       data: {
         organization_id: 'org-1',
@@ -74,10 +75,12 @@ describe('OrgSearchTuningService', () => {
 
   it('rejects save when viewer is not admin', async () => {
     const profiles = TestBed.inject(UserProfileService);
+    const supabase = TestBed.inject(SupabaseService);
     vi.mocked(profiles.getOwnProfile).mockResolvedValueOnce({
       data: { fullName: 'Worker', organizationId: 'org-1', roles: ['worker'] },
       error: null,
     });
+    vi.mocked(supabase.client.rpc).mockResolvedValueOnce({ data: false, error: null });
     await service.bootstrapFromSession();
     await expect(service.saveOrgProfile({ resolver: { maxGeocoderResults: 4 } })).rejects.toThrow(
       /admin/i,
