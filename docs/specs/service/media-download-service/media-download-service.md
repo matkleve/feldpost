@@ -76,7 +76,7 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 | `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts`                           | Detail thumb/full preview consumer    | Facade preview/state calls                       |
 | `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts`                              | ZIP export trigger                    | Facade edge export call                          |
 | `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts` | ZIP export dialog trigger             | Facade edge export call                          |
-| `apps/web/src/app/features/upload/upload-panel-job-file-actions.service.ts`                             | Single-file download action           | Facade download API                              |
+| `apps/web/src/app/features/upload/upload-panel/upload-panel-job-file-actions.service.ts`                             | Single-file download action           | Facade download API                              |
 
 ## Phase 2 - Spec Restructure and Archive Status
 
@@ -268,7 +268,7 @@ stateDiagram-v2
 | `apps/web/src/app/core/media-detail-data/media-detail-data.facade.ts`                              | Facade calls for thumb/full signing                                                                                                                    | Done             | Direct typed dependency now points to `MediaDownloadService`                                                            |
 | `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts`                              | Facade edge export call                                                                                                                                | Done             | `ZipExportService` dependency removed                                                                                   |
 | `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts` | Facade edge export call                                                                                                                                | Done             | `ZipExportService` dependency removed                                                                                   |
-| `apps/web/src/app/features/upload/upload-panel-job-file-actions.service.ts`                             | Facade single-file download call                                                                                                                       | Pending          | `uploadService.downloadFile` replaced by unified media download API                                                     |
+| `apps/web/src/app/features/upload/upload-panel/upload-panel-job-file-actions.service.ts`                             | Facade single-file download call                                                                                                                       | Pending          | `uploadService.downloadFile` replaced by unified media download API                                                     |
 
 ## Wiring
 

@@ -4,7 +4,7 @@
  *
  * @see apps/web/src/styles/_typography-baseline.scss
  * @see apps/web/src/styles/_option-menu-list.scss
- * @see apps/web/src/app/features/map/map-shell/_map-shell-context-menu.scss
+ * @see apps/web/src/app/features/map/map-shell/scss/_map-shell-context-menu.scss
  */
 const ROOT_FONT_SIZE_PX = 16;
 

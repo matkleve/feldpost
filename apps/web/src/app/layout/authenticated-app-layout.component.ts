@@ -15,7 +15,7 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
-import { MapShellComponent } from '../features/map/map-shell/map-shell.component';
+import { MapShellComponent } from '../features/map/map-shell/component/map-shell.component';
 import {
   resolveAuthenticatedActiveShell,
   type AuthenticatedActiveShell,
@@ -28,10 +28,10 @@ import { ToastService } from '../core/toast/toast.service';
 import { NavComponent } from '../features/nav/nav.component';
 import { DragDividerComponent } from '../shared/workspace-pane/shell/drag-divider/drag-divider.component';
 import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace-pane.component';
-import { UploadPanelComponent } from '../features/upload/upload-panel.component';
-import { UploadShellComponent } from '../features/upload/upload-shell.component';
-import { UploadShellUiService } from '../features/upload/upload-shell-ui.service';
-import { MapShellState } from '../features/map/map-shell/map-shell.state';
+import { UploadPanelComponent } from '../features/upload/upload-panel/upload-panel.component';
+import { UploadShellComponent } from '../features/upload/upload-shell/upload-shell.component';
+import { UploadShellUiService } from '../features/upload/upload-shell/upload-shell-ui.service';
+import { MapShellState } from '../features/map/map-shell/component/map-shell.state';
 import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';
 import { MapZoomOrchestratorService } from '../core/map-zoom/map-zoom-orchestrator.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../core/workspace-pane/workspace-pane-layout-map-effects.service';

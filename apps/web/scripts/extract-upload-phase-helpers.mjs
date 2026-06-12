@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const panelPath = path.join(root, 'src/app/features/upload/upload-panel.component.ts');
+const panelPath = path.join(root, 'src/app/features/upload/upload-panel/upload-panel.component.ts');
 const helperPath = path.join(root, 'src/app/features/upload/upload-phase.helpers.ts');
 
 const panel = fs.readFileSync(panelPath, 'utf8');

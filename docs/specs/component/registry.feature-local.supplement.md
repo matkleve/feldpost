@@ -200,7 +200,7 @@
 
 #### `<app-upload-shell>` — Upload Shell
 
-- **File**: `apps/web/src/app/features/upload/upload-shell.component.ts`
+- **File**: `apps/web/src/app/features/upload/upload-shell/upload-shell.component.ts`
 - **Purpose**: Fixed top-right shell: upload trigger, dock column for panel + resolver tray on all authenticated routes.
 - **Spec**: [`docs/specs/component/upload/upload-shell.md`](upload/upload-shell.md)
 - **Variant axes**: none (panel open/closed via shell state)
@@ -212,7 +212,7 @@
 
 #### `<app-upload-resolver-tray>` — Upload Resolver Tray
 
-- **File**: `apps/web/src/app/features/upload/upload-resolver-tray.component.ts`
+- **File**: `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.component.ts`
 - **Purpose**: Pre-upload address disambiguation card (questions, numbered options, media chip, carousel).
 - **Spec**: [`docs/specs/component/upload/upload-resolver-tray.md`](upload/upload-resolver-tray.md), [`upload-resolver-tray.question-copy.md`](upload/upload-resolver-tray.question-copy.md)
 - **Variant axes**: `data-state` (`passive` | `active`); programmatic `trayMode` includes `hidden`
@@ -226,7 +226,7 @@
 
 #### `<app-upload-panel>` — Upload Panel
 
-- **File**: `apps/web/src/app/features/upload/upload-panel.component.ts`
+- **File**: `apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts`
 - **Purpose**: Slide-in panel that lists active upload jobs with per-item controls and a drop-zone.
 - **Spec**: [`docs/specs/component/upload/upload-panel.md`](upload/upload-panel.md)
 - **Variant axes**: none
@@ -238,7 +238,7 @@
 
 #### `<app-upload-panel-item>` — Upload Panel Item
 
-- **File**: `apps/web/src/app/features/upload/upload-panel-item.component.ts`
+- **File**: `apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.ts`
 - **Purpose**: Single upload job row: thumbnail, progress bar, phase chip, and action menu.
 - **Spec**: [`docs/specs/component/upload/upload-panel.md`](upload/upload-panel.md)
 - **Variant axes**: none (state driven by `UploadJob`)

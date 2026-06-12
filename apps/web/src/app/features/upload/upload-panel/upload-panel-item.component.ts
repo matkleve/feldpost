@@ -1,0 +1,474 @@
+import type { OnDestroy} from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import type { UploadJob, UploadPhase } from '../../../core/upload/upload-manager.service';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { chipVariantForFileType } from '../../../core/media/file-type-chip-variant';
+import { ChipComponent } from '../../../shared/components/chip/chip.component';
+import { getIssueKind, getLaneForJob, phaseToStatusClass } from '../upload-phase.helpers';
+import { statusLabelText, actionLabel, actionIcon } from './upload-panel-item-helpers';
+import { getBoundProjectIds } from './upload-panel-project-bindings.util';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { MediaDownloadService } from '../../../core/media-download/media-download.service';
+import { UniversalMediaComponent } from '../../../shared/media/universal-media.component';
+import type { MediaRenderState, UploadOverlayState } from '../../../core/media/media-renderer.types';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
+import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
+
+
+export type UploadItemMenuAction =
+  | 'view_file_details'
+  | 'assign_to_project'
+  | 'download'
+  | 'open_in_media'
+  | 'open_project'
+  | 'toggle_priority'
+  | 'open_existing_media'
+  | 'upload_anyway'
+  | 'retry'
+  | 'change_location_map'
+  | 'change_location_address'
+  | 'candidate_select'
+  | 'manual_location_entry'
+  | 'cancel_location_prompt'
+  | 'cancel_upload'
+  | 'remove_from_project'
+  | 'delete_media'
+  | 'dismiss';
+
+export interface UploadItemActionContext {
+  contextType: typeof ACTION_CONTEXT_IDS.uploadItem;
+  lane: 'uploading' | 'uploaded' | 'issues';
+  issueKind: ReturnType<typeof getIssueKind>;
+}
+
+export interface UploadItemActionEvent {
+  job: UploadJob;
+  action: UploadItemMenuAction;
+  context: UploadItemActionContext;
+}
+
+/**
+ * UploadPanelItemComponent — per-file row in upload panel.
+ *
+ * Renders job state (thumbnail, progress, actions, menu) based on:
+ *  - Current lane (uploading|uploaded|issues)
+ *  - Job phase (queued → complete|error|missing_data)
+ *  - Issue kind (duplicate_photo|missing_gps|document_unresolved|upload_error)
+ *
+ * Action Gating (Spec: upload-panel.md § Wiring/Data):
+ * ✅ Uploading lane: view_file_details, cancel_upload
+ * ✅ Uploaded lane: change_location_*, open_in_media, assign_to_project, open_project?, priority?, download?
+ * ✅ Issues lane: Actions depend on issue kind:
+ *    - duplicate_photo: open_existing_media, upload_anyway
+ *    - missing_gps: change_location_map, change_location_address, retry
+ *    - document_unresolved: change_location_map, change_location_address, assign_to_project
+ *    - upload_error/conflict_review: retry
+ *
+ * Menu Placement (Spec: down-first with fallback upward when clipped):
+ * ✅ Implemented via DropdownShellComponent (UPLOAD_ITEM_MENU_WIDTH=224px, offset-y=4px)
+ */
+@Component({
+  selector: 'app-upload-panel-item',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ...HLM_BUTTON_IMPORTS,
+    ChipComponent,
+    UniversalMediaComponent,
+    DropdownShellComponent,
+    HlmMenuItemDirective,
+    HlmMenuSeparatorDirective,
+  ],
+  templateUrl: './upload-panel-item.component.html',
+  styleUrl: './upload-panel-item.component.scss',
+})
+export class UploadPanelItemComponent implements OnDestroy {
+  private static activeMenuOwner: UploadPanelItemComponent | null = null;
+
+  private readonly i18nService = inject(I18nService);
+  private readonly mediaOrchestrator = inject(MediaDownloadService);
+
+  readonly job = input.required<UploadJob>();
+  readonly interactive = input<boolean>(false);
+  readonly selectable = input<boolean>(false);
+  readonly selected = input<boolean>(false);
+  readonly documentFallbackLabel = input<string | null>(null);
+  readonly showOpenProject = input<boolean>(false);
+  readonly priorityEnabled = input<boolean>(false);
+  readonly prioritized = input<boolean>(false);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
+
+  readonly requestPlacement = output<{ jobId: string; phase: UploadPhase; event: MouseEvent }>();
+  readonly dismissFile = output<string>();
+  readonly rowMainClick = output<UploadJob>();
+  readonly rowMainKeydown = output<{ job: UploadJob; event: KeyboardEvent }>();
+  readonly menuActionSelected = output<UploadItemActionEvent>();
+  readonly selectionChanged = output<{ jobId: string; selected: boolean }>();
+
+  readonly menuOpen = signal(false);
+  readonly menuAnchor = signal<HTMLElement | null>(null);
+  readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
+  readonly showDuplicateExistingMediaShortcut = computed(() => {
+    const job = this.job();
+    return (
+      (getIssueKind(job) === 'duplicate_file' || getIssueKind(job) === 'duplicate_photo') &&
+      !!job.existingMediaId
+    );
+  });
+  readonly showThumbnailSpinner = computed(() => this.showsUploadOverlay(this.job().phase));
+  /** Location / open hint over thumbnail on interactive rows (workspace detail / placement). */
+  readonly showThumbnailLocationHint = computed(() => {
+    if (this.showDuplicateExistingMediaShortcut()) {
+      return false;
+    }
+    return (
+      this.interactive() &&
+      (this.canOpenInWorkspacePane() || this.canZoomToJob() || this.job().phase === 'missing_data')
+    );
+  });
+
+  // Media renderer state
+  readonly fileIdentity = (): { mimeType: string; fileName: string } => ({
+    mimeType: this.job().file.type,
+    fileName: this.job().file.name,
+  });
+
+  readonly mediaRenderState = (): MediaRenderState => {
+    const j = this.job();
+    if (j.thumbnailUrl) {
+      return {
+        status: 'loaded',
+        url: j.thumbnailUrl,
+        resolvedTier: 'inline',
+      };
+    } else if (
+      j.phase === 'converting_format' ||
+      j.phase === 'uploading' ||
+      j.phase === 'validating' ||
+      j.phase === 'parsing_exif'
+    ) {
+      return { status: 'loading' };
+    } else {
+      return { status: 'placeholder' };
+    }
+  };
+
+  readonly uploadOverlay = (): UploadOverlayState | null => {
+    const job = this.job();
+    if (!this.showsUploadOverlay(job.phase)) {
+      return null;
+    }
+
+    return {
+      progress: job.progress,
+      label: job.statusLabel,
+      phase: job.phase,
+    };
+  };
+
+  phaseToStatusClass(phase: UploadPhase): string {
+    return phaseToStatusClass(phase);
+  }
+
+  canZoomToJob(): boolean {
+    const j = this.job();
+    return (
+      getLaneForJob(j) === 'uploaded' &&
+      !!j.mediaId &&
+      typeof j.coords?.lat === 'number' &&
+      typeof j.coords?.lng === 'number'
+    );
+  }
+
+  canOpenInWorkspacePane(): boolean {
+    const job = this.job();
+    if (getLaneForJob(job) === 'uploaded' && !!job.mediaId) {
+      return true;
+    }
+    return (
+      (getIssueKind(job) === 'duplicate_file' || getIssueKind(job) === 'duplicate_photo') &&
+      !!job.existingMediaId
+    );
+  }
+
+  rowMainActionAriaLabel(): string | null {
+    const name = this.job().file.name;
+    if (
+      this.job().phase === 'missing_data' &&
+      getIssueKind(this.job()) !== 'duplicate_file' &&
+      getIssueKind(this.job()) !== 'duplicate_photo'
+    ) {
+      return `Place ${name} on map`;
+    }
+    if (this.canOpenInWorkspacePane() || this.showDuplicateExistingMediaShortcut()) {
+      return `Open ${name} in workspace`;
+    }
+    if (this.canZoomToJob()) {
+      return `Zoom map to ${name}`;
+    }
+    return null;
+  }
+
+  thumbnailHintIcon(): string {
+    const issueKind = getIssueKind(this.job());
+    if (
+      this.job().phase === 'missing_data' &&
+      issueKind !== 'duplicate_file' &&
+      issueKind !== 'duplicate_photo'
+    ) {
+      return 'add_location_alt';
+    }
+    if (this.canZoomToJob()) {
+      return 'my_location';
+    }
+    return 'open_in_full';
+  }
+
+  isUploading(): boolean {
+    return getLaneForJob(this.job()) === 'uploading';
+  }
+
+  availableMenuActions(): UploadItemMenuAction[] {
+    const job = this.job();
+    const lane = getLaneForJob(job);
+    const boundProjectIds = getBoundProjectIds(job);
+    let actions: UploadItemMenuAction[] = [];
+
+    if (lane === 'uploading') {
+      actions.push('view_file_details');
+      actions.push('cancel_upload');
+      return actions;
+    }
+
+    if (lane === 'issues') {
+      const issueKind = getIssueKind(job);
+      if (issueKind === 'duplicate_file' || issueKind === 'duplicate_photo') {
+        if (job.existingMediaId) {
+          actions.push('open_existing_media');
+        }
+        actions.push('upload_anyway');
+      } else if (issueKind === 'document_unresolved') {
+        actions.push('change_location_map');
+        actions.push('change_location_address');
+        actions.push('assign_to_project');
+      } else if (issueKind === 'conflict_review' || issueKind === 'upload_error') {
+        actions.push('retry');
+      } else if (issueKind === 'address_ambiguous') {
+        if ((job.addressCandidates?.length ?? 0) > 0) {
+          actions.push('candidate_select');
+        }
+        actions.push('manual_location_entry');
+        actions.push('cancel_location_prompt');
+        return actions;
+      } else if (issueKind === 'missing_gps') {
+        actions.push('change_location_map');
+        actions.push('change_location_address');
+        actions.push('retry');
+      }
+      actions.push('dismiss');
+      return actions;
+    } else if (lane === 'uploaded' && job.mediaId) {
+      actions.push('change_location_map');
+      actions.push('change_location_address');
+      actions.push('assign_to_project');
+      if (boundProjectIds.length > 0 && this.showOpenProject()) {
+        actions.push('open_project');
+      }
+      actions.push('open_in_media');
+      if (job.storagePath) {
+        actions.push('download');
+      }
+      if (this.priorityEnabled()) {
+        actions.push('toggle_priority');
+      }
+      if (boundProjectIds.length > 0) {
+        actions.push('remove_from_project');
+      }
+      actions.push('delete_media');
+      return actions;
+    }
+
+    actions.push('dismiss');
+
+    return actions;
+  }
+
+  isDestructiveAction(action: UploadItemMenuAction): boolean {
+    return (
+      action === 'cancel_upload' ||
+      action === 'remove_from_project' ||
+      action === 'delete_media' ||
+      action === 'cancel_location_prompt' ||
+      action === 'dismiss'
+    );
+  }
+
+  actionIcon(action: UploadItemMenuAction): string {
+    return actionIcon(action);
+  }
+
+  actionLabel(action: UploadItemMenuAction): string {
+    return actionLabel(action, this.job(), this.prioritized(), this.t);
+  }
+
+  statusLabelText(): string {
+    return statusLabelText(this.job(), this.t);
+  }
+
+  menuPanelClass(): string {
+    return 'map-context-menu option-menu-surface upload-item-context-menu';
+  }
+
+  onRowContextMenu(event: MouseEvent): void {
+    if (!this.hasMenuActions()) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.openMenu(event.currentTarget instanceof HTMLElement ? event.currentTarget : null);
+  }
+
+  onMenuTriggerClick(event: MouseEvent): void {
+    if (!this.hasMenuActions()) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    if (this.menuOpen()) {
+      this.closeMenu();
+      return;
+    }
+
+    this.openMenu(event.currentTarget instanceof HTMLElement ? event.currentTarget : null);
+  }
+
+  onMenuCloseRequested(): void {
+    this.closeMenu();
+  }
+
+  onMenuAction(action: UploadItemMenuAction): void {
+    this.closeMenu();
+    this.menuActionSelected.emit({
+      job: this.job(),
+      action,
+      context: {
+        contextType: ACTION_CONTEXT_IDS.uploadItem,
+        lane: getLaneForJob(this.job()),
+        issueKind: getIssueKind(this.job()),
+      },
+    });
+  }
+
+  onOpenExistingMediaShortcut(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.menuActionSelected.emit({
+      job: this.job(),
+      action: 'open_existing_media',
+      context: {
+        contextType: ACTION_CONTEXT_IDS.uploadItem,
+        lane: getLaneForJob(this.job()),
+        issueKind: getIssueKind(this.job()),
+      },
+    });
+  }
+
+  onRequestPlacement(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.requestPlacement.emit({ jobId: this.job().id, phase: this.job().phase, event });
+  }
+
+  onDismissClick(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.closeMenu();
+    this.dismissFile.emit(this.job().id);
+  }
+
+  ngOnDestroy(): void {
+    this.closeMenu();
+  }
+
+  onSelectionChanged(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    this.selectionChanged.emit({ jobId: this.job().id, selected: target.checked });
+  }
+
+  fileTypeBadge(): string | null {
+    const file = this.job().file;
+    return this.mediaOrchestrator.resolveBadge({
+      mimeType: file.type,
+      fileName: file.name,
+    });
+  }
+
+  fileTypeChipVariant() {
+    const file = this.job().file;
+    const definition = this.mediaOrchestrator.resolveFileType({
+      mimeType: file.type,
+      fileName: file.name,
+    });
+    return chipVariantForFileType(definition);
+  }
+
+  fileTypeIcon(): string {
+    const file = this.job().file;
+    return this.mediaOrchestrator.resolveIcon({
+      mimeType: file.type,
+      fileName: file.name,
+    });
+  }
+
+  private showsUploadOverlay(phase: UploadPhase): boolean {
+    return (
+      phase === 'queued' ||
+      phase === 'validating' ||
+      phase === 'parsing_exif' ||
+      phase === 'converting_format' ||
+      phase === 'hashing' ||
+      phase === 'dedup_check' ||
+      phase === 'extracting_title' ||
+      phase === 'conflict_check' ||
+      phase === 'uploading' ||
+      phase === 'saving_record' ||
+      phase === 'replacing_record' ||
+      phase === 'resolving_address' ||
+      phase === 'resolving_coordinates'
+    );
+  }
+
+  private closeMenu(): void {
+    if (UploadPanelItemComponent.activeMenuOwner === this) {
+      UploadPanelItemComponent.activeMenuOwner = null;
+    }
+    this.menuOpen.set(false);
+    this.menuAnchor.set(null);
+  }
+
+  private openMenu(anchor: HTMLElement | null): void {
+    if (!this.hasMenuActions()) {
+      return;
+    }
+
+    // upload-panel.md § Dropdown Visibility Rationale: only one row menu should be active at once.
+    const previousOwner = UploadPanelItemComponent.activeMenuOwner;
+    if (previousOwner && previousOwner !== this) {
+      previousOwner.closeMenu();
+    }
+
+    this.menuAnchor.set(anchor);
+    this.menuOpen.set(true);
+    UploadPanelItemComponent.activeMenuOwner = this;
+  }
+}

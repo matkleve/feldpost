@@ -30,7 +30,7 @@ import {
 } from '../../core/media-query/media-gallery-view.helpers';
 import type { PreviewGenerationStatus } from '../../core/media/preview-generation-status.types';
 import { MediaThumbnailRealtimeService } from '../../core/media-thumbnail/media-thumbnail-realtime.service';
-import type { ZoomToLocationEvent } from '../upload/upload-panel-row-handlers';
+import type { ZoomToLocationEvent } from '../upload/upload-panel/upload-panel-row-handlers';
 
 export type MediaContentState = 'loading' | 'error' | 'ready';
 

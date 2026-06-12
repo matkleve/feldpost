@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getIssueKind, getLaneForJob } from './upload-phase.helpers';
-import { makeUploadJob } from './upload-panel.test-utils.spec';
+import { makeUploadJob } from './upload-panel/upload-panel.test-utils.spec';
 
 describe('upload-phase helpers with locationSourceUsed', () => {
   it('keeps complete jobs in uploaded lane regardless of source marker', () => {

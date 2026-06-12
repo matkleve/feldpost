@@ -43,7 +43,7 @@ import { workspaceMediaToMediaRecord } from '../../core/workspace-view/workspace
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import { AuthService } from '../../core/auth/auth.service';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../core/workspace-pane/workspace-pane-shell-host.token';
-import type { ZoomToLocationEvent } from '../upload/upload-panel-row-handlers';
+import type { ZoomToLocationEvent } from '../upload/upload-panel/upload-panel-row-handlers';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../core/filter/filter.service';
 import { MetadataService } from '../../core/metadata/metadata.service';

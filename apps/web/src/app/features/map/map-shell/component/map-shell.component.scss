@@ -1,0 +1,10 @@
+// MapShellComponent styles — full-screen map shell.
+// All colours use design-system tokens. No raw hex values.
+
+@use '../scss/map-shell-context-menu';
+@use '../scss/map-shell-style-switch';
+@use '../scss/map-shell-gps-placement';
+@use '../scss/map-shell-layout';
+
+// ── Drag divider — styles moved to DragDividerComponent ──────────────────────
+

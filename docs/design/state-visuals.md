@@ -77,10 +77,10 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 - `apps/web/src/app/features/map/map-shell/_map-shell-upload.scss` — map/media upload trigger (`.map-upload-btn`)
 - `apps/web/src/styles/_option-menu-item-states.scss` — menu rows (hover already primary; destructive branch unchanged)
 - `apps/web/src/styles/_interaction-emphasis-quiet-row.scss` — shared SCSS mixins for feature list rows
-- `apps/web/src/app/features/upload/upload-resolver-tray.component.scss` — resolver choice rows
+- `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.component.scss` — resolver choice rows
 - `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` — section rail + TOC
 - `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.scss` — option rows
-- `apps/web/src/app/features/upload/upload-panel-item.component.scss` — embedded multi-select rows
+- `apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.scss` — embedded multi-select rows
 - `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.scss` — picker options
 - `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.scss` — multi-select rows
 - `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.scss` — `__option--selected`
