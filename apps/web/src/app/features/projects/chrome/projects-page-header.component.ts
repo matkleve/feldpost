@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { I18nService } from '../../core/i18n/i18n.service';
-import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 @Component({
   selector: 'app-projects-page-header',

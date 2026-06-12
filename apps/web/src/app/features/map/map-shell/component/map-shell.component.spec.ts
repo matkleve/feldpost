@@ -30,6 +30,37 @@ import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { MarkerInteractionService } from '../markers/marker-interaction.service';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
+import { MapBasemapLayerService } from '../leaflet/map-basemap-layer.service';
+import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
+
+function createMapContainerElementStub(): {
+  classList: { add: ReturnType<typeof vi.fn>; remove: ReturnType<typeof vi.fn> };
+  removeEventListener: ReturnType<typeof vi.fn>;
+  getBoundingClientRect: ReturnType<typeof vi.fn>;
+  focus: ReturnType<typeof vi.fn>;
+} {
+  return {
+    classList: { add: vi.fn(), remove: vi.fn() },
+    removeEventListener: vi.fn(),
+    getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0 }),
+    focus: vi.fn(),
+  };
+}
+
+function createMapStub(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    addLayer: vi.fn(),
+    removeLayer: vi.fn(),
+    setView: vi.fn(),
+    getZoom: vi.fn().mockReturnValue(13),
+    latLngToContainerPoint: vi.fn().mockReturnValue({ x: 10, y: 10 }),
+    getContainer: vi.fn().mockReturnValue(createMapContainerElementStub()),
+    remove: vi.fn(),
+    ...overrides,
+  };
+}
 
 function createMarkerStub() {
   return {
@@ -78,17 +109,24 @@ function createWorkspacePaneShellHostStub(state: MapShellState): WorkspacePaneSh
 }
 
 function createSupabaseQueryMock() {
+  const resolved = { data: [], error: null };
   const query = {
     select: vi.fn(),
     not: vi.fn(),
     order: vi.fn(),
     limit: vi.fn(),
+    in: vi.fn(),
+    then: (
+      onFulfilled: (value: typeof resolved) => unknown,
+      onRejected?: (reason: unknown) => unknown,
+    ) => Promise.resolve(resolved).then(onFulfilled, onRejected),
   };
 
   query.select.mockReturnValue(query);
   query.not.mockReturnValue(query);
   query.order.mockReturnValue(query);
-  query.limit.mockResolvedValue({ data: [], error: null });
+  query.in.mockReturnValue(query);
+  query.limit.mockReturnValue(Promise.resolve(resolved));
 
   return query;
 }
@@ -205,8 +243,11 @@ describe('MapShellComponent', () => {
     );
     expect(switchRoot).not.toBeNull();
     expect(options).toHaveLength(2);
-    expect(options[0]?.textContent?.trim()).toBe('Street');
-    expect(options[1]?.textContent?.trim()).toBe('Photo');
+    const icons = (fixture.nativeElement as HTMLElement).querySelectorAll(
+      '.map-style-switch .material-icons',
+    );
+    expect(icons[0]?.textContent?.trim()).toBe('map');
+    expect(icons[1]?.textContent?.trim()).toBe('satellite_alt');
   });
 
   it('renders the map container element', () => {
@@ -271,27 +312,29 @@ describe('MapShellComponent', () => {
 
     const previousLayer = { addTo: vi.fn() };
     const nextLayer = { addTo: vi.fn() };
-    const mapStub = {
-      removeLayer: vi.fn(),
-      remove: vi.fn(),
-    };
+    const mapStub = createMapStub();
+    const basemapLayerService = TestBed.inject(MapBasemapLayerService);
+    const applyBasemapLayerSpy = vi.spyOn(basemapLayerService, 'applyBasemapLayer').mockReturnValue({
+      activeBaseTileLayer: nextLayer,
+    });
 
     const component = fixture.componentInstance as unknown as {
-      map: { removeLayer: ReturnType<typeof vi.fn> };
+      map: Record<string, unknown>;
       activeBaseTileLayer: { addTo: ReturnType<typeof vi.fn> } | null;
-      createMapBasemapLayer: (mode: 'default' | 'satellite') => { addTo: ReturnType<typeof vi.fn> };
       setMapViewMode: (mode: 'street' | 'photo') => void;
     };
 
     component.map = mapStub;
     component.activeBaseTileLayer = previousLayer;
-    component.createMapBasemapLayer = vi.fn().mockReturnValue(nextLayer);
 
     component.setMapViewMode('photo');
 
-    expect(mapStub.removeLayer).toHaveBeenCalledWith(previousLayer);
-    expect(component.createMapBasemapLayer).toHaveBeenCalledWith('satellite');
-    expect(nextLayer.addTo).toHaveBeenCalledWith(mapStub);
+    expect(applyBasemapLayerSpy).toHaveBeenCalledWith({
+      map: mapStub,
+      activeBaseTileLayer: previousLayer,
+      basemap: 'satellite',
+    });
+    expect(component.activeBaseTileLayer).toBe(nextLayer);
   });
 
   it('toggleUploadPanel() hides the panel when called twice', () => {
@@ -1268,7 +1311,7 @@ describe('MapShellComponent', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    const mapStub = {
+    const mapStub = createMapStub({
       mouseEventToContainerPoint: vi.fn((evt: { clientX: number; clientY: number }) => ({
         x: evt.clientX,
         y: evt.clientY,
@@ -1276,8 +1319,7 @@ describe('MapShellComponent', () => {
       on: vi.fn(),
       off: vi.fn(),
       distance: vi.fn().mockReturnValue(100),
-      remove: vi.fn(),
-    };
+    });
 
     const component = fixture.componentInstance as unknown as {
       map: unknown;
@@ -1631,13 +1673,14 @@ describe('MapShellComponent', () => {
       },
     ];
 
+    const selectionService = TestBed.inject(WorkspaceSelectionService);
     const fetchSpy = vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue(incoming);
-    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+    const selectSpy = vi.spyOn(selectionService, 'selectAllInScope');
 
     await component.selectRadiusImages({ lat: 48.2, lng: 16.37 }, 200, false);
 
     expect(fetchSpy).toHaveBeenCalledWith([{ lat: 48.2, lng: 16.37 }], 15);
-    expect(setSpy).toHaveBeenCalledWith(incoming);
+    expect(selectSpy).toHaveBeenCalledWith(['img-radius-1']);
     expect(Array.from(component.selectedMarkerKeys())).toEqual(['in-radius']);
   });
 
@@ -1689,28 +1732,8 @@ describe('MapShellComponent', () => {
     TestBed.inject(MapShellState).setSelectedMarkerKeys(new Set(['already-selected']));
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.setActiveSelectionImages([
-      {
-        id: 'img-existing',
-        latitude: 48.25,
-        longitude: 16.35,
-        thumbnailPath: null,
-        storagePath: null,
-        capturedAt: null,
-        createdAt: '2026-01-01T00:00:00.000Z',
-        projectId: null,
-        projectName: null,
-        direction: null,
-        exifLatitude: null,
-        exifLongitude: null,
-        addressLabel: null,
-        city: null,
-        district: null,
-        street: null,
-        country: null,
-        userName: null,
-      },
-    ]);
+    const selectionService = TestBed.inject(WorkspaceSelectionService);
+    selectionService.selectAllInScope(['img-existing']);
 
     const incoming = [
       {
@@ -1756,12 +1779,12 @@ describe('MapShellComponent', () => {
     ];
 
     vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue(incoming);
-    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+    const selectSpy = vi.spyOn(selectionService, 'selectAllInScope');
 
     await component.selectRadiusImages({ lat: 48.2, lng: 16.37 }, 200, true);
 
-    const merged = setSpy.mock.calls[0]?.[0] ?? [];
-    expect(merged.map((image) => image.id).sort()).toEqual(['img-added', 'img-existing']);
+    const mergedIds = selectSpy.mock.calls[0]?.[0] ?? [];
+    expect([...mergedIds].sort()).toEqual(['img-added', 'img-existing']);
     expect(Array.from(component.selectedMarkerKeys()).sort()).toEqual([
       'already-selected',
       'in-radius',
@@ -1878,28 +1901,8 @@ describe('MapShellComponent', () => {
     });
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.setActiveSelectionImages([
-      {
-        id: 'img-existing',
-        latitude: 48.25,
-        longitude: 16.35,
-        thumbnailPath: null,
-        storagePath: null,
-        capturedAt: null,
-        createdAt: '2026-01-01T00:00:00.000Z',
-        projectId: null,
-        projectName: null,
-        direction: null,
-        exifLatitude: null,
-        exifLongitude: null,
-        addressLabel: null,
-        city: null,
-        district: null,
-        street: null,
-        country: null,
-        userName: null,
-      },
-    ]);
+    const selectionService = TestBed.inject(WorkspaceSelectionService);
+    selectionService.selectAllInScope(['img-existing']);
 
     vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue([
       {
@@ -1924,12 +1927,13 @@ describe('MapShellComponent', () => {
       },
     ]);
 
-    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+    const selectSpy = vi.spyOn(selectionService, 'selectAllInScope');
 
-    await component.handlePhotoMarkerClick('cluster-1', { originalEvent: { ctrlKey: true } });
+    component.handlePhotoMarkerClick('cluster-1', { originalEvent: { ctrlKey: true } });
+    await vi.waitUntil(() => selectSpy.mock.calls.length > 0);
 
-    const merged = setSpy.mock.calls[0]?.[0] ?? [];
-    expect(merged.map((image) => image.id).sort()).toEqual(['img-added', 'img-existing']);
+    const mergedIds = selectSpy.mock.calls.at(-1)?.[0] ?? [];
+    expect([...mergedIds].sort()).toEqual(['img-added', 'img-existing']);
   });
 
   it('Ctrl-click on single marker appends selection without opening detail view', async () => {
@@ -1971,7 +1975,8 @@ describe('MapShellComponent', () => {
     });
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
-    workspaceView.setActiveSelectionImages([]);
+    const selectionService = TestBed.inject(WorkspaceSelectionService);
+    selectionService.clearSelection();
 
     vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue([
       {
@@ -1996,11 +2001,12 @@ describe('MapShellComponent', () => {
       },
     ]);
 
-    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+    const selectSpy = vi.spyOn(selectionService, 'selectAllInScope');
 
-    await component.handlePhotoMarkerClick('single-1', { originalEvent: { ctrlKey: true } });
+    component.handlePhotoMarkerClick('single-1', { originalEvent: { ctrlKey: true } });
+    await vi.waitUntil(() => selectSpy.mock.calls.length > 0);
 
-    expect(setSpy).toHaveBeenCalled();
+    expect(selectSpy).toHaveBeenCalledWith(['img-single']);
     expect(fixture.componentInstance.detailMediaId()).toBeNull();
   });
 

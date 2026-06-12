@@ -2,13 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { I18nService } from '../../core/i18n/i18n.service';
-import { ProjectsService } from '../../core/projects/projects.service';
-import { ToastService } from '../../core/toast/toast.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { ProjectsService } from '../../../core/projects/projects.service';
+import { ToastService } from '../../../core/toast/toast.service';
 import { ProjectsPageComponent } from './projects-page.component';
-import { ProjectsToolbarComponent } from './projects-toolbar.component';
-import type { ProjectListItem } from '../../core/projects/projects.types';
-import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
+import { ProjectsToolbarComponent } from '../chrome/projects-toolbar.component';
+import type { ProjectListItem } from '../../../core/projects/projects.types';
+import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
 
 function createProject(overrides: Partial<ProjectListItem> = {}): ProjectListItem {
   return {

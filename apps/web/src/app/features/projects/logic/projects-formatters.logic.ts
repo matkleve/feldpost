@@ -1,5 +1,5 @@
-import type { ProjectColorKey, ProjectListItem, ProjectSummary } from '../../core/projects/projects.types';
-import type { PendingProjectAction } from './projects-page.config';
+import type { ProjectColorKey, ProjectListItem, ProjectSummary } from '../../../core/projects/projects.types';
+import type { PendingProjectAction } from '../page/projects-page.config';
 
 export function pendingActionTitle(
   action: PendingProjectAction,

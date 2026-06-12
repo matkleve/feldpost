@@ -20,7 +20,7 @@ const loadMedia = () =>
   import('../features/media/media.component').then((m) => m.MediaComponent);
 
 const loadProjects = () =>
-  import('../features/projects/projects-page.component').then((m) => m.ProjectsPageComponent);
+  import('../features/projects/page/projects-page.component').then((m) => m.ProjectsPageComponent);
 
 export const AUTHENTICATED_APP_ROUTES: Routes = [
   {

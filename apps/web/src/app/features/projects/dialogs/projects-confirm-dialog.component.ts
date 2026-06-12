@@ -1,7 +1,7 @@
 import { Component, input, output, viewChild } from '@angular/core';
 import { BrnDialog, BrnDialogImports } from '@spartan-ng/brain/dialog';
-import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
-import { HLM_DIALOG_IMPORTS } from '../../shared/ui/dialog';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_DIALOG_IMPORTS } from '../../../shared/ui/dialog';
 
 @Component({
   selector: 'app-projects-confirm-dialog',

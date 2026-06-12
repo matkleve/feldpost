@@ -8,16 +8,16 @@ import {
   output,
   signal,
 } from '@angular/core';
-import type { ProjectColorKey, ProjectSummary } from '../../core/projects/projects.types';
-import type { ChipVariant } from '../../shared/components/chip/chip.component';
-import { formatRelativeDate } from './projects-formatters.logic';
+import type { ProjectColorKey, ProjectSummary } from '../../../core/projects/projects.types';
+import type { ChipVariant } from '../../../shared/components/chip/chip.component';
+import { formatRelativeDate } from '../logic/projects-formatters.logic';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
-import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
-import { ChipComponent } from '../../shared/components/chip/chip.component';
-import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
-import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../shared/ui/menu';
-import { I18nService } from '../../core/i18n/i18n.service';
-import { CONTEXT_MENU_PANEL_WIDTH_PX } from '../../shared/ui/menu/context-menu-layout.constants';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { ChipComponent } from '../../../shared/components/chip/chip.component';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { CONTEXT_MENU_PANEL_WIDTH_PX } from '../../../shared/ui/menu/context-menu-layout.constants';
 
 // @see docs/specs/component/project/project-card.md
 

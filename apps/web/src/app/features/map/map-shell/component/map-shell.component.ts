@@ -855,11 +855,12 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private destroyMapInstance(): void {
-    const mapContainer = this.map?.getContainer();
-    if (mapContainer) {
+    const getContainer = this.map?.getContainer;
+    const mapContainer = typeof getContainer === 'function' ? getContainer.call(this.map) : undefined;
+    if (mapContainer && typeof mapContainer.removeEventListener === 'function') {
       mapContainer.removeEventListener('contextmenu', this.mapContainerContextMenuHandler, true);
     }
-    this.map?.remove();
+    this.map?.remove?.();
     this.mapInitialized = false;
   }
 
@@ -968,39 +969,32 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private async copyAddressWithFeedback(lat: number, lng: number): Promise<void> {
-    const copied = await this.mapContextActionsService.copyAddressFromCoords(lat, lng);
-    if (copied) {
-      this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
-      return;
-    }
-
-    this.toastService.show({
-      message: this.t(
-        'workspace.export.error.addressNotFound',
-        'Address could not be resolved.',
-      ),
-      type: 'warning',
-      dedupe: true,
+    await this.mapContextActionsService.copyAddressWithFeedback(lat, lng, {
+      onCopied: () =>
+        this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true }),
+      onNotFound: () =>
+        this.toastService.show({
+          message: this.t(
+            'workspace.export.error.addressNotFound',
+            'Address could not be resolved.',
+          ),
+          type: 'warning',
+          dedupe: true,
+        }),
     });
   }
 
   private async copyGpsWithFeedback(lat: number, lng: number): Promise<void> {
-    const text = this.mapContextActionsService.formatGps(lat, lng);
-    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
-    this.toastService.show({
-      message: copied ? 'GPS kopiert.' : text,
-      type: copied ? 'success' : 'info',
-      dedupe: true,
+    await this.mapContextActionsService.copyGpsWithFeedback(lat, lng, {
+      onCopied: () =>
+        this.toastService.show({ message: 'GPS kopiert.', type: 'success', dedupe: true }),
+      onFallback: (text) =>
+        this.toastService.show({ message: text, type: 'info', dedupe: true }),
     });
   }
 
   private openGoogleMapsForCoords(lat: number, lng: number): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const url = this.mapContextActionsService.buildGoogleMapsUrl(lat, lng);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    this.mapContextActionsService.openGoogleMaps(lat, lng);
   }
 
   async onMapContextCopyAddress(): Promise<void> {

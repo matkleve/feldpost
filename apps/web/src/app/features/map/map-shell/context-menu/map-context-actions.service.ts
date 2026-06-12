@@ -83,6 +83,47 @@ export class MapContextActionsService {
     return `https://www.google.com/maps?q=${lat},${lng}`;
   }
 
+  openGoogleMaps(lat: number, lng: number): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.open(this.buildGoogleMapsUrl(lat, lng), '_blank', 'noopener,noreferrer');
+  }
+
+  async copyAddressWithFeedback(
+    lat: number,
+    lng: number,
+    feedback: {
+      onCopied: () => void;
+      onNotFound: () => void;
+    },
+  ): Promise<void> {
+    const copied = await this.copyAddressFromCoords(lat, lng);
+    if (copied) {
+      feedback.onCopied();
+      return;
+    }
+    feedback.onNotFound();
+  }
+
+  async copyGpsWithFeedback(
+    lat: number,
+    lng: number,
+    feedback: {
+      onCopied: () => void;
+      onFallback: (text: string) => void;
+    },
+  ): Promise<void> {
+    const text = this.formatGps(lat, lng);
+    const copied = await this.copyTextToClipboard(text);
+    if (copied) {
+      feedback.onCopied();
+      return;
+    }
+    feedback.onFallback(text);
+  }
+
   async assignImagesToProject(
     mediaIds: string[],
     projectId: string,

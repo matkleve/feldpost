@@ -1,9 +1,9 @@
 import { Component, computed, inject, input, output } from '@angular/core';
-import { I18nService } from '../../core/i18n/i18n.service';
-import type { ProjectColorKey } from '../../core/projects/projects.types';
-import type { ProjectGroupedSection } from './projects-page.config';
-import { ProjectCardComponent } from './project-card.component';
-import { toProjectSummary } from './projects-formatters.logic';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import type { ProjectColorKey } from '../../../core/projects/projects.types';
+import type { ProjectGroupedSection } from '../page/projects-page.config';
+import { ProjectCardComponent } from '../cards/project-card.component';
+import { toProjectSummary } from '../logic/projects-formatters.logic';
 
 @Component({
   selector: 'app-projects-grid-view',

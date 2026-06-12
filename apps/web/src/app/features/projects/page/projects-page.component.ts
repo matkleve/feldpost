@@ -4,24 +4,24 @@ import type { OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { FilterService } from '../../core/filter/filter.service';
-import { I18nService } from '../../core/i18n/i18n.service';
-import { ProjectsService } from '../../core/projects/projects.service';
-import { ToastService } from '../../core/toast/toast.service';
-import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspace-pane-observer.adapter';
-import type { SelectedItemsContextPort } from '../../core/workspace-pane/workspace-pane-context.port';
+import { FilterService } from '../../../core/filter/filter.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { ProjectsService } from '../../../core/projects/projects.service';
+import { ToastService } from '../../../core/toast/toast.service';
+import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
+import type { SelectedItemsContextPort } from '../../../core/workspace-pane/workspace-pane-context.port';
 import type {
   ProjectColorKey,
   ProjectListItem,
   ProjectStatusFilter,
   ProjectsViewMode,
-} from '../../core/projects/projects.types';
-import { GroupHeaderComponent } from '../../shared/ui-primitives/group-header.component';
-import { type GroupingProperty } from '../../shared/dropdown-trigger/grouping-dropdown.component';
-import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
-import { ProjectsConfirmDialogComponent } from './projects-confirm-dialog.component';
-import { ProjectsGridViewComponent } from './projects-grid-view.component';
-import { ProjectsPageHeaderComponent } from './projects-page-header.component';
+} from '../../../core/projects/projects.types';
+import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
+import { type GroupingProperty } from '../../../shared/dropdown-trigger/grouping-dropdown.component';
+import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
+import { ProjectsConfirmDialogComponent } from '../dialogs/projects-confirm-dialog.component';
+import { ProjectsGridViewComponent } from '../views/projects-grid-view.component';
+import { ProjectsPageHeaderComponent } from '../chrome/projects-page-header.component';
 import {
   applyProjectFilters,
   buildGroupedSections,
@@ -36,13 +36,13 @@ import {
   tableAriaSort,
   tableSortDirection,
 } from './projects-page.logic';
-import { ProjectsTableViewComponent } from './projects-table-view.component';
-import { ProjectsToolbarComponent } from './projects-toolbar.component';
-import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
-import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
-import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
-import { TextInputDialogComponent } from '../../shared/text-input-dialog/text-input-dialog.component';
-import { ProjectLocationPickerComponent } from './project-location-picker.component';
+import { ProjectsTableViewComponent } from '../views/projects-table-view.component';
+import { ProjectsToolbarComponent } from '../chrome/projects-toolbar.component';
+import { CardVariantSettingsService } from '../../../shared/ui-primitives/card-variant-settings.service';
+import { CARD_VARIANTS, type CardVariant } from '../../../shared/ui-primitives/card-variant.types';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
+import { ProjectLocationPickerComponent } from '../cards/project-location-picker.component';
 
 import {
   FILTER_OPTIONS,

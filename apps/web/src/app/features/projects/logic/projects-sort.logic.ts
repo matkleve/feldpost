@@ -1,5 +1,5 @@
-import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
-import type { ProjectListItem } from '../../core/projects/projects.types';
+import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
+import type { ProjectListItem } from '../../../core/projects/projects.types';
 import { getProjectFieldValue } from './projects-fields.logic';
 
 export function tableSortDirection(

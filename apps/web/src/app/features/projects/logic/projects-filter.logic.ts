@@ -1,5 +1,5 @@
-import { evaluateRulesForItem } from '../../core/filter/filter-rule-evaluator';
-import type { ProjectListItem } from '../../core/projects/projects.types';
+import { evaluateRulesForItem } from '../../../core/filter/filter-rule-evaluator';
+import type { ProjectListItem } from '../../../core/projects/projects.types';
 import { getProjectFieldValue } from './projects-fields.logic';
 
 export type ProjectFilterRule = {

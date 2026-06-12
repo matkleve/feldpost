@@ -4,11 +4,11 @@
  */
 
 import { Component, effect, inject, input, signal } from '@angular/core';
-import { MediaLocationsService } from '../../core/media-locations/media-locations.service';
-import { locationPinEligible } from '../../core/media-locations/media-locations.helpers';
-import { ProjectsService } from '../../core/projects/projects.service';
-import { I18nService } from '../../core/i18n/i18n.service';
-import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
+import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import { locationPinEligible } from '../../../core/media-locations/media-locations.helpers';
+import { ProjectsService } from '../../../core/projects/projects.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 interface ProjectLocationRowView {
   linkId: string;

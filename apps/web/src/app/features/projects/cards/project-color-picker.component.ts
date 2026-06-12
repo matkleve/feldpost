@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
-import type { ProjectColorKey } from '../../core/projects/projects.types';
-import { HlmMenuItemDirective } from '../../shared/ui/menu';
+import type { ProjectColorKey } from '../../../core/projects/projects.types';
+import { HlmMenuItemDirective } from '../../../shared/ui/menu';
 
 @Component({
   selector: 'app-project-color-picker',

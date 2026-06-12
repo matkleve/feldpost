@@ -1,6 +1,6 @@
-import type { ProjectListItem } from '../../core/projects/projects.types';
-import type { GroupingProperty } from '../../shared/dropdown-trigger/grouping-dropdown.component';
-import type { ProjectGroupedSection } from './projects-page.config';
+import type { ProjectListItem } from '../../../core/projects/projects.types';
+import type { GroupingProperty } from '../../../shared/dropdown-trigger/grouping-dropdown.component';
+import type { ProjectGroupedSection } from '../page/projects-page.config';
 
 export function buildGroupedSections(
   projects: ProjectListItem[],

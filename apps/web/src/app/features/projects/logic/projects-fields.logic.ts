@@ -1,4 +1,4 @@
-import type { ProjectListItem } from '../../core/projects/projects.types';
+import type { ProjectListItem } from '../../../core/projects/projects.types';
 
 export function getProjectFieldValue(
   project: ProjectListItem,

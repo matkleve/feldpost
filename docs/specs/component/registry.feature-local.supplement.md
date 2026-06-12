@@ -127,7 +127,7 @@
 
 #### `<app-project-card>` — Project Card
 
-- **File**: `apps/web/src/app/features/projects/project-card.component.ts`
+- **File**: `apps/web/src/app/features/projects/cards/project-card.component.ts`
 - **Purpose**: Clickable project card shown in grid or compact-row layout.
 - **Spec**: [`docs/specs/component/project/project-item.md`](project/project-item.md)
 - **Variant axes**:
@@ -142,7 +142,7 @@
 
 #### `<app-project-color-picker>` — Project Color Picker
 
-- **File**: `apps/web/src/app/features/projects/project-color-picker.component.ts`
+- **File**: `apps/web/src/app/features/projects/cards/project-color-picker.component.ts`
 - **Purpose**: Colour swatch grid for picking a project accent colour.
 - **Spec**: [`docs/specs/component/project/project-color-picker.md`](project/project-color-picker.md)
 - **Variant axes**: none
@@ -154,7 +154,7 @@
 
 #### `<app-projects-grid-view>` — Projects Grid View
 
-- **File**: `apps/web/src/app/features/projects/projects-grid-view.component.ts`
+- **File**: `apps/web/src/app/features/projects/views/projects-grid-view.component.ts`
 - **Purpose**: Grouped card grid layout for the projects page.
 - **Spec**: @no-spec
 - **Variant axes**: none (variant passed through to `app-project-card`)
@@ -165,7 +165,7 @@
 
 #### `<app-projects-table-view>` — Projects Table View
 
-- **File**: `apps/web/src/app/features/projects/projects-table-view.component.ts`
+- **File**: `apps/web/src/app/features/projects/views/projects-table-view.component.ts`
 - **Purpose**: Tabular list layout for the projects page with sortable columns.
 - **Spec**: @no-spec
 - **Variant axes**: none
@@ -176,7 +176,7 @@
 
 #### `<app-projects-toolbar>` — Projects Toolbar
 
-- **File**: `apps/web/src/app/features/projects/projects-toolbar.component.ts`
+- **File**: `apps/web/src/app/features/projects/chrome/projects-toolbar.component.ts`
 - **Purpose**: Toolbar for the projects page: grouping, filter, sort, view-toggle, card-variant switch.
 - **Spec**: @no-spec
 - **Variant axes**: none
@@ -187,7 +187,7 @@
 
 #### `<app-projects-page-header>` — Projects Page Header
 
-- **File**: `apps/web/src/app/features/projects/projects-page-header.component.ts`
+- **File**: `apps/web/src/app/features/projects/chrome/projects-page-header.component.ts`
 - **Purpose**: Title + action header bar for the `/projects` route.
 - **Spec**: @no-spec
 - **Variant axes**: none
