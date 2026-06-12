@@ -78,6 +78,8 @@
           >
             @for (img of item.images; track img.id) {
               <div
+                draggable="true"
+                (dragstart)="onMediaCellDragStart($event, img.id)"
                 (mouseenter)="onCellHoverStarted(img)"
                 (mouseleave)="hoverEnded.emit(img.id)"
                 (contextmenu.capture)="onWorkspaceCellContextMenu($event, img.id)"
@@ -106,6 +108,8 @@
     >
       @for (img of flatImages(); track img.id) {
         <div
+          draggable="true"
+          (dragstart)="onMediaCellDragStart($event, img.id)"
           (mouseenter)="onCellHoverStarted(img)"
           (mouseleave)="hoverEnded.emit(img.id)"
           (contextmenu.capture)="onWorkspaceCellContextMenu($event, img.id)"

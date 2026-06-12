@@ -273,6 +273,40 @@ export class ProjectsService {
     return this.mapProjectRowToListItem(row);
   }
 
+  // Creates a project with the provided name in a single Supabase call.
+  // Used by the workspace pane Projects panel inline-draft flow.
+  // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Data Flow
+  async createProject(name: string): Promise<ProjectListItem | null> {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const context = await this.resolveProjectInsertContext();
+    if (!context) {
+      return null;
+    }
+
+    const { data, error } = await this.supabase.client
+      .from('projects')
+      .insert({
+        name: trimmed,
+        color_key: DEFAULT_PROJECT_COLOR,
+        organization_id: context.organizationId,
+        created_by: context.userId,
+      })
+      .select('id,name,color_key,archived_at,created_at,updated_at')
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    this.invalidateProjectsReadCaches();
+
+    return this.mapProjectRowToListItem(data as ProjectRow);
+  }
+
   async renameProject(projectId: string, name: string): Promise<boolean> {
     const trimmed = name.trim();
     if (!trimmed) {

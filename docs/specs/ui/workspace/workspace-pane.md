@@ -1,5 +1,7 @@
 # Workspace Pane
 
+> **Projects tab spec (child):** [`workspace-pane-projects-tab.md`](./workspace-pane-projects-tab.md)
+
 ## Layout host (canonical)
 
 The **Workspace Pane** is hosted by a **layout-level shell** that owns the horizontal **split** between main route content and the pane (including drag-divider width and pane open/close). **Canonical contract:** **`AuthenticatedAppLayoutComponent`** (selector: **`app-authenticated-app-layout`**) wraps `router-outlet` **and** mounts **`WorkspacePaneShell` / `WorkspacePaneComponent`** so the **same** pane implementation appears on **`/`**, **`/map`**, **`/media`**, **`/projects`**, and **`/settings/**`**, with consistent resize and tab behavior.

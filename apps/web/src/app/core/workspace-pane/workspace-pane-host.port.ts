@@ -1,7 +1,7 @@
 import type { Signal } from '@angular/core';
 import type { SelectedItemsContextPort } from './workspace-pane-context.port';
 
-export type WorkspacePaneTab = 'selected-items' | 'upload';
+export type WorkspacePaneTab = 'selected-items' | 'upload' | 'projects';
 
 export interface WorkspacePaneHostPort {
   isOpen$: Signal<boolean>;

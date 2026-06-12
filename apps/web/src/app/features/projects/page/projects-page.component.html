@@ -1,5 +1,11 @@
 <main class="projects-page" data-i18n-skip>
-  <section class="projects-rail content-clamp content-clamp--list">
+  <!-- Board mode breaks out of the narrow content-clamp to allow two full-width columns -->
+  <!-- @see docs/specs/page/projects-page.md § Board view -->
+  <section
+    class="projects-rail"
+    [class.content-clamp]="viewMode() !== 'board'"
+    [class.content-clamp--list]="viewMode() !== 'board'"
+  >
     <app-projects-page-header
       [currentProjectId]="currentProjectId()"
       [breadcrumbCurrentLabel]="breadcrumbCurrentLabel()"
@@ -71,13 +77,12 @@
           <!-- TODO: Replace with MapAdapter-backed implementation — @see docs/specs/page/projects-page.md § 3.6 -->
         </section>
       } @else if (viewMode() === 'board') {
-        <section class="projects-board-stub" role="region" [attr.aria-label]="t('projects.viewToggle.board.aria', 'Board view')">
-          <span class="material-icons projects-board-stub__icon" aria-hidden="true">view_kanban</span>
-          <p class="projects-board-stub__label">
-            {{ t('projects.page.boardView.comingSoon', 'Board view — coming soon') }}
-          </p>
-          <!-- TODO: Replace with board column implementation — @see docs/specs/page/projects-page.md § 3.6 -->
-        </section>
+        <app-projects-board-view
+          [projects]="visibleProjects()"
+          [statusFilter]="statusFilter()"
+          (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
+          (dangerAction)="requestDangerAction($event.projectId, $event.action)"
+        />
       } @else {
         <section
           class="projects-content content-clamp content-clamp--list"

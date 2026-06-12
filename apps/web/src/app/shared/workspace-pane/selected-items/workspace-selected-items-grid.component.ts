@@ -525,6 +525,17 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
     this.hoverStarted.emit({ mediaId: img.id, lat: img.latitude, lng: img.longitude });
   }
 
+  // Sets drag transfer payload for HTML5 drag from pane grid items.
+  // If the dragged item is selected, all selected IDs are included; otherwise just this item.
+  // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Drag Contract
+  onMediaCellDragStart(event: DragEvent, imgId: string): void {
+    if (!event.dataTransfer) return;
+    const selected = this.selectionService.selectedMediaIds();
+    const ids = selected.has(imgId) ? Array.from(selected) : [imgId];
+    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.setData('application/x-feldpost-media-ids', JSON.stringify(ids));
+  }
+
   onWorkspaceCellContextMenu(event: Event, mediaId: string): void {
     if (!(event instanceof MouseEvent)) {
       return;

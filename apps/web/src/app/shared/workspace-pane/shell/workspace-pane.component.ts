@@ -8,6 +8,7 @@ import { WorkspaceToolbarComponent } from '../toolbar/workspace-toolbar/workspac
 import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from '../media-detail/media-detail-view.component';
 import { WorkspacePaneFooterComponent } from '../footer/workspace-pane-footer/workspace-pane-footer.component';
+import { WorkspaceProjectsPanelComponent } from '../projects-panel/workspace-projects-panel.component';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
@@ -31,6 +32,7 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
     WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
     WorkspacePaneFooterComponent,
+    WorkspaceProjectsPanelComponent,
   ],
   templateUrl: './workspace-pane.component.html',
   styleUrl: './workspace-pane.component.scss',
@@ -149,7 +151,7 @@ export class WorkspacePaneComponent {
   }
 
   onBrnTabsChange(tab: string | undefined): void {
-    if (tab === 'selected-items' || tab === 'upload') {
+    if (tab === 'selected-items' || tab === 'upload' || tab === 'projects') {
       this.setActiveTab(tab);
     }
   }

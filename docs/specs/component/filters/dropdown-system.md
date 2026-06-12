@@ -288,5 +288,5 @@ None - delegated to consumer feature services.
 - [x] Sort active rows use **`interaction-selected-ink`**; hover uses primary (including direction chip on hover)
 - [x] Filter form rules stay component-specific; footer uses menu-panel footer action
 - [x] Media detail context menu uses option-menu list + destructive variant
-- [ ] Shared project-selector flows reuse menu-panel search/footer primitives (media-detail inline section partial)
+- [x] Shared project-selector flows reuse menu-panel search/footer primitives (media-detail inline section partial)
 - [ ] Metadata key suggestion fully on option-menu primitives (future)

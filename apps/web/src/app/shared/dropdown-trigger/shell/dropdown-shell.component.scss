@@ -48,8 +48,13 @@
   }
 
   // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).
+  // Standalone rule — does NOT require toolbar-dropdown because the media-detail shell uses anchor
+  // positioning, not the toolbar width floor. Max-width caps at 20rem per spec table.
+  // @see docs/specs/component/filters/dropdown-system.md#shell-width-variants-non-exhaustive
   // @see docs/specs/ui/media-detail/media-detail-inline-section.md
-  :host.toolbar-dropdown.media-detail-projects-panel {
+  :host.media-detail-projects-panel {
+    box-sizing: border-box;
+    overflow: hidden;
     width: 100%;
     min-width: 0;
     max-width: min(20rem, calc(100vw - 2rem));

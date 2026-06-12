@@ -33,11 +33,14 @@
       class="w-full justify-start"
       [attr.aria-label]="t('workspace.pane.tabs.aria', 'Workspace tabs')"
     >
-      <button brnTabsTrigger="selected-items" hlmTabsTrigger>
-        {{ t('workspace.pane.tab.selectedItems', 'Selected Items') }}
-      </button>
       <button brnTabsTrigger="upload" hlmTabsTrigger>
         {{ t('workspace.pane.tab.upload', 'Upload') }}
+      </button>
+      <button brnTabsTrigger="selected-items" hlmTabsTrigger>
+        {{ t('workspace.pane.tab.media', 'Media') }}
+      </button>
+      <button brnTabsTrigger="projects" hlmTabsTrigger>
+        {{ t('workspace.pane.tab.projects', 'Projects') }}
       </button>
     </div>
   </div>
@@ -55,12 +58,22 @@
         (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       />
     } @else {
-      <!-- Selected items tab panel — always in DOM so grid state is preserved across tab switches -->
+      <!-- Upload tab panel — always in DOM so ng-content projection slot is stable -->
+      <section
+        class="workspace-pane__upload-tab"
+        [class.workspace-pane__upload-tab--active]="activeTab() === 'upload'"
+        [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
+        role="tabpanel"
+      >
+        <ng-content select="[data-workspace-upload-tab]" />
+      </section>
+
+      <!-- Media tab panel — always in DOM so grid state is preserved across tab switches -->
       <div
         class="workspace-pane__tab-panel"
         [class.workspace-pane__tab-panel--active]="activeTab() === 'selected-items'"
         role="tabpanel"
-        [attr.aria-label]="t('workspace.pane.tab.selectedItems', 'Selected Items')"
+        [attr.aria-label]="t('workspace.pane.tab.media', 'Media')"
       >
         <app-workspace-toolbar />
         <app-workspace-selected-items-grid
@@ -80,15 +93,17 @@
         }
       </div>
 
-      <!-- Upload tab panel — always in DOM so ng-content projection slot is stable -->
-      <section
-        class="workspace-pane__upload-tab"
-        [class.workspace-pane__upload-tab--active]="activeTab() === 'upload'"
-        [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
+      <!-- Projects tab panel -->
+      <div
+        class="workspace-pane__tab-panel"
+        [class.workspace-pane__tab-panel--active]="activeTab() === 'projects'"
         role="tabpanel"
+        [attr.aria-label]="t('workspace.pane.tab.projects', 'Projects')"
       >
-        <ng-content select="[data-workspace-upload-tab]" />
-      </section>
+        @if (activeTab() === 'projects') {
+          <app-workspace-projects-panel />
+        }
+      </div>
     }
   </div>
 </div>

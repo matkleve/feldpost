@@ -36,6 +36,7 @@ import {
   tableAriaSort,
   tableSortDirection,
 } from './projects-page.logic';
+import { ProjectsBoardViewComponent } from '../views/projects-board-view.component';
 import { ProjectsTableViewComponent } from '../views/projects-table-view.component';
 import { ProjectsToolbarComponent } from '../chrome/projects-toolbar.component';
 import { CardVariantSettingsService } from '../../../shared/ui-primitives/card-variant-settings.service';
@@ -58,6 +59,7 @@ import {
   imports: [
     CommonModule,
     GroupHeaderComponent,
+    ProjectsBoardViewComponent,
     ProjectsConfirmDialogComponent,
     ProjectsGridViewComponent,
     ProjectsPageHeaderComponent,
