@@ -1,0 +1,148 @@
+<main class="projects-page" data-i18n-skip>
+  <!-- Board mode breaks out of the narrow content-clamp to allow two full-width columns -->
+  <!-- @see docs/specs/page/projects-page.md § Board view -->
+  <section
+    class="projects-rail"
+    [class.content-clamp]="viewMode() !== 'board'"
+    [class.content-clamp--list]="viewMode() !== 'board'"
+  >
+    <app-projects-page-header
+      [currentProjectId]="currentProjectId()"
+      [breadcrumbCurrentLabel]="breadcrumbCurrentLabel()"
+      [projectCountLabel]="projectCountLabel()"
+      [loading]="loading()"
+      (newProject)="onNewProject()"
+    />
+
+    <app-projects-toolbar
+      [groupingOptions]="groupingOptions()"
+      [activeGroupingsInput]="activeGroupings()"
+      [filterOptions]="filterOptions()"
+      [sortOptions]="sortOptions()"
+      [hasGrouping]="hasGrouping()"
+      [hasFilters]="hasFilters()"
+      [hasCustomSort]="hasCustomSort()"
+      [hasArchivedProjects]="hasArchivedProjects()"
+      [viewMode]="viewMode()"
+      [statusFilter]="statusFilter()"
+      [activeSorts]="activeSorts()"
+      (groupingChanged)="activeGroupings.set($event)"
+      (sortChanged)="activeSorts.set($event)"
+      (viewModeChange)="viewMode.set($event)"
+      (statusFilterChange)="onStatusFilterChange($event)"
+    />
+
+    @if (currentProjectId(); as pid) {
+      <app-project-location-picker [projectId]="pid" />
+    }
+
+    @if (loading()) {
+      <section
+        class="projects-loading"
+        role="status"
+        [attr.aria-label]="t('projects.page.loading.aria', 'Loading projects')"
+      >
+        <div class="projects-loading__row"></div>
+        <div class="projects-loading__row"></div>
+        <div class="projects-loading__row"></div>
+      </section>
+    } @else if (loadError()) {
+      <section class="projects-error" role="alert">
+        <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
+        <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
+        <button
+          hlmBtn
+          variant="outline"
+          type="button"
+          (click)="refreshProjects()"
+        >
+          {{ t('projects.page.error.retry', 'Retry') }}
+        </button>
+      </section>
+    } @else if (groupedSections().length === 0) {
+      <section class="projects-empty">
+        <h2>{{ t('projects.page.empty.title', 'No projects match your filters') }}</h2>
+        <p>
+          {{ t('projects.page.empty.body', 'Try another search or reset your status filter.') }}
+        </p>
+      </section>
+    } @else {
+      <!-- Map view — @see docs/specs/page/projects-page.md § View Mode State -->
+      @if (viewMode() === 'map') {
+        <section class="projects-map-stub" role="region" [attr.aria-label]="t('projects.viewToggle.map.aria', 'Map view')">
+          <span class="material-icons projects-map-stub__icon" aria-hidden="true">map</span>
+          <p class="projects-map-stub__label">
+            {{ t('projects.page.mapView.comingSoon', 'Map view — coming soon') }}
+          </p>
+          <!-- TODO: Replace with MapAdapter-backed implementation — @see docs/specs/page/projects-page.md § 3.6 -->
+        </section>
+      } @else if (viewMode() === 'board') {
+        <app-projects-board-view
+          [projects]="visibleProjects()"
+          [statusFilter]="statusFilter()"
+          (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
+          (dangerAction)="requestDangerAction($event.projectId, $event.action)"
+        />
+      } @else {
+        <section
+          class="projects-content content-clamp content-clamp--list"
+          [class.projects-content--grid]="viewMode() === 'grid'"
+        >
+          @for (section of groupedSections(); track section.id) {
+            <section class="projects-section">
+              @if (section.heading) {
+                <app-group-header
+                  [heading]="section.heading"
+                  [imageCount]="section.projectCount"
+                  [level]="section.level"
+                  [collapsed]="false"
+                />
+              }
+
+              @if (viewMode() === 'list') {
+                <app-projects-table-view
+                  [section]="section"
+                  [tableAriaSort]="tableAriaSortFn"
+                  [tableSortDirection]="tableSortDirectionFn"
+                  [colorTokenFor]="colorTokenForFn"
+                  [projectStatusLabel]="projectStatusLabelFn"
+                  [formatRelativeDate]="formatRelativeDateFn"
+                />
+              } @else {
+                <app-projects-grid-view
+                  [section]="section"
+                  (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
+                  (dangerAction)="requestDangerAction($event.projectId, $event.action)"
+                />
+              }
+            </section>
+          }
+        </section>
+      }
+    }
+
+    <app-projects-confirm-dialog
+      [open]="hasPendingAction()"
+      [title]="pendingActionTitle()"
+      [message]="pendingActionMessage()"
+      [confirmLabel]="pendingActionConfirmLabel()"
+      [cancelLabel]="t('common.cancel', 'Cancel')"
+      [busy]="pendingActionBusy()"
+      [danger]="pendingProjectAction() === 'delete'"
+      (cancel)="cancelPendingAction()"
+      (confirm)="confirmPendingAction()"
+    />
+
+    @if (projectNameDialogOpen()) {
+      <app-text-input-dialog
+        [title]="t('projects.page.action.newProject', 'New project')"
+        [message]="t('map.shell.dialog.projectName.message', 'Enter a project name.')"
+        [placeholder]="t('map.shell.dialog.projectName.placeholder', 'e.g. Radius Selection North')"
+        [confirmLabel]="t('map.shell.dialog.projectName.confirm', 'Create project')"
+        [cancelLabel]="t('map.shell.dialog.cancel', 'Cancel')"
+        (cancelled)="onProjectNameDialogCancelled()"
+        (confirmed)="onProjectNameDialogConfirmed($event)"
+      />
+    }
+  </section>
+</main>

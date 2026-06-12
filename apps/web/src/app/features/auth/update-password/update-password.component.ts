@@ -11,17 +11,21 @@
  */
 
 import { Component, inject, signal } from '@angular/core';
-import {
+import type {
   AbstractControl,
+  ValidationErrors} from '@angular/forms';
+import {
   FormBuilder,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
-import { I18nService } from '../../../core/i18n/i18n.service';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -31,7 +35,13 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-update-password',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+  ],
   templateUrl: './update-password.component.html',
   styleUrl: './update-password.component.scss',
 })
@@ -39,9 +49,6 @@ export class UpdatePasswordComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly i18nService = inject(I18nService);
-
-  protected readonly t = this.i18nService.t.bind(this.i18nService);
 
   protected readonly form = this.fb.nonNullable.group(
     {
@@ -73,3 +80,4 @@ export class UpdatePasswordComponent {
     this.router.navigate(['/auth/login']);
   }
 }
+

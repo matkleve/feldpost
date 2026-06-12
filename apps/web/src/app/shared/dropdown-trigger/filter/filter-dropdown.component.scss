@@ -1,0 +1,163 @@
+@use '../../../../styles/frosted-chrome';
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../scss/dropdown-panel-flex-chain' as panel-flex;
+
+:host {
+  @include panel-flex.panel-flex-child;
+}
+
+// Constrains host width when nested under toolbar menu shell.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-dropdown-host {
+  width: 100%;
+  min-width: 0;
+}
+
+.filter-rules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  // Vertical-only inset; horizontal padding owned by app-standard-dropdown.
+  // @see docs/specs/component/filters/dropdown-system.md
+  padding-block: var(--spacing-1);
+  // Scroll + `scrollbar-gutter` owned by `.standard-dropdown__items--filter-rules-band` (single host).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+}
+
+// Stable state: rule row idle / hover — neutral surface tint (quiet toolbar vocabulary).
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
+  }
+
+  &:hover .filter-rule__remove {
+    opacity: 1;
+  }
+}
+
+// Stable state: conjunction control — outline chip, muted label (not primary-tint row chrome).
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__conj {
+  flex: 0 0 auto;
+  min-width: 3.25rem;
+}
+
+.filter-rule__picker {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+// Stable state: compact picker trigger — matches outline control row; chevron stays muted on row hover.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-trigger {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+// Invisible longest-label copy sizes the trigger; visible label stacks in the same grid cell.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-label-stack {
+  display: inline-grid;
+  min-width: 0;
+  flex: 1 1 auto;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
+
+// Ghost sizing span — hidden but sets column width from longest option label (per locale).
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-sizer {
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+// Visible picker label — truncates when the row is narrower than the ghost width.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Grid stacks ghost row + visible content in one cell so width is always rule-sized.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-dropdown__body {
+  display: grid;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
+
+// Hidden full rule row establishes shell width (normal flow; no height collapse).
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-dropdown__size-anchor {
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.filter-dropdown__empty,
+.filter-rules {
+  align-self: start;
+}
+
+.filter-rule__picker-chevron {
+  color: var(--muted-foreground);
+}
+
+.filter-rule__value {
+  flex: 1.5 1 0;
+  min-width: 0;
+}
+
+// Stable state: fixed flyout list for property/operator (escapes rule stack overflow).
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__picker-flyout {
+  position: fixed;
+  z-index: 302;
+  overflow-x: hidden;
+  overflow-y: auto;
+  @include frosted-chrome.floating-panel-shell;
+}
+
+// Stable state: highlighted option in flyout list.
+// @see docs/specs/component/filters/filter-dropdown.md
+// @see docs/design/state-visuals.md § Interaction emphasis
+.filter-rule__picker-option[data-selected='true'] {
+  @include emphasis.selected(12%);
+}
+
+.filter-rule__remove {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 80ms ease-out;
+}
+
+// Stable state: quiet destructive remove — muted icon, destructive color on hover/focus only.
+// @see docs/specs/component/filters/filter-dropdown.md
+.filter-rule__remove .material-icons {
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+}
+
+.filter-rule__remove:hover .material-icons,
+.filter-rule__remove:focus-visible .material-icons {
+  color: var(--destructive);
+}
+
+.filter-rule__remove:hover,
+.filter-rule__remove:focus-visible {
+  background-color: color-mix(in srgb, var(--destructive) 12%, transparent);
+}

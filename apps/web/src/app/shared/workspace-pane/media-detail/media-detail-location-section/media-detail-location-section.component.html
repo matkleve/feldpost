@@ -1,0 +1,46 @@
+<!-- Location section: multi-address list. Orchestration in MediaDetailViewComponent. @see media-detail-location-section/README.md -->
+<div class="detail-section media-detail-location-section">
+  <p class="detail-section__label">{{ t('workspace.imageDetail.section.location', 'Location') }}</p>
+
+  <div class="detail-section__rows">
+    <app-media-location-add-search
+      [mediaItemId]="media().id"
+      [searchContext]="addressSearchContext()"
+      [disabled]="saving()"
+      (addFromText)="onAddFromText($event)"
+      (addFromGeocode)="onAddFromGeocode($event)"
+      (locationLinked)="onLocationLinked($event)"
+    />
+
+    @if (showListFilter()) {
+      <div class="media-detail-location-section__list-filter">
+        <input
+          class="detail-row__field-input"
+          type="search"
+          [placeholder]="t('location.listFilter.placeholder', 'Filter locations...')"
+          [value]="listFilter()"
+          (input)="listFilter.set($any($event.target).value)"
+        />
+      </div>
+    }
+
+    <div
+      class="media-detail-location-section__list"
+      [class.media-detail-location-section__list--scroll]="listNeedsScroll()"
+    >
+      @for (row of filteredLocations(); track row.id) {
+        <app-media-location-row
+          [location]="row"
+          [locationCount]="locations().length"
+          [saving]="saving()"
+          (saveRequested)="rowSaveRequested.emit($event)"
+          (deleteRequested)="rowDeleteRequested.emit($event)"
+          (mapPickRequested)="mapPickRequested.emit($event)"
+          (showOnMapRequested)="showOnMapRequested.emit($event)"
+          (copyFieldRequested)="copyFieldRequested.emit($event)"
+          (changeAddressRequested)="beginChangeAddress($event)"
+        />
+      }
+    </div>
+  </div>
+</div>

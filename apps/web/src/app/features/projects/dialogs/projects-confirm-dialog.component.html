@@ -1,0 +1,43 @@
+@if (open()) {
+  <!-- Stable state: open — BrnDialog when pending action @see apps/web confirm-dialog pattern -->
+  <ng-container
+    brnDialog
+    [state]="'open'"
+    [closeOnBackdropClick]="false"
+    [aria-label]="title() || message() || 'Confirm'"
+    [aria-modal]="true"
+  >
+    <div hlmDialogOverlay></div>
+    <ng-template brnDialogContent>
+      <div hlmDialogContent [class]="'max-w-[26rem]'">
+        <div hlmDialogHeader>
+          <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">{{ title() }}</div>
+          <p brnDialogDescription hlmDialogDescription>{{ message() }}</p>
+        </div>
+        <div hlmDialogFooter>
+          <button
+            hlmBtn
+            variant="outline"
+            class="projects-confirm__cancel"
+            type="button"
+            brnDialogClose
+            [disabled]="busy()"
+            (click)="onCancel()"
+          >
+            {{ cancelLabel() }}
+          </button>
+          <button
+            hlmBtn
+            [variant]="danger() ? 'destructive' : 'default'"
+            class="projects-confirm__confirm"
+            type="button"
+            [disabled]="busy()"
+            (click)="onConfirm()"
+          >
+            {{ confirmLabel() }}
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ng-container>
+}

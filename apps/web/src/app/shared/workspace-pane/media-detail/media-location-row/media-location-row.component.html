@@ -1,0 +1,241 @@
+@if (effectiveVisualState() === 'editing') {
+  <div class="detail-row detail-row--editing media-location-row">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center media-location-row__edit-grid">
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.street.label', 'Street') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftStreet()" (input)="draftStreet.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.house_number.label', 'House number') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftHouseNumber()" (input)="draftHouseNumber.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.staircase.label', 'Staircase') }}</span>
+        <input class="detail-row__field-input" type="text" [placeholder]="t('location.staircase.placeholder', 'e.g. A, Aufgang 3')" [value]="draftStaircase()" (input)="draftStaircase.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.door.label', 'Top') }}</span>
+        <input class="detail-row__field-input" type="text" [placeholder]="t('location.door.placeholder', 'e.g. 1, DG, 11-12')" [value]="draftDoor()" (input)="draftDoor.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.postcode.label', 'Postcode') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftPostcode()" (input)="draftPostcode.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field">
+        <span class="detail-row__label">{{ t('location.floor.label', 'Floor') }}</span>
+        <input class="detail-row__field-input" type="text" [value]="draftFloor()" (input)="draftFloor.set($any($event.target).value)" />
+      </label>
+      <label class="media-location-row__field media-location-row__field--wide">
+        <span class="detail-row__label">{{ t('location.extra_information.label', 'Extra information') }}</span>
+        <input class="detail-row__field-input" type="text" [placeholder]="t('location.extra_information.placeholder', 'e.g. Ring twice')" [value]="draftExtra()" (input)="draftExtra.set($any($event.target).value)" />
+      </label>
+    </div>
+    <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--r1 detail-row-action--confirm" type="button" [disabled]="saving()" (click)="saveEdit()">
+      <span class="material-icons" aria-hidden="true">check</span>
+    </button>
+    <button hlmBtn variant="ghost" size="icon" class="detail-row-action detail-row-action--r2 detail-row-action--danger" type="button" (click)="cancelEdit()">
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  </div>
+} @else {
+  <div class="detail-row media-location-row">
+    <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--l2"
+      type="button"
+      [attr.aria-label]="t('location.action.edit', 'Edit location')"
+      [attr.title]="t('location.action.edit', 'Edit location')"
+      (click)="requestEditAddress()"
+    >
+      <span class="material-icons" aria-hidden="true">edit</span>
+    </button>
+    <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="detail-row-action detail-row-action--l1"
+      type="button"
+      [disabled]="!canShowOnMap()"
+      [attr.aria-label]="
+        canShowOnMap()
+          ? t('location.action.show_on_map', 'Show on map')
+          : t('location.action.show_on_map.disabled', 'No coordinates for this location')
+      "
+      [attr.title]="
+        canShowOnMap()
+          ? t('location.action.show_on_map', 'Show on map')
+          : t('location.action.show_on_map.disabled', 'No coordinates for this location')
+      "
+      (click)="onShowOnMap()"
+    >
+      <span class="material-icons" aria-hidden="true">map</span>
+    </button>
+    <div class="detail-row__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">location_on</span>
+      <span class="detail-row__label media-location-row__label-spacer" aria-hidden="true"></span>
+      <button class="detail-row__field-trigger" type="button" (click)="requestEditAddress()">{{ displayLine() }}</button>
+    </div>
+    <span #overflowAnchorEl>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--r1"
+        type="button"
+        [attr.aria-expanded]="overflowMenuOpen()"
+        [attr.aria-label]="t('location.action.overflow', 'More location actions')"
+        [attr.title]="t('location.action.overflow', 'More location actions')"
+        (click)="toggleOverflowMenu()"
+      >
+        <span class="material-icons" aria-hidden="true">more_vert</span>
+      </button>
+    </span>
+    @if (effectiveVisualState() === 'delete_armed') {
+      <app-detail-row-inline-confirm-action
+        class="media-location-row__delete-confirm"
+        slot="r2"
+        [disabled]="saving()"
+        idleIcon="delete"
+        initialAriaKey="location.action.delete"
+        initialAriaFallback="Delete location"
+        confirmAriaKey="location.action.confirmDelete"
+        confirmAriaFallback="Confirm delete location"
+        (confirmed)="onDeleteConfirmed()"
+      />
+    } @else {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--r2 detail-row-action--danger"
+        type="button"
+        [attr.aria-label]="t('location.action.delete', 'Delete location')"
+        [attr.title]="t('location.action.delete', 'Delete location')"
+        (click)="armDelete()"
+      >
+        <span class="material-icons" aria-hidden="true">delete</span>
+      </button>
+    }
+  </div>
+  @if (overflowMenuOpen() && overflowAnchorElement()) {
+    <app-dropdown-shell
+      [anchor]="overflowAnchorElement()"
+      panelClass="media-location-row__overflow-panel option-menu-surface"
+      placement="end"
+      [minWidth]="220"
+      (closeRequested)="closeOverflowMenu()"
+    >
+      <div class="media-location-row__overflow-menu detail-context-menu__items flex flex-col" role="menu">
+        <button
+          hlmMenuItem
+          class="w-full"
+          type="button"
+          role="menuitem"
+          (click)="onEditAddressMenu()"
+        >
+          <span class="material-icons option-menu-item__icon" aria-hidden="true">edit</span>
+          <span class="min-w-0 flex-1 text-left">{{ t('location.action.edit_address', 'Edit address') }}</span>
+        </button>
+        <button
+          hlmMenuItem
+          class="w-full"
+          type="button"
+          role="menuitem"
+          (click)="onChangeAddressMenu()"
+        >
+          <span class="material-icons option-menu-item__icon" aria-hidden="true">search</span>
+          <span class="min-w-0 flex-1 text-left">{{
+            t('location.action.change_address', 'Change to different address')
+          }}</span>
+        </button>
+        <div hlmMenuSeparator aria-hidden="true"></div>
+        <button
+          hlmMenuItem
+          class="w-full"
+          type="button"
+          role="menuitem"
+          (click)="onMapPick()"
+        >
+          <span class="material-icons option-menu-item__icon" aria-hidden="true">map</span>
+          <span class="min-w-0 flex-1 text-left">{{
+            t('workspace.imageDetail.action.chooseLocationMap.title', 'Change GPS on map')
+          }}</span>
+        </button>
+        @if (copyMenuActions().length > 0) {
+          <div
+            class="media-location-row__copy-submenu-host"
+            (mouseenter)="openCopySubmenu()"
+            (mouseleave)="scheduleCloseCopySubmenu()"
+            (focusin)="openCopySubmenu()"
+            (focusout)="scheduleCloseCopySubmenu()"
+          >
+            <button
+              #copySubmenuTrigger
+              hlmMenuItem
+              class="media-location-row__copy-trigger w-full"
+              type="button"
+              role="menuitem"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="copySubmenuOpen()"
+              (click)="onCopySubmenuTriggerClick($event)"
+            >
+              <span class="material-icons option-menu-item__icon" aria-hidden="true">content_copy</span>
+              <span class="min-w-0 flex-1 text-left">{{ t('location.copy.menu', 'Copy') }}</span>
+              <span
+                class="material-icons option-menu-item__icon media-location-row__copy-chevron"
+                aria-hidden="true"
+                >chevron_right</span
+              >
+            </button>
+            @if (copySubmenuOpen() && copySubmenuGeom(); as geom) {
+              <div
+                class="media-location-row__copy-submenu option-menu-surface flex flex-col"
+                role="menu"
+                data-location-copy-submenu
+                [style.top.px]="geom.top"
+                [style.left.px]="geom.left"
+                [attr.aria-label]="t('location.copy.menu', 'Copy')"
+                (mouseenter)="cancelCloseCopySubmenu()"
+                (mouseleave)="scheduleCloseCopySubmenu()"
+              >
+                @for (action of copyMenuActions(); track action.field) {
+                  <button
+                    hlmMenuItem
+                    class="w-full"
+                    type="button"
+                    role="menuitem"
+                    (click)="onCopyAction(action)"
+                  >
+                    <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
+                    <span class="min-w-0 flex-1 text-left">{{ t(action.labelKey, action.labelFallback) }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </app-dropdown-shell>
+  }
+}
+
+@if (sharedEditConfirmOpen()) {
+  <app-confirm-dialog
+    [title]="t('location.shared_edit.confirm.title', 'Edit shared address?')"
+    [message]="
+      t(
+        'location.shared_edit.confirm.message',
+        'Editing this address updates it for all media items linked to this location.'
+      )
+    "
+    [confirmLabel]="t('location.shared_edit.confirm.continue', 'Continue editing')"
+    [cancelLabel]="t('workspace.imageDetail.confirm.cancel', 'Cancel')"
+    [danger]="false"
+    (confirmed)="onSharedEditConfirm()"
+    (cancelled)="onSharedEditCancel()"
+  />
+}

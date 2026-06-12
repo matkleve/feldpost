@@ -1,0 +1,102 @@
+<div
+  class="detail-header"
+  [attr.data-detail-active-editor]="editingTitle() ? 'address_label' : null"
+>
+  <button
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-back-btn"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.back.aria', 'Back to gallery')"
+    [attr.title]="t('workspace.imageDetail.action.back.title', 'Back to gallery')"
+    (click)="closed.emit()"
+  >
+    <span class="material-icons" aria-hidden="true">arrow_back</span>
+  </button>
+
+  @if (editingTitle()) {
+    <input
+      #titleInput
+      hlmInput
+      class="detail-title-input"
+      type="text"
+      [value]="titleValue()"
+      [attr.aria-label]="t('workspace.imageDetail.title.edit.aria', 'Edit image title')"
+      (keydown.enter)="titleSaveRequested.emit(titleInput.value)"
+      (keydown.escape)="titleEditCancelled.emit()"
+      (blur)="titleSaveRequested.emit(titleInput.value)"
+    />
+  } @else {
+    <div class="detail-header__title-group">
+      <button
+        class="detail-title detail-title--editable"
+        type="button"
+        [attr.title]="t('workspace.imageDetail.title.edit.title', 'Click to edit title')"
+        (click)="titleEditRequested.emit()"
+      >
+        {{ displayTitle() }}
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-header__title-edit"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.title.edit.aria', 'Edit image title')"
+        [attr.title]="t('workspace.imageDetail.title.edit.title', 'Click to edit title')"
+        (click)="titleEditRequested.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+    </div>
+  }
+
+  <button
+    #contextMenuTrigger
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-actions-btn"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.more.aria', 'More actions')"
+    [attr.title]="t('workspace.imageDetail.action.more.title', 'More actions')"
+    aria-haspopup="true"
+    [attr.aria-expanded]="showContextMenu()"
+    (click)="onContextMenuToggleRequested()"
+  >
+    <span class="material-icons" aria-hidden="true">more_vert</span>
+  </button>
+
+  @if (showContextMenu()) {
+    <app-dropdown-shell
+      class="detail-context-menu"
+      [anchor]="contextMenuAnchor()"
+      placement="end"
+      [minWidth]="176"
+      panelClass="detail-context-menu option-menu-surface"
+      (closeRequested)="onContextMenuCloseRequested()"
+    >
+      <div class="detail-context-menu__items flex flex-col" role="menu">
+        @for (action of contextActions(); track action.id; let index = $index) {
+          @if (index > 0 && contextActions()[index - 1]?.section !== action.section) {
+            <div hlmMenuSeparator role="separator"></div>
+          }
+          <button
+            hlmMenuItem
+            class="w-full"
+            [class.text-destructive]="action.section === 'destructive'"
+            type="button"
+            role="menuitem"
+            [disabled]="action.disabled"
+            (keydown)="onContextMenuKeydown($event)"
+            (click)="actionSelected.emit(action.id)"
+          >
+            <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
+          </button>
+        }
+      </div>
+    </app-dropdown-shell>
+  }
+</div>

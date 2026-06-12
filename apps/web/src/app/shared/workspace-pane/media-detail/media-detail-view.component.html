@@ -1,0 +1,176 @@
+<!-- MediaDetailViewComponent - full detail view coordinator. -->
+
+@if (error() && !loading()) {
+  <div class="detail-error" role="alert">
+    <span class="material-icons" aria-hidden="true">error_outline</span>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading() && !error()) {
+  <div class="detail-main-column detail-main-column--loading" aria-hidden="true">
+    <div class="detail-header detail-header--loading">
+      <span class="detail-loading-placeholder detail-loading-placeholder--icon"></span>
+      <div class="detail-loading-placeholder-group">
+        <span class="detail-loading-placeholder detail-loading-placeholder--title"></span>
+      </div>
+      <span class="detail-loading-placeholder detail-loading-placeholder--icon"></span>
+    </div>
+
+    <div class="detail-scroll">
+      <div class="detail-content">
+        <span class="detail-loading-placeholder detail-loading-placeholder--media" aria-hidden="true"></span>
+
+        <div class="detail-section detail-section--loading">
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (media() && !loading()) {
+  <div class="detail-main-column">
+    <app-media-detail-header
+      [displayTitle]="displayTitle()"
+      [titleValue]="media()!.address_label ?? ''"
+      [editingTitle]="editingField() === 'address_label'"
+      [showContextMenu]="showContextMenu()"
+      [contextActions]="workspaceHeaderActions()"
+      (closed)="close()"
+      (titleEditRequested)="onTitleEditRequested()"
+      (titleSaveRequested)="saveImageField('address_label', $event)"
+      (titleEditCancelled)="editingField.set(null)"
+      (contextMenuToggled)="toggleContextMenu()"
+      (contextMenuClosed)="closeContextMenu()"
+      (actionSelected)="onWorkspaceSingleActionSelected($event)"
+    />
+
+    <div class="detail-scroll">
+      <app-media-detail-media-viewer
+        [item]="media()"
+        [mediaId]="detailMediaIdentity()"
+        [isImageLike]="isImageLike()"
+        [displayTitle]="displayTitle()"
+        [replacing]="replacing()"
+        [replaceError]="replaceError()"
+        [acceptTypes]="acceptTypes"
+        (fileSelected)="onFileSelected($event)"
+        (contextMenuRequested)="onThumbnailContextRequested()"
+      />
+
+      <div class="detail-content">
+        <app-quick-info-chips [chips]="infoChips()" (chipClicked)="onChipClicked($event)" />
+
+        <app-media-detail-inline-section
+          [media]="media()!"
+          [detailViewLabel]="detailViewLabel()"
+          [fileFormatLabel]="fileFormatLabel()"
+          [editingField]="editingField()"
+          [editDate]="editDate()"
+          [editTime]="editTime()"
+          [captureDate]="captureDate()"
+          [uploadDate]="uploadDate()"
+          [projectName]="projectName()"
+          [projectOptions]="projectOptions()"
+          [selectedProjectIds]="selectedProjectIds()"
+          [isImageLike]="isImageLike()"
+          [saving]="saving()"
+          [exifLocationAddState]="exifLocationAddState()"
+          (exifToLocationRequested)="onExifToLocationRequested()"
+          (fieldEditRequested)="onDetailFieldEditRequested($event)"
+          (fieldSaveRequested)="saveImageField($event.field, $event.value)"
+          (editingCancelled)="editingField.set(null)"
+          (capturedAtEditRequested)="openCapturedAtEditor()"
+          (capturedAtSaved)="saveCapturedAt($event)"
+          (projectsChanged)="applyDetailProjectsSelection($event)"
+        />
+
+        <app-media-detail-location-section
+          [media]="media()!"
+          [locations]="locations()"
+          [saving]="saving()"
+          (addFromText)="onLocationAddFromText($event)"
+          (addFromGeocode)="onLocationAddFromGeocode($event)"
+          (locationLinked)="onLocationLinked($event)"
+          (replaceLocationLinked)="onLocationReplaceLinked($event)"
+          (replaceFromText)="onLocationReplaceFromText($event)"
+          (replaceFromGeocode)="onLocationReplaceFromGeocode($event)"
+          (rowSaveRequested)="onLocationRowSave($event)"
+          (rowDeleteRequested)="onLocationRowDelete($event)"
+          (mapPickRequested)="requestMapLocationPick($event)"
+          (showOnMapRequested)="onLocationShowOnMap($event)"
+          (copyFieldRequested)="onLocationCopyField($event)"
+        />
+
+        <!-- Reconciliation offer banner: shown when an address suggestion is available -->
+        <!-- @see docs/specs/service/location-resolver/address-reconciliation.md#detail-open-flow -->
+        @if (reconciliationOffer(); as offer) {
+          <div class="detail-reconciliation-banner" role="region" [attr.aria-label]="t('workspace.reconciliation.prompt.title', 'Address suggestion found')">
+            <div class="detail-reconciliation-banner__body">
+              <span class="material-icons detail-reconciliation-banner__icon" aria-hidden="true">travel_explore</span>
+              <div class="detail-reconciliation-banner__text">
+                <span class="detail-reconciliation-banner__title">{{
+                  offer.verificationOnly
+                    ? t('workspace.reconciliation.prompt.confirmTitle', 'Confirm this address?')
+                    : t('workspace.reconciliation.prompt.title', 'Address suggestion found')
+                }}</span>
+                <span class="detail-reconciliation-banner__candidate">{{ offer.candidateLabel }}</span>
+              </div>
+            </div>
+            <div class="detail-reconciliation-banner__actions">
+              <button hlmBtn variant="ghost" size="sm" type="button" (click)="onReconciliationApply()">
+                {{ t('workspace.reconciliation.action.apply', 'Apply') }}
+              </button>
+              <button hlmBtn variant="ghost" size="sm" type="button" (click)="onReconciliationSuppress()">
+                {{ t('workspace.reconciliation.action.dontAskAgain', "Don't ask again") }}
+              </button>
+              <button hlmBtn variant="ghost" size="sm" type="button" (click)="onReconciliationRetry()">
+                {{ t('workspace.reconciliation.action.retry', 'Try again') }}
+              </button>
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                type="button"
+                class="detail-reconciliation-banner__close"
+                [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel')"
+                (click)="onReconciliationDismiss()"
+              >
+                <span class="material-icons" aria-hidden="true">close</span>
+              </button>
+            </div>
+          </div>
+        }
+
+        <app-metadata-section
+          [entries]="metadata()"
+          [metadataKeyDefinitions]="metadataKeyDefinitions()"
+          (valueChanged)="saveMetadata($event.entry, $event.newValue)"
+          (entryRemoved)="removeMetadata($event)"
+          (entryAdded)="addMetadata($event.keyName, $event.keyType, $event.value)"
+        />
+
+        <app-detail-actions
+          [actions]="workspaceSingleActions()"
+          (actionSelected)="onWorkspaceSingleActionSelected($event)"
+        />
+      </div>
+    </div>
+  </div>
+}
+
+@if (destructiveConfirmCopy(); as confirmCopy) {
+  <app-confirm-dialog
+    [title]="confirmCopy.title"
+    [message]="confirmCopy.message"
+    [confirmLabel]="confirmCopy.confirmLabel"
+    [cancelLabel]="t('workspace.imageDetail.confirm.cancel', 'Cancel')"
+    [danger]="true"
+    (confirmed)="onDestructiveConfirmed()"
+    (cancelled)="cancelDestructiveConfirm()"
+  />
+}

@@ -1,42 +1,57 @@
-<div
-  class="text-input-dialog-overlay"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="text-input-dialog-title"
-  (click)="cancelled.emit()"
+<!-- Stable state: open — parent-mounted; BrnDialog opens CDK portal on mount @see docs/specs/component/text-input-dialog/text-input-dialog.md -->
+<ng-container
+  brnDialog
+  [state]="'open'"
+  [closeOnBackdropClick]="false"
+  [aria-label]="title()"
+  [aria-modal]="true"
 >
-  <div class="text-input-dialog ui-container" (click)="$event.stopPropagation()">
-    <h2 id="text-input-dialog-title" class="text-input-dialog__title">{{ title() }}</h2>
+  <div hlmDialogOverlay></div>
+  <ng-template brnDialogContent>
+    <div hlmDialogContent [class]="'max-w-[30rem]'">
+      <div hlmDialogHeader>
+        <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">{{ title() }}</div>
+        @if (message(); as content) {
+          <p brnDialogDescription hlmDialogDescription class="text-input-dialog__message">{{ content }}</p>
+        }
+      </div>
 
-    @if (message(); as content) {
-      <p class="text-input-dialog__message">{{ content }}</p>
-    }
+      <input
+        #nameInput
+        hlmInput
+        class="text-input-dialog__input"
+        type="text"
+        [value]="initialValue()"
+        [placeholder]="placeholder()"
+        [attr.aria-label]="title()"
+        maxlength="120"
+        autofocus
+        (keydown.escape)="onEscape()"
+        (keydown.enter)="emitConfirmed(nameInput.value)"
+      />
 
-    <input
-      #nameInput
-      class="text-input-dialog__input"
-      type="text"
-      [value]="initialValue()"
-      [placeholder]="placeholder()"
-      [attr.aria-label]="title()"
-      maxlength="120"
-      autofocus
-      (keydown.escape)="cancelled.emit()"
-      (keydown.enter)="emitConfirmed(nameInput.value)"
-    />
-
-    <div class="text-input-dialog__actions">
-      <button class="text-input-dialog__cancel" type="button" (click)="cancelled.emit()">
-        {{ cancelLabel() }}
-      </button>
-      <button
-        class="text-input-dialog__confirm"
-        type="button"
-        [disabled]="nameInput.value.trim().length === 0"
-        (click)="emitConfirmed(nameInput.value)"
-      >
-        {{ confirmLabel() }}
-      </button>
+      <div hlmDialogFooter class="text-input-dialog__actions">
+        <button
+          hlmBtn
+          variant="ghost"
+          class="text-input-dialog__cancel"
+          type="button"
+          brnDialogClose
+          (click)="cancelled.emit()"
+        >
+          {{ cancelLabel() }}
+        </button>
+        <button
+          hlmBtn
+          variant="default"
+          class="text-input-dialog__confirm"
+          type="button"
+          [disabled]="nameInput.value.trim().length === 0"
+          (click)="emitConfirmed(nameInput.value)"
+        >
+          {{ confirmLabel() }}
+        </button>
+      </div>
     </div>
-  </div>
-</div>
+  </ng-template>
+</ng-container>

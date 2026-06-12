@@ -1,7 +1,10 @@
 ﻿import { computed, Injectable, signal } from '@angular/core';
-import { LanguageCode, TRANSLATION_BY_KEY, TRANSLATION_BY_ORIGINAL } from './translation-catalog';
+import { TRANSLATION_BY_KEY, TRANSLATION_BY_ORIGINAL } from './translation-catalog';
+import type { LanguageCode } from './translation-catalog';
+import { environment } from '../../../environments/environment';
 
 const LANGUAGE_STORAGE_KEY = 'feldpost.settings.language';
+const LEGACY_I18N_FALLBACK_STORAGE_KEY = 'feldpost.i18n.enableLegacyFallback';
 
 interface RuntimeLanguageDictionary {
   byKey: Record<string, string>;
@@ -206,6 +209,7 @@ export class I18nService {
 
   readonly language = this.languageSignal.asReadonly();
   readonly runtimeRevision = this.runtimeRevisionSignal.asReadonly();
+  readonly legacyFallbackEnabled = computed(() => this.readLegacyFallbackEnabled());
   readonly locale = computed(() => {
     switch (this.languageSignal()) {
       case 'de':
@@ -237,21 +241,31 @@ export class I18nService {
     // non-catalog keys or for missing Italian catalog values.
     if (!entry) {
       const runtimeByKey = runtimeDictionary.byKey[key];
-      if (runtimeByKey) return runtimeByKey;
-      return fallback || key;
+      return this.firstNonEmpty(runtimeByKey, fallback, key) ?? '';
     }
 
     switch (language) {
       case 'de':
-        return entry.de;
+        return this.firstNonEmpty(entry.de, fallback, entry.en, key) ?? '';
       case 'it': {
-        if (entry.it) return entry.it;
+        const italianCatalogValue = this.firstNonEmpty(entry.it);
+        if (italianCatalogValue) return italianCatalogValue;
+
         const runtimeByOriginal = runtimeDictionary.byOriginal[entry.original];
-        if (runtimeByOriginal) return runtimeByOriginal;
-        return this.heuristicTranslateToItalian(entry.en);
+        const runtimeValue = this.firstNonEmpty(runtimeByOriginal);
+        if (runtimeValue) return runtimeValue;
+
+        if (!this.legacyFallbackEnabled()) {
+          return this.firstNonEmpty(fallback, entry.en, key) ?? '';
+        }
+
+        return (
+          this.firstNonEmpty(fallback, this.heuristicTranslateToItalian(entry.en), entry.en, key) ??
+          ''
+        );
       }
       default:
-        return entry.en;
+        return this.firstNonEmpty(entry.en, fallback, key) ?? '';
     }
   }
 
@@ -264,6 +278,9 @@ export class I18nService {
 
     const entry = TRANSLATION_BY_ORIGINAL[original];
     if (!entry) {
+      if (!this.legacyFallbackEnabled()) {
+        return fallback || original;
+      }
       if (language === 'de') {
         return this.heuristicTranslateToGerman(original);
       }
@@ -274,11 +291,11 @@ export class I18nService {
     }
     switch (language) {
       case 'de':
-        return entry.de;
+        return this.firstNonEmpty(entry.de, fallback, entry.en, entry.original) ?? '';
       case 'it':
-        return entry.it ?? entry.en;
+        return this.firstNonEmpty(entry.it, fallback, entry.en, entry.original) ?? '';
       default:
-        return entry.en;
+        return this.firstNonEmpty(entry.en, fallback, entry.original) ?? '';
     }
   }
 
@@ -311,6 +328,15 @@ export class I18nService {
 
   formatNumber(value: number, options?: Intl.NumberFormatOptions): string {
     return new Intl.NumberFormat(this.locale(), options).format(value);
+  }
+
+  private firstNonEmpty(...values: Array<string | undefined | null>): string | undefined {
+    for (const value of values) {
+      if (typeof value === 'string' && value.trim().length > 0) {
+        return value;
+      }
+    }
+    return undefined;
   }
 
   private readInitialLanguage(): LanguageCode {
@@ -348,5 +374,17 @@ export class I18nService {
   private applyDocumentLanguage(language: LanguageCode): void {
     if (typeof document === 'undefined') return;
     document.documentElement.lang = language;
+  }
+
+  private readLegacyFallbackEnabled(): boolean {
+    if (typeof window === 'undefined') {
+      return environment.i18n.enableLegacyDomFallback;
+    }
+
+    const override = window.localStorage.getItem(LEGACY_I18N_FALLBACK_STORAGE_KEY);
+    if (override === 'true') return true;
+    if (override === 'false') return false;
+
+    return environment.i18n.enableLegacyDomFallback;
   }
 }

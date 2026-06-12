@@ -8,8 +8,8 @@
  *  - The root redirect sends unauthenticated users through authGuard → /auth/login.
  */
 
-import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/auth.guard';
+import type { Routes } from '@angular/router';
+import { authGuard, guestGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   // ── Auth routes (unauthenticated only) ────────────────────────────────────
@@ -51,51 +51,8 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    children: [
-      // M-IMPL3: map shell — the main authenticated view
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
-        pathMatch: 'full',
-      },
-      {
-        path: 'map',
-        loadComponent: () =>
-          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
-      },
-
-      // M-UI2: placeholder routes — full pages implemented in M-UI6–9
-      {
-        path: 'photos',
-        loadComponent: () =>
-          import('./features/photos/photos.component').then((m) => m.PhotosComponent),
-      },
-      {
-        path: 'groups',
-        loadComponent: () =>
-          import('./features/groups/groups.component').then((m) => m.GroupsComponent),
-      },
-      {
-        path: 'projects',
-        loadComponent: () =>
-          import('./features/projects/projects-page.component').then(
-            (m) => m.ProjectsPageComponent,
-          ),
-      },
-      {
-        path: 'projects/:projectId',
-        loadComponent: () =>
-          import('./features/projects/projects-page.component').then(
-            (m) => m.ProjectsPageComponent,
-          ),
-      },
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('./features/settings/settings.component').then((m) => m.SettingsComponent),
-      },
-    ],
+    loadChildren: () =>
+      import('./layout/authenticated-app.routes').then((m) => m.AUTHENTICATED_APP_ROUTES),
   },
 
   // ── Fallback ──────────────────────────────────────────────────────────────

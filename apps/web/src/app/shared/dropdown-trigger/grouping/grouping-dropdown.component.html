@@ -1,0 +1,127 @@
+<app-standard-dropdown
+  class="workspace-toolbar-menu-panel"
+  [searchTerm]="searchTerm()"
+  [searchPlaceholder]="t('workspace.grouping.search.placeholder', 'Search properties…')"
+  [showDefaultClearAction]="true"
+  [reserveProjectedSearchActionSlot]="false"
+  [scrollMode]="'split'"
+  (searchTermChange)="searchTerm.set($event)"
+  (clearRequested)="searchTerm.set('')"
+>
+  <div dropdown-items class="grouping-dropdown__body" cdkDropListGroup>
+    <div class="grouping-dropdown__pinned">
+      <div class="grouping-section grouping-section--pinned">
+        <div class="grouping-section__header">
+          <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">{{
+            t('workspace.grouping.section.groupedBy', 'Grouped by')
+          }}</span>
+          @if (activeGroupings().length > 0) {
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              class="grouping-toolbar-reset shrink-0 text-muted-foreground"
+              type="button"
+              data-fp-dropdown-grouping-reset="true"
+              (click)="clearGroupings()"
+              [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
+            >
+              <span
+                class="grouping-toolbar-reset__icon material-icons inline-block"
+                data-fp-dropdown-grouping-reset-icon="true"
+                aria-hidden="true"
+                >restart_alt</span>
+            </button>
+          }
+        </div>
+        <div
+          cdkDropList
+          #activeList="cdkDropList"
+          [cdkDropListData]="activeGroupings()"
+          [cdkDropListConnectedTo]="[availableList]"
+          (cdkDropListDropped)="onDrop($event)"
+          class="grouping-drop-zone grouping-drop-zone--active-list"
+          [class.grouping-drop-zone--empty]="activeGroupings().length === 0"
+          [class.grouping-drop-zone--dragging]="isDragging()"
+        >
+          @if (activeGroupings().length === 0) {
+            <div class="grouping-empty-slot">
+              {{
+                isDragging()
+                  ? t('workspace.grouping.empty.dragging', 'Drop here to group')
+                  : t('workspace.grouping.empty.default', 'No grouping applied')
+              }}
+            </div>
+          }
+          @for (prop of activeGroupings(); track prop.id) {
+            <div
+              cdkDrag
+              [cdkDragData]="prop"
+              (cdkDragStarted)="onDragStart()"
+              (cdkDragEnded)="onDragEnd()"
+              hlmMenuItem
+              class="grouping-dropdown__row"
+              [class.grouping-row--selected]="selectedRows().has(prop.id)"
+              tabindex="0"
+              (click)="onRowClick(prop.id, $event)"
+            >
+              <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ prop.icon }}</span>
+              <span class="min-w-0 flex-1 text-left">{{ prop.label }}</span>
+              <span
+                class="grouping-dropdown__drag-handle material-icons shrink-0 text-base text-muted-foreground"
+                cdkDragHandle
+                aria-hidden="true"
+                >drag_indicator</span
+              >
+            </div>
+          }
+        </div>
+      </div>
+      <div hlmMenuSeparator class="grouping-dropdown__section-divider" aria-hidden="true"></div>
+    </div>
+    <div class="grouping-dropdown__scroll">
+      <div class="grouping-section grouping-section--available">
+        <span hlmMenuLabel class="dropdown-section uppercase tracking-wide">{{
+          t('workspace.grouping.section.available', 'Available')
+        }}</span>
+        <div
+          cdkDropList
+          #availableList="cdkDropList"
+          [cdkDropListData]="availableDropListData()"
+          [cdkDropListConnectedTo]="[activeList]"
+          [cdkDropListSortingDisabled]="hasGroupingSearch()"
+          (cdkDropListDropped)="onDrop($event)"
+          class="grouping-drop-zone grouping-drop-zone--available-list"
+        >
+          @if (hasGroupingSearch() && availableDropListData().length === 0) {
+            <div class="grouping-dropdown__empty-search px-2 py-3 text-center text-sm text-muted-foreground">
+              {{ t('workspace.sort.empty.noMatchingProperties', 'No matching properties') }}
+            </div>
+          }
+          @for (prop of availableDropListData(); track prop.id) {
+            <div
+              cdkDrag
+              [cdkDragData]="prop"
+              (cdkDragStarted)="onDragStart()"
+              (cdkDragEnded)="onDragEnd()"
+              hlmMenuItem
+              class="grouping-dropdown__row"
+              [class.grouping-row--selected]="selectedRows().has(prop.id)"
+              tabindex="0"
+              (click)="onRowClick(prop.id, $event)"
+            >
+              <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ prop.icon }}</span>
+              <span class="min-w-0 flex-1 text-left">{{ prop.label }}</span>
+              <span
+                class="grouping-dropdown__drag-handle material-icons shrink-0 text-base text-muted-foreground"
+                cdkDragHandle
+                aria-hidden="true"
+                >drag_indicator</span
+              >
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</app-standard-dropdown>

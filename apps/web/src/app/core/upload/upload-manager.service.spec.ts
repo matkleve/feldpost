@@ -1,0 +1,569 @@
+/**
+ * UploadManagerService unit tests.
+ *
+ * Strategy:
+ *  - UploadService, GeocodingService, AuthService, and SupabaseService are faked.
+ *  - Tests verify queue management, concurrency, pipeline phases, event emissions,
+ *    and state transitions without any real network calls.
+ */
+
+import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { UploadManagerService } from './upload-manager.service';
+import { UploadService } from './upload.service';
+import { GeocodingService } from '../geocoding/geocoding.service';
+import { AuthService } from '../auth/auth.service';
+import { SupabaseService } from '../supabase/supabase.service';
+import { LocalGeoDataAdapter } from '../location-path-parser/local-geo-data.adapter';
+
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Fakes ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+function buildFakeUploadService() {
+  return {
+    resolveMimeType: vi.fn().mockReturnValue('image/jpeg'),
+    resolveMediaType: vi.fn().mockReturnValue('photo'),
+    isPhotoFile: vi.fn().mockReturnValue(true),
+    validateFile: vi.fn().mockReturnValue({ valid: true }),
+    parseExif: vi.fn().mockResolvedValue({ coords: { lat: 48.2, lng: 16.37 }, direction: 90 }),
+    isHeic: vi.fn().mockReturnValue(false),
+    convertToJpeg: vi.fn().mockImplementation(async (file: File) => file),
+    uploadFile: vi.fn().mockResolvedValue({
+      id: 'img-123',
+      storagePath: 'org/user/uuid.jpg',
+      coords: { lat: 48.2, lng: 16.37 },
+      direction: 90,
+      error: null,
+    }),
+  };
+}
+
+function buildFakeGeocodingService() {
+  return {
+    reverse: vi.fn().mockResolvedValue({
+      addressLabel: '123 Test St',
+      city: 'Vienna',
+      district: null,
+      street: 'Test St',
+      country: 'Austria',
+    }),
+    forward: vi.fn().mockResolvedValue({
+      lat: 48.2,
+      lng: 16.37,
+      addressLabel: '123 Test St',
+      city: 'Vienna',
+      district: null,
+      street: 'Test St',
+      country: 'Austria',
+    }),
+    search: vi.fn().mockResolvedValue([]),
+    searchStructuredForward: vi.fn().mockResolvedValue([]),
+    searchStructuredForwardBias: vi.fn().mockResolvedValue([]),
+    searchStreetHouseNumbers: vi.fn().mockResolvedValue([]),
+  };
+}
+
+function buildFakeAuthService() {
+  const userSignal = signal({ id: 'user-1' });
+  return {
+    user: userSignal.asReadonly(),
+    session: signal(null).asReadonly(),
+    loading: signal(false).asReadonly(),
+    _userSignal: userSignal,
+  };
+}
+
+function buildFakeSupabaseService() {
+  /** Build a chainable Supabase query builder mock that resolves to { data, error }. */
+  function buildQueryChain(
+    resolvedValue: { data: unknown; error: unknown } = { data: null, error: null },
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chain: any = {};
+    chain.select = vi.fn().mockReturnValue(chain);
+    chain.insert = vi.fn().mockReturnValue(chain);
+    chain.update = vi.fn().mockReturnValue(chain);
+    chain.delete = vi.fn().mockReturnValue(chain);
+    chain.upsert = vi.fn().mockReturnValue(chain);
+    chain.eq = vi.fn().mockReturnValue(chain);
+    chain.single = vi.fn().mockResolvedValue(resolvedValue);
+    // Make the chain itself thenable (for fire-and-forget .then() calls)
+    chain.then = (onFulfilled?: (v: unknown) => unknown, onRejected?: (e: unknown) => unknown) =>
+      Promise.resolve(resolvedValue).then(onFulfilled, onRejected);
+    return chain;
+  }
+
+  return {
+    client: {
+      storage: {
+        from: vi.fn().mockReturnValue({
+          remove: vi.fn().mockResolvedValue({ data: null, error: null }),
+          upload: vi.fn().mockResolvedValue({ data: { path: 'test.jpg' }, error: null }),
+        }),
+      },
+      from: vi.fn().mockImplementation(() => buildQueryChain()),
+      rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    },
+  };
+}
+
+function makeFile(name = 'photo.jpg'): File {
+  return new File([new Uint8Array(512)], name, { type: 'image/jpeg' });
+}
+
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Setup ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+async function setup() {
+  const fakeUpload = buildFakeUploadService();
+  const fakeGeocoding = buildFakeGeocodingService();
+  const fakeAuth = buildFakeAuthService();
+  const fakeSupabase = buildFakeSupabaseService();
+
+  TestBed.configureTestingModule({
+    providers: [
+      UploadManagerService,
+      { provide: UploadService, useValue: fakeUpload },
+      { provide: GeocodingService, useValue: fakeGeocoding },
+      { provide: AuthService, useValue: fakeAuth },
+      { provide: SupabaseService, useValue: fakeSupabase },
+      {
+        provide: LocalGeoDataAdapter,
+        useValue: {
+          getBundeslaender: vi.fn().mockResolvedValue([]),
+          getGemeinden: vi.fn().mockResolvedValue([]),
+          getPlzMap: vi.fn().mockResolvedValue({}),
+        },
+      },
+    ],
+  });
+
+  const service = TestBed.inject(UploadManagerService);
+  return { service, fakeUpload, fakeGeocoding, fakeAuth, fakeSupabase };
+}
+
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Tests ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+describe('UploadManagerService', () => {
+  describe('creation', () => {
+    it('creates', async () => {
+      const { service } = await setup();
+      expect(service).toBeTruthy();
+    });
+
+    it('starts with empty jobs', async () => {
+      const { service } = await setup();
+      expect(service.jobs()).toHaveLength(0);
+    });
+
+    it('starts with isBusy false', async () => {
+      const { service } = await setup();
+      expect(service.isBusy()).toBe(false);
+    });
+
+    it('starts with activeCount 0', async () => {
+      const { service } = await setup();
+      expect(service.activeCount()).toBe(0);
+    });
+  });
+
+  describe('submit()', () => {
+    it('returns a batch ID and creates job IDs', async () => {
+      const { service } = await setup();
+      const batchId = await service.submit([makeFile(), makeFile()]);
+      expect(typeof batchId).toBe('string');
+      const jobIds = service.jobs().map((j) => j.id);
+      expect(jobIds).toHaveLength(2);
+      expect(typeof jobIds[0]).toBe('string');
+      expect(typeof jobIds[1]).toBe('string');
+    });
+
+    it('adds jobs to the queue', async () => {
+      const { service } = await setup();
+      service.submit([makeFile()]);
+      expect(service.jobs().length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('creates thumbnail URLs for submitted files', async () => {
+      const { service } = await setup();
+      service.submit([makeFile()]);
+      const job = service.jobs()[0];
+      expect(job.thumbnailUrl).toBeTruthy();
+    });
+  });
+
+  describe('Path A: GPS in EXIF', () => {
+    it('completes upload with coords from EXIF', async () => {
+      const { service, fakeUpload } = await setup();
+
+      fakeUpload.parseExif.mockResolvedValue({
+        coords: { lat: 48.2, lng: 16.37 },
+        direction: 90,
+      });
+
+      const events: { mediaId: string }[] = [];
+      service.imageUploaded$.subscribe((e) => events.push(e));
+
+      service.submit([makeFile()]);
+
+      await vi.waitFor(() => {
+        expect(events.length).toBe(1);
+      });
+
+      expect(events[0].mediaId).toBe('img-123');
+    });
+  });
+
+  describe('Path B: address in filename', () => {
+    it('detects address in filename and forward-geocodes', async () => {
+      const { service, fakeUpload, fakeGeocoding } = await setup();
+
+      // No GPS in EXIF
+      fakeUpload.parseExif.mockResolvedValue({});
+      // Upload succeeds without coords
+      fakeUpload.uploadFile.mockResolvedValue({
+        id: 'img-456',
+        storagePath: 'org/user/uuid.jpg',
+        coords: undefined,
+        direction: undefined,
+        error: null,
+      });
+      // Single high-confidence Photon hit for the filename address — auto-resolves.
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([
+        {
+          lat: 48.2,
+          lng: 16.37,
+          displayName: 'Burgstraße 7, Wien, Österreich',
+          name: 'Burgstraße 7',
+          importance: 0.97,
+          address: {
+            road: 'Burgstraße',
+            house_number: '7',
+            postcode: '1010',
+            city: 'Wien',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ]);
+
+      const events: { mediaId: string }[] = [];
+      service.imageUploaded$.subscribe((e) => events.push(e));
+
+      // Filename with street address
+      service.submit([makeFile('BurgstraÃƒÆ’Ã…Â¸e_7_facade.jpg')]);
+
+      await vi.waitFor(() => {
+        expect(events.length).toBe(1);
+      });
+
+      expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalled();
+      expect(events[0].mediaId).toBe('img-456');
+    });
+  });
+
+  describe('Path C: no GPS, no address', () => {
+    it('enters missing_data and emits missingData$', async () => {
+      const { service, fakeUpload } = await setup();
+
+      // No GPS in EXIF
+      fakeUpload.parseExif.mockResolvedValue({});
+
+      const events: { jobId: string; reason: string }[] = [];
+      service.missingData$.subscribe((e) => events.push(e));
+
+      // Generic camera filename ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no address
+      service.submit([makeFile('IMG_20260311_143022.jpg')]);
+
+      await vi.waitFor(() => {
+        expect(events.length).toBe(1);
+      });
+
+      expect(events[0].reason).toBe('no_gps_no_address');
+      const job = service.jobs().find((j) => j.id === events[0].jobId);
+      expect(job?.phase).toBe('missing_data');
+    });
+  });
+
+  describe('concurrency', () => {
+    it('does not start more than 3 concurrent uploads', async () => {
+      const { service, fakeUpload } = await setup();
+
+      // Make upload hang indefinitely
+      let resolvers: Array<(v: unknown) => void> = [];
+      fakeUpload.parseExif.mockImplementation(() => new Promise((res) => resolvers.push(res)));
+
+      service.submit([makeFile(), makeFile(), makeFile(), makeFile(), makeFile()]);
+
+      // Wait a tick for the drain to run
+      await new Promise((r) => setTimeout(r, 10));
+
+      // Only 3 should have started parsing (the 4th and 5th should be queued)
+      expect(resolvers.length).toBe(3);
+    });
+  });
+
+  describe('retryJob()', () => {
+    it('moves an errored job back to queued', async () => {
+      const { service, fakeUpload } = await setup();
+
+      // First upload fails
+      fakeUpload.uploadFile.mockResolvedValueOnce({ error: 'Network error' });
+      // Second attempt succeeds
+      fakeUpload.uploadFile.mockResolvedValueOnce({
+        id: 'img-retry',
+        storagePath: 'p',
+        coords: { lat: 1, lng: 2 },
+        error: null,
+      });
+
+      const failEvents: string[] = [];
+      service.uploadFailed$.subscribe((e) => failEvents.push(e.jobId));
+
+      service.submit([makeFile()]);
+      const jobId = service.jobs()[0].id;
+
+      await vi.waitFor(() => {
+        expect(failEvents.length).toBe(1);
+      });
+
+      // Retry
+      const successEvents: string[] = [];
+      service.imageUploaded$.subscribe((e) => successEvents.push(e.jobId));
+
+      service.retryJob(jobId);
+
+      await vi.waitFor(() => {
+        expect(successEvents.length).toBe(1);
+      });
+    });
+  });
+
+  describe('dismissJob()', () => {
+    it('removes a completed job from the list', async () => {
+      const { service } = await setup();
+      const events: string[] = [];
+      service.imageUploaded$.subscribe((e) => events.push(e.jobId));
+
+      service.submit([makeFile()]);
+      const jobId = service.jobs()[0].id;
+
+      await vi.waitFor(() => {
+        expect(events.length).toBe(1);
+      });
+
+      service.dismissJob(jobId);
+      expect(service.jobs().find((j) => j.id === jobId)).toBeUndefined();
+    });
+  });
+
+  describe('dismissAllCompleted()', () => {
+    it('removes all terminal jobs', async () => {
+      const { service } = await setup();
+      const events: string[] = [];
+      service.imageUploaded$.subscribe((e) => events.push(e.jobId));
+
+      service.submit([makeFile(), makeFile()]);
+
+      await vi.waitFor(() => {
+        expect(events.length).toBe(2);
+      });
+
+      service.dismissAllCompleted();
+      expect(service.jobs().filter((j) => j.phase === 'complete')).toHaveLength(0);
+    });
+  });
+
+  describe('cancelJob()', () => {
+    it('cancels a queued job', async () => {
+      const { service, fakeUpload } = await setup();
+
+      // Make all uploads hang
+      fakeUpload.parseExif.mockImplementation(() => new Promise(() => {}));
+
+      service.submit([makeFile(), makeFile(), makeFile(), makeFile()]);
+      await new Promise((r) => setTimeout(r, 10));
+
+      // The 4th job should still be queued
+      const allIds = service.jobs().map((j) => j.id);
+      const fourthJob = service.jobs().find((j) => j.id === allIds[3]);
+      expect(fourthJob?.phase).toBe('queued');
+
+      service.cancelJob(allIds[3]);
+
+      const cancelled = service.jobs().find((j) => j.id === allIds[3]);
+      expect(cancelled?.phase).toBe('error');
+      expect(cancelled?.error).toContain('cancelled');
+    });
+
+    it('aborts in-flight upload and ignores late success resolution', async () => {
+      const { service, fakeUpload } = await setup();
+
+      let resolveUpload!: (result: {
+        id: string;
+        storagePath: string;
+        coords: { lat: number; lng: number };
+        direction: number;
+        error: null;
+      }) => void;
+      let capturedSignal: AbortSignal | undefined;
+
+      fakeUpload.uploadFile.mockImplementation(
+        (
+          _file: File,
+          _manualCoords?: unknown,
+          _parsedExif?: unknown,
+          _projectId?: string,
+          signal?: AbortSignal,
+        ) => {
+          capturedSignal = signal;
+          return new Promise((resolve) => {
+            resolveUpload = resolve;
+          });
+        },
+      );
+
+      const uploadedEvents: string[] = [];
+      service.imageUploaded$.subscribe((e) => uploadedEvents.push(e.jobId));
+
+      service.submit([makeFile('cancel-race.jpg')]);
+      const jobId = service.jobs()[0].id;
+
+      await vi.waitFor(() => {
+        expect(capturedSignal).toBeDefined();
+      });
+
+      service.cancelJob(jobId);
+
+      expect(capturedSignal?.aborted).toBe(true);
+
+      resolveUpload({
+        id: 'img-late',
+        storagePath: 'org/user/late.jpg',
+        coords: { lat: 48.2, lng: 16.37 },
+        direction: 90,
+        error: null,
+      });
+
+      await new Promise((r) => setTimeout(r, 25));
+
+      const cancelled = service.jobs().find((j) => j.id === jobId);
+      expect(cancelled?.phase).toBe('error');
+      expect(cancelled?.error?.toLowerCase()).toContain('cancelled');
+      expect(uploadedEvents).toHaveLength(0);
+    });
+  });
+
+  describe('placeJob()', () => {
+    it('moves a missing_data job back to queued with coords', async () => {
+      const { service, fakeUpload } = await setup();
+
+      // No GPS in EXIF
+      fakeUpload.parseExif.mockResolvedValue({});
+
+      const missingEvents: string[] = [];
+      service.missingData$.subscribe((e) => missingEvents.push(e.jobId));
+
+      // Camera filename ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no address
+      service.submit([makeFile('IMG_20260311_143022.jpg')]);
+      const jobId = service.jobs()[0].id;
+
+      await vi.waitFor(() => {
+        expect(missingEvents.length).toBe(1);
+      });
+
+      // Now upload succeeds when called with coords
+      fakeUpload.uploadFile.mockResolvedValueOnce({
+        id: 'img-placed',
+        storagePath: 'p',
+        coords: { lat: 48.2, lng: 16.37 },
+        direction: undefined,
+        error: null,
+      });
+
+      const completeEvents: string[] = [];
+      service.imageUploaded$.subscribe((e) => completeEvents.push(e.jobId));
+
+      service.placeJob(jobId, { lat: 48.2, lng: 16.37 });
+
+      await vi.waitFor(() => {
+        expect(completeEvents.length).toBe(1);
+      });
+    });
+  });
+
+  describe('validation failure', () => {
+    it('moves to error phase if validation fails', async () => {
+      const { service, fakeUpload } = await setup();
+
+      fakeUpload.validateFile.mockReturnValue({ valid: false, error: 'File too large' });
+
+      const failEvents: string[] = [];
+      service.uploadFailed$.subscribe((e) => failEvents.push(e.error));
+
+      service.submit([makeFile()]);
+
+      await vi.waitFor(() => {
+        expect(failEvents.length).toBe(1);
+      });
+
+      expect(failEvents[0]).toBe('File too large');
+    });
+  });
+
+  describe('title extraction', () => {
+    it('detects German street address in filename', async () => {
+      const { service, fakeUpload, fakeGeocoding } = await setup();
+      fakeUpload.parseExif.mockResolvedValue({});
+      fakeUpload.uploadFile.mockResolvedValue({
+        id: 'img-title',
+        storagePath: 'p',
+        coords: undefined,
+        error: null,
+      });
+
+      const events: string[] = [];
+      service.imageUploaded$.subscribe((e) => events.push(e.jobId));
+
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([
+        {
+          lat: 48.2,
+          lng: 16.37,
+          displayName: 'Hauptstraße 12, Wien, Österreich',
+          name: 'Hauptstraße 12',
+          importance: 0.97,
+          address: {
+            road: 'Hauptstraße',
+            house_number: '12',
+            postcode: '1010',
+            city: 'Wien',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ]);
+
+      service.submit([makeFile('HauptstraÃƒÆ’Ã…Â¸e_12_front.jpg')]);
+
+      await vi.waitFor(() => {
+        expect(events.length).toBe(1);
+      });
+
+      expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalled();
+      const job = service.jobs().find((j) => j.id === events[0]);
+      expect(job?.titleAddress).toContain('Hauptstraße');
+    });
+
+    it('rejects camera-generated filenames', async () => {
+      const { service, fakeUpload } = await setup();
+      fakeUpload.parseExif.mockResolvedValue({});
+
+      const missingEvents: string[] = [];
+      service.missingData$.subscribe((e) => missingEvents.push(e.jobId));
+
+      service.submit([makeFile('IMG_0042.jpg')]);
+
+      await vi.waitFor(() => {
+        expect(missingEvents.length).toBe(1);
+      });
+    });
+  });
+});

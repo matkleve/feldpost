@@ -1,0 +1,73 @@
+<div
+  class="upload-shell"
+  [class.upload-shell--open]="uploadPanelOpen()"
+  [class.upload-shell--panel-closed]="!uploadPanelOpen()"
+  [class.upload-shell--resolver-active]="uploadResolverTrayActive()"
+>
+  <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
+    <button
+      hlmBtn
+      variant="outline"
+      size="icon"
+      class="map-upload-btn"
+      type="button"
+      [attr.aria-label]="
+        uploadBatchActive()
+          ? t('upload.trigger.status.uploading', 'Uploading...')
+          : t('auto.0369.upload_images', 'Upload images')
+      "
+      [attr.title]="
+        uploadBatchActive()
+          ? t('upload.trigger.status.uploading', 'Uploading...')
+          : t('auto.0369.upload_images', 'Upload images')
+      "
+      [class.map-upload-btn--active]="uploadPanelOpen()"
+      [class.map-upload-btn--uploading]="uploadBatchActive()"
+      [class.map-upload-btn--issues]="uploadHasIssues() && !uploadPanelOpen()"
+      (click)="toggleUploadPanel()"
+    >
+      <span class="map-upload-btn__icon-shell" aria-hidden="true">
+        @if (uploadBatchActive()) {
+          <span class="map-upload-btn__spinner" aria-hidden="true"></span>
+          <span
+            class="map-upload-btn__progress-bar"
+            [style.--upload-progress]="uploadBatchProgress() + '%'"
+            role="progressbar"
+            [attr.aria-valuenow]="uploadBatchProgress()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-hidden="true"
+          ></span>
+        } @else {
+          <span class="material-icons" aria-hidden="true">cloud_upload</span>
+        }
+      </span>
+    </button>
+  </div>
+
+  <div
+    class="upload-shell__dock"
+    [class.upload-shell__dock--visible]="showUploadDock()"
+    [class.upload-shell__dock--panel-open]="uploadPanelOpen()"
+    [class.upload-shell__dock--resolver-active]="uploadResolverTrayActive()"
+  >
+    @if (uploadPanelOpen()) {
+      <app-upload-panel
+        [visible]="true"
+        (imageUploaded)="onImageUploaded($event)"
+        (detailRequested)="openDetailView($event)"
+        (zoomToLocationRequested)="onZoomToLocation($event)"
+        (placementRequested)="enterPlacementMode($event)"
+        (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
+        (locationPreviewCleared)="onUploadLocationPreviewCleared()"
+        (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+      />
+    }
+
+    <app-upload-resolver-tray
+      [panelOpen]="uploadPanelOpen()"
+      (previewLocation)="onUploadLocationPreviewRequested($event)"
+      (previewLocationCleared)="onUploadLocationPreviewCleared()"
+    />
+  </div>
+</div>

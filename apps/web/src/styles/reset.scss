@@ -1,0 +1,40 @@
+// ── Global Reset ──────────────────────────────────────────────────────────────
+// Wrapped in `@layer base` so Tailwind `@layer utilities` (e.g. `.px-3`, `.px-4`) wins
+// over this universal `padding: 0`. Unlayered rules here previously beat all utilities.
+// @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    // Full-screen app — clip both axes so no root scrollbar ever steals layout width.
+    // All 100vw usages subtract a margin; fixed overlays are not clipped by clip on ancestor.
+    // @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
+    overflow: clip;
+    font-size: var(--font-size-md);
+    line-height: 1.45;
+    // Stack matches tweakcn `--font-sans` (DM Sans); var resolves after :root in this bundle.
+    // @see apps/web/src/styles.scss (:root --font-sans); docs/migration/phase-8-global-scss-elimination.md §7
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  app-root {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    overflow: clip;
+  }
+}

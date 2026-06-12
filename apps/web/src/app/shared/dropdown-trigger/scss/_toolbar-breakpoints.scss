@@ -1,0 +1,141 @@
+// Shared container-query breakpoints for workspace-aligned pane toolbars (menu triggers + view toggle).
+// @see docs/specs/ui/workspace/workspace-pane.md
+
+// Icon-only menu triggers when toolbar is narrower than four labeled triggers + view toggle.
+$toolbar-menu-compact-max: 42.5rem;
+
+// Single cycle button replaces full card-variant toggle group.
+$toolbar-view-toggle-compact-max: 23.75rem;
+
+// Applies spacious default and compact icon-only rules for toolbar dropdown triggers.
+// @see docs/specs/ui/workspace/workspace-pane.md
+@mixin toolbar-menu-trigger-responsive($block, $container) {
+  .#{$block}__menu-trigger-icon {
+    display: none;
+  }
+
+  @container #{$container} (max-width: #{$toolbar-menu-compact-max}) {
+    .#{$block}__menu-trigger-icon {
+      display: inline-flex;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .#{$block}__menu-trigger-label,
+    .#{$block}__menu-trigger-chevron {
+      display: none;
+    }
+
+    .#{$block}__menu-trigger {
+      width: 2.25rem;
+      height: 2.25rem;
+      min-width: 2.25rem;
+      flex-shrink: 0;
+      padding: 0;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+// Hides full pill toggle group and shows compact cycle button below view-toggle breakpoint.
+// @see docs/specs/ui/workspace/workspace-pane.md
+@mixin toolbar-size-control-responsive($block, $container) {
+  // Matches `hlmBtn size="sm"` / compact icon-only menu triggers (h-9 = 2.25rem).
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  $toolbar-control-size: 2.25rem;
+
+  .#{$block}__size-control--compact {
+    display: none;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    align-self: center;
+    inline-size: $toolbar-control-size;
+    block-size: $toolbar-control-size;
+    min-inline-size: $toolbar-control-size;
+    min-block-size: $toolbar-control-size;
+  }
+
+  .#{$block}__size-control {
+    inline-size: auto;
+    min-inline-size: auto;
+    flex-shrink: 0;
+  }
+
+  @container #{$container} (max-width: #{$toolbar-view-toggle-compact-max}) {
+    .#{$block}__size-control--full {
+      display: none;
+    }
+
+    .#{$block}__size-control--compact {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Compact cycle control: same muted pill track as full view toggle; solo segment inside.
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  .#{$block}__size-control--compact .#{$block}__size-control-track {
+    box-sizing: border-box;
+    block-size: $toolbar-control-size;
+    min-block-size: $toolbar-control-size;
+    max-block-size: $toolbar-control-size;
+  }
+
+  .#{$block}__size-control--compact .#{$block}__size-control-track button[hlmToggleGroupItem] {
+    color: var(--muted-foreground);
+    background: transparent;
+    box-shadow: none;
+    transition:
+      background 80ms ease-out,
+      color 80ms ease-out;
+
+    .material-icons {
+      color: inherit;
+    }
+
+    // Cycle control is not a selected segment — neutral idle even if toggle item reports "on".
+    // @see docs/specs/ui/workspace/workspace-pane.md
+    &[data-state='on'],
+    &[data-state='off'] {
+      background: transparent;
+      color: var(--muted-foreground);
+      box-shadow: none;
+    }
+
+    &:hover,
+    &[data-state='on']:hover,
+    &[data-state='off']:hover {
+      background: color-mix(in srgb, var(--primary) 10%, transparent);
+      color: var(--primary);
+    }
+  }
+}
+
+// Base menu-trigger part layout (spacious mode).
+// @see docs/specs/ui/workspace/workspace-pane.md
+@mixin toolbar-menu-trigger-parts($block) {
+  .#{$block}__menu-trigger {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .#{$block}__menu-trigger-icon {
+    flex-shrink: 0;
+    font-size: 1.125rem;
+    line-height: 1;
+  }
+
+  .#{$block}__menu-trigger-label {
+    white-space: nowrap;
+  }
+
+  .#{$block}__menu-trigger-chevron {
+    flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+  }
+}
+

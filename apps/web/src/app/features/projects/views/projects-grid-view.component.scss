@@ -1,0 +1,23 @@
+// Flex/grid child host — must declare min-height/min-width: 0
+// @see AGENTS.md § Flex/grid child hosts
+:host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
+}
+
+// Projects grid: 4-col desktop, 2-col tablet, 1-col mobile
+// @see docs/specs/page/projects-page.md § Grid density
+.projects-grid {
+  display: grid;
+  gap: var(--spacing-2);
+  grid-template-columns: 1fr;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

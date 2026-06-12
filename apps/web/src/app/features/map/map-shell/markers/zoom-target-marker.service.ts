@@ -1,0 +1,108 @@
+import { Injectable } from '@angular/core';
+import type * as L from 'leaflet';
+import type { PhotoMarkerState } from './map-marker-reconcile.facade';
+import { getMarkerKeysForMedia, type MarkersByMediaIdMap } from './marker-media-index.helpers';
+
+@Injectable({ providedIn: 'root' })
+export class ZoomTargetMarkerService {
+  findMarkerKeyForZoomTarget(params: {
+    mediaId: string;
+    lat: number;
+    lng: number;
+    allowClusterFallback: boolean;
+    map: L.Map | undefined;
+    markersByMediaId: MarkersByMediaIdMap;
+    uploadedPhotoMarkers: Map<string, PhotoMarkerState>;
+    toMarkerKey: (lat: number, lng: number) => string;
+    clusterFallbackMaxMeters: number;
+  }): string | null {
+    const markerKeys = getMarkerKeysForMedia(params.markersByMediaId, params.mediaId);
+    let nearestSingle: { key: string; distanceMeters: number } | null = null;
+
+    for (const markerKey of markerKeys) {
+      const state = params.uploadedPhotoMarkers.get(markerKey);
+      if (!state || state.count !== 1) {
+        continue;
+      }
+      const distanceMeters = this.distanceMeters(
+        params.map,
+        params.lat,
+        params.lng,
+        state.lat,
+        state.lng,
+      );
+      if (!nearestSingle || distanceMeters < nearestSingle.distanceMeters) {
+        nearestSingle = { key: markerKey, distanceMeters };
+      }
+    }
+
+    if (nearestSingle && nearestSingle.distanceMeters <= params.clusterFallbackMaxMeters) {
+      return nearestSingle.key;
+    }
+
+    if (markerKeys.length === 1) {
+      const onlyKey = markerKeys[0];
+      const state = params.uploadedPhotoMarkers.get(onlyKey);
+      if (state?.count === 1) {
+        return onlyKey;
+      }
+    }
+
+    const exactKey = params.toMarkerKey(params.lat, params.lng);
+    const exactState = params.uploadedPhotoMarkers.get(exactKey);
+    if (exactState?.count === 1) {
+      return exactKey;
+    }
+
+    if (!params.allowClusterFallback) {
+      return null;
+    }
+
+    let nearestCluster: { key: string; distanceMeters: number } | null = null;
+    let nearestAny: { key: string; distanceMeters: number } | null = null;
+
+    for (const [key, state] of params.uploadedPhotoMarkers) {
+      const distanceMeters = this.distanceMeters(
+        params.map,
+        params.lat,
+        params.lng,
+        state.lat,
+        state.lng,
+      );
+
+      if (!nearestAny || distanceMeters < nearestAny.distanceMeters) {
+        nearestAny = { key, distanceMeters };
+      }
+
+      if (state.count > 1 && (!nearestCluster || distanceMeters < nearestCluster.distanceMeters)) {
+        nearestCluster = { key, distanceMeters };
+      }
+    }
+
+    if (nearestCluster && nearestCluster.distanceMeters <= params.clusterFallbackMaxMeters) {
+      return nearestCluster.key;
+    }
+
+    if (nearestAny && nearestAny.distanceMeters <= params.clusterFallbackMaxMeters) {
+      return nearestAny.key;
+    }
+
+    return null;
+  }
+
+  private distanceMeters(
+    map: L.Map | undefined,
+    latA: number,
+    lngA: number,
+    latB: number,
+    lngB: number,
+  ): number {
+    if (map) {
+      return map.distance([latA, lngA], [latB, lngB]);
+    }
+
+    const dx = latA - latB;
+    const dy = lngA - lngB;
+    return Math.sqrt(dx * dx + dy * dy) * 111_320;
+  }
+}

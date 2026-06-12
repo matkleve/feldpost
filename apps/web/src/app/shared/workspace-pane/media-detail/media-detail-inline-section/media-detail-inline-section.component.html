@@ -1,0 +1,280 @@
+<div class="detail-section">
+  <p class="detail-section__label">{{ detailViewLabel() }}</p>
+
+  <div class="detail-row detail-row--readonly">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">description</span>
+      <span class="detail-row__label">{{ t('workspace.imageDetail.field.type', 'Type') }}</span>
+      <span class="detail-row__value detail-row__value--static">{{ fileFormatLabel() }}</span>
+    </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+  </div>
+
+  @if (isImageLike()) {
+    <div
+      class="detail-row detail-row--readonly detail-row--exif-location-add"
+      [attr.data-state]="exifLocationAddState()"
+    >
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      @if (hasExifCoordinates()) {
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--l1"
+          type="button"
+          [disabled]="exifAddDisabled()"
+          [attr.aria-label]="
+            t(
+              'workspace.imageDetail.action.addExifToLocations.aria',
+              'Add reverse-geocoded address from EXIF coordinates to locations'
+            )
+          "
+          [attr.title]="
+            t('workspace.imageDetail.action.addExifToLocations', 'Add as address to locations')
+          "
+          (click)="exifToLocationRequested.emit()"
+        >
+          <span class="material-icons" aria-hidden="true">{{
+            exifLocationAddState() === 'resolving' ? 'progress_activity' : 'add_location'
+          }}</span>
+        </button>
+      } @else {
+        <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      }
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">photo_camera</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.exifCoordinates', 'EXIF coordinates')
+        }}</span>
+        @if (hasExifCoordinates()) {
+          <span class="detail-row__value detail-row__value--static detail-row__value--mono">
+            {{ formatCoord(media().exif_latitude) }}°, {{ formatCoord(media().exif_longitude) }}°
+          </span>
+        } @else {
+          <span class="detail-row__value detail-row__value--static">{{
+            t('workspace.imageDetail.value.empty', '—')
+          }}</span>
+        }
+      </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    </div>
+  }
+
+  <div class="detail-row detail-row--readonly">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">drive_file_rename_outline</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.originalFilename', 'Original file name')
+      }}</span>
+      <span class="detail-row__value detail-row__value--static">{{
+        media().original_filename ?? t('workspace.imageDetail.value.empty', '—')
+      }}</span>
+    </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+  </div>
+
+  <div
+    class="detail-row"
+    [class.detail-row--editing]="editingField() === 'captured_at'"
+    [attr.data-detail-active-editor]="editingField() === 'captured_at' ? 'captured_at' : null"
+  >
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    @if (editingField() === 'captured_at') {
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.captured', 'Captured')
+        }}</span>
+        <input
+          class="detail-row__field-input detail-row__field-slot detail-row__field-input--trigger"
+          type="text"
+          readonly
+          tabindex="0"
+          [value]="captureDate() ?? ''"
+          [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
+        />
+        <app-captured-date-editor
+          [initialDate]="editDate()"
+          [initialTime]="editTime()"
+          (save)="capturedAtSaved.emit($event)"
+          (cancel)="editingCancelled.emit()"
+        />
+      </div>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--r1 detail-row-action--danger"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
+        [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
+        (click)="editingCancelled.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    } @else {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--l1"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
+        [attr.title]="t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')"
+        (click)="capturedAtEditRequested.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.captured', 'Captured')
+        }}</span>
+        <button class="detail-row__field-trigger" type="button" (click)="capturedAtEditRequested.emit()">
+          {{ captureDate() ?? t('workspace.imageDetail.value.empty', '—') }}
+        </button>
+      </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    }
+  </div>
+
+  @if (editingField() === 'project_ids') {
+    <div
+      class="media-detail-projects-stack"
+      data-detail-active-editor="project_ids"
+    >
+      <div class="detail-row detail-row--editing media-detail-projects-row">
+        <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--l1 detail-row-action--slot-reserved"
+          type="button"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <span class="material-icons" aria-hidden="true">edit</span>
+        </button>
+        <div class="detail-row__center" #projectsCenter>
+          <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
+          <span class="detail-row__label">{{
+            t('workspace.imageDetail.field.projects', 'Projects')
+          }}</span>
+          <div
+            class="detail-row__field-slot media-detail-projects-editor"
+            role="group"
+            [attr.aria-label]="t('workspace.imageDetail.projects.manage.aria', 'Manage projects')"
+          >
+            <div
+              class="media-detail-projects-editor__chips detail-row__field-input detail-row__field-slot"
+              (click)="focusProjectsDropdownSearch()"
+            >
+              @for (opt of selectedProjectOptions(); track opt.id) {
+                <button
+                  type="button"
+                  class="media-detail-projects-editor__chip"
+                  (click)="removeProject(opt.id); $event.stopPropagation()"
+                  [attr.aria-label]="
+                    t('workspace.imageDetail.projects.removePrefix', 'Remove project') +
+                    ' ' +
+                    opt.label
+                  "
+                >
+                  <span class="media-detail-projects-editor__chip-label">{{ opt.label }}</span>
+                  <span class="material-icons" aria-hidden="true">close</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="detail-row-action detail-row-action--r1 detail-row-action--danger"
+          type="button"
+          [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
+          [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
+          (click)="editingCancelled.emit()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+        <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+      </div>
+      <app-dropdown-shell
+        class="media-detail-projects-shell"
+        panelClass="option-menu-surface media-detail-projects-panel"
+        [anchor]="projectsAnchorEl()"
+        [minWidth]="projectsCenterWidth()"
+        (closeRequested)="editingCancelled.emit()"
+      >
+        <app-projects-dropdown
+          #projectsDropdown
+          variant="media-detail"
+          [projectsInput]="projectsForDropdown()"
+          [selectedIdsInput]="selectedProjectIds()"
+          (projectsChanged)="projectsChanged.emit($event)"
+        />
+      </app-dropdown-shell>
+    </div>
+  } @else {
+    <div class="detail-row">
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--l1"
+        type="button"
+        [attr.aria-label]="t('workspace.imageDetail.projects.edit.aria', 'Edit projects')"
+        [attr.title]="t('workspace.imageDetail.projects.edit.title', 'Edit projects')"
+        (click)="fieldEditRequested.emit('project_ids')"
+      >
+        <span class="material-icons" aria-hidden="true">edit</span>
+      </button>
+      <div class="detail-row__center">
+        <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
+        <span class="detail-row__label">{{
+          t('workspace.imageDetail.field.projects', 'Projects')
+        }}</span>
+        <button
+          class="detail-row__field-trigger"
+          type="button"
+          (click)="fieldEditRequested.emit('project_ids')"
+        >
+          {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
+        </button>
+      </div>
+      <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    </div>
+  }
+
+  <div class="detail-row detail-row--readonly">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.uploaded', 'Uploaded')
+      }}</span>
+      <span class="detail-row__value detail-row__value--static">{{
+        uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
+      }}</span>
+    </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+  </div>
+</div>

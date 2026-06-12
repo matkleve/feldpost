@@ -1,0 +1,26 @@
+// Host passes through grid; button visibility follows parent .detail-row hover.
+// @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+:host {
+  display: contents;
+}
+
+button.detail-row-action--remove {
+  opacity: 0;
+  pointer-events: none;
+}
+
+// Parent row hover/focus reveals remove; armed stays visible for two-step confirm.
+// @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+:host-context(.detail-row:hover:not(.detail-row--editing)) button.detail-row-action--remove,
+:host-context(.detail-row:focus-within:not(.detail-row--editing)) button.detail-row-action--remove,
+button.detail-row-action--armed {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  button.detail-row-action--remove {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

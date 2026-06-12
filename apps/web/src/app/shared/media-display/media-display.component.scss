@@ -1,0 +1,239 @@
+:host {
+  --media-display-max-width: 100%;
+  --media-display-max-height: 100%;
+
+  display: contents;
+}
+
+// fill mode: host is a real block so overlays in media-item__slot can anchor to it.
+// @see docs/specs/component/media/media-display.md#geometry-ownership-between-mediadisplay-and-parent
+:host.media-display--fill-slot {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+// intrinsic mode: fills parent slot; slot owns aspect-ratio transition + border clip.
+// @see docs/specs/component/media/media-item.md#spacing--framing-ownership
+:host.media-display--intrinsic {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+// Viewport fills media-display host; layers stack inside (state-driven opacity).
+// @see docs/specs/component/media/media-display.rendering-matrix.supplement.md#fsm-layer-opacity-matrix
+.media-display__viewport {
+  position: relative;
+  overflow: hidden;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+// All layers: absolute, fill viewport; opacity is set only by FSM matrix blocks below.
+// @see docs/specs/component/media/media-display.rendering-matrix.supplement.md#fsm-layer-opacity-matrix
+.media-display__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
+}
+
+// Image fills layer box; object-fit keeps proportions.
+// @see docs/specs/component/media/media-display.md#what-it-looks-like
+.media-display__image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  object-position: center center;
+}
+
+// -------------------------------------------------------------------
+// Layer-specific base styles (not state-driven)
+// -------------------------------------------------------------------
+
+.media-display__layer--loading-surface {
+  background: var(--muted);
+}
+
+// Muted pulse while loading surface is active (through ratio-known-contain shrink).
+// @see docs/specs/component/media/media-display.md#state-rendering-matrix
+@keyframes media-display-loading-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.media-display__layer--staged-content {
+  filter: blur(8px);
+}
+
+.media-display__layer--icon-only,
+.media-display__layer--error,
+.media-display__layer--no-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-display__layer--icon-only {
+  background: color-mix(in srgb, var(--card) 92%, var(--background));
+  color: var(--muted-foreground);
+}
+
+.media-display__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.media-display__layer--error {
+  background: color-mix(in srgb, var(--background) 65%, transparent);
+}
+
+.media-display__layer--no-media {
+  flex-direction: column;
+  gap: var(--spacing-2);
+  background: color-mix(in srgb, var(--card) 88%, var(--background));
+}
+
+.media-display__no-media-label {
+  color: var(--muted-foreground);
+  font-size: var(--font-size-2xs, 0.875rem);
+  text-align: center;
+}
+
+// -------------------------------------------------------------------
+// FSM layer opacity matrix — every state sets opacity for every layer.
+// No layer visibility outside this table.
+// @see docs/specs/component/media/media-display.rendering-matrix.supplement.md#fsm-layer-opacity-matrix
+// -------------------------------------------------------------------
+
+@mixin media-display-fsm-layers(
+  $loading,
+  $staged,
+  $content,
+  $icon,
+  $error,
+  $no-media
+) {
+  .media-display__layer--loading-surface {
+    opacity: $loading;
+  }
+
+  .media-display__layer--staged-content {
+    opacity: $staged;
+  }
+
+  .media-display__layer--content {
+    opacity: $content;
+  }
+
+  .media-display__layer--icon-only {
+    opacity: $icon;
+  }
+
+  .media-display__layer--error {
+    opacity: $error;
+  }
+
+  .media-display__layer--no-media {
+    opacity: $no-media;
+  }
+}
+
+// idle
+.media-display__viewport[data-state='idle'] {
+  @include media-display-fsm-layers(0, 0, 0, 0, 0, 0);
+}
+
+// loading-surface-visible
+.media-display__viewport[data-state='loading-surface-visible'] {
+  @include media-display-fsm-layers(1, 0, 0, 0, 0, 0);
+
+  .media-display__layer--loading-surface {
+    animation: media-display-loading-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+// ratio-known-contain
+.media-display__viewport[data-state='ratio-known-contain'] {
+  @include media-display-fsm-layers(1, 0, 0, 0, 0, 0);
+
+  .media-display__layer--loading-surface {
+    animation: media-display-loading-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+// media-ready
+.media-display__viewport[data-state='media-ready'] {
+  @include media-display-fsm-layers(0, 1, 0, 0, 0, 0);
+
+  .media-display__layer--staged-content {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
+  }
+}
+
+// content-fade-in
+.media-display__viewport[data-state='content-fade-in'] {
+  @include media-display-fsm-layers(0, 1, 1, 0, 0, 0);
+
+  .media-display__layer--staged-content,
+  .media-display__layer--content {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+
+  .media-display__layer--content {
+    pointer-events: auto;
+  }
+}
+
+// content-visible
+.media-display__viewport[data-state='content-visible'] {
+  @include media-display-fsm-layers(0, 0, 1, 0, 0, 0);
+
+  .media-display__layer--content {
+    pointer-events: auto;
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+
+  .media-display__layer--staged-content {
+    transition: opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+
+// icon-only
+.media-display__viewport[data-state='icon-only'] {
+  @include media-display-fsm-layers(0, 0, 0, 1, 0, 0);
+
+  .media-display__layer--icon-only {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+}
+
+// error
+.media-display__viewport[data-state='error'] {
+  @include media-display-fsm-layers(0, 0, 0, 0, 1, 0);
+
+  .media-display__layer--error {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+}
+
+// no-media
+.media-display__viewport[data-state='no-media'] {
+  @include media-display-fsm-layers(0, 0, 0, 0, 0, 1);
+
+  .media-display__layer--no-media {
+    transition: opacity var(--motion-duration-fast) var(--motion-ease-out) 60ms;
+  }
+}

@@ -1,16 +1,31 @@
-<div class="chips">
-  @for (chip of chips(); track $index) {
+@for (chip of chips(); track $index) {
+  @if (chip.action) {
     <button
-      class="chip focus-ring-primary"
+      type="button"
+      hlmBadge
+      [variant]="chipBadgeVariant(chip)"
+      class="chip chip--interactive cursor-pointer focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
       [class.chip--filled]="chip.variant === 'filled'"
       [class.chip--success]="chip.variant === 'success'"
       [class.chip--warning]="chip.variant === 'warning'"
-      type="button"
       [title]="chip.title ?? chip.text"
       (click)="chipClicked.emit($index)"
     >
       <span class="material-icons chip__icon" aria-hidden="true">{{ chip.icon }}</span>
       <span class="chip__text">{{ chip.text }}</span>
     </button>
+  } @else {
+    <span
+      hlmBadge
+      [variant]="chipBadgeVariant(chip)"
+      class="chip chip--readonly"
+      [class.chip--filled]="chip.variant === 'filled'"
+      [class.chip--success]="chip.variant === 'success'"
+      [class.chip--warning]="chip.variant === 'warning'"
+      [title]="chip.title ?? chip.text"
+    >
+      <span class="material-icons chip__icon" aria-hidden="true">{{ chip.icon }}</span>
+      <span class="chip__text">{{ chip.text }}</span>
+    </span>
   }
-</div>
+}

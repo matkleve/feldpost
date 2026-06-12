@@ -1,5 +1,7 @@
-import { SearchQueryContext } from './search.models';
+import type { SearchQueryContext } from './search.models';
 import { isInViewport } from './search-bar-helpers';
+import { SEARCH_TUNING_SYSTEM_DEFAULTS } from './search-tuning.defaults';
+import type { SearchTuningScoringConfig } from './search-tuning.types';
 import { computeTextMatchScore } from './search-query';
 
 export function computeGeocoderTextScore(
@@ -38,13 +40,14 @@ export function computeShortPrefixNoisePenalty(
   countryBoost: number,
   geoScore: number,
   primaryLabel: string,
+  scoring: SearchTuningScoringConfig = SEARCH_TUNING_SYSTEM_DEFAULTS.scoring,
 ): number {
-  if (!isShortAmbiguousPrefixQuery(query, textScore)) return 0;
+  if (!isShortAmbiguousPrefixQuery(query, textScore, scoring)) return 0;
 
   return (
-    locationPenalty(inViewport, countryBoost) +
-    geoPenalty(geoScore) +
-    prefixPenalty(primaryLabel, query)
+    locationPenalty(inViewport, countryBoost, scoring) +
+    geoPenalty(geoScore, scoring) +
+    prefixPenalty(primaryLabel, query, scoring)
   );
 }
 
@@ -55,18 +58,16 @@ export function computeGeocoderWeightedScore(
   qualityScore: number,
   countryScore: number,
   noisePenalty: number,
+  scoring: SearchTuningScoringConfig = SEARCH_TUNING_SYSTEM_DEFAULTS.scoring,
 ): number {
   const isShortPrefix = query.length >= 3 && query.length <= 6 && !query.includes(' ');
-  const textWeight = isShortPrefix ? 0.35 : 0.5;
-  const geoWeight = isShortPrefix ? 0.45 : 0.3;
-  const qualityWeight = isShortPrefix ? 0.1 : 0.15;
-  const countryWeight = isShortPrefix ? 0.1 : 0.05;
+  const weights = isShortPrefix ? scoring.weightsShortPrefix : scoring.weightsNormal;
 
   return (
-    textScore * textWeight +
-    geoScore * geoWeight +
-    qualityScore * qualityWeight +
-    countryScore * countryWeight -
+    textScore * weights.text +
+    geoScore * weights.geo +
+    qualityScore * weights.quality +
+    countryScore * weights.country -
     noisePenalty
   );
 }
@@ -94,21 +95,40 @@ function normalize(value: string | undefined): string {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
-function isShortAmbiguousPrefixQuery(query: string, textScore: number): boolean {
-  return query.length >= 3 && query.length <= 6 && !query.includes(' ') && textScore < 0.95;
+function isShortAmbiguousPrefixQuery(
+  query: string,
+  textScore: number,
+  scoring: SearchTuningScoringConfig,
+): boolean {
+  return (
+    query.length >= 3 &&
+    query.length <= 6 &&
+    !query.includes(' ') &&
+    textScore < scoring.shortPrefixAmbiguousTextScoreLt
+  );
 }
 
-function locationPenalty(inViewport: boolean, countryBoost: number): number {
+function locationPenalty(
+  inViewport: boolean,
+  countryBoost: number,
+  scoring: SearchTuningScoringConfig,
+): number {
   if (inViewport) return 0;
-  return countryBoost < 1 ? 0.25 : 0.15;
+  return countryBoost < 1
+    ? scoring.penaltyOutOfViewOutCountry
+    : scoring.penaltyOutOfViewInCountry;
 }
 
-function geoPenalty(geoScore: number): number {
-  if (geoScore < 0.15) return 0.3;
-  if (geoScore < 0.3) return 0.2;
+function geoPenalty(geoScore: number, scoring: SearchTuningScoringConfig): number {
+  if (geoScore < 0.15) return scoring.penaltyGeoLt015;
+  if (geoScore < 0.3) return scoring.penaltyGeoLt030;
   return 0;
 }
 
-function prefixPenalty(primaryLabel: string, query: string): number {
-  return startsWithQueryPrefix(primaryLabel, query) ? 0 : 0.45;
+function prefixPenalty(
+  primaryLabel: string,
+  query: string,
+  scoring: SearchTuningScoringConfig,
+): number {
+  return startsWithQueryPrefix(primaryLabel, query) ? 0 : scoring.penaltyPrefixNotMatching;
 }

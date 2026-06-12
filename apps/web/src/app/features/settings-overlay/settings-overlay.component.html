@@ -1,33 +1,43 @@
 @if (open()) {
   <section
-    class="settings-overlay ui-container"
+    class="settings-overlay w-full"
     data-i18n-skip
     role="dialog"
     aria-modal="true"
     [attr.aria-label]="t('settings.overlay.aria.dialog', 'Settings')"
   >
-    <button
-      type="button"
-      class="settings-overlay__close"
-      [attr.aria-label]="t('settings.overlay.aria.close', 'Close settings overlay')"
-      (click)="requestClose()"
-    >
-      <span class="material-icons" aria-hidden="true">close</span>
-    </button>
-
-    <div class="settings-overlay__lead-divider" aria-hidden="true"></div>
-
     <div class="settings-overlay__shell">
       <aside
         class="settings-overlay__sections"
         [attr.aria-label]="t('settings.overlay.aria.sections', 'Settings sections')"
       >
+        <div class="settings-overlay__sections-toolbar">
+          <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            type="button"
+            class="settings-overlay__close"
+            [attr.aria-label]="t('settings.overlay.aria.close', 'Close settings overlay')"
+            (click)="requestClose()"
+          >
+            <span class="material-icons" aria-hidden="true">close</span>
+          </button>
+        </div>
         <header class="settings-overlay__sections-header">
-          <p class="settings-overlay__kicker">{{ t('settings.overlay.kicker', 'Settings') }}</p>
-          <h2 class="settings-overlay__title">
+          <h2 class="settings-overlay__kicker">{{ t('settings.overlay.kicker', 'Settings') }}</h2>
+          <p
+            class="settings-overlay__title"
+            [attr.title]="t('settings.overlay.title', 'Workspace Preferences')"
+          >
             {{ t('settings.overlay.title', 'Workspace Preferences') }}
-          </h2>
-          <p class="settings-overlay__subtitle">
+          </p>
+          <p
+            class="settings-overlay__subtitle"
+            [attr.title]="
+              t('settings.overlay.subtitle', 'iOS-style section navigation with Feldpost controls.')
+            "
+          >
             {{
               t('settings.overlay.subtitle', 'iOS-style section navigation with Feldpost controls.')
             }}
@@ -37,484 +47,649 @@
         <div class="settings-overlay__section-list" role="list">
           @for (section of sectionList(); track section.id) {
             <button
-              class="settings-overlay__section-item ui-item dd-item"
+              type="button"
+              class="settings-overlay__section-item"
               [class.settings-overlay__section-item--active]="isSectionSelected(section.id)"
               [attr.aria-current]="isSectionSelected(section.id) ? 'true' : null"
               (click)="selectSection(section.id)"
             >
-              <span class="settings-overlay__section-media ui-item-media" aria-hidden="true">
-                <span class="material-icons">{{ section.icon }}</span>
-              </span>
-              <span class="settings-overlay__section-label ui-item-label">
-                <strong>{{ section.title }}</strong>
-                <small>{{ section.subtitle }}</small>
-              </span>
-              <span class="settings-overlay__section-chevron material-icons" aria-hidden="true"
-                >chevron_right</span
+              <span
+                class="settings-overlay__section-media flex size-5 shrink-0 items-center justify-center"
+                aria-hidden="true"
               >
+                <span class="material-icons text-base leading-none">{{ section.icon }}</span>
+              </span>
+              <span class="settings-overlay__section-label flex min-w-0 flex-1 flex-col gap-0.5">
+                <strong class="min-w-0 font-semibold" [attr.title]="section.title">{{
+                  section.title
+                }}</strong>
+                <small
+                  class="min-w-0 text-xs text-muted-foreground"
+                  [attr.title]="section.subtitle"
+                >
+                  {{ section.subtitle }}
+                </small>
+              </span>
+              <span
+                class="settings-overlay__section-chevron material-icons ml-auto shrink-0"
+                aria-hidden="true"
+                >chevron_right</span>
             </button>
           }
         </div>
       </aside>
 
-      <div class="settings-overlay__column-divider" aria-hidden="true"></div>
-
-      <div class="settings-overlay__detail" aria-live="polite">
+      <div class="settings-overlay__detail content-clamp content-clamp--text" aria-live="polite">
         @switch (selectedSectionId()) {
           @case ('general') {
-            <section
-              class="settings-overlay__detail-card ui-container ui-container--compact ui-section-card"
-            >
-              <h3>{{ t('settings.overlay.general.title', 'General') }}</h3>
-              <p>
-                {{
-                  t(
-                    'settings.overlay.general.description',
-                    'Control base language and content density for workspace surfaces.'
-                  )
-                }}
-              </p>
-
-              <div class="settings-overlay__field-row ui-field-row">
-                <span class="ui-field-label">{{
-                  t('settings.overlay.general.language.label', 'Language')
-                }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
-                  data-i18n-skip
-                  [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
+            @let tocAnchors = anchorsForSection('general');
+            <div class="settings-overlay__detail-section">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.general.title', 'General') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.general.description',
+                      'Control base language and content density for workspace surfaces.'
+                    )
+                  }}
+                </p>
+              </div>
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
                 >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="settingsModel().language === 'en'"
-                    [class.ui-segmented__button--active]="settingsModel().language === 'en'"
-                    (click)="setLanguage('en')"
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('general', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('general', 'language')"
                   >
-                    English
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="settingsModel().language === 'de'"
-                    [class.ui-segmented__button--active]="settingsModel().language === 'de'"
-                    (click)="setLanguage('de')"
+                    <label hlmLabel>{{ t('settings.overlay.general.language.label', 'Language') }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div class="settings-overlay__segmented" hlmPillToggle size="sm" data-i18n-skip>
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().language"
+                          (valueChange)="onLanguageValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
+                        >
+                          @for (option of languageOptions; track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('general', 'density')"
                   >
-                    Deutsch
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="settingsModel().language === 'it'"
-                    [class.ui-segmented__button--active]="settingsModel().language === 'it'"
-                    (click)="setLanguage('it')"
-                  >
-                    Italiano
-                  </button>
+                    <label hlmLabel>{{ t('settings.overlay.general.density.label', 'Density') }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div class="settings-overlay__segmented" hlmPillToggle size="sm" data-i18n-skip>
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().density"
+                          (valueChange)="onDensityValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.general.density.label', 'Density')"
+                        >
+                          @for (option of densityOptions(); track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div class="settings-overlay__field-row ui-field-row">
-                <span class="ui-field-label">{{
-                  t('settings.overlay.general.density.label', 'Density')
-                }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
-                  [attr.aria-label]="t('settings.overlay.general.density.label', 'Density')"
-                >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().density === 'compact'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().density === 'compact'"
-                    (click)="setDensity('compact')"
-                  >
-                    {{ t('settings.overlay.general.density.option.compact', 'Compact') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().density === 'comfortable'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().density === 'comfortable'"
-                    (click)="setDensity('comfortable')"
-                  >
-                    {{ t('settings.overlay.general.density.option.comfortable', 'Comfortable') }}
-                  </button>
-                </div>
-              </div>
-            </section>
+            </div>
           }
 
           @case ('appearance') {
-            <section
-              class="settings-overlay__detail-card ui-container ui-container--compact ui-section-card"
-            >
-              <h3>{{ t('settings.overlay.appearance.title', 'Appearance') }}</h3>
-              <p>
-                {{
-                  t(
-                    'settings.overlay.appearance.description',
-                    'Use the same palette behavior as dropdowns and map surfaces.'
-                  )
-                }}
-              </p>
-              <div class="settings-overlay__field-row ui-field-row">
-                <span class="ui-field-label">{{
-                  t('settings.overlay.appearance.themeMode.label', 'Theme mode')
-                }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
-                  [attr.aria-label]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
+            @let tocAnchors = anchorsForSection('appearance');
+            <div class="settings-overlay__detail-section">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.appearance.title', 'Appearance') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.appearance.description',
+                      'Use the same palette behavior as dropdowns and map surfaces.'
+                    )
+                  }}
+                </p>
+              </div>
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
                 >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'light'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'light'"
-                    (click)="setThemeMode('light')"
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('appearance', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('appearance', 'theme')"
                   >
-                    {{ t('settings.overlay.appearance.themeMode.option.light', 'Light') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'dark'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'dark'"
-                    (click)="setThemeMode('dark')"
-                  >
-                    {{ t('settings.overlay.appearance.themeMode.option.dark', 'Dark') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'system'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'system'"
-                    (click)="setThemeMode('system')"
-                  >
-                    {{ t('settings.overlay.appearance.themeMode.option.system', 'System') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'sandstone'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'sandstone'"
-                    (click)="setThemeMode('sandstone')"
-                  >
-                    {{ t('settings.overlay.appearance.themeMode.option.sandstone', 'Sandstone') }}
-                  </button>
+                    <label hlmLabel>{{
+                      t('settings.overlay.appearance.themeMode.label', 'Theme mode')
+                    }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div
+                        class="settings-overlay__segmented settings-overlay__segmented--theme"
+                        hlmPillToggle
+                        size="sm"
+                        data-i18n-skip
+                      >
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().themeMode"
+                          (valueChange)="onThemeModeValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
+                        >
+                          @for (option of themeModeOptions(); track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </section>
+            </div>
           }
 
           @case ('notifications') {
-            <section
-              class="settings-overlay__detail-card ui-container ui-container--compact ui-section-card"
-            >
-              <h3>{{ t('settings.overlay.notifications.title', 'Notifications') }}</h3>
-              <p>
-                {{
-                  t(
-                    'settings.overlay.notifications.description',
-                    'Choose what feedback appears while working on-site.'
-                  )
-                }}
-              </p>
+            @let tocAnchors = anchorsForSection('notifications');
+            <div class="settings-overlay__detail-section">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.notifications.title', 'Notifications') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.notifications.description',
+                      'Choose what feedback appears while working on-site.'
+                    )
+                  }}
+                </p>
+              </div>
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('notifications', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('notifications', 'in-app')"
+                  >
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('notificationsEnabled')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.notifications.inApp.title', 'In-app notifications')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.notifications.inApp.description',
+                              'Show success and warning notices for actions.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().notificationsEnabled"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().notificationsEnabled"></span>
+                      </span>
+                    </button>
+                  </div>
 
-              <button
-                type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row"
-                (click)="toggleSetting('notificationsEnabled')"
-              >
-                <span class="ui-item-label">
-                  <strong>{{
-                    t('settings.overlay.notifications.inApp.title', 'In-app notifications')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.notifications.inApp.description',
-                        'Show success and warning notices for actions.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().notificationsEnabled"
-                  [class.ui-toggle-switch--on]="settingsModel().notificationsEnabled"
-                ></span>
-              </button>
-
-              <button
-                type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row"
-                (click)="toggleSetting('uploadFailureAlerts')"
-              >
-                <span class="ui-item-label">
-                  <strong>
-                    {{
-                      t(
-                        'settings.overlay.notifications.uploadFailure.title',
-                        'Upload failure alerts'
-                      )
-                    }}
-                  </strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.notifications.uploadFailure.description',
-                        'Raise immediate warning toasts for failed uploads.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().uploadFailureAlerts"
-                  [class.ui-toggle-switch--on]="settingsModel().uploadFailureAlerts"
-                ></span>
-              </button>
-            </section>
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('notifications', 'upload-failures')"
+                  >
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('uploadFailureAlerts')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>
+                          {{
+                            t(
+                              'settings.overlay.notifications.uploadFailure.title',
+                              'Upload failure alerts'
+                            )
+                          }}
+                        </strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.notifications.uploadFailure.description',
+                              'Raise immediate warning toasts for failed uploads.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().uploadFailureAlerts"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().uploadFailureAlerts"></span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           }
 
           @case ('map') {
-            <section
-              class="settings-overlay__detail-card ui-container ui-container--compact ui-section-card"
-            >
-              <h3>{{ t('settings.overlay.map.title', 'Map Preferences') }}</h3>
-              <p>
-                {{
-                  t(
-                    'settings.overlay.map.description',
-                    'Keep map behavior consistent with field navigation workflows.'
-                  )
-                }}
-              </p>
-
-              <button
-                type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row"
-                (click)="toggleSetting('mapAutoLocate')"
-              >
-                <span class="ui-item-label">
-                  <strong>{{
-                    t('settings.overlay.map.autoLocate.title', 'Auto-locate after login')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.map.autoLocate.description',
-                        'Center map to your current position when entering map shell.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().mapAutoLocate"
-                  [class.ui-toggle-switch--on]="settingsModel().mapAutoLocate"
-                ></span>
-              </button>
-
-              <button
-                type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row"
-                (click)="toggleSetting('mapGridOverlay')"
-              >
-                <span class="ui-item-label">
-                  <strong>{{
-                    t('settings.overlay.map.gridOverlay.title', 'Grid helper overlay')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.map.gridOverlay.description',
-                        'Show subtle grid alignment lines on high zoom levels.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().mapGridOverlay"
-                  [class.ui-toggle-switch--on]="settingsModel().mapGridOverlay"
-                ></span>
-              </button>
-
-              <div class="settings-overlay__field-row ui-field-row">
-                <span class="ui-field-label">{{
-                  t('settings.overlay.map.markerMotion.label', 'Marker motion')
-                }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
-                  [attr.aria-label]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
+            @let tocAnchors = anchorsForSection('map');
+            <div class="settings-overlay__detail-section">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.map.title', 'Map Preferences') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.map.description',
+                      'Keep map behavior consistent with field navigation workflows.'
+                    )
+                  }}
+                </p>
+              </div>
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
                 >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().markerMotion === 'off'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().markerMotion === 'off'"
-                    (click)="setMarkerMotion('off')"
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('map', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('map', 'auto-locate')"
                   >
-                    {{ t('settings.overlay.map.markerMotion.option.off', 'Off') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().markerMotion === 'smooth'
-                    "
-                    [class.ui-segmented__button--active]="settingsModel().markerMotion === 'smooth'"
-                    (click)="setMarkerMotion('smooth')"
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('mapAutoLocate')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.map.autoLocate.title', 'Auto-locate after login')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.map.autoLocate.description',
+                              'Center map to your current position when entering map shell.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().mapAutoLocate"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().mapAutoLocate"></span>
+                      </span>
+                    </button>
+                  </div>
+
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('map', 'grid-overlay')"
                   >
-                    {{ t('settings.overlay.map.markerMotion.option.smooth', 'Smooth') }}
-                  </button>
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('mapGridOverlay')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.map.gridOverlay.title', 'Grid helper overlay')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.map.gridOverlay.description',
+                              'Show subtle grid alignment lines on high zoom levels.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().mapGridOverlay"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().mapGridOverlay"></span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__field-row settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('map', 'marker-motion')"
+                  >
+                    <label hlmLabel>{{
+                      t('settings.overlay.map.markerMotion.label', 'Marker motion')
+                    }}</label>
+                    <div class="settings-overlay__field-value">
+                      <div class="settings-overlay__segmented" hlmPillToggle size="sm" data-i18n-skip>
+                        <div
+                          hlmToggleGroup
+                          brnToggleGroup
+                          type="single"
+                          [nullable]="false"
+                          [value]="settingsModel().markerMotion"
+                          (valueChange)="onMarkerMotionValueChange($event)"
+                          [attr.aria-label]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
+                        >
+                          @for (option of markerMotionOptions(); track option.id) {
+                            <button
+                              hlmToggleGroupItem
+                              type="button"
+                              brnToggleGroupItem
+                              [value]="option.id"
+                              [disabled]="!!option.disabled"
+                              [attr.aria-label]="option.ariaLabel || option.label"
+                              [attr.title]="option.title || option.label"
+                            >
+                              @if (option.icon && optLayout(option) !== 'text-only') {
+                                <span class="material-icons" aria-hidden="true">{{
+                                  option.icon
+                                }}</span>
+                              }
+                              @if (optLayout(option) !== 'icon-only') {
+                                <span>{{ option.label }}</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </section>
+            </div>
           }
 
-          @case ('search') {
-            <section
-              class="settings-overlay__detail-card ui-container ui-container--compact ui-section-card"
-            >
-              <h3>{{ t('settings.overlay.search.title', 'Search Tuning') }}</h3>
-              <p>
-                {{
-                  t(
-                    'settings.overlay.search.description',
-                    'Adjust bias and distance defaults for address and place results.'
-                  )
-                }}
-              </p>
-
-              <div class="settings-overlay__field-row ui-field-row">
-                <span class="ui-field-label">{{
-                  t('settings.overlay.search.bias.label', 'Search bias')
-                }}</span>
-                <select
-                  class="settings-overlay__select ui-select-control"
-                  [value]="settingsModel().searchBias"
-                  (change)="setSearchBias($any($event.target).value)"
-                >
-                  <option value="balanced">
-                    {{ t('settings.overlay.search.bias.option.balanced', 'Balanced') }}
-                  </option>
-                  <option value="address-first">
-                    {{ t('settings.overlay.search.bias.option.addressFirst', 'Address first') }}
-                  </option>
-                  <option value="place-first">
-                    {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
-                  </option>
-                </select>
-              </div>
-
-              <div
-                class="settings-overlay__field-row settings-overlay__field-row--stacked ui-field-row ui-field-row--stacked"
-              >
-                <span class="ui-field-label">{{
-                  t('settings.overlay.search.radius.label', 'Default radius (km)')
-                }}</span>
-                <input
-                  class="settings-overlay__range"
-                  type="range"
-                  min="1"
-                  max="10"
-                  [value]="settingsModel().searchRadiusKm"
-                  (input)="setSearchRadius(+$any($event.target).value)"
-                />
-                <strong>{{ settingsModel().searchRadiusKm }} km</strong>
-              </div>
-            </section>
+          @case ('search-tuning') {
+            <div class="settings-overlay__detail-section">
+              <ss-search-tuning-settings-section />
+            </div>
           }
 
           @case ('data') {
-            <section
-              class="settings-overlay__detail-card ui-container ui-container--compact ui-section-card"
-            >
-              <h3>{{ t('settings.overlay.data.title', 'Data and Privacy') }}</h3>
-              <p>
-                {{
-                  t(
-                    'settings.overlay.data.description',
-                    'Control retention and diagnostics behavior.'
-                  )
-                }}
-              </p>
-
-              <div
-                class="settings-overlay__field-row settings-overlay__field-row--stacked ui-field-row ui-field-row--stacked"
-              >
-                <span>{{
-                  t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
-                }}</span>
-                <input
-                  class="settings-overlay__range"
-                  type="range"
-                  min="7"
-                  max="90"
-                  [value]="settingsModel().cacheRetentionDays"
-                  (input)="setCacheRetentionDays(+$any($event.target).value)"
-                />
-                <strong>{{ settingsModel().cacheRetentionDays }} days</strong>
+            @let tocAnchors = anchorsForSection('data');
+            <div class="settings-overlay__detail-section">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.data.title', 'Data and Privacy') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.data.description',
+                      'Control retention and diagnostics behavior.'
+                    )
+                  }}
+                </p>
               </div>
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('data', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <div class="settings-overlay__detail-body">
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__field-row settings-overlay__field-row--stacked settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('data', 'cache')"
+                  >
+                    <label hlmLabel for="settings-cache-retention">{{
+                      t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
+                    }}</label>
+                    <input
+                      fpRangeProgress
+                      id="settings-cache-retention"
+                      class="settings-overlay__range"
+                      type="range"
+                      min="7"
+                      max="90"
+                      [value]="settingsModel().cacheRetentionDays"
+                      (input)="setCacheRetentionDays(+$any($event.target).value)"
+                    />
+                    <strong>{{ settingsModel().cacheRetentionDays }} days</strong>
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                class="settings-overlay__toggle-row ui-item ui-toggle-row"
-                (click)="toggleSetting('telemetryEnabled')"
-              >
-                <span class="ui-item-label">
-                  <strong>{{
-                    t('settings.overlay.data.telemetry.title', 'Diagnostics telemetry')
-                  }}</strong>
-                  <small>
-                    {{
-                      t(
-                        'settings.overlay.data.telemetry.description',
-                        'Send anonymous performance and crash diagnostics.'
-                      )
-                    }}
-                  </small>
-                </span>
-                <span
-                  class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().telemetryEnabled"
-                  [class.ui-toggle-switch--on]="settingsModel().telemetryEnabled"
-                ></span>
-              </button>
-            </section>
+                <div class="settings-overlay__detail-group">
+                  <div
+                    class="settings-overlay__anchor-target"
+                    [attr.id]="settingsAnchorDomId('data', 'telemetry')"
+                  >
+                    <button
+                      type="button"
+                      class="settings-overlay__toggle-row"
+                      (click)="toggleSetting('telemetryEnabled')"
+                    >
+                      <span class="settings-overlay__toggle-label">
+                        <strong>{{
+                          t('settings.overlay.data.telemetry.title', 'Diagnostics telemetry')
+                        }}</strong>
+                        <small>
+                          {{
+                            t(
+                              'settings.overlay.data.telemetry.description',
+                              'Send anonymous performance and crash diagnostics.'
+                            )
+                          }}
+                        </small>
+                      </span>
+                      <span
+                        hlmSwitch
+                        class="settings-overlay__switch"
+                        aria-hidden="true"
+                        [checked]="settingsModel().telemetryEnabled"
+                      >
+                        <span hlmSwitchThumb [checked]="settingsModel().telemetryEnabled"></span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           }
 
           @case ('account') {
-            <app-account />
+            @let tocAnchors = anchorsForSection('account');
+            <div class="settings-overlay__detail-section settings-overlay__detail-section--embedded">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.section.account.title', 'Account') }}</h3>
+                <p>{{ t('settings.overlay.section.account.subtitle', 'Identity and sign-in context') }}</p>
+              </div>
+              @if (tocAnchors.length > 0) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('account', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <app-account [embeddedInSettings]="true" />
+            </div>
           }
 
           @case ('invite-management') {
-            <ss-invite-management-section
-              [openContext]="inviteSectionRequest().openContext"
-              [preselectedRole]="inviteSectionRequest().preselectedRole"
-              [requestToken]="inviteSectionRequest().requestToken"
-            />
+            @let tocAnchors = anchorsForSection('invite-management');
+            <div class="settings-overlay__detail-section settings-overlay__detail-section--embedded">
+              <div class="settings-overlay__detail-lead">
+                <h3>{{ t('settings.overlay.section.invites.title', 'Invite Management') }}</h3>
+                <p>{{ t('settings.overlay.section.invites.subtitle', 'Role-scoped QR and share links') }}</p>
+              </div>
+              @if (tocAnchors.length > 0 && inviteManagementTocVisible()) {
+                <nav
+                  class="settings-overlay__detail-toc"
+                  [attr.aria-label]="t('settings.overlay.toc.aria', 'On this page')"
+                >
+                  @for (a of tocAnchors; track a.subsectionSlug) {
+                    <button
+                      type="button"
+                      class="settings-overlay__detail-toc-item"
+                      (click)="scrollToDetailAnchor('invite-management', a.subsectionSlug)"
+                    >
+                      {{ t(a.labelKey, a.labelFallback) }}
+                    </button>
+                  }
+                </nav>
+              }
+              <ss-invite-management-section
+                [openContext]="inviteSectionRequest().openContext"
+                [preselectedRole]="inviteSectionRequest().preselectedRole"
+                [requestToken]="inviteSectionRequest().requestToken"
+              />
+            </div>
           }
         }
       </div>

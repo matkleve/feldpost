@@ -1,0 +1,100 @@
+<!-- CapturedDateEditorComponent — Notion-style calendar + time editor -->
+<div class="captured-date-editor">
+  <!-- Header: date + time split fields -->
+  <div class="captured-date-editor__header">
+    <input
+      #dateField
+      hlmInput
+      class="captured-date-editor__date-input"
+      type="text"
+      [placeholder]="t('workspace.capturedDate.placeholder.date', 'DD.MM.YYYY')"
+      [value]="dateInput()"
+      [attr.aria-label]="t('workspace.capturedDate.aria.editDate', 'Edit date')"
+      (input)="dateInput.set(dateField.value)"
+      (blur)="onDateBlur()"
+      (keydown)="onDateKeydown($event)"
+    />
+    <input
+      #timeField
+      hlmInput
+      class="captured-date-editor__time-input"
+      type="text"
+      inputmode="numeric"
+      [placeholder]="t('workspace.capturedDate.placeholder.time', 'No time')"
+      [value]="timeInput()"
+      [attr.aria-label]="t('workspace.capturedDate.aria.editTime', 'Edit time (24h format)')"
+      (input)="timeInput.set(timeField.value)"
+      (blur)="onTimeBlur()"
+      (keydown)="onTimeKeydown($event)"
+    />
+  </div>
+
+  <!-- Month navigation -->
+  <div class="captured-date-editor__month-nav">
+    <span class="captured-date-editor__month-label">{{ monthLabel() }}</span>
+    <button
+      class="captured-date-editor__now-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+      type="button"
+      (click)="setToday()"
+    >
+      {{ t('workspace.capturedDate.action.today', 'Today') }}
+    </button>
+    <button
+      class="captured-date-editor__nav-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+      type="button"
+      [attr.aria-label]="t('workspace.capturedDate.aria.previousMonth', 'Previous month')"
+      (click)="prevMonth()"
+    >
+      <span class="material-icons" aria-hidden="true">chevron_left</span>
+    </button>
+    <button
+      class="captured-date-editor__nav-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+      type="button"
+      [attr.aria-label]="t('workspace.capturedDate.aria.nextMonth', 'Next month')"
+      (click)="nextMonth()"
+    >
+      <span class="material-icons" aria-hidden="true">chevron_right</span>
+    </button>
+  </div>
+
+  <!-- Calendar grid -->
+  <div class="captured-date-editor__grid">
+    <!-- Weekday headers -->
+    @for (day of weekdays(); track day) {
+      <span class="captured-date-editor__weekday">{{ day }}</span>
+    }
+    <!-- Day cells -->
+    @for (day of calendarDays(); track day.date) {
+      <button
+        class="captured-date-editor__day focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+        type="button"
+        [class.captured-date-editor__day--other-month]="!day.isCurrentMonth"
+        [class.captured-date-editor__day--today]="day.isToday"
+        [class.captured-date-editor__day--selected]="day.isSelected"
+        [attr.aria-label]="day.date"
+        [attr.aria-current]="day.isToday ? 'date' : null"
+        (click)="selectDay(day)"
+      >
+        {{ day.day }}
+      </button>
+    }
+  </div>
+
+  <!-- Action row -->
+  <div class="captured-date-editor__actions">
+    <button
+      class="captured-date-editor__clear-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+      type="button"
+      (click)="emitClear()"
+    >
+      {{ t('workspace.capturedDate.action.clear', 'Clear') }}
+    </button>
+    <button
+      class="captured-date-editor__done-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-success focus-visible:outline-offset-2"
+      type="button"
+      (click)="emitSave()"
+    >
+      {{ t('workspace.capturedDate.action.done', 'Done') }}
+    </button>
+  </div>
+</div>

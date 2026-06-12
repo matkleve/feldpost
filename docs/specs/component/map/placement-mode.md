@@ -1,0 +1,130 @@
+# Placement Mode
+
+## What It Is
+
+A temporary map interaction mode activated when an uploaded photo has no GPS data. The user clicks the map to place the photo at a specific location. A banner at the bottom explains what to do and provides a Cancel option.
+
+## What It Looks Like
+
+**Placement Banner:** Bottom-center floating pill over the map. Pin-drop icon + "Click the map to place this photo" + Cancel button. `--color-bg-surface` background, subtle shadow. `role="status"` for screen readers.
+
+**Crosshair Cursor:** The map container switches to `cursor: crosshair` so the user knows clicking will place the pin.
+
+## Where It Lives
+
+- **Parent**: Map Zone in `MapShellComponent`
+- **Appears when**: `MapShellComponent` receives a placement request for a job in `missing_data`
+
+## Actions
+
+| #   | User Action                      | System Response                                                                 | Triggers                                              |
+| --- | -------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 1   | Upload panel reports missing GPS | Placement mode activates, banner appears, cursor changes                        | `enterPlacementMode(jobId)`                           |
+| 2   | Clicks on map                    | Places marker at click coordinates, completes file upload                       | Coordinates sent to upload service                    |
+| 3   | After pin placed                 | Reverse-geocode coordinates to populate address fields                          | Async: city, district, street, country, address_label |
+| 3b  | After pin placed (conflict)      | If a photoless row exists near placed coords, show conflict popup before upload | `locationConflict$` from UploadManager                |
+| 4   | Clicks Cancel                    | Exits placement mode, file stays in `missing_data` lane until later placement   | `placementActive` → false                             |
+| 5   | Draft marker already exists      | Placement is resolved immediately without map click                             | `UploadPanel.placeFile(jobId, draftCoords)`           |
+
+## Placement → Address Resolution Flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Upload as UploadPanelComponent
+    participant Map as MapShell
+    participant Manager as UploadManagerService
+    participant Pipeline as UploadNewPipelineService
+    participant DB as Supabase
+
+    Upload->>Map: placementRequested(jobId)
+    alt draft marker exists
+      Map->>Upload: placeFile(jobId, draftCoords)
+    else map click required
+      Map->>Map: set pendingPlacementKey + placementActive
+      User->>Map: click map
+      Map->>Upload: placeFile(jobId, clickCoords)
+    end
+    Upload->>Manager: placeJob(jobId, coords)
+    Manager->>Pipeline: resume queued job
+    Pipeline->>DB: upload + save image row
+    Pipeline-->>Map: imageUploaded event (via manager)
+    Map->>Map: clear pendingPlacementKey + exit placement mode
+```
+
+## Component Hierarchy
+
+```
+[placement mode active]
+├── PlacementBanner                        ← absolute bottom-16, center, z-30, pill shape
+│   ├── PinDropIcon                        ← Material Icon "place", left side
+│   ├── "Click the map to place this photo"← instruction text
+│   └── PlacementCancelButton              ← ghost pill button "Cancel"
+└── MapContainer.--placing                 ← CSS class adds cursor: crosshair
+```
+
+## Data
+
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  A[UploadPanel emits placementRequested jobId] --> B[MapShell enterPlacementMode]
+  B --> C{Draft marker exists?}
+  C -->|Yes| D[UploadPanel.placeFile with draft coords]
+  C -->|No| E[Wait for map click]
+  E --> F[UploadPanel.placeFile with click coords]
+  D --> G[UploadManager.placeJob]
+  F --> G
+  G --> H[Job phase back to queued]
+  H --> I[Pipeline resumes upload]
+```
+
+| Field          | Source                  | Type                           |
+| -------------- | ----------------------- | ------------------------------ |
+| Placement key  | Emitted by Upload Panel | `string \| null`               |
+| Click location | Leaflet map click event | `{ lat: number, lng: number }` |
+
+## State
+
+| Name                    | Type                      | Default | Controls                                         |
+| ----------------------- | ------------------------- | ------- | ------------------------------------------------ |
+| `placementActive`       | `WritableSignal<boolean>` | `false` | Banner visibility + cursor change                |
+| `searchPlacementActive` | `WritableSignal<boolean>` | `false` | Distinct pin-drop mode triggered by search input |
+| `pendingPlacementKey`   | `string \| null`          | `null`  | Which upload job is waiting for map placement    |
+
+## File Map
+
+Part of `MapShellComponent` template and styles — not a separate component. The banner HTML and the `--placing` CSS class live in `map-shell.component.html` and `.scss`.
+
+## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant Panel as UploadPanelComponent
+  participant Map as MapShellComponent
+  participant Manager as UploadManagerService
+
+  Panel-->>Map: placementRequested(jobId)
+  Map->>Map: set pendingPlacementKey + placementActive
+  Map->>Panel: placeFile(jobId, coords)
+  Panel->>Manager: placeJob(jobId, coords)
+  Manager-->>Panel: jobs() phase updates
+  Manager-->>Map: imageUploaded
+```
+
+- Placement mode state managed by `pendingPlacementKey` and `placementActive` in `MapShellComponent`
+- Banner template is inline in `map-shell.component.html`
+- Cursor style applied via `[class.--placing]` binding on map container
+- Upload Panel emits placement key via `@Output()` to `MapShellComponent`
+
+## Acceptance Criteria
+
+- [ ] Banner appears when placement mode is active
+- [ ] Map cursor changes to crosshair
+- [ ] Clicking map places the marker and completes the upload
+- [ ] Cancel button exits placement mode
+- [ ] Only one file can be placed at a time
+- [ ] Banner has `role="status"` for accessibility

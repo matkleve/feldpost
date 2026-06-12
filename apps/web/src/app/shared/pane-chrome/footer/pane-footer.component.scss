@@ -1,0 +1,24 @@
+// Flex child in pane column — sticky footer, must not collapse text
+// @see docs/specs/component/workspace/pane-footer.md
+:host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
+}
+
+.pane-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--card);
+  border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  z-index: 1;
+}
+
+.pane-footer__spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}

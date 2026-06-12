@@ -1,0 +1,189 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../scss/dropdown-panel-flex-chain' as panel-flex;
+@use '../scss/toolbar-dropdown-list-scroll' as list-scroll;
+
+// Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button.
+// @see docs/specs/component/filters/dropdown-system.md
+// Fills toolbar shell width; flex child of `app-dropdown-shell` (scroll owned by StandardDropdown).
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+:host {
+  @include panel-flex.panel-flex-child;
+  max-width: 100%;
+}
+
+// --- Sections (grouping-specific layout) ---
+.grouping-section {
+  padding-inline: 0;
+  min-width: 0;
+}
+
+.grouping-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// --- Empty slot (positioned absolutely inside drop zone) ---
+.grouping-empty-slot {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+}
+
+// List body — pinned “Grouped by” + scrollable “Available” (upload-resolver-tray 2px gap).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.grouping-dropdown__body {
+  @include list-scroll.toolbar-dropdown-list-body;
+}
+
+.grouping-dropdown__pinned {
+  @include list-scroll.toolbar-dropdown-list-pinned;
+}
+
+.grouping-dropdown__scroll {
+  @include list-scroll.toolbar-dropdown-list-scroll;
+}
+
+// Section stack — same 2px rhythm as upload-resolver-tray__choices.
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.grouping-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+// --- Drop zones (CDK drag-drop targets) ---
+.grouping-drop-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0.25rem;
+  position: relative;
+
+  &--empty {
+    min-height: 2rem;
+    border-radius: var(--radius-sm);
+    transition:
+      background 80ms ease-out,
+      outline-color 80ms ease-out;
+  }
+
+  &--empty.grouping-drop-zone--dragging {
+    background: color-mix(in srgb, var(--primary) 4%, transparent);
+    outline: 1.5px dashed var(--border);
+    outline-offset: -1.5px;
+
+    .grouping-empty-slot {
+      color: var(--muted-foreground);
+    }
+  }
+
+  &--empty.cdk-drop-list-receiving,
+  &--empty.grouping-drop-zone--dragging.cdk-drop-list-receiving {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    outline: 1.5px dashed var(--primary);
+    outline-offset: -1.5px;
+
+    .grouping-empty-slot {
+      color: var(--foreground);
+    }
+  }
+}
+
+// --- Selected row (multi-select via Ctrl+Click) ---
+// @see docs/design/state-visuals.md § Interaction emphasis
+.grouping-row--selected {
+  background: color-mix(in srgb, var(--interaction-selected-ink) 14%, transparent);
+  border-left: 2px solid var(--interaction-selected-ink);
+
+  &:hover {
+    @include emphasis.selected-hover(18%);
+    border-left-color: var(--primary);
+  }
+}
+
+// --- CDK drag placeholder (ghost in source list) ---
+.cdk-drag-placeholder {
+  opacity: 0.4;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+// --- Drag handle (quiet until row hover) ---
+.grouping-dropdown__drag-handle {
+  margin-left: auto;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 80ms ease-out;
+}
+
+.grouping-dropdown__row:hover .grouping-dropdown__drag-handle {
+  opacity: 1;
+}
+
+// --- CDK drag preview (floating element while dragging) ---
+.cdk-drag-preview {
+  border-radius: var(--radius-sm);
+  background: var(--popover);
+  box-shadow: var(--shadow-xl);
+  opacity: 0.9;
+
+  .grouping-dropdown__drag-handle {
+    opacity: 1;
+    cursor: grabbing;
+  }
+}
+
+// --- CDK drag animating ---
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@layer components {
+  // Grouping reset motion — `data-fp-*` only (no broad class chains).
+  // @see docs/specs/component/filters/dropdown-system.md
+  [data-fp-dropdown-grouping-reset-icon='true'] {
+    transition-property: transform;
+    transition-duration: var(--motion-duration-fast);
+    transition-timing-function: var(--motion-ease-out);
+  }
+
+  // Motion-reduced: skip spin on grouping reset.
+  // @see docs/design/motion.md
+  @media (prefers-reduced-motion: reduce) {
+    [data-fp-dropdown-grouping-reset-icon='true'] {
+      transition-duration: 0s;
+    }
+  }
+
+  // Hover tilt for grouping header reset.
+  // @see docs/specs/component/filters/dropdown-system.md
+  [data-fp-dropdown-grouping-reset='true']:hover [data-fp-dropdown-grouping-reset-icon='true'] {
+    transform: rotate(-12deg);
+  }
+
+  // Active spin for grouping header reset.
+  // @see docs/specs/component/filters/dropdown-system.md
+  [data-fp-dropdown-grouping-reset='true']:active [data-fp-dropdown-grouping-reset-icon='true'] {
+    transform: rotate(-180deg);
+    transition-duration: 300ms;
+  }
+
+  // Reduced-motion: no rotation on grouping reset.
+  // @see docs/design/motion.md
+  @media (prefers-reduced-motion: reduce) {
+    [data-fp-dropdown-grouping-reset='true']:hover [data-fp-dropdown-grouping-reset-icon='true'],
+    [data-fp-dropdown-grouping-reset='true']:active [data-fp-dropdown-grouping-reset-icon='true'] {
+      transform: none;
+    }
+  }
+}

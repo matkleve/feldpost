@@ -3,20 +3,22 @@
 **Who this is for:** engineers working on system design, data flows, and performance.  
 **What you’ll get:** a high‑level view of how Feldpost is put together and where responsibilities and invariants sit.
 
-See also: `database-schema.md`, `security-boundaries.md`.
+See also: `architecture/database-schema.md`, `security-boundaries.md`.
+
+**Product colors:** Not specified here. Canonical palette and semantics: [`docs/design/tokens.md`](design/tokens.md) and `apps/web/src/styles.scss`. Mermaid diagrams below use default styling only (not UI swatches).
 
 ---
 
 ## 1. System Overview
 
-Feldpost is a map‑first, geo‑based image management system.
+Feldpost is a map‑first, geo‑based media management system.
 
 Users can:
 
 - Register and log in.
-- Upload images.
+- Upload media.
 - Store geographic coordinates.
-- View images on a map.
+- View media on a map.
 - Move map markers to update coordinates.
 
 The main screen is **map‑first**:
@@ -50,7 +52,7 @@ graph TB
   subgraph Supabase["Supabase BaaS (Trusted)"]
     Auth["Supabase Auth<br/>(JWT, Sessions)"]
     DB["PostgreSQL + PostGIS<br/>(RLS Enforced)"]
-    Storage["Supabase Storage<br/>(Private Bucket: images/)"]
+    Storage["Supabase Storage<br/>(Private Buckets: media/ primary +<br/>images/ read-only fallback)"]
   end
 
   subgraph External["External Services"]
@@ -61,7 +63,7 @@ graph TB
   UI --> Services
   Services --> Auth
   Services --> DB
-  Services --> Storage
+  Services -->|"photo signing:<br/>media-first + fallback"| Storage
   Services -->|"functions.invoke"| EdgeFn["Edge Function: geocode<br/>(Nominatim proxy)"]
   EdgeFn -->|"Rate-limited 1 req/1.1s"| Nominatim
   MapAdapter --> Tiles
@@ -69,10 +71,6 @@ graph TB
   Services --> MapAdapter
   Services --> GeoAdapter
   GeoAdapter -->|"via Edge Function"| EdgeFn
-
-  style Client fill:#1a1917,stroke:#2E2B27,color:#EDEBE7
-  style Supabase fill:#0F0E0C,stroke:#3D3830,color:#EDEBE7
-  style External fill:#0F0E0C,stroke:#3D3830,color:#EDEBE7
 ```
 
 ### Architectural Layer Stack
@@ -82,16 +80,11 @@ graph TD
   L1["Layer 1 — Identity<br/>(Supabase Auth → auth.users)"]
   L2["Layer 2 — Domain Profile<br/>(profiles table, 1:1 with auth.users)"]
   L3["Layer 3 — Authorization<br/>(roles + user_roles, RLS policies)"]
-  L4["Layer 4 — Domain Data<br/>(images, projects, metadata_keys,<br/>saved_groups, coordinate_corrections)"]
+  L4["Layer 4 — Domain Data<br/>(media_items, media_projects, metadata_keys,<br/>media_metadata, coordinate_corrections)"]
 
   L1 --> L2
   L2 --> L3
   L3 --> L4
-
-  style L1 fill:#2563EB,stroke:#1D4ED8,color:#fff
-  style L2 fill:#7C3AED,stroke:#6D28D9,color:#fff
-  style L3 fill:#CC7A4A,stroke:#B86B3E,color:#fff
-  style L4 fill:#16A34A,stroke:#15803D,color:#fff
 ```
 
 ### Adapter Pattern Overview
@@ -213,7 +206,7 @@ See `security-boundaries.md` for policy details.
 
 Primary table:
 
-- `images`
+- `media_items`
 
 Contains:
 
@@ -287,7 +280,7 @@ interface GeocodingResult {
 
 **Ranking model:**
 
-1. Query the Feldpost `images` database (org-scoped) for known address labels using fuzzy trigram similarity (`pg_trgm`). Matches are weighted by image count at each address — confirmed project locations appear first.
+1. Query the Feldpost `media_items` dataset (org-scoped) for known address labels using fuzzy trigram similarity (`pg_trgm`). Matches are weighted by media count at each address — confirmed project locations appear first.
 2. In parallel, call `GeocodingAdapter.search()` for external candidates.
 3. Merge results: DB candidates first (up to 3), followed by a visual separator, then geocoder candidates (up to 5). Geocoder results within 30m of a DB candidate are deduplicated.
 
@@ -333,12 +326,12 @@ See `address-resolver.md` for the full interface contract, UI presentation spec,
 
 - Authorization.
 - Data integrity.
-- Row-Level Security enforcement for `images`, roles, and other domain tables.
+- Row-Level Security enforcement for `media_items`, roles, and other domain tables.
 
 **Storage (Supabase Storage):**
 
 - Secure file storage.
-- Access policy enforcement for image files.
+- Access policy enforcement for media files.
 
 **Leaflet:**
 
@@ -348,7 +341,7 @@ See `address-resolver.md` for the full interface contract, UI presentation spec,
 
 ## 5. Image Input Layer
 
-Feldpost treats image ingestion as a **provider-agnostic pipeline**. The core ingestion flow — EXIF parsing, Supabase Storage upload, and database record write — never imports a concrete input source directly. All input sources implement a common `ImageInputAdapter` interface.
+Feldpost treats media ingestion as a **provider-agnostic pipeline**. The core ingestion flow — EXIF parsing, Supabase Storage upload, and database record write — never imports a concrete input source directly. All input sources implement a common `ImageInputAdapter` interface.
 
 This mirrors the same adapter-boundary pattern used for geocoding (section 3) and map rendering (section 6).
 
@@ -389,7 +382,7 @@ flowchart TD
   Q --> S[Upload to Supabase Storage<br/>org_id/user_id/uuid.ext + thumbnail]
   R --> S
 
-  S --> T[Insert images row<br/>exif coords + corrected coords<br/>+ latitude/longitude + geog trigger]
+  S --> T[Insert media_items row<br/>exif coords + corrected coords<br/>+ latitude/longitude + geog trigger]
   T --> U[✅ Upload complete<br/>Marker appears on map]
 ```
 
@@ -422,12 +415,12 @@ interface ImageInputMetadata {
 
 ### Concrete Adapters
 
-| Adapter               | Status   | Description                                                                                                                                                                                                                   |
-| --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LocalUploadAdapter`  | MVP      | Wraps the browser `<input type="file">` API. Ships first.                                                                                                                                                                     |
-| `FolderImportAdapter` | Planned  | Wraps the File System Access API (`showDirectoryPicker()`). Recursively scans a local folder; includes `FilenameLocationParser` for address extraction from paths. Requires a Chromium-based browser. See `folder-import.md`. |
-| `GoogleDriveAdapter`  | Post-MVP | Fetches files via the Google Drive Picker API.                                                                                                                                                                                |
-| _(future)_            | Post-MVP | Any source (Dropbox, FTP, camera API) that implements `ImageInputAdapter`.                                                                                                                                                    |
+| Adapter               | Status   | Description                                                                                                                                                                                                                             |
+| --------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LocalUploadAdapter`  | MVP      | Wraps the browser `<input type="file">` API. Ships first.                                                                                                                                                                               |
+| `FolderImportAdapter` | Planned  | Wraps the File System Access API (`showDirectoryPicker()`). Recursively scans a local folder; includes `FilenameLocationParser` for address extraction from paths. Requires a Chromium-based browser. See `use-cases/folder-import.md`. |
+| `GoogleDriveAdapter`  | Post-MVP | Fetches files via the Google Drive Picker API.                                                                                                                                                                                          |
+| _(future)_            | Post-MVP | Any source (Dropbox, FTP, camera API) that implements `ImageInputAdapter`.                                                                                                                                                              |
 
 ### Invariants
 
@@ -455,7 +448,7 @@ Before entering the ingestion pipeline, all files are validated client-side (for
 
 ### Image Compression
 
-- Before upload, JPEG/PNG images larger than 4096px on their longest side are resized client-side to 4096px (maintaining aspect ratio) using `OffscreenCanvas` or `<canvas>`.
+- Before upload, JPEG/PNG media files larger than 4096px on their longest side are resized client-side to 4096px (maintaining aspect ratio) using `OffscreenCanvas` or `<canvas>`.
 - HEIC/HEIF files are converted to JPEG client-side before upload (using a library like `heic2any`) for browser compatibility.
 - Compression quality: JPEG 85%.
 - Original EXIF is parsed **before** compression (compression may strip EXIF).
@@ -580,7 +573,7 @@ interface ClusterGroup {
   center: LatLng;
   pointCount: number;
   bounds: LatLngBounds;
-  imageIds: string[]; // IDs of images in this cluster (for expand/detail)
+  imageIds: string[]; // IDs of media items in this cluster (for expand/detail)
 }
 
 interface RadiusSelectionOptions {
@@ -679,7 +672,7 @@ sequenceDiagram
     DB-->>VQS: ClusterGroup[] (ST_SnapToGrid)
     VQS->>Render: renderClusters(groups)
   else zoom ≥ 15 (street/building)
-    DB-->>VQS: Individual image markers
+    DB-->>VQS: Individual media markers
     VQS->>Render: addMarker() for each
   end
 
@@ -697,9 +690,9 @@ sequenceDiagram
 
 ### Pagination Contract
 
-- **Page size:** 200 images per page (server-side).
+- **Page size:** 200 media items per page (server-side).
 - **Cursor:** Keyset pagination using `(distance_from_center, id)` for spatial queries or `(created_at, id)` for time-ordered queries. No `OFFSET` (avoids performance degradation on deep pages).
-- **Max results per viewport:** 2000 images. Beyond this, the server returns clusters instead of individual markers. The zoom level determines whether to return clusters or points.
+- **Max results per viewport:** 2000 media items. Beyond this, the server returns clusters instead of individual markers. The zoom level determines whether to return clusters or points.
 - **Viewport padding:** The query viewport is expanded by 10% on each side to pre-fetch markers just outside the visible area, reducing flicker on small pans.
 
 ### Zoom-Level Behaviour
@@ -713,9 +706,9 @@ sequenceDiagram
 
 ---
 
-## 9. Progressive Image Loading
+## 9. Progressive Media Loading
 
-Images are loaded in three tiers to minimize bandwidth and maximize perceived speed. This applies everywhere images are displayed: map popups, workspace pane, detail views.
+Media is loaded in three tiers to minimize bandwidth and maximize perceived speed. This applies everywhere media is displayed: map popups, workspace pane, detail views.
 
 ### Progressive Loading Tiers
 
@@ -735,10 +728,6 @@ graph LR
 
   T1 -->|"Zoom in / expand cluster"| T2
   T2 -->|"Click image → detail view"| T3
-
-  style T1 fill:#2563EB,stroke:#1D4ED8,color:#fff
-  style T2 fill:#7C3AED,stroke:#6D28D9,color:#fff
-  style T3 fill:#CC7A4A,stroke:#B86B3E,color:#fff
 ```
 
 ### Tier 1 — Marker Only (Zero Image Bytes)
@@ -750,14 +739,14 @@ At cluster/overview zoom levels, markers show only counts and positions. No imag
 Fetched when:
 
 - A cluster is expanded or the user zooms to individual-marker level.
-- Images appear in the workspace pane (Active Selection or group tab).
-- An image appears in a map popup on marker click.
+- Media appears in the workspace pane (Active Selection or group tab).
+- A media item appears in a map popup on marker click.
 
 Thumbnails are generated on upload:
 
 - The ingestion pipeline produces a 128×128 JPEG thumbnail and stores it in Supabase Storage alongside the original.
-- The `images` table stores `thumbnail_url` (the storage path to the thumbnail).
-- If Supabase Storage image transformations are available, `thumbnail_url` may alternatively be a transformation URL (`?width=128&height=128`). The choice is an implementation detail; the contract is that `thumbnail_url` resolves to a small image.
+- The `media_items` table stores `thumbnail_path` (the storage path to the thumbnail).
+- If Supabase Storage image transformations are available, `thumbnail_path` may alternatively map to a transformation URL (`?width=128&height=128`). The choice is an implementation detail; the contract is that the configured thumbnail reference resolves to a small preview image.
 
 Thumbnails use `loading="lazy"` and `IntersectionObserver` for lists/grids.
 
@@ -765,10 +754,10 @@ Thumbnails use `loading="lazy"` and `IntersectionObserver` for lists/grids.
 
 Fetched only when:
 
-- The user clicks an image to open the detail view.
+- The user clicks a media item to open the detail view.
 - The user explicitly requests download/export.
 
-Full-resolution images use Supabase Storage signed URLs (1-hour TTL, refreshed on demand if expired).
+Full-resolution media uses Supabase Storage signed URLs (1-hour TTL, refreshed on demand if expired).
 
 ### Network Priority
 
@@ -778,7 +767,7 @@ On constrained connections (Technician persona on LTE):
 2. Thumbnails load second (content preview).
 3. Full-res loads last (explicit user action).
 
-Thumbnails and full-res images use `<img loading="lazy">` and are fetched with lower priority (`fetch priority: low`) where the browser supports it.
+Thumbnails and full-res media previews use `<img loading="lazy">` and are fetched with lower priority (`fetch priority: low`) where the browser supports it.
 
 ---
 
@@ -849,7 +838,7 @@ flowchart TD
 
 ## 11. Group Workspace Architecture
 
-The workspace pane uses a **group-based tabbed model**. Each tab represents a named collection of images, not a single image.
+The workspace pane uses a **group-based tabbed model**. Each tab represents a named collection of media items, not a single media item.
 
 ### Group Workspace Data Flow
 
@@ -863,7 +852,7 @@ flowchart TD
   D -->|Click 'Save as Group'| F[Prompt for group name]
   D -->|Click thumbnail| G[Inline detail view<br/>full-res loads on demand]
 
-  F --> H[API writes to<br/>saved_groups + saved_group_images]
+  F --> H[API writes to<br/>share_sets + share_set_items]
   H --> I[New named tab appears<br/>in workspace pane]
 
   subgraph "Workspace Pane Tabs"
@@ -907,16 +896,16 @@ sequenceDiagram
 
 ### Tab Types
 
-| Tab                  | Persistent                                                                                | Source                                                                                                |
-| -------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **Active Selection** | Always visible (cannot be closed). Ephemeral — not saved to database.                     | Populated by radius selection, filter results, or marker clicks. Auto-updates when selection changes. |
-| **Named Group**      | Saved to database (`saved_groups` / `saved_group_images`). Survives refresh and sessions. | Created by the user via "Save as Group" from Active Selection, or via sidebar → "New Group."          |
+| Tab                  | Persistent                                                                           | Source                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **Active Selection** | Always visible (cannot be closed). Ephemeral — not saved to database.                | Populated by radius selection, filter results, or marker clicks. Auto-updates when selection changes. |
+| **Named Group**      | Saved to database (`share_sets` / `share_set_items`). Survives refresh and sessions. | Created by the user via "Save as Group" from Active Selection, or via sidebar → "New Group."          |
 
 ### Data Flow
 
-1. **Selection → Active Selection tab:** User draws a radius (right-click drag) → query returns matching images → Active Selection tab populates.
-2. **Active Selection → Named Group:** User clicks "Save as Group" → prompted for name → API writes to `saved_groups` + `saved_group_images` → new tab appears.
-3. **Named Group lifecycle:** Groups are loaded on login from `saved_groups WHERE user_id = auth.uid()`. Tabs are rendered in `tab_order`. Closing a tab hides it but does not delete the group. Groups can be re-opened from sidebar → "My Groups."
+1. **Selection → Active Selection tab:** User draws a radius (right-click drag) → query returns matching media items → Active Selection tab populates.
+2. **Active Selection → Named Group:** User clicks "Save as Group" → prompted for name → API persists selection via `share_sets` + `share_set_items` → new tab appears.
+3. **Named Group lifecycle:** Groups are restored from active share-set records in the current organization. Closing a tab hides it but does not revoke the persisted set. Groups can be re-opened from sidebar → "My Groups."
 
 ### Memory and Rendering
 
@@ -934,14 +923,14 @@ sequenceDiagram
 
 ## 12. Spatial Selection
 
-Spatial selection allows users to select all images within a user-defined radius on the map. The primary interaction is **right-click + drag**.
+Spatial selection allows users to select all media within a user-defined radius on the map. The primary interaction is **right-click + drag**.
 
 ### Desktop Interaction
 
 1. User right-clicks on the map and holds.
 2. Browser `contextmenu` event is suppressed (`preventDefault()`).
 3. As the user drags, a circle overlay grows from the click origin. A label shows the radius in meters.
-4. On mouse-up, the circle is finalized. The frontend queries for all images within the radius.
+4. On mouse-up, the circle is finalized. The frontend queries for all media within the radius.
 5. Results populate the **Active Selection** tab in the workspace pane.
 6. The circle persists on the map with drag handles (center and edge) for refinement.
 7. `Escape` or the ✕ button on the circle dismisses the selection.
@@ -959,8 +948,8 @@ A toolbar button (crosshair icon, keyboard shortcut `S`) enters selection mode w
 Selection triggers a spatial query:
 
 ```sql
-SELECT id, latitude, longitude, thumbnail_url, captured_at, project_id
-FROM images
+SELECT id, latitude, longitude, thumbnail_path, captured_at
+FROM media_items
 WHERE ST_DWithin(geog, ST_MakePoint(:lng, :lat)::geography, :radius_meters)
   AND [active filters applied]
 ORDER BY geog <-> ST_MakePoint(:lng, :lat)::geography
@@ -975,23 +964,23 @@ Active filters (time range, project, metadata) are AND-combined with the spatial
 
 Every asynchronous operation in Feldpost must handle four states. Components that skip any state are considered defects.
 
-| State       | Visual Treatment                                                 | Example                                                                                                                                    |
-| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Loading** | Skeleton / shimmer placeholder or spinner. Never a blank screen. | Map: tile placeholders. Workspace: skeleton thumbnail grid. Search: spinner in input.                                                      |
-| **Success** | Content rendered normally.                                       | Markers on map. Thumbnails in grid. Search results in dropdown.                                                                            |
-| **Empty**   | Explicit empty-state message with guidance. Never a blank area.  | "No images found in this area. Try zooming out or adjusting filters." / "This group is empty. Select images on the map and add them here." |
-| **Error**   | Error message with retry action. User-friendly language.         | "Failed to load images. [Retry]" / "Address search unavailable. Try again or navigate manually."                                           |
+| State       | Visual Treatment                                                 | Example                                                                                                                                  |
+| ----------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Loading** | Skeleton / shimmer placeholder or spinner. Never a blank screen. | Map: tile placeholders. Workspace: skeleton thumbnail grid. Search: spinner in input.                                                    |
+| **Success** | Content rendered normally.                                       | Markers on map. Thumbnails in grid. Search results in dropdown.                                                                          |
+| **Empty**   | Explicit empty-state message with guidance. Never a blank area.  | "No media found in this area. Try zooming out or adjusting filters." / "This group is empty. Select media on the map and add them here." |
+| **Error**   | Error message with retry action. User-friendly language.         | "Failed to load media. [Retry]" / "Address search unavailable. Try again or navigate manually."                                          |
 
 ### Operations and Their States
 
 | Operation              | Loading                               | Empty                      | Error                             |
 | ---------------------- | ------------------------------------- | -------------------------- | --------------------------------- |
 | Map initialization     | Tile skeleton, gray rectangle         | N/A                        | "Map failed to load. [Retry]"     |
-| Viewport query         | Previous markers remain while loading | "No images in this area"   | "Failed to load images. [Retry]"  |
+| Viewport query         | Previous markers remain while loading | "No media in this area"    | "Failed to load media. [Retry]"   |
 | Geocoding search       | Spinner in search input               | "No results for '[query]'" | "Search unavailable"              |
-| Image detail           | Thumbnail shown while full-res loads  | N/A                        | "Image failed to load. [Retry]"   |
+| Media detail           | Thumbnail shown while full-res loads  | N/A                        | "Media failed to load. [Retry]"   |
 | Upload                 | Per-file progress bar (bytes / total) | N/A                        | Per-file error with retry button  |
-| Radius selection query | Spinner in Active Selection tab       | "No images within [X]m"    | "Selection query failed. [Retry]" |
+| Radius selection query | Spinner in Active Selection tab       | "No media within [X]m"     | "Selection query failed. [Retry]" |
 | Group load             | Skeleton grid in tab                  | "Group is empty"           | "Failed to load group. [Retry]"   |
 
 ---
@@ -1075,17 +1064,17 @@ stateDiagram-v2
 
 ### Service Responsibilities
 
-| Service                  | State Managed                                                          | Persistence                                          |
-| ------------------------ | ---------------------------------------------------------------------- | ---------------------------------------------------- |
-| `AuthService`            | Current user, JWT, roles                                               | Supabase session (auto-managed)                      |
-| `ViewportQueryService`   | Current viewport bounds, debounce timer, abort controller              | In-memory only                                       |
-| `FilterService`          | Active filters (time, project, metadata, distance)                     | `localStorage`                                       |
-| `SelectionService`       | Active selection circle (center, radius), selected image IDs           | In-memory (ephemeral)                                |
-| `GroupService`           | Saved groups, group membership, active tab                             | Server (`saved_groups`) + `localStorage` (tab order) |
-| `ImageCacheService`      | Fetched image metadata, thumbnail URLs                                 | In-memory `Map` with LRU eviction (max 5000 entries) |
-| `ThemeService`           | Light/dark mode                                                        | `localStorage` key: `feldpost-theme`                 |
-| `MapStateService`        | Last viewport center + zoom                                            | `localStorage` key: `feldpost-map-state`             |
-| `AddressResolverService` | Result cache (query → `AddressCandidateGroup`, 5-min TTL, LRU max 200) | In-memory only; stateless across sessions            |
+| Service                  | State Managed                                                          | Persistence                                                           |
+| ------------------------ | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `AuthService`            | Current user, JWT, roles                                               | Supabase session (auto-managed)                                       |
+| `ViewportQueryService`   | Current viewport bounds, debounce timer, abort controller              | In-memory only                                                        |
+| `FilterService`          | Active filters (time, project, metadata, distance)                     | `localStorage`                                                        |
+| `SelectionService`       | Active selection circle (center, radius), selected media item IDs      | In-memory (ephemeral)                                                 |
+| `GroupService`           | Saved groups, group membership, active tab                             | Server (`share_sets`, `share_set_items`) + `localStorage` (tab order) |
+| `ImageCacheService`      | Fetched image metadata, thumbnail URLs                                 | In-memory `Map` with LRU eviction (max 5000 entries)                  |
+| `ThemeService`           | Light/dark mode                                                        | `localStorage` key: `feldpost-theme`                                  |
+| `MapStateService`        | Last viewport center + zoom                                            | `localStorage` key: `feldpost-map-state`                              |
+| `AddressResolverService` | Result cache (query → `AddressCandidateGroup`, 5-min TTL, LRU max 200) | In-memory only; stateless across sessions                             |
 
 ### Signal Pattern
 

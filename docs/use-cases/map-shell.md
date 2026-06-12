@@ -1,9 +1,9 @@
 # Map Shell — Interaction Scenarios
 
-> **Element spec:** [element-specs/map-shell.md](../element-specs/map-shell.md)
-> **Blueprint:** [implementation-blueprints/map-shell.md](../implementation-blueprints/map-shell.md)
+> **Element spec:** [specs/page/map-page.md](../specs/page/map-page.md)
+> **Contracts:** [map-page spec](../specs/page/map-page.md), [workspace-pane](../specs/ui/workspace/workspace-pane.md)
 > **Product use cases:** [UC1](README.md#uc1--technician-on-site-view-history), [UC2](README.md#uc2--clerk-preparing-a-quote), [UC3](README.md#uc3--upload-and-correct-a-new-image)
-> **Related specs:** [workspace-pane](../element-specs/workspace-pane.md), [drag-divider](../element-specs/drag-divider.md), [search-bar](../element-specs/search-bar.md), [upload-button-zone](../element-specs/upload-button-zone.md), [photo-marker](../element-specs/photo-marker.md), [image-detail-view](../element-specs/image-detail-view.md), [map-context-menu](../element-specs/map-context-menu.md)
+> **Related specs:** [workspace-pane](../specs/ui/workspace/workspace-pane.md), [drag-divider](../specs/component/workspace/drag-divider.md), [search-bar](../specs/ui/search-bar/search-bar.md), [upload-button-zone](../specs/component/upload/upload-button-zone.md), [photo-marker](../specs/ui/media-marker/media-marker.md), [image-detail-view](../specs/ui/media-detail/media-detail-view.md), [map-context-menu](../specs/component/map/map-context-menu.md)
 > **Related use cases:** [map-context-menu](map-context-menu.md)
 
 ---
@@ -42,7 +42,7 @@ sequenceDiagram
 - `placementActive` = false
 - `searchPlacementActive` = false
 - `uploadPanelOpen` = false
-- `workspacePaneOpen` = false
+- `photoPanelOpen` = false (Workspace Pane closed; **interim:** signal on `MapShellComponent` — see [Workspace Pane visibility](#workspace-pane-visibility-canonical-vs-interim))
 - Map renders with markers from viewport query
 
 ---
@@ -50,7 +50,7 @@ sequenceDiagram
 ## IS-2: Open Workspace Pane via Marker Click (spec Actions #3)
 
 **Product context:** UC1 step 6 (tap marker), UC2 step 6 (browse markers).
-**Related:** [photo-marker spec](../element-specs/photo-marker.md) §Cluster Click, [workspace-pane spec](../element-specs/workspace-pane.md) §1/§1b
+**Related:** [photo-marker spec](../specs/ui/media-marker/media-marker.md) §Cluster Click, [workspace-pane spec](../specs/ui/workspace/workspace-pane.md) §1/§1b
 
 ```mermaid
 sequenceDiagram
@@ -90,7 +90,7 @@ sequenceDiagram
 ## IS-3: Close Workspace Pane (spec Actions #6)
 
 **Product context:** User is done reviewing; wants to return to map-only view.
-**Related:** [workspace-pane spec](../element-specs/workspace-pane.md) §3
+**Related:** [workspace-pane spec](../specs/ui/workspace/workspace-pane.md) §3
 
 ```mermaid
 sequenceDiagram
@@ -111,7 +111,7 @@ sequenceDiagram
 
 **Expected state after:**
 
-- `workspacePaneOpen / photoPanelOpen` = false
+- `photoPanelOpen` = false (same as Workspace Pane closed; **target** rename `workspacePaneOpen` on layout host per [symbol rename backlog](../backlog/media-photo-symbol-rename-roadmap.md))
 - `detailImageId` = null
 - `selectedMarkerKey` = null
 
@@ -139,7 +139,7 @@ sequenceDiagram
 ## IS-5: Upload and Placement Mode (spec Actions #4, #5)
 
 **Product context:** UC3 — upload a new image, place it if no EXIF GPS.
-**Related:** [upload-button-zone spec](../element-specs/upload-button-zone.md)
+**Related:** [upload-button-zone spec](../specs/component/upload/upload-button-zone.md)
 
 ```mermaid
 sequenceDiagram
@@ -196,6 +196,12 @@ No JS needed — CSS media queries handle the reflow. `NavComponent` handles sid
 
 ---
 
-## Signal naming note
+## Workspace Pane visibility (canonical vs interim)
 
-The spec uses `workspacePaneOpen` as the canonical signal name. The current code uses `photoPanelOpen`. These refer to the same state. A rename is planned but deferred to avoid unnecessary churn during active development.
+**Canonical:** The **authenticated layout host** owns the horizontal split and mounts **Workspace Pane** alongside route content. See [workspace-pane § Layout host](../specs/ui/workspace/workspace-pane.md#layout-host-canonical).
+
+**Interim:** The pane DOM is still mounted under **`MapShellComponent`** on map and settings routes until the layout hoist matches that contract. See [workspace-pane § Interim implementation](../specs/ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
+
+**Symbols:** Product language is **Workspace Pane** / **media item**. The shipped visibility signal is **`photoPanelOpen`** on `MapShellComponent` today; a post-hoist rename (e.g. `workspacePaneOpen` on the layout host) is deferred — [workspace-pane § Terminology](../specs/ui/workspace/workspace-pane.md#terminology-symbols-and-product-language), [media-photo-symbol-rename-roadmap](../backlog/media-photo-symbol-rename-roadmap.md).
+
+Sequence diagrams above use **`photoPanelOpen`** to match current TypeScript.

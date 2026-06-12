@@ -1,0 +1,40 @@
+// Search row layout — geometry owned here; clear-button motion stays on standard-dropdown :host rules.
+// @see docs/specs/component/ui-primitives/menu-panel-search-row.md
+
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--spacing-2, 0.5rem);
+  align-items: center;
+}
+
+.standard-dropdown__search-field {
+  min-width: 0;
+}
+
+.standard-dropdown__search-trailing {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  align-items: center;
+  column-gap: var(--spacing-2, 0.5rem);
+}
+
+.standard-dropdown__search-action-slot {
+  display: flex;
+  box-sizing: border-box;
+  width: var(--std-dropdown-search-icon-slot-size, 2.5rem);
+  min-width: var(--std-dropdown-search-icon-slot-size, 2.5rem);
+  align-items: center;
+  justify-content: center;
+}
+
+.standard-dropdown__search-slot-spacer {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--std-dropdown-search-icon-slot-size, 2.5rem);
+}
+
+.standard-dropdown__search-icon-btn {
+  flex-shrink: 0;
+}

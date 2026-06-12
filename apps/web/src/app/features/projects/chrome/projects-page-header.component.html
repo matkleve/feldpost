@@ -1,0 +1,35 @@
+<header class="projects-header" data-i18n-skip>
+  <div class="projects-header__title-wrap">
+    @if (currentProjectId()) {
+      <nav class="projects-breadcrumbs" [attr.aria-label]="t('nav.item.projects', 'Projects')">
+        <a
+          class="projects-breadcrumbs__item projects-breadcrumbs__item--link"
+          [routerLink]="['/projects']"
+        >
+          {{ t('nav.item.projects', 'Projects') }}
+        </a>
+        <span class="projects-breadcrumbs__separator" aria-hidden="true">/</span>
+        <span class="projects-breadcrumbs__item projects-breadcrumbs__item--current">
+          {{ breadcrumbCurrentLabel() }}
+        </span>
+      </nav>
+    }
+    <h1 class="projects-header__title">{{ t('nav.item.projects', 'Projects') }}</h1>
+    <p class="projects-header__count">{{ projectCountLabel() }}</p>
+  </div>
+
+  <div class="projects-header__actions">
+    <button
+      hlmBtn
+      type="button"
+      iconPlacement="start"
+      class="projects-header__new"
+      [disabled]="loading()"
+      (click)="onNewProject()"
+      [attr.aria-label]="t('projects.page.action.newProject', 'New project')"
+    >
+      <span class="material-icons" aria-hidden="true">add</span>
+      <span>{{ t('projects.page.action.newProject', 'New project') }}</span>
+    </button>
+  </div>
+</header>

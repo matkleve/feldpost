@@ -1,0 +1,47 @@
+<!-- Inline coordinates edit row — decimal pair, DMS, or maps URL paste. -->
+<!-- @see docs/specs/ui/media-detail/media-detail-location-section.md -->
+<div class="detail-row detail-row--editing">
+  <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+  <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+  <div class="detail-row__center">
+    <span class="material-icons detail-row__icon" aria-hidden="true">{{ icon() }}</span>
+    <span class="detail-row__label">{{
+      isCorrected()
+        ? t('workspace.imageDetail.field.correctedCoordinates', 'Corrected coordinates')
+        : t('workspace.imageDetail.field.coordinates', 'Coordinates')
+    }}</span>
+    <input
+      #coordInput
+      class="detail-row__field-input detail-row__field-slot coordinates-field-editor__input"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      [attr.aria-label]="t('workspace.imageDetail.action.editCoordinates.aria', 'Edit coordinates')"
+      [attr.placeholder]="
+        t('workspace.imageDetail.field.coordinatesPlaceholder', 'e.g. 47.3769, 8.5417')
+      "
+      [value]="initialValue()"
+      (keydown)="onKeydown($event)"
+      (click)="$event.stopPropagation()"
+    />
+  </div>
+  <button
+    class="detail-row-action detail-row-action--r1 detail-row-action--save"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.saveCoordinates.aria', 'Save coordinates')"
+    [attr.title]="t('workspace.imageDetail.action.saveCoordinates.title', 'Save coordinates')"
+    (mousedown)="$event.preventDefault()"
+    (click)="onSaveClick()"
+  >
+    <span class="material-icons" aria-hidden="true">check</span>
+  </button>
+  <button
+    class="detail-row-action detail-row-action--r2 detail-row-action--danger coordinates-field-editor__cancel-btn--visible"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.cancelEdit.aria', 'Cancel edit')"
+    [attr.title]="t('workspace.imageDetail.action.cancelEdit.title', 'Cancel edit')"
+    (click)="onCancelClick()"
+  >
+    <span class="material-icons" aria-hidden="true">close</span>
+  </button>
+</div>

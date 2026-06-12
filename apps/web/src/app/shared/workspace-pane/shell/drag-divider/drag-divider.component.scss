@@ -1,0 +1,127 @@
+// DragDividerComponent — vertical resize handle between Map Zone and Workspace Pane.
+// All colours use design tokens. No raw hex values.
+
+// ── Host — full-height strip, col-resize cursor ──────────────────────────────
+// The host takes up only 2px in the flex layout. The hit zone is a thin absolute
+// strip on the seam (host + small map-side extension) so adjacent pane controls
+// stay clickable.
+
+:host {
+  position: relative;
+  display: block;
+  flex: 0 0 2px;
+  flex-shrink: 0;
+  width: 2px;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  pointer-events: none;
+  outline: none;
+  z-index: 2; // above workspace-pane (z-index: 1) so grip paints at the seam
+
+  // Focus ring (Accessibility spec)
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+// ── Hit zone — thin seam strip, map-facing only ──────────────────────────────
+// Covers the 2px host plus a small map-side extension. Does not extend into the
+// workspace pane so adjacent toolbar/thumbnail controls stay clickable.
+
+.drag-divider__hit-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--spacing-2));
+  right: 0;
+  width: auto;
+  pointer-events: auto;
+  cursor: col-resize;
+}
+
+// ── Bar — 2px visual line on the seam (host right edge) ──────────────────────
+
+.drag-divider__bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--border);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+// ── Hover / focus / dragging states ──────────────────────────────────────────
+
+:host:hover .drag-divider__bar,
+:host:focus-visible .drag-divider__bar,
+:host.dragging .drag-divider__bar {
+  width: 4px;
+  background: color-mix(in srgb, var(--border) 78%, var(--foreground));
+}
+
+// ── Grip indicator — pill badge with drag icon ───────────────────────────────
+
+.drag-divider__grip {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: auto;
+  transform: translate(50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Smaller than ui-item-media (24px wide), taller to form a vertical band
+  width: var(--spacing-5);
+  height: var(--spacing-6); // 32px — taller than wide
+  border-radius: var(--container-radius-control); // same corners as .ui-item-media (8px)
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition:
+    opacity 80ms ease-out,
+    border-color 80ms ease-out,
+    box-shadow 80ms ease-out;
+  pointer-events: none;
+}
+
+:host:hover .drag-divider__grip,
+:host:focus-visible .drag-divider__grip,
+:host.dragging .drag-divider__grip {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--border) 78%, var(--foreground));
+  box-shadow: var(--shadow-md);
+}
+
+.drag-divider__grip-icon {
+  font-size: var(--font-size-md); // 16px — inline-with-text icon size
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
+  transition: color 80ms ease-out;
+  user-select: none;
+}
+
+:host:hover .drag-divider__grip-icon {
+  color: var(--muted-foreground);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+  .drag-divider__grip,
+  .drag-divider__grip-icon {
+    transition: none;
+  }
+}
+
+// ── Mobile: host is hidden entirely by parent @if, but defensive fallback ────
+
+@media (max-width: 47.9375rem) {
+  :host {
+    display: none;
+  }
+}

@@ -1,0 +1,163 @@
+<li class="upload-panel__file-item upload-panel__file-item--{{ phaseToStatusClass(job().phase) }}">
+  <div
+    class="upload-panel__file-main"
+    [class.upload-panel__file-main--interactive]="interactive()"
+    [class.upload-panel__file-main--has-menu]="hasMenuActions()"
+    [class.upload-panel__file-main--selectable]="selectable()"
+    [class.upload-panel__file-main--selected]="selected()"
+    (contextmenu)="onRowContextMenu($event)"
+  >
+    @if (interactive()) {
+      <button
+        type="button"
+        class="upload-panel__row-main-action"
+        [attr.aria-label]="rowMainActionAriaLabel()"
+        (click)="rowMainClick.emit(job())"
+        (keydown)="rowMainKeydown.emit({ job: job(), event: $event })"
+      ></button>
+    }
+
+    @if (selectable()) {
+      <label class="upload-panel__selection">
+        <input
+          class="upload-panel__selection-input"
+          type="checkbox"
+          [checked]="selected()"
+          [attr.aria-checked]="selected()"
+          (change)="onSelectionChanged($event)"
+        />
+      </label>
+    }
+
+    <div class="upload-panel__thumbnail-container">
+      <div class="upload-panel__thumbnail-helper">
+        <app-universal-media
+          class="upload-panel__universal-media"
+          [fileIdentity]="fileIdentity()"
+          [context]="'upload'"
+          [requestedTier]="'inline'"
+          [slotWidthRem]="2"
+          [slotHeightRem]="2"
+          [renderState]="mediaRenderState()"
+          [uploadOverlay]="uploadOverlay()"
+          [fit]="'contain'"
+          [minHeightRem]="2"
+          [altText]="job().file.name"
+        ></app-universal-media>
+      </div>
+      @if (showThumbnailSpinner()) {
+        <div
+          class="upload-panel__thumbnail-spinner"
+          role="status"
+          [attr.aria-label]="t('upload.trigger.status.uploading', 'Uploading...')"
+        ></div>
+      }
+      @if (showThumbnailLocationHint()) {
+        <span class="upload-panel__thumbnail-action-btn upload-panel__thumbnail-action-btn--hint" aria-hidden="true">
+          <span class="material-icons">{{ thumbnailHintIcon() }}</span>
+        </span>
+      }
+      @if (showDuplicateExistingMediaShortcut()) {
+        <button
+          hlmBtn
+          variant="default"
+          size="icon"
+          type="button"
+          class="upload-panel__thumbnail-action-btn upload-panel__thumbnail-action-btn--interactive"
+          [attr.aria-label]="t('upload.item.menu.issue.openExisting', 'Open existing media')"
+          [attr.title]="t('upload.item.menu.issue.openExisting', 'Open existing media')"
+          (click)="onOpenExistingMediaShortcut($event)"
+        >
+          <span class="material-icons" aria-hidden="true">my_location</span>
+        </button>
+      }
+    </div>
+
+    <div class="upload-panel__file-meta">
+      <div class="upload-panel__name-row">
+        <span class="upload-panel__file-name" [title]="job().file.name" aria-label="File name">{{
+          job().file.name
+        }}</span>
+        @if (fileTypeBadge(); as fileType) {
+          <app-chip
+            class="upload-panel__filetype-chip"
+            [icon]="fileTypeIcon()"
+            [text]="fileType"
+            [variant]="fileTypeChipVariant()"
+          ></app-chip>
+        }
+      </div>
+      <div class="upload-panel__status-row">
+        <p
+          class="upload-panel__file-status upload-panel__file-status--{{
+            phaseToStatusClass(job().phase)
+          }}"
+          [attr.aria-live]="showThumbnailSpinner() ? 'polite' : null"
+        >
+          @if (job().phase === 'complete' || job().phase === 'skipped') {
+            <span class="material-icons upload-panel__success-indicator">check_circle</span>
+            <span>{{ statusLabelText() }}</span>
+          } @else if (job().phase === 'missing_data') {
+            <span class="material-icons" aria-hidden="true">location_off</span>
+            <span>{{ statusLabelText() }}</span>
+          } @else {
+            {{ statusLabelText() }}
+          }
+        </p>
+      </div>
+    </div>
+
+    @if (hasMenuActions()) {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="upload-panel__row-action upload-panel__row-action--menu"
+        type="button"
+        [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+        [attr.title]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+        [attr.aria-expanded]="menuOpen()"
+        aria-haspopup="menu"
+        (click)="onMenuTriggerClick($event)"
+      >
+        <span class="material-icons" aria-hidden="true">more_vert</span>
+      </button>
+    }
+  </div>
+
+  @if (menuOpen()) {
+    <app-dropdown-shell
+      class="map-context-menu"
+      [anchor]="menuAnchor()"
+      placement="end"
+      [minWidth]="224"
+      [panelClass]="menuPanelClass()"
+      (closeRequested)="onMenuCloseRequested()"
+    >
+      <div
+        class="map-context-menu__items flex flex-col"
+        role="menu"
+        [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+      >
+        @for (action of availableMenuActions(); track action) {
+          @if (isDestructiveAction(action)) {
+            <div hlmMenuSeparator aria-hidden="true"></div>
+          }
+          <button
+            hlmMenuItem
+            class="w-full"
+            [class.text-destructive]="isDestructiveAction(action)"
+            type="button"
+            role="menuitem"
+            (click)="onMenuAction(action)"
+          >
+            <span class="material-icons option-menu-item__icon" aria-hidden="true">{{
+              actionIcon(action)
+            }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ actionLabel(action) }}</span>
+          </button>
+        }
+      </div>
+    </app-dropdown-shell>
+  }
+</li>

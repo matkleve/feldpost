@@ -1,0 +1,38 @@
+name: Supabase Contract Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/validate-supabase-rpc-media-type.mjs"
+      - "scripts/validate-supabase-storage-cleanup-api-mode.mjs"
+      - "package.json"
+      - ".github/workflows/supabase-contract-check.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/validate-supabase-rpc-media-type.mjs"
+      - "scripts/validate-supabase-storage-cleanup-api-mode.mjs"
+      - "package.json"
+      - ".github/workflows/supabase-contract-check.yml"
+
+jobs:
+  supabase-contract-check:
+    name: Supabase Runtime Contract Guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run supabase contract smoke checks
+        run: npm run supabase:smoke

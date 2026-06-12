@@ -1,0 +1,135 @@
+// Figma Dev URL: https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev
+// @see docs/specs/component/ui-primitives/panel-trigger.md
+
+// Layers use descriptive names; tokens are now tweakcn-aligned.
+// @see .cursor/rules/scss-ownership.mdc (maps to components / states split)
+
+@layer fp-components {
+  // Inline-flex host: stacking context and positioning root for internal layers
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §Visual Behavior Contract
+  :host {
+    display: inline-flex;
+    position: relative;
+  }
+
+  // Stable state: panelState='closed' — muted fill, chevron down
+  // Stable state: panelState='open'   — muted fill, chevron up (rotated in @layer fp-states)
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §State
+
+  // Primary visual chrome: geometry, fill, typography, interaction affordance
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
+  .panel-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    // Touch target: visible + hit area meets constitution (48px mobile, 44px from md up); replaces fixed height that was below desktop minimum.
+    // @see docs/design/constitution.md (Sizes and Touch)
+    min-height: 3rem;
+    @media (min-width: 48rem) {
+      min-height: 2.75rem;
+    }
+    // Minimum horizontal inset on all layouts; `text-action` / `icon-text-action` override below.
+    // Replaces `padding: 0` so no host layout ships flush-to-border by default.
+    // @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md
+    padding-block: 0;
+    padding-inline: var(--spacing-2);
+    background-color: var(--muted);
+    border: none;
+    border-radius: var(--spacing-1);
+    appearance: none;
+    color: var(--foreground);
+    font-family: var(--font-sans), sans-serif;
+    font-size: 0.6875rem;
+    line-height: 1;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.03125rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
+      box-shadow 120ms ease-out;
+  }
+
+  // icon-text-action: same symmetric inline as base (see `.panel-trigger` above).
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
+
+  // text-action: asymmetric padding 8px left, 4px right per Figma pl-base-8 pr-base-4
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
+  :host([data-layout='text-action']) .panel-trigger {
+    padding-left: var(--spacing-2);
+    padding-right: var(--spacing-1);
+  }
+
+  // Icon slot container: fixed 8px × 8px per Figma leading-icon placeholder
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §What It Looks Like
+  .panel-trigger__icon {
+    width: var(--spacing-2);
+    height: var(--spacing-2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  // Label wrapper: no geometry of its own; inherits font from .panel-trigger
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §Component Hierarchy
+  .panel-trigger__label {
+    flex-shrink: 0;
+  }
+
+  // Chevron: 12px icon box; rotates in @layer fp-states for open state
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §Token references
+  .panel-trigger__chevron {
+    flex-shrink: 0;
+    font-size: var(--spacing-3);
+    width: var(--spacing-3);
+    height: var(--spacing-3);
+    line-height: 1;
+    display: block;
+    overflow: hidden;
+    // Chevron rotation transition per spec choreography table
+    // @see docs/specs/component/ui-primitives/panel-trigger.md §Transition map
+    transition: transform var(--motion-duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer fp-states {
+  // Hover and pressed: warm primary tint per Figma interaction rows
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §State, §Actions #2
+  .panel-trigger:hover,
+  .panel-trigger:active {
+    background-color: var(--muted);
+  }
+
+  // Open state: chevron rotates 180deg (points up); disabled keeps chevron down per state-visuals
+  // @see docs/specs/component/ui-primitives/panel-trigger.md §Transition map
+  // @see docs/design/state-visuals.md §Compact toolbar triggers
+  :host([data-state='open']) .panel-trigger:not(:disabled) .panel-trigger__chevron {
+    transform: rotate(180deg);
+  }
+
+  // Keyboard focus ring: interactive-focus-ring token
+  // @see docs/design/state-visuals.md §Focus-visible
+  .panel-trigger:focus-visible {
+    outline: none;
+    box-shadow: var(--interactive-focus-ring);
+  }
+
+  // Disabled: host opacity and cursor per canonical disabled shell (not on button alone)
+  // @see docs/design/state-visuals.md §Disabled, §Compact toolbar triggers
+  :host:has(.panel-trigger:disabled) {
+    opacity: 0.66;
+    cursor: not-allowed;
+  }
+
+  .panel-trigger:disabled {
+    cursor: not-allowed;
+  }
+
+  // Suppress hover and active fills when button is disabled
+  // @see docs/design/state-visuals.md §Disabled
+  .panel-trigger:disabled:hover,
+  .panel-trigger:disabled:active {
+    background-color: var(--muted);
+  }
+}

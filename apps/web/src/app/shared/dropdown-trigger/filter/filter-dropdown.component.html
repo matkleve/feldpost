@@ -1,0 +1,243 @@
+<div class="filter-dropdown-host block w-max max-w-full min-w-0">
+  <app-standard-dropdown
+    class="filter-dropdown"
+    [style.--std-dropdown-min-height]="'7rem'"
+    [showSearch]="false"
+    [scrollMode]="'none'"
+    [actionLabel]="t('workspace.filter.action.add', 'Add a filter')"
+    (actionRequested)="filterService.addRule()"
+    (itemsScroll)="onRulesScroll()"
+  >
+    <div class="filter-dropdown__body min-w-0 w-max max-w-full" dropdown-items>
+      <div class="filter-dropdown__size-anchor filter-rule" aria-hidden="true">
+        <button
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="filter-rule__conj shrink-0 font-normal text-muted-foreground"
+          type="button"
+          tabindex="-1"
+          disabled
+        >
+          {{ t('workspace.filter.conjunction.where', 'Where') }}
+        </button>
+        <div class="filter-rule__picker">
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            iconPlacement="end"
+            class="filter-rule__picker-trigger font-normal"
+            type="button"
+            tabindex="-1"
+            disabled
+          >
+            <span class="filter-rule__picker-label-stack">
+              <span class="filter-rule__picker-sizer">{{ longestPropertySizingLabel() }}</span>
+              <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                longestPropertySizingLabel()
+              }}</span>
+            </span>
+            <span
+              class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
+              aria-hidden="true"
+              >expand_more</span
+            >
+          </button>
+        </div>
+        <div class="filter-rule__picker">
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            iconPlacement="end"
+            class="filter-rule__picker-trigger font-normal"
+            type="button"
+            tabindex="-1"
+            disabled
+          >
+            <span class="filter-rule__picker-label-stack">
+              <span class="filter-rule__picker-sizer">{{ longestOperatorSizingLabelAll() }}</span>
+              <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                longestOperatorSizingLabelAll()
+              }}</span>
+            </span>
+            <span
+              class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
+              aria-hidden="true"
+              >expand_more</span
+            >
+          </button>
+        </div>
+        <input
+          hlmInput
+          class="filter-rule__value"
+          type="text"
+          tabindex="-1"
+          readonly
+          [attr.aria-hidden]="true"
+          [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
+        />
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="filter-rule__remove shrink-0"
+          type="button"
+          tabindex="-1"
+          disabled
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+      </div>
+      @if (filterService.rules().length === 0) {
+        <div class="filter-dropdown__empty w-full min-w-0 py-3 text-center text-sm text-muted-foreground">
+          {{ t('workspace.filter.empty', 'No filters applied') }}
+        </div>
+      } @else {
+        <div class="filter-rules">
+          @for (rule of filterService.rules(); track rule.id; let i = $index) {
+            <div class="filter-rule select-text min-w-0">
+              <button
+                hlmBtn
+                variant="outline"
+                size="sm"
+                class="filter-rule__conj shrink-0 font-normal text-muted-foreground"
+                type="button"
+                (click)="toggleConjunction(rule.id)"
+              >
+                {{ conjunctionLabel(i, rule.conjunction) }}
+              </button>
+
+              <div
+                class="filter-rule__picker"
+                [attr.data-filter-picker]="rule.id + '-property'"
+              >
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  iconPlacement="end"
+                  class="filter-rule__picker-trigger font-normal"
+                  type="button"
+                  [attr.aria-expanded]="isPickerOpen(rule.id, 'property')"
+                  aria-haspopup="listbox"
+                  (click)="togglePicker($event, rule.id, 'property')"
+                >
+                  <span class="filter-rule__picker-label-stack">
+                    <span class="filter-rule__picker-sizer" aria-hidden="true">{{
+                      longestPropertySizingLabel()
+                    }}</span>
+                    <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                      propertyTriggerLabel(rule.property)
+                    }}</span>
+                  </span>
+                  <span
+                    data-dd-part="chevron"
+                    class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
+                    aria-hidden="true"
+                    >expand_more</span
+                  >
+                </button>
+              </div>
+
+              <div
+                class="filter-rule__picker"
+                [attr.data-filter-picker]="rule.id + '-operator'"
+              >
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  iconPlacement="end"
+                  class="filter-rule__picker-trigger font-normal"
+                  type="button"
+                  [attr.aria-expanded]="isPickerOpen(rule.id, 'operator')"
+                  aria-haspopup="listbox"
+                  (click)="togglePicker($event, rule.id, 'operator')"
+                >
+                  <span class="filter-rule__picker-label-stack">
+                    <span class="filter-rule__picker-sizer" aria-hidden="true">{{
+                      longestOperatorSizingLabel(rule.property)
+                    }}</span>
+                    <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                      operatorTriggerLabel(rule.operator)
+                    }}</span>
+                  </span>
+                  <span
+                    data-dd-part="chevron"
+                    class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
+                    aria-hidden="true"
+                    >expand_more</span
+                  >
+                </button>
+              </div>
+
+              <input
+                hlmInput
+                class="filter-rule__value"
+                [type]="getInputType(rule.property)"
+                [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
+                [value]="rule.value"
+                (input)="updateValue(rule.id, $any($event.target).value)"
+              />
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                class="filter-rule__remove shrink-0"
+                type="button"
+                (click)="removeRule(rule.id)"
+                [attr.aria-label]="t('workspace.filter.remove.aria', 'Remove filter')"
+              >
+                <span class="material-icons" aria-hidden="true">close</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </app-standard-dropdown>
+
+  @if (openRulePicker(); as pk) {
+    @let fly = pickerFlyoutGeom();
+    @let activeRule = ruleById(pk.ruleId);
+    @if (fly && activeRule) {
+      <div
+        data-filter-picker-flyout
+        class="filter-rule__picker-flyout"
+        role="listbox"
+        [style.top.px]="fly.top"
+        [style.left.px]="fly.left"
+        [style.width.px]="fly.width"
+        [style.maxHeight.px]="fly.maxHeight"
+      >
+        @if (pk.field === 'property') {
+          @for (prop of propertyOptions(); track prop.id) {
+            <button
+              hlmMenuItem
+              type="button"
+              class="filter-rule__picker-option w-full justify-start font-normal"
+              [attr.data-selected]="prop.id === activeRule.property ? 'true' : null"
+              (click)="pickProperty($event, pk.ruleId, prop.id)"
+            >
+              {{ prop.label }}
+            </button>
+          }
+        } @else {
+          @for (op of getOperatorsForRule(activeRule.property); track op) {
+            <button
+              hlmMenuItem
+              type="button"
+              class="filter-rule__picker-option w-full justify-start font-normal"
+              [attr.data-selected]="op === activeRule.operator ? 'true' : null"
+              (click)="pickOperator($event, pk.ruleId, op)"
+            >
+              {{ operatorLabel(op) }}
+            </button>
+          }
+        }
+      </div>
+    }
+  }
+</div>

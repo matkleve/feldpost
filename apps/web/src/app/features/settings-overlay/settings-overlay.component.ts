@@ -1,18 +1,62 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
   computed,
   effect,
   inject,
   input,
   output,
+  runInInjectionContext,
   signal,
+  viewChild,
 } from '@angular/core';
+import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { LanguageCode } from '../../core/i18n/translation-catalog';
-import { SettingsPaneService } from '../../core/settings-pane.service';
+import { Router } from '@angular/router';
+import type { SettingsPaneSectionId } from '../../core/settings-pane/settings-pane.service';
+import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
+import {
+  buildSettingsUrl,
+  parseSettingsUrl,
+  resolveShellSegmentsFromUrl,
+} from '../../core/settings-pane/settings-url.helpers';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import type { ToggleGroupOption } from '../../shared/ui/toggle-group/toggle-group-option.types';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
+import {
+  toggleOptionLayout,
+  toggleSingleStringValue,
+} from '../../shared/ui/toggle-group/toggle-group-option.helpers';
+import { HLM_INPUT_IMPORTS } from '../../shared/ui/input';
+import { HLM_BUTTON_IMPORTS } from '../../shared/ui/button';
+import { HLM_LABEL_IMPORTS } from '../../shared/ui/label';
+import { HLM_SELECT_IMPORTS } from '../../shared/ui/select';
+import { HLM_SWITCH_IMPORTS } from '../../shared/ui/switch';
+import { RangeProgressStyleDirective } from '../../shared/ui/range/range-progress-style.directive';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
-import { AccountComponent } from '../account/account.component';
+import { SearchTuningSettingsSectionComponent } from './sections/search-tuning-settings-section.component';
+import { AccountComponent } from '../../shared/account/account.component';
+import { OrgSearchTuningService } from '../../core/search/org-search-tuning.service';
+import {
+  buildSettingsSectionList,
+  buildSettingsSectionRegistry,
+  filterSettingsSectionsForViewer,
+  isKnownSettingsSectionId,
+} from './settings-sections.const';
+import {
+  SETTINGS_SECTION_ANCHORS,
+  settingsDetailAnchorDomId,
+  type SettingsSectionAnchorDef,
+} from './settings-section-anchors.const';
+import {
+  buildLanguageOptions,
+  buildDensityOptions,
+  buildThemeModeOptions,
+  buildMarkerMotionOptions,
+} from './settings-options.const';
 
 type ThemeMode = 'light' | 'dark' | 'system' | 'sandstone';
 
@@ -25,8 +69,9 @@ type MarkerMotionPreference = 'off' | 'smooth';
 const MAP_MARKER_MOTION_STORAGE_KEY = 'feldpost.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'feldpost:map-marker-motion-changed';
 const THEME_MODE_STORAGE_KEY = 'feldpost.settings.themeMode';
+const SUBSECTION_HIGHLIGHT_DURATION_MS = 1800;
 
-interface SettingsSection {
+export interface SettingsSection {
   id: string;
   icon: string;
   title: string;
@@ -42,8 +87,6 @@ interface SettingsModel {
   mapAutoLocate: boolean;
   mapGridOverlay: boolean;
   markerMotion: MarkerMotionPreference;
-  searchBias: SearchBias;
-  searchRadiusKm: number;
   cacheRetentionDays: number;
   telemetryEnabled: boolean;
 }
@@ -53,78 +96,82 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
 @Component({
   selector: 'ss-settings-overlay',
   standalone: true,
-  imports: [InviteManagementSectionComponent, AccountComponent],
+  imports: [
+    ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
+    InviteManagementSectionComponent,
+    SearchTuningSettingsSectionComponent,
+    AccountComponent,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+    ...HLM_SELECT_IMPORTS,
+    ...HLM_SWITCH_IMPORTS,
+    RangeProgressStyleDirective,
+  ],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsOverlayComponent {
+  /** Template helper: icon/text layout for pill toggle options. */
+  readonly optLayout = toggleOptionLayout;
+
   private readonly i18nService = inject(I18nService);
+  private readonly router = inject(Router);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly orgSearchTuning = inject(OrgSearchTuningService);
+  private readonly hostRef = inject(ElementRef<HTMLElement>);
+  private readonly injector = inject(Injector);
+  private highlightedSubsectionToken = 0;
+  private tocHighlightToken = 0;
+  /** Service-driven subsection scroll: only set after `findSubsectionElement` succeeds for this token. */
+  private lastSuccessfulSubsectionRequestToken: number | null = null;
+
+  readonly accountSection = viewChild(AccountComponent);
+  readonly inviteSection = viewChild(InviteManagementSectionComponent);
 
   readonly open = input(false);
   readonly openChange = output<boolean>();
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
-  readonly sectionList = computed<ReadonlyArray<SettingsSection>>(() => [
-    {
-      id: 'general',
-      icon: 'tune',
-      title: this.t('settings.overlay.section.general.title', 'General'),
-      subtitle: this.t(
-        'settings.overlay.section.general.subtitle',
-        'Language, density, and defaults',
-      ),
-    },
-    {
-      id: 'appearance',
-      icon: 'palette',
-      title: this.t('settings.overlay.section.appearance.title', 'Appearance'),
-      subtitle: this.t('settings.overlay.section.appearance.subtitle', 'Theme and visual behavior'),
-    },
-    {
-      id: 'notifications',
-      icon: 'notifications',
-      title: this.t('settings.overlay.section.notifications.title', 'Notifications'),
-      subtitle: this.t(
-        'settings.overlay.section.notifications.subtitle',
-        'In-app status and alerts',
-      ),
-    },
-    {
-      id: 'map',
-      icon: 'map',
-      title: this.t('settings.overlay.section.map.title', 'Map Preferences'),
-      subtitle: this.t('settings.overlay.section.map.subtitle', 'Map behaviors and helper layers'),
-    },
-    {
-      id: 'search',
-      icon: 'manage_search',
-      title: this.t('settings.overlay.section.search.title', 'Search Tuning'),
-      subtitle: this.t('settings.overlay.section.search.subtitle', 'Ranking and fallback tuning'),
-    },
-    {
-      id: 'data',
-      icon: 'storage',
-      title: this.t('settings.overlay.section.data.title', 'Data and Privacy'),
-      subtitle: this.t('settings.overlay.section.data.subtitle', 'Retention and telemetry'),
-    },
-    {
-      id: 'account',
-      icon: 'person',
-      title: this.t('settings.overlay.section.account.title', 'Account'),
-      subtitle: this.t('settings.overlay.section.account.subtitle', 'Identity and sign-in context'),
-    },
-    {
-      id: 'invite-management',
-      icon: 'qr_code_2',
-      title: this.t('settings.overlay.section.invites.title', 'Invite Management'),
-      subtitle: this.t(
-        'settings.overlay.section.invites.subtitle',
-        'Role-scoped QR and share links',
-      ),
-    },
-  ]);
+  private readonly sectionRegistry = buildSettingsSectionRegistry();
+
+  readonly visibleSectionRegistry = computed(() =>
+    filterSettingsSectionsForViewer(this.sectionRegistry, this.orgSearchTuning.isOrgAdmin()),
+  );
+
+  readonly sectionList = computed<ReadonlyArray<SettingsSection>>(() =>
+    buildSettingsSectionList(this.t, this.orgSearchTuning.isOrgAdmin()),
+  );
+
+  /** Anchors for the detail-column TOC; keyed separately from rail `SettingsSection` list. */
+  anchorsForSection(sectionId: string): readonly SettingsSectionAnchorDef[] {
+    return SETTINGS_SECTION_ANCHORS[sectionId] ?? [];
+  }
+
+  /** Invite TOC: hide while child is missing or in error panel (anchors not in DOM). */
+  readonly inviteManagementTocVisible = computed(() => {
+    const invite = this.inviteSection();
+    if (!invite) {
+      return false;
+    }
+    return invite.panelMode() !== 'error';
+  });
+
+  readonly languageOptions: ReadonlyArray<ToggleGroupOption> = buildLanguageOptions();
+
+  readonly densityOptions = computed<ReadonlyArray<ToggleGroupOption>>(() =>
+    buildDensityOptions(this.t),
+  );
+
+  readonly themeModeOptions = computed<ReadonlyArray<ToggleGroupOption>>(() =>
+    buildThemeModeOptions(this.t),
+  );
+
+  readonly markerMotionOptions = computed<ReadonlyArray<ToggleGroupOption>>(() =>
+    buildMarkerMotionOptions(this.t),
+  );
 
   readonly selectedSectionId = signal<string>('general');
   readonly loadState = signal<SettingsLoadState>('populated');
@@ -140,13 +187,17 @@ export class SettingsOverlayComponent {
     mapAutoLocate: false,
     mapGridOverlay: false,
     markerMotion: this.readMarkerMotionPreference(),
-    searchBias: 'balanced',
-    searchRadiusKm: 2,
     cacheRetentionDays: 30,
     telemetryEnabled: false,
   });
 
   constructor() {
+    effect(() => {
+      if (this.open()) {
+        void this.orgSearchTuning.bootstrapFromSession();
+      }
+    });
+
     effect(() => {
       const pendingSection = this.settingsPaneService.selectedSectionId();
       if (pendingSection) {
@@ -157,10 +208,90 @@ export class SettingsOverlayComponent {
     effect(() => {
       this.applyThemeMode(this.settingsModel().themeMode);
     });
+
+    effect(() => {
+      const subsectionRequest = this.settingsPaneService.subsectionRequest();
+      const selectedSectionId = this.selectedSectionId();
+      const open = this.open();
+      const subsectionId = subsectionRequest.id;
+      const requestToken = subsectionRequest.requestToken;
+
+      const accountRef = this.accountSection();
+      const inviteRef = this.inviteSection();
+      const accountLoading = accountRef?.loading() ?? false;
+      const invitePanelMode = inviteRef?.panelMode();
+      void accountLoading;
+      void invitePanelMode;
+
+      if (!open || !subsectionId) {
+        this.lastSuccessfulSubsectionRequestToken = null;
+        return;
+      }
+
+      if (this.lastSuccessfulSubsectionRequestToken === requestToken) {
+        return;
+      }
+
+      if (selectedSectionId === 'account') {
+        if (!accountRef || accountLoading) {
+          return;
+        }
+      }
+
+      if (selectedSectionId === 'invite-management') {
+        if (!inviteRef || inviteRef.panelMode() === 'error') {
+          return;
+        }
+      }
+
+      const enableRafRetry =
+        selectedSectionId === 'account' || selectedSectionId === 'invite-management';
+
+      runInInjectionContext(this.injector, () => {
+        afterNextRender(() => {
+          this.tryScrollSubsectionWithOptionalRafRetry(
+            selectedSectionId,
+            subsectionId,
+            requestToken,
+            enableRafRetry,
+            () => {
+              this.lastSuccessfulSubsectionRequestToken = requestToken;
+            },
+          );
+        });
+      });
+    });
   }
 
+  /** Scroll + highlight from TOC buttons (same visual treatment as URL-driven subsection). */
+  scrollToDetailAnchor(sectionId: string, subsectionSlug: string): void {
+    if (isKnownSettingsSectionId(sectionId, this.visibleSectionRegistry())) {
+      this.syncSettingsUrl(sectionId as SettingsPaneSectionId, subsectionSlug);
+    }
+    const token = ++this.tocHighlightToken;
+    const invite = this.inviteSection();
+    void invite?.panelMode();
+
+    if (sectionId === 'invite-management') {
+      if (!invite || invite.panelMode() === 'error') {
+        return;
+      }
+    }
+
+    const enableRafRetry = sectionId === 'account' || sectionId === 'invite-management';
+
+    runInInjectionContext(this.injector, () => {
+      afterNextRender(() => {
+        this.tryScrollSubsectionWithOptionalRafRetry(sectionId, subsectionSlug, token, enableRafRetry);
+      });
+    });
+  }
+
+  /** @internal Template helper for stable anchor ids. */
+  readonly settingsAnchorDomId = settingsDetailAnchorDomId;
+
   onOverlayAttach(): void {
-    // No-op: section content renders immediately; async loading is section-local.
+    void this.orgSearchTuning.bootstrapFromSession();
   }
 
   onEscape(event: KeyboardEvent): void {
@@ -175,19 +306,11 @@ export class SettingsOverlayComponent {
   }
 
   selectSection(sectionId: string): void {
-    this.selectedSectionId.set(sectionId);
-    if (
-      sectionId === 'general' ||
-      sectionId === 'appearance' ||
-      sectionId === 'notifications' ||
-      sectionId === 'map' ||
-      sectionId === 'search' ||
-      sectionId === 'data' ||
-      sectionId === 'account' ||
-      sectionId === 'invite-management'
-    ) {
-      this.settingsPaneService.setSelectedSection(sectionId);
+    if (!isKnownSettingsSectionId(sectionId, this.visibleSectionRegistry())) {
+      return;
     }
+    this.selectedSectionId.set(sectionId);
+    this.settingsPaneService.setSelectedSection(sectionId as SettingsPaneSectionId);
   }
 
   updatePosition(): void {
@@ -222,8 +345,32 @@ export class SettingsOverlayComponent {
     this.i18nService.setLanguage(language);
   }
 
-  setSearchBias(searchBias: SearchBias): void {
-    this.settingsModel.update((model) => ({ ...model, searchBias }));
+  onLanguageValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
+    if (value === 'en' || value === 'de' || value === 'it') {
+      this.setLanguage(value);
+    }
+  }
+
+  onDensityValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
+    if (value === 'compact' || value === 'comfortable') {
+      this.setDensity(value);
+    }
+  }
+
+  onThemeModeValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
+    if (value === 'light' || value === 'dark' || value === 'system' || value === 'sandstone') {
+      this.setThemeMode(value);
+    }
+  }
+
+  onMarkerMotionValueChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
+    if (value === 'off' || value === 'smooth') {
+      this.setMarkerMotion(value);
+    }
   }
 
   setMarkerMotion(markerMotion: MarkerMotionPreference): void {
@@ -236,10 +383,6 @@ export class SettingsOverlayComponent {
         detail: { markerMotion },
       }),
     );
-  }
-
-  setSearchRadius(radiusKm: number): void {
-    this.settingsModel.update((model) => ({ ...model, searchRadiusKm: radiusKm }));
   }
 
   setCacheRetentionDays(cacheRetentionDays: number): void {
@@ -291,5 +434,97 @@ export class SettingsOverlayComponent {
     }
 
     root.setAttribute('data-theme', themeMode);
+  }
+
+  /**
+   * Scroll + highlight; optional rAF chain for first-paint races (not a substitute for signal deps).
+   * Invokes `onScrollSuccess` whenever a target is found and scrolled (sync or inside rAF).
+   */
+  private tryScrollSubsectionWithOptionalRafRetry(
+    sectionId: string,
+    subsectionSlug: string,
+    highlightToken: number,
+    enableRafRetry: boolean,
+    onScrollSuccess?: () => void,
+  ): void {
+    const run = (): boolean => {
+      const target = this.findSubsectionElement(sectionId, subsectionSlug);
+      if (!target) {
+        return false;
+      }
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.highlightSubsection(target, highlightToken);
+      onScrollSuccess?.();
+      return true;
+    };
+
+    if (run()) {
+      return;
+    }
+    if (!enableRafRetry || typeof requestAnimationFrame === 'undefined') {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      if (run()) {
+        return;
+      }
+      requestAnimationFrame(() => {
+        run();
+      });
+    });
+  }
+
+  private findSubsectionElement(sectionId: string, subsectionSlug: string): HTMLElement | null {
+    const host = this.hostRef.nativeElement;
+    const domId = settingsDetailAnchorDomId(sectionId, subsectionSlug);
+    const byId = host.querySelector(`#${CSS.escape(domId)}`) as HTMLElement | null;
+    if (byId) {
+      return byId;
+    }
+
+    const candidates = host.querySelectorAll(
+      '[data-settings-subsection]',
+    ) as NodeListOf<HTMLElement>;
+
+    for (const candidate of candidates) {
+      const value = candidate.dataset['settingsSubsection'];
+      if (value && value.toLowerCase() === subsectionSlug.toLowerCase()) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  private highlightSubsection(target: HTMLElement, requestToken: number): void {
+    const activeToken = Math.max(requestToken, this.highlightedSubsectionToken + 1);
+    this.highlightedSubsectionToken = activeToken;
+
+    target.classList.remove('settings-overlay__subsection-highlight');
+    // Force reflow so repeated deep-links replay the highlight animation.
+    void target.offsetWidth;
+    target.classList.add('settings-overlay__subsection-highlight');
+
+    setTimeout(() => {
+      if (this.highlightedSubsectionToken !== activeToken) {
+        return;
+      }
+
+      target.classList.remove('settings-overlay__subsection-highlight');
+    }, SUBSECTION_HIGHLIGHT_DURATION_MS);
+  }
+
+  private syncSettingsUrl(section: SettingsPaneSectionId, subsection: string | null): void {
+    const parsed = parseSettingsUrl(this.router.url);
+    const shellSegments = parsed?.shellSegments ?? resolveShellSegmentsFromUrl(this.router.url);
+    const target = buildSettingsUrl(shellSegments, section, subsection);
+    const currentPath = this.router.url.split('?')[0]?.split('#')[0] ?? this.router.url;
+
+    if (currentPath === target) {
+      return;
+    }
+
+    void this.router.navigateByUrl(target, { replaceUrl: true });
   }
 }

@@ -1,0 +1,47 @@
+// Map style switch (street/photo) — top-left of map zone
+// @see docs/migration/phase-8-global-scss-elimination.md (map-shell partial split)
+
+.map-style-switch {
+  position: absolute;
+  top: var(--spacing-3);
+  left: var(--spacing-3);
+  z-index: 200;
+  display: inline-flex;
+  align-items: flex-start;
+
+  @media (max-width: 47.9375rem) {
+    top: calc(var(--spacing-3) + var(--spacing-2));
+    left: var(--spacing-3);
+  }
+}
+
+// Track shell only — lighter than default frosted (85% card); segments keep shared toggle on/hover.
+// Lighter = higher `--card` opacity in the mix (same tokens as sidebar/settings, no new global name).
+// @see docs/design/tokens.md § Frosted chrome
+:host .map-style-switch [hlmToggleGroup] {
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+  min-height: 0;
+  gap: var(--spacing-1);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-1);
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+}
+
+// Each segment is a full circle; gap separates them inside the frosted track.
+// @see docs/migration/phase-10-manual-matrix.md (map style switch pierce)
+:host .map-style-switch [hlmToggleGroupItem] {
+  justify-content: center;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  overflow: hidden;
+  border-radius: calc(var(--radius-full) - var(--spacing-1));
+}

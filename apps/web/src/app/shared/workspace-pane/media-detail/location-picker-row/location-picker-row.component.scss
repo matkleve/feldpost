@@ -1,0 +1,48 @@
+// Two-line format D content inside address-search result buttons
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+
+:host {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+@layer components {
+  // Icon column aligned with multi-line text block
+  // @see media-detail-location-section.md#add-search-dropdown
+  .location-picker-row__icon {
+    flex-shrink: 0;
+    font-size: 1.125rem;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  // Primary + secondary stack fills remaining row width
+  // @see media-detail-location-section.md#add-search-dropdown
+  .location-picker-row__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  // Street/access line matches org picker primary
+  // @see media-locations.helpers.ts#formatLocationDisplayPrimaryLine
+  .location-picker-row__primary {
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  // Locality line — muted secondary
+  // @see media-locations.helpers.ts#formatLocationDisplayLocalityLine
+  .location-picker-row__secondary {
+    font-size: var(--font-size-2xs);
+    line-height: 1.2;
+    color: var(--muted-foreground);
+    min-width: 0;
+    word-break: break-word;
+  }
+}

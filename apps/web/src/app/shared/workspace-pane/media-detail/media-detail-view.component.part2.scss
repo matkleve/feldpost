@@ -1,0 +1,27 @@
+// MediaDetailViewComponent — split stylesheet (sections, layout breakpoints, keyframes).
+// @see docs/specs/ui/media-detail/media-detail-view.md
+
+.detail-section {
+  padding: 0 var(--spacing-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  overflow: visible;
+
+  [hlmMenuLabel] {
+    padding-top: var(--spacing-3);
+    padding-bottom: 0;
+  }
+}
+
+// ─── Keyframes ───
+
+@keyframes detail-placeholder-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}

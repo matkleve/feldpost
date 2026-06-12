@@ -6,9 +6,17 @@ export type SearchState =
   | 'results-complete'
   | 'committed';
 
-export type SearchResultFamily = 'db-address' | 'db-content' | 'geocoder' | 'command' | 'recent';
+export type SearchResultFamily =
+  | 'db-address'
+  | 'db-content'
+  | 'geocoder'
+  | 'command'
+  | 'recent'
+  | 'operator-suggestion';
 
-export type SearchContentType = 'photo' | 'group' | 'project' | 'metadata';
+export type SearchOperatorPrefix = '#' | '+' | '-';
+
+export type SearchContentType = 'photo' | 'project' | 'metadata';
 
 export interface SearchQueryContext {
   organizationId?: string;
@@ -33,7 +41,6 @@ export interface SearchQueryContext {
   };
   activeFilterCount?: number;
   commandMode?: boolean;
-  selectedGroupId?: string;
 }
 
 export interface SearchBaseCandidate {
@@ -72,7 +79,7 @@ export interface SearchContentCandidate extends SearchBaseCandidate {
 
 export interface SearchCommandCandidate extends SearchBaseCandidate {
   family: 'command';
-  command: 'upload' | 'clear-filters' | 'go-to-location' | 'open-group' | 'create-qr-invite';
+  command: 'upload' | 'clear-filters' | 'go-to-location' | 'create-qr-invite';
   payload?: string;
 }
 
@@ -83,11 +90,28 @@ export interface SearchRecentCandidate extends SearchBaseCandidate {
   usageCount?: number;
 }
 
+export interface SearchOperatorSuggestionCandidate extends SearchBaseCandidate {
+  family: 'operator-suggestion';
+  operator: SearchOperatorPrefix;
+  keyword: string;
+  providerId: string;
+}
+
 export type SearchCandidate =
   | SearchAddressCandidate
   | SearchContentCandidate
   | SearchCommandCandidate
-  | SearchRecentCandidate;
+  | SearchRecentCandidate
+  | SearchOperatorSuggestionCandidate;
+
+export interface SearchFilterChip {
+  id: string;
+  providerId: string;
+  family: SearchResultFamily;
+  label: string;
+  value: string;
+  active: boolean;
+}
 
 export interface SearchSection {
   family: SearchResultFamily;
@@ -126,8 +150,31 @@ export type SearchCommitAction =
       type: 'recent-selected';
       query: string;
       label: string;
+    }
+  | {
+      type: 'filter-chip-toggle';
+      query: string;
+      chip: SearchFilterChip;
+      removed: boolean;
     };
 
+export interface SearchEngineOptions {
+  debounceMs: number;
+  cacheTtlMs: number;
+  recentMaxItems: number;
+  geocoderDedupMeters: number;
+  maxGeocoderSectionItems: number;
+}
+
+export const DEFAULT_SEARCH_ENGINE_OPTIONS: SearchEngineOptions = {
+  debounceMs: 300,
+  cacheTtlMs: 5 * 60 * 1000,
+  recentMaxItems: 8,
+  geocoderDedupMeters: 30,
+  maxGeocoderSectionItems: 3,
+};
+
+/** @deprecated Replaced by SearchEngineOptions; kept for SearchBarService.orchestratorOptionsFromOrg(). */
 export interface SearchOrchestratorOptions {
   debounceMs: number;
   cacheTtlMs: number;
@@ -135,9 +182,10 @@ export interface SearchOrchestratorOptions {
   geocoderDedupMeters: number;
 }
 
+/** @deprecated Replaced by DEFAULT_SEARCH_ENGINE_OPTIONS; kept for orchestratorOptionsFromOrg(). */
 export const DEFAULT_SEARCH_ORCHESTRATOR_OPTIONS: SearchOrchestratorOptions = {
-  debounceMs: 300,
-  cacheTtlMs: 5 * 60 * 1000,
-  recentMaxItems: 8,
-  geocoderDedupMeters: 30,
+  debounceMs: DEFAULT_SEARCH_ENGINE_OPTIONS.debounceMs,
+  cacheTtlMs: DEFAULT_SEARCH_ENGINE_OPTIONS.cacheTtlMs,
+  recentMaxItems: DEFAULT_SEARCH_ENGINE_OPTIONS.recentMaxItems,
+  geocoderDedupMeters: DEFAULT_SEARCH_ENGINE_OPTIONS.geocoderDedupMeters,
 };

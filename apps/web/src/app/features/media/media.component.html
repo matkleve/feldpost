@@ -1,0 +1,145 @@
+<!-- Renders the /media page content stack in a flat host-owned layout. -->
+<!-- @see docs/specs/component/item-grid/item-grid.md#data -->
+<!-- Stacks header, toolbar, content, and progressive-loading footer with token spacing. -->
+<!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
+  <div class="media-page-body">
+<app-vstack class="content-clamp content-clamp--list" [spacing]="4">
+  <!-- Page Header with Breadcrumb -->
+  <!-- Renders media title, breadcrumb, and loaded-count summary. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#data -->
+  <app-media-page-header
+    [title]="t('media.page.title', 'Media')"
+    [mediaCount]="flatDisplayItems().length"
+    [totalCount]="flatDisplayItems().length"
+    [state]="headerState()"
+  />
+
+  <!-- Hosts workspace-aligned toolbar controls plus view and card-variant toggles. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
+  <app-pane-toolbar class="media-toolbar">
+    <div slot="left" class="media-toolbar__left">
+      @for (btn of toolbarButtons(); track btn.id) {
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="media-toolbar__menu-trigger"
+          [class.media-toolbar__menu-trigger--open]="activeDropdown() === btn.id"
+          [attr.data-active]="btn.active() ? 'true' : null"
+          [attr.aria-label]="btn.label"
+          [attr.title]="btn.label"
+          [attr.aria-expanded]="activeDropdown() === btn.id"
+          [attr.aria-haspopup]="true"
+          (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
+        >
+          <span
+            data-dd-part="icon"
+            class="material-icons media-toolbar__menu-trigger-icon"
+            aria-hidden="true"
+            >{{ btn.icon }}</span
+          >
+          <span data-dd-part="label" class="media-toolbar__menu-trigger-label">{{ btn.label }}</span>
+          <span
+            data-dd-part="chevron"
+            class="material-icons media-toolbar__menu-trigger-chevron"
+            aria-hidden="true"
+            >expand_more</span
+          >
+        </button>
+      }
+    </div>
+
+    <div slot="right" class="media-toolbar__right">
+      <div class="media-toolbar__size-control media-toolbar__size-control--full" hlmPillToggle size="sm">
+        <div
+          hlmToggleGroup
+          size="sm"
+          brnToggleGroup
+          type="single"
+          [nullable]="false"
+          [value]="cardVariant()"
+          (valueChange)="onCardVariantToggleChange($event)"
+          [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+        >
+          @for (opt of cardVariantToggleOptions(); track opt.id) {
+            <button
+              type="button"
+              hlmToggleGroupItem
+              size="icon"
+              brnToggleGroupItem
+              [value]="opt.id"
+              [attr.aria-label]="opt.ariaLabel || opt.label"
+              [attr.title]="opt.title || opt.label"
+            >
+              <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="media-toolbar__size-control media-toolbar__size-control--compact">
+        <div class="media-toolbar__size-control-track" hlmToggleGroup size="sm">
+          <button
+            type="button"
+            hlmToggleGroupItem
+            brnToggleGroupItem
+            size="icon"
+            [attr.aria-label]="compactCardVariantToggleTitle()"
+            [attr.title]="compactCardVariantToggleTitle()"
+            (click)="cycleCardVariant()"
+          >
+            <span class="material-icons" aria-hidden="true">{{ currentCardVariantToggleOption()?.icon }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </app-pane-toolbar>
+
+  <app-toolbar-dropdown-stack
+    [activePanelId]="activeDropdown()"
+    [anchor]="dropdownAnchor()"
+    [outsideCloseEnabled]="!isDragging()"
+    (closeRequested)="closeDropdown()"
+  >
+    @switch (activeDropdown()) {
+        @case ('grouping') {
+          <app-grouping-dropdown
+            [activeGroupings]="activeGroupings()"
+            [availableProperties]="availableGroupings()"
+            (groupingsChanged)="onGroupingsChanged($event.active)"
+            (dragStarted)="onDragStarted()"
+            (dragEnded)="onDragEnded()"
+          />
+        }
+        @case ('filter') {
+          <app-filter-dropdown />
+        }
+        @case ('sort') {
+          <app-sort-dropdown
+            [groupingIdsInput]="activeGroupingIds()"
+            (sortChanged)="onSortChanged($event)"
+          />
+        }
+        @case ('projects') {
+          <app-projects-dropdown (projectsChanged)="onProjectsChanged($event)" />
+        }
+      }
+  </app-toolbar-dropdown-stack>
+
+  <!-- Renders media content state machine and forwards item/retry events to page controller. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
+  <app-media-content
+    [state]="contentState()"
+    [items]="flatDisplayItems()"
+    [renderRows]="mediaRenderRows()"
+    [collapsedGroupHeadings]="viewService.collapsedGroups()"
+    [emptyReason]="emptyReason()"
+    [cardVariant]="cardVariant()"
+    [projectNameFor]="projectNameForFn"
+    (itemClicked)="onMediaItemClicked($event)"
+    (zoomToLocationRequested)="onZoomToLocation($event)"
+    (retry)="onRetryLoad()"
+  />
+</app-vstack>
+  </div>

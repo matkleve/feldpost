@@ -1,0 +1,124 @@
+// Host IS the workspace pane shell box — flex sibling of drag-divider in authenticated layout.
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+
+// Shell geometry, surface, and stacking context
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+:host {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+}
+
+// Desktop: clip content to shell boundary
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+@media (min-width: 48rem) {
+  :host {
+    overflow: hidden;
+  }
+}
+
+// Mobile sheet: bottom-anchored panel
+// @see docs/specs/ui/workspace/workspace-pane-shell.md
+@media (max-width: 47.9375rem) {
+  :host {
+    width: 100% !important;
+    height: 40vh;
+    position: fixed;
+    bottom: 3.5rem;
+    left: 0;
+    right: 0;
+    // Matches former `var(--z-panel)` — Batch 41 inline (`docs/migration/phase-7-token-migration.md` §Batch 41)
+    z-index: 100;
+    border-radius: 0;
+  }
+}
+
+// Flex column container — fills shell height, clips content to shell boundary
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// Content area below header+tabs; max-width caps layout and margin-inline centers when pane is wide
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane__content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 56rem;
+  margin-inline: auto;
+  overflow: hidden;
+}
+
+// Tab bar row — same max-width + centering as content area so tabs align with detail/selected-items rows below
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane__tabs {
+  flex-shrink: 0;
+  padding: var(--spacing-3) var(--spacing-3) 0;
+  max-width: 56rem;
+  width: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+// Selected-items tab panel wrapper — hidden by default, shown when active
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane__tab-panel {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+
+  // Active state: participates in flex layout
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  &--active {
+    display: flex;
+  }
+}
+
+// Upload tab panel — hidden by default, shown when active; always in DOM for stable ng-content
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane__upload-tab {
+  display: none;
+  flex: 1;
+  min-height: 0;
+
+  // Active state: participates in flex layout
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  &--active {
+    display: flex;
+  }
+}
+
+// Stretch the projected upload panel to fill the tab panel
+// @see docs/specs/ui/workspace/workspace-pane.md
+.workspace-pane__upload-tab > app-upload-panel {
+  flex: 1;
+  min-height: 0;
+}
+
+app-workspace-selected-items-grid {
+  flex: 1;
+  min-height: 0;
+}
+
+app-media-detail-view {
+  flex: 1;
+  min-height: 0;
+}

@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
+import type {
+  EffectRef,
+  OnDestroy,
+  OnInit} from '@angular/core';
 import {
   Component,
   ElementRef,
-  EffectRef,
   HostListener,
-  OnDestroy,
-  OnInit,
   computed,
   effect,
   input,
@@ -17,12 +18,24 @@ import {
 import { Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { SearchDropdownItemComponent } from './search-dropdown-item.component';
-import { SearchOrchestratorService } from '../../../core/search/search-orchestrator.service';
-import { SearchBarService, GhostTrieEntry } from '../../../core/search/search-bar.service';
-import { GeocodingService } from '../../../core/geocoding.service';
-import { I18nService } from '../../../core/i18n/i18n.service';
-import {
+import { SearchFilterChipsComponent } from './search-filter-chips.component';
+import type { GhostTrieEntry } from '../../../core/search/search-bar.service';
+import { SearchBarService } from '../../../core/search/search-bar.service';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { SearchEngine } from '../../../core/search/engine/search-engine';
+import { createMapSearchEngine } from '../../../core/search/engine/search-engine.factory';
+import { RecentsProvider } from '../../../core/search/providers/recents.provider';
+import { DbAddressProvider } from '../../../core/search/providers/db-address.provider';
+import { ProjectsProvider } from '../../../core/search/providers/projects.provider';
+import { GeocoderProvider } from '../../../core/search/providers/geocoder.provider';
+import { CommandProvider } from '../../../core/search/providers/command.provider';
+import { OrgSearchTuningService } from '../../../core/search/org-search-tuning.service';
+import { parseSearchQuery } from '../../../core/search/engine/search-operator';
+import type {
   SearchCandidate,
+  SearchFilterChip,
+  SearchOperatorSuggestionCandidate,
   SearchQueryContext,
   SearchRecentCandidate,
   SearchResultSet,
@@ -33,20 +46,14 @@ import {
 const MAX_RECENT_SEARCHES = 8;
 const MAX_RECENT_MATCHES_WHILE_TYPING = 2;
 
-const PLACEHOLDER_EXAMPLES: ReadonlyArray<{ key: string; fallback: string }> = [
-  { key: 'map.searchBar.placeholder.search', fallback: 'Search address, project, group…' },
-  { key: 'map.searchBar.placeholder.example.denishgasse', fallback: 'Denisgasse 46, Vienna' },
-  { key: 'map.searchBar.placeholder.example.coordsDecimal', fallback: '48.2082, 16.3738' },
-  { key: 'map.searchBar.placeholder.example.mapsUrl', fallback: 'maps.google.com/…' },
-  { key: 'map.searchBar.placeholder.example.project', fallback: 'Project Alpha' },
-  {
-    key: 'map.searchBar.placeholder.example.schoenbrunnerAllee',
-    fallback: 'Schönbrunner Allee 6',
-  },
-  {
-    key: 'map.searchBar.placeholder.example.coordsDms',
-    fallback: '48°12\'30"N 16°22\'23"E',
-  },
+const PLACEHOLDER_EXAMPLES = [
+  'Search address or project…',
+  'Denisgasse 46, Vienna',
+  '48.2082, 16.3738',
+  'maps.google.com/…',
+  'Project Alpha',
+  'Schönbrunner Allee 6',
+  '48°12\'30"N 16°22\'23"E',
 ];
 const PLACEHOLDER_INTERVAL_MS = 4000;
 const PLACEHOLDER_FADE_MS = 300;
@@ -60,9 +67,25 @@ type SearchSectionsState = {
 @Component({
   selector: 'ss-search-bar',
   standalone: true,
-  imports: [CommonModule, SearchDropdownItemComponent],
+  imports: [CommonModule, SearchDropdownItemComponent, SearchFilterChipsComponent, ...HLM_INPUT_IMPORTS],
   templateUrl: './search-bar.component.html',
   styleUrl: './search-bar.component.scss',
+  providers: [
+    {
+      provide: SearchEngine,
+      useFactory: () =>
+        createMapSearchEngine(
+          {
+            recents: inject(RecentsProvider),
+            dbAddress: inject(DbAddressProvider),
+            projects: inject(ProjectsProvider),
+            geocoder: inject(GeocoderProvider),
+            commands: inject(CommandProvider),
+          },
+          inject(OrgSearchTuningService),
+        ),
+    },
+  ],
   host: {
     class: 'search-bar-host',
     '[class.search-bar-host--projects]': "mode() === 'projects'",
@@ -72,11 +95,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly router = inject(Router);
   private readonly searchBarService = inject(SearchBarService);
-  private readonly searchOrchestrator = inject(SearchOrchestratorService);
+  private readonly searchEngine = inject(SearchEngine);
+  private readonly recentsProvider = inject(RecentsProvider);
   private readonly geocodingService = inject(GeocodingService);
-  private readonly i18nService = inject(I18nService);
-
-  readonly t = this.i18nService.t.bind(this.i18nService);
 
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
@@ -85,7 +106,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private placeholderTimer: ReturnType<typeof setInterval> | null = null;
   private placeholderIndex = 0;
 
-  readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
+  readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   readonly queryContext = input<SearchQueryContext>({});
   readonly mode = input<'map' | 'projects'>('map');
 
@@ -94,19 +115,20 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   readonly dropPinRequested = output<void>();
   readonly qrInviteCommandRequested = output<void>();
   readonly queryChanged = output<string>();
+  readonly projectFilterIdsChanged = output<string[]>();
 
   readonly state = signal<SearchState>('idle');
   readonly query = signal('');
   readonly dropdownOpen = signal(false);
-  readonly placeholderText = signal(
-    this.t(PLACEHOLDER_EXAMPLES[0].key, PLACEHOLDER_EXAMPLES[0].fallback),
-  );
+  readonly placeholderText = signal(PLACEHOLDER_EXAMPLES[0]);
   readonly placeholderFading = signal(false);
   readonly activeIndex = signal(-1);
   readonly sections = signal<SearchSectionsState>(this.createEmptySections());
   readonly recentSearches = signal<SearchRecentCandidate[]>([]);
   readonly committedCandidate = signal<SearchCandidate | null>(null);
   readonly commandSection = signal<SearchSection | null>(null);
+  readonly operatorSection = signal<SearchSection | null>(null);
+  readonly filterChips = signal<SearchFilterChip[]>([]);
   readonly liveRegionText = signal('');
   readonly ghostText = signal<string | null>(null);
 
@@ -154,6 +176,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     const sections = this.sections();
     return [
+      ...(this.operatorSection()?.items ?? []),
       ...this.matchingRecents(),
       ...sections.dbAddress.items,
       ...sections.dbContent.items,
@@ -168,24 +191,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.rebuildGhostTrie();
   });
 
-  private readonly languageSyncEffect: EffectRef = effect(() => {
-    this.i18nService.language();
-    this.syncLocalizedSearchUiText();
-  });
-
   ngOnInit(): void {
     this.recentSearches.set(
-      this.searchBarService.loadRecentSearches().slice(0, MAX_RECENT_SEARCHES),
+      this.recentsProvider.getRecentSearches(MAX_RECENT_SEARCHES).slice(0, MAX_RECENT_SEARCHES),
     );
     if (!this.isProjectsMode()) {
-      this.configureSearchSources();
       this.rebuildGhostTrie();
     }
     this.startPlaceholderRotation();
 
     if (!this.isProjectsMode()) {
       this.subscription.add(
-        this.searchOrchestrator
+        this.searchEngine
           .searchInput(this.queryChanges.asObservable(), this.contextChanges.asObservable())
           .subscribe((result) => this.applySearchResult(result)),
       );
@@ -195,12 +212,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.contextSyncEffect.destroy();
-    this.languageSyncEffect.destroy();
     this.stopPlaceholderRotation();
   }
 
   focusSearch(): void {
-    const input = this.searchInput().nativeElement;
+    const input = this.searchInput()?.nativeElement;
+    if (!input) return;
     input.focus();
     input.select();
     this.dropdownOpen.set(true);
@@ -210,7 +227,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   onFocus(): void {
     this.recentSearches.set(
-      this.searchBarService.loadRecentSearches().slice(0, MAX_RECENT_SEARCHES),
+      this.recentsProvider.getRecentSearches(MAX_RECENT_SEARCHES).slice(0, MAX_RECENT_SEARCHES),
     );
     this.dropdownOpen.set(!this.isProjectsMode());
     this.activeIndex.set(-1);
@@ -361,16 +378,30 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     return `search-option-${index}`;
   }
 
+  private operatorItemsCount(): number {
+    return this.operatorSection()?.items.length ?? 0;
+  }
+
+  recentMatchOptionIndex(index: number): number {
+    return this.operatorItemsCount() + index;
+  }
+
   addressOptionIndex(index: number): number {
-    return this.matchingRecents().length + index;
+    return this.operatorItemsCount() + this.matchingRecents().length + index;
   }
 
   contentOptionIndex(index: number): number {
-    return this.matchingRecents().length + this.sections().dbAddress.items.length + index;
+    return (
+      this.operatorItemsCount() +
+      this.matchingRecents().length +
+      this.sections().dbAddress.items.length +
+      index
+    );
   }
 
   geocoderOptionIndex(index: number): number {
     return (
+      this.operatorItemsCount() +
       this.matchingRecents().length +
       this.sections().dbAddress.items.length +
       this.sections().dbContent.items.length +
@@ -381,6 +412,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   commandOptionIndex(index: number): number {
     return (
+      this.operatorItemsCount() +
       this.matchingRecents().length +
       this.sections().dbAddress.items.length +
       this.sections().dbContent.items.length +
@@ -430,17 +462,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     const dbAddressSection =
       result.sections.find((section) => section.family === 'db-address') ??
-      this.createSection('db-address', this.t('map.searchBar.section.addresses', 'Addresses'));
+      this.createSection('db-address', 'Addresses');
     const dbContentSection =
       result.sections.find((section) => section.family === 'db-content') ??
-      this.createSection(
-        'db-content',
-        this.t('map.searchBar.section.projectsAndGroups', 'Projects & Groups'),
-      );
+      this.createSection('db-content', 'Projects & Groups');
     const geocoderSection =
       result.sections.find((section) => section.family === 'geocoder') ??
-      this.createSection('geocoder', this.t('map.searchBar.section.places', 'Places'));
+      this.createSection('geocoder', 'Places');
     const commandSection = result.sections.find((section) => section.family === 'command') ?? null;
+    const operatorSection =
+      result.sections.find((section) => section.family === 'operator-suggestion') ?? null;
 
     this.sections.set({
       dbAddress: dbAddressSection,
@@ -448,8 +479,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       geocoder: geocoderSection,
     });
     this.commandSection.set(commandSection);
+    this.operatorSection.set(operatorSection);
 
     if (result.state === 'focused-empty') {
+      const recentSection = result.sections.find((section) => section.family === 'recent');
+      if (recentSection) {
+        this.recentSearches.set(recentSection.items as SearchRecentCandidate[]);
+      }
       this.state.set(this.dropdownOpen() ? 'focused-empty' : 'idle');
       return;
     }
@@ -458,36 +494,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     if (result.state === 'results-complete') {
       const resultCount = this.selectableItems().length;
-      const query = this.query().trim();
       this.liveRegionText.set(
         resultCount > 0
-          ? this.formatPlaceholders(
-              this.t(
-                'map.searchBar.liveRegion.resultsAvailable',
-                `${resultCount} results available for ${query}.`,
-              ),
-              {
-                count: resultCount,
-                query,
-              },
-            )
-          : this.formatPlaceholders(
-              this.t('map.searchBar.liveRegion.noAddressFound', `No address found for ${query}.`),
-              {
-                query,
-              },
-            ),
+          ? `${resultCount} results available for ${this.query().trim()}.`
+          : `No address found for ${this.query().trim()}.`,
       );
     }
-  }
-
-  noAddressFoundText(): string {
-    return this.formatPlaceholders(
-      this.t('map.searchBar.empty.noAddressFound', 'No address found for {query}'),
-      {
-        query: this.query().trim(),
-      },
-    );
   }
 
   private moveActiveIndex(direction: 1 | -1): void {
@@ -510,13 +522,53 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.activeIndex.set((currentIndex + direction + items.length) % items.length);
   }
 
+  onFilterChipRemove(chip: SearchFilterChip): void {
+    const keyword = chip.providerId === 'projects' ? 'project' : chip.providerId;
+    this.searchEngine.applySubtractiveOperator(
+      parseSearchQuery(`-${keyword} ${chip.label}`),
+      this.contextChanges.value,
+    );
+    this.syncFilterChips();
+  }
+
   private commitCandidate(candidate: SearchCandidate): void {
+    if (candidate.family === 'operator-suggestion') {
+      const suggestion = candidate as SearchOperatorSuggestionCandidate;
+      const nextQuery = `${suggestion.operator}${suggestion.keyword} `;
+      this.query.set(nextQuery);
+      const inputEl = this.searchInput()?.nativeElement;
+      if (inputEl) inputEl.value = nextQuery;
+      this.dropdownOpen.set(true);
+      this.state.set('typing');
+      this.activeIndex.set(-1);
+      this.queryChanges.next(nextQuery);
+      return;
+    }
+
     if (candidate.family === 'recent') {
       this.query.set(candidate.label);
       this.dropdownOpen.set(true);
       this.state.set('typing');
       this.activeIndex.set(-1);
       this.queryChanges.next(candidate.label);
+      return;
+    }
+
+    const parsedQuery = parseSearchQuery(this.query());
+    const commitQuery = this.query().trim() || candidate.label;
+    const commitAction = this.searchEngine.commit(candidate, commitQuery, parsedQuery);
+
+    if (commitAction.type === 'filter-chip-toggle') {
+      this.syncFilterChips();
+      this.query.set('');
+      const inputEl = this.searchInput()?.nativeElement;
+      if (inputEl) inputEl.value = '';
+      this.dropdownOpen.set(false);
+      this.activeIndex.set(-1);
+      this.state.set('focused-empty');
+      this.queryChanges.next('');
+      this.queryChanged.emit('');
+      this.suppressNextDocumentClick = true;
       return;
     }
 
@@ -528,7 +580,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.addRecentSearch(candidate.label);
     this.suppressNextDocumentClick = true;
 
-    const commitAction = this.searchOrchestrator.commit(candidate, candidate.label);
     switch (commitAction.type) {
       case 'map-center':
         this.mapCenterRequested.emit({
@@ -542,7 +593,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           break;
         }
 
-        void this.router.navigate([candidate.contentType === 'group' ? '/groups' : '/photos'], {
+        void this.router.navigate(['/media'], {
           queryParams: {
             search: commitAction.query,
             type: candidate.contentType,
@@ -579,35 +630,26 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.clearRequested.emit();
   }
 
-  private configureSearchSources(): void {
-    this.searchOrchestrator.configureSources({
-      dbAddressResolver: (query, ctx) =>
-        this.searchBarService.resolveDbAddressCandidates(query, ctx),
-      dbContentResolver: (query, ctx) =>
-        this.searchBarService.resolveDbContentCandidates(query, ctx),
-      geocoderResolver: (query, ctx) => this.searchBarService.resolveGeocoderCandidates(query, ctx),
-    });
-  }
-
   private addRecentSearch(label: string): void {
-    const nextRecentSearches = this.searchBarService
+    const nextRecentSearches = this.recentsProvider
       .addRecentSearch(label, this.contextChanges.value.activeProjectId, this.recentSearches())
       .slice(0, MAX_RECENT_SEARCHES);
     this.recentSearches.set(nextRecentSearches);
-    this.searchOrchestrator.addRecentSearch(label);
+  }
+
+  private syncFilterChips(): void {
+    const chips = this.searchEngine.getFilterChips();
+    this.filterChips.set(chips);
+    this.projectFilterIdsChanged.emit(
+      chips.filter((chip) => chip.providerId === 'projects').map((chip) => chip.value),
+    );
   }
 
   private createEmptySections(): SearchSectionsState {
     return {
-      dbAddress: this.createSection(
-        'db-address',
-        this.t('map.searchBar.section.addresses', 'Addresses'),
-      ),
-      dbContent: this.createSection(
-        'db-content',
-        this.t('map.searchBar.section.projectsAndGroups', 'Projects & Groups'),
-      ),
-      geocoder: this.createSection('geocoder', this.t('map.searchBar.section.places', 'Places')),
+      dbAddress: this.createSection('db-address', 'Addresses'),
+      dbContent: this.createSection('db-content', 'Projects'),
+      geocoder: this.createSection('geocoder', 'Places'),
     };
   }
 
@@ -615,47 +657,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     return { family, title, items: [] };
   }
 
-  private syncLocalizedSearchUiText(): void {
-    const placeholder = PLACEHOLDER_EXAMPLES[this.placeholderIndex] ?? PLACEHOLDER_EXAMPLES[0];
-    this.placeholderText.set(this.t(placeholder.key, placeholder.fallback));
-
-    const localizedSections: SearchSectionsState = {
-      dbAddress: {
-        ...this.sections().dbAddress,
-        title: this.t('map.searchBar.section.addresses', 'Addresses'),
-      },
-      dbContent: {
-        ...this.sections().dbContent,
-        title: this.t('map.searchBar.section.projectsAndGroups', 'Projects & Groups'),
-      },
-      geocoder: {
-        ...this.sections().geocoder,
-        title: this.t('map.searchBar.section.places', 'Places'),
-      },
-    };
-    this.sections.set(localizedSections);
-
-    const commandSection = this.commandSection();
-    if (commandSection) {
-      this.commandSection.set({
-        ...commandSection,
-        title: this.t('map.searchBar.section.commands', 'Commands'),
-      });
-    }
-  }
-
   private normalizeLabel(value: string): string {
     return value.trim().toLowerCase();
-  }
-
-  private formatPlaceholders(
-    text: string,
-    values: Record<string, string | number | null | undefined>,
-  ): string {
-    return text.replace(/\{(\w+)\}/g, (_, token: string) => {
-      const value = values[token];
-      return value === undefined || value === null ? '' : String(value);
-    });
   }
 
   private reverseGeocodeAndUpdateLabel(lat: number, lng: number): void {
@@ -704,8 +707,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.placeholderFading.set(true);
       setTimeout(() => {
         this.placeholderIndex = (this.placeholderIndex + 1) % PLACEHOLDER_EXAMPLES.length;
-        const placeholder = PLACEHOLDER_EXAMPLES[this.placeholderIndex];
-        this.placeholderText.set(this.t(placeholder.key, placeholder.fallback));
+        this.placeholderText.set(PLACEHOLDER_EXAMPLES[this.placeholderIndex]);
         this.placeholderFading.set(false);
       }, PLACEHOLDER_FADE_MS);
     }, PLACEHOLDER_INTERVAL_MS);

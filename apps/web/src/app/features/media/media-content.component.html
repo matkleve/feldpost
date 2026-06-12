@@ -1,0 +1,94 @@
+<!-- Hosts the /media content state machine that switches between loading, error, empty, and loaded grid branches. -->
+<!-- @see docs/specs/component/item-grid/item-grid.md#state -->
+@if (state() === 'error') {
+  <!-- Renders media error state branch when page-level load failed. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
+  <app-media-error (retry)="retry.emit()" />
+} @else if (useGroupedRenderLayout()) {
+  <!-- Renders grouped headers and item grids for toolbar-driven grouping on /media. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
+  @for (row of displayRenderRows(); track $index) {
+    @if (!isRowHidden($index)) {
+      @switch (row.type) {
+        @case ('header') {
+          <app-group-header
+            [heading]="row.heading"
+            [imageCount]="row.imageCount"
+            [level]="row.level"
+            [collapsed]="collapsedGroupHeadings().has(row.heading)"
+            (toggle)="onGroupToggle(row.heading)"
+          />
+        }
+        @case ('grid') {
+          <app-item-grid [mode]="itemMode()" [role]="gridRole()">
+            @for (item of row.items; track item.id) {
+              <app-media-item
+                [itemId]="item.id"
+                [item]="item"
+                [mode]="itemMode()"
+                [state]="isSelected(item.id) ? 'selected' : 'idle'"
+                [actionContextId]="mediaItemActionContext"
+                (pointerClick)="onItemPointerClick(item.id, $event)"
+                (selectedChange)="onSelectionToggled(item.id, $event)"
+                (contextActionRequested)="onItemContextActionRequested($event)"
+              />
+            }
+          </app-item-grid>
+        }
+      }
+    }
+  }
+  @if (showListEnd()) {
+    <p class="media-content__list-end" aria-live="polite">
+      {{ t('media.page.listEnd', 'No more media') }}
+    </p>
+  }
+  @if (loadingMore()) {
+    <p class="media-content__list-loading-more" aria-live="polite">
+      {{ t('media.page.loading.more', 'Loading more media...') }}
+    </p>
+  }
+} @else if (showGrid()) {
+  <app-item-grid [mode]="itemMode()" [role]="gridRole()">
+    @for (slot of gridSlots(); track slot.trackId) {
+      @if (slot.item; as item) {
+        <!-- Renders one media-domain item component per normalized media record. -->
+        <!-- @see docs/specs/component/item-grid/item-grid.md#component-hierarchy -->
+        <app-media-item
+          [itemId]="item.id"
+          [item]="item"
+          [mode]="itemMode()"
+          [state]="isSelected(item.id) ? 'selected' : 'idle'"
+          [actionContextId]="mediaItemActionContext"
+          (pointerClick)="onItemPointerClick(item.id, $event)"
+          (selectedChange)="onSelectionToggled(item.id, $event)"
+          (contextActionRequested)="onItemContextActionRequested($event)"
+        />
+      } @else {
+        <app-media-item
+          [itemId]="'placeholder-' + slot.placeholderId"
+          [mode]="itemMode()"
+          [class.media-content__placeholder-item--exiting]="slot.exiting"
+        />
+      }
+    }
+  </app-item-grid>
+  @if (showListEnd()) {
+    <p class="media-content__list-end" aria-live="polite">
+      {{ t('media.page.listEnd', 'No more media') }}
+    </p>
+  }
+  @if (loadingMore()) {
+    <p class="media-content__list-loading-more" aria-live="polite">
+      {{ t('media.page.loading.more', 'Loading more media...') }}
+    </p>
+  }
+} @else if (showEmptyState()) {
+  <!-- Renders media empty state branch when no items are available. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
+  <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
+} @else {
+  <!-- Keeps fallback empty branch for unreachable state combinations. -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
+  <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
+}

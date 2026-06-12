@@ -1,6 +1,6 @@
 # Custom Properties in Operators — Use Cases
 
-> **Related specs:** [custom-properties](../element-specs/custom-properties.md), [property-registry](../element-specs/property-registry.md), [sort-dropdown](../element-specs/sort-dropdown.md), [grouping-dropdown](../element-specs/grouping-dropdown.md), [filter-dropdown](../element-specs/filter-dropdown.md)
+> **Related specs:** [custom-properties](../specs/service/metadata/metadata-service.md), [property-registry](../specs/service/metadata/metadata-service.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md)
 > **Related use cases:** [property-registry PR-1–PR-5](property-registry.md), [workspace-view WV-3, WV-4, WV-6](workspace-view.md)
 
 ---

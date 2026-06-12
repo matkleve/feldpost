@@ -1,0 +1,16 @@
+<div
+  class="auth-map-layer"
+  [class.auth-map-layer--ready]="mapLoaded()"
+  aria-hidden="true"
+>
+  <div class="auth-map-bg">
+    <iframe
+      class="auth-map-frame"
+      [src]="mapEmbedUrl"
+      tabindex="-1"
+      title="Decorative city map background"
+      (load)="onMapIframeLoad()"
+    ></iframe>
+  </div>
+  <div class="auth-map-overlay"></div>
+</div>

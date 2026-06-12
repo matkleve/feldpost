@@ -23,11 +23,11 @@ Scope:
 
 - Frontend code in `apps/web/src/app/**`
 - Supabase migrations in `supabase/migrations/**`
-- Security docs in `docs/security-boundaries.md`, `docs/user-lifecycle.md`, `docs/database-schema.md`
+- Security docs in `docs/security-boundaries.md`, `docs/user-lifecycle.md`, `docs/architecture/database-schema.md`
 
 Output requirements:
 
-- Create/update `docs/role-permissions.md`.
+- Create/update `docs/playbooks/security/role-permissions.md`.
 - Include a complete matrix of actions vs roles.
 - For every matrix row, cite source files/lines for both:
   - UI action implementation location
@@ -71,16 +71,16 @@ Optional follow-up:
 
 Use the full prompt above with this header:
 
-"Perform a thorough codebase-wide role and permission audit for Feldpost. Read frontend actions, SQL migrations, and security docs. Update docs/role-permissions.md with current effective permissions, policy gaps, and migration recommendations."
+"Perform a thorough codebase-wide role and permission audit for Feldpost. Read frontend actions, SQL migrations, and security docs. Update docs/playbooks/security/role-permissions.md with current effective permissions, policy gaps, and migration recommendations."
 
 ## Invocation Prompt (reviewer)
 
 Use this focused prompt:
 
-"Review docs/role-permissions.md against the actual code and migrations. Flag mismatches by severity, include exact file citations, and propose minimal SQL policy changes to enforce least privilege before production."
+"Review docs/playbooks/security/role-permissions.md against the actual code and migrations. Flag mismatches by severity, include exact file citations, and propose minimal SQL policy changes to enforce least privilege before production."
 
 ## Invocation Prompt (checker)
 
 Use this focused prompt:
 
-"Check whether the permissions model in docs/role-permissions.md is consistent with element specs and security-boundaries docs. Report contract violations and missing acceptance checks, without writing implementation code."
+"Check whether the permissions model in docs/playbooks/security/role-permissions.md is consistent with element specs and security-boundaries docs. Report contract violations and missing acceptance checks, without writing implementation code."

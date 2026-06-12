@@ -1,0 +1,55 @@
+// Shared option-menu list rhythm (address-search dropdown, context menus, toolbar panels).
+// Row chrome targets `.option-menu-item` from `HlmMenuItemDirective` / `menuItemVariants` (not `[hlmMenuItem]` — that is not a DOM attribute).
+// @see apps/web/src/app/shared/workspace-pane/media-detail/address-search/address-search.component.scss
+
+@layer components {
+  .option-menu-list,
+  .option-menu-surface .map-context-menu__items,
+  .option-menu-surface .detail-context-menu__items,
+  .option-menu-surface .standard-dropdown__items,
+  .option-menu-surface.add-metadata-suggestions {
+    box-sizing: border-box;
+    // Inset owned by `.option-menu-surface` padding (upload-resolver-tray contract).
+    // @see docs/specs/component/upload/upload-resolver-tray.md
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .option-menu-list__section-label,
+  .option-menu-label {
+    padding: var(--spacing-1) var(--spacing-1) 0;
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--muted-foreground);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  // Row layout — all `hlmMenuItem` hosts (class `option-menu-item`).
+  .option-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    min-height: 2rem;
+    padding: var(--spacing-1);
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    border-radius: var(--radius-sm);
+  }
+
+  // Leading icon geometry — colors/hover in `_option-menu-item-states.scss` (unlayered).
+  .option-menu-item__icon.material-icons,
+  .option-menu-item > .option-menu-item__icon.material-icons,
+  .option-menu-item > .detail-actions__icon.material-icons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-md);
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+}

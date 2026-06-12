@@ -1,0 +1,248 @@
+---
+name: audit-scope-to-issues
+description: "Audit a Feldpost folder or file for spec drift, likely bugs, and naming/glossary drift, then create GitHub issues from findings. Use when the user asks to check/audit a path and file issues."
+argument-hint: "Path to audit, for example apps/web/src/app/core or apps/web/src/app/features/media/media.component.ts"
+---
+
+# Audit Scope To Issues
+
+Audit a requested folder or file and create GitHub issues for confirmed findings.
+
+## Role
+
+Router, orchestrator, and user checkpoint. Detects scope, dispatches specialist skills, collects their reports, presents a consolidated finding list to the user for confirmation, resolves unclear items interactively, then creates GitHub issues. This is the only skill that creates GitHub issues.
+
+## Inputs
+
+- Required: one file or folder path.
+- If no path is provided, ask for exactly one path before auditing.
+- Do not default to the whole repository unless the user explicitly asks for a repo-wide audit.
+
+## Required Context
+
+Before judging code, read:
+
+1. `AGENTS.md`.
+2. `docs/specs/README.md`.
+3. `docs/glossary.md`.
+4. The local `README.md` under the relevant `docs/specs/` area.
+5. Relevant specs for the audited code area.
+
+For database/security findings involving overlaps, feasibility, immutability, uniqueness, publication, or history, inspect migrations, constraints, triggers, and RLS before opening an issue.
+
+## Scope Routing
+
+Detect scope type from the path and apply matching specialist skills before judging any finding:
+
+| Scope type | Specialist skills to apply |
+|---|---|
+| `docs/specs/**` | `spec-audit` |
+| `apps/web/src/app/core/**` | `service-symmetry` |
+| Angular component (`.component.ts`) | `check-spec` + `component-structure` |
+| Large refactor candidate | `safe-file-split` |
+| Any scope | Always ends with issue creation after checkpoint |
+
+If a path matches multiple types, apply all matching specialist skills in order.
+<!-- spec-hierarchy-audit: planned, not yet available -->
+
+Look only for findings returned by specialist reports:
+
+- Spec/code mismatch: behavior, state, boundaries, File Map, FSM, Ownership Triad, i18n, or adapter rules differ from specs.
+- Likely bugs/risk: clear logic errors, unsafe assumptions, lost error context, broken edge cases, or missing verification hooks.
+- Naming/glossary drift: UI copy, symbols, routes, or identifiers that contradict `docs/glossary.md` or active specs.
+
+Do not open issues for style preferences, speculative optimizations, or vague concerns.
+
+## Comprehensive Scope Rule
+
+Audit the entire requested path, not just the first files or first findings that look actionable.
+
+- For a file audit, inspect the whole file and its relevant spec/code dependencies.
+- For a folder audit, enumerate the files and subareas that belong to the requested scope before judging findings.
+- Do not stop after creating a few issues. Continue until the requested scope is covered or explicitly report why a file/subarea was not examined.
+- Keep GitHub issues limited to clearly supported findings. Comprehensiveness means complete coverage and clear reporting, not creating weak issues.
+
+## Finding Quality Gate
+
+Every GitHub issue must be either:
+
+- Confirmed: cite code path(s), spec path(s), and the observed mismatch/risk.
+- Hypothesis: cite the evidence and state the exact runtime/test/database check needed to confirm it.
+
+Do not create GitHub issues for unclear or weakly supported suspicions. Record them in the unclear findings report instead.
+
+### Unclear findings (evidence anchor)
+
+Weak or ambiguous findings still need an anchor so the team can re-find the signal. **Every unclear finding MUST include at least one concrete pointer** to where it showed up (minimum one repository path):
+
+- Code: file path (and optional line range or symbol), migration under `supabase/migrations/`, config (`vercel.json`, `_headers`, env wiring).
+- Spec/docs: path under `docs/specs/`, `docs/`, or local feature `README.md`.
+
+If the ambiguity is a **cross-layer mismatch**, cite **at least one pointer on each side** when two artifacts disagree (spec vs code, policy vs template). If only one side exists, one pointer is enough.
+
+Every issue candidate must carry a compact evidence packet before the user checkpoint:
+
+| Field | Required content |
+|---|---|
+| `spec` | Governing spec path, rule path, or `n/a` |
+| `code` | Code path, migration path, doc path, or `n/a` |
+| `invariant` | RLS, i18n, FSM, Ownership Triad, Adapter boundary, service symmetry, glossary, or `n/a` |
+| `mismatch` | One sentence describing the exact observed difference or risk |
+| `issue_type` | `task` or `idea` |
+| `verification` | Targeted test, build, migration/RLS check, lint, or `n/a` |
+
+Use label `task` for concrete actionable findings.
+Use label `idea` for hypotheses, product decisions, or larger refactor proposals.
+
+## Priority Labels
+
+Assign exactly one priority label to every issue:
+
+- `priority:P0`: security boundary failure, data loss/corruption risk, build-blocking failure, or release-blocking database/RLS issue.
+- `priority:P1`: user-blocking bug or critical workflow regression.
+- `priority:P2`: confirmed bounded bug, spec drift, naming drift, or missing verification hook.
+- `priority:P3`: hypothesis, cleanup, product decision, or larger refactor proposal.
+
+Default `task` findings to `priority:P2` unless evidence justifies `P0` or `P1`.
+Default `idea` findings to `priority:P3`.
+
+### Priority Normalization
+
+Specialist reports may suggest priority, but the orchestrator owns final labels.
+
+- Normalize every specialist priority through the policy above before the user checkpoint.
+- Do not pass through `P0` or `P1` for ordinary spec drift, missing docs, missing tests, module-shape drift, or cleanup.
+- Use `P0` only for proven security boundary failure, data loss/corruption risk, build-blocking failure, or release-blocking database/RLS issue.
+- Use `P1` only for confirmed user-blocking behavior or a critical workflow regression.
+- Record the normalized label in the evidence packet and checkpoint table.
+
+## User Checkpoint
+
+After collecting all specialist reports, stop and present the consolidated findings to the user before creating any issues:
+
+---
+**Audit complete. Before I create issues, please confirm:**
+
+**Confirmed findings (will become issues):**
+| # | Type | Area | Observation | Priority |
+|---|---|---|---|---|
+
+**Verification/tracking findings (will become issues):**
+| # | Type | Area | Missing verification or tracking gap | Priority |
+|---|---|---|---|---|
+
+**Unclear findings (need your input):**
+| # | Pointer(s) | Area | Suspicion | Check needed | Your call |
+|---|---|---|---|---|---|
+
+For each unclear finding, ask: "Create as `idea`, promote to `task`, or drop?" Wait for the user's response before proceeding.
+
+Use **Confirmed findings** for direct code/spec/database/glossary mismatches or likely bugs. Use **Verification/tracking findings** for missing tests, unchecked acceptance criteria, incomplete audit hooks, or documentation classification work that is still actionable.
+
+Do not create any GitHub issue until the user replies with confirmation or explicit approval per finding.
+---
+
+## GitHub Issue Creation
+
+Before creating any issues, run the priority-label preflight once:
+
+```bash
+gh label list --search "priority:"
+```
+
+Do not create labels automatically. If any priority label is missing, stop and output these commands:
+
+```bash
+gh label create "priority:P0" --description "Security, data loss, build-blocking, or release-blocking issue"
+gh label create "priority:P1" --description "User-blocking bug or critical workflow regression"
+gh label create "priority:P2" --description "Confirmed bounded bug, spec drift, or missing verification hook"
+gh label create "priority:P3" --description "Hypothesis, cleanup, product decision, or larger refactor"
+```
+
+Before creating planned issues, fetch open issues once and compare locally:
+
+```bash
+gh issue list --state open --limit 200 --json number,title,labels,url
+```
+
+Use the returned title and label set to compare against each planned issue. If an existing issue already covers the finding, do not create a duplicate. Report the existing issue in the output table instead.
+
+Only fall back to targeted search when the bulk open-issue list is too large or ambiguous:
+
+```bash
+gh issue list --state open --search "<title keywords>"
+```
+
+Create one issue per distinct finding from the repo root:
+
+```bash
+gh issue create --label task --label priority:P2 --title "spec drift: concise title" --body "..."
+```
+
+If `gh` is unavailable or authentication fails, stop and output the exact `gh issue create` commands the user should run. Do not silently skip issue creation.
+
+## Issue Body Template
+
+Use this structure for `task` findings:
+
+```markdown
+**Spec:** docs/specs/... or n/a
+**Code area:** apps/web/src/app/... or supabase/...
+**Invariant:** RLS / i18n / FSM / Ownership Triad / Adapter boundary / n/a
+**Priority:** priority:Px
+
+**Evidence:**
+- Spec: ...
+- Code: ...
+- Behavior/risk: ...
+
+**Acceptance:**
+- [ ] ...
+
+**Verification:** ng build / targeted test / migration check / n/a
+**PR:** n/a
+```
+
+For `idea` findings, keep the body short but include evidence and the question/product decision.
+
+## Unclear Findings Report
+
+After creating safe issues, report unclear findings separately. Use this for suspicious evidence that should not become an issue yet:
+
+- Possible spec/code differences where the intended behavior is ambiguous.
+- Discrepancies between specs, README files, glossary terms, or workflow docs.
+- Naming/glossary drift that may be intentional but needs confirmation.
+- Risky-looking code paths that need a runtime, test, or database check before an issue is justified.
+
+For each unclear finding, state the exact check or decision needed to promote it to an issue, and include **at least one pointer** (see **Unclear findings (evidence anchor)** above); weak suspicions without a path are not allowed in this report.
+Write unclear findings before the created-issues summary table, not after.
+
+## Coverage Ledger
+
+For folder audits, keep an audit ledger while working:
+
+| Area/File | Examined? | Specs checked | Notes |
+| --- | --- | --- | --- |
+
+Use the ledger to avoid stopping after the first few findings. Do not create low-quality issues to fill a quota; instead, report unexamined files and the reason they were skipped.
+
+## Output To Chat
+
+After creating safe issues, report unclear findings first:
+
+| Pointer(s) | Area | Suspicion | Evidence | Check needed |
+| --- | --- | --- | --- | --- |
+
+Then report created or reused issues:
+
+| ID | Priority | Type | Summary | GitHub |
+| --- | --- | --- | --- | --- |
+
+Then list anything not examined and include the coverage ledger.
+
+## Constraints
+
+- Do not edit implementation code.
+- Do not bulk-rename.
+- Do not create labels, milestones, or projects.
+- Do not close issues in this workflow.

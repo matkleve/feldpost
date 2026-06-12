@@ -1,5 +1,8 @@
 export const environment = {
   production: true,
+  i18n: {
+    enableLegacyDomFallback: false,
+  },
   supabase: {
     url: 'https://yvvzbpnoesxlzlbomlkv.supabase.co',
     anonKey:

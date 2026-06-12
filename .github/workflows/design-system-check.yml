@@ -1,0 +1,50 @@
+name: Design System Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "docs/design-system/**"
+      - "scripts/audit-panel-breakpoints.mjs"
+      - "scripts/validate-design-system-registry.mjs"
+      - "apps/web/src/app/features/map/**/*.scss"
+      - "apps/web/src/app/features/settings-overlay/**/*.scss"
+      - "apps/web/src/app/features/upload/**/*.scss"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/design-system-check.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/design-system/**"
+      - "scripts/audit-panel-breakpoints.mjs"
+      - "scripts/validate-design-system-registry.mjs"
+      - "apps/web/src/app/features/map/**/*.scss"
+      - "apps/web/src/app/features/settings-overlay/**/*.scss"
+      - "apps/web/src/app/features/upload/**/*.scss"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/design-system-check.yml"
+
+jobs:
+  design-system-check:
+    name: Design System Contract Gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run design system checks
+        run: npm run design-system:check

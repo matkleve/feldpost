@@ -1,0 +1,27 @@
+@if (tag() === 'ul') {
+  <ul
+    class="card-grid card-grid--list"
+    [class.card-grid--row]="variant() === 'row'"
+    [class.card-grid--small]="variant() === 'small'"
+    [class.card-grid--medium]="variant() === 'medium'"
+    [class.card-grid--large]="variant() === 'large'"
+    [style.--card-grid-min-column-width]="minColumnWidth()"
+    [style.--card-grid-gap]="gap()"
+    [attr.role]="role()"
+  >
+    <ng-content />
+  </ul>
+} @else {
+  <div
+    class="card-grid"
+    [class.card-grid--row]="variant() === 'row'"
+    [class.card-grid--small]="variant() === 'small'"
+    [class.card-grid--medium]="variant() === 'medium'"
+    [class.card-grid--large]="variant() === 'large'"
+    [style.--card-grid-min-column-width]="minColumnWidth()"
+    [style.--card-grid-gap]="gap()"
+    [attr.role]="role()"
+  >
+    <ng-content />
+  </div>
+}

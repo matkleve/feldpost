@@ -1,6 +1,6 @@
 # Projects Page Grouping/Filter/Sort — Use Cases
 
-> Related specs: [projects-page](../element-specs/projects-page.md), [grouping-dropdown](../element-specs/grouping-dropdown.md), [filter-dropdown](../element-specs/filter-dropdown.md), [sort-dropdown](../element-specs/sort-dropdown.md)
+> Related specs: [projects-page](../specs/page/projects-page.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md)
 
 ## Scope
 

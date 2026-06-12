@@ -1,0 +1,11 @@
+<!-- Presentational shell + BrnPopoverContent registration; slotted feature UI owns semantics. -->
+<!-- @see docs/specs/component/ui-primitives/popover.md §Component Hierarchy -->
+<div
+  brnPopoverContent
+  hlmPopover
+  [class]="resolvedHostClass()"
+  [style.min-width]="minWidthStyle()"
+  [style.max-width]="maxWidthStyle()"
+>
+  <ng-content />
+</div>

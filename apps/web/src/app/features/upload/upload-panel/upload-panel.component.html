@@ -1,75 +1,219 @@
+<!-- 
+  UPLOAD PANEL TEMPLATE (upload-panel.component.html)
+  
+  Structure & Zones (Spec: upload-panel.md § Actions):
+  ✅ Block 1: Intake Zone — drag-drop, file picker, scan progress label
+  ✅ Block 2: Segmented Switch — lane selector (uploading|uploaded|issues)
+  ✅ Block 3: File List Stack — per-file items rendered by lane, scrollable
+  
+  Dialogs & Modals (Spec: upload-panel.md § Wiring/Data):
+  ✅ Duplicate Resolution Modal — use_existing | upload_anyway | reject
+  ✅ Project Selection Modal — assign file to active or pick project
+  ✅ Location Address Search Modal — resolve missing GPS by address lookup
+  
+  Spacing: Transparent gaps between blocks (no styling per design system).
+  Scale: Line count ~328; DOM complexity intentionally split across item/dialog/action services.
+-->
+
 <section
-  class="upload-panel ui-container"
+  class="upload-panel"
+  data-i18n-skip
   [class.upload-panel--visible]="visible()"
+  [class.upload-panel--embedded]="embeddedInPane()"
   role="region"
-  aria-label="Upload files"
+  [attr.aria-label]="panelTitleText()"
 >
-  <header class="upload-panel__header">
-    <h3 class="upload-panel__title">Upload files</h3>
-    <p class="upload-panel__subtitle">
-      Add photos, videos, PDFs, and Office files for the active project.
-    </p>
-  </header>
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+    BLOCK 1: INTAKE ZONE
+    Purpose: Drag-and-drop file selection + folder scanning progress feedback.
+    ═══════════════════════════════════════════════════════════════════════════ -->
+  <div class="upload-panel__area upload-panel__area--intake">
+    <div class="upload-panel__header">
+      <div class="upload-panel__header-copy">
+        <h3 class="upload-panel__title">{{ panelTitleText() }}</h3>
+        <p class="upload-panel__subtitle">{{ panelSubtitleText() }}</p>
+      </div>
+    </div>
 
-  @if (scanningLabel(); as label) {
-    <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
-  }
+    @if (scanningLabel(); as label) {
+      <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
+    }
 
-  <!-- Drop zone / file picker trigger -->
-  <div
-    class="upload-panel__dropzone"
-    [class.upload-panel__dropzone--dragging]="isDragging()"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave($event)"
-    (drop)="onDrop($event)"
-    role="button"
-    tabindex="0"
-    aria-label="Drag files here or click to select"
-    (click)="openFilePicker(fileInput)"
-    (keydown)="onDropZoneKeydown($event, fileInput)"
-  >
-    <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">photo_camera</span>
-    <p class="upload-panel__dropzone-label">
-      Drag &amp; drop files here<br />
-      <span class="upload-panel__dropzone-sub">or click to select files</span>
-    </p>
-    <p class="upload-panel__dropzone-hint">
-      JPEG · PNG · HEIC · WebP · MP4 · MOV · WebM · PDF · DOCX · XLSX · PPTX · max 25 MB
-    </p>
+    <!-- Drop zone shell: clickable dropzone + chip row (siblings — no nested interactives). -->
+    <div
+      class="upload-panel__dropzone-shell"
+      (dragover)="inputHandlers.onDragOver($event)"
+      (dragleave)="inputHandlers.onDragLeave($event)"
+      (drop)="inputHandlers.onDrop($event); laneHandlers.setSelectedLane('uploading')"
+    >
+      <div
+        class="upload-panel__dropzone"
+        [class.upload-panel__dropzone--dragging]="isDragging()"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="dropzonePickAriaLabel()"
+        (click)="onDropzoneClick($event, fileInput)"
+        (keydown)="inputHandlers.onDropZoneKeydown($event, fileInput)"
+      >
+        <div class="upload-panel__dropzone-pick">
+          <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
+          <span class="upload-panel__dropzone-label">
+            {{ dropzoneLabelText() }}
+          </span>
+        </div>
+      </div>
+      <div class="upload-panel__file-type-chips">
+        @for (group of fileTypeGroups; track group.id) {
+          <div
+            class="upload-panel__file-type-group"
+            [class.upload-panel__file-type-group--expanded]="isFileTypeGroupExpanded(group.id)"
+          >
+            <button
+              type="button"
+              class="upload-panel__file-type-chip-trigger"
+              [attr.aria-label]="fileTypeGroupPickAriaLabel(group)"
+              [attr.aria-expanded]="isFileTypeGroupExpanded(group.id)"
+              (click)="onPickFileTypeGroup(fileInput, group, $event)"
+            >
+              <app-chip
+                [decorative]="true"
+                [icon]="group.icon"
+                [text]="t(group.labelKey, group.labelFallback)"
+                [variant]="group.variant"
+              ></app-chip>
+            </button>
+            <div
+              class="upload-panel__file-type-group-detail"
+              role="group"
+              [attr.aria-label]="t(group.descriptionKey, group.descriptionFallback)"
+            >
+              @for (member of group.members; track member.extension) {
+                <button
+                  type="button"
+                  class="upload-panel__file-type-chip-trigger"
+                  [attr.aria-label]="fileTypeMemberPickAriaLabel(member)"
+                  (click)="onPickFileTypeMember(fileInput, group, member, $event)"
+                >
+                  <app-chip
+                    [decorative]="true"
+                    [icon]="member.icon"
+                    [text]="member.type"
+                    [variant]="member.variant"
+                  ></app-chip>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
 
     <!-- Hidden file input; trigger by clicking the drop zone -->
     <input
       #fileInput
       type="file"
       class="upload-panel__file-input"
-      accept="image/jpeg,image/png,image/heic,image/heif,image/webp,video/mp4,video/quicktime,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      [attr.accept]="defaultFileInputAccept"
       multiple
       aria-hidden="true"
       tabindex="-1"
-      (change)="onFileInputChange($event)"
+      (change)="inputHandlers.onFileInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
-  </div>
 
-  <div class="upload-panel__intake-actions" role="group" aria-label="Additional upload actions">
     <button
-      class="upload-panel__intake-btn"
+      hlmBtn
+      variant="outline"
+      iconPlacement="start"
+      class="upload-panel__intake-btn upload-panel__intake-btn--folder"
       type="button"
-      [disabled]="scanning()"
-      (click)="onSelectFolder($event, folderInput)"
+      [disabled]="scanning() || !folderImportSupported"
+      [attr.title]="
+        !folderImportSupported
+          ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
+          : null
+      "
+      (click)="inputHandlers.onSelectFolder($event, folderInput)"
     >
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
-      Upload folder
+      <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
     </button>
 
+    @if (!folderImportSupported) {
+      <p class="upload-panel__folder-unsupported-hint" role="note">
+        {{ t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.') }}
+      </p>
+    }
+
     <button
+      hlmBtn
+      variant="outline"
+      iconPlacement="start"
       class="upload-panel__intake-btn upload-panel__intake-btn--capture"
       type="button"
-      (click)="openCapturePicker($event, captureInput)"
+      [disabled]="scanning()"
+      (click)="inputHandlers.openCapturePicker($event, captureInput)"
     >
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
         >photo_camera</span
       >
-      Take photo
+      <span class="upload-panel__intake-btn-label">{{ takePhotoLabelText() }}</span>
+    </button>
+
+    <button
+      hlmBtn
+      variant="ghost"
+      iconPlacement="start"
+      type="button"
+      class="upload-panel__location-mode-row"
+      (click)="toggleLocationRequirementMode()"
+      (mouseenter)="onLocationModeRowPreviewStart()"
+      (mouseleave)="onLocationModeRowPreviewEnd()"
+      (focusin)="onLocationModeRowPreviewStart()"
+      (focusout)="onLocationModeRowPreviewEnd()"
+      [attr.aria-label]="locationModeToggleAria()"
+    >
+      <span class="material-icons upload-panel__location-mode-icon" aria-hidden="true"
+        >location_searching</span
+      >
+      <span class="upload-panel__location-mode-copy">
+        @if (locationModeDisplayMode() === 'required') {
+          <span class="upload-panel__location-mode-title">{{
+            t('upload.location.mode.title.on', 'Auto location')
+          }}</span>
+          @let locationSubtitle = t(
+            'upload.location.mode.subtitle.on',
+            'GPS and file names; missing location → Issues.'
+          );
+          <span
+            class="upload-panel__location-mode-subtitle"
+            [attr.aria-label]="locationSubtitle"
+            [attr.title]="locationSubtitle"
+            >{{ locationSubtitle }}</span
+          >
+        } @else {
+          <span class="upload-panel__location-mode-title">{{
+            t('upload.location.mode.title.off', 'No auto location')
+          }}</span>
+          @let locationSubtitle = t(
+            'upload.location.mode.subtitle.off',
+            'Uploads without a location.'
+          );
+          <span
+            class="upload-panel__location-mode-subtitle"
+            [attr.aria-label]="locationSubtitle"
+            [attr.title]="locationSubtitle"
+            >{{ locationSubtitle }}</span
+          >
+        }
+      </span>
+      <span
+        hlmSwitch
+        class="upload-panel__location-mode-switch"
+        aria-hidden="true"
+        [checked]="locationRequirementMode() === 'required'"
+      >
+        <span hlmSwitchThumb [checked]="locationRequirementMode() === 'required'"></span>
+      </span>
     </button>
 
     <input
@@ -80,7 +224,7 @@
       capture="environment"
       aria-hidden="true"
       tabindex="-1"
-      (change)="onCaptureInputChange($event)"
+      (change)="inputHandlers.onCaptureInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
 
     <input
@@ -92,165 +236,281 @@
       directory
       aria-hidden="true"
       tabindex="-1"
-      (change)="onFolderInputChange($event)"
+      (change)="inputHandlers.onFolderInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
   </div>
 
-  @if (showLastUpload() && lastUploadLabel(); as lastLabel) {
-    <section class="upload-panel__last-upload" aria-label="Last upload summary">
-      <span class="upload-panel__last-upload-label">Last upload</span>
-      <strong class="upload-panel__last-upload-value">{{ lastLabel }}</strong>
-    </section>
-  }
-
-  @if (!showProgressBoard() && !showLastUpload()) {
-    <section class="upload-panel__empty" aria-label="Upload idle state">
-      <span class="upload-panel__empty-title">No uploads yet</span>
-      <p class="upload-panel__empty-text">
-        Add files to start. Status dots and lane filters appear once files enter the queue.
-      </p>
-    </section>
-  }
-
   @if (showProgressBoard()) {
-    <section class="upload-panel__progress-board" aria-label="Upload progress board">
-      <div class="upload-panel__dot-matrix" role="list" aria-label="Upload status matrix">
-        @for (dot of dotItems(); track dot.id) {
+    <div class="upload-panel__area--switch upload-panel__segmented" hlmPillToggle fill>
+      <div
+        hlmToggleGroup
+        class="upload-panel__lane-toggle-group w-full"
+        brnToggleGroup
+        type="single"
+        [nullable]="false"
+        [value]="effectiveLane()"
+        (valueChange)="laneHandlers.onLaneSwitchValueChange($event)"
+        [attr.aria-label]="t('auto.0370.upload_lanes', 'Upload lanes')"
+      >
+        @for (option of laneSwitchOptions(); track option.id) {
           <button
+            hlmToggleGroupItem
+            class="shadow-none"
             type="button"
-            class="upload-panel__dot upload-panel__dot--{{ dot.statusClass }}"
-            [attr.aria-label]="'Open ' + dot.lane + ' item'"
-            (click)="onDotClick(dot.id)"
-          ></button>
+            brnToggleGroupItem
+            [value]="option.id"
+            [disabled]="!!option.disabled"
+            [attr.data-attention]="option.attention ? 'true' : null"
+            [attr.data-destructive-hint]="option.destructiveHint ? 'true' : null"
+            [attr.aria-label]="option.ariaLabel || option.label"
+            [attr.title]="option.title || option.label"
+          >
+            @if (option.icon && optLayout(option) !== 'text-only') {
+              <span class="material-icons" aria-hidden="true">{{
+                option.icon
+              }}</span>
+            }
+            @if (optLayout(option) !== 'icon-only') {
+              <span>{{ option.label }}</span>
+            }
+          </button>
         }
       </div>
-
-      <div class="upload-panel__lane-switch" role="tablist" aria-label="Upload lanes">
-        <button
-          type="button"
-          role="tab"
-          class="upload-panel__lane-btn upload-panel__lane-btn--uploading"
-          [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploading'"
-          [attr.aria-selected]="effectiveLane() === 'uploading'"
-          (click)="setSelectedLane('uploading')"
-        >
-          Uploading ({{ laneCounts().uploading }})
-        </button>
-        <button
-          type="button"
-          role="tab"
-          class="upload-panel__lane-btn upload-panel__lane-btn--uploaded"
-          [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploaded'"
-          [attr.aria-selected]="effectiveLane() === 'uploaded'"
-          (click)="setSelectedLane('uploaded')"
-        >
-          Uploaded ({{ laneCounts().uploaded }})
-        </button>
-        <button
-          type="button"
-          role="tab"
-          class="upload-panel__lane-btn upload-panel__lane-btn--issues"
-          [class.upload-panel__lane-btn--active]="effectiveLane() === 'issues'"
-          [class.upload-panel__lane-btn--attention]="
-            issueAttentionPulse() && laneCounts().issues > 0 && effectiveLane() !== 'issues'
-          "
-          [attr.aria-selected]="effectiveLane() === 'issues'"
-          (click)="setSelectedLane('issues')"
-        >
-          Issues ({{ laneCounts().issues }})
-        </button>
-      </div>
-    </section>
+    </div>
   }
 
   <!-- Per-file progress list -->
-  @if (laneJobs().length > 0) {
-    <ul class="upload-panel__file-list" aria-label="Upload queue">
-      @for (job of laneJobs(); track trackByJobId($index, job)) {
-        <li
-          class="upload-panel__file-item upload-panel__file-item--{{
-            phaseToStatusClass(job.phase)
-          }}"
-        >
-          <button
-            class="upload-panel__row-action upload-panel__row-action--left"
-            type="button"
-            aria-label="Place {{ job.file.name }} on map"
-            title="Place on map"
-            [disabled]="job.phase !== 'missing_data'"
-            (click)="requestPlacement(job.id, job.phase, $event)"
-          >
-            <span class="material-icons" aria-hidden="true">my_location</span>
-          </button>
-
-          <div
-            class="upload-panel__file-main"
-            [class.upload-panel__file-main--interactive]="isRowInteractive(job)"
-            [attr.role]="isRowInteractive(job) ? 'button' : null"
-            [attr.tabindex]="isRowInteractive(job) ? '0' : null"
-            [attr.aria-label]="
-              job.phase === 'missing_data'
-                ? 'Place ' + job.file.name + ' on map'
-                : canZoomToJob(job)
-                  ? 'Zoom map to ' + job.file.name
-                  : null
+  @if (visibleLaneJobs().length > 0) {
+    <div
+      class="upload-panel__lane-overflow"
+      [class.upload-panel__lane-overflow--scrollable]="visibleLaneJobs().length > 5"
+    >
+      <ul class="upload-panel__file-list" aria-label="Upload queue">
+        @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
+          <app-upload-panel-item
+            [job]="job"
+            [interactive]="rowHandlers.isRowInteractive(job)"
+            [selectable]="embeddedInPane()"
+            [selected]="selectedUploadJobIds().has(job.id)"
+            [documentFallbackLabel]="documentFallbackLabel(job)"
+            [showOpenProject]="!!job.projectId || !!job.projectIds?.length"
+            [priorityEnabled]="priorityWorkflowEnabled()"
+            [prioritized]="prioritizedUploadedJobIds().has(job.id)"
+            (requestPlacement)="
+              rowInteractionHandlers.requestPlacement(job.id, job.phase, $event.event)
             "
-            (click)="onRowMainClick(job)"
-            (keydown)="onRowMainKeydown(job, $event)"
-          >
-            <!-- Thumbnail preview -->
-            @if (job.thumbnailUrl) {
-              <img
-                class="upload-panel__thumbnail"
-                [src]="job.thumbnailUrl"
-                [alt]="''"
-                aria-hidden="true"
-              />
-            } @else {
-              <div
-                class="upload-panel__thumbnail upload-panel__thumbnail--placeholder"
-                aria-hidden="true"
-              >
-                @if (documentFallbackLabel(job); as fallbackLabel) {
-                  <span class="upload-panel__thumbnail-fallback">{{ fallbackLabel }}</span>
-                } @else {
-                  <span class="material-icons">image</span>
-                }
-              </div>
-            }
+            (dismissFile)="dismissFile(job.id)"
+            (rowMainClick)="rowInteractionHandlers.onRowMainClick(job)"
+            (rowMainKeydown)="rowInteractionHandlers.onRowMainKeydown(job, $event.event)"
+            (menuActionSelected)="
+              actionHandlers.handleMenuAction($event.job, $event.action, $event.context)
+            "
+            (selectionChanged)="bulkHandlers.onRowSelectionChanged($event)"
+          ></app-upload-panel-item>
+        }
+      </ul>
+    </div>
+  }
 
-            <div class="upload-panel__file-meta">
-              <span class="upload-panel__file-name" [title]="job.file.name" aria-label="File name">
-                {{ job.file.name }}
-              </span>
+  @if (embeddedInPane() && hasSelectedUploadJobs()) {
+    <app-pane-footer>
+      <div class="upload-panel__bulk-summary" slot="left">
+        <strong>{{ selectedUploadJobs().length }}</strong>
+        <span>{{ t('workspace.export.summary.selected', 'selected') }}</span>
+      </div>
 
-              <p
-                class="upload-panel__file-status upload-panel__file-status--{{
-                  phaseToStatusClass(job.phase)
-                }}"
-              >
-                @if (job.phase === 'error' && job.error) {
-                  {{ job.error }}
-                } @else if (job.phase === 'missing_data') {
-                  Missing GPS - click map marker icon to place
-                } @else {
-                  {{ job.statusLabel }}
-                }
-              </p>
-            </div>
-          </div>
-
+      <div class="upload-panel__bulk-actions" slot="right">
+        @if (hasRetryableSelection()) {
           <button
-            class="upload-panel__row-action upload-panel__row-action--right"
+            hlmBtn
+            variant="outline"
+            size="icon"
             type="button"
-            aria-label="Dismiss {{ job.file.name }}"
-            title="Dismiss"
-            (click)="dismissFile(job.id)"
+            (click)="bulkHandlers.retrySelectedUploads()"
+            [attr.aria-label]="t('projects.page.error.retry', 'Retry')"
+            [title]="t('projects.page.error.retry', 'Retry')"
           >
-            <span class="material-icons" aria-hidden="true">close</span>
+            <span class="material-icons" aria-hidden="true">refresh</span>
           </button>
-        </li>
+        }
+
+        @if (canDownloadSelectedUploads()) {
+          <button
+            hlmBtn
+            variant="outline"
+            size="icon"
+            type="button"
+            (click)="bulkHandlers.downloadSelectedUploads()"
+            [attr.aria-label]="t('auto.0099.download', 'Download')"
+            [title]="t('auto.0099.download', 'Download')"
+          >
+            <span class="material-icons" aria-hidden="true">download</span>
+          </button>
+        }
+
+        <button
+          hlmBtn
+          variant="outline"
+          size="icon"
+          type="button"
+          class="upload-panel__bulk-remove"
+          (click)="bulkHandlers.removeSelectedUploads()"
+          [attr.aria-label]="t('workspace.imageDetail.projects.remove', 'Remove')"
+          [title]="t('workspace.imageDetail.projects.remove', 'Remove')"
+        >
+          <span class="material-icons" aria-hidden="true">delete</span>
+        </button>
+
+        <button
+          hlmBtn
+          variant="outline"
+          size="icon"
+          type="button"
+          (click)="bulkHandlers.clearSelectedUploads()"
+          [attr.aria-label]="t('workspace.export.action.selectNone', 'Select none')"
+          [title]="t('workspace.export.action.selectNone', 'Select none')"
+        >
+          <span class="material-icons" aria-hidden="true">deselect</span>
+        </button>
+      </div>
+    </app-pane-footer>
+  }
+
+  @if (locationAddressDialogOpen()) {
+    <section
+      class="upload-panel__location-editor option-menu-surface"
+      [attr.aria-label]="t('upload.location.editor.aria', 'Change location by address')"
+    >
+      <header class="upload-panel__location-editor-header">
+        <h4 class="upload-panel__location-editor-title">
+          {{ t('upload.item.menu.section.location', 'Change location') }}
+        </h4>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          type="button"
+          class="upload-panel__location-editor-close"
+          [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"
+          (click)="actionHandlers.onLocationAddressDialogClose()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <label class="upload-panel__location-editor-label" for="upload-location-search-input">
+        {{ t('upload.item.menu.location.enterAddress', 'Enter address') }}
+      </label>
+
+      <input
+        id="upload-location-search-input"
+        hlmInput
+        class="upload-panel__location-editor-input"
+        type="text"
+        [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
+        [value]="locationAddressDialogQuery()"
+        (input)="actionHandlers.onLocationAddressDialogQueryInput(uploadLocationSearchInput.value)"
+        #uploadLocationSearchInput
+      />
+
+      @if (locationAddressDialogLoading()) {
+        <div class="upload-panel__location-editor-loading" role="status" aria-live="polite">
+          {{ t('workspace.addressSearch.loading', 'Searching...') }}
+        </div>
       }
-    </ul>
+
+      @if (locationAddressDialogSuggestions().length > 0) {
+        <div class="upload-panel__location-editor-results flex flex-col" role="listbox">
+          @for (suggestion of locationAddressDialogSuggestions(); track suggestion.addressLabel) {
+            <button
+              hlmMenuItem
+              class="w-full"
+              type="button"
+              role="option"
+              (mouseenter)="actionHandlers.onLocationAddressSuggestionHover(suggestion)"
+              (mouseleave)="actionHandlers.onLocationAddressSuggestionHoverEnd()"
+              (focus)="actionHandlers.onLocationAddressSuggestionHover(suggestion)"
+              (blur)="actionHandlers.onLocationAddressSuggestionHoverEnd()"
+              (click)="actionHandlers.onLocationAddressSuggestionApply(suggestion)"
+            >
+              <span class="material-icons option-menu-item__icon" aria-hidden="true">place</span>
+              <span class="min-w-0 flex-1 text-left">{{ suggestion.addressLabel }}</span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (duplicateResolutionDialogOpen()) {
+    <section
+      class="upload-panel__duplicate-dialog-overlay"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="t('upload.duplicate.dialog.title', 'Resolve duplicate upload')"
+    >
+      <div class="upload-panel__duplicate-dialog option-menu-surface">
+        <h4 class="upload-panel__duplicate-dialog-title">
+          {{ t('upload.duplicate.dialog.title', 'Resolve duplicate upload') }}
+        </h4>
+        <p class="upload-panel__duplicate-dialog-message">
+          {{
+            t('upload.duplicate.dialog.message', 'This file already exists. Choose how to proceed.')
+          }}
+        </p>
+
+        <label class="upload-panel__duplicate-dialog-batch">
+          <input
+            type="checkbox"
+            [checked]="duplicateResolutionApplyToBatch()"
+            (change)="actionHandlers.onDuplicateResolutionApplyToBatchChange($event)"
+          />
+          <span>{{
+            t('upload.duplicate.dialog.applyToBatch', 'Apply to all matching items in this batch')
+          }}</span>
+        </label>
+
+        <div class="upload-panel__duplicate-dialog-actions">
+          <button
+            hlmBtn
+            variant="outline"
+            type="button"
+            (click)="actionHandlers.onDuplicateResolutionChoice('use_existing')"
+          >
+            {{ t('upload.duplicate.dialog.action.useExisting', 'Use existing') }}
+          </button>
+          <button
+            hlmBtn
+            variant="outline"
+            type="button"
+            (click)="actionHandlers.onDuplicateResolutionChoice('upload_anyway')"
+          >
+            {{ t('upload.duplicate.dialog.action.uploadAnyway', 'Upload anyway') }}
+          </button>
+          <button
+            hlmBtn
+            variant="ghost"
+            type="button"
+            (click)="actionHandlers.onDuplicateResolutionChoice('reject')"
+          >
+            {{ t('upload.duplicate.dialog.action.reject', 'Reject') }}
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+
+  @if (projectSelectionDialogOpen()) {
+    <app-project-select-dialog
+      [title]="projectSelectionDialogTitle()"
+      [message]="projectSelectionDialogMessage()"
+      [options]="projectSelectionDialogOptions()"
+      [selectedId]="projectSelectionDialogSelectedId()"
+      confirmLabel="Auswaehlen"
+      cancelLabel="Abbrechen"
+      (selectedIdChange)="actionHandlers.onProjectSelectionDialogSelected($event)"
+      (confirmed)="actionHandlers.onProjectSelectionDialogConfirmed($event)"
+      (cancelled)="actionHandlers.onProjectSelectionDialogCancelled()"
+    />
   }
 </section>

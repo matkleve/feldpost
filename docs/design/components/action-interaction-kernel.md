@@ -93,13 +93,7 @@ Radius is hierarchical, not uniform.
 
 ## Accent Policy
 
-Use accent intentionally, not decoratively.
-
-Accent is preferred for:
-
-- Active state
-- Focus-leading hover states
-- High-attention guided actions
+Use **`--accent`** only where a control still maps to shadcn defaults not yet migrated. **Do not** use `--accent` for quiet-button hover — use **Interaction emphasis** (`docs/design/state-visuals.md` § Interaction emphasis).
 
 Avoid accent for:
 
@@ -108,10 +102,13 @@ Avoid accent for:
 
 ## Button Policy
 
-- Primary actions: filled.
-- Secondary actions: ghost.
-- Toolbar baseline: ghost + thin border on hover/active.
-- Danger actions: semantic danger styling, never ambiguous.
+- **Commit CTAs:** `hlmBtn` `variant="default"` — filled `--primary`; `variant="destructive"` — filled danger.
+- **Quiet actions:** `outline` and `ghost` — idle `--muted-foreground`; hover/focus `--primary` + 10% primary wash; selected/on `--interaction-selected-ink` + 10% wash; selected+hover primary wins (see state-visuals).
+- **Link-style:** `variant="link"` — primary text + underline on hover.
+- **Legacy filled secondary:** `variant="secondary"` — rare; prefer `outline` for new work.
+- Toolbar triggers may keep geometry/padding exceptions; colors follow interaction emphasis when open (selected ink) and on hover (primary).
+- Danger actions: semantic destructive styling, never ambiguous.
+- Icon + label on `hlmBtn`: horizontal padding locks to spacing-2 (`ps-2` / `pe-2`) on both edges for every size and `iconPlacement` (`start` / `end`); set `iconPlacement` for composition semantics; `size="icon"` stays square (`w-10 h-10`).
 
 ## Reactive Integration Contract
 

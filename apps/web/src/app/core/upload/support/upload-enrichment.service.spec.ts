@@ -1,0 +1,102 @@
+import { TestBed } from '@angular/core/testing';
+import { UploadEnrichmentService } from './upload-enrichment.service';
+import { GeocodingService } from '../../geocoding/geocoding.service';
+import { MediaLocationsService } from '../../media-locations/media-locations.service';
+import { SupabaseService } from '../../supabase/supabase.service';
+
+describe('UploadEnrichmentService', () => {
+  it('persists forward geocode via resolve_media_location RPC', async () => {
+    const geocodingMock = {
+      forward: vi.fn().mockResolvedValue({
+        lat: 47.3769,
+        lng: 8.5417,
+        addressLabel: 'Burgstrasse 7, 8001 Zurich, Switzerland',
+        city: 'Zurich',
+        district: 'Altstadt',
+        street: 'Burgstrasse 7',
+        streetNumber: '7',
+        zip: '8001',
+        country: 'Switzerland',
+      }),
+    };
+
+    const rpcMock = vi.fn().mockResolvedValue({ data: true, error: null });
+    const supabaseMock = {
+      client: {
+        rpc: rpcMock,
+      },
+    };
+    const mediaLocationsMock = {
+      syncListCacheAfterPlacement: vi.fn().mockResolvedValue(1),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        UploadEnrichmentService,
+        { provide: GeocodingService, useValue: geocodingMock },
+        { provide: SupabaseService, useValue: supabaseMock },
+        { provide: MediaLocationsService, useValue: mediaLocationsMock },
+      ],
+    });
+
+    const service = TestBed.inject(UploadEnrichmentService);
+    const result = await service.enrichWithForwardGeocode('media-123', 'Burgstrasse 7, Zurich');
+
+    expect(geocodingMock.forward).toHaveBeenCalledWith('Burgstrasse 7, Zurich');
+    expect(rpcMock).toHaveBeenCalledWith(
+      'resolve_media_location',
+      expect.objectContaining({
+        p_media_item_id: 'media-123',
+        p_latitude: 47.3769,
+        p_longitude: 8.5417,
+        p_address_label: 'Burgstrasse 7, 8001 Zurich, Switzerland',
+      }),
+    );
+    expect(result).toEqual({ coords: { lat: 47.3769, lng: 8.5417 } });
+    expect(mediaLocationsMock.syncListCacheAfterPlacement).toHaveBeenCalledWith('media-123');
+  });
+
+  it('retries forward geocode with generic locality anchor when first query misses', async () => {
+    const geocodingMock = {
+      forward: vi
+        .fn()
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          lat: 48.1372,
+          lng: 16.3738,
+          addressLabel: 'Mariahilferstraße 56, Wien',
+          city: 'Wien',
+          district: null,
+          street: 'Mariahilferstraße',
+          streetNumber: '56',
+          zip: null,
+          country: 'Österreich',
+        }),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        UploadEnrichmentService,
+        { provide: GeocodingService, useValue: geocodingMock },
+        {
+          provide: SupabaseService,
+          useValue: { client: { rpc: vi.fn().mockResolvedValue({ error: null }) } },
+        },
+        {
+          provide: MediaLocationsService,
+          useValue: { syncListCacheAfterPlacement: vi.fn().mockResolvedValue(1) },
+        },
+      ],
+    });
+
+    const service = TestBed.inject(UploadEnrichmentService);
+    const result = await service.enrichWithForwardGeocode('media-anchor', 'Mariahilferstraße 56');
+
+    expect(geocodingMock.forward).toHaveBeenNthCalledWith(1, 'Mariahilferstraße 56');
+    expect(geocodingMock.forward).toHaveBeenNthCalledWith(
+      2,
+      'Mariahilferstraße 56, Wien, Österreich',
+    );
+    expect(result?.coords).toEqual({ lat: 48.1372, lng: 16.3738 });
+  });
+});

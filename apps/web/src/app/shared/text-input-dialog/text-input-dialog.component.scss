@@ -1,97 +1,77 @@
-:host {
-  display: contents;
-}
-
-.text-input-dialog-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-modal);
-  background: color-mix(in srgb, var(--color-bg-base) 80%, transparent);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-4);
-}
-
-.text-input-dialog {
-  width: min(100%, 30rem);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--elevation-modal);
-  background: var(--color-bg-elevated);
-  padding: var(--spacing-5);
-  display: grid;
-  gap: var(--spacing-3);
-}
-
-.text-input-dialog__title {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.4;
-  color: var(--color-text-primary);
-}
-
-.text-input-dialog__message {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--color-text-secondary);
-}
-
-.text-input-dialog__input {
-  min-height: 3rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  padding: 0 var(--spacing-3);
-  font: inherit;
-
-  &:focus-visible {
-    outline: none;
-    border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
-    box-shadow: var(--shadow-focus);
-  }
-}
-
-.text-input-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-2);
-}
-
-.text-input-dialog__cancel,
-.text-input-dialog__confirm {
-  min-height: 2.75rem;
-  border-radius: var(--radius-md);
-  padding: 0 var(--spacing-4);
-  font: inherit;
-  cursor: pointer;
-  transition: background-color 140ms ease;
-}
-
-.text-input-dialog__cancel {
-  border: 1px solid var(--color-border-strong);
-  background: none;
-  color: var(--color-text-primary);
-
-  &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
-  }
-}
-
-.text-input-dialog__confirm {
-  border: 1px solid transparent;
-  background: var(--color-primary);
-  color: #fff;
-
-  &:hover:not(:disabled) {
-    background: var(--color-primary-hover);
+@layer components {
+  // Host participates in parent layout without creating an extra box.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  :host {
+    display: contents;
   }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
+  // Secondary copy under the dialog title.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__message {
+    margin: 0;
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-comfortable);
+    color: var(--muted-foreground);
+  }
+
+  // Single-line text field geometry and focus ring for the prompt.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__input {
+    min-height: 3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--card);
+    color: var(--foreground);
+    padding: 0 var(--spacing-3);
+    font: inherit;
+
+    &:focus-visible {
+      outline: none;
+      border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+      // Focus stack: tweakcn `--shadow-sm`; dark adds `--interactive-focus-ring` (ex `--shadow-focus`).
+      // @see docs/migration/phase-7-token-migration.md §Batch 45
+      box-shadow: var(--shadow-sm);
+    }
+
+    // Dark theme: focus stack adds `--interactive-focus-ring` (replaces removed `--shadow-focus`).
+    // @see docs/migration/phase-7-token-migration.md §Batch 45
+    html[data-theme='dark'] &:focus-visible {
+      box-shadow: var(--shadow-sm), var(--interactive-focus-ring);
+    }
+
+    // System dark when app is not forced light (matches legacy bridge dark mixin scope).
+    // @see docs/migration/phase-7-token-migration.md §Batch 45
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']) &:focus-visible {
+        box-shadow: var(--shadow-sm), var(--interactive-focus-ring);
+      }
+    }
+  }
+
+  // Footer action row layout (geometry only).
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-2);
+  }
+
+  // Cancel control tap target and padding.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__cancel {
+    min-height: 2.75rem;
+    padding: 0 var(--spacing-4);
+  }
+
+  // Confirm control tap target, padding, and disabled affordance.
+  // @see docs/specs/component/text-input-dialog/text-input-dialog.md
+  .text-input-dialog__confirm {
+    min-height: 2.75rem;
+    padding: 0 var(--spacing-4);
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   }
 }

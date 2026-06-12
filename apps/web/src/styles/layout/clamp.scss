@@ -1,0 +1,17 @@
+// Constrains default page content width to the general clamp band (45rem; bridge `--content-clamp-default` inlined Batch 38)
+// @see docs/migration/phase-7-token-migration.md §Batch 38
+.content-clamp {
+  width: 100%;
+  max-width: 45rem;
+  margin-inline: auto;
+}
+
+.content-clamp--text {
+  max-width: 38rem;
+}
+
+// Constrains list/table layouts to the wider clamp band (52rem; bridge `--content-clamp-list` inlined Batch 38)
+// @see docs/migration/phase-7-token-migration.md §Batch 38
+.content-clamp--list {
+  max-width: 52rem;
+}

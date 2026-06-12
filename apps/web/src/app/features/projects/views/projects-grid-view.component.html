@@ -1,0 +1,9 @@
+<div class="projects-grid">
+  @for (summary of summaries(); track summary.id) {
+    <app-project-card
+      [project]="summary"
+      (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
+      (dangerAction)="onDangerAction($event.projectId, $event.action)"
+    />
+  }
+</div>

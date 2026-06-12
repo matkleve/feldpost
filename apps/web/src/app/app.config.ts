@@ -10,10 +10,11 @@
  *  - Add new global providers here, not in individual feature modules.
  */
 
+import type {
+  ApplicationConfig} from '@angular/core';
 import {
   APP_INITIALIZER,
-  ApplicationConfig,
-  inject,
+  Injector,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
@@ -23,23 +24,35 @@ import {
   withPreloading,
 } from '@angular/router';
 import { routes } from './app.routes';
-import { AuthService } from './core/auth.service';
+import { AuthService } from './core/auth/auth.service';
+import { OrgSearchTuningService } from './core/search/org-search-tuning.service';
+import { resolveSupabaseRuntimeConfig } from './core/supabase/supabase-runtime-config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
 
     // Router with component-input binding and background preloading enabled.
-    provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withPreloading(PreloadAllModules),
+    ),
 
-    // Initialize auth session before the first route renders.
-    // Guards will wait for loading() === false before deciding.
+    // Resolve Supabase endpoint, then auth — single initializer so AuthService (and
+    // SupabaseService) are not constructed before runtime config exists.
     {
       provide: APP_INITIALIZER,
-      useFactory: () => {
-        const auth = inject(AuthService);
-        return () => auth.initialize();
+      useFactory: (injector: Injector) => async () => {
+        await resolveSupabaseRuntimeConfig();
+        // injector.get — inject() is invalid after await (loses injection context).
+        const auth = injector.get(AuthService);
+        await auth.initialize();
+        if (auth.session()) {
+          await injector.get(OrgSearchTuningService).bootstrapFromSession();
+        }
       },
+      deps: [Injector],
       multi: true,
     },
   ],

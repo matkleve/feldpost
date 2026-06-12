@@ -1,0 +1,260 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-03-20",
+  "families": [
+    {
+      "id": "primitives",
+      "status": "stable",
+      "components": [
+        {
+          "id": "ui-container",
+          "status": "stable",
+          "variants": {
+            "density": ["balanced", "dense"],
+            "responsive-behavior": ["fixed", "fluid"]
+          },
+          "states": ["default", "focus-visible"],
+          "responsiveBehavior": ["fixed", "fluid"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "medium",
+            "targetWave": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "inputs-selection",
+      "status": "draft",
+      "components": [
+        {
+          "id": "segmented-switch",
+          "status": "stable",
+          "variants": {
+            "orientation": ["horizontal", "vertical"],
+            "size": ["compact", "default", "large"],
+            "density": ["balanced", "dense"]
+          },
+          "states": ["default", "hover", "active", "focus-visible", "disabled"],
+          "responsiveBehavior": ["fixed", "collapse"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "medium",
+            "targetWave": 3
+          }
+        },
+        {
+          "id": "field-select-toggle-family",
+          "status": "draft",
+          "variants": {
+            "size": ["compact", "default", "large"],
+            "density": ["field", "balanced", "dense"],
+            "label-mode": ["short", "standard", "multiline"]
+          },
+          "states": [
+            "default",
+            "hover",
+            "active",
+            "focus-visible",
+            "disabled",
+            "read-only",
+            "loading",
+            "error"
+          ],
+          "responsiveBehavior": ["fixed", "fluid"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "high",
+            "targetWave": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "navigation",
+      "status": "draft",
+      "components": [
+        {
+          "id": "breadcrumbs",
+          "status": "draft",
+          "variants": {
+            "size": ["compact", "default"],
+            "density": ["balanced", "dense"],
+            "label-mode": ["short", "standard"]
+          },
+          "states": ["default", "hover", "active", "focus-visible", "disabled"],
+          "responsiveBehavior": ["fixed", "fluid", "collapse"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "medium",
+            "targetWave": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "menus-overlays-dialogs",
+      "status": "draft",
+      "components": [
+        {
+          "id": "dropdown-shell",
+          "status": "stable",
+          "variants": {
+            "size": ["compact", "default", "large"],
+            "density": ["balanced", "dense"]
+          },
+          "states": ["default", "hover", "active", "focus-visible", "disabled"],
+          "responsiveBehavior": ["fixed", "fluid", "drawer", "sheet"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "high",
+            "targetWave": 3
+          }
+        },
+        {
+          "id": "settings-overlay-shell",
+          "status": "draft",
+          "variants": {
+            "density": ["balanced", "dense"],
+            "responsive-behavior": ["fixed", "fluid", "sheet"]
+          },
+          "states": ["default", "focus-visible", "loading", "error"],
+          "responsiveBehavior": ["fixed", "fluid", "sheet"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "high",
+            "targetWave": 2
+          }
+        },
+        {
+          "id": "popover-panel",
+          "status": "draft",
+          "variants": {
+            "size": ["compact", "default", "large"],
+            "density": ["balanced", "dense"],
+            "label-mode": ["short", "standard", "multiline"]
+          },
+          "states": [
+            "default",
+            "hover",
+            "active",
+            "focus-visible",
+            "disabled",
+            "loading",
+            "error"
+          ],
+          "responsiveBehavior": ["fixed", "fluid", "drawer", "sheet"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "high",
+            "targetWave": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "data-display",
+      "status": "draft",
+      "components": [
+        {
+          "id": "table-primitive",
+          "status": "draft",
+          "variants": {
+            "size": ["compact", "default", "large"],
+            "density": ["balanced", "dense"],
+            "label-mode": ["short", "standard", "multiline"]
+          },
+          "states": [
+            "default",
+            "hover",
+            "active",
+            "focus-visible",
+            "disabled",
+            "read-only",
+            "loading",
+            "error",
+            "success"
+          ],
+          "responsiveBehavior": [
+            "fixed",
+            "fluid",
+            "collapse",
+            "drawer",
+            "sheet"
+          ],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "high",
+            "targetWave": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "layout-surfaces",
+      "status": "draft",
+      "components": [
+        {
+          "id": "workspace-pane",
+          "status": "draft",
+          "variants": {
+            "responsive-behavior": ["fixed", "drawer", "sheet"],
+            "density": ["balanced", "dense"]
+          },
+          "states": ["default", "active", "loading", "error"],
+          "responsiveBehavior": ["fixed", "drawer", "sheet"],
+          "a11y": {
+            "focusVisible": true,
+            "keyboard": true,
+            "minTouchTargetDesktop": "44x44",
+            "minTouchTargetMobile": "48x48"
+          },
+          "migration": {
+            "impact": "critical",
+            "targetWave": 2
+          }
+        }
+      ]
+    }
+  ]
+}

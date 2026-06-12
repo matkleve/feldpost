@@ -1,6 +1,7 @@
 # Implementation Checklist
 
 Run through this after every agent-generated feature. Compare against the element spec.
+This file is a verification aid only; project rules live in `AGENTS.md` and spec governance lives in `docs/specs/README.md`.
 
 ## Structure
 
@@ -9,7 +10,7 @@ Run through this after every agent-generated feature. Compare against the elemen
 - [ ] All components are standalone (no NgModules)
 - [ ] Files follow naming convention: `kebab-case.component.ts`
 - [ ] Files are in correct directories per project structure
-- [ ] Design pattern source was reviewed (`docs/design/constitution.md`, `docs/design.md`, relevant `docs/design/*` files, and relevant element specs)
+- [ ] Design pattern source was reviewed (`docs/design/constitution.md`, `docs/design/README.md`, relevant `docs/design/*` files, and relevant element specs)
 - [ ] Context7 MCP was consulted for external library API usage
 
 ## Behavior
@@ -23,7 +24,7 @@ Run through this after every agent-generated feature. Compare against the elemen
 ## Data
 
 - [ ] Correct Supabase tables/queries match the Data section
-- [ ] Service method signatures match the implementation blueprint (if one exists in `docs/implementation-blueprints/`)
+- [ ] Service method signatures match the **facade spec** under `docs/specs/service/<module>/` (see `docs/specs/service/README.md`)
 - [ ] TypeScript types come from generated schema (no `any`)
 - [ ] No hardcoded dummy data left behind
 - [ ] Service abstractions used (not direct Supabase calls from components)

@@ -1,7 +1,7 @@
 # Upload Manager — Use Cases & Interaction Scenarios
 
-> **Element spec:** [element-specs/upload-manager.md](../element-specs/upload-manager.md)
-> **Related specs:** [upload-panel](../element-specs/upload-panel.md), [upload-button-zone](../element-specs/upload-button-zone.md), [image-detail-view](../element-specs/image-detail-view.md), [photo-marker](../element-specs/photo-marker.md)
+> **Element spec:** [upload-manager.md](../specs/service/media-upload-service/upload-manager.md)
+> **Related specs:** [upload-panel](../specs/component/upload/upload-panel.md), [upload-button-zone](../specs/component/upload/upload-button-zone.md), [image-detail-view](../specs/ui/media-detail/media-detail-view.md), [photo-marker](../specs/ui/media-marker/media-marker.md)
 > **Services:** `UploadManagerService`, `UploadService`, `GeocodingService`, `AddressResolverService`
 
 ---

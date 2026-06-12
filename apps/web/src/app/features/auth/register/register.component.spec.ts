@@ -14,7 +14,7 @@ import {
   withNavigationErrorHandler,
 } from '@angular/router';
 import { RegisterComponent } from './register.component';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 function buildFakeAuth(signUpError: Error | null = null) {
   return {
@@ -113,6 +113,19 @@ describe('RegisterComponent', () => {
       'Alice',
       'alice@example.com',
       'ab'.repeat(24),
+      'StrongPass1!',
+      'StrongPass1!',
+    );
+    expect(fixture.componentInstance['form'].valid).toBe(true);
+  });
+
+  it('accepts readable dev invite codes (hashed server-side)', () => {
+    const { fixture } = setup();
+    fillForm(
+      fixture,
+      'Alice',
+      'alice@example.com',
+      'KlevetaKamin',
       'StrongPass1!',
       'StrongPass1!',
     );

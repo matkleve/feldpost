@@ -1,0 +1,51 @@
+@use '../../../dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../../../dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
+
+// Flex child of .workspace-pane — owns its own padding, replaces workspace-pane-toolbar wrapper
+// @see docs/specs/ui/workspace/workspace-pane.md
+:host {
+  display: block;
+  container-type: inline-size;
+  container-name: workspace-toolbar;
+  width: min(60rem, 100%);
+  margin-inline: auto;
+  padding: var(--spacing-2) var(--spacing-4);
+  flex-shrink: 0;
+}
+
+.workspace-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-2);
+  // Min height aligns menu triggers; no fixed height — toggle track needs p-1 inset (≈2.75rem total).
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  min-height: 2.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  // Menu triggers and view toggles keep intrinsic width; spacer absorbs squeeze
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  > :not(.workspace-toolbar__spacer) {
+    flex-shrink: 0;
+  }
+}
+
+.workspace-toolbar__spacer {
+  flex: 1;
+}
+
+@layer components {
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('workspace-toolbar');
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('workspace-toolbar');
+}
+
+@layer states {
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('workspace-toolbar');
+}
+
+@include fp-toolbar-breakpoints.toolbar-size-control-responsive('workspace-toolbar', workspace-toolbar);
+@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('workspace-toolbar', workspace-toolbar);

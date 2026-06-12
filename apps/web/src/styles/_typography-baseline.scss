@@ -1,0 +1,127 @@
+// ── Typography baseline ────────────────────────────────────────────────────────
+// Must run after Tailwind Preflight so heading metrics are not reset away.
+// @see apps/web/AGENTS.md (typography ownership — global baseline only)
+
+// Exposes typography + spacing/radius primitives + interactive focus ring for headings and app `var()` consumers after legacy bridge and `@theme inline` load order
+// @see docs/migration/phase-7-token-migration.md §Batch 41 / §Batch 42 / §Batch 44 / §Batch 47
+:root {
+  // Defines modular spacing scale (4px base unit) for layout gaps and component insets
+  // @see docs/migration/phase-7-token-migration.md §Batch 44
+  --spacing-1: calc(0.25rem * 1);
+  --spacing-2: calc(0.25rem * 2);
+  --spacing-3: calc(0.25rem * 3);
+  --spacing-4: calc(0.25rem * 4);
+  --spacing-5: calc(0.25rem * 6);
+  --spacing-6: calc(0.25rem * 8);
+  --spacing-8: calc(0.25rem * 16);
+
+  // Defines full pill radius for chips and circular controls (not in Tailwind @theme radius ladder)
+  // @see docs/design/tokens.md §3.3
+  --radius-full: 9999px;
+
+  // Maps semantic container corners to theme radius steps (`--radius-md|lg` from `styles.scss` @theme inline)
+  // @see docs/migration/phase-7-token-migration.md §Batch 44
+  --container-radius-control: var(--radius-md);
+  --container-radius-panel: var(--radius-lg);
+
+  // Sets tight line-height for h1–h2 and other dense heading contexts
+  // @see docs/migration/phase-7-token-migration.md §Batch 41
+  --line-height-tight: 1.2;
+  // Sets solid (unit) line-height for icon rows and compact single-line UI
+  // @see docs/migration/phase-7-token-migration.md §Batch 41
+  --line-height-solid: 1;
+  // Sets reading line-height for long-form body-adjacent labels
+  // @see docs/migration/phase-7-token-migration.md §Batch 41
+  --line-height-reading: 1.4;
+  // Sets comfortable line-height for dialog copy and long labels (ex-legacy bridge Batch 42)
+  // @see docs/migration/phase-7-token-migration.md §Batch 42
+  --line-height-comfortable: 1.55;
+
+  // Typography scale — unified mathematical scale (ratio 1.13) with 0.75rem minimum (moved from legacy bridge Batch 42)
+  // @see docs/design/tokens.md §3.2
+  --font-size-2xs: 0.75rem;
+  --font-size-xs: calc(var(--font-size-2xs) * 1.13);
+  --font-size-sm: calc(var(--font-size-xs) * 1.13);
+  --font-size-md: calc(var(--font-size-sm) * 1.13);
+  --font-size-lg: calc(var(--font-size-md) * 1.13);
+  --font-size-xl: calc(var(--font-size-lg) * 1.13);
+  --font-size-2xl: calc(var(--font-size-xl) * 1.13);
+
+  // Shared font-weight steps for baseline + components (moved from legacy bridge Batch 42)
+  // @see docs/design/tokens.md §3.2
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  // Motion primitives consumed by transitions outside the legacy bridge (moved Batch 42)
+  // @see docs/design/tokens.md §3.6
+  --motion-duration-fast: 100ms;
+  --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  // Defines keyboard focus-visible ring shadow (moved from legacy bridge Batch 47)
+  // @see docs/migration/phase-7-token-migration.md §Batch 47
+  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+// Overrides focus ring mix strength when dark palette is active (ex legacy dark mixin Batch 47)
+// @see docs/migration/phase-7-token-migration.md §Batch 47
+@mixin typography-baseline-dark-focus-ring {
+  --interactive-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+// Applies dark focus ring token when app theme is explicitly dark
+// @see docs/migration/phase-7-token-migration.md §Batch 47
+[data-theme='dark'] {
+  @include typography-baseline-dark-focus-ring;
+}
+
+// Applies dark focus ring when OS prefers dark and user has not forced light theme
+// @see docs/migration/phase-7-token-migration.md §Batch 47
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include typography-baseline-dark-focus-ring;
+  }
+}
+
+h1 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+h2 {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+h3 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  // Matches former `--line-height-snug` (1.1) — inlined Batch 41 (token removed from legacy bridge)
+  // @see docs/migration/phase-7-token-migration.md §Batch 41
+  line-height: 1.1;
+}
+
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  // Uses same snug line-height as h3 for dense heading rhythm
+  // @see docs/migration/phase-7-token-migration.md §Batch 41 (h3 block)
+  line-height: 1.1;
+}
+
+// ── Link baseline ─────────────────────────────────────────────────────────────
+// Must follow @tailwind base; aligns default anchors with primary token.
+// @see apps/web/AGENTS.md (typography / link ownership)
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

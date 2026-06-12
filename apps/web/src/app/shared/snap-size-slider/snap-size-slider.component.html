@@ -1,26 +1,24 @@
-<section class="snap-size-slider" role="group" [attr.aria-label]="label()">
-  <div
-    class="snap-size-slider__steps"
-    role="radiogroup"
-    [attr.aria-label]="label()"
-    [style.--snap-option-count]="options().length"
-  >
-    @for (option of options(); track option.value) {
-      <button
-        class="snap-size-slider__step"
-        type="button"
-        [class.snap-size-slider__step--active]="value() === option.value"
-        role="radio"
-        [attr.aria-label]="option.label"
-        [attr.aria-checked]="value() === option.value"
-        (click)="select(option.value)"
-      >
-        @if (option.icon) {
-          <span class="snap-size-slider__step-icon material-icons" aria-hidden="true">
-            {{ option.icon }}
-          </span>
-        }
-      </button>
-    }
-  </div>
-</section>
+<div
+  class="snap-size-slider__steps"
+  role="radiogroup"
+  [attr.aria-label]="label()"
+  [style.--snap-option-count]="options().length"
+>
+  @for (option of options(); track option.value) {
+    <button
+      class="snap-size-slider__step"
+      type="button"
+      [class.snap-size-slider__step--active]="value() === option.value"
+      role="radio"
+      [attr.aria-label]="option.label"
+      [attr.aria-checked]="value() === option.value"
+      (click)="select(option.value)"
+    >
+      @if (option.icon) {
+        <span class="snap-size-slider__step-icon material-icons" aria-hidden="true">
+          {{ option.icon }}
+        </span>
+      }
+    </button>
+  }
+</div>

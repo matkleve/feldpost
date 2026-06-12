@@ -1,0 +1,79 @@
+:host {
+  // Menu body geometry (single owner — no inner `.standard-dropdown` wrapper; flex from `host.class` Tailwind).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 100%;
+  // Open floor for empty panels — shell `min-height` also uses this token; do not exceed shell (flex child).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  --std-dropdown-min-height: 8rem;
+  min-height: min(var(--std-dropdown-min-height, 0rem), 100%);
+  // Shared with `app-menu-panel-search-row` for fixed icon slots.
+  // @see docs/specs/component/ui-primitives/menu-panel-search-row.md
+  --std-dropdown-search-icon-slot-size: 2.5rem;
+  // Shell inset lives on `.option-menu-surface` (upload-resolver-tray contract) — no inner card radius/padding.
+  // @see docs/specs/component/upload/upload-resolver-tray.md
+  padding: 0;
+  border-radius: 0;
+}
+
+// Media-detail project picker: shorter floor; shell carries spacing-1 inset.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+:host.projects-dropdown__shell--media-detail {
+  --std-dropdown-min-height: 0;
+  min-height: 0;
+}
+
+:host.projects-dropdown__shell--media-detail .standard-dropdown__search {
+  padding: 0;
+  border-bottom: none;
+}
+
+:host.projects-dropdown__shell--media-detail .standard-dropdown__search-field {
+  padding: 0;
+}
+
+// Reserves the scrollbar track via layout (no extra pe-* on this host); rows stay full width inside shell padding-inline.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__items {
+  scrollbar-gutter: stable;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// Inner band (e.g. `.projects-list`) owns scroll + `scrollbar-gutter: stable` — this wrapper must not stack a second gutter.
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+.standard-dropdown__items.standard-dropdown__items--scrollbar-gutter-delegate {
+  scrollbar-gutter: auto;
+  overflow: hidden;
+}
+
+// Pinned header + inner scroll band (grouping / sort); outer items host does not scroll.
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__items.standard-dropdown__items--scroll-split {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// Filter toolbar: cap rules band here so one scroll host owns `scrollbar-gutter: stable` (see `.standard-dropdown__items`).
+// @see docs/specs/component/filters/dropdown-system.md
+.standard-dropdown__items.standard-dropdown__items--filter-rules-band {
+  max-height: min(18rem, 50vh);
+}
+
+// Search clear: never `transform` (hlmBtn `[class]` can drop template hooks; `data-*` + `!important` wins over stray utilities).
+// @see docs/specs/component/filters/dropdown-system.md
+:host [data-fp-dropdown-search-clear='true'],
+:host [data-fp-dropdown-search-clear-icon='true'] {
+  transform: none !important;
+}
+
+// Clear icon: do not animate `transform` from unrelated row utilities.
+// @see docs/specs/component/filters/dropdown-system.md
+:host [data-fp-dropdown-search-clear='true']:hover [data-fp-dropdown-search-clear-icon='true'],
+:host [data-fp-dropdown-search-clear='true']:active [data-fp-dropdown-search-clear-icon='true'],
+:host [data-fp-dropdown-search-clear='true']:focus-visible [data-fp-dropdown-search-clear-icon='true'] {
+  transform: none !important;
+}
+

@@ -1,0 +1,12 @@
+# Gotenberg 8 for local Office/PDF → PNG preview generation.
+# Start: docker compose -f supabase/gotenberg/docker-compose.yml up -d
+# Edge secret: GOTENBERG_URL=http://host.docker.internal:3000
+services:
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - '3000:3000'
+    command:
+      - 'gotenberg'
+      - '--api-timeout=120s'
+      - '--libreoffice-auto-start=true'

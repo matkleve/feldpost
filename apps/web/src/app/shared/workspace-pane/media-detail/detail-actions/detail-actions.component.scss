@@ -1,0 +1,109 @@
+// Actions section — two-column grid; hover/type matches detail-row center.
+// @see docs/specs/ui/media-detail/media-detail-actions.md
+
+@use '../detail-row-slots';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --mdv-menu-item-text: var(--foreground);
+  --mdv-action-text-default: var(--muted-foreground);
+}
+
+:host-context([data-theme='sandstone']) {
+  --mdv-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
+  --mdv-menu-item-text: #2f271f;
+  --mdv-action-text-default: #6b5a47;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.detail-section__label {
+  @include detail-row-slots.detail-row-center-width;
+  padding: var(--spacing-3) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.detail-actions__list {
+  @include detail-row-slots.detail-row-center-width;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-1);
+  min-width: 0;
+
+  @media (max-width: 29.9375rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-actions__separator {
+  grid-column: 1 / -1;
+}
+
+// Action tile — same default/hover colors as `.detail-row__center` (icon, label, value).
+// @see docs/specs/ui/media-detail/media-detail-actions.md
+.detail-actions__item {
+  gap: var(--spacing-1);
+  min-height: var(--detail-row-height, 2rem);
+  padding-inline: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  &:hover:not(:disabled):not([disabled]),
+  &:focus-visible {
+    background: var(--mdv-menu-item-hover-bg, color-mix(in srgb, var(--primary) 8%, transparent));
+
+    .detail-actions__icon,
+    .detail-actions__label {
+      color: var(--primary);
+    }
+  }
+}
+
+.detail-actions__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: var(--font-size-md);
+  line-height: 1;
+  color: var(--muted-foreground);
+  transition: color 80ms ease-out;
+}
+
+.detail-actions__label {
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--foreground);
+  transition: color 80ms ease-out;
+}
+
+.detail-actions__item--destructive {
+  .detail-actions__icon,
+  .detail-actions__label {
+    color: var(--destructive);
+  }
+
+  &:hover:not(:disabled):not([disabled]),
+  &:focus-visible {
+    background: color-mix(in srgb, var(--destructive) 10%, transparent);
+
+    .detail-actions__icon,
+    .detail-actions__label {
+      color: var(--destructive);
+    }
+  }
+}

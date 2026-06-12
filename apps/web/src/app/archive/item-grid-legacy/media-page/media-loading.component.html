@@ -1,0 +1,21 @@
+<app-centered-layout>
+  <section
+    class="media-loading"
+    [class.media-loading--row]="variant() === 'row'"
+    [class.media-loading--small]="variant() === 'small'"
+    [class.media-loading--medium]="variant() === 'medium'"
+    [class.media-loading--large]="variant() === 'large'"
+    role="status"
+    [attr.aria-label]="t('common.loading', 'Loading media...')"
+  >
+    @if (variant() === 'row') {
+      @for (row of rowSkeletonItems; track row) {
+        <div class="media-loading__row"></div>
+      }
+    } @else {
+      @for (tile of tileSkeletonItems; track tile) {
+        <div class="media-loading__tile"></div>
+      }
+    }
+  </section>
+</app-centered-layout>

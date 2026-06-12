@@ -1,0 +1,157 @@
+// MediaDetailHeaderComponent styles.
+// @see docs/specs/ui/media-detail/media-detail-header.md
+
+:host {
+  display: block;
+  flex-shrink: 0;
+  --mdv-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+:host-context([data-theme='sandstone']) {
+  --mdv-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
+}
+
+// ─── Header ───
+
+.detail-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+// Groups title + hover edit control so the chip/menu cluster keeps a stable flex lane.
+// @see docs/specs/ui/media-detail/media-detail-header.md
+.detail-header__title-group {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+// Reveals inline edit affordance on title hover without overlapping the type chip.
+// @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+.detail-header__title-edit {
+  --icon-btn-size: 2rem;
+  --icon-btn-radius: var(--radius-sm);
+  --icon-btn-icon-size: 0.9375rem;
+
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease-out;
+
+  .material-icons {
+    font-size: var(--font-size-md);
+  }
+}
+
+.detail-header__title-group:hover .detail-header__title-edit,
+.detail-header__title-group:focus-within .detail-header__title-edit {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .detail-header__title-edit {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.detail-back-btn,
+.detail-actions-btn {
+  --icon-btn-size: 2.75rem;
+  --icon-btn-radius: var(--radius-md);
+  --icon-btn-icon-size: 1.25rem;
+
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+
+  @media (max-width: 47.9375rem) {
+    --icon-btn-size: 3rem;
+  }
+}
+
+.detail-header__title-group .detail-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.detail-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-md); // modular md — @see docs/design/tokens.md §3.1e
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
+  line-height: var(--line-height-reading);
+
+  &--editable {
+    background: none;
+    border: none;
+    border-bottom: 1px dashed transparent;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    text-align: left;
+    transition: border-color 80ms ease-out;
+
+    &:hover {
+      border-bottom-color: var(--primary);
+    }
+  }
+}
+
+.detail-title-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: 0.125rem var(--spacing-2);
+  font-family: inherit;
+  outline: none;
+  // Title field elevation; dark stacks ring formerly on removed `--shadow-focus` (Batch 45).
+  // @see docs/migration/phase-7-token-migration.md §Batch 45
+  box-shadow: var(--shadow-sm);
+}
+
+// Dark theme: stacks primary ring on title field (replaces removed `--shadow-focus`).
+// @see docs/migration/phase-7-token-migration.md §Batch 45
+html[data-theme='dark'] .detail-title-input {
+  box-shadow: var(--shadow-sm), var(--interactive-focus-ring);
+}
+
+// System dark when app is not forced light (matches legacy bridge dark mixin scope).
+// @see docs/migration/phase-7-token-migration.md §Batch 45
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .detail-title-input {
+    box-shadow: var(--shadow-sm), var(--interactive-focus-ring);
+  }
+}
+
+// ─── Context menu ───
+
+.detail-context-menu {
+  min-width: 11rem;
+}
+
+// Anchored shell list inset (no StandardDropdown); matches `--std-dropdown-padding-inline` rhythm.
+// @see docs/specs/component/filters/dropdown-system.md

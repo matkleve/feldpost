@@ -1,0 +1,286 @@
+<!-- Workspace Projects Panel
+     @see docs/specs/ui/workspace/workspace-pane-projects-tab.md -->
+
+<!-- Stable state: list — project list with search and new-project trigger -->
+@if (panelState() === 'list' || panelState() === 'new-draft') {
+  <div class="projects-panel">
+    <!-- Search input -->
+    <div class="projects-panel__search">
+      <span class="material-icons projects-panel__search-icon" aria-hidden="true">search</span>
+      <input
+        class="projects-panel__search-input"
+        type="search"
+        [attr.placeholder]="t('workspace.projects.panel.search.placeholder', 'Search projects…')"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        [attr.aria-label]="t('workspace.projects.panel.search.aria', 'Search projects')"
+      />
+    </div>
+
+    <!-- Project rows -->
+    <ul class="projects-panel__list" role="list">
+      @if (loading()) {
+        @for (i of [1, 2, 3]; track i) {
+          <li class="projects-panel__row projects-panel__row--skeleton" aria-hidden="true">
+            <span class="projects-panel__row-chip projects-panel__row-chip--skeleton"></span>
+            <span class="projects-panel__row-name projects-panel__row-name--skeleton"></span>
+          </li>
+        }
+      } @else {
+        @if (filteredActive().length === 0 && !searchTerm()) {
+          <li class="projects-panel__empty">
+            {{ t('workspace.projects.panel.emptyActive', 'No active projects') }}
+          </li>
+        }
+        @for (project of filteredActive(); track project.id) {
+          <li
+            class="projects-panel__row"
+            role="listitem"
+            (click)="openDetail(project.id)"
+            (contextmenu)="openContextMenu($event, project.id)"
+            [attr.aria-label]="project.name"
+          >
+            <span
+              class="projects-panel__row-chip"
+              [style.background-color]="projectColorStyle(project.colorKey)"
+              aria-hidden="true"
+            ></span>
+            <span class="projects-panel__row-name">{{ project.name }}</span>
+            <span class="projects-panel__row-count" [attr.aria-label]="project.totalImageCount + ' media'">
+              {{ project.totalImageCount }}
+            </span>
+          </li>
+        }
+
+        <!-- Archived section -->
+        @if (showArchived()) {
+          @if (filteredArchived().length > 0) {
+            <li class="projects-panel__section-label" aria-hidden="true">
+              {{ t('workspace.projects.panel.archived', 'Archived') }}
+            </li>
+          }
+          @for (project of filteredArchived(); track project.id) {
+            <li
+              class="projects-panel__row projects-panel__row--archived"
+              role="listitem"
+              (click)="openDetail(project.id)"
+              (contextmenu)="openContextMenu($event, project.id)"
+              [attr.aria-label]="project.name"
+            >
+              <span
+                class="projects-panel__row-chip projects-panel__row-chip--muted"
+                [style.background-color]="projectColorStyle(project.colorKey)"
+                aria-hidden="true"
+              ></span>
+              <span class="projects-panel__row-name projects-panel__row-name--muted">{{ project.name }}</span>
+              <span class="projects-panel__row-count" [attr.aria-label]="project.totalImageCount + ' media'">
+                {{ project.totalImageCount }}
+              </span>
+            </li>
+          }
+        }
+      }
+    </ul>
+
+    <!-- Stable state: new-draft — inline name input row at list bottom -->
+    @if (panelState() === 'new-draft') {
+      <div class="projects-panel__draft-row">
+        <span class="material-icons projects-panel__draft-icon" aria-hidden="true">folder_open</span>
+        <input
+          #draftInput
+          class="projects-panel__draft-input"
+          type="text"
+          autofocus
+          [ngModel]="draftName()"
+          (ngModelChange)="draftName.set($event)"
+          [attr.placeholder]="t('workspace.projects.panel.newProject.placeholder', 'Project name…')"
+          [attr.aria-label]="t('workspace.projects.panel.newProject.aria', 'New project name')"
+          [disabled]="draftBusy()"
+          (keydown)="onDraftKeydown($event)"
+        />
+        <button
+          class="projects-panel__draft-cancel"
+          type="button"
+          [attr.aria-label]="t('workspace.projects.panel.cancelDraft', 'Cancel')"
+          (click)="cancelDraft()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+      </div>
+    }
+
+    <!-- List footer: New project + Show archived toggle -->
+    <div class="projects-panel__footer">
+      @if (panelState() === 'list') {
+        <button
+          class="projects-panel__new-btn"
+          type="button"
+          (click)="startNewDraft()"
+          [attr.aria-label]="t('workspace.projects.panel.newProject', 'New project')"
+        >
+          <span class="material-icons projects-panel__new-icon" aria-hidden="true">add</span>
+          <span>{{ t('workspace.projects.panel.newProject', 'New project') }}</span>
+        </button>
+      }
+      <button
+        class="projects-panel__toggle-archived"
+        type="button"
+        [class.projects-panel__toggle-archived--active]="showArchived()"
+        (click)="showArchived.update(v => !v)"
+        [attr.aria-pressed]="showArchived()"
+      >
+        {{ t('workspace.projects.panel.showArchived', 'Show archived') }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Stable state: detail — single project detail + drop zone -->
+@if (panelState() === 'detail') {
+  @if (openProject(); as project) {
+    <div class="projects-panel-detail">
+      <!-- Back + identity row -->
+      <div class="projects-panel-detail__header">
+        <button
+          class="projects-panel-detail__back"
+          type="button"
+          (click)="backToList()"
+          [attr.aria-label]="t('workspace.projects.panel.backToList', 'Back to projects')"
+        >
+          <span class="material-icons" aria-hidden="true">arrow_back</span>
+        </button>
+        <!-- Color chip (tap opens picker) -->
+        <button
+          class="projects-panel-detail__color-chip"
+          type="button"
+          [style.background-color]="projectColorStyle(project.colorKey)"
+          (click)="toggleColorPicker()"
+          [attr.aria-label]="t('workspace.projects.panel.changeColor', 'Change color')"
+          [attr.aria-expanded]="colorPickerOpen()"
+        ></button>
+        <!-- Color picker popover -->
+        @if (colorPickerOpen()) {
+          <app-dropdown-shell
+            class="projects-panel-detail__color-picker-shell"
+            [top]="48"
+            [left]="48"
+            [minWidth]="200"
+            (closeRequested)="colorPickerOpen.set(false)"
+          >
+            <app-project-color-picker
+              [selectedColor]="project.colorKey"
+              (colorSelected)="onColorSelected($event)"
+            />
+          </app-dropdown-shell>
+        }
+        <!-- Inline name editor -->
+        <input
+          #renameInput
+          class="projects-panel-detail__name-input"
+          type="text"
+          [ngModel]="renameValue()"
+          (ngModelChange)="renameValue.set($event)"
+          [disabled]="renameBusy()"
+          (keydown)="onRenameKeydown($event)"
+          (blur)="submitRename()"
+          [attr.aria-label]="t('workspace.projects.panel.rename.aria', 'Project name')"
+        />
+      </div>
+
+      <!-- Stats row -->
+      <div class="projects-panel-detail__stats">
+        <span class="projects-panel-detail__stat">
+          <span class="material-icons projects-panel-detail__stat-icon" aria-hidden="true">photo_library</span>
+          {{ project.totalImageCount }}
+        </span>
+        @if (project.lastActivity) {
+          <span class="projects-panel-detail__stat">
+            <span class="material-icons projects-panel-detail__stat-icon" aria-hidden="true">schedule</span>
+            {{ project.lastActivity | slice: 0 : 10 }}
+          </span>
+        }
+        @if (project.city) {
+          <span class="projects-panel-detail__stat">
+            <span class="material-icons projects-panel-detail__stat-icon" aria-hidden="true">place</span>
+            {{ project.city }}
+          </span>
+        }
+      </div>
+
+      <!-- Drop zone — active in detail state only -->
+      <div
+        class="projects-panel-detail__drop-zone"
+        [class.projects-panel-detail__drop-zone--over]="isDragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+        [attr.aria-label]="t('workspace.projects.panel.dropZone', 'Drop media here to assign to project')"
+      >
+        <span class="material-icons projects-panel-detail__drop-icon" aria-hidden="true">
+          {{ isDragOver() ? 'move_to_inbox' : 'upload' }}
+        </span>
+        <span class="projects-panel-detail__drop-label">
+          {{ t('workspace.projects.panel.dropZone', 'Drop media here to assign to project') }}
+        </span>
+      </div>
+
+      <!-- Danger actions -->
+      <div class="projects-panel-detail__actions">
+        @if (project.status === 'active') {
+          <button
+            class="projects-panel-detail__action-btn projects-panel-detail__action-btn--muted"
+            type="button"
+            (click)="onDangerAction(project.id, 'archive')"
+          >
+            <span class="material-icons" aria-hidden="true">archive</span>
+            {{ t('workspace.projects.panel.archive', 'Archive') }}
+          </button>
+        } @else {
+          <button
+            class="projects-panel-detail__action-btn"
+            type="button"
+            (click)="onDangerAction(project.id, 'restore')"
+          >
+            <span class="material-icons" aria-hidden="true">unarchive</span>
+            {{ t('workspace.projects.panel.restore', 'Restore') }}
+          </button>
+        }
+        <button
+          class="projects-panel-detail__action-btn projects-panel-detail__action-btn--danger"
+          type="button"
+          (click)="onDangerAction(project.id, 'delete')"
+        >
+          <span class="material-icons" aria-hidden="true">delete</span>
+          {{ t('workspace.projects.panel.delete', 'Delete') }}
+        </button>
+      </div>
+    </div>
+  }
+}
+
+<!-- Context menu for project row right-click -->
+@if (contextMenuOpen() && contextMenuPosition(); as pos) {
+  <app-dropdown-shell
+    class="projects-panel__context-menu"
+    [top]="pos.y"
+    [left]="pos.x"
+    [minWidth]="200"
+    [panelClass]="'option-menu-surface'"
+    (closeRequested)="closeContextMenu()"
+  >
+    <div class="flex flex-col" role="menu">
+      <button
+        hlmMenuItem
+        class="w-full"
+        type="button"
+        role="menuitem"
+        (click)="openInProjectsPage()"
+      >
+        <span class="material-icons option-menu-item__icon" aria-hidden="true">open_in_new</span>
+        <span class="min-w-0 flex-1 text-left">
+          {{ t('workspace.projects.panel.openInPage', 'Open in Projects page') }}
+        </span>
+      </button>
+    </div>
+  </app-dropdown-shell>
+}

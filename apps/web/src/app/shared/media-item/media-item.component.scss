@@ -1,0 +1,251 @@
+// Grid: host reserves a fixed square cell; inner slot animates ratio without reflow.
+// Row: host height comes from item-grid lane.
+// @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
+:host {
+  display: block;
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+:host:not([data-mode='row']) {
+  position: relative;
+  aspect-ratio: 1;
+  block-size: auto;
+}
+
+// Row mode keeps fixed lane height from item-grid.
+// @see docs/specs/component/item-grid/item-grid.md#row-mode
+:host([data-mode='row']) {
+  block-size: var(--item-grid-slot-block-size, 6.5rem);
+}
+
+// Detail pane embed: height-first slot inside fixed hero band; border hugs media width.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+:host.media-item--detail-embed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: unset;
+  block-size: 100%;
+  max-block-size: 100%;
+  min-block-size: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+:host.media-item--detail-embed .media-item__slot {
+  position: relative;
+  inset-block-start: auto;
+  inset-inline-start: auto;
+  transform: none;
+  margin-inline: auto;
+  block-size: 100%;
+  inline-size: auto;
+  max-block-size: 100%;
+  max-inline-size: 100%;
+  aspect-ratio: var(--media-aspect-ratio, 1);
+  transition:
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+// Fills hero band (app-media-item footprint) until native ratio arrives — no 1:1 grow animation.
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+:host.media-item--detail-embed .media-item__slot--detail-pending-ratio {
+  inline-size: 100%;
+  aspect-ratio: unset;
+}
+
+// Placeholder tiles without item payload use muted pulse inside inherited slot geometry.
+// @see docs/specs/component/media/media-item.md#what-it-looks-like
+:host([data-has-item='false']) {
+  aspect-ratio: 1;
+  background: var(--muted);
+  animation: none;
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+:host([data-has-item='false'][data-mode='row']) {
+  border-radius: var(--radius-md);
+}
+
+// Slot owns media geometry, border emphasis, and file-type chip stacking context.
+// @see docs/specs/component/media/media-item.md#visual-behavior-contract
+.media-item__slot {
+  position: relative;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  // Landscape: full width; portrait: shrink width (spec AC).
+  // @see docs/specs/component/media/media-item.md#added-verification-cases
+  inline-size: min(100%, calc(100% * var(--media-aspect-ratio, 1)));
+  aspect-ratio: var(--media-aspect-ratio, 1);
+  min-inline-size: 0;
+  min-block-size: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  box-shadow: none;
+  transition:
+    aspect-ratio 300ms var(--motion-ease-out),
+    inline-size 300ms var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+// Positions shrinking slot inside fixed square host so grid rows/columns stay stable.
+// @see docs/specs/component/media/media-item.md#added-verification-cases
+:host:not([data-mode='row']):not(.media-item--detail-embed) .media-item__slot {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  margin-inline: 0;
+}
+
+:host([data-mode='row']) .media-item__slot {
+  block-size: 100%;
+  inline-size: 100%;
+  aspect-ratio: auto;
+  margin-inline: 0;
+  transition: none;
+}
+
+// Preview fills slot width; block-size follows viewport intrinsic height in grid modes.
+// @see docs/specs/component/media/media-item.md#component-hierarchy
+.media-item__preview {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+// File-type chip: lower-right inside slot, above open hit-target.
+// @see docs/specs/component/media/media-item.md#file-type-chip-phase-2
+.media-item__filetype-chip {
+  position: absolute;
+  inset-inline-end: var(--spacing-2);
+  inset-block-end: var(--spacing-2);
+  z-index: 5;
+  max-inline-size: calc(100% - (var(--spacing-2) * 2));
+  display: block;
+  pointer-events: none;
+}
+
+// Detail hero: resolution badge inside slot bounds (on the photo, not the preview band).
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+.media-item__resolution-badge {
+  position: absolute;
+  inset-block-end: var(--spacing-2);
+  inset-inline-end: var(--spacing-2);
+  z-index: 6;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--shadow-color) 72%, transparent);
+  color: var(--card);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  pointer-events: none;
+  user-select: none;
+}
+
+:host([data-mode='row']) .media-item__preview {
+  block-size: 100%;
+}
+
+// Stable state: selected — elevation level 1 (constant 1px border; no inset shrink).
+// @see docs/specs/component/media/media-item.md#visual-behavior-contract
+.media-item__slot--selected {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
+}
+
+// Hover/focus-within on slot only (not empty square host padding).
+// @see docs/design/tokens.md §3.5
+.media-item__slot:hover,
+.media-item__slot:focus-within {
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.media-item__open {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.media-item__open:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.media-item__upload-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+.media-item__quiet-actions {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  opacity: 0;
+  transform: translateY(-2px);
+  pointer-events: none;
+  transition:
+    opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1),
+    transform var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
+}
+
+.media-item__slot:hover .media-item__quiet-actions,
+.media-item__slot:focus-within .media-item__quiet-actions {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+// Selected tiles keep the select affordance visible; map stays hover-only (see quiet-actions SCSS).
+// @see docs/specs/component/media/media-item.md#actions--interactions
+.media-item__slot--selected .media-item__quiet-actions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: none;
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.media-item__slot--selected .media-item-quiet-actions__button--select {
+  pointer-events: auto;
+}
+
+.media-item__slot--selected:not(.media-item__slot--map-enabled) app-media-item-map-action {
+  pointer-events: none;
+}
+
+.media-item__slot--selected.media-item__slot--map-enabled app-media-item-map-action {
+  pointer-events: auto;
+}
+
+.media-item__slot--selected:hover app-media-item-map-action,
+.media-item__slot--selected:focus-within app-media-item-map-action {
+  pointer-events: auto;
+}
+
+.media-item__slot--selected.media-item__slot--map-enabled .media-item-map-action__trigger {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}

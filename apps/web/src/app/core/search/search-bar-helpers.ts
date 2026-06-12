@@ -1,5 +1,18 @@
-import { GeocoderSearchResult } from '../geocoding.service';
-import { SearchAddressCandidate, SearchQueryContext, SearchRecentCandidate } from './search.models';
+import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
+import type { SearchAddressCandidate, SearchQueryContext, SearchRecentCandidate } from './search.models';
+
+/** Structured fields from first row in a db-address group (format D). */
+export interface AddressGroupPickerSnapshot {
+  street: string | null;
+  house_number: string | null;
+  staircase: string | null;
+  door: string | null;
+  postcode: string | null;
+  city: string | null;
+  district: string | null;
+  country: string | null;
+  address_label: string | null;
+}
 
 export interface AddressGroup {
   label: string;
@@ -10,6 +23,7 @@ export interface AddressGroup {
   activeProjectHits: number;
   latestCreatedAtMs: number;
   score: number;
+  pickerSnapshot: AddressGroupPickerSnapshot;
 }
 
 export interface StoredRecentSearch {
@@ -17,6 +31,24 @@ export interface StoredRecentSearch {
   lastUsedAt: string;
   projectId?: string;
   usageCount: number;
+}
+
+export function deduplicateGeocoderCandidatesByLabel(
+  candidates: SearchAddressCandidate[],
+): SearchAddressCandidate[] {
+  const bestByLabel = new Map<string, SearchAddressCandidate>();
+
+  for (const candidate of candidates) {
+    const key = candidate.label.trim().toLowerCase();
+    if (!key) continue;
+
+    const existing = bestByLabel.get(key);
+    if (!existing || (candidate.score ?? 0) > (existing.score ?? 0)) {
+      bestByLabel.set(key, candidate);
+    }
+  }
+
+  return [...bestByLabel.values()];
 }
 
 export function sanitizeRecentLabel(label: string): string {

@@ -1,0 +1,25 @@
+@if (showSearch()) {
+  <app-menu-panel-search-row
+    [searchTerm]="searchTerm()"
+    [searchPlaceholder]="searchPlaceholder()"
+    [showDefaultClearAction]="showDefaultClearAction()"
+    [clearSearchAriaLabel]="clearSearchAriaLabel()"
+    [reserveProjectedSearchActionSlot]="reserveProjectedSearchActionSlot()"
+    (searchTermChange)="searchTermChange.emit($event)"
+    (clearRequested)="clearRequested.emit()"
+  >
+    <ng-content select="[dropdown-search-action]" />
+  </app-menu-panel-search-row>
+}
+
+<div [class]="itemsHostClass()" (scroll)="itemsScroll.emit()">
+  <ng-content select="[dropdown-items]" />
+</div>
+
+@if (actionLabel()) {
+  <app-menu-panel-footer-action
+    [actionLabel]="actionLabel()!"
+    [actionIcon]="actionIcon()"
+    (actionRequested)="actionRequested.emit()"
+  />
+}

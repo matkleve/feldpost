@@ -114,24 +114,254 @@ Use this file to:
 4. Settings section card and form composition primitives
 5. Accessibility + visual-regression checklist per primitive
 
+## Professional Rollout Plan
+
+This overhaul should be executed as a system migration, not as isolated component polish.
+
+### Phase Status Snapshot (Primitives-Focused)
+
+1. Phase 1: Freeze the Design-System Contract — `95%`
+2. Phase 2: Harden the Primitive Set — `94%`
+3. Phase 3: Migrate High-Visibility Surfaces — `83%`
+4. Phase 4: Migrate Composition Surfaces — `71%`
+5. Phase 5: Verify, Promote, and Enforce — `46%`
+
+Status date: 2026-03-18
+
+### Phase 1: Freeze the Design-System Contract
+
+Progress: `95%`
+
+Goal: prevent more drift while migrations continue.
+
+Deliverables:
+
+1. Treat `docs/design/README.md` as orchestrator only.
+2. Treat `docs/design/tokens.md` as the only raw token value source.
+3. Treat `docs/design/token-layers.md` as the only layer/alias/theming architecture source.
+4. Treat `docs/design/components/action-interaction-kernel.md` as the only interaction-policy source.
+5. Keep `apps/web/src/styles.scss` as the runtime home for Tailwind `@theme inline` and remaining shared patterns; **no** legacy bridge partial under `apps/web/src/styles/` (Phase 7 Batch 50 — see `docs/migration/phase-7-token-migration.md`). Layer C menu/action names are **not** emitted from a global bridge file — use **`docs/design/token-layers.md`** with **`docs/design/tokens.md`** for binding rules.
+
+Exit criteria:
+
+1. New UI work does not add competing policy or token definitions in feature docs.
+2. New shared primitives bind tweakcn semantics and spacing/radius/motion per **`docs/design/tokens.md`**, follow **`docs/design/token-layers.md`** for bridge vs per-component **`:host`** ownership, and align menu/dropdown shells with **`docs/specs/component/filters/dropdown-system.md`**.
+3. Feature SCSS does not define duplicate hover/focus/border systems where a base primitive exists.
+
+Done:
+
+1. Canonical ownership split is established across design docs.
+2. `token-layers.md` is active as Layer A/B/C reference.
+3. Interaction policy vs implementation profile is separated.
+
+Remaining:
+
+1. Continue enforcing ownership discipline on every new doc change.
+
+### Phase 2: Harden the Primitive Set
+
+Progress: `94%`
+
+Goal: make the shared primitives good enough that features can adopt them without feature-local redesign.
+
+Target primitives:
+
+1. Button family: primary, secondary, ghost, icon, danger.
+2. Segmented switch.
+3. Menu surface and dropdown shell.
+4. Select/input/field row primitives.
+5. Toggle row and switch.
+6. Dialog shell.
+7. Section/card shell.
+
+Exit criteria:
+
+1. Each primitive has one canonical implementation path.
+2. Ghost buttons keep the agreed light gray default border.
+3. Border policy remains action-first: passive containers do not regain stacked borders.
+4. Primitive states are defined centrally for default, hover, active, focus, disabled.
+
+Done:
+
+1. Shared segmented switch exists and is in use.
+2. Shared menu surface/dropdown shell is broadly adopted.
+3. Button family standardization has started and ghost-border rule is applied.
+4. Segmented primitive now supports detached inactive option + smooth state transitions + reduced-motion fallback.
+5. Map-type switch now consumes the same shared segmented primitive (legacy local switch styles removed).
+6. Ghost-style toolbar and icon buttons now share a consistent light gray default border via global primitives.
+7. Segmented primitive exposes consumer-level layout variables (host/group width, button min-height/flex) so feature pages stop re-defining segmented button state/layout rules.
+8. Settings overlay close action now consumes the shared `icon-btn-ghost` primitive (feature-local hover/focus state styling removed).
+9. Account action markup now uses primitive-first button classes (`ui-button*`) without redundant feature wrapper class usage.
+10. Settings overlay segmented groups (language, density, theme mode, marker motion) now consume `app-segmented-switch` with typed option/value handlers.
+11. Shared select primitive now supports consumer-level sizing variables, and a shared `ui-input-control` primitive is available for consistent input behavior in compact contexts.
+12. Dropdown search/reset icon actions now consume the shared `icon-btn-ghost` primitive with dropdown-level size/color overrides, replacing duplicated local icon-action base styling.
+
+Remaining:
+
+1. Finish button-family adoption in remaining composition surfaces still carrying local state styling.
+2. Complete canonical field/select/toggle/dialog-shell usage across all major flows.
+
+### Phase 3: Migrate High-Visibility Surfaces
+
+Progress: `85%`
+
+Goal: standardize the UI that users see most often.
+
+Priority order:
+
+1. Toolbar triggers and option menus.
+2. Context menus and detail menus.
+3. Segmented controls and toggle rows.
+4. Suggestion/autocomplete panels.
+5. Dialogs and settings surfaces.
+
+Exit criteria:
+
+1. Feature templates use shared primitives instead of local button/menu/switch structures where possible.
+2. Remaining exceptions are documented explicitly in this file.
+3. No functional regressions in keyboard behavior, outputs, focus return, or reactive flows.
+
+Done:
+
+1. Toolbar dropdown family and major option-menu surfaces are standardized.
+2. Map-type switch and projects status filter now use the shared segmented primitive.
+3. Context-menu structure parity improved across map/detail areas.
+4. `/projects` segmented status filter no longer shifts layout when archived state becomes inactive.
+5. `/projects` labels use a robust fallback helper (`text(key, fallback)`) to avoid empty/vanishing strings.
+6. Map and Projects now share one segmented control primitive with aligned behavior.
+7. `/projects` mobile segmented layout now uses segmented primitive variables instead of local per-button selectors.
+8. Toolbar dropdown search/reset actions now share the same icon-ghost primitive baseline in standard/sort/grouping dropdown flows.
+9. Image-detail header action buttons (back/more) now consume `icon-btn-ghost` with component-level size overrides instead of local ghost button base rules.
+10. Detail inline action rails now consume `icon-btn-ghost` across location/metadata interaction rows for consistent icon action behavior in high-use detail workflows.
+11. Map, radius, and marker context menus now use the shared dropdown shell/frame plus shared option-menu row structure instead of free-standing menu containers.
+12. Detail header overflow menu and inline projects editor now use hardened shared-shell menu placement with aligned keyboard/focus behavior instead of fragile local dropdown positioning.
+
+Remaining:
+
+1. Finish `/projects` page consistency pass (labels, spacing, action-row parity).
+2. Close remaining menu edge cases with strict primitive structure.
+3. Verify segmented primitive parity across all contexts in regression matrix.
+
+### Phase 4: Migrate Composition Surfaces
+
+Progress: `72%`
+
+Goal: move larger feature flows onto the same primitives so themes and future redesigns scale.
+
+Priority areas:
+
+1. Settings overlay and its subsections.
+2. Account/auth surfaces.
+3. Project filters and management flows.
+4. Workspace/detail inline editors and metadata rows.
+
+Exit criteria:
+
+1. Feature SCSS is mostly layout and composition, not state styling.
+2. Shared section/field/action primitives are reused across feature clusters.
+3. Theme changes primarily require alias updates, not component rewrites.
+
+Done:
+
+1. Settings/account/invite surfaces are partially migrated to shared section/field/action primitives.
+2. Local style duplication has been reduced in several high-use flows.
+3. Shared dialog actions (confirm/project-select/text-input) now consume `ui-button` variants instead of feature-local button visuals.
+4. Settings overlay section composition now uses shared segmented primitive consistently instead of local per-section segmented button markup.
+5. Invite share actions now consume `icon-btn-ghost`, with local icon-button styles reduced to size/layout concerns.
+6. Settings overlay toggle rows now use the shared toggle-on state class only (redundant local state binding removed).
+7. Projects filter dropdown now consumes shared `ui-select-control` and `ui-input-control` primitives with compact tokenized sizing, replacing duplicate local control-state styling.
+8. Dropdown control composition reduced duplicate action-button state styling by centralizing icon-action base behavior on `icon-btn-ghost`.
+9. Detail-view header composition now keeps only layout/sizing overrides while shared icon-button interaction states come from `icon-btn-ghost`.
+10. Metadata row action controls now consume the shared icon-button primitive with component-level positioning/visibility overrides only.
+11. Detail inline project editing now keeps local styles focused on composition while dropdown placement, close behavior, and keyboard navigation are handled through the shared dropdown shell pattern.
+
+Remaining:
+
+1. Continue migrating low-readiness composition surfaces.
+2. Remove remaining feature-local state styling that duplicates base primitives.
+
+### Phase 5: Verify, Promote, and Enforce
+
+Progress: `48%`
+
+Goal: turn the overhaul into a stable operating model.
+
+Deliverables:
+
+1. Update `docs/design/components/theme-regression-matrix.md` with real `OK` or `BUG(...)` statuses.
+2. Keep accessibility and keyboard behavior tied to primitive contracts.
+3. Keep i18n pipeline updates bundled with any new user-facing text.
+4. Use the catalog as the migration backlog and readiness tracker.
+
+Exit criteria:
+
+1. Critical primitives have verified light, dark, and sandstone behavior.
+2. Keyboard/focus checks pass or have explicit tracked bugs.
+3. New feature work extends the shared system instead of bypassing it.
+
+Done:
+
+1. Regression matrix exists and is actively tracked.
+2. Initial focused test infrastructure blockers were reduced.
+3. Segmented-switch motion resource and source rationale were documented.
+4. Regression statuses were updated from pure harness blockers to mixed pass/fail evidence after focused runs.
+5. Regression matrix rows for toolbar controls and dialog shell were promoted from `TODO` to tracked `*-unverified` statuses.
+6. Regression matrix row for map context menus was promoted from `TODO` to tracked `*-unverified` status after code-level menu-shell consolidation.
+7. Detail-surface tracking notes now explicitly cover header-menu and inline-project-editor placement/keyboard hardening ahead of manual smoke promotion.
+
+Remaining:
+
+1. Convert `TODO`/`unverified` rows to evidence-based `OK`/`BUG(...)` outcomes.
+2. Complete manual light/dark/sandstone smoke checks for critical primitives.
+3. Promote verification checks into default delivery flow.
+
+## Working Rules During Migration
+
+1. Migrate by primitive family, not by random page order.
+2. Prefer central alias or primitive fixes over local feature overrides.
+3. Accept documented exceptions only when interaction structure is genuinely different.
+4. Do not mix visual standardization with unrelated logic refactors in the same slice.
+5. Update the regression matrix in the same change set when a primitive meaningfully changes.
+
+## Primitive-Level Changes (Recent)
+
+1. Segmented primitive implementation updates:
+   1. `apps/web/src/app/shared/segmented-switch/segmented-switch.component.ts`
+   2. `apps/web/src/app/shared/segmented-switch/segmented-switch.component.html`
+   3. `apps/web/src/app/shared/segmented-switch/segmented-switch.component.scss`
+2. Global segmented token/state updates:
+   1. `apps/web/src/styles.scss`
+3. Projects consumer migration and text fallback hardening:
+   1. `apps/web/src/app/features/projects/projects-page.component.ts`
+   2. `apps/web/src/app/features/projects/projects-page.component.html`
+   3. `apps/web/src/app/features/projects/projects-page.component.scss`
+4. Motion guidance/resource docs:
+   1. `docs/design/components/segmented-switch-motion-resource.md`
+
+Definition note:
+
+1. Primitive-level changes are changes in shared components and global style primitives first; feature files only consume those primitives and only keep layout/exceptions.
+
 ## UI Primitive Inventory (Mapping)
 
 | Primitive block                                 | Canonical contract                                 | Primary implementation files                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Current state | Theme readiness |
 | ----------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------------- |
 | Global token foundation                         | Global CSS custom properties in one source         | `apps/web/src/styles.scss`, `docs/design/tokens.md`                                                                                                                                                                                                                                                                                                                                                                                                                                             | present       | medium          |
+| Button family                                   | Shared button primitive + semantic variants        | `apps/web/src/styles.scss`, `apps/web/src/app/features/account/account.component.html`, `apps/web/src/app/features/projects/projects-page.component.html`, `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html`                                                                                                                                                                                                                                       | partial       | medium          |
 | Dropdown shell/anchoring                        | Shared shell + panel classes                       | `apps/web/src/app/shared/dropdown-shell.component.ts`, `apps/web/src/app/shared/standard-dropdown.component.ts`                                                                                                                                                                                                                                                                                                                                                                                 | present       | medium          |
 | Toolbar option dropdowns                        | Shared menu surface + dropdown shell               | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/workspace-toolbar.component.html`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts` | present       | medium          |
 | Map context menus                               | Option menu surface primitives                     | `apps/web/src/app/features/map/map-shell/map-shell.component.html`, `apps/web/src/app/features/map/map-shell/map-shell.component.scss`                                                                                                                                                                                                                                                                                                                                                          | partial       | low             |
-| Detail context menu                             | Option menu surface + contextual actions           | `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html`, `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.scss`                                                                                                                                                                                                                                                                                                                                | partial       | low             |
+| Detail context menu                             | Option menu surface + contextual actions           | `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html`, `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.scss`                                                                                                                                                                                                                                                                                                                                | partial       | low             |
 | Search suggestions panel (integrated exception) | Integrated search + suggestion panel pattern       | `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html`, `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.scss`                                                                                                                                                                                                                                                                                                        | partial       | medium          |
 | Metadata suggestion menu                        | Option menu surface in inline form flow            | `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html`, `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.scss`                                                                                                                                                                                                                                                                                                | partial       | medium          |
 | Settings form sections                          | Shared settings/form primitives + semantic aliases | `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`, `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                                                          | partial       | medium          |
+| Segmented switch (icon + inactive state)        | Shared segmented switch component                  | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.ts`, `apps/web/src/app/shared/segmented-switch/segmented-switch.component.html`, `apps/web/src/app/shared/segmented-switch/segmented-switch.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                    | present       | medium          |
 | Dialog shell (confirm/input/select)             | Shared modal primitives                            | `apps/web/src/app/shared/confirm-dialog/confirm-dialog.component.ts`, `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`, `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts`                                                                                                                                                                                                                                                            | present       | medium          |
 | Chips and compact selector rows                 | Shared chip behavior + row semantics               | `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.ts`, `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.scss`, `apps/web/src/app/features/projects/projects-view-toggle.component.ts`                                                                                                                                                                                                                                                                    | partial       | medium          |
 | Slider control                                  | Shared slider primitive                            | `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.ts`, `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.scss`                                                                                                                                                                                                                                                                                                                                            | present       | medium          |
 | Color selector popover                          | Feature-specific option picker                     | `apps/web/src/app/features/projects/project-color-picker.component.ts`                                                                                                                                                                                                                                                                                                                                                                                                                          | partial       | medium          |
 | Invite management section                       | Shared settings/form primitives + semantic aliases | `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html`, `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                      | partial       | medium          |
-| Captured date inline editor                     | Shared field/menu/action aliases in inline editor  | `apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                                                                                                                                  | partial       | medium          |
+| Captured date inline editor                     | Shared field primitives + per-host menu/action colors per **token-layers**     | `apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                                                                                                                                  | partial       | medium          |
 
 Notes:
 
@@ -140,127 +370,48 @@ Notes:
 
 ## Theme Contract (Semantic Token Layer)
 
-Goal: allow new themes by remapping semantic aliases, not by editing each component.
+Canonical source: `docs/design/token-layers.md`.
 
-### Contract layer A: Foundation tokens (already in use)
+Catalog-level enforcement summary:
 
-- Color: `--color-bg-*`, `--color-border*`, `--color-text-*`, `--color-primary`, `--color-clay`, semantic states
-- Radius: `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full`
-- Elevation: `--elevation-base`, `--elevation-subtle`, `--elevation-overlay`, `--elevation-dropdown`, `--elevation-modal`
-- Spacing/layout: `--spacing-*`, `--container-*`, `--ui-item-*`
-
-### Contract layer B: Interactive semantic aliases (partially in use)
-
-- `--interactive-border-muted`
-- `--interactive-surface-hover`
-- `--interactive-focus-ring`
-- `--interactive-transition-standard`
-
-### Contract layer C: Component-role aliases (to standardize next)
-
-Introduce and migrate to role aliases so primitives can be themed independently from raw palette tokens:
-
-1. Action controls
-
-- `--action-bg-default`
-- `--action-bg-hover`
-- `--action-bg-active`
-- `--action-border-default`
-- `--action-border-active`
-- `--action-text-default`
-- `--action-text-active`
-
-2. Menu and option surfaces
-
-- `--menu-surface-bg`
-- `--menu-surface-border`
-- `--menu-item-bg-hover`
-- `--menu-item-bg-active`
-- `--menu-item-text`
-- `--menu-item-text-active`
-
-3. Form controls
-
-- `--field-bg`
-- `--field-border`
-- `--field-border-focus`
-- `--field-placeholder`
-- `--field-text`
-
-4. Settings sections and cards
-
-- `--section-bg`
-- `--section-border`
-- `--section-title`
-- `--section-text`
-
-5. Feedback states
-
-- `--state-success-bg`
-- `--state-warning-bg`
-- `--state-danger-bg`
-- `--state-info-bg`
-
-### Migration rule
-
-- New or refactored primitives must consume layer C aliases first.
-- Layer C aliases resolve to existing layer A/B tokens in `apps/web/src/styles.scss`.
-- Theme packs only override layer C aliases (and optionally layer A for global rebrand).
+1. New or refactored primitives bind **`docs/design/tokens.md`** semantics first, then **`docs/design/token-layers.md`** for tweakcn **`styles.scss`** vs per-component **`:host`** custom properties (the removed legacy bridge file does **not** emit Layer C — global menu/action bridge rows are gone).
+2. Runtime theme and shared Tailwind keys stay centralized in `apps/web/src/styles.scss`; do not assume a global bridge alias exists when **`token-layers.md`** lists the name as removed.
+3. Theme packs override semantic tokens first; reserve raw Layer A tweaks for global rebranding only.
 
 ## Immediate Next Deliverables
 
-1. Migrate remaining low-readiness menu surfaces (map context and detail context edge cases) to strict Layer C role aliases only.
-2. Roll out shared settings/form primitives to additional account/invite subflows beyond current section shell.
-3. Maintain and execute the baseline UI regression matrix in `docs/design/components/theme-regression-matrix.md` (menus, toolbars, settings, dialogs) plus keyboard/focus smoke checks.
-4. Add visual-theme verification pass (light/dark + one new custom theme profile) for all medium-readiness primitives and record outcomes in the regression matrix.
+1. Finish button-family rollout across remaining settings/projects/dialog consumers still using local button styling.
+2. Migrate remaining low-readiness menu surfaces (map context and detail context edge cases) to **`docs/specs/component/filters/dropdown-system.md`** with tweakcn + per-component **`:host`** colors per **`docs/design/token-layers.md`** (global menu bridge names are removed — bind via tweakcn + **`:host`** only).
+3. Add one shared field-row/select adoption pass in `/projects` filter surfaces to reduce composition drift.
+4. Add visual-theme verification pass (light/dark + one custom theme profile) for medium-readiness primitives.
 
-## Project-Wide Migration Backlog (Wave Plan)
+## Next Execution Plan (Primitive-First)
 
-This backlog is the execution order for standardization across the whole product, not per-component hotfixes.
+### Slice A — Segmented Primitive Finalization
 
-### Priority Scoring
+Status: `completed (implementation) / pending (full theme verification)`
 
-- Priority is based on: `user visibility x interaction risk x inconsistency debt`.
-- Effort buckets: `S` (<= 0.5 day), `M` (1-2 days), `L` (3+ days).
-- Risk buckets: `low`, `medium`, `high`.
+1. Motion values and detached inactive spacing were locked into primitive-level behavior.
+2. Additional consumer migrations were completed (map-type switch + projects status filter).
+3. Segmented regression row now tracks evidence-based bug IDs instead of only harness-blocked placeholders.
 
-### Wave A (Highest ROI, low regression risk)
+### Slice B — Button/Icon Primitive Completion
 
-| Cluster                     | Scope                                                                            | Readiness   | Effort | Risk   | Why first                                                      |
-| --------------------------- | -------------------------------------------------------------------------------- | ----------- | ------ | ------ | -------------------------------------------------------------- |
-| Menu surfaces               | `option-menu-surface`, `dd-item`, map/detail context edge cases                  | partial/low | M      | medium | Highest reuse and most visible interaction consistency gap     |
-| Segmented + toggle controls | `ui-segmented`, `ui-toggle-row`, `ui-toggle-switch` across map/settings/projects | partial     | M      | low    | Shared primitive exists; remaining work is adoption and polish |
-| Select and field controls   | `ui-select-control`, `ui-field-row`, label/value alignment                       | partial     | M      | low    | Fixes cross-page form consistency quickly                      |
+1. Finish button-family adoption in remaining composition surfaces.
+2. Remove residual feature-local hover/focus/border state rules where shared button primitives already exist.
+3. Run targeted visual parity pass for `/projects`, settings overlay, and account surfaces.
+4. Update regression matrix notes for button/icon primitive parity after the visual pass.
 
-### Wave B (Form/system coherence)
+Status update:
 
-| Cluster                        | Scope                                                   | Readiness | Effort | Risk   | Entry condition                    |
-| ------------------------------ | ------------------------------------------------------- | --------- | ------ | ------ | ---------------------------------- |
-| Settings and account sections  | section cards, spacing, semantic text/border aliases    | partial   | M      | low    | Wave A primitives stable           |
-| Workspace/detail metadata rows | key-value rows, inline editors, compact chips           | partial   | M      | medium | Menu and field contracts finalized |
-| Validation and feedback states | inline error/warning/success semantics per field/action | partial   | M      | medium | Common field contracts deployed    |
+1. Targeted parity pass is completed at code level for `/projects`, settings overlay, and account surfaces; manual browser theme smoke remains open.
 
-### Wave C (Complex interaction surfaces)
+### Slice C — Menu/Popover Low-Readiness Closure
 
-| Cluster                          | Scope                                                                | Readiness | Effort | Risk   | Entry condition                           |
-| -------------------------------- | -------------------------------------------------------------------- | --------- | ------ | ------ | ----------------------------------------- |
-| Map shell interaction surfaces   | map-specific overlays, marker/radius context behavior styling parity | low       | L      | high   | Wave A/B complete + keyboard checks green |
-| Upload and queue row consistency | queue item actions, compact controls, status visuals                 | partial   | M      | medium | Shared action primitives stabilized       |
-| Project-specific pickers         | color picker and feature-local popovers to shared shell rules        | partial   | M      | medium | Popover/menu contract finalized           |
+1. Close map/detail context-menu edge cases still at low readiness (implementation contract: **`docs/specs/component/filters/dropdown-system.md`**; token ownership: **`docs/design/token-layers.md`** + **`docs/design/tokens.md`**).
+2. Ensure keyboard/focus parity (`Arrow`, `Home/End`, `Escape`, focus return) across option-openers.
+3. Update `theme-regression-matrix.md` in the same slice.
 
-### Per-Wave Definition of Done
+## Supporting Resources
 
-1. No new feature-local visual primitives introduced for covered scope.
-2. All touched controls use Layer C aliases (`action/menu/field/section/state`).
-3. `npm run build` passes.
-4. `docs/design/components/theme-regression-matrix.md` updated from `TODO` to `OK` or `BUG(<id>)` for affected rows.
-5. Keyboard smoke checks pass for affected controls.
-
-### Suggested Execution Order (Next 6 PRs)
-
-1. Map/detail context menu parity and alias cleanup.
-2. Segmented and toggle normalization in map/settings/projects surfaces.
-3. Select + field row normalization in settings/account/invite forms.
-4. Workspace metadata and inline editor unification.
-5. Feedback/validation state token alignment.
-6. Map shell complex overlays and upload queue consolidation.
+1. Segmented-switch motion reference: `docs/design/components/segmented-switch-motion-resource.md`

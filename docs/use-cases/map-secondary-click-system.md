@@ -1,6 +1,6 @@
 # Map Secondary-Click System — Use Cases
 
-> **Element spec:** [element-specs/map-secondary-click-system.md](../element-specs/map-secondary-click-system.md)
+> **Element spec:** [specs/map-secondary-click-system.md](../specs/system/map-secondary-click-system.md)
 
 ---
 

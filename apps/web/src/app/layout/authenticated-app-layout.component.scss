@@ -1,0 +1,82 @@
+// Hosts authenticated route outlet + workspace pane split (canonical layout owner).
+// @see docs/specs/ui/workspace/workspace-pane.md § Layout host
+
+// app-nav::host is display:block so it claims a flex slot even though its .sidebar is position:fixed.
+// Collapse the slot to zero; the visual nav renders fixed and needs no layout space here.
+app-nav {
+  flex: none;
+  width: 0;
+  height: 0;
+  overflow: visible;
+}
+
+// Flex row split owner: main content vs workspace pane. Fixed app-nav sits outside flow.
+// overflow-x clip prevents horizontal scroll; overflow-y visible keeps map chrome shadows unclipped.
+// @see docs/design/tokens.md §3.5 — map chrome uses --shadow-md
+:host {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  background: var(--background);
+}
+
+.authenticated-app-layout__main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  position: relative;
+  // Clip map tiles in .map-container only — not chrome shadows on .upload-btn-zone etc.
+  overflow: visible;
+}
+
+.authenticated-app-layout__map-host {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.authenticated-app-layout__map-host--visible {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.authenticated-app-layout__shell-outlet {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+// Map UI lives in __map-host; outlet only mounts an empty placeholder — must not steal hits.
+.authenticated-app-layout__shell-outlet--map-active {
+  pointer-events: none;
+}
+
+// Split seam: 2px divider flex item + pane width (divider hit zone overflows into map only).
+// @see docs/specs/component/workspace/drag-divider.md
+app-drag-divider {
+  flex: 0 0 2px;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+}
+
+app-workspace-pane {
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 0;
+}

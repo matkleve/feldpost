@@ -1,0 +1,112 @@
+// Location add/search — reuses address-search row + dropdown chrome; local rules only for collapsed/static rows.
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+// @see ../address-search/address-search.component.scss
+
+.media-location-add-search__collapsed {
+  cursor: pointer;
+}
+
+.media-location-add-search__collapsed--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+// Multi-line picker rows (format D) align icon to first line
+// @see location-picker-row.component.scss
+.media-location-add-search__org-option {
+  align-items: flex-start;
+}
+
+// New-address row label must not clip to one character in narrow flex layout.
+.media-location-add-search__add-new-item {
+  min-width: 0;
+  width: 100%;
+}
+
+.media-location-add-search__add-new-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+}
+
+// Internet section header — nav buttons only when history exists
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+.media-location-add-search__internet-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  padding: var(--spacing-1) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  line-height: 1;
+}
+
+// Section label — same left edge as other sections until back button mounts
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+.media-location-add-search__internet-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 0;
+}
+
+// Nav buttons match INTERNET label line-height (1lh square)
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+.media-location-add-search__internet-nav-btn {
+  flex: 0 0 auto;
+  width: 1lh;
+  height: 1lh;
+  min-width: 1lh;
+  min-height: 1lh;
+  padding: 0;
+  margin: 0;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  animation: media-location-internet-nav-in var(--motion-duration-fast) var(--motion-ease-out);
+
+  .material-icons {
+    font-size: 1lh;
+    width: 1lh;
+    height: 1lh;
+    line-height: 1;
+  }
+
+  &:hover {
+    color: var(--foreground);
+  }
+}
+
+@keyframes media-location-internet-nav-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Calm opacity pulse while Internet rows refresh in place
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+@keyframes media-location-internet-result-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@layer states {
+  // Stable state: loading refresh — prior Internet hits pulse until new set arrives
+  // @see docs/specs/ui/media-detail/media-detail-location-section.md
+  .media-location-add-search__result-item--pulse {
+    animation: media-location-internet-result-pulse 1.1s var(--motion-ease-out) infinite;
+    pointer-events: none;
+  }
+}

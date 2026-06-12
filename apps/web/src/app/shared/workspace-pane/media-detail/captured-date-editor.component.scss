@@ -1,0 +1,241 @@
+// CapturedDateEditorComponent — Notion-style calendar styles.
+
+// Ex-bridge `--menu-*` (Phase 7 Batch 48): standalone host + sandstone (ex global bridge).
+// @see docs/migration/phase-7-token-migration.md §Batch 48
+// Ex-bridge `--action-bg-hover` (Phase 7 Batch 49) — global `:root` + sandstone (`--action-text-active` was `var(--primary)`).
+// @see docs/migration/phase-7-token-migration.md §Batch 49
+// Flex child in detail row — calendar popover host
+// @see docs/specs/ui/workspace/workspace-pane.md
+:host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
+  --cde-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
+  --cde-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --cde-menu-item-text: var(--foreground);
+  --cde-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+:host-context([data-theme='sandstone']) {
+  --cde-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
+  --cde-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
+  --cde-menu-item-text: #2f271f;
+  --cde-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
+}
+
+.captured-date-editor {
+  background: var(--popover);
+  border: 1px solid var(--cde-menu-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-2);
+  width: 16rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  // ── Header: date + time ──
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding-bottom: var(--spacing-1);
+    border-bottom: 1px solid var(--cde-menu-border);
+  }
+
+  &__date-input,
+  &__time-input {
+    flex: 1 1 50%;
+    min-width: 0;
+    font-size: var(--font-size-xs);
+    color: var(--foreground);
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 0.1875rem var(--spacing-2);
+    font-family: inherit;
+    outline: none;
+    transition:
+      border-color 80ms ease-out,
+      box-shadow 80ms ease-out;
+
+    &::placeholder {
+      color: var(--text-disabled);
+    }
+
+    &:focus {
+      border-color: var(--primary);
+      box-shadow: var(--interactive-focus-ring);
+    }
+  }
+
+  &__time-input {
+    text-align: left;
+  }
+
+  // ── Month navigation ──
+
+  &__month-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+  }
+
+  &__month-label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--foreground);
+    flex: 1 1 auto;
+  }
+
+  &__now-btn {
+    font-size: var(--font-size-2xs);
+    color: var(--muted-foreground);
+    background: none;
+    border: none;
+    padding: 0.125rem var(--spacing-1);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+      color 80ms ease-out,
+      background 80ms ease-out;
+
+    &:hover {
+      color: var(--primary);
+      background: var(--cde-action-bg-hover);
+    }
+  }
+
+  &__nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition:
+      color 80ms ease-out,
+      background 80ms ease-out;
+
+    .material-icons {
+      font-size: var(--font-size-md);
+    }
+
+    &:hover {
+      color: var(--cde-menu-item-text);
+      background: var(--cde-action-bg-hover);
+    }
+  }
+
+  // ── Calendar grid ──
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    text-align: center;
+  }
+
+  &__weekday {
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--muted-foreground);
+    padding: 0.125rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  &__day {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.625rem;
+    height: 1.625rem;
+    margin: 0 auto;
+    font-size: var(--font-size-2xs);
+    color: var(--foreground);
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+      background 80ms ease-out,
+      color 80ms ease-out;
+
+    &:hover:not(&--selected) {
+      background: var(--cde-menu-item-hover-bg);
+    }
+
+    &--other-month {
+      color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
+    }
+
+    &--today:not(&--selected) {
+      box-shadow: inset 0 0 0 1.5px var(--primary);
+    }
+
+    // Stable state: picked calendar day — selected ink (quiet emphasis, not filled CTA)
+    // @see docs/design/state-visuals.md § Interaction emphasis
+    &--selected {
+      background: color-mix(in srgb, var(--interaction-selected-ink) 12%, transparent);
+      color: var(--interaction-selected-ink);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    &--selected:hover {
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      color: var(--primary);
+    }
+  }
+
+  // ── Action row ──
+
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-1);
+    border-top: 1px solid var(--cde-menu-border);
+  }
+
+  &__clear-btn,
+  &__done-btn {
+    font-size: var(--font-size-2xs);
+    font-family: inherit;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-1) var(--spacing-2);
+    cursor: pointer;
+    transition:
+      color 80ms ease-out,
+      background 80ms ease-out;
+  }
+
+  &__clear-btn {
+    color: var(--muted-foreground);
+
+    &:hover {
+      color: var(--destructive);
+      background: color-mix(in srgb, var(--destructive) 8%, transparent);
+    }
+  }
+
+  &__done-btn {
+    color: var(--success-foreground);
+    font-weight: var(--font-weight-medium);
+    background: var(--success);
+    border-radius: var(--radius-sm);
+
+    &:hover {
+      background: color-mix(in srgb, var(--success) 88%, black);
+    }
+  }
+}

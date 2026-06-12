@@ -1,0 +1,74 @@
+// Hoisted @keyframes for MapShellComponent partials — emitted once globally to trim
+// per-component CSS duplication. Names audited repo-wide for uniqueness (2026-05-17).
+// @see docs/migration/phase-8-global-scss-elimination.md §7
+
+// Photo marker placeholder loading pulse (opacity only)
+// @see apps/web/src/styles/_map-shell-leaflet-global.scss
+@keyframes map-photo-marker-placeholder-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+// Photo marker pending ring pulse (opacity + scale)
+// @see apps/web/src/styles/_map-shell-leaflet-global.scss (.map-photo-marker__pending-ring)
+@keyframes map-photo-marker-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+// One-shot spotlight ring expansion on map marker wrapper
+// @see apps/web/src/styles/_map-shell-leaflet-global.scss
+@keyframes map-photo-marker-spotlight {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.92;
+  }
+
+  70% {
+    transform: translate(-50%, -50%) scale(1.9);
+    opacity: 0.25;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(2.15);
+    opacity: 0;
+  }
+}
+
+// Upload preview status dot ring pulse (uses semantic tokens at computed-value time)
+// @see apps/web/src/app/features/map/map-shell/_map-shell-upload.scss
+@keyframes upload-panel-dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent);
+  }
+
+  70% {
+    box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+}
+
+// GPS locate button spinner rotation
+// @see apps/web/src/app/features/map/map-shell/_map-shell-gps-placement.scss
+@keyframes gps-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

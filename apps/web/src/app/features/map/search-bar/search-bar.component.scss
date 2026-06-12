@@ -1,20 +1,25 @@
+@use '../../../../styles/frosted-chrome';
+
 :host {
-  --search-bar-safe-inline: max(var(--container-inset), calc(3rem + var(--spacing-4)));
-  --search-bar-viewport-inset: var(--container-inset);
+  --search-bar-safe-inline: max(
+    var(--spacing-3),
+    var(--map-upload-chrome-inline, calc(5rem + var(--spacing-1)))
+  );
+  --search-bar-viewport-inset: var(--spacing-3);
 
   position: absolute;
-  top: var(--container-inset);
+  top: var(--spacing-3);
   left: 50%;
-  z-index: var(--z-upload-button);
+  z-index: 200;
   width: min(36rem, calc(100% - (2 * var(--search-bar-safe-inline))));
   transform: translateX(-50%);
 
   @media (max-width: 47.9375rem) {
-    --search-bar-safe-inline: var(--container-inset-mobile);
-    --search-bar-viewport-inset: var(--container-inset-mobile);
+    --search-bar-safe-inline: var(--spacing-3);
+    --search-bar-viewport-inset: var(--spacing-3);
 
     width: calc(100% - (2 * var(--search-bar-safe-inline)));
-    top: var(--container-inset-mobile);
+    top: var(--spacing-3);
   }
 }
 
@@ -28,13 +33,12 @@
 }
 
 .search-bar {
-  --ui-container-radius: var(--container-radius-panel);
-  --search-bar-padding-inline: var(--ui-container-padding-inline);
-  --search-bar-padding-block: var(--ui-container-padding-block);
-  --search-bar-gap: var(--ui-container-gap);
-  --search-bar-dropdown-padding-inline: var(--container-padding-inline-panel);
-  --search-bar-dropdown-padding-block: var(--container-padding-block-panel);
-  --search-bar-dropdown-gap: var(--container-gap-panel);
+  --search-bar-padding-inline: var(--spacing-1);
+  --search-bar-padding-block: var(--spacing-1);
+  --search-bar-gap: var(--spacing-1);
+  --search-bar-dropdown-padding-inline: var(--spacing-1);
+  --search-bar-dropdown-padding-block: var(--spacing-1);
+  --search-bar-dropdown-gap: var(--spacing-1);
   --search-bar-media-size: var(--spacing-6);
   --search-bar-row-height: 3rem;
   --search-bar-results-max-block-size: calc(
@@ -42,7 +46,7 @@
   );
   --search-bar-reveal-duration: 180ms;
   --search-dropdown-item-padding-inline: var(--search-bar-padding-inline);
-  --search-dropdown-item-padding-block: var(--container-padding-block-compact);
+  --search-dropdown-item-padding-block: var(--spacing-2);
   --search-dropdown-item-gap: var(--search-bar-gap);
   --search-dropdown-item-radius: var(--container-radius-control);
   --search-dropdown-item-row-min-height: 3rem;
@@ -51,10 +55,8 @@
   grid-template-rows: var(--search-bar-row-height) minmax(0, 0fr);
   row-gap: 0;
   width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: var(--ui-container-radius);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
-  box-shadow: var(--elevation-overlay);
+  border-radius: var(--container-radius-panel);
+  @include frosted-chrome.surface;
   overflow: hidden;
   contain: layout paint;
 }
@@ -72,9 +74,6 @@
   min-height: var(--search-bar-row-height);
   align-items: center;
   column-gap: var(--search-bar-gap);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 .search-bar__slot-wrapper {
@@ -87,18 +86,25 @@
   flex-shrink: 0;
 }
 
+// Icon and clear inner-slot: centers icon inside the slot-wrapper column.
+// @see search-bar.component.html §icon-slot / clear-slot structure
 .search-bar__icon-slot,
 .search-bar__clear-slot {
-  --ui-item-media-size: var(--search-bar-media-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--search-bar-media-size);
+  block-size: var(--search-bar-media-size);
+  flex-shrink: 0;
 }
 
 .search-bar__icon,
 .search-bar__clear .material-icons {
-  font-size: 1rem;
+  font-size: var(--font-size-md);
 }
 
 .search-bar__icon {
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
 }
 
 .search-bar__input {
@@ -106,14 +112,14 @@
   min-width: 0;
   border: 0;
   background: transparent;
-  color: var(--color-text-primary);
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  color: var(--foreground);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-reading);
   outline: 0;
   padding-block: 0;
 
   &::placeholder {
-    color: var(--color-text-disabled);
+    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   }
 }
 
@@ -126,8 +132,8 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-reading);
   color: transparent;
   overflow: hidden;
   white-space: nowrap;
@@ -136,7 +142,7 @@
 }
 
 .search-bar__ghost-suffix {
-  color: var(--color-text-muted);
+  color: var(--muted-foreground);
   opacity: 0.4;
 }
 
@@ -149,9 +155,9 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  font-size: 0.9375rem;
-  line-height: 1.4;
-  color: var(--color-text-disabled);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-reading);
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   overflow: hidden;
   white-space: nowrap;
   grid-column: 2;
@@ -168,15 +174,15 @@
 .search-bar__ghost-action {
   border: 0;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   cursor: pointer;
   transition:
     background-color 120ms ease-in-out,
     color 120ms ease-in-out;
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 10%, transparent);
-    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--foreground);
   }
 }
 
@@ -195,7 +201,7 @@
   min-height: 0;
   width: 100%;
   border-top: 1px solid transparent;
-  background: var(--color-bg-elevated);
+  background: var(--popover);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -207,7 +213,7 @@
 }
 
 .search-bar--expanded .search-bar__dropdown {
-  border-top-color: color-mix(in srgb, var(--color-border) 82%, transparent);
+  border-top-color: color-mix(in srgb, var(--border) 82%, transparent);
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -233,9 +239,9 @@
 
 .search-bar__section-label {
   padding: 0;
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -243,7 +249,7 @@
 .search-bar__divider {
   height: 1px;
   margin: 0;
-  background: var(--color-border);
+  background: var(--border);
 }
 
 .search-bar__empty-state {
@@ -254,15 +260,15 @@
 
 .search-bar__empty-title {
   margin: 0;
-  color: var(--color-text-primary);
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  color: var(--foreground);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-reading);
 }
 
 .search-bar__empty-copy {
   margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
   line-height: 1.5;
 }
 
@@ -270,7 +276,7 @@
   min-width: 0;
   align-self: flex-start;
   padding-inline: var(--search-bar-padding-inline);
-  color: var(--color-clay);
+  color: var(--primary);
 }
 
 .search-bar__skeleton-list {
@@ -293,9 +299,9 @@
 .search-bar__skeleton-line {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-border) 70%, transparent) 0%,
-    color-mix(in srgb, var(--color-bg-surface) 65%, transparent) 50%,
-    color-mix(in srgb, var(--color-border) 70%, transparent) 100%
+    color-mix(in srgb, var(--border) 70%, transparent) 0%,
+    color-mix(in srgb, var(--card) 65%, transparent) 50%,
+    color-mix(in srgb, var(--border) 70%, transparent) 100%
   );
   background-size: 200% 100%;
   animation: search-bar-skeleton 1.2s ease-in-out infinite;

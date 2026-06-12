@@ -1,13 +1,14 @@
-<div class="search-bar ui-container" [class.search-bar--expanded]="dropdownOpen()" role="search">
+<div class="search-bar" [class.search-bar--expanded]="dropdownOpen()" role="search">
   <div class="search-bar__input-row">
     <span class="search-bar__slot-wrapper" aria-hidden="true">
-      <span class="search-bar__icon-slot ui-item-media" aria-hidden="true">
+      <span class="search-bar__icon-slot" aria-hidden="true">
         <span class="material-icons search-bar__icon">search</span>
       </span>
     </span>
 
     <input
       #searchInput
+      hlmInput
       class="search-bar__input"
       type="search"
       role="combobox"
@@ -43,18 +44,22 @@
       <button
         class="search-bar__clear"
         type="button"
-        [attr.aria-label]="t('map.searchBar.clear.aria', 'Clear search')"
+        aria-label="Clear search"
         (mousedown)="$event.preventDefault()"
         (click)="onClearClick()"
       >
         <span class="search-bar__slot-wrapper" aria-hidden="true">
-          <span class="search-bar__clear-slot ui-item-media" aria-hidden="true">
+          <span class="search-bar__clear-slot" aria-hidden="true">
             <span class="material-icons">close</span>
           </span>
         </span>
       </button>
     }
   </div>
+
+  @if (!isProjectsMode()) {
+    <ss-search-filter-chips [chips]="filterChips()" (removeChip)="onFilterChipRemove($event)" />
+  }
 
   @if (!isProjectsMode()) {
     <div
@@ -65,14 +70,10 @@
     >
       <div class="search-bar__dropdown-content">
         @if (showingRecentSearches()) {
-          <div class="search-bar__section-label" role="presentation">
-            {{ t('map.searchBar.section.recentSearches', 'Recent searches') }}
-          </div>
+          <div class="search-bar__section-label" role="presentation">Recent searches</div>
 
           @if (recentSearches().length === 0) {
-            <div class="search-bar__empty-copy" role="presentation">
-              {{ t('map.searchBar.empty.noRecents', 'No recent searches yet.') }}
-            </div>
+            <div class="search-bar__empty-copy" role="presentation">No recent searches yet.</div>
           } @else {
             @for (candidate of recentSearches(); track candidate.id; let index = $index) {
               <ss-search-dropdown-item
@@ -84,21 +85,33 @@
             }
           }
         } @else {
+          @if (operatorSection(); as operators) {
+            @if (operators.items.length > 0) {
+              <div class="search-bar__section-label" role="presentation">{{ operators.title }}</div>
+              @for (candidate of operators.items; track candidate.id; let index = $index) {
+                <ss-search-dropdown-item
+                  [candidate]="candidate"
+                  [active]="activeIndex() === index"
+                  [optionId]="optionIdFor(index)"
+                  (selected)="onCandidateSelected($event)"
+                />
+              }
+            }
+          }
+
           @if (matchingRecents().length > 0) {
             @for (candidate of matchingRecents(); track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"
-                [active]="activeIndex() === index"
-                [optionId]="optionIdFor(index)"
+                [active]="activeIndex() === recentMatchOptionIndex(index)"
+                [optionId]="optionIdFor(recentMatchOptionIndex(index))"
                 (selected)="onCandidateSelected($event)"
               />
             }
           }
 
           @if (sections().dbAddress.items.length > 0) {
-            <div class="search-bar__section-label" role="presentation">
-              {{ t('map.searchBar.section.addresses', 'Addresses') }}
-            </div>
+            <div class="search-bar__section-label" role="presentation">Addresses</div>
             @for (candidate of sections().dbAddress.items; track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"
@@ -110,9 +123,7 @@
           }
 
           @if (sections().dbContent.items.length > 0) {
-            <div class="search-bar__section-label" role="presentation">
-              {{ t('map.searchBar.section.projectsAndGroups', 'Projects &amp; Groups') }}
-            </div>
+            <div class="search-bar__section-label" role="presentation">Projects</div>
             @for (candidate of sections().dbContent.items; track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"
@@ -125,9 +136,7 @@
 
           @if (commandSection(); as commands) {
             @if (commands.items.length > 0) {
-              <div class="search-bar__section-label" role="presentation">
-                {{ t('map.searchBar.section.commands', 'Commands') }}
-              </div>
+              <div class="search-bar__section-label" role="presentation">Commands</div>
               @for (candidate of commands.items; track candidate.id; let index = $index) {
                 <ss-search-dropdown-item
                   [candidate]="candidate"
@@ -144,9 +153,7 @@
           }
 
           @if (sections().geocoder.items.length > 0 || geocoderLoading()) {
-            <div class="search-bar__section-label" role="presentation">
-              {{ t('map.searchBar.section.places', 'Places') }}
-            </div>
+            <div class="search-bar__section-label" role="presentation">Places</div>
 
             @if (geocoderLoading()) {
               <div class="search-bar__skeleton-list" aria-hidden="true">
@@ -187,22 +194,15 @@
 
           @if (showingEmptyState()) {
             <div class="search-bar__empty-state" role="presentation">
-              <p class="search-bar__empty-title">{{ noAddressFoundText() }}</p>
-              <p class="search-bar__empty-copy">
-                {{
-                  t(
-                    'map.searchBar.empty.tryDifferentAddress',
-                    'Try a different address or pin manually.'
-                  )
-                }}
-              </p>
+              <p class="search-bar__empty-title">No address found for {{ query().trim() }}</p>
+              <p class="search-bar__empty-copy">Try a different address or pin manually.</p>
               <button
                 class="search-bar__ghost-action"
                 type="button"
                 (mousedown)="$event.preventDefault()"
                 (click)="onDropPinClick()"
               >
-                {{ t('map.searchBar.action.dropPin', 'Drop pin') }}
+                Drop pin
               </button>
             </div>
           }

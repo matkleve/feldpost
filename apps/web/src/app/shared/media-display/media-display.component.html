@@ -1,0 +1,60 @@
+<div class="media-display__viewport" [attr.data-state]="state()">
+  <!-- Stable state: loading-surface-visible, ratio-known-contain -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
+  <div class="media-display__layer media-display__layer--loading-surface" aria-hidden="true"></div>
+
+  <!-- Stable state: media-ready -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
+  <div
+    class="media-display__layer media-display__layer--staged-content"
+    aria-hidden="true"
+    (transitionend)="onLayerTransitionEnd($event, 'staged-content')"
+  >
+    @if (stagedContentUrl()) {
+      <img
+        class="media-display__image"
+        [src]="stagedContentUrl()"
+        alt=""
+        aria-hidden="true"
+        [style.object-position]="contentObjectPosition()"
+      />
+    }
+  </div>
+
+  <!-- Stable state: content-fade-in, content-visible -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
+  <div
+    class="media-display__layer media-display__layer--content"
+    (transitionend)="onLayerTransitionEnd($event, 'content')"
+  >
+    @if (showSharpContent()) {
+      <img
+        class="media-display__image"
+        [src]="resolvedUrl()"
+        alt=""
+        aria-hidden="true"
+        [style.object-position]="contentObjectPosition()"
+        (load)="onContentImageLoad($event)"
+      />
+    }
+  </div>
+
+  <!-- Stable state: icon-only -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
+  <div class="media-display__layer media-display__layer--icon-only" aria-hidden="true">
+    <span class="material-icons media-display__icon">{{ icon() }}</span>
+  </div>
+
+  <!-- Stable state: error -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
+  <div class="media-display__layer media-display__layer--error" aria-hidden="true">
+    <span class="material-icons media-display__icon" aria-hidden="true">broken_image</span>
+  </div>
+
+  <!-- Stable state: no-media -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
+  <div class="media-display__layer media-display__layer--no-media" aria-hidden="true">
+    <span class="material-icons media-display__icon" aria-hidden="true">hide_image</span>
+    <span class="media-display__no-media-label">{{ noMediaLabel() }}</span>
+  </div>
+</div>

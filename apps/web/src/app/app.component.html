@@ -1,0 +1,10 @@
+@if (showNav()) {
+  <ss-settings-overlay
+    [open]="settingsOverlayOpen()"
+    (openChange)="onSettingsOverlayOpenChange($event)"
+  />
+}
+
+<router-outlet />
+
+<ss-toast-container />

@@ -1,7 +1,7 @@
 # Upload Panel — Use Cases and Interaction Scenarios
 
-> Element spec: [element-specs/upload-panel.md](../element-specs/upload-panel.md)
-> Related specs: [upload-button-zone](../element-specs/upload-button-zone.md), [upload-manager](../element-specs/upload-manager.md)
+> Element spec: [specs/component/upload/upload-panel.md](../specs/component/upload/upload-panel.md)
+> Related specs: [upload-button-zone](../specs/component/upload/upload-button-zone.md), [upload-manager](../specs/service/media-upload-service/upload-manager.md)
 
 ## Overview
 

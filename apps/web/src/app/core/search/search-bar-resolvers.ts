@@ -1,29 +1,37 @@
-import {
+import type {
   GeocodingService,
   GeocoderSearchOptions,
   GeocoderSearchResult,
-} from '../geocoding.service';
-import { SupabaseService } from '../supabase.service';
-import {
+} from '../geocoding/geocoding.service';
+import type { SupabaseService } from '../supabase/supabase.service';
+import type {
   SearchAddressCandidate,
   SearchContentCandidate,
   SearchQueryContext,
 } from './search.models';
-import { computeTextMatchScore } from './search-query';
-import { distanceToSearchContextMeters, isInViewport, toSizeSignal } from './search-bar-helpers';
+import { SEARCH_TUNING_SYSTEM_DEFAULTS } from './search-tuning.defaults';
+import type { SearchTuningConfig } from './search-tuning.types';
+import {
+  computeTextMatchScore,
+  houseNumberSharesQueryPrefix,
+  isSpecificStreetQuery,
+  parseStreetAndHouseNumber,
+  type StreetHouseQuery,
+} from './search-query';
+import {
+  deduplicateGeocoderCandidatesByLabel,
+  distanceToSearchContextMeters,
+  isInViewport,
+  toSizeSignal,
+} from './search-bar-helpers';
 import { logGeocoderResolverStage } from './search-debug';
+
+/** Internal Nominatim fetch budget; display count stays `maxGeocoderResults`. */
+export const NOMINATIM_FETCH_LIMIT = 15;
 
 interface DbContentRow {
   id: string;
   name: string | null;
-}
-
-interface SavedGroupImageRow {
-  group_id: string;
-}
-
-interface ImageProjectRow {
-  project_id: string | null;
 }
 
 export async function fetchDbContentCandidates(
@@ -45,35 +53,17 @@ export async function fetchDbContentCandidates(
     projectsQuery = projectsQuery.eq('organization_id', context.organizationId);
   }
 
-  const [projectsResponse, groupsResponse] = await Promise.all([
-    projectsQuery,
-    supabase.client
-      .from('saved_groups')
-      .select('id,name')
-      .ilike('name', `*${trimmedQuery}*`)
-      .limit(maxDbContentResults),
-  ]);
+  const projectsResponse = await projectsQuery;
 
   const projectRows =
     projectsResponse.error || !Array.isArray(projectsResponse.data)
       ? []
       : (projectsResponse.data as DbContentRow[]).filter((row) => !!row.name);
-  const groupRows =
-    groupsResponse.error || !Array.isArray(groupsResponse.data)
-      ? []
-      : (groupsResponse.data as DbContentRow[]).filter((row) => !!row.name);
-
-  const [projectSizes, groupSizes] = await Promise.all([
-    loadProjectSizeSignals(
-      supabase,
-      projectRows.map((row) => row.id),
-      context.organizationId,
-    ),
-    loadGroupSizeSignals(
-      supabase,
-      groupRows.map((row) => row.id),
-    ),
-  ]);
+  const projectSizes = await loadProjectSizeSignals(
+    supabase,
+    projectRows.map((row) => row.id),
+    context.organizationId,
+  );
 
   const projectCandidates = buildProjectContentCandidates(
     projectRows,
@@ -82,9 +72,7 @@ export async function fetchDbContentCandidates(
     projectSizes,
   );
 
-  const groupCandidates = buildGroupContentCandidates(groupRows, trimmedQuery, context, groupSizes);
-
-  return [...projectCandidates, ...groupCandidates]
+  return projectCandidates
     .sort((left, right) => {
       const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
       if (scoreDelta !== 0) return scoreDelta;
@@ -119,32 +107,6 @@ function buildProjectContentCandidates(
     .filter((candidate) => candidate.label.length > 0);
 }
 
-function buildGroupContentCandidates(
-  groupRows: DbContentRow[],
-  query: string,
-  context: SearchQueryContext,
-  groupSizes: Map<string, number>,
-): SearchContentCandidate[] {
-  return groupRows
-    .map((row) => {
-      const label = row.name?.trim() ?? '';
-      const textMatch = computeTextMatchScore(row.name ?? '', query);
-      const projectBoost = context.selectedGroupId === row.id ? 1.6 : 1;
-      const sizeSignal = toSizeSignal(groupSizes.get(row.id) ?? 0);
-
-      return {
-        id: `group-${row.id}`,
-        family: 'db-content' as const,
-        label,
-        contentType: 'group' as const,
-        contentId: row.id,
-        subtitle: 'Saved group',
-        score: textMatch * projectBoost * sizeSignal,
-      };
-    })
-    .filter((candidate) => candidate.label.length > 0);
-}
-
 export async function fetchGeocoderCandidates(
   geocodingService: GeocodingService,
   normalizedQuery: string,
@@ -156,14 +118,12 @@ export async function fetchGeocoderCandidates(
     index: number,
     context: SearchQueryContext,
   ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig = SEARCH_TUNING_SYSTEM_DEFAULTS,
 ): Promise<SearchAddressCandidate[]> {
-  if (normalizedQuery.length < 3) return [];
+  if (!tuning.resolver.enableInternetSearch) return [];
+  if (normalizedQuery.length < tuning.resolver.minQueryLength) return [];
 
-  const constrainedOptions = buildConstrainedSearchOptions(
-    context,
-    maxGeocoderResults,
-    normalizedQuery,
-  );
+  const constrainedOptions = buildConstrainedSearchOptions(context, normalizedQuery, tuning);
   logGeocoderResolverStage('constrained-request', {
     query: normalizedQuery,
     options: constrainedOptions,
@@ -180,72 +140,430 @@ export async function fetchGeocoderCandidates(
     normalizedQuery,
     context,
     toCandidate,
-    maxGeocoderResults,
+    NOMINATIM_FETCH_LIMIT,
+    tuning,
   );
 
-  const shouldRetry = shouldRunUnconstrainedRetry(normalizedQuery, context, constrainedCandidates);
-  logGeocoderResolverStage('retry-decision', {
-    query: normalizedQuery,
-    shouldRetry,
-    constrainedTop: constrainedCandidates.slice(0, 3).map((candidate) => ({
-      label: candidate.label,
-      score: candidate.score,
-      distanceMeters: distanceToSearchContextMeters(candidate, context),
-    })),
-  });
+  // Unconstrained retry disabled: NOMINATIM_FETCH_LIMIT covers short-prefix cases in one call.
+  return finalizeGeocoderCandidates(
+    geocodingService,
+    constrainedCandidates,
+    normalizedQuery,
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+}
 
-  if (!shouldRetry) {
-    return constrainedCandidates;
-  }
-
-  logGeocoderResolverStage('unconstrained-request', {
-    query: normalizedQuery,
-    options: { limit: maxGeocoderResults * 3 },
-  });
-  const unconstrainedResults = await geocodingService.search(normalizedQuery, {
-    limit: maxGeocoderResults * 3,
-  });
-  logGeocoderResolverStage('unconstrained-response', {
-    query: normalizedQuery,
-    count: unconstrainedResults.length,
-    labels: unconstrainedResults.slice(0, 20).map((result) => result.displayName),
-  });
-
-  const unconstrainedCandidates = rankGeocoderCandidates(
-    unconstrainedResults,
+/** Rank and finalize raw Nominatim hits (structured search or other non-`q` paths). */
+export async function processGeocoderSearchResults(
+  geocodingService: GeocodingService,
+  rawResults: GeocoderSearchResult[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig = SEARCH_TUNING_SYSTEM_DEFAULTS,
+): Promise<SearchAddressCandidate[]> {
+  const ranked = rankGeocoderCandidates(
+    rawResults,
     normalizedQuery,
     context,
     toCandidate,
-    maxGeocoderResults * 3,
+    NOMINATIM_FETCH_LIMIT,
+    tuning,
   );
-
-  const merged = mergeAndRankCandidates(
-    constrainedCandidates,
-    unconstrainedCandidates,
-    context,
+  return finalizeGeocoderCandidates(
+    geocodingService,
+    ranked,
     normalizedQuery,
-  ).slice(0, maxGeocoderResults);
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+}
+
+const STREET_SUFFIX_PROBE_SUFFIXES = ['gasse', 'strasse', 'weg', 'platz', 'allee'] as const;
+
+async function finalizeGeocoderCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  const withHouseNumbers = await expandHouseNumberSiblingCandidates(
+    geocodingService,
+    primary,
+    normalizedQuery,
+    context,
+    maxGeocoderResults,
+    toCandidate,
+    tuning,
+  );
+  // Expansions disabled: higher fetch limit covers these cases.
+  // Re-enable if NOMINATIM_FETCH_LIMIT drops below 8.
+  // const withStreetHouses = await expandStreetLevelHouseCandidates(...);
+  // const results = await expandStreetSuffixProbeCandidates(...);
+  const results = withHouseNumbers;
 
   logGeocoderResolverStage('final-ranked', {
     query: normalizedQuery,
-    top: merged.slice(0, 3).map((candidate) => ({
+    top: results.slice(0, 3).map((candidate) => ({
       label: candidate.label,
       score: candidate.score,
       distanceMeters: distanceToSearchContextMeters(candidate, context),
     })),
   });
 
-  return merged;
+  return results.slice(0, maxGeocoderResults);
+}
+
+async function expandHouseNumberSiblingCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  const parsed = parseStreetAndHouseNumber(normalizedQuery);
+  if (!parsed) {
+    return primary;
+  }
+
+  const streetOptions = buildConstrainedSearchOptions(context, parsed.street, tuning);
+
+  logGeocoderResolverStage('house-prefix-expansion-request', {
+    query: normalizedQuery,
+    street: parsed.street,
+    housePrefix: parsed.houseNumber,
+    options: streetOptions,
+  });
+
+  const streetResults = await geocodingService.search(parsed.street, streetOptions);
+  const prefixMatches = streetResults.filter((result) =>
+    geocoderResultMatchesHousePrefix(result, parsed),
+  );
+
+  logGeocoderResolverStage('house-prefix-expansion-response', {
+    query: normalizedQuery,
+    raw: streetResults.length,
+    prefixMatches: prefixMatches.length,
+    labels: prefixMatches.slice(0, 12).map((result) => result.displayName),
+  });
+
+  const expansionCandidates = rankGeocoderCandidates(
+    prefixMatches,
+    normalizedQuery,
+    context,
+    toCandidate,
+    NOMINATIM_FETCH_LIMIT,
+    tuning,
+  );
+
+  const merged = deduplicateGeocoderCandidatesByLabel(
+    sortHouseNumberPrefixCandidates(
+      mergeAndRankCandidates(primary, expansionCandidates, context, normalizedQuery),
+      parsed,
+    ),
+  );
+
+  return merged.slice(0, maxGeocoderResults);
+}
+
+function shouldExpandStreetLevelHouses(normalizedQuery: string, tuning: SearchTuningConfig): boolean {
+  if (!isSpecificStreetQuery(normalizedQuery, tuning.query.specificStreetMinLength)) {
+    return false;
+  }
+  if (parseStreetAndHouseNumber(normalizedQuery)) {
+    return false;
+  }
+  const streetSuffixes = [...STREET_SUFFIX_PROBE_SUFFIXES, 'strasse', 'zeile', 'ring'] as const;
+  return streetSuffixes.some((suffix) => normalizedQuery.endsWith(suffix));
+}
+
+async function expandStreetLevelHouseCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  if (!shouldExpandStreetLevelHouses(normalizedQuery, tuning)) {
+    return primary;
+  }
+  if (primary.length === 0) {
+    return primary;
+  }
+
+  const streetOptions = buildConstrainedSearchOptions(context, normalizedQuery, tuning);
+
+  logGeocoderResolverStage('street-house-expansion-request', {
+    query: normalizedQuery,
+    options: streetOptions,
+  });
+
+  const streetResults = await geocodingService.search(normalizedQuery, streetOptions);
+  const sameStreet = streetResults.filter((result) =>
+    geocoderRoadMatchesStreetQuery(result, normalizedQuery),
+  );
+  const withHouseNumbers = sameStreet.filter((result) => result.address?.house_number?.trim());
+  const pool = withHouseNumbers.length >= 2 ? withHouseNumbers : sameStreet;
+
+  logGeocoderResolverStage('street-house-expansion-response', {
+    query: normalizedQuery,
+    raw: streetResults.length,
+    sameStreet: sameStreet.length,
+    withHouseNumbers: withHouseNumbers.length,
+  });
+
+  if (pool.length === 0) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const expansionCandidates = rankGeocoderCandidates(
+    pool,
+    normalizedQuery,
+    context,
+    toCandidate,
+    NOMINATIM_FETCH_LIMIT,
+    tuning,
+  );
+
+  return deduplicateGeocoderCandidatesByLabel(
+    mergeAndRankCandidates(primary, expansionCandidates, context, normalizedQuery),
+  ).slice(0, maxGeocoderResults);
+}
+
+function geocoderRoadMatchesStreetQuery(
+  result: GeocoderSearchResult,
+  streetQuery: string,
+): boolean {
+  const road = result.address?.road?.trim();
+  if (!road) return false;
+
+  const roadNorm = normalizeForLexicalMatch(road);
+  const streetNorm = normalizeForLexicalMatch(streetQuery);
+  return (
+    roadNorm === streetNorm ||
+    roadNorm.startsWith(streetNorm) ||
+    streetNorm.startsWith(roadNorm)
+  );
+}
+
+async function expandStreetSuffixProbeCandidates(
+  geocodingService: GeocodingService,
+  primary: SearchAddressCandidate[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  tuning: SearchTuningConfig,
+): Promise<SearchAddressCandidate[]> {
+  if (!isShortAmbiguousPrefixQuery(normalizedQuery, tuning)) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const countryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
+  if (!countryCodes.includes('at')) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  if (primary.length === 0) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const queryNorm = normalizeForLexicalMatch(normalizedQuery);
+  if (STREET_SUFFIX_PROBE_SUFFIXES.some((suffix) => normalizedQuery.endsWith(suffix))) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  if (primary.some((candidate) => candidateHasStrongStreetPrefixMatch(candidate.label, queryNorm))) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  const probeQueries = STREET_SUFFIX_PROBE_SUFFIXES.filter(
+    (suffix) => !normalizedQuery.endsWith(suffix),
+  ).map((suffix) => `${normalizedQuery}${suffix}`);
+
+  const probeCandidates: SearchAddressCandidate[] = [];
+  for (const probeQuery of probeQueries) {
+    const options = buildConstrainedSearchOptions(context, probeQuery, tuning);
+    logGeocoderResolverStage('street-suffix-probe-request', {
+      query: normalizedQuery,
+      probeQuery,
+      options,
+    });
+    const probeResults = await geocodingService.search(probeQuery, options);
+    const roadMatches = probeResults.filter((result) =>
+      geocoderRoadStartsWithQuery(result, queryNorm),
+    );
+    logGeocoderResolverStage('street-suffix-probe-response', {
+      query: normalizedQuery,
+      probeQuery,
+      raw: probeResults.length,
+      roadMatches: roadMatches.length,
+    });
+    probeCandidates.push(
+      ...rankGeocoderCandidates(
+        roadMatches,
+        normalizedQuery,
+        context,
+        toCandidate,
+        NOMINATIM_FETCH_LIMIT,
+        tuning,
+      ),
+    );
+    if (probeCandidates.some((candidate) => candidateHasStrongStreetPrefixMatch(candidate.label, queryNorm))) {
+      break;
+    }
+  }
+
+  if (probeCandidates.length === 0) {
+    return primary.slice(0, maxGeocoderResults);
+  }
+
+  return deduplicateGeocoderCandidatesByLabel(
+    mergeAndRankCandidates(primary, probeCandidates, context, normalizedQuery),
+  ).slice(0, maxGeocoderResults);
+}
+
+function geocoderRoadStartsWithQuery(result: GeocoderSearchResult, queryNorm: string): boolean {
+  const road = result.address?.road?.trim();
+  if (!road) return false;
+  return normalizeForLexicalMatch(road).startsWith(queryNorm);
+}
+
+function candidateStreetTokenStartsWithQuery(label: string, queryNorm: string): boolean {
+  const streetSegment = label.split(',')[0]?.trim() ?? '';
+  const firstToken = streetSegment.split(/\s+/).find(Boolean) ?? '';
+  return normalizeForLexicalMatch(firstToken).startsWith(queryNorm);
+}
+
+function candidateHasStrongStreetPrefixMatch(label: string, queryNorm: string): boolean {
+  const firstToken = (label.split(',')[0]?.trim() ?? '').split(/\s+/).find(Boolean) ?? '';
+  const tokenNorm = normalizeForLexicalMatch(firstToken);
+  if (!tokenNorm.startsWith(queryNorm)) {
+    return false;
+  }
+  if (label.includes(',')) {
+    return true;
+  }
+  return (
+    tokenNorm.endsWith('gasse') ||
+    tokenNorm.endsWith('strasse') ||
+    tokenNorm.endsWith('weg') ||
+    tokenNorm.endsWith('platz') ||
+    tokenNorm.endsWith('allee')
+  );
+}
+
+function geocoderResultMatchesHousePrefix(
+  result: GeocoderSearchResult,
+  parsed: StreetHouseQuery,
+): boolean {
+  const road = result.address?.road?.trim();
+  if (!road) return false;
+
+  const roadNorm = normalizeForLexicalMatch(road);
+  const streetNorm = normalizeForLexicalMatch(parsed.street);
+  if (roadNorm !== streetNorm && !roadNorm.includes(streetNorm) && !streetNorm.includes(roadNorm)) {
+    return false;
+  }
+
+  const houseNumber = result.address?.house_number?.trim() ?? '';
+  if (!houseNumber) return false;
+
+  return houseNumberSharesQueryPrefix(houseNumber, parsed.houseNumber);
+}
+
+function sortHouseNumberPrefixCandidates(
+  candidates: SearchAddressCandidate[],
+  parsed: StreetHouseQuery,
+): SearchAddressCandidate[] {
+  return [...candidates].sort((left, right) => {
+    const tierDelta = houseNumberMatchTier(left, parsed) - houseNumberMatchTier(right, parsed);
+    if (tierDelta !== 0) return tierDelta;
+    return left.label.localeCompare(right.label);
+  });
+}
+
+function houseNumberMatchTier(candidate: SearchAddressCandidate, parsed: StreetHouseQuery): number {
+  const houseNumber = extractHouseNumberFromCandidateLabel(candidate.label, parsed.street);
+  if (!houseNumber) return 2;
+  if (houseNumber === parsed.houseNumber) return 0;
+  if (houseNumberSharesQueryPrefix(houseNumber, parsed.houseNumber)) return 1;
+  return 2;
+}
+
+function extractHouseNumberFromCandidateLabel(label: string, street: string): string | null {
+  const streetNorm = street.trim().toLowerCase();
+  const labelNorm = label.trim().toLowerCase();
+  const streetIndex = labelNorm.indexOf(streetNorm);
+  if (streetIndex < 0) return null;
+
+  const afterStreet = label.slice(streetIndex + street.length);
+  const match = afterStreet.match(/^\s*[,\s]*(\d+[a-z]?)/i);
+  return match ? match[1].toLowerCase() : null;
+}
+
+/** Clone context with cluster viewbox as viewportBounds (Nominatim west,north,east,south). */
+export function searchContextFromClusterViewbox(
+  context: SearchQueryContext,
+  viewbox: string,
+): SearchQueryContext {
+  const parts = viewbox.split(',').map((segment) => Number.parseFloat(segment.trim()));
+  if (parts.length !== 4 || parts.some((value) => !Number.isFinite(value))) {
+    return context;
+  }
+  const [west, north, east, south] = parts;
+  return {
+    ...context,
+    viewportBounds: { north, east, south, west },
+  };
 }
 
 function buildConstrainedSearchOptions(
   context: SearchQueryContext,
-  maxGeocoderResults: number,
-  query: string,
+  normalizedQuery: string,
+  tuning: SearchTuningConfig,
 ): GeocoderSearchOptions {
-  const useShortPrefixHeadroom = !!context.viewportBounds && isShortAmbiguousPrefixQuery(query);
   const searchOptions: GeocoderSearchOptions = {
-    limit: useShortPrefixHeadroom ? Math.max(maxGeocoderResults * 4, 12) : maxGeocoderResults,
+    limit: NOMINATIM_FETCH_LIMIT,
+    addressLayer: !isShortAmbiguousPrefixQuery(normalizedQuery, tuning),
   };
   if (context.countryCodes?.length) {
     searchOptions.countrycodes = context.countryCodes;
@@ -253,7 +571,11 @@ function buildConstrainedSearchOptions(
   if (context.viewportBounds) {
     const b = context.viewportBounds;
     searchOptions.viewbox = `${b.west},${b.north},${b.east},${b.south}`;
-    searchOptions.bounded = true;
+    // Viewbox biases ranking only; bounded=1 often returns [] for valid streets just outside
+    // the cluster (e.g. Denisgasse in Wien when project GPS is in NÖ). Country + distance
+    // gates in rankGeocoderCandidates still localize results.
+    // @see docs/specs/service/address-field-suggest/adapters/nominatim-field-suggest.adapter.md
+    searchOptions.bounded = false;
   }
   return searchOptions;
 }
@@ -269,16 +591,17 @@ function rankGeocoderCandidates(
     context: SearchQueryContext,
   ) => SearchAddressCandidate,
   limit: number,
+  tuning: SearchTuningConfig,
 ): SearchAddressCandidate[] {
   const streetLevelResults = rawResults.filter((r) => isStreetLevelResult(r));
   if (streetLevelResults.length === 0) return [];
 
   const localizedResults = streetLevelResults.filter((result) =>
-    matchesCountryConstraint(result, context),
+    matchesCountryConstraint(result, context, normalizedQuery, tuning),
   );
 
   const lexicalResults = localizedResults.filter((result) =>
-    meetsLexicalMatchThreshold(result, normalizedQuery),
+    meetsLexicalMatchThreshold(result, normalizedQuery, tuning),
   );
 
   logGeocoderResolverStage('candidate-filter', {
@@ -291,25 +614,53 @@ function rankGeocoderCandidates(
 
   if (lexicalResults.length === 0) return [];
 
-  return lexicalResults
+  const orderedLexical = isShortAmbiguousPrefixQuery(normalizedQuery, tuning)
+    ? orderGeocoderResultsByRoadPrefix(lexicalResults, normalizedQuery)
+    : lexicalResults;
+
+  const ranked = orderedLexical
     .map((result, index) => toCandidate(result, normalizedQuery, index, context))
-    .filter((candidate) => (candidate.score ?? 0) > 0.01)
-    .sort((left, right) => compareCandidateRank(left, right, context, normalizedQuery))
-    .slice(0, limit);
+    .filter((candidate) => (candidate.score ?? 0) > tuning.resolver.candidateScoreFloor)
+    .sort((left, right) => compareCandidateRank(left, right, context, normalizedQuery));
+
+  return deduplicateGeocoderCandidatesByLabel(ranked).slice(0, limit);
+}
+
+function hasGeographicSearchAnchor(context: SearchQueryContext): boolean {
+  return !!(
+    context.viewportBounds ||
+    context.activeMarkerCentroid ||
+    context.activeProjectCentroid ||
+    context.currentLocation ||
+    context.dataCentroid ||
+    (context.countryCodes?.length ?? 0) > 0
+  );
 }
 
 function matchesCountryConstraint(
   result: GeocoderSearchResult,
   context: SearchQueryContext,
+  normalizedQuery: string,
+  tuning: SearchTuningConfig,
 ): boolean {
   const allowedCountryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
   if (allowedCountryCodes.length === 0) {
+    if (!hasGeographicSearchAnchor(context)) {
+      return true;
+    }
+
     if (isCoordinateInViewport(result.lat, result.lng, context.viewportBounds)) {
       return true;
     }
 
+    if (isSpecificStreetQuery(normalizedQuery, tuning.query.specificStreetMinLength)) {
+      return true;
+    }
+
+    // Org km cap (stored as meters): unrealistic Internet hit vs search anchor — not exifAssistRadiusMeters.
+    // @see docs/specs/service/search/search-tuning.distance-radii-contract.md
     const contextDistance = distanceFromContextMeters(result.lat, result.lng, context);
-    return contextDistance <= 120000;
+    return contextDistance <= tuning.resolver.contextDistanceMaxMeters;
   }
 
   const resultCountryCode = result.address?.country_code?.toLowerCase();
@@ -317,13 +668,62 @@ function matchesCountryConstraint(
     return true;
   }
 
-  return isCoordinateInViewport(result.lat, result.lng, context.viewportBounds);
+  if (
+    !resultCountryCode &&
+    isCoordinateInAllowedCountries(result.lat, result.lng, allowedCountryCodes, tuning)
+  ) {
+    return true;
+  }
+
+  if (isCoordinateInViewport(result.lat, result.lng, context.viewportBounds)) {
+    return true;
+  }
+
+  return isSpecificStreetQuery(normalizedQuery, tuning.query.specificStreetMinLength);
+}
+
+function isCoordinateInAllowedCountries(
+  lat: number,
+  lng: number,
+  countryCodes: string[],
+  tuning: SearchTuningConfig,
+): boolean {
+  for (const code of countryCodes) {
+    const bounds = tuning.resolver.countryBounds[code.toLowerCase()];
+    if (!bounds) continue;
+    if (
+      lat >= bounds.latMin &&
+      lat <= bounds.latMax &&
+      lng >= bounds.lngMin &&
+      lng <= bounds.lngMax
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function meetsLexicalMatchThreshold(
   result: GeocoderSearchResult,
   normalizedQuery: string,
+  tuning: SearchTuningConfig,
 ): boolean {
+  const queryNorm = normalizeForLexicalMatch(normalizedQuery);
+  if (queryNorm.length >= 3) {
+    const normalizedFields = [
+      result.displayName ?? '',
+      result.name ?? '',
+      result.address?.road ?? '',
+      result.address?.city ?? '',
+      result.address?.town ?? '',
+      result.address?.village ?? '',
+      result.address?.municipality ?? '',
+    ].map((value) => normalizeForLexicalMatch(value));
+    if (normalizedFields.some((field) => field.includes(queryNorm))) {
+      return true;
+    }
+  }
+
   const displayNameScore = computeTextMatchScore(result.displayName ?? '', normalizedQuery);
   const roadScore = computeTextMatchScore(result.address?.road ?? '', normalizedQuery);
   const nameScore = computeTextMatchScore(result.name ?? '', normalizedQuery);
@@ -360,12 +760,12 @@ function meetsLexicalMatchThreshold(
       return true;
     }
 
-    if (matchedTokens === queryTokens.length && bestScore >= 0.35) {
+    if (matchedTokens === queryTokens.length && bestScore >= tuning.resolver.multiTokenExactMinScore) {
       return true;
     }
   }
 
-  return bestScore >= minimumLexicalScore(normalizedQuery);
+  return bestScore >= minimumLexicalScore(normalizedQuery, tuning);
 }
 
 function normalizeForLexicalMatch(value: string): string {
@@ -376,11 +776,14 @@ function normalizeForLexicalMatch(value: string): string {
     .replace(/ß/g, 'ss');
 }
 
-function minimumLexicalScore(query: string): number {
-  if (query.length <= 4) return 0.6;
-  if (query.length <= 6) return 0.7;
-  if (query.length <= 9) return 0.8;
-  return 0.9;
+function minimumLexicalScore(query: string, tuning: SearchTuningConfig): number {
+  if (isSpecificStreetQuery(query, tuning.query.specificStreetMinLength)) {
+    return tuning.resolver.lexicalSpecificStreet;
+  }
+  if (query.length <= 4) return tuning.resolver.lexicalLenLe4;
+  if (query.length <= 6) return tuning.resolver.lexicalLen5to6;
+  if (query.length <= 9) return tuning.resolver.lexicalLen7to9;
+  return tuning.resolver.lexicalLenGe10;
 }
 
 function isCoordinateInViewport(
@@ -417,6 +820,11 @@ function compareCandidateRank(
   const rightLocal = isInViewport(right, context.viewportBounds);
   if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
 
+  const queryNorm = normalizeForLexicalMatch(query);
+  const leftRoadPrefix = candidateStreetTokenStartsWithQuery(left.label, queryNorm);
+  const rightRoadPrefix = candidateStreetTokenStartsWithQuery(right.label, queryNorm);
+  if (leftRoadPrefix !== rightRoadPrefix) return leftRoadPrefix ? -1 : 1;
+
   const leftPrefixLeading = startsWithQueryPrefix(left.label, query);
   const rightPrefixLeading = startsWithQueryPrefix(right.label, query);
   if (leftPrefixLeading !== rightPrefixLeading) return leftPrefixLeading ? -1 : 1;
@@ -434,12 +842,13 @@ function shouldRunUnconstrainedRetry(
   normalizedQuery: string,
   context: SearchQueryContext,
   constrainedCandidates: SearchAddressCandidate[],
+  tuning: SearchTuningConfig,
 ): boolean {
   if (!context.countryCodes?.length && !context.viewportBounds) {
     return false;
   }
 
-  if (!isShortAmbiguousPrefixQuery(normalizedQuery)) {
+  if (!isShortAmbiguousPrefixQuery(normalizedQuery, tuning)) {
     return false;
   }
 
@@ -457,13 +866,36 @@ function shouldRunUnconstrainedRetry(
     return true;
   }
 
-  const clearlyRemote = topDistance > 60000;
-  const weakTopScore = (top.score ?? 0) < 0.75;
+  const clearlyRemote = topDistance > tuning.resolver.remoteTopDistanceMeters;
+  const weakTopScore = (top.score ?? 0) < tuning.resolver.weakTopScoreThreshold;
   return clearlyRemote || weakTopScore;
 }
 
-function isShortAmbiguousPrefixQuery(query: string): boolean {
-  return query.length >= 3 && query.length <= 6 && !query.includes(' ');
+function isShortAmbiguousPrefixQuery(query: string, tuning: SearchTuningConfig): boolean {
+  return (
+    query.length >= tuning.resolver.shortPrefixLenMin &&
+    query.length <= tuning.resolver.shortPrefixLenMax &&
+    !query.includes(' ')
+  );
+}
+
+function orderGeocoderResultsByRoadPrefix(
+  results: GeocoderSearchResult[],
+  query: string,
+): GeocoderSearchResult[] {
+  const queryNorm = normalizeForLexicalMatch(query);
+  const roadMatches: GeocoderSearchResult[] = [];
+  const other: GeocoderSearchResult[] = [];
+
+  for (const result of results) {
+    if (geocoderRoadStartsWithQuery(result, queryNorm)) {
+      roadMatches.push(result);
+    } else {
+      other.push(result);
+    }
+  }
+
+  return roadMatches.length > 0 ? [...roadMatches, ...other] : results;
 }
 
 function mergeAndRankCandidates(
@@ -512,7 +944,10 @@ async function loadProjectSizeSignals(
   const counts = new Map<string, number>();
   if (projectIds.length === 0) return counts;
 
-  let request = supabase.client.from('images').select('project_id').in('project_id', projectIds);
+  let request = supabase.client
+    .from('media_projects')
+    .select('project_id')
+    .in('project_id', projectIds);
 
   if (organizationId) {
     request = request.eq('organization_id', organizationId);
@@ -521,30 +956,9 @@ async function loadProjectSizeSignals(
   const response = await request;
   if (response.error || !Array.isArray(response.data)) return counts;
 
-  for (const row of response.data as ImageProjectRow[]) {
+  for (const row of response.data as Array<{ project_id: string | null }>) {
     if (!row.project_id) continue;
     counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
-  }
-
-  return counts;
-}
-
-async function loadGroupSizeSignals(
-  supabase: SupabaseService,
-  groupIds: string[],
-): Promise<Map<string, number>> {
-  const counts = new Map<string, number>();
-  if (groupIds.length === 0) return counts;
-
-  const response = await supabase.client
-    .from('saved_group_images')
-    .select('group_id')
-    .in('group_id', groupIds);
-
-  if (response.error || !Array.isArray(response.data)) return counts;
-
-  for (const row of response.data as SavedGroupImageRow[]) {
-    counts.set(row.group_id, (counts.get(row.group_id) ?? 0) + 1);
   }
 
   return counts;

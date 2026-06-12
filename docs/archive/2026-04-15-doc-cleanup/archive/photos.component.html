@@ -1,0 +1,60 @@
+<main class="media-page" data-i18n-skip>
+  <section class="media-rail content-clamp content-clamp--list">
+    <app-vstack [spacing]="4">
+      <!-- Page Header with Breadcrumb -->
+      <app-media-page-header
+        [title]="t('media.page.title', 'Media')"
+        [mediaCount]="mediaItems().length"
+        [loading]="loading()"
+      />
+
+      <!-- Content Section -->
+      <section class="media-content">
+        @if (loading()) {
+          <div
+            class="media-loading"
+            role="status"
+            [attr.aria-label]="t('common.loading', 'Loading media...')"
+          >
+            <p>{{ t('common.loading', 'Loading media...') }}</p>
+          </div>
+        } @else if (loadError()) {
+          <div class="media-error" role="alert">
+            <p>{{ t('media.page.error', 'Failed to load media') }}</p>
+            <button (click)="loadMedia()" class="media-error__retry">
+              {{ t('media.page.retry', 'Retry') }}
+            </button>
+          </div>
+        } @else if (mediaItems().length === 0) {
+          <div class="media-empty">
+            <p>{{ t('media.page.empty', 'No media found') }}</p>
+          </div>
+        } @else {
+          <ul class="media-grid">
+            @for (item of mediaItems(); track item.id) {
+              <li
+                class="media-grid__item"
+                (click)="onMediaItemClicked(item.id)"
+                [class.media-grid__item--selected]="workspaceSelectionService.isSelected(item.id)"
+                tabindex="0"
+                role="option"
+                [attr.aria-selected]="workspaceSelectionService.isSelected(item.id)"
+              >
+                <div class="media-card">
+                  <img
+                    [src]="item.thumbnail_path || ''"
+                    [alt]="item.address_label || 'Media item'"
+                  />
+                  <div class="media-card__info">
+                    <p class="media-card__title">{{ item.address_label }}</p>
+                    <p class="media-card__date">{{ formatDate(item.captured_at) }}</p>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </app-vstack>
+  </section>
+</main>

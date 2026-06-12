@@ -1,7 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { SearchBarService, DetectedCoordinates } from './search-bar.service';
-import { SupabaseService } from '../supabase.service';
-import { GeocodingService } from '../geocoding.service';
+import { signal } from '@angular/core';
+import { SearchBarService } from './search-bar.service';
+import { provideOrgSearchTuningTestDouble } from './search-test.providers';
+import { SupabaseService } from '../supabase/supabase.service';
+import { GeocodingService } from '../geocoding/geocoding.service';
+import { MediaClusterService } from '../geocoding/media-cluster.service';
 import { firstValueFrom } from 'rxjs';
 
 function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
@@ -29,29 +32,40 @@ describe('SearchBarService', () => {
   let supabaseMock: { client: { from: ReturnType<typeof vi.fn> } };
   let geocodingMock: {
     search: ReturnType<typeof vi.fn>;
+    searchStructured: ReturnType<typeof vi.fn>;
     reverse: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     localStorage.clear();
 
-    const imagesBuilder = createQueryBuilder({
+    const linksBuilder = createQueryBuilder({
       data: [
         {
-          id: 'img-1',
-          address_label: 'Schleiergasse 18, 1100 Wien',
-          street: 'Schleiergasse 18',
-          city: 'Wien',
-          latitude: 48.1746,
-          longitude: 16.3823,
+          media_item_id: 'img-1',
+          locations: {
+            address_label: 'Schleiergasse 18, 1100 Wien',
+            street: 'Schleiergasse',
+            house_number: '18',
+            postcode: '1100',
+            city: 'Wien',
+            latitude: 48.1746,
+            longitude: 16.3823,
+          },
+          media_items: { created_at: '2024-01-01T00:00:00Z' },
         },
         {
-          id: 'img-2',
-          address_label: 'Schleiergasse 18, 1100 Wien',
-          street: 'Schleiergasse 18',
-          city: 'Wien',
-          latitude: 48.1747,
-          longitude: 16.3824,
+          media_item_id: 'img-2',
+          locations: {
+            address_label: 'Schleiergasse 18, 1100 Wien',
+            street: 'Schleiergasse',
+            house_number: '18',
+            postcode: '1100',
+            city: 'Wien',
+            latitude: 48.1747,
+            longitude: 16.3824,
+          },
+          media_items: { created_at: '2024-01-02T00:00:00Z' },
         },
       ],
       error: null,
@@ -62,29 +76,19 @@ describe('SearchBarService', () => {
       error: null,
     });
 
-    const groupsBuilder = createQueryBuilder({
-      data: [],
-      error: null,
-    });
-
-    const savedGroupImagesBuilder = createQueryBuilder({
-      data: [{ group_id: 'group-1' }],
-      error: null,
-    });
-
     supabaseMock = {
       client: {
         from: vi.fn((table: string) => {
-          if (table === 'images') return imagesBuilder;
+          if (table === 'media_item_location_links') return linksBuilder;
           if (table === 'projects') return projectsBuilder;
-          if (table === 'saved_groups') return groupsBuilder;
-          if (table === 'saved_group_images') return savedGroupImagesBuilder;
           return createQueryBuilder({ data: [], error: null });
         }),
       },
     };
 
     geocodingMock = {
+      ensureGeocodeAvailable: vi.fn().mockResolvedValue(true),
+      isGeocodeBlocked: vi.fn().mockReturnValue(false),
       search: vi.fn().mockResolvedValue([
         {
           lat: 48.1746,
@@ -101,14 +105,24 @@ describe('SearchBarService', () => {
           },
         },
       ]),
+      searchStructured: vi.fn().mockResolvedValue([]),
       reverse: vi.fn().mockResolvedValue(null),
     };
 
+    const emptyClusters = signal([]).asReadonly();
     TestBed.configureTestingModule({
       providers: [
         SearchBarService,
+        provideOrgSearchTuningTestDouble(),
         { provide: SupabaseService, useValue: supabaseMock },
         { provide: GeocodingService, useValue: geocodingMock },
+        {
+          provide: MediaClusterService,
+          useValue: {
+            ensureLoaded: vi.fn().mockResolvedValue(undefined),
+            clusters: emptyClusters,
+          },
+        },
       ],
     });
 
@@ -163,7 +177,7 @@ describe('SearchBarService', () => {
   // ── Address Formatting ───────────────────────────────────────────────
 
   describe('formatAddressLabel', () => {
-    it('formats full address as "Street Number, Postcode City"', () => {
+    it('formats full address as "Street Number, Postcode City, Country"', () => {
       const result = service.formatAddressLabel({
         lat: 48.17,
         lng: 16.38,
@@ -175,9 +189,10 @@ describe('SearchBarService', () => {
           house_number: '18',
           postcode: '1100',
           city: 'Wien',
+          country: 'Österreich',
         },
       });
-      expect(result).toBe('Schleiergasse 18, 1100 Wien');
+      expect(result).toBe('Schleiergasse 18, 1100 Wien, Österreich');
     });
 
     it('formats without house number', () => {
@@ -187,9 +202,46 @@ describe('SearchBarService', () => {
         displayName: 'verbose',
         name: null,
         importance: 0.5,
-        address: { road: 'Schleiergasse', postcode: '1100', city: 'Wien' },
+        address: {
+          road: 'Schleiergasse',
+          postcode: '1100',
+          city: 'Wien',
+          country: 'Österreich',
+        },
       });
-      expect(result).toBe('Schleiergasse, 1100 Wien');
+      expect(result).toBe('Schleiergasse, 1100 Wien, Österreich');
+    });
+
+    it('fills locality from display_name when structured address is sparse', () => {
+      const result = service.formatAddressLabel({
+        lat: 48.185,
+        lng: 16.365,
+        displayName: 'Denisgasse, Favoriten, 1200 Wien, Österreich',
+        name: 'Denisgasse',
+        importance: 0.55,
+        address: {
+          road: 'Denisgasse',
+        },
+      });
+      expect(result).toBe('Denisgasse, 1200 Wien, Österreich');
+    });
+
+    it('prefers district over postcode when both are present', () => {
+      const result = service.formatAddressLabel({
+        lat: 48.17,
+        lng: 16.38,
+        displayName: 'verbose',
+        name: null,
+        importance: 0.5,
+        address: {
+          road: 'Denisgasse',
+          city_district: 'Favoriten',
+          postcode: '1100',
+          city: 'Wien',
+          country: 'Österreich',
+        },
+      });
+      expect(result).toBe('Denisgasse, Favoriten, Österreich');
     });
 
     it('falls back to city only', () => {
@@ -255,7 +307,8 @@ describe('SearchBarService', () => {
     it('fails soft and records one structured debug entry when the images query returns 400', async () => {
       localStorage.setItem('feldpost-search-debug', '1');
 
-      const failingImagesBuilder = createQueryBuilder({
+      const defaultBuilder = createQueryBuilder({ data: [], error: null });
+      const failingLinksBuilder = createQueryBuilder({
         data: [],
         error: {
           code: 'PGRST204',
@@ -266,22 +319,30 @@ describe('SearchBarService', () => {
         },
       });
 
-      const defaultBuilder = createQueryBuilder({ data: [], error: null });
       const failureSupabase = {
         client: {
           from: vi.fn((table: string) => {
-            if (table === 'images') return failingImagesBuilder;
+            if (table === 'media_item_location_links') return failingLinksBuilder;
             return defaultBuilder;
           }),
         },
       };
 
+      const emptyClusters = signal([]).asReadonly();
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         providers: [
           SearchBarService,
+          provideOrgSearchTuningTestDouble(),
           { provide: SupabaseService, useValue: failureSupabase },
           { provide: GeocodingService, useValue: geocodingMock },
+          {
+            provide: MediaClusterService,
+            useValue: {
+              ensureLoaded: vi.fn().mockResolvedValue(undefined),
+              clusters: emptyClusters,
+            },
+          },
         ],
       });
 
@@ -328,7 +389,8 @@ describe('SearchBarService', () => {
       const results = await firstValueFrom(service.resolveGeocoder('schleiergasse', {}));
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].family).toBe('geocoder');
-      expect(results[0].label).toBe('Schleiergasse 18, 1100 Wien');
+      expect(results[0].label).toBe('Schleiergasse 18, 1100 Wien, Austria');
+      expect(results[0].secondaryLabel).toBe('1100 Wien · Austria');
     });
 
     it('passes countrycodes and viewbox when context has them', async () => {
@@ -344,20 +406,108 @@ describe('SearchBarService', () => {
         expect.objectContaining({
           countrycodes: ['at'],
           viewbox: '15,49,17,47',
-          bounded: true,
+          bounded: false,
         }),
       );
 
       const lastCallOptions = geocodingMock.search.mock.calls.at(-1)?.[1] as
         | Record<string, unknown>
         | undefined;
-      expect(lastCallOptions?.['bounded']).toBe(true);
+      expect(lastCallOptions?.['bounded']).toBe(false);
     });
 
     it('returns empty array on geocoder failure', async () => {
       geocodingMock.search.mockRejectedValue(new Error('network'));
       const results = await firstValueFrom(service.resolveGeocoder('schleiergasse', {}));
       expect(results).toEqual([]);
+    });
+
+    it('prefers full formatted street labels over road-only duplicates', async () => {
+      geocodingMock.search.mockResolvedValue([
+        {
+          lat: 48.2412,
+          lng: 16.4102,
+          displayName: 'Handelskai 265, 1020 Wien, Austria',
+          name: null,
+          importance: 0.5,
+          address: {
+            road: 'Handelskai',
+            house_number: '265',
+            postcode: '1020',
+            city: 'Wien',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.242,
+          lng: 16.411,
+          displayName: 'Handelskai 120, 1020 Wien, Austria',
+          name: null,
+          importance: 0.48,
+          address: {
+            road: 'Handelskai',
+            house_number: '120',
+            postcode: '1020',
+            city: 'Wien',
+            country_code: 'at',
+          },
+        },
+        {
+          lat: 48.243,
+          lng: 16.412,
+          displayName: 'Handelskai 1, 1020 Wien, Austria',
+          name: null,
+          importance: 0.47,
+          address: {
+            road: 'Handelskai',
+            house_number: '1',
+            postcode: '1020',
+            city: 'Wien',
+            country_code: 'at',
+          },
+        },
+      ]);
+
+      const results = await firstValueFrom(service.resolveGeocoder('handelskai', {}));
+      expect(results.map((item) => item.label)).toEqual([
+        'Handelskai 265, 1020 Wien',
+        'Handelskai 120, 1020 Wien',
+        'Handelskai 1, 1020 Wien',
+      ]);
+    });
+
+    it('collapses identical geocoder labels to a single place result', async () => {
+      geocodingMock.search.mockResolvedValue([
+        {
+          lat: 48.2412,
+          lng: 16.4102,
+          displayName: 'Handelskai, Wien, Austria',
+          name: null,
+          importance: 0.5,
+          address: { road: 'Handelskai', city: 'Wien', country_code: 'at' },
+        },
+        {
+          lat: 48.242,
+          lng: 16.411,
+          displayName: 'Handelskai, Wien, Austria',
+          name: null,
+          importance: 0.48,
+          address: { road: 'Handelskai', city: 'Wien', country_code: 'at' },
+        },
+        {
+          lat: 48.243,
+          lng: 16.412,
+          displayName: 'Handelskai, Wien, Austria',
+          name: null,
+          importance: 0.47,
+          address: { road: 'Handelskai', city: 'Wien', country_code: 'at' },
+        },
+      ]);
+
+      const results = await firstValueFrom(service.resolveGeocoder('handelskai', {}));
+      expect(results).toHaveLength(1);
+      expect(results[0].label).toBe('Handelskai, Wien');
+      expect(results[0].secondaryLabel).toBe('Wien');
     });
 
     it('handles POI results with secondary label', async () => {
@@ -373,13 +523,14 @@ describe('SearchBarService', () => {
             house_number: '18',
             postcode: '1100',
             city: 'Wien',
+            country: 'Österreich',
           },
         },
       ]);
 
       const results = await firstValueFrom(service.resolveGeocoder('kuratorium', {}));
       expect(results[0].label).toBe('Kuratorium für Verkehrssicherheit');
-      expect(results[0].secondaryLabel).toBe('Schleiergasse 18, 1100 Wien');
+      expect(results[0].secondaryLabel).toBe('1100 Wien · Österreich');
     });
 
     it('does not retry fallback queries when strict geocoder hits are filtered out', async () => {
@@ -482,46 +633,43 @@ describe('SearchBarService', () => {
 
       expect(results.length).toBeGreaterThan(0);
       expect(results.slice(0, 3).map((item) => item.label)).toContain(
-        'Wilhelminenstrasse 85, 1160 Wien',
+        'Wilhelminenstrasse 85, 1160 Wien, Austria',
       );
-      expect(results[0].label).toBe('Wilhelminenstrasse 85, 1160 Wien');
+      expect(results[0].label).toBe('Wilhelminenstrasse 85, 1160 Wien, Austria');
     });
 
     it('broadens city-hint retries with query stems and keeps only original-prefix matches', async () => {
       geocodingMock.reverse.mockResolvedValue({ city: 'Vienna' });
-      geocodingMock.search
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([
-          {
-            lat: 48.2169,
-            lng: 16.3136,
-            displayName: 'Wilhelminenstrasse, Ottakring, Vienna, Austria',
-            name: null,
-            importance: 0.62,
-            address: {
-              road: 'Wilhelminenstrasse',
-              city: 'Vienna',
-              country_code: 'at',
-              country: 'Austria',
-            },
+      geocodingMock.search.mockResolvedValueOnce([]);
+      geocodingMock.searchStructured.mockResolvedValueOnce([]);
+      geocodingMock.search.mockResolvedValueOnce([
+        {
+          lat: 48.2169,
+          lng: 16.3136,
+          displayName: 'Wilhelminenstrasse, Ottakring, Vienna, Austria',
+          name: null,
+          importance: 0.62,
+          address: {
+            road: 'Wilhelminenstrasse',
+            city: 'Vienna',
+            country_code: 'at',
+            country: 'Austria',
           },
-          {
-            lat: 48.2346,
-            lng: 16.3193,
-            displayName: 'Dr. Wilhelmine Lowenstein-Brill, Bastiengasse, Vienna, Austria',
-            name: null,
-            importance: 0.68,
-            address: {
-              road: 'Bastiengasse',
-              city: 'Vienna',
-              country_code: 'at',
-              country: 'Austria',
-            },
+        },
+        {
+          lat: 48.2346,
+          lng: 16.3193,
+          displayName: 'Dr. Wilhelmine Lowenstein-Brill, Bastiengasse, Vienna, Austria',
+          name: null,
+          importance: 0.68,
+          address: {
+            road: 'Bastiengasse',
+            city: 'Vienna',
+            country_code: 'at',
+            country: 'Austria',
           },
-        ]);
+        },
+      ]);
 
       const results = await firstValueFrom(
         service.resolveGeocoder('wilhe', {
@@ -537,13 +685,14 @@ describe('SearchBarService', () => {
       );
 
       expect(results.length).toBe(1);
-      expect(results[0].label).toBe('Wilhelminenstrasse');
-      expect(
-        geocodingMock.search.mock.calls.some(
-          ([query]) =>
-            typeof query === 'string' && /^(wil|wilh|wilhe)\s+(vienna|wien)$/.test(query),
-        ),
-      ).toBe(true);
+      expect(results[0].label).toBe('Wilhelminenstrasse, Vienna, Austria');
+      expect(geocodingMock.searchStructured).toHaveBeenCalledWith('wilhe', 'Vienna', {
+        limit: 15,
+        countrycodes: ['at'],
+      });
+      expect(geocodingMock.search).toHaveBeenCalledTimes(2);
+      expect(geocodingMock.search.mock.calls[0]?.[0]).toBe('wilhe');
+      expect(geocodingMock.search.mock.calls[1]?.[0]).toBe('wilhe vienna');
     });
   });
 
@@ -557,6 +706,7 @@ describe('SearchBarService', () => {
     it('corrects street abbreviations', () => {
       expect(service.normalizeSearchQuery('schleier g.')).toBe('schleier gasse');
       expect(service.normalizeSearchQuery('burg str.')).toBe('burg strasse');
+      expect(service.normalizeSearchQuery('Denisgas')).toBe('denisgasse');
     });
   });
 

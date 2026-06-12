@@ -1,0 +1,213 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+// Figma Chip `96:74`: single row height `spacing-4` (16px), pill radius, label-small typescale.
+// @see docs/specs/component/filters/chip.md
+.chip {
+  --chip-height: var(--spacing-4);
+  --chip-padding-inline: var(--spacing-2);
+  --chip-padding-block: 0;
+  --chip-icon-size: var(--spacing-2);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  min-height: var(--chip-height);
+  height: var(--chip-height);
+  padding: var(--chip-padding-block) var(--chip-padding-inline);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--primary) 10%, var(--background));
+  color: var(--foreground);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-solid);
+  letter-spacing: 0.03125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.chip__icon {
+  flex-shrink: 0;
+  font-size: var(--chip-icon-size);
+  line-height: var(--line-height-solid);
+}
+
+.chip__avatar {
+  flex-shrink: 0;
+  width: var(--spacing-4);
+  height: var(--spacing-4);
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.chip__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+}
+
+.chip__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-3);
+  height: var(--spacing-3);
+  border: 0;
+  border-radius: var(--radius-full);
+  padding: 0;
+  margin-left: calc(var(--spacing-1) * 0.5);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.72;
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    opacity var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.chip__dismiss .material-icons {
+  font-size: calc(var(--chip-icon-size) * 0.75);
+  line-height: var(--line-height-solid);
+}
+
+.chip__dismiss:hover,
+.chip__dismiss:focus-visible {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  outline: none;
+}
+
+.chip--icon-only {
+  width: var(--chip-height);
+  min-width: var(--chip-height);
+  padding-inline: 0;
+  gap: 0;
+}
+
+.chip--avatar-text {
+  gap: var(--spacing-1);
+  padding-inline-start: 0;
+  padding-inline-end: var(--spacing-2);
+  padding-block: 0;
+}
+
+.chip--dismissible.chip--icon-only {
+  width: auto;
+  min-width: var(--chip-height);
+  padding-inline: var(--spacing-1);
+  gap: var(--spacing-1);
+}
+
+.chip--default {
+  background: color-mix(in srgb, var(--primary) 10%, var(--background));
+  color: var(--foreground);
+  border-color: transparent;
+}
+
+.chip--default:hover {
+  background: color-mix(in srgb, var(--primary) 16%, var(--background));
+  border-color: transparent;
+}
+
+:host-context([data-theme='dark']) {
+  .chip--default {
+    background: color-mix(in srgb, var(--primary) 26%, var(--card));
+    border-color: transparent;
+  }
+
+  .chip--default:hover {
+    background: color-mix(in srgb, var(--primary) 34%, var(--card));
+  }
+}
+
+.chip--primary,
+.chip--success,
+.chip--warning,
+.chip--neutral,
+.chip--info,
+.chip--status-success,
+.chip--status-warning,
+.chip--status-danger,
+.chip--custom {
+  --chip-ink: var(--chip-color);
+  background: color-mix(in srgb, var(--chip-color) 12%, var(--card));
+  color: var(--chip-ink);
+  border-color: color-mix(in srgb, var(--chip-color) 28%, var(--border));
+}
+
+// File-type chips: stronger tint + ink mixed toward foreground for WCAG on frosted panels.
+// @see docs/specs/component/media/file-type-chips.md
+.chip--filetype-image,
+.chip--filetype-video,
+.chip--filetype-document,
+.chip--filetype-pdf,
+.chip--filetype-spreadsheet,
+.chip--filetype-presentation {
+  --chip-ink: color-mix(in oklch, var(--chip-color) 58%, var(--foreground));
+  background: color-mix(in srgb, var(--chip-color) 20%, var(--background));
+  color: var(--chip-ink);
+  border-color: color-mix(in srgb, var(--chip-color) 40%, var(--border));
+}
+
+.chip--primary:hover,
+.chip--success:hover,
+.chip--warning:hover,
+.chip--neutral:hover,
+.chip--info:hover,
+.chip--status-success:hover,
+.chip--status-warning:hover,
+.chip--status-danger:hover,
+.chip--custom:hover {
+  background: color-mix(in srgb, var(--chip-color) 18%, var(--card));
+  border-color: color-mix(in srgb, var(--chip-color) 38%, var(--border));
+}
+
+.chip--filetype-image:hover,
+.chip--filetype-video:hover,
+.chip--filetype-document:hover,
+.chip--filetype-pdf:hover,
+.chip--filetype-spreadsheet:hover,
+.chip--filetype-presentation:hover {
+  background: color-mix(in srgb, var(--chip-color) 28%, var(--background));
+  border-color: color-mix(in srgb, var(--chip-color) 50%, var(--border));
+}
+
+:host-context([data-theme='dark']) {
+  .chip--filetype-image,
+  .chip--filetype-video,
+  .chip--filetype-document,
+  .chip--filetype-pdf,
+  .chip--filetype-spreadsheet,
+  .chip--filetype-presentation {
+    --chip-ink: color-mix(in oklch, var(--chip-color) 72%, var(--foreground));
+    background: color-mix(in srgb, var(--chip-color) 24%, var(--card));
+    border-color: color-mix(in srgb, var(--chip-color) 44%, var(--border));
+  }
+
+  .chip--filetype-image:hover,
+  .chip--filetype-video:hover,
+  .chip--filetype-document:hover,
+  .chip--filetype-pdf:hover,
+  .chip--filetype-spreadsheet:hover,
+  .chip--filetype-presentation:hover {
+    background: color-mix(in srgb, var(--chip-color) 32%, var(--card));
+    border-color: color-mix(in srgb, var(--chip-color) 54%, var(--border));
+  }
+}
+

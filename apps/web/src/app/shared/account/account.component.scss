@@ -1,0 +1,340 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+// Settings overlay embed: drop percent height chain; detail column owns scroll
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+:host.account--embedded {
+  height: auto;
+  min-height: 0;
+}
+
+.account-page {
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--spacing-4);
+  display: grid;
+  gap: var(--spacing-6);
+  min-width: 0;
+}
+
+// Full-width stack inside overlay detail (no outer clamp / double padding)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+:host.account--embedded .account-page {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: var(--spacing-6);
+}
+
+.account-page__state {
+  min-height: 14rem;
+  display: grid;
+  place-content: center;
+  gap: var(--spacing-2);
+  color: var(--muted-foreground);
+}
+
+// Subsection stack: heading + flat controls (no divider rules between blocks)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 0;
+}
+
+// Primary fields/actions under the subsection lead (flex column only; no border fill)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-detail-block__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 0;
+}
+
+// Subsection title color only (metrics from global h2 baseline)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-detail-block__lead h2 {
+  margin: 0;
+  color: var(--foreground);
+}
+
+// Intro under subsection title (matches rail row subtitle / settings detail lead)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-detail-block__lead > p {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+// Identity hero only: single elevated card on account surfaces
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding-block: var(--spacing-3);
+  padding-inline: var(--spacing-4);
+  border-radius: max(2px, calc(var(--radius-sm) - 2px));
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+// Identity hero keeps h1 + email inside the card (no separate lead block)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-card--identity {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding-block: var(--spacing-4);
+  padding-inline: var(--spacing-4);
+}
+
+.account-card__avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  display: grid;
+  place-items: center;
+  font-weight: var(--font-weight-semibold);
+  background: color-mix(in srgb, var(--primary) 18%, var(--card));
+  color: var(--primary);
+}
+
+// Text column between avatar and badges; must shrink so badges stay visible
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-card__identity-copy {
+  min-width: 0;
+  overflow: hidden;
+}
+
+// Display name color only (metrics from global h1 baseline)
+// @see apps/web/AGENTS.md (typography ownership)
+.account-card__identity-copy h1 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+
+// Email line under display name (secondary body)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-card__identity-copy p {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: var(--line-height-reading);
+  color: var(--muted-foreground);
+}
+
+// Role and assurance chips stay full width; never compete with identity text
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-card__badges {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--spacing-1);
+  align-items: center;
+}
+
+.account-chip {
+  min-height: 1.75rem;
+  padding: 0 var(--spacing-2);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+.account-skeleton {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--border) 68%, transparent) 0%,
+    color-mix(in srgb, var(--border) 36%, transparent) 50%,
+    color-mix(in srgb, var(--border) 68%, transparent) 100%
+  );
+  background-size: 220% 100%;
+  animation: account-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.account-skeleton--avatar {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: var(--radius-full);
+}
+
+.account-skeleton--line {
+  width: 14rem;
+  max-width: 100%;
+  height: 1rem;
+  border-radius: var(--radius-sm);
+}
+
+.account-skeleton--line-short {
+  width: 10rem;
+  margin-top: var(--spacing-1);
+}
+
+.account-skeleton--chip {
+  width: 4.5rem;
+  min-height: 1.75rem;
+  border-color: transparent;
+}
+
+.account-skeleton-row {
+  min-height: 3.35rem;
+  border-color: transparent;
+}
+
+.account-skeleton-row::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--container-radius-control);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--border) 68%, transparent) 0%,
+    color-mix(in srgb, var(--border) 36%, transparent) 50%,
+    color-mix(in srgb, var(--border) 68%, transparent) 100%
+  );
+  background-size: 220% 100%;
+  animation: account-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+// Label-to-control rhythm inside each hlm-form-field (matches settings field density)
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-field {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.account-field label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--foreground);
+}
+
+.account-field input {
+  width: 100%;
+  min-width: 0;
+}
+
+// Stacked password (and similar) fields — looser than compact list rows
+// @see docs/specs/ui/settings-overlay/settings-detail-embedded-layout.md
+.account-grid {
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+.account-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.account-factor-list {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.account-factor {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--container-radius-control);
+  padding: var(--spacing-2);
+}
+
+.account-factor strong {
+  display: block;
+  font-size: var(--font-size-md);
+  color: var(--foreground);
+}
+
+.account-factor small {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+.account-muted {
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+}
+
+.account-enroll {
+  display: grid;
+  gap: var(--spacing-2);
+  border: 1px dashed var(--border);
+  border-radius: var(--container-radius-control);
+  padding: var(--spacing-2);
+}
+
+.account-enroll img {
+  width: 10rem;
+  height: 10rem;
+  object-fit: contain;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.account-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: color-mix(in srgb, var(--background) 50%, transparent);
+  display: grid;
+  place-items: center;
+  padding: var(--spacing-3);
+}
+
+.account-delete-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding-block: var(--spacing-2);
+  padding-inline: var(--spacing-3);
+  border-radius: var(--container-radius-control);
+  width: min(26rem, 100%);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--destructive) 28%, var(--border));
+}
+
+@keyframes account-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+@media (max-width: 48rem) {
+  .account-page {
+    padding: var(--spacing-3);
+  }
+
+  .account-card--identity {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+}

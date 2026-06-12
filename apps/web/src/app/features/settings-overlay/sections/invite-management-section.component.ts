@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
+import type {
+  ElementRef,
+  OnDestroy,
+  OnInit} from '@angular/core';
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
   effect,
   inject,
   input,
@@ -14,24 +15,36 @@ import {
 } from '@angular/core';
 import { toCanvas } from 'qrcode';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { InviteService } from '../../../core/invites/invite.service';
-import {
+import { InvitesService } from '../../../core/invites/invites.service';
+import type {
   InviteOpenContext,
   InvitePanelMode,
   InviteTargetRole,
+  InviteStatus,
   QrInviteViewModel,
-} from '../../../core/invites/invite.types';
-
+} from '../../../core/invites/invites.types';
+import { HLM_BADGE_IMPORTS } from '../../../shared/ui/badge';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
+import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
+import { HLM_SELECT_IMPORTS } from '../../../shared/ui/select';
 @Component({
   selector: 'ss-invite-management-section',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    ...HLM_BADGE_IMPORTS,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+    ...HLM_SELECT_IMPORTS,
+  ],
   templateUrl: './invite-management-section.component.html',
   styleUrl: './invite-management-section.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InviteManagementSectionComponent implements OnInit, OnDestroy {
-  private readonly inviteService = inject(InviteService);
+  private readonly inviteService = inject(InvitesService);
   private readonly i18nService = inject(I18nService);
 
   private expirationTimer: ReturnType<typeof setInterval> | null = null;
@@ -47,6 +60,19 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   readonly inviteCreated = output<string>();
   readonly inviteRevoked = output<string>();
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
+  inviteStatusBadgeVariant(status: InviteStatus): 'success' | 'warning' | 'destructive' | 'info' {
+    switch (status) {
+      case 'active':
+        return 'success';
+      case 'expired':
+        return 'warning';
+      case 'revoked':
+        return 'destructive';
+      case 'accepted':
+        return 'info';
+    }
+  }
 
   readonly panelMode = signal<InvitePanelMode>('ready');
   readonly targetRole = signal<InviteTargetRole>('worker');
@@ -288,15 +314,34 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Matches `html[data-theme]` and system dark palette when theme is unset. */
+  private isDarkThemeActive(): boolean {
+    if (typeof document === 'undefined') {
+      return false;
+    }
+    const theme = document.documentElement.getAttribute('data-theme');
+    if (theme === 'dark') {
+      return true;
+    }
+    if (theme === 'light' || theme === 'sandstone') {
+      return false;
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
   private async renderQrCanvas(canvas: HTMLCanvasElement, payload: string): Promise<void> {
     const currentSequence = ++this.qrRenderSequence;
     this.qrVisible.set(false);
     this.qrLoading.set(true);
 
     try {
+      const darkTheme = this.isDarkThemeActive();
       await toCanvas(canvas, payload, {
         width: 192,
         margin: 1,
+        color: darkTheme
+          ? { dark: '#ffffff', light: '#000000' }
+          : { dark: '#000000', light: '#ffffff' },
       });
 
       if (currentSequence !== this.qrRenderSequence) {
@@ -366,3 +411,4 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
     }
   }
 }
+

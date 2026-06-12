@@ -26,10 +26,10 @@
   - Used in Row-Level Security (RLS) checks.
 
 - **Technician**  
-  A field user documenting construction sites with photos. Typically has role `user`.
+  A field user documenting construction sites (product copy often says “photos”; domain rows are **media items** on `media_items`). Typically has role `user`.
 
 - **Clerk**  
-  An office user preparing quotes and documentation from historical images. May have role `user` or `viewer`.
+  An office user preparing quotes and documentation from historical field documentation (same “photos” wording note as Technician). May have role `user` or `viewer`.
 
 - **Admin**  
   User with elevated permissions (see `security-boundaries.md`), including broader visibility and management tasks.
@@ -38,10 +38,12 @@
 
 ## Spatial & Temporal Concepts
 
-- **Image**  
+- **Image / Media Item**  
   A single photo plus its associated metadata in the database.
-  - Table: `images`.
-  - Key fields: `id`, `user_id`, `storage_path`, `latitude`, `longitude`, `geog`, `captured_at`, (optional) direction/bearing, project reference, metadata.
+  - Primary table: `media_items` (replaces legacy `images`).
+  - Legacy archive: `source_image_id` column in `media_items` stores references to old `public.images` for backward compatibility during transition.
+  - Key fields: `id`, `user_id`, `storage_path`, `media_bucket_name`, `latitude`, `longitude`, `geog`, `captured_at`, (optional) direction/bearing, project reference, metadata.
+  - Identifier naming contract: use `mediaId` / `mediaIds` in specs and application contracts. `imageId` / `imageIds` are legacy compatibility names only.
 
 - **Viewport**  
   The rectangular area of the map currently visible to the user.
@@ -72,11 +74,11 @@
 
 - **Radius Selection**  
   A spatial interaction: right-click + drag on desktop (long-press + drag on mobile) to draw a circle on the map.
-  - All images within the circle are added to the Active Selection.
+  - All **media items** within the circle are added to the Active Selection.
 
 - **Location / Coordinates**  
-  The latitude and longitude representing where the photo was taken or is anchored on the map.
-  - Stored as numeric fields in `images`.
+  The latitude and longitude representing where a **media item** was captured or is anchored on the map.
+  - Stored on **`media_items`** (`latitude`, `longitude`, generated `geog`). Legacy migration-era reads may still reference **`images`** in some SQL/RPC names; treat **`media_items`** as canonical for new contracts.
   - Used for all spatial queries and map rendering.
 
 - **EXIF Coordinates**  
@@ -102,8 +104,8 @@
   Whether an image is considered relevant given a viewer’s position and facing direction.
   - Depends on distance (e.g., 50m radius) and bearing tolerance (e.g., ±30°).
 - **Address Label**  
-  A human-readable address string stored alongside an image's coordinates (e.g., "Burgstraße 7, 8001 Zürich").
-  - Column: `images.address_label`.
+  A human-readable address string stored alongside a **media item's** coordinates (e.g., "Burgstraße 7, 8001 Zürich").
+  - Column: `media_items.address_label`.
   - Populated on upload from (a) a user-entered address, (b) a filename hint resolved via `AddressResolverService`, or (c) reverse geocoding of the EXIF coordinates.
   - Used by `AddressResolverService` to build the DB-first address index for autocomplete ranking.
   - See `address-resolver.md` §7.
@@ -112,18 +114,18 @@
   An address or location string extracted from a folder name or filename during folder-based bulk import (e.g., `Burgstraße_7` from a folder path).
   - Extracted by `FilenameLocationParser`.
   - Treated as a primary location source because it represents deliberate human organization, not automatic sensor data.
-  - See `folder-import.md` §4.1.
+  - See `use-cases/folder-import.md` §4.1.
 
 - **Location Resolution (folder import)**  
   The per-image process during `FolderImportAdapter` that combines filename hints and EXIF GPS to produce a confirmed set of coordinates before import.
   - Outcomes: concordant (auto-import), conflict (must be resolved by user), filename-only, EXIF-only, or unresolved (manual review queue).
-  - See `folder-import.md` §4.3.
+  - See `use-cases/folder-import.md` §4.3.
 
 - **Manual Review Queue**  
-  A holding area in the folder import review UI for images that could not be automatically resolved to a location.
+  A holding area in the folder import review UI for **media items** that could not be automatically resolved to a location.
   - The user can enter an address, use drag-to-map placement, assign a batch location, or skip.
   - Skipped images are stored with `location_unresolved = TRUE` and do not appear on the map.
-  - See `folder-import.md` §5.3.
+  - See `use-cases/folder-import.md` §5.3.
 
 ---
 
@@ -135,37 +137,34 @@
   - All RLS policies use `organization_id` to enforce data isolation between orgs (see security-boundaries.md §2.1).
 
 - **Project**  
-  A logical grouping of images that belong to the same construction job, site, or contract.
+  A logical grouping of **media items** that belong to the same construction job, site, or contract.
   - Scoped to an organization.
-  - Used to filter and organize photos across time and space.
+  - Used to filter and organize field documentation across time and space.
 
 - **Group (Saved Group)**  
-  A named, user-created collection of images. Represented as a tab in the workspace.
-  - Table: `saved_groups` + `saved_group_images`.
-  - A group can contain images from any project, location, or time range.
-  - Private to the creator (future: optionally shared within the org).
+  Legacy concept for named, user-created collections.
+  - Tables `saved_groups` and `saved_group_images` were removed in the 2026-03-27 cleanup migration.
+  - Current product flow uses Active Selection and project membership (`media_projects`) instead of persisted group tabs.
 
 - **Active Selection**  
-  A transient, in-memory group that holds images currently selected on the map (via click, Ctrl+click, or radius selection).
-  - Always visible as the first tab in the workspace.
+  A transient, in-memory set that holds **media items** currently selected on the map (via click, Ctrl+click, or radius selection).
   - Not persisted to the database; cleared on page reload.
-  - Can be saved as a named Group.
 
 - **Workspace**  
-  The tabbed panel (desktop: side pane; mobile: bottom sheet) that displays image groups.
-  - Contains the Active Selection tab plus zero or more named Group tabs.
+  The side panel (desktop) / bottom sheet (mobile) that displays selection and detail context.
+  - Group tabs are deprecated and removed from persistence.
   - See architecture.md §11.
 
 - **Metadata Key**  
-  A user-defined property name attached to an image, such as “Fang”, “Türe”, “Material”.
-  - Represents a dimension along which images can be searched or filtered.
+  A user-defined property name attached to a **media item**, such as “Fang”, “Türe”, “Material”.
+  - Represents a dimension along which media items can be searched or filtered.
 
 - **Metadata Value**  
-  The concrete value assigned to a metadata key for a given image.
+  The concrete value assigned to a metadata key for a given **media item**.
   - Example: key `Material`, value `Beton`.
 
 - **Custom Properties**  
-  The end-user feature for defining and managing metadata keys and their values on images. Encompasses the UI for creating new keys, assigning values, and filtering by metadata. Built on the `metadata_keys` and `metadata_values` tables.
+  The end-user feature for defining and managing metadata keys and their values on **media items**. Encompasses the UI for creating new keys, assigning values, and filtering by metadata. Built on the `metadata_keys` and `metadata_values` tables.
 
 ---
 
@@ -173,7 +172,7 @@
 
 - **Row-Level Security (RLS)**  
   PostgreSQL mechanism that restricts which rows a given authenticated user can see or modify.
-  - Enforces ownership, role-based, and organization-scoped access in tables such as `images`.
+  - Enforces ownership, role-based, and organization-scoped access on **`media_items`** and related tables (legacy **`images`** only where migration-era policies or views still reference it).
 
 - **JWT (JSON Web Token)**  
   Token issued by Supabase upon login.
@@ -186,9 +185,9 @@
   - The frontend never constructs storage paths directly; it always requests a signed URL.
 
 - **Storage Path**  
-  The relative path to an image file within Supabase Storage.
+  The relative path to a media file within Supabase Storage.
   - Format: `{org_id}/{user_id}/{uuid}.jpg`.
-  - Stored in `images.storage_path` — not a full URL. URLs are generated at runtime via signed-URL APIs.
+  - Stored on **`media_items.storage_path`** — not a full URL. URLs are generated at runtime via signed-URL APIs (see **Media Download Service**).
 
 ---
 
@@ -199,12 +198,17 @@
   - Enabled by `CREATE EXTENSION postgis;` in the Supabase SQL editor.
 - **GiST Index**  
   Generalized Search Tree index used by PostGIS for efficient spatial queries.
-  - Applied to `images.geog` for bounding-box and distance queries.
+  - Applied to **`media_items.geog`** for bounding-box and distance queries (legacy **`images.geog`** only in historical migrations).
 
 - **MapAdapter**  
   An abstraction layer over the map library (Leaflet).
   - Defined in architecture.md §6.
   - Ensures the Angular application never calls Leaflet APIs directly, making it swappable.
+
+- **Media Download Service**  
+  Canonical headless media retrieval boundary for preview/download/export flows.
+  - Unifies signed URL loading, tier fallback, cache reuse, binary download, and ZIP export orchestration via **`MediaDownloadService`** and its adapters (e.g. signed-URL cache).
+  - Active contract: `docs/specs/service/media-download-service/media-download-service.md`.
 
 - **AddressResolverService**  
   An Angular service (`providedIn: 'root'`) that resolves address queries to a ranked list of geographic candidates.
@@ -217,13 +221,13 @@
   An `ImageInputAdapter` implementation that wraps the browser File System Access API (`showDirectoryPicker()`).
   - Recursively scans a user-selected folder for images and feeds them into the core ingestion pipeline.
   - Requires a Chromium-based browser (Chrome 86+, Edge 86+).
-  - See `folder-import.md`.
+  - See `use-cases/folder-import.md`.
 
 - **FilenameLocationParser**  
   A pure utility function (no Angular DI dependencies) that extracts address hints from file paths and filenames.
   - Applied during the folder import resolution phase.
   - Normalises German street name variants (`str.` → `Straße`, `Strasse` → `Straße`).
-  - See `folder-import.md` §4.1.
+  - See `use-cases/folder-import.md` §4.1.
 
 - **pg_trgm**  
   PostgreSQL extension providing trigram-based string similarity functions (`similarity()`, `word_similarity()`).
@@ -405,6 +409,24 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 - **Workspace View System**  
   The mechanism for switching between workspace display modes (grid view, list view, map-only). Controlled via the workspace toolbar.
 
+### Toolbar menus & naming
+
+- **Toolbar menu**  
+  Anchored toolbar pattern: a **menu trigger** toggles a **menu panel** of options (sort, group, project scope, filters). Prefer this term in specs and tickets over vague “dropdown.”  
+  - See also: **Menu trigger**, **Menu panel**, [Anchored UI (toolbar menus)](migration/README.md#anchored-ui-toolbar-menus).
+
+- **Menu panel**  
+  The open surface listing choices (e.g. `hlmMenuContent`, scroll list, or `StandardDropdown`); horizontal padding tokens such as `--std-dropdown-padding-inline` apply here, separate from the closed trigger.  
+  - See also: **Toolbar menu**, **Menu trigger**.
+
+- **Menu trigger**  
+  The closed control that opens a toolbar menu (commonly `hlmBtn` with outline/sm sizing plus `*__menu-trigger` or `sorting-controls__btn`); trigger-side `padding-inline` aligns the affordance with the panel.  
+  - See also: **Toolbar menu**, **Toolbar filter controls (grouping / filter / sort / projects)**.
+
+- **Dropdown (informal)**  
+  Colloquial label for any list that opens from a control; use **toolbar menu** / **menu panel** when writing durable docs. Not synonymous with the Radix/shadcn **Popover** primitive name—reserve **Popover** for library-level discussion.  
+  - See also: **Toolbar menu**.
+
 ### Panels & Detail Views
 
 - **Filter Panel**  
@@ -431,7 +453,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 ### Controls & Buttons
 
 - **GPS Button**  
-  44 px circle, bottom-right of map zone. `my_location` icon. Locating state: spinner replaces icon.
+  44 px circle, bottom-right of map zone. `gps_not_fixed` when inactive, `gps_fixed` when tracking active. Locating state: spinner replaces icon.
 
 - **Theme Toggle**  
   Toolbar button cycling light → dark → system. `--color-clay` fill accent.
@@ -444,6 +466,20 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 
 - **Compact Button**  
   28 px visual height. Workspace inline micro-actions, tab chips, command palette results.
+
+### Chips & badges
+
+- **Semantic chip (`app-chip`)**  
+  Shared Angular component for file-type tints, tags, and optional dismiss. Single canonical height (**16px** / `--spacing-4` per Figma). File-type colors: `chipVariantForFileType()` + `--filetype-*` tokens — see [file-type-chips](specs/component/media/file-type-chips.md) § Agent entry points. Spec: [chip.md](specs/component/filters/chip.md); inventory: [badges-and-chips](specs/component/ui-primitives/ui-primitives.badges-and-chips.md).
+
+- **UI chip (`uiChip` / `.ui-chip`)**  
+  Directive-applied primitive styles for toolbar-adjacent chips and quick-info bridges—not necessarily the same DOM as `app-chip`.
+
+- **Toolbar filter controls (grouping / filter / sort / projects)**  
+  **`hlmBtn`** (`variant="outline"`, `size="sm"`) plus per-toolbar **`*__menu-trigger`** classes; opens panels via **`DropdownShellComponent`**. **Rounded control** radius (`--container-radius-control`), **not** a full pill; distinct from semantic loose chips.
+
+- **Filter rule conjunction control**  
+  Compact **rounded** chip (`--radius-sm`), not pill: toggles “Where” / “And” / “Or” inside the filter dropdown (`filter-rule__conj`).
 
 ### Spatial Selection
 
@@ -479,8 +515,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 
 ### Page-Level Components (placeholder)
 
-- **Photos Page** — responsive thumbnail grid + empty state + cursor pagination.
-- **Groups Page** — groups list + detail + create / rename / delete.
+- **Media Page** — responsive thumbnail grid + empty state + cursor pagination.
 - **Settings Page** — theme control (light / dark / system) with persisted preference.
 - **Account Page** — email / password change + delete-account flow.
 

@@ -1,0 +1,117 @@
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../../../../shared/dropdown-trigger/scss/dropdown-panel-flex-chain' as panel-flex;
+
+// Projects dropdown — project-specific: checkbox, count, "All" separator
+// Search/footer/list chrome from `app-standard-dropdown` + menu-panel primitives + option-menu globals.
+
+// Flex child of shell; height floor owned by `app-standard-dropdown` + `.projects-list` scroll band.
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+:host {
+  @include panel-flex.panel-flex-child;
+}
+
+// Media detail: list height follows content (cap only), no toolbar search/footer chrome.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+:host.projects-dropdown--media-detail {
+  min-height: 0;
+}
+
+:host.projects-dropdown--media-detail .projects-list {
+  height: auto;
+  max-height: min(12rem, 45vh);
+}
+
+:host.projects-dropdown--media-detail .projects-list--picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding: 0;
+}
+
+// Notion-style option rows — click adds/removes chip in detail row (no drag, no checkbox).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.projects-picker__hint {
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+  line-height: 1.35;
+}
+
+.projects-picker__option {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  min-height: 2rem;
+  padding: var(--spacing-1) var(--spacing-2);
+  cursor: pointer;
+  transition: background 80ms ease-out;
+
+  &:hover:not(.projects-picker__option--selected) {
+    @include emphasis.hover(8%);
+  }
+
+  &.projects-picker__option--selected {
+    @include emphasis.selected(8%);
+  }
+
+  &.projects-picker__option--selected:hover {
+    @include emphasis.selected-hover(8%);
+  }
+}
+
+.projects-picker__chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 14%, var(--card));
+  color: var(--foreground);
+  padding: 0.125rem var(--spacing-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projects-list {
+  // Single scroll owner when `standard-dropdown__items--scrollbar-gutter-delegate` is set.
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(18rem, 50vh);
+  overflow-y: auto;
+  // Scrollbar track reserved by gutter only — no extra `padding-inline-end` (avoids asymmetric gap vs host padding).
+  // @see docs/specs/component/filters/dropdown-system.md
+  scrollbar-gutter: stable;
+}
+
+.projects-row--all {
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  margin-bottom: var(--spacing-1);
+  padding-bottom: var(--spacing-2);
+}
+
+.projects-checkbox {
+  accent-color: var(--interaction-selected-ink);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.projects-count {
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}

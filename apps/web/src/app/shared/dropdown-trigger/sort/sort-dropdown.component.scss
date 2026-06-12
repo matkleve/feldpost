@@ -1,0 +1,164 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../scss/dropdown-panel-flex-chain' as panel-flex;
+@use '../scss/toolbar-dropdown-list-scroll' as list-scroll;
+
+// Sort dropdown — component-specific styles.
+// @see docs/specs/component/filters/dropdown-system.md
+
+// Fills toolbar shell width; flex child of `app-dropdown-shell` (scroll owned by StandardDropdown).
+// @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+:host {
+  @include panel-flex.panel-flex-child;
+  max-width: 100%;
+}
+
+// Pinned grouped section + scrollable primary list (upload-resolver-tray 2px gap).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.sort-dropdown__body {
+  @include list-scroll.toolbar-dropdown-list-body;
+}
+
+.sort-dropdown__pinned {
+  @include list-scroll.toolbar-dropdown-list-pinned;
+}
+
+.sort-dropdown__scroll {
+  @include list-scroll.toolbar-dropdown-list-scroll;
+}
+
+// Section stack — upload-resolver-tray__choices rhythm between header + option rows.
+// @see docs/specs/component/upload/upload-resolver-tray.md
+.sort-dropdown__section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+// Section label + trailing reset (same row rhythm as grouping dropdown header).
+// @see docs/specs/component/filters/dropdown-system.md
+.sort-dropdown__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Stable state: active sort row — selected ink (not primary button fill).
+// @see docs/design/state-visuals.md § Interaction emphasis
+.sort-dropdown__option--active {
+  @include emphasis.selected(10%);
+
+  > .option-menu-item__icon {
+    color: var(--interaction-selected-ink);
+  }
+}
+
+.sort-dropdown__option--active:hover,
+.sort-dropdown__option--active:focus-visible {
+  @include emphasis.selected-hover(10%);
+
+  > .option-menu-item__icon {
+    color: var(--primary);
+  }
+}
+
+// ── Direction toggle (sort-specific) ────────────────────────────────────────
+.sort-direction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-solid);
+  opacity: 0;
+  transition:
+    opacity 80ms ease-out,
+    color 80ms ease-out,
+    background 80ms ease-out;
+
+  .sort-dropdown__option:hover & {
+    opacity: 1;
+    color: var(--primary);
+  }
+
+  .sort-dropdown__option--active & {
+    opacity: 1;
+    color: var(--interaction-selected-ink);
+  }
+
+  .sort-dropdown__option--hovered & {
+    opacity: 1;
+    color: var(--primary);
+  }
+
+  &--visible {
+    opacity: 1;
+    color: var(--primary);
+  }
+
+  .sort-dropdown__option--active &--visible {
+    color: var(--interaction-selected-ink);
+  }
+
+  .sort-dropdown__option--active:hover &,
+  .sort-dropdown__option--active:focus-visible &,
+  .sort-dropdown__option--active.sort-dropdown__option--hovered &,
+  .sort-dropdown__option--active:hover &--visible,
+  .sort-dropdown__option--active:focus-visible &--visible,
+  .sort-dropdown__option--active.sort-dropdown__option--hovered &--visible {
+    color: var(--primary);
+  }
+
+  &--preview,
+  .sort-dropdown__option:hover &,
+  .sort-dropdown__option--hovered & {
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    color: var(--primary);
+  }
+}
+
+@layer components {
+  // Reset glyph motion — `data-fp-dropdown-sort-reset*` only (matches grouping header reset pattern).
+  // @see docs/specs/component/filters/dropdown-system.md
+  [data-fp-dropdown-sort-reset-icon='true'] {
+    transition-property: transform;
+    transition-duration: var(--motion-duration-fast);
+    transition-timing-function: var(--motion-ease-out);
+  }
+
+  // Motion-reduced: skip spin affordance on sort reset control.
+  // @see docs/design/motion.md
+  @media (prefers-reduced-motion: reduce) {
+    [data-fp-dropdown-sort-reset-icon='true'] {
+      transition-duration: 0s;
+    }
+  }
+
+  // Hover tilt for sort header reset.
+  // @see docs/specs/component/filters/dropdown-system.md
+  [data-fp-dropdown-sort-reset='true']:hover [data-fp-dropdown-sort-reset-icon='true'] {
+    transform: rotate(-12deg);
+  }
+
+  // Active spin for sort header reset.
+  // @see docs/specs/component/filters/dropdown-system.md
+  [data-fp-dropdown-sort-reset='true']:active [data-fp-dropdown-sort-reset-icon='true'] {
+    transform: rotate(-180deg);
+    transition-duration: 300ms;
+  }
+
+  // Reduced-motion users: no rotation on sort reset.
+  // @see docs/design/motion.md
+  @media (prefers-reduced-motion: reduce) {
+    [data-fp-dropdown-sort-reset='true']:hover [data-fp-dropdown-sort-reset-icon='true'],
+    [data-fp-dropdown-sort-reset='true']:active [data-fp-dropdown-sort-reset-icon='true'] {
+      transform: none;
+    }
+  }
+}

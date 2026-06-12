@@ -54,6 +54,21 @@ npm run lint
 
 The lint config is intentionally forward-looking. It warns on unusually large TypeScript files, long functions, and higher cyclomatic complexity without forcing broad refactors across the current codebase.
 
+## Design System Contract Checks
+
+When your change touches design-system docs, panel SCSS, or geometry behavior, run from the repository root:
+
+```bash
+npm run design-system:check
+```
+
+This command runs:
+
+```bash
+node scripts/validate-design-system-registry.mjs
+node scripts/audit-panel-breakpoints.mjs
+```
+
 ## Running end-to-end tests
 
 For end-to-end (e2e) testing, run:

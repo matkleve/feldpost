@@ -1,6 +1,7 @@
 # Upload Panel MCP Action Pack
 
 This action pack turns MCP findings into execution-ready items for the upload-panel rollout.
+It is a task-specific artifact for this rollout, not a general-purpose agent workflow or project-wide instruction source.
 
 ## Status (Executed)
 

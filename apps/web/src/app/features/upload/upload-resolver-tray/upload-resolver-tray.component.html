@@ -1,0 +1,210 @@
+<!-- Stable state: passive — slim status card when dock is visible without active groups -->
+<!-- @see docs/specs/component/upload/upload-resolver-tray.md -->
+@if (trayMode() === 'passive' && passiveDisplayLine(); as line) {
+  <p class="upload-resolver-tray__passive" [attr.data-state]="'passive'">
+    {{ line }}
+  </p>
+}
+
+<!-- Stable state: active — one dialogue turn per bundle (orchestrator) -->
+@if (trayMode() === 'active' && activeItem(); as item) {
+  <section
+    class="upload-resolver-tray"
+    [attr.data-state]="'active'"
+    tabindex="0"
+    role="region"
+    [attr.aria-label]="t('upload.resolver.tray.aria', 'Address resolver')"
+    aria-labelledby="upload-resolver-section upload-resolver-question"
+  >
+    <header class="upload-resolver-tray__toolbar">
+      <span id="upload-resolver-section" class="upload-resolver-tray__section-label">
+        {{ t('upload.resolver.sectionLabel', 'Address resolver') }}
+      </span>
+      @if (bundleItems().length > 1) {
+        <div
+          class="upload-resolver-tray__nav"
+          role="group"
+          [attr.aria-label]="carouselPositionAria() ?? t('upload.resolver.carousel.aria', 'Switch address issue')"
+        >
+          <button
+            type="button"
+            class="upload-resolver-tray__nav-btn"
+            [disabled]="!canGoToPreviousGroup()"
+            [attr.aria-label]="t('upload.resolver.carousel.prev', 'Previous address')"
+            (click)="goToAdjacentGroup(-1)"
+          >
+            <span class="material-icons" aria-hidden="true">chevron_left</span>
+          </button>
+          @if (carouselIndicator(); as indicator) {
+            <span class="upload-resolver-tray__nav-position" aria-hidden="true">{{ indicator }}</span>
+          }
+          <button
+            type="button"
+            class="upload-resolver-tray__nav-btn"
+            [disabled]="!canGoToNextGroup()"
+            [attr.aria-label]="t('upload.resolver.carousel.next', 'Next address')"
+            (click)="goToAdjacentGroup(1)"
+          >
+            <span class="material-icons" aria-hidden="true">chevron_right</span>
+          </button>
+        </div>
+      }
+    </header>
+
+    <p id="upload-resolver-question" class="upload-resolver-tray__question">
+      {{ resolverQuestion() }}
+    </p>
+
+    @if (item.folderDisplayPath) {
+      <p
+        class="upload-resolver-tray__context upload-resolver-tray__context--folder"
+        [attr.title]="folderPathTitle(item.folderDisplayPath)"
+        [attr.aria-label]="folderPathTitle(item.folderDisplayPath)"
+      >
+        <span class="material-icons" aria-hidden="true">folder</span>
+        <span>{{ item.folderDisplayPath }}</span>
+      </p>
+      @if (folderParsedSubtitle(); as parsedLine) {
+        <p class="upload-resolver-tray__context upload-resolver-tray__context--parsed">
+          {{ parsedLine }}
+        </p>
+      }
+    }
+
+    @if (isItemBlocked()) {
+      <p class="upload-resolver-tray__blocked-hint" [attr.data-state]="'blocked'">
+        {{ t('upload.resolver.dependsOnPrior', 'Answer the previous question first.') }}
+      </p>
+    } @else if (showTextAnswer()) {
+      <div class="upload-resolver-tray__city-step">
+        <label class="upload-resolver-tray__city-label" for="upload-resolver-city-input">
+          {{ t('upload.resolver.cityStep.label', 'City') }}
+        </label>
+        <input
+          id="upload-resolver-city-input"
+          class="upload-resolver-tray__city-input"
+          type="text"
+          [value]="cityDraft()"
+          (input)="cityDraft.set($any($event.target).value)"
+          [attr.placeholder]="t('upload.resolver.cityStep.placeholder', 'e.g. Wien')"
+        />
+      </div>
+    } @else {
+      <ol
+        class="upload-resolver-tray__choices"
+        role="listbox"
+        aria-labelledby="upload-resolver-question"
+        [attr.aria-label]="t('upload.resolver.options', 'Choose one answer')"
+      >
+        @for (entry of numberedOptions(); track entry.option.id) {
+          <li class="upload-resolver-tray__choice-item" role="presentation">
+            <button
+              type="button"
+              class="upload-resolver-tray__choice"
+              role="option"
+              [class.upload-resolver-tray__choice--selected]="selectedOptionId() === entry.option.id"
+              [attr.aria-selected]="selectedOptionId() === entry.option.id"
+              [attr.aria-label]="optionAriaLabel(entry)"
+              (click)="selectOption(entry.option.id)"
+              (mouseenter)="onPreviewOption(entry.option)"
+              (mouseleave)="onOptionHoverEnd()"
+              (focus)="onPreviewOption(entry.option)"
+            >
+              <span class="upload-resolver-tray__choice-index" aria-hidden="true">{{ entry.index }}</span>
+              <span class="upload-resolver-tray__choice-body">
+                <span class="upload-resolver-tray__choice-label">{{ entry.label }}</span>
+                @if (formatScorePercent(entry.option.score); as percent) {
+                  <span
+                    class="upload-resolver-tray__choice-score-col"
+                    aria-hidden="true"
+                    [attr.data-score-band]="scoreBand(entry.option.score)"
+                    [style.--score-fill]="scoreFillPercent(entry.option.score)"
+                  >
+                    <span class="upload-resolver-tray__choice-score">{{ percent }}</span>
+                    <span class="upload-resolver-tray__choice-score-bar">
+                      <span class="upload-resolver-tray__choice-score-bar__fill"></span>
+                    </span>
+                  </span>
+                }
+              </span>
+            </button>
+          </li>
+        }
+      </ol>
+      @if (showHouseNoNumber()) {
+        <button type="button" class="upload-resolver-tray__street-centroid" (click)="onStreetCentroid()">
+          {{ t('upload.resolver.houseStep.noNumber', 'No number needed') }}
+        </button>
+      }
+    }
+
+    @if (affectedMedia().length > 0) {
+      <div class="upload-resolver-tray__media-chip-host">
+        <button
+          #mediaChipTrigger
+          type="button"
+          class="upload-resolver-tray__media-chip-trigger"
+          [attr.aria-expanded]="mediaMenuOpen()"
+          [attr.aria-haspopup]="'menu'"
+          [attr.aria-label]="mediaChipAria(affectedMedia().length)"
+          [attr.title]="mediaChipTitle(affectedMedia().length)"
+          (click)="toggleMediaMenu()"
+        >
+          <app-chip
+            [decorative]="true"
+            variant="neutral"
+            [text]="mediaCountLabel(affectedMedia().length)"
+          />
+        </button>
+        @if (mediaMenuOpen()) {
+          <app-dropdown-shell
+            class="upload-resolver-tray__media-menu-shell"
+            panelClass="option-menu-surface"
+            [anchor]="mediaMenuAnchor()"
+            [minWidth]="220"
+            (closeRequested)="closeMediaMenu()"
+          >
+            <ul
+              class="upload-resolver-tray__media-list option-menu-list"
+              role="menu"
+              [attr.aria-label]="mediaListAria()"
+            >
+              @for (row of affectedMedia(); track row.jobId) {
+                <li class="upload-resolver-tray__media-row" role="none">
+                  <span class="upload-resolver-tray__media-name" [attr.title]="row.label">{{
+                    row.label
+                  }}</span>
+                  <button
+                    type="button"
+                    class="upload-resolver-tray__media-ask-later"
+                    role="menuitem"
+                    [attr.aria-label]="askLaterAria(row.label)"
+                    (click)="onAskLater(row.jobId, $event)"
+                  >
+                    {{ t('upload.resolver.media.askLater', 'Ask later') }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </app-dropdown-shell>
+        }
+      </div>
+    }
+
+    <footer class="upload-resolver-tray__footer">
+      <button type="button" class="upload-resolver-tray__skip" (click)="onDefer()">
+        {{ t('upload.resolver.skip', 'Skip') }}
+      </button>
+      <button
+        hlmBtn
+        type="button"
+        size="sm"
+        class="upload-resolver-tray__continue"
+        [disabled]="!canConfirmContinue()"
+        (click)="confirmSelection()"
+      >
+        {{ continueLabel() }}
+      </button>
+    </footer>
+  </section>
+}

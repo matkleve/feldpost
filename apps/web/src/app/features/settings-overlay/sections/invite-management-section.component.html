@@ -1,19 +1,19 @@
-<section
-  class="invite-section ui-container ui-container--compact ui-section-card"
-  aria-labelledby="invite-section-title"
->
+<section class="invite-section" aria-labelledby="invite-section-title">
   @if (panelMode() === 'error') {
-    <div class="invite-section__state invite-section__state--error" role="alert">
+    <div
+      class="invite-section__surface invite-section__state invite-section__state--error"
+      role="alert"
+    >
       <span class="material-icons" aria-hidden="true">warning</span>
       <h3>{{ t('settings.inviteManagement.errorState.title', 'Invite unavailable') }}</h3>
       <p>{{ lastError() }}</p>
-      <button type="button" class="invite-section__ghost" (click)="retry()">
+      <button hlmBtn variant="ghost" type="button" class="invite-section__ghost" (click)="retry()">
         {{ t('settings.inviteManagement.errorState.retry', 'Try again') }}
       </button>
     </div>
   } @else {
-    <header class="invite-section__header ui-item">
-      <div class="invite-section__title-wrap ui-item-label">
+    <header class="invite-section__header">
+      <div class="invite-section__title-wrap min-w-0 flex-1">
         <h3 id="invite-section-title">
           {{ t('settings.inviteManagement.title', 'Invite Management') }}
         </h3>
@@ -27,7 +27,11 @@
         </p>
       </div>
       @if (activeInvite(); as invite) {
-        <span class="invite-section__status-chip" [attr.data-status]="invite.status">
+        <span
+          hlmBadge
+          class="invite-section__status-chip"
+          [variant]="inviteStatusBadgeVariant(invite.status)"
+        >
           <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
           <span>{{ statusLabel() }}</span>
         </span>
@@ -38,51 +42,61 @@
       }
     </header>
 
+    <div class="invite-section__surface">
     <div class="invite-section__stack">
       <section
         class="invite-section__role-block"
+        id="settings-invite-management-role"
         [attr.aria-label]="t('settings.inviteManagement.aria.rolePicker', 'Role picker')"
       >
-        <label class="invite-section__label" for="invite-role-select">
-          {{ t('settings.inviteManagement.targetRole.label', 'Target role') }}
-        </label>
-        <div class="invite-section__role-row">
-          <select
-            #roleSelect
-            id="invite-role-select"
-            class="invite-section__select ui-select-control"
-            [value]="targetRole()"
-            [disabled]="isRegenerateDisabled()"
-            (change)="onRoleChange($event)"
-          >
-            <option value="worker">
-              {{ t('settings.inviteManagement.targetRole.option.worker', 'Worker') }}
-            </option>
-            <option value="clerk">
-              {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
-            </option>
-          </select>
-          <button
-            type="button"
-            class="invite-section__button invite-section__button--ghost"
-            [disabled]="isRegenerateDisabled()"
-            (click)="onRegenerate()"
-          >
-            {{ t('settings.inviteManagement.action.regenerate', 'Regenerate') }}
-          </button>
-          <button
-            type="button"
-            class="invite-section__button invite-section__button--danger"
-            [disabled]="activeInvite()?.status !== 'active'"
-            (click)="onRevoke()"
-          >
-            {{ t('settings.inviteManagement.action.revoke', 'Revoke') }}
-          </button>
-        </div>
+        <hlm-form-field class="invite-section__role-field">
+          <label hlmLabel for="invite-role-select">{{
+            t('settings.inviteManagement.targetRole.label', 'Target role')
+          }}</label>
+          <div class="invite-section__role-row">
+            <select
+              hlmSelect
+              #roleSelect
+              id="invite-role-select"
+              class="min-w-0"
+              [value]="targetRole()"
+              [disabled]="isRegenerateDisabled()"
+              (change)="onRoleChange($event)"
+            >
+              <option value="worker">
+                {{ t('settings.inviteManagement.targetRole.option.worker', 'Worker') }}
+              </option>
+              <option value="clerk">
+                {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
+              </option>
+            </select>
+            <button
+              hlmBtn
+              variant="ghost"
+              type="button"
+              class="invite-section__button"
+              [disabled]="isRegenerateDisabled()"
+              (click)="onRegenerate()"
+            >
+              {{ t('settings.inviteManagement.action.regenerate', 'Regenerate') }}
+            </button>
+            <button
+              hlmBtn
+              variant="destructive"
+              type="button"
+              class="invite-section__button"
+              [disabled]="activeInvite()?.status !== 'active'"
+              (click)="onRevoke()"
+            >
+              {{ t('settings.inviteManagement.action.revoke', 'Revoke') }}
+            </button>
+          </div>
+        </hlm-form-field>
       </section>
 
       <section
         class="invite-section__qr-block"
+        id="settings-invite-management-qr"
         [attr.aria-label]="t('settings.inviteManagement.aria.qrPreview', 'QR preview')"
       >
         <div class="invite-section__qr-frame">
@@ -112,10 +126,14 @@
 
       <section
         class="invite-section__share-block"
+        id="settings-invite-management-share"
         [attr.aria-label]="t('settings.inviteManagement.aria.shareActions', 'Share actions')"
       >
         <div class="invite-section__share-row">
           <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
             class="invite-section__icon-button"
             [attr.aria-label]="t('settings.inviteManagement.share.copy.aria', 'Copy invite link')"
@@ -126,6 +144,9 @@
             <span class="material-icons" aria-hidden="true">content_copy</span>
           </button>
           <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
             class="invite-section__icon-button"
             [attr.aria-label]="
@@ -138,6 +159,9 @@
             <span class="material-icons" aria-hidden="true">mail</span>
           </button>
           <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
             class="invite-section__icon-button"
             [attr.aria-label]="
@@ -156,5 +180,6 @@
     @if (lastError()) {
       <p class="invite-section__inline-error" role="status">{{ lastError() }}</p>
     }
+    </div>
   }
 </section>

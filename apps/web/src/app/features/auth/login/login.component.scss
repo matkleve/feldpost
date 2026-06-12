@@ -1,1 +1,34 @@
 @use '../auth.styles';
+
+// Establishes stacking context so the toggle button can be positioned absolutely
+// @see login.component.html#password-field-wrapper
+.password-field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+// Right-padding reserves space so typed text clears the toggle button
+// @see login.component.html#password-field-wrapper
+.password-input {
+  flex: 1 1 auto;
+  padding-right: 2.5rem;
+  min-width: 0;
+}
+
+// Positioned inside wrapper; interaction and visual owned by .icon-btn-ghost
+// @see login.component.html#password-field-wrapper
+.password-toggle {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+// Smaller visibility icon so the control matches compact auth inputs
+// @see docs/migration/phase-10-visual-qa.md Part 3 login
+.password-toggle .material-icons {
+  font-size: var(--font-size-lg);
+}

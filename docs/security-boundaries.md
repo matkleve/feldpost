@@ -3,7 +3,7 @@
 **Who this is for:** engineers and operators responsible for keeping Feldpost data secure.  
 **What you'll get:** the trust model, RLS boundaries, and storage rules that must never be violated.
 
-See also: `database-schema.md`, `user-lifecycle.md`, `architecture.md`.
+See also: `architecture/database-schema.md`, `user-lifecycle.md`, `architecture.md`.
 
 ---
 
@@ -95,11 +95,13 @@ $$;
 
 ### 2.2 Roles
 
-| Role           | Capabilities                                                                      |
-| -------------- | --------------------------------------------------------------------------------- |
-| **admin**      | Full CRUD on all org data; manage users and roles; delete org resources.          |
-| **technician** | Upload images; edit own images (metadata, coordinates); create/manage own groups. |
-| **viewer**     | Read-only access to all org images, projects, and groups. No uploads, no edits.   |
+| Role       | Capabilities                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| **admin**  | Full CRUD on org data; manage users and roles; revoke/export resources.                       |
+| **clerk**  | Non-viewer member role for office workflows; can create project and invite artifacts.         |
+| **worker** | Non-viewer member role for field workflows; can upload and mutate own/org media per policies. |
+| **user**   | Baseline non-viewer member role (legacy-compatible).                                          |
+| **viewer** | Read-only access to org-scoped runtime data. No uploads, no write mutations.                  |
 
 The `viewer` role enables the Clerk persona (UC2) to browse and quote without risking data modification.
 
@@ -114,16 +116,16 @@ The `viewer` role enables the Clerk persona (UC2) to browse and quote without ri
 
 All policies below assume the `user_org_id()` helper from §2.1.
 
-### 3.1 Images Table
+### 3.1 Media Items Table
 
-| Operation  | Policy                                                                                                                             |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **SELECT** | `organization_id = user_org_id()` — all org members (including viewer) can read.                                                   |
-| **INSERT** | `user_id = auth.uid() AND organization_id = user_org_id()` — user owns the row; org must match. Viewers are blocked by role check. |
-| **UPDATE** | `(user_id = auth.uid() OR is_admin()) AND organization_id = user_org_id()` — owner or admin within the same org.                   |
-| **DELETE** | Same as UPDATE.                                                                                                                    |
+| Operation  | Policy                                                                                                                                   |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **SELECT** | `organization_id = user_org_id()` — all org members (including viewer) can read.                                                         |
+| **INSERT** | `created_by = auth.uid() AND organization_id = user_org_id()` — creator owns the row; org must match. Viewers are blocked by role check. |
+| **UPDATE** | `(created_by = auth.uid() OR is_admin()) AND organization_id = user_org_id()` — creator or admin within the same org.                    |
+| **DELETE** | Same as UPDATE.                                                                                                                          |
 
-Note: `images.organization_id` is denormalized from `profiles.organization_id` for RLS performance (avoids join on every SELECT). A trigger keeps them in sync.
+Note: `media_items.organization_id` is denormalized from `profiles.organization_id` for RLS performance (avoids join on every SELECT).
 
 ### 3.2 Profiles Table
 
@@ -150,23 +152,23 @@ Note: `images.organization_id` is denormalized from `profiles.organization_id` f
 
 - `projects`: SELECT by org members (`organization_id = user_org_id()`). INSERT/UPDATE/DELETE by owner or admin.
 - `metadata_keys`: scoped to `organization_id`. Readable by all org members. Writable by creator or admin.
-- `image_metadata`: inherits visibility/write permissions from the parent image.
+- `media_metadata`: inherits visibility/write permissions from the parent media item.
 
-### 3.6 Saved Groups
+### 3.6 Share Set Memberships (Media-Era)
 
-- `saved_groups`:
-  - **SELECT**: `user_id = auth.uid()` — groups are private to the creator. (Future: shared groups via org visibility.)
-  - **INSERT**: `user_id = auth.uid()`.
-  - **UPDATE / DELETE**: `user_id = auth.uid()`.
-- `saved_group_images`:
-  - Inherits access from the parent `saved_groups` row via `group_id`.
-  - INSERT/DELETE allowed only if user owns the group.
+- `share_sets`:
+  - **SELECT**: org-scoped (`organization_id = user_org_id()`), active only (`revoked_at IS NULL`, not expired).
+  - **INSERT**: creator must be `auth.uid()`, org must match, viewer blocked.
+  - **UPDATE / DELETE**: creator or admin, org-scoped.
+- `share_set_items`:
+  - Inherits access from parent `share_sets` constraints.
+  - Write operations require creator/admin rights through the parent set.
 
 ### 3.7 Coordinate Corrections
 
 - `coordinate_corrections`:
-  - **INSERT**: Any org member can log a correction for an image within the org.
-  - **SELECT**: Readable by the image owner and admins (audit trail).
+  - **INSERT**: Any org member can log a correction for a media item within the org.
+  - **SELECT**: Readable by the media owner and admins (audit trail).
   - **UPDATE / DELETE**: Not allowed (append-only audit log).
 
 ### 3.8 Share Sets (Export Links)
@@ -175,16 +177,22 @@ Note: `images.organization_id` is denormalized from `profiles.organization_id` f
   - **SELECT**: Authenticated users within same org (`organization_id = user_org_id()`), and only if not revoked and not expired.
   - **INSERT**: Creator must be `auth.uid()`, org must match `user_org_id()`, viewers cannot create.
   - **UPDATE / DELETE**: Creator or org admin only.
+  - **Audience / grant columns:** `audience` (`public` | `organization` | `named`) and `share_grant` (e.g. `view`) describe how `resolve_share_set` authorizes callers; see `docs/specs/service/share-set/share-set-access-model.md`.
 - `share_set_items`:
   - **SELECT**: Allowed only if parent `share_sets` row is visible under the same constraints.
   - **INSERT / DELETE**: Creator or org admin through parent set ownership.
+- `share_set_recipients` (for `named` audience):
+  - **Direct client access:** RLS enabled with no broad member policies; rows are written by `create_or_reuse_share_set` and read only inside **`SECURITY DEFINER`** resolve logic. Do not expose recipient lists through permissive SELECT policies.
 
 Token security rules:
 
 - Raw share token is never stored; only hash (`token_hash`) is persisted.
 - Resolve flow hashes incoming token server-side and compares against `token_hash`.
 - Revoked or expired sets return no media rows.
-- Cross-org token usage always returns denied/empty result.
+- **`resolve_share_set`:** single RPC for all audiences; server branches on `audience` + caller (`anon` vs authenticated, `user_org_id()`, recipient membership). Wrong audience for caller returns an **empty** result (no cross-org leakage).
+- **Share vs RLS:** `share_grant` limits **share-mediated** RPC behavior only. Authenticated org members using normal queries remain governed by table RLS and roles alone.
+
+Canonical matrix: `docs/specs/service/share-set/share-set-access-model.md`.
 
 ### Role Check Logic (Conceptual)
 
@@ -218,7 +226,7 @@ as $$
 $$;
 ```
 
-Viewers are blocked from INSERT/UPDATE/DELETE on `images`, `projects`, and `metadata_keys` by adding `AND NOT is_viewer()` to write policies.
+Viewers are blocked from INSERT/UPDATE/DELETE on `media_items`, `media_projects`, `media_metadata`, `projects`, and `metadata_keys` by adding `AND NOT is_viewer()` to write policies.
 
 ---
 
@@ -228,7 +236,7 @@ Viewers are blocked from INSERT/UPDATE/DELETE on `images`, `projects`, and `meta
 
 ```mermaid
 flowchart TD
-    subgraph Bucket["Supabase Storage: images/ (private)"]
+    subgraph Bucket["Supabase Storage: media/ (private, primary)"]
         direction TB
         ORG["{org_id}/"] --> USR["{user_id}/"]
         USR --> ORIG["{uuid}.jpg\n(original, compressed)"]
@@ -250,12 +258,13 @@ flowchart TD
     Policies --> Access
 ```
 
-- Images are stored in Supabase Storage in a private bucket named `images`.
+- Media files are stored in Supabase Storage in a private bucket named `media`.
+- Compatibility reads may still fallback to bucket `images` during transition phases.
 
 ### 4.1 Bucket Structure
 
 ```
-images/
+media/
   {org_id}/
     {user_id}/
       {uuid}.jpg          ← original (compressed)
@@ -281,7 +290,7 @@ Path segments use UUIDs only — no user-visible names, no sequential IDs.
 ### 4.4 Upload Constraints
 
 - Maximum file size: **25 MB** (enforced by Supabase Storage config).
-- Allowed MIME types: `image/jpeg`, `image/png`, `image/heic`, `image/heif`, `image/webp`.
+- Allowed MIME types include images, videos, and documents (for example `image/jpeg`, `video/mp4`, `application/pdf`).
 - HEIC/HEIF files are converted to JPEG client-side before upload (see architecture.md §5).
 
 ### 4.5 CORS Configuration
@@ -340,7 +349,7 @@ flowchart TB
 
 - Client-side checks are for UX only.  
   Security and access control must always be implemented and tested at the database/policy level.
-- EXIF GPS coordinates from uploaded images are treated as untrusted input; latitude must be in `[-90, 90]`, longitude in `[-180, 180]` (enforced by CHECK constraints — see database-schema.md).
+- EXIF GPS coordinates from uploaded images are treated as untrusted input; latitude must be in `[-90, 90]`, longitude in `[-180, 180]` (enforced by CHECK constraints — see architecture/database-schema.md).
 
 ---
 
@@ -354,4 +363,4 @@ Before any new table or feature ships:
 4. Storage policies match the bucket path convention `{org_id}/{user_id}/{uuid}`.
 5. No sensitive data is exposed in error messages returned to the client.
 6. Signed URLs are used for all storage access (no public URLs).
-7. Foreign keys with CASCADE or SET NULL are documented in the cascade summary (database-schema.md §12).
+7. Foreign keys with CASCADE or SET NULL are documented in the cascade summary (architecture/database-schema.md §12).

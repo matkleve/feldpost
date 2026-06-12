@@ -1,0 +1,143 @@
+# Drag Divider
+
+## What It Is
+
+A vertical resize handle between the Map Zone and Workspace Pane. Lets the user drag to resize the workspace width on desktop. On mobile, hidden — the bottom sheet uses snap points instead.
+
+## What It Looks Like
+
+A thin vertical bar (2px visual width, neutral border token at rest) occupying the full height between map and workspace. Nearly invisible at rest — follows the Quiet Actions principle (constitution §1.8, Notion-inspired). On hover or active drag, the bar subtly widens and a centered **grip indicator** fades in: three short horizontal lines stacked vertically with **`var(--spacing-1)`** (4px) gap, rendered in muted foreground ink. A transparent **hit zone** (**`2.75rem`** / **44px** wide), centered on the 2px host, captures pointers so the target meets the desktop minimum without changing flex layout. `cursor: col-resize` on the full hit zone. On drag, the bar background shifts to a stronger border mix (see implementation SCSS).
+
+## Where It Lives
+
+- **Parent (canonical):** **`app-authenticated-app-layout`** (split host) — renders the divider between the **main column** (route outlet: map, media, projects, …) and **Workspace Pane**. **Rollback:** divider may return under `MapShellComponent` only if layout hoist is reverted; see [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-rollback--partial-landing).
+- **Appears when**: `photoPanelOpen()` is `true` (desktop only, hidden at `< 768px`) — product: Workspace Pane open ([symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md) for future `workspacePaneOpen`).
+- **Component**: `DragDividerComponent` at `apps/web/src/app/shared/workspace-pane/drag-divider/`
+
+## Actions
+
+| #   | User Action                            | System Response                                                                                               | Triggers                                 |
+| --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 1   | Hovers over divider zone               | Bar widens to 4px, color shifts to `--color-border-strong`, grip lines fade in (80ms)                         | CSS `:hover` state                       |
+| 2   | Presses pointer down on divider        | Enters drag state: bar stays highlighted, user-select disabled on body, `cursor: col-resize` forced globally  | `dragging` signal → `true`               |
+| 3   | Moves pointer while dragging           | Workspace pane width updates in real time, clamped to min 17.5rem (280px) and map-pane minimum ~20rem (320px) | Emits `widthChange` with new width in px |
+| 4   | Releases pointer                       | Exits drag state: bar returns to rest state, user-select re-enabled                                           | `dragging` signal → `false`              |
+| 5   | Double-clicks the divider              | Resets workspace pane to default width (22.5rem / 360px)                                                      | Emits `widthChange` with default width   |
+| 6   | Presses Left/Right arrow while focused | Resizes workspace in 0.5rem (8px) steps, clamped to same min/max                                              | Emits `widthChange`, ARIA value updates  |
+| 7   | Presses Home/End while focused         | Home: sets workspace to minimum width. End: expands to available max.                                         | Emits `widthChange`, ARIA value updates  |
+| 8   | Screen resizes below 768px             | Divider is hidden (mobile uses bottom sheet snap points)                                                      | Angular `@if` / CSS media query          |
+
+## Component Hierarchy
+
+```
+DragDivider                                ← host element, full height, col-resize cursor
+├── HitZone                                ← transparent tap target, min-width 2.75rem (44px)
+│   ├── Bar                                ← 2px visual line, centered in hit zone, --color-border
+│   └── GripIndicator                      ← pill badge centered vertically in hit zone
+│       └── drag_indicator icon              ← Material icon, 1rem, --color-text-disabled
+```
+
+### Grip indicator details
+
+The grip indicator is a pill badge centered on the divider. It uses a `drag_indicator` Material icon as the visual affordance:
+
+- **Badge dimensions**: **`var(--spacing-5)`** wide × **`var(--spacing-6)`** tall — portrait pill (matches **`drag-divider.component.scss`**; use only steps defined on the spacing scale in [`docs/design/tokens.md`](../../../design/tokens.md) — do not prescribe **`var(--spacing-7)`**)
+- **Badge style**: **`var(--card)`** surface, **`1px solid var(--border)`**, **`var(--shadow-sm)`**, **`var(--container-radius-control)`** corners
+- **Icon**: `drag_indicator`, `1rem` (16px), `--color-text-disabled` at rest → `--color-text-secondary` on hover
+- **Vertical position**: centered in the divider’s full height
+- **Horizontal position**: centered in the hit zone
+- **Visibility**: `opacity: 0` at rest → `opacity: 1` on hover/focus/drag, with border/shadow upgrade; transitions over 80ms
+
+This follows the VS Code / Figma resizable-pane pill handle pattern.
+
+## Data
+
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
+None — the Drag Divider is purely a layout interaction component with no data dependencies.
+
+## State
+
+| Name       | Type      | Default | Controls                                                           |
+| ---------- | --------- | ------- | ------------------------------------------------------------------ |
+| `dragging` | `boolean` | `false` | Bar highlight, grip visibility, global cursor lock, body no-select |
+
+### Inputs (from parent)
+
+| Name           | Type     | Description                                                               |
+| -------------- | -------- | ------------------------------------------------------------------------- |
+| `currentWidth` | `number` | Current workspace pane width in px                                        |
+| `minWidth`     | `number` | Minimum workspace width (280px / 17.5rem)                                 |
+| `maxWidth`     | `number` | Maximum workspace width (computed from viewport minus map minimum ~320px) |
+| `defaultWidth` | `number` | Default width for double-click reset (360px / 22.5rem)                    |
+
+### Outputs (to parent)
+
+| Name          | Type                   | Description                                           |
+| ------------- | ---------------------- | ----------------------------------------------------- |
+| `widthChange` | `EventEmitter<number>` | New workspace width in px after drag or keyboard step |
+
+## File Map
+
+| File                                                                   | Purpose                                          |
+| ---------------------------------------------------------------------- | ------------------------------------------------ |
+| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.ts`   | Component with pointer tracking + keyboard logic |
+| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.html` | Template: hit zone, bar, grip indicator          |
+| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.scss` | Styles: rest/hover/active states, grip lines     |
+
+## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
+- Imported by **`app-authenticated-app-layout`**, between main `router-outlet` content and Workspace Pane when **`photoPanelOpen()`** is true.
+- Parent passes `currentWidth`, `minWidth`, `maxWidth`, `defaultWidth` as inputs
+- Parent listens to `widthChange` output and applies the new width to the Workspace Pane flex-basis
+- Hidden at `< 768px` — mobile layout uses bottom sheet snap points instead
+- During drag, the component adds `user-select: none` to `document.body` and sets `cursor: col-resize` on the root element to prevent text selection and cursor flicker
+- On `pointerup` or `pointercancel` (even outside the component), drag ends and cleanup runs
+
+## Accessibility
+
+- `role="separator"` with `aria-orientation="vertical"`
+- `aria-valuenow`: current workspace width (unitless px)
+- `aria-valuemin`: minimum workspace width
+- `aria-valuemax`: maximum workspace width
+- `tabindex="0"` for keyboard focus
+- Visible focus ring using `--color-primary` outline (2px, offset 2px)
+- Arrow keys resize in 0.5rem (8px) steps; Home/End jump to min/max
+- `prefers-reduced-motion: reduce` disables the grip fade transition (immediate show/hide)
+
+## Acceptance Criteria
+
+- [ ] Divider renders as a 2px vertical line between map and workspace on desktop
+- [ ] Hit zone is at least 2.75rem (44px) wide for accessible pointer targeting
+- [ ] Hover shows the grip indicator (3 horizontal lines) with 80ms fade-in
+- [ ] Pointer drag resizes workspace pane in real time
+- [ ] Width is clamped: workspace min 17.5rem (280px), map min ~20rem (320px)
+- [ ] Double-click resets workspace to default width (22.5rem / 360px)
+- [ ] Keyboard arrow keys resize in 0.5rem (8px) steps
+- [ ] `role="separator"` with correct ARIA value attributes
+- [ ] Visible focus ring on keyboard navigation
+- [ ] Hidden on mobile (`< 768px`)
+- [ ] All colors use design tokens, works in both light and dark mode
+- [ ] No text selection or cursor flicker during drag
+- [ ] `prefers-reduced-motion` disables fade transitions

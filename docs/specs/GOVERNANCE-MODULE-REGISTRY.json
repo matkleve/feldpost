@@ -1,0 +1,466 @@
+[
+  {
+    "module_slug": "shared/account",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/account/account.md",
+    "code_path": "apps/web/src/app/shared/account",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/upload",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/ui/upload/upload-panel-system.md",
+    "code_path": "apps/web/src/app/features/upload",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/settings-overlay",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/ui/settings-overlay",
+    "code_path": "apps/web/src/app/features/settings-overlay",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/containers",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/containers/containers.md",
+    "code_path": "apps/web/src/app/shared/containers",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/confirm-dialog",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/confirm-dialog/confirm-dialog.md",
+    "code_path": "apps/web/src/app/shared/confirm-dialog",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/components",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/filters/chip.md",
+    "code_path": "apps/web/src/app/shared/components",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/settings",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/page/settings-routes.md",
+    "code_path": "apps/web/src/app/features/settings",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/map",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/ui/workspace",
+    "code_path": "apps/web/src/app/features/map",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/groups",
+    "module_type": "thin-module",
+    "owner": "features",
+    "spec_path": "docs/specs/page/groups-feature.md",
+    "code_path": "apps/web/src/app/features/groups",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/auth",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/page/auth-pages.md",
+    "code_path": "apps/web/src/app/features/auth",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/projects",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/page/projects-page.md",
+    "code_path": "apps/web/src/app/features/projects",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/nav",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/ui/nav/nav-system.md",
+    "code_path": "apps/web/src/app/features/nav",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/media",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/page/media-page.md",
+    "code_path": "apps/web/src/app/features/media",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/dropdown-trigger",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/filters/dropdown-system.md",
+    "code_path": "apps/web/src/app/shared/dropdown-trigger",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/snap-size-slider",
+    "module_type": "thin-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/workspace/snap-size-slider.md",
+    "code_path": "apps/web/src/app/shared/snap-size-slider",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/segmented-switch",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/filters/segmented-switch.md",
+    "code_path": "apps/web/src/app/shared/segmented-switch",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/quick-info-chips",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/workspace/quick-info-chips.md",
+    "code_path": "apps/web/src/app/shared/quick-info-chips",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/view-toggle",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/project/projects-view-toggle.md",
+    "code_path": "apps/web/src/app/shared/view-toggle",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/ui-primitives",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/ui-primitives/ui-primitives.md",
+    "code_path": "apps/web/src/app/shared/ui-primitives",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/text-input-dialog",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/text-input-dialog/text-input-dialog.md",
+    "code_path": "apps/web/src/app/shared/text-input-dialog",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/project-select-dialog",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/project-select-dialog/project-select-dialog.md",
+    "code_path": "apps/web/src/app/shared/project-select-dialog",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/media-display",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/media/media-display.md",
+    "code_path": "apps/web/src/app/shared/media-display",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/media",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/page/media-page.md",
+    "code_path": "apps/web/src/app/shared/media",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/item-grid",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/item-grid/item-grid.md",
+    "code_path": "apps/web/src/app/shared/item-grid",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/workspace-pane",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/ui/workspace/workspace-pane.md",
+    "code_path": "apps/web/src/app/shared/workspace-pane",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/media-item",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/media/media-item.md",
+    "code_path": "apps/web/src/app/shared/media-item",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/photo-lightbox",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/media/photo-lightbox.md",
+    "code_path": "apps/web/src/app/shared/photo-lightbox",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/pane-toolbar",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/workspace/pane-toolbar.md",
+    "code_path": "apps/web/src/app/shared/pane-toolbar",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/pane-footer",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/workspace/pane-footer.md",
+    "code_path": "apps/web/src/app/shared/pane-footer",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/action-system",
+    "module_type": "thin-module",
+    "owner": "features",
+    "spec_path": "docs/specs/system/action-engine-system.md",
+    "code_path": "apps/web/src/app/features/action-system",
+    "status": "deprecated"
+  },
+  {
+    "module_slug": "core/action",
+    "module_type": "thin-module",
+    "owner": "core",
+    "spec_path": "docs/specs/system/action-engine-system.md",
+    "code_path": "apps/web/src/app/core/action",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/map",
+    "module_type": "thin-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/map",
+    "code_path": "apps/web/src/app/core/map",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/location-resolver",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/location-resolver",
+    "code_path": "apps/web/src/app/core/location-resolver",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/location-path-parser",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/location-path-parser",
+    "code_path": "apps/web/src/app/core/location-path-parser",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/media-location-update",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/media-location-update",
+    "code_path": "apps/web/src/app/core/media-location-update",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/media-download",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/media-download-service",
+    "code_path": "apps/web/src/app/core/media-download",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/media",
+    "module_type": "adapter-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/media-download-service/adapters/tier-resolver.adapter.md",
+    "code_path": "apps/web/src/app/core/media",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/invites",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/invites",
+    "code_path": "apps/web/src/app/core/invites",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/filter",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/filter",
+    "code_path": "apps/web/src/app/core/filter",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/filename-parser",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/filename-parser",
+    "code_path": "apps/web/src/app/core/filename-parser",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/auth",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/auth",
+    "code_path": "apps/web/src/app/core/auth",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/i18n",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/i18n",
+    "code_path": "apps/web/src/app/core/i18n",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/geocoding",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/geocoding",
+    "code_path": "apps/web/src/app/core/geocoding",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/folder-scan",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/folder-scan",
+    "code_path": "apps/web/src/app/core/folder-scan",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/media-preview",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/media-preview",
+    "code_path": "apps/web/src/app/core/media-preview",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/user-profile",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/user-profile",
+    "code_path": "apps/web/src/app/core/user-profile",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/upload",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/media-upload-service",
+    "code_path": "apps/web/src/app/core/upload",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/toast",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/toast",
+    "code_path": "apps/web/src/app/core/toast",
+    "status": "active"
+  },
+  {
+    "module_slug": "features/account",
+    "module_type": "ui-bound-module",
+    "owner": "features",
+    "spec_path": "docs/specs/page/account-feature.md",
+    "code_path": "apps/web/src/app/features/account",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/workspace-view",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/workspace-view",
+    "code_path": "apps/web/src/app/core/workspace-view",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/workspace-selection",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/workspace-selection",
+    "code_path": "apps/web/src/app/core/workspace-selection",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/supabase",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/supabase",
+    "code_path": "apps/web/src/app/core/supabase",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/projects",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/projects",
+    "code_path": "apps/web/src/app/core/projects",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/metadata",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/metadata",
+    "code_path": "apps/web/src/app/core/metadata",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/media-query",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/media-query",
+    "code_path": "apps/web/src/app/core/media-query",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/share-set",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/share-set",
+    "code_path": "apps/web/src/app/core/share-set",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/settings-pane",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/settings-pane",
+    "code_path": "apps/web/src/app/core/settings-pane",
+    "status": "active"
+  },
+  {
+    "module_slug": "core/search",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/search",
+    "code_path": "apps/web/src/app/core/search",
+    "status": "active"
+  }
+]

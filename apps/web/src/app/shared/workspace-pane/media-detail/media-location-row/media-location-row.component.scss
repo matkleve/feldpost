@@ -1,0 +1,90 @@
+// Location row edit grid and primary marker
+// @see docs/specs/ui/media-detail/media-detail-location-section.md
+
+@layer components {
+  .media-location-row__edit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2);
+    width: 100%;
+  }
+
+  .media-location-row__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    min-width: 0;
+  }
+
+  .media-location-row__field--wide {
+    grid-column: 1 / -1;
+  }
+
+  .media-location-row__primary-icon {
+    color: var(--primary);
+    pointer-events: none;
+  }
+
+  .media-location-row--primary .detail-row__icon {
+    color: var(--primary);
+  }
+
+  // Collapses label column so address sits in the value column like other detail rows.
+  // @see docs/specs/ui/media-detail/media-detail-location-section.md
+  .media-location-row__label-spacer {
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .media-location-row__delete-confirm {
+    display: inline-flex;
+    align-self: stretch;
+  }
+
+  .media-location-row__delete-confirm button.detail-row-action--r2 {
+    grid-area: unset;
+    justify-self: auto;
+    align-self: stretch;
+  }
+}
+
+@layer states {
+  .media-location-row__error {
+    margin: 0;
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--text-sm);
+    color: var(--destructive);
+  }
+
+  .option-menu-list__hint {
+    margin: 0;
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    pointer-events: none;
+  }
+
+  // Copy flyout uses fixed viewport coords — escapes dropdown-shell overflow clipping.
+  // @see docs/specs/ui/media-detail/media-detail-location-section.md
+  .media-location-row__copy-chevron {
+    margin-left: auto;
+  }
+
+  .media-location-row__copy-submenu {
+    position: fixed;
+    z-index: 302;
+    min-width: 11rem;
+    box-sizing: border-box;
+    padding: var(--spacing-1);
+    gap: 2px;
+  }
+}
+
+// Allow side flyout to paint outside the overflow dropdown host.
+// @see apps/web/src/app/shared/dropdown-trigger/dropdown-shell.component.scss
+app-dropdown-shell.media-location-row__overflow-panel {
+  overflow: visible;
+}

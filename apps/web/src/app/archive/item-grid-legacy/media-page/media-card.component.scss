@@ -1,0 +1,119 @@
+:host {
+  display: block;
+}
+
+.media-card {
+  position: relative;
+  display: grid;
+  border-radius: var(--container-radius-control);
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--muted);
+  transition: box-shadow 0.2s;
+
+  &--row {
+    aspect-ratio: auto;
+    min-block-size: 6rem;
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    align-items: stretch;
+
+    .media-card__info {
+      position: static;
+      background: transparent;
+      color: var(--foreground);
+      display: grid;
+      align-content: center;
+      gap: var(--spacing-1);
+      padding: var(--spacing-2);
+    }
+
+    .media-card__title {
+      color: var(--foreground);
+    }
+
+    .media-card__date,
+    .media-card__context {
+      color: var(--muted-foreground);
+      opacity: 1;
+    }
+  }
+
+  &--large {
+    min-block-size: 12rem;
+  }
+}
+
+.media-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-card__media {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.media-card__info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-2);
+  background: linear-gradient(to top, var(--overlay-scrim-80), transparent);
+  color: var(--primary-foreground);
+}
+
+.media-card__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-card__date,
+.media-card__context {
+  margin: var(--spacing-1) 0 0 0;
+  font-size: 0.625rem;
+  opacity: 0.85;
+}
+
+.media-card__meta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+  margin-top: var(--spacing-1);
+}
+
+.media-card__chip {
+  max-width: 100%;
+}
+
+.media-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+  margin-top: var(--spacing-2);
+}
+
+.media-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-block-size: 3rem;
+  padding-inline: var(--spacing-2);
+  border: 1px solid var(--border);
+  border-radius: var(--container-radius-control);
+  background: color-mix(in srgb, var(--card) 90%, var(--background));
+  color: var(--foreground);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.media-card__action .material-icons {
+  font-size: 1rem;
+}

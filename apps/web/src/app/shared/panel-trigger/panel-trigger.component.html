@@ -1,0 +1,31 @@
+<!-- Figma Dev URL: https://www.figma.com/design/eCgblR1PiQnIKoFBYhCWwA/Untitled?node-id=164-2177&m=dev -->
+<!-- @see docs/specs/component/ui-primitives/panel-trigger.md §Component Hierarchy -->
+
+<!-- Stable state: panelState='closed' — chevron points down -->
+<!-- Stable state: panelState='open'   — chevron rotates 180deg -->
+<!-- @see docs/specs/component/ui-primitives/panel-trigger.md §State -->
+<button
+  class="panel-trigger"
+  type="button"
+  [disabled]="disabled()"
+  [attr.aria-expanded]="panelState() === 'open'"
+  (click)="onButtonClick()"
+>
+  <!-- Icon slot: rendered only for icon-text-action layout -->
+  <!-- @see docs/specs/component/ui-primitives/panel-trigger.md §What It Looks Like -->
+  @if (layout() === 'icon-text-action') {
+    <span class="panel-trigger__icon" aria-hidden="true">
+      <ng-content select="[slot=icon]" />
+    </span>
+  }
+
+  <!-- Label region: all text is parent-supplied and pre-translated -->
+  <!-- @see docs/specs/component/ui-primitives/panel-trigger.md §Data -->
+  <span class="panel-trigger__label">
+    <ng-content />
+  </span>
+
+  <!-- Trailing chevron: rotates 180deg when data-state=open -->
+  <!-- @see docs/specs/component/ui-primitives/panel-trigger.md §Transition map -->
+  <span class="panel-trigger__chevron material-icons" aria-hidden="true">expand_more</span>
+</button>

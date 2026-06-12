@@ -23,6 +23,11 @@ export class DomTranslationService {
 
   start(): void {
     if (this.started) return;
+
+    if (!this.i18nService.legacyFallbackEnabled()) {
+      return;
+    }
+
     this.started = true;
 
     this.translateSubtree(this.documentRef.body, this.i18nService.language());

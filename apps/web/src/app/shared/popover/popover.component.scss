@@ -1,0 +1,28 @@
+// Elevated menu/dropdown shell — upload-resolver-tray frosted chrome; no feature content styling.
+// @see docs/specs/component/ui-primitives/popover.md §Token references
+
+@use '../../../styles/frosted-chrome';
+
+@layer fp-components {
+  // Host is a transparent projection frame only (panel carries chrome).
+  // @see docs/specs/component/ui-primitives/popover.md §Visual Behavior Contract
+  :host {
+    display: block;
+  }
+
+  // Block surface: background, border, radius, elevation, stacking index
+  // @see docs/specs/component/ui-primitives/popover.md §Visual Behavior Contract
+  .popover {
+    display: block;
+    position: relative;
+    z-index: 300;
+    @include frosted-chrome.floating-panel-shell;
+  }
+
+  // Optional scroll containment for tall panels
+  // @see docs/specs/component/ui-primitives/popover.md §Variants
+  .popover.popover--scrollable {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+}

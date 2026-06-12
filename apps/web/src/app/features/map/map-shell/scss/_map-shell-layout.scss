@@ -1,0 +1,44 @@
+// Map shell :host, map zone, and Leaflet container geometry / stacking.
+// @see docs/migration/phase-8-global-scss-elimination.md (map-shell layout partial)
+
+// ── Host — horizontal flex row ────────────────────────────────────────────────
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  background: var(--background);
+}
+
+// ── Map zone — fills remaining width ─────────────────────────────────────────
+
+.map-zone {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  // Reserve only the upload *button* column — tray/panel drop below, not beside search.
+  --map-upload-chrome-inline: calc(2.75rem + var(--spacing-4));
+  // Visible overflow so floating chrome shadows (upload, toggles) are not clipped.
+  overflow: visible;
+}
+
+// ── Leaflet container ─────────────────────────────────────────────────────────
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  &--placing {
+    cursor: crosshair !important;
+
+    * {
+      cursor: crosshair !important;
+    }
+  }
+}

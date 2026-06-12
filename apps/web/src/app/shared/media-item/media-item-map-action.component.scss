@@ -1,0 +1,105 @@
+@use '../../../styles/frosted-chrome';
+
+// Top-right map affordance inside the quiet-actions overlay (geometry owner).
+// @see docs/specs/component/media/media-item-quiet-actions.md#state-machine
+:host {
+  position: absolute;
+  inset-block-start: var(--spacing-2);
+  inset-inline-end: var(--spacing-2);
+  z-index: 2;
+  pointer-events: none;
+}
+
+// Pass clicks through the quiet-actions layer when the slot is hovered.
+// @see docs/specs/component/media/media-item.md#actions--interactions
+:host-context(.media-item__slot:hover) :host,
+:host-context(.media-item__slot:focus-within) :host {
+  pointer-events: auto;
+}
+
+// Map trigger hidden until slot hover (not when merely selected).
+// @see docs/specs/component/media/media-item-quiet-actions.md#state-machine
+.media-item-map-action__trigger {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1),
+    visibility var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
+}
+
+:host-context(.media-item__slot:hover) .media-item-map-action__trigger,
+:host-context(.media-item__slot:focus-within) .media-item-map-action__trigger {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-out),
+    visibility var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.media-item-map-action__trigger:focus-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+// Frosted outline on thumbnail — overrides hlmBtn outline transparent hover wash.
+// @see docs/design/tokens.md § Frosted chrome
+// @see docs/specs/component/ui-primitives/ui-primitives.button.md
+button.media-item-map-action__trigger {
+  @include frosted-chrome.outline-control;
+  box-shadow: var(--shadow-md);
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    @include frosted-chrome.outline-control-hover;
+  }
+}
+
+.media-item-map-action__icon {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+// Loading spinner inside icon-sm map trigger.
+// @see docs/specs/component/media/media-item-quiet-actions.md#state-machine
+.media-item-map-action__spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  animation: media-item-map-action-spin 0.7s linear infinite;
+}
+
+@keyframes media-item-map-action-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Anchored location picker panel cap.
+// @see docs/specs/component/filters/dropdown-system.md
+.media-item-map-action__shell {
+  max-height: min(40vh, 16rem);
+}
+
+// Picker list uses shared option-menu-list + option-menu-item row chrome.
+// @see docs/specs/component/media/media-item-map-action.md
+.media-item-map-action__list {
+  min-width: 0;
+}
+
+.media-item-map-action__option {
+  align-items: flex-start;
+  text-align: start;
+  white-space: normal;
+}
+
+.media-item-map-action__empty {
+  margin: 0;
+  padding: var(--spacing-2);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}

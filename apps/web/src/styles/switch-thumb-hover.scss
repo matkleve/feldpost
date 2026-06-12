@@ -1,0 +1,68 @@
+// Switch thumb slide + hover (spacing grid + semantic colors; motion per segmented-switch doc).
+// Track: Tailwind h-6/w-11 = var(--spacing-5) height × calc(0.25rem * 11) width; thumb = calc(0.25rem * 5).
+// @see docs/design/tokens.md §3.3
+// @see docs/design/components/segmented-switch-motion-resource.md
+// @see docs/specs/component/ui-primitives/ui-primitives.toggle.md
+@layer utilities {
+  [hlmSwitch] {
+    --switch-thumb-size: calc(0.25rem * 5);
+    --switch-thumb-travel: calc(0.25rem * 5);
+    --switch-thumb-nudge: var(--spacing-1);
+    --switch-motion-duration: calc(var(--motion-duration-fast) * 1.8);
+    --switch-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    position: relative;
+    line-height: 0;
+    transition: background-color var(--switch-motion-duration) var(--switch-motion-ease);
+  }
+
+  [hlmSwitchThumb] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--switch-thumb-size);
+    height: var(--switch-thumb-size);
+    margin: 0;
+    box-sizing: border-box;
+    transition: transform var(--switch-motion-duration) var(--switch-motion-ease);
+  }
+
+  [hlmSwitchThumb][data-state='unchecked'] {
+    transform: translateX(0);
+  }
+
+  [hlmSwitchThumb][data-state='checked'] {
+    transform: translateX(var(--switch-thumb-travel));
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    // Track tint — direct switch hover or parent row (switch often has pointer-events: none)
+    [hlmSwitch][data-state='unchecked']:hover,
+    :is(button, label, [role='switch']):hover > [hlmSwitch][data-state='unchecked'] {
+      background-color: color-mix(in srgb, var(--input) 90%, var(--foreground));
+    }
+
+    [hlmSwitch][data-state='checked']:hover,
+    :is(button, label, [role='switch']):hover > [hlmSwitch][data-state='checked'] {
+      background-color: color-mix(in srgb, var(--primary) 90%, var(--foreground));
+    }
+
+    // Thumb nudge toward the edge being activated
+    [hlmSwitch]:hover > [hlmSwitchThumb][data-state='unchecked'],
+    :is(button, label, [role='switch']):hover > [hlmSwitch] > [hlmSwitchThumb][data-state='unchecked'] {
+      transform: translateX(var(--switch-thumb-nudge));
+    }
+
+    [hlmSwitch]:hover > [hlmSwitchThumb][data-state='checked'],
+    :is(button, label, [role='switch']):hover > [hlmSwitch] > [hlmSwitchThumb][data-state='checked'] {
+      transform: translateX(calc(var(--switch-thumb-travel) - var(--switch-thumb-nudge)));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [hlmSwitch],
+    [hlmSwitchThumb] {
+      transition: none;
+    }
+  }
+}

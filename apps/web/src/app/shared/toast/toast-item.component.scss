@@ -1,0 +1,311 @@
+// Block host for one toast row; re-enables pointer events inside the stack container.
+// @see docs/specs/service/toast/toast-system.md
+:host {
+  display: block;
+  pointer-events: auto;
+}
+
+// Card surface aligned with media-detail panels (card bg, md radius, section spacing).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.toast-surface {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow-md);
+}
+
+// Top row: severity dot, heading, dismiss.
+// @see docs/specs/service/toast/toast-system.md
+.toast-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+// Title block grows between indicator and dismiss.
+// @see docs/specs/service/toast/toast-system.md
+.toast-head {
+  flex: 1;
+  min-width: 0;
+}
+
+// Severity dot; default muted, overridden per toast type on :host.
+// @see docs/specs/service/toast/toast-system.md
+.toast-indicator {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.4rem;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+}
+
+:host(.success) .toast-indicator {
+  background: var(--success);
+}
+
+:host(.error) .toast-indicator {
+  background: var(--destructive);
+}
+
+:host(.warning) .toast-indicator {
+  background: var(--warning);
+}
+
+:host(.info) .toast-indicator {
+  background: var(--primary);
+}
+
+// Section heading — mirrors `.detail-section__label` in media detail view.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.toast-title {
+  margin: 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Legacy flat message — mirrors `.detail-row__value` readable body copy.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
+.toast-message {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  line-height: var(--line-height-comfortable);
+  color: var(--foreground);
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Body block under section title.
+// @see docs/specs/service/toast/toast-system.md
+.toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding-inline-start: calc(0.5rem + var(--spacing-2));
+  min-width: 0;
+}
+
+// Summary/hint — mirrors `.detail-row__value--static` / subvalue stack.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
+.toast-body {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  line-height: var(--line-height-comfortable);
+  color: var(--muted-foreground);
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:host(.expanded) .toast-body--expanded {
+  -webkit-line-clamp: unset;
+  display: block;
+}
+
+// App code pointer — mirrors `.detail-row__value--mono` at compact scale.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
+.toast-code-ref {
+  margin: 0;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: var(--font-size-2xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+  letter-spacing: -0.02em;
+  word-break: break-all;
+}
+
+// Full technical detail when expanded — mirrors `.detail-row__subvalue`.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
+.toast-detail {
+  margin: 0;
+  font-size: var(--font-size-2xs);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-height: 8rem;
+  overflow-y: auto;
+}
+
+// Text control for expand — same scale as detail row actions (link-like).
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
+.toast-expand {
+  align-self: flex-start;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-comfortable);
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+
+  &:hover {
+    color: color-mix(in srgb, var(--primary) 82%, var(--foreground));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+// Footer row for primary action (e.g. Undo).
+// @see docs/specs/service/toast/toast-system.md
+.toast-footer {
+  padding-inline-start: calc(0.5rem + var(--spacing-2));
+}
+
+// Action link — mirrors editable `.detail-row__value` text button.
+// @see docs/specs/ui/media-detail/_detail-row-slots.scss
+.toast-action {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-comfortable);
+  color: var(--primary);
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    color: color-mix(in srgb, var(--primary) 82%, var(--foreground));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+// Dismiss control: compact ghost X at the trailing edge.
+// @see docs/specs/service/toast/toast-system.md
+.toast-dismiss {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+
+  &:hover {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--muted) 55%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+// Unicode close glyph sized to match sm controls.
+// @see docs/specs/service/toast/toast-system.md
+.toast-dismiss__glyph {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+:host(.entering) [data-toast-surface] {
+  animation: toast-enter 200ms ease-out forwards;
+}
+
+:host(.visible) [data-toast-surface] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+:host(.exiting) [data-toast-surface] {
+  animation: toast-exit 200ms ease-in forwards;
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.entering) [data-toast-surface] {
+    animation: toast-enter-reduced 1ms forwards;
+  }
+
+  :host(.exiting) [data-toast-surface] {
+    animation: toast-exit-reduced 1ms forwards;
+  }
+
+  @keyframes toast-enter-reduced {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes toast-exit-reduced {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+}

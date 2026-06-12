@@ -1,28 +1,77 @@
 # Element Spec Format
 
-Every UI element in Feldpost must have a spec in `docs/element-specs/` before agent implementation. This is the template.
+Practical writing and refactoring template for specs in docs/specs/.
+This file is guidance. Governance and mandatory policy are owned by docs/specs/README.md.
 
 ---
 
-## Template Structure
+## Source Of Truth Hierarchy
 
-Each spec has these sections in this order. **Order matters** — agents read top-down and the short sections at the top prevent hallucination.
+- docs/specs/README.md is authoritative for scope, ownership, naming, and enforcement gates.
+- This file MUST follow docs/specs/README.md and MUST NOT redefine conflicting rules.
+- If this template conflicts with docs/specs/README.md, docs/specs/README.md MUST win.
 
-### 1. Title + "What It Is" (1–2 sentences)
+## Directive-First Mode (Required For Active Refactor Phases)
 
-Plain English. What is this thing? What does the user do with it?
+- Before editing any spec, read docs/specs/README.md and apply the active directive scope and boundaries.
+- In directive-first phases, contributors MUST use enforceable RFC 2119 language (MUST, SHOULD, MAY).
+- In directive-first phases, contributors MUST remove or convert non-normative prose.
+- If ownership, naming registry, or scope is ambiguous, contributors MUST stop and output exactly:
+  - ⚠ SPEC GAP: [describe the ambiguity]
 
-### 2. What It Looks Like (3–5 sentences)
+## Mandatory Preflight (Before Any Edits)
 
-Visual appearance in plain words. Reference design tokens, sizes, rough layout. Enough for an agent to set up the right Tailwind classes.
+- Provide a 3-5 line understanding statement for Orchestration Layer vs Visual Contract Layer.
+- List first target files in the exact order defined by docs/specs/README.md for the active phase.
+- Confirm no out-of-scope file will be edited.
+- If a required target is missing or owner is ambiguous, stop with:
+  - ⚠ SPEC GAP: [missing file or ambiguous owner]
+
+## Mandatory Gates (Before Save)
+
+- Single Source of Truth: each requirement detail MUST have exactly one owning spec location.
+- Layer ownership MUST be explicit:
+  - Page layer for orchestration/composition and page-level state ownership.
+  - Component layer for behavior contracts, FSM, and API/service boundaries.
+  - Item/domain layer for tile visuals, local UI states, and atomic data mapping.
+- Canonical naming MUST match glossary/registry entries.
+- If a name is not canonical, stop with:
+  - ⚠ SPEC GAP: [describe the ambiguity]
+- Inferred behavior without traceable parent/child contract MUST be removed.
+
+## Required Deliverable Structure (Directive Passes)
+
+For directive-governed refactors, output MUST use this exact section order:
+
+1. Audit Table per file (Issue, Owner Layer, Severity, Action)
+2. Edited Files Summary with exact headings changed
+3. State-to-UI Mapping Table added in shell spec (when required by active directive)
+4. Contradictions resolved and final deterministic policy statement (for the active contradiction scope)
+5. Residual gaps listed as SPEC GAP items
+
+Completion condition:
+
+- Ownership-consistent
+- Canonical-name consistent
+- Normative-language compliant
+
+## Default Spec Template (Non-Directive Work)
+
+Use this structure when no stricter phase directive overrides it in docs/specs/README.md.
+
+### 1. Title + What It Is
+
+Plain English summary in 1-2 sentences.
+
+### 2. What It Looks Like
+
+Visual appearance summary in 3-5 sentences.
 
 ### 3. Where It Lives
 
-Route, parent component, and trigger condition. The agent needs to know where to wire it in.
+Route, parent component, and trigger condition.
 
 ### 4. Actions & Interactions (table)
-
-Every user action and system response. If it's not in this table, the agent won't build it.
 
 | #   | User Action | System Response | Triggers        |
 | --- | ----------- | --------------- | --------------- |
@@ -30,167 +79,49 @@ Every user action and system response. If it's not in this table, the agent won'
 
 ### 5. Component Hierarchy (tree diagram)
 
-The most important section. Shows what nests inside what, using a simple ASCII tree (not real HTML or Angular template code). Each node = a component or visual area. Include:
-
-- Position/sizing hints as inline notes
-- Conditional visibility in `[brackets]`
-- Short description of what each node renders
-
-Keep it readable — this is a structural guideline, not copy-pasteable code.
-
-When a panel or list row matches an existing shared primitive, name it directly in the hierarchy (`.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, `.ui-spacer`) instead of describing new bespoke geometry.
-
-In addition to the hierarchy tree, every spec should include at least two Mermaid diagrams:
-
-- A **Wiring** diagram (`sequenceDiagram` or `flowchart`) for parent/component/service integration
-- A **Data** diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`) for schema or query/data flow
+- Show structure as an ASCII tree.
+- Include conditional visibility in [brackets].
+- Keep hierarchy structural, not copy-paste HTML.
+- Include any Mermaid diagram that docs/specs/README.md requires.
 
 ### 6. Data (table)
 
-Where does data come from? Which Supabase tables, which columns, which service methods. Heading: `## Data`.
+Sources, tables, fields, and service methods.
 
 ### 7. State (table)
 
-Every piece of state: name, TypeScript type, default value, what it controls.
+State name, type, default, and visual/behavioral effect.
 
 ### 8. File Map (table)
 
-Every file to create, with a 1-phrase purpose. Agent creates exactly these files.
+Files to create/change and purpose.
 
 ### 9. Wiring
 
-How this element connects to its parent. Route config, component imports, service injections.
+Parent integration, imports, injections, and cross-component wiring.
 
 ### 10. Acceptance Criteria (checklist)
 
-Checkbox list. Each item is testable. Used for verification after implementation.
+Each criterion is testable.
 
----
+### 11. Interaction emphasis (interactive components only)
 
-## Example Spec Skeleton
+Skip for passive/display-only components. Required when the spec describes buttons, links, toggles, menu rows, or other actionable controls.
 
 ```markdown
-# [Element Name]
-
-## What It Is
-
-[1-2 sentences]
-
-## What It Looks Like
-
-[3-5 sentences with visual description, sizes, colors, design token references]
-
-## Where It Lives
-
-- **Route**: `/path` or "global — available on every page"
-- **Parent**: `ParentComponent` in `path/to/parent.ts`
-- **Appears when**: [trigger condition]
-
-## Actions
-
-| #   | User Action | System Response | Triggers |
-| --- | ----------- | --------------- | -------- |
-| 1   | ...         | ...             | ...      |
-
-## Component Hierarchy
-
-<!-- Tree diagram showing nesting, not real code -->
+## Interaction emphasis
+- Canonical: docs/design/state-visuals.md § Interaction emphasis
+- [ ] This component implements the contract (or documented exception below)
 ```
 
-ElementRoot ← positioning, size, role
-├── SubArea ← what this area does
-│ ├── ChildA ← brief description
-│ └── ChildB ← brief description
-└── [conditional] AnotherArea
-├── ChildC × N ← repeated for each item
-└── EmptyState ← shown when no items
-
-````
-
-## Data Flow (Mermaid)
-
-```mermaid
-sequenceDiagram
-	participant C as Component
-	participant S as Service
-	participant DB as Supabase
-
-	C->>S: Request query/data
-	S->>DB: Read/write
-	DB-->>S: Rows/result
-	S-->>C: Mapped view model
-````
-
-## Wiring Flow (Mermaid)
-
-```mermaid
-flowchart LR
-	Parent[Parent Component] --> Child[Element Component]
-	Child --> Service[Feature Service]
-	Service --> Adapter[Adapter / API Layer]
-```
-
-## Data
-
-| Field | Source                                 | Type     |
-| ----- | -------------------------------------- | -------- |
-| items | `supabase.from('table').select('...')` | `Type[]` |
-
-## State
-
-| Name   | Type      | Default | Controls         |
-| ------ | --------- | ------- | ---------------- |
-| isOpen | `boolean` | `false` | panel visibility |
-
-## File Map
-
-| File                          | Purpose        |
-| ----------------------------- | -------------- |
-| `features/x/x.component.ts`   | root component |
-| `features/x/x.component.html` | template       |
-| `core/x.service.ts`           | data access    |
-
-## Wiring
-
-- Import `XComponent` in `parent.component.ts`
-- Add route in `app.routes.ts` (if routed)
-- Inject `XService` in component constructor
-
-## Acceptance Criteria
-
-- [ ] Specific testable behavior 1
-- [ ] Specific testable behavior 2
-
-```
+When implemented, check the box and add any exception to the table in [`docs/specs/system/interaction-emphasis-rollout.md`](../specs/system/interaction-emphasis-rollout.md). Remove the row’s **pending** note there.
 
 ---
 
-## Why This Format Works
+## Writing Notes
 
-| Section             | What it prevents                                        |
-| ------------------- | ------------------------------------------------------- |
-| What It Is          | Agent misunderstanding the element's purpose            |
-| What It Looks Like  | Agent guessing visual dimensions, colors, or layout     |
-| Where It Lives      | Agent placing the component in the wrong parent or zone |
-| Actions table       | Agent skipping unlisted behaviors                       |
-| Hierarchy tree      | Agent guessing the component nesting                    |
-| Data table          | Agent inventing fake APIs or queries                    |
-| State table         | Agent adding extra unnecessary state                    |
-| File Map            | Agent putting files in wrong places                     |
-| Wiring              | Agent forgetting to connect the component to its parent |
-| Acceptance Criteria | Unchecked bugs after generation                         |
-
-## Rules
-
-- Every glossary UI element MUST have a spec before implementation
-- Specs are the **source of truth** — code must match spec, not the other way around
-- Update specs BEFORE asking agents to modify features
-- Keep "What It Is" and "What It Looks Like" short — detail goes in Actions and Hierarchy
-- Keep Component Hierarchy as a tree diagram for readability
-- Include at least 2 Mermaid diagrams in each spec: one for Data and one for Wiring
-- Prefer shared layout primitives in the spec before inventing new panel or row patterns
-- Use `rem` as the primary unit for accessibility-sensitive UI dimensions: touch targets, button heights, interactive sizes, spacing, and layout dimensions. Include the px equivalent as an annotation when the exact reference size matters.
-- Use `em` only for component-internal spacing that should scale with the component's own font size.
-- Use `px` only for precision details that should not scale with font size: borders, outlines, shadows, image display sizes, and pixel-resolution thresholds.
-- Use `vh` / `vw` only for viewport-relative layout behavior.
-```
+- Keep early sections short; move behavioral detail into actions, hierarchy, state, and wiring.
+- Prefer shared layout primitives before introducing bespoke geometry.
+- Use rem as primary unit for accessibility-sensitive dimensions.
+- Use px only for precision details that should not scale with font size.
+- Use vh/vw only for viewport-relative behavior.

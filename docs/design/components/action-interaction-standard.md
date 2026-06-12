@@ -2,6 +2,7 @@
 
 Status: Draft v1 (2026-03-17)
 Owner: UI Standardization
+Role: implementation profile and migration checklist; policy source is `action-interaction-kernel.md`.
 
 Primary reference: docs/design/components/action-interaction-kernel.md
 
@@ -29,27 +30,13 @@ This first draft prioritizes the user-selected categories:
 
 ## Non-Regression Rules
 
-Every UI standardization refactor must pass these invariants:
+Non-regression invariants are canonical in `docs/design/components/action-interaction-kernel.md`.
 
-1. Public component API compatibility
+This file only adds implementation-level checks for concrete standardization work:
 
-- Keep existing inputs and outputs stable unless migration is explicitly planned.
-- Keep output event semantics stable (same trigger moments and payload meaning).
-
-2. Interaction behavior compatibility
-
-- Keep keyboard behavior (Enter, Escape, tab flow) and pointer behavior unchanged.
-- Keep drag/drop capabilities where currently present.
-- Keep empty/loading/error states and reset/clear actions.
-
-3. Data/reaction compatibility
-
-- Components must continue to work when parent state is signal-driven.
-- Components must continue to work when parent state is observable-driven.
-
-4. Accessibility compatibility
-
-- Preserve aria labels, button semantics, focus visibility, and target sizes.
+1. Keep category-specific output payload shapes stable.
+2. Keep option-opener keyboard/focus rules from the checklist below intact.
+3. Keep visual token usage aligned with `docs/design/tokens.md` and `docs/design/token-layers.md`.
 
 ## Reactive Contract (Signals + Observables)
 
@@ -240,8 +227,14 @@ Applies to all controls that open selectable options: dropdowns, context menus, 
 
 2. Toolbar and button standard second
 
-- Normalize thin-border button variants and active states across toolbars.
+- **Done (2026-05-27):** `hlmBtn` `outline`/`ghost` + toggle lanes implement **Interaction emphasis** (`docs/design/state-visuals.md`).
+- Normalize toolbar trigger open/selected states to `--interaction-selected-ink`; remove duplicate `color-mix(primary)` on `hlmBtn` hosts.
 - Reduce nested borders where visual weight is too high.
+
+**Grep gates (quiet buttons):**
+
+- `button-variants.ts` must not use `hover:bg-accent` on `outline`/`ghost`.
+- New feature SCSS must not reintroduce per-button primary hover mixes on plain `hlmBtn` hosts — use variants instead.
 
 3. Toggle and chips third
 

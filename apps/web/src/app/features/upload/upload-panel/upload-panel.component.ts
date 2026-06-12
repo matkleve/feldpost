@@ -2,485 +2,357 @@
  * UploadPanelComponent — drag-and-drop / file-picker upload UI.
  *
  * Ground rules:
- *  - Thin UI layer — all queue management and upload orchestration
- *    are delegated to UploadManagerService.
- *  - Signals for all local UI state; no BehaviorSubject.
- *  - Errors are shown inline per-file; the panel never navigates.
- *  - Missing-data files (no GPS + no address) are reported to the parent
- *    so MapShellComponent can enter placement mode.
- *  - The panel reads upload state from uploadManager.jobs() —
- *    it does not maintain its own queue.
+ *  - Ultra-thin UI coordinator that delegates to injected services.
+ *  - All signals & computed exposed via UploadPanelSignalsService
+ *  - All subscriptions & lifecycle via UploadPanelLifecycleService
+ *  - Component only bridges template events to services.
  */
 
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ExifCoords } from '../../../core/upload.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import {
-  UploadManagerService,
-  UploadJob,
-  UploadPhase,
-  UploadBatch,
-  ImageUploadedEvent as ManagerImageUploadedEvent,
-} from '../../../core/upload-manager.service';
-
-// ── Types ──────────────────────────────────────────────────────────────────────
-
-/** Emitted to the parent after a successful upload with valid GPS coordinates. */
-export interface ImageUploadedEvent {
-  id: string;
-  lat: number;
-  lng: number;
-  /** Camera compass direction (0–360°), if available from EXIF. */
-  direction?: number;
-  /** Object URL used for marker thumbnail previews on the map. */
-  thumbnailUrl?: string;
-}
-
-export interface ZoomToLocationEvent {
-  imageId: string;
-  lat: number;
-  lng: number;
-}
-
-type UploadLane = 'uploading' | 'uploaded' | 'issues';
-
-// ── Component ──────────────────────────────────────────────────────────────────
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  HostListener,
+  inject,
+  input,
+  OnDestroy,
+  output,
+  signal,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { UploadPanelItemComponent } from './upload-panel-item.component';
+import type { ExifCoords } from '../../../core/upload/upload.service';
+import { UploadManagerService } from '../../../core/upload/upload-manager.service';
+import { UploadPanelSignalsService } from './upload-panel-signals.service';
+import { UploadPanelDialogSignals } from './upload-panel-dialog-signals.service';
+import { UploadPanelLifecycleService } from './upload-panel-lifecycle.service';
+import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
+import { UploadPanelLaneHandlersService } from './upload-panel-lane-handlers';
+import {
+  UploadPanelRowHandlersService,
+  type ZoomToLocationEvent,
+} from './upload-panel-row-handlers';
+import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
+import {
+  alternateUploadLocationRequirementMode,
+  dropzoneLabelText,
+  locationModeToggleAriaLabel,
+  nonEmptyLocalized,
+} from './upload-panel-helpers';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { HLM_SWITCH_IMPORTS } from '../../../shared/ui/switch';
+import { ChipComponent } from '../../../shared/components/chip/chip.component';
+import { HlmMenuItemDirective } from '../../../shared/ui/menu';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
+import { BrnToggleGroupImports } from '@spartan-ng/brain/toggle-group';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
+import { PaneFooterComponent } from '../../../shared/pane-chrome/footer/pane-footer.component';
+import { toggleOptionLayout } from '../../../shared/ui/toggle-group/toggle-group-option.helpers';
+import { DEFAULT_FILE_TYPE_GROUPS } from './upload-panel-file-type-groups';
+import type {
+  UploadFileTypeGroup,
+  UploadFileTypeGroupId,
+} from './upload-panel-file-type-groups';
+import { DEFAULT_UPLOAD_FILE_INPUT_ACCEPT } from './upload-panel-file-accept';
+import type { UploadFileTypeChip } from './upload-panel.constants';
+import {
+  fileTypeGroupPickAriaLabel,
+  fileTypeMemberPickAriaLabel,
+} from './upload-panel-file-type-pick-labels';
+import { UploadPanelJobActionsService } from './upload-panel-job-actions.service';
+import { UploadPanelBulkActionsService } from './upload-panel-bulk-actions.service';
+import { UploadPanelViewModelService } from './upload-panel-view-model.service';
+import { UploadPanelJobFileActionsService } from './upload-panel-job-file-actions.service';
+import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
+import { UploadPanelMenuActionRouterService } from './upload-panel-menu-action-router.service';
+import { UploadPanelRegistrationService } from './upload-panel-registration.service';
+import { UploadPanelRowInteractionsService } from './upload-panel-row-interactions.service';
+import { UploadPanelSetupService } from './upload-panel-setup.service';
+import type {
+  ImageUploadedEvent,
+  UploadLocationMapPickRequest,
+  UploadLocationPreviewEvent,
+} from './upload-panel.types';
+export type {
+  ImageUploadedEvent,
+  UploadLocationMapPickRequest,
+  UploadLocationPreviewEvent,
+} from './upload-panel.types';
 
 @Component({
   selector: 'app-upload-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    UploadPanelItemComponent,
+    ChipComponent,
+    ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_SWITCH_IMPORTS,
+    HlmMenuItemDirective,
+    ProjectSelectDialogComponent,
+    PaneFooterComponent,
+  ],
+  providers: [
+    UploadPanelDialogSignals,
+    UploadPanelJobActionsService,
+    UploadPanelJobFileActionsService,
+    UploadPanelDialogActionsService,
+    UploadPanelMenuActionRouterService,
+    UploadPanelBulkActionsService,
+    UploadPanelViewModelService,
+    UploadPanelRegistrationService,
+    UploadPanelRowInteractionsService,
+    UploadPanelSetupService,
+  ],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
 })
-export class UploadPanelComponent {
+/**
+ * Upload panel — dual-mode floating/embedded surface.
+ *
+ * MODE 1 (map floating): shown via `visible` input above the map at z-index 200,
+ * no backdrop, anchored under the upload button zone.
+ * MODE 2 (embedded in workspace pane): `embeddedInPane=true`, always visible in the
+ * Upload tab, inline layout — never an overlay.
+ *
+ * TODO(brn-sheet): BrnSheet was evaluated for the map floating mode but deferred.
+ * Reasons: (1) BrnSheet uses CDK overlay semantics that conflict with the
+ * z-index 200 stacking plane and no-backdrop requirement; (2) the embedded pane
+ * mode cannot use an overlay; (3) migrating would require either splitting the
+ * component or adding CDK `attachTo`/`positionStrategy` non-trivially.
+ * Re-evaluate when the map zone overlay contract is redesigned.
+ * @see docs/MIGRATION_PLAN.md — Upload panel decision 2026-05-13
+ */
+export class UploadPanelComponent implements OnDestroy {
+  /** Template helper: icon/text layout for lane and location toggles. */
+  readonly optLayout = toggleOptionLayout;
+
+  // Services
   private readonly uploadManager = inject(UploadManagerService);
-  private readonly workspaceView = inject(WorkspaceViewService);
+  private readonly i18nService = inject(I18nService);
+  private readonly signals = inject(UploadPanelSignalsService);
+  private readonly lifecycle = inject(UploadPanelLifecycleService);
+  private readonly inputs = inject(UploadPanelInputHandlersService);
+  private readonly lanes = inject(UploadPanelLaneHandlersService);
+  private readonly rows = inject(UploadPanelRowHandlersService);
+  private readonly jobActions = inject(UploadPanelJobActionsService);
+  private readonly bulkActions = inject(UploadPanelBulkActionsService);
+  private readonly viewModel = inject(UploadPanelViewModelService);
+  private readonly setup = inject(UploadPanelSetupService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly rowInteractions = inject(UploadPanelRowInteractionsService);
+  readonly actionHandlers = this.jobActions;
+  readonly inputHandlers = this.inputs;
+  readonly laneHandlers = this.lanes;
+  readonly rowHandlers = this.rows;
+  readonly rowInteractionHandlers = this.rowInteractions;
+  readonly bulkHandlers = this.bulkActions;
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
-  // ── Inputs / outputs ───────────────────────────────────────────────────────
-
-  /** Whether the panel is visible. Controlled by the parent MapShellComponent. */
+  // Component I/O
   readonly visible = input<boolean>(false);
-
-  /**
-   * Emitted after each file is successfully uploaded and has GPS coordinates.
-   * The parent adds a Leaflet marker at (lat, lng).
-   */
+  readonly embeddedInPane = input<boolean>(false);
   readonly imageUploaded = output<ImageUploadedEvent>();
-
-  /**
-   * Emitted when a file has no GPS and no address and enters `missing_data`.
-   * The parent (MapShellComponent) should enter placement mode so the next
-   * map click supplies coordinates for this file.
-   */
   readonly placementRequested = output<string>();
-
-  /**
-   * Emitted when users click an uploaded row that already has map coordinates.
-   * The parent can fly/zoom the map to this photo location.
-   */
+  readonly detailRequested = output<string>();
   readonly zoomToLocationRequested = output<ZoomToLocationEvent>();
+  readonly locationPreviewRequested = output<UploadLocationPreviewEvent>();
+  readonly locationPreviewCleared = output<void>();
+  readonly locationMapPickRequested = output<UploadLocationMapPickRequest>();
 
-  // ── State (read from UploadManagerService) ─────────────────────────────────
-
-  /** All upload jobs from the manager. */
-  readonly jobs = this.uploadManager.jobs;
-  readonly batches = this.uploadManager.batches;
-  readonly activeBatch = this.uploadManager.activeBatch;
-  readonly folderImportSupported = this.uploadManager.isFolderImportSupported;
-
-  readonly isDragging = signal(false);
-
-  /** True when at least one upload is in progress. */
-  readonly isUploading = this.uploadManager.isBusy;
-
-  /** True when any file is waiting for manual placement. */
-  readonly hasAwaitingPlacement = computed(() =>
-    this.uploadManager.jobs().some((j) => j.phase === 'missing_data'),
+  // Delegate all signals to signals service
+  readonly jobs = this.signals.jobs;
+  readonly batches = this.signals.batches;
+  readonly activeBatch = this.signals.activeBatch;
+  readonly folderImportSupported = this.signals.folderImportSupported;
+  readonly isUploading = this.signals.isUploading;
+  readonly laneCounts = this.signals.laneCounts;
+  readonly scanning = this.signals.scanning;
+  readonly scanningLabel = this.signals.scanningLabel;
+  readonly hasAwaitingPlacement = this.signals.hasAwaitingPlacement;
+  readonly showProgressBoard = this.signals.showProgressBoard;
+  readonly isDragging = this.inputs.isDragging;
+  readonly priorityWorkflowEnabled = computed(() => this.embeddedInPane());
+  readonly selectedLane = this.signals.selectedLane;
+  readonly locationRequirementMode = this.signals.locationRequirementMode;
+  private readonly locationModeRowPreview = signal(false);
+  readonly locationModeDisplayMode = computed(() => {
+    const current = this.locationRequirementMode();
+    return this.locationModeRowPreview()
+      ? alternateUploadLocationRequirementMode(current)
+      : current;
+  });
+  readonly locationModeToggleAria = computed(() =>
+    locationModeToggleAriaLabel(this.locationModeDisplayMode(), (key, fallback) =>
+      this.t(key, fallback),
+    ),
   );
+  readonly effectiveLane = this.signals.effectiveLane;
+  readonly laneJobs = this.signals.laneJobs;
+  readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
+  readonly dropzoneLabelText = (): string => dropzoneLabelText(this.t);
+  readonly dropzonePickAriaLabel = (): string =>
+    nonEmptyLocalized(
+      this.t('auto.0103.drag_files_here_or_click_to_select', 'Drag files here or click to select'),
+      'Drag files here or click to select',
+    );
+  readonly panelTitleText = (): string =>
+    nonEmptyLocalized(this.t('upload.panel.title', 'Upload Panel'), 'Upload Panel');
+  readonly panelSubtitleText = (): string =>
+    nonEmptyLocalized(
+      this.t('upload.panel.subtitle', 'You can upload things here.'),
+      'You can upload things here.',
+    );
+  readonly uploadFolderLabelText = (): string =>
+    nonEmptyLocalized(this.t('auto.0367.upload_folder', 'Upload folder'), 'Upload folder');
+  readonly takePhotoLabelText = (): string =>
+    nonEmptyLocalized(this.t('auto.0349.take_photo', 'Take photo'), 'Take photo');
 
-  /** True while the manager scans a selected directory. */
-  readonly scanning = computed(() => this.activeBatch()?.status === 'scanning');
-
-  /** Live scan label shown during folder traversal. */
-  readonly scanningLabel = computed(() => {
-    const batch = this.activeBatch();
-    if (!batch || batch.status !== 'scanning') return null;
-    return `Scanning... ${batch.totalFiles} file${batch.totalFiles === 1 ? '' : 's'} found`;
-  });
-
-  readonly selectedLane = signal<UploadLane>('uploading');
-  readonly issueAttentionPulse = signal(false);
-
-  private issueAttentionTimer: ReturnType<typeof setTimeout> | null = null;
-
-  readonly laneCounts = computed(() => {
-    const jobs = this.jobs();
-    return {
-      uploading: jobs.filter((job) => this.getLaneForJob(job) === 'uploading').length,
-      uploaded: jobs.filter((job) => this.getLaneForJob(job) === 'uploaded').length,
-      issues: jobs.filter((job) => this.getLaneForJob(job) === 'issues').length,
-    };
-  });
-
-  readonly effectiveLane = computed<UploadLane>(() => this.selectedLane());
-
-  readonly laneJobs = computed(() => {
-    const lane = this.effectiveLane();
-    return this.jobs().filter((job) => this.getLaneForJob(job) === lane);
-  });
-
-  readonly dotItems = computed(() => {
-    return this.jobs().map((job) => ({
-      id: job.id,
-      lane: this.getLaneForJob(job),
-      statusClass: this.getDotStatusClass(job),
-    }));
-  });
-
-  readonly lastCompletedBatch = computed<UploadBatch | null>(() => {
-    const completeBatches = this.batches().filter((batch) => batch.status === 'complete');
-    if (completeBatches.length === 0) return null;
-    return completeBatches[completeBatches.length - 1] ?? null;
-  });
-
-  readonly showLastUpload = computed(() => this.jobs().length === 0 && !!this.lastCompletedBatch());
-
-  readonly showProgressBoard = computed(() => this.jobs().length > 0);
-
-  readonly lastUploadLabel = computed(() => {
-    const batch = this.lastCompletedBatch();
-    if (!batch) return null;
-    if (batch.totalFiles <= 1) {
-      return batch.label;
-    }
-    return `Batch · ${batch.totalFiles} files`;
-  });
+  readonly laneSwitchOptions = this.viewModel.laneSwitchOptions;
+  readonly visibleLaneJobs = this.viewModel.visibleLaneJobs;
+  readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
+  readonly fileTypeGroups = DEFAULT_FILE_TYPE_GROUPS;
+  readonly defaultFileInputAccept = DEFAULT_UPLOAD_FILE_INPUT_ACCEPT;
+  private readonly pinnedFileTypeGroupId = signal<UploadFileTypeGroupId | null>(null);
+  readonly documentFallbackLabel = documentFallbackLabel;
+  readonly trackByJobId = trackByJobId;
+  readonly selectedUploadJobIds = signal<Set<string>>(new Set());
+  readonly selectedUploadJobs = this.viewModel.selectedUploadJobs;
+  readonly hasSelectedUploadJobs = this.viewModel.hasSelectedUploadJobs;
+  readonly hasRetryableSelection = this.viewModel.hasRetryableSelection;
+  readonly canDownloadSelectedUploads = this.viewModel.canDownloadSelectedUploads;
+  private readonly dialogSignals = inject(UploadPanelDialogSignals);
+  readonly projectSelectionDialogOpen = this.dialogSignals.projectSelectionDialogOpen;
+  readonly projectSelectionDialogTitle = this.dialogSignals.projectSelectionDialogTitle;
+  readonly projectSelectionDialogMessage = this.dialogSignals.projectSelectionDialogMessage;
+  readonly projectSelectionDialogOptions = this.dialogSignals.projectSelectionDialogOptions;
+  readonly projectSelectionDialogSelectedId = this.dialogSignals.projectSelectionDialogSelectedId;
+  readonly locationAddressDialogOpen = this.dialogSignals.locationAddressDialogOpen;
+  readonly locationAddressDialogQuery = this.dialogSignals.locationAddressDialogQuery;
+  readonly locationAddressDialogLoading = this.dialogSignals.locationAddressDialogLoading;
+  readonly locationAddressDialogSuggestions = this.dialogSignals.locationAddressDialogSuggestions;
+  readonly duplicateResolutionDialogOpen = this.dialogSignals.duplicateResolutionDialogOpen;
+  readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
 
   constructor() {
-    // React to manager events and bridge them to component outputs.
     effect(() => {
-      // Re-read jobs signal to track changes.
-      const jobs = this.uploadManager.jobs();
-      // (Event bridging is handled by Observable subscriptions below.)
-      void jobs;
-    });
-
-    // Bridge imageUploaded$ events from the manager to the component output.
-    this.uploadManager.imageUploaded$.subscribe((event: ManagerImageUploadedEvent) => {
-      if (event.coords) {
-        this.imageUploaded.emit({
-          id: event.imageId,
-          lat: event.coords.lat,
-          lng: event.coords.lng,
-          direction: event.direction,
-          thumbnailUrl: event.thumbnailUrl,
-        });
+      if (!this.visible()) {
+        this.clearPinnedFileTypeGroup();
       }
     });
 
-    // New issue transitions should be visually noticeable in the lane switch.
-    this.uploadManager.jobPhaseChanged$.subscribe((event) => {
-      const becameIssue =
-        (event.currentPhase === 'error' || event.currentPhase === 'missing_data') &&
-        event.previousPhase !== 'error' &&
-        event.previousPhase !== 'missing_data';
-
-      if (!becameIssue) return;
-      this.triggerIssueAttentionPulse();
+    this.setup.initialize({
+      destroyRef: this.destroyRef,
+      imageUploaded: (event) => this.imageUploaded.emit(event),
+      placementRequested: (jobId) => this.placementRequested.emit(jobId),
+      detailRequested: (mediaId) => this.detailRequested.emit(mediaId),
+      zoomToLocationRequested: (event) => this.zoomToLocationRequested.emit(event),
+      locationMapPickRequested: (event) => this.locationMapPickRequested.emit(event),
+      locationPreviewRequested: (event) => this.locationPreviewRequested.emit(event),
+      locationPreviewCleared: () => this.locationPreviewCleared.emit(),
+      selectedUploadJobIds: this.selectedUploadJobIds,
+      prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
+      dismissFile: (jobId) => this.dismissFile(jobId),
     });
   }
 
-  // ── Drag-and-drop ──────────────────────────────────────────────────────────
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(true);
+  ngOnDestroy(): void {
+    this.setup.clearHostCallbacks();
   }
 
-  onDragLeave(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(false);
-  }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(false);
-
-    const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      this.uploadManager.submit(Array.from(files), { projectId: this.activeProjectId() });
-    }
-  }
-
-  // ── File input ─────────────────────────────────────────────────────────────
-
-  onFileInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
-      // Reset so the same file can be re-selected if needed
-      input.value = '';
-    }
-  }
-
-  onCaptureInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.uploadManager.submit([input.files[0]], { projectId: this.activeProjectId() });
-      input.value = '';
-    }
-  }
-
-  openFilePicker(input: HTMLInputElement): void {
-    input.click();
-  }
-
-  openCapturePicker(event: MouseEvent, input: HTMLInputElement): void {
-    event.preventDefault();
-    event.stopPropagation();
-    input.click();
-  }
-
-  onDropZoneKeydown(event: KeyboardEvent, input: HTMLInputElement): void {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      input.click();
-    }
-  }
-
-  setSelectedLane(lane: UploadLane): void {
-    this.selectedLane.set(lane);
-  }
-
-  onDotClick(jobId: string): void {
-    const job = this.jobs().find((entry) => entry.id === jobId);
-    if (!job) return;
-    this.selectedLane.set(this.getLaneForJob(job));
-  }
-
-  requestPlacement(jobId: string, phase: UploadPhase, event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    if (phase !== 'missing_data') return;
-    this.placementRequested.emit(jobId);
-  }
-
-  canZoomToJob(job: UploadJob): boolean {
-    return (
-      this.getLaneForJob(job) === 'uploaded' &&
-      !!job.imageId &&
-      typeof job.coords?.lat === 'number' &&
-      typeof job.coords?.lng === 'number'
-    );
-  }
-
-  isRowInteractive(job: UploadJob): boolean {
-    return this.canZoomToJob(job) || job.phase === 'missing_data';
-  }
-
-  onRowMainClick(job: UploadJob): void {
-    if (job.phase === 'missing_data') {
-      this.placementRequested.emit(job.id);
-      return;
-    }
-
-    if (!this.canZoomToJob(job)) return;
-    this.zoomToLocationRequested.emit({
-      imageId: job.imageId!,
-      lat: job.coords!.lat,
-      lng: job.coords!.lng,
-    });
-  }
-
-  onRowMainKeydown(job: UploadJob, event: KeyboardEvent): void {
-    if (!this.isRowInteractive(job)) return;
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    this.onRowMainClick(job);
-  }
-
-  async onSelectFolder(event: MouseEvent, folderInput: HTMLInputElement): Promise<void> {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const picker = (
-      window as Window & {
-        showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
-      }
-    ).showDirectoryPicker;
-
-    if (!picker) {
-      folderInput.click();
-      return;
-    }
-
-    try {
-      const dirHandle = await picker.call(window);
-      await this.uploadManager.submitFolder(dirHandle, { projectId: this.activeProjectId() });
-    } catch {
-      // User cancel and permission errors are non-fatal for panel state.
-    }
-  }
-
-  onFolderInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
-      input.value = '';
-    }
-  }
-
-  private activeProjectId(): string | undefined {
-    const ids = this.workspaceView.selectedProjectIds();
-    return ids.size > 0 ? (Array.from(ids.values())[0] ?? undefined) : undefined;
-  }
-
-  // ── Manual placement ───────────────────────────────────────────────────────
-
-  /**
-   * Called by the parent MapShellComponent after the user clicks the map to
-   * place an image that had no GPS data and no address in the filename.
-   * Delegates to the manager's placeJob method.
-   */
+  // Public API used by map-shell pending-placement flow.
   placeFile(key: string, coords: ExifCoords): void {
-    this.uploadManager.placeJob(key, coords);
+    this.rows.placeFile(key, coords);
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  /** Remove a completed, errored, or missing_data job from the list. */
   dismissFile(jobId: string): void {
-    this.uploadManager.dismissJob(jobId);
+    this.rows.dismissFile(jobId);
+    this.selectedUploadJobIds.update((selected) => {
+      if (!selected.has(jobId)) {
+        return selected;
+      }
+
+      const next = new Set(selected);
+      next.delete(jobId);
+      return next;
+    });
   }
 
-  /** Retry a failed job. */
-  retryFile(jobId: string): void {
-    this.uploadManager.retryJob(jobId);
+  onLocationModeRowPreviewStart(): void {
+    this.locationModeRowPreview.set(true);
   }
 
-  /** Map UploadPhase to a CSS-friendly status class name. */
-  phaseToStatusClass(phase: UploadPhase): string {
-    switch (phase) {
-      case 'queued':
-        return 'pending';
-      case 'validating':
-      case 'parsing_exif':
-      case 'hashing':
-      case 'dedup_check':
-      case 'extracting_title':
-      case 'conflict_check':
-        return 'parsing';
-      case 'awaiting_conflict_resolution':
-        return 'awaiting_placement';
-      case 'uploading':
-      case 'saving_record':
-      case 'replacing_record':
-        return 'uploading';
-      case 'resolving_address':
-      case 'resolving_coordinates':
-        return 'uploading';
-      case 'complete':
-        return 'complete';
-      case 'skipped':
-        return 'skipped';
-      case 'error':
-        return 'error';
-      case 'missing_data':
-        return 'awaiting_placement';
+  onLocationModeRowPreviewEnd(): void {
+    this.locationModeRowPreview.set(false);
+  }
+
+  toggleLocationRequirementMode(): void {
+    const next = alternateUploadLocationRequirementMode(this.locationRequirementMode());
+    this.signals.setLocationRequirementMode(next);
+    this.locationModeRowPreview.set(false);
+  }
+
+  onDropzoneClick(_event: MouseEvent, fileInput: HTMLInputElement): void {
+    if (this.pinnedFileTypeGroupId()) {
+      this.clearPinnedFileTypeGroup();
+      return;
+    }
+    this.inputHandlers.openFilePicker(fileInput);
+  }
+
+  isFileTypeGroupExpanded(groupId: UploadFileTypeGroupId): boolean {
+    return this.pinnedFileTypeGroupId() === groupId;
+  }
+
+  onPickFileTypeGroup(
+    fileInput: HTMLInputElement,
+    group: UploadFileTypeGroup,
+    event: MouseEvent,
+  ): void {
+    event.stopPropagation();
+    this.pinFileTypeGroup(group.id);
+    this.inputHandlers.openFilePicker(fileInput, {
+      extensions: group.members.map((member) => member.extension),
+    });
+  }
+
+  onPickFileTypeMember(
+    fileInput: HTMLInputElement,
+    group: UploadFileTypeGroup,
+    member: UploadFileTypeChip,
+    event: MouseEvent,
+  ): void {
+    event.stopPropagation();
+    this.pinFileTypeGroup(group.id);
+    this.inputHandlers.openFilePicker(fileInput, { extensions: [member.extension] });
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.pinnedFileTypeGroupId()) {
+      this.clearPinnedFileTypeGroup();
     }
   }
 
-  /** TrackBy function used in the template. */
-  trackByJobId(_idx: number, job: UploadJob): string {
-    return job.id;
+  private pinFileTypeGroup(groupId: UploadFileTypeGroupId): void {
+    this.pinnedFileTypeGroupId.set(groupId);
   }
 
-  documentFallbackLabel(job: UploadJob): string | null {
-    const type = job.file.type;
-    if (!type) {
-      const ext = this.fileExtension(job.file.name);
-      return this.extensionToBadge(ext);
-    }
-
-    if (type === 'application/pdf') return 'PDF';
-    if (type === 'application/msword') return 'DOC';
-    if (type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      return 'DOCX';
-    }
-    if (type === 'application/vnd.ms-excel') return 'XLS';
-    if (type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      return 'XLSX';
-    }
-    if (type === 'application/vnd.ms-powerpoint') return 'PPT';
-    if (type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
-      return 'PPTX';
-    }
-
-    return null;
+  private clearPinnedFileTypeGroup(): void {
+    this.pinnedFileTypeGroupId.set(null);
   }
 
-  private getLaneForJob(job: UploadJob): UploadLane {
-    if (job.phase === 'complete' || job.phase === 'skipped') return 'uploaded';
-    if (job.phase === 'error' || job.phase === 'missing_data') return 'issues';
-    return 'uploading';
+  fileTypeGroupPickAriaLabel(group: UploadFileTypeGroup): string {
+    return fileTypeGroupPickAriaLabel(group, (key, fallback) => this.t(key, fallback));
   }
 
-  private getDotStatusClass(job: UploadJob): string {
-    if (job.phase === 'complete' || job.phase === 'skipped') return 'complete';
-    if (job.phase === 'error' || job.phase === 'missing_data') return 'issue';
-    if (
-      job.phase === 'uploading' ||
-      job.phase === 'saving_record' ||
-      job.phase === 'replacing_record' ||
-      job.phase === 'resolving_address' ||
-      job.phase === 'resolving_coordinates'
-    ) {
-      return 'uploading';
-    }
-    return 'queued';
-  }
-
-  private fileExtension(fileName: string): string {
-    const parts = fileName.toLowerCase().split('.');
-    return parts.length > 1 ? (parts[parts.length - 1] ?? '') : '';
-  }
-
-  private extensionToBadge(extension: string): string | null {
-    switch (extension) {
-      case 'pdf':
-        return 'PDF';
-      case 'doc':
-        return 'DOC';
-      case 'docx':
-        return 'DOCX';
-      case 'xls':
-        return 'XLS';
-      case 'xlsx':
-        return 'XLSX';
-      case 'ppt':
-        return 'PPT';
-      case 'pptx':
-        return 'PPTX';
-      default:
-        return null;
-    }
-  }
-
-  private triggerIssueAttentionPulse(): void {
-    this.issueAttentionPulse.set(true);
-
-    if (this.issueAttentionTimer) {
-      clearTimeout(this.issueAttentionTimer);
-    }
-
-    this.issueAttentionTimer = setTimeout(() => {
-      this.issueAttentionPulse.set(false);
-      this.issueAttentionTimer = null;
-    }, 1500);
+  fileTypeMemberPickAriaLabel(member: UploadFileTypeChip): string {
+    return fileTypeMemberPickAriaLabel(member, (key, fallback) => this.t(key, fallback));
   }
 }

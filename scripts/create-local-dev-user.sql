@@ -1,0 +1,2 @@
+-- Deprecated alias — use promote-local-dev-admin.sql instead.
+--   See header in scripts/promote-local-dev-admin.sql (use supabase_admin, not postgres).

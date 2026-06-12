@@ -1,877 +1,350 @@
-/*
- * Tailwind directives must stay at the top of this file.
- * Use CSS block comments here so preprocessing order cannot turn commented
- * examples into accidental @tailwind directives.
- */
+// ── SCSS Module Imports ────────────────────────────────────────────────────────
+// Sass @use statements must appear before all other rules (Sass language rule).
+// Global output order for newcomers (do not reorder blindly):
+// 1) Top @use emits first: map-leaflet-host → reset (`@layer base`) → layout/app → layout/clamp → map-shell-keyframes → map-shell-leaflet-global.
+// 2) CDK prebuilt, then @import "tailwindcss" (Preflight + @source / @config).
+// 3) tweakcn :root / html[data-theme] blocks (semantic variables; @theme inline maps them in step 4).
+// 4) @theme inline, @layer base (border/body) in this file.
+// 5) meta.load-css after @layer base — shared menu/scrollbar/switch chrome, then typography-baseline (h1–h6 + anchors after Preflight; top @use would break that order).
+@use 'sass:meta';
+@use './styles/map-leaflet-host';
+@use './styles/reset';
+@use './styles/layout/app';
+@use './styles/layout/clamp';
+@use './styles/map-shell-keyframes';
+@use './styles/map-shell-leaflet-global';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+// ── Angular CDK overlay — moved from tokens.scss (Phase 7 cleanup) ─────────────
+@import "@angular/cdk/overlay-prebuilt.css";
 
-@import '@angular/cdk/overlay-prebuilt.css';
+// ── Tailwind v4 CSS entry point ────────────────────────────────────────────────
+// Replaces @tailwind base/components/utilities (v3 directives removed in v4).
+// Processed by @tailwindcss/postcss plugin — see postcss.config.json.
+@import "tailwindcss";
 
-/* =============================================================
-   Feldpost — Global Styles & Design Token System
-   M-UI1: All CSS custom property tokens from design.md §3.
-   ============================================================= */
+// Explicit source paths for Tailwind v4 utility class generation.
+// Relative to this file (apps/web/src/).
+@source "./**/*.{html,ts,scss}";
 
-// ── Light-mode tokens (default) ──────────────────────────────────────────────
+// Dark mode: `dark:` utilities activate when html carries [data-theme="dark"]`.
+// ThemeService explicit "dark" sets that attribute; "system" removes it (OS then drives CSS vars via prefers-color-scheme below, not this variant).
+// Long-form `@custom-variant` with `@slot` (system + OS dark) is blocked here: Sass parses `styles.scss` before Tailwind and errors on top-level `&` inside the variant block — see `docs/migration/phase-7-token-migration.md` § Risks / QA.
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+// Preserve Tailwind v3 theme extensions (custom radius, colors, spacing, etc.)
+// during the migration.  Remove after all callsites are migrated to v4 tokens.
+// @see docs/migration/phase-7-token-migration.md
+@config "../tailwind.config.js";
+
+// Shared tweakcn dark palette — used for explicit `data-theme="dark"` and for ThemeService "system" when `data-theme` is absent and OS prefers dark.
+// @see docs/migration/phase-7-token-migration.md § Batch 4; docs/specs/ui/settings-overlay/theme-toggle.md
+@mixin tweakcn-dark-semantic-palette {
+  // Slate-blue ink surface (~262° aligns light :root foreground hue ~264; avoids violet ~308 tweakcn export)
+  --background: oklch(0.1797 0.007 262);
+  --foreground: oklch(0.8109 0 0);
+  --card: oklch(0.1822 0 0);
+  --card-foreground: oklch(0.8109 0 0);
+  --popover: var(--background);
+  --popover-foreground: oklch(0.8109 0 0);
+  --primary: oklch(0.796 0.134 80);
+  --primary-foreground: var(--background);
+  --secondary: oklch(0.5940 0.0443 196.0233);
+  --secondary-foreground: var(--background);
+  --muted: oklch(0.2520 0 0);
+  --muted-foreground: oklch(0.6268 0 0);
+  --accent: oklch(0.3211 0 0);
+  --accent-foreground: oklch(0.8109 0 0);
+  --destructive: oklch(0.6368 0.2078 25.3313);
+  --destructive-foreground: oklch(0.9851 0 0);
+  --border: oklch(0.2520 0 0);
+  --input: oklch(0.2520 0 0);
+  --ring: oklch(0.796 0.134 80);
+  --chart-1: oklch(0.5940 0.0443 196.0233);
+  --chart-2: oklch(0.796 0.134 80);
+  --chart-3: oklch(0.8721 0.0864 68.5474);
+  --chart-4: oklch(0.6268 0 0);
+  --chart-5: oklch(0.6830 0 0);
+  --sidebar: oklch(0.1822 0 0);
+  --sidebar-foreground: oklch(0.8109 0 0);
+  --sidebar-primary: oklch(0.796 0.134 80);
+  --sidebar-primary-foreground: var(--background);
+  --sidebar-accent: oklch(0.3211 0 0);
+  --sidebar-accent-foreground: oklch(0.8109 0 0);
+  --sidebar-border: oklch(0.2520 0 0);
+  --sidebar-ring: oklch(0.796 0.134 80);
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: Playfair Display, ui-serif, serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: 0.75rem;
+  --shadow-x: 0px;
+  --shadow-y: 1px;
+  --shadow-blur: 4px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.05;
+  --shadow-color: #000000;
+  --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
+  --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
+  --shadow-sm: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
+  --shadow: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
+  --shadow-md: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 2px 4px -1px hsl(0 0% 0% / 0.05);
+  --shadow-lg: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 4px 6px -1px hsl(0 0% 0% / 0.05);
+  --shadow-xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.05);
+  --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
+  --success: oklch(0.68 0.16 152);
+  --success-foreground: oklch(0.18 0.02 152);
+  --warning: oklch(0.78 0.15 85);
+  --warning-foreground: oklch(0.2 0.04 85);
+  --primary-hover: oklch(from var(--primary) calc(l - 0.04) c h);
+  --text-disabled: color-mix(in oklch, var(--muted-foreground) 48%, var(--background));
+  --border-strong: color-mix(in oklch, var(--border) 78%, var(--foreground));
+  --filetype-image: oklch(0.78 0.12 68);
+  --filetype-pdf: oklch(0.72 0.14 25);
+  --filetype-video: oklch(0.62 0.14 25);
+  --filetype-office: color-mix(in oklch, var(--muted-foreground) 75%, var(--foreground));
+  --filetype-document: oklch(0.62 0.12 245);
+  --interaction-selected-ink: var(--filetype-document);
+  --app-violet-accent: oklch(0.72 0.14 290);
+  --map-marker-user: var(--chart-1);
+  --map-marker-search: var(--primary);
+  // Media/map ink scrims (derive from shadow source; Phase 7 Batch 10)
+  // @see docs/migration/phase-7-token-migration.md
+  --overlay-scrim-30: color-mix(in srgb, var(--shadow-color) 30%, transparent);
+  --overlay-scrim-55: color-mix(in srgb, var(--shadow-color) 55%, transparent);
+  --overlay-scrim-80: color-mix(in srgb, var(--shadow-color) 80%, transparent);
+  // Fixed light ink on arbitrary photo/map imagery (not app theme text; Phase 7 Batch 11)
+  // @see docs/migration/phase-7-token-migration.md
+  --media-chrome-foreground: oklch(1 0 0);
+  --media-chrome-control-bg: color-mix(in srgb, var(--media-chrome-foreground) 10%, transparent);
+  --media-chrome-control-bg-hover: color-mix(in srgb, var(--media-chrome-foreground) 20%, transparent);
+  // Auth card scroll-edge + map shell veils — dark ink surfaces (Phase 7 Batch 11)
+  // @see docs/migration/phase-7-token-migration.md
+  --auth-scroll-radial-sheen: color-mix(in srgb, var(--foreground) 16%, transparent);
+  --auth-map-veil-stop-a: color-mix(in srgb, var(--background) 74%, transparent);
+  --auth-map-veil-stop-b: color-mix(in srgb, var(--background) 40%, transparent);
+  --auth-map-veil-stop-c: color-mix(in srgb, var(--background) 78%, transparent);
+  --auth-map-veil-flat: color-mix(in srgb, var(--background) 26%, transparent);
+}
+
+// ── tweakcn design token foundation — light mode ───────────────────────────────
+// Single CSS variable foundation for spartan/ui.
+// --primary = oklch(0.748 0.128 84.6) ≈ Feldpost brand gold #c9a84c (tonal stop 70).
+// @see docs/design/tokens.md §3.1a
 :root {
-  // Backgrounds (warm off-whites, never cold grays)
-  --color-bg-base: #f9f7f4;
-  --color-bg-surface: #ffffff;
-  --color-bg-elevated: #ffffff;
-
-  // Borders
-  --color-border: #e8e4de;
-  --color-border-strong: #c8c1b8;
-
-  // Text (warm near-black / warm secondary)
-  --color-text-primary: #1a1714;
-  --color-text-secondary: #6b6259;
-  --color-text-disabled: #a89e95;
-
-  // Brand / semantic
-  --color-primary: #cc7a4a;
-  --color-primary-hover: #b8663a;
-  --color-success: #16a34a;
-  --color-warning: #c2610a;
-  --color-danger: #dc2626;
-  --color-accent: #7c3aed;
-  --color-clay: #cc7a4a; // upload CTA, active selection — used sparingly
-  --color-map-user-marker: #2f6fdb;
-  --color-map-search-marker: var(--color-clay);
-
-  // Border radius
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  // Shadows — warm-tinted black (not cold blue)
-  // Physical shadow scale: sm → md → lg → xl
-  --shadow-sm: 0 1px 3px rgba(15, 14, 12, 0.12), 0 1px 2px rgba(15, 14, 12, 0.08);
-  --shadow-md: 0 4px 12px rgba(15, 14, 12, 0.15), 0 2px 4px rgba(15, 14, 12, 0.1);
-  --shadow-lg: 0 8px 24px rgba(15, 14, 12, 0.18), 0 4px 8px rgba(15, 14, 12, 0.12);
-  --shadow-xl: 0 16px 48px rgba(15, 14, 12, 0.22), 0 6px 16px rgba(15, 14, 12, 0.14);
-  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
-
-  // Elevation layers — semantic aliases; every element uses a layer, not a raw shadow.
-  // All elements at the same visual plane share the same layer → same shadow.
-  --elevation-base: none; // flush with page background
-  --elevation-subtle: var(--shadow-sm); // subtle lift: mobile bottom bar, dividers
-  --elevation-overlay: var(
-    --shadow-md
-  ); // map overlays: sidebar, search bar, FAB, GPS, markers, banners
-  --elevation-dropdown: var(--shadow-lg); // dropdowns, context menus, popovers
-  --elevation-modal: var(--shadow-xl); // modals, dialogs, image detail overlay
-
-  // Z-index stacking ladder (audit issue #2, #13)
-  --z-map: 0;
-  --z-panel: 300;
-  --z-upload-button: 350;
-  --z-dropdown: 400;
-  --z-toast: 450;
-  --z-modal: 500;
-
-  // Spacing scale — 4 px base unit
-  --spacing-1: 4px;
-  --spacing-2: 8px;
-  --spacing-3: 12px;
-  --spacing-4: 16px;
-  --spacing-5: 24px;
-  --spacing-6: 32px;
-  --spacing-7: 48px;
-  --spacing-8: 64px;
-
-  // Container geometry — containers define the alignment boundaries that
-  // nested content, dropdowns, and panels should inherit.
-  --container-inset: var(--spacing-3);
-  --container-inset-mobile: var(--spacing-3);
-  --container-padding-inline-panel: var(--spacing-1);
-  --container-padding-block-panel: var(--spacing-1);
-  --container-padding-inline-compact: var(--spacing-3);
-  --container-padding-block-compact: var(--spacing-2);
-  --container-gap-panel: var(--spacing-1);
-  --container-gap: var(--spacing-2);
-  --container-radius-control: var(--radius-md);
-  --container-radius-panel: var(--radius-lg);
-  --container-radius-pill: var(--radius-full);
-
-  // Shared media sizing primitives
-  --ui-item-media-size-default: var(--spacing-6);
-
-  // Photo marker geometry derives from the shared media token system.
-  --photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25);
-  --photo-marker-hit-size: 2.5rem;
-  --photo-marker-correction-dot-size: 8px;
-  --photo-marker-drop-shadow: 0 1px 3px rgba(15, 14, 12, 0.45);
-  --photo-marker-selected-scale: 1.05;
-  --photo-marker-cluster-font-size: 0.875rem;
-
-  // Sidebar layout dimensions — standardized from docs/design/tokens.md.
-  --layout-sidebar-width-collapsed: var(--spacing-7);
-  --layout-sidebar-width-expanded: 15rem;
-  --layout-sidebar-row-padding-inline: var(--spacing-1);
-  --layout-sidebar-row-padding-block: var(--spacing-1);
-  --layout-sidebar-row-gap: var(--spacing-3);
-  --layout-sidebar-media-size: var(--spacing-6);
-  --layout-sidebar-row-height: calc(
-    var(--layout-sidebar-media-size) + (var(--layout-sidebar-row-padding-block) * 2)
-  );
-  --layout-sidebar-icon-size: 1.25rem;
-  --layout-sidebar-label-size: 0.8125rem;
-
-  // Shared interactive primitives (single source for hover/focus/motion)
-  --interactive-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
-  --interactive-surface-hover: color-mix(in srgb, var(--color-clay) 12%, transparent);
-  --interactive-focus-ring: 0 0 0 2px color-mix(in srgb, var(--color-clay) 16%, transparent);
-  --interactive-transition-standard:
-    border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
-    box-shadow 120ms ease-out;
-
-  // Component-role aliases (Theme Contract layer C)
-  // Action controls
-  --action-bg-default: transparent;
-  --action-bg-hover: var(--interactive-surface-hover);
-  --action-bg-active: color-mix(in srgb, var(--color-clay) 12%, transparent);
-  --action-border-default: color-mix(in srgb, var(--color-clay) 35%, var(--color-border));
-  --action-border-active: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
-  --action-text-default: var(--color-text-secondary);
-  --action-text-active: var(--color-clay);
-
-  // Menu and option surfaces
-  --menu-surface-bg: var(--color-bg-elevated);
-  --menu-surface-border: var(--interactive-border-muted);
-  --menu-item-bg-hover: color-mix(in srgb, var(--color-clay) 8%, transparent);
-  --menu-item-bg-active: color-mix(in srgb, var(--color-clay) 12%, transparent);
-  --menu-item-text: var(--color-text-primary);
-  --menu-item-text-active: var(--color-clay);
-
-  // Form controls
-  --field-bg: var(--color-bg-surface);
-  --field-border: var(--color-border-strong);
-  --field-border-focus: var(--color-primary);
-  --field-placeholder: var(--color-text-disabled);
-  --field-text: var(--color-text-primary);
-
-  // Settings sections and cards
-  --section-bg: var(--color-bg-surface);
-  --section-border: var(--interactive-border-muted);
-  --section-title: var(--color-text-primary);
-  --section-text: var(--color-text-secondary);
-
-  // Feedback states
-  --state-success-bg: color-mix(in srgb, var(--color-success) 12%, transparent);
-  --state-warning-bg: color-mix(in srgb, var(--color-warning) 12%, transparent);
-  --state-danger-bg: color-mix(in srgb, var(--color-danger) 12%, transparent);
-  --state-info-bg: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  --background: oklch(1.0000 0 0);
+  --foreground: oklch(0.2101 0.0318 264.6645);
+  --card: oklch(1.0000 0 0);
+  --card-foreground: oklch(0.2101 0.0318 264.6645);
+  --popover: oklch(1.0000 0 0);
+  --popover-foreground: oklch(0.2101 0.0318 264.6645);
+  --primary: oklch(0.748 0.128 84.6);
+  --primary-foreground: oklch(1.0000 0 0);
+  --secondary: oklch(0.4716 0.0393 65.1728);
+  --secondary-foreground: oklch(1.0000 0 0);
+  --muted: oklch(0.9670 0.0029 264.5419);
+  --muted-foreground: oklch(0.5510 0.0234 264.3637);
+  --accent: oklch(0.9491 0 0);
+  --accent-foreground: oklch(0.2101 0.0318 264.6645);
+  --destructive: oklch(0.6368 0.2078 25.3313);
+  --destructive-foreground: oklch(0.9851 0 0);
+  --border: oklch(0.9276 0.0058 264.5313);
+  --input: oklch(0.9276 0.0058 264.5313);
+  --ring: oklch(0.748 0.128 84.6);
+  --chart-1: oklch(0.5940 0.0443 196.0233);
+  --chart-2: oklch(0.748 0.128 84.6);
+  --chart-3: oklch(0.8721 0.0864 68.5474);
+  --chart-4: oklch(0.6268 0 0);
+  --chart-5: oklch(0.6830 0 0);
+  --sidebar: oklch(0.9670 0.0029 264.5419);
+  --sidebar-foreground: oklch(0.2101 0.0318 264.6645);
+  --sidebar-primary: oklch(0.748 0.128 84.6);
+  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-accent: oklch(1.0000 0 0);
+  --sidebar-accent-foreground: oklch(0.2101 0.0318 264.6645);
+  --sidebar-border: oklch(0.9276 0.0058 264.5313);
+  --sidebar-ring: oklch(0.748 0.128 84.6);
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: Playfair Display, ui-serif, serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: 0.75rem;
+  --shadow-x: 0px;
+  --shadow-y: 1px;
+  --shadow-blur: 4px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.05;
+  --shadow-color: #000000;
+  --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
+  --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
+  --shadow-sm: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
+  --shadow: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
+  --shadow-md: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 2px 4px -1px hsl(0 0% 0% / 0.05);
+  --shadow-lg: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 4px 6px -1px hsl(0 0% 0% / 0.05);
+  --shadow-xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.05);
+  --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
+  --tracking-normal: 0rem;
+  --spacing: 0.25rem;
+  // Semantic states and file-type accents (single definition point; Phase 7)
+  // @see docs/migration/phase-7-token-migration.md
+  --success: oklch(0.52 0.145 152);
+  --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.58 0.14 55);
+  --warning-foreground: oklch(0.22 0.03 55);
+  --primary-hover: oklch(from var(--primary) calc(l - 0.05) c h);
+  --text-disabled: color-mix(in oklch, var(--muted-foreground) 55%, var(--background));
+  --border-strong: color-mix(in oklch, var(--border) 72%, var(--foreground));
+  // De-facto office / Adobe hues (readable L for chip ink — not raw chart-3).
+  --filetype-image: oklch(0.55 0.13 68);
+  --filetype-pdf: oklch(0.52 0.17 25);
+  --filetype-video: oklch(0.52 0.16 25);
+  --filetype-document: oklch(0.5 0.1 245);
+  // Cool selection ink for quiet controls (nav active, toggle on) — not tweakcn --secondary (olive in light).
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  --interaction-selected-ink: var(--filetype-document);
+  --filetype-spreadsheet: var(--success);
+  --filetype-presentation: oklch(0.56 0.15 42);
+  --filetype-office: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
+  --app-violet-accent: oklch(0.52 0.19 290);
+  --map-marker-user: var(--chart-1);
+  --map-marker-search: var(--primary);
+  // Media/map ink scrims (derive from shadow source; Phase 7 Batch 10)
+  // @see docs/migration/phase-7-token-migration.md
+  --overlay-scrim-30: color-mix(in srgb, var(--shadow-color) 30%, transparent);
+  --overlay-scrim-55: color-mix(in srgb, var(--shadow-color) 55%, transparent);
+  --overlay-scrim-80: color-mix(in srgb, var(--shadow-color) 80%, transparent);
+  // Light-on-media controls + auth/map veils (theme where noted; Phase 7 Batch 11)
+  // @see docs/migration/phase-7-token-migration.md
+  --media-chrome-foreground: oklch(1 0 0);
+  --media-chrome-control-bg: color-mix(in srgb, var(--media-chrome-foreground) 10%, transparent);
+  --media-chrome-control-bg-hover: color-mix(in srgb, var(--media-chrome-foreground) 20%, transparent);
+  --auth-scroll-radial-sheen: color-mix(in srgb, var(--media-chrome-foreground) 75%, transparent);
+  --auth-map-veil-stop-a: color-mix(in srgb, var(--card) 75%, transparent);
+  --auth-map-veil-stop-b: color-mix(in srgb, var(--card) 35%, transparent);
+  --auth-map-veil-stop-c: color-mix(in srgb, var(--card) 72%, transparent);
+  --auth-map-veil-flat: color-mix(in srgb, var(--card) 22%, transparent);
 }
 
-// ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
-[data-theme='dark'] {
-  --color-bg-base: #0f0e0c;
-  --color-bg-surface: #1a1917;
-  --color-bg-elevated: #252320;
-
-  --color-border: #2e2b27;
-  --color-border-strong: #3d3830;
-
-  --color-text-primary: #edebe7;
-  --color-text-secondary: #908880;
-  --color-text-disabled: #4a4540;
-
-  --color-primary: #d9895a;
-  --color-primary-hover: #e89a6e;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-accent: #a78bfa;
-  --color-clay: #d9895a;
-  --color-map-user-marker: #60a5fa;
-  --color-map-search-marker: var(--color-clay);
-
-  // Shadows — higher opacity so they punch through dark surfaces
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.18);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.38), 0 2px 4px rgba(0, 0, 0, 0.22);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.48), 0 4px 8px rgba(0, 0, 0, 0.28);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.56), 0 6px 16px rgba(0, 0, 0, 0.32);
-  --photo-marker-drop-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
+// ── Dark mode token overrides ──────────────────────────────────────────────────
+// Activated by [data-theme="dark"] on <html> (explicit user choice).
+// @see docs/migration/phase-2-foundation.md
+html[data-theme="dark"] {
+  @include tweakcn-dark-semantic-palette;
 }
 
-// Optional custom profile to validate themeability of semantic aliases.
-// Activate manually via: document.documentElement.setAttribute('data-theme', 'sandstone')
-[data-theme='sandstone'] {
-  --color-bg-base: #f3efe8;
-  --color-bg-surface: #fdfaf4;
-  --color-bg-elevated: #fffaf0;
-  --color-border: #d8cdbf;
-  --color-border-strong: #b9ab98;
-  --color-text-primary: #2f271f;
-  --color-text-secondary: #655749;
-  --color-text-disabled: #9e8f80;
-  --color-primary: #a56137;
-  --color-primary-hover: #8d4f2a;
-  --color-clay: #a56137;
-  --color-map-user-marker: #2f5f89;
-
-  --action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
-  --action-bg-active: color-mix(in srgb, #a56137 22%, transparent);
-  --action-border-default: color-mix(in srgb, #a56137 36%, var(--color-border));
-  --action-border-active: color-mix(in srgb, #a56137 52%, var(--color-border));
-  --action-text-default: #6b5a47;
-  --action-text-active: #8f522d;
-
-  --menu-surface-bg: #fffaf2;
-  --menu-surface-border: color-mix(in srgb, #a38d73 44%, transparent);
-  --menu-item-bg-hover: color-mix(in srgb, #c59f63 14%, transparent);
-  --menu-item-bg-active: color-mix(in srgb, #a56137 18%, transparent);
-  --menu-item-text: #2f271f;
-  --menu-item-text-active: #8f522d;
-
-  --field-bg: #fffdf8;
-  --field-border: #b7a48e;
-  --field-border-focus: #8f522d;
-  --field-placeholder: #9f8d78;
-  --field-text: #2f271f;
-
-  --section-bg: #fdf8ef;
-  --section-border: color-mix(in srgb, #a38d73 42%, transparent);
-  --section-title: #2f271f;
-  --section-text: #66594a;
-
-  --state-success-bg: color-mix(in srgb, #4f8b4b 20%, transparent);
-  --state-warning-bg: color-mix(in srgb, #d08b36 24%, transparent);
-  --state-danger-bg: color-mix(in srgb, #ba4b44 18%, transparent);
-  --state-info-bg: color-mix(in srgb, #2f5f89 18%, transparent);
-}
-
-// ── Dark-mode tokens — system preference fallback (audit issue #10) ───────────
-// Applies dark tokens when the user's OS is in dark mode and they haven't
-// explicitly set a preference in the app.
+// System theme: ThemeService "system" removes `data-theme`; mirror dark palette on :root when OS prefers dark (semantic vars + legacy bridge `var(--primary)` chains stay aligned).
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --color-bg-base: #0f0e0c;
-    --color-bg-surface: #1a1917;
-    --color-bg-elevated: #252320;
-
-    --color-border: #2e2b27;
-    --color-border-strong: #3d3830;
-
-    --color-text-primary: #edebe7;
-    --color-text-secondary: #908880;
-    --color-text-disabled: #4a4540;
-
-    --color-primary: #d9895a;
-    --color-primary-hover: #e89a6e;
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-danger: #ef4444;
-    --color-accent: #a78bfa;
-    --color-clay: #d9895a;
-    --color-map-user-marker: #60a5fa;
-    --color-map-search-marker: var(--color-clay);
-
-    // Shadows — higher opacity so they punch through dark surfaces
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.18);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.38), 0 2px 4px rgba(0, 0, 0, 0.22);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.48), 0 4px 8px rgba(0, 0, 0, 0.28);
-    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.56), 0 6px 16px rgba(0, 0, 0, 0.32);
-    --photo-marker-drop-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
+  :root:not([data-theme]) {
+    @include tweakcn-dark-semantic-palette;
   }
 }
 
-// ── Leaflet overrides — neutralise default blue strokes / focus rings ────────
-// leaflet.css (loaded before this file) hard-codes blue on interactive SVG
-// paths and the tile-pane focus outline. Override here so all Leaflet chrome
-// uses the app's orange primary token instead.
-.leaflet-interactive:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+// ── Sandstone theme — warm tinted surface overrides ───────────────────────────
+// Activated by [data-theme="sandstone"] on <html>.
+// Derived from light-mode values with warmer surfaces and borders.
+// @see docs/migration/phase-2-foundation.md
+html[data-theme="sandstone"] {
+  --background: oklch(0.9800 0.0080 75.0000);
+  --card: oklch(0.9700 0.0090 72.0000);
+  --popover: oklch(0.9800 0.0080 75.0000);
+  --border: oklch(0.8900 0.0150 70.0000);
+  --input: oklch(0.8900 0.0150 70.0000);
+  --muted: oklch(0.9500 0.0100 70.0000);
+  --sidebar: oklch(0.9600 0.0120 72.0000);
+  --sidebar-border: oklch(0.8800 0.0160 69.0000);
+  --map-marker-user: oklch(0.52 0.1 250);
 }
 
-.leaflet-container a {
-  color: var(--color-primary);
+// ── Tailwind v4 CSS-first theme mapping ───────────────────────────────────────
+// Maps tweakcn CSS custom properties to Tailwind color utilities.
+// bg-primary → background-color: var(--primary), etc.
+// @see https://tailwindcss.com/docs/theme
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
 
-// ── Global Reset ──────────────────────────────────────────────────────────────
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html,
-body {
-  height: 100%;
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
-  background: var(--color-bg-base);
-  color: var(--color-text-primary);
-}
-
-app-root {
-  display: block;
-  height: 100%;
-}
-
-// ── App layout helpers ─────────────────────────────────────────────────────────
-// router-outlet host needs full height. Nav is floating (position: fixed),
-// so no margin offset is needed for the map view.
-// Non-map pages (photos, groups…) add their own padding if needed.
-router-outlet + * {
-  display: block;
-  height: 100%;
-}
-
-// ── Shared container layout helpers ─────────────────────────────────────────
-.ui-container {
-  --ui-container-padding-inline: var(--container-padding-inline-panel);
-  --ui-container-padding-block: var(--container-padding-block-panel);
-  --ui-container-gap: var(--container-gap-panel);
-  --ui-container-radius: var(--container-radius-panel);
-
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-container-gap);
-  padding-block: var(--ui-container-padding-block);
-  padding-inline: var(--ui-container-padding-inline);
-  border-radius: var(--ui-container-radius);
-}
-
-.ui-container--compact {
-  --ui-container-padding-inline: var(--container-padding-inline-compact);
-  --ui-container-padding-block: var(--container-padding-block-compact);
-}
-
-.ui-item {
-  --ui-item-min-height: 2.5rem;
-  --ui-item-padding-inline: var(--container-padding-inline-compact);
-  --ui-item-padding-block: var(--container-padding-block-compact);
-  --ui-item-gap: var(--container-gap);
-  --ui-item-radius: var(--container-radius-control);
-  --ui-item-media-size: var(--ui-item-media-size-default);
-  --ui-item-content-gap: var(--container-gap-panel);
-
-  display: grid;
-  grid-template-columns: var(--ui-item-media-size) minmax(0, 1fr);
-  align-items: center;
-  column-gap: var(--ui-item-gap);
-  min-height: var(--ui-item-min-height);
-  padding-block: var(--ui-item-padding-block);
-  padding-inline: var(--ui-item-padding-inline);
-  border-radius: var(--ui-item-radius);
-}
-
-.ui-item-media {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: var(--ui-item-media-size);
-  block-size: var(--ui-item-media-size);
-  min-inline-size: var(--ui-item-media-size);
-  flex-shrink: 0;
-}
-
-.ui-item-label {
-  display: flex;
-  min-width: 0;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: var(--ui-item-content-gap);
-}
-
-.ui-item-label > * {
-  min-width: 0;
-}
-
-.ui-spacer {
-  flex: 1 1 auto;
-  min-block-size: var(--spacing-2);
-}
-
-// ── Shared dropdown primitives (dd-*) ───────────────────────────────────────
-// Composable classes for all floating dropdowns / context menus.
-// See docs/element-specs/dropdown-system.md for the full spec.
-//
-// Available pieces — pick what you need:
-//   .dd-search          search input row (border-bottom separator)
-//   .dd-search__input   the actual <input> inside .dd-search
-//   .dd-search__action  trailing icon button (clear, reset)
-//   .dd-items           scrollable items area wrapper
-//   .dd-item            base actionable row (icon + label + optional trailing)
-//   .dd-item--active    highlighted/enabled state (clay text)
-//   .dd-item--muted     secondary/available state (secondary text, clay on hover)
-//   .dd-item--danger    destructive action (danger color)
-//   .dd-item__icon      leading Material Icon
-//   .dd-item__label     flexible label text
-//   .dd-item__trailing  trailing slot (direction toggle, count, drag handle…)
-//   .dd-section-label   uppercase group heading
-//   .dd-divider         horizontal 1px separator
-//   .dd-empty           centered empty-state / hint text
-//   .dd-action-row      ghost "add" / "new" action at bottom
-//   .dd-reset-btn       inline reset / clear button (e.g. "Empty" in grouping header)
-//   .dd-drag-handle     trailing drag indicator (quiet-actions pattern)
-
-.dd-search {
-  display: flex;
-  align-items: center;
-  padding: var(--spacing-1) var(--spacing-1) var(--spacing-1) var(--spacing-3);
-  border-bottom: 1px solid var(--menu-surface-border);
-}
-
-.dd-search__input {
-  flex: 1 1 auto;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 0.8125rem;
-  color: var(--field-text);
-  padding: var(--spacing-1) 0;
-
-  &::placeholder {
-    color: var(--field-placeholder);
+// ── Base layer — global defaults for border color and body tokens ──────────────
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
+  body {
+    @apply bg-background text-foreground;
+    letter-spacing: var(--tracking-normal);
+  }
 
-.dd-search__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 1.75rem;
-  height: 1.75rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--action-text-default);
-  cursor: pointer;
-  padding: 0;
-
+  // Sets a slightly smaller global Material Icons baseline for calmer icon prominence
+  // @see docs/migration/phase-10-visual-qa.md
   .material-icons {
-    font-size: 1rem;
-  }
-
-  &:hover {
-    background: var(--action-bg-hover);
-    color: var(--menu-item-text);
-  }
-}
-
-.dd-items {
-  padding: var(--spacing-2);
-}
-
-.dd-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  width: 100%;
-  min-height: 2rem;
-  padding: var(--spacing-1) var(--spacing-2);
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-size: 0.8125rem;
-  color: var(--menu-item-text);
-  cursor: pointer;
-  transition: background 80ms ease-out;
-
-  &:hover {
-    background: var(--menu-item-bg-hover);
-  }
-}
-
-.dd-item--active {
-  color: var(--menu-item-text-active);
-}
-
-.dd-item--muted {
-  color: var(--color-text-secondary);
-
-  &:hover {
-    color: var(--color-text-primary);
-  }
-}
-
-.dd-item--danger {
-  color: var(--color-danger);
-}
-
-.dd-item__icon {
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-  flex-shrink: 0;
-
-  .dd-item--active &,
-  .dd-item--danger & {
-    color: inherit;
-  }
-}
-
-.dd-item__label {
-  flex: 1 1 auto;
-  text-align: left;
-}
-
-.dd-item__trailing {
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.dd-section-label {
-  padding: var(--spacing-1) var(--spacing-2);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--color-text-disabled);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.dd-divider {
-  height: 1px;
-  margin: var(--spacing-1) var(--spacing-2);
-  background: var(--color-border);
-}
-
-.dd-empty {
-  padding: var(--spacing-3) var(--spacing-2);
-  font-size: 0.8125rem;
-  color: var(--color-text-disabled);
-  text-align: center;
-}
-
-.dd-action-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  margin: var(--spacing-1) var(--spacing-2) var(--spacing-2);
-  padding: var(--spacing-1) var(--spacing-2);
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-size: 0.8125rem;
-  color: var(--action-text-default);
-  cursor: pointer;
-  transition: var(--interactive-transition-standard);
-
-  .material-icons {
-    font-size: 1rem;
-  }
-
-  &:hover {
-    background: var(--action-bg-hover);
-    color: var(--menu-item-text);
-  }
-}
-
-.dd-reset-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--action-text-default);
-  cursor: pointer;
-  transition: var(--interactive-transition-standard);
-
-  .material-icons {
-    font-size: 1rem;
-  }
-
-  &:hover {
-    background: var(--action-bg-hover);
-    color: var(--action-text-active);
-  }
-}
-
-.dd-drag-handle {
-  opacity: 0;
-  margin-left: auto;
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-  cursor: grab;
-  transition: opacity 80ms ease-out;
-
-  .dd-item:hover & {
-    opacity: 1;
-  }
-}
-
-// ── Shared toolbar primitives ───────────────────────────────────────────────
-// Reused by workspace toolbar and projects page toolbar controls.
-
-.toolbar-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  box-sizing: border-box;
-  height: 1.75rem;
-  padding-inline: var(--spacing-2);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: var(--action-bg-default);
-  color: var(--action-text-default);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: var(--interactive-transition-standard);
-
-  &:hover {
-    background: var(--action-bg-hover);
-    border-color: var(--action-border-default);
-    color: var(--action-text-active);
-  }
-
-  &:focus-visible {
-    border-color: var(--action-border-active);
-    box-shadow: var(--interactive-focus-ring);
-    outline: none;
-  }
-}
-
-.toolbar-btn--active {
-  background: var(--action-bg-active);
-  border-color: var(--action-border-default);
-  color: var(--action-text-active);
-}
-
-.toolbar-btn--open {
-  background: color-mix(in srgb, var(--action-bg-active) 80%, var(--action-bg-hover));
-  border-color: var(--action-border-active);
-  color: var(--action-text-active);
-}
-
-.toolbar-btn__chevron {
-  font-size: 1rem;
-  line-height: 1;
-  transition: transform 150ms ease-out;
-}
-
-.toolbar-btn--open .toolbar-btn__chevron {
-  transform: rotate(180deg);
-}
-
-.toolbar-dropdown,
-.projects-toolbar-dropdown {
-  position: fixed;
-  z-index: var(--z-dropdown);
-  min-width: 15rem;
-  max-width: calc(100vw - 1rem);
-  max-height: min(24rem, calc(100vh - 6rem));
-  display: flex;
-  flex-direction: column;
-}
-
-.option-menu-surface {
-  background: var(--menu-surface-bg);
-  border: 1px solid var(--menu-surface-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--elevation-dropdown);
-  overflow: hidden;
-}
-
-.option-menu-surface.dd-items,
-.option-menu-surface .dd-items {
-  max-height: min(18rem, 52vh);
-  overflow-y: auto;
-}
-
-.option-menu-header {
-  padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid var(--menu-surface-border);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--section-text);
-}
-
-// ── Shared settings/form primitives ─────────────────────────────────────────
-
-.ui-section-card {
-  border: 1.5px solid var(--section-border);
-  background: var(--section-bg);
-}
-
-.ui-field-row {
-  display: grid;
-  grid-template-columns: minmax(10rem, 12rem) 1fr;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
-.ui-field-row--stacked {
-  grid-template-columns: 1fr;
-  align-items: start;
-}
-
-.ui-field-label {
-  font-size: 0.875rem;
-  color: var(--section-text);
-}
-
-.ui-segmented {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  border: 1.5px solid var(--action-border-default);
-  border-radius: var(--radius-full);
-  padding: 0.15rem;
-}
-
-.ui-segmented__button {
-  min-height: 2.25rem;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--action-bg-default);
-  color: var(--action-text-default);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--interactive-transition-standard);
-
-  &:hover {
-    color: var(--menu-item-text);
-    background: var(--action-bg-hover);
-  }
-
-  &:focus-visible {
-    box-shadow: var(--interactive-focus-ring);
-    outline: none;
-  }
-}
-
-.ui-segmented__button--active {
-  background: var(--action-bg-active);
-  color: var(--action-text-active);
-}
-
-.ui-toggle-row {
-  --ui-item-media-size: 0;
-
-  grid-template-columns: minmax(0, 1fr) auto;
-  width: 100%;
-  border: 1.5px solid var(--action-border-default);
-  background: color-mix(in srgb, var(--field-bg) 90%, transparent);
-  text-align: left;
-  color: var(--menu-item-text);
-  cursor: pointer;
-  transition: var(--interactive-transition-standard);
-
-  &:hover {
-    border-color: var(--action-border-active);
-    background: var(--action-bg-hover);
-  }
-
-  &:focus-visible {
-    border-color: var(--action-border-active);
-    box-shadow: var(--interactive-focus-ring);
-    outline: none;
-  }
-}
-
-.ui-toggle-switch {
-  position: relative;
-  display: inline-flex;
-  width: 2.6rem;
-  height: 1.5rem;
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--action-text-default) 35%, transparent);
-}
-
-.ui-toggle-switch::after {
-  content: '';
-  position: absolute;
-  top: 0.15rem;
-  left: 0.17rem;
-  width: 1.2rem;
-  height: 1.2rem;
-  border-radius: var(--radius-full);
-  background: var(--field-bg);
-  box-shadow: var(--shadow-sm);
-  transition: transform 140ms ease-out;
-}
-
-.ui-toggle-switch--on {
-  background: color-mix(in srgb, var(--action-text-active) 70%, transparent);
-}
-
-.ui-toggle-switch--on::after {
-  transform: translateX(1.08rem);
-}
-
-.ui-select-control {
-  min-height: 2.5rem;
-  border: 1.5px solid var(--field-border);
-  border-radius: var(--radius-md);
-  background: var(--field-bg);
-  color: var(--field-text);
-  padding: 0.5rem 0.75rem;
-  transition: var(--interactive-transition-standard);
-
-  &:focus-visible {
-    border-color: var(--field-border-focus);
-    box-shadow: var(--interactive-focus-ring);
-    outline: none;
-  }
-}
-
-// ── Shared icon ghost button primitives ─────────────────────────────────────
-
-.icon-btn-ghost {
-  --icon-btn-size: 1.25rem;
-  --icon-btn-radius: var(--radius-sm);
-  --icon-btn-icon-size: 0.875rem;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--icon-btn-size);
-  height: var(--icon-btn-size);
-  border: none;
-  border-radius: var(--icon-btn-radius);
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: 0;
-  transition: var(--interactive-transition-standard);
-
-  .material-icons,
-  .material-symbols-outlined {
-    font-size: var(--icon-btn-icon-size);
+    font-size: 1.375rem; // 22px (was 24px from Google Material Icons baseline)
     line-height: 1;
   }
-
-  &:hover {
-    background: var(--interactive-surface-hover);
-    color: var(--color-text-primary);
-  }
 }
 
-.icon-btn-ghost--danger:hover {
-  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-  color: var(--color-danger);
-}
+@include meta.load-css('styles/subtle-scrollbar');
 
-// ── Shared focus-ring primitive ─────────────────────────────────────────────
+@include meta.load-css('styles/option-menu-surface');
+@include meta.load-css('styles/option-menu-list');
+@include meta.load-css('styles/option-menu-item-states');
+@include meta.load-css('styles/switch-thumb-hover');
 
-.focus-ring-primary:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
+// Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).
+// @see docs/migration/phase-8-global-scss-elimination.md §7
+@include meta.load-css('styles/typography-baseline');

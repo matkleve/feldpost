@@ -59,10 +59,12 @@ Load this file for every visual or product implementation task. These rules are 
 
 ## Reference Files Index
 
-- `docs/design.md` — always-load index file with principles, dark mode, accessibility, responsive summary, and design debt.
+- `docs/design/README.md` — always-load index file with principles, dark mode, accessibility, responsive summary, and design debt.
 - `docs/design/tokens.md` — colors, typography, sizing, radius, shadows, iconography.
+- `docs/design/token-layers.md` — canonical Layer A/B/C token architecture and override policy.
 - `docs/design/map-system.md` — map hierarchy, marker prominence, clustering, and proximity rules.
 - `docs/design/layout.md` — breakpoint behavior, panel dimensions, and responsive layout.
 - `docs/design/motion.md` — animation timing and transition rules.
+- `docs/design/state-visuals.md` — canonical shared visuals for disabled, focus, and other cross-cutting control states.
 - `docs/design/components/*.md` — task-specific component contracts.
-- `docs/archive/reference-products.md` — human reading only; do not load in agentic coding sessions.
+- Historical reference products can be reviewed manually as last-resort context; do not load archived docs in agentic coding sessions.

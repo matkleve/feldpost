@@ -1,0 +1,95 @@
+// Icon-only type trigger (type name shown in menu + aria-label only).
+// @see docs/specs/ui/media-detail/metadata-type-picker.md
+.metadata-type-picker__trigger {
+  --metadata-type-picker-inset: var(--detail-row-field-inset, 0.125rem);
+  --metadata-type-picker-size: var(
+    --metadata-compose-type-col,
+    calc(var(--detail-row-action-size, 2rem) - 2 * var(--metadata-type-picker-inset) - 0.25rem)
+  );
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: var(--metadata-type-picker-size);
+  min-width: var(--metadata-type-picker-size);
+  height: var(--metadata-type-picker-size);
+  padding: var(--metadata-type-picker-inset);
+}
+
+.metadata-type-picker__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.metadata-type-picker__trigger--open {
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
+}
+
+// Country-style combobox dropdown — same shell/list/row chrome as property picker.
+// @see metadata-property-picker.component.scss
+.metadata-type-picker__shell {
+  max-height: min(40vh, 16rem);
+  overflow-y: auto;
+}
+
+.metadata-type-picker__dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.metadata-type-picker__result-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--foreground);
+  text-align: left;
+  min-height: 2rem;
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+
+    .metadata-type-picker__result-icon,
+    .metadata-type-picker__result-label {
+      color: var(--primary);
+    }
+  }
+}
+
+.metadata-type-picker__result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: var(--font-size-md);
+  line-height: 1;
+  color: var(--muted-foreground);
+  transition: color 80ms ease-out;
+}
+
+.metadata-type-picker__result-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  transition: color 80ms ease-out;
+}

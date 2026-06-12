@@ -1,0 +1,14 @@
+// ── Leaflet host overrides ────────────────────────────────────────────────────
+// Neutralises default Leaflet blue chrome (SVG focus outline + anchor colour) so
+// map interaction matches app primary tokens — distinct from document reset scope.
+// @see docs/migration/phase-8-global-scss-elimination.md §7; docs/design/map-system.md
+.leaflet-interactive:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+// Aligns default Leaflet anchor colour with app link / primary treatment
+// @see docs/design/map-system.md
+.leaflet-container a {
+  color: var(--primary);
+}

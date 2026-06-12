@@ -1,0 +1,50 @@
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  background: var(--group-header-bg, var(--card));
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms ease;
+
+  &:hover {
+    background: var(--group-header-hover-bg, var(--card));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+  }
+}
+
+.group-header__chevron {
+  font-size: var(--font-size-lg);
+  transition: transform 200ms ease;
+  color: var(--muted-foreground);
+
+  &--collapsed {
+    transform: rotate(-90deg);
+  }
+}
+
+.group-header__name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-header__count {
+  color: var(--muted-foreground);
+  font-weight: 400;
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+}

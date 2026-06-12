@@ -1,0 +1,125 @@
+// Address field combobox — row/dropdown geometry copied from address-search.
+// @see docs/specs/ui/media-detail/address-search.md
+
+@use '../detail-row-slots';
+
+:host {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  column-gap: var(--spacing-1);
+  align-items: start;
+  position: relative;
+  min-width: 0;
+  overflow: visible;
+}
+
+:host .address-field-combobox__row.detail-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  width: 100%;
+}
+
+.address-field-combobox__input {
+  grid-column: 3;
+  min-width: 0;
+}
+
+// Save/cancel visible while editing (address search only exposes clear on r1).
+.address-field-combobox__row.detail-row--editing {
+  .detail-row-action--save,
+  .detail-row-action--danger.address-field-combobox__cancel-btn--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.address-field-combobox__stack {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  position: relative;
+  overflow: visible;
+}
+
+.address-field-combobox-shell {
+  max-height: min(40vh, 16rem);
+  overflow-y: auto;
+}
+
+.address-field-combobox__dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.address-field-combobox__section-label {
+  padding: var(--spacing-1) var(--spacing-2) 0;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.address-field-combobox__result-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--foreground);
+  text-align: left;
+  min-height: 2rem;
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: normal;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  &:hover,
+  &.address-field-combobox__result-item--focused {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+
+    .address-field-combobox__result-label,
+    .address-field-combobox__result-subtitle {
+      color: var(--primary);
+    }
+  }
+}
+
+.address-field-combobox__result-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+  transition: color 80ms ease-out;
+}
+
+.address-field-combobox__result-subtitle {
+  font-size: var(--font-size-2xs);
+  color: var(--muted-foreground);
+  transition: color 80ms ease-out;
+}
+
+.address-field-combobox__divider {
+  height: 1px;
+  margin: var(--spacing-1) 0;
+  background: var(--border);
+}
+
+.address-field-combobox__loading,
+.address-field-combobox__empty {
+  padding: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+  text-align: center;
+}

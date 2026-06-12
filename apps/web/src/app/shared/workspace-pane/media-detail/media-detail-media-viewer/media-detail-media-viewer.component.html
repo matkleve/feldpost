@@ -1,0 +1,77 @@
+<input
+  [id]="fileInputId"
+  type="file"
+  [accept]="acceptTypes()"
+  class="visually-hidden"
+  aria-hidden="true"
+  (change)="onFileSelected($event)"
+/>
+
+@if (hasPhoto() && item(); as record) {
+  <div class="detail-media__preview-wrap">
+    <app-media-item
+      [itemId]="mediaId()"
+      [item]="record"
+      mode="grid-md"
+      state="idle"
+      downloadContext="detail"
+      [showInteractionChrome]="false"
+      (pointerClick)="onItemPointerClick($event)"
+      (embedContextMenu)="onEmbedContextMenu()"
+    />
+  </div>
+
+  <button
+    hlmBtn
+    variant="ghost"
+    size="icon"
+    class="detail-media__edit-btn"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.replaceMedia.aria', 'Replace media')"
+    [attr.title]="t('workspace.imageDetail.action.replaceMedia.title', 'Replace media')"
+    [disabled]="replacing()"
+    (click)="triggerFileInput()"
+  >
+    @if (replacing()) {
+      <span class="detail-media__edit-btn__spinner" aria-hidden="true"></span>
+    } @else {
+      <span class="material-icons" aria-hidden="true">edit</span>
+    }
+  </button>
+
+  @if (replaceError()) {
+    <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+  }
+} @else {
+  <div class="detail-upload-prompt">
+    <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
+    <span class="detail-upload-prompt__text">{{
+      t('workspace.imageDetail.noMediaAttached', 'No media attached')
+    }}</span>
+    <button
+      hlmBtn
+      variant="default"
+      class="detail-upload-prompt__button"
+      type="button"
+      [iconPlacement]="replacing() ? 'start' : undefined"
+      [disabled]="replacing()"
+      (click)="triggerFileInput()"
+    >
+      @if (replacing()) {
+        <span class="detail-upload-prompt__spinner" aria-hidden="true"></span>
+      }
+      {{ t('workspace.imageDetail.action.uploadMedia', 'Upload media') }}
+    </button>
+    @if (replaceError()) {
+      <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+    }
+  </div>
+}
+
+@if (showLightbox() && lightboxImageUrl(); as imageUrl) {
+  <app-photo-lightbox
+    [imageUrl]="imageUrl"
+    [alt]="displayTitle()"
+    (closed)="showLightbox.set(false)"
+  />
+}

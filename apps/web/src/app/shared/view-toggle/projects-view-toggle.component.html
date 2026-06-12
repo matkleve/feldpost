@@ -1,0 +1,26 @@
+<div hlmPillToggle size="sm">
+  <div
+    hlmToggleGroup
+    size="sm"
+    brnToggleGroup
+    type="single"
+    [nullable]="false"
+    [value]="viewMode()"
+    (valueChange)="onViewModeToggleChange($event)"
+    [attr.aria-label]="t('projects.viewToggle.aria.group', 'View mode')"
+  >
+    @for (option of viewOptions(); track option.id) {
+      <button
+        hlmToggleGroupItem
+        size="icon"
+        type="button"
+        brnToggleGroupItem
+        [value]="option.id"
+        [attr.aria-label]="option.ariaLabel || option.label"
+        [attr.title]="option.title || option.label"
+      >
+        <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
+      </button>
+    }
+  </div>
+</div>

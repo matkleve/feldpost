@@ -1,0 +1,33 @@
+// Thin, subtle scrollbar — global default for all scrollable regions.
+// @see apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.scss (.detail-scroll)
+// @see docs/specs/ui/workspace/workspace-pane.md
+
+@mixin subtle {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 0.3125rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-full);
+
+    &:hover {
+      background: var(--muted-foreground);
+    }
+  }
+}
+
+// Project-wide scrollbar chrome (Firefox + WebKit); opt out per host if a surface needs native or hidden scrollbars.
+// @see docs/design/tokens.md (--border, --muted-foreground, --radius-full)
+@layer base {
+  * {
+    @include subtle;
+  }
+}

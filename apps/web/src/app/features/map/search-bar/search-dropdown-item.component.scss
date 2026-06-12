@@ -1,0 +1,94 @@
+// Item row: grid layout with icon column + content column; configurable via context tokens.
+// @see docs/migration/phase-6-template-cleanup.md §ui-item → component-local row classes
+.search-dropdown-item {
+  --item-min-height: var(--search-dropdown-item-row-min-height, 3rem);
+  --item-padding-inline: var(--search-dropdown-item-padding-inline, var(--spacing-3));
+  --item-padding-block: var(--search-dropdown-item-padding-block, var(--spacing-2));
+  --item-gap: var(--search-dropdown-item-gap, var(--spacing-2));
+  --item-radius: var(--search-dropdown-item-radius, var(--container-radius-control));
+  --item-media-size: var(--search-dropdown-item-media-size, var(--spacing-6));
+  --item-content-gap: var(--search-dropdown-item-content-gap, var(--spacing-1));
+
+  display: grid;
+  grid-template-columns: var(--item-media-size) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--item-gap);
+  min-height: var(--item-min-height);
+  padding-block: var(--item-padding-block);
+  padding-inline: var(--item-padding-inline);
+  border-radius: var(--item-radius);
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-in-out,
+    color 120ms ease-in-out;
+}
+
+.search-dropdown-item:hover,
+.search-dropdown-item--active {
+  background: color-mix(in srgb, var(--primary) 12%, var(--popover));
+}
+
+// Icon slot: fixed-size inline-flex cell; aligns icon top within the row.
+// @see docs/migration/phase-6-template-cleanup.md §ui-item-media → component-local
+.search-dropdown-item__media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--item-media-size);
+  block-size: var(--item-media-size);
+  min-inline-size: var(--item-media-size);
+  flex-shrink: 0;
+  align-self: start;
+}
+
+// Content column: flex column for label + secondary lines; allows text truncation.
+// @see docs/migration/phase-6-template-cleanup.md §ui-item-label → component-local
+.search-dropdown-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--item-content-gap);
+  min-width: 0;
+  flex: 1 1 auto;
+
+  > * {
+    min-width: 0;
+  }
+}
+
+.search-dropdown-item__icon {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--muted-foreground);
+}
+
+.search-dropdown-item__label,
+.search-dropdown-item__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-dropdown-item__label {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+
+.search-dropdown-item__secondary {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-dropdown-item__meta {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}

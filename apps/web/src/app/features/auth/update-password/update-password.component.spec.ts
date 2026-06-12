@@ -10,7 +10,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { UpdatePasswordComponent } from './update-password.component';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 function buildFakeAuth(updateError: Error | null = null) {
   return {

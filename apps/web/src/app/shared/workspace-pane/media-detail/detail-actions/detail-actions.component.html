@@ -1,0 +1,41 @@
+@if (actions().length > 0) {
+  <div class="detail-section">
+    <p class="detail-section__label">{{ t('workspace.detailActions.section.title', 'Actions') }}</p>
+
+    <div class="detail-actions__list">
+      @for (action of actions(); track action.id) {
+        @if (action.section === 'primary' || action.section === 'secondary') {
+          <button
+            hlmMenuItem
+            class="detail-actions__item w-full"
+            type="button"
+            [disabled]="action.disabled"
+            (click)="actionSelected.emit(action.id)"
+          >
+            <span class="material-icons detail-actions__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="detail-actions__label min-w-0 flex-1 text-left">{{ action.label }}</span>
+          </button>
+        }
+      }
+
+      @if (hasDestructiveActions()) {
+        <div hlmMenuSeparator class="detail-actions__separator" role="separator"></div>
+      }
+
+      @for (action of actions(); track action.id + '-danger') {
+        @if (action.section === 'destructive') {
+          <button
+            hlmMenuItem
+            class="detail-actions__item detail-actions__item--destructive w-full"
+            type="button"
+            [disabled]="action.disabled"
+            (click)="actionSelected.emit(action.id)"
+          >
+            <span class="material-icons detail-actions__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="detail-actions__label min-w-0 flex-1 text-left">{{ action.label }}</span>
+          </button>
+        }
+      }
+    </div>
+  </div>
+}

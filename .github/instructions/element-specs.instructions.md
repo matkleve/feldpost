@@ -1,7 +1,7 @@
 ---
 name: "Element Specs"
-description: "Use when creating or editing element specification documents in docs/element-specs/."
-applyTo: "docs/element-specs/**"
+description: "Use when creating or editing element specification documents in docs/specs/."
+applyTo: "docs/specs/**"
 ---
 
 # Element Spec Conventions
@@ -36,5 +36,37 @@ Every UI element must have a spec before implementation. Follow the template exa
 - Use `em` only for component-internal spacing that should scale with the component's own font size.
 - Use `px` only for precision details that should not scale with font size: borders, outlines, shadows, image display sizes, and pixel-resolution thresholds.
 - Use `vh` / `vw` only for viewport-relative layout behavior.
+
+## Spec size and splits
+
+- Run `node scripts/lint-specs.mjs` before merge; default **error** at **180** lines, **warn** at **150** (parent specs only; split children are excluded).
+- If a spec exceeds limits: **structural mirror** for `adapters/` → add `adapters/<name>.adapter.md` under `docs/specs/service/<module>/`; for long **Acceptance Criteria**, **FSM**, or **Visual Behavior** tables, add **concern slices** in the same folder (e.g. `<name>.acceptance-criteria.md`) and keep the parent as the index.
+- **Do not** copy the same contract into both `docs/specs/ui/` and `docs/specs/service/`; the service (or the single owner) is canonical, the other file is a **linking stub** if a second path is needed for navigation.
+- Full policy: root `AGENTS.md` → **Spec split and organization policy**.
+
+## Governance Operations
+
+- Any remaining references to the legacy path `docs/element-specs/...` must be rewritten to the correct `docs/specs/...` target (see governance artifacts under `docs/specs/`).
+- Deterministic (single-candidate) legacy targets must be updated directly.
+- Multi-target legacy references must follow context routing:
+  - `ui/page/component/system` context -> `docs/specs/ui/...`.
+  - `service/core` context -> `docs/specs/service/...`.
+- No-target legacy references must be marked Deprecated with rationale and proposed direction.
+- Traceability changes must be recorded in `docs/specs/GOVERNANCE-TRACEABILITY-REPORT.json`.
+
+## SPEC GAP Handling
+
+- Blocking SPEC GAP: stop only for the affected module and continue unrelated modules.
+- Non-blocking SPEC GAP: mark and continue.
+- Every SPEC GAP entry must include ambiguity, impacted scope, and proposed resolution direction.
+
+## Governance Artifact Set
+
+- `docs/specs/GOVERNANCE-MATRIX.md`
+- `docs/specs/GOVERNANCE-README-COVERAGE.md`
+- `docs/specs/GOVERNANCE-DUPLICATION-REPORT.md`
+- `docs/specs/GOVERNANCE-VIOLATIONS.md`
+- `docs/specs/GOVERNANCE-MODULE-REGISTRY.json`
+- `docs/specs/GOVERNANCE-TRACEABILITY-REPORT.json`
 
 Full template: [docs/agent-workflows/element-spec-format.md](../../docs/agent-workflows/element-spec-format.md)

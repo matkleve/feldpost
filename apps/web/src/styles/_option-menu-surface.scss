@@ -1,0 +1,35 @@
+// Floating dropdown / menu shell — upload-resolver-tray chrome (unlayered beats Tailwind `bg-popover` on shell hosts).
+// @see docs/specs/component/upload/upload-resolver-tray.md
+// @see docs/design/tokens.md § option-menu-surface
+
+@use 'frosted-chrome';
+
+.option-menu-surface {
+  @include frosted-chrome.floating-panel-shell;
+  // Toolbar / context menus — tighter inset than upload-resolver cards (tray keeps mixin spacing-2).
+  // @see docs/specs/component/filters/dropdown-system.md#padding-ownership-normative
+  padding: var(--spacing-1);
+}
+
+[data-theme='dark'] .option-menu-surface {
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 1px color-mix(in srgb, var(--foreground) 22%, transparent);
+}
+
+// Toolbar scroll list — upload-resolver-tray__choices rhythm (2px); beats Tailwind utilities on the host.
+// @see apps/web/src/app/features/upload/upload-resolver-tray.component.scss
+.option-menu-surface .standard-dropdown__items {
+  gap: 2px;
+  scroll-padding-block-end: var(--spacing-1);
+}
+
+// Projected list body: column gap between sections/rows inside the scroll host.
+.option-menu-surface .standard-dropdown__items > [dropdown-items] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 0;
+}

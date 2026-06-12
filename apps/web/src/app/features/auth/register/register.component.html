@@ -1,180 +1,141 @@
 <div class="auth-shell auth-shell--map">
-  <div class="auth-map-bg" aria-hidden="true">
-    <iframe
-      class="auth-map-frame"
-      src="https://www.openstreetmap.org/export/embed.html?bbox=8.46%2C47.34%2C8.62%2C47.43&amp;layer=mapnik&amp;marker=47.3769%2C8.5417"
-      tabindex="-1"
-      [attr.title]="t('auth.register.mapBackground.title', 'Decorative city map background')"
-    ></iframe>
-  </div>
-  <div class="auth-map-overlay" aria-hidden="true"></div>
+  <app-auth-map-layer />
   <div class="auth-card">
     @if (success()) {
       <div class="auth-success">
-        <h1 class="auth-title">{{ t('auth.register.success.title', 'Check your email') }}</h1>
+        <h1>Check your email</h1>
         <p>
-          {{ t('auth.register.success.message.prefix', 'We sent a confirmation link to') }}
-          <strong>{{ form.controls.email.value }}</strong
-          >{{ t('auth.register.success.message.suffix', '. Click it to activate your account.') }}
+          We sent a confirmation link to <strong>{{ form.controls.email.value }}</strong
+          >. Click it to activate your account.
         </p>
-        <p class="auth-footer">
-          <a routerLink="/auth/login">{{
-            t('auth.register.success.backToSignIn', 'Back to sign in')
-          }}</a>
-        </p>
+        <p class="auth-footer"><a routerLink="/auth/login">Back to sign in</a></p>
       </div>
     } @else {
-      <h1 class="auth-title">{{ t('auth.register.title', 'Create account') }}</h1>
-      <p class="auth-subtitle">{{ t('auth.register.subtitle', 'Start documenting your sites') }}</p>
+      <h1>Create account</h1>
+      <p class="auth-subtitle">Start documenting your sites</p>
 
-      <div
-        class="auth-card-scroll"
-        role="region"
-        [attr.aria-label]="t('auth.register.form.aria', 'Create account form')"
-      >
+      <div class="auth-card-scroll" role="region" aria-label="Create account form">
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <!-- Full name -->
-          <div class="field">
-            <label for="fullName">{{ t('auth.register.field.fullName.label', 'Full name') }}</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="fullName">Full name</label>
             <input
+              hlmInput
+              [error]="form.controls.fullName.touched && form.controls.fullName.invalid"
               id="fullName"
               type="text"
               formControlName="fullName"
               autocomplete="name"
-              [attr.placeholder]="t('auth.register.field.fullName.placeholder', 'Jane Smith')"
+              placeholder="Jane Smith"
             />
             @if (form.controls.fullName.touched && form.controls.fullName.hasError('required')) {
-              <span class="field-error">{{
-                t('auth.register.field.fullName.error.required', 'Full name is required.')
-              }}</span>
+              <span class="field-error">Full name is required.</span>
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Email -->
-          <div class="field">
-            <label for="email">{{ t('auth.register.field.email.label', 'Email') }}</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="email">Email</label>
             <input
+              hlmInput
+              [error]="form.controls.email.touched && form.controls.email.invalid"
               id="email"
               type="email"
               formControlName="email"
               autocomplete="email"
-              [attr.placeholder]="t('auth.register.field.email.placeholder', 'you@example.com')"
+              placeholder="you@example.com"
             />
             @if (form.controls.email.touched && form.controls.email.hasError('required')) {
-              <span class="field-error">{{
-                t('auth.register.field.email.error.required', 'Email is required.')
-              }}</span>
+              <span class="field-error">Email is required.</span>
             } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
-              <span class="field-error">{{
-                t('auth.register.field.email.error.invalid', 'Enter a valid email address.')
-              }}</span>
+              <span class="field-error">Enter a valid email address.</span>
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Invite code -->
-          <div class="field">
-            <label for="inviteCode">{{
-              t('auth.register.field.inviteCode.label', 'Invite code')
-            }}</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="inviteCode">Invite code</label>
             <input
+              hlmInput
+              [error]="form.controls.inviteCode.touched && form.controls.inviteCode.invalid"
               id="inviteCode"
               type="text"
               formControlName="inviteCode"
               autocomplete="off"
               spellcheck="false"
-              [attr.placeholder]="
-                t('auth.register.field.inviteCode.placeholder', 'Paste invite code from QR link')
-              "
+              placeholder="Paste invite code or enter shared dev code"
             />
             @if (
               form.controls.inviteCode.touched && form.controls.inviteCode.hasError('required')
             ) {
-              <span class="field-error">{{
-                t('auth.register.field.inviteCode.error.required', 'Invite code is required.')
-              }}</span>
+              <span class="field-error">Invite code is required.</span>
             } @else if (
-              form.controls.inviteCode.touched && form.controls.inviteCode.hasError('pattern')
+              form.controls.inviteCode.touched && form.controls.inviteCode.hasError('inviteCodeFormat')
             ) {
-              <span class="field-error">{{
-                t(
-                  'auth.register.field.inviteCode.error.pattern',
-                  'Invite code must be a 48-character hex value.'
-                )
-              }}</span>
+              <span class="field-error"
+                >Enter the code from your invite link or a code from your administrator.</span
+              >
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Password -->
-          <div class="field">
-            <label for="password">{{ t('auth.register.field.password.label', 'Password') }}</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="password">Password</label>
             <input
+              hlmInput
+              [error]="form.controls.password.touched && form.controls.password.invalid"
               id="password"
               type="password"
               formControlName="password"
               autocomplete="new-password"
-              [attr.placeholder]="
-                t(
-                  'auth.register.field.password.placeholder',
-                  'Min. 12 incl. upper/lower, number, symbol'
-                )
-              "
+              placeholder="Min. 12 incl. upper/lower, number, symbol"
             />
             @if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
-              <span class="field-error">{{
-                t(
-                  'auth.register.field.password.error.minlength',
-                  'Password must be at least 12 characters.'
-                )
-              }}</span>
+              <span class="field-error">Password must be at least 12 characters.</span>
             } @else if (
               form.controls.password.touched && form.controls.password.hasError('pattern')
             ) {
-              <span class="field-error">{{
-                t(
-                  'auth.register.field.password.error.pattern',
-                  'Password must include uppercase, lowercase, number, and symbol.'
-                )
-              }}</span>
+              <span class="field-error"
+                >Password must include uppercase, lowercase, number, and symbol.</span
+              >
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Confirm password -->
-          <div class="field">
-            <label for="confirmPassword">{{
-              t('auth.register.field.confirmPassword.label', 'Confirm password')
-            }}</label>
+          <hlm-form-field class="field">
+            <label hlmLabel for="confirmPassword">Confirm password</label>
             <input
+              hlmInput
+              [error]="
+                (form.controls.confirmPassword.touched && form.controls.confirmPassword.invalid) ||
+                (form.controls.confirmPassword.touched && form.hasError('passwordsMismatch'))
+              "
               id="confirmPassword"
               type="password"
               formControlName="confirmPassword"
               autocomplete="new-password"
-              [attr.placeholder]="t('auth.register.field.confirmPassword.placeholder', '••••••••')"
+              placeholder="••••••••"
             />
             @if (form.controls.confirmPassword.touched && form.hasError('passwordsMismatch')) {
-              <span class="field-error">{{
-                t('auth.register.field.confirmPassword.error.mismatch', 'Passwords do not match.')
-              }}</span>
+              <span class="field-error">Passwords do not match.</span>
             }
-          </div>
+          </hlm-form-field>
 
           <!-- Error banner -->
           @if (errorMessage()) {
             <div class="alert alert-error" role="alert">{{ errorMessage() }}</div>
           }
 
-          <button type="submit" class="btn-primary" [disabled]="loading()">
+          <button hlmBtn variant="default" type="submit" class="btn-primary" [disabled]="loading()">
             @if (loading()) {
-              {{ t('auth.register.action.creatingAccount', 'Creating account…') }}
+              Creating account…
             } @else {
-              {{ t('auth.register.action.createAccount', 'Create account') }}
+              Create account
             }
           </button>
         </form>
 
-        <p class="auth-footer">
-          {{ t('auth.register.footer.alreadyHaveAccount', 'Already have an account?') }}
-          <a routerLink="/auth/login">{{ t('auth.register.footer.signIn', 'Sign in') }}</a>
-        </p>
+        <p class="auth-footer">Already have an account? <a routerLink="/auth/login">Sign in</a></p>
       </div>
     }
   </div>

@@ -60,7 +60,7 @@ schema_paths = []
 enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql", "./seed_i18n.sql"]
+sql_paths = ["./seed_i18n.sql"]
 
 [db.network_restrictions]
 # Enable management of network restrictions.
@@ -261,6 +261,9 @@ max_frequency = "5s"
 
 [functions.geocode]
 verify_jwt = true
+
+[functions.generate-media-preview]
+verify_jwt = true
 # [auth.hook.custom_access_token]
 # enabled = true
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
@@ -362,8 +365,11 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
-# [edge_runtime.secrets]
-# secret_key = "env(SECRET_VALUE)"
+[edge_runtime.secrets]
+ALLOWED_ORIGINS = "http://localhost:4200,http://127.0.0.1:4200"
+GOTENBERG_URL = "http://host.docker.internal:3000"
+# Remote Austria Photon (Hetzner); sslip.io — no purchased domain.
+GEOCODER_FORWARD_URL = "https://178-105-242-74.sslip.io"
 
 [analytics]
 enabled = true

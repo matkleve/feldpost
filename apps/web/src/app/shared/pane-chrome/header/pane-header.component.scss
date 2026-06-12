@@ -1,0 +1,181 @@
+// Flex child of .workspace-pane — header row; :host spans full width so background fills edge-to-edge
+// @see docs/specs/ui/workspace/workspace-pane.md
+:host {
+  display: block;
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+// Inner layout container — capped at 56rem and centered so title/close align with content below
+// @see docs/specs/ui/workspace/workspace-pane.md
+.pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  width: 100%;
+  max-width: 56rem;
+  margin-inline: auto;
+  box-sizing: border-box;
+  padding: var(--spacing-2) var(--spacing-4);
+  background: transparent;
+}
+
+.pane-header__leading {
+  position: absolute;
+  inset-inline-start: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+}
+
+.pane-header__color-btn {
+  position: relative;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, var(--foreground));
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--card) 94%, var(--background));
+  cursor: pointer;
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.pane-header__color-btn:hover,
+.pane-header__color-btn:focus-visible,
+.pane-header__color-btn[aria-expanded='true'] {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.pane-header__color-swatch {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: var(--radius-full);
+}
+
+.pane-header__color-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  color: var(--primary-foreground);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.pane-header__title-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-1);
+  max-width: calc(100% - 6rem);
+  min-width: 0;
+  min-height: 2rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pane-header__title-edit {
+  flex-shrink: 0;
+  font-size: var(--font-size-md);
+  color: var(--primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.pane-header__title-btn:hover .pane-header__title-edit,
+.pane-header__title-btn:focus-visible .pane-header__title-edit {
+  opacity: 1;
+}
+
+.pane-header__title-btn:hover .pane-header__title,
+.pane-header__title-btn:focus-visible .pane-header__title {
+  color: var(--primary);
+}
+
+.pane-header:has(.pane-header__color-btn) .pane-header__title-btn,
+.pane-header:has(.pane-header__color-btn) .pane-header__title-input,
+.pane-header:has(.pane-header__color-btn) > .pane-header__title {
+  margin-inline-start: calc(2rem + var(--spacing-2));
+}
+
+.pane-header__spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.pane-header__title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-tight);
+  color: var(--foreground);
+  text-align: start;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pane-header__title-input {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  color: var(--foreground);
+  text-align: start;
+  width: min(30rem, calc(100% - 6rem));
+  min-height: 2.25rem;
+  padding: var(--spacing-1) var(--spacing-3);
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+  outline: none;
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    background var(--motion-duration-fast) var(--motion-ease-out);
+
+  &:focus-visible {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 18%, var(--card));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+}
+
+.pane-header__close-btn {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: background var(--motion-duration-fast) var(--motion-ease-out);
+
+  &:hover {
+    background: color-mix(in srgb, var(--muted-foreground) 12%, transparent);
+  }
+
+  .material-icons {
+    font-size: var(--font-size-xl);
+  }
+}

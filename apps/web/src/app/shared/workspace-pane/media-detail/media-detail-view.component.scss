@@ -1,0 +1,227 @@
+// MediaDetailViewComponent styles.
+
+@use './detail-row-slots';
+
+:host {
+  --detail-row-height: 2rem;
+  --detail-row-rail-size: var(--detail-row-height);
+  --detail-row-rail-gap: var(--spacing-1);
+  --detail-content-main-max-width: 40rem;
+  --detail-media-panel-width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
+
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--card);
+
+  @media (max-width: 47.9375rem) {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+  }
+}
+
+.detail-main-column {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  &--loading {
+    overflow: hidden;
+  }
+}
+
+.detail-loading-placeholder-group {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.detail-loading-placeholder {
+  display: block;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--border) 68%, transparent) 0%,
+    color-mix(in srgb, var(--card) 78%, transparent) 50%,
+    color-mix(in srgb, var(--border) 68%, transparent) 100%
+  );
+  background-size: 220% 100%;
+  animation: detail-placeholder-pulse 1400ms ease-in-out infinite;
+
+  &--icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-md);
+    flex: 0 0 auto;
+  }
+
+  &--title {
+    width: min(16rem, 100%);
+    height: 1.1rem;
+  }
+
+  &--chip {
+    width: 4.5rem;
+    height: 1.5rem;
+    border-radius: var(--radius-pill);
+    flex: 0 0 auto;
+  }
+
+  &--row {
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  &--media {
+    width: var(--detail-media-panel-width);
+    max-width: 100%;
+    margin: var(--spacing-3) auto 0;
+    min-height: 8rem;
+    aspect-ratio: 4 / 3;
+    max-height: 33vh;
+  }
+}
+
+.detail-section--loading {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+// Loading skeleton header layout (parent-owned; live header in media-detail-header.component.scss)
+.detail-header.detail-header--loading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.detail-error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin: var(--spacing-4);
+  padding: var(--spacing-3);
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--destructive) 40%, transparent);
+  border-radius: var(--radius-md);
+  color: var(--destructive);
+  font-size: var(--font-size-md);
+
+  .material-icons {
+    font-size: var(--font-size-lg);
+    flex-shrink: 0;
+  }
+}
+
+// ─── Scrollable content ───
+
+.detail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: var(--spacing-2);
+}
+
+// ─── Content area ───
+
+// Content area — simple flex column; rows manage their own internal layout
+// @see docs/specs/ui/workspace/workspace-pane.md
+.detail-content {
+  max-width: var(--detail-content-main-max-width);
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 var(--spacing-3) var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+
+  > app-quick-info-chips {
+    @include detail-row-slots.detail-row-center-width;
+  }
+}
+
+// ─── Reconciliation banner ───
+
+// Inline address suggestion offer strip; appears below the location section.
+// @see docs/specs/service/location-resolver/address-reconciliation.md#prompt-ui-contract
+.detail-reconciliation-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: color-mix(in srgb, var(--color-clay, var(--primary)) 6%, transparent);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-clay, var(--primary)) 18%, transparent);
+}
+
+// Banner body: icon + text block side by side.
+// @see docs/specs/service/location-resolver/address-reconciliation.md
+.detail-reconciliation-banner__body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+// Suggest icon.
+.detail-reconciliation-banner__icon {
+  font-size: 1.125rem;
+  color: var(--color-clay, var(--primary));
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+// Text column: title + candidate address.
+.detail-reconciliation-banner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+// Banner title label.
+.detail-reconciliation-banner__title {
+  font-size: var(--text-small, 0.8125rem);
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+// Suggested address candidate line.
+.detail-reconciliation-banner__candidate {
+  font-size: var(--text-small, 0.8125rem);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Action row: apply / suppress / retry / close.
+.detail-reconciliation-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+// Close button — right-aligned.
+.detail-reconciliation-banner__close {
+  margin-left: auto;
+}

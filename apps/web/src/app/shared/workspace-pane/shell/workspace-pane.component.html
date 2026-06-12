@@ -1,0 +1,109 @@
+<!-- Workspace Pane — host IS the shell box; drag divider is a layout-level flex sibling -->
+<div
+  class="workspace-pane"
+  role="region"
+  [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
+>
+  <app-pane-header
+    [title]="resolvedTitle()"
+    [editable]="titleEditable()"
+    [editEnabled]="titleEditEnabled()"
+    [editValue]="titleEditValue()"
+    [colorToken]="projectColorToken()"
+    [colorPickerEnabled]="colorPickerEnabled()"
+    [colorPickerOpen]="colorPickerOpen()"
+    (editValueChange)="onTitleEditValueChange($event)"
+    (editSubmitted)="onTitleSubmit($event)"
+    (editRequested)="onTitleEditRequest()"
+    (colorPickerRequested)="onColorPickerRequest()"
+    (close)="close()"
+  ></app-pane-header>
+
+  <div
+    class="workspace-pane__tabs"
+    hlmTabs
+    brnTabs
+    [brnTabs]="activeTab()"
+    (brnTabsChange)="onBrnTabsChange($event)"
+  >
+    <div
+      hlmTabsList
+      brnTabsList
+      variant="line"
+      class="w-full justify-start"
+      [attr.aria-label]="t('workspace.pane.tabs.aria', 'Workspace tabs')"
+    >
+      <button brnTabsTrigger="upload" hlmTabsTrigger>
+        {{ t('workspace.pane.tab.upload', 'Upload') }}
+      </button>
+      <button brnTabsTrigger="selected-items" hlmTabsTrigger>
+        {{ t('workspace.pane.tab.media', 'Media') }}
+      </button>
+      <button brnTabsTrigger="projects" hlmTabsTrigger>
+        {{ t('workspace.pane.tab.projects', 'Projects') }}
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-pane__content">
+    @if (detailMediaId()) {
+      <!-- Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> detail actions route map-pick through pane output wiring. -->
+      <app-media-detail-view
+        [mediaId]="detailMediaId()"
+        [addressSearchRequestImageId]="detailAddressSearchRequestMediaId()"
+        [addressSearchRequestId]="detailAddressSearchRequestId()"
+        (closed)="onDetailClose()"
+        (addressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
+        (zoomToLocationRequested)="onZoomToLocation($event)"
+        (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+      />
+    } @else {
+      <!-- Upload tab panel — always in DOM so ng-content projection slot is stable -->
+      <section
+        class="workspace-pane__upload-tab"
+        [class.workspace-pane__upload-tab--active]="activeTab() === 'upload'"
+        [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
+        role="tabpanel"
+      >
+        <ng-content select="[data-workspace-upload-tab]" />
+      </section>
+
+      <!-- Media tab panel — always in DOM so grid state is preserved across tab switches -->
+      <div
+        class="workspace-pane__tab-panel"
+        [class.workspace-pane__tab-panel--active]="activeTab() === 'selected-items'"
+        role="tabpanel"
+        [attr.aria-label]="t('workspace.pane.tab.media', 'Media')"
+      >
+        <app-workspace-toolbar />
+        <app-workspace-selected-items-grid
+          [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
+          (thumbnailClicked)="onThumbnailClick($event)"
+          (zoomToLocationRequested)="onZoomToLocation($event)"
+          (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+          (hoverStarted)="onWorkspaceItemHoverStarted($event)"
+          (hoverEnded)="onWorkspaceItemHoverEnded($event)"
+        />
+
+        @if (selectionService.selectedCount() > 0) {
+          <app-workspace-pane-footer
+            [scopeIds]="exportScopeIds()"
+            [images]="exportScopeImages()"
+          ></app-workspace-pane-footer>
+        }
+      </div>
+
+      <!-- Projects tab panel -->
+      <div
+        class="workspace-pane__tab-panel"
+        [class.workspace-pane__tab-panel--active]="activeTab() === 'projects'"
+        role="tabpanel"
+        [attr.aria-label]="t('workspace.pane.tab.projects', 'Projects')"
+      >
+        @if (activeTab() === 'projects') {
+          <app-workspace-projects-panel />
+        }
+      </div>
+    }
+  </div>
+</div>

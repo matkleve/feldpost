@@ -1,0 +1,211 @@
+<!-- Stable state: active — combobox row + optional dropdown zones. @see docs/specs/ui/media-detail/media-detail-location-section.md -->
+@if (active()) {
+  <div class="address-search__stack">
+    <div class="detail-row address-search__row detail-row--editing">
+      <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+      <div class="detail-row__center address-search__center" #addressCenter>
+        <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
+        <span class="detail-row__label">{{ t('location.addSearch.label', 'Add or search address') }}</span>
+        <input
+          #searchInput
+          class="detail-row__field-input detail-row__field-slot address-search__input"
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          [attr.aria-expanded]="showPanel()"
+          aria-controls="media-location-add-search-listbox"
+          [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
+          [attr.aria-label]="t('location.addSearch.aria', 'Add or search for an address')"
+          (input)="onInput($event)"
+          (keydown)="onInputKeydown($event)"
+          (click)="$event.stopPropagation()"
+        />
+      </div>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--r1 detail-row-action--danger address-search__clear-btn address-search__clear-btn--visible"
+        type="button"
+        (click)="close(); $event.stopPropagation()"
+        [attr.aria-label]="t('workspace.addressSearch.aria.cancel', 'Cancel search')"
+      >
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+      <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+    </div>
+
+    @if (showPanel() && addressAnchorEl()) {
+      <app-dropdown-shell
+        class="address-search-shell"
+        panelClass="option-menu-surface address-search-panel"
+        [anchor]="addressAnchorEl()"
+        [minWidth]="addressCenterWidth()"
+        [outsideCloseEnabled]="false"
+        (closeRequested)="close()"
+      >
+        <div
+          id="media-location-add-search-listbox"
+          class="address-search__dropdown option-menu-list"
+          role="listbox"
+          [attr.aria-label]="t('workspace.addressSearch.aria.results', 'Address suggestions')"
+        >
+          @if (orgLocationSuggestions().length > 0 || loadingOrgLocations()) {
+            <div class="address-search__section-label">{{ orgSectionLabel() }}</div>
+            @if (loadingOrgLocations() && orgLocationSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (row of orgLocationSuggestions(); track row.id) {
+              @let lines = pickerLines(row);
+              @let flatIdx = flatIndexForOrg(row.id);
+              <button
+                class="address-search__result-item media-location-add-search__org-option"
+                [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
+                type="button"
+                role="option"
+                [attr.aria-selected]="preResolvedLocationId() === row.id"
+                (mousedown)="$event.preventDefault()"
+                (click)="onOrgLocationClick(row, $event)"
+              >
+                <app-location-picker-row
+                  [icon]="'bookmark'"
+                  [primary]="lines.primary"
+                  [secondary]="lines.secondary"
+                />
+              </button>
+            }
+          }
+
+          @if (otherMediaSuggestions().length > 0 || loadingOther()) {
+            <div class="address-search__section-label">
+              {{ t('location.dropdown.section.otherMedia', 'Other media') }}
+            </div>
+            @if (loadingOther() && otherMediaSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (c of otherMediaSuggestions(); track c.id) {
+              @let lines = candidatePickerLines(c);
+              @let flatIdx = flatSelectable().findIndex((item) => item.kind === 'other' && item.candidate.id === c.id);
+              <button
+                class="address-search__result-item media-location-add-search__org-option"
+                [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
+                type="button"
+                role="option"
+                (mousedown)="$event.preventDefault()"
+                (click)="onInternetClick(c, $event)"
+              >
+                <app-location-picker-row
+                  [icon]="'photo_library'"
+                  [primary]="lines.primary"
+                  [secondary]="lines.secondary"
+                />
+              </button>
+            }
+          }
+
+          @if (placeSuggestions().length > 0 || loadingPlaces()) {
+            <div class="media-location-add-search__internet-header">
+              @if (canGoBackInternet()) {
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon"
+                  class="media-location-add-search__internet-nav-btn media-location-add-search__internet-nav-btn--back"
+                  type="button"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="goBackInternet($event)"
+                  [attr.aria-label]="t('location.dropdown.internet.back', 'Back to previous Internet results')"
+                >
+                  <span class="material-icons" aria-hidden="true">arrow_back</span>
+                </button>
+              }
+              <span class="address-search__section-label media-location-add-search__internet-label">
+                {{ t('location.dropdown.section.internet', 'Internet') }}
+              </span>
+              @if (canGoForwardInternet()) {
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon"
+                  class="media-location-add-search__internet-nav-btn media-location-add-search__internet-nav-btn--forward"
+                  type="button"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="goForwardInternet($event)"
+                  [attr.aria-label]="t('location.dropdown.internet.forward', 'Forward to newer Internet results')"
+                >
+                  <span class="material-icons" aria-hidden="true">arrow_forward</span>
+                </button>
+              }
+            </div>
+            @if (loadingPlaces() && placeSuggestions().length === 0) {
+              <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+            }
+            @for (c of placeSuggestions(); track c.id) {
+              @let lines = candidatePickerLines(c);
+              @let flatIdx = flatSelectable().findIndex((item) => item.kind === 'internet' && item.candidate.id === c.id);
+              <button
+                class="address-search__result-item media-location-add-search__org-option"
+                [class.address-search__result-item--focused]="isFocusedFlatIndex(flatIdx)"
+                [class.media-location-add-search__result-item--pulse]="internetResultsRefreshing()"
+                type="button"
+                role="option"
+                (mousedown)="$event.preventDefault()"
+                (click)="onInternetClick(c, $event)"
+              >
+                <app-location-picker-row
+                  [icon]="'public'"
+                  [primary]="lines.primary"
+                  [secondary]="lines.secondary"
+                />
+              </button>
+            }
+          }
+
+          @if (query().trim()) {
+            @let addIdx = flatSelectable().length - 1;
+            <div class="address-search__section-label">
+              {{ t('location.dropdown.section.addNew', 'New address') }}
+            </div>
+            @let addLines = newAddressPickerLines();
+            <button
+              class="address-search__result-item media-location-add-search__add-new-item media-location-add-search__org-option"
+              [class.address-search__result-item--focused]="isFocusedFlatIndex(addIdx)"
+              type="button"
+              role="option"
+              [attr.aria-label]="addNewAriaLabel()"
+              (mousedown)="$event.preventDefault()"
+              (click)="commitAddNew()"
+            >
+              <app-location-picker-row
+                [icon]="'add'"
+                [primary]="addLines.primary"
+                [secondary]="addLines.secondary"
+              />
+            </button>
+          }
+        </div>
+      </app-dropdown-shell>
+    }
+  </div>
+} @else {
+  <div
+    class="detail-row address-search__row media-location-add-search__collapsed"
+    role="button"
+    tabindex="0"
+    [class.media-location-add-search__collapsed--disabled]="disabled()"
+    [attr.aria-label]="t('location.addSearch.label', 'Add or search address')"
+    (click)="open()"
+    (keydown.enter)="open()"
+    (keydown.space)="$event.preventDefault(); open()"
+  >
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center address-search__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">search</span>
+      <span class="detail-row__label">{{ t('location.addSearch.label', 'Add or search address') }}</span>
+    </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+  </div>
+}

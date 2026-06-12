@@ -1,0 +1,957 @@
+/**
+ * GeocodingService — reverse-geocodes coordinates to structured address data
+ * via the `geocode` Supabase Edge Function (which proxies Nominatim).
+ *
+ * Ground rules:
+ *  - Requests are routed through a server-side proxy to eliminate browser CORS
+ *    issues and enforce rate limiting centrally.
+ *  - Never throws — returns null on failure.
+ *  - Results are cached in-memory (5-minute TTL) to avoid redundant requests.
+ *  - A serial queue ensures only one in-flight request at a time, preventing
+ *    concurrent calls from bypassing the rate limit.
+ *  - Used by LocationResolverService, UploadService, and PlacementMode.
+ */
+
+import { Injectable, inject, signal } from '@angular/core';
+import { I18nService } from '../i18n/i18n.service';
+import { SupabaseService } from '../supabase/supabase.service';
+import { ToastService } from '../toast/toast.service';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
+import { isGeocodeInfrastructureFailure } from './geocoding.helpers';
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+/** Structured address fields extracted from a Nominatim reverse-geocode response. */
+export interface ReverseGeocodeResult {
+  addressLabel: string;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  streetNumber: string | null;
+  zip: string | null;
+  country: string | null;
+  countryCode: string | null;
+}
+
+/** Raw Nominatim reverse-geocode JSON shape (subset we use). */
+interface NominatimReverseResponse {
+  display_name?: string;
+  address?: {
+    road?: string;
+    house_number?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    city_district?: string;
+    suburb?: string;
+    borough?: string;
+    quarter?: string;
+    county?: string;
+    state?: string;
+    country?: string;
+    country_code?: string;
+    postcode?: string;
+  };
+}
+
+/** Structured result from forward geocoding (address string → coordinates). */
+export interface ForwardGeocodeResult {
+  lat: number;
+  lng: number;
+  addressLabel: string;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  streetNumber: string | null;
+  zip: string | null;
+  country: string | null;
+}
+
+/** Options for multi-result search queries (used by search bar). */
+export interface GeocoderSearchOptions {
+  limit?: number;
+  countrycodes?: string[];
+  viewbox?: string;
+  bounded?: boolean;
+  acceptLanguage?: string;
+  /** When false, Nominatim forward search omits `layer=address` (short ambiguous prefixes). */
+  addressLayer?: boolean;
+}
+
+/** Options for Nominatim structured search (`street` + `city` fields). */
+export interface GeocoderStructuredSearchOptions {
+  limit?: number;
+  countrycodes?: string[];
+  acceptLanguage?: string;
+}
+
+/** Structured forward (Photon /structured or Nominatim fallback). */
+export interface GeocoderStructuredForwardParams {
+  street: string;
+  city?: string;
+  postcode?: string;
+  countryCode?: string;
+}
+
+/** Bias structured forward (Photon lat/lon/zoom). */
+export interface GeocoderStructuredBiasParams extends GeocoderStructuredForwardParams {
+  lat: number;
+  lng: number;
+  zoom?: number;
+}
+
+/** A single result from a multi-result geocoder search. */
+export interface GeocoderSearchResult {
+  lat: number;
+  lng: number;
+  displayName: string;
+  name: string | null;
+  importance: number;
+  address: {
+    road?: string;
+    house_number?: string;
+    postcode?: string;
+    country_code?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    city_district?: string;
+    suburb?: string;
+    borough?: string;
+    quarter?: string;
+    country?: string;
+  } | null;
+}
+
+/** Raw Nominatim forward-search JSON shape (subset we use). */
+interface NominatimSearchResponse {
+  lat?: string;
+  lon?: string;
+  display_name?: string;
+  name?: string;
+  importance?: number;
+  address?: NominatimReverseResponse['address'];
+  country_code?: string;
+}
+
+// ── Constants ──────────────────────────────────────────────────────────────────
+
+interface GeocodeFailureDetails {
+  status: number | null;
+  code: string | null;
+  name: string | null;
+  message: string;
+  bodySnippet: string | null;
+}
+
+// ── Service ────────────────────────────────────────────────────────────────────
+
+const GEOCODE_PROBE_OK_TTL_MS = 5 * 60 * 1000;
+
+@Injectable({ providedIn: 'root' })
+export class GeocodingService {
+  private readonly supabase = inject(SupabaseService);
+  private readonly locationConfig = inject(UploadLocationConfigService);
+  private readonly i18n = inject(I18nService);
+  private readonly toastService = inject(ToastService);
+
+  private readonly reverseCache = new Map<
+    string,
+    { data: ReverseGeocodeResult; expires: number }
+  >();
+  private readonly forwardCache = new Map<
+    string,
+    { data: ForwardGeocodeResult; expires: number }
+  >();
+  private readonly searchCache = new Map<
+    string,
+    { data: GeocoderSearchResult[]; expires: number }
+  >();
+  private readonly structuredSearchCache = new Map<
+    string,
+    { data: GeocoderSearchResult[]; expires: number }
+  >();
+  private readonly structuredForwardCache = new Map<
+    string,
+    { data: GeocoderSearchResult[]; expires: number }
+  >();
+  private readonly recentFailureLogs = new Map<string, number>();
+  private authFailureUntilMs = 0;
+  private serviceUnavailableUntilMs = 0;
+  private probeOkUntilMs = 0;
+  private probeInFlight: Promise<boolean> | null = null;
+
+  readonly geocodeAvailable = signal<boolean | null>(null);
+
+  /**
+   * Serial queue: chains every request so only one is in-flight at a time.
+   * This prevents concurrent callers from racing past the server-side rate limit.
+   */
+  private queue: Promise<void> = Promise.resolve();
+
+  isGeocodeBlocked(): boolean {
+    const now = Date.now();
+    return now < this.authFailureUntilMs || now < this.serviceUnavailableUntilMs;
+  }
+
+  async ensureGeocodeAvailable(): Promise<boolean> {
+    if (this.isGeocodeBlocked()) {
+      this.geocodeAvailable.set(false);
+      return false;
+    }
+    if (this.probeOkUntilMs > Date.now()) {
+      this.geocodeAvailable.set(true);
+      return true;
+    }
+    if (!this.probeInFlight) {
+      this.probeInFlight = this.runGeocodeProbe().finally(() => {
+        this.probeInFlight = null;
+      });
+    }
+    return this.probeInFlight;
+  }
+
+  /**
+   * Reverse-geocode a lat/lng pair to structured address fields.
+   * Returns null when the geocoder cannot resolve the location or on network error.
+   */
+  async reverse(lat: number, lng: number): Promise<ReverseGeocodeResult | null> {
+    const cacheKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+    const cached = this.reverseCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
+    return this.enqueue(async () => {
+      // Re-check cache after waiting in queue (another request may have resolved it).
+      const freshCached = this.reverseCache.get(cacheKey);
+      if (freshCached && freshCached.expires > Date.now()) {
+        return freshCached.data;
+      }
+
+      try {
+        const data = await this.callProxy<NominatimReverseResponse>(
+          {
+            action: 'reverse',
+            lat,
+            lng,
+          },
+          'reverse',
+        );
+        if (!data?.address) return null;
+
+        const result = this.parseReverseResponse(data);
+        this.reverseCache.set(cacheKey, {
+          data: result,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
+        return result;
+      } catch {
+        return null;
+      }
+    });
+  }
+
+  /**
+   * Forward-geocode an address string to coordinates + structured address fields.
+   * Returns null when the geocoder cannot resolve the address or on network error.
+   */
+  async forward(address: string): Promise<ForwardGeocodeResult | null> {
+    const trimmed = address.trim();
+    if (!trimmed) return null;
+
+    const cacheKey = trimmed.toLowerCase();
+    const cached = this.forwardCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
+    return this.enqueue(async () => {
+      const freshCached = this.forwardCache.get(cacheKey);
+      if (freshCached && freshCached.expires > Date.now()) {
+        return freshCached.data;
+      }
+
+      try {
+        const results = await this.callProxy<NominatimSearchResponse[]>(
+          {
+            action: 'forward',
+            q: trimmed,
+          },
+          'forward',
+        );
+        if (!results?.length || !results[0].lat || !results[0].lon) return null;
+
+        const result = this.parseForwardResponse(results[0]);
+        if (!result) return null;
+
+        this.forwardCache.set(cacheKey, {
+          data: result,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
+        return result;
+      } catch {
+        return null;
+      }
+    });
+  }
+
+  // ── Private helpers ────────────────────────────────────────────────────
+
+  /**
+   * Search for multiple geocoding results. Used by the search bar.
+   * Returns an empty array on failure — never throws.
+   */
+  async search(query: string, options?: GeocoderSearchOptions): Promise<GeocoderSearchResult[]> {
+    const trimmed = query.trim();
+    if (!trimmed) return [];
+
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
+    const countrycodes = options?.countrycodes?.join(',') ?? '';
+    const viewbox = options?.viewbox ?? '';
+    const bounded = options?.bounded ? '1' : '';
+    const addressLayer = options?.addressLayer === false ? '0' : '1';
+    const cacheKey = `${trimmed.toLowerCase()}|${limit}|${countrycodes}|${viewbox}|${bounded}|${addressLayer}|${acceptLanguage}`;
+    const cached = this.searchCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
+    return this.enqueue(async () => {
+      const freshCached = this.searchCache.get(cacheKey);
+      if (freshCached && freshCached.expires > Date.now()) {
+        return freshCached.data;
+      }
+
+      try {
+        const body: Record<string, unknown> = {
+          action: 'forward',
+          q: trimmed,
+          limit,
+          acceptLanguage,
+          addressLayer: options?.addressLayer !== false,
+        };
+        if (options?.countrycodes?.length) {
+          body['countrycodes'] = options.countrycodes.join(',');
+        }
+        if (options?.viewbox) body['viewbox'] = options.viewbox;
+        if (options?.bounded) body['bounded'] = 1;
+
+        const results = await this.callProxy<NominatimSearchResponse[]>(body, 'search');
+        if (!results?.length) return [];
+
+        const parsed = results
+          .map((hit) => this.parseSearchHit(hit))
+          .filter((r): r is GeocoderSearchResult => r !== null);
+
+        this.searchCache.set(cacheKey, {
+          data: parsed,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
+        return parsed;
+      } catch {
+        return [];
+      }
+    });
+  }
+
+  /**
+   * Structured forward geocode (Photon /structured when configured, else Nominatim).
+   * Returns an empty array on failure — never throws.
+   */
+  async searchStructuredForward(
+    params: GeocoderStructuredForwardParams,
+    options?: GeocoderStructuredSearchOptions,
+  ): Promise<GeocoderSearchResult[]> {
+    const trimmedStreet = params.street.trim();
+    if (!trimmedStreet) {
+      return [];
+    }
+
+    const city = params.city?.trim() ?? '';
+    const postcode = params.postcode?.trim() ?? '';
+    const countryCode = params.countryCode?.trim().toLowerCase() ?? '';
+    if (!countryCode) {
+      return [];
+    }
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
+    const cacheKey = `sf|${trimmedStreet.toLowerCase()}|${city.toLowerCase()}|${postcode}|${countryCode}|${limit}|${acceptLanguage}`;
+    const cached = this.structuredForwardCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
+    return this.enqueue(async () => {
+      const freshCached = this.structuredForwardCache.get(cacheKey);
+      if (freshCached && freshCached.expires > Date.now()) {
+        return freshCached.data;
+      }
+
+      try {
+        const body: Record<string, unknown> = {
+          action: 'structured-forward',
+          street: trimmedStreet,
+          city: city || undefined,
+          postcode: postcode || undefined,
+          countryCode,
+          limit,
+          acceptLanguage,
+        };
+        if (options?.countrycodes?.length) {
+          body['countrycodes'] = options.countrycodes.join(',');
+        }
+
+        let results = await this.callProxy<NominatimSearchResponse[]>(
+          body,
+          'structured-forward',
+        );
+
+        if (!results?.length && city) {
+          results = await this.callProxy<NominatimSearchResponse[]>(
+            {
+              action: 'structured-search',
+              street: trimmedStreet,
+              city,
+              limit,
+              acceptLanguage,
+              countrycodes: options?.countrycodes?.join(','),
+            },
+            'structured-search',
+          );
+        }
+
+        if (!results?.length) {
+          return [];
+        }
+
+        const parsed = results
+          .map((hit) => this.parseSearchHit(hit))
+          .filter((r): r is GeocoderSearchResult => r !== null);
+
+        this.structuredForwardCache.set(cacheKey, {
+          data: parsed,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
+        return parsed;
+      } catch {
+        return [];
+      }
+    });
+  }
+
+  /**
+   * Structured forward with geographic bias (Branch B).
+   * Returns empty array when edge/Photon unavailable — never throws.
+   */
+  async searchStructuredForwardBias(
+    params: GeocoderStructuredBiasParams,
+    options?: GeocoderStructuredSearchOptions,
+  ): Promise<GeocoderSearchResult[]> {
+    const trimmedStreet = params.street.trim();
+    const countryCode = params.countryCode?.trim().toLowerCase() ?? '';
+    if (!trimmedStreet || !countryCode) {
+      return [];
+    }
+    if (!Number.isFinite(params.lat) || !Number.isFinite(params.lng)) {
+      return [];
+    }
+
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
+
+    return this.enqueue(async () => {
+      try {
+        const body: Record<string, unknown> = {
+          action: 'structured-forward-bias',
+          street: trimmedStreet,
+          city: params.city?.trim() || undefined,
+          postcode: params.postcode?.trim() || undefined,
+          countryCode,
+          lat: params.lat,
+          lon: params.lng,
+          zoom: params.zoom ?? 14,
+          limit,
+          acceptLanguage,
+        };
+        const results = await this.callProxy<NominatimSearchResponse[]>(body, 'structured-forward-bias');
+        if (!results?.length) {
+          return [];
+        }
+        return results
+          .map((hit) => this.parseSearchHit(hit))
+          .filter((r): r is GeocoderSearchResult => r !== null);
+      } catch {
+        return [];
+      }
+    });
+  }
+
+  /**
+   * Enumerate house numbers on a street (Step 1B). Photon structured multi-hit.
+   */
+  async searchStreetHouseNumbers(
+    params: GeocoderStructuredForwardParams & { lat?: number; lng?: number; zoom?: number },
+    options?: GeocoderStructuredSearchOptions,
+  ): Promise<GeocoderSearchResult[]> {
+    const trimmedStreet = params.street.trim();
+    const city = params.city?.trim() ?? '';
+    const countryCode = params.countryCode?.trim().toLowerCase() ?? '';
+    if (!trimmedStreet || !city || !countryCode) {
+      return [];
+    }
+
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? 50;
+
+    return this.enqueue(async () => {
+      try {
+        const body: Record<string, unknown> = {
+          action: 'street-house-numbers',
+          street: trimmedStreet,
+          city,
+          postcode: params.postcode?.trim() || undefined,
+          countryCode,
+          limit,
+          acceptLanguage,
+        };
+        if (params.lat != null && params.lng != null) {
+          body['lat'] = params.lat;
+          body['lon'] = params.lng;
+          body['zoom'] = params.zoom ?? 14;
+        }
+        const results = await this.callProxy<NominatimSearchResponse[]>(body, 'street-house-numbers');
+        if (!results?.length) {
+          return [];
+        }
+        return results
+          .map((hit) => this.parseSearchHit(hit))
+          .filter((r): r is GeocoderSearchResult => r !== null);
+      } catch {
+        return [];
+      }
+    });
+  }
+
+  /**
+   * Structured Nominatim search (`street` + `city`). No viewbox/layer.
+   * Returns an empty array on failure — never throws.
+   */
+  async searchStructured(
+    street: string,
+    city: string,
+    options?: GeocoderStructuredSearchOptions,
+  ): Promise<GeocoderSearchResult[]> {
+    const trimmedStreet = street.trim();
+    const trimmedCity = city.trim();
+    if (!trimmedStreet || !trimmedCity) return [];
+
+    const acceptLanguage = options?.acceptLanguage ?? this.i18n.language();
+    const limit = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
+    const countrycodes = options?.countrycodes?.join(',') ?? '';
+    const cacheKey = `structured|${trimmedStreet.toLowerCase()}|${trimmedCity.toLowerCase()}|${limit}|${countrycodes}|${acceptLanguage}`;
+    const cached = this.structuredSearchCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
+    return this.enqueue(async () => {
+      const freshCached = this.structuredSearchCache.get(cacheKey);
+      if (freshCached && freshCached.expires > Date.now()) {
+        return freshCached.data;
+      }
+
+      try {
+        const body: Record<string, unknown> = {
+          action: 'structured-search',
+          street: trimmedStreet,
+          city: trimmedCity,
+          limit,
+          acceptLanguage,
+        };
+        if (options?.countrycodes?.length) {
+          body['countrycodes'] = options.countrycodes.join(',');
+        }
+
+        const results = await this.callProxy<NominatimSearchResponse[]>(
+          body,
+          'structured-search',
+        );
+        if (!results?.length) return [];
+
+        const parsed = results
+          .map((hit) => this.parseSearchHit(hit))
+          .filter((r): r is GeocoderSearchResult => r !== null);
+
+        this.structuredSearchCache.set(cacheKey, {
+          data: parsed,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
+        return parsed;
+      } catch {
+        return [];
+      }
+    });
+  }
+
+  /**
+   * Enqueue a request so only one runs at a time.
+   * Each call chains onto `this.queue`, preventing concurrent Nominatim hits.
+   */
+  private enqueue<T>(fn: () => Promise<T>): Promise<T> {
+    const result = this.queue.then(fn, fn);
+    // Keep the queue moving regardless of success/failure
+    this.queue = result.then(
+      () => {},
+      () => {},
+    );
+    return result;
+  }
+
+  /** Call the `geocode` Supabase Edge Function with bounded retry/backoff. */
+  private async callProxy<T>(
+    body: Record<string, unknown>,
+    operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward' | 'structured-forward-bias' | 'street-house-numbers',
+  ): Promise<T> {
+    if (this.isGeocodeBlocked()) {
+      throw new Error('Geocoding temporarily unavailable');
+    }
+
+    let lastError: unknown;
+
+    const maxAttempts = this.locationConfig.getConfig().geocodeMaxProxyAttempts;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        const headers = await this.getFunctionAuthHeaders();
+        const { data, error } = await this.supabase.client.functions.invoke('geocode', {
+          body,
+          headers,
+        });
+        if (error) throw error;
+        this.authFailureUntilMs = 0;
+        this.serviceUnavailableUntilMs = 0;
+        this.probeOkUntilMs = Date.now() + GEOCODE_PROBE_OK_TTL_MS;
+        this.geocodeAvailable.set(true);
+        return data as T;
+      } catch (error) {
+        lastError = error;
+        const details = await this.extractFailureDetails(error);
+        const retryable = this.isRetryableFailure(details);
+        const finalAttempt = attempt >= maxAttempts || !retryable;
+
+        if (details.status === 401) {
+          this.authFailureUntilMs =
+            Date.now() + this.locationConfig.getConfig().geocodeAuthFailureCooldownMs;
+          this.geocodeAvailable.set(false);
+        }
+
+        if (finalAttempt && isGeocodeInfrastructureFailure(details)) {
+          this.markServiceUnavailable();
+        }
+
+        if (finalAttempt) {
+          this.logProxyFailure(operation, attempt, details, retryable);
+          throw error;
+        }
+
+        await this.delay(this.backoffMs(attempt));
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async runGeocodeProbe(): Promise<boolean> {
+    try {
+      const headers = await this.getFunctionAuthHeaders();
+      const { data, error } = await this.supabase.client.functions.invoke('geocode', {
+        body: { action: 'forward', q: 'wien', limit: 1 },
+        headers,
+      });
+      if (error) throw error;
+      if (!data) {
+        this.markServiceUnavailable();
+        return false;
+      }
+      this.serviceUnavailableUntilMs = 0;
+      this.probeOkUntilMs = Date.now() + GEOCODE_PROBE_OK_TTL_MS;
+      this.geocodeAvailable.set(true);
+      return true;
+    } catch (error) {
+      const details = await this.extractFailureDetails(error);
+      if (isGeocodeInfrastructureFailure(details)) {
+        this.markServiceUnavailable();
+      } else {
+        this.geocodeAvailable.set(false);
+      }
+      return false;
+    }
+  }
+
+  private markServiceUnavailable(): void {
+    const cooldownMs = this.locationConfig.getConfig().geocodeAuthFailureCooldownMs;
+    this.serviceUnavailableUntilMs = Date.now() + cooldownMs;
+    this.probeOkUntilMs = 0;
+    this.geocodeAvailable.set(false);
+    this.notifyGeocodeUnavailableToast();
+  }
+
+  private notifyGeocodeUnavailableToast(): void {
+    this.toastService.show({
+      type: 'warning',
+      dedupe: true,
+      duration: 8000,
+      title: this.i18n.t(
+        'geocoding.toast.unavailable.title',
+        'Internet address search unavailable',
+      ),
+      body: this.i18n.t(
+        'geocoding.toast.unavailable.body',
+        'The geocoding service is not reachable. Check local Supabase Edge (geocode) or try again later.',
+      ),
+    });
+  }
+
+  private async getFunctionAuthHeaders(): Promise<Record<string, string>> {
+    const {
+      data: { session },
+    } = await this.supabase.client.auth.getSession();
+
+    const accessToken = session?.access_token;
+    if (!accessToken) {
+      throw new Error('Missing Supabase access token for geocode function');
+    }
+
+    return {
+      Authorization: `Bearer ${accessToken}`,
+    };
+  }
+
+  private async extractFailureDetails(error: unknown): Promise<GeocodeFailureDetails> {
+    const candidate =
+      typeof error === 'object' && error !== null
+        ? (error as {
+            status?: unknown;
+            code?: unknown;
+            name?: unknown;
+            message?: unknown;
+            context?: unknown;
+          })
+        : null;
+
+    const response = this.toResponse(candidate?.context);
+    const statusFromError = typeof candidate?.status === 'number' ? candidate.status : null;
+    const status = statusFromError ?? response?.status ?? null;
+
+    return {
+      status,
+      code: typeof candidate?.code === 'string' ? candidate.code : null,
+      name: typeof candidate?.name === 'string' ? candidate.name : null,
+      message:
+        typeof candidate?.message === 'string'
+          ? this.sanitizeSnippet(candidate.message)
+          : this.sanitizeSnippet(String(error)),
+      bodySnippet: response ? await this.readResponseSnippet(response) : null,
+    };
+  }
+
+  private isRetryableFailure(details: GeocodeFailureDetails): boolean {
+    const { status, name, message } = details;
+
+    if (status != null) {
+      if (status === 408 || status === 429) return true;
+      if (status >= 500) return true;
+      return false;
+    }
+
+    const normalizedName = (name ?? '').toLowerCase();
+    const normalizedMessage = message.toLowerCase();
+    if (normalizedName.includes('fetch') || normalizedName.includes('relay')) return true;
+    if (normalizedMessage.includes('networkerror')) return true;
+    if (normalizedMessage.includes('failed to fetch')) return true;
+    if (normalizedMessage.includes('network')) return true;
+    return false;
+  }
+
+  private logProxyFailure(
+    operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward' | 'structured-forward-bias' | 'street-house-numbers',
+    attempt: number,
+    details: GeocodeFailureDetails,
+    retryable: boolean,
+  ): void {
+    const key = [
+      operation,
+      details.status ?? 'none',
+      details.code ?? 'none',
+      details.name ?? 'none',
+      details.message,
+      details.bodySnippet ?? 'none',
+    ].join('|');
+
+    const now = Date.now();
+    const lastLoggedAt = this.recentFailureLogs.get(key) ?? 0;
+    if (now - lastLoggedAt < this.locationConfig.getConfig().geocodeLogDedupWindowMs) {
+      return;
+    }
+    this.recentFailureLogs.set(key, now);
+
+    console.warn('[Geocoding] geocode request failed', {
+      operation,
+      attempt,
+      maxAttempts: this.locationConfig.getConfig().geocodeMaxProxyAttempts,
+      retryable,
+      status: details.status,
+      code: details.code,
+      name: details.name,
+      message: details.message,
+      bodySnippet: details.bodySnippet,
+    });
+  }
+
+  private backoffMs(attempt: number): number {
+    if (attempt <= 1) return 250;
+    return 600;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private toResponse(value: unknown): Response | null {
+    if (typeof Response === 'undefined') return null;
+    return value instanceof Response ? value : null;
+  }
+
+  private async readResponseSnippet(response: Response): Promise<string | null> {
+    try {
+      const raw = await response.clone().text();
+      if (!raw) return null;
+      return this.sanitizeSnippet(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  private sanitizeSnippet(input: string): string {
+    return input.replace(/\s+/g, ' ').trim().slice(0, 300);
+  }
+
+  private parseReverseResponse(data: NominatimReverseResponse): ReverseGeocodeResult {
+    const { city, district, streetName, streetNumber, zip, country, countryCode } =
+      this.extractAddressFields(data.address!);
+    const street = this.combineStreet(streetName, streetNumber);
+    const addressLabel = this.buildAddressLabel(street, city, zip, data.display_name);
+    return { addressLabel, city, district, street, streetNumber, zip, country, countryCode };
+  }
+
+  private parseForwardResponse(hit: NominatimSearchResponse): ForwardGeocodeResult | null {
+    const lat = parseFloat(hit.lat!);
+    const lng = parseFloat(hit.lon!);
+    if (isNaN(lat) || isNaN(lng)) return null;
+
+    const { city, district, streetName, streetNumber, zip, country } = this.extractAddressFields(
+      hit.address,
+    );
+    const street = this.combineStreet(streetName, streetNumber);
+    const addressLabel = this.buildAddressLabel(street, city, zip, hit.display_name);
+    return { lat, lng, addressLabel, city, district, street, streetNumber, zip, country };
+  }
+
+  /**
+   * Build a clean address label as "Street Number, Postcode City".
+   * Falls back to display_name only when structured fields are missing.
+   */
+  private buildAddressLabel(
+    street: string | null,
+    city: string | null,
+    zip: string | null,
+    displayName?: string,
+  ): string {
+    const cityPart = zip && city ? `${zip} ${city}` : city || null;
+
+    if (street && cityPart) return `${street}, ${cityPart}`;
+    if (street) return street;
+    if (cityPart) return cityPart;
+    return displayName ?? '';
+  }
+
+  /** Parse a single Nominatim search hit into a GeocoderSearchResult. */
+  private parseSearchHit(hit: NominatimSearchResponse): GeocoderSearchResult | null {
+    const lat = parseFloat(hit.lat ?? '');
+    const lng = parseFloat(hit.lon ?? '');
+    if (isNaN(lat) || isNaN(lng)) return null;
+
+    return {
+      lat,
+      lng,
+      displayName: hit.display_name ?? '',
+      name: hit.name ?? null,
+      importance: hit.importance ?? 0,
+      address: hit.address
+        ? {
+            road: hit.address.road,
+            house_number: hit.address.house_number,
+            postcode: hit.address.postcode,
+            country_code: hit.country_code ?? hit.address.country_code,
+            city: hit.address.city,
+            town: hit.address.town,
+            village: hit.address.village,
+            municipality: hit.address.municipality,
+            city_district: hit.address.city_district,
+            suburb: hit.address.suburb,
+            borough: hit.address.borough,
+            quarter: hit.address.quarter,
+            country: hit.address.country,
+          }
+        : null,
+    };
+  }
+
+  /** Extract structured address fields from a Nominatim address object. */
+  private extractAddressFields(addr?: NominatimReverseResponse['address']): {
+    city: string | null;
+    district: string | null;
+    streetName: string | null;
+    streetNumber: string | null;
+    zip: string | null;
+    country: string | null;
+    countryCode: string | null;
+  } {
+    if (!addr)
+      return {
+        city: null,
+        district: null,
+        streetName: null,
+        streetNumber: null,
+        zip: null,
+        country: null,
+        countryCode: null,
+      };
+
+    const city = this.firstOf(addr.city, addr.town, addr.village, addr.municipality);
+    const district = this.firstOf(addr.city_district, addr.suburb, addr.borough, addr.quarter);
+
+    return {
+      city,
+      district,
+      streetName: addr.road ?? null,
+      streetNumber: addr.house_number ?? null,
+      zip: addr.postcode ?? null,
+      country: addr.country ?? null,
+      countryCode: addr.country_code?.toLowerCase() ?? null,
+    };
+  }
+
+  private combineStreet(streetName: string | null, streetNumber: string | null): string | null {
+    if (streetName && streetNumber) return `${streetName} ${streetNumber}`;
+    return streetName ?? streetNumber;
+  }
+
+  /** Returns the first non-nullish value, or null. */
+  private firstOf(...values: (string | undefined | null)[]): string | null {
+    return values.find((v) => v != null) ?? null;
+  }
+}

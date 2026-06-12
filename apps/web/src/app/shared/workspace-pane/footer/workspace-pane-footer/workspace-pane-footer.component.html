@@ -1,0 +1,180 @@
+<app-pane-footer>
+  <div class="workspace-action__summary" slot="left">
+    <strong>{{ selectionService.selectedCount() }}</strong>
+    <span>{{ t('workspace.export.summary.selected', 'selected') }}</span>
+  </div>
+
+  <div class="workspace-action__actions" slot="right">
+    @for (action of actions(); track action.id) {
+      @if (action.id === 'download_zip') {
+        <button
+          hlmBtn
+          variant="default"
+          size="sm"
+          iconPlacement="start"
+          type="button"
+          [disabled]="pending() || action.disabled"
+          (click)="onActionSelected(action.id)"
+          [attr.aria-label]="action.label"
+          [title]="action.label"
+        >
+          <span class="material-icons" aria-hidden="true">{{ action.icon }}</span>
+          <span>{{ action.label }}</span>
+        </button>
+      } @else {
+        <button
+          hlmBtn
+          variant="outline"
+          size="icon"
+          type="button"
+          [disabled]="pending() || action.disabled"
+          (click)="onActionSelected(action.id)"
+          [attr.aria-label]="action.label"
+          [title]="action.label"
+        >
+          <span class="material-icons" aria-hidden="true">{{ action.icon }}</span>
+        </button>
+      }
+    }
+  </div>
+</app-pane-footer>
+
+@if (projectDialogOpen()) {
+  <app-project-select-dialog
+    [title]="t('workspace.export.projectDialog.title', 'Select project')"
+    [message]="t('workspace.export.projectDialog.message', 'Choose a project for selected media.')"
+    [options]="projectOptions()"
+    [selectedId]="projectDialogSelectedId()"
+    [confirmLabel]="t('workspace.export.projectDialog.confirm', 'Assign')"
+    [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (selectedIdChange)="onProjectDialogSelected($event)"
+    (confirmed)="confirmProjectDialog($event)"
+    (cancelled)="closeProjectDialog()"
+  />
+}
+
+@if (addressDialogOpen()) {
+  <app-text-input-dialog
+    [title]="t('workspace.export.addressDialog.title', 'Change address')"
+    [message]="
+      t('workspace.export.addressDialog.message', 'Apply one address to all selected media.')
+    "
+    [placeholder]="t('workspace.export.addressDialog.placeholder', 'Enter address')"
+    [confirmLabel]="t('workspace.export.addressDialog.confirm', 'Apply')"
+    [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (confirmed)="confirmAddressDialog($event)"
+    (cancelled)="closeAddressDialog()"
+  />
+}
+
+@if (deleteDialogOpen()) {
+  <button
+    class="workspace-action__dialog-backdrop"
+    type="button"
+    [attr.aria-label]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (click)="closeDeleteDialog()"
+  ></button>
+  <section
+    class="workspace-action__dialog"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="t('workspace.export.deleteDialog.aria', 'Delete selection')"
+  >
+    <h3>{{ t('workspace.export.deleteDialog.title', 'Delete selected media') }}</h3>
+    <p>
+      {{
+        t(
+          'workspace.export.deleteDialog.message',
+          'This action cannot be undone. All selected media will be deleted.'
+        )
+      }}
+    </p>
+
+    <div class="workspace-action__dialog-actions">
+      <button
+        hlmBtn
+        variant="outline"
+        type="button"
+        class="workspace-action__btn"
+        [disabled]="pending()"
+        (click)="closeDeleteDialog()"
+      >
+        {{ t('workspace.export.dialog.cancel', 'Cancel') }}
+      </button>
+      <button
+        hlmBtn
+        variant="default"
+        type="button"
+        class="workspace-action__btn workspace-action__btn--primary"
+        [disabled]="pending()"
+        (click)="confirmDeleteDialog()"
+      >
+        {{ t('workspace.export.deleteDialog.confirm', 'Delete') }}
+      </button>
+    </div>
+  </section>
+}
+
+@if (shareAudienceDialogOpen()) {
+  <app-share-link-audience-dialog
+    (confirmed)="onShareAudienceDialogConfirmed($event)"
+    (cancelled)="closeShareAudienceDialog()"
+  />
+}
+
+@if (zipDialogOpen()) {
+  <button
+    class="workspace-action__dialog-backdrop"
+    type="button"
+    [attr.aria-label]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (click)="closeZipDialog()"
+  ></button>
+  <section
+    class="workspace-action__dialog"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="t('workspace.export.dialog.aria', 'Export selection')"
+  >
+    <h3>{{ t('workspace.export.dialog.title', 'Export selection') }}</h3>
+    <label for="zip-title">{{ t('workspace.export.dialog.field.title', 'Title') }}</label>
+    <input
+      hlmInput
+      id="zip-title"
+      type="text"
+      [value]="zipTitle()"
+      (input)="zipTitle.set($any($event.target).value)"
+      [disabled]="pending()"
+    />
+
+    <div class="workspace-action__progress" [style.--progress]="zipProgress() * 100 + '%'">
+      <span>{{ (zipProgress() * 100).toFixed(0) }}%</span>
+    </div>
+
+    <div class="workspace-action__dialog-actions">
+      <button
+        hlmBtn
+        variant="outline"
+        type="button"
+        class="workspace-action__btn"
+        [disabled]="pending()"
+        (click)="closeZipDialog()"
+      >
+        {{ t('workspace.export.dialog.cancel', 'Cancel') }}
+      </button>
+      <button
+        hlmBtn
+        variant="default"
+        type="button"
+        class="workspace-action__btn workspace-action__btn--primary"
+        [disabled]="pending()"
+        (click)="downloadZip()"
+      >
+        {{
+          pending()
+            ? t('workspace.export.dialog.pending', 'Preparing...')
+            : t('workspace.export.dialog.confirm', 'Export ZIP')
+        }}
+      </button>
+    </div>
+  </section>
+}

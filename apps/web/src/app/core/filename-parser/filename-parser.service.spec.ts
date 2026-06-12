@@ -1,0 +1,66 @@
+import { TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { LocationPathParserService } from '../location-path-parser/location-path-parser.service';
+import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
+import { FilenameParserService } from './filename-parser.service';
+
+function provideService(config = new UploadLocationConfigService()): FilenameParserService {
+  TestBed.configureTestingModule({
+    providers: [
+      FilenameParserService,
+      LocationPathParserService,
+      { provide: UploadLocationConfigService, useValue: config },
+    ],
+  });
+  return TestBed.inject(FilenameParserService);
+}
+
+describe('FilenameParserService', () => {
+  let service: FilenameParserService;
+
+  beforeEach(() => {
+    service = provideService();
+  });
+
+  it('extracts address from Wienzeile-style filename with high confidence (street suffix)', () => {
+    const parsed = service.extractAddress('Linke Wienzeile 26, Wien_0327.jpg');
+    expect(parsed).toEqual({ address: 'Linke Wienzeile 26, Wien', confidence: 'high' });
+  });
+
+  it('parses Fuchsthalergasse 4 folder label as high-confidence street address', () => {
+    const parsed = service.extractAddress('Fuchsthalergasse 4');
+    expect(parsed?.confidence).toBe('high');
+    expect(parsed?.address.toLowerCase()).toContain('fuchsthalergasse');
+    expect(parsed?.address).toMatch(/\b4\b/);
+  });
+
+  it('extracts address from Strasse filename with high confidence (street suffix)', () => {
+    const parsed = service.extractAddress('Arsenalstrasse 3, Wien_000123.jpeg');
+    expect(parsed).toEqual({ address: 'Arsenalstrasse 3, Wien', confidence: 'high' });
+  });
+
+  it('returns undefined for camera-generated filename', () => {
+    const parsed = service.extractAddress('20240822_000000_IMG_0054.jpg');
+    expect(parsed).toBeUndefined();
+  });
+
+  it('extracts address via fallback pattern with low confidence (no street suffix)', () => {
+    const parsed = service.extractAddress('Fahrafeld 4.jpg');
+    expect(parsed).toEqual({ address: 'Fahrafeld 4', confidence: 'low' });
+  });
+
+  it('rejects generic non-address filename words in fallback path', () => {
+    const parsed = service.extractAddress('Photo 4.jpg');
+    expect(parsed).toBeUndefined();
+  });
+
+  it('uses configurable single-word minimum length threshold', () => {
+    const config = new UploadLocationConfigService();
+    config.patchConfig({ filenameSingleWordMinLength: 10, filenameSingleWordCityMinLength: 4 });
+    TestBed.resetTestingModule();
+    const configurableService = provideService(config);
+
+    const parsed = configurableService.extractAddress('Fahrafeld 4.jpg');
+    expect(parsed).toBeUndefined();
+  });
+});

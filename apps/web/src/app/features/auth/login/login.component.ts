@@ -12,12 +12,24 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/auth.service';
-import { I18nService } from '../../../core/i18n/i18n.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
+import { AuthMapLayerComponent } from '../auth-map-layer/auth-map-layer.component';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    AuthMapLayerComponent,
+    ReactiveFormsModule,
+    RouterLink,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -25,18 +37,20 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly i18nService = inject(I18nService);
 
-  protected readonly t = this.i18nService.t.bind(this.i18nService);
-
-  // Form definition — both fields required; email must be valid format
+  // Form definition — email required + valid format; password required only (server validates strength)
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', Validators.required],
   });
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
+
+  protected togglePassword(): void {
+    this.showPassword.update((v) => !v);
+  }
 
   protected async submit(): Promise<void> {
     if (this.form.invalid) return;
@@ -58,3 +72,4 @@ export class LoginComponent {
     this.router.navigate(['/']);
   }
 }
+

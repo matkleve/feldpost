@@ -1,0 +1,135 @@
+﻿
+[1mElement Spec Lint[0m
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+[2mFile                                      Lines Status[0m
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+active-filter-chips.md                   [2m    86[0m [32mOK[0m
+active-selection-view.md                 [2m   379[0m [32mOK[0m
+auth-map-background.md                   [2m    93[0m [32mOK[0m
+captured-date-editor.md                  [2m    97[0m [32mOK[0m
+chip.md                                  [2m   279[0m [32mOK[0m
+drag-divider.md                          [2m   144[0m [32mOK[0m
+dropdown-system.md                       [2m   188[0m [33m1 warn[0m
+file-type-chips.md                       [33m   448[0m [33m1 warn[0m
+filter-dropdown.md                       [2m   328[0m [32mOK[0m
+gps-button.md                            [2m   171[0m [32mOK[0m
+group-tab-bar.md                         [2m    97[0m [32mOK[0m
+grouping-dropdown.md                     [33m   456[0m [33m1 warn[0m
+item-grid-filter-operator.md             [2m   117[0m [32mOK[0m
+item-grid.md                             [2m   244[0m [32mOK[0m
+item-grid.migration-acceptance-and-gates.md [2m   127[0m [32mOK[0m
+item-grid.state-and-fsm.md               [2m   201[0m [32mOK[0m
+item-grid.visual-behavior-and-scss.md    [2m   190[0m [32mOK[0m
+item-state-frame.md                      [2m   257[0m [32mOK[0m
+map-context-menu.md                      [2m   233[0m [32mOK[0m
+map-zone.md                              [2m   130[0m [32mOK[0m
+media-content.md                         [2m   184[0m [32mOK[0m
+media-display.md                         [33m   471[0m [33m1 warn[0m
+media-item-quiet-actions.md              [2m   277[0m [32mOK[0m
+media-item-upload-overlay.md             [2m   254[0m [32mOK[0m
+media-item.md                            [2m   381[0m [32mOK[0m
+media-page-header.md                     [2m   130[0m [32mOK[0m
+media-toolbar.md                         [2m   133[0m [32mOK[0m
+media.component.md                       [2m   239[0m [32mOK[0m
+placement-mode.md                        [2m   131[0m [32mOK[0m
+project-color-picker.md                  [2m   151[0m [32mOK[0m
+project-details-view.md                  [2m   185[0m [32mOK[0m
+project-item.md                          [2m   298[0m [32mOK[0m
+projects-dropdown.md                     [2m   269[0m [32mOK[0m
+radius-selection.md                      [2m   144[0m [32mOK[0m
+segmented-switch.md                      [2m   122[0m [32mOK[0m
+sidebar.md                               [2m   267[0m [32mOK[0m
+sort-dropdown.md                         [2m   360[0m [32mOK[0m
+upload-button-zone.md                    [2m   127[0m [32mOK[0m
+upload-panel.acceptance-criteria.md      [2m   144[0m [32mOK[0m
+upload-panel.feedback-triage.md          [2m    64[0m [32mOK[0m
+upload-panel.lane-and-row-actions.md     [2m   193[0m [32mOK[0m
+upload-panel.layout-and-states.md        [2m   124[0m [32mOK[0m
+upload-panel.md                          [2m   318[0m [32mOK[0m
+user-location-marker.md                  [2m    75[0m [32mOK[0m
+map-page.md                              [2m   130[0m [33m1 warn[0m
+media-page.md                            [2m   347[0m [33m1 warn[0m
+projects-page.md                         [2m   340[0m [32mOK[0m
+filename-parser.md                       [2m   199[0m [32mOK[0m
+folder-scan.md                           [2m   219[0m [32mOK[0m
+location-path-parser.md                  [2m   348[0m [32mOK[0m
+address-resolver.md                      [33m   462[0m [31m6 errors[0m
+search-algorithm-addresses-and-places.md [33m   511[0m [31m6 errors[0m
+edge-export-orchestrator.adapter.md      [2m    96[0m [32mOK[0m
+signed-url-cache.adapter.md              [2m    92[0m [32mOK[0m
+tier-resolver.adapter.md                 [2m    97[0m [32mOK[0m
+media-download-service.md                [33m   541[0m [33m1 warn[0m
+upload-location-config.md                [2m   127[0m [32mOK[0m
+upload-manager-pipeline.md               [33m   552[0m [33m1 warn[0m
+upload-manager.md                        [2m   280[0m [32mOK[0m
+metadata-service.md                      [2m   158[0m [32mOK[0m
+toast-system.md                          [2m   310[0m [32mOK[0m
+workspace-view-system.md                 [33m   555[0m [33m1 warn[0m
+action-context-matrix.md                 [2m   266[0m [32mOK[0m
+map-secondary-click-system.md            [2m   178[0m [33m1 warn[0m
+user-lifecycle.md                        [2m   188[0m [31m6 errors[0m
+media-detail-actions.md                  [2m   138[0m [32mOK[0m
+media-detail-inline-editing.md           [2m   143[0m [32mOK[0m
+media-detail-media-viewer.md             [33m   403[0m [33m1 warn[0m
+media-detail-view.md                     [2m   129[0m [32mOK[0m
+media-marker-context-menu.md             [2m   186[0m [32mOK[0m
+media-marker-draft-flow.md               [2m   128[0m [32mOK[0m
+media-marker.md                          [33m   494[0m [33m2 warns[0m
+search-bar-data-and-service.md           [33m   431[0m [33m1 warn[0m
+search-bar-query-behavior.md             [2m   279[0m [32mOK[0m
+search-bar.md                            [2m   313[0m [32mOK[0m
+search-tuning-settings.md                [2m   201[0m [32mOK[0m
+account-page.md                          [2m   155[0m [32mOK[0m
+account-settings-section.md              [2m   283[0m [32mOK[0m
+invite-only-registration.md              [2m   147[0m [32mOK[0m
+language-locale-settings.md              [2m   209[0m [32mOK[0m
+qr-invite-flow.md                        [2m   212[0m [32mOK[0m
+settings-overlay.md                      [2m   212[0m [32mOK[0m
+settings-page.md                         [2m    98[0m [32mOK[0m
+shortcut-reference-settings.md           [2m   123[0m [32mOK[0m
+theme-toggle.md                          [2m    93[0m [32mOK[0m
+workspace-actions-bar.md                 [33m   411[0m [33m2 warns[0m
+workspace-pane.md                        [2m   334[0m [33m1 warn[0m
+workspace-toolbar.md                     [2m   233[0m [32mOK[0m
+workspace-view-system.md                 [2m    31[0m [32mOK[0m
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+[33mÔÜá[0m dropdown-system.md:10 [2m[what-it-looks-like-length][0m "What It Looks Like" has 55 lines (recommended max: 40). Move detail to Actions or child specs.
+[33mÔÜá[0m file-type-chips.md:1 [2m[spec-max-lines][0m Spec has 448 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m grouping-dropdown.md:1 [2m[spec-max-lines][0m Spec has 456 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m media-display.md:1 [2m[spec-max-lines][0m Spec has 471 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m map-page.md:3 [2m[what-it-is-length][0m "What It Is" has 10 lines (recommended max: 5). Keep it to 1-2 sentences.
+[33mÔÜá[0m media-page.md:9 [2m[what-it-is-length][0m "What It Is" has 7 lines (recommended max: 5). Keep it to 1-2 sentences.
+[33mÔÜá[0m address-resolver.md:1 [2m[spec-max-lines][0m Spec has 462 lines (recommended max: 400). Consider splitting.
+[31mÔ£û[0m address-resolver.md:1 [2m[spec-required-sections][0m Missing required section: "## What It Is"
+[31mÔ£û[0m address-resolver.md:1 [2m[spec-required-sections][0m Missing required section: "## What It Looks Like"
+[31mÔ£û[0m address-resolver.md:1 [2m[spec-required-sections][0m Missing required section: "## Where It Lives"
+[31mÔ£û[0m address-resolver.md:1 [2m[spec-required-sections][0m Missing required section: "## Actions"
+[31mÔ£û[0m address-resolver.md:1 [2m[spec-required-sections][0m Missing required section: "## Component Hierarchy"
+[31mÔ£û[0m address-resolver.md:1 [2m[spec-required-sections][0m Missing required section: "## Acceptance Criteria"
+[33mÔÜá[0m search-algorithm-addresses-and-places.md:1 [2m[spec-max-lines][0m Spec has 511 lines (recommended max: 400). Consider splitting.
+[31mÔ£û[0m search-algorithm-addresses-and-places.md:1 [2m[spec-required-sections][0m Missing required section: "## What It Is"
+[31mÔ£û[0m search-algorithm-addresses-and-places.md:1 [2m[spec-required-sections][0m Missing required section: "## What It Looks Like"
+[31mÔ£û[0m search-algorithm-addresses-and-places.md:1 [2m[spec-required-sections][0m Missing required section: "## Where It Lives"
+[31mÔ£û[0m search-algorithm-addresses-and-places.md:1 [2m[spec-required-sections][0m Missing required section: "## Actions"
+[31mÔ£û[0m search-algorithm-addresses-and-places.md:1 [2m[spec-required-sections][0m Missing required section: "## Component Hierarchy"
+[31mÔ£û[0m search-algorithm-addresses-and-places.md:1 [2m[spec-required-sections][0m Missing required section: "## Acceptance Criteria"
+[33mÔÜá[0m media-download-service.md:1 [2m[spec-max-lines][0m Spec has 541 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m upload-manager-pipeline.md:1 [2m[spec-max-lines][0m Spec has 552 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m workspace-view-system.md:1 [2m[spec-max-lines][0m Spec has 555 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m map-secondary-click-system.md:7 [2m[what-it-is-length][0m "What It Is" has 8 lines (recommended max: 5). Keep it to 1-2 sentences.
+[31mÔ£û[0m user-lifecycle.md:1 [2m[spec-required-sections][0m Missing required section: "## What It Is"
+[31mÔ£û[0m user-lifecycle.md:1 [2m[spec-required-sections][0m Missing required section: "## What It Looks Like"
+[31mÔ£û[0m user-lifecycle.md:1 [2m[spec-required-sections][0m Missing required section: "## Where It Lives"
+[31mÔ£û[0m user-lifecycle.md:1 [2m[spec-required-sections][0m Missing required section: "## Actions"
+[31mÔ£û[0m user-lifecycle.md:1 [2m[spec-required-sections][0m Missing required section: "## Component Hierarchy"
+[31mÔ£û[0m user-lifecycle.md:1 [2m[spec-required-sections][0m Missing required section: "## Acceptance Criteria"
+[33mÔÜá[0m media-detail-media-viewer.md:1 [2m[spec-max-lines][0m Spec has 403 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m media-marker.md:1 [2m[spec-max-lines][0m Spec has 494 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m media-marker.md:6 [2m[what-it-is-length][0m "What It Is" has 6 lines (recommended max: 5). Keep it to 1-2 sentences.
+[33mÔÜá[0m search-bar-data-and-service.md:1 [2m[spec-max-lines][0m Spec has 431 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m workspace-actions-bar.md:1 [2m[spec-max-lines][0m Spec has 411 lines (recommended max: 400). Consider splitting.
+[33mÔÜá[0m workspace-actions-bar.md:6 [2m[what-it-is-length][0m "What It Is" has 7 lines (recommended max: 5). Keep it to 1-2 sentences.
+[33mÔÜá[0m workspace-pane.md:3 [2m[what-it-is-length][0m "What It Is" has 6 lines (recommended max: 5). Keep it to 1-2 sentences.
+
+[31m89 specs checked: 18 errors, 19 warnings[0m

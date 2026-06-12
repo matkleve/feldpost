@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+.media-grid__item {
+  cursor: pointer;
+  border-radius: var(--container-radius-control);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  min-block-size: 3rem;
+  transition: outline-color 0.2s;
+
+  &:focus-visible {
+    outline-color: var(--primary);
+  }
+
+  &:hover app-media-card {
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--shadow-color) 12%, transparent);
+  }
+
+  &--selected app-media-card {
+    outline: 2px solid var(--primary);
+  }
+}

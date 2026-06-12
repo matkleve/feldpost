@@ -1,0 +1,520 @@
+// Host — fills the tab panel slot, scrollable vertically
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+// Outer list wrapper — grows to fill available space
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+// Sticky search row at top
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+// Search icon — decorative overlay
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel__search-icon {
+  position: absolute;
+  left: 0.75rem;
+  font-size: 1rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+// Search text input — full width, no ring
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel__search-input {
+  width: 100%;
+  padding-left: 1.75rem;
+  padding-right: 0.5rem;
+  height: 1.75rem;
+  font-size: 0.8125rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--foreground);
+
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+}
+
+// Scrollable list region
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.25rem 0;
+  margin: 0;
+  list-style: none;
+}
+
+// Section label for archived group
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
+.projects-panel__section-label {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+// Single project row — click target
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 120ms ease;
+
+  &:hover {
+    background-color: var(--accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+}
+
+// Archived row muted treatment
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
+.projects-panel__row--archived {
+  opacity: 0.65;
+}
+
+// Skeleton row for loading state
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § loading
+.projects-panel__row--skeleton {
+  pointer-events: none;
+}
+
+// Color chip — 12×12 filled circle
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A row
+.projects-panel__row-chip {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background-color: var(--muted);
+}
+
+// Skeleton chip — greyed placeholder
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § loading
+.projects-panel__row-chip--skeleton {
+  background-color: var(--muted);
+}
+
+// Muted chip for archived rows
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
+.projects-panel__row-chip--muted {
+  opacity: 0.5;
+}
+
+// Row name label — grows, truncates
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A row
+.projects-panel__row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--foreground);
+}
+
+// Skeleton name placeholder
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § loading
+.projects-panel__row-name--skeleton {
+  height: 0.75rem;
+  border-radius: 4px;
+  background-color: var(--muted);
+  width: 60%;
+  color: transparent;
+}
+
+// Muted name for archived
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
+.projects-panel__row-name--muted {
+  color: var(--muted-foreground);
+}
+
+// Media count badge
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A row
+.projects-panel__row-count {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+// Empty state text
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A empty
+.projects-panel__empty {
+  padding: 1rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  list-style: none;
+}
+
+// Inline draft row
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State C
+.projects-panel__draft-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background-color: var(--accent);
+  border-top: 1px solid var(--border);
+}
+
+// Draft row folder icon
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State C
+.projects-panel__draft-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: var(--muted-foreground);
+}
+
+// Draft name text input
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State C
+.projects-panel__draft-input {
+  flex: 1;
+  min-width: 0;
+  height: 1.5rem;
+  font-size: 0.8125rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ring);
+  outline: none;
+  color: var(--foreground);
+
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+}
+
+// Draft cancel icon button
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State C
+.projects-panel__draft-cancel {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  border-radius: 4px;
+
+  &:hover {
+    color: var(--foreground);
+    background-color: var(--muted);
+  }
+
+  .material-icons {
+    font-size: 1rem;
+  }
+}
+
+// List footer — new project + show archived
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A footer
+.projects-panel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.75rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+// New project action button
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel__new-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.375rem;
+  border-radius: 4px;
+  transition: background-color 120ms ease;
+
+  &:hover {
+    background-color: var(--accent);
+  }
+}
+
+// New project icon
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
+.projects-panel__new-icon {
+  font-size: 1rem;
+  color: var(--muted-foreground);
+}
+
+// Show archived toggle
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived toggle
+.projects-panel__toggle-archived {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.375rem;
+  border-radius: 4px;
+  transition: color 120ms ease, background-color 120ms ease;
+
+  &:hover {
+    background-color: var(--accent);
+    color: var(--foreground);
+  }
+
+  &--active {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+}
+
+// ---- Detail view ----
+
+// Detail pane container
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B
+.projects-panel-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0.75rem;
+  gap: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+// Header row: back + color chip + name
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B
+.projects-panel-detail__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+// Back arrow button
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B navigation
+.projects-panel-detail__back {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  border-radius: 4px;
+  transition: background-color 120ms ease, color 120ms ease;
+
+  &:hover {
+    background-color: var(--accent);
+    color: var(--foreground);
+  }
+
+  .material-icons {
+    font-size: 1.125rem;
+  }
+}
+
+// Color chip button — opens inline picker
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B color
+.projects-panel-detail__color-chip {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--foreground);
+    outline: none;
+  }
+}
+
+// Color picker shell — positioned relative to header
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B color
+.projects-panel-detail__color-picker-shell {
+  position: absolute;
+  top: 2rem;
+  left: 0;
+  z-index: 50;
+}
+
+// Inline name editor
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B name
+.projects-panel-detail__name-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  outline: none;
+  color: var(--foreground);
+  padding: 0.125rem 0.25rem;
+  transition: border-color 120ms ease;
+
+  &:hover,
+  &:focus {
+    border-bottom-color: var(--border);
+  }
+}
+
+// Stats row — icon + number/text pairs
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B stats
+.projects-panel-detail__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+// Single stat item
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B stats
+.projects-panel-detail__stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+// Stat icon
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B stats
+.projects-panel-detail__stat-icon {
+  font-size: 0.9375rem;
+}
+
+// Drop zone — accepts HTML5 drag events carrying media IDs
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Drag Contract
+.projects-panel-detail__drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 6rem;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: border-color 120ms ease, background-color 120ms ease;
+
+  &--over {
+    border-color: var(--primary);
+    background-color: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+}
+
+// Drop zone icon
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Drag Contract
+.projects-panel-detail__drop-icon {
+  font-size: 1.5rem;
+  color: var(--muted-foreground);
+}
+
+// Drop zone label text
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Drag Contract
+.projects-panel-detail__drop-label {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+// Danger actions row
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B actions
+.projects-panel-detail__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+// Action button base
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B actions
+.projects-panel-detail__action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  color: var(--foreground);
+  transition: background-color 120ms ease, color 120ms ease;
+
+  &:hover {
+    background-color: var(--accent);
+  }
+
+  .material-icons {
+    font-size: 1rem;
+  }
+}
+
+// Muted variant for archive
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B actions
+.projects-panel-detail__action-btn--muted {
+  color: var(--muted-foreground);
+}
+
+// Danger (delete) variant
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B actions
+.projects-panel-detail__action-btn--danger {
+  color: var(--destructive);
+  border-color: var(--destructive);
+
+  &:hover {
+    background-color: var(--destructive);
+    color: var(--destructive-foreground);
+  }
+}
+
+// Context menu — positioned via dropdown-shell
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A row right-click
+.projects-panel__context-menu {
+  position: fixed;
+  z-index: 100;
+}

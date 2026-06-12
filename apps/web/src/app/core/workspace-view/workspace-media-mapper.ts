@@ -1,0 +1,33 @@
+import type { MediaRecord } from '../media-query/media-query.types';
+import type { WorkspaceMedia } from './workspace-view.types';
+
+/** Maps workspace viewport media rows to canonical MediaRecord for MediaItem / MediaDownloadService. */
+export function workspaceMediaToMediaRecord(w: WorkspaceMedia): MediaRecord {
+  const captured = w.capturedAt;
+  return {
+    id: w.id,
+    user_id: '',
+    organization_id: null,
+    project_id: w.projectId,
+    project_ids: w.projectIds,
+    storage_path: w.storagePath,
+    thumbnail_path: w.thumbnailPath,
+    original_filename: w.fileMetadata?.originalFilename ?? null,
+    preview_generation_status: w.previewGenerationStatus ?? null,
+    latitude: Number.isFinite(w.latitude) ? w.latitude : null,
+    longitude: Number.isFinite(w.longitude) ? w.longitude : null,
+    exif_latitude: w.exifLatitude,
+    exif_longitude: w.exifLongitude,
+    captured_at: captured,
+    has_time: captured != null && captured.length > 0,
+    created_at: w.createdAt,
+    address_label: w.addressLabel,
+    street: w.street,
+    city: w.city,
+    district: w.district,
+    country: w.country,
+    direction: w.direction,
+    location_unresolved: null,
+    zoomable_location_count: w.zoomableLocationCount ?? 0,
+  };
+}

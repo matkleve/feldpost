@@ -1,0 +1,119 @@
+:host {
+  display: contents;
+}
+
+.workspace-action__summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-1);
+  color: var(--foreground);
+}
+
+.workspace-action__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.workspace-action__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-height: 2.75rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--foreground);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--popover);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.workspace-action__btn--primary {
+  background: var(--primary);
+  color: var(--foreground);
+  border-color: var(--primary);
+}
+
+.workspace-action__dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: var(--overlay-scrim-30);
+  z-index: 500;
+}
+
+.workspace-action__dialog {
+  position: fixed;
+  right: var(--spacing-4);
+  bottom: var(--spacing-4);
+  width: min(24rem, calc(100vw - var(--spacing-8)));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-4);
+  z-index: 501;
+
+  h3 {
+    margin: 0 0 var(--spacing-3);
+  }
+
+  label {
+    display: block;
+    margin-bottom: var(--spacing-1);
+    color: var(--muted-foreground);
+  }
+
+  input {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    padding: 0 var(--spacing-2);
+  }
+}
+
+.workspace-action__progress {
+  margin-top: var(--spacing-3);
+  height: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0,
+    var(--primary) var(--progress),
+    transparent var(--progress),
+    transparent 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+}
+
+.workspace-action__dialog-actions {
+  margin-top: var(--spacing-3);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+@media (max-width: 48rem) {
+  .workspace-action__actions {
+    justify-content: flex-start;
+  }
+}

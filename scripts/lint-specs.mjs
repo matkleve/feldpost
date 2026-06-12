@@ -1,15 +1,22 @@
 #!/usr/bin/env node
 
 /**
- * Element Spec Lint — validates docs/element-specs/*.md
+ * Element Spec Lint — validates markdown specs under docs/specs recursively
  *
  * Rules:
- *   spec-max-lines        Max total lines per spec (default: 250, warn: 200)
+ *   spec-max-lines        Max total lines per parent spec (default: 180, warn: 150)
  *   spec-required-sections Required sections present in every spec
  *   spec-section-order     Sections appear in the canonical order
  *   what-it-is-length      "What It Is" section max lines (default: 5)
  *   what-it-looks-like-len "What It Looks Like" section max lines (default: 40)
  *   has-acceptance-criteria At least one acceptance criterion checkbox
+ *
+ * Excluded from element-spec rules (see shouldIncludeSpecFile):
+ *   - readme.md, *.bak, spec-*audit* notes
+ *   - governance-*.md (matrices/reports; not UI/service element contracts)
+ *   - docs/specs/system/security/** (security analysis writeups)
+ *   - Listed technical/service paths without element-spec skeleton (address resolver, search algorithm, user-lifecycle)
+ *   - Meta: spec-size-backlog.md; certain *.deep-dive.md / *.data.md splits; *.supplement.md
  *
  * Usage:
  *   node scripts/lint-specs.mjs [--fix] [--max-lines=N] [--warn-lines=N] [glob]
@@ -20,12 +27,12 @@
  */
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join, basename, resolve } from "node:path";
+import { join, basename, resolve, relative } from "node:path";
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
-const DEFAULT_MAX_LINES = 600;
-const DEFAULT_WARN_LINES = 400;
+const DEFAULT_MAX_LINES = 180;
+const DEFAULT_WARN_LINES = 150;
 const DEFAULT_MAX_WHAT_IT_IS = 5;
 const DEFAULT_MAX_WHAT_IT_LOOKS_LIKE = 40;
 
@@ -105,7 +112,7 @@ function escapeTableCell(value) {
   return String(value).replace(/\|/g, "\\|").trim();
 }
 
-function parseSettingsEntries(filePath, parsed) {
+function parseSettingsEntries(filePath, parsed, specRootDir) {
   const diagnostics = [];
   const entries = [];
   const section = findSection(parsed.sections, "Settings");
@@ -128,7 +135,7 @@ function parseSettingsEntries(filePath, parsed) {
     if (match) {
       entries.push({
         section: match[1].trim(),
-        sourceSpec: basename(filePath),
+        sourceSpec: relative(specRootDir, filePath).replaceAll("\\", "/"),
         what: match[2].trim(),
       });
     }
@@ -160,7 +167,7 @@ function renderSettingsRegistry(entries) {
   const lines = [
     "# Settings Registry",
     "",
-    "Generated from all `## Settings` sections in `docs/element-specs/*.md`.",
+    "Generated from all `## Settings` sections in `docs/specs/**/*.md` (excluding README and audit docs).",
     "Do not edit manually; update element specs and run `node scripts/lint-specs.mjs --fix`.",
     "",
     "| Section | Source Spec | What it configures |",
@@ -182,14 +189,14 @@ function renderSettingsRegistry(entries) {
   return `${lines.join("\n")}\n`;
 }
 
-function ruleSettingsRegistrySync(specFiles, config, projectRoot) {
+function ruleSettingsRegistrySync(specFiles, config, projectRoot, specRootDir) {
   const diagnostics = [];
   const entries = [];
 
   for (const filePath of specFiles) {
     const content = readFileSync(filePath, "utf-8");
     const parsed = parseSections(content);
-    const parsedSettings = parseSettingsEntries(filePath, parsed);
+    const parsedSettings = parseSettingsEntries(filePath, parsed, specRootDir);
 
     entries.push(...parsedSettings.entries);
     diagnostics.push(...parsedSettings.diagnostics);
@@ -238,7 +245,7 @@ function ruleMaxLines(parsed, config) {
     diagnostics.push({
       severity: "error",
       rule: "spec-max-lines",
-      message: `Spec has ${parsed.totalLines} lines (max: ${config.maxLines}). Split into child specs with cross-references.`,
+      message: `Spec has ${parsed.totalLines} lines (max: ${config.maxLines}). Split into child specs (*.supplement.md, *.acceptance-criteria.md, or parent-name.slice.md) and link from the parent.`,
       line: 1,
     });
   } else if (parsed.totalLines > config.warnLines) {
@@ -406,6 +413,112 @@ function parseArgs(argv) {
   return config;
 }
 
+/** Split slices (linked from parent) — not subject to parent line cap. */
+function isSplitChildSpec(filePath) {
+  const base = basename(filePath).toLowerCase();
+  if (base.endsWith(".supplement.md") || base.endsWith(".acceptance-criteria.md")) {
+    return true;
+  }
+  const stem = base.slice(0, -".md".length);
+  const dotIndex = stem.indexOf(".");
+  if (dotIndex <= 0) {
+    return false;
+  }
+  return stem.length > dotIndex + 1;
+}
+
+function shouldIncludeSpecFile(filePath, specRootDir) {
+  const lowerName = basename(filePath).toLowerCase();
+  if (!lowerName.endsWith(".md")) {
+    return false;
+  }
+  if (lowerName === "readme.md" || lowerName.endsWith(".bak")) {
+    return false;
+  }
+
+  // Keep audit notes out of spec lint and generated settings registry.
+  if (lowerName.startsWith("spec-") && lowerName.includes("audit")) {
+    return false;
+  }
+
+  // Governance artifacts are matrices/reports, not element-spec contracts.
+  if (lowerName.startsWith("governance-")) {
+    return false;
+  }
+
+  // Security analysis docs under system/security are not element specs.
+  if (specRootDir) {
+    const rel = relative(specRootDir, filePath).replace(/\\/g, "/");
+    if (rel.toLowerCase().startsWith("system/security/")) {
+      return false;
+    }
+
+    // Technical/service docs that intentionally omit element-spec headings (algorithm, lifecycle).
+    const technicalDocProfiles = new Set([
+      "service/location-resolver/address-resolver.md",
+      "service/location-resolver/search-algorithm-addresses-and-places.md",
+      "system/user-lifecycle.md",
+    ]);
+    if (technicalDocProfiles.has(rel)) {
+      return false;
+    }
+
+    // Meta index and split-child supplements (not standalone element specs).
+    const relLower = rel.toLowerCase();
+    if (relLower === "spec-size-backlog.md") {
+      return false;
+    }
+    if (relLower.endsWith("workspace-view-system.deep-dive.md")) {
+      return false;
+    }
+    if (relLower.endsWith("upload-manager-pipeline.data.md")) {
+      return false;
+    }
+    // Split-out reference bodies (linked from parent specs; avoid duplicate element-spec skeleton).
+    if (isSplitChildSpec(filePath)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function collectSpecFiles(specDir) {
+  const files = [];
+  const stack = [specDir];
+
+  while (stack.length > 0) {
+    const currentDir = stack.pop();
+    const entries = readdirSync(currentDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (entry.isFile() && shouldIncludeSpecFile(fullPath, specDir)) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  return files.sort();
+}
+
+function resolveDefaultSpecDir(projectRoot) {
+  const preferred = join(projectRoot, "docs", "specs");
+  if (existsSync(preferred)) {
+    return preferred;
+  }
+
+  const legacy = join(projectRoot, "docs", "element-specs");
+  if (existsSync(legacy)) {
+    return legacy;
+  }
+
+  // Keep deterministic behavior even if neither path exists.
+  return preferred;
+}
+
 function main() {
   const config = parseArgs(process.argv);
 
@@ -415,16 +528,11 @@ function main() {
     "$1",
   );
   const projectRoot = resolve(scriptDir, "..");
-  const specDir = config.specDir || join(projectRoot, "docs", "element-specs");
+  const specDir = config.specDir || resolveDefaultSpecDir(projectRoot);
 
   let files;
   try {
-    files = readdirSync(specDir)
-      .filter(
-        (f) => f.endsWith(".md") && f !== "README.md" && !f.endsWith(".bak"),
-      )
-      .map((f) => join(specDir, f))
-      .sort();
+    files = collectSpecFiles(specDir);
   } catch (err) {
     console.error(`Error reading spec directory: ${specDir}`);
     console.error(err.message);
@@ -454,6 +562,7 @@ function main() {
     files,
     config,
     projectRoot,
+    specDir,
   );
 
   for (const diagnostic of settingsRegistryDiagnostics) {

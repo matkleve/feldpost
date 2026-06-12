@@ -1,0 +1,42 @@
+name: Spec Lint
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "docs/specs/**"
+      - "scripts/lint-specs.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/spec-lint.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/specs/**"
+      - "scripts/lint-specs.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/spec-lint.yml"
+
+jobs:
+  spec-lint:
+    name: Spec governance & shape (lint-specs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run spec lint
+        run: npm run lint:specs

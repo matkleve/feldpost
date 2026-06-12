@@ -2,47 +2,61 @@
   display: contents;
 }
 
-.lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-modal);
-  background: rgba(0, 0, 0, 0.9);
+// Positions the close control over the centered image area (geometry + stacking).
+// @see docs/specs/component/media/photo-lightbox.md
+.photo-lightbox__panel {
+  position: relative;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--media-chrome-control-bg);
+  color: var(--media-chrome-foreground);
+  cursor: pointer;
+  z-index: 1;
+  transition: background 80ms ease-out;
+
+  .material-icons {
+    font-size: var(--font-size-xl);
+  }
+
+  &:hover {
+    background: var(--media-chrome-control-bg-hover);
+  }
+}
+
+// Scrollable stage for zoomed image dimensions (geometry owner for zoom pan).
+// @see docs/specs/component/media/photo-lightbox.md
+.lightbox__viewport {
+  max-width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: zoom-out;
+}
 
-  &__close {
-    position: absolute;
-    top: var(--spacing-3);
-    right: var(--spacing-3);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border: none;
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    cursor: pointer;
-    z-index: 1;
-    transition: background 80ms ease-out;
+.lightbox__image {
+  max-width: 95vw;
+  max-height: 95vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: zoom-in;
+  border-radius: var(--radius-md);
+}
 
-    .material-icons {
-      font-size: 1.25rem;
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-  }
-
-  &__image {
-    max-width: 95vw;
-    max-height: 95vh;
-    object-fit: contain;
-    cursor: default;
-    border-radius: var(--radius-md);
-  }
+// Stable state: zoomed — wheel adjusts scale; default cursor (pan via viewport scroll).
+// @see docs/specs/component/media/photo-lightbox.md
+.photo-lightbox__panel[data-state='zoomed'] .lightbox__image {
+  cursor: default;
 }

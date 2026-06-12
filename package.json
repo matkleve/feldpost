@@ -1,9 +1,33 @@
 {
   "scripts": {
+    "sync-tokens": "node scripts/sync-tokens.mjs",
+    "lint:specs": "node scripts/lint-specs.mjs",
+    "design-system:check": "node scripts/validate-design-system-registry.mjs && node scripts/audit-panel-breakpoints.mjs && node scripts/guard-visual-behavior.mjs",
+    "design-system:audit-breakpoints": "node scripts/audit-panel-breakpoints.mjs",
+    "design-system:validate-registry": "node scripts/validate-design-system-registry.mjs",
+    "design-system:guard-visual-behavior": "node scripts/guard-visual-behavior.mjs",
     "i18n:generate-language": "node scripts/generate-i18n-language.mjs",
-    "i18n:validate-language": "node scripts/validate-i18n-language.mjs"
+    "i18n:validate-language": "node scripts/validate-i18n-language.mjs",
+    "i18n:normalize-diacritics": "node scripts/normalize-i18n-diacritics.mjs",
+    "i18n:validate-diacritics": "node scripts/validate-i18n-diacritics.mjs",
+    "i18n:check": "node scripts/validate-i18n-diacritics.mjs",
+    "i18n:normalize-de-umlauts": "node scripts/normalize-i18n-diacritics.mjs --lang=de",
+    "i18n:validate-de-umlauts": "node scripts/validate-i18n-diacritics.mjs --lang=de",
+    "i18n:guard": "node scripts/check-i18n-hardcoded-literals.mjs",
+    "i18n:guard:strict": "node scripts/check-i18n-hardcoded-literals.mjs --strict",
+    "supabase:smoke:photoless": "node scripts/validate-supabase-rpc-media-type.mjs",
+    "supabase:smoke:storage-cleanup": "node scripts/validate-supabase-storage-cleanup-api-mode.mjs",
+    "supabase:smoke": "npm run supabase:smoke:photoless && npm run supabase:smoke:storage-cleanup",
+    "supabase:ensure-edge": "node scripts/ensure-supabase-edge-runtime.mjs",
+    "supabase:cli:version": "node scripts/run-supabase-cli.mjs --version",
+    "supabase:db:push": "node scripts/run-supabase-cli.mjs db push",
+    "supabase:migration:list": "node scripts/run-supabase-cli.mjs migration list",
+    "diagnose:geocoder": "node --experimental-strip-types scripts/diagnose-geocoder.ts",
+    "geo:build-gemeinden": "node scripts/build-at-gemeinden-bev.mjs",
+    "geo:build-gemeinden:fast": "node scripts/build-at-gemeinden-bev.mjs --source=github"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.97.0"
+    "@supabase/supabase-js": "^2.97.0",
+    "heic2any": "^0.0.4"
   }
 }

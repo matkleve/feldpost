@@ -1,43 +1,63 @@
+@use '../../../styles/frosted-chrome';
+
 // NavComponent styles — LeftSidebar (desktop) / bottom tab bar (mobile).
 //
-// Design spec reference: design.md §3.3
+// Design spec reference: docs/design/README.md §3.3
 //   collapsed  → 48px (3rem) icon rail, icons centred
 //   expanded   → 240px (15rem) panel, icon + label
 //   Frosted glass: surface at 85% opacity + 16px blur
-//   Active link: --color-clay accent
-//   Ghost buttons: transparent bg, fill on hover (Notion pattern)
+//   Active link: cool selection ink (--nav-selected-ink → --filetype-document)
+//   Hover (any link): brand primary wash; selected + hover upgrades to primary
+//   Ghost buttons: transparent bg at rest (Notion pattern)
 //
 // Mobile: fixed full-width bottom tab bar, icons only, 56px tall.
 
 // ── Host ──────────────────────────────────────────────────────────────────────
 
 :host {
-  display: contents;
+  // Avoid `display: contents` — it breaks `position: fixed` on `.sidebar`; the map route
+  // paints after this host in DOM order and fully covers a non-fixed sidebar.
+  display: block;
+  position: relative;
+  // Above map chrome plane (200); rail must stay visible over the map canvas.
+  // @see docs/design/tokens.md § Z-index — panel vs map chrome
+  z-index: 201;
+  pointer-events: none;
+}
+
+// Settings open + rail hover: expanded width overlaps the overlay — lift above modal plane (500).
+// @see docs/specs/ui/settings-overlay/settings-overlay.md
+@media (min-width: 768px) {
+  :host:has(.sidebar.sidebar--settings-open:hover) {
+    z-index: 501;
+  }
 }
 
 // ── LeftSidebar — trigger zone ───────────────────────────────────────────────
 
 .sidebar {
-  --sidebar-width-collapsed: var(--layout-sidebar-width-collapsed);
-  --sidebar-width-expanded: var(--layout-sidebar-width-expanded);
-  --sidebar-row-padding-inline: var(--layout-sidebar-row-padding-inline);
-  --sidebar-row-padding-block: var(--layout-sidebar-row-padding-block);
-  --sidebar-row-gap: var(--layout-sidebar-row-gap);
-  --sidebar-row-height: var(--layout-sidebar-row-height);
-  --sidebar-media-size: var(--layout-sidebar-media-size);
-  --sidebar-icon-size: var(--layout-sidebar-icon-size);
-  --sidebar-label-size: var(--layout-sidebar-label-size);
-
+  --sidebar-width-collapsed: calc(0.25rem * 12);
+  --sidebar-width-expanded: 15rem;
+  --sidebar-row-padding-inline: var(--spacing-1);
+  --sidebar-row-padding-block: var(--spacing-1);
+  --sidebar-row-gap: var(--spacing-3);
+  --sidebar-row-height: calc(var(--spacing-6) + (var(--spacing-1) * 2));
+  --sidebar-media-size: var(--spacing-6);
+  --sidebar-icon-size: 1.25rem;
   position: fixed;
-  z-index: var(--z-panel);
+  z-index: 201;
+  pointer-events: auto;
 
   @media (min-width: 768px) {
     top: 50%;
-    left: var(--container-inset);
+    left: var(--spacing-3);
     transform: translateY(-50%);
     width: var(--sidebar-width-collapsed);
+    min-width: var(--sidebar-width-collapsed);
+    max-width: var(--sidebar-width-collapsed);
     height: auto; // fit content
     max-height: 80vh;
+    overflow: visible;
     border-radius: var(--container-radius-panel);
     display: flex;
     align-items: stretch;
@@ -45,6 +65,8 @@
 
     &:hover {
       width: var(--sidebar-width-expanded);
+      min-width: var(--sidebar-width-expanded);
+      max-width: var(--sidebar-width-expanded);
 
       .nav__label {
         opacity: 1;
@@ -65,9 +87,9 @@
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    background: var(--color-bg-surface);
-    border-top: 1px solid var(--color-border);
-    box-shadow: var(--elevation-subtle);
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
   }
 }
 
@@ -78,18 +100,17 @@
   z-index: 2;
 
   @media (min-width: 768px) {
-    --ui-container-radius: var(--container-radius-panel);
-
+    display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
     min-height: 0;
+    padding-block: var(--spacing-1);
+    padding-inline: var(--spacing-1);
+    border-radius: var(--container-radius-panel);
+    overflow: hidden;
 
-    // Frosted glass
-    background: color-mix(in srgb, var(--color-bg-surface) 85%, transparent);
-    backdrop-filter: blur(16px) saturate(1.2);
-    -webkit-backdrop-filter: blur(16px) saturate(1.2);
-    box-shadow: var(--elevation-overlay);
-    border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+    @include frosted-chrome.surface;
   }
 
   @media (max-width: 767px) {
@@ -110,7 +131,7 @@
   @media (min-width: 768px) {
     display: flex;
     flex-direction: column;
-    gap: var(--ui-container-gap);
+    gap: var(--spacing-1);
     width: 100%;
     min-height: 0;
     flex: 1 1 auto;
@@ -139,6 +160,9 @@
 }
 
 .sidebar__item--spacer {
+  flex: 1 1 auto;
+  min-block-size: var(--spacing-2);
+
   @media (max-width: 767px) {
     display: none;
   }
@@ -153,19 +177,16 @@
 // ── Nav link — ghost button pattern (Notion-inspired) ────────────────────────
 
 .nav__link {
-  --ui-item-min-height: var(--sidebar-row-height);
-  --ui-item-padding-inline: var(--sidebar-row-padding-inline);
-  --ui-item-padding-block: var(--sidebar-row-padding-block);
-  --ui-item-gap: var(--sidebar-row-gap);
-  --ui-item-radius: var(--container-radius-control);
-  --ui-item-media-size: var(--sidebar-media-size);
-
   display: grid;
   grid-template-columns: var(--sidebar-media-size) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--sidebar-row-gap);
+  min-height: var(--sidebar-row-height);
+  padding-block: var(--sidebar-row-padding-block);
+  padding-inline: var(--sidebar-row-padding-inline);
+  border-radius: var(--container-radius-control);
   text-decoration: none;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   white-space: nowrap;
   cursor: pointer;
   margin: 0;
@@ -189,31 +210,49 @@
     gap: 0.125rem;
   }
 
-  // Ghost hover — transparent fill appears
-  &:hover {
-    background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
-    color: var(--color-text-primary);
-  }
-
-  // Active route — clay accent
-  &--active {
-    color: var(--color-clay, var(--color-primary));
-    background: color-mix(in srgb, var(--color-clay, var(--color-primary)) 10%, transparent);
+  // Hover — brand primary (attention), including over the active route
+  &:hover,
+  &:focus-visible {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
 
     .nav__icon {
-      color: var(--color-clay, var(--color-primary));
+      color: var(--primary);
     }
   }
 
-  &--active:hover {
-    background: color-mix(in srgb, var(--color-clay, var(--color-primary)) 14%, transparent);
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--interactive-focus-ring);
+  }
+
+  // Active route — cool selection ink (global token)
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  &--active {
+    color: var(--interaction-selected-ink);
+    background: color-mix(in srgb, var(--interaction-selected-ink) 10%, transparent);
+
+    .nav__icon {
+      color: var(--interaction-selected-ink);
+    }
+  }
+
+  // Selected row still uses primary on hover/focus (wins over --active)
+  &--active:hover,
+  &--active:focus-visible {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+
+    .nav__icon {
+      color: var(--primary);
+    }
   }
 
   &--disabled {
     opacity: 0.3;
     cursor: default;
     pointer-events: none;
-    color: var(--color-text-disabled);
+    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
   }
 }
 
@@ -221,26 +260,33 @@
 
 .nav__icon {
   font-size: var(--sidebar-icon-size);
-  line-height: 1;
+  line-height: var(--line-height-solid);
   flex-shrink: 0;
   text-align: center;
 }
 
 .nav__media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   inline-size: var(--sidebar-media-size);
   block-size: var(--sidebar-media-size);
   min-inline-size: var(--sidebar-media-size);
 }
 
 // ── Label text ────────────────────────────────────────────────────────────────
+// Label row type scale is Tailwind `text-sm` in the template (matches `hlmMenuItem` rows).
+// @see docs/specs/component/workspace/sidebar.md
 
 .nav__label {
-  font-size: var(--sidebar-label-size);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  color: inherit;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   min-width: 0;
+  letter-spacing: 0.01em;
+  line-height: var(--line-height-solid);
+  color: inherit;
   opacity: 0;
   visibility: hidden;
   overflow: hidden;
@@ -259,8 +305,11 @@
   background: transparent;
   width: 100%;
   text-align: left;
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
+
+// Avatar badge carries Tailwind `text-sm font-semibold` in the template for initials at row scale.
+// @see docs/specs/component/workspace/sidebar.md
 
 .nav__avatar-badge {
   display: flex;
@@ -270,17 +319,15 @@
   height: var(--sidebar-media-size);
   flex-shrink: 0;
   border-radius: var(--radius-full);
-  background: var(--color-clay, var(--color-primary));
-  color: #fff;
-  font-size: var(--sidebar-label-size);
-  font-weight: 600;
+  background: var(--primary);
+  color: var(--primary-foreground);
   transition:
     background 80ms ease-out,
     transform 80ms ease-out;
   user-select: none;
 
   .nav__account-link:hover & {
-    background: color-mix(in srgb, var(--color-clay, var(--color-primary)) 85%, #000);
+    background: color-mix(in srgb, var(--primary) 85%, var(--shadow-color));
     transform: scale(1.03);
   }
 }
@@ -293,11 +340,11 @@
 }
 
 .nav__avatar-initial {
-  line-height: 1;
+  line-height: var(--line-height-solid);
 }
 
 .nav__account-name {
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 // ── Screen-reader only ────────────────────────────────────────────────────────

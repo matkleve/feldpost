@@ -1,0 +1,450 @@
+@use '../../../../styles/frosted-chrome';
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
+// Upload resolver tray — compact Cursor Questions card; passive + active modes
+// @see docs/specs/component/upload/upload-resolver-tray.md
+// Choice rows align with metadata-property-picker / option-menu-list (2rem); card uses spacing-2
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+:host(:empty) {
+  display: none;
+}
+
+@layer components {
+  // Passive status — same chrome as active, tight padding
+  // @see upload-resolver-tray.md#passive-mode
+  .upload-resolver-tray__passive {
+    margin: 0;
+    max-width: 100%;
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    color: var(--muted-foreground);
+    text-align: left;
+    @include frosted-chrome.floating-panel-shell;
+  }
+
+  // Active card — same shell chrome as `.option-menu-surface` on dropdown hosts.
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    width: 100%;
+    @include frosted-chrome.floating-panel-shell;
+  }
+
+  // Top row — section label + carousel chevrons
+  // @see upload-resolver-tray.md#carousel
+  .upload-resolver-tray__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-2);
+    min-width: 0;
+    min-height: 1.25rem;
+  }
+
+  // Muted section title (not a heading element)
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__section-label {
+    font-size: var(--font-size-2xs);
+    line-height: 1.4;
+    color: var(--muted-foreground);
+    letter-spacing: 0.02em;
+  }
+
+  // Chevron pair for multi-group carousel
+  // @see upload-resolver-tray.md#carousel
+  .upload-resolver-tray__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    flex-shrink: 0;
+  }
+
+  // Current/total between carousel chevrons (e.g. 1/4)
+  // @see upload-resolver-tray.md#carousel
+  .upload-resolver-tray__nav-position {
+    min-width: 2rem;
+    font-size: var(--font-size-2xs);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+    text-align: center;
+    user-select: none;
+  }
+
+  // Compact icon-only carousel control
+  // @see upload-resolver-tray.md#carousel
+  .upload-resolver-tray__nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+
+    .material-icons {
+      font-size: 1rem;
+    }
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--muted) 60%, transparent);
+      color: var(--foreground);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+
+  // Dependent item waiting on parent answer (1B after 1A)
+  // @see upload-resolver-tray-orchestrator.md#dependencies
+  .upload-resolver-tray__blocked-hint {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    color: var(--muted-foreground);
+  }
+
+  // Primary question — ~1rem: `--font-size-md` (1.08rem); no exact 1rem step on scale
+  // @see docs/design/tokens.md § Type scale
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__question {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    color: var(--foreground);
+  }
+
+  // Supporting context — address or folder path
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__context {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    color: var(--muted-foreground);
+
+    &--folder {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-1);
+
+      .material-icons {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  // Option list — option-menu-list rhythm (2px gap)
+  // @see metadata-property-picker.component.scss
+  .upload-resolver-tray__choices {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  // Single choice — mirrors metadata-property-picker__result-item height/padding
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__choice {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2rem;
+    padding-block: var(--spacing-1);
+    padding-inline: var(--spacing-2);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition:
+      background 80ms ease-out,
+      color 80ms ease-out;
+
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+
+      .upload-resolver-tray__choice-label,
+      .upload-resolver-tray__choice-score {
+        color: var(--primary);
+      }
+    }
+
+    // Stable state: selected choice — cool selection ink at rest; primary on hover
+    // @see docs/design/state-visuals.md § Interaction emphasis
+    &--selected {
+      @include emphasis.selected(10%);
+
+      .upload-resolver-tray__choice-label,
+      .upload-resolver-tray__choice-score {
+        color: var(--interaction-selected-ink);
+      }
+    }
+
+    &--selected:hover,
+    &--selected:focus-visible {
+      @include emphasis.selected-hover(8%);
+
+      .upload-resolver-tray__choice-label,
+      .upload-resolver-tray__choice-score {
+        color: var(--primary);
+      }
+    }
+  }
+
+  // Number badge — Cursor Questions option index (keyboard 1–9)
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__choice-index {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 1.25rem;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--muted) 35%, var(--card));
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    color: var(--muted-foreground);
+    pointer-events: none;
+  }
+
+  .upload-resolver-tray__choice--selected .upload-resolver-tray__choice-index {
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 35%, var(--border));
+    color: var(--foreground);
+  }
+
+  .upload-resolver-tray__choice--selected:hover .upload-resolver-tray__choice-index,
+  .upload-resolver-tray__choice--selected:focus-visible .upload-resolver-tray__choice-index {
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+  }
+
+  // Label + score on one row
+  // @see address-field-combobox__result-item
+  .upload-resolver-tray__choice-body {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-width: 0;
+  }
+
+  // Option primary text
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__choice-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    color: var(--foreground);
+    word-break: break-word;
+    transition: color 80ms ease-out;
+  }
+
+  // Trailing score column — percent centered over confidence micro-bar
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col {
+    --score-bar-width: 1.5rem;
+    // Neutral greys (no muted-foreground hue) for percent + low-confidence bar
+    // @see upload-resolver-tray.md#score-micro-bar
+    --score-track: color-mix(in oklch, var(--foreground) 8%, var(--background));
+    --score-ink-neutral: color-mix(in oklch, var(--foreground) 34%, var(--background));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+    width: var(--score-bar-width);
+    min-width: var(--score-bar-width);
+  }
+
+  // Geocoder confidence percent label
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score {
+    width: 100%;
+    font-size: var(--font-size-2xs);
+    line-height: 1;
+    text-align: center;
+    color: var(--score-ink-neutral);
+    transition: color 80ms ease-out;
+  }
+
+  // Neutral track for confidence fill (width via --score-fill custom property)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-bar {
+    width: 100%;
+    height: 3px;
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--score-track);
+  }
+
+  // Filled portion of confidence bar
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-bar__fill {
+    display: block;
+    height: 100%;
+    width: calc(var(--score-fill, 0) * 1%);
+    min-width: 0;
+    border-radius: inherit;
+    background: var(--score-ink-neutral);
+    transition:
+      width var(--motion-duration-fast) var(--motion-ease-out),
+      background-color 80ms ease-out;
+  }
+
+  // Affected files count
+  // @see upload-resolver-tray.md#active-mode
+  // Affected-media count chip + scrollable dropdown (click to open; native title tooltip on chip)
+  // @see upload-resolver-tray.md#affected-media-chip
+  .upload-resolver-tray__media-chip-host {
+    position: relative;
+    align-self: flex-start;
+    padding-inline: var(--spacing-2);
+  }
+
+  .upload-resolver-tray__media-chip-trigger {
+    display: inline-flex;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  .upload-resolver-tray__media-list {
+    max-height: min(40vh, 12rem);
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .upload-resolver-tray__media-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-height: 2rem;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-sm);
+  }
+
+  .upload-resolver-tray__media-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    color: var(--foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .upload-resolver-tray__media-ask-later {
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: var(--font-size-2xs);
+    line-height: 1.4;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: var(--foreground);
+    }
+  }
+
+  // Skip + Continue — compact footer (Cursor Questions rhythm)
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-2);
+    padding-top: var(--spacing-1);
+  }
+
+  // Text skip — deferGroup
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__skip {
+    padding: 0 var(--spacing-1);
+    font-size: var(--font-size-xs);
+    line-height: 1.25;
+    color: var(--muted-foreground);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--foreground);
+    }
+  }
+
+  // Primary confirm — slimmer than default hlmBtn sm (Cursor Continue)
+  // @see upload-resolver-tray.md#active-mode
+  .upload-resolver-tray__continue {
+    flex-shrink: 0;
+    // Overrides hlmBtn `h-9` utilities on the same node
+    min-height: 1.625rem !important;
+    height: 1.625rem !important;
+    padding-block: 0 !important;
+    padding-inline: var(--spacing-2) !important;
+    font-size: var(--font-size-xs) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    line-height: 1.25 !important;
+    border-radius: var(--radius-sm) !important;
+  }
+}
+
+@layer states {
+  // Stable state: low confidence — muted bar fill (<70%)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col[data-score-band='low']
+    .upload-resolver-tray__choice-score-bar__fill {
+    background: var(--score-ink-neutral);
+  }
+
+  // Stable state: okay confidence — primary bar fill (70–97.9%)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col[data-score-band='okay']
+    .upload-resolver-tray__choice-score-bar__fill {
+    background: var(--primary);
+  }
+
+  // Stable state: strong confidence — chart-1 bar fill (≥98%, high-trust readout)
+  // @see upload-resolver-tray.md#score-micro-bar
+  .upload-resolver-tray__choice-score-col[data-score-band='strong']
+    .upload-resolver-tray__choice-score-bar__fill {
+    background: var(--chart-1);
+  }
+}

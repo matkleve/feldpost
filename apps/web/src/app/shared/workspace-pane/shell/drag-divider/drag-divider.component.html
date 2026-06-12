@@ -1,0 +1,14 @@
+<!-- Hit zone — thin seam strip on map-facing edge only (see SCSS) -->
+<div
+  class="drag-divider__hit-zone"
+  (pointerdown)="onPointerDown($event)"
+  (dblclick)="onDoubleClick()"
+></div>
+
+<!-- Bar — 2px seam line on host right edge (map | pane boundary) -->
+<div class="drag-divider__bar" aria-hidden="true"></div>
+
+<!-- Grip indicator — pill badge centered on the seam -->
+<div class="drag-divider__grip" aria-hidden="true">
+  <span class="material-icons drag-divider__grip-icon">drag_indicator</span>
+</div>

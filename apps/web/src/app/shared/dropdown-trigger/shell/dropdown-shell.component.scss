@@ -1,0 +1,63 @@
+@use '../scss/dropdown-panel-flex-chain' as panel-flex;
+
+@layer components {
+  // OWNERSHIP: Toolbar menu width / height floors live ONLY on `:host.toolbar-dropdown` below — not on `app-standard-dropdown` or feature panels.
+  // Standard panels **18rem** wide; filter **32rem** floor / **40rem** cap — keep `toolbar-menu-panel-layout.ts` px in sync.
+  // @see docs/specs/component/filters/dropdown-system.md — Ownership matrix
+  // Flex column + scroll; panel chrome comes from `[hlmMenuContent]` (Tailwind + tweakcn tokens).
+  // @see docs/specs/component/filters/dropdown-system.md
+  :host {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+
+  // Frosted shell: one scroll owner inside (StandardDropdown or `.option-menu-list`), never on the shell host.
+  // @see docs/specs/component/upload/upload-resolver-tray.md
+  :host.option-menu-surface {
+    overflow: hidden;
+  }
+
+  // Direct body (context menu list, address results) — child fills shell and scrolls locally.
+  // @see docs/specs/component/filters/dropdown-system.md
+  :host.option-menu-surface > * {
+    @include panel-flex.panel-flex-child;
+  }
+
+  // Locks toolbar menu width (test: 18rem) and max height (test: 18rem×1.6) to the viewport clamp.
+  // Scroll lives on `.standard-dropdown__items` so shell padding stays visible at the bottom (min-height floor independent of inset token).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  :host.toolbar-dropdown {
+    box-sizing: border-box;
+    width: min(18rem, calc(100vw - 2rem));
+    max-width: min(18rem, calc(100vw - 2rem));
+    min-width: min(18rem, calc(100vw - 2rem));
+    max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
+    min-height: min(calc(8rem + 2 * var(--spacing-2)), calc(18rem * 1.6));
+    overflow: hidden;
+  }
+
+  // Filter: **wider floor** (32rem) for rule-row content — not the same width as sort/grouping/projects (see `toolbarDropdownPositionWidthPx`).
+  // @see docs/specs/component/filters/dropdown-system.md#toolbar-menu-panels-anchored-ui
+  :host.toolbar-dropdown.toolbar-dropdown--filter {
+    width: max-content;
+    max-width: min(40rem, calc(100vw - 2rem));
+    min-width: min(32rem, calc(100vw - 2rem));
+    max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
+  }
+
+  // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).
+  // Standalone rule — does NOT require toolbar-dropdown because the media-detail shell uses anchor
+  // positioning, not the toolbar width floor. Max-width caps at 20rem per spec table.
+  // @see docs/specs/component/filters/dropdown-system.md#shell-width-variants-non-exhaustive
+  // @see docs/specs/ui/media-detail/media-detail-inline-section.md
+  :host.media-detail-projects-panel {
+    box-sizing: border-box;
+    overflow: hidden;
+    width: 100%;
+    min-width: 0;
+    max-width: min(20rem, calc(100vw - 2rem));
+    max-height: min(calc(14rem + 2rem), calc(100vh - 2rem));
+  }
+}

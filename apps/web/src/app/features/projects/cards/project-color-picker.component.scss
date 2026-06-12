@@ -1,0 +1,22 @@
+.project-color-picker {
+  min-width: 14rem;
+}
+
+.project-color-picker__list {
+  max-height: none;
+  // Menu list horizontal inset aligned with anchored dropdown surfaces.
+  // @see docs/specs/component/filters/dropdown-system.md
+  --std-dropdown-padding-inline: var(--spacing-3, 0.75rem);
+  padding-inline: var(--std-dropdown-padding-inline);
+}
+
+.project-color-picker__list button {
+  width: 100%;
+}
+
+.project-color-picker__swatch {
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+}

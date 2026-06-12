@@ -46,6 +46,39 @@ BEGIN
   SELECT id INTO _role_user  FROM public.roles WHERE name = 'user';
   SELECT id INTO _role_admin FROM public.roles WHERE name = 'admin';
 
+  -- Seed users are bootstrap data. Temporarily swap to a permissive bootstrap
+  -- implementation so deterministic auth.users inserts can proceed.
+  CREATE OR REPLACE FUNCTION public.handle_new_user()
+  RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = public
+  AS $bootstrap$
+  DECLARE
+    v_org_id uuid;
+    v_role_id uuid;
+  BEGIN
+    SELECT id INTO v_org_id FROM public.organizations LIMIT 1;
+
+    INSERT INTO public.profiles (id, organization_id, full_name, avatar_url)
+    VALUES (
+      NEW.id,
+      v_org_id,
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'avatar_url'
+    )
+    ON CONFLICT (id) DO NOTHING;
+
+    SELECT id INTO v_role_id FROM public.roles WHERE name = 'user';
+    IF v_role_id IS NOT NULL THEN
+      INSERT INTO public.user_roles (user_id, role_id)
+      VALUES (NEW.id, v_role_id)
+      ON CONFLICT (user_id, role_id) DO NOTHING;
+    END IF;
+
+    RETURN NEW;
+  END;
+  $bootstrap$;
+
   FOREACH _u SLICE 1 IN ARRAY _users LOOP
     _uid := _u[1]::uuid;
 
@@ -83,6 +116,125 @@ BEGIN
       ON CONFLICT (user_id, role_id) DO NOTHING;
     END IF;
   END LOOP;
+
+  -- Restore invite-only registration behavior after bootstrap users are seeded.
+  CREATE OR REPLACE FUNCTION public.handle_new_user()
+  RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = public
+  AS $strict$
+  DECLARE
+    v_invite_token_hash text;
+    v_invite public.qr_invites%rowtype;
+    v_role_id uuid;
+  BEGIN
+    v_invite_token_hash := nullif(NEW.raw_user_meta_data->>'invite_token_hash', '');
+
+    IF v_invite_token_hash IS NULL THEN
+      RAISE EXCEPTION 'Invite code is required for registration.';
+    END IF;
+
+    SELECT *
+      INTO v_invite
+    FROM public.qr_invites
+    WHERE token_hash = v_invite_token_hash
+      AND status = 'active'
+      AND expires_at > now()
+    LIMIT 1
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Invite code is invalid, expired, or already used.';
+    END IF;
+
+    INSERT INTO public.profiles (id, organization_id, full_name, avatar_url)
+    VALUES (
+      NEW.id,
+      v_invite.organization_id,
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'avatar_url'
+    );
+
+    SELECT id INTO v_role_id FROM public.roles WHERE name = v_invite.target_role;
+
+    IF v_role_id IS NULL THEN
+      SELECT id INTO v_role_id FROM public.roles WHERE name = 'user';
+    END IF;
+
+    IF v_role_id IS NOT NULL THEN
+      INSERT INTO public.user_roles (user_id, role_id) VALUES (NEW.id, v_role_id);
+    END IF;
+
+    UPDATE public.qr_invites
+    SET
+      status = 'accepted',
+      accepted_at = now(),
+      accepted_user_id = NEW.id
+    WHERE id = v_invite.id;
+
+    RETURN NEW;
+  END;
+  $strict$;
+EXCEPTION
+  WHEN OTHERS THEN
+    CREATE OR REPLACE FUNCTION public.handle_new_user()
+    RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path = public
+    AS $strict$
+    DECLARE
+      v_invite_token_hash text;
+      v_invite public.qr_invites%rowtype;
+      v_role_id uuid;
+    BEGIN
+      v_invite_token_hash := nullif(NEW.raw_user_meta_data->>'invite_token_hash', '');
+
+      IF v_invite_token_hash IS NULL THEN
+        RAISE EXCEPTION 'Invite code is required for registration.';
+      END IF;
+
+      SELECT *
+        INTO v_invite
+      FROM public.qr_invites
+      WHERE token_hash = v_invite_token_hash
+        AND status = 'active'
+        AND expires_at > now()
+      LIMIT 1
+      FOR UPDATE;
+
+      IF NOT FOUND THEN
+        RAISE EXCEPTION 'Invite code is invalid, expired, or already used.';
+      END IF;
+
+      INSERT INTO public.profiles (id, organization_id, full_name, avatar_url)
+      VALUES (
+        NEW.id,
+        v_invite.organization_id,
+        NEW.raw_user_meta_data->>'full_name',
+        NEW.raw_user_meta_data->>'avatar_url'
+      );
+
+      SELECT id INTO v_role_id FROM public.roles WHERE name = v_invite.target_role;
+
+      IF v_role_id IS NULL THEN
+        SELECT id INTO v_role_id FROM public.roles WHERE name = 'user';
+      END IF;
+
+      IF v_role_id IS NOT NULL THEN
+        INSERT INTO public.user_roles (user_id, role_id) VALUES (NEW.id, v_role_id);
+      END IF;
+
+      UPDATE public.qr_invites
+      SET
+        status = 'accepted',
+        accepted_at = now(),
+        accepted_user_id = NEW.id
+      WHERE id = v_invite.id;
+
+      RETURN NEW;
+    END;
+    $strict$;
+    RAISE;
 END $$;
 
 -- ---------------------------------------------------------------------------
@@ -131,6 +283,7 @@ END $$;
 DO $$
 DECLARE
   _org_id   uuid;
+  _has_images boolean := to_regclass('public.images') IS NOT NULL;
 
   -- Technician user IDs (field workers rotate between sites)
   _techs    uuid[] := ARRAY[
@@ -228,6 +381,11 @@ DECLARE
   -- For storage path
   _ext         text;
 BEGIN
+  IF NOT _has_images THEN
+    RAISE NOTICE 'Skipping legacy image seed block: table public.images not present';
+    RETURN;
+  END IF;
+
   -- Dynamically find the Default Organization
   SELECT id INTO _org_id FROM public.organizations WHERE name = 'Default Organization' LIMIT 1;
 
@@ -335,6 +493,8 @@ END $$;
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
+  _has_images boolean := to_regclass('public.images') IS NOT NULL;
+  _has_coordinate_corrections boolean := to_regclass('public.coordinate_corrections') IS NOT NULL;
   _img   record;
   _new_lat numeric;
   _new_lng numeric;
@@ -345,6 +505,11 @@ DECLARE
     'b0000000-0000-0000-0000-000000000003'
   ];
 BEGIN
+  IF NOT (_has_images AND _has_coordinate_corrections) THEN
+    RAISE NOTICE 'Skipping coordinate correction seed: required legacy tables not present';
+    RETURN;
+  END IF;
+
   FOR _img IN
     SELECT id, latitude, longitude, user_id
     FROM public.images
@@ -389,18 +554,20 @@ DECLARE _org_id uuid;
 BEGIN
   SELECT id INTO _org_id FROM public.organizations WHERE name = 'Default Organization' LIMIT 1;
 
-  INSERT INTO public.metadata_keys (id, organization_id, created_by, name) VALUES
-    ('d0000000-0000-0000-0000-000000000001', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Bauphase'),
-    ('d0000000-0000-0000-0000-000000000002', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Gewerk'),
-    ('d0000000-0000-0000-0000-000000000003', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Mangel'),
-    ('d0000000-0000-0000-0000-000000000004', _org_id, 'b0000000-0000-0000-0000-000000000002', 'Stockwerk'),
-    ('d0000000-0000-0000-0000-000000000005', _org_id, 'b0000000-0000-0000-0000-000000000003', 'Wetter')
+  INSERT INTO public.metadata_keys (id, organization_id, created_by, key_name, key_type) VALUES
+    ('d0000000-0000-0000-0000-000000000001', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Bauphase', 'text'),
+    ('d0000000-0000-0000-0000-000000000002', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Gewerk', 'text'),
+    ('d0000000-0000-0000-0000-000000000003', _org_id, 'b0000000-0000-0000-0000-000000000001', 'Mangel', 'text'),
+    ('d0000000-0000-0000-0000-000000000004', _org_id, 'b0000000-0000-0000-0000-000000000002', 'Stockwerk', 'text'),
+    ('d0000000-0000-0000-0000-000000000005', _org_id, 'b0000000-0000-0000-0000-000000000003', 'Wetter', 'text')
   ON CONFLICT (id) DO NOTHING;
 END $$;
 
 -- Assign metadata to ~40% of images
 DO $$
 DECLARE
+  _has_images boolean := to_regclass('public.images') IS NOT NULL;
+  _has_image_metadata boolean := to_regclass('public.image_metadata') IS NOT NULL;
   _img    record;
   _phases text[] := ARRAY['Aushub', 'Rohbau', 'Rohinstallation', 'Innenausbau', 'Fassade', 'Außenanlage', 'Abnahme'];
   _trades text[] := ARRAY['Maurer', 'Zimmerer', 'Elektriker', 'Installateur', 'Spengler', 'Maler', 'Estrichleger', 'Bodenleger', 'Dachdecker'];
@@ -408,6 +575,11 @@ DECLARE
   _floors text[] := ARRAY['UG2', 'UG1', 'EG', 'OG1', 'OG2', 'OG3', 'OG4', 'OG5', 'OG6', 'DG'];
   _weather text[] := ARRAY['sonnig', 'bewölkt', 'Regen', 'Schnee', 'Nebel', 'windig'];
 BEGIN
+  IF NOT (_has_images AND _has_image_metadata) THEN
+    RAISE NOTICE 'Skipping legacy image metadata seed: tables public.images/public.image_metadata not present';
+    RETURN;
+  END IF;
+
   FOR _img IN
     SELECT id FROM public.images ORDER BY random() LIMIT (SELECT COUNT(*) * 0.4 FROM public.images)::int
   LOOP
@@ -451,36 +623,49 @@ END $$;
 -- ---------------------------------------------------------------------------
 -- 6. Create some saved groups
 -- ---------------------------------------------------------------------------
-INSERT INTO public.saved_groups (id, user_id, name) VALUES
-  ('e0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Mängelfotos Seestadt'),
-  ('e0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'Rohbau Fortschritt'),
-  ('e0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'Fassadendetails DC Tower'),
-  ('e0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000004', 'Baustelleneinrichtung'),
-  ('e0000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000005', 'Hochwasserschutz Donauinsel')
-ON CONFLICT (id) DO NOTHING;
-
--- Add random images to saved groups
 DO $$
 DECLARE
-  _groups uuid[] := ARRAY[
-    'e0000000-0000-0000-0000-000000000001',
-    'e0000000-0000-0000-0000-000000000002',
-    'e0000000-0000-0000-0000-000000000003',
-    'e0000000-0000-0000-0000-000000000004',
-    'e0000000-0000-0000-0000-000000000005'
-  ];
-  _g uuid;
-  _img_id uuid;
+  _has_saved_groups boolean := to_regclass('public.saved_groups') IS NOT NULL;
+  _has_saved_group_images boolean := to_regclass('public.saved_group_images') IS NOT NULL;
 BEGIN
-  FOREACH _g IN ARRAY _groups LOOP
-    FOR _img_id IN
-      SELECT id FROM public.images ORDER BY random() LIMIT (10 + floor(random() * 25))::int
-    LOOP
-      INSERT INTO public.saved_group_images (group_id, image_id)
-      VALUES (_g, _img_id)
-      ON CONFLICT (group_id, image_id) DO NOTHING;
-    END LOOP;
-  END LOOP;
+  IF NOT (_has_saved_groups AND _has_saved_group_images) THEN
+    RAISE NOTICE 'Skipping legacy saved group seed: tables public.saved_groups/public.saved_group_images not present';
+    RETURN;
+  END IF;
+
+  EXECUTE $sql$
+    INSERT INTO public.saved_groups (id, user_id, name) VALUES
+      ('e0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Mängelfotos Seestadt'),
+      ('e0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'Rohbau Fortschritt'),
+      ('e0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'Fassadendetails DC Tower'),
+      ('e0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000004', 'Baustelleneinrichtung'),
+      ('e0000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000005', 'Hochwasserschutz Donauinsel')
+    ON CONFLICT (id) DO NOTHING;
+  $sql$;
+
+  -- Add random images to saved groups
+  EXECUTE $sql$
+    INSERT INTO public.saved_group_images (group_id, image_id)
+    SELECT
+      g.group_id,
+      i.id
+    FROM (
+      SELECT unnest(ARRAY[
+        'e0000000-0000-0000-0000-000000000001'::uuid,
+        'e0000000-0000-0000-0000-000000000002'::uuid,
+        'e0000000-0000-0000-0000-000000000003'::uuid,
+        'e0000000-0000-0000-0000-000000000004'::uuid,
+        'e0000000-0000-0000-0000-000000000005'::uuid
+      ]) AS group_id
+    ) g
+    CROSS JOIN LATERAL (
+      SELECT id
+      FROM public.images
+      ORDER BY random()
+      LIMIT 15
+    ) i
+    ON CONFLICT (group_id, image_id) DO NOTHING;
+  $sql$;
 END $$;
 
 -- ---------------------------------------------------------------------------
@@ -492,9 +677,15 @@ END $$;
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
+  _has_images boolean := to_regclass('public.images') IS NOT NULL;
   -- Site definitions: lat_center, lng_center, radius (degrees), city, district, street, country, address_label
   _sites record;
 BEGIN
+  IF NOT _has_images THEN
+    RAISE NOTICE 'Skipping legacy address backfill seed: table public.images not present';
+    RETURN;
+  END IF;
+
   -- Aspern Seestadt D12 — 22nd district
   UPDATE public.images SET
     city = 'Wien', district = 'Donaustadt', street = 'Seestadt-Straße',
@@ -641,8 +832,14 @@ END $$;
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
+  _has_images boolean := to_regclass('public.images') IS NOT NULL;
   _count bigint;
 BEGIN
+  IF NOT _has_images THEN
+    RAISE NOTICE '=== SEED COMPLETE: legacy images seed skipped on media-items-only schema ===';
+    RETURN;
+  END IF;
+
   SELECT COUNT(*) INTO _count FROM public.images;
   RAISE NOTICE '=== SEED COMPLETE: % total images in database ===', _count;
 END $$;

@@ -10,7 +10,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, withNavigationErrorHandler } from '@angular/router';
 import { ResetPasswordComponent } from './reset-password.component';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 function buildFakeAuth(resetError: Error | null = null) {
     return {

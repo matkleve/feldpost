@@ -1,0 +1,52 @@
+# Phase 5 — Callsite Migration & Legacy Removal
+
+**Status:** In Progress (callsite groups **A–G + D** complete **2026-05-16**; **`tokens.scss` / `_legacy-design-tokens.scss` bridge removed under [Phase 7](./phase-7-token-migration.md) Batch 50 — 2026-05-18**; **`tailwind.config.js` legacy utility-name aliases removed — 2026-05-19** — 11 zero-usage aliases deleted; 4 retained with active callsites — see §Barrel removal)
+
+- [~] **Phase 5** — Callsite Migration & Legacy Removal — **SCSS cleanup + `UI_PRIMITIVE_DIRECTIVES` barrel removed (2026-05-14);** **Group D done (2026-05-16);** shim file deletion done; legacy alias removal remains open; **`npm run design-system:check` green (2026-05-15)** — root `AGENTS.md` includes required Ownership Matrix column header (`scripts/guard-visual-behavior.mjs`)
+  - [x] **Pre-flight** (do before ANY callsite changes)
+    - [x] Audit which components import `UI_PRIMITIVE_DIRECTIVES` barrel vs individual directives — **done (2026-05-14):** `apps/web/src` had **zero** barrel imports after `filter-dropdown` narrowed; barrel export deleted
+    - [ ] Map each directive to its callsites (how many templates use `[uiButton]`, `[uiInputControl]`, etc.) — **optional housekeeping**
+    - [x] Confirm `ng build` is green before starting — **verified (2026-05-14)**
+  - [x] **Callsite migration order** (migrate in this sequence — each group must be done together)
+    - [x] Group A — Form fields (always migrate label + input + field-row together per component)
+      - [x] Auth pages: login, register, reset-password, update-password (2026-05-13 — `HLM_*_IMPORTS`; `[error]` on inputs)
+      - [x] Account settings section (`app-account` — `hlm-form-field`, `hlmInput`, `hlmLabel`, `hlmBtn`; no select on account)
+      - [x] Settings overlay form sections (`settings-overlay`, `invite-management-section` — `hlm-form-field` / `hlmLabel` / `hlmSelect` / `hlmBtn`)
+      - [x] Address search, editable property row, captured date editor (`hlmInput`; `hlmLabel` on editable row key)
+    - [x] Group B — Buttons (standalone, no form dependency) (2026-05-13 — `hlmBtn` / `HLM_BUTTON_IMPORTS`; map search-bar & GPS had no `uiButton`; media-page-header, projects-toolbar, detail-actions, workspace-pane-toolbar, nav, card-variant-switch had none; sorting-controls: `uiToolbarButton` → `hlmBtn`)
+      - [x] Map chrome: search bar, GPS button, toolbar buttons (verified: search-bar/GPS no `uiButton`; toolbar dropdown triggers → **`hlmBtn`** in Group D **2026-05-16**)
+      - [x] Media detail actions, quiet actions (`detail-actions` plain buttons; `media-item-quiet-actions` → `hlmBtn`)
+      - [x] Projects page header, media page header (`projects-page-header` migrated; `media-page-header` had no buttons; `media-error` retry migrated)
+      - [x] Nav buttons (verified: no `uiButton` on nav)
+    - [x] Group C — Dialogs (already use BrnDialog; clean up UI_PRIMITIVE_DIRECTIVES from imports) — **done (2026-05-13):** `HLM_BUTTON_IMPORTS` + `HLM_INPUT_IMPORTS` where needed; `project-select-dialog` keeps `UiItemDirective` only
+      - [x] confirm-dialog, text-input-dialog, project-select-dialog
+      - [x] share-link-audience-dialog, projects-confirm-dialog
+    - [x] Group D — Toolbar dropdown triggers — **done (2026-05-16):** `uiDropdownTrigger` removed from **`media`**, **`projects-toolbar`**, **`workspace-toolbar`** templates; **`hlmBtn`** (`outline` / `sm`) + per-toolbar `*__menu-trigger` classes + existing **`DropdownShellComponent`**; **`ui-dropdown-trigger.directive.ts`** and **`styles/primitives/dropdown-trigger.scss`** deleted
+    - [x] Group E — Badges/chips — **done (2026-05-13):** `HLM_BADGE_IMPORTS` from `shared/ui/badge/` (barrel exports `HLM_BADGE_IMPORTS`); status → `variant` mapping where needed
+      - [x] `[uiStatusBadge]` / `[uiStatusPill]` → `[hlmBadge]` (projects table, invite header, media detail, account)
+      - [x] `[uiChip]` → `[hlmBadge]` (`quick-info-chips`; interactive rows keep `cursor-pointer` + existing chip SCSS hooks)
+    - [x] Group F — Select controls — **done (2026-05-13):** `select[hlmSelect]` + `HLM_SELECT_IMPORTS`; compact rows use `size="sm"`
+      - [x] Invite role select, settings search-bias select, filter-dropdown rule selects, editable-property-row select
+    - [x] Group G — Toggle switches — **done (2026-05-13):** `HLM_SWITCH_IMPORTS` — `[hlmSwitch]` + `[hlmSwitchThumb]` with `[checked]`; settings-overlay notification/map/data toggles (row chrome classes retained for layout)
+      - [x] Remaining `[uiToggleSwitch]` / `[uiToggleRow]` callsites cleared in `settings-overlay`
+  - [x] **SCSS removal** (global `@use` for migrated primitive/pattern sheets — **deleted 2026-05-14**; shim directives may still emit legacy BEM class names for component-local SCSS)
+    - [x] Delete `apps/web/src/styles/primitives/button.scss` — **done (2026-05-14)**; `@use` removed from `styles.scss`
+    - [x] Delete `apps/web/src/styles/primitives/field.scss` — **done (2026-05-14)**
+    - [x] Delete `apps/web/src/styles/primitives/badge.scss` — **done (2026-05-14)**
+    - [x] Delete `apps/web/src/styles/primitives/chip.scss` — **done (2026-05-14)**
+    - [x] Delete `apps/web/src/styles/primitives/toggle.scss` — **done (2026-05-14)**
+    - [x] Delete `apps/web/src/styles/primitives/tab.scss` — **done (2026-05-14)**
+    - [x] Delete `apps/web/src/styles/patterns/dropdown.scss` — **done (2026-05-13):** all `dd-*` template hooks migrated to Tailwind + `[hlmMenuItem]` / `[hlmMenuLabel]` / `[hlmMenuSeparator]`; `map-context-menu__items` for map/thumbnail overflow; `styles.scss` `@use` removed.
+    - [x] Delete `apps/web/src/styles/patterns/toolbar.scss` — **done (2026-05-14)**
+    - [x] Delete `apps/web/src/styles/patterns/form.scss` — **done (2026-05-14)**
+  - [~] **Barrel removal**
+    - [x] Remove `UI_PRIMITIVE_DIRECTIVES` export from `ui-primitives.directive.ts` — **done (2026-05-14)** (last callsite was `filter-dropdown`; Group D unchanged)
+    - [x] Delete `ui-primitives.directive.ts` entirely (verify no remaining imports) — **done (2026-05-16):** `rg "from ['\"].*ui-primitives\\.directive" apps/web/src -l` → **0**; file removed after `projects-dropdown` dropped `UiChoice*`. **`UiDropdownTriggerDirective`** removed **2026-05-16** with Group D (toolbar templates + deleted `ui-dropdown-trigger.directive.ts`).
+    - [x] Remove legacy bridge / monolithic token emit from runtime — **done under Phase 7:** `_legacy-design-tokens.scss` **deleted**, `meta.load-css('styles/legacy-design-tokens')` **removed**, `tokens.scss` **never reintroduced** (`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web` → **0**; `var(--color-` in `apps/web/src/app/**/*.scss` → **0**). CDK overlay import lives in `styles.scss` header (Phase 7).
+    - [x] Remove zero-usage `tailwind.config.js` legacy utility-name aliases — **done (2026-05-19, commit 97a454f):** 127-line reduction; **removed** (0 callsites each via `rg`): `bg-base`, `bg-surface`, `bg-elevated`, `border-strong`\*, `text-primary`†, `text-secondary`†, `text-disabled`, `primary`†, `primary-hover`, `danger`, `clay` (colors); `borderRadius.pill/card/input`; `spacing.spacing-1`…`spacing-8`; `fontSize.label-sm/label/body-sm/body`; `fontFamily.sans`; `minWidth.tap/tap-lg`; `boxShadow.sm/md`\*\*; `zIndex.map/panel/upload-btn/dropdown/modal`. **Retained with active callsites:** `colors.border` (`border-border` — 8 callsites in CVA + styles.scss + dropdown); `colors.success` (4 in toast/badge CVA); `colors.warning` (4 in toast/badge CVA); `colors.accent` (5 in button CVA + address-search); `minHeight.tap/tap-lg` (2 callsites each). *\*`border-strong` usages are `var(--border-strong)` CSS var calls — not Tailwind utilities; removal was safe.* *†`bg-primary`/`text-primary`/`text-secondary` still work via `@theme inline` in `styles.scss` (tweakcn).* *\*\*`shadow-sm`/`shadow-md` still work as Tailwind built-ins; `--shadow-sm`/`--shadow-md` also available via `@theme inline`.* **`ng build` + `npm run design-system:check` green (2026-05-19)** after removal.
+    - [x] Delete `apps/web/src/styles/tokens.scss` — **N/A / superseded:** monolith successor was `_legacy-design-tokens.scss` (Phase 7); file absent from tree (**2026-05-18**).
+  - [~] **Final verification**
+    - [x] `ng build` — **green (2026-05-19)** — zero errors; pre-existing map-shell style budget + CommonJS warnings unchanged
+    - [x] `npm run design-system:check` — **green (2026-05-19):** registry + panel audit + `guard-visual-behavior.mjs` green
+    - [ ] Visual QA: open app, verify light/dark/sandstone themes, verify all interactive states
+    - [x] Update `docs/migration/README.md` (migration index) — **2026-05-14; Phase 5 % updated 2026-05-19**

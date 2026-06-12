@@ -10,17 +10,22 @@
  */
 
 import { Component, inject, signal } from '@angular/core';
-import {
+import type {
   AbstractControl,
+  ValidationErrors} from '@angular/forms';
+import {
   FormBuilder,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
-import { I18nService } from '../../../core/i18n/i18n.service';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
+import { AuthMapLayerComponent } from '../auth-map-layer/auth-map-layer.component';
 
 /** Custom validator: both password fields must match. */
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
@@ -29,9 +34,32 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   return password === confirm ? null : { passwordsMismatch: true };
 }
 
+/** QR links use 48-char hex; dev/admin codes may be readable words (hashed server-side). */
+function inviteCodeFormat(control: AbstractControl): ValidationErrors | null {
+  const value = typeof control.value === 'string' ? control.value.trim() : '';
+  if (!value) {
+    return null;
+  }
+  if (/^[a-fA-F0-9]{48}$/.test(value)) {
+    return null;
+  }
+  if (/^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$/.test(value)) {
+    return null;
+  }
+  return { inviteCodeFormat: true };
+}
+
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    AuthMapLayerComponent,
+    ReactiveFormsModule,
+    RouterLink,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_FORM_FIELD_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+    ...HLM_LABEL_IMPORTS,
+  ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
@@ -39,15 +67,12 @@ export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
-  private readonly i18nService = inject(I18nService);
-
-  protected readonly t = this.i18nService.t.bind(this.i18nService);
 
   protected readonly form = this.fb.nonNullable.group(
     {
       fullName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      inviteCode: ['', [Validators.required, Validators.pattern(/^[a-fA-F0-9]{48}$/)]],
+      inviteCode: ['', [Validators.required, inviteCodeFormat]],
       password: ['', passwordStrengthValidators()],
       confirmPassword: ['', Validators.required],
     },
@@ -85,3 +110,4 @@ export class RegisterComponent {
     this.loading.set(false);
   }
 }
+
