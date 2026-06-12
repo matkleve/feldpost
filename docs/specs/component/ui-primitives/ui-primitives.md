@@ -12,7 +12,7 @@ Token-driven chrome from **`hlm*`** directives / Tailwind; composites (`app-card
 
 - **Code:** `apps/web/src/app/shared/ui-primitives/` (non-directive utilities and composites; **~~`ui-primitives.directive.ts`~~ removed 2026-05-16**)
 - **Global primitive CSS:** ~~`apps/web/src/styles/primitives/*.scss`~~ **removed** — **`styles/primitives/`** directory **empty** (2026-05-16); tokens via Tailwind + component SCSS
-- **Layout chrome:** [Toolbar pane (`app-pane-toolbar`)](../workspace/pane-toolbar.md) lives under `shared/pane-toolbar/`, not the `ui-primitives/` folder.
+- **Layout chrome:** [Toolbar pane (`app-pane-toolbar`)](../workspace/pane-toolbar.md) lives under `shared/pane-chrome/toolbar/`, not the `ui-primitives/` folder.
 
 ## Actions
 

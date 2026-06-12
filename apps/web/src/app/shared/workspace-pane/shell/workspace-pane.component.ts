@@ -2,7 +2,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 
 /** Layout width of `app-drag-divider` host in the authenticated split row. */
 import { BrnTabsImports } from '@spartan-ng/brain/tabs';
-import { PaneHeaderComponent } from '../chrome/pane-header.component';
+import { PaneHeaderComponent } from '../../pane-chrome/header/pane-header.component';
 import { HLM_TABS_IMPORTS } from '../../ui/tabs';
 import { WorkspaceToolbarComponent } from '../toolbar/workspace-toolbar/workspace-toolbar.component';
 import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace-selected-items-grid.component';

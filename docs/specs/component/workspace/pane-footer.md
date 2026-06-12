@@ -10,7 +10,7 @@ A horizontal strip: optional left slot, expanding spacer, optional right slot. A
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/pane-footer/`
+- **Code:** `apps/web/src/app/shared/pane-chrome/footer/`
 - **Consumers:** Workspace panes needing consistent footer alignment.
 
 ## Actions
@@ -39,8 +39,8 @@ app-pane-footer
 
 | File | Purpose |
 | ---- | ------- |
-| `apps/web/src/app/shared/pane-footer/pane-footer.component.ts` | Host + inline template |
-| `apps/web/src/app/shared/pane-footer/pane-footer.component.scss` | Footer flex + spacer |
+| `apps/web/src/app/shared/pane-chrome/footer/pane-footer.component.ts` | Host + inline template |
+| `apps/web/src/app/shared/pane-chrome/footer/pane-footer.component.scss` | Footer flex + spacer |
 
 ## Wiring
 

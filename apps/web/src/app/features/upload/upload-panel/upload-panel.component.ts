@@ -49,7 +49,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { BrnToggleGroupImports } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
-import { PaneFooterComponent } from '../../../shared/pane-footer/pane-footer.component';
+import { PaneFooterComponent } from '../../../shared/pane-chrome/footer/pane-footer.component';
 import { toggleOptionLayout } from '../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { DEFAULT_FILE_TYPE_GROUPS } from './upload-panel-file-type-groups';
 import type {

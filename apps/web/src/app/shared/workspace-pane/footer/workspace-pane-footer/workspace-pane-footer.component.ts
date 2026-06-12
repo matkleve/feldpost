@@ -9,7 +9,7 @@ import { ActionEngineService } from '../../../../core/action/action-engine.servi
 import { ACTION_CONTEXT_IDS } from '../../../../core/action/action-context-ids';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
-import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
+import { PaneFooterComponent } from '../../../pane-chrome/footer/pane-footer.component';
 import { WORKSPACE_EXPORT_ACTION_DEFINITIONS } from '../workspace-export-actions.registry';
 import type { WorkspaceExportActionId } from '../workspace-export-actions.types';
 import {

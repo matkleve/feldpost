@@ -10,7 +10,7 @@ Single horizontal bar; optional clusters in left and right (`flex: 1` each), opt
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/pane-toolbar/`
+- **Code:** `apps/web/src/app/shared/pane-chrome/toolbar/`
 - **Canonical spec:** this document (`docs/specs/component/workspace/pane-toolbar.md`)
 - **Consumers today:** `/projects` toolbar shell ([projects-toolbar](apps/web/src/app/features/projects/projects-toolbar.component.html)), `/media` toolbar shell ([media.component.html](apps/web/src/app/features/media/media.component.html)), workspace chrome wrapper ([workspace-pane-toolbar](apps/web/src/app/shared/workspace-pane/chrome/workspace-pane-toolbar/workspace-pane-toolbar.component.ts))
 - **Related:** Domain bundles (dropdown triggers, segmented switches, etc.) **compose inside slots**—same pattern can repeat across routes without a separate “filter toolbar” primitive.
@@ -42,8 +42,8 @@ app-pane-toolbar
 
 | File | Purpose |
 | ---- | ------- |
-| `apps/web/src/app/shared/pane-toolbar/pane-toolbar.component.ts` | Host + inline template |
-| `apps/web/src/app/shared/pane-toolbar/pane-toolbar.component.scss` | Flex geometry |
+| `apps/web/src/app/shared/pane-chrome/toolbar/pane-toolbar.component.ts` | Host + inline template |
+| `apps/web/src/app/shared/pane-chrome/toolbar/pane-toolbar.component.scss` | Flex geometry |
 
 ## Wiring
 

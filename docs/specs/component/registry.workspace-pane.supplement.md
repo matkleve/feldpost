@@ -47,25 +47,12 @@
 
 ### `<app-pane-header>` — Pane Header
 
-- **File**: `apps/web/src/app/shared/workspace-pane/chrome/pane-header.component.ts`
+- **File**: `apps/web/src/app/shared/pane-chrome/header/pane-header.component.ts`
 - **Purpose**: Workspace pane title row with optional inline edit and colour-picker trigger.
 - **Spec**: @no-spec
 - **Variant axes**: none
 - **Other inputs**: `title`, `editable`, `editEnabled`, `editValue`, `colorPickerEnabled`, `colorPickerOpen`
 - **Composed of**: standalone
-- **Used in**: `app-workspace-pane-header`
-- **Gaps**: none
-
----
-
-### `<app-workspace-pane-header>` — Workspace Pane Header
-
-- **File**: `apps/web/src/app/shared/workspace-pane/chrome/workspace-pane-header/workspace-pane-header.component.ts`
-- **Purpose**: Full chrome header for the workspace pane (wraps `app-pane-header` with close/nav controls).
-- **Spec**: @no-spec
-- **Variant axes**: none
-- **Other inputs**: `title`, `editable`, `editEnabled`, `editValue`, `colorPickerEnabled`, `colorPickerOpen`
-- **Composed of**: `app-pane-header`
 - **Used in**: `app-workspace-pane`
 - **Gaps**: none
 
@@ -85,7 +72,7 @@
 
 ### `<app-pane-toolbar>` — Pane Toolbar
 
-- **File**: `apps/web/src/app/shared/pane-toolbar/pane-toolbar.component.ts`
+- **File**: `apps/web/src/app/shared/pane-chrome/toolbar/pane-toolbar.component.ts`
 - **Purpose**: Generic toolbar row slot (`ng-content`) for workspace pane chrome.
 - **Spec**: [`docs/specs/component/workspace/pane-toolbar.md`](workspace/pane-toolbar.md)
 - **Variant axes**: none
@@ -95,15 +82,15 @@
 
 ---
 
-### `<app-workspace-pane-toolbar>` — Workspace Pane Toolbar
+### `<app-workspace-toolbar>` — Workspace Toolbar
 
-- **File**: `apps/web/src/app/shared/workspace-pane/chrome/workspace-pane-toolbar/workspace-pane-toolbar.component.ts`
-- **Purpose**: Toolbar chrome wrapper specific to the workspace pane (`ng-content`).
-- **Spec**: [`docs/specs/component/workspace/pane-toolbar.md`](workspace/pane-toolbar.md)
+- **File**: `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts`
+- **Purpose**: Domain toolbar (sort, filter, grouping) inside the workspace pane.
+- **Spec**: @no-spec
 - **Variant axes**: none
-- **Composed of**: standalone
+- **Composed of**: `app-toolbar-dropdown-stack`, filter/grouping/sort dropdowns
 - **Used in**: `app-workspace-pane`
-- **Gaps**: none
+- **Gaps**: `@no-spec`
 
 ---
 
@@ -111,7 +98,7 @@
 
 ### `<app-pane-footer>` — Pane Footer
 
-- **File**: `apps/web/src/app/shared/pane-footer/pane-footer.component.ts`
+- **File**: `apps/web/src/app/shared/pane-chrome/footer/pane-footer.component.ts`
 - **Purpose**: Generic footer row slot for workspace pane chrome.
 - **Spec**: [`docs/specs/component/workspace/pane-footer.md`](workspace/pane-footer.md)
 - **Variant axes**: none

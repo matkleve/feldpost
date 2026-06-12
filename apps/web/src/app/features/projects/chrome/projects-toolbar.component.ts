@@ -26,7 +26,7 @@ import {
   getNextCardVariantToggleOption,
 } from '../../../shared/ui-primitives/card-variant-toggle.helpers';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
-import { PaneToolbarComponent } from '../../../shared/pane-toolbar/pane-toolbar.component';
+import { PaneToolbarComponent } from '../../../shared/pane-chrome/toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../../core/projects/projects.types';
 import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
 import { CARD_VARIANTS, type CardVariant } from '../../../shared/ui-primitives/card-variant.types';
