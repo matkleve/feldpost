@@ -298,7 +298,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (this.isProjectsMode()) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        this.searchInput().nativeElement.blur();
+        this.searchInput()?.nativeElement.blur();
         this.state.set(this.query().trim().length > 0 ? 'typing' : 'idle');
       }
       return;
@@ -308,7 +308,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       event.preventDefault();
       const fullQuery = this.query() + this.ghostText();
       this.query.set(fullQuery);
-      this.searchInput().nativeElement.value = fullQuery;
+      const inputEl = this.searchInput()?.nativeElement;
+      if (inputEl) {
+        inputEl.value = fullQuery;
+      }
       this.ghostText.set(null);
       this.state.set('typing');
       this.queryChanges.next(fullQuery);
@@ -347,7 +350,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.activeIndex.set(-1);
         this.state.set(this.committedCandidate() ? 'committed' : 'idle');
       } else {
-        this.searchInput().nativeElement.blur();
+        this.searchInput()?.nativeElement.blur();
         this.state.set(this.committedCandidate() ? 'committed' : 'idle');
       }
       return;

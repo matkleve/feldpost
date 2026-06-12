@@ -42,6 +42,7 @@ interface NominatimReverseResponse {
     city?: string;
     town?: string;
     village?: string;
+    hamlet?: string;
     municipality?: string;
     city_district?: string;
     suburb?: string;
@@ -116,6 +117,7 @@ export interface GeocoderSearchResult {
     city?: string;
     town?: string;
     village?: string;
+    hamlet?: string;
     municipality?: string;
     city_district?: string;
     suburb?: string;

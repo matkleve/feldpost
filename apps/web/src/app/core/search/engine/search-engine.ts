@@ -32,7 +32,11 @@ import type {
 import { DEFAULT_SEARCH_ENGINE_OPTIONS } from '../search.models';
 import { buildFallbackQueries, normalizeSearchQuery } from '../search-query';
 import { isInViewport } from '../search-bar-helpers';
-import { parseSearchQuery, providerMatchesKeyword } from './search-operator';
+import {
+  parseSearchQuery,
+  providerMatchesKeyword,
+  type ParsedSearchQuery,
+} from './search-operator';
 import type { SearchProvider } from './search-provider.interface';
 
 interface CachedResult {
@@ -430,7 +434,12 @@ export class SearchEngine {
   ): Promise<SearchResultSet> {
     const recentsProvider = this.providers.find((provider) => provider.family === 'recent');
     if (!recentsProvider) {
-      return this.buildFocusedEmptyResult(query, context);
+      return {
+        query,
+        state: 'focused-empty',
+        sections: [],
+        empty: true,
+      };
     }
 
     const items = await firstValueFrom(
