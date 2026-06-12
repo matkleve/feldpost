@@ -17,6 +17,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const fileContent = `export const environment = {
     production: true,
+    i18n: {
+        enableLegacyDomFallback: false,
+    },
     supabase: {
         url: '${supabaseUrl}',
         anonKey: '${supabaseAnonKey}',

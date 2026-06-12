@@ -3,10 +3,24 @@
 
 @layer components {
   .media-location-row__edit-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
     width: 100%;
+  }
+
+  .media-location-row__field-group {
+    display: grid;
+    gap: var(--spacing-2);
+    min-width: 0;
+  }
+
+  .media-location-row__field-group--address {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .media-location-row__field-group--building {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .media-location-row__field {
@@ -16,8 +30,9 @@
     min-width: 0;
   }
 
-  .media-location-row__field--wide {
-    grid-column: 1 / -1;
+  .media-location-row__field--wide,
+  .media-location-row__field--postcode {
+    width: 100%;
   }
 
   .media-location-row__primary-icon {

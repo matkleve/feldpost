@@ -11,6 +11,20 @@ import {
   output,
   signal,
 } from '@angular/core';
+
+/** Stable state: parent shell — loading skeleton, error alert, or ready content. @see docs/specs/ui/media-detail/media-detail-view.md */
+export type MediaDetailPaneLayout = 'narrow' | 'medium' | 'wide';
+export type MediaDetailViewState = 'loading' | 'error' | 'ready';
+
+function resolvePaneLayout(widthPx: number): MediaDetailPaneLayout {
+  if (widthPx < 480) {
+    return 'narrow';
+  }
+  if (widthPx <= 720) {
+    return 'medium';
+  }
+  return 'wide';
+}
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -56,7 +70,7 @@ import type {
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { QuickInfoChipsComponent } from '../../../shared/quick-info-chips/quick-info-chips.component';
 import { MetadataSectionComponent } from './metadata-section/metadata-section.component';
-import { DetailActionsComponent } from './detail-actions/detail-actions.component';
+import { ContextActionBarComponent } from '../../context-action-bar/context-action-bar.component';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import {
   coerceLocationCoordinate,
@@ -152,7 +166,7 @@ export type { MediaRecord, MetadataEntry } from './media-detail-view.types';
     ConfirmDialogComponent,
     QuickInfoChipsComponent,
     MetadataSectionComponent,
-    DetailActionsComponent,
+    ContextActionBarComponent,
     MediaDetailHeaderComponent,
     MediaDetailMediaViewerComponent,
     MediaDetailInlineSectionComponent,
@@ -164,6 +178,8 @@ export type { MediaRecord, MetadataEntry } from './media-detail-view.types';
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
     '[style.--no-photo-icon]': 'noPhotoIconUrl',
+    '[attr.data-pane-layout]': 'paneLayout()',
+    '[attr.data-state]': 'viewState()',
   },
 })
 export class MediaDetailViewComponent implements OnDestroy {
@@ -196,6 +212,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly mediaId = input<string | null>(null);
+  readonly paneWidth = input<number | null>(null);
   readonly addressSearchRequestImageId = input<string | null>(null);
   readonly addressSearchRequestId = input(0);
   readonly closed = output<void>();
@@ -212,6 +229,24 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly metadata = signal<MetadataEntry[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  private readonly measuredPaneWidth = signal(0);
+  private resizeObserver: ResizeObserver | null = null;
+
+  readonly paneLayout = computed((): MediaDetailPaneLayout => {
+    const explicit = this.paneWidth();
+    const width = explicit != null && explicit > 0 ? explicit : this.measuredPaneWidth();
+    return resolvePaneLayout(width > 0 ? width : 720);
+  });
+
+  readonly viewState = computed((): MediaDetailViewState => {
+    if (this.loading()) {
+      return 'loading';
+    }
+    if (this.error()) {
+      return 'error';
+    }
+    return 'ready';
+  });
   readonly showContextMenu = signal(false);
   readonly destructiveConfirm = signal<DetailDestructiveConfirmState | null>(null);
   readonly saving = signal(false);
@@ -592,9 +627,19 @@ export class MediaDetailViewComponent implements OnDestroy {
           dedupe: true,
         });
       });
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const width = entries[0]?.contentRect.width ?? 0;
+        this.measuredPaneWidth.set(width);
+      });
+      this.resizeObserver.observe(this.elementRef.nativeElement);
+    }
   }
 
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     this.abortController?.abort();
     if (this.locationHighlightTimer) {
       clearTimeout(this.locationHighlightTimer);

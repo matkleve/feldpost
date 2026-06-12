@@ -11,9 +11,9 @@ Address component fields (street/city/district/country) use `app-address-field-c
 
 ## What It Looks Like
 
-Each property row has a **leading Material icon** (1rem, `--color-text-secondary`), a label (`--text-small`, 13px), and a value (`--text-body`, 15px, `--color-text-primary`). On hover, a warm clay tint background appears (`color-mix(in srgb, var(--color-clay) 8%, transparent)`) and an edit pencil icon fades in on the right (hidden → visible on parent hover, like `dd-drag-handle`). Clicking the value replaces it with an inline input. Row geometry follows `dd-item` pattern: `gap: --spacing-2`, `padding: --spacing-1 --spacing-2`, `--radius-sm`.
+Each property row has a **leading Material icon** (1rem, `--muted-foreground`), a label (`--font-size-xs`), and a value (`--font-size-xs`, `--foreground`). On hover, a primary-tint background appears (`color-mix(in srgb, var(--primary) 8%, transparent)`) per [state-visuals.md](../../../design/state-visuals.md) § Interaction emphasis; editable row text shifts to `--primary`. An edit pencil icon fades in on the left action rail (hidden → visible on parent hover, like `dd-drag-handle`). Clicking the value replaces it with an inline input. Row geometry follows `dd-item` pattern: `gap: --spacing-2`, `padding: --spacing-1 --spacing-2`, `--radius-sm`.
 
-Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-text-secondary` value text and no edit icon.
+Read-only rows (Location, Uploaded, coordinate evidence) display with `--muted-foreground` value text and no edit icon.
 
 ## Where It Lives
 
@@ -132,13 +132,13 @@ LocationSection                        ← dd-section-label "Location"
 - [ ] **Captured date**: click value → `datetime-local` input → save → updates `media_items.captured_at`
 - [ ] **Projects**: click value → multi-select checklist → save → updates `media_projects` memberships
 - [x] **Street/City/District/Country**: edited only in location rows (not Details inline section)
-- [ ] Escape key cancels any active edit without saving
-- [ ] Optimistic updates: UI reflects changes immediately, rolls back on error
-- [ ] All editable rows show dashed underline hover affordance
-- [ ] All property rows have **leading Material icon** (1rem, `--color-text-secondary`)
-- [ ] Row hover uses **warm clay tint** (`color-mix(in srgb, var(--color-clay) 8%, transparent)`)
-- [ ] Hover reveals **edit pencil icon** on right (hidden at rest, like dd-drag-handle)
-- [ ] Section headings use **dd-section-label** style: `0.6875rem`, uppercase, `600`, `--color-text-disabled`
+- [x] Escape key cancels any active edit without saving
+- [x] Optimistic updates: UI reflects changes immediately, rolls back on error with toast
+- [x] All editable rows show dashed underline hover affordance
+- [x] All property rows have **leading Material icon** (1rem, `--muted-foreground`)
+- [x] Row hover uses **primary tint** (`color-mix(in srgb, var(--primary) 8%, transparent)`)
+- [x] Hover reveals **edit pencil icon** on left action rail (hidden at rest, like dd-drag-handle)
+- [x] Section headings use **detail-section__label** style: `--font-size-2xs`, uppercase, `--font-weight-semibold`, `--muted-foreground`, `letter-spacing: 0.07em`
 - [ ] Read-only rows (Location, Uploaded) show muted value text, no edit icon
 - [ ] Address search bar triggers geocoding on input (debounced 400ms)
 - [ ] Selecting a search result fills all address fields at once

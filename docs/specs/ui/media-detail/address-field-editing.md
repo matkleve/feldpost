@@ -36,7 +36,7 @@ Each address row (this is the normative detail) (street/city/district/country) h
 | **Editing — clean** | spacer | spacer | icon + label + `app-address-field-combobox` | **check** (save) | **close** (cancel) |
 | **Editing — (dropdown open)** | — | — | input + panel below | check | close |
 
-**Subtle hint for unverified fields:** an inline `(?)` icon or small text badge appended to the value text (not a separate element) with `--color-text-disabled` color and `aria-label` "Unverified value".
+**Subtle hint for unverified fields:** an inline `(?)` icon or small text badge appended to the value text (not a separate element) with `--muted-foreground` color and `aria-label` "Unverified value".
 
 **Resolve button:** uses `travel_explore` Material icon, same aria pattern as `resolve_location` action. Aria label: `workspace.addressField.action.resolve.aria` → "Resolve address field".
 

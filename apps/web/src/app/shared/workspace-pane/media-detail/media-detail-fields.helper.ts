@@ -133,6 +133,13 @@ export class MediaDetailFieldsHelper {
 
     if (!persisted) {
       this.deps.signals.media.update((prev) => (prev ? { ...prev, [field]: oldValue } : prev));
+      this.deps.services.toastService.show({
+        message: this.deps.helpers.t(
+          'workspace.imageDetail.toast.saveFailed',
+          'Could not save changes',
+        ),
+        type: 'error',
+      });
       this.deps.signals.saving.set(false);
       return false;
     }
@@ -307,6 +314,13 @@ export class MediaDetailFieldsHelper {
         this.deps.signals.media.update((prev) =>
           prev ? { ...prev, captured_at: oldCapturedAt, has_time: oldHasTime } : prev,
         );
+        this.deps.services.toastService.show({
+          message: this.deps.helpers.t(
+            'workspace.imageDetail.toast.saveFailed',
+            'Could not save changes',
+          ),
+          type: 'error',
+        });
       }
       this.deps.signals.saving.set(false);
       return;
@@ -332,6 +346,13 @@ export class MediaDetailFieldsHelper {
       this.deps.signals.media.update((prev) =>
         prev ? { ...prev, captured_at: oldCapturedAt, has_time: oldHasTime } : prev,
       );
+      this.deps.services.toastService.show({
+        message: this.deps.helpers.t(
+          'workspace.imageDetail.toast.saveFailed',
+          'Could not save changes',
+        ),
+        type: 'error',
+      });
     }
 
     this.deps.signals.saving.set(false);

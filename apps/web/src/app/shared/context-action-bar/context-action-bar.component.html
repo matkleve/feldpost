@@ -1,0 +1,72 @@
+@if (variant() === 'footer') {
+  <div class="context-action-bar context-action-bar--footer" role="toolbar">
+    <div class="context-action-bar__actions">
+      @for (action of primaryActions(); track action.id) {
+        <button
+          hlmBtn
+          variant="outline"
+          size="icon-sm"
+          type="button"
+          [disabled]="pending() || action.disabled"
+          [attr.aria-label]="action.label"
+          [attr.title]="action.label"
+          (click)="onActionClick(action.id)"
+        >
+          <span class="material-icons" aria-hidden="true">{{ action.icon }}</span>
+        </button>
+      }
+      @if (hasDestructiveActions()) {
+        <span class="context-action-bar__divider" aria-hidden="true"></span>
+      }
+      @for (action of destructiveActions(); track action.id) {
+        <button
+          hlmBtn
+          variant="outline"
+          size="icon-sm"
+          type="button"
+          class="context-action-bar__btn--destructive"
+          [disabled]="pending() || action.disabled"
+          [attr.aria-label]="action.label"
+          [attr.title]="action.label"
+          (click)="onActionClick(action.id)"
+        >
+          <span class="material-icons" aria-hidden="true">{{ action.icon }}</span>
+        </button>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="context-action-bar context-action-bar--section">
+    <div class="context-action-bar__list">
+      @for (action of primaryActions(); track action.id) {
+        <button
+          hlmMenuItem
+          class="context-action-bar__item w-full"
+          type="button"
+          [disabled]="action.disabled"
+          (click)="onActionClick(action.id)"
+        >
+          <span class="material-icons context-action-bar__icon" aria-hidden="true">{{ action.icon }}</span>
+          <span class="context-action-bar__label min-w-0 flex-1 text-left">{{ action.label }}</span>
+        </button>
+      }
+
+      @if (hasDestructiveActions()) {
+        <div hlmMenuSeparator class="context-action-bar__separator" role="separator"></div>
+      }
+
+      @for (action of destructiveActions(); track action.id + '-danger') {
+        <button
+          hlmMenuItem
+          class="context-action-bar__item context-action-bar__item--destructive w-full"
+          type="button"
+          [disabled]="action.disabled"
+          (click)="onActionClick(action.id)"
+        >
+          <span class="material-icons context-action-bar__icon" aria-hidden="true">{{ action.icon }}</span>
+          <span class="context-action-bar__label min-w-0 flex-1 text-left">{{ action.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
+}

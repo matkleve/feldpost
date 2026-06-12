@@ -16,13 +16,15 @@ This surface consumes the canonical matrix actions `open_details_or_selection`, 
 
 ## What It Looks Like
 
-Actions use **`dd-item`** button styling — not bordered outline buttons. Each action is a full-width row with a leading Material icon (`1rem`, `--color-text-secondary`), label text (`0.8125rem`), `dd-item` hover (warm clay tint), and `--radius-sm` border radius. A `dd-divider` separates destructive actions from normal ones. The delete action uses `dd-item--danger` style (red icon + label).
+**Primary surface:** sticky footer `app-context-action-bar` (`variant="footer"`) — compact `icon-sm` buttons with tooltips from action labels. Destructive actions separated by a vertical divider.
+
+**Optional section surface:** `app-detail-actions` wraps `app-context-action-bar` (`variant="section"`) — two-column labeled rows with leading Material icon (`1rem`, `--muted-foreground`), primary-tint hover per [state-visuals.md](../../../design/state-visuals.md). Destructive rows use `--destructive` ink.
 
 ```pseudo
-┌─ [icon] Zoom to location    ─┐   ← dd-item style, clay hover
-├─ 📁  Assign project          ─┤   ← dd-item style, clay hover
-├─ 📋  Copy coordinates        ─┤   ← dd-item style, clay hover
-├─ ⬇️  Download media          ─┤   ← dd-item style, clay hover
+┌─ [icon] Zoom to location    ─┐   ← dd-item style, primary hover
+├─ 📁  Assign project          ─┤   ← dd-item style, primary hover
+├─ 📋  Copy coordinates        ─┤   ← dd-item style, primary hover
+├─ ⬇️  Download media          ─┤   ← dd-item style, primary hover
 ├──────────────────────────────-─┤   ← dd-divider
 └─ 🗑️  Delete media            ─┘   ← dd-item--danger style
 ```

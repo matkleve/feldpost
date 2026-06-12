@@ -15,6 +15,8 @@
   min-width: 0;
 }
 
+@layer components {
+
 .detail-row {
   --detail-row-action-size: var(--detail-row-height, 2rem);
 
@@ -319,10 +321,14 @@
   }
 }
 
-@media (hover: none) {
-  .detail-row-action:is(button) {
-    opacity: 1;
-    pointer-events: auto;
+}
+
+@layer states {
+  @media (hover: none) {
+    .detail-row-action:is(button) {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 }
 

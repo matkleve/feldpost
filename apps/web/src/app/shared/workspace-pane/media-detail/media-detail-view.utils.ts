@@ -396,7 +396,7 @@ export function buildInfoChips(args: {
       action: 'project',
     },
     {
-      icon: 'schedule',
+      icon: 'calendar_today',
       text: captureDate ?? t('workspace.imageDetail.value.noDate', 'No date'),
       title: t('workspace.imageDetail.chip.captureDate', 'Capture date'),
       action: 'captured_at',

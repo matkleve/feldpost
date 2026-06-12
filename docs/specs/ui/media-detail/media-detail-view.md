@@ -121,13 +121,42 @@ The parent spec owns the mapping contract only; concrete action semantics remain
 | `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/*`             | Details and location editing UI                                      |
 | `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-project-membership.helper.ts` | Project membership persistence rules                                 |
 | `apps/web/src/app/shared/workspace-pane/media-detail/metadata-section/*`                        | Custom metadata section                                              |
-| `apps/web/src/app/shared/workspace-pane/media-detail/detail-actions/*`                          | Actions section                                                      |
+| `apps/web/src/app/shared/workspace-pane/media-detail/detail-actions/*`                          | Scrollable actions section (optional; footer is primary discovery surface) |
+| `apps/web/src/app/shared/context-action-bar/*`                                                  | Shared footer/section action rendering                               |
+
+## Loading State
+
+While `viewState === 'loading'`, the parent renders a skeleton (no live data):
+
+- Header row: icon + title placeholders
+- Media block: 4:3 aspect placeholder (`max-height: 33vh`)
+- Details block: four row placeholders
+
+Skeleton uses shimmer gradient on `--border` / `--card` tokens. No interactive controls during loading.
+
+## Parent View State
+
+Host exposes `[attr.data-state]` with `loading | error | ready` (field-level `editing` stays on child rows).
+
+Pane layout uses `[attr.data-pane-layout]` (`narrow | medium | wide`) from pane width: `<480px`, `480–720px`, `>720px`. `ResizeObserver` on `:host` plus optional `[paneWidth]` input from workspace pane.
+
+`narrow` layout: full-viewport fixed overlay (`z-index: 500`).
+
+## Reconciliation Banner
+
+Parent-owned inline banner between location section and metadata when `reconciliationOffer` is set. Not a separate component spec — orchestration in `MediaDetailViewComponent`; UI contract in [address-reconciliation](../../service/location-resolver/address-reconciliation.md).
+
+## Action Footer
+
+Single-media actions render in a sticky `app-context-action-bar` footer (`variant="footer"`) when detail is ready. Same action registry as header overflow menu. See [context-action-bar.md](../../component/context-action-bar.md).
 
 ## Acceptance Criteria
 
 - [x] Parent element focuses on composition, shared state, and navigation
 - [x] Quick Info Bar remains directly under the media preview surface
 - [x] Child specs own feature-specific behavior
+- [x] Loading skeleton documented and implemented
+- [x] Parent `[attr.data-state]` for loading/error/ready
+- [x] Uses `ResizeObserver` on the host element to measure pane width
+- [x] Mobile overlay on `data-pane-layout="narrow"`
 - [ ] Parent and child viewer adhere to shared cache identity contract with map marker and `/media` consumers.
-- [ ] Uses `ResizeObserver` on the host element to measure pane width
-- [ ] Mobile overlay behavior matches the parent spec

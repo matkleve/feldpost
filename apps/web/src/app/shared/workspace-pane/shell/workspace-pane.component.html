@@ -50,6 +50,7 @@
       <!-- Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> detail actions route map-pick through pane output wiring. -->
       <app-media-detail-view
         [mediaId]="detailMediaId()"
+        [paneWidth]="currentWidth()"
         [addressSearchRequestImageId]="detailAddressSearchRequestMediaId()"
         [addressSearchRequestId]="detailAddressSearchRequestId()"
         (closed)="onDetailClose()"

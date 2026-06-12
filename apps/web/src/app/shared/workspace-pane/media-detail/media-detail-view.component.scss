@@ -17,7 +17,7 @@
   overflow: hidden;
   background: var(--card);
 
-  @media (max-width: 47.9375rem) {
+  &[data-pane-layout='narrow'] {
     position: fixed;
     inset: 0;
     z-index: 500;
@@ -34,6 +34,15 @@
   &--loading {
     overflow: hidden;
   }
+}
+
+// Sticky action footer — selection-driven discovery surface for single-media actions.
+// @see docs/specs/ui/media-detail/media-detail-actions.md
+.detail-action-footer {
+  flex-shrink: 0;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-top: 1px solid var(--border);
+  background: var(--card);
 }
 
 .detail-loading-placeholder-group {

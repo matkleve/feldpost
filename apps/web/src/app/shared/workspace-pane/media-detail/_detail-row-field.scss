@@ -28,6 +28,10 @@
   color: var(--primary);
 }
 
+.detail-row:not(.detail-row--readonly):not(.detail-row--editing) .detail-row__field-trigger {
+  border-bottom: 1px dashed color-mix(in srgb, var(--foreground) 20%, transparent);
+}
+
 .detail-row__field-trigger {
   width: 100%;
   min-width: 0;

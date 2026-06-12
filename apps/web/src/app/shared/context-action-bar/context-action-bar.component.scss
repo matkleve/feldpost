@@ -1,0 +1,119 @@
+// Shared context action bar — footer (compact icons) and section (labeled rows).
+// @see docs/specs/ui/media-detail/media-detail-actions.md
+
+@use '../workspace-pane/media-detail/detail-row-slots';
+
+:host {
+  display: block;
+  min-width: 0;
+  --cab-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --cab-menu-item-text: var(--foreground);
+}
+
+.context-action-bar--footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.context-action-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.context-action-bar__divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 1.5rem;
+  margin-inline: var(--spacing-1);
+  background: var(--border);
+}
+
+.context-action-bar__btn--destructive {
+  color: var(--destructive);
+
+  &:hover:not(:disabled) {
+    color: var(--destructive);
+    background: color-mix(in srgb, var(--destructive) 10%, transparent);
+  }
+}
+
+.context-action-bar__list {
+  @include detail-row-slots.detail-row-center-width;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+:host([data-pane-layout='narrow']) .context-action-bar__list,
+.context-action-bar--section .context-action-bar__list {
+  @media (max-width: 29.9375rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.context-action-bar__separator {
+  grid-column: 1 / -1;
+}
+
+.context-action-bar__item {
+  gap: var(--spacing-1);
+  min-height: var(--detail-row-height, 2rem);
+  padding-inline: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  &:hover:not(:disabled):not([disabled]),
+  &:focus-visible {
+    background: var(--cab-menu-item-hover-bg);
+
+    .context-action-bar__icon,
+    .context-action-bar__label {
+      color: var(--primary);
+    }
+  }
+}
+
+.context-action-bar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: var(--font-size-md);
+  line-height: 1;
+  color: var(--muted-foreground);
+  transition: color 80ms ease-out;
+}
+
+.context-action-bar__label {
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--foreground);
+  transition: color 80ms ease-out;
+}
+
+.context-action-bar__item--destructive {
+  .context-action-bar__icon,
+  .context-action-bar__label {
+    color: var(--destructive);
+  }
+
+  &:hover:not(:disabled):not([disabled]),
+  &:focus-visible {
+    background: color-mix(in srgb, var(--destructive) 10%, transparent);
+
+    .context-action-bar__icon,
+    .context-action-bar__label {
+      color: var(--destructive);
+    }
+  }
+}

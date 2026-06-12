@@ -3,29 +3,33 @@
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
     <div class="detail-row__center media-location-row__edit-grid">
-      <label class="media-location-row__field">
-        <span class="detail-row__label">{{ t('location.street.label', 'Street') }}</span>
-        <input class="detail-row__field-input" type="text" [value]="draftStreet()" (input)="draftStreet.set($any($event.target).value)" />
-      </label>
-      <label class="media-location-row__field">
-        <span class="detail-row__label">{{ t('location.house_number.label', 'House number') }}</span>
-        <input class="detail-row__field-input" type="text" [value]="draftHouseNumber()" (input)="draftHouseNumber.set($any($event.target).value)" />
-      </label>
-      <label class="media-location-row__field">
-        <span class="detail-row__label">{{ t('location.staircase.label', 'Staircase') }}</span>
-        <input class="detail-row__field-input" type="text" [placeholder]="t('location.staircase.placeholder', 'e.g. A, Aufgang 3')" [value]="draftStaircase()" (input)="draftStaircase.set($any($event.target).value)" />
-      </label>
-      <label class="media-location-row__field">
-        <span class="detail-row__label">{{ t('location.door.label', 'Top') }}</span>
-        <input class="detail-row__field-input" type="text" [placeholder]="t('location.door.placeholder', 'e.g. 1, DG, 11-12')" [value]="draftDoor()" (input)="draftDoor.set($any($event.target).value)" />
-      </label>
-      <label class="media-location-row__field">
+      <div class="media-location-row__field-group media-location-row__field-group--address">
+        <label class="media-location-row__field media-location-row__field--street">
+          <span class="detail-row__label">{{ t('location.street.label', 'Street') }}</span>
+          <input class="detail-row__field-input" type="text" [value]="draftStreet()" (input)="draftStreet.set($any($event.target).value)" />
+        </label>
+        <label class="media-location-row__field media-location-row__field--house">
+          <span class="detail-row__label">{{ t('location.house_number.label', 'House number') }}</span>
+          <input class="detail-row__field-input" type="text" [value]="draftHouseNumber()" (input)="draftHouseNumber.set($any($event.target).value)" />
+        </label>
+      </div>
+      <div class="media-location-row__field-group media-location-row__field-group--building">
+        <label class="media-location-row__field">
+          <span class="detail-row__label">{{ t('location.staircase.label', 'Staircase') }}</span>
+          <input class="detail-row__field-input" type="text" [placeholder]="t('location.staircase.placeholder', 'e.g. A, Aufgang 3')" [value]="draftStaircase()" (input)="draftStaircase.set($any($event.target).value)" />
+        </label>
+        <label class="media-location-row__field">
+          <span class="detail-row__label">{{ t('location.door.label', 'Top') }}</span>
+          <input class="detail-row__field-input" type="text" [placeholder]="t('location.door.placeholder', 'e.g. 1, DG, 11-12')" [value]="draftDoor()" (input)="draftDoor.set($any($event.target).value)" />
+        </label>
+        <label class="media-location-row__field">
+          <span class="detail-row__label">{{ t('location.floor.label', 'Floor') }}</span>
+          <input class="detail-row__field-input" type="text" [value]="draftFloor()" (input)="draftFloor.set($any($event.target).value)" />
+        </label>
+      </div>
+      <label class="media-location-row__field media-location-row__field--postcode">
         <span class="detail-row__label">{{ t('location.postcode.label', 'Postcode') }}</span>
         <input class="detail-row__field-input" type="text" [value]="draftPostcode()" (input)="draftPostcode.set($any($event.target).value)" />
-      </label>
-      <label class="media-location-row__field">
-        <span class="detail-row__label">{{ t('location.floor.label', 'Floor') }}</span>
-        <input class="detail-row__field-input" type="text" [value]="draftFloor()" (input)="draftFloor.set($any($event.target).value)" />
       </label>
       <label class="media-location-row__field media-location-row__field--wide">
         <span class="detail-row__label">{{ t('location.extra_information.label', 'Extra information') }}</span>

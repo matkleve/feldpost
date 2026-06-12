@@ -3,6 +3,7 @@ import {
   computed,
   effect,
   ElementRef,
+  HostListener,
   inject,
   input,
   output,
@@ -122,5 +123,13 @@ export class MediaDetailInlineSectionComponent {
     window.requestAnimationFrame(() => {
       this.projectsDropdownRef()?.focusSearchField();
     });
+  }
+
+  @HostListener('document:keydown.escape')
+  onDocumentEscape(): void {
+    const field = this.editingField();
+    if (field === 'captured_at' || field === 'project_ids') {
+      this.editingCancelled.emit();
+    }
   }
 }

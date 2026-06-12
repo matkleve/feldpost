@@ -40,6 +40,9 @@ import { METADATA_COMPOSE_TYPE_ICONS } from '../metadata/metadata-type-icons';
   ],
   templateUrl: './metadata-section.component.html',
   styleUrls: ['../_detail-row-slots.scss', './metadata-section.component.scss'],
+  host: {
+    '[attr.data-state]': "showAddForm() ? 'composing' : 'collapsed'",
+  },
 })
 export class MetadataSectionComponent {
   private readonly i18nService = inject(I18nService);
