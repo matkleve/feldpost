@@ -13,19 +13,23 @@ BEGIN
      AND NEW.mime_type NOT LIKE 'image/%'
      AND NEW.mime_type NOT LIKE 'video/%'
   THEN
-    PERFORM supabase_functions.http_request(
-      'https://178-105-242-74.sslip.io/generate',
-      'POST',
-      '{"Content-Type": "application/json"}'::jsonb,
-      json_build_object(
-        'mediaId',        NEW.id,
-        'storagePath',    NEW.storage_path,
-        'mimeType',       NEW.mime_type,
-        'organizationId', NEW.organization_id,
-        'userId',         NEW.created_by
-      )::text,
-      5000
-    );
+    -- supabase_functions schema is only available on Supabase Cloud (pg_net);
+    -- skip gracefully in local dev where the schema does not exist.
+    IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'supabase_functions') THEN
+      PERFORM supabase_functions.http_request(
+        'https://178-105-242-74.sslip.io/generate',
+        'POST',
+        '{"Content-Type": "application/json"}'::jsonb,
+        json_build_object(
+          'mediaId',        NEW.id,
+          'storagePath',    NEW.storage_path,
+          'mimeType',       NEW.mime_type,
+          'organizationId', NEW.organization_id,
+          'userId',         NEW.created_by
+        )::text,
+        5000
+      );
+    END IF;
   END IF;
   RETURN NEW;
 END;
