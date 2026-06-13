@@ -279,13 +279,11 @@ describe('SearchBarComponent', () => {
     expect(clearSpy).toHaveBeenCalled();
   });
 
-  it('shows the empty state and emits drop pin when requested', async () => {
+  it('shows the empty state when no results are found', async () => {
     const geocodingService = TestBed.inject(GeocodingService);
     (geocodingService.search as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
     const fixture = TestBed.createComponent(SearchBarComponent);
-    const dropPinSpy = vi.fn();
-    fixture.componentInstance.dropPinRequested.subscribe(dropPinSpy);
     fixture.detectChanges();
 
     const supabaseService = TestBed.inject(SupabaseService) as unknown as {
@@ -305,13 +303,8 @@ describe('SearchBarComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No address found for nowhere');
-
-    const dropPinButton = fixture.nativeElement.querySelector(
-      '.search-bar__ghost-action',
-    ) as HTMLButtonElement;
-    dropPinButton.click();
-
-    expect(dropPinSpy).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.textContent).toContain('Try a different address or search term.');
+    expect(fixture.nativeElement.querySelector('.search-bar__ghost-action')).toBeNull();
   });
 
   it('keeps fixed input-row track sizing in component styles', () => {

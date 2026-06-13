@@ -2816,14 +2816,6 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: "Fai clic sulla mappa per posizionare l'immagine",
   },
   {
-    key: 'map.shell.placement.dropPin',
-    original: 'Click the map to drop a pin',
-    context: 'Placement banner text when dropping a manual pin.',
-    en: 'Click the map to drop a pin',
-    de: 'Klicke auf die Karte, um einen Pin zu setzen',
-    it: 'Fai clic sulla mappa per inserire un pin',
-  },
-  {
     key: 'map.shell.placement.cancel',
     original: 'Cancel',
     context: 'Placement banner cancel button label.',
@@ -3267,19 +3259,11 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
   },
   {
     key: 'map.searchBar.empty.tryDifferentAddress',
-    original: 'Try a different address or pin manually.',
+    original: 'Try a different address or search term.',
     context: 'Empty state guidance text for map search no-results state.',
-    en: 'Try a different address or pin manually.',
-    de: 'Versuche eine andere Adresse oder setze den Pin manuell.',
-    it: 'Prova un indirizzo diverso o inserisci il pin manualmente.',
-  },
-  {
-    key: 'map.searchBar.action.dropPin',
-    original: 'Drop pin',
-    context: 'Action button label to enter manual pin placement from search empty state.',
-    en: 'Drop pin',
-    de: 'Pin setzen',
-    it: 'Inserisci pin',
+    en: 'Try a different address or search term.',
+    de: 'Versuche eine andere Adresse oder einen anderen Suchbegriff.',
+    it: 'Prova un indirizzo diverso o un altro termine di ricerca.',
   },
   {
     key: 'map.searchBar.liveRegion.resultsAvailable',

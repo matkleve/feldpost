@@ -48,7 +48,7 @@ Derived from the use cases. Each row maps to specific UC scenarios.
 | 12  | Clicks outside search                      | Closes dropdown                                                                                                                  | �                 | State ? `idle` or `committed`                             |
 | 13  | Clicks `�` clear button                    | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State ? `idle`                                            |
 | 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State ? `focused-empty`                                   |
-| 15  | Query returns no results                   | Shows empty state with "No address found" + suggested actions                                                                    | UC-10             | �                                                         |
+| 15  | Query returns no results                   | Shows empty state with "No address found" + guidance copy                                                                    | UC-10             | �                                                         |
 | 16  | Geocoder slow/fails                        | DB results render immediately, geocoder section shows skeleton then hides                                                        | UC-7              | Graceful degradation                                      |
 | 17  | Pastes coordinates or Google Maps URL      | Detects coordinate format, centers map, reverse-geocodes label                                                                   | UC-5              | `commit` type `map-center`                                |
 | 18  | "Did you mean?" suggestion clicked         | Replaces query with corrected text, reruns search                                                                                | UC-16             | Query updated, new search triggered                       |
@@ -111,8 +111,7 @@ SearchBar                                  ? positioned top-center in Map Zone, 
     �
     +-- [no results] EmptyState
         +-- "No address found for {query}"
-        +-- "Try a different address or pin manually"
-        +-- GhostButton "Drop pin"         ? starts placement mode
+        +-- "Try a different address or search term."
 ```
 
 ### DropdownItem (shared child component)
@@ -264,7 +263,7 @@ sequenceDiagram
 - [x] Click outside closes dropdown
 - [x] `�` clear button appears after commit; clicking it resets everything
 - [x] `�` clear button uses square control geometry aligned to shared control/media sizing tokens
-- [x] Empty state shows "No address found" with "Drop pin" recovery action
+- [x] Empty state shows "No address found" with guidance to try a different address or search term
 - [x] Pasting coordinates or Google Maps URL auto-detects and centers map
 
 ### Accessibility

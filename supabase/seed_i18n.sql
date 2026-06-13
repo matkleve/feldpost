@@ -14387,14 +14387,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.searchBar.empty.tryDifferentAddress', 'Try a different address or pin manually.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+values (null, 'map.searchBar.empty.tryDifferentAddress', 'Try a different address or search term.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Try a different address or pin manually.', 'published'
+select t.id, 'en', 'Try a different address or search term.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.empty.tryDifferentAddress'
 on conflict (app_text_id, lang) do update set
@@ -14402,7 +14402,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Versuche eine andere Adresse oder setze den Pin manuell.', 'published'
+select t.id, 'de', 'Versuche eine andere Adresse oder einen anderen Suchbegriff.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.empty.tryDifferentAddress'
 on conflict (app_text_id, lang) do update set
@@ -14410,40 +14410,9 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Prova un indirizzo diverso o inserisci il pin manualmente.', 'published'
+select t.id, 'it', 'Prova un indirizzo diverso o un altro termine di ricerca.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.searchBar.empty.tryDifferentAddress'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.searchBar.action.dropPin', 'Drop pin', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Drop pin', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'map.searchBar.action.dropPin'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pin setzen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'map.searchBar.action.dropPin'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Inserisci pin', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'map.searchBar.action.dropPin'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -22380,37 +22349,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Clicca sulla mappa per impostare la nuova posizione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.placement.banner.setNewLocation'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.placement.banner.dropPin', 'Click the map to drop a pin', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:return')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Click the map to drop a pin', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.placement.banner.dropPin'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Klicke auf die Karte um einen Pin zu setzen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.placement.banner.dropPin'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Clicca sulla mappa per inserire un pin', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.placement.banner.dropPin'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -194,15 +194,7 @@
           @if (showingEmptyState()) {
             <div class="search-bar__empty-state" role="presentation">
               <p class="search-bar__empty-title">No address found for {{ query().trim() }}</p>
-              <p class="search-bar__empty-copy">Try a different address or pin manually.</p>
-              <button
-                class="search-bar__ghost-action"
-                type="button"
-                (mousedown)="$event.preventDefault()"
-                (click)="onDropPinClick()"
-              >
-                Drop pin
-              </button>
+              <p class="search-bar__empty-copy">Try a different address or search term.</p>
             </div>
           }
         }

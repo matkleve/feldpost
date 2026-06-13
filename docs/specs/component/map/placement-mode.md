@@ -90,7 +90,7 @@ flowchart LR
 | Name                    | Type                      | Default | Controls                                         |
 | ----------------------- | ------------------------- | ------- | ------------------------------------------------ |
 | `placementActive`       | `WritableSignal<boolean>` | `false` | Banner visibility + cursor change                |
-| `searchPlacementActive` | `WritableSignal<boolean>` | `false` | Distinct pin-drop mode triggered by search input |
+| `searchPlacementActive` | `WritableSignal<boolean>` | `false` | Crosshair mode for upload location map-pick on the map |
 | `pendingPlacementKey`   | `string \| null`          | `null`  | Which upload job is waiting for map placement    |
 
 ## File Map

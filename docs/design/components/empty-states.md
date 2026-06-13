@@ -19,5 +19,5 @@ Each empty state includes:
 | ------------------------ | -------------------------------------------------------------------------- | ------------------- |
 | No images in viewport    | "Nothing here yet" + "Try expanding the radius or adjusting your filters." | "Clear filters"     |
 | Empty group tab          | "This group is empty" + "Add images by selecting them on the map."         | "Go to map"         |
-| No search results        | "No address found" + "Try a different address or pin a location manually." | "Drop pin manually" |
+| No search results        | "No address found" + "Try a different address or search term." | — |
 | First login (no uploads) | "Welcome to Feldpost" + "Start by uploading your first site photos."       | "Upload photos"     |

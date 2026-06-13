@@ -2086,14 +2086,6 @@ export class MapShellComponent implements OnDestroy {
     this.clearSearchLocationMarker();
   }
 
-  onSearchDropPinRequested(): void {
-    this.pendingPlacementKey = null;
-    this.pendingUploadedLocationMapPick = null;
-    this.placementActive.set(false);
-    this.searchPlacementActive.set(true);
-    this.map?.getContainer().classList.add('map-container--placing');
-  }
-
   onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
     const points =
       event.points?.length && event.points.length > 0
@@ -2121,13 +2113,11 @@ export class MapShellComponent implements OnDestroy {
     if (this.placementActive()) {
       return this.t('upload.placement.banner.placeImage', 'Click the map to place the image');
     }
-    if (this.pendingUploadedLocationMapPick) {
-      return this.t(
-        'upload.placement.banner.setNewLocation',
-        'Click the map to set the new location',
-      );
-    }
-    return this.t('upload.placement.banner.dropPin', 'Click the map to drop a pin');
+
+    return this.t(
+      'upload.placement.banner.setNewLocation',
+      'Click the map to set the new location',
+    );
   }
 
   // ── Map init ──────────────────────────────────────────────────────────────

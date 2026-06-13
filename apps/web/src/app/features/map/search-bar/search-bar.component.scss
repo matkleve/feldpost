@@ -189,21 +189,6 @@
   opacity: 0;
 }
 
-.search-bar__ghost-action {
-  border: 0;
-  background: transparent;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition:
-    background-color 120ms ease-in-out,
-    color 120ms ease-in-out;
-
-  &:hover {
-    background: color-mix(in srgb, var(--primary) 10%, transparent);
-    color: var(--foreground);
-  }
-}
-
 .search-bar__dropdown {
   min-height: 0;
   width: 100%;
@@ -278,13 +263,6 @@
   color: var(--muted-foreground);
   font-size: var(--font-size-xs);
   line-height: 1.4;
-}
-
-.search-bar__ghost-action {
-  min-width: 0;
-  align-self: flex-start;
-  padding-inline: var(--search-bar-padding-inline);
-  color: var(--primary);
 }
 
 .search-bar__skeleton-list {

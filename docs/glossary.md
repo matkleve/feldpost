@@ -510,7 +510,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 
 - **No Images in Viewport:** "Nothing here yet" + "Try adjusting filters" + "Clear filters" button.
 - **Empty Group:** "This group is empty" + "Add images from the map" + "Go to map" button.
-- **No Search Results:** "No address found" + "Try a different address or pin manually" + "Drop pin" button.
+- **No Search Results:** "No address found" + "Try a different address or search term."
 - **First Login / Welcome:** "Welcome to Feldpost" + "Start by uploading photos" + "Upload photos" button.
 
 ### Page-Level Components (placeholder)

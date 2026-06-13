@@ -119,7 +119,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   readonly mapCenterRequested = output<{ lat: number; lng: number; label: string }>();
   readonly clearRequested = output<void>();
-  readonly dropPinRequested = output<void>();
+  readonly goToLocationRequested = output<void>();
   readonly qrInviteCommandRequested = output<void>();
   readonly queryChanged = output<string>();
   readonly projectFilterIdsChanged = output<string[]>();
@@ -374,13 +374,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.focusSearch();
   }
 
-  onDropPinClick(): void {
-    this.dropdownOpen.set(false);
-    this.activeIndex.set(-1);
-    this.state.set('idle');
-    this.dropPinRequested.emit();
-  }
-
   onCandidateSelected(candidate: SearchCandidate): void {
     this.commitCandidate(candidate);
   }
@@ -614,7 +607,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         break;
       case 'run-command':
         if (commitAction.command === 'go-to-location') {
-          this.dropPinRequested.emit();
+          this.goToLocationRequested.emit();
         }
 
         if (commitAction.command === 'create-qr-invite') {

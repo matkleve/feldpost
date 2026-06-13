@@ -161,26 +161,6 @@ sequenceDiagram
     MapShell->>MapShell: placementActive → false
 ```
 
-### Search pin-drop variant (spec Actions #5):
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant SearchBar
-    participant MapShell
-    participant Leaflet
-
-    User->>SearchBar: Click "Drop pin" action
-    SearchBar->>MapShell: dropPinRequested
-    MapShell->>MapShell: searchPlacementActive → true
-    MapShell->>Leaflet: Crosshair cursor on map
-    Note over MapShell: Placement banner: "Click the map to drop a pin"
-    User->>Leaflet: Click on map
-    Leaflet->>MapShell: handleMapClick(latlng)
-    MapShell->>MapShell: renderSearchLocationMarker(coords)
-    MapShell->>MapShell: searchPlacementActive → false
-```
-
 ---
 
 ## IS-6: Browser Resize — Responsive Reflow (spec Actions #2)

@@ -192,41 +192,4 @@ describe('MapShellComponent – search bar', () => {
         .searchLocationMarker,
     ).toBeNull();
   });
-
-  it('onSearchDropPinRequested() enables manual pin placement mode', () => {
-    const fixture = TestBed.createComponent(MapShellComponent);
-    fixture.detectChanges();
-
-    fixture.componentInstance.onSearchDropPinRequested();
-
-    expect(fixture.componentInstance.searchPlacementActive()).toBe(true);
-  });
-
-  it('map click in search placement mode drops a search marker and exits the mode', () => {
-    const fixture = TestBed.createComponent(MapShellComponent);
-    fixture.detectChanges();
-
-    const mapStub = {
-      addLayer: vi.fn(),
-      setView: vi.fn(),
-      getZoom: vi.fn().mockReturnValue(13),
-      remove: vi.fn(),
-      getContainer: vi.fn().mockReturnValue({ classList: { add: vi.fn(), remove: vi.fn() } }),
-    };
-    (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
-
-    fixture.componentInstance.onSearchDropPinRequested();
-
-    (
-      fixture.componentInstance as unknown as {
-        handleMapClick: (event: { latlng: { lat: number; lng: number } }) => void;
-      }
-    ).handleMapClick({ latlng: { lat: 48.2082, lng: 16.3738 } });
-
-    expect(fixture.componentInstance.searchPlacementActive()).toBe(false);
-    expect(
-      (fixture.componentInstance as unknown as { searchLocationMarker: unknown })
-        .searchLocationMarker,
-    ).not.toBeNull();
-  });
 });
