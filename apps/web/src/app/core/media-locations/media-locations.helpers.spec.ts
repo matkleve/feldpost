@@ -3,6 +3,7 @@ import {
   formatLocationDisplayLine,
   formatLocationFullAddressCopy,
   filterAndDedupeOrgSuggestions,
+  locationRowHasAddressContent,
   formatGeocoderPickerLines,
   formatLocationPickerLines,
   coerceLocationCoordinate,
@@ -337,5 +338,75 @@ describe('media-locations.helpers', () => {
     const b = { ...BASE_ROW, id: 'b', is_linked_to_media: false };
     const bDup = { ...BASE_ROW, id: 'b', is_linked_to_media: false };
     expect(filterAndDedupeOrgSuggestions([a, b, bDup])).toEqual([b]);
+  });
+
+  it('filterAndDedupeOrgSuggestions drops blank rows without GPS', () => {
+    const blank = {
+      ...BASE_ROW,
+      id: 'blank',
+      street: null,
+      house_number: null,
+      city: null,
+      district: null,
+      country: null,
+      postcode: null,
+      address_label: null,
+      latitude: null,
+      longitude: null,
+      is_linked_to_media: false,
+    };
+    const withGps = { ...blank, id: 'gps', latitude: 48.2, longitude: 16.37 };
+    const withAddress = { ...BASE_ROW, id: 'addr', is_linked_to_media: false };
+    expect(filterAndDedupeOrgSuggestions([blank, withGps, withAddress])).toEqual([
+      withGps,
+      withAddress,
+    ]);
+  });
+
+  it('locationRowHasAddressContent matches visible display line', () => {
+    expect(
+      locationRowHasAddressContent({
+        street: 'Hauptstraße',
+        house_number: '1',
+        staircase: null,
+        door: null,
+        postcode: null,
+        city: null,
+        address_label: null,
+      }),
+    ).toBe(true);
+    expect(
+      locationRowHasAddressContent({
+        street: null,
+        house_number: null,
+        staircase: null,
+        door: null,
+        postcode: null,
+        city: null,
+        address_label: 'Site gate',
+      }),
+    ).toBe(true);
+    expect(
+      locationRowHasAddressContent({
+        street: null,
+        house_number: null,
+        staircase: null,
+        door: null,
+        postcode: null,
+        city: 'Wien',
+        address_label: null,
+      }),
+    ).toBe(false);
+    expect(
+      locationRowHasAddressContent({
+        street: null,
+        house_number: null,
+        staircase: null,
+        door: null,
+        postcode: null,
+        city: null,
+        address_label: null,
+      }),
+    ).toBe(false);
   });
 });

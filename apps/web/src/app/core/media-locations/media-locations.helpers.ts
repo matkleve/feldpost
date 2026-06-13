@@ -117,6 +117,14 @@ export function formatLocationDisplayPrimaryLine(row: LocationDisplayLineInput, 
   return access || row.address_label?.trim() || '—';
 }
 
+/** True when read-mode display line would not render the empty placeholder (`—`). */
+export function locationRowHasAddressContent(
+  row: LocationDisplayLineInput,
+  doorLabel = 'Top',
+): boolean {
+  return formatLocationDisplayLine(row, doorLabel) !== '—';
+}
+
 /** Picker secondary: postcode city · district · country. */
 export function formatLocationDisplayLocalityLine(
   row: Pick<MediaItemLocationRow, 'postcode' | 'city' | 'district' | 'country'>,
@@ -185,12 +193,18 @@ export function formatGeocoderPickerLines(
   );
 }
 
-/** Org picker: hide already-linked rows and duplicate ids (Recent + Results paths). */
+/** Org picker: hide already-linked, blank, and duplicate rows (Recent + Results paths). */
 export function filterAndDedupeOrgSuggestions(rows: OrgLocationSearchRow[]): OrgLocationSearchRow[] {
   const seen = new Set<string>();
   const filtered: OrgLocationSearchRow[] = [];
   for (const row of rows) {
     if (row.is_linked_to_media === true) continue;
+    if (
+      !locationRowHasAddressContent(row) &&
+      !legacyMediaHasGps(row.latitude, row.longitude)
+    ) {
+      continue;
+    }
     if (seen.has(row.id)) continue;
     seen.add(row.id);
     filtered.push(row);

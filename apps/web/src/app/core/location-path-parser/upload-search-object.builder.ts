@@ -218,6 +218,24 @@ function applySegment(
   }
 }
 
+/**
+ * True when the SO has no anchor fields (city, zip, postcode, high-confidence street).
+ * Prevents garbage filenames (e.g. "CV Matthias Kleveta ERP DE.pdf") from
+ * being wired onto jobs as if they were real addresses.
+ * @see path-token-classifier.ts — fallback classifier emits street at 0.5
+ */
+export function isSearchObjectMeaningless(so: UploadSearchObject): boolean {
+  if (so.city || so.postcode) {
+    return false;
+  }
+  if (!so.street) {
+    return true;
+  }
+  const streetSources = so.sources.filter((s) => s.field === 'street');
+  const hasHighConfidenceStreet = streetSources.some((s) => s.confidence >= 0.9);
+  return !hasHighConfidenceStreet;
+}
+
 export function buildGroupingKey(fields: SoFields): string {
   const norm = (v: string | null | undefined): string =>
     (v ?? '')

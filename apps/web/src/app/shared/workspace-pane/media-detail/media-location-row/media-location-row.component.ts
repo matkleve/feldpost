@@ -37,7 +37,9 @@ import {
   formatLocationDisplayLine,
   legacyMediaHasGps,
   locationGpsDisplay,
+  locationRowHasAddressContent,
 } from '../../../../core/media-locations/media-locations.helpers';
+import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 
 export type MediaLocationRowVisualState =
@@ -112,10 +114,10 @@ const COPY_FIELD_ICONS: Record<MediaLocationCopyFieldId, string> = {
 export class MediaLocationRowComponent {
   private readonly i18n = inject(I18nService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly mediaLocationsService = inject(MediaLocationsService);
   readonly t = (key: string, fallback = '') => this.i18n.t(key, fallback);
 
   readonly location = input.required<MediaItemLocationRow>();
-  readonly locationCount = input(1);
   readonly saving = input(false);
 
   readonly editRequested = output<string>();
@@ -155,6 +157,14 @@ export class MediaLocationRowComponent {
   readonly displayLine = computed(() =>
     formatLocationDisplayLine(this.location(), this.doorLabel()),
   );
+
+  readonly needsSharedEditConfirm = computed(() => {
+    const row = this.location();
+    return (
+      locationRowHasAddressContent(row) &&
+      this.mediaLocationsService.isLocationSharedAcrossMedia(row.id)
+    );
+  });
 
   readonly canShowOnMap = computed(() => {
     const row = this.location();
@@ -297,7 +307,11 @@ export class MediaLocationRowComponent {
   });
 
   requestEditAddress(): void {
-    this.sharedEditConfirmOpen.set(true);
+    if (this.needsSharedEditConfirm()) {
+      this.sharedEditConfirmOpen.set(true);
+      return;
+    }
+    this.startEdit();
   }
 
   onSharedEditConfirm(): void {

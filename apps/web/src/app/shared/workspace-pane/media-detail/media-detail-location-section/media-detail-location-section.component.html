@@ -31,7 +31,6 @@
       @for (row of filteredLocations(); track row.id) {
         <app-media-location-row
           [location]="row"
-          [locationCount]="locations().length"
           [saving]="saving()"
           (saveRequested)="rowSaveRequested.emit($event)"
           (deleteRequested)="rowDeleteRequested.emit($event)"

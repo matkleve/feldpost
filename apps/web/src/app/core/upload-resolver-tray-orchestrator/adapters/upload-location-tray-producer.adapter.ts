@@ -116,6 +116,9 @@ export class UploadLocationTrayProducerAdapter {
     }
     const unitId = this.dialogueUnitIdForGroup(group.id);
     const input = groupToEnqueueInput(group, unitId);
+    if (!input.options.length) {
+      return '';
+    }
     const itemId = this.orchestrator.enqueueItem(input);
     this.groupStepToItemId.set(stepKey, itemId);
     return itemId;
@@ -253,8 +256,6 @@ function groupToEnqueueInput(
   }
 
   const options = resolveOptions(group);
-  const answerKind =
-    group.disambiguationKind === 'city_step' && !options.length ? 'text' : 'single_choice';
 
   return {
     dialogueUnitId,
@@ -262,7 +263,7 @@ function groupToEnqueueInput(
     batchId: group.batchId,
     questionKey,
     questionParams,
-    answerKind,
+    answerKind: 'single_choice',
     options,
     jobIds: [...group.jobIds],
     folderDisplayPath: group.folderDisplayPath,

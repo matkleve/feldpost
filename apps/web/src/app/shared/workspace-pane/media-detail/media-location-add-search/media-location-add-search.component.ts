@@ -44,6 +44,8 @@ import {
   filterAndDedupeOrgSuggestions,
   formatLocationDisplayLine,
   formatLocationPickerLines,
+  legacyMediaHasGps,
+  locationRowHasAddressContent,
 } from '../../../../core/media-locations/media-locations.helpers';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { BehaviorSubject, Subscription, finalize, take } from 'rxjs';
@@ -348,6 +350,13 @@ export class MediaLocationAddSearchComponent implements OnDestroy {
     const preId = this.preResolvedLocationId();
     if (preId && text === this.pickQuerySnapshot) {
       const row = this.orgLocationSuggestions().find((r) => r.id === preId);
+      if (
+        row &&
+        !locationRowHasAddressContent(row) &&
+        !legacyMediaHasGps(row.latitude, row.longitude)
+      ) {
+        return;
+      }
       this.locationLinked.emit({
         locationId: preId,
         alreadyLinked: row?.is_linked_to_media === true,

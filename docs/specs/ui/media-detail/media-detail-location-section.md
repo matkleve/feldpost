@@ -86,12 +86,12 @@ Overflow menu uses `hlmMenuItem` rows with icons (same pattern as detail header 
 
 | Menu item | Behavior |
 | --- | --- |
-| **Edit address** | `app-confirm-dialog` with `location.shared_edit.confirm.*` — then inline row edit → `update_media_item_location` (patches shared `locations` row for all linked media) |
+| **Edit address** | When row has address text **and** the `locations.id` is linked to more than one media item in session cache → `app-confirm-dialog` with `location.shared_edit.confirm.*`; otherwise inline edit opens immediately. Save → `update_media_item_location` (patches shared `locations` row for all linked media) |
 | **Change to different address** | Opens section **Add or search address** in replace mode → `unlink_media_from_location` + `find_or_create_location` + `link_media_to_location` via `MediaLocationsService.replaceMediaItemLocationLink` |
 | **Change GPS on map** | Map pick → `update_media_item_location` on row |
 | **Copy** | Side submenu (full address first, then parts) |
 
-Slot **l2** edit and center address click use the same shared-edit confirm as **Edit address**. Null/empty copy fields hidden; `extra_information` excluded from copy.
+Slot **l2** edit and center address click use the same shared-edit confirm gate as **Edit address**. Org picker excludes blank rows (no address text and no GPS). Null/empty copy fields hidden; `extra_information` excluded from copy.
 
 ## Add/Search Dropdown (4 zones)
 

@@ -125,6 +125,22 @@ describe('MediaLocationsService listCache (N:N)', () => {
     expect(locationToRow.size).toBe(1);
   });
 
+  it('countMediaLinkedToLocation reflects shared cache entries', () => {
+    const shared = makeRow({ id: 'loc-shared', city: 'Shared City' });
+    service.seedListCache(
+      new Map([
+        ['media-a', [shared]],
+        ['media-b', [{ ...shared, media_item_id: 'media-b', link_id: 'link-b' }]],
+        ['media-c', [makeRow({ id: 'loc-other', city: 'Other' })]],
+      ]),
+    );
+
+    expect(service.countMediaLinkedToLocation('loc-shared')).toBe(2);
+    expect(service.isLocationSharedAcrossMedia('loc-shared')).toBe(true);
+    expect(service.countMediaLinkedToLocation('loc-other')).toBe(1);
+    expect(service.isLocationSharedAcrossMedia('loc-other')).toBe(false);
+  });
+
   it('updateLocation patches canonical row so other media sees change without list RPC', async () => {
     const shared = makeRow({ id: 'loc-shared', city: 'Before' });
     service.seedListCache(

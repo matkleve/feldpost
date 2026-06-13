@@ -6,6 +6,7 @@
 import { Injectable, inject } from '@angular/core';
 import { LocalGeoDataAdapter } from '../../location-path-parser/local-geo-data.adapter';
 import { resolveLayersForJob } from '../../location-path-parser/upload-search-object.layer-map';
+import { isSearchObjectMeaningless } from '../../location-path-parser/upload-search-object.builder';
 import { deriveFolderDisplayPath } from '../location/upload-location-resolution.helpers';
 import { UploadLocationLookupAdapter } from '../adapters/upload-location-lookup.adapter';
 import { UploadProjectLocationsAdapter } from '../adapters/upload-project-locations.adapter';
@@ -185,6 +186,16 @@ export class UploadAddressResolutionOrchestrator {
           folderDisplayPath,
           titleAddress: titleAddressLabel,
           titleAddressSource: job.titleAddressSource ?? 'folder',
+        });
+        continue;
+      }
+
+      if (isSearchObjectMeaningless(so)) {
+        uploadAddressDebug('orchestrator', 'skip meaningless SO — no real address signal', {
+          jobId: job.id,
+          fileName: job.file.name,
+          street: so.street,
+          country: so.country,
         });
         continue;
       }

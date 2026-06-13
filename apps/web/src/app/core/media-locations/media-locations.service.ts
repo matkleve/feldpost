@@ -57,6 +57,22 @@ export class MediaLocationsService {
   /** Canonical row per `locations.id` (shared across media). */
   private readonly locationToRow = new Map<string, MediaLocationCoreRow>();
 
+  /** How many cached media items currently link to this location (session cache only). */
+  countMediaLinkedToLocation(locationId: string): number {
+    let count = 0;
+    for (const refs of this.mediaToLinks.values()) {
+      if (refs.some((ref) => ref.locationId === locationId)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /** True when more than one media item in cache shares this `locations.id`. */
+  isLocationSharedAcrossMedia(locationId: string): boolean {
+    return this.countMediaLinkedToLocation(locationId) > 1;
+  }
+
   /** Drop cached link lists; optional nuclear reset clears canonical locations too. */
   invalidateListCache(mediaItemId?: string): void {
     if (mediaItemId) {
