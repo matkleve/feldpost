@@ -284,14 +284,15 @@ The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes w
 
 ## 3.2 Typography
 
-All text uses **Spectral** via **`--font-sans`** unless noted. Short metadata strings (timestamps, coordinates, toast code pointers) use **`--font-mono`** (JetBrains Mono).
+All UI text uses **Source Sans 3** via **`--font-sans`**. Headings (`h1`–`h6`) use **Libre Caslon Text** via **`--font-serif`**. Short metadata strings (timestamps, coordinates, toast code pointers) use **`--font-mono`** (Courier Prime).
 
 ```
-font-family: Spectral, ui-serif, Georgia, serif;   /* --font-sans / body + headings */
-font-family: JetBrains Mono, ui-monospace, monospace; /* --font-mono / metadata only */
+font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;   /* --font-sans / body + UI */
+font-family: "Libre Caslon Text", ui-serif, Georgia, serif;         /* --font-serif / headings */
+font-family: "Courier Prime", ui-monospace, monospace;              /* --font-mono / metadata only */
 ```
 
-**Weights:** body **`400`** (`styles.scss` `@layer base` on `body`); headings **`600`** (`--font-weight-semibold` on `h1`–`h6` in `_typography-baseline.scss`).
+**Weights:** body **`400`** (`styles.scss` `@layer base` on `body`); headings **`700`** (`--font-weight-bold` on `h1`–`h6` in `_typography-baseline.scss` — Libre Caslon Text has only 400/700, so heading levels differentiate by **size** only). Labels and buttons use **`500`** (`--font-weight-medium`) where a second UI weight is needed.
 
 **Type scale (rem, base 16px, ratio 1.13):** the modular steps are emitted on **`_typography-baseline.scss`** `:root` (Phase 7 **Batch 42** — moved from the legacy bridge; same **`calc(* * 1.13)`** chain). **Batch 31** removed the **`--font-size-ratio`** indirection — steps multiply by the literal **1.13** factor.
 

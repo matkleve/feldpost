@@ -84,20 +84,23 @@
 }
 
 h1 {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
 }
 
 h2 {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
 }
 
 h3 {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   // Matches former `--line-height-snug` (1.1) — inlined Batch 41 (token removed from legacy bridge)
   // @see docs/migration/phase-7-token-migration.md §Batch 41
   line-height: 1.1;
@@ -106,8 +109,9 @@ h3 {
 h4,
 h5,
 h6 {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   // Uses same snug line-height as h3 for dense heading rhythm
   // @see docs/migration/phase-7-token-migration.md §Batch 41 (h3 block)
   line-height: 1.1;
