@@ -161,27 +161,29 @@ Existing helpers:
 | Upload pipeline failure | `upload-notification.service.ts` | `error` | Structured + codeRef | ✅ partial | Shipped |
 | Location update failure | `media-location-update.helpers.ts` | `error` | Structured + codeRef | ❌ | Shipped |
 | Media deleted (undo) | `media-delete-undo.service.ts` | `success` | Structured + action | ✅ partial | Shipped |
-| GPS fix failed | `gps-button.component.ts` | `error` | Flat | ❌ | **Needs upgrade** |
-| Copy address (map context menu) | `map-shell.component.ts` | `success` | Flat, **hardcoded DE** | ❌ | **Needs i18n + structured** |
-| Copy GPS (map context menu) | `map-shell.component.ts` | `success` | Flat, **hardcoded DE** | ❌ | **Needs i18n + structured** |
-| Media marker created | `map-shell.component.ts` | `success` | Flat, **hardcoded DE** | ❌ | **Needs i18n + structured** |
-| Address not resolvable (copy) | `map-shell.component.ts` | `warning` | Flat | ✅ partial | Needs structured |
-| Project create / delete | `projects-page.component.ts` | `success`/`error` | Flat | ❌ | **Needs i18n** |
-| Workspace footer export errors | `workspace-pane-footer.component.ts` | `error` | Flat | ❌ | **Needs i18n** |
+| Copy address (map context menu) | `map-shell.component.ts` | `success` | Structured `title` + i18n | ✅ | Shipped |
+| Copy GPS (map context menu) | `map-shell.component.ts` | `success` | Structured `title` + i18n | ✅ | Shipped |
+| Media marker created | `map-shell.component.ts` | `success` | Structured `title` + i18n | ✅ | Shipped |
+| Address not resolvable (copy) | `map-shell.component.ts` | `warning` | Structured `title` + `codeRef` | ✅ | Shipped |
+| GPS fix failed | `gps-button.component.ts` | `error` | Structured `title`/`body`/`detail`/`codeRef` | ✅ | Shipped |
+| Project create / delete | `projects-page.component.ts` | `success`/`error` | Structured `title` + `codeRef` (errors) | ✅ partial | Shipped |
+| Workspace footer export errors | `workspace-pane-footer.component.ts` | `error` | Structured `title`/`detail`/`codeRef` | ✅ partial | Shipped |
 
 ---
 
 ## 8. Known Copy Debt
 
-These call sites use hardcoded German strings or missing i18n and must be migrated:
+**Resolved (2026-06-13):** `map-shell.component.ts` hardcoded German clipboard/marker toasts — migrated to `map.shell.toast.*` keys with structured `title` form.
 
-| Location | String | Key to add |
+**Remaining:**
+
+| Location | Issue | Priority |
 | --- | --- | --- |
-| `map-shell.component.ts` `copyAddressWithFeedback` | `'Adresse kopiert.'` | `map.toast.addressCopied.message` |
-| `map-shell.component.ts` `copyGpsWithFeedback` | `'GPS kopiert.'` | `map.toast.gpsCopied.message` |
-| `map-shell.component.ts` `onMapContextCreateMarker` | `'Media Marker erstellt. Upload starten.'` | `map.toast.markerCreated.message` |
-
-Migration: replace `message: 'hardcoded'` with `title: t('key', 'English fallback')` + drop the flat `message` field.
+| `account.component.ts` | Uses `tr()` with German source strings + flat `message` | Medium — separate account i18n migration |
+| `media-detail-view.component.ts` | ~10 warning toasts with flat `message: result.error` | Medium — needs domain error formatter |
+| `workspace-bulk-action.service.ts` | Raw `errorMessage` as flat `message` | Medium |
+| `workspace-selected-items-grid.component.ts` | Flat `message` with `t()` — works, prefer `title` | Low |
+| Upload panel services | Mix of structured helpers + flat `message` success toasts | Low |
 
 ---
 

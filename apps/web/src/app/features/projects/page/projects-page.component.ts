@@ -296,27 +296,19 @@ export class ProjectsPageComponent implements OnDestroy {
     try {
       const draft = await this.projectsService.createDraftProject();
       if (!draft) {
-        this.toastService.show({
-          message: this.t(
-            'projects.page.toast.createError',
-            'Could not create project. Please try again.',
-          ),
-          type: 'error',
-          dedupe: true,
-        });
+        this.showMutationError(
+          'projects.page.toast.createError',
+          'Could not create project. Please try again.',
+        );
         return;
       }
 
       const renamed = await this.projectsService.renameProject(draft.id, projectName);
       if (!renamed) {
-        this.toastService.show({
-          message: this.t(
-            'projects.page.toast.createError',
-            'Could not create project. Please try again.',
-          ),
-          type: 'error',
-          dedupe: true,
-        });
+        this.showMutationError(
+          'projects.page.toast.createError',
+          'Could not create project. Please try again.',
+        );
         return;
       }
 
@@ -441,9 +433,10 @@ export class ProjectsPageComponent implements OnDestroy {
 
   private showMutationError(key: string, fallback: string): void {
     this.toastService.show({
-      message: this.t(key, fallback),
+      title: this.t(key, fallback),
       type: 'error',
       dedupe: true,
+      codeRef: { file: 'projects-page.component.ts', fn: 'showMutationError' },
     });
   }
 

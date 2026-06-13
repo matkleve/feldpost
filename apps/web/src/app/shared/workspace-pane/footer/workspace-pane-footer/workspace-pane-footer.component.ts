@@ -268,8 +268,9 @@ export class WorkspacePaneFooterComponent {
     const selectedImages = this.selectedImages();
     if (selectedImages.length === 0) {
       this.toastService.show({
-        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        title: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
         type: 'error',
+        codeRef: { file: 'workspace-pane-footer.component.ts', fn: 'downloadZip' },
       });
       return;
     }
@@ -284,16 +285,17 @@ export class WorkspacePaneFooterComponent {
         },
       );
       this.toastService.show({
-        message: this.t('workspace.export.success.zipStarted', 'ZIP download started.'),
+        title: this.t('workspace.export.success.zipStarted', 'ZIP download started.'),
         type: 'success',
       });
       this.zipDialogOpen.set(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : this.t('workspace.export.error.zipFailed', 'ZIP export failed.');
-      this.toastService.show({ message, type: 'error' });
+      this.toastService.show({
+        title: this.t('workspace.export.error.zipFailed', 'ZIP export failed.'),
+        detail: error instanceof Error ? error.message : undefined,
+        type: 'error',
+        codeRef: { file: 'workspace-pane-footer.component.ts', fn: 'downloadZip' },
+      });
     } finally {
       this.pending.set(false);
     }
