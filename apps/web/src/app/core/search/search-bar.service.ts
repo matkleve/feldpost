@@ -87,12 +87,14 @@ export class SearchBarService {
     projectId?: string,
     existingRecents?: SearchRecentCandidate[],
     secondaryLabel?: string,
+    coords?: { lat: number; lng: number },
   ): SearchRecentCandidate[] {
     return this.recentsProvider.addRecentSearch(
       label,
       projectId,
       existingRecents,
       secondaryLabel,
+      coords,
     );
   }
 

@@ -78,6 +78,35 @@
   column-gap: var(--search-bar-gap);
 }
 
+// Committed address: grow row downward while keeping icon/clear vertically centered.
+// @see search-bar.component.html
+.search-bar__input-row--address-committed {
+  height: auto;
+  min-height: var(--search-bar-row-height);
+}
+
+// Input column: single-line field by default; stacks secondary locality under committed primary text.
+// @see search-bar.component.html
+.search-bar__input-stack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.search-bar__input-row--address-committed .search-bar__input-stack {
+  justify-content: center;
+  gap: 0;
+  block-size: auto;
+  padding-block: var(--spacing-1);
+}
+
 // Icon column: single wrapper centers the search glyph in the leading grid track.
 // @see search-bar.component.html
 .search-bar__icon-slot {
@@ -161,6 +190,27 @@
   }
 }
 
+.search-bar__input-row--address-committed input[hlmInput].search-bar__input {
+  height: auto;
+  flex-shrink: 0;
+}
+
+// Secondary locality line under committed primary address text.
+// @see search-dropdown-item.component.scss
+.search-bar__input-secondary {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.search-bar__input-secondary--ghost {
+  opacity: 0.4;
+}
+
 .search-bar__ghost-text {
   position: absolute;
   top: 0;
@@ -175,8 +225,6 @@
   color: transparent;
   overflow: hidden;
   white-space: nowrap;
-  grid-column: 2;
-  grid-row: 1;
 }
 
 .search-bar__ghost-suffix {
@@ -198,8 +246,6 @@
   color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   overflow: hidden;
   white-space: nowrap;
-  grid-column: 2;
-  grid-row: 1;
   opacity: 1;
   transition: opacity 300ms ease-in-out;
 }

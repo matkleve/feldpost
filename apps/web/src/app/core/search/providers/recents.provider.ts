@@ -59,6 +59,8 @@ export class RecentsProvider implements SearchProvider {
             typeof item.secondaryLabel === 'string' && item.secondaryLabel.trim().length > 0
               ? item.secondaryLabel.trim()
               : undefined,
+          lat: typeof item.lat === 'number' && Number.isFinite(item.lat) ? item.lat : undefined,
+          lng: typeof item.lng === 'number' && Number.isFinite(item.lng) ? item.lng : undefined,
           lastUsedAt:
             typeof item.lastUsedAt === 'string' ? item.lastUsedAt : new Date(0).toISOString(),
           projectId: typeof item.projectId === 'string' ? item.projectId : undefined,
@@ -76,6 +78,7 @@ export class RecentsProvider implements SearchProvider {
     projectId?: string,
     existingRecents?: SearchRecentCandidate[],
     secondaryLabel?: string,
+    coords?: { lat: number; lng: number },
   ): SearchRecentCandidate[] {
     const normalizedLabel = label.trim();
     if (!normalizedLabel) return existingRecents ?? [];
@@ -92,6 +95,8 @@ export class RecentsProvider implements SearchProvider {
       family: 'recent',
       label: normalizedLabel,
       secondaryLabel: normalizedSecondary ?? existing?.secondaryLabel,
+      lat: coords?.lat ?? existing?.lat,
+      lng: coords?.lng ?? existing?.lng,
       lastUsedAt: now,
       projectId,
       usageCount: Math.max(1, existing?.usageCount ?? 0) + (existing ? 1 : 0),
@@ -122,6 +127,8 @@ export class RecentsProvider implements SearchProvider {
       const serializable: StoredRecentSearch[] = recents.map((entry) => ({
         label: entry.label,
         secondaryLabel: entry.secondaryLabel,
+        lat: entry.lat,
+        lng: entry.lng,
         lastUsedAt: entry.lastUsedAt,
         projectId: entry.projectId,
         usageCount: Math.max(1, entry.usageCount ?? 1),

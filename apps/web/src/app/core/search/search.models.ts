@@ -88,6 +88,8 @@ export interface SearchRecentCandidate extends SearchBaseCandidate {
   lastUsedAt: string;
   projectId?: string;
   usageCount?: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface SearchOperatorSuggestionCandidate extends SearchBaseCandidate {

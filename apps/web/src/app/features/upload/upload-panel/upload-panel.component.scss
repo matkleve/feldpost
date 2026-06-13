@@ -230,6 +230,19 @@
     width: auto;
     overflow: visible;
     pointer-events: none;
+
+    // Stable state: one group open — sibling group chips recede (hover, focus, or pinned expanded).
+    // @see docs/specs/component/media/file-type-chips.md
+    &:has(&__file-type-group:hover),
+    &:has(&__file-type-group:focus-within),
+    &:has(&__file-type-group--expanded) {
+      .upload-panel__file-type-group:not(:hover):not(:focus-within):not(
+          .upload-panel__file-type-group--expanded
+        ) {
+        opacity: 0.5;
+        filter: saturate(0.45);
+      }
+    }
   }
 
   // Group chip + absolute hover dropdown of format chips (no layout shift, no transition).
@@ -241,6 +254,9 @@
     z-index: 1;
     // Re-enable hits on the group subtree (parent `.file-type-chips` uses `none` for dropzone passthrough).
     pointer-events: auto;
+    transition:
+      opacity var(--motion-duration-fast) var(--motion-ease-out),
+      filter var(--motion-duration-fast) var(--motion-ease-out);
 
     &:hover,
     &:focus-within,

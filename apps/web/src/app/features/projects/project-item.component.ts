@@ -25,7 +25,6 @@ export type ProjectItemState = 'idle' | 'selected' | 'loading';
     '[attr.data-has-item]': "project() ? 'true' : 'false'",
     '[attr.data-mode]': 'mode()',
     '[class.project-item]': 'true',
-    '[class.project-item--selected]': 'selected()',
     '[class.project-item--archived]': 'isArchived()',
     '(contextmenu)': 'onContextMenu($event)',
   },

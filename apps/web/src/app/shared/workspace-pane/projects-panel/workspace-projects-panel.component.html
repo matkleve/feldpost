@@ -32,17 +32,15 @@
           </p>
         }
         @if (filteredActive().length > 0) {
-          <app-item-grid class="projects-panel__grid" [mode]="gridMode" role="list">
+          <app-item-grid class="projects-panel__grid" [mode]="gridMode">
             @for (project of filteredActive(); track project.id) {
-              <div class="projects-panel__grid-cell" role="listitem">
-                <app-project-item
-                  [itemId]="project.id"
-                  [project]="project"
-                  [mode]="gridMode"
-                  (opened)="onProjectItemOpened($event)"
-                  (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
-                />
-              </div>
+              <app-project-item
+                [itemId]="project.id"
+                [project]="project"
+                [mode]="gridMode"
+                (opened)="onProjectItemOpened($event)"
+                (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
+              />
             }
           </app-item-grid>
         }
@@ -53,17 +51,15 @@
             <p class="projects-panel__section-label" aria-hidden="true">
               {{ t('workspace.projects.panel.archived', 'Archived') }}
             </p>
-            <app-item-grid class="projects-panel__grid" [mode]="gridMode" role="list">
+            <app-item-grid class="projects-panel__grid" [mode]="gridMode">
               @for (project of filteredArchived(); track project.id) {
-                <div class="projects-panel__grid-cell" role="listitem">
-                  <app-project-item
-                    [itemId]="project.id"
-                    [project]="project"
-                    [mode]="gridMode"
-                    (opened)="onProjectItemOpened($event)"
-                    (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
-                  />
-                </div>
+                <app-project-item
+                  [itemId]="project.id"
+                  [project]="project"
+                  [mode]="gridMode"
+                  (opened)="onProjectItemOpened($event)"
+                  (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
+                />
               }
             </app-item-grid>
           }

@@ -72,13 +72,6 @@
   --item-grid-gap: var(--spacing-2);
 }
 
-// Grid cell wrapper — allows context menu without nesting interactive elements.
-// @see docs/specs/component/project/project-item.md
-.projects-panel__grid-cell {
-  min-inline-size: 0;
-  min-block-size: 0;
-}
-
 // Section label for archived group
 // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
 .projects-panel__section-label {

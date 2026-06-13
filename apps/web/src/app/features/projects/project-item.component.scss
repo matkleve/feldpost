@@ -67,7 +67,6 @@
   overflow: hidden;
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-  box-shadow: none;
   transition:
     box-shadow var(--motion-duration-fast) var(--motion-ease-out),
     border-color var(--motion-duration-fast) var(--motion-ease-out);
@@ -196,11 +195,6 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-}
-
-.project-item__open--row {
-  position: absolute;
-  inset: 0;
 }
 
 .project-item__open:focus-visible {

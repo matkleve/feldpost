@@ -12,13 +12,6 @@
   --item-grid-gap: var(--spacing-2);
 }
 
-// Grid cell wrapper — context menu without nested interactive elements.
-// @see docs/specs/component/project/project-item.md
-.projects-grid__cell {
-  min-inline-size: 0;
-  min-block-size: 0;
-}
-
 // Context menu — positioned via dropdown-shell
 // @see docs/specs/component/project/project-card.md § Context menu
 .projects-grid__context-menu {

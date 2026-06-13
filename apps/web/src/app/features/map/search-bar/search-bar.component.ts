@@ -201,6 +201,62 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     () => this.query().trim().length > 0 || this.committedCandidate() !== null,
   );
 
+  // Stable state: committed address rows show primary in the input and locality in a secondary line.
+  // @see docs/specs/ui/search-bar/search-bar.md § Structure
+  readonly committedAddressSecondary = computed(() => {
+    const committed = this.committedCandidate();
+    if (!committed || (committed.family !== 'db-address' && committed.family !== 'geocoder')) {
+      return null;
+    }
+
+    const secondary = committed.secondaryLabel?.trim();
+    return secondary ? secondary : null;
+  });
+
+  readonly searchInputAriaLabel = computed(() => {
+    const secondary = this.committedAddressSecondary();
+    const query = this.query().trim();
+    if (secondary && query) {
+      return `${query}, ${secondary}`;
+    }
+
+    return this.placeholderText();
+  });
+
+  // Stable state: Enter would commit the highlighted (or first) address row — preview its secondary line.
+  // @see docs/specs/ui/search-bar/search-bar.md § Structure
+  readonly enterCommitCandidate = computed(() => {
+    if (this.committedCandidate() || !this.dropdownOpen()) {
+      return null;
+    }
+
+    const items = this.selectableItems();
+    if (items.length === 0) {
+      return null;
+    }
+
+    const index = this.activeIndex();
+    return items[index >= 0 ? index : 0] ?? null;
+  });
+
+  readonly ghostAddressSecondary = computed(() => {
+    if (this.committedAddressSecondary()) {
+      return null;
+    }
+
+    const candidate = this.enterCommitCandidate();
+    if (!candidate || (candidate.family !== 'db-address' && candidate.family !== 'geocoder')) {
+      return null;
+    }
+
+    const secondary = candidate.secondaryLabel?.trim();
+    return secondary ? secondary : null;
+  });
+
+  readonly showInputSecondaryStack = computed(
+    () => this.committedAddressSecondary() !== null || this.ghostAddressSecondary() !== null,
+  );
+
   readonly matchingRecents = computed(() => {
     const q = this.query().trim().toLowerCase();
     if (!q || this.showingRecentSearches()) return [];
@@ -595,6 +651,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
 
     if (candidate.family === 'recent') {
+      if (typeof candidate.lat === 'number' && typeof candidate.lng === 'number') {
+        this.commitCandidate({
+          id: candidate.id,
+          family: 'geocoder',
+          label: candidate.label,
+          secondaryLabel: candidate.secondaryLabel,
+          lat: candidate.lat,
+          lng: candidate.lng,
+        });
+        return;
+      }
+
       this.query.set(candidate.label);
       this.invalidateResultsUnlessQueryMatches(candidate.label.trim());
       this.dropdownOpen.set(true);
@@ -628,7 +696,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.state.set('committed');
     this.clearResultSections();
     this.lastResolvedQuery.set(candidate.label.trim());
-    this.addRecentSearch(candidate.label, candidate.secondaryLabel);
+    this.addRecentSearch(
+      candidate.label,
+      candidate.secondaryLabel,
+      candidate.family === 'db-address' || candidate.family === 'geocoder'
+        ? { lat: candidate.lat, lng: candidate.lng }
+        : undefined,
+    );
     this.suppressNextDocumentClick = true;
 
     switch (commitAction.type) {
@@ -684,13 +758,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.resumePlaceholderIfIdle();
   }
 
-  private addRecentSearch(label: string, secondaryLabel?: string): void {
+  private addRecentSearch(
+    label: string,
+    secondaryLabel?: string,
+    coords?: { lat: number; lng: number },
+  ): void {
     const nextRecentSearches = this.recentsProvider
       .addRecentSearch(
         label,
         this.queryContext().activeProjectId,
         this.recentSearches(),
         secondaryLabel,
+        coords,
       )
       .slice(0, MAX_RECENT_SEARCHES);
     this.recentSearches.set(nextRecentSearches);

@@ -314,6 +314,84 @@ describe('SearchBarComponent', () => {
     expect(fixture.nativeElement.querySelector('.search-bar__ghost-text')).toBeNull();
   });
 
+  it('shows secondary locality line when an address candidate is committed', () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onCandidateSelected({
+      id: 'geo-1',
+      family: 'geocoder',
+      label: 'Dreikreuzstraße',
+      secondaryLabel: '3071 Böheimkirchen · Austria',
+      lat: 48.0,
+      lng: 15.7,
+    });
+    fixture.detectChanges();
+
+    const secondary = fixture.nativeElement.querySelector('.search-bar__input-secondary');
+    expect(secondary?.textContent).toContain('3071 Böheimkirchen · Austria');
+    expect(
+      fixture.nativeElement.querySelector('.search-bar__input-row--address-committed'),
+    ).not.toBeNull();
+  });
+
+  it('commits a stored recent with coordinates immediately', () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    const mapCenterSpy = vi.fn();
+    fixture.componentInstance.mapCenterRequested.subscribe(mapCenterSpy);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onCandidateSelected({
+      id: 'recent-dreikreuzstraße',
+      family: 'recent',
+      label: 'Dreikreuzstraße',
+      secondaryLabel: '3071 Böheimkirchen · Austria',
+      lat: 48.1,
+      lng: 15.6,
+      lastUsedAt: new Date().toISOString(),
+    });
+    fixture.detectChanges();
+
+    expect(mapCenterSpy).toHaveBeenCalled();
+    expect(fixture.componentInstance.state()).toBe('committed');
+    expect(fixture.nativeElement.querySelector('.search-bar__input-secondary')?.textContent).toContain(
+      '3071 Böheimkirchen · Austria',
+    );
+  });
+
+  it('shows ghost secondary for the Enter commit target while typing', () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.query.set('Drei');
+    fixture.componentInstance.dropdownOpen.set(true);
+    fixture.componentInstance.sections.set({
+      dbAddress: { family: 'db-address', title: '', items: [] },
+      dbContent: { family: 'db-content', title: '', items: [] },
+      geocoder: {
+        family: 'geocoder',
+        title: 'From internet',
+        items: [
+          {
+            id: 'geo-1',
+            family: 'geocoder',
+            label: 'Dreikreuzstraße',
+            secondaryLabel: '3071 Böheimkirchen · Austria',
+            lat: 48.0,
+            lng: 15.7,
+          },
+        ],
+      },
+    });
+    fixture.componentInstance.state.set('results-complete');
+    fixture.detectChanges();
+
+    const ghostSecondary = fixture.nativeElement.querySelector(
+      '.search-bar__input-secondary--ghost',
+    );
+    expect(ghostSecondary?.textContent).toContain('3071 Böheimkirchen · Austria');
+  });
+
   it('shows the clear button while typing and clears the query when clicked', async () => {
     const fixture = TestBed.createComponent(SearchBarComponent);
     fixture.detectChanges();

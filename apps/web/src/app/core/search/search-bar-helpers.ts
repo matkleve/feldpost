@@ -29,6 +29,8 @@ export interface AddressGroup {
 export interface StoredRecentSearch {
   label: string;
   secondaryLabel?: string;
+  lat?: number;
+  lng?: number;
   lastUsedAt: string;
   projectId?: string;
   usageCount: number;

@@ -1,16 +1,14 @@
 <!-- Renders grouped projects through the shared item-grid + project-item stack. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md -->
-<app-item-grid class="projects-grid" [mode]="itemMode()" role="list">
+<app-item-grid class="projects-grid" [mode]="itemMode()">
   @for (project of section().projects; track project.id) {
-    <div class="projects-grid__cell" role="listitem">
-      <app-project-item
-        [itemId]="project.id"
-        [project]="project"
-        [mode]="itemMode()"
-        (opened)="onProjectOpened($event)"
-        (contextMenuRequested)="onProjectContextMenu($event, project.id)"
-      />
-    </div>
+    <app-project-item
+      [itemId]="project.id"
+      [project]="project"
+      [mode]="itemMode()"
+      (opened)="onProjectOpened($event)"
+      (contextMenuRequested)="onProjectContextMenu($event, project.id)"
+    />
   }
 </app-item-grid>
 

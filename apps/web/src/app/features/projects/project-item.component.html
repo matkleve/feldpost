@@ -1,8 +1,7 @@
 @if (project(); as item) {
-  <!-- Stable state: grid — square card with color accent; row — compact scan band. -->
-  <!-- @see docs/specs/component/project/project-item.md#visual-contract-by-mode -->
-  <div class="project-item__surface" [class.project-item__surface--row]="isRowMode()">
-    @if (isRowMode()) {
+  @if (isRowMode()) {
+    <!-- Stable state: row — compact scan band. @see docs/specs/component/project/project-item.md -->
+    <div class="project-item__surface project-item__surface--row">
       <span
         class="project-item__row-chip"
         [style.background-color]="colorStyle()"
@@ -21,41 +20,42 @@
       </div>
       <button
         type="button"
-        class="project-item__open project-item__open--row"
-        [attr.aria-label]="item.name"
-        (click)="onOpenClick($event)"
-      ></button>
-    } @else {
-      <div
-        class="project-item__frame"
-        [class.project-item__frame--selected]="selected()"
-        [class.project-item__frame--archived]="isArchived()"
-        [style.--project-item-color]="colorStyle()"
-      >
-        <div class="project-item__accent" aria-hidden="true">
-          <span class="material-icons project-item__icon">folder</span>
-        </div>
-        <div class="project-item__footer">
-          <span class="project-item__name" [attr.title]="item.name">{{ item.name }}</span>
-          <span
-            class="project-item__count"
-            [attr.aria-label]="
-              t('workspace.projects.panel.item.mediaCount', '{count} media').replace(
-                '{count}',
-                mediaCountLabel()
-              )
-            "
-          >
-            {{ mediaCountLabel() }}
-          </span>
-        </div>
-      </div>
-      <button
-        type="button"
         class="project-item__open"
         [attr.aria-label]="item.name"
         (click)="onOpenClick($event)"
       ></button>
-    }
-  </div>
+    </div>
+  } @else {
+    <!-- Stable state: grid — square card; frame is sole geometry owner. -->
+    <!-- @see docs/specs/component/project/project-item.md -->
+    <div
+      class="project-item__frame"
+      [class.project-item__frame--selected]="selected()"
+      [style.--project-item-color]="colorStyle()"
+    >
+      <div class="project-item__accent" aria-hidden="true">
+        <span class="material-icons project-item__icon">folder</span>
+      </div>
+      <div class="project-item__footer">
+        <span class="project-item__name" [attr.title]="item.name">{{ item.name }}</span>
+        <span
+          class="project-item__count"
+          [attr.aria-label]="
+            t('workspace.projects.panel.item.mediaCount', '{count} media').replace(
+              '{count}',
+              mediaCountLabel()
+            )
+          "
+        >
+          {{ mediaCountLabel() }}
+        </span>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="project-item__open"
+      [attr.aria-label]="item.name"
+      (click)="onOpenClick($event)"
+    ></button>
+  }
 }

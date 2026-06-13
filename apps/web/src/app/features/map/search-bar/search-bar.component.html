@@ -1,42 +1,55 @@
 <div class="search-bar" [class.search-bar--open]="showDropdownPanel()" role="search">
-  <div class="search-bar__input-row">
+  <div
+    class="search-bar__input-row"
+    [class.search-bar__input-row--address-committed]="showInputSecondaryStack()"
+  >
     <span class="search-bar__icon-slot" aria-hidden="true">
       <span class="material-icons search-bar__icon">search</span>
     </span>
 
-    <input
-      #searchInput
-      hlmInput
-      class="search-bar__input"
-      type="text"
-      role="combobox"
-      autocomplete="off"
-      aria-autocomplete="list"
-      aria-haspopup="listbox"
-      [attr.aria-expanded]="showDropdownPanel()"
-      [attr.aria-controls]="showDropdownPanel() ? 'search-results-listbox' : null"
-      [attr.aria-activedescendant]="activeIndex() >= 0 ? optionIdFor(activeIndex()) : null"
-      [attr.aria-label]="placeholderText()"
-      [value]="query()"
-      (focus)="onFocus()"
-      (input)="onInput($event)"
-      (keydown)="onInputKeydown($event)"
-    />
+    <div class="search-bar__input-stack">
+      <input
+        #searchInput
+        hlmInput
+        class="search-bar__input"
+        type="text"
+        role="combobox"
+        autocomplete="off"
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
+        [attr.aria-expanded]="showDropdownPanel()"
+        [attr.aria-controls]="showDropdownPanel() ? 'search-results-listbox' : null"
+        [attr.aria-activedescendant]="activeIndex() >= 0 ? optionIdFor(activeIndex()) : null"
+        [attr.aria-label]="searchInputAriaLabel()"
+        [value]="query()"
+        (focus)="onFocus()"
+        (input)="onInput($event)"
+        (keydown)="onInputKeydown($event)"
+      />
 
-    @if (!query()) {
-      <span
-        class="search-bar__placeholder"
-        [class.search-bar__placeholder--fading]="placeholderFading()"
-        aria-hidden="true"
-        >{{ placeholderText() }}</span
-      >
-    }
+      @if (!query()) {
+        <span
+          class="search-bar__placeholder"
+          [class.search-bar__placeholder--fading]="placeholderFading()"
+          aria-hidden="true"
+          >{{ placeholderText() }}</span
+        >
+      }
 
-    @if (ghostText()) {
-      <span class="search-bar__ghost-text" aria-hidden="true"
-        >{{ query() }}<span class="search-bar__ghost-suffix">{{ ghostText() }}</span></span
-      >
-    }
+      @if (ghostText()) {
+        <span class="search-bar__ghost-text" aria-hidden="true"
+          >{{ query() }}<span class="search-bar__ghost-suffix">{{ ghostText() }}</span></span
+        >
+      }
+
+      @if (committedAddressSecondary(); as secondary) {
+        <span class="search-bar__input-secondary" aria-hidden="true">{{ secondary }}</span>
+      } @else if (ghostAddressSecondary(); as ghostSecondary) {
+        <span class="search-bar__input-secondary search-bar__input-secondary--ghost" aria-hidden="true">{{
+          ghostSecondary
+        }}</span>
+      }
+    </div>
 
     @if (showClearButton()) {
       <span class="search-bar__clear-slot">

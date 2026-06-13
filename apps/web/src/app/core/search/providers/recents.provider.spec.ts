@@ -27,4 +27,16 @@ describe('RecentsProvider', () => {
     expect(recents[0]?.label).toBe('Fahrafeld 4');
     expect(recents[0]?.secondaryLabel).toBe('3071 Kasten bei Böheimkirchen · Austria');
   });
+
+  it('persists coordinates for address recents', () => {
+    const provider = TestBed.inject(RecentsProvider);
+    provider.addRecentSearch('Fahrafeld 4', undefined, undefined, '3071 Kasten bei Böheimkirchen · Austria', {
+      lat: 48.1,
+      lng: 15.6,
+    });
+
+    const recents = provider.loadRecentSearches();
+    expect(recents[0]?.lat).toBe(48.1);
+    expect(recents[0]?.lng).toBe(15.6);
+  });
 });
