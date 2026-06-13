@@ -72,7 +72,12 @@
           <div class="search-bar__section-label" role="presentation">Recent searches</div>
 
           @if (recentSearches().length === 0) {
-            <div class="search-bar__empty-copy" role="presentation">No recent searches yet.</div>
+            <div class="search-bar__recents-empty" role="presentation">
+              <span class="search-bar__recents-empty-icon" aria-hidden="true">
+                <span class="material-icons">history</span>
+              </span>
+              <p class="search-bar__recents-empty-copy">No recent searches yet.</p>
+            </div>
           } @else {
             @for (candidate of recentSearches(); track candidate.id; let index = $index) {
               <ss-search-dropdown-item
