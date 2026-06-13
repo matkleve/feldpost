@@ -55,10 +55,13 @@ import {
   MEDIA_PLACEHOLDER_ICON,
 } from '../../../../core/media-download/media-download.service';
 import { ToastService } from '../../../../core/toast/toast.service';
+import { truncateToastTechnicalDetail } from '../../../../core/toast/toast.helpers';
+import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
 import { MediaDeleteUndoService } from '../../../../core/media-delete/media-delete-undo.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../../core/search/search.models';
+import { searchQueryContextsEqual } from '../../../../core/search/search-bar-helpers';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { SettingsPaneService } from '../../../../core/settings-pane/settings-pane.service';
 import { MapSessionCacheService } from '../../../../core/map-session-cache/map-session-cache.service';
@@ -303,6 +306,29 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapWorkspaceActionExecutorService = inject(MapWorkspaceActionExecutorService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
+  private showMapToast(
+    key: string,
+    fallback: string,
+    type: ToastType,
+    extra?: Omit<ToastOptions, 'title' | 'type'>,
+  ): void {
+    this.toastService.show({
+      title: this.t(key, fallback),
+      type,
+      dedupe: true,
+      ...extra,
+    });
+  }
+
+  private showMapToastTitle(title: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void {
+    this.toastService.show({
+      title,
+      type,
+      dedupe: true,
+      ...extra,
+    });
+  }
+
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
 
@@ -400,27 +426,30 @@ export class MapShellComponent implements OnDestroy {
     },
   );
 
-  readonly searchQueryContext = computed<SearchQueryContext>(() => {
-    const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
-    const activeProjectId =
-      selectedProjectIds.size > 0 ? Array.from(selectedProjectIds.values())[0] : undefined;
-    const userPos = this.userPosition();
+  readonly searchQueryContext = computed<SearchQueryContext>(
+    () => {
+      const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
+      const activeProjectId =
+        selectedProjectIds.size > 0 ? Array.from(selectedProjectIds.values())[0] : undefined;
+      const userPos = this.userPosition();
 
-    return {
-      activeProjectId,
-      activeMarkerCentroid: this.searchActiveMarkerCentroid(),
-      activeProjectCentroid: this.searchDataCentroid(),
-      currentLocation: userPos
-        ? {
-            lat: userPos[0],
-            lng: userPos[1],
-          }
-        : undefined,
-      viewportBounds: this.searchViewportBounds(),
-      dataCentroid: this.searchDataCentroid(),
-      countryCodes: this.searchCountryCodes(),
-    };
-  });
+      return {
+        activeProjectId,
+        activeMarkerCentroid: this.searchActiveMarkerCentroid(),
+        activeProjectCentroid: this.searchDataCentroid(),
+        currentLocation: userPos
+          ? {
+              lat: userPos[0],
+              lng: userPos[1],
+            }
+          : undefined,
+        viewportBounds: this.searchViewportBounds(),
+        dataCentroid: this.searchDataCentroid(),
+        countryCodes: this.searchCountryCodes(),
+      };
+    },
+    { equal: searchQueryContextsEqual },
+  );
 
   // ── GPS state ────────────────────────────────────────────────────────────
 
@@ -591,7 +620,9 @@ export class MapShellComponent implements OnDestroy {
 
   private userLocationMarker: MapMarker | null = null;
   private searchLocationMarker: MapMarker | null = null;
+  private uploadPreviewMarker: MapMarker | null = null;
   private searchLocationPreviewMarkers: MapMarker[] = [];
+  private pendingSearchMapCenter: { lat: number; lng: number; label: string } | null = null;
   private draftMediaMarkerLeaflet: MapMarker | null = null;
   private readonly uploadedPhotoMarkers = new Map<
     string,
@@ -2076,10 +2107,25 @@ export class MapShellComponent implements OnDestroy {
   }
 
   onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
-    if (!this.map) return;
+    if (!this.map) {
+      this.pendingSearchMapCenter = event;
+      return;
+    }
 
-    this.map.setView([event.lat, event.lng], 14);
+    this.applySearchMapCenter(event);
+  }
+
+  private applySearchMapCenter(event: { lat: number; lng: number; label: string }): void {
+    if (!this.map) {
+      return;
+    }
+
+    this.map.setView([event.lat, event.lng], MapShellComponent.STREET_PROXIMITY_ZOOM, {
+      animate: false,
+    });
+    this.updateSearchViewportBounds();
     this.renderOrUpdateSearchLocationMarker([event.lat, event.lng]);
+    void this.refreshSearchCountryCode(event.lat, event.lng);
   }
 
   onSearchClearRequested(): void {
@@ -2138,6 +2184,10 @@ export class MapShellComponent implements OnDestroy {
     this.updateSearchViewportBounds();
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
+    if (this.pendingSearchMapCenter) {
+      this.applySearchMapCenter(this.pendingSearchMapCenter);
+      this.pendingSearchMapCenter = null;
+    }
 
     const pendingZoom = this.mapZoomOrchestrator.consumePending();
     if (pendingZoom) {
@@ -3035,7 +3085,16 @@ export class MapShellComponent implements OnDestroy {
     }
     this.clearSearchLocationPreviewMarkers();
     if (points.length === 1) {
-      this.renderOrUpdateSearchLocationMarker([points[0]!.lat, points[0]!.lng]);
+      this.uploadPreviewMarker = this.mapLeafletService.createSearchLocationMarker([
+        points[0]!.lat,
+        points[0]!.lng,
+      ]);
+      try {
+        this.uploadPreviewMarker.addTo(this.map);
+      } catch {
+        this.uploadPreviewMarker.remove();
+        this.uploadPreviewMarker = null;
+      }
       return;
     }
     for (const point of points) {
@@ -3054,7 +3113,8 @@ export class MapShellComponent implements OnDestroy {
       marker.remove();
     }
     this.searchLocationPreviewMarkers = [];
-    this.clearSearchLocationMarker();
+    this.uploadPreviewMarker?.remove();
+    this.uploadPreviewMarker = null;
   }
 
   private async refreshSearchCountryCode(lat: number, lng: number): Promise<void> {

@@ -6,6 +6,7 @@ import { SearchFilterChipsComponent } from './search-filter-chips.component';
 import { provideOrgSearchTuningTestDouble } from '../../../core/search/search-test.providers';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { MediaClusterService } from '../../../core/geocoding/media-cluster.service';
 import { signal } from '@angular/core';
 
@@ -94,6 +95,7 @@ describe('SearchBarComponent', () => {
           provide: GeocodingService,
           useValue: {
             ensureGeocodeAvailable: vi.fn().mockResolvedValue(true),
+            isGeocodeBlocked: vi.fn().mockReturnValue(false),
             search: vi.fn().mockResolvedValue([
               {
                 lat: 46.948,
@@ -108,6 +110,12 @@ describe('SearchBarComponent', () => {
                 },
               },
             ]),
+          },
+        },
+        {
+          provide: I18nService,
+          useValue: {
+            t: (_key: string, fallback: string) => fallback,
           },
         },
       ],
@@ -189,14 +197,16 @@ describe('SearchBarComponent', () => {
     input.value = 'burg';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
+    TestBed.flushEffects();
 
     await vi.advanceTimersByTimeAsync(300);
     await Promise.resolve();
+    await Promise.resolve();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('From DB');
+    expect(fixture.nativeElement.textContent).toContain('From your data');
     expect(fixture.nativeElement.textContent).toContain('Projects');
-    expect(fixture.nativeElement.textContent).toContain('From Internet');
+    expect(fixture.nativeElement.textContent).toContain('From internet');
   });
 
   it('commits the highlighted item with Enter and emits map-center for addresses', async () => {
@@ -212,8 +222,10 @@ describe('SearchBarComponent', () => {
     input.value = 'burg';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
+    TestBed.flushEffects();
 
     await vi.advanceTimersByTimeAsync(300);
+    await Promise.resolve();
     await Promise.resolve();
     fixture.detectChanges();
 
@@ -297,8 +309,10 @@ describe('SearchBarComponent', () => {
     input.value = 'nowhere';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
+    TestBed.flushEffects();
 
     await vi.advanceTimersByTimeAsync(300);
+    await Promise.resolve();
     await Promise.resolve();
     fixture.detectChanges();
 

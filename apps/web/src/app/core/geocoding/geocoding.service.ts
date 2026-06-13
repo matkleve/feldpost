@@ -618,8 +618,7 @@ export class GeocodingService {
     body: Record<string, unknown>,
     operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward' | 'structured-forward-bias' | 'street-house-numbers',
   ): Promise<T> {
-    // User-initiated map search must retry even after a probe cooldown — upload paths stay gated.
-    if (this.isGeocodeBlocked() && operation !== 'search') {
+    if (this.isGeocodeBlocked()) {
       throw new Error('Geocoding temporarily unavailable');
     }
 
@@ -815,8 +814,8 @@ export class GeocodingService {
   }
 
   private backoffMs(attempt: number): number {
-    if (attempt <= 1) return 250;
-    return 600;
+    const cap = attempt <= 1 ? 250 : 600;
+    return Math.floor(Math.random() * cap);
   }
 
   private delay(ms: number): Promise<void> {

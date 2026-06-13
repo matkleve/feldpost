@@ -9,6 +9,23 @@ import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { buildTestBed } from './map-shell.spec-setup';
 
+function createMapStub() {
+  const bounds = {
+    getNorth: vi.fn().mockReturnValue(49),
+    getEast: vi.fn().mockReturnValue(17),
+    getSouth: vi.fn().mockReturnValue(47),
+    getWest: vi.fn().mockReturnValue(15),
+  };
+
+  return {
+    addLayer: vi.fn(),
+    setView: vi.fn(),
+    getZoom: vi.fn().mockReturnValue(13),
+    getBounds: vi.fn().mockReturnValue(bounds),
+    remove: vi.fn(),
+  };
+}
+
 describe('MapShellComponent – search bar', () => {
   beforeEach(async () => {
     localStorage.clear();
@@ -19,12 +36,7 @@ describe('MapShellComponent – search bar', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    const mapStub = {
-      addLayer: vi.fn(),
-      setView: vi.fn(),
-      getZoom: vi.fn().mockReturnValue(13),
-      remove: vi.fn(),
-    };
+    const mapStub = createMapStub();
     (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
 
     fixture.componentInstance.onSearchMapCenterRequested({
@@ -33,7 +45,7 @@ describe('MapShellComponent – search bar', () => {
       label: 'Stephansplatz 1, 1010 Wien Austria',
     });
 
-    expect(mapStub.setView).toHaveBeenCalledWith([48.2082, 16.3738], 14);
+    expect(mapStub.setView).toHaveBeenCalledWith([48.2082, 16.3738], 17, { animate: false });
     expect(
       (fixture.componentInstance as unknown as { searchLocationMarker: unknown })
         .searchLocationMarker,
@@ -132,12 +144,7 @@ describe('MapShellComponent – search bar', () => {
       countryCode: 'fr',
     });
 
-    const mapStub = {
-      addLayer: vi.fn(),
-      setView: vi.fn(),
-      getZoom: vi.fn().mockReturnValue(13),
-      remove: vi.fn(),
-    };
+    const mapStub = createMapStub();
     (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
 
     const originalGeolocation = navigator.geolocation;
@@ -172,12 +179,7 @@ describe('MapShellComponent – search bar', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    const mapStub = {
-      addLayer: vi.fn(),
-      setView: vi.fn(),
-      getZoom: vi.fn().mockReturnValue(13),
-      remove: vi.fn(),
-    };
+    const mapStub = createMapStub();
     (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
 
     fixture.componentInstance.onSearchMapCenterRequested({

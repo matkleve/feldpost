@@ -35,21 +35,29 @@ function addressRow(options: {
   lng: number;
   projectId?: string | null;
   createdAt?: string;
+  postcode?: string | null;
+  district?: string | null;
+  country?: string | null;
 }) {
   return {
     address_label: options.addressLabel,
     street: options.street,
     house_number: options.houseNumber,
+    staircase: null,
+    door: null,
+    postcode: options.postcode ?? null,
     city: options.city,
+    district: options.district ?? null,
+    country: options.country ?? null,
     latitude: options.lat,
     longitude: options.lng,
     media_item_location_links: {
       media_item_id: options.mediaItemId,
-    media_items: {
-      created_at: options.createdAt ?? new Date().toISOString(),
-      organization_id: 'org-1',
-      media_projects: options.projectId ? [{ project_id: options.projectId }] : [],
-    },
+      media_items: {
+        created_at: options.createdAt ?? new Date().toISOString(),
+        organization_id: 'org-1',
+        media_projects: options.projectId ? [{ project_id: options.projectId }] : [],
+      },
     },
   };
 }
@@ -181,6 +189,46 @@ describe('DbAddressProvider', () => {
     expect(results[0]?.imageCount).toBe(2);
     expect(results[0]?.label).toContain('Burgstrasse');
     expect((results[0]?.score ?? 0)).toBeGreaterThan(results[1]?.score ?? 0);
+  });
+
+  it('includes postcode and district in secondaryLabel', async () => {
+    const linksBuilder = createQueryBuilder({
+      data: [
+        addressRow({
+          mediaItemId: 'img-1',
+          addressLabel: 'Denisgasse 46, Vienna',
+          street: 'Denisgasse',
+          houseNumber: '46',
+          city: 'Vienna',
+          postcode: '1200',
+          district: 'Brigittenau',
+          country: 'Austria',
+          lat: 48.25,
+          lng: 16.37,
+        }),
+      ],
+      error: null,
+    });
+
+    TestBed.configureTestingModule({
+      providers: [
+        DbAddressProvider,
+        provideOrgSearchTuningTestDouble(),
+        {
+          provide: SupabaseService,
+          useValue: {
+            client: {
+              from: vi.fn(() => linksBuilder),
+            },
+          },
+        },
+      ],
+    });
+
+    const provider = TestBed.inject(DbAddressProvider);
+    const results = await firstValueFrom(provider.search('denis', {}));
+
+    expect(results[0]?.secondaryLabel).toBe('1200 Vienna · Brigittenau · Austria');
   });
 
   it('boosts ranking when project_id matches activeProjectId', async () => {

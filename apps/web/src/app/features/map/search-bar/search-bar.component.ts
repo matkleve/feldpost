@@ -1,12 +1,10 @@
 import { CommonModule } from '@angular/common';
-import type {
-  EffectRef,
-  OnDestroy,
-  OnInit} from '@angular/core';
+import type { OnDestroy, OnInit } from '@angular/core';
 import {
   Component,
   ElementRef,
   HostListener,
+  Injector,
   computed,
   effect,
   input,
@@ -15,13 +13,15 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { SearchDropdownItemComponent } from './search-dropdown-item.component';
 import { SearchFilterChipsComponent } from './search-filter-chips.component';
 import type { GhostTrieEntry } from '../../../core/search/search-bar.service';
 import { SearchBarService } from '../../../core/search/search-bar.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 import { SearchEngine } from '../../../core/search/engine/search-engine';
@@ -95,7 +95,6 @@ type SearchSectionsState = {
   ],
   host: {
     class: 'search-bar-host',
-    '[class.search-bar-host--projects]': "mode() === 'projects'",
   },
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
@@ -105,17 +104,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private readonly searchEngine = inject(SearchEngine);
   private readonly recentsProvider = inject(RecentsProvider);
   private readonly geocodingService = inject(GeocodingService);
+  private readonly i18nService = inject(I18nService);
+  private readonly injector = inject(Injector);
 
-  private readonly queryChanges = new BehaviorSubject<string>('');
-  private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
   private readonly subscription = new Subscription();
   private suppressNextDocumentClick = false;
   private placeholderTimer: ReturnType<typeof setInterval> | null = null;
+  private placeholderFadeTimer: ReturnType<typeof setTimeout> | null = null;
   private placeholderIndex = 0;
+  private destroyed = false;
 
   readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   readonly queryContext = input<SearchQueryContext>({});
-  readonly mode = input<'map' | 'projects'>('map');
 
   readonly mapCenterRequested = output<{ lat: number; lng: number; label: string }>();
   readonly clearRequested = output<void>();
@@ -160,10 +160,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       !this.geocoderLoading() &&
       this.allEmpty(),
   );
-  readonly isProjectsMode = computed(() => this.mode() === 'projects');
-  readonly showClearButton = computed(() =>
-    this.isProjectsMode() ? this.query().trim().length > 0 : this.committedCandidate() !== null,
-  );
+  readonly showClearButton = computed(() => this.committedCandidate() !== null);
 
   readonly matchingRecents = computed(() => {
     const q = this.query().trim().toLowerCase();
@@ -193,39 +190,64 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     ];
   });
 
-  private readonly contextSyncEffect: EffectRef = effect(() => {
-    const nextContext = this.queryContext();
-    this.contextChanges.next(nextContext);
+  readonly optionIndexOffsets = computed(() => {
+    const operators = this.operatorSection()?.items.length ?? 0;
+    const recents = this.matchingRecents().length;
+    const addresses = this.sections().dbAddress.items.length;
+    const content = this.sections().dbContent.items.length;
+    const commands = this.commandSection()?.items.length ?? 0;
+
+    return {
+      operators: 0,
+      recentMatches: operators,
+      addresses: operators + recents,
+      content: operators + recents + addresses,
+      commands: operators + recents + addresses + content,
+      geocoder: operators + recents + addresses + content + commands,
+    };
+  });
+
+  private readonly ghostTrieEffect = effect(() => {
+    this.queryContext();
+    this.recentSearches();
     this.rebuildGhostTrie();
   });
+
+  readonly t = (key: string, fallback: string): string => {
+    const value = this.i18nService.t(key, fallback);
+    return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+  };
+
+  constructor() {
+    this.subscription.add(
+      this.searchEngine
+        .searchInput(
+          toObservable(this.query, { injector: this.injector }),
+          toObservable(this.queryContext, { injector: this.injector }),
+        )
+        .subscribe((result) => this.applySearchResult(result)),
+    );
+  }
 
   ngOnInit(): void {
     this.recentSearches.set(
       this.recentsProvider.getRecentSearches(MAX_RECENT_SEARCHES).slice(0, MAX_RECENT_SEARCHES),
     );
-    if (!this.isProjectsMode()) {
-      this.rebuildGhostTrie();
-    }
+    this.rebuildGhostTrie();
     this.startPlaceholderRotation();
-
-    if (!this.isProjectsMode()) {
-      this.subscription.add(
-        this.searchEngine
-          .searchInput(this.queryChanges.asObservable(), this.contextChanges.asObservable())
-          .subscribe((result) => this.applySearchResult(result)),
-      );
-    }
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.subscription.unsubscribe();
-    this.contextSyncEffect.destroy();
+    this.ghostTrieEffect.destroy();
     this.stopPlaceholderRotation();
   }
 
   focusSearch(): void {
     const input = this.searchInput()?.nativeElement;
     if (!input) return;
+    this.stopPlaceholderRotation();
     input.focus();
     input.select();
     this.dropdownOpen.set(true);
@@ -234,10 +256,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   onFocus(): void {
+    this.stopPlaceholderRotation();
     this.recentSearches.set(
       this.recentsProvider.getRecentSearches(MAX_RECENT_SEARCHES).slice(0, MAX_RECENT_SEARCHES),
     );
-    this.dropdownOpen.set(!this.isProjectsMode());
+    this.dropdownOpen.set(true);
     this.activeIndex.set(-1);
     this.state.set(this.query().trim() ? this.state() : 'focused-empty');
   }
@@ -245,19 +268,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   onInput(event: Event): void {
     const nextQuery = (event.target as HTMLInputElement).value;
     this.query.set(nextQuery);
-    this.dropdownOpen.set(!this.isProjectsMode());
+    this.dropdownOpen.set(true);
     this.activeIndex.set(-1);
     this.queryChanged.emit(nextQuery);
-
-    if (this.isProjectsMode()) {
-      if (!nextQuery.trim()) {
-        this.state.set('focused-empty');
-      } else {
-        this.state.set('typing');
-      }
-      this.queryChanges.next(nextQuery);
-      return;
-    }
 
     const committedCandidate = this.committedCandidate();
     if (
@@ -274,57 +287,57 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.commandSection.set(null);
       this.liveRegionText.set('');
       this.ghostText.set(null);
-    } else {
-      // Coordinate/URL detection (UC-5)
-      const coords = this.searchBarService.detectCoordinates(nextQuery);
-      if (coords) {
-        this.state.set('committed');
-        this.dropdownOpen.set(false);
-        this.ghostText.set(null);
-        const label = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
-        this.committedCandidate.set({
-          id: `coords-${label}`,
-          family: 'geocoder',
-          label,
-          lat: coords.lat,
-          lng: coords.lng,
-        });
-        this.mapCenterRequested.emit({ lat: coords.lat, lng: coords.lng, label });
-        this.reverseGeocodeAndUpdateLabel(coords.lat, coords.lng);
-        return;
-      }
-
-      this.state.set('typing');
-      // Ghost completion (UC-8)
-      this.ghostText.set(this.searchBarService.queryGhostCompletion(nextQuery));
-    }
-
-    this.queryChanges.next(nextQuery);
-  }
-
-  onInputKeydown(event: KeyboardEvent): void {
-    if (this.isProjectsMode()) {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        this.searchInput()?.nativeElement.blur();
-        this.state.set(this.query().trim().length > 0 ? 'typing' : 'idle');
-      }
       return;
     }
 
+    const coords = this.searchBarService.detectCoordinates(nextQuery);
+    if (coords) {
+      this.state.set('committed');
+      this.dropdownOpen.set(false);
+      this.ghostText.set(null);
+      const label = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
+      this.committedCandidate.set({
+        id: `coords-${label}`,
+        family: 'geocoder',
+        label,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+      this.mapCenterRequested.emit({ lat: coords.lat, lng: coords.lng, label });
+      this.reverseGeocodeAndUpdateLabel(coords.lat, coords.lng);
+      return;
+    }
+
+    this.state.set('typing');
+    this.ghostText.set(this.searchBarService.queryGhostCompletion(nextQuery));
+  }
+
+  onInputKeydown(event: KeyboardEvent): void {
     if (event.key === 'Tab' && this.ghostText()) {
       event.preventDefault();
       const fullQuery = this.query() + this.ghostText();
       this.query.set(fullQuery);
-      const inputEl = this.searchInput()?.nativeElement;
-      if (inputEl) {
-        inputEl.value = fullQuery;
-      }
       this.ghostText.set(null);
       this.state.set('typing');
-      this.queryChanges.next(fullQuery);
-      // Recompute ghost for new query
       this.ghostText.set(this.searchBarService.queryGhostCompletion(fullQuery));
+      return;
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      const items = this.selectableItems();
+      if (items.length > 0) {
+        this.activeIndex.set(0);
+      }
+      return;
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault();
+      const items = this.selectableItems();
+      if (items.length > 0) {
+        this.activeIndex.set(items.length - 1);
+      }
       return;
     }
 
@@ -357,9 +370,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.dropdownOpen.set(false);
         this.activeIndex.set(-1);
         this.state.set(this.committedCandidate() ? 'committed' : 'idle');
+        this.resumePlaceholderIfIdle();
       } else {
         this.searchInput()?.nativeElement.blur();
         this.state.set(this.committedCandidate() ? 'committed' : 'idle');
+        this.resumePlaceholderIfIdle();
       }
       return;
     }
@@ -382,46 +397,25 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     return `search-option-${index}`;
   }
 
-  private operatorItemsCount(): number {
-    return this.operatorSection()?.items.length ?? 0;
+  sectionId(family: string): string {
+    return `search-section-${family}`;
   }
 
-  recentMatchOptionIndex(index: number): number {
-    return this.operatorItemsCount() + index;
-  }
-
-  addressOptionIndex(index: number): number {
-    return this.operatorItemsCount() + this.matchingRecents().length + index;
-  }
-
-  contentOptionIndex(index: number): number {
-    return (
-      this.operatorItemsCount() +
-      this.matchingRecents().length +
-      this.sections().dbAddress.items.length +
-      index
-    );
-  }
-
-  geocoderOptionIndex(index: number): number {
-    return (
-      this.operatorItemsCount() +
-      this.matchingRecents().length +
-      this.sections().dbAddress.items.length +
-      this.sections().dbContent.items.length +
-      (this.commandSection()?.items.length ?? 0) +
-      index
-    );
-  }
-
-  commandOptionIndex(index: number): number {
-    return (
-      this.operatorItemsCount() +
-      this.matchingRecents().length +
-      this.sections().dbAddress.items.length +
-      this.sections().dbContent.items.length +
-      index
-    );
+  sectionTitle(section: SearchSection): string {
+    switch (section.family) {
+      case 'db-address':
+        return this.t('map.searchBar.section.fromDb', 'From your data');
+      case 'geocoder':
+        return this.t('map.searchBar.section.fromInternet', 'From internet');
+      case 'db-content':
+        return this.t('map.searchBar.section.projects', 'Projects');
+      case 'recent':
+        return this.t('map.searchBar.section.recentSearches', 'Recent searches');
+      case 'command':
+        return this.t('map.searchBar.section.commands', 'Commands');
+      default:
+        return section.title;
+    }
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -447,15 +441,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (!this.hostElement.nativeElement.contains(target)) {
       this.dropdownOpen.set(false);
       this.activeIndex.set(-1);
-      this.state.set(
-        this.isProjectsMode()
-          ? this.query().trim().length > 0
-            ? 'typing'
-            : 'idle'
-          : this.committedCandidate()
-            ? 'committed'
-            : 'idle',
-      );
+      this.state.set(this.committedCandidate() ? 'committed' : 'idle');
+      this.resumePlaceholderIfIdle();
     }
   }
 
@@ -466,13 +453,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     const dbAddressSection =
       result.sections.find((section) => section.family === 'db-address') ??
-      this.createSection('db-address', 'From DB');
+      this.createSection('db-address');
     const dbContentSection =
       result.sections.find((section) => section.family === 'db-content') ??
-      this.createSection('db-content', 'Projects & Groups');
+      this.createSection('db-content');
     const geocoderSection =
       result.sections.find((section) => section.family === 'geocoder') ??
-      this.createSection('geocoder', 'From Internet');
+      this.createSection('geocoder');
     const commandSection = result.sections.find((section) => section.family === 'command') ?? null;
     const operatorSection =
       result.sections.find((section) => section.family === 'operator-suggestion') ?? null;
@@ -498,10 +485,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     if (result.state === 'results-complete') {
       const resultCount = this.selectableItems().length;
+      const trimmedQuery = this.query().trim();
       this.liveRegionText.set(
         resultCount > 0
-          ? `${resultCount} results available for ${this.query().trim()}.`
-          : `No address found for ${this.query().trim()}.`,
+          ? this.t('map.searchBar.liveRegion.resultsAvailable', '{count} results available for {query}.')
+              .replace('{count}', String(resultCount))
+              .replace('{query}', trimmedQuery)
+          : this.t('map.searchBar.liveRegion.noAddressFound', 'No address found for {query}.').replace(
+              '{query}',
+              trimmedQuery,
+            ),
       );
     }
   }
@@ -530,7 +523,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const keyword = chip.providerId === 'projects' ? 'project' : chip.providerId;
     this.searchEngine.applySubtractiveOperator(
       parseSearchQuery(`-${keyword} ${chip.label}`),
-      this.contextChanges.value,
+      this.queryContext(),
     );
     this.syncFilterChips();
   }
@@ -540,12 +533,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       const suggestion = candidate as SearchOperatorSuggestionCandidate;
       const nextQuery = `${suggestion.operator}${suggestion.keyword} `;
       this.query.set(nextQuery);
-      const inputEl = this.searchInput()?.nativeElement;
-      if (inputEl) inputEl.value = nextQuery;
       this.dropdownOpen.set(true);
       this.state.set('typing');
       this.activeIndex.set(-1);
-      this.queryChanges.next(nextQuery);
       return;
     }
 
@@ -554,7 +544,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.dropdownOpen.set(true);
       this.state.set('typing');
       this.activeIndex.set(-1);
-      this.queryChanges.next(candidate.label);
       return;
     }
 
@@ -565,12 +554,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (commitAction.type === 'filter-chip-toggle') {
       this.syncFilterChips();
       this.query.set('');
-      const inputEl = this.searchInput()?.nativeElement;
-      if (inputEl) inputEl.value = '';
       this.dropdownOpen.set(false);
       this.activeIndex.set(-1);
       this.state.set('focused-empty');
-      this.queryChanges.next('');
       this.queryChanged.emit('');
       this.suppressNextDocumentClick = true;
       return;
@@ -615,7 +601,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         }
         break;
       case 'recent-selected':
-        this.queryChanges.next(commitAction.label);
+        this.query.set(commitAction.label);
+        this.state.set('typing');
         break;
     }
   }
@@ -629,14 +616,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.commandSection.set(null);
     this.liveRegionText.set('');
     this.committedCandidate.set(null);
-    this.queryChanges.next('');
     this.queryChanged.emit('');
     this.clearRequested.emit();
+    this.resumePlaceholderIfIdle();
   }
 
   private addRecentSearch(label: string): void {
     const nextRecentSearches = this.recentsProvider
-      .addRecentSearch(label, this.contextChanges.value.activeProjectId, this.recentSearches())
+      .addRecentSearch(label, this.queryContext().activeProjectId, this.recentSearches())
       .slice(0, MAX_RECENT_SEARCHES);
     this.recentSearches.set(nextRecentSearches);
   }
@@ -651,14 +638,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   private createEmptySections(): SearchSectionsState {
     return {
-      dbAddress: this.createSection('db-address', 'From DB'),
-      dbContent: this.createSection('db-content', 'Projects'),
-      geocoder: this.createSection('geocoder', 'From Internet'),
+      dbAddress: this.createSection('db-address'),
+      dbContent: this.createSection('db-content'),
+      geocoder: this.createSection('geocoder'),
     };
   }
 
-  private createSection(family: SearchSection['family'], title: string): SearchSection {
-    return { family, title, items: [] };
+  private createSection(family: SearchSection['family']): SearchSection {
+    return { family, title: '', items: [] };
   }
 
   private normalizeLabel(value: string): string {
@@ -667,10 +654,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   private reverseGeocodeAndUpdateLabel(lat: number, lng: number): void {
     this.geocodingService.reverse(lat, lng).then((result) => {
-      if (!result) return;
+      if (this.destroyed || !result) return;
       const committed = this.committedCandidate();
       if (!committed || committed.family !== 'geocoder') return;
-      // Update label if still committed to these coords
       const coordLabel = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       if (committed.label === coordLabel) {
         this.committedCandidate.set({ ...committed, label: result.addressLabel });
@@ -681,14 +667,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   private rebuildGhostTrie(): void {
-    if (this.isProjectsMode()) {
-      return;
-    }
-
     const entries: GhostTrieEntry[] = [];
-    const activeProjectId = this.contextChanges.value.activeProjectId;
+    const activeProjectId = this.queryContext().activeProjectId;
 
-    // Priority 1+2: Recent searches
     for (const recent of this.recentSearches()) {
       const isActiveProject = recent.projectId === activeProjectId;
       const sourcePriority = isActiveProject ? 100 : 80;
@@ -707,9 +688,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   private startPlaceholderRotation(): void {
+    if (this.placeholderTimer) {
+      return;
+    }
+
     this.placeholderTimer = setInterval(() => {
       this.placeholderFading.set(true);
-      setTimeout(() => {
+      this.placeholderFadeTimer = setTimeout(() => {
+        if (this.destroyed) {
+          return;
+        }
         this.placeholderIndex = (this.placeholderIndex + 1) % PLACEHOLDER_EXAMPLES.length;
         this.placeholderText.set(PLACEHOLDER_EXAMPLES[this.placeholderIndex]);
         this.placeholderFading.set(false);
@@ -721,6 +709,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (this.placeholderTimer) {
       clearInterval(this.placeholderTimer);
       this.placeholderTimer = null;
+    }
+    if (this.placeholderFadeTimer) {
+      clearTimeout(this.placeholderFadeTimer);
+      this.placeholderFadeTimer = null;
+    }
+  }
+
+  private resumePlaceholderIfIdle(): void {
+    if (!this.dropdownOpen() && !this.query().trim() && !this.placeholderTimer) {
+      this.startPlaceholderRotation();
     }
   }
 }

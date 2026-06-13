@@ -66,7 +66,7 @@ describe('SearchEngine', () => {
     const dbAddress = mockProvider({
       id: 'db-address',
       family: 'db-address',
-      sectionTitle: 'From DB',
+      sectionTitle: 'From your data',
       search: () =>
         of([
           {
@@ -112,7 +112,7 @@ describe('SearchEngine', () => {
     const dbAddress = mockProvider({
       id: 'db-address',
       family: 'db-address',
-      sectionTitle: 'From DB',
+      sectionTitle: 'From your data',
       search: () =>
         of([
           {
@@ -130,7 +130,7 @@ describe('SearchEngine', () => {
     const geocoder = mockProvider({
       id: 'geocoder',
       family: 'geocoder',
-      sectionTitle: 'From Internet',
+      sectionTitle: 'From internet',
       search: () =>
         of([
           {
@@ -164,7 +164,7 @@ describe('SearchEngine', () => {
     const dbAddress = mockProvider({
       id: 'db-address',
       family: 'db-address',
-      sectionTitle: 'From DB',
+      sectionTitle: 'From your data',
       search: () =>
         of([
           {
@@ -181,7 +181,7 @@ describe('SearchEngine', () => {
     const geocoder = mockProvider({
       id: 'geocoder',
       family: 'geocoder',
-      sectionTitle: 'From Internet',
+      sectionTitle: 'From internet',
       search: () => of([]),
     });
 

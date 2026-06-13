@@ -79,7 +79,7 @@ export class DbAddressProvider implements SearchProvider {
   private readonly orgSearchTuning = inject(OrgSearchTuningService);
 
   readonly id = 'db-address';
-  readonly sectionTitle = 'From DB';
+  readonly sectionTitle = 'From your data';
   readonly family = 'db-address' as const;
   readonly keywords = ['address'];
   readonly priority = 10;

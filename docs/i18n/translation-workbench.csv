@@ -457,6 +457,9 @@ map.searchBar.placeholder.example.schoenbrunnerAllee,Sch�nbrunner Allee 6,apps
 map.searchBar.placeholder.example.coordsDms,"48�12'30""N 16�22'23""E",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"48°12'30""N 16°22'23""E","48°12'30""N 16°22'23""E","48°12'30""N 16°22'23""E"
 map.searchBar.clear.aria,Clear search,apps/web/src/app/features/map/search-bar/search-bar.component.html attr:aria-label,Clear search,Suche leeren,Cancella ricerca
 map.searchBar.section.recentSearches,Recent searches,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Recent searches,Letzte Suchen,Ricerche recenti
+map.searchBar.section.fromDb,From your data,apps/web/src/app/features/map/search-bar/search-bar.component.ts section-title,From your data,Aus deinen Daten,Dai tuoi dati
+map.searchBar.section.fromInternet,From internet,apps/web/src/app/features/map/search-bar/search-bar.component.ts section-title,From internet,Aus dem Internet,Da internet
+map.searchBar.section.projects,Projects,apps/web/src/app/features/map/search-bar/search-bar.component.ts section-title,Projects,Projekte,Progetti
 map.searchBar.empty.noRecents,No recent searches yet.,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,No recent searches yet.,Noch keine letzten Suchen.,Nessuna ricerca recente.
 map.searchBar.section.addresses,Addresses,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Addresses,Adressen,Indirizzi
 map.searchBar.section.projectsAndGroups,Projects & Groups,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Projects & Groups,Projekte und Gruppen,Progetti e gruppi

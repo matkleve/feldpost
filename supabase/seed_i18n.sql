@@ -14201,6 +14201,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.fromDb', 'From your data', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts section-title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'From your data', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.fromDb'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus deinen Daten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.fromDb'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Dai tuoi dati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.fromDb'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.fromInternet', 'From internet', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts section-title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'From internet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.fromInternet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus dem Internet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.fromInternet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Da internet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.fromInternet'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.projects', 'Projects', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts section-title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Projects', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.projects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.projects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.projects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'map.searchBar.empty.noRecents', 'No recent searches yet.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

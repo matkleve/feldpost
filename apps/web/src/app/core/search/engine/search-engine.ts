@@ -48,6 +48,7 @@ const FALLBACK_CONFIDENCE_THRESHOLD = 0.7;
 const FALLBACK_SCORE_IMPROVEMENT_MIN = 0.05;
 
 const SLOW_PROVIDER_FAMILIES = new Set<SearchSection['family']>(['geocoder']);
+const CACHE_MAX_ENTRIES = 50;
 
 export class SearchEngine {
   private readonly options: SearchEngineOptions;
@@ -269,10 +270,7 @@ export class SearchEngine {
       empty: sections.every((section) => section.items.length === 0),
     };
 
-    this.cache.set(cacheKey, {
-      result,
-      expiresAt: Date.now() + this.options.cacheTtlMs,
-    });
+    this.setCacheEntry(cacheKey, result);
 
     return result;
   }
@@ -360,10 +358,7 @@ export class SearchEngine {
         );
       }),
       tap((result) => {
-        this.cache.set(cacheKey, {
-          result,
-          expiresAt: Date.now() + this.options.cacheTtlMs,
-        });
+        this.setCacheEntry(cacheKey, result);
       }),
     );
 
@@ -661,6 +656,20 @@ export class SearchEngine {
     parsed: ParsedSearchQuery,
   ): string {
     return `${query}::${JSON.stringify({ context, parsed })}`;
+  }
+
+  private setCacheEntry(cacheKey: string, result: SearchResultSet): void {
+    if (this.cache.size >= CACHE_MAX_ENTRIES) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
+    }
+
+    this.cache.set(cacheKey, {
+      result,
+      expiresAt: Date.now() + this.options.cacheTtlMs,
+    });
   }
 
   private toConfidenceLabel(score: number, topMargin: number): 'high' | 'medium' | 'low' {

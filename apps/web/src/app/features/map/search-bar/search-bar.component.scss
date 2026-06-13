@@ -16,25 +16,12 @@
 
   @media (max-width: 47.9375rem) {
     --search-bar-safe-inline: var(--spacing-3);
-    --search-bar-viewport-inset: var(--spacing-3);
 
     width: calc(100% - (2 * var(--search-bar-safe-inline)));
-    top: var(--spacing-3);
   }
 }
 
-:host(.search-bar-host--projects) {
-  position: static;
-  top: auto;
-  left: auto;
-  z-index: auto;
-  width: 100%;
-  transform: none;
-}
-
 .search-bar {
-  --search-bar-padding-inline: var(--spacing-1);
-  --search-bar-padding-block: var(--spacing-1);
   --search-bar-gap: var(--spacing-1);
   --search-bar-dropdown-padding-inline: var(--spacing-2);
   --search-bar-dropdown-padding-block: var(--spacing-2);
@@ -44,7 +31,6 @@
   --search-bar-results-max-block-size: calc(
     100dvh - (2 * var(--search-bar-viewport-inset)) - var(--search-bar-row-height)
   );
-  --search-bar-reveal-duration: 180ms;
   --search-dropdown-item-padding-inline: 0;
   --search-dropdown-item-padding-block: var(--spacing-1);
   --search-dropdown-item-gap: var(--search-bar-gap);
@@ -61,15 +47,19 @@
   overflow: hidden;
   contain: layout paint;
   transition:
-    background 120ms ease-out,
-    border-color 120ms ease-out;
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover:not(:focus-within) {
     background: color-mix(in srgb, var(--primary) 8%, color-mix(in srgb, var(--card) 85%, transparent));
     border-color: color-mix(in srgb, var(--primary) 42%, color-mix(in srgb, var(--border) 50%, transparent));
   }
-}
 
+  &:focus-within {
+    box-shadow: var(--interactive-focus-ring);
+  }
+}
 
 .search-bar__input-row {
   position: relative;
@@ -84,32 +74,22 @@
   column-gap: var(--search-bar-gap);
 }
 
-.search-bar__slot-wrapper {
+// Icon column: single wrapper centers the search glyph in the leading grid track.
+// @see search-bar.component.html
+.search-bar__icon-slot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   inline-size: var(--search-bar-row-height);
   min-inline-size: var(--search-bar-row-height);
   block-size: 100%;
-  flex-shrink: 0;
-}
-
-// Icon inner-slot: centers icon inside the slot-wrapper column.
-// @see search-bar.component.html §icon-slot structure
-.search-bar__icon-slot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: var(--search-bar-media-size);
-  block-size: var(--search-bar-media-size);
-  flex-shrink: 0;
 }
 
 .search-bar__icon {
   font-size: var(--font-size-lg);
   line-height: var(--line-height-solid);
   color: var(--muted-foreground);
-  transition: color 120ms ease-out;
+  transition: color var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .search-bar:hover:not(:focus-within) .search-bar__icon,
@@ -208,6 +188,7 @@
   border-top: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   background: transparent;
   overflow: hidden;
+  animation: search-bar-dropdown-reveal var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .search-bar__dropdown-content {
@@ -302,7 +283,7 @@
 
 .search-bar__skeleton-row {
   display: grid;
-  grid-template-columns: var(--spacing-6) minmax(0, 1fr);
+  grid-template-columns: var(--search-dropdown-item-media-size) minmax(0, 1fr);
   align-items: start;
   min-height: var(--search-dropdown-item-row-min-height);
   padding-block: var(--search-dropdown-item-padding-block);
@@ -324,8 +305,8 @@
 }
 
 .search-bar__skeleton-media {
-  width: var(--spacing-6);
-  height: var(--spacing-6);
+  width: var(--search-dropdown-item-media-size);
+  height: var(--search-dropdown-item-media-size);
   border-radius: 50%;
 }
 
@@ -333,7 +314,7 @@
   display: grid;
   gap: calc(var(--search-bar-gap) * 0.5);
   align-content: center;
-  min-height: var(--spacing-6);
+  min-height: var(--search-dropdown-item-media-size);
 }
 
 .search-bar__skeleton-line {
@@ -361,6 +342,18 @@
   border: 0;
 }
 
+@keyframes search-bar-dropdown-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes search-bar-skeleton {
   0% {
     background-position: 200% 0;
@@ -373,7 +366,15 @@
 
 @media (prefers-reduced-motion: reduce) {
   .search-bar,
-  .search-bar__placeholder {
+  .search-bar__icon,
+  .search-bar__placeholder,
+  .search-bar__dropdown {
     transition: none;
+    animation: none;
+  }
+
+  .search-bar__skeleton-media,
+  .search-bar__skeleton-line {
+    animation: none;
   }
 }

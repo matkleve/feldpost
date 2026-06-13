@@ -149,6 +149,26 @@ describe('GeocodingService resilience', () => {
     expect(toastShow).toHaveBeenCalledTimes(1);
   });
 
+  it('blocks map search during service cooldown without extra invokes', async () => {
+    const unavailableError = {
+      name: 'FunctionsHttpError',
+      message: 'Edge function returned status 503',
+      status: 503,
+      context: new Response(JSON.stringify({ code: 'BOOT_ERROR', message: 'Worker failed to boot' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    };
+
+    invokeSpy.mockResolvedValue({ data: null, error: unavailableError });
+
+    await service.ensureGeocodeAvailable();
+    const searchResults = await service.search('wien');
+
+    expect(searchResults).toEqual([]);
+    expect(invokeSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('opens auth cooldown after 401 so subsequent calls fail soft without extra network calls', async () => {
     const unauthorizedError = {
       name: 'FunctionsHttpError',

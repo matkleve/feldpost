@@ -297,3 +297,52 @@ export function isInViewport(
     candidate.lng <= viewport.east
   );
 }
+
+function coordsEqual(
+  left?: { lat: number; lng: number },
+  right?: { lat: number; lng: number },
+): boolean {
+  if (!left && !right) return true;
+  if (!left || !right) return false;
+  return left.lat === right.lat && left.lng === right.lng;
+}
+
+function boundsEqual(
+  left?: { north: number; east: number; south: number; west: number },
+  right?: { north: number; east: number; south: number; west: number },
+): boolean {
+  if (!left && !right) return true;
+  if (!left || !right) return false;
+  return (
+    left.north === right.north &&
+    left.east === right.east &&
+    left.south === right.south &&
+    left.west === right.west
+  );
+}
+
+function stringArraysEqual(left?: string[], right?: string[]): boolean {
+  const a = left ?? [];
+  const b = right ?? [];
+  if (a.length !== b.length) return false;
+  return a.every((value, index) => value === b[index]);
+}
+
+/** Shallow equality for map-shell → search-bar context to avoid redundant engine runs. */
+export function searchQueryContextsEqual(
+  left: SearchQueryContext,
+  right: SearchQueryContext,
+): boolean {
+  return (
+    left.organizationId === right.organizationId &&
+    left.activeProjectId === right.activeProjectId &&
+    coordsEqual(left.activeMarkerCentroid, right.activeMarkerCentroid) &&
+    coordsEqual(left.activeProjectCentroid, right.activeProjectCentroid) &&
+    coordsEqual(left.currentLocation, right.currentLocation) &&
+    coordsEqual(left.dataCentroid, right.dataCentroid) &&
+    boundsEqual(left.viewportBounds, right.viewportBounds) &&
+    stringArraysEqual(left.countryCodes, right.countryCodes) &&
+    left.activeFilterCount === right.activeFilterCount &&
+    left.commandMode === right.commandMode
+  );
+}

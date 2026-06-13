@@ -6,21 +6,7 @@ A global notification system that displays short, non-blocking feedback messages
 
 ## What It Looks Like
 
-**`z-index` (stacking):** the toast stack uses literal **`400`** on **`ToastContainerComponent`** (`toast-container.component.scss`) — between **dropdown plane `300`** and **modal plane `500`**; **`--z-toast`** was removed from the legacy bridge (**Batch 35**). See [`docs/design/tokens.md`](../../../design/tokens.md) §3.5 and [`docs/design/token-layers.md`](../../../design/token-layers.md).
-
-Toasts are compact horizontal bars: per-item chrome comes from Spartan **`hlmToast`** + CVA (`toastVariants` in code), a leading status icon, message text on **`.toast-message`** (`toast-item.component.scss`: `font-size: var(--font-size-md)`, line clamp, `word-break: break-word`), and a dismiss control. Severity colors map through tweakcn semantic tokens (`--success`, `--destructive`, `--warning`, `muted-foreground` for info) on the toast item host — see [`docs/design/tokens.md`](../../../design/tokens.md) and [`docs/design/token-layers.md`](../../../design/token-layers.md) for the global ladder.
-
-**`ToastContainerComponent`** (`toast-container.component.scss`) positions the stack: `:host` is `position: fixed` with **`bottom: 1rem`**, **`left: 1rem`**, **`z-index: 400`**, **`display: flex`**, **`flex-direction: column`** (normal column — not `column-reverse`), **`gap: var(--spacing-2)`**, **`transition: gap 200ms ease`**, **`width: min(24rem, calc(100vw - 2rem))`**, and **`pointer-events: none`** on the container (children re-enable hits as needed). At **`max-width: 48rem`**, the same partial repeats **`left: 1rem`**, **`bottom: 1rem`**, and the same **`width`** clamp (no horizontal centering / full-bleed row in current SCSS).
-
-Each toast enters with **`toast-enter`** (200ms ease-out): from **`translateY(0.5rem)`** + **`scale(0.98)`** + opacity 0 → rest + opacity 1 on **`[data-toast-surface]`**. Exit uses **`toast-exit`** (200ms ease-in): to **`translateY(-0.5rem)`** + opacity 0. State moves **`entering` → `visible`** and **`exiting` → removed** only on **`animationend`** from the toast item host — **`afterExit(toastId)`** runs after the exit animation. Never use a raw **`setTimeout(200)`** fallback; bind to the DOM event so timing changes stay consistent.
-
-Message text wraps naturally (`word-break: break-word`). A maximum of 3 lines is enforced via `-webkit-line-clamp: 3` with `overflow: hidden` and `text-overflow: ellipsis`. This keeps individual toasts compact even with long messages.
-
-When multiple toasts stack, **`ToastService`** appends each new item to the end of the array; with **`flex-direction: column`**, older toasts render **above** and the newest sits **closest to the bottom** anchor. The container uses **`transition: gap 200ms ease`** so when a toast exits, the stack’s gap animates smoothly. A maximum of **3** non-exiting toasts stay visible; a **4th** dismisses the oldest (see `enforceMaxLimit` in `toast.service.ts`).
-
-**Narrow viewports (`max-width: 48rem`):** container SCSS keeps the same **`left` / `bottom`** insets and width clamp as desktop; there is **no** separate “above bottom sheet” **`bottom: 5rem`** or centered **`left` / `right`** pair in `toast-container.component.scss` today.
-
-`prefers-reduced-motion: reduce` disables translate transforms — toasts appear/disappear with opacity-only instant transitions.
+Compact horizontal bars, bottom-left of viewport (`position: fixed`, `left: 1rem`, `bottom: 1rem`, `width: min(24rem, calc(100vw - 2rem))`), max 3 stacked. Chrome: Spartan `hlmToast` + `toastVariants` CVA, leading severity icon, message text (3-line clamp, `word-break: break-word`), dismiss (×). Severity via tweakcn semantic tokens (`--success`, `--destructive`, `--warning`, `muted-foreground`). z-index `400` (between dropdown plane `300` and modal plane `500`; `--z-toast` removed — see [`docs/design/token-layers.md`](../../../design/token-layers.md)).
 
 ## Where It Lives
 
@@ -87,111 +73,75 @@ sequenceDiagram
 - **`exiting` → removed**: Transition happens on `animationend` of the exit animation (200ms ease-in). `afterExit(toastId)` is called from the `animationend` handler, which then removes the item from the `items` signal.
 - **Pause / Resume**: On `mouseenter`, record `remainingMs = duration - (Date.now() - startedAt)` and clear the timeout. On `mouseleave`, start a new timeout with the saved `remainingMs`. The `startedAt` timestamp is reset to `Date.now()` on resume so subsequent pauses calculate correctly.
 
-## Consumer Wiring — Who Shows Toasts
-
-```mermaid
-graph TB
-    subgraph Consumers["Toast Consumers"]
-        GPS["GpsButtonComponent<br/>GPS fix failed"]
-        IDV["MediaDetailViewComponent<br/>Replace/attach success/error<br/>Copy coordinates"]
-        MS["MapShellComponent<br/>Upload failed (uploadFailed$)"]
-        AP["AccountPageComponent<br/>Email/password update result"]
-        UMS["UploadManagerService<br/>Batch complete summary"]
-    end
-
-    subgraph Toast["ToastService (singleton)"]
-        Show["show(options)"]
-        Items["items: Signal&lt;ToastItem[]&gt;"]
-        Dismiss["dismiss(id) / dismissAll()"]
-    end
-
-    subgraph Render["ToastContainerComponent (in app.html)"]
-        Stack["Stacked toast elements<br/>max 3 visible"]
-    end
-
-    GPS --> Show
-    IDV --> Show
-    MS --> Show
-    AP --> Show
-    UMS --> Show
-
-    Show --> Items
-    Items --> Stack
-    Dismiss --> Items
-```
-
 ## Component Hierarchy
 
 ```
-ToastContainerComponent                    ← fixed position, bottom-left, z-index: 400 (between dropdown plane 300 and modal plane 500 — see [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/token-layers.md`](../../../design/token-layers.md), and [`dropdown-system.md`](../../component/filters/dropdown-system.md))
-│                                             `toast-container.component.scss`: bottom/left `1rem`, width `min(24rem, calc(100vw - 2rem))`, `gap: var(--spacing-2)`, `flex-direction: column`, `transition: gap 200ms ease`, `pointer-events: none` on `:host`
-│                                             `@media (max-width: 48rem)`: same insets + width clamp (no extra centering rule in SCSS)
-│                                             `role="region"`, `aria-label="Notifications"`, `aria-live="polite"` on container host
-│                                             transition: gap 200ms ease (smooth collapse on exit)
-│                                             role="region", aria-label="Notifications"
-│                                             aria-live="polite" (container-level default)
+ToastContainerComponent  ← position: fixed, bottom-left, z-index: 400
+│   role="region", aria-label="Notifications", aria-live="polite"
+│   width: min(24rem, calc(100vw - 2rem)), flex-direction: column
 │
-└── ToastItemComponent × N (max 3)         ← individual toast bar
-    │                                         Error toasts: aria-live="assertive" (overrides container)
-    │                                         All other types: inherit container's aria-live="polite"
-    │                                         Not tab-focusable (no tabindex) — dismissed via mouse/touch only
-    │                                         Dismiss button IS focusable (natural button element)
-    ├── StatusIcon                          ← Material Icon, matches type color
-    │                                         success: "check_circle", error: "error",
-    │                                         warning: "warning", info: "info"
-    ├── MessageText                         ← --text-body, --color-text-primary, flex: 1
-    │                                         word-break: break-word, -webkit-line-clamp: 3
-    └── DismissButton (×)                   ← "close" icon, ghost button, 1.75rem tap target
-                                              Focusable via Tab, aria-label="Dismiss notification"
+└── ToastItemComponent × N (max 3)
+    ├── StatusIcon       ← check_circle / error / warning / info
+    ├── MessageText      ← title (collapsed) + body + optional "Show details"
+    │   codeRef          ← muted debug sub-line (file · fn)
+    └── DismissButton    ← focusable, aria-label="Dismiss notification"
+        ToastAction      ← optional footer CTA button
 ```
+
+Error toasts set `aria-live="assertive"` on their host to interrupt screen readers.
+Consumer wiring table: [`toast-authoring.supplement.md §7`](toast-authoring.supplement.md#7-event-inventory).
 
 ## Data
 
-### Data Flow (Mermaid)
-
-```mermaid
-flowchart LR
-  UI[UI Component] --> S[Service Layer]
-  S --> DB[(Supabase Tables)]
-  DB --> S
-  S --> UI
-```
-
-| Field         | Source                 | Type                  |
-| ------------- | ---------------------- | --------------------- |
-| Active toasts | `ToastService.items()` | `Signal<ToastItem[]>` |
-
-## State
-
-| Name    | Type          | Default | Controls              |
-| ------- | ------------- | ------- | --------------------- |
-| `items` | `ToastItem[]` | `[]`    | List of active toasts |
+Active state: `ToastService.items()` → `Signal<ToastItem[]>` (default `[]`).
 
 ### ToastItem interface
 
+Full definition in `apps/web/src/app/core/toast/toast.types.ts`.
+
 ```typescript
 interface ToastItem {
-  id: string; // crypto.randomUUID()
-  message: string; // Display text
-  type: "success" | "error" | "warning" | "info"; // Severity
-  duration: number; // Auto-dismiss ms (0 = no auto-dismiss, manual only)
-  state: "entering" | "visible" | "exiting"; // Animation state
-  createdAt: number; // Date.now() for ordering
-  startedAt: number; // Date.now() when timer last (re)started — used for pause math
+  id: string;          // crypto.randomUUID() with Math.random() fallback
+  message: string;     // Derived: title + body when structured fields set; flat message otherwise
+  type: ToastType;     // 'success' | 'error' | 'warning' | 'info'
+  duration: number;    // Auto-dismiss ms (0 = manual-only)
+  state: 'entering' | 'visible' | 'exiting'; // Animation FSM
+  createdAt: number;   // Date.now() for ordering
+  startedAt: number;   // Date.now() when timer last (re)started — used for pause math
   remainingMs?: number; // Set on pause: duration - (Date.now() - startedAt)
+  // Structured display (preferred over flat message)
+  title?: string;      // One-line headline shown in collapsed state
+  body?: string;       // One-to-two sentence user guidance shown below title
+  detail?: string;     // Expandable technical detail (shown behind "Show details")
+  codeRef?: ToastCodeRef; // { file: string; fn: string } — debug pointer shown below body
+  action?: ToastAction;   // { label: string; onClick: () => void } — single footer CTA
 }
 ```
 
 ### ToastOptions (show() input)
 
+Full definition in `apps/web/src/app/core/toast/toast.types.ts`.
+
 ```typescript
 interface ToastOptions {
-  message: string;
-  type?: "success" | "error" | "warning" | "info"; // default: 'info'
-  duration?: number; // default: 4000 (error: 6000). 0 = no auto-dismiss.
-  dedupe?: boolean; // default: false. If true, skip if an identical message+type toast is already visible.
+  // Structured form (preferred — see toast-authoring.supplement.md)
+  title?: string;    // Short headline. Shown collapsed. Required when body or detail is set.
+  body?: string;     // User-facing guidance. Shown below title.
+  detail?: string;   // Raw technical message. Hidden behind "Show details" expand control.
+  codeRef?: ToastCodeRef; // { file, fn } — rendered as muted sub-line for debugging
+  action?: ToastAction;   // Optional single CTA button in toast footer
+
+  // Legacy flat form (still supported; used where body/title split is not needed)
+  message?: string;  // Ignored when title is set. Shown as the full toast text.
+
+  type?: 'success' | 'error' | 'warning' | 'info'; // default: 'info'
+  duration?: number; // default: 4000ms (error: 6000ms). 0 = no auto-dismiss.
+  dedupe?: boolean;  // default: false. Skip if identical title+type toast already visible.
 }
 ```
+
+> **Authoring rules, when-to-toast guidance, copy templates, i18n requirements, and the per-event inventory** live in
+> [`toast-authoring.supplement.md`](toast-authoring.supplement.md).
 
 ## File Map
 
@@ -207,97 +157,16 @@ interface ToastOptions {
 | `apps/web/src/app/shared/toast/toast-item.component.scss` | Enter/exit keyframes, message clamp, dismiss/icon styling |
 | `apps/web/src/app/core/toast/toast.service.spec.ts` | Unit tests — timers, stack limit, dedupe, pause/resume |
 
-## Edge Cases
+## Edge cases and consumer inventory
 
-| #   | Scenario                                   | Behavior                                                                                                                                                                                                                                                |
-| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Rapid `show()` calls** (3+ in same tick) | Pushes are synchronous within the signal update. After all pushes, if `items.length > 3`, dismiss the oldest items until length ≤ 3. This is naturally atomic because signal updates batch within the same microtask.                                   |
-| 2   | **Duplicate messages**                     | By default, duplicates are allowed (5 identical errors = 5 toasts). Set `dedupe: true` in `ToastOptions` to skip if an active toast with the same `message` + `type` already exists. `UploadManagerService` should use `dedupe: true` for batch errors. |
-| 3   | **`duration: 0`**                          | No auto-dismiss timer is started. Toast stays visible until manually dismissed via × button. Valid for any type. **`ToastService` does not apply a breakpoint-specific override** — mobile-only forcing of error duration is **not** implemented in the current service.                                                 |
-| 4   | **Route change**                           | Toasts persist across route changes. No `dismissAll()` on navigation. Rationale: toasts are transient feedback about past actions (e.g., "Photo uploaded") and remain relevant after navigation.                                                        |
-| 5   | **`crypto.randomUUID()` unavailable**      | Fallback to `Math.random().toString(36).slice(2)` for ID generation. Wrap in a private `generateId()` method. No silent failure — the toast must still appear.                                                                                          |
-| 6   | **`dismissAll()` usage**                   | Called only from unit tests (`_testReset()`) and from `AccountPageComponent` on sign-out (clears stale toasts). No other consumer. If no sign-out toast clearing is needed, `dismissAll()` may be kept for tests only.                                  |
+See [`toast-system.acceptance-criteria.md`](toast-system.acceptance-criteria.md) for edge-case behaviour (rapid calls, dedupe, route change, `crypto.randomUUID` fallback, `dismissAll`).
 
-## Wiring
+See [`toast-authoring.supplement.md §7`](toast-authoring.supplement.md#7-event-inventory) for the per-consumer event inventory and known copy debt.
 
-### Wiring Flow (Mermaid)
+**Shipped API:** `ToastService.show(options: ToastOptions)` only — no legacy `(message, duration)` overload.
 
-```mermaid
-sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
-```
-
-### Root integration
-
-- Add `<ss-toast-container />` to `app.html` after `<router-outlet />`
-- Import `ToastContainerComponent` in `App` component imports
-- Remove old `ToastComponent` import if present anywhere
-
-### Z-index
-
-- Toast stack: **`z-index: 400`** in **`toast-container.component.scss`** — above **dropdown plane `300`**, below **modal plane `500`**. Layering aligns with [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/token-layers.md`](../../../design/token-layers.md), and the dropdown shell in [`docs/specs/component/filters/dropdown-system.md`](../../component/filters/dropdown-system.md). Use only the documented numeric planes — do not reintroduce removed ad-hoc stacking variables.
-
-### Consumer wiring (existing files to update)
-
-Each consumer injects `ToastService` and calls `show()` with appropriate options:
-
-| Consumer file                                                | Event                                        | Toast call                                                    |
-| ------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------- |
-| `features/map/map-shell/map-shell.component.ts`              | `uploadFailed$` subscription                 | `toast.show({ message: event.error, type: 'error' })`         |
-| `features/map/map-shell/map-shell.component.ts`              | `imageUploaded$` (already handled via panel) | `toast.show({ message: 'Photo uploaded', type: 'success' })`  |
-| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts` | Replace/attach success                       | `toast.show({ message: 'Photo replaced', type: 'success' })`  |
-| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts` | Replace/attach failure via `uploadFailed$`   | `toast.show({ message: event.error, type: 'error' })`         |
-| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts` | Copy coordinates                             | `toast.show({ message: 'Coordinates copied', type: 'info' })` |
-| `features/map/gps-button/gps-button.component.ts`            | GPS failure                                  | `toast.show({ … })` with `ToastOptions` |
-
-### Backward compatibility
-
-**Shipped API:** `ToastService.show(options: ToastOptions)` only — there is no legacy `(message, duration)` overload in `toast.service.ts`. All callers pass an options object.
+**Root integration:** add `<ss-toast-container />` to `app.html` after `<router-outlet />` and import `ToastContainerComponent` in the root `App` component.
 
 ## Acceptance Criteria
 
-- [ ] `ToastService` is `providedIn: 'root'` singleton with signal-based `items()`
-- [ ] `show()` accepts `ToastOptions` with message, optional type and duration
-- [ ] Toasts appear bottom-left of the viewport per `toast-container.component.scss` (`left: 1rem`, `bottom: 1rem`, width `min(24rem, calc(100vw - 2rem))`)
-- [ ] Sidebar overlap / rail clearance is a **Phase 10** visual QA concern unless layout rules are added beyond current container SCSS
-- [ ] Toast enter animation: **`toast-enter`** — `translateY(0.5rem)` + `scale(0.98)` → rest, opacity 0→1, 200ms ease-out on `[data-toast-surface]`
-- [ ] Toast exit animation: **`toast-exit`** — `translateY(-0.5rem)` + opacity 0, 200ms ease-in
-- [ ] Auto-dismiss after 4s (info/success/warning) or 6s (error)
-- [ ] Hover pauses auto-dismiss timer; mouseleave resumes
-- [ ] Dismiss button (×) removes toast immediately
-- [ ] Maximum 3 toasts visible; 4th dismisses oldest
-- [ ] Stacking: `flex-direction: column` + append order — newest toast closest to bottom edge, older above (`ToastService` pushes to array end; `@for` preserves order)
-- [ ] Narrow (`max-width: 48rem`): container SCSS matches desktop insets in current implementation; any dedicated bottom-sheet clearance is **not** in `toast-container.component.scss` today (defer to Phase 10 if required)
-- [ ] `prefers-reduced-motion` disables transforms (opacity-only)
-- [ ] Container has `role="region"`, `aria-label="Notifications"`, and `aria-live="polite"`
-- [ ] Error toasts individually set `aria-live="assertive"` to interrupt screen readers
-- [ ] Dismiss button is focusable via Tab with `aria-label="Dismiss notification"`
-- [ ] Severity styling comes from **`hlmToast`** / `toastVariants` (`apps/web/src/app/shared/ui/toast/toast-variants.ts`) — border + surface + text per variant (includes `dark:` treatments on some variants); not a separate 2px `--color-*` left-border strip in feature SCSS
-- [ ] `z-index: 400` on container — above dropdowns (300), below modals (500)
-- [ ] `MapShellComponent` subscribes to `uploadFailed$` and shows error toast
-- [ ] `MediaDetailViewComponent` subscribes to `uploadFailed$` and shows error toast
-- [ ] `MediaDetailViewComponent` shows success toast on replace/attach complete
-- [ ] `MediaDetailViewComponent` shows info toast on coordinate copy
-- [ ] `GpsButtonComponent` updated to use new `show(ToastOptions)` API
-- [x] Legacy monolithic `toast.component.*` removed — stack lives under `apps/web/src/app/shared/toast/` + `apps/web/src/app/core/toast/`
-- [ ] Light/dark: toast surfaces follow Spartan variant classes (tweakcn semantic variables under the hood); no parallel bespoke `--color-bg-elevated` sheet in feature SCSS
-- [ ] Works in both light and dark themes (variant + global token stack)
-- [ ] `entering` → `visible` transition fires on `animationend`, not `setTimeout`
-- [ ] `exiting` → removed transition fires on `animationend` via `afterExit()`
-- [ ] Hover pause records `remainingMs` correctly; resume uses saved value
-- [ ] `duration: 0` disables auto-dismiss timer (toast stays until manual dismiss)
-- [ ] **Optional / not shipped:** error toasts on small viewports forcing `duration: 0` — no `matchMedia` / width branch in `toast.service.ts` today; add only with spec + product sign-off
-- [ ] `dedupe: true` option prevents duplicate message+type toasts in the stack
-- [ ] Rapid `show()` calls (same tick) correctly enforce max 3 limit
-- [ ] Toasts persist across route changes (no `dismissAll()` on navigation)
-- [ ] Message text wraps with `word-break: break-word`, clamped to 3 lines
-- [ ] Gap between toasts collapses smoothly on exit (`transition: gap 200ms ease`)
-- [ ] ID generation falls back to `Math.random()` if `crypto.randomUUID()` unavailable
-- [ ] `ToastService` exposes `_testReset()` method that calls `dismissAll()` and clears all timers for test teardown
-- [ ] Unit tests use `fakeAsync` / `tick` with `_testReset()` for deterministic timer testing
+- [ ] Full checklist in [`toast-system.acceptance-criteria.md`](toast-system.acceptance-criteria.md).

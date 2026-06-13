@@ -10,7 +10,7 @@ import { provideOrgSearchTuningTestDouble } from '../search-test.providers';
 describe('GeocoderProvider', () => {
   let provider: GeocoderProvider;
   let geocodingMock: {
-    ensureGeocodeAvailable: ReturnType<typeof vi.fn>;
+    isGeocodeBlocked: ReturnType<typeof vi.fn>;
     search: ReturnType<typeof vi.fn>;
     searchStructured: ReturnType<typeof vi.fn>;
     reverse: ReturnType<typeof vi.fn>;
@@ -37,7 +37,7 @@ describe('GeocoderProvider', () => {
 
   beforeEach(() => {
     geocodingMock = {
-      ensureGeocodeAvailable: vi.fn().mockResolvedValue(true),
+      isGeocodeBlocked: vi.fn().mockReturnValue(false),
       search: vi.fn().mockResolvedValue([schleiergasseResult]),
       searchStructured: vi.fn().mockResolvedValue([]),
       reverse: vi.fn().mockResolvedValue(null),
@@ -67,13 +67,13 @@ describe('GeocoderProvider', () => {
     expect(geocodingMock.search).not.toHaveBeenCalled();
   });
 
-  it('attempts forward geocode even when probe reports unavailable', async () => {
-    geocodingMock.ensureGeocodeAvailable.mockResolvedValue(false);
+  it('skips forward geocode when service cooldown is active', async () => {
+    geocodingMock.isGeocodeBlocked.mockReturnValue(true);
 
     const results = await firstValueFrom(provider.search('schleiergasse', {}));
 
-    expect(geocodingMock.search).toHaveBeenCalled();
-    expect(results.length).toBeGreaterThan(0);
+    expect(geocodingMock.search).not.toHaveBeenCalled();
+    expect(results).toEqual([]);
   });
 
   it('returns geocoder candidates from forward geocode', async () => {

@@ -37,7 +37,7 @@ export class GeocoderProvider implements SearchProvider {
   private readonly mediaClusterService = inject(MediaClusterService);
 
   readonly id = 'geocoder';
-  readonly sectionTitle = 'From Internet';
+  readonly sectionTitle = 'From internet';
   readonly family = 'geocoder' as const;
   readonly keywords = ['address', 'place'];
   readonly priority = 50;
@@ -61,6 +61,14 @@ export class GeocoderProvider implements SearchProvider {
   search(query: string, context: SearchQueryContext): Observable<SearchCandidate[]> {
     const normalizedQuery = normalizeSearchQuery(query);
     if (!normalizedQuery) return of([]);
+
+    if (this.geocodingService.isGeocodeBlocked()) {
+      logSearchEvent('geocoder-skipped-cooldown', {
+        query,
+        normalizedQuery,
+      });
+      return of([]);
+    }
 
     logSearchEvent('geocoder-query', {
       query,

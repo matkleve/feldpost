@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SupabaseService } from '../../../../core/supabase/supabase.service';
 import type { ProjectSelectOption } from '../../../../shared/project-select-dialog/project-select-dialog.component';
 
@@ -25,6 +26,7 @@ export interface ProjectAssignmentResultLike {
 @Injectable({ providedIn: 'root' })
 export class MapProjectActionsService {
   private readonly supabaseService = inject(SupabaseService);
+  private readonly i18n = inject(I18nService);
 
   getAssignmentFailureMessage(result: ProjectAssignmentResultLike): string | null {
     if (result.ok) {
@@ -32,16 +34,32 @@ export class MapProjectActionsService {
     }
 
     if (result.reason === 'empty') {
-      return 'Keine Medien fuer Projektzuweisung gefunden.';
+      return this.i18n.t(
+        'map.shell.toast.noMediaForProjectAssignment',
+        'No media found for project assignment.',
+      );
     }
 
-    return result.errorMessage ?? 'Projektzuweisung fehlgeschlagen.';
+    return (
+      result.errorMessage ??
+      this.i18n.t('map.shell.toast.projectAssignmentFailed', 'Project assignment failed.')
+    );
   }
 
   formatProjectAssignmentSuccess(projectName: string, imageCount: number): string {
-    return imageCount === 1
-      ? `Zum Projekt "${projectName}" zugewiesen.`
-      : `${imageCount} Medien dem Projekt "${projectName}" zugewiesen.`;
+    if (imageCount === 1) {
+      return this.i18n
+        .t('map.shell.toast.projectAssigned.single', 'Assigned to project "{project}".')
+        .replace('{project}', projectName);
+    }
+
+    return this.i18n
+      .t(
+        'map.shell.toast.projectAssigned.multi',
+        '{count} media items assigned to project "{project}".',
+      )
+      .replace('{count}', String(imageCount))
+      .replace('{project}', projectName);
   }
 
   async loadProjectOptions(): Promise<LoadProjectOptionsResult>;
