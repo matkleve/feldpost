@@ -10,6 +10,7 @@
  *   POST /geocode  { action: "structured-search", street, city }
  */
 
+import { resolveAllowedOrigin } from "./cors-origin.ts";
 import {
   buildPhotonSearchUrl,
   buildPhotonStructuredUrl,
@@ -40,23 +41,6 @@ async function rateLimitNominatim(): Promise<void> {
   lastNominatimRequestTime = Date.now();
 }
 
-function resolveAllowedOrigin(req: Request): string | null {
-  const origin = req.headers.get("origin");
-  if (!origin) {
-    return null;
-  }
-
-  if (ALLOWED_ORIGINS.length === 0) {
-    return null;
-  }
-
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    return origin;
-  }
-
-  return null;
-}
-
 function corsHeaders(req: Request): Record<string, string> {
   const headers: Record<string, string> = {
     "Access-Control-Allow-Headers":
@@ -65,7 +49,7 @@ function corsHeaders(req: Request): Record<string, string> {
     Vary: "Origin",
   };
 
-  const allowedOrigin = resolveAllowedOrigin(req);
+  const allowedOrigin = resolveAllowedOrigin(req.headers.get("origin"), ALLOWED_ORIGINS);
   if (allowedOrigin) {
     headers["Access-Control-Allow-Origin"] = allowedOrigin;
   }
@@ -150,7 +134,7 @@ async function fetchUpstream(
 }
 
 Deno.serve(async (req: Request) => {
-  const allowedOrigin = resolveAllowedOrigin(req);
+  const allowedOrigin = resolveAllowedOrigin(req.headers.get("origin"), ALLOWED_ORIGINS);
 
   if (req.method === "OPTIONS") {
     if (req.headers.get("origin") && !allowedOrigin) {

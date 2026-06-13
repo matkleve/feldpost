@@ -145,9 +145,14 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+# Local stack only — hosted project Site URL is https://feldpost.pages.dev (see `supabase config push`).
+site_url = "http://127.0.0.1:4200"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+additional_redirect_urls = [
+  "https://feldpost.pages.dev/auth/update-password",
+  "http://localhost:4200/auth/update-password",
+  "http://127.0.0.1:4200/auth/update-password",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
@@ -366,7 +371,7 @@ inspector_port = 8083
 deno_version = 2
 
 [edge_runtime.secrets]
-ALLOWED_ORIGINS = "http://localhost:4200,http://127.0.0.1:4200"
+ALLOWED_ORIGINS = "http://localhost:4200,http://127.0.0.1:4200,https://feldpost.pages.dev,https://*.feldpost.pages.dev"
 GOTENBERG_URL = "http://host.docker.internal:3000"
 # Remote Austria Photon (Hetzner); sslip.io — no purchased domain.
 GEOCODER_FORWARD_URL = "https://178-105-242-74.sslip.io"

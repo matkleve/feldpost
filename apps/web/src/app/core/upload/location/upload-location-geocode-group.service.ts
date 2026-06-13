@@ -17,6 +17,7 @@ import {
 } from './upload-location-resolution.helpers';
 import {
   patchAmbiguousGeocodeOutcome,
+  patchContainmentCheckOutcome,
   patchFallbackTrayGeocodeOutcome,
   patchPartialClassifyFailedGeocode,
 } from './upload-location-geocode-outcome.util';
@@ -244,6 +245,9 @@ export class UploadLocationGeocodeGroupService {
     }
     if (group.geocodeBranch === 'branch_c' || group.geocodeBranch === 'branch_b') {
       return patchFallbackTrayGeocodeOutcome(this.orchestrator, batchId, group);
+    }
+    if (group.resolvedFromAdminConflict) {
+      return patchContainmentCheckOutcome(this.orchestrator, batchId, group);
     }
     return patchPartialClassifyFailedGeocode(this.orchestrator, batchId, group);
   }

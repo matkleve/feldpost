@@ -14,6 +14,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Session, User, AuthError } from '@supabase/supabase-js';
+import { environment } from '../../../environments/environment';
 import { clearAccountProfileCache } from '../../shared/account/account-profile-cache';
 import { SupabaseService } from '../supabase/supabase.service';
 
@@ -172,7 +173,7 @@ export class AuthService {
    */
   async resetPasswordForEmail(email: string): Promise<AuthResult> {
     const { error } = await this.supabase.client.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
+      redirectTo: `${this.authRedirectOrigin()}/auth/update-password`,
     });
     return { error };
   }
@@ -298,6 +299,13 @@ export class AuthService {
       return { error: new Error(error.message) };
     }
     return { error: null };
+  }
+
+  private authRedirectOrigin(): string {
+    if (environment.production && environment.appUrl) {
+      return environment.appUrl;
+    }
+    return window.location.origin;
   }
 
   private async sha256(value: string): Promise<string> {

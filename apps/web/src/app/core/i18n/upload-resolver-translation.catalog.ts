@@ -133,6 +133,14 @@ export const UPLOAD_RESOLVER_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry
     it: 'Questa foto è nell’area di progetto corretta?',
   },
   {
+    key: 'upload.resolver.question.containmentCheck',
+    original: '{street} was not found in {city}. Is this address correct?',
+    context: 'Containment-check tray — Photon 0-hit after admin conflict resolution.',
+    en: '{street} was not found in {city}. Is this address correct?',
+    de: '{street} wurde in {city} nicht gefunden. Ist diese Adresse korrekt?',
+    it: '{street} non è stato trovato in {city}. Questo indirizzo è corretto?',
+  },
+  {
     key: 'upload.resolver.title.fallbackAddress',
     original: 'this address',
     context: 'Placeholder when group has no titleAddress.',

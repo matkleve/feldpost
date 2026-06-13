@@ -16,6 +16,7 @@ import { UploadLocationDisambiguationStoreService } from './upload-location-disa
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { UploadLocationTrayFlowService } from './upload-location-tray-flow.service';
 import type { UploadJob } from '../upload-manager.types';
+import type { UploadGroupResolutionState } from '../address-resolution/upload-address-resolution.types';
 
 const geo = {
   states: [
@@ -55,6 +56,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     registerDisambiguationGroup: ReturnType<typeof vi.fn>;
     notifyDisambiguationResolved: ReturnType<typeof vi.fn>;
     applyPreResolveFromOrchestrator: ReturnType<typeof vi.fn>;
+    deferGroup: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -62,6 +64,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
       registerDisambiguationGroup: vi.fn(),
       notifyDisambiguationResolved: vi.fn(),
       applyPreResolveFromOrchestrator: vi.fn().mockResolvedValue('continue'),
+      deferGroup: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -220,5 +223,147 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     const after = orchestrator.listGroupStates('batch-tray');
     expect(after.some((s) => s.status === 'needsAdminLevelResolution')).toBe(false);
     expect(resolutionMock.applyPreResolveFromOrchestrator).toHaveBeenCalledWith('job-1');
+  });
+
+  it('G2: cascading re-registration uses buildAdminConflictSignature not field names', async () => {
+    jobState.addJobs([
+      buildJob({
+        id: 'job-cascade',
+        relativePath: 'AT/Wien/Innsbruck/Graz/Hauptstraße 5/photo.jpg',
+      }),
+    ]);
+    await orchestrator.classifyBatch('batch-tray');
+
+    const adminState = orchestrator
+      .listGroupStates('batch-tray')
+      .find((s) => s.status === 'needsAdminLevelResolution')!;
+    const conflicts = adminState.adminLevelConflicts ?? [];
+    const candidates = buildAdminConflictCandidates(conflicts).map((c) => ({
+      id: c.id,
+      addressLabel: c.addressLabel,
+      lat: 0,
+      lng: 0,
+    }));
+    const group = disambiguationStore.createGroup({
+      batchId: 'batch-tray',
+      queryKey: adminState.adminConflictQueryKey ?? adminState.groupingKey,
+      folderDisplayPath: adminState.folderDisplayPath,
+      titleAddress: adminState.titleAddressLabel,
+      jobIds: [...adminState.jobIds],
+      candidates,
+      disambiguationKind: 'admin_level_conflict',
+    });
+    disambiguationStore.patchGroup({
+      ...group,
+      adminLevelConflicts: conflicts,
+    });
+
+    const cityEntry = conflicts[0]?.entries.find(
+      (e) => e.field === 'city' && e.value === 'Wien',
+    );
+    if (cityEntry) {
+      await trayFlow.applyAdminLevelConflictChoice(
+        disambiguationStore.groups().find((g) => g.id === group.id)!,
+        adminLevelCandidateId(cityEntry),
+      );
+    }
+
+    const afterStates = orchestrator.listGroupStates('batch-tray');
+    const cascaded = afterStates.find((s) => s.status === 'needsAdminLevelResolution');
+    if (cascaded) {
+      expect(cascaded.adminConflictQueryKey).toContain('adminConflict|');
+      expect(cascaded.adminConflictQueryKey).not.toMatch(/^adminConflict\|[a-z_]+(,[a-z_]+)*$/);
+    }
+  });
+
+  it('G3: registerContainmentCheckGroup registers containment_check disambiguation', async () => {
+    const state: UploadGroupResolutionState = {
+      status: 'needsTray',
+      groupingKey: 'at|wien|1200|wien|hauptstrasse|',
+      jobIds: ['job-1'],
+      searchObject: {
+        country: 'AT',
+        state: 'Wien',
+        postcode: '1200',
+        city: 'Wien',
+        street: 'Hauptstraße',
+        houseNumber: null,
+        staircase: null,
+        door: null,
+        project: null,
+        sources: [],
+        sourceDeviations: [],
+        postcodeCandidates: [],
+        uncertainFields: [],
+        groupingKey: 'at|wien|1200|wien|hauptstrasse|',
+        relativePath: 'AT/Wien/1200/Hauptstraße',
+        fileName: 'photo.jpg',
+      },
+      folderDisplayPath: 'AT/Wien/1200/Hauptstraße',
+      titleAddressLabel: 'Hauptstraße, Wien',
+      containmentCheck: true,
+      trayStep: '3',
+      candidates: [
+        { id: 'keep-address', addressLabel: 'Keep: Hauptstraße, Wien', lat: 0, lng: 0 },
+        { id: 'enter-different', addressLabel: 'Enter a different address', lat: 0, lng: 0 },
+      ],
+    };
+    jobState.addJobs([buildJob({ id: 'job-1' })]);
+    trayFlow.registerContainmentCheckGroup('batch-tray', state);
+
+    expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        batchId: 'batch-tray',
+        disambiguationKind: 'containment_check',
+        candidates: expect.arrayContaining([
+          expect.objectContaining({ id: 'keep-address' }),
+          expect.objectContaining({ id: 'enter-different' }),
+        ]),
+      }),
+    );
+  });
+
+  it('G3: applyContainmentCheckChoice with keep-address marks jobs partial', () => {
+    jobState.addJobs([buildJob({ id: 'job-cc' })]);
+    const group = disambiguationStore.createGroup({
+      batchId: 'batch-tray',
+      queryKey: 'containment|at|wien|1200|wien|hauptstrasse|',
+      folderDisplayPath: 'AT/Wien/1200/Hauptstraße',
+      titleAddress: 'Hauptstraße, Wien',
+      jobIds: ['job-cc'],
+      candidates: [
+        { id: 'keep-address', addressLabel: 'Keep: Hauptstraße, Wien', lat: 0, lng: 0 },
+        { id: 'enter-different', addressLabel: 'Enter a different address', lat: 0, lng: 0 },
+      ],
+      disambiguationKind: 'containment_check',
+    });
+
+    trayFlow.applyContainmentCheckChoice(group, 'keep-address');
+
+    const updatedJob = jobState.findJob('job-cc');
+    expect(updatedJob?.pendingPartialLocation).toBe(true);
+    const updatedGroup = disambiguationStore.groups().find((g) => g.id === group.id)!;
+    expect(updatedGroup.resolutionStatus).toBe('resolved');
+    expect(updatedGroup.selectedCandidateId).toBe('keep-address');
+  });
+
+  it('G3: applyContainmentCheckChoice with enter-different defers group', () => {
+    jobState.addJobs([buildJob({ id: 'job-defer' })]);
+    const group = disambiguationStore.createGroup({
+      batchId: 'batch-tray',
+      queryKey: 'containment|key',
+      folderDisplayPath: 'AT/Wien/Hauptstraße',
+      titleAddress: 'Hauptstraße, Wien',
+      jobIds: ['job-defer'],
+      candidates: [
+        { id: 'keep-address', addressLabel: 'Keep', lat: 0, lng: 0 },
+        { id: 'enter-different', addressLabel: 'Enter different', lat: 0, lng: 0 },
+      ],
+      disambiguationKind: 'containment_check',
+    });
+
+    trayFlow.applyContainmentCheckChoice(group, 'enter-different');
+
+    expect(resolutionMock.deferGroup).toHaveBeenCalledWith(group.id);
   });
 });

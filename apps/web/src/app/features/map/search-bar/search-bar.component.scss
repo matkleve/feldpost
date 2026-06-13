@@ -61,6 +61,14 @@
   @include frosted-chrome.surface;
   overflow: hidden;
   contain: layout paint;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover:not(:focus-within) {
+    background: color-mix(in srgb, var(--primary) 8%, color-mix(in srgb, var(--card) 85%, transparent));
+    border-color: color-mix(in srgb, var(--primary) 42%, color-mix(in srgb, var(--border) 50%, transparent));
+  }
 }
 
 .search-bar--expanded {
@@ -71,9 +79,11 @@
   position: relative;
   display: grid;
   grid-template-columns: var(--search-bar-row-height) minmax(0, 1fr) auto;
+  box-sizing: border-box;
   width: 100%;
   height: var(--search-bar-row-height);
   min-height: var(--search-bar-row-height);
+  padding-block: var(--search-bar-padding-block);
   align-items: center;
   column-gap: var(--search-bar-gap);
 }
@@ -84,7 +94,7 @@
   justify-content: center;
   inline-size: var(--search-bar-row-height);
   min-inline-size: var(--search-bar-row-height);
-  block-size: var(--search-bar-row-height);
+  block-size: 100%;
   flex-shrink: 0;
 }
 
@@ -101,6 +111,13 @@
 
 .search-bar__icon {
   font-size: var(--font-size-lg);
+  line-height: var(--line-height-solid);
+  color: var(--muted-foreground);
+  transition: color 120ms ease-out;
+}
+
+.search-bar:hover:not(:focus-within) .search-bar__icon,
+.search-bar:focus-within .search-bar__icon {
   color: var(--primary);
 }
 
@@ -115,9 +132,8 @@
   background: transparent;
   color: var(--foreground);
   font-size: var(--font-size-md);
-  line-height: var(--line-height-reading);
-  padding-block: 0;
-  padding-inline: 0;
+  line-height: var(--line-height-solid);
+  padding: 0;
   box-shadow: none;
   outline: 0;
 
@@ -152,7 +168,7 @@
   height: 100%;
   pointer-events: none;
   font-size: var(--font-size-md);
-  line-height: var(--line-height-reading);
+  line-height: var(--line-height-solid);
   color: transparent;
   overflow: hidden;
   white-space: nowrap;
@@ -175,7 +191,7 @@
   height: 100%;
   pointer-events: none;
   font-size: var(--font-size-md);
-  line-height: var(--line-height-reading);
+  line-height: var(--line-height-solid);
   color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
   overflow: hidden;
   white-space: nowrap;

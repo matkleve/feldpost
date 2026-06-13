@@ -77,3 +77,39 @@ export function patchPartialClassifyFailedGeocode(
   uploadTraceExit('geocode', 'runGeocodeForGroup', 'partial');
   return partial;
 }
+
+export function patchContainmentCheckOutcome(
+  orchestrator: UploadAddressResolutionOrchestrator,
+  batchId: string,
+  group: UploadGroupResolutionState,
+): UploadGroupResolutionState {
+  const street = group.searchObject.street?.trim() ?? '';
+  const city = group.searchObject.city?.trim() ?? '';
+  uploadTraceDecision('geocode', 'containment_check — Branch A 0-hit after admin resolution', {
+    street,
+    city,
+  });
+  const containmentCheck: UploadGroupResolutionState = {
+    ...group,
+    status: 'needsTray',
+    trayStep: '3',
+    containmentCheck: true,
+    candidates: [
+      {
+        id: 'keep-address',
+        addressLabel: `Keep: ${street}, ${city}`.trim(),
+        lat: 0,
+        lng: 0,
+      },
+      {
+        id: 'enter-different',
+        addressLabel: 'Enter a different address',
+        lat: 0,
+        lng: 0,
+      },
+    ],
+  };
+  orchestrator.patchGroupState(batchId, containmentCheck);
+  uploadTraceExit('geocode', 'runGeocodeForGroup', 'needsTray/containment_check');
+  return containmentCheck;
+}

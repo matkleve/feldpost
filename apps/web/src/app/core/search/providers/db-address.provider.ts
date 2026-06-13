@@ -23,7 +23,6 @@ import { logSearchEvent } from '../search-debug';
 const MAX_DB_ADDRESS_ROWS = 24;
 
 interface DbAddressRow {
-  media_item_id: string;
   address_label: string | null;
   street: string | null;
   house_number?: string | null;
@@ -35,35 +34,43 @@ interface DbAddressRow {
   country?: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
-  created_at: string | null;
-  locations?: {
-    address_label: string | null;
-    street: string | null;
-    house_number?: string | null;
-    staircase?: string | null;
-    door?: string | null;
-    postcode?: string | null;
-    city: string | null;
-    district?: string | null;
-    country?: string | null;
-    latitude: number | string | null;
-    longitude: number | string | null;
-  } | Array<{
-    address_label: string | null;
-    street: string | null;
-    house_number?: string | null;
-    staircase?: string | null;
-    door?: string | null;
-    postcode?: string | null;
-    city: string | null;
-    district?: string | null;
-    country?: string | null;
-    latitude: number | string | null;
-    longitude: number | string | null;
-  }>;
-  media_items?:
-    | { created_at: string | null; project_id?: string | null }
-    | Array<{ created_at: string | null; project_id?: string | null }>;
+  media_item_location_links?:
+    | {
+        media_item_id: string;
+        media_items?:
+          | {
+              created_at: string | null;
+              organization_id?: string | null;
+              media_projects?:
+                | { project_id: string | null }
+                | Array<{ project_id: string | null }>;
+            }
+          | Array<{
+              created_at: string | null;
+              organization_id?: string | null;
+              media_projects?:
+                | { project_id: string | null }
+                | Array<{ project_id: string | null }>;
+            }>;
+      }
+    | Array<{
+        media_item_id: string;
+        media_items?:
+          | {
+              created_at: string | null;
+              organization_id?: string | null;
+              media_projects?:
+                | { project_id: string | null }
+                | Array<{ project_id: string | null }>;
+            }
+          | Array<{
+              created_at: string | null;
+              organization_id?: string | null;
+              media_projects?:
+                | { project_id: string | null }
+                | Array<{ project_id: string | null }>;
+            }>;
+      }>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -103,17 +110,17 @@ export class DbAddressProvider implements SearchProvider {
     if (!trimmedQuery) return [];
 
     let request = this.supabaseService.client
-      .from('media_item_location_links')
+      .from('locations')
       .select(
-        'media_item_id, locations!inner(address_label, street, house_number, city, latitude, longitude), media_items!inner(created_at, organization_id, project_id)',
+        'address_label, street, house_number, city, latitude, longitude, media_item_location_links!inner(media_item_id, media_items!inner(created_at, organization_id, media_projects(project_id)))',
       )
-      .ilike('locations.address_label', `%${trimmedQuery}%`)
-      .not('locations.latitude', 'is', null)
-      .not('locations.longitude', 'is', null)
+      .ilike('address_label', `%${trimmedQuery}%`)
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
       .limit(MAX_DB_ADDRESS_ROWS);
 
     if (context.organizationId) {
-      request = request.eq('media_items.organization_id', context.organizationId);
+      request = request.eq('organization_id', context.organizationId);
     }
 
     const response = await request;
@@ -149,71 +156,75 @@ export class DbAddressProvider implements SearchProvider {
     const grouped = new Map<string, AddressGroup>();
 
     for (const row of rows) {
-      const locRaw = row.locations;
-      const loc = Array.isArray(locRaw) ? locRaw[0] : locRaw;
-      const mediaRaw = row.media_items;
-      const media = Array.isArray(mediaRaw) ? mediaRaw[0] : mediaRaw;
-      const mediaId = row.media_item_id;
-      const rawLabel = (loc?.address_label ?? row.address_label)?.trim();
-      const lat = toNumber(loc?.latitude ?? row.latitude);
-      const lng = toNumber(loc?.longitude ?? row.longitude);
-      if (!rawLabel || lat === null || lng === null || !mediaId) continue;
+      const linksRaw = row.media_item_location_links;
+      const links = Array.isArray(linksRaw) ? linksRaw : linksRaw ? [linksRaw] : [];
+      const rawLabel = row.address_label?.trim();
+      const lat = toNumber(row.latitude);
+      const lng = toNumber(row.longitude);
+      if (!rawLabel || lat === null || lng === null) continue;
 
-      const street = loc?.street ?? row.street;
-      const houseNumber = loc?.house_number ?? row.house_number;
+      const street = row.street;
+      const houseNumber = row.house_number;
       const streetWithNumber =
         street && houseNumber ? `${street} ${houseNumber}` : street ?? null;
 
       const label = formatDbAddressLabel(
         rawLabel,
         streetWithNumber,
-        buildCityPart(null, loc?.city ?? row.city),
+        buildCityPart(null, row.city),
       );
       const key = label.toLowerCase();
       const textMatch = computeTextMatchScore(label, trimmedQuery);
-      const createdAtMs = media?.created_at
-        ? Date.parse(media.created_at)
-        : row.created_at
-          ? Date.parse(row.created_at)
-          : 0;
-      const activeProjectHit =
-        context.activeProjectId && media?.project_id === context.activeProjectId ? 1 : 0;
 
       const pickerSnapshot = {
-        street: loc?.street ?? row.street ?? null,
-        house_number: loc?.house_number ?? row.house_number ?? null,
-        staircase: loc?.staircase ?? row.staircase ?? null,
-        door: loc?.door ?? row.door ?? null,
-        postcode: loc?.postcode ?? row.postcode ?? null,
-        city: loc?.city ?? row.city ?? null,
-        district: loc?.district ?? row.district ?? null,
-        country: loc?.country ?? row.country ?? null,
+        street: row.street ?? null,
+        house_number: row.house_number ?? null,
+        staircase: row.staircase ?? null,
+        door: row.door ?? null,
+        postcode: row.postcode ?? null,
+        city: row.city ?? null,
+        district: row.district ?? null,
+        country: row.country ?? null,
         address_label: rawLabel,
       };
 
-      const existing = grouped.get(key);
-      if (existing) {
-        existing.ids.push(mediaId);
-        existing.latTotal += lat;
-        existing.lngTotal += lng;
-        existing.count += 1;
-        existing.activeProjectHits += activeProjectHit;
-        existing.latestCreatedAtMs = Math.max(existing.latestCreatedAtMs, createdAtMs);
-        existing.score = Math.max(existing.score, textMatch);
-        continue;
-      }
+      for (const link of links) {
+        const mediaRaw = link.media_items;
+        const media = Array.isArray(mediaRaw) ? mediaRaw[0] : mediaRaw;
+        const mediaId = link.media_item_id;
+        if (!mediaId) continue;
 
-      grouped.set(key, {
-        label,
-        ids: [mediaId],
-        latTotal: lat,
-        lngTotal: lng,
-        count: 1,
-        activeProjectHits: activeProjectHit,
-        latestCreatedAtMs: createdAtMs,
-        score: textMatch,
-        pickerSnapshot,
-      });
+        const createdAtMs = media?.created_at ? Date.parse(media.created_at) : 0;
+        const activeProjectHit =
+          context.activeProjectId &&
+          this.mediaProjectIds(media).includes(context.activeProjectId)
+            ? 1
+            : 0;
+
+        const existing = grouped.get(key);
+        if (existing) {
+          existing.ids.push(mediaId);
+          existing.latTotal += lat;
+          existing.lngTotal += lng;
+          existing.count += 1;
+          existing.activeProjectHits += activeProjectHit;
+          existing.latestCreatedAtMs = Math.max(existing.latestCreatedAtMs, createdAtMs);
+          existing.score = Math.max(existing.score, textMatch);
+          continue;
+        }
+
+        grouped.set(key, {
+          label,
+          ids: [mediaId],
+          latTotal: lat,
+          lngTotal: lng,
+          count: 1,
+          activeProjectHits: activeProjectHit,
+          latestCreatedAtMs: createdAtMs,
+          score: textMatch,
+          pickerSnapshot,
+        });
+      }
     }
 
     return grouped;
@@ -258,6 +269,25 @@ export class DbAddressProvider implements SearchProvider {
           score: entry.score,
         };
       });
+  }
+
+  private mediaProjectIds(
+    media:
+      | {
+          media_projects?:
+            | { project_id: string | null }
+            | Array<{ project_id: string | null }>;
+        }
+      | undefined,
+  ): string[] {
+    const links = media?.media_projects;
+    if (!links) {
+      return [];
+    }
+
+    return (Array.isArray(links) ? links : [links])
+      .map((entry) => entry.project_id)
+      .filter((projectId): projectId is string => !!projectId);
   }
 
   private describeDbAddressError(error: unknown): {

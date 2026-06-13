@@ -63,6 +63,17 @@ supabase functions deploy geocode
 
 Unset `GEOCODER_FORWARD_URL` on hosted to fall back to Nominatim for forward search only.
 
+### CORS (`ALLOWED_ORIGINS`)
+
+Browser calls to the `geocode` Edge Function require the page origin in `ALLOWED_ORIGINS`. Local dev values live in `supabase/config.toml` → `[edge_runtime.secrets]`. Hosted projects must set the same secret and redeploy:
+
+```bash
+supabase secrets set ALLOWED_ORIGINS="http://localhost:4200,http://127.0.0.1:4200,https://feldpost.pages.dev,https://*.feldpost.pages.dev"
+supabase functions deploy geocode
+```
+
+Wildcard entries (e.g. `https://*.feldpost.pages.dev`) cover Cloudflare Pages preview URLs. Without a matching origin, preflight returns `403 Origin not allowed` and search geocoding fails in the browser.
+
 ## Optional: local Photon on your PC
 
 For offline work or isolated experiments:

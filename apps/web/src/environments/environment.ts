@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  appUrl: 'https://feldpost.pages.dev',
   i18n: {
     enableLegacyDomFallback: false,
   },

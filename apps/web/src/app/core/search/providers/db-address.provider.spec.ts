@@ -37,19 +37,19 @@ function addressRow(options: {
   createdAt?: string;
 }) {
   return {
-    media_item_id: options.mediaItemId,
-    locations: {
-      address_label: options.addressLabel,
-      street: options.street,
-      house_number: options.houseNumber,
-      city: options.city,
-      latitude: options.lat,
-      longitude: options.lng,
-    },
+    address_label: options.addressLabel,
+    street: options.street,
+    house_number: options.houseNumber,
+    city: options.city,
+    latitude: options.lat,
+    longitude: options.lng,
+    media_item_location_links: {
+      media_item_id: options.mediaItemId,
     media_items: {
       created_at: options.createdAt ?? new Date().toISOString(),
       organization_id: 'org-1',
-      project_id: options.projectId ?? null,
+      media_projects: options.projectId ? [{ project_id: options.projectId }] : [],
+    },
     },
   };
 }

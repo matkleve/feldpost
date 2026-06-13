@@ -106,4 +106,9 @@ export interface UploadGroupResolutionState {
   /** Tray merge key for admin_level_conflict groups. */
   adminConflictQueryKey?: string;
   adminLevelConflicts?: AdminLevelConflict[];
+  /** Set when this group was created by integrateResolvedAdminGroups.
+   * Used to trigger a containment_check tray instead of silent partial on Photon 0-hit. */
+  resolvedFromAdminConflict?: boolean;
+  /** Photon 0-hit after admin resolution — open validation tray instead of silent partial. */
+  containmentCheck?: boolean;
 }

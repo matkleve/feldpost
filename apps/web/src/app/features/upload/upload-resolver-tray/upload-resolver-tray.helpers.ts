@@ -24,6 +24,7 @@ export type ResolverQuestionKey =
   | 'upload.resolver.question.layerPackage'
   | 'upload.resolver.question.source'
   | 'upload.resolver.question.contextDistance'
+  | 'upload.resolver.question.containmentCheck'
   | 'upload.resolver.question.city'
   | 'upload.resolver.question.door'
   | 'upload.resolver.question.address'
@@ -68,6 +69,9 @@ export function resolverQuestionKeyForGroup(
   }
   if (group.disambiguationKind === 'context_distance') {
     return 'upload.resolver.question.contextDistance';
+  }
+  if (group.disambiguationKind === 'containment_check') {
+    return 'upload.resolver.question.containmentCheck';
   }
   if (group.disambiguationKind === 'city_step' || group.trayStep === '1a') {
     return 'upload.resolver.question.cityStep';

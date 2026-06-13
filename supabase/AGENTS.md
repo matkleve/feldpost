@@ -32,6 +32,8 @@ npm run supabase:ensure-edge
 
 `npm start` in `apps/web` runs this automatically before `ng serve`.
 
+**Hosted CORS:** set `ALLOWED_ORIGINS` on the cloud project (include `https://feldpost.pages.dev` and `https://*.feldpost.pages.dev` for Cloudflare previews) and redeploy `geocode`. See [`docs/playbooks/remote-photon.md`](../docs/playbooks/remote-photon.md#cors-allowed_origins).
+
 ## Photon (forward/search via `GEOCODER_FORWARD_URL`)
 
 Forward search and `structured-forward` use **Photon** when `GEOCODER_FORWARD_URL` is set on the Edge runtime; otherwise the `geocode` function falls back to public Nominatim. **Reverse** and **`structured-search`** always use Nominatim.

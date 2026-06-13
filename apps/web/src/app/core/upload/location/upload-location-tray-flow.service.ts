@@ -22,6 +22,10 @@ import {
   pickDiscriminatingField,
 } from './upload-location-resolution.helpers';
 import {
+  buildAdminConflictQueryKey,
+  buildAdminConflictSignature,
+} from '../../location-path-parser/upload-address-level-map.helpers';
+import {
   applyAdminLevelSelectionsToSearchObject,
   buildAdminConflictCandidates,
   parseAdminLevelCandidateId,
@@ -126,6 +130,53 @@ export class UploadLocationTrayFlowService {
       disambiguationKind: 'admin_level_conflict',
       adminLevelConflicts: conflicts,
     });
+  }
+
+  registerContainmentCheckGroup(batchId: string, state: UploadGroupResolutionState): void {
+    const queryKey = `containment|${state.groupingKey}`;
+    const candidates = state.candidates ?? [];
+    this.resolution().registerDisambiguationGroup({
+      batchId,
+      queryKey,
+      folderDisplayPath: state.folderDisplayPath,
+      titleAddress: state.titleAddressLabel,
+      jobIds: state.jobIds,
+      candidates,
+      disambiguationKind: 'containment_check',
+      trayStep: state.trayStep,
+    });
+  }
+
+  applyContainmentCheckChoice(group: UploadDisambiguationGroup, candidateId: string): void {
+    if (candidateId === 'enter-different') {
+      this.resolution().deferGroup(group.id);
+      return;
+    }
+
+    for (const jobId of group.jobIds) {
+      this.jobState.updateJob(jobId, {
+        resolutionStatus: 'failed',
+        pendingPartialLocation: true,
+        disambiguationGroupId: undefined,
+      });
+    }
+
+    this.disambiguationStore.patchGroup({
+      ...group,
+      resolutionStatus: 'resolved',
+      resolutionGateOpen: false,
+      selectedCandidateId: candidateId,
+    });
+
+    const resolvedEvent: DisambiguationResolvedEvent = {
+      batchId: group.batchId,
+      groupId: group.id,
+      jobIds: [...group.jobIds],
+      selectedCandidateId: candidateId,
+    };
+    this.resolution().notifyDisambiguationResolved(resolvedEvent);
+    this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
+    this.disambiguationStore.pickNextActiveGroup(group.batchId);
   }
 
   registerLayerPackageGroup(batchId: string, state: UploadGroupResolutionState): void {
@@ -316,7 +367,7 @@ export class UploadLocationTrayFlowService {
       const sample = resolvedJobs[0];
       if (sample) {
         const nextConflicts = sample.searchObject.adminLevelConflicts ?? [];
-        const nextKey = `adminConflict|${nextConflicts.map((c) => c.field).join(',')}`;
+        const nextKey = buildAdminConflictQueryKey(buildAdminConflictSignature(nextConflicts));
         this.orchestrator.patchGroupState(group.batchId, {
           status: 'needsAdminLevelResolution',
           groupingKey: nextKey,

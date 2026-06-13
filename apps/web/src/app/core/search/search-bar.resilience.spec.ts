@@ -50,7 +50,7 @@ describe('SearchBarService resilience', () => {
     const supabaseMock = {
       client: {
         from: vi.fn((table: string) =>
-          table === 'media_item_location_links' ? failingLinksBuilder : fallbackBuilder,
+          table === 'locations' ? failingLinksBuilder : fallbackBuilder,
         ),
       },
     };

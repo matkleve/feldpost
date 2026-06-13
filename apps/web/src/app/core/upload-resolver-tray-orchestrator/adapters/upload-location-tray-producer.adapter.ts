@@ -63,6 +63,14 @@ export class UploadLocationTrayProducerAdapter {
         return;
       }
 
+      if (group.disambiguationKind === 'containment_check') {
+        if (event.answer?.optionId) {
+          this.resolution.applyContainmentCheckChoice(groupId, event.answer.optionId);
+        }
+        this.clearGroupMappings(groupId);
+        return;
+      }
+
       if (event.item.trayStepLabel === '1b' || group.trayStep === '1b') {
         if (event.answer?.optionId) {
           this.resolution.applyTrayHouseSelection(groupId, event.answer.optionId);
@@ -179,6 +187,9 @@ function questionKeyForGroup(group: UploadDisambiguationGroup): string {
   if (group.disambiguationKind === 'admin_level_conflict') {
     return 'upload.resolver.question.adminLevelConflict';
   }
+  if (group.disambiguationKind === 'containment_check') {
+    return 'upload.resolver.question.containmentCheck';
+  }
   if (group.disambiguationKind === 'source') {
     return 'upload.resolver.question.source';
   }
@@ -226,6 +237,7 @@ function groupToEnqueueInput(
   const questionParams: Record<string, string> = {
     street,
     address: group.titleAddress,
+    city: group.candidates.find((c) => c.city)?.city ?? street.split(',')[1]?.trim() ?? '',
   };
   if (group.disambiguationKind === 'source') {
     const pathLeaf = labelFromFolderDisplayPath(group.folderDisplayPath);

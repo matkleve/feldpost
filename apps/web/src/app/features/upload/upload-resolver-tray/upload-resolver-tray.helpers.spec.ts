@@ -57,6 +57,72 @@ describe('upload-resolver-tray.helpers', () => {
     ).toBe('upload.resolver.question.layerPackage');
   });
 
+  it('resolverQuestionKeyForGroup picks containment check question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'containment_check' })),
+    ).toBe('upload.resolver.question.containmentCheck');
+  });
+
+  it('resolverQuestionKeyForGroup picks source question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'source' })),
+    ).toBe('upload.resolver.question.source');
+  });
+
+  it('resolverQuestionKeyForGroup picks context_distance question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'context_distance' })),
+    ).toBe('upload.resolver.question.contextDistance');
+  });
+
+  it('resolverQuestionKeyForGroup picks city_step question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'city_step' })),
+    ).toBe('upload.resolver.question.cityStep');
+  });
+
+  it('resolverQuestionKeyForGroup picks house_step question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'house_step' })),
+    ).toBe('upload.resolver.question.houseStep');
+  });
+
+  it('resolverQuestionKeyForGroup picks project_address_a question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'project_address_a' })),
+    ).toBe('upload.resolver.question.projectAddressA');
+  });
+
+  it('resolverQuestionKeyForGroup picks project_address_b question', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'project_address_b' })),
+    ).toBe('upload.resolver.question.projectAddressB');
+  });
+
+  it('resolverQuestionKeyForGroup: containment_check takes priority over collapseStage', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({
+        disambiguationKind: 'containment_check',
+        collapseStage: 'city',
+      })),
+    ).toBe('upload.resolver.question.containmentCheck');
+  });
+
+  it('resolverQuestionKeyForGroup: admin_level_conflict takes priority over trayStep 1a', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({
+        disambiguationKind: 'admin_level_conflict',
+        trayStep: '1a',
+      })),
+    ).toBe('upload.resolver.question.adminLevelConflict');
+  });
+
+  it('resolverQuestionKeyForGroup falls back to address for unknown kind', () => {
+    expect(
+      resolverQuestionKeyForGroup(group({ disambiguationKind: 'geocode' })),
+    ).toBe('upload.resolver.question.address');
+  });
+
   it('resolverScoreBand maps low, okay, and strong thresholds', () => {
     expect(resolverScoreBand(0.69)).toBe('low');
     expect(resolverScoreBand(0.7)).toBe('okay');

@@ -42,30 +42,23 @@ describe('SearchBarService', () => {
     const linksBuilder = createQueryBuilder({
       data: [
         {
-          media_item_id: 'img-1',
-          locations: {
-            address_label: 'Schleiergasse 18, 1100 Wien',
-            street: 'Schleiergasse',
-            house_number: '18',
-            postcode: '1100',
-            city: 'Wien',
-            latitude: 48.1746,
-            longitude: 16.3823,
-          },
-          media_items: { created_at: '2024-01-01T00:00:00Z' },
-        },
-        {
-          media_item_id: 'img-2',
-          locations: {
-            address_label: 'Schleiergasse 18, 1100 Wien',
-            street: 'Schleiergasse',
-            house_number: '18',
-            postcode: '1100',
-            city: 'Wien',
-            latitude: 48.1747,
-            longitude: 16.3824,
-          },
-          media_items: { created_at: '2024-01-02T00:00:00Z' },
+          address_label: 'Schleiergasse 18, 1100 Wien',
+          street: 'Schleiergasse',
+          house_number: '18',
+          postcode: '1100',
+          city: 'Wien',
+          latitude: 48.1746,
+          longitude: 16.3823,
+          media_item_location_links: [
+            {
+              media_item_id: 'img-1',
+              media_items: { created_at: '2024-01-01T00:00:00Z' },
+            },
+            {
+              media_item_id: 'img-2',
+              media_items: { created_at: '2024-01-02T00:00:00Z' },
+            },
+          ],
         },
       ],
       error: null,
@@ -79,7 +72,7 @@ describe('SearchBarService', () => {
     supabaseMock = {
       client: {
         from: vi.fn((table: string) => {
-          if (table === 'media_item_location_links') return linksBuilder;
+          if (table === 'locations') return linksBuilder;
           if (table === 'projects') return projectsBuilder;
           return createQueryBuilder({ data: [], error: null });
         }),
@@ -322,7 +315,7 @@ describe('SearchBarService', () => {
       const failureSupabase = {
         client: {
           from: vi.fn((table: string) => {
-            if (table === 'media_item_location_links') return failingLinksBuilder;
+            if (table === 'locations') return failingLinksBuilder;
             return defaultBuilder;
           }),
         },

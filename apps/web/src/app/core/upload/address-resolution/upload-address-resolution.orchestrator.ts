@@ -457,6 +457,7 @@ export class UploadAddressResolutionOrchestrator {
           folderDisplayPath,
           titleAddressLabel,
           geocodeBranch: 'branch_c',
+          resolvedFromAdminConflict: true,
         });
         continue;
       }
@@ -498,6 +499,7 @@ export class UploadAddressResolutionOrchestrator {
         titleAddressLabel,
         geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
         projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
+        resolvedFromAdminConflict: true,
       });
     }
 

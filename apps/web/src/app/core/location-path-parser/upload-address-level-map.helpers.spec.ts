@@ -15,6 +15,7 @@ const municipalities = [
 
 const postcodeMap = {
   '1090': ['Wien'],
+  '1200': ['Wien'],
 };
 
 describe('detectAdminLevelConflicts', () => {
@@ -136,6 +137,142 @@ describe('normalizeAdminValue', () => {
   it('strips diacritics and normalizes whitespace', () => {
     expect(normalizeAdminValue('  Wörgl  ')).toBe('worgl');
     expect(normalizeAdminValue('Sankt Pölten')).toBe('sankt polten');
+  });
+});
+
+describe('detectAdminLevelConflicts — postcode-city cross-validation', () => {
+  it('conflicts when postcode 1200 maps to Wien but city is St. Pölten', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'St. Pölten', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '1200', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts.length).toBeGreaterThan(0);
+    expect(conflicts[0].field).toBe('city');
+    const values = conflicts[0].entries.map((e) => normalizeAdminValue(e.value));
+    expect(values).toContain('wien');
+    expect(values.some((v) => v.includes('polten'))).toBe(true);
+  });
+
+  it('does not conflict when postcode 1200 and city Wien agree', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'Wien', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '1200', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('skips postcode-city check when postcode is unknown in PLZ map', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'St. Pölten', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '9999', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('skips postcode-city check for non-AT country', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'Hamburg', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '1200', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'DE' },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('skips postcode-city check when no postcodeMap provided', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'St. Pölten', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '1200', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('postcode-city conflict merges with existing per-field city conflict', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [
+          { level: 3, value: 'Graz', source: 'folder', field: 'city' },
+          { level: 2, value: 'St. Pölten', source: 'folder', field: 'city' },
+        ],
+        postcode: [{ level: 1, value: '1200', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0].field).toBe('city');
+    const values = conflicts[0].entries.map((e) => normalizeAdminValue(e.value));
+    expect(values).toContain('graz');
+    expect(values.some((v) => v.includes('polten'))).toBe(true);
+    expect(values).toContain('wien');
+  });
+
+  it('postcode-city conflict includes synthetic entry from PLZ expansion', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'Linz', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '1090', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(1);
+    const entries = conflicts[0].entries;
+    expect(entries.some((e) => e.value === 'Wien')).toBe(true);
+    expect(entries.some((e) => e.value === 'Linz')).toBe(true);
+  });
+
+  it('does not conflict when only postcode present (no city entries)', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        postcode: [{ level: 1, value: '1200', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('does not conflict when only city present (no postcode entries)', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 1, value: 'Wien', source: 'folder', field: 'city' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('postcode-city check with case-insensitive city name match', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'wien', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '1200', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('postcode-city check with diacritics in city name', () => {
+    const conflicts = detectAdminLevelConflicts(
+      {
+        city: [{ level: 2, value: 'WIEN', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '1090', source: 'folder', field: 'postcode' }],
+      },
+      { municipalities, postcodeMap, country: 'AT' },
+    );
+    expect(conflicts).toHaveLength(0);
   });
 });
 

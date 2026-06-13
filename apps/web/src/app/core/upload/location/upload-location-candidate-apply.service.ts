@@ -167,7 +167,7 @@ export class UploadLocationCandidateApplyService {
     for (const jobId of group.jobIds) {
       this.jobState.updateJob(jobId, {
         resolutionStatus: 'failed',
-        issueKind: 'missing_gps',
+        issueKind: 'address_deferred',
       });
       this.jobState.setPhase(jobId, 'missing_data');
     }

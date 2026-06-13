@@ -40,19 +40,19 @@ describe('SearchBarComponent', () => {
     const linksBuilder = createQueryBuilder({
       data: [
         {
-          media_item_id: 'img-1',
-          locations: {
-            address_label: 'Burgstrasse 7, Zurich',
-            street: 'Burgstrasse',
-            house_number: '7',
-            city: 'Zurich',
-            latitude: 47.3769,
-            longitude: 8.5417,
-          },
-          media_items: {
-            created_at: new Date().toISOString(),
-            organization_id: 'org-1',
-            project_id: null,
+          address_label: 'Burgstrasse 7, Zurich',
+          street: 'Burgstrasse',
+          house_number: '7',
+          city: 'Zurich',
+          latitude: 47.3769,
+          longitude: 8.5417,
+          media_item_location_links: {
+            media_item_id: 'img-1',
+            media_items: {
+              created_at: new Date().toISOString(),
+              organization_id: 'org-1',
+              project_id: null,
+            },
           },
         },
       ],
@@ -76,7 +76,7 @@ describe('SearchBarComponent', () => {
           useValue: {
             client: {
               from: vi.fn((table: string) => {
-                if (table === 'media_item_location_links') return linksBuilder;
+                if (table === 'locations') return linksBuilder;
                 if (table === 'projects') return projectsBuilder;
                 return createQueryBuilder({ data: [], error: null });
               }),

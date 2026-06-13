@@ -23904,6 +23904,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.question.containmentCheck', 'Containment-check tray after Photon 0-hit', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Containment-check tray after Photon 0-hit', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.containmentCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{street} was not found in {city}. Is this address correct?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.containmentCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{street} wurde in {city} nicht gefunden. Ist diese Adresse korrekt?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.question.containmentCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.resolver.question.layerPackage', 'Which address information should we use?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

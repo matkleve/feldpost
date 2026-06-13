@@ -18,7 +18,7 @@ const geo = {
     { n: 'Graz', b: 'Steiermark', a: [] },
     { n: 'Salzburg', b: 'Salzburg', a: [] },
   ],
-  postcodeMap: { '1090': ['Wien'] },
+  postcodeMap: { '1090': ['Wien'], '1200': ['Wien'] },
 };
 
 function buildJob(overrides: Partial<UploadJob> = {}): UploadJob {
@@ -195,5 +195,78 @@ describe('UploadAddressResolutionOrchestrator — admin level conflicts', () => 
     const after = orchestrator.listGroupStates('batch-admin');
     expect(after.some((s) => s.status === 'needsAdminLevelResolution')).toBe(false);
     expect(after.some((s) => s.status === 'needsGeocode' || s.status === 'partial')).toBe(true);
+    const geocodeState = after.find((s) => s.status === 'needsGeocode');
+    expect(geocodeState?.resolvedFromAdminConflict).toBe(true);
+  });
+
+  it('integrateResolvedAdminGroups sets resolvedFromAdminConflict on branch_c groups', async () => {
+    jobState.addJobs([buildJob()]);
+    await orchestrator.classifyBatch('batch-admin');
+
+    const adminState = orchestrator
+      .listGroupStates('batch-admin')
+      .find((s) => s.status === 'needsAdminLevelResolution')!;
+    const oldKey = adminState.adminConflictQueryKey ?? adminState.groupingKey;
+    const resolvedSo = {
+      ...adminState.searchObject,
+      city: 'Wien',
+      state: 'Wien',
+      street: null,
+      houseNumber: null,
+      adminLevelConflicts: [],
+      groupingKey: 'at|wien||wien||',
+    };
+
+    await orchestrator.integrateResolvedAdminGroups('batch-admin', oldKey, [
+      {
+        groupingKey: resolvedSo.groupingKey,
+        jobIds: adminState.jobIds,
+        searchObject: resolvedSo,
+        folderDisplayPath: adminState.folderDisplayPath,
+        titleAddressLabel: adminState.titleAddressLabel,
+      },
+    ]);
+
+    const after = orchestrator.listGroupStates('batch-admin');
+    const geocodeState = after.find(
+      (s) => s.status === 'needsGeocode' && s.resolvedFromAdminConflict,
+    );
+    if (geocodeState) {
+      expect(geocodeState.resolvedFromAdminConflict).toBe(true);
+    }
+  });
+
+  it('non-admin-resolved groups do NOT have resolvedFromAdminConflict', async () => {
+    orchestrator.clearBatch('batch-plz');
+    jobState.addJobs([
+      buildJob({
+        id: 'job-regular',
+        batchId: 'batch-plz',
+        relativePath: 'AT/Wien/1090/Hauptstraße/photo.jpg',
+        file: new File([], 'photo.jpg'),
+      }),
+    ]);
+    await orchestrator.classifyBatch('batch-plz');
+
+    const states = orchestrator.listGroupStates('batch-plz');
+    const geocodeState = states.find((s) => s.status === 'needsGeocode');
+    if (geocodeState) {
+      expect(geocodeState.resolvedFromAdminConflict).toBeUndefined();
+    }
+  });
+
+  it('admin conflict query key uses signature with sorted values', async () => {
+    jobState.addJobs([buildJob()]);
+    await orchestrator.classifyBatch('batch-admin');
+
+    const adminState = orchestrator
+      .listGroupStates('batch-admin')
+      .find((s) => s.status === 'needsAdminLevelResolution')!;
+    const key = adminState.adminConflictQueryKey!;
+    expect(key).toMatch(/^adminConflict\|city\|/);
+    const valuePart = key.replace('adminConflict|city|', '');
+    const values = valuePart.split(',');
+    const sorted = [...values].sort();
+    expect(values).toEqual(sorted);
   });
 });

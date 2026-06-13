@@ -11,6 +11,7 @@ export type UploadIssueKind =
   | 'duplicate_file'
   | 'duplicate_photo'
   | 'missing_gps'
+  | 'address_deferred'
   | 'address_ambiguous'
   | 'document_unresolved'
   | 'conflict_review'

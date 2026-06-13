@@ -219,5 +219,48 @@ export function detectAdminLevelConflicts(
     }
   }
 
+  // Pass 3: postcode-city cross-check (AT only).
+  // If a postcode expands to cities via PLZ map, and the assigned city is NOT
+  // among them, that's a contradiction (e.g. postcode 1200 = Wien, but city = St. Pölten).
+  const postcodeEntries = adminLevelMap.postcode ?? [];
+  if (useAtGazetteer && cityEntries.length && postcodeEntries.length && options.postcodeMap) {
+    const incompatiblePc: FieldLevelEntry[] = [];
+    for (const pcEntry of postcodeEntries) {
+      const expandedCities = expandPostcodeCities(pcEntry.value, options.postcodeMap);
+      if (!expandedCities.length) {
+        continue;
+      }
+      const normalizedExpanded = expandedCities.map(normalizeAdminValue);
+      for (const cityEntry of cityEntries) {
+        const normCity = normalizeAdminValue(cityEntry.value);
+        if (!normalizedExpanded.includes(normCity)) {
+          incompatiblePc.push(cityEntry);
+          for (const expandedCity of expandedCities) {
+            incompatiblePc.push({
+              level: pcEntry.level,
+              value: expandedCity,
+              source: pcEntry.source,
+              field: 'city',
+            });
+          }
+        }
+      }
+    }
+    if (incompatiblePc.length) {
+      const merged = uniqueEntries([
+        ...(conflicts.find((c) => c.field === 'city')?.entries ?? []),
+        ...incompatiblePc,
+      ]);
+      if (merged.length >= 2) {
+        const existing = conflicts.find((c) => c.field === 'city');
+        if (existing) {
+          existing.entries = merged;
+        } else {
+          conflicts.push({ field: 'city', entries: merged });
+        }
+      }
+    }
+  }
+
   return conflicts.filter((c) => c.entries.length >= 2);
 }

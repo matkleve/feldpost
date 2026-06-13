@@ -142,6 +142,14 @@ export class UploadLocationPreResolveOrchestratorService {
       uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue (exif weak branch c)');
       return 'continue';
     }
+    if (groupState.containmentCheck) {
+      uploadTraceDecision('ulr', 'held — register containment_check tray', {
+        groupingKey: groupState.groupingKey,
+      });
+      this.trayFlow.registerContainmentCheckGroup(batchId, groupState);
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held (containment_check)');
+      return 'held';
+    }
     uploadTraceDecision('ulr', 'held — register tray step', {
       trayStep: groupState.trayStep,
       geocodeBranch: groupState.geocodeBranch,

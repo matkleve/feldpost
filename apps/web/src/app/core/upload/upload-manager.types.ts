@@ -104,6 +104,7 @@ export type UploadJobIssueKind =
   | 'duplicate_file'
   | 'duplicate_photo'
   | 'missing_gps'
+  | 'address_deferred'
   | 'address_ambiguous'
   | 'document_unresolved'
   | 'conflict_review'
@@ -118,7 +119,8 @@ export type UploadDisambiguationKind =
   | 'city_step'
   | 'house_step'
   | 'project_address_a'
-  | 'project_address_b';
+  | 'project_address_b'
+  | 'containment_check';
 
 export type UploadTrayStep = '1a' | '1b' | '2' | '3';
 

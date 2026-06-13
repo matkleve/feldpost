@@ -157,4 +157,12 @@ export class UploadLocationResolutionService {
   deferGroup(groupId: string): void {
     this.candidateApply.deferGroup(groupId);
   }
+
+  applyContainmentCheckChoice(groupId: string, candidateId: string): void {
+    const group = this.disambiguationStore.groups().find((g) => g.id === groupId);
+    if (!group) {
+      return;
+    }
+    this.trayFlow.applyContainmentCheckChoice(group, candidateId);
+  }
 }
