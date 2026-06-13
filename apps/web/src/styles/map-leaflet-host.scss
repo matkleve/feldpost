@@ -12,3 +12,10 @@
 .leaflet-container a {
   color: var(--primary);
 }
+
+// Restores tile geometry after Tailwind Preflight `img { max-width: 100% }` (tiles stay 256px)
+// @see docs/design/map-system.md
+.leaflet-container img.leaflet-tile {
+  max-width: none;
+  max-height: none;
+}
