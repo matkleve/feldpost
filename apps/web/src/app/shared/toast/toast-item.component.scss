@@ -29,6 +29,12 @@
   min-width: 0;
 }
 
+// Flat message row: vertically center dot, copy, and dismiss (no title offset).
+// @see docs/specs/service/toast/toast-system.md
+:host(.message-only) .toast-header {
+  align-items: center;
+}
+
 // Title block grows between indicator and dismiss.
 // @see docs/specs/service/toast/toast-system.md
 .toast-head {
@@ -45,6 +51,10 @@
   margin-top: 0.4rem;
   border-radius: 50%;
   background: var(--muted-foreground);
+}
+
+:host(.message-only) .toast-indicator {
+  margin-top: 0;
 }
 
 :host(.success) .toast-indicator {

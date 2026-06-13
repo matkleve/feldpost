@@ -73,7 +73,7 @@
 :host([data-has-item='false'][data-mode='row']) {
   aspect-ratio: unset;
   block-size: auto;
-  min-block-size: var(--media-item-row-min-height, 3rem);
+  min-block-size: var(--media-item-row-min-height, 2rem);
   border-radius: var(--container-radius-control);
 }
 
@@ -127,9 +127,9 @@
   grid-template-columns: var(--media-item-row-media-size, var(--spacing-6)) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--media-item-row-gap, var(--spacing-2));
-  min-block-size: var(--media-item-row-min-height, 3rem);
-  padding-block: var(--spacing-2);
-  padding-inline: var(--media-item-row-padding-inline, var(--spacing-3));
+  min-block-size: var(--media-item-row-min-height, 2rem);
+  padding-block: var(--media-item-row-padding-block, var(--spacing-1));
+  padding-inline: var(--media-item-row-padding-inline, var(--spacing-1));
   border-radius: var(--container-radius-control);
   transition:
     background-color var(--motion-duration-fast) var(--motion-ease-out),

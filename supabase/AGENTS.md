@@ -14,6 +14,32 @@
 - Never drop columns in the same migration as code removal
 - Always test rollback before merging
 
+### Hosted migration history (mandatory — recurring failure mode)
+
+**The migration filename timestamp is the version ID.** Remote `supabase_migrations.schema_migrations` must match committed files in `supabase/migrations/` exactly. This repo has repeatedly drifted when agents or humans applied hosted SQL without committing the file, or re-created the same change under a new timestamp.
+
+**Agents must:**
+
+1. Create migrations only with `supabase migration new <description>` (or an equivalent committed file) — never paste SQL in the Supabase Dashboard SQL editor for schema that belongs in git.
+2. **Commit the migration file before** `supabase db push` to hosted. Uncommitted local files are invisible to other machines and cause duplicate timestamps for the same change.
+3. Run `supabase migration list` after any hosted push attempt. Every row must show the same version in **Local** and **Remote**. A blank Local column means a remote-only orphan; a blank Remote column means push is still pending.
+
+**If `db push` fails with** `Remote migration versions not found in local migrations directory`:
+
+1. Run `supabase migration list` and note the orphan version (e.g. `20260613132632` on Remote only).
+2. **Prefer aligning the filename**, not `migration repair`, when the schema is already correct on remote:
+   - Confirm remote objects exist (e.g. `supabase db query --linked "SELECT …"`).
+   - Add or rename the local file to use the **remote timestamp exactly**: `YYYYMMDDHHMMSS_description.sql`.
+   - Do **not** add a second file with a new timestamp for the same SQL — that blocks future pushes until someone repairs history again.
+3. Use `supabase migration repair --status reverted <version>` only when the remote migration record is wrong **and** you intend to re-apply from a different committed file (SQL must be idempotent: `CREATE OR REPLACE`, `DROP … IF EXISTS`).
+4. Re-run `supabase migration list` until Local and Remote match, then `supabase db push` should report `Remote database is up to date`.
+
+**Anti-patterns (forbidden):**
+
+- Dashboard SQL / manual trigger creation for changes that should live in `supabase/migrations/`
+- `supabase db push` with an uncommitted migration, then committing under a **different** timestamp
+- `supabase db pull` as the first fix when only the history table is out of sync (pull creates a new diff migration; rename/repair is usually correct)
+
 ## Storage
 
 - Private `images/` bucket

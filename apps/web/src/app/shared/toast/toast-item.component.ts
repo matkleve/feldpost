@@ -12,6 +12,7 @@ import { ToastService } from '../../core/toast/toast.service';
   styleUrl: './toast-item.component.scss',
   host: {
     '[class]': 'item().type',
+    '[class.message-only]': '!item().title',
     '[class.entering]': "item().state === 'entering'",
     '[class.visible]': "item().state === 'visible'",
     '[class.exiting]': "item().state === 'exiting'",

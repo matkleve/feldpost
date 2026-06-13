@@ -28,9 +28,6 @@
 }
 
 .thumbnail-grid--row .thumbnail-grid__cards {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
   justify-content: start;
 }
 

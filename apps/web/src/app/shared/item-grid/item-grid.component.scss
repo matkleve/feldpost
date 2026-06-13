@@ -60,18 +60,29 @@
   --item-grid-column-min: var(--item-grid-column-min-card);
 }
 
-// Switches container flow to vertical stacking for row mode.
+// Row mode: auto-fill grid so cards flow left-to-right and wrap.
 // @see docs/specs/component/media/media-item.row-mode.supplement.md
 :host(.item-grid--row) {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
+  --item-grid-column-min: var(--item-grid-column-min-row, 16rem);
+  --item-grid-gap: var(--spacing-1);
   --item-grid-slot-aspect-ratio: auto;
   --item-grid-slot-block-size: auto;
-  --media-item-row-min-height: 3rem;
+  --media-item-row-min-height: 2rem;
   --media-item-row-media-size: var(--spacing-6);
-  --media-item-row-padding-inline: var(--spacing-3);
-  --media-item-row-gap: var(--spacing-2);
+  --media-item-row-padding-inline: var(--spacing-1);
+  --media-item-row-padding-block: var(--spacing-1);
+  --media-item-row-gap: var(--spacing-1);
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--item-grid-column-min), 1fr));
+  gap: var(--item-grid-gap);
+  align-items: stretch;
+}
+
+// Row grid cells: allow label truncation inside projected wrappers.
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
+:host(.item-grid--row) > * {
+  min-inline-size: 0;
 }
 
 // Grid cells: square host (media-item aspect-ratio 1); media ratio animates inside the cell.

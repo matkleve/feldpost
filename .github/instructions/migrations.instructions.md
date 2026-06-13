@@ -18,6 +18,27 @@ applyTo: "supabase/migrations/**"
 - Test rollback before merging
 - Use `IF NOT EXISTS` / `IF EXISTS` guards where appropriate
 
+## Hosted push and history sync
+
+Migration **filename timestamps are version IDs**. Local `supabase/migrations/` must stay aligned with remote `schema_migrations`.
+
+**Workflow:**
+
+1. `supabase migration new <description>` → edit SQL → **commit** → `supabase db push`
+2. Gate: `supabase migration list` — every applied version must appear in both Local and Remote columns
+
+**`Remote migration versions not found in local migrations directory`:**
+
+| Situation | Fix |
+| --- | --- |
+| Remote has version, local file missing (schema already applied) | Add/rename local file to **that exact timestamp**; verify with `migration list` |
+| Same SQL re-authored under a new timestamp | Rename local file to remote timestamp; delete the duplicate timestamp file |
+| Remote record is a mistake | `supabase migration repair --status reverted <version>`, then push idempotent migration |
+
+Do **not** apply hosted schema via Dashboard SQL for git-tracked changes. Do **not** use `db pull` as the default fix for a history-table mismatch.
+
+Full playbook: [supabase/AGENTS.md](../../supabase/AGENTS.md) § Hosted migration history.
+
 ## References
 
 - Schema: [docs/architecture/database-schema.md](../../docs/architecture/database-schema.md)

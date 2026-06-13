@@ -9,11 +9,12 @@ When `mode === 'row'`, `MediaItemComponent` renders a **dense horizontal scan ro
 
 ## What It Looks Like
 
-Each row is one interactive band inside the item-grid row stack:
+Each row card is one interactive band inside an **auto-fill grid** (left-to-right, wrapping):
 
 - **Leading media column:** square (`var(--spacing-6)` / 24px), `border-radius: var(--container-radius-control)`, `MediaDisplayComponent` fills the square with `object-fit: contain` (icon-only for document-like types when required by media-display contract).
 - **Label column:** flex column with `gap: var(--spacing-1)`; primary line `font-size: var(--font-size-sm)`, secondary `font-size: var(--font-size-xs)`, both single-line ellipsis.
-- **Row chrome:** `padding-inline: var(--spacing-3)`, `padding-block: var(--spacing-2)`, `min-height: 3rem`, `border-radius: var(--container-radius-control)`.
+- **Row chrome:** `padding: var(--spacing-1)` on all sides, `min-height: 2rem`, `border-radius: var(--container-radius-control)`.
+- **Grid container:** `ItemGrid` row mode uses `repeat(auto-fill, minmax(16rem, 1fr))` with `gap: var(--spacing-1)` so cards flow left-to-right and wrap.
 - **Hover / selected:** row background uses the same primary tint rhythm as search results (`color-mix(in srgb, var(--primary) 12%, transparent)` on hover; selected row keeps quiet-action visibility and primary border on the media square).
 - **File-type chip:** hidden on row thumb; file category appears in the secondary line instead.
 
@@ -86,17 +87,20 @@ flowchart LR
 
 | Token | Value | Consumer |
 | --- | --- | --- |
-| `--media-item-row-min-height` | `3rem` | `.media-item__row` |
+| `--item-grid-column-min-row` | `16rem` | `ItemGrid` row column template |
+| `--item-grid-gap` (row mode) | `var(--spacing-1)` | `ItemGrid` row grid gap |
+| `--media-item-row-min-height` | `2rem` | `.media-item__surface--row` |
 | `--media-item-row-media-size` | `var(--spacing-6)` | `.media-item__row-media` |
-| `--media-item-row-padding-inline` | `var(--spacing-3)` | `.media-item__row` |
-| `--media-item-row-gap` | `var(--spacing-2)` | `.media-item__row` |
+| `--media-item-row-padding-inline` | `var(--spacing-1)` | `.media-item__surface--row` |
+| `--media-item-row-padding-block` | `var(--spacing-1)` | `.media-item__surface--row` |
+| `--media-item-row-gap` | `var(--spacing-1)` | `.media-item__surface--row` |
 
 `--item-grid-slot-block-size` MUST NOT force tall full-width lanes in row mode.
 
 ## Acceptance Criteria
 
-- [ ] Row mode renders horizontal layout with 24px square thumb and label column (not full-width 6.5rem bands).
-- [ ] Row `min-height` is `3rem`, aligned with search-dropdown item rows.
+- [ ] Row mode grid flows left-to-right with `auto-fill` columns and `spacing-1` gap.
+- [ ] Row card padding is `spacing-1` on all sides.
 - [ ] Primary line uses address → filename → i18n fallback order.
 - [ ] Secondary line shows capture date, file type, and location snippet when available.
 - [ ] File-type chip is suppressed on row thumb; type appears in secondary line.
