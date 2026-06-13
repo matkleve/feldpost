@@ -44,7 +44,7 @@
   }
 }
 
-// Icon slot: fixed-size inline-flex cell; aligns icon top within the row.
+// Icon slot: fixed-size inline-flex cell centered in the row padding box.
 // @see docs/migration/phase-6-template-cleanup.md §ui-item-media → component-local
 .search-dropdown-item__media {
   display: inline-flex;
@@ -53,7 +53,6 @@
   inline-size: var(--item-media-size);
   block-size: var(--item-media-size);
   min-inline-size: var(--item-media-size);
-  align-self: start;
 }
 
 // Content column: flex column for label + secondary lines; allows text truncation.

@@ -1,4 +1,4 @@
-<div class="search-bar" role="search">
+<div class="search-bar" [class.search-bar--open]="dropdownOpen()" role="search">
   <div class="search-bar__input-row">
     <span class="search-bar__icon-slot" aria-hidden="true">
       <span class="material-icons search-bar__icon">search</span>
@@ -39,18 +39,20 @@
     }
 
     @if (showClearButton()) {
-      <button
-        hlmBtn
-        variant="ghost"
-        size="icon-sm"
-        class="search-bar__clear shrink-0"
-        type="button"
-        [attr.aria-label]="t('map.searchBar.clear.aria', 'Clear search')"
-        (mousedown)="$event.preventDefault()"
-        (click)="onClearClick()"
-      >
-        <span class="material-icons text-current" aria-hidden="true">close</span>
-      </button>
+      <span class="search-bar__clear-slot">
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon-sm"
+          class="search-bar__clear shrink-0"
+          type="button"
+          [attr.aria-label]="t('map.searchBar.clear.aria', 'Clear search')"
+          (mousedown)="$event.preventDefault()"
+          (click)="onClearClick()"
+        >
+          <span class="material-icons text-current" aria-hidden="true">close</span>
+        </button>
+      </span>
     }
   </div>
 
@@ -110,6 +112,13 @@
 
           @if (matchingRecents().length > 0) {
             <div role="group" [attr.aria-labelledby]="sectionId('recent-matches')">
+              <div
+                class="search-bar__section-label"
+                [id]="sectionId('recent-matches')"
+                role="presentation"
+              >
+                {{ t('map.searchBar.section.recentSearches', 'Recent searches') }}
+              </div>
               @for (candidate of matchingRecents(); track candidate.id; let index = $index) {
                 <ss-search-dropdown-item
                   [candidate]="candidate"

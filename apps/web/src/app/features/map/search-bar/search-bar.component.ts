@@ -536,6 +536,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.dropdownOpen.set(true);
       this.state.set('typing');
       this.activeIndex.set(-1);
+      this.ghostText.set(this.searchBarService.queryGhostCompletion(nextQuery));
       return;
     }
 
@@ -544,6 +545,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.dropdownOpen.set(true);
       this.state.set('typing');
       this.activeIndex.set(-1);
+      this.ghostText.set(this.searchBarService.queryGhostCompletion(candidate.label));
       return;
     }
 
@@ -557,6 +559,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.dropdownOpen.set(false);
       this.activeIndex.set(-1);
       this.state.set('focused-empty');
+      this.ghostText.set(null);
       this.queryChanged.emit('');
       this.suppressNextDocumentClick = true;
       return;
@@ -564,6 +567,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     this.committedCandidate.set(candidate);
     this.query.set(candidate.label);
+    this.ghostText.set(null);
     this.dropdownOpen.set(false);
     this.activeIndex.set(-1);
     this.state.set('committed');
@@ -615,6 +619,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.sections.set(this.createEmptySections());
     this.commandSection.set(null);
     this.liveRegionText.set('');
+    this.ghostText.set(null);
     this.committedCandidate.set(null);
     this.queryChanged.emit('');
     this.clearRequested.emit();

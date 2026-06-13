@@ -53,7 +53,7 @@ export class SearchDropdownItemComponent {
       case 'geocoder':
         return 'External result';
       case 'recent':
-        return 'Recent search';
+        return '';
       case 'operator-suggestion':
         return candidate.secondaryLabel ?? '';
       default:

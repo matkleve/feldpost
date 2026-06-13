@@ -263,6 +263,30 @@ describe('SearchBarComponent', () => {
     });
   });
 
+  it('clears ghost completion overlay when a result is committed', () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.query.set('Denisgasse 46');
+    component.ghostText.set('30-34');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.search-bar__ghost-suffix')).not.toBeNull();
+
+    component.onCandidateSelected({
+      id: 'db-1',
+      family: 'db-address',
+      label: 'Denisgasse 30-34, Vienna',
+      lat: 48.2,
+      lng: 16.3,
+    });
+    fixture.detectChanges();
+
+    expect(component.ghostText()).toBeNull();
+    expect(fixture.nativeElement.querySelector('.search-bar__ghost-text')).toBeNull();
+  });
+
   it('shows the clear button after a committed candidate and clears state when clicked', () => {
     const fixture = TestBed.createComponent(SearchBarComponent);
     const clearSpy = vi.fn();

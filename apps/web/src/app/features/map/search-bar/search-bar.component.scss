@@ -1,4 +1,5 @@
 @use '../../../../styles/frosted-chrome';
+@use '../../../../styles/subtle-scrollbar';
 
 :host {
   --search-bar-safe-inline: max(
@@ -25,14 +26,14 @@
   --search-bar-gap: var(--spacing-1);
   --search-bar-dropdown-padding-inline: var(--spacing-2);
   --search-bar-dropdown-padding-block: var(--spacing-2);
-  --search-bar-dropdown-gap: var(--spacing-1);
+  --search-bar-dropdown-gap: var(--spacing-3);
   --search-bar-media-size: var(--spacing-6);
   --search-bar-row-height: 3rem;
   --search-bar-results-max-block-size: calc(
     100dvh - (2 * var(--search-bar-viewport-inset)) - var(--search-bar-row-height)
   );
-  --search-dropdown-item-padding-inline: 0;
-  --search-dropdown-item-padding-block: var(--spacing-1);
+  --search-dropdown-item-padding-inline: var(--spacing-2);
+  --search-dropdown-item-padding-block: var(--spacing-2);
   --search-dropdown-item-gap: var(--search-bar-gap);
   --search-dropdown-item-radius: var(--container-radius-control);
   --search-dropdown-item-row-min-height: 2.25rem;
@@ -51,7 +52,7 @@
     border-color var(--motion-duration-fast) var(--motion-ease-out),
     box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover:not(:focus-within) {
+  &:hover:not(:focus-within):not(.search-bar--open) {
     background: color-mix(in srgb, var(--primary) 8%, color-mix(in srgb, var(--card) 85%, transparent));
     border-color: color-mix(in srgb, var(--primary) 42%, color-mix(in srgb, var(--border) 50%, transparent));
   }
@@ -92,9 +93,22 @@
   transition: color var(--motion-duration-fast) var(--motion-ease-out);
 }
 
-.search-bar:hover:not(:focus-within) .search-bar__icon,
+.search-bar:hover:not(:focus-within):not(.search-bar--open) .search-bar__icon,
 .search-bar:focus-within .search-bar__icon {
   color: var(--primary);
+}
+
+// Trailing clear column: mirrors leading icon slot with matching inset from the panel edge.
+// @see search-bar.component.html
+.search-bar__clear-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: var(--search-bar-row-height);
+  min-inline-size: var(--search-bar-row-height);
+  block-size: 100%;
+  padding-inline-end: var(--spacing-2);
 }
 
 // Composite search input: strip hlmInput field chrome (border, ring, inset padding).
@@ -191,21 +205,25 @@
   animation: search-bar-dropdown-reveal var(--motion-duration-fast) var(--motion-ease-out);
 }
 
+// Scrollable results band: thin project scrollbar, no stable gutter (symmetric row inset on desktop).
+// @see apps/web/src/styles/_subtle-scrollbar.scss
 .search-bar__dropdown-content {
   display: grid;
   gap: var(--search-bar-dropdown-gap);
   block-size: fit-content;
   padding: var(--search-bar-dropdown-padding-block) var(--search-bar-dropdown-padding-inline);
   max-block-size: var(--search-bar-results-max-block-size);
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
+  @include subtle-scrollbar.subtle;
 }
 
 .search-bar__section-label {
   margin: 0;
-  padding-block: 0 var(--spacing-1);
-  padding-inline: 0;
+  padding-block: var(--spacing-1) var(--spacing-1);
+  padding-inline: var(--search-dropdown-item-padding-inline, var(--spacing-2));
   color: var(--muted-foreground);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -284,7 +302,7 @@
 .search-bar__skeleton-row {
   display: grid;
   grid-template-columns: var(--search-dropdown-item-media-size) minmax(0, 1fr);
-  align-items: start;
+  align-items: center;
   min-height: var(--search-dropdown-item-row-min-height);
   padding-block: var(--search-dropdown-item-padding-block);
   padding-inline: var(--search-dropdown-item-padding-inline);
