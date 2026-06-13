@@ -18,7 +18,7 @@ export const MEDIA_DISPLAY_TRANSITIONS: Record<MediaDisplayState, MediaDisplaySt
     'error',
     'no-media',
   ],
-  'ratio-known-contain': ['media-ready', 'error', 'no-media'],
+  'ratio-known-contain': ['media-ready', 'icon-only', 'error', 'no-media'],
   // content-visible: warm grid revisit (skip fade) — spec media-display.md#intrinsic-grid-warm-revisit
   'media-ready': ['content-fade-in', 'content-visible', 'icon-only', 'error', 'no-media'],
   'content-fade-in': ['content-visible', 'icon-only', 'error', 'no-media'],
