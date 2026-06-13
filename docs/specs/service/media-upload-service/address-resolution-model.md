@@ -13,6 +13,7 @@ Child specs hold detail; this document is the index and cross-cutting rules.
 
 | Topic | Spec |
 | --- | --- |
+| **Contradiction model** | [contradiction-resolution-model.md](./contradiction-resolution-model.md) — CSP philosophy, taxonomy (C1–C5, A1–A2, V1–V2), propagation lifecycle, open gaps |
 | Search Object | [upload-search-object.md](./upload-search-object.md) |
 | Layer packages | [upload-search-object.layer-map.md](./upload-search-object.layer-map.md) |
 | Pipeline steps | [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md) |
@@ -48,6 +49,12 @@ Gaps are allowed only at **higher** tiers, never below without the parent tier.
 | 6 | No street or tier-only SO → admin centroid; `locationPinEligible=false` | — |
 | 7 | Placement + EXIF within `exifAssistRadiusMeters` (default **80 m**) → EXIF refines | — |
 | 8 | `placementResolvedBy` → upload bytes | — |
+
+## Contradiction resolution
+
+The tray is a **contradiction resolver**, not an address picker. See [contradiction-resolution-model.md](./contradiction-resolution-model.md) for the full CSP philosophy, taxonomy of contradiction classes (C1–C5, A1–A2, V1–V2), propagation lifecycle, and resolution scope rules.
+
+Key principle: when a user resolves a conflict at a given admin tier (e.g. city), the decision propagates to **all** jobs sharing that constraint violation — scoped by `(batchId, field, conflicting-value-set)`, not by `groupingKey`. This prevents asking the same question once per street under a shared postcode.
 
 ## Tray enqueue contract (hard)
 
@@ -128,3 +135,7 @@ Normative detail: [search-tuning.distance-radii-contract.md](../search/search-tu
 - [x] `notifyScanIdle` after pre-resolve wave, not immediately after `classifyBatch` — `classifyBatch` is followed by `preResolveWave.resetWave(...)`; `notifyScanIdle` fires only via `notifyFirstTrayReady`/`completeJob` (`upload-pre-resolve-wave.service.ts`). See corrected wording in [upload-location-resolution.md](./upload-location-resolution.md).
 - [x] Bundle caps: 5 s max window, 5 dialogue units max; 1A+1B = one unit — `PRESENTATION_BUNDLE_WINDOW_MS=5000`, `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS=5`, shared `dialogueUnitId` via `dialogueUnitIdForGroup` (`upload-location-tray-producer.adapter.ts`).
 - [ ] Same `groupingKey` across concurrent batches reuses one disambiguation group/result instead of opening a second tray (see "Cross-batch same-address dedup" above).
+- [ ] **G1** Folder-to-folder sibling conflict detected when child SO inherits conflicting ancestry ([contradiction-resolution-model.md](./contradiction-resolution-model.md#open-gaps-implementation-required))
+- [ ] **G2** Admin-level resolution fans out by `(batchId, field, conflicting-value-set)`, not just `group.jobIds` ([contradiction-resolution-model.md](./contradiction-resolution-model.md#resolution-scope-rules))
+- [ ] **G3** Post-resolution validation gate: Photon probe before Step 5; V1 tray on 0 hits ([contradiction-resolution-model.md](./contradiction-resolution-model.md#post-resolution-validation-gate-gap-g3))
+- [ ] **G4** Skip → `deferred` status persists through upload and is actionable in Media Detail ([contradiction-resolution-model.md](./contradiction-resolution-model.md#deferred-resolution-contract-gap-g4))

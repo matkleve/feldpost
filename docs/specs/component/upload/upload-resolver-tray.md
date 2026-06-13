@@ -107,16 +107,19 @@ Jobs in `awaiting_disambiguation` stay in **Queue** with label “Choose address
 
 ## `disambiguationKind` (tray copy and layout)
 
-| Kind | When | UI |
-| --- | --- | --- |
-| `geocode` (default) | Multiple forward-geocode hits (Step 3) | Question + options per [question-copy](./upload-resolver-tray.question-copy.md) |
-| `city_step` | Branch C / B→C fallback (Step 1A) | City input + Continue |
-| `house_step` | Step 1B after city confirmed | House number list + “No number needed” |
-| `project_address_a` / `project_address_b` | Batch project precedence (Step 2) | See [stepper FSM supplement](./upload-resolver-tray.stepper-fsm.supplement.md) |
-| `source` | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + **four** placement options (folder address / photo / both / set later) |
-| `layer_package` | Competing folder vs filename street packages | `upload.resolver.question.layerPackage` — package labels per layer |
-| `admin_level_conflict` | Admin fields disagree across folder levels or AT gazetteer | `upload.resolver.question.adminLevelConflict` — per-field `Level N: {value}` options |
-| `context_distance` | Placement beyond org `contextDistanceMaxMeters` (Settings km cap) from project GPS anchor | **Prompt B** — confirm; not the same as `exifAssistRadiusMeters` (m) |
+Each `disambiguationKind` maps to a **contradiction class** in the [contradiction-resolution-model.md](../../service/media-upload-service/contradiction-resolution-model.md#contradiction-taxonomy). The tray is a **contradiction resolver** — see that document for the CSP philosophy, propagation lifecycle, and resolution scope rules.
+
+| Kind | Class | When | UI |
+| --- | --- | --- | --- |
+| `geocode` (default) | A1 | Multiple forward-geocode hits (Step 3) | Question + options per [question-copy](./upload-resolver-tray.question-copy.md) |
+| `city_step` | A1 | Branch C / B→C fallback (Step 1A) | City input + Continue |
+| `house_step` | A2 | Step 1B after city confirmed | House number list + “No number needed” |
+| `project_address_a` / `project_address_b` | — | *(deprecated — types remain, no producer)* | See [stepper FSM supplement](./upload-resolver-tray.stepper-fsm.supplement.md) |
+| `source` | C1 | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + **four** placement options (folder address / photo / both / set later) |
+| `layer_package` | C2 | Competing folder vs filename street packages | `upload.resolver.question.layerPackage` — package labels per layer |
+| `admin_level_conflict` | C3/C4 | Admin fields disagree across folder levels or AT gazetteer; cascading after folder-to-folder sibling detection | `upload.resolver.question.adminLevelConflict` — per-field `Level N: {value}` options |
+| `context_distance` | C5 | Placement beyond org `contextDistanceMaxMeters` (Settings km cap) from project GPS anchor | **Prompt B** — confirm; not the same as `exifAssistRadiusMeters` (m) |
+| *(planned)* `containment_check` | V1 | Post-resolution: resolved street not found in resolved city+postcode via Photon probe | Yes/No + text input — see [contradiction model § G3](../../service/media-upload-service/contradiction-resolution-model.md#post-resolution-validation-gate-gap-g3) |
 
 ## Dev QA (local only)
 

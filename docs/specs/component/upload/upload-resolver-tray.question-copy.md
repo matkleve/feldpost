@@ -4,7 +4,7 @@
 
 ## Principle
 
-The tray is a **questionnaire**, not a settings panel. Every active card has:
+The tray is a **contradiction resolver**, not a settings panel or address picker. Each card resolves one contradiction class (see [contradiction-resolution-model.md](../../service/media-upload-service/contradiction-resolution-model.md#contradiction-taxonomy) for the full taxonomy: C1–C5 source contradictions, A1–A2 ambiguities, V1 validation failures). Every active card has:
 
 1. **Section chrome** — `Address resolver` (what system is asking).
 2. **One `h2` question** — natural language, typed by resolution scenario.

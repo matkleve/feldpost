@@ -10,7 +10,7 @@
       #searchInput
       hlmInput
       class="search-bar__input"
-      type="search"
+      type="text"
       role="combobox"
       autocomplete="off"
       aria-autocomplete="list"
@@ -42,17 +42,16 @@
 
     @if (showClearButton()) {
       <button
-        class="search-bar__clear"
+        hlmBtn
+        variant="ghost"
+        size="icon-sm"
+        class="search-bar__clear shrink-0"
         type="button"
         aria-label="Clear search"
         (mousedown)="$event.preventDefault()"
         (click)="onClearClick()"
       >
-        <span class="search-bar__slot-wrapper" aria-hidden="true">
-          <span class="search-bar__clear-slot" aria-hidden="true">
-            <span class="material-icons">close</span>
-          </span>
-        </span>
+        <span class="material-icons text-current" aria-hidden="true">close</span>
       </button>
     }
   </div>

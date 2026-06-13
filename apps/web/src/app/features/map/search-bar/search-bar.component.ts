@@ -22,6 +22,7 @@ import { SearchFilterChipsComponent } from './search-filter-chips.component';
 import type { GhostTrieEntry } from '../../../core/search/search-bar.service';
 import { SearchBarService } from '../../../core/search/search-bar.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 import { SearchEngine } from '../../../core/search/engine/search-engine';
 import { createMapSearchEngine } from '../../../core/search/engine/search-engine.factory';
@@ -67,7 +68,13 @@ type SearchSectionsState = {
 @Component({
   selector: 'ss-search-bar',
   standalone: true,
-  imports: [CommonModule, SearchDropdownItemComponent, SearchFilterChipsComponent, ...HLM_INPUT_IMPORTS],
+  imports: [
+    CommonModule,
+    SearchDropdownItemComponent,
+    SearchFilterChipsComponent,
+    ...HLM_BUTTON_IMPORTS,
+    ...HLM_INPUT_IMPORTS,
+  ],
   templateUrl: './search-bar.component.html',
   styleUrl: './search-bar.component.scss',
   providers: [
@@ -149,6 +156,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     () =>
       this.dropdownOpen() &&
       this.query().trim().length > 0 &&
+      this.state() === 'results-complete' &&
       !this.geocoderLoading() &&
       this.allEmpty(),
   );

@@ -46,10 +46,12 @@
   );
   --search-bar-reveal-duration: 180ms;
   --search-dropdown-item-padding-inline: var(--search-bar-padding-inline);
-  --search-dropdown-item-padding-block: var(--spacing-2);
+  --search-dropdown-item-padding-block: var(--spacing-1);
   --search-dropdown-item-gap: var(--search-bar-gap);
   --search-dropdown-item-radius: var(--container-radius-control);
-  --search-dropdown-item-row-min-height: 3rem;
+  --search-dropdown-item-row-min-height: 2.25rem;
+  --search-dropdown-item-media-size: var(--spacing-5);
+  --search-dropdown-item-content-gap: 0;
 
   display: grid;
   grid-template-rows: var(--search-bar-row-height) minmax(0, 0fr);
@@ -86,10 +88,9 @@
   flex-shrink: 0;
 }
 
-// Icon and clear inner-slot: centers icon inside the slot-wrapper column.
-// @see search-bar.component.html §icon-slot / clear-slot structure
-.search-bar__icon-slot,
-.search-bar__clear-slot {
+// Icon inner-slot: centers icon inside the slot-wrapper column.
+// @see search-bar.component.html §icon-slot structure
+.search-bar__icon-slot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -98,28 +99,46 @@
   flex-shrink: 0;
 }
 
-.search-bar__icon,
-.search-bar__clear .material-icons {
-  font-size: var(--font-size-md);
-}
-
 .search-bar__icon {
-  color: var(--muted-foreground);
+  font-size: var(--font-size-lg);
+  color: var(--primary);
 }
 
-.search-bar__input {
+// Composite search input: strip hlmInput field chrome (border, ring, inset padding).
+// @see docs/migration/reports/padding-and-hit-area-audit-2026-05-16.md §hlmInput in composite layouts
+.search-bar__input-row input[hlmInput].search-bar__input {
   height: 100%;
   min-width: 0;
+  min-height: 0;
   border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--foreground);
   font-size: var(--font-size-md);
   line-height: var(--line-height-reading);
-  outline: 0;
   padding-block: 0;
+  padding-inline: 0;
+  box-shadow: none;
+  outline: 0;
+
+  &:focus,
+  &:focus-visible {
+    border: 0;
+    box-shadow: none;
+    outline: 0;
+    --tw-ring-shadow: 0 0 #0000;
+    --tw-ring-offset-shadow: 0 0 #0000;
+  }
 
   &::placeholder {
     color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
+  }
+
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration,
+  &::-webkit-search-results-button {
+    display: none;
+    appearance: none;
   }
 }
 
@@ -170,7 +189,6 @@
   opacity: 0;
 }
 
-.search-bar__clear,
 .search-bar__ghost-action {
   border: 0;
   background: transparent;
@@ -186,22 +204,11 @@
   }
 }
 
-.search-bar__clear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: var(--search-bar-row-height);
-  min-inline-size: var(--search-bar-row-height);
-  block-size: var(--search-bar-row-height);
-  padding: 0;
-  border-radius: var(--container-radius-control);
-}
-
 .search-bar__dropdown {
   min-height: 0;
   width: 100%;
   border-top: 1px solid transparent;
-  background: var(--popover);
+  background: transparent;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -267,9 +274,10 @@
 
 .search-bar__empty-copy {
   margin: 0;
+  padding-inline: var(--search-bar-padding-inline);
   color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
 }
 
 .search-bar__ghost-action {

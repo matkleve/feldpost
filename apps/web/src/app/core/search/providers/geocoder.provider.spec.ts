@@ -67,13 +67,13 @@ describe('GeocoderProvider', () => {
     expect(geocodingMock.search).not.toHaveBeenCalled();
   });
 
-  it('returns empty list when geocoder is unavailable', async () => {
+  it('attempts forward geocode even when probe reports unavailable', async () => {
     geocodingMock.ensureGeocodeAvailable.mockResolvedValue(false);
 
     const results = await firstValueFrom(provider.search('schleiergasse', {}));
 
-    expect(results).toEqual([]);
-    expect(geocodingMock.search).not.toHaveBeenCalled();
+    expect(geocodingMock.search).toHaveBeenCalled();
+    expect(results.length).toBeGreaterThan(0);
   });
 
   it('returns geocoder candidates from forward geocode', async () => {

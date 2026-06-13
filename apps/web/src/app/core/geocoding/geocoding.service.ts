@@ -618,7 +618,8 @@ export class GeocodingService {
     body: Record<string, unknown>,
     operation: 'reverse' | 'forward' | 'search' | 'structured-search' | 'structured-forward' | 'structured-forward-bias' | 'street-house-numbers',
   ): Promise<T> {
-    if (this.isGeocodeBlocked()) {
+    // User-initiated map search must retry even after a probe cooldown — upload paths stay gated.
+    if (this.isGeocodeBlocked() && operation !== 'search') {
       throw new Error('Geocoding temporarily unavailable');
     }
 

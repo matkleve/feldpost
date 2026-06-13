@@ -30,7 +30,7 @@
 
 .search-dropdown-item:hover,
 .search-dropdown-item--active {
-  background: color-mix(in srgb, var(--primary) 12%, var(--popover));
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 // Icon slot: fixed-size inline-flex cell; aligns icon top within the row.
@@ -61,8 +61,8 @@
 }
 
 .search-dropdown-item__icon {
-  font-size: 1rem;
-  line-height: 1.5rem;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-solid);
   color: var(--muted-foreground);
 }
 
@@ -74,14 +74,14 @@
 }
 
 .search-dropdown-item__label {
-  font-size: 0.9375rem;
-  line-height: 1.35;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
 }
 
 .search-dropdown-item__secondary {
   color: var(--muted-foreground);
-  font-size: 0.8125rem;
-  line-height: 1.4;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -89,6 +89,6 @@
 
 .search-dropdown-item__meta {
   color: var(--muted-foreground);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-tight);
 }

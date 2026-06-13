@@ -149,10 +149,6 @@ export class GeocoderProvider implements SearchProvider {
     normalizedQuery: string,
     context: SearchQueryContext,
   ): Promise<SearchAddressCandidate[]> {
-    if (!(await this.geocodingService.ensureGeocodeAvailable())) {
-      return [];
-    }
-
     const strictCandidates = await this.fetchGeocoderCandidates(normalizedQuery, context);
     const maxResults = this.orgSearchTuning.orgSearchConfig().resolver.maxGeocoderResults;
 
