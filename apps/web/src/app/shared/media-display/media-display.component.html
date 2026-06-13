@@ -17,6 +17,7 @@
         alt=""
         aria-hidden="true"
         [style.object-position]="contentObjectPosition()"
+        (error)="onContentImageError()"
       />
     }
   </div>
@@ -35,6 +36,7 @@
         aria-hidden="true"
         [style.object-position]="contentObjectPosition()"
         (load)="onContentImageLoad($event)"
+        (error)="onContentImageError()"
       />
     }
   </div>

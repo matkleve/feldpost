@@ -17,6 +17,7 @@ import { I18nService } from '../i18n/i18n.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { ToastService } from '../toast/toast.service';
 import { UploadLocationConfigService } from '../upload/location/upload-location-config.service';
+import { WideEventService } from '../wide-event/wide-event.service';
 import { isGeocodeInfrastructureFailure } from './geocoding.helpers';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -158,6 +159,7 @@ export class GeocodingService {
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly i18n = inject(I18nService);
   private readonly toastService = inject(ToastService);
+  private readonly wideEvent = inject(WideEventService);
 
   private readonly reverseCache = new Map<
     string,
@@ -264,15 +266,22 @@ export class GeocodingService {
     const trimmed = address.trim();
     if (!trimmed) return null;
 
+    const ev = this.wideEvent.start('geocoding.forward', {
+      query: trimmed,
+      geocodeBlocked: this.isGeocodeBlocked(),
+    });
+
     const cacheKey = trimmed.toLowerCase();
     const cached = this.forwardCache.get(cacheKey);
     if (cached && cached.expires > Date.now()) {
+      ev.end('ok', { resultCount: 1, providerStatus: 'cache_hit' });
       return cached.data;
     }
 
     return this.enqueue(async () => {
       const freshCached = this.forwardCache.get(cacheKey);
       if (freshCached && freshCached.expires > Date.now()) {
+        ev.end('ok', { resultCount: 1, providerStatus: 'cache_hit' });
         return freshCached.data;
       }
 
@@ -284,17 +293,37 @@ export class GeocodingService {
           },
           'forward',
         );
-        if (!results?.length || !results[0].lat || !results[0].lon) return null;
+        if (!results?.length || !results[0].lat || !results[0].lon) {
+          ev.end('ok', { resultCount: 0, providerStatus: 'empty' });
+          return null;
+        }
 
         const result = this.parseForwardResponse(results[0]);
-        if (!result) return null;
+        if (!result) {
+          ev.end('ok', { resultCount: results.length, providerStatus: 'unparseable' });
+          return null;
+        }
 
         this.forwardCache.set(cacheKey, {
           data: result,
           expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
         });
+        ev.end('ok', { resultCount: results.length, providerStatus: 'ok' });
         return result;
-      } catch {
+      } catch (error) {
+        const details = await this.extractFailureDetails(error);
+        const isTimeout =
+          details.status === 408 ||
+          details.message.toLowerCase().includes('timeout') ||
+          details.name?.toLowerCase().includes('timeout') === true;
+
+        ev.set({ geocodeBlocked: this.isGeocodeBlocked() });
+        ev.end(isTimeout ? 'timeout' : 'error', {
+          errorType: details.code ?? details.name ?? 'geocode_forward_error',
+          errorMessage: details.message,
+          providerStatus: details.status != null ? String(details.status) : 'failed',
+          resultCount: 0,
+        });
         return null;
       }
     });

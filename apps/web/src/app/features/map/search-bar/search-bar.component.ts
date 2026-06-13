@@ -113,6 +113,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private placeholderFadeTimer: ReturnType<typeof setTimeout> | null = null;
   private placeholderIndex = 0;
   private destroyed = false;
+  /** Query text that last finished a search cycle (`applySearchResult`). */
+  private readonly lastResolvedQuery = signal<string | null>(null);
 
   readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   readonly queryContext = input<SearchQueryContext>({});
@@ -158,8 +160,40 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.query().trim().length > 0 &&
       this.state() === 'results-complete' &&
       !this.geocoderLoading() &&
-      this.allEmpty(),
+      this.allEmpty() &&
+      this.hasResolvedResultsForCurrentQuery(),
   );
+  readonly showDropdownPanel = computed(() => {
+    if (!this.dropdownOpen() || this.committedCandidate()) {
+      return false;
+    }
+
+    if (this.showingRecentSearches()) {
+      return true;
+    }
+
+    if (this.geocoderLoading() || this.state() === 'results-partial') {
+      return true;
+    }
+
+    if (this.showingEmptyState()) {
+      return true;
+    }
+
+    if (!this.allEmpty()) {
+      return true;
+    }
+
+    if ((this.operatorSection()?.items.length ?? 0) > 0) {
+      return true;
+    }
+
+    if ((this.commandSection()?.items.length ?? 0) > 0) {
+      return true;
+    }
+
+    return this.matchingRecents().length > 0;
+  });
   readonly showClearButton = computed(() => this.committedCandidate() !== null);
 
   readonly matchingRecents = computed(() => {
@@ -250,9 +284,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.stopPlaceholderRotation();
     input.focus();
     input.select();
-    this.dropdownOpen.set(true);
-    this.state.set(this.query().trim() ? 'typing' : 'focused-empty');
     this.activeIndex.set(-1);
+    if (this.committedCandidate()) {
+      this.dropdownOpen.set(false);
+      this.state.set('committed');
+      return;
+    }
+    this.dropdownOpen.set(true);
+    this.restoreDropdownStateOnOpen();
   }
 
   onFocus(): void {
@@ -260,9 +299,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.recentSearches.set(
       this.recentsProvider.getRecentSearches(MAX_RECENT_SEARCHES).slice(0, MAX_RECENT_SEARCHES),
     );
-    this.dropdownOpen.set(true);
     this.activeIndex.set(-1);
-    this.state.set(this.query().trim() ? this.state() : 'focused-empty');
+    if (this.committedCandidate()) {
+      this.dropdownOpen.set(false);
+      this.state.set('committed');
+      return;
+    }
+    this.dropdownOpen.set(true);
+    this.restoreDropdownStateOnOpen();
   }
 
   onInput(event: Event): void {
@@ -271,6 +315,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.dropdownOpen.set(true);
     this.activeIndex.set(-1);
     this.queryChanged.emit(nextQuery);
+
+    if (nextQuery.trim()) {
+      this.invalidateResultsUnlessQueryMatches(nextQuery.trim());
+    }
 
     const committedCandidate = this.committedCandidate();
     if (
@@ -283,10 +331,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     if (!nextQuery.trim()) {
       this.state.set('focused-empty');
-      this.sections.set(this.createEmptySections());
-      this.commandSection.set(null);
+      this.clearResultSections();
       this.liveRegionText.set('');
       this.ghostText.set(null);
+      this.lastResolvedQuery.set(null);
       return;
     }
 
@@ -318,6 +366,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       const fullQuery = this.query() + this.ghostText();
       this.query.set(fullQuery);
       this.ghostText.set(null);
+      this.invalidateResultsUnlessQueryMatches(fullQuery.trim());
       this.state.set('typing');
       this.ghostText.set(this.searchBarService.queryGhostCompletion(fullQuery));
       return;
@@ -367,13 +416,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (event.key === 'Escape') {
       event.preventDefault();
       if (this.dropdownOpen()) {
-        this.dropdownOpen.set(false);
-        this.activeIndex.set(-1);
-        this.state.set(this.committedCandidate() ? 'committed' : 'idle');
-        this.resumePlaceholderIfIdle();
+        this.closeDropdown();
       } else {
         this.searchInput()?.nativeElement.blur();
-        this.state.set(this.committedCandidate() ? 'committed' : 'idle');
+        if (!this.query().trim() && !this.committedCandidate()) {
+          this.state.set('idle');
+        } else if (this.committedCandidate()) {
+          this.state.set('committed');
+        }
         this.resumePlaceholderIfIdle();
       }
       return;
@@ -439,10 +489,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
 
     if (!this.hostElement.nativeElement.contains(target)) {
-      this.dropdownOpen.set(false);
-      this.activeIndex.set(-1);
-      this.state.set(this.committedCandidate() ? 'committed' : 'idle');
-      this.resumePlaceholderIfIdle();
+      this.closeDropdown();
     }
   }
 
@@ -482,6 +529,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
 
     this.state.set(result.state);
+    this.lastResolvedQuery.set(result.query.trim());
 
     if (result.state === 'results-complete') {
       const resultCount = this.selectableItems().length;
@@ -533,6 +581,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       const suggestion = candidate as SearchOperatorSuggestionCandidate;
       const nextQuery = `${suggestion.operator}${suggestion.keyword} `;
       this.query.set(nextQuery);
+      this.invalidateResultsUnlessQueryMatches(nextQuery.trim());
       this.dropdownOpen.set(true);
       this.state.set('typing');
       this.activeIndex.set(-1);
@@ -542,6 +591,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     if (candidate.family === 'recent') {
       this.query.set(candidate.label);
+      this.invalidateResultsUnlessQueryMatches(candidate.label.trim());
       this.dropdownOpen.set(true);
       this.state.set('typing');
       this.activeIndex.set(-1);
@@ -571,6 +621,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.dropdownOpen.set(false);
     this.activeIndex.set(-1);
     this.state.set('committed');
+    this.clearResultSections();
+    this.lastResolvedQuery.set(candidate.label.trim());
     this.addRecentSearch(candidate.label);
     this.suppressNextDocumentClick = true;
 
@@ -606,6 +658,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         break;
       case 'recent-selected':
         this.query.set(commitAction.label);
+        this.invalidateResultsUnlessQueryMatches(commitAction.label.trim());
         this.state.set('typing');
         break;
     }
@@ -616,11 +669,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.state.set('focused-empty');
     this.dropdownOpen.set(false);
     this.activeIndex.set(-1);
-    this.sections.set(this.createEmptySections());
-    this.commandSection.set(null);
+    this.clearResultSections();
     this.liveRegionText.set('');
     this.ghostText.set(null);
     this.committedCandidate.set(null);
+    this.lastResolvedQuery.set(null);
     this.queryChanged.emit('');
     this.clearRequested.emit();
     this.resumePlaceholderIfIdle();
@@ -725,5 +778,76 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (!this.dropdownOpen() && !this.query().trim() && !this.placeholderTimer) {
       this.startPlaceholderRotation();
     }
+  }
+
+  /** Close the panel only; keep result sections and search state when the query is still active. */
+  private closeDropdown(): void {
+    this.dropdownOpen.set(false);
+    this.activeIndex.set(-1);
+    if (this.committedCandidate()) {
+      this.state.set('committed');
+    } else if (!this.query().trim()) {
+      this.state.set('idle');
+    }
+    this.resumePlaceholderIfIdle();
+  }
+
+  /** Re-open dropdown UI from cached sections / last search state (no new fetch). */
+  private restoreDropdownStateOnOpen(): void {
+    const trimmed = this.query().trim();
+    if (!trimmed) {
+      this.state.set('focused-empty');
+      return;
+    }
+
+    if (this.hasResolvedResultsForCurrentQuery()) {
+      this.state.set(this.geocoderLoading() ? 'results-partial' : 'results-complete');
+      return;
+    }
+
+    this.refreshPendingSearch();
+  }
+
+  private hasResolvedResultsForCurrentQuery(): boolean {
+    const trimmed = this.query().trim();
+    return trimmed.length > 0 && this.lastResolvedQuery() === trimmed;
+  }
+
+  private invalidateResultsUnlessQueryMatches(trimmedQuery: string): void {
+    if (!trimmedQuery || trimmedQuery === this.lastResolvedQuery()) {
+      return;
+    }
+    this.clearResultSections();
+    this.lastResolvedQuery.set(null);
+  }
+
+  private clearResultSections(): void {
+    this.sections.set(this.createEmptySections());
+    this.commandSection.set(null);
+    this.operatorSection.set(null);
+  }
+
+  private setGeocoderLoading(loading: boolean): void {
+    const sections = this.sections();
+    this.sections.set({
+      ...sections,
+      geocoder: { ...sections.geocoder, loading },
+    });
+  }
+
+  private refreshPendingSearch(): void {
+    const trimmed = this.query().trim();
+    if (!trimmed || this.hasResolvedResultsForCurrentQuery()) {
+      return;
+    }
+
+    this.state.set('results-partial');
+    this.setGeocoderLoading(true);
+    this.subscription.add(
+      this.searchEngine.searchOnce(trimmed, this.queryContext()).subscribe((result) => {
+        this.applySearchResult(result);
+        this.setGeocoderLoading(false);
+      }),
+    );
   }
 }

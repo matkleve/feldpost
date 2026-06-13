@@ -30,6 +30,33 @@ function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
   return builder;
 }
 
+async function typeSearchQuery(
+  fixture: {
+    nativeElement: HTMLElement;
+    detectChanges: () => void;
+    componentInstance: SearchBarComponent;
+  },
+  query: string,
+): Promise<HTMLInputElement> {
+  const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+  input.value = query;
+  input.dispatchEvent(new Event('input'));
+  fixture.detectChanges();
+  TestBed.flushEffects();
+
+  await vi.advanceTimersByTimeAsync(300);
+  await Promise.resolve();
+  await Promise.resolve();
+  fixture.detectChanges();
+
+  return input;
+}
+
+function clickOutsideSearch(fixture: { detectChanges: () => void }): void {
+  document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  fixture.detectChanges();
+}
+
 describe('SearchBarComponent', () => {
   let router: { navigate: ReturnType<typeof vi.fn> };
 
@@ -329,20 +356,167 @@ describe('SearchBarComponent', () => {
       createQueryBuilder({ data: [], error: null }),
     ) as never;
 
-    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
-    input.value = 'nowhere';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    TestBed.flushEffects();
-
-    await vi.advanceTimersByTimeAsync(300);
-    await Promise.resolve();
-    await Promise.resolve();
-    fixture.detectChanges();
+    await typeSearchQuery(fixture, 'nowhere');
 
     expect(fixture.nativeElement.textContent).toContain('No address found for nowhere');
     expect(fixture.nativeElement.textContent).toContain('Try a different address or search term.');
     expect(fixture.nativeElement.querySelector('.search-bar__ghost-action')).toBeNull();
+  });
+
+  it('preserves results-complete on blur and restores empty state on refocus', async () => {
+    const geocodingService = TestBed.inject(GeocodingService);
+    (geocodingService.search as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    const supabaseService = TestBed.inject(SupabaseService) as unknown as {
+      client: { from: ReturnType<typeof vi.fn> };
+    };
+    supabaseService.client.from = vi.fn(() =>
+      createQueryBuilder({ data: [], error: null }),
+    ) as never;
+
+    const input = await typeSearchQuery(fixture, 'nowhere');
+
+    expect(fixture.nativeElement.querySelector('.search-bar__empty-state')).not.toBeNull();
+
+    clickOutsideSearch(fixture);
+
+    expect(fixture.componentInstance.dropdownOpen()).toBe(false);
+    expect(fixture.componentInstance.query()).toBe('nowhere');
+    expect(fixture.componentInstance.state()).toBe('results-complete');
+
+    input.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.showDropdownPanel()).toBe(true);
+    expect(fixture.componentInstance.state()).toBe('results-complete');
+    expect(fixture.nativeElement.querySelector('.search-bar__empty-state')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('No address found for nowhere');
+  });
+
+  it('restores cached result rows after blur and refocus', async () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    const input = await typeSearchQuery(fixture, 'burg');
+
+    expect(fixture.nativeElement.querySelectorAll('ss-search-dropdown-item').length).toBeGreaterThan(
+      0,
+    );
+
+    clickOutsideSearch(fixture);
+    expect(fixture.componentInstance.state()).toBe('results-complete');
+
+    input.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.showDropdownPanel()).toBe(true);
+    expect(fixture.componentInstance.state()).toBe('results-complete');
+    expect(fixture.nativeElement.querySelectorAll('ss-search-dropdown-item').length).toBeGreaterThan(
+      0,
+    );
+  });
+
+  it('preserves search state when Escape closes the dropdown', async () => {
+    const geocodingService = TestBed.inject(GeocodingService);
+    (geocodingService.search as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    const supabaseService = TestBed.inject(SupabaseService) as unknown as {
+      client: { from: ReturnType<typeof vi.fn> };
+    };
+    supabaseService.client.from = vi.fn(() =>
+      createQueryBuilder({ data: [], error: null }),
+    ) as never;
+
+    const input = await typeSearchQuery(fixture, 'nowhere');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.dropdownOpen()).toBe(false);
+    expect(fixture.componentInstance.state()).toBe('results-complete');
+  });
+
+  it('refreshes pending search after blur before debounce completes', async () => {
+    const geocodingService = TestBed.inject(GeocodingService);
+    (geocodingService.search as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    const supabaseService = TestBed.inject(SupabaseService) as unknown as {
+      client: { from: ReturnType<typeof vi.fn> };
+    };
+    supabaseService.client.from = vi.fn(() =>
+      createQueryBuilder({ data: [], error: null }),
+    ) as never;
+
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'nowhere';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    clickOutsideSearch(fixture);
+    expect(fixture.componentInstance.state()).toBe('typing');
+
+    input.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+    await vi.runAllTimersAsync();
+    for (let i = 0; i < 8; i++) {
+      await Promise.resolve();
+    }
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.showDropdownPanel()).toBe(true);
+    expect(fixture.componentInstance.state()).toBe('results-complete');
+    expect(fixture.nativeElement.querySelector('.search-bar__empty-state')).not.toBeNull();
+  });
+
+  it('clears stale sections when the query changes before debounce completes', async () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    await typeSearchQuery(fixture, 'burg');
+    const initialCount = fixture.nativeElement.querySelectorAll('ss-search-dropdown-item').length;
+    expect(initialCount).toBeGreaterThan(0);
+
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'burgx';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.sections().dbAddress.items.length).toBe(0);
+    expect(fixture.componentInstance.sections().geocoder.items.length).toBe(0);
+    expect(fixture.nativeElement.querySelector('.search-bar__dropdown')).toBeNull();
+  });
+
+  it('does not reopen the results panel after commit when the input is focused again', () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onCandidateSelected({
+      id: 'db-1',
+      family: 'db-address',
+      label: 'Burgstrasse 7, Zurich',
+      lat: 47.3769,
+      lng: 8.5417,
+    });
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.dropdownOpen()).toBe(false);
+    expect(fixture.componentInstance.showDropdownPanel()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.search-bar__dropdown')).toBeNull();
   });
 
   it('keeps fixed input-row track sizing in component styles', () => {

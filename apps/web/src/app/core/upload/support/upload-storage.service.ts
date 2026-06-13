@@ -19,62 +19,86 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { SupabaseService } from '../../supabase/supabase.service';
+import { WideEventService } from '../../wide-event/wide-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class UploadStorageService {
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
+  private readonly wideEvent = inject(WideEventService);
 
   /**
    * Upload a file to Supabase Storage and return the storage path.
    * Returns null on failure.
    */
   async upload(file: File, abortSignal?: AbortSignal): Promise<string | null> {
-    console.log('[upload-storage] upload called:', {
+    const ev = this.wideEvent.start('upload.storage', {
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
     });
 
-    const user = this.auth.user();
-    if (!user) {
-      console.error('[upload-storage] ✗ no authenticated user');
-      return null;
+    try {
+      const user = this.auth.user();
+      if (!user) {
+        ev.end('error', { errorMessage: 'No authenticated user' });
+        return null;
+      }
+
+      const profileQuery = this.supabase.client
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id);
+      const { data: profile, error: profileError } = await this.withAbort(
+        profileQuery,
+        abortSignal,
+      ).single();
+
+      if (!profile) {
+        ev.end('error', {
+          errorMessage: profileError?.message ?? 'Profile fetch failed',
+          errorType: profileError?.code ?? 'profile_fetch_failed',
+        });
+        return null;
+      }
+
+      const uuid = crypto.randomUUID();
+      const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
+      const storagePath = `${profile.organization_id}/${user.id}/${uuid}.${ext}`;
+      ev.set({ storagePath, bytesWritten: file.size });
+
+      const { error } = await this.supabase.client.storage.from('media').upload(storagePath, file, {
+        contentType: file.type,
+        upsert: false,
+        ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
+      });
+
+      if (error) {
+        ev.end('error', {
+          errorMessage: error.message,
+          errorType: error.name ?? 'storage_upload_error',
+        });
+        return null;
+      }
+
+      ev.end('ok');
+      return storagePath;
+    } catch (e) {
+      const isAbort =
+        e instanceof DOMException && e.name === 'AbortError'
+          ? true
+          : typeof e === 'object' &&
+            e !== null &&
+            'name' in e &&
+            (e as { name?: string }).name === 'AbortError';
+
+      ev.end(isAbort ? 'timeout' : 'error', {
+        errorType: e instanceof Error ? e.constructor.name : 'unknown',
+        errorMessage: e instanceof Error ? e.message : String(e),
+        errorStack: e instanceof Error ? e.stack : undefined,
+      });
+      throw e;
     }
-    console.log('[upload-storage] user:', user.id);
-
-    const profileQuery = this.supabase.client
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', user.id);
-    const { data: profile, error: profileError } = await this.withAbort(
-      profileQuery,
-      abortSignal,
-    ).single();
-
-    if (!profile) {
-      console.error('[upload-storage] ✗ profile fetch failed:', profileError);
-      return null;
-    }
-    console.log('[upload-storage] org:', profile.organization_id);
-
-    const uuid = crypto.randomUUID();
-    const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
-    const storagePath = `${profile.organization_id}/${user.id}/${uuid}.${ext}`;
-    console.log('[upload-storage] uploading to path:', storagePath);
-
-    const { error } = await this.supabase.client.storage.from('media').upload(storagePath, file, {
-      contentType: file.type,
-      upsert: false,
-      ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
-    });
-
-    if (error) {
-      console.error('[upload-storage] ✗ Supabase storage.upload error:', error);
-      return null;
-    }
-    console.log('[upload-storage] ✓ upload succeeded:', storagePath);
-    return storagePath;
   }
 
   private withAbort<T extends { abortSignal?: (signal: AbortSignal) => T }>(

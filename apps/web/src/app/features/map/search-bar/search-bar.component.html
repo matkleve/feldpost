@@ -1,4 +1,4 @@
-<div class="search-bar" [class.search-bar--open]="dropdownOpen()" role="search">
+<div class="search-bar" [class.search-bar--open]="showDropdownPanel()" role="search">
   <div class="search-bar__input-row">
     <span class="search-bar__icon-slot" aria-hidden="true">
       <span class="material-icons search-bar__icon">search</span>
@@ -13,8 +13,8 @@
       autocomplete="off"
       aria-autocomplete="list"
       aria-haspopup="listbox"
-      [attr.aria-expanded]="dropdownOpen()"
-      [attr.aria-controls]="dropdownOpen() ? 'search-results-listbox' : null"
+      [attr.aria-expanded]="showDropdownPanel()"
+      [attr.aria-controls]="showDropdownPanel() ? 'search-results-listbox' : null"
       [attr.aria-activedescendant]="activeIndex() >= 0 ? optionIdFor(activeIndex()) : null"
       [attr.aria-label]="placeholderText()"
       [value]="query()"
@@ -58,7 +58,7 @@
 
   <ss-search-filter-chips [chips]="filterChips()" (removeChip)="onFilterChipRemove($event)" />
 
-  @if (dropdownOpen()) {
+  @if (showDropdownPanel()) {
     <div class="search-bar__dropdown" id="search-results-listbox" role="listbox">
       <div class="search-bar__dropdown-content">
         @if (showingRecentSearches()) {

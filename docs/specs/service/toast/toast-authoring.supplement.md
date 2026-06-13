@@ -201,3 +201,49 @@ User does something → did it work?
             ├─ Has recovery path → structured title + body + optional action
             └─ Technical detail  → structured title + body + detail (expandable)
 ```
+
+---
+
+## 10. Wide-Event Integration
+
+Full spec: [`wide-event-service.md`](../wide-event/wide-event-service.md).
+
+### Boundary rule
+
+`ToastService` has **no knowledge** of wide-event logging. The two systems share a caller, not a wire.
+
+### Caller-owns model
+
+The catch block (or error branch) is the single source of truth. It:
+
+1. Builds `ToastOptions` — via a domain helper (`buildUploadFailureToast`, etc.) or inline
+2. Calls `handle.setToast({ title, body, codeRef })` on the wide-event handle
+3. Calls `handle.end('error', { errorMessage, ... })`
+4. Calls `toastService.show(toast)`
+
+Steps 2–4 happen in the same catch block. The toast and the wide event can diverge: the toast gets a user-friendly message; the event gets the raw stack trace and full error context.
+
+### Pattern
+
+```typescript
+catch (e) {
+  const toast = buildUploadFailureToast(e.message, codeRef);
+  // Optionally append trace ID to expandable detail
+  toast.detail = [toast.detail, `Trace: ${ev.traceId}`].filter(Boolean).join('\n');
+
+  ev.setToast({ title: toast.title, body: toast.body, codeRef: toast.codeRef });
+  ev.end('error', { errorMessage: e.message, errorStack: e.stack?.slice(0, 1000) });
+  this.toastService.show(toast);
+}
+```
+
+### What NOT to do
+
+- Do not inject `WideEventService` into `ToastService`
+- Do not add a callback/hook in `ToastService.show()` that notifies a logger
+- Do not rely on an "active event" context that `ToastService` discovers implicitly
+- Do not duplicate toast fields inside the `event` jsonb if they are already on the `ToastOptions` passed to `setToast()` — the wide-event service copies them into the record
+
+### Trace ID in toasts
+
+When an error toast is shown for an instrumented operation, the caller **may** append the 8-char `traceId` to the toast `detail` field. This lets users quote it in support requests. It is optional per call site and has no effect on `ToastService` behavior.

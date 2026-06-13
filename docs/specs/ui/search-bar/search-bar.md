@@ -44,8 +44,10 @@ Derived from the use cases. Each row maps to specific UC scenarios.
 | 8   | Clicks a DB content result (project/group) | Navigates to that content's context; when multiple geolocated items are in scope, map fits bounds to include all of them         | UC-6              | `commit` type `open-content`                              |
 | 9   | Clicks a geocoder result                   | Map centers on location and zooms to a tight local view (~50m horizontal span when supported)                                    | UC-10, UC-3       | `commit` type `map-center`                                |
 | 10  | Clicks a recent search item                | Re-executes that query                                                                                                           | UC-2              | `commit` type `recent-selected`                           |
-| 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                                                                       | UC-13             | State ? `idle`                                            |
-| 12  | Clicks outside search                      | Closes dropdown                                                                                                                  | �                 | State ? `idle` or `committed`                             |
+| 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                                                                       | UC-13             | Dropdown closes; state stays `results-complete` / `typing` when query remains |
+| 12  | Clicks outside search                      | Closes dropdown; cached sections preserved when query remains                                                                    | UC-13             | State stays `results-complete` / `typing` / `committed`; refocus restores panel |
+| 12b | Refocuses input after blur with same query   | Reopens results panel from cache; pending queries re-run search                                                                  | UC-13             | No blank panel shell |
+| 12c | Refocuses committed input                  | Results panel stays closed                                                                                                       | UC-12             | State `committed` |
 | 13  | Clicks `�` clear button                    | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State ? `idle`                                            |
 | 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State ? `focused-empty`                                   |
 | 15  | Query returns no results                   | Shows empty state with "No address found" + guidance copy                                                                    | UC-10             | �                                                         |
@@ -236,6 +238,7 @@ sequenceDiagram
 - [x] Search bar is visible top-center over the map on both desktop and mobile
 - [x] Search surface uses `.ui-container` with the same panel radius as the Sidebar in all states
 - [x] Search surface uses the same shared panel padding and gap tokens as the Sidebar
+- [x] Results dropdown inset uses `var(--spacing-1)`; row hover surfaces use `var(--container-radius-control)` (matches nav `.sidebar__panel` / `.nav__link`)
 - [x] Leading search icon uses a fixed square media slot aligned to shared media-size tokens
 - [x] Leading search icon and trailing clear button use wrappers that preserve the fixed media slot alignment within the taller search row
 - [x] Results panel is revealed inside the same surface and does not behave like a detached floating dropdown
@@ -259,8 +262,9 @@ sequenceDiagram
 - [x] Single-location map-center commits zoom to a tight local view (target ~50m horizontal ground span when supported by map zoom limits)
 - [x] Multi-location commits (for example project/group contexts with several geolocated items) fit map bounds so all relevant locations are visible
 - [x] Content commit navigates to the correct route
-- [x] Escape closes dropdown; second Escape blurs input
-- [x] Click outside closes dropdown
+- [x] Escape closes dropdown; second Escape blurs input; search state is preserved while query text remains
+- [x] Click outside closes dropdown; refocus restores cached results or empty state for the same query
+- [x] Committed input refocus does not reopen stale results panel
 - [x] `�` clear button appears after commit; clicking it resets everything
 - [x] `�` clear button uses square control geometry aligned to shared control/media sizing tokens
 - [x] Empty state shows "No address found" with guidance to try a different address or search term

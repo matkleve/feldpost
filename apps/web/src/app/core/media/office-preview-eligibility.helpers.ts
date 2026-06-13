@@ -8,3 +8,8 @@ export function requiresServerPreviewGeneration(definition: FileTypeDefinition):
     definition.id === 'presentation'
   );
 }
+
+/** Document-like types that may need server thumbnail backfill when `thumbnail_path` is missing. */
+export function requiresMissingThumbnailBackfill(definition: FileTypeDefinition): boolean {
+  return requiresServerPreviewGeneration(definition) || definition.id === 'pdf';
+}

@@ -18,6 +18,7 @@ import { Injectable, inject } from '@angular/core';
 import { GeocodingService, type ReverseGeocodeResult } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { AuthService } from '../auth/auth.service';
+import { WideEventService } from '../wide-event/wide-event.service';
 import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
 
 const BATCH_SIZE = 50;
@@ -34,6 +35,7 @@ export class LocationResolverService {
   private readonly geocoding = inject(GeocodingService);
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
+  private readonly wideEvent = inject(WideEventService);
 
   /** Image IDs currently being resolved (prevents duplicate work). */
   private readonly pending = new Set<string>();
@@ -60,6 +62,8 @@ export class LocationResolverService {
   }
 
   async resolvePendingMediaItem(mediaItemId: string): Promise<ResolvePendingMediaItemResult> {
+    const ev = this.wideEvent.start('location.resolve', { mediaItemId });
+
     const { data: mediaRow, error: mediaError } = await this.supabase.client
       .from('media_items')
       .select('id,source_image_id,location_status')
@@ -68,6 +72,11 @@ export class LocationResolverService {
       .maybeSingle();
 
     if (mediaError || !mediaRow) {
+      ev.end('error', {
+        rpcName: 'media_items.select',
+        errorMessage: mediaError?.message ?? 'Media item not found',
+        errorType: mediaError?.code ?? 'media_not_found',
+      });
       return { status: 'unresolvable', changed: false };
     }
 
@@ -78,6 +87,11 @@ export class LocationResolverService {
     );
 
     if (locError) {
+      ev.end('error', {
+        rpcName: 'list_locations_for_media',
+        errorMessage: locError.message,
+        errorType: locError.code ?? 'rpc_error',
+      });
       return { status: 'unresolvable', changed: false };
     }
 
@@ -96,28 +110,44 @@ export class LocationResolverService {
       country: loc?.country ?? null,
     } as UnresolvedRow & { id: string };
     if (!resolvedMediaId) {
+      ev.end('error', { errorMessage: 'Resolved media item id missing' });
       return { status: 'unresolvable', changed: false };
     }
 
+    ev.set({
+      addressLabel: row.address_label ?? undefined,
+      latitude: row.latitude ?? undefined,
+      longitude: row.longitude ?? undefined,
+    });
+
     const normalizedStatus = this.normalizeLocationStatus(row.location_status);
     if (normalizedStatus && normalizedStatus !== 'pending') {
+      ev.end('ok', { locationStatus: normalizedStatus, changed: false });
       return { status: normalizedStatus, changed: false };
     }
 
     if (this.pending.has(resolvedMediaId)) {
+      ev.end('ok', { locationStatus: 'pending', deduped: true });
       return { status: 'pending', changed: false };
     }
 
     this.pending.add(resolvedMediaId);
     try {
-      const resolved = await this.resolveRow(row, resolvedMediaId);
+      const resolved = await this.resolveRow(row, resolvedMediaId, ev);
       if (resolved) {
+        ev.end('ok', { locationStatus: 'resolved', changed: true });
         return { status: 'resolved', changed: true };
       }
 
-      await this.markUnresolvable(resolvedMediaId);
+      await this.markUnresolvable(resolvedMediaId, ev);
+      ev.end('ok', { locationStatus: 'unresolvable', changed: true });
       return { status: 'unresolvable', changed: true };
-    } catch {
+    } catch (error) {
+      ev.end('error', {
+        errorType: error instanceof Error ? error.constructor.name : 'unknown',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
       return { status: 'pending', changed: false };
     } finally {
       this.pending.delete(resolvedMediaId);
@@ -311,7 +341,11 @@ export class LocationResolverService {
   }
 
   /** Resolve a single unresolved row — returns true if resolved. */
-  private async resolveRow(row: UnresolvedRow, mediaItemId: string): Promise<boolean> {
+  private async resolveRow(
+    row: UnresolvedRow,
+    mediaItemId: string,
+    ev?: { set(fields: Record<string, unknown>): void },
+  ): Promise<boolean> {
     const hasGps = row.latitude != null && row.longitude != null;
     const hasAddress = row.address_label != null;
 
@@ -319,11 +353,12 @@ export class LocationResolverService {
       // Reverse geocode: GPS → address
       const result = await this.geocoding.reverse(row.latitude!, row.longitude!);
       if (!result) {
-        await this.markUnresolvable(mediaItemId);
+        await this.markUnresolvable(mediaItemId, ev);
         return false;
       }
 
       await this.persistAddressSingle(mediaItemId, result);
+      ev?.set({ rpcName: 'resolve_media_location', addressLabel: result.addressLabel });
       return true;
     }
 
@@ -331,7 +366,7 @@ export class LocationResolverService {
       // Forward geocode: address → GPS
       const result = await this.geocoding.forward(row.address_label!);
       if (!result) {
-        await this.markUnresolvable(mediaItemId);
+        await this.markUnresolvable(mediaItemId, ev);
         return false;
       }
 
@@ -344,19 +379,24 @@ export class LocationResolverService {
         zip: result.zip,
         country: result.country,
       });
+      ev?.set({ rpcName: 'resolve_media_location', addressLabel: result.addressLabel });
       return true;
     }
 
     return false;
   }
 
-  private async markUnresolvable(mediaItemId: string): Promise<void> {
+  private async markUnresolvable(
+    mediaItemId: string,
+    ev?: { set(fields: Record<string, unknown>): void },
+  ): Promise<void> {
     const { error } = await this.supabase.client.rpc('resolve_media_location', {
       p_media_item_id: mediaItemId,
       p_location_status: 'unresolvable',
     });
 
     if (error) {
+      ev?.set({ rpcName: 'resolve_media_location' });
       console.error('[LocationResolver] Failed to mark media item as unresolvable:', {
         mediaItemId,
         ...this.describeError(error),

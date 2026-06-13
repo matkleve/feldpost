@@ -15,7 +15,7 @@ import type { AfterViewInit, InputSignal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { resolveFileType } from '../../core/media/file-type-registry';
 import { mediaFileIdentityFromRecord } from '../../core/media/media-file-identity.helpers';
-import { requiresServerPreviewGeneration } from '../../core/media/office-preview-eligibility.helpers';
+import { requiresMissingThumbnailBackfill } from '../../core/media/office-preview-eligibility.helpers';
 import type { MediaContext } from '../../core/media/media-renderer.types';
 import type { PreviewGenerationStatus } from '../../core/media/preview-generation-status.types';
 import { MediaAspectRatioCacheService } from '../../core/media/media-aspect-ratio-cache.service';
@@ -228,7 +228,7 @@ export class MediaDisplayComponent implements AfterViewInit {
             original_filename: this.originalFilename(),
           }),
         );
-        if (requiresServerPreviewGeneration(fileType)) {
+        if (requiresMissingThumbnailBackfill(fileType)) {
           void this.previewGeneration.enqueue(id, previewStatus);
         }
       }
@@ -304,9 +304,46 @@ export class MediaDisplayComponent implements AfterViewInit {
    * If no metadata ratio is known yet, derive it from natural dimensions and trigger
    * the ratio-known-contain transition before advancing to content-fade-in.
    */
+  /**
+   * Sharp or staged preview failed to decode — fall back to icon-only and enqueue backfill when eligible.
+   * @see docs/specs/component/media/media-display.md#state-rendering-matrix
+   */
+  onContentImageError(): void {
+    const id = this.mediaId().trim();
+    const storagePath = this.storagePath();
+
+    this.resolvedUrl.set('');
+    this.stagedContentUrl.set('');
+    this.contentResolutionChange.emit(null);
+
+    if (id && storagePath) {
+      this.mediaDownloadService.invalidate(id);
+      this.mediaDownloadService.registerPreviewPaths(
+        id,
+        storagePath,
+        null,
+        'failed',
+        this.downloadContext(),
+      );
+
+      const fileType = resolveFileType(
+        mediaFileIdentityFromRecord({
+          storage_path: storagePath,
+          original_filename: this.originalFilename(),
+        }),
+      );
+      if (requiresMissingThumbnailBackfill(fileType)) {
+        void this.previewGeneration.enqueue(id, 'failed');
+      }
+    }
+
+    this.goTo('icon-only');
+  }
+
   onContentImageLoad(event: Event): void {
     const img = event.target;
     if (!(img instanceof HTMLImageElement) || img.naturalWidth <= 0 || img.naturalHeight <= 0) {
+      this.onContentImageError();
       return;
     }
 

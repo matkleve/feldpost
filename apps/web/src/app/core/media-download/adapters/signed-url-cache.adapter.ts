@@ -10,6 +10,7 @@ import type {
   StateChangedEvent,
   UrlChangedEvent,
 } from '../media-download.types';
+import { isImageLikeStoragePath } from '../media-preview-target.helpers';
 import { SupabaseStorageAdapter } from './supabase-storage.adapter';
 
 const TRANSFORMS: Record<
@@ -231,7 +232,12 @@ export class SignedUrlCacheAdapter {
     size: MediaSize,
     results: Map<string, SignedUrlResult>,
   ): Promise<void> {
-    const needsOriginal = pending.filter((item) => item.storagePath && !results.has(item.id));
+    const needsOriginal = pending.filter(
+      (item) =>
+        item.storagePath &&
+        !results.has(item.id) &&
+        isImageLikeStoragePath(item.storagePath),
+    );
     if (needsOriginal.length === 0) return;
 
     const transform = TRANSFORMS[size];
