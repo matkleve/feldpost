@@ -148,7 +148,7 @@ Parent-owned inline banner between location section and metadata when `reconcili
 
 ## Action Footer
 
-Single-media actions render in a sticky `app-context-action-bar` footer (`variant="footer"`) when detail is ready. Same action registry as header overflow menu. See [context-action-bar.md](../../component/context-action-bar.md).
+Single-media actions render as an inline **Actions** section (`app-detail-actions` → `app-context-action-bar` `variant="section"`) inside `.detail-content` after metadata when detail is ready. Destructive section actions use a two-step inline confirm before emitting. Same action registry as header overflow menu. See [context-action-bar.md](../../component/context-action-bar.md) and [media-detail-actions.md](media-detail-actions.md).
 
 ## Acceptance Criteria
 

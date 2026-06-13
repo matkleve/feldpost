@@ -1,0 +1,209 @@
+// Grid: host reserves a fixed square cell; frame fills slot geometry.
+// Row: host height comes from item-grid lane.
+// @see docs/specs/component/project/project-item.md#visual-behavior-contract
+:host {
+  display: block;
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+:host:not([data-mode='row']) {
+  aspect-ratio: 1;
+  block-size: auto;
+}
+
+:host([data-mode='row']) {
+  block-size: auto;
+  aspect-ratio: unset;
+}
+
+// Placeholder tiles without project payload use muted pulse inside inherited slot geometry.
+// @see docs/specs/component/project/project-item.md#what-it-looks-like
+:host([data-has-item='false']) {
+  aspect-ratio: 1;
+  background: var(--muted);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: project-item-pulse 1.2s ease-in-out infinite;
+}
+
+:host([data-has-item='false'][data-mode='row']) {
+  aspect-ratio: unset;
+  block-size: auto;
+  min-block-size: var(--project-item-row-min-height, 2rem);
+  border-radius: var(--container-radius-control);
+}
+
+@keyframes project-item-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+// Archived items use muted treatment across modes.
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
+:host.project-item--archived {
+  opacity: 0.72;
+}
+
+// Frame owns project geometry, border emphasis, and footer stacking context.
+// @see docs/specs/component/project/project-item.md#ownership-matrix
+.project-item__frame {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  box-shadow: none;
+  transition:
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+// Color accent band with folder icon — mirrors media thumbnail zone density.
+// @see docs/specs/component/project/project-item.md#what-it-looks-like
+.project-item__accent {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--project-item-color, var(--primary)) 22%, var(--card));
+}
+
+.project-item__icon {
+  font-size: 1.75rem;
+  color: color-mix(in srgb, var(--project-item-color, var(--primary)) 72%, var(--foreground));
+}
+
+// Footer stacks name and media count inside the square frame.
+// @see docs/specs/component/project/project-item.md#ownership-matrix
+.project-item__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  min-block-size: 2rem;
+  border-block-start: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: var(--card);
+}
+
+.project-item__name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+  color: var(--foreground);
+}
+
+.project-item__count {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+// Stable state: selected — frame emphasis matches media-item slot treatment.
+// @see docs/specs/component/project/project-item.md#transition-choreography-table
+.project-item__frame--selected {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
+}
+
+.project-item__frame:hover,
+.project-item__frame:focus-within {
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+// Row scan band: color chip + stacked labels.
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
+.project-item__surface--row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--project-item-row-media-size, var(--spacing-6)) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--project-item-row-gap, var(--spacing-2));
+  min-block-size: var(--project-item-row-min-height, 2rem);
+  padding-block: var(--project-item-row-padding-block, var(--spacing-1));
+  padding-inline: var(--project-item-row-padding-inline, var(--spacing-1));
+  border-radius: var(--container-radius-control);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.project-item__surface--row:hover,
+.project-item__surface--row:focus-within,
+:host([data-state='selected']) .project-item__surface--row {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.project-item__row-chip {
+  inline-size: var(--project-item-row-media-size, var(--spacing-6));
+  block-size: var(--project-item-row-media-size, var(--spacing-6));
+  min-inline-size: var(--project-item-row-media-size, var(--spacing-6));
+  border-radius: 50%;
+}
+
+.project-item__row-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-inline-size: 0;
+}
+
+.project-item__row-label,
+.project-item__row-secondary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-item__row-label {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+  color: var(--foreground);
+}
+
+.project-item__row-secondary {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+  color: var(--muted-foreground);
+}
+
+.project-item__open {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.project-item__open--row {
+  position: absolute;
+  inset: 0;
+}
+
+.project-item__open:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

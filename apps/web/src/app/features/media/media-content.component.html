@@ -20,7 +20,11 @@
           />
         }
         @case ('grid') {
-          <app-item-grid [mode]="itemMode()" [role]="gridRole()">
+          <app-item-grid
+            [mode]="itemMode()"
+            [role]="gridRole()"
+            [orderedItemIds]="orderedVisibleMediaIds()"
+          >
             @for (item of row.items; track item.id) {
               <app-media-item
                 [itemId]="item.id"
@@ -49,7 +53,11 @@
     </p>
   }
 } @else if (showGrid()) {
-  <app-item-grid [mode]="itemMode()" [role]="gridRole()">
+  <app-item-grid
+    [mode]="itemMode()"
+    [role]="gridRole()"
+    [orderedItemIds]="orderedVisibleMediaIds()"
+  >
     @for (slot of gridSlots(); track slot.trackId) {
       @if (slot.item; as item) {
         <!-- Renders one media-domain item component per normalized media record. -->

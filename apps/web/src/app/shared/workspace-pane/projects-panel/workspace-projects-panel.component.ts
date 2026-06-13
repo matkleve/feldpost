@@ -21,6 +21,9 @@ import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { ProjectListItem, ProjectColorKey } from '../../../core/projects/projects.types';
 import { ProjectColorPickerComponent } from '../../../features/projects/cards/project-color-picker.component';
+import { ProjectItemComponent } from '../../../features/projects/project-item.component';
+import type { ItemDisplayMode } from '../../item-grid/item.component';
+import { ItemGridComponent } from '../../item-grid/item-grid.component';
 import { DropdownShellComponent } from '../../dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective } from '../../ui/menu';
 
@@ -37,6 +40,8 @@ export const DRAG_MEDIA_IDS_MIME = 'application/x-feldpost-media-ids';
     FormsModule,
     SlicePipe,
     ProjectColorPickerComponent,
+    ProjectItemComponent,
+    ItemGridComponent,
     DropdownShellComponent,
     HlmMenuItemDirective,
   ],
@@ -79,6 +84,10 @@ export class WorkspaceProjectsPanelComponent {
   readonly renameValue = signal('');
   readonly renameBusy = signal(false);
 
+  /** Compact grid for narrow workspace pane — mirrors media thumbnail grid density. */
+  readonly gridMode: ItemDisplayMode = 'grid-sm';
+  readonly skeletonSlots = [1, 2, 3, 4, 5, 6] as const;
+
   readonly activeProjects = computed(() =>
     this.projects().filter((p) => p.status === 'active'),
   );
@@ -102,6 +111,14 @@ export class WorkspaceProjectsPanelComponent {
   readonly openProject = computed(() =>
     this.projects().find((p) => p.id === this.openProjectId()) ?? null,
   );
+
+  onProjectItemOpened(projectId: string): void {
+    this.openDetail(projectId);
+  }
+
+  onProjectItemContextMenu(event: MouseEvent, projectId: string): void {
+    this.openContextMenu(event, projectId);
+  }
 
   // Colour preview helper — kept in TS to stay consistent with ProjectColorPickerComponent
   protected projectColorStyle(colorKey: ProjectColorKey): string {

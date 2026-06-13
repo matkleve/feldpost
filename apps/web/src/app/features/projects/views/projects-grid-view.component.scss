@@ -6,18 +6,27 @@
   min-width: 0;
 }
 
-// Projects grid: 4-col desktop, 2-col tablet, 1-col mobile
-// @see docs/specs/page/projects-page.md § Grid density
+// Item grid layout for /projects — column sizing owned by item-grid tokens.
+// @see docs/specs/component/item-grid/item-grid.md
 .projects-grid {
-  display: grid;
-  gap: var(--spacing-2);
-  grid-template-columns: 1fr;
+  --item-grid-gap: var(--spacing-2);
+}
 
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+// Grid cell wrapper — context menu without nested interactive elements.
+// @see docs/specs/component/project/project-item.md
+.projects-grid__cell {
+  min-inline-size: 0;
+  min-block-size: 0;
+}
 
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
+// Context menu — positioned via dropdown-shell
+// @see docs/specs/component/project/project-card.md § Context menu
+.projects-grid__context-menu {
+  position: fixed;
+  z-index: 100;
+}
+
+.map-context-menu__items {
+  padding-inline: var(--spacing-2);
+  padding-block: var(--spacing-1);
 }

@@ -86,8 +86,14 @@ export class SearchBarService {
     label: string,
     projectId?: string,
     existingRecents?: SearchRecentCandidate[],
+    secondaryLabel?: string,
   ): SearchRecentCandidate[] {
-    return this.recentsProvider.addRecentSearch(label, projectId, existingRecents);
+    return this.recentsProvider.addRecentSearch(
+      label,
+      projectId,
+      existingRecents,
+      secondaryLabel,
+    );
   }
 
   getRecentSearches(

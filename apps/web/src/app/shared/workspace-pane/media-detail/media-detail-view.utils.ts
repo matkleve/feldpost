@@ -67,6 +67,29 @@ export function isLikelyImagePath(path: string | null): boolean {
   return /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|tiff?|webp)$/i.test(path);
 }
 
+export interface OriginalFilePathParts {
+  folder: string | null;
+  filename: string | null;
+}
+
+/** Splits a client upload path into folder + basename when directory separators are present. */
+export function splitOriginalFilePath(path: string | null | undefined): OriginalFilePathParts {
+  const trimmed = path?.trim();
+  if (!trimmed) {
+    return { folder: null, filename: null };
+  }
+
+  const normalized = trimmed.replace(/\\/g, '/');
+  const lastSlash = normalized.lastIndexOf('/');
+  if (lastSlash === -1) {
+    return { folder: null, filename: normalized };
+  }
+
+  const folder = normalized.slice(0, lastSlash) || null;
+  const filename = normalized.slice(lastSlash + 1) || null;
+  return { folder, filename };
+}
+
 export function resolveMediaTypeLabel(
   media: MediaRecord | null,
   mediaType: string | null,

@@ -45,6 +45,7 @@ import { METADATA_COMPOSE_TYPE_ICONS } from './metadata-type-icons';
         panelClass="option-menu-surface address-search-panel"
         [anchor]="shellAnchor()"
         [minWidth]="panelMinWidth()"
+        [maxWidth]="panelMinWidth()"
         [outsideCloseEnabled]="false"
         (closeRequested)="close()"
       >

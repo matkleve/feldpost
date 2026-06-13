@@ -106,7 +106,7 @@ export class WorkspaceSelectionService {
       return 'selection-changed';
     }
 
-    this.setRangeAnchor(targetId);
+    this.setSingle(targetId);
     return 'open-item';
   }
 

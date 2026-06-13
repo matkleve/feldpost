@@ -140,6 +140,12 @@ describe('SearchBarService', () => {
       expect(recents[0].label).toBe('Schleiergasse 18, 1100 Wien');
     });
 
+    it('persists secondaryLabel for address commits', () => {
+      service.addRecentSearch('Fahrafeld 4', undefined, undefined, '3071 Kasten bei Böheimkirchen · Austria');
+      const recents = service.loadRecentSearches();
+      expect(recents[0]?.secondaryLabel).toBe('3071 Kasten bei Böheimkirchen · Austria');
+    });
+
     it('deduplicates by label (case-insensitive) and moves to front', () => {
       service.addRecentSearch('Burgstrasse 7, Zurich');
       service.addRecentSearch('Schleiergasse 18, Wien');

@@ -70,7 +70,7 @@ import type {
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { QuickInfoChipsComponent } from '../../../shared/quick-info-chips/quick-info-chips.component';
 import { MetadataSectionComponent } from './metadata-section/metadata-section.component';
-import { ContextActionBarComponent } from '../../context-action-bar/context-action-bar.component';
+import { DetailActionsComponent } from './detail-actions/detail-actions.component';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import {
   coerceLocationCoordinate,
@@ -166,7 +166,7 @@ export type { MediaRecord, MetadataEntry } from './media-detail-view.types';
     ConfirmDialogComponent,
     QuickInfoChipsComponent,
     MetadataSectionComponent,
-    ContextActionBarComponent,
+    DetailActionsComponent,
     MediaDetailHeaderComponent,
     MediaDetailMediaViewerComponent,
     MediaDetailInlineSectionComponent,

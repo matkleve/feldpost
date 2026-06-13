@@ -12,6 +12,7 @@
   min-block-size: 0;
   min-inline-size: 0;
   max-inline-size: 100%;
+  overflow: hidden;
 
   &:hover .detail-media__edit-btn,
   &:focus-within .detail-media__edit-btn {
@@ -29,6 +30,7 @@
   inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
   max-inline-size: 100%;
   margin-inline: auto;
+  overflow: hidden;
 }
 
 // Constrained to hero band height; slot shrink-wraps width from aspect-ratio.

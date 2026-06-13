@@ -1,9 +1,54 @@
-<div class="projects-grid">
-  @for (summary of summaries(); track summary.id) {
-    <app-project-card
-      [project]="summary"
-      (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
-      (dangerAction)="onDangerAction($event.projectId, $event.action)"
-    />
+<!-- Renders grouped projects through the shared item-grid + project-item stack. -->
+<!-- @see docs/specs/component/item-grid/item-grid.md -->
+<app-item-grid class="projects-grid" [mode]="itemMode()" role="list">
+  @for (project of section().projects; track project.id) {
+    <div class="projects-grid__cell" role="listitem">
+      <app-project-item
+        [itemId]="project.id"
+        [project]="project"
+        [mode]="itemMode()"
+        (opened)="onProjectOpened($event)"
+        (contextMenuRequested)="onProjectContextMenu($event, project.id)"
+      />
+    </div>
   }
-</div>
+</app-item-grid>
+
+@if (contextMenuOpen() && contextMenuPosition(); as pos) {
+  <app-dropdown-shell
+    class="projects-grid__context-menu"
+    [top]="pos.y"
+    [left]="pos.x"
+    [minWidth]="contextMenuMinWidthPx"
+    [panelClass]="menuPanelClass()"
+    (closeRequested)="closeContextMenu()"
+  >
+    @if (contextMenuPanel() === 'actions') {
+      <div class="map-context-menu__items flex flex-col" role="menu">
+        @for (action of contextMenuActions(); track action) {
+          @if (shouldShowSeparatorBefore(action)) {
+            <div hlmMenuSeparator aria-hidden="true"></div>
+          }
+          <button
+            hlmMenuItem
+            class="w-full"
+            [class.text-destructive]="isDestructiveAction(action)"
+            type="button"
+            role="menuitem"
+            (click)="onContextMenuAction(action)"
+          >
+            <span class="material-icons option-menu-item__icon" aria-hidden="true">{{
+              actionIcon(action)
+            }}</span>
+            <span class="min-w-0 flex-1 text-left">{{ actionLabel(action) }}</span>
+          </button>
+        }
+      </div>
+    } @else if (contextProject(); as project) {
+      <app-project-color-picker
+        [selectedColor]="project.colorKey"
+        (colorSelected)="onColorSelectedFromMenu($event)"
+      />
+    }
+  </app-dropdown-shell>
+}

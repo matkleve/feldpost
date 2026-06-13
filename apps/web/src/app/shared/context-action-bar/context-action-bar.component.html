@@ -59,12 +59,19 @@
         <button
           hlmMenuItem
           class="context-action-bar__item context-action-bar__item--destructive w-full"
+          [class.context-action-bar__item--armed]="isDestructiveArmed(action.id)"
           type="button"
           [disabled]="action.disabled"
+          [attr.aria-label]="destructiveLabel(action)"
+          [attr.title]="destructiveLabel(action)"
           (click)="onActionClick(action.id)"
         >
-          <span class="material-icons context-action-bar__icon" aria-hidden="true">{{ action.icon }}</span>
-          <span class="context-action-bar__label min-w-0 flex-1 text-left">{{ action.label }}</span>
+          <span class="material-icons context-action-bar__icon" aria-hidden="true">{{
+            destructiveIcon(action)
+          }}</span>
+          <span class="context-action-bar__label min-w-0 flex-1 text-left">{{
+            destructiveLabel(action)
+          }}</span>
         </button>
       }
     </div>

@@ -12,10 +12,10 @@ When `mode === 'row'`, `MediaItemComponent` renders a **dense horizontal scan ro
 Each row card is one interactive band inside an **auto-fill grid** (left-to-right, wrapping):
 
 - **Leading media column:** square (`var(--spacing-6)` / 24px), `border-radius: var(--container-radius-control)`, `MediaDisplayComponent` fills the square with `object-fit: contain` (icon-only for document-like types when required by media-display contract).
-- **Label column:** flex column with `gap: var(--spacing-1)`; primary line `font-size: var(--font-size-sm)`, secondary `font-size: var(--font-size-xs)`, both single-line ellipsis.
+- **Label column:** flex column with `gap: 2px`; primary line `font-size: var(--font-size-sm)`, secondary `font-size: var(--font-size-xs)`, both single-line ellipsis.
 - **Row chrome:** `padding: var(--spacing-1)` on all sides, `min-height: 2rem`, `border-radius: var(--container-radius-control)`.
 - **Grid container:** `ItemGrid` row mode uses `repeat(auto-fill, minmax(16rem, 1fr))` with `gap: var(--spacing-1)` so cards flow left-to-right and wrap.
-- **Hover / selected:** row background uses the same primary tint rhythm as search results (`color-mix(in srgb, var(--primary) 12%, transparent)` on hover; selected row keeps quiet-action visibility and primary border on the media square).
+- **Hover / selected:** row background uses primary tint on hover only (`color-mix(in srgb, var(--primary) 12%, transparent)`). Selected row adds `border: 1px solid var(--primary)` on the row band plus quiet-action visibility; focus-within does not apply row tint (avoids false highlight when tabbing to select button).
 - **File-type chip:** hidden on row thumb; file category appears in the secondary line instead.
 
 ### Text content contract
@@ -60,7 +60,7 @@ MediaItemComponent [data-mode=row]
 | Square thumb | `.media-item__row-media` / `.media-item__slot` | `.media-item__slot` | `.media-item__open` (row) | `.media-item__row-media` | content | 24×24px used size |
 | Primary label | `.media-item__row-label` | `.media-item__row-content` | `.media-item__open` | `.media-item__row-label` | content | truncates |
 | Secondary meta | `.media-item__row-secondary` | `.media-item__row-content` | `.media-item__open` | `.media-item__row-secondary` | content | truncates |
-| Selected emphasis | `.media-item__slot--selected` | `.media-item__slot` | quiet-action buttons | `.media-item__slot--selected` | surface/selected | ring on thumb only |
+| Selected emphasis | `.media-item__surface--row` | `:host[data-state=selected]` | `.media-item__surface--row` | `:host([data-state='selected']) .media-item__surface--row` | surface/selected | primary border on row band |
 | Quiet actions | `.media-item__quiet-actions` | `.media-item__slot` | action buttons | `.media-item__quiet-actions` | overlay/actions | thumb hover only |
 
 ### Ownership Triad

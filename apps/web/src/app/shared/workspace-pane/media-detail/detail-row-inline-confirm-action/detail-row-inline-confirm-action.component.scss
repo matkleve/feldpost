@@ -9,17 +9,34 @@ button.detail-row-action--remove {
   pointer-events: none;
 }
 
+button.detail-row-action--danger {
+  opacity: 0;
+  pointer-events: none;
+  color: var(--destructive);
+}
+
 // Parent row hover/focus reveals remove; armed stays visible for two-step confirm.
 // @see docs/specs/ui/media-detail/media-detail-inline-editing.md
 :host-context(.detail-row:hover:not(.detail-row--editing)) button.detail-row-action--remove,
 :host-context(.detail-row:focus-within:not(.detail-row--editing)) button.detail-row-action--remove,
+:host-context(.detail-row:hover:not(.detail-row--editing)) button.detail-row-action--danger,
+:host-context(.detail-row:focus-within:not(.detail-row--editing)) button.detail-row-action--danger,
 button.detail-row-action--armed {
+  color: var(--destructive);
   opacity: 1;
   pointer-events: auto;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--destructive);
+    background: color-mix(in srgb, var(--destructive) 12%, transparent);
+    outline-color: var(--destructive);
+  }
 }
 
 @media (hover: none) {
-  button.detail-row-action--remove {
+  button.detail-row-action--remove,
+  button.detail-row-action--danger {
     opacity: 1;
     pointer-events: auto;
   }

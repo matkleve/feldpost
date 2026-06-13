@@ -55,6 +55,10 @@ export class RecentsProvider implements SearchProvider {
           id: `recent-${item.label.trim().toLowerCase()}`,
           family: 'recent' as const,
           label: sanitizeRecentLabel(item.label),
+          secondaryLabel:
+            typeof item.secondaryLabel === 'string' && item.secondaryLabel.trim().length > 0
+              ? item.secondaryLabel.trim()
+              : undefined,
           lastUsedAt:
             typeof item.lastUsedAt === 'string' ? item.lastUsedAt : new Date(0).toISOString(),
           projectId: typeof item.projectId === 'string' ? item.projectId : undefined,
@@ -71,10 +75,12 @@ export class RecentsProvider implements SearchProvider {
     label: string,
     projectId?: string,
     existingRecents?: SearchRecentCandidate[],
+    secondaryLabel?: string,
   ): SearchRecentCandidate[] {
     const normalizedLabel = label.trim();
     if (!normalizedLabel) return existingRecents ?? [];
 
+    const normalizedSecondary = secondaryLabel?.trim() || undefined;
     const now = new Date().toISOString();
     const recents = existingRecents ?? this.loadRecentSearches();
     const existing = recents.find(
@@ -85,6 +91,7 @@ export class RecentsProvider implements SearchProvider {
       id: `recent-${normalizedLabel.toLowerCase()}`,
       family: 'recent',
       label: normalizedLabel,
+      secondaryLabel: normalizedSecondary ?? existing?.secondaryLabel,
       lastUsedAt: now,
       projectId,
       usageCount: Math.max(1, existing?.usageCount ?? 0) + (existing ? 1 : 0),
@@ -114,6 +121,7 @@ export class RecentsProvider implements SearchProvider {
     try {
       const serializable: StoredRecentSearch[] = recents.map((entry) => ({
         label: entry.label,
+        secondaryLabel: entry.secondaryLabel,
         lastUsedAt: entry.lastUsedAt,
         projectId: entry.projectId,
         usageCount: Math.max(1, entry.usageCount ?? 1),

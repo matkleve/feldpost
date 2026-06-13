@@ -34,6 +34,7 @@
   min-block-size: 0;
   inline-size: 100%;
   max-inline-size: 100%;
+  overflow: hidden;
 }
 
 :host.media-item--detail-embed .media-item__slot {
@@ -92,7 +93,7 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--card);
-  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   box-shadow: none;
   transition:
     aspect-ratio 300ms var(--motion-ease-out),
@@ -137,9 +138,12 @@
 }
 
 .media-item__surface--row:hover,
-.media-item__surface--row:focus-within,
 :host([data-state='selected']) .media-item__surface--row {
   background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+:host([data-state='selected']) .media-item__surface--row {
+  border: 1px solid var(--primary);
 }
 
 // Fixed square leading media column for row mode.
@@ -161,7 +165,7 @@
 .media-item__row-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: 2px;
   min-inline-size: 0;
   min-block-size: 0;
 }
@@ -238,7 +242,9 @@
 // Stable state: selected — elevation level 1 (constant 1px border; no inset shrink).
 // @see docs/specs/component/media/media-item.md#visual-behavior-contract
 .media-item__slot--selected {
-  box-shadow: var(--shadow-sm);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 2px var(--primary);
   border-color: var(--primary);
 }
 
@@ -246,7 +252,7 @@
 // @see docs/design/tokens.md §3.5
 .media-item__slot:hover,
 .media-item__slot:focus-within {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
 }
 
@@ -276,11 +282,8 @@
   inset: 0;
   z-index: 4;
   opacity: 0;
-  transform: translateY(-2px);
   pointer-events: none;
-  transition:
-    opacity var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1),
-    transform var(--motion-duration-fast) cubic-bezier(0.4, 0, 1, 1);
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .media-item__slot:hover .media-item__quiet-actions,
@@ -288,21 +291,15 @@
 .media-item__surface--row:hover .media-item__quiet-actions,
 .media-item__surface--row:focus-within .media-item__quiet-actions {
   opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity var(--motion-duration-fast) var(--motion-ease-out),
-    transform var(--motion-duration-fast) var(--motion-ease-out);
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 // Selected tiles keep the select affordance visible; map stays hover-only (see quiet-actions SCSS).
 // @see docs/specs/component/media/media-item.md#actions--interactions
 .media-item__slot--selected .media-item__quiet-actions {
   opacity: 1;
-  transform: translateY(0);
   pointer-events: none;
-  transition:
-    opacity var(--motion-duration-fast) var(--motion-ease-out),
-    transform var(--motion-duration-fast) var(--motion-ease-out);
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .media-item__slot--selected .media-item-quiet-actions__button--select {

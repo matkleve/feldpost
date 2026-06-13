@@ -103,7 +103,7 @@ describe('WorkspaceSelectionService', () => {
     expect(service.isSelected('d')).toBe(false);
   });
 
-  it('returns open-item for plain click and sets range anchor', () => {
+  it('returns open-item for plain click and selects sole item with range anchor', () => {
     const service = setup();
     const ordered = ['a', 'b'];
 
@@ -115,6 +115,7 @@ describe('WorkspaceSelectionService', () => {
 
     expect(result).toBe('open-item');
     expect(service.rangeAnchorId()).toBe('b');
-    expect(service.selectedCount()).toBe(0);
+    expect(service.selectedCount()).toBe(1);
+    expect(service.isSelected('b')).toBe(true);
   });
 });

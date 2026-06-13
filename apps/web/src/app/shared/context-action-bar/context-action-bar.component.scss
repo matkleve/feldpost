@@ -64,7 +64,7 @@
 }
 
 .context-action-bar__item {
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
   min-height: var(--detail-row-height, 2rem);
   padding-inline: var(--spacing-2);
   border-radius: var(--radius-sm);
@@ -115,5 +115,15 @@
     .context-action-bar__label {
       color: var(--destructive);
     }
+  }
+}
+
+.context-action-bar__item--destructive.context-action-bar__item--armed {
+  background: color-mix(in srgb, var(--destructive) 12%, transparent);
+
+  .context-action-bar__icon,
+  .context-action-bar__label {
+    color: var(--destructive);
+    font-weight: var(--font-weight-semibold);
   }
 }

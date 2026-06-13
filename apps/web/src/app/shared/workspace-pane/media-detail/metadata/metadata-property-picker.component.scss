@@ -24,6 +24,7 @@
   max-height: min(40vh, 16rem);
   overflow-y: auto;
   transform: translateX(calc(-1 * var(--spacing-2)));
+  max-width: min(100vw - var(--spacing-4), 24rem);
 }
 
 .metadata-property-picker__dropdown {
@@ -31,6 +32,8 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  max-height: min(36vh, 14rem);
+  overflow-y: auto;
 }
 
 // Row chrome — mirrors address-field-combobox__result-item; grid keeps type | name alignment.

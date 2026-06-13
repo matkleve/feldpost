@@ -75,6 +75,7 @@
             class="thumbnail-grid__cards"
             [class.thumbnail-grid__cards--start]="isUnderfilled(item.images.length)"
             [mode]="itemGridMode()"
+            [orderedItemIds]="orderedThumbnailIds()"
           >
             @for (img of item.images; track img.id) {
               <div
@@ -105,6 +106,7 @@
       class="thumbnail-grid__cards"
       [class.thumbnail-grid__cards--start]="isUnderfilled(flatImages().length)"
       [mode]="itemGridMode()"
+      [orderedItemIds]="orderedThumbnailIds()"
     >
       @for (img of flatImages(); track img.id) {
         <div

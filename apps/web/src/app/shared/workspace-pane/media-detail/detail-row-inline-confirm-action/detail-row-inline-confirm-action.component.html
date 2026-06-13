@@ -7,8 +7,11 @@
     [class]="
       'detail-row-action detail-row-action--' +
       slot() +
-      ' detail-row-action--remove' +
-      (armed() ? ' detail-row-action--armed' : '')
+      (armed()
+        ? ' detail-row-action--armed'
+        : idleIcon() === 'delete'
+          ? ' detail-row-action--danger'
+          : ' detail-row-action--remove')
     "
     type="button"
     [disabled]="disabled()"

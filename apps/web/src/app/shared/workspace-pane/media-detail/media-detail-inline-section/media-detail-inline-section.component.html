@@ -69,13 +69,35 @@
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
     <div class="detail-row__center">
+      <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.originalFolder', 'Original folder')
+      }}</span>
+      <span
+        class="detail-row__value detail-row__value--static"
+        [attr.title]="originalFolderLabel() ?? null"
+        >{{ originalFolderLabel() ?? t('workspace.imageDetail.value.empty', '—') }}</span
+      >
+    </div>
+    <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
+  </div>
+
+  <div class="detail-row detail-row--readonly">
+    <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
+    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">drive_file_rename_outline</span>
       <span class="detail-row__label">{{
         t('workspace.imageDetail.field.originalFilename', 'Original file name')
       }}</span>
-      <span class="detail-row__value detail-row__value--static">{{
-        media().original_filename ?? t('workspace.imageDetail.value.empty', '—')
-      }}</span>
+      <span
+        class="detail-row__value detail-row__value--static"
+        [attr.title]="originalFilenameLabel() ?? null"
+        >{{
+          originalFilenameLabel() ?? t('workspace.imageDetail.value.empty', '—')
+        }}</span
+      >
     </div>
     <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>

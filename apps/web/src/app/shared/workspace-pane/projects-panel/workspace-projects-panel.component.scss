@@ -57,20 +57,33 @@
   }
 }
 
-// Scrollable list region
+// Scrollable grid region
 // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
-.projects-panel__list {
+.projects-panel__grid-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 0.25rem 0;
-  margin: 0;
-  list-style: none;
+  min-height: 0;
+  padding: var(--spacing-2);
+}
+
+// Item grid inside workspace pane — compact columns for narrow panel width.
+// @see docs/specs/component/item-grid/item-grid.md
+.projects-panel__grid {
+  --item-grid-gap: var(--spacing-2);
+}
+
+// Grid cell wrapper — allows context menu without nesting interactive elements.
+// @see docs/specs/component/project/project-item.md
+.projects-panel__grid-cell {
+  min-inline-size: 0;
+  min-block-size: 0;
 }
 
 // Section label for archived group
 // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
 .projects-panel__section-label {
-  padding: 0.25rem 0.75rem;
+  padding: var(--spacing-2) var(--spacing-2) var(--spacing-1);
+  margin: 0;
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -78,106 +91,13 @@
   color: var(--muted-foreground);
 }
 
-// Single project row — click target
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A
-.projects-panel__row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 120ms ease;
-
-  &:hover {
-    background-color: var(--accent);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: -2px;
-  }
-}
-
-// Archived row muted treatment
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
-.projects-panel__row--archived {
-  opacity: 0.65;
-}
-
-// Skeleton row for loading state
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § loading
-.projects-panel__row--skeleton {
-  pointer-events: none;
-}
-
-// Color chip — 12×12 filled circle
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A row
-.projects-panel__row-chip {
-  flex-shrink: 0;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background-color: var(--muted);
-}
-
-// Skeleton chip — greyed placeholder
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § loading
-.projects-panel__row-chip--skeleton {
-  background-color: var(--muted);
-}
-
-// Muted chip for archived rows
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
-.projects-panel__row-chip--muted {
-  opacity: 0.5;
-}
-
-// Row name label — grows, truncates
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A row
-.projects-panel__row-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8125rem;
-  color: var(--foreground);
-}
-
-// Skeleton name placeholder
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § loading
-.projects-panel__row-name--skeleton {
-  height: 0.75rem;
-  border-radius: 4px;
-  background-color: var(--muted);
-  width: 60%;
-  color: transparent;
-}
-
-// Muted name for archived
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Archived section
-.projects-panel__row-name--muted {
-  color: var(--muted-foreground);
-}
-
-// Media count badge
-// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A row
-.projects-panel__row-count {
-  flex-shrink: 0;
-  font-size: 0.6875rem;
-  color: var(--muted-foreground);
-  min-width: 1.5rem;
-  text-align: right;
-}
-
 // Empty state text
 // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State A empty
 .projects-panel__empty {
-  padding: 1rem 0.75rem;
+  padding: var(--spacing-4) var(--spacing-3);
+  margin: 0;
   font-size: 0.8125rem;
   color: var(--muted-foreground);
-  list-style: none;
 }
 
 // Inline draft row

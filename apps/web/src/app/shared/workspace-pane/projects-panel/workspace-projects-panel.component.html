@@ -17,70 +17,59 @@
       />
     </div>
 
-    <!-- Project rows -->
-    <ul class="projects-panel__list" role="list">
+    <!-- Project grid -->
+    <div class="projects-panel__grid-scroll">
       @if (loading()) {
-        @for (i of [1, 2, 3]; track i) {
-          <li class="projects-panel__row projects-panel__row--skeleton" aria-hidden="true">
-            <span class="projects-panel__row-chip projects-panel__row-chip--skeleton"></span>
-            <span class="projects-panel__row-name projects-panel__row-name--skeleton"></span>
-          </li>
-        }
+        <app-item-grid class="projects-panel__grid" [mode]="gridMode">
+          @for (i of skeletonSlots; track i) {
+            <app-project-item [itemId]="'skeleton-' + i" [mode]="gridMode" />
+          }
+        </app-item-grid>
       } @else {
         @if (filteredActive().length === 0 && !searchTerm()) {
-          <li class="projects-panel__empty">
+          <p class="projects-panel__empty">
             {{ t('workspace.projects.panel.emptyActive', 'No active projects') }}
-          </li>
+          </p>
         }
-        @for (project of filteredActive(); track project.id) {
-          <li
-            class="projects-panel__row"
-            role="listitem"
-            (click)="openDetail(project.id)"
-            (contextmenu)="openContextMenu($event, project.id)"
-            [attr.aria-label]="project.name"
-          >
-            <span
-              class="projects-panel__row-chip"
-              [style.background-color]="projectColorStyle(project.colorKey)"
-              aria-hidden="true"
-            ></span>
-            <span class="projects-panel__row-name">{{ project.name }}</span>
-            <span class="projects-panel__row-count" [attr.aria-label]="project.totalImageCount + ' media'">
-              {{ project.totalImageCount }}
-            </span>
-          </li>
+        @if (filteredActive().length > 0) {
+          <app-item-grid class="projects-panel__grid" [mode]="gridMode" role="list">
+            @for (project of filteredActive(); track project.id) {
+              <div class="projects-panel__grid-cell" role="listitem">
+                <app-project-item
+                  [itemId]="project.id"
+                  [project]="project"
+                  [mode]="gridMode"
+                  (opened)="onProjectItemOpened($event)"
+                  (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
+                />
+              </div>
+            }
+          </app-item-grid>
         }
 
         <!-- Archived section -->
         @if (showArchived()) {
           @if (filteredArchived().length > 0) {
-            <li class="projects-panel__section-label" aria-hidden="true">
+            <p class="projects-panel__section-label" aria-hidden="true">
               {{ t('workspace.projects.panel.archived', 'Archived') }}
-            </li>
-          }
-          @for (project of filteredArchived(); track project.id) {
-            <li
-              class="projects-panel__row projects-panel__row--archived"
-              role="listitem"
-              (click)="openDetail(project.id)"
-              (contextmenu)="openContextMenu($event, project.id)"
-              [attr.aria-label]="project.name"
-            >
-              <span
-                class="projects-panel__row-chip projects-panel__row-chip--muted"
-                [style.background-color]="projectColorStyle(project.colorKey)"
-                aria-hidden="true"
-              ></span>
-              <span class="projects-panel__row-name projects-panel__row-name--muted">{{ project.name }}</span>
-              <span class="projects-panel__row-count" [attr.aria-label]="project.totalImageCount + ' media'">
-                {{ project.totalImageCount }}
-              </span>
-            </li>
+            </p>
+            <app-item-grid class="projects-panel__grid" [mode]="gridMode" role="list">
+              @for (project of filteredArchived(); track project.id) {
+                <div class="projects-panel__grid-cell" role="listitem">
+                  <app-project-item
+                    [itemId]="project.id"
+                    [project]="project"
+                    [mode]="gridMode"
+                    (opened)="onProjectItemOpened($event)"
+                    (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
+                  />
+                </div>
+              }
+            </app-item-grid>
           }
         }
       }
-    </ul>
+    </div>
 
     <!-- Stable state: new-draft — inline name input row at list bottom -->
     @if (panelState() === 'new-draft') {

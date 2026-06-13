@@ -73,7 +73,6 @@ function applyMediaPreviewPatch(item: MediaRecord, patch: MediaPreviewPatch | un
   styleUrl: './media-content.component.scss',
   host: {
     '[class.media-content]': 'true',
-    '(document:click)': 'onDocumentClick($event)',
   },
 })
 export class MediaContentComponent implements AfterViewInit {
@@ -403,64 +402,6 @@ export class MediaContentComponent implements AfterViewInit {
 
   onGroupToggle(heading: string): void {
     this.workspaceViewService.toggleGroupCollapsed(heading);
-  }
-
-  onDocumentKeydown(event: KeyboardEvent): void {
-    if (this.state() !== 'ready') {
-      return;
-    }
-
-    const key = event.key.toLowerCase();
-    if (key === 'escape') {
-      if (this.workspaceSelectionService.selectedCount() > 0) {
-        event.preventDefault();
-        this.workspaceSelectionService.clearSelection();
-      }
-      return;
-    }
-
-    if (key !== 'a' || !(event.ctrlKey || event.metaKey) || event.shiftKey) {
-      return;
-    }
-
-    const target = event.target;
-    if (!(target instanceof Node) || !this.hostElement.nativeElement.contains(target)) {
-      return;
-    }
-
-    const orderedIds = this.orderedVisibleMediaIds();
-    if (orderedIds.length === 0) {
-      return;
-    }
-
-    event.preventDefault();
-    this.workspaceSelectionService.selectAllInScope(orderedIds);
-    const lastId = orderedIds[orderedIds.length - 1];
-    if (lastId) {
-      this.workspaceSelectionService.setRangeAnchor(lastId);
-    }
-  }
-
-  onDocumentClick(event: MouseEvent): void {
-    if (this.state() !== 'ready') {
-      return;
-    }
-
-    const target = event.target;
-    if (!(target instanceof Element)) {
-      return;
-    }
-
-    if (target.closest('app-group-header')) {
-      return;
-    }
-
-    // Grid gaps, placeholder cells, and square-host padding outside the slot clear selection.
-    if (target.closest('app-media-item[data-has-item="true"] .media-item__slot')) {
-      return;
-    }
-
-    this.workspaceSelectionService.clearSelection();
   }
 
   private readonly updateViewportMetrics = (): void => {

@@ -18,4 +18,13 @@ describe('RecentsProvider', () => {
     expect(recents.length).toBe(2);
     expect(recents[0].label).toBe('zurich');
   });
+
+  it('persists secondaryLabel alongside primary label', () => {
+    const provider = TestBed.inject(RecentsProvider);
+    provider.addRecentSearch('Fahrafeld 4', undefined, undefined, '3071 Kasten bei Böheimkirchen · Austria');
+
+    const recents = provider.loadRecentSearches();
+    expect(recents[0]?.label).toBe('Fahrafeld 4');
+    expect(recents[0]?.secondaryLabel).toBe('3071 Kasten bei Böheimkirchen · Austria');
+  });
 });

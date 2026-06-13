@@ -24,7 +24,7 @@
   grid-template-columns: auto auto minmax(0, 1fr) auto auto;
   grid-template-areas: 'action-l2 action-l1 center action-r1 action-r2';
   align-items: stretch;
-  column-gap: var(--spacing-1);
+  column-gap: var(--spacing-2);
   position: relative;
   padding: 0;
   min-height: var(--detail-row-action-size);
@@ -96,7 +96,7 @@
   grid-template-columns: 1.25rem minmax(4rem, auto) 1fr;
   align-items: center;
   align-self: stretch;
-  column-gap: var(--spacing-1);
+  column-gap: var(--spacing-2);
   min-width: 0;
   min-height: var(--detail-row-action-size);
   padding-inline: var(--spacing-2);

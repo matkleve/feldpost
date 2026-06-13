@@ -156,19 +156,13 @@
               (entryRemoved)="removeMetadata($event)"
               (entryAdded)="addMetadata($event.keyName, $event.keyType, $event.value)"
             />
-          </div>
-        </div>
 
-        @if (workspaceSingleActions().length > 0) {
-          <div class="detail-action-footer">
-            <app-context-action-bar
-              variant="footer"
+            <app-detail-actions
               [actions]="workspaceSingleActions()"
-              [pending]="saving()"
               (actionSelected)="onWorkspaceSingleActionSelected($event)"
             />
           </div>
-        }
+        </div>
       </div>
     }
   }

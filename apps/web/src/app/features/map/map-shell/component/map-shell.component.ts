@@ -980,7 +980,7 @@ export class MapShellComponent implements OnDestroy {
   onMapContextZoomHouseHere(): void {
     const coords = this.mapContextMenuCoords();
     if (!coords || !this.map) return;
-    this.map.setView([coords.lat, coords.lng], MapShellComponent.HOUSE_PROXIMITY_ZOOM);
+    this.setViewWithPaneOffset(coords.lat, coords.lng, MapShellComponent.HOUSE_PROXIMITY_ZOOM);
     this.onMapMenuCloseRequested();
   }
 
@@ -996,7 +996,31 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.map.setView([lat, lng], zoomLevel);
+    this.setViewWithPaneOffset(lat, lng, zoomLevel);
+  }
+
+  /**
+   * Centers the map on (lat, lng) at zoom, visually offsetting for the workspace pane.
+   * When the pane is open, Leaflet's center is shifted right by half the pane width so the
+   * target point appears centered in the visible (non-pane) map area.
+   * @see docs/specs/ui/workspace/workspace-view-system.md
+   */
+  private setViewWithPaneOffset(
+    lat: number,
+    lng: number,
+    zoom: number,
+    options?: Parameters<MapInstance['setView']>[2],
+  ): void {
+    if (!this.map) return;
+    const paneOffset = this.photoPanelOpen() ? this.workspacePaneWidth() / 2 : 0;
+    if (paneOffset === 0) {
+      this.map.setView([lat, lng], zoom, options);
+      return;
+    }
+    const targetPx = this.map.project([lat, lng], zoom);
+    const shiftedPx = targetPx.add([paneOffset, 0]);
+    const shiftedLatLng = this.map.unproject(shiftedPx, zoom);
+    this.map.setView(shiftedLatLng, zoom, options);
   }
 
   private async copyAddressWithFeedback(lat: number, lng: number): Promise<void> {
@@ -1607,14 +1631,14 @@ export class MapShellComponent implements OnDestroy {
   onMarkerContextZoomHouse(): void {
     const payload = this.markerContextMenuPayload();
     if (!payload || !this.map) return;
-    this.map.setView([payload.lat, payload.lng], MapShellComponent.HOUSE_PROXIMITY_ZOOM);
+    this.setViewWithPaneOffset(payload.lat, payload.lng, MapShellComponent.HOUSE_PROXIMITY_ZOOM);
     this.onMapMenuCloseRequested();
   }
 
   onMarkerContextZoomStreet(): void {
     const payload = this.markerContextMenuPayload();
     if (!payload || !this.map) return;
-    this.map.setView([payload.lat, payload.lng], MapShellComponent.STREET_PROXIMITY_ZOOM);
+    this.setViewWithPaneOffset(payload.lat, payload.lng, MapShellComponent.STREET_PROXIMITY_ZOOM);
     this.onMapMenuCloseRequested();
   }
 
@@ -1884,7 +1908,7 @@ export class MapShellComponent implements OnDestroy {
     // Keep Leaflet dimensions in sync with the currently visible map area
     // before calculating the fly-to center.
     this.map.invalidateSize();
-    this.map.setView([event.lat, event.lng], requestedZoom, {
+    this.setViewWithPaneOffset(event.lat, event.lng, requestedZoom, {
       animate: false,
     });
 
@@ -2154,7 +2178,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.map.setView([event.lat, event.lng], MapShellComponent.STREET_PROXIMITY_ZOOM, {
+    this.setViewWithPaneOffset(event.lat, event.lng, MapShellComponent.STREET_PROXIMITY_ZOOM, {
       animate: false,
     });
     this.updateSearchViewportBounds();
@@ -2365,7 +2389,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.map.setView([payload.lat, payload.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM);
+    this.setViewWithPaneOffset(payload.lat, payload.lng, MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM);
     this.pendingMapFocus.set(null);
   }
 

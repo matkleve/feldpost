@@ -294,6 +294,14 @@
   }
 }
 
+// EXIF add control stays visible when coordinates exist (not hover-gated).
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+.detail-row--exif-location-add[data-state='idle'] .detail-row-action--l1:is(button),
+.detail-row--exif-location-add[data-state='resolving'] .detail-row-action--l1:is(button) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 // Active stack anchors dropdown below the projects row (scrolls with detail panel).
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 .media-detail-projects-stack {

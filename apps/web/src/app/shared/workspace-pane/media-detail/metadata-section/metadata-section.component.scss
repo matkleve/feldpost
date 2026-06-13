@@ -48,6 +48,8 @@
 // Validation copy sits below the row so row height matches other detail rows.
 // @see docs/specs/ui/media-detail/metadata-section.md
 .metadata-add-row-stack {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -113,7 +115,7 @@ $metadata-row-center-bg: var(
 
   display: grid;
   grid-template-columns: var(--metadata-compose-type-col) minmax(0, 1fr);
-  column-gap: var(--spacing-1);
+  column-gap: var(--spacing-2);
   align-items: center;
   min-width: 0;
   width: 100%;

@@ -628,7 +628,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.state.set('committed');
     this.clearResultSections();
     this.lastResolvedQuery.set(candidate.label.trim());
-    this.addRecentSearch(candidate.label);
+    this.addRecentSearch(candidate.label, candidate.secondaryLabel);
     this.suppressNextDocumentClick = true;
 
     switch (commitAction.type) {
@@ -684,9 +684,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.resumePlaceholderIfIdle();
   }
 
-  private addRecentSearch(label: string): void {
+  private addRecentSearch(label: string, secondaryLabel?: string): void {
     const nextRecentSearches = this.recentsProvider
-      .addRecentSearch(label, this.queryContext().activeProjectId, this.recentSearches())
+      .addRecentSearch(
+        label,
+        this.queryContext().activeProjectId,
+        this.recentSearches(),
+        secondaryLabel,
+      )
       .slice(0, MAX_RECENT_SEARCHES);
     this.recentSearches.set(nextRecentSearches);
   }

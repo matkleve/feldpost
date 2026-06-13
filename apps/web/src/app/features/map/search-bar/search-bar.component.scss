@@ -101,21 +101,21 @@
   color: var(--primary);
 }
 
-// Trailing clear column: mirrors leading icon slot geometry in the input row.
+// Trailing clear column: inset square control with outer padding against the chrome edge.
 // @see search-bar.component.html
 .search-bar__clear-slot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  inline-size: var(--search-bar-row-height);
-  min-inline-size: var(--search-bar-row-height);
   block-size: 100%;
+  padding-block: var(--spacing-1);
+  padding-inline-end: var(--spacing-1);
 }
 
 .search-bar__clear {
-  inline-size: var(--search-bar-row-height);
-  block-size: var(--search-bar-row-height);
+  inline-size: calc(var(--search-bar-row-height) - (2 * var(--spacing-1)));
+  block-size: calc(var(--search-bar-row-height) - (2 * var(--spacing-1)));
   color: var(--muted-foreground);
 
   .material-icons {
