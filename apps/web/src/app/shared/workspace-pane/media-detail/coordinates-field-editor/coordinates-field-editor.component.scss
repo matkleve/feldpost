@@ -8,7 +8,7 @@
 
 @layer components {
   .coordinates-field-editor__input {
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--font-mono), ui-monospace, monospace;
     font-size: var(--font-size-xs);
     letter-spacing: -0.02em;
   }

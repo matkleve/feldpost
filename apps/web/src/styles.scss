@@ -72,9 +72,9 @@
   --sidebar-accent-foreground: oklch(0.8109 0 0);
   --sidebar-border: oklch(0.2520 0 0);
   --sidebar-ring: oklch(0.796 0.134 80);
-  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: Playfair Display, ui-serif, serif;
-  --font-mono: JetBrains Mono, monospace;
+  --font-sans: Spectral, ui-serif, Georgia, serif;
+  --font-serif: Spectral, ui-serif, Georgia, serif;
+  --font-mono: JetBrains Mono, ui-monospace, monospace;
   --radius: 0.75rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -162,9 +162,9 @@
   --sidebar-accent-foreground: oklch(0.2101 0.0318 264.6645);
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
   --sidebar-ring: oklch(0.748 0.128 84.6);
-  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: Playfair Display, ui-serif, serif;
-  --font-mono: JetBrains Mono, monospace;
+  --font-sans: Spectral, ui-serif, Georgia, serif;
+  --font-serif: Spectral, ui-serif, Georgia, serif;
+  --font-mono: JetBrains Mono, ui-monospace, monospace;
   --radius: 0.75rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -327,6 +327,7 @@ html[data-theme="sandstone"] {
   }
   body {
     @apply bg-background text-foreground;
+    font-weight: 400;
     letter-spacing: var(--tracking-normal);
   }
 

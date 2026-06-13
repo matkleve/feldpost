@@ -284,11 +284,14 @@ The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes w
 
 ## 3.2 Typography
 
-All text is set in the system sans-serif stack unless the brand acquires a custom typeface. The stack prioritizes native fonts for performance on field devices:
+All text uses **Spectral** via **`--font-sans`** unless noted. Short metadata strings (timestamps, coordinates, toast code pointers) use **`--font-mono`** (JetBrains Mono).
 
 ```
-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+font-family: Spectral, ui-serif, Georgia, serif;   /* --font-sans / body + headings */
+font-family: JetBrains Mono, ui-monospace, monospace; /* --font-mono / metadata only */
 ```
+
+**Weights:** body **`400`** (`styles.scss` `@layer base` on `body`); headings **`600`** (`--font-weight-semibold` on `h1`–`h6` in `_typography-baseline.scss`).
 
 **Type scale (rem, base 16px, ratio 1.13):** the modular steps are emitted on **`_typography-baseline.scss`** `:root` (Phase 7 **Batch 42** — moved from the legacy bridge; same **`calc(* * 1.13)`** chain). **Batch 31** removed the **`--font-size-ratio`** indirection — steps multiply by the literal **1.13** factor.
 

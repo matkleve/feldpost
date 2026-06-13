@@ -138,7 +138,7 @@
 // @see docs/specs/ui/media-detail/_detail-row-slots.scss
 .toast-code-ref {
   margin: 0;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--font-size-2xs);
   font-weight: 400;
   line-height: 1.35;
