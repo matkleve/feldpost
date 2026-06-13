@@ -1,0 +1,119 @@
+@use '../../dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
+
+// Container query root — drives compact view toggle and archived label collapse.
+// @see docs/specs/ui/workspace/workspace-pane.md
+:host {
+  display: block;
+  container-type: inline-size;
+  container-name: workspace-projects-toolbar;
+  flex-shrink: 0;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.workspace-projects-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: 2.5rem;
+  width: 100%;
+  overflow: hidden;
+
+  > :not(.workspace-projects-toolbar__spacer):not(.workspace-projects-toolbar__search) {
+    flex-shrink: 0;
+  }
+}
+
+.workspace-projects-toolbar__spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+// Search grows in the toolbar row and truncates when the pane narrows.
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md
+.workspace-projects-toolbar__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 14rem;
+}
+
+.workspace-projects-toolbar__search-icon {
+  position: absolute;
+  left: var(--spacing-2);
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.workspace-projects-toolbar__search-input {
+  width: 100%;
+  min-width: 0;
+  height: 2.25rem;
+  padding-inline: 2rem var(--spacing-2);
+  font-size: var(--font-size-sm);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-radius: var(--radius-md);
+  outline: none;
+  color: var(--foreground);
+
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  &:focus-visible {
+    border-color: var(--primary);
+    box-shadow: var(--interactive-focus-ring);
+  }
+}
+
+@container workspace-projects-toolbar (max-width: 20rem) {
+  .workspace-projects-toolbar__search {
+    max-width: none;
+  }
+
+  .workspace-projects-toolbar__search-input::placeholder {
+    color: transparent;
+  }
+}
+
+// Archived toggle — label hides on narrow toolbar; icon remains.
+// @see docs/specs/ui/workspace/workspace-pane-projects-tab.md
+.workspace-projects-toolbar__archived-btn {
+  gap: var(--spacing-1);
+}
+
+.workspace-projects-toolbar__archived-icon {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.workspace-projects-toolbar__archived-label {
+  white-space: nowrap;
+}
+
+.workspace-projects-toolbar__archived-btn--active {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+@container workspace-projects-toolbar (max-width: 26rem) {
+  .workspace-projects-toolbar__archived-label {
+    display: none;
+  }
+
+  .workspace-projects-toolbar__archived-btn {
+    width: 2.25rem;
+    min-width: 2.25rem;
+    padding-inline: 0;
+    justify-content: center;
+  }
+}
+
+@include fp-toolbar-breakpoints.toolbar-size-control-responsive(
+  'workspace-projects-toolbar',
+  workspace-projects-toolbar
+);

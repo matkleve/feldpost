@@ -40,10 +40,10 @@ describe('media-item-row-display.helpers', () => {
     expect(resolveMediaItemRowPrimaryLabel(record)).toBe('IMG_001.jpg');
   });
 
-  it('builds secondary line with date, file type, and non-duplicate city', () => {
+  it('builds secondary line with date and non-duplicate city (file type uses chip in row UI)', () => {
     const record = { ...baseRecord(), address_label: 'IMG_001.jpg', city: 'Bern' };
     const secondary = resolveMediaItemRowSecondaryLine(record, 'en');
-    expect(secondary).toContain('JPEG');
+    expect(secondary).not.toContain('JPEG');
     expect(secondary).toContain('Bern');
     expect(secondary).toMatch(/·/);
   });

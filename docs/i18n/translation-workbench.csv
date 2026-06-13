@@ -1112,6 +1112,7 @@ workspace.projects.panel.archive,Archive,workspace projects panel detail archive
 workspace.projects.panel.restore,Restore,workspace projects panel detail restore action,Restore,Wiederherstellen,Ripristina
 workspace.projects.panel.delete,Delete,workspace projects panel detail delete action,Delete,Löschen,Elimina
 workspace.projects.panel.openInPage,Open in Projects page,workspace projects panel context menu action to open project in main page,Open in Projects page,In Projektseite öffnen,Apri nella pagina Progetti
+workspace.projects.toolbar.aria,Project browser controls,workspace projects tab toolbar aria label,Project browser controls,Projekt-Browser-Steuerung,Controlli browser progetti
 workspace.projects.panel.item.mediaCount,{count} media,workspace projects panel project item media count aria label,{count} media,{count} Medien,{count} media
 map.shell.uploadButton.aria,Upload media,upload-shell floating upload button aria-label,Upload media,Medien hochladen,Carica media
 map.shell.uploadButton.title,Upload media,upload-shell floating upload button tooltip,Upload media,Medien hochladen,Carica media

@@ -77,11 +77,6 @@ export function resolveMediaItemRowSecondaryLine(
     parts.push(captured);
   }
 
-  const fileType = resolveMediaItemRowFileTypeLabel(record);
-  if (fileType) {
-    parts.push(fileType);
-  }
-
   const location = resolveMediaItemRowLocationSnippet(record);
   if (location && location !== primary && !primary.includes(location)) {
     parts.push(location);

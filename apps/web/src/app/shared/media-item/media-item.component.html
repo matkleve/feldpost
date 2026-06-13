@@ -8,8 +8,20 @@
 
       <div class="media-item__row-content">
         <span class="media-item__row-label">{{ rowPrimaryLine() }}</span>
-        @if (rowSecondaryLine(); as secondary) {
-          <span class="media-item__row-secondary">{{ secondary }}</span>
+        @if (showFileTypeChip() || rowSecondaryLine()) {
+          <div class="media-item__row-meta">
+            @if (showFileTypeChip() && fileTypeChipText(); as chipText) {
+              <app-chip
+                class="media-item__row-filetype-chip"
+                [icon]="fileTypeChipIcon()"
+                [text]="chipText"
+                [variant]="fileTypeChipVariant()"
+              />
+            }
+            @if (rowSecondaryLine(); as secondary) {
+              <span class="media-item__row-secondary">{{ secondary }}</span>
+            }
+          </div>
         }
       </div>
 

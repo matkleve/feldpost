@@ -147,9 +147,7 @@ export class MediaItemComponent {
 
   readonly fileTypeChipIcon = computed(() => this.fileTypeDefinition().icon);
 
-  readonly showFileTypeChip = computed(
-    () => !this.isRowMode() && (this.fileTypeChipText()?.length ?? 0) > 0,
-  );
+  readonly showFileTypeChip = computed(() => (this.fileTypeChipText()?.length ?? 0) > 0);
 
   readonly slotContentObjectPosition = computed(() => 'center center');
 

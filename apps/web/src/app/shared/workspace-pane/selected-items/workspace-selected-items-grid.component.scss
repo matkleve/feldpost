@@ -28,7 +28,11 @@
 }
 
 .thumbnail-grid--row .thumbnail-grid__cards {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: unset;
   justify-content: start;
+  gap: var(--spacing-1);
 }
 
 .thumbnail-grid--large .thumbnail-grid__cards,

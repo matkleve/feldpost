@@ -164,7 +164,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.hasResolvedResultsForCurrentQuery(),
   );
   readonly showDropdownPanel = computed(() => {
-    if (!this.dropdownOpen() || this.committedCandidate()) {
+    if (!this.dropdownOpen()) {
       return false;
     }
 
@@ -347,8 +347,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     input.select();
     this.activeIndex.set(-1);
     if (this.committedCandidate()) {
-      this.dropdownOpen.set(false);
-      this.state.set('committed');
+      this.dropdownOpen.set(true);
+      this.restoreDropdownStateOnOpen();
       return;
     }
     this.dropdownOpen.set(true);
@@ -362,8 +362,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     );
     this.activeIndex.set(-1);
     if (this.committedCandidate()) {
-      this.dropdownOpen.set(false);
-      this.state.set('committed');
+      this.dropdownOpen.set(true);
+      this.restoreDropdownStateOnOpen();
       return;
     }
     this.dropdownOpen.set(true);
@@ -694,8 +694,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.dropdownOpen.set(false);
     this.activeIndex.set(-1);
     this.state.set('committed');
-    this.clearResultSections();
     this.lastResolvedQuery.set(candidate.label.trim());
+    if (commitAction.type !== 'map-center') {
+      this.clearResultSections();
+    }
     this.addRecentSearch(
       candidate.label,
       candidate.secondaryLabel,

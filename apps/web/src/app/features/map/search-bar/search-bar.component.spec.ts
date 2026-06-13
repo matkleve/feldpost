@@ -593,9 +593,15 @@ describe('SearchBarComponent', () => {
     expect(fixture.nativeElement.querySelector('.search-bar__dropdown')).toBeNull();
   });
 
-  it('does not reopen the results panel after commit when the input is focused again', () => {
+  it('restores cached result rows after commit blur and refocus', async () => {
     const fixture = TestBed.createComponent(SearchBarComponent);
     fixture.detectChanges();
+
+    const input = await typeSearchQuery(fixture, 'burg');
+
+    expect(fixture.nativeElement.querySelectorAll('ss-search-dropdown-item').length).toBeGreaterThan(
+      0,
+    );
 
     fixture.componentInstance.onCandidateSelected({
       id: 'db-1',
@@ -606,13 +612,17 @@ describe('SearchBarComponent', () => {
     });
     fixture.detectChanges();
 
-    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(fixture.componentInstance.dropdownOpen()).toBe(false);
+    expect(fixture.componentInstance.committedCandidate()).not.toBeNull();
+
     input.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.dropdownOpen()).toBe(false);
-    expect(fixture.componentInstance.showDropdownPanel()).toBe(false);
-    expect(fixture.nativeElement.querySelector('.search-bar__dropdown')).toBeNull();
+    expect(fixture.componentInstance.showDropdownPanel()).toBe(true);
+    expect(fixture.componentInstance.state()).toBe('results-complete');
+    expect(fixture.nativeElement.querySelectorAll('ss-search-dropdown-item').length).toBeGreaterThan(
+      0,
+    );
   });
 
   it('keeps fixed input-row track sizing in component styles', () => {

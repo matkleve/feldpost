@@ -4,25 +4,21 @@
 <!-- Stable state: list — project list with search and new-project trigger -->
 @if (panelState() === 'list' || panelState() === 'new-draft') {
   <div class="projects-panel">
-    <!-- Search input -->
-    <div class="projects-panel__search">
-      <span class="material-icons projects-panel__search-icon" aria-hidden="true">search</span>
-      <input
-        class="projects-panel__search-input"
-        type="search"
-        [attr.placeholder]="t('workspace.projects.panel.search.placeholder', 'Search projects…')"
-        [ngModel]="searchTerm()"
-        (ngModelChange)="searchTerm.set($event)"
-        [attr.aria-label]="t('workspace.projects.panel.search.aria', 'Search projects')"
-      />
-    </div>
+    <app-workspace-projects-toolbar
+      [searchTerm]="searchTerm()"
+      [showArchived]="showArchived()"
+      [cardVariant]="cardVariant()"
+      (searchTermChange)="searchTerm.set($event)"
+      (showArchivedChange)="showArchived.set($event)"
+      (cardVariantChange)="cardVariant.set($event)"
+    />
 
     <!-- Project grid -->
     <div class="projects-panel__grid-scroll">
       @if (loading()) {
-        <app-item-grid class="projects-panel__grid" [mode]="gridMode">
+        <app-item-grid class="projects-panel__grid" [mode]="gridMode()">
           @for (i of skeletonSlots; track i) {
-            <app-project-item [itemId]="'skeleton-' + i" [mode]="gridMode" />
+            <app-project-item [itemId]="'skeleton-' + i" [mode]="gridMode()" />
           }
         </app-item-grid>
       } @else {
@@ -32,12 +28,12 @@
           </p>
         }
         @if (filteredActive().length > 0) {
-          <app-item-grid class="projects-panel__grid" [mode]="gridMode">
+          <app-item-grid class="projects-panel__grid" [mode]="gridMode()">
             @for (project of filteredActive(); track project.id) {
               <app-project-item
                 [itemId]="project.id"
                 [project]="project"
-                [mode]="gridMode"
+                [mode]="gridMode()"
                 (opened)="onProjectItemOpened($event)"
                 (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
               />
@@ -51,12 +47,12 @@
             <p class="projects-panel__section-label" aria-hidden="true">
               {{ t('workspace.projects.panel.archived', 'Archived') }}
             </p>
-            <app-item-grid class="projects-panel__grid" [mode]="gridMode">
+            <app-item-grid class="projects-panel__grid" [mode]="gridMode()">
               @for (project of filteredArchived(); track project.id) {
                 <app-project-item
                   [itemId]="project.id"
                   [project]="project"
-                  [mode]="gridMode"
+                  [mode]="gridMode()"
                   (opened)="onProjectItemOpened($event)"
                   (contextMenuRequested)="onProjectItemContextMenu($event, project.id)"
                 />
@@ -94,7 +90,7 @@
       </div>
     }
 
-    <!-- List footer: New project + Show archived toggle -->
+    <!-- List footer: New project -->
     <div class="projects-panel__footer">
       @if (panelState() === 'list') {
         <button
@@ -107,15 +103,6 @@
           <span>{{ t('workspace.projects.panel.newProject', 'New project') }}</span>
         </button>
       }
-      <button
-        class="projects-panel__toggle-archived"
-        type="button"
-        [class.projects-panel__toggle-archived--active]="showArchived()"
-        (click)="showArchived.update(v => !v)"
-        [attr.aria-pressed]="showArchived()"
-      >
-        {{ t('workspace.projects.panel.showArchived', 'Show archived') }}
-      </button>
     </div>
   </div>
 }

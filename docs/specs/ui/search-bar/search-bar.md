@@ -47,7 +47,7 @@ Derived from the use cases. Each row maps to specific UC scenarios.
 | 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                                                                       | UC-13             | Dropdown closes; state stays `results-complete` / `typing` when query remains |
 | 12  | Clicks outside search                      | Closes dropdown; cached sections preserved when query remains                                                                    | UC-13             | State stays `results-complete` / `typing` / `committed`; refocus restores panel |
 | 12b | Refocuses input after blur with same query   | Reopens results panel from cache; pending queries re-run search                                                                  | UC-13             | No blank panel shell |
-| 12c | Refocuses committed input                  | Results panel stays closed                                                                                                       | UC-12             | State `committed` |
+| 12c | Refocuses committed input                  | Reopens cached results panel for the same query                                                                                  | UC-12             | State → `results-complete` when cache exists; map commit unchanged |
 | 13  | Clicks `×` clear button while typing       | Clears query text, closes dropdown; committed state and Search Location Marker unchanged when none was set                         | UC-12             | State → `focused-empty`                                   |
 | 13b | Clicks `×` clear button after commit       | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State → `focused-empty` / `idle`                          |
 | 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State → `focused-empty`                                   |
@@ -264,8 +264,8 @@ sequenceDiagram
 - [x] Multi-location commits (for example project/group contexts with several geolocated items) fit map bounds so all relevant locations are visible
 - [x] Content commit navigates to the correct route
 - [x] Escape closes dropdown; second Escape blurs input; search state is preserved while query text remains
-- [x] Click outside closes dropdown; refocus restores cached results or empty state for the same query
-- [x] Committed input refocus does not reopen stale results panel
+- [x] Click outside closes dropdown; refocus restores cached results or empty state for the same query (including after map-center commit)
+- [x] Committed input refocus reopens the cached results panel without re-centering the map
 - [x] `×` clear button appears while typing (`query.trim().length > 0`) and after commit; hidden when the input is empty
 - [x] `×` while typing clears query text and closes the dropdown without requiring a prior commit
 - [x] `×` after commit clears query, committed state, and Search Location Marker

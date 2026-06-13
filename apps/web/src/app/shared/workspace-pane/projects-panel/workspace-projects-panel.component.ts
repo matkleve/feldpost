@@ -8,6 +8,7 @@ import {
   Component,
   ElementRef,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -26,6 +27,9 @@ import type { ItemDisplayMode } from '../../item-grid/item.component';
 import { ItemGridComponent } from '../../item-grid/item-grid.component';
 import { DropdownShellComponent } from '../../dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective } from '../../ui/menu';
+import { CardVariantSettingsService } from '../../ui-primitives/card-variant-settings.service';
+import type { CardVariant } from '../../ui-primitives/card-variant.types';
+import { WorkspaceProjectsToolbarComponent } from './workspace-projects-toolbar.component';
 
 // Panel view states — @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State
 type ProjectsPanelState = 'list' | 'detail' | 'new-draft';
@@ -44,6 +48,7 @@ export const DRAG_MEDIA_IDS_MIME = 'application/x-feldpost-media-ids';
     ItemGridComponent,
     DropdownShellComponent,
     HlmMenuItemDirective,
+    WorkspaceProjectsToolbarComponent,
   ],
   templateUrl: './workspace-projects-panel.component.html',
   styleUrl: './workspace-projects-panel.component.scss',
@@ -55,6 +60,7 @@ export class WorkspaceProjectsPanelComponent {
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly cardVariantSettings = inject(CardVariantSettingsService);
 
   protected readonly t = (key: string, fallback = ''): string =>
     this.i18nService.t(key, fallback);
@@ -84,8 +90,21 @@ export class WorkspaceProjectsPanelComponent {
   readonly renameValue = signal('');
   readonly renameBusy = signal(false);
 
-  /** Compact grid for narrow workspace pane — mirrors media thumbnail grid density. */
-  readonly gridMode: ItemDisplayMode = 'grid-sm';
+  readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('projects'));
+  readonly gridMode = computed<ItemDisplayMode>(() => {
+    switch (this.cardVariant()) {
+      case 'row':
+        return 'row';
+      case 'small':
+        return 'grid-sm';
+      case 'medium':
+        return 'grid-md';
+      case 'large':
+        return 'grid-lg';
+      default:
+        return 'grid-md';
+    }
+  });
   readonly skeletonSlots = [1, 2, 3, 4, 5, 6] as const;
 
   readonly activeProjects = computed(() =>
@@ -134,6 +153,9 @@ export class WorkspaceProjectsPanelComponent {
 
   // Lifecycle — load on first render (panel mounts only when tab is active)
   constructor() {
+    effect(() => {
+      this.cardVariantSettings.setVariant('projects', this.cardVariant());
+    });
     void this.loadProjects();
   }
 

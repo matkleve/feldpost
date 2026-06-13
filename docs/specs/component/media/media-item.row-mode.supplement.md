@@ -9,21 +9,22 @@ When `mode === 'row'`, `MediaItemComponent` renders a **dense horizontal scan ro
 
 ## What It Looks Like
 
-Each row card is one interactive band inside an **auto-fill grid** (left-to-right, wrapping):
+Each row card is one **full-width horizontal band** in a single-column list (one item per row):
 
 - **Leading media column:** square (`var(--spacing-6)` / 24px), `border-radius: var(--container-radius-control)`, `MediaDisplayComponent` fills the square with `object-fit: contain` (icon-only for document-like types when required by media-display contract).
-- **Label column:** flex column with `gap: 2px`; primary line `font-size: var(--font-size-sm)`, secondary `font-size: var(--font-size-xs)`, both single-line ellipsis.
+- **Label column:** flex column with `gap: 2px`; primary line `font-size: var(--font-size-sm)`; secondary meta row with inline file-type chip + capture/location text (`font-size: var(--font-size-xs)`, ellipsis).
 - **Row chrome:** `padding: var(--spacing-1)` on all sides, `min-height: 2rem`, `border-radius: var(--container-radius-control)`.
-- **Grid container:** `ItemGrid` row mode uses `repeat(auto-fill, minmax(16rem, 1fr))` with `gap: var(--spacing-1)` so cards flow left-to-right and wrap.
+- **Grid container:** `ItemGrid` row mode uses a single-column flex stack with `gap: var(--spacing-1)` — one item per row, full width.
 - **Hover / selected:** row background uses primary tint on hover only (`color-mix(in srgb, var(--primary) 12%, transparent)`). Selected row adds `border: 1px solid var(--primary)` on the row band plus quiet-action visibility; focus-within does not apply row tint (avoids false highlight when tabbing to select button).
-- **File-type chip:** hidden on row thumb; file category appears in the secondary line instead.
+- **File-type chip:** rendered inline in the secondary meta row via `app-chip` (not overlaid on thumb, not plain text).
 
 ### Text content contract
 
 | Line | Source priority | Fallback |
 | --- | --- | --- |
 | **Primary** | `address_label` → `original_filename` | i18n `media.card.alt.missing` (`Image`) |
-| **Secondary** | Join with ` · `: formatted `captured_at` (date+time when `has_time`), file-type badge (`fileTypeBadge`), location snippet (`city`, `district`, or non-duplicate `address_label`) | Omit empty segments; line hidden when all segments empty |
+| **Secondary** | Join with ` · `: formatted `captured_at` (date+time when `has_time`), location snippet (`city`, `district`, or non-duplicate `address_label`) | Omit empty segments; meta row hidden when chip and text both empty |
+| **File type** | `app-chip` in secondary meta row (same chip contract as grid mode) | Hidden when badge text empty |
 
 Formatting uses `I18nService.locale()` via `Intl.DateTimeFormat` (`dateStyle: 'medium'`; `timeStyle: 'short'` when `has_time`).
 
@@ -46,7 +47,9 @@ MediaItemComponent [data-mode=row]
     │       └── MediaItemQuietActionsComponent
     ├── .media-item__row-content
     │   ├── .media-item__row-label (primary)
-    │   └── .media-item__row-secondary (optional)
+    │   └── .media-item__row-meta
+    │       ├── app-chip (file type)
+    │       └── .media-item__row-secondary (optional)
     └── .media-item__open (full-row hit target)
 ```
 
@@ -87,8 +90,7 @@ flowchart LR
 
 | Token | Value | Consumer |
 | --- | --- | --- |
-| `--item-grid-column-min-row` | `16rem` | `ItemGrid` row column template |
-| `--item-grid-gap` (row mode) | `var(--spacing-1)` | `ItemGrid` row grid gap |
+| `--item-grid-gap` (row mode) | `var(--spacing-1)` | `ItemGrid` row list gap |
 | `--media-item-row-min-height` | `2rem` | `.media-item__surface--row` |
 | `--media-item-row-media-size` | `var(--spacing-6)` | `.media-item__row-media` |
 | `--media-item-row-padding-inline` | `var(--spacing-1)` | `.media-item__surface--row` |
@@ -99,10 +101,10 @@ flowchart LR
 
 ## Acceptance Criteria
 
-- [ ] Row mode grid flows left-to-right with `auto-fill` columns and `spacing-1` gap.
+- [ ] Row mode list is single-column — one full-width item per row.
 - [ ] Row card padding is `spacing-1` on all sides.
 - [ ] Primary line uses address → filename → i18n fallback order.
 - [ ] Secondary line shows capture date, file type, and location snippet when available.
-- [ ] File-type chip is suppressed on row thumb; type appears in secondary line.
+- [ ] File-type chip appears inline in row meta row; type is not plain text in secondary line.
 - [ ] Open/select/quiet-actions behavior matches grid mode; hit target spans full row width.
 - [ ] `/media` loading placeholder count uses ~48px row height for row variant.

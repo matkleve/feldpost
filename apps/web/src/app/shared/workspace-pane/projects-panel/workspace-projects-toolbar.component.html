@@ -1,0 +1,80 @@
+<div
+  class="workspace-projects-toolbar"
+  role="toolbar"
+  [attr.aria-label]="t('workspace.projects.toolbar.aria', 'Project browser controls')"
+>
+  <label class="workspace-projects-toolbar__search">
+    <span class="material-icons workspace-projects-toolbar__search-icon" aria-hidden="true">search</span>
+    <input
+      class="workspace-projects-toolbar__search-input"
+      type="search"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="onSearchTermChange($event)"
+      [attr.placeholder]="t('workspace.projects.panel.search.placeholder', 'Search projects…')"
+      [attr.aria-label]="t('workspace.projects.panel.search.aria', 'Search projects')"
+    />
+  </label>
+
+  <span class="workspace-projects-toolbar__spacer" aria-hidden="true"></span>
+
+  <button
+    type="button"
+    hlmBtn
+    variant="outline"
+    size="sm"
+    class="workspace-projects-toolbar__archived-btn"
+    [class.workspace-projects-toolbar__archived-btn--active]="showArchived()"
+    [attr.aria-pressed]="showArchived()"
+    [attr.aria-label]="t('workspace.projects.panel.showArchived', 'Show archived')"
+    [attr.title]="t('workspace.projects.panel.showArchived', 'Show archived')"
+    (click)="toggleShowArchived()"
+  >
+    <span class="material-icons workspace-projects-toolbar__archived-icon" aria-hidden="true">inventory_2</span>
+    <span class="workspace-projects-toolbar__archived-label">
+      {{ t('workspace.projects.panel.showArchived', 'Show archived') }}
+    </span>
+  </button>
+
+  <div class="workspace-projects-toolbar__size-control workspace-projects-toolbar__size-control--full" hlmPillToggle size="sm">
+    <div
+      hlmToggleGroup
+      size="sm"
+      brnToggleGroup
+      type="single"
+      [nullable]="false"
+      [value]="cardVariant()"
+      (valueChange)="onCardVariantToggleChange($event)"
+      [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+    >
+      @for (opt of cardVariantToggleOptions(); track opt.id) {
+        <button
+          type="button"
+          hlmToggleGroupItem
+          size="icon"
+          brnToggleGroupItem
+          [value]="opt.id"
+          [attr.aria-label]="opt.ariaLabel || opt.label"
+          [attr.title]="opt.title || opt.label"
+        >
+          <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="workspace-projects-toolbar__size-control workspace-projects-toolbar__size-control--compact">
+    <div class="workspace-projects-toolbar__size-control-track" hlmToggleGroup size="sm">
+      <button
+        type="button"
+        hlmToggleGroupItem
+        brnToggleGroupItem
+        size="icon"
+        [attr.aria-label]="compactCardVariantToggleTitle()"
+        [attr.title]="compactCardVariantToggleTitle()"
+        (click)="cycleCardVariant()"
+      >
+        <span class="material-icons" aria-hidden="true">{{ currentCardVariantToggleOption()?.icon }}</span>
+      </button>
+    </div>
+  </div>
+</div>

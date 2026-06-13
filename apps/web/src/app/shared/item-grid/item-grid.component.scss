@@ -60,10 +60,9 @@
   --item-grid-column-min: var(--item-grid-column-min-card);
 }
 
-// Row mode: auto-fill grid so cards flow left-to-right and wrap.
+// Row mode: single column — one item per row, full width.
 // @see docs/specs/component/media/media-item.row-mode.supplement.md
 :host(.item-grid--row) {
-  --item-grid-column-min: var(--item-grid-column-min-row, 16rem);
   --item-grid-gap: var(--spacing-1);
   --item-grid-slot-aspect-ratio: auto;
   --item-grid-slot-block-size: auto;
@@ -73,8 +72,8 @@
   --media-item-row-padding-block: var(--spacing-1);
   --media-item-row-gap: var(--spacing-1);
 
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--item-grid-column-min), 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--item-grid-gap);
   align-items: stretch;
 }
