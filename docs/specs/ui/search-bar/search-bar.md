@@ -48,8 +48,9 @@ Derived from the use cases. Each row maps to specific UC scenarios.
 | 12  | Clicks outside search                      | Closes dropdown; cached sections preserved when query remains                                                                    | UC-13             | State stays `results-complete` / `typing` / `committed`; refocus restores panel |
 | 12b | Refocuses input after blur with same query   | Reopens results panel from cache; pending queries re-run search                                                                  | UC-13             | No blank panel shell |
 | 12c | Refocuses committed input                  | Results panel stays closed                                                                                                       | UC-12             | State `committed` |
-| 13  | Clicks `�` clear button                    | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State ? `idle`                                            |
-| 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State ? `focused-empty`                                   |
+| 13  | Clicks `×` clear button while typing       | Clears query text, closes dropdown; committed state and Search Location Marker unchanged when none was set                         | UC-12             | State → `focused-empty`                                   |
+| 13b | Clicks `×` clear button after commit       | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State → `focused-empty` / `idle`                          |
+| 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State → `focused-empty`                                   |
 | 15  | Query returns no results                   | Shows empty state with "No address found" + guidance copy                                                                    | UC-10             | �                                                         |
 | 16  | Geocoder slow/fails                        | DB results render immediately, geocoder section shows skeleton then hides                                                        | UC-7              | Graceful degradation                                      |
 | 17  | Pastes coordinates or Google Maps URL      | Detects coordinate format, centers map, reverse-geocodes label                                                                   | UC-5              | `commit` type `map-center`                                |
@@ -86,7 +87,7 @@ SearchBar                                  ? positioned top-center in Map Zone, 
 �   +-- SearchIconSlot                     ? fixed square media slot, non-clickable
 �   �   +-- SearchIcon                     ? 16px, left side, wrapped to absorb extra row height
 �   +-- <input type="search">              ? flex-1, role="combobox", placeholder "Search address, project, group�"
-�   +-- ClearButton (�)                    ? shown only in committed state, same wrapped media-slot geometry as leading icon
+�   +-- ClearButton (×)                    → visible when query has text or a commit is active; same wrapped media-slot geometry as leading icon
 �
 +-- ResultsPanel                           ? revealed inside the same surface (not an overlay), role="listbox", same width, animates panel height only
     �
@@ -265,8 +266,10 @@ sequenceDiagram
 - [x] Escape closes dropdown; second Escape blurs input; search state is preserved while query text remains
 - [x] Click outside closes dropdown; refocus restores cached results or empty state for the same query
 - [x] Committed input refocus does not reopen stale results panel
-- [x] `�` clear button appears after commit; clicking it resets everything
-- [x] `�` clear button uses square control geometry aligned to shared control/media sizing tokens
+- [x] `×` clear button appears while typing (`query.trim().length > 0`) and after commit; hidden when the input is empty
+- [x] `×` while typing clears query text and closes the dropdown without requiring a prior commit
+- [x] `×` after commit clears query, committed state, and Search Location Marker
+- [x] `×` clear button uses square control geometry aligned to shared control/media sizing tokens
 - [x] Empty state shows "No address found" with guidance to try a different address or search term
 - [x] Pasting coordinates or Google Maps URL auto-detects and centers map
 

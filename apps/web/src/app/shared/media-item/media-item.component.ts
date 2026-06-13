@@ -9,6 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { MediaContext, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
@@ -40,6 +41,10 @@ import {
   resolveInitialGridAspectRatioCss,
   shouldIgnoreGridAspectHandoffReset,
 } from './media-item-grid-aspect.helpers';
+import {
+  resolveMediaItemRowPrimaryLabel,
+  resolveMediaItemRowSecondaryLine,
+} from './media-item-row-display.helpers';
 
 export const MEDIA_ITEM_ACTION_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
 
@@ -48,6 +53,7 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
 @Component({
   selector: 'app-media-item',
   imports: [
+    NgTemplateOutlet,
     ChipComponent,
     MediaDisplayComponent,
     MediaItemUploadOverlayComponent,
@@ -110,6 +116,7 @@ export class MediaItemComponent {
   /** Detail embed: decoded sharp layer size for in-slot resolution badge. */
   readonly detailContentResolution = signal<MediaContentResolution | null>(null);
   readonly usesFillSlotGeometry = computed(() => this.mode() === 'row');
+  readonly isRowMode = computed(() => this.mode() === 'row' && this.showInteractionChrome());
   private readonly mediaPreview = viewChild(MediaDisplayComponent);
 
   readonly fileIdentity = computed(() => {
@@ -140,7 +147,9 @@ export class MediaItemComponent {
 
   readonly fileTypeChipIcon = computed(() => this.fileTypeDefinition().icon);
 
-  readonly showFileTypeChip = computed(() => (this.fileTypeChipText()?.length ?? 0) > 0);
+  readonly showFileTypeChip = computed(
+    () => !this.isRowMode() && (this.fileTypeChipText()?.length ?? 0) > 0,
+  );
 
   readonly slotContentObjectPosition = computed(() => 'center center');
 
@@ -272,6 +281,23 @@ export class MediaItemComponent {
   readonly titleText = computed(
     () => this.item()?.address_label || this.t('media.page.title', 'Media'),
   );
+
+  readonly rowPrimaryLine = computed(() => {
+    const record = this.item();
+    if (!record) {
+      return this.t('media.card.alt.missing', 'Image');
+    }
+    const primary = resolveMediaItemRowPrimaryLabel(record);
+    return primary || this.t('media.card.alt.missing', 'Image');
+  });
+
+  readonly rowSecondaryLine = computed(() => {
+    const record = this.item();
+    if (!record) {
+      return '';
+    }
+    return resolveMediaItemRowSecondaryLine(record, this.i18nService.locale());
+  });
 
   t(key: string, fallback: string): string {
     const value = this.i18nService.t(key, fallback);

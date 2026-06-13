@@ -194,6 +194,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     return this.matchingRecents().length > 0;
   });
+
+  // Stable state: trailing clear control visible when query has text or a map commit is active.
+  // @see docs/specs/ui/search-bar/search-bar.md § Actions (rows 13 / 13b)
   readonly showClearButton = computed(
     () => this.query().trim().length > 0 || this.committedCandidate() !== null,
   );

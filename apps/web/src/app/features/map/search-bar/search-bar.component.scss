@@ -22,14 +22,16 @@
 
 // Sidebar-aligned panel + row rhythm — @see apps/web/src/app/features/nav/nav.component.scss
 .search-bar {
+  --search-bar-chrome-size: 2.75rem;
   --search-bar-gap: var(--spacing-1);
   --search-bar-dropdown-padding-inline: var(--spacing-1);
   --search-bar-dropdown-padding-block: var(--spacing-1);
   --search-bar-dropdown-gap: var(--spacing-3);
   --search-bar-media-size: var(--spacing-6);
-  --search-bar-row-height: 2.75rem;
+  // Inner row fits inside frosted border so total chrome matches map-upload-btn (2.75rem).
+  --search-bar-row-height: calc(var(--search-bar-chrome-size) - 2px);
   --search-bar-results-max-block-size: calc(
-    100dvh - (2 * var(--search-bar-viewport-inset)) - var(--search-bar-row-height)
+    100dvh - (2 * var(--search-bar-viewport-inset)) - var(--search-bar-chrome-size)
   );
   --search-dropdown-item-padding-inline: var(--spacing-1);
   --search-dropdown-item-padding-block: var(--spacing-1);
@@ -41,8 +43,10 @@
 
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  min-height: var(--search-bar-chrome-size);
   width: 100%;
-  border-radius: var(--container-radius-panel);
+  border-radius: var(--radius-md);
   @include frosted-chrome.surface;
   overflow: hidden;
   contain: layout;

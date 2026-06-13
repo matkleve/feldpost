@@ -140,7 +140,7 @@ export class MediaContentComponent implements AfterViewInit {
     const gapPx = 12;
 
     if (mode === 'row') {
-      const rowHeightPx = 104;
+      const rowHeightPx = 48;
       return Math.max(
         6,
         Math.ceil(

@@ -176,16 +176,18 @@ Use cases are the source of truth. The state machine, actions table, component h
 
 ## UC-12: Clear and start over
 
-**Who:** Anyone who committed a search and wants to start fresh.
-**Goal:** Remove the committed state and search for something else.
+**Who:** Anyone typing in the search bar or who committed a search and wants to start fresh.
+**Goal:** Clear the current query (and committed map state when present) with one action.
 
-1. Search bar shows committed state: "Schleiergasse 18, 1100 Wien" with `×` button.
-2. User clicks `×` → query clears, committed state resets, Search Location Marker removed, dropdown closes.
-3. User can now type a new query.
+1. While typing, search bar shows `×` in the trailing slot whenever `query.trim().length > 0`.
+2. User clicks `×` while typing → query clears, dropdown closes, state returns to `focused-empty`; no Search Location Marker change when nothing was committed.
+3. After commit, search bar shows committed label with `×` still visible.
+4. User clicks `×` after commit → query clears, committed state resets, Search Location Marker removed, dropdown closes.
+5. User can now type a new query.
 
 **Edge cases:**
-- **EC-12a:** User presses Backspace on empty committed input → same as clicking `×`.
-- **EC-12b:** User edits the committed text directly → state transitions back to `typing`, committed state is cleared, new search fires.
+- **EC-12a:** User presses Backspace on empty committed input → same as clicking `×` after commit.
+- **EC-12b:** User edits the committed text directly → state transitions back to `typing`, committed state is cleared, new search fires; `×` remains visible while text remains.
 
 ## UC-13: Navigating results with keyboard only
 

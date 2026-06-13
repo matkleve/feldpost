@@ -61,13 +61,17 @@
 }
 
 // Switches container flow to vertical stacking for row mode.
-// @see docs/specs/component/item-grid/item-grid.md#scss-responsibilities
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
 :host(.item-grid--row) {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: var(--spacing-1);
   --item-grid-slot-aspect-ratio: auto;
-  --item-grid-slot-block-size: 6.5rem;
+  --item-grid-slot-block-size: auto;
+  --media-item-row-min-height: 3rem;
+  --media-item-row-media-size: var(--spacing-6);
+  --media-item-row-padding-inline: var(--spacing-3);
+  --media-item-row-gap: var(--spacing-2);
 }
 
 // Grid cells: square host (media-item aspect-ratio 1); media ratio animates inside the cell.

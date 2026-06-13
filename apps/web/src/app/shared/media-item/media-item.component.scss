@@ -15,10 +15,11 @@
   block-size: auto;
 }
 
-// Row mode keeps fixed lane height from item-grid.
-// @see docs/specs/component/item-grid/item-grid.md#row-mode
+// Row: compact horizontal scan band; height from row surface tokens.
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
 :host([data-mode='row']) {
-  block-size: var(--item-grid-slot-block-size, 6.5rem);
+  block-size: auto;
+  aspect-ratio: unset;
 }
 
 // Detail pane embed: height-first slot inside fixed hero band; border hugs media width.
@@ -70,7 +71,10 @@
 }
 
 :host([data-has-item='false'][data-mode='row']) {
-  border-radius: var(--radius-md);
+  aspect-ratio: unset;
+  block-size: auto;
+  min-block-size: var(--media-item-row-min-height, 3rem);
+  border-radius: var(--container-radius-control);
 }
 
 // Slot owns media geometry, border emphasis, and file-type chip stacking context.
@@ -110,9 +114,81 @@
 :host([data-mode='row']) .media-item__slot {
   block-size: 100%;
   inline-size: 100%;
-  aspect-ratio: auto;
+  aspect-ratio: 1;
   margin-inline: 0;
   transition: none;
+}
+
+// Row scan band: search-dropdown-item density (square thumb + label column).
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
+.media-item__surface--row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--media-item-row-media-size, var(--spacing-6)) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--media-item-row-gap, var(--spacing-2));
+  min-block-size: var(--media-item-row-min-height, 3rem);
+  padding-block: var(--spacing-2);
+  padding-inline: var(--media-item-row-padding-inline, var(--spacing-3));
+  border-radius: var(--container-radius-control);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.media-item__surface--row:hover,
+.media-item__surface--row:focus-within,
+:host([data-state='selected']) .media-item__surface--row {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+// Fixed square leading media column for row mode.
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
+.media-item__row-media {
+  inline-size: var(--media-item-row-media-size, var(--spacing-6));
+  block-size: var(--media-item-row-media-size, var(--spacing-6));
+  min-inline-size: var(--media-item-row-media-size, var(--spacing-6));
+  min-block-size: var(--media-item-row-media-size, var(--spacing-6));
+  position: relative;
+}
+
+.media-item__row-media .media-item__slot {
+  border-radius: var(--container-radius-control);
+}
+
+// Stacked primary + secondary labels; truncate inside flexible column.
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
+.media-item__row-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.media-item__row-label,
+.media-item__row-secondary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-item__row-label {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+  color: var(--foreground);
+}
+
+.media-item__row-secondary {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+  color: var(--muted-foreground);
+}
+
+.media-item__open--row {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 
 // Preview fills slot width; block-size follows viewport intrinsic height in grid modes.
@@ -208,7 +284,9 @@
 }
 
 .media-item__slot:hover .media-item__quiet-actions,
-.media-item__slot:focus-within .media-item__quiet-actions {
+.media-item__slot:focus-within .media-item__quiet-actions,
+.media-item__surface--row:hover .media-item__quiet-actions,
+.media-item__surface--row:focus-within .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   transition:
