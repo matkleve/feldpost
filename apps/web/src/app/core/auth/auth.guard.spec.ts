@@ -28,13 +28,15 @@ function makeSession() {
   } as any;
 }
 
-function setup(authenticated: boolean) {
+function setup(authenticated: boolean, passwordRecoveryPending = false) {
   const sessionSig = signal<any>(authenticated ? makeSession() : null);
   const loadingSig = signal(false); // already loaded
+  const passwordRecoveryPendingSig = signal(passwordRecoveryPending);
 
   const fakeAuth = {
     session: sessionSig,
     loading: loadingSig,
+    passwordRecoveryPending: passwordRecoveryPendingSig,
   };
 
   const routerSpy = {
@@ -71,6 +73,14 @@ describe('authGuard', () => {
     const tree = result as UrlTree;
     expect(tree.toString()).toContain('auth/login');
   });
+
+  it('redirects to /auth/update-password when password recovery is pending', async () => {
+    setup(true, true);
+    const result = await TestBed.runInInjectionContext(() => authGuard({} as any, {} as any));
+    expect(result).not.toBe(true);
+    const tree = result as UrlTree;
+    expect(tree.toString()).toContain('auth/update-password');
+  });
 });
 
 // ── guestGuard ─────────────────────────────────────────────────────────────────
@@ -101,6 +111,7 @@ describe('authGuard loading race condition', () => {
     const fakeAuth = {
       session: sessionSig,
       loading: loadingSig,
+      passwordRecoveryPending: signal(false),
     };
 
     const routerSpy = {

@@ -60,10 +60,9 @@
     <ss-search-filter-chips [chips]="filterChips()" (removeChip)="onFilterChipRemove($event)" />
   }
 
-  @if (!isProjectsMode()) {
+  @if (!isProjectsMode() && dropdownOpen()) {
     <div
       class="search-bar__dropdown"
-      [attr.aria-hidden]="!dropdownOpen()"
       id="search-results-listbox"
       role="listbox"
     >
@@ -115,7 +114,7 @@
           }
 
           @if (sections().dbAddress.items.length > 0) {
-            <div class="search-bar__section-label" role="presentation">Addresses</div>
+            <div class="search-bar__section-label" role="presentation">{{ sections().dbAddress.title }}</div>
             @for (candidate of sections().dbAddress.items; track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"
@@ -157,7 +156,7 @@
           }
 
           @if (sections().geocoder.items.length > 0 || geocoderLoading()) {
-            <div class="search-bar__section-label" role="presentation">Places</div>
+            <div class="search-bar__section-label" role="presentation">{{ sections().geocoder.title }}</div>
 
             @if (geocoderLoading()) {
               <div class="search-bar__skeleton-list" aria-hidden="true">

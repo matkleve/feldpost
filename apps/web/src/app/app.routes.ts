@@ -12,6 +12,15 @@ import type { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
+  // Recovery links establish a session — must NOT use guestGuard (it redirects to /).
+  {
+    path: 'auth/update-password',
+    loadComponent: () =>
+      import('./features/auth/update-password/update-password.component').then(
+        (m) => m.UpdatePasswordComponent,
+      ),
+  },
+
   // ── Auth routes (unauthenticated only) ────────────────────────────────────
   {
     path: 'auth',
@@ -32,15 +41,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/reset-password/reset-password.component').then(
             (m) => m.ResetPasswordComponent,
-          ),
-      },
-      {
-        // Password recovery link lands here — no guestGuard needed
-        // (user arrives with a temporary recovery session, not a full session)
-        path: 'update-password',
-        loadComponent: () =>
-          import('./features/auth/update-password/update-password.component').then(
-            (m) => m.UpdatePasswordComponent,
           ),
       },
       { path: '', redirectTo: 'login', pathMatch: 'full' },

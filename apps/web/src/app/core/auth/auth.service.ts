@@ -59,6 +59,10 @@ export class AuthService {
   /** Shortcut: the authenticated user from the current session. */
   readonly user = computed<User | null>(() => this._session()?.user ?? null);
 
+  /** True while the user must set a new password before using the app. */
+  private readonly _passwordRecoveryPending = signal(false);
+  readonly passwordRecoveryPending = this._passwordRecoveryPending.asReadonly();
+
   /** True while initialize() is still resolving. Guards use this to wait. */
   private readonly _loading = signal<boolean>(true);
   readonly loading = this._loading.asReadonly();
@@ -72,6 +76,8 @@ export class AuthService {
    */
   async initialize(): Promise<void> {
     try {
+      this.markPasswordRecoveryFromUrl();
+
       // Load any existing session from storage
       const { data } = await this.supabase.client.auth.getSession();
       this._session.set(data.session);
@@ -81,12 +87,17 @@ export class AuthService {
       this.supabase.client.auth.onAuthStateChange((event, session) => {
         this._session.set(session);
 
-        // After a PASSWORD_RECOVERY link is clicked, Supabase fires SIGNED_IN
-        // with type 'recovery'. Route the user to the update-password form.
+        // After a PASSWORD_RECOVERY link is clicked, Supabase fires PASSWORD_RECOVERY.
+        // Route the user to the update-password form and block the main app until done.
         if (event === 'PASSWORD_RECOVERY') {
-          this.router.navigate(['/auth/update-password']);
+          this._passwordRecoveryPending.set(true);
+          void this.router.navigate(['/auth/update-password']);
         }
       });
+
+      if (this._passwordRecoveryPending()) {
+        void this.router.navigate(['/auth/update-password']);
+      }
     } finally {
       // Guards wait on loading(); always clear even when getSession fails.
       this._loading.set(false);
@@ -152,6 +163,7 @@ export class AuthService {
    */
   async signOut(): Promise<void> {
     clearAccountProfileCache();
+    this._passwordRecoveryPending.set(false);
     await this.supabase.client.auth.signOut();
     // session signal is set to null by onAuthStateChange
     this.router.navigate(['/auth/login']);
@@ -187,6 +199,9 @@ export class AuthService {
       password: newPassword,
       nonce,
     });
+    if (!error) {
+      this._passwordRecoveryPending.set(false);
+    }
     return { error };
   }
 
@@ -299,6 +314,17 @@ export class AuthService {
       return { error: new Error(error.message) };
     }
     return { error: null };
+  }
+
+  private markPasswordRecoveryFromUrl(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const locationBits = `${window.location.hash}&${window.location.search}`;
+    if (locationBits.includes('type=recovery')) {
+      this._passwordRecoveryPending.set(true);
+    }
   }
 
   private authRedirectOrigin(): string {

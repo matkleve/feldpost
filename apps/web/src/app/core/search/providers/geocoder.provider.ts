@@ -37,7 +37,7 @@ export class GeocoderProvider implements SearchProvider {
   private readonly mediaClusterService = inject(MediaClusterService);
 
   readonly id = 'geocoder';
-  readonly sectionTitle = 'Places';
+  readonly sectionTitle = 'From Internet';
   readonly family = 'geocoder' as const;
   readonly keywords = ['address', 'place'];
   readonly priority = 50;

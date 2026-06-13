@@ -79,7 +79,7 @@ export class DbAddressProvider implements SearchProvider {
   private readonly orgSearchTuning = inject(OrgSearchTuningService);
 
   readonly id = 'db-address';
-  readonly sectionTitle = 'Addresses';
+  readonly sectionTitle = 'From DB';
   readonly family = 'db-address' as const;
   readonly keywords = ['address'];
   readonly priority = 10;
@@ -112,7 +112,7 @@ export class DbAddressProvider implements SearchProvider {
     let request = this.supabaseService.client
       .from('locations')
       .select(
-        'address_label, street, house_number, city, latitude, longitude, media_item_location_links!inner(media_item_id, media_items!inner(created_at, organization_id, media_projects(project_id)))',
+        'address_label, street, house_number, staircase, door, postcode, city, district, country, latitude, longitude, media_item_location_links!inner(media_item_id, media_items!inner(created_at, organization_id, media_projects(project_id)))',
       )
       .ilike('address_label', `%${trimmedQuery}%`)
       .not('latitude', 'is', null)

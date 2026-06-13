@@ -46,6 +46,10 @@ export const authGuard: CanActivateFn = async () => {
 
   await waitForAuth(auth);
 
+  if (auth.passwordRecoveryPending()) {
+    return router.createUrlTree(['/auth/update-password']);
+  }
+
   if (auth.session()) {
     return true;
   }

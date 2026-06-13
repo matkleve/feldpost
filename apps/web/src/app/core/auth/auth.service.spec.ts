@@ -231,6 +231,23 @@ describe('AuthService', () => {
     });
   });
 
+  describe('initialize()', () => {
+    it('navigates to update-password on PASSWORD_RECOVERY', async () => {
+      const { service, fakeSupabase, routerSpy } = setup();
+      let recoveryHandler: ((event: string, session: unknown) => void) | undefined;
+      fakeSupabase.client.auth.onAuthStateChange.mockImplementation((handler) => {
+        recoveryHandler = handler;
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      });
+
+      await service.initialize();
+      recoveryHandler?.('PASSWORD_RECOVERY', makeSession());
+
+      expect(service.passwordRecoveryPending()).toBe(true);
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/update-password']);
+    });
+  });
+
   describe('resetPasswordForEmail()', () => {
     it('calls Supabase with the email and correct redirectTo', async () => {
       const { service, fakeSupabase } = setup();

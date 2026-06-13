@@ -31,6 +31,17 @@
 .search-dropdown-item:hover,
 .search-dropdown-item--active {
   background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+
+  .search-dropdown-item__icon,
+  .search-dropdown-item__label {
+    color: var(--primary);
+  }
+
+  .search-dropdown-item__secondary,
+  .search-dropdown-item__meta {
+    color: color-mix(in srgb, var(--primary) 72%, var(--muted-foreground));
+  }
 }
 
 // Icon slot: fixed-size inline-flex cell; aligns icon top within the row.

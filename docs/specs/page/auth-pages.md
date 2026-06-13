@@ -10,8 +10,8 @@ Centered auth card on a calm neutral backdrop, shared typography and spacing fro
 
 ## Where It Lives
 
-- **Routes**: `/auth/login`, `/auth/register`, `/auth/reset-password`, `/auth/update-password` (`apps/web/src/app/app.routes.ts`).
-- **Guards**: `guestGuard` on the `/auth` parent; unauthenticated users hitting `/` are steered through `authGuard` toward `/auth/login`.
+- **Routes**: `/auth/login`, `/auth/register`, `/auth/reset-password` under `guestGuard`; `/auth/update-password` is a sibling route **without** `guestGuard` (recovery session counts as authenticated).
+- **Guards**: `guestGuard` on the `/auth` parent; `authGuard` redirects pending recovery sessions to `/auth/update-password`; unauthenticated users hitting `/` are steered through `authGuard` toward `/auth/login`.
 - **Code**: `apps/web/src/app/features/auth/<screen>/`.
 
 ## Actions
@@ -28,11 +28,12 @@ Centered auth card on a calm neutral backdrop, shared typography and spacing fro
 ## Component Hierarchy
 
 ```text
-app.routes /auth (guestGuard)
-├── LoginComponent
-├── RegisterComponent
-├── ResetPasswordComponent
-└── UpdatePasswordComponent
+app.routes
+├── auth/update-password (no guestGuard — recovery session)
+└── /auth (guestGuard)
+    ├── LoginComponent
+    ├── RegisterComponent
+    └── ResetPasswordComponent
 ```
 
 Normative IO and session rules live in the service contract, not duplicated here.
@@ -48,7 +49,8 @@ Normative IO and session rules live in the service contract, not duplicated here
 
 | Name              | Owner              | Notes                                      |
 | ----------------- | ------------------ | ------------------------------------------ |
-| Guest vs session  | `guestGuard` / core | Redirect logged-in users away from `/auth` |
+| Guest vs session  | `guestGuard` / core | Redirect logged-in users away from login/register/reset |
+| Recovery session  | `AuthService.passwordRecoveryPending` + `authGuard` | Force `/auth/update-password` before app shell |
 
 ## File Map
 

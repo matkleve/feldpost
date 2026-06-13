@@ -194,9 +194,9 @@ describe('SearchBarComponent', () => {
     await Promise.resolve();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Addresses');
+    expect(fixture.nativeElement.textContent).toContain('From DB');
     expect(fixture.nativeElement.textContent).toContain('Projects');
-    expect(fixture.nativeElement.textContent).toContain('Places');
+    expect(fixture.nativeElement.textContent).toContain('From Internet');
   });
 
   it('commits the highlighted item with Enter and emits map-center for addresses', async () => {
@@ -315,10 +315,9 @@ describe('SearchBarComponent', () => {
       .map((node) => node.textContent ?? '')
       .join('\n');
 
-    expect(styleText).toContain('grid-template-rows: var(--search-bar-row-height) minmax(0, 0fr);');
-    expect(styleText).toContain(
-      'grid-template-rows: var(--search-bar-row-height) minmax(0, auto);',
-    );
+    expect(styleText).toContain('display: flex');
+    expect(styleText).toContain('flex-direction: column');
     expect(styleText).toContain('height: var(--search-bar-row-height);');
+    expect(fixture.nativeElement.querySelector('.search-bar__dropdown')).toBeNull();
   });
 });

@@ -466,13 +466,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     const dbAddressSection =
       result.sections.find((section) => section.family === 'db-address') ??
-      this.createSection('db-address', 'Addresses');
+      this.createSection('db-address', 'From DB');
     const dbContentSection =
       result.sections.find((section) => section.family === 'db-content') ??
       this.createSection('db-content', 'Projects & Groups');
     const geocoderSection =
       result.sections.find((section) => section.family === 'geocoder') ??
-      this.createSection('geocoder', 'Places');
+      this.createSection('geocoder', 'From Internet');
     const commandSection = result.sections.find((section) => section.family === 'command') ?? null;
     const operatorSection =
       result.sections.find((section) => section.family === 'operator-suggestion') ?? null;
@@ -651,9 +651,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   private createEmptySections(): SearchSectionsState {
     return {
-      dbAddress: this.createSection('db-address', 'Addresses'),
+      dbAddress: this.createSection('db-address', 'From DB'),
       dbContent: this.createSection('db-content', 'Projects'),
-      geocoder: this.createSection('geocoder', 'Places'),
+      geocoder: this.createSection('geocoder', 'From Internet'),
     };
   }
 
