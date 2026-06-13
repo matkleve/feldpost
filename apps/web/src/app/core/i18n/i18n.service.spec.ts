@@ -28,17 +28,17 @@ describe('I18nService language switch smoke', () => {
 
     service.setLanguage('en');
     expect(service.t('auth.login.title', 'fallback')).toBe('Sign in');
-    expect(service.t('map.shell.uploadButton.title', 'fallback')).toBe('Upload images');
+    expect(service.t('map.shell.uploadButton.title', 'fallback')).toBe('Upload media');
     expect(service.t('settings.overlay.section.search.title', 'fallback')).toBe('Search Tuning');
 
     service.setLanguage('de');
     expect(service.t('auth.login.title', 'fallback')).toBe('Anmelden');
-    expect(service.t('map.shell.uploadButton.title', 'fallback')).toBe('Bilder hochladen');
+    expect(service.t('map.shell.uploadButton.title', 'fallback')).toBe('Medien hochladen');
     expect(service.t('settings.overlay.section.search.title', 'fallback')).toBe('Such-Optimierung');
 
     service.setLanguage('it');
     expect(service.t('auth.login.title', 'fallback')).toBe('Accedi');
-    expect(service.t('map.shell.uploadButton.title', 'fallback')).toBe('Carica immagini');
+    expect(service.t('map.shell.uploadButton.title', 'fallback')).toBe('Carica media');
     expect(service.t('settings.overlay.section.search.title', 'fallback')).toBe(
       'Cerca sintonizzazione',
     );

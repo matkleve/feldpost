@@ -81,7 +81,8 @@ describe('GeocoderProvider', () => {
 
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].family).toBe('geocoder');
-    expect(results[0].label).toBe('Schleiergasse 18, 1100 Wien, Austria');
+    expect(results[0].label).toBe('Schleiergasse 18');
+    expect(results[0].secondaryLabel).toBe('1100 Wien · Austria');
     expect(geocodingMock.search).toHaveBeenCalledWith('schleiergasse', expect.any(Object));
   });
 
@@ -123,7 +124,9 @@ describe('GeocoderProvider', () => {
 
     expect(geocodingMock.reverse).toHaveBeenCalled();
     expect(geocodingMock.search).toHaveBeenCalledTimes(2);
-    expect(results.some((item) => item.label.includes(','))).toBe(true);
+    expect(results.some((item) => item.label === 'Schleiergasse 18' || item.secondaryLabel?.includes('1100 Wien'))).toBe(
+      true,
+    );
   });
 
   it('fetches per cluster viewbox in parallel when multiple clusters exist', async () => {

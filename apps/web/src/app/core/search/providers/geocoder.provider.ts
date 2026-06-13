@@ -161,7 +161,9 @@ export class GeocoderProvider implements SearchProvider {
     const maxResults = this.orgSearchTuning.orgSearchConfig().resolver.maxGeocoderResults;
 
     if (strictCandidates.length > 0) {
-      const needsRicherLabels = strictCandidates.some((candidate) => !candidate.label.includes(','));
+      const needsRicherLabels = strictCandidates.some(
+        (candidate) => !this.geocoderCandidateHasLocality(candidate),
+      );
       if (!needsRicherLabels) {
         return strictCandidates;
       }
@@ -175,7 +177,7 @@ export class GeocoderProvider implements SearchProvider {
         normalizedQuery,
         context,
         cityHint,
-        { requireCommaInLabel: true },
+        { requireCompleteLocality: true },
       );
       if (refinedCandidates.length > 0) {
         logSearchEvent('geocoder-city-hint-enrich', {
@@ -205,7 +207,7 @@ export class GeocoderProvider implements SearchProvider {
       normalizedQuery,
       context,
       cityHint,
-      { requireCommaInLabel: false },
+      { requireCompleteLocality: false },
     );
 
     if (refinedCandidates.length === 0) {
@@ -233,7 +235,7 @@ export class GeocoderProvider implements SearchProvider {
     normalizedQuery: string,
     context: SearchQueryContext,
     cityHint: string,
-    options: { requireCommaInLabel: boolean },
+    options: { requireCompleteLocality: boolean },
   ): Promise<SearchAddressCandidate[]> {
     const tuning = this.orgSearchTuning.orgSearchConfig();
     const toCandidate = (
@@ -265,7 +267,7 @@ export class GeocoderProvider implements SearchProvider {
         const refinedStructured = structuredCandidates.filter(
           (candidate) =>
             this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
-            (!options.requireCommaInLabel || candidate.label.includes(',')),
+            (!options.requireCompleteLocality || this.geocoderCandidateHasLocality(candidate)),
         );
         if (refinedStructured.length > 0) {
           logSearchEvent('geocoder-city-hint-structured', {
@@ -287,8 +289,14 @@ export class GeocoderProvider implements SearchProvider {
     return hintedCandidates.filter(
       (candidate) =>
         this.matchesOriginalPrefix(candidate.label, normalizedQuery) &&
-        (!options.requireCommaInLabel || candidate.label.includes(',')),
+        (!options.requireCompleteLocality || this.geocoderCandidateHasLocality(candidate)),
     );
+  }
+
+  private geocoderCandidateHasLocality(candidate: SearchAddressCandidate): boolean {
+    const secondary = candidate.secondaryLabel?.trim() ?? '';
+    if (!secondary) return false;
+    return /\b\d{4,5}\b/.test(secondary) || secondary.includes(' · ');
   }
 
   private mergeGeocoderCandidateSets(
@@ -301,7 +309,8 @@ export class GeocoderProvider implements SearchProvider {
       const existing = merged.get(key);
       const prefer =
         !existing ||
-        (candidate.label.includes(',') && !existing.label.includes(',')) ||
+        (this.geocoderCandidateHasLocality(candidate) &&
+          !this.geocoderCandidateHasLocality(existing)) ||
         (candidate.score ?? 0) > (existing.score ?? 0);
       if (prefer) {
         merged.set(key, candidate);
@@ -355,8 +364,8 @@ export class GeocoderProvider implements SearchProvider {
     context: SearchQueryContext,
   ): SearchAddressCandidate {
     const formatted = formatGeocoderAddressLabel(result);
-    const primaryLabel = this.selectGeocoderPrimaryLabel(result, formatted, query);
     const pickerLines = formatGeocoderPickerLines(result, 'Top');
+    const primaryLabel = pickerLines.primary;
     const secondaryLabel = pickerLines.secondary || undefined;
     const textScore = computeGeocoderTextScore(primaryLabel, formatted, query);
     const geoScore = computeProximityDecay(result.lat, result.lng, context);
@@ -391,7 +400,7 @@ export class GeocoderProvider implements SearchProvider {
       stableId: `geo-${result.lat.toFixed(6)}-${result.lng.toFixed(6)}-${index}`,
       family: 'geocoder',
       label: primaryLabel,
-      secondaryLabel: pickerLines.secondary || secondaryLabel,
+      secondaryLabel,
       lat: result.lat,
       lng: result.lng,
       textScore,
@@ -400,29 +409,5 @@ export class GeocoderProvider implements SearchProvider {
       noisePenalty,
       score,
     };
-  }
-
-  private selectGeocoderPrimaryLabel(
-    result: GeocoderSearchResult,
-    formatted: string,
-    query: string,
-  ): string {
-    const name = result.name?.trim() ?? '';
-    const road = result.address?.road?.trim() ?? '';
-
-    if (name.length > 0) {
-      const nameScore = computeGeocoderTextScore(name, formatted, query);
-      const formattedScore = computeGeocoderTextScore(formatted, formatted, query);
-      const roadScore = computeGeocoderTextScore(road, formatted, query);
-      if (nameScore > formattedScore + 0.05 && nameScore >= roadScore) {
-        return name;
-      }
-    }
-
-    if (road.length > 0 && formatted.length > 0) {
-      return formatted;
-    }
-
-    return formatted || road || name;
   }
 }

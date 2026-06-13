@@ -382,7 +382,7 @@ describe('SearchBarService', () => {
       const results = await firstValueFrom(service.resolveGeocoder('schleiergasse', {}));
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].family).toBe('geocoder');
-      expect(results[0].label).toBe('Schleiergasse 18, 1100 Wien, Austria');
+      expect(results[0].label).toBe('Schleiergasse 18');
       expect(results[0].secondaryLabel).toBe('1100 Wien · Austria');
     });
 
@@ -463,9 +463,9 @@ describe('SearchBarService', () => {
 
       const results = await firstValueFrom(service.resolveGeocoder('handelskai', {}));
       expect(results.map((item) => item.label)).toEqual([
-        'Handelskai 265, 1020 Wien',
-        'Handelskai 120, 1020 Wien',
-        'Handelskai 1, 1020 Wien',
+        'Handelskai 265',
+        'Handelskai 120',
+        'Handelskai 1',
       ]);
     });
 
@@ -499,11 +499,11 @@ describe('SearchBarService', () => {
 
       const results = await firstValueFrom(service.resolveGeocoder('handelskai', {}));
       expect(results).toHaveLength(1);
-      expect(results[0].label).toBe('Handelskai, Wien');
+      expect(results[0].label).toBe('Handelskai');
       expect(results[0].secondaryLabel).toBe('Wien');
     });
 
-    it('handles POI results with secondary label', async () => {
+    it('uses road and house number for POI hits with structured address', async () => {
       geocodingMock.search.mockResolvedValue([
         {
           lat: 48.17,
@@ -522,7 +522,7 @@ describe('SearchBarService', () => {
       ]);
 
       const results = await firstValueFrom(service.resolveGeocoder('kuratorium', {}));
-      expect(results[0].label).toBe('Kuratorium für Verkehrssicherheit');
+      expect(results[0].label).toBe('Schleiergasse 18');
       expect(results[0].secondaryLabel).toBe('1100 Wien · Österreich');
     });
 
@@ -625,10 +625,8 @@ describe('SearchBarService', () => {
       );
 
       expect(results.length).toBeGreaterThan(0);
-      expect(results.slice(0, 3).map((item) => item.label)).toContain(
-        'Wilhelminenstrasse 85, 1160 Wien, Austria',
-      );
-      expect(results[0].label).toBe('Wilhelminenstrasse 85, 1160 Wien, Austria');
+      expect(results.slice(0, 3).map((item) => item.label)).toContain('Wilhelminenstrasse 85');
+      expect(results[0].label).toBe('Wilhelminenstrasse 85');
     });
 
     it('broadens city-hint retries with query stems and keeps only original-prefix matches', async () => {
@@ -678,7 +676,7 @@ describe('SearchBarService', () => {
       );
 
       expect(results.length).toBe(1);
-      expect(results[0].label).toBe('Wilhelminenstrasse, Vienna, Austria');
+      expect(results[0].label).toBe('Wilhelminenstrasse');
       expect(geocodingMock.searchStructured).toHaveBeenCalledWith('wilhe', 'Vienna', {
         limit: 15,
         countrycodes: ['at'],

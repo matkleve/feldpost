@@ -3158,11 +3158,13 @@ export class MapShellComponent implements OnDestroy {
     const bounds = this.map?.getBounds();
     if (!bounds) return;
 
+    const quantizeCoord = (value: number): number => Math.round(value * 1e5) / 1e5;
+
     this.searchViewportBounds.set({
-      north: bounds.getNorth(),
-      east: bounds.getEast(),
-      south: bounds.getSouth(),
-      west: bounds.getWest(),
+      north: quantizeCoord(bounds.getNorth()),
+      east: quantizeCoord(bounds.getEast()),
+      south: quantizeCoord(bounds.getSouth()),
+      west: quantizeCoord(bounds.getWest()),
     });
   }
 

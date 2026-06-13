@@ -1111,6 +1111,8 @@ workspace.projects.panel.archive,Archive,workspace projects panel detail archive
 workspace.projects.panel.restore,Restore,workspace projects panel detail restore action,Restore,Wiederherstellen,Ripristina
 workspace.projects.panel.delete,Delete,workspace projects panel detail delete action,Delete,Löschen,Elimina
 workspace.projects.panel.openInPage,Open in Projects page,workspace projects panel context menu action to open project in main page,Open in Projects page,In Projektseite öffnen,Apri nella pagina Progetti
+map.shell.uploadButton.aria,Upload media,upload-shell floating upload button aria-label,Upload media,Medien hochladen,Carica media
+map.shell.uploadButton.title,Upload media,upload-shell floating upload button tooltip,Upload media,Medien hochladen,Carica media
 map.shell.toast.noMediaForProjectRemoval,No media found for project removal.,map-shell warning toast when project removal has no targets,No media found for project removal.,Keine Medien für Projektentfernung gefunden.,Nessun media trovato per la rimozione dal progetto.
 map.shell.toast.removedFromProjects,Media removed from projects.,map-shell success toast after removing media from projects,Media removed from projects.,Medien aus Projekten entfernt.,Media rimossi dai progetti.
 map.shell.toast.noMediaToDelete,No media found to delete.,map-shell warning toast when delete has no targets,No media found to delete.,Keine Medien zum Löschen gefunden.,Nessun media trovato da eliminare.

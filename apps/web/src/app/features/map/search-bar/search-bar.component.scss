@@ -16,8 +16,6 @@
   transform: translateX(-50%);
 
   @media (max-width: 47.9375rem) {
-    --search-bar-safe-inline: var(--spacing-3);
-
     width: calc(100% - (2 * var(--search-bar-safe-inline)));
   }
 }
@@ -29,7 +27,7 @@
   --search-bar-dropdown-padding-block: var(--spacing-1);
   --search-bar-dropdown-gap: var(--spacing-3);
   --search-bar-media-size: var(--spacing-6);
-  --search-bar-row-height: 3rem;
+  --search-bar-row-height: 2.75rem;
   --search-bar-results-max-block-size: calc(
     100dvh - (2 * var(--search-bar-viewport-inset)) - var(--search-bar-row-height)
   );
@@ -47,7 +45,7 @@
   border-radius: var(--container-radius-panel);
   @include frosted-chrome.surface;
   overflow: hidden;
-  contain: layout paint;
+  contain: layout;
   transition:
     background var(--motion-duration-fast) var(--motion-ease-out),
     border-color var(--motion-duration-fast) var(--motion-ease-out),
@@ -99,7 +97,7 @@
   color: var(--primary);
 }
 
-// Trailing clear column: mirrors leading icon slot with matching inset from the panel edge.
+// Trailing clear column: mirrors leading icon slot geometry in the input row.
 // @see search-bar.component.html
 .search-bar__clear-slot {
   display: inline-flex;
@@ -109,7 +107,17 @@
   inline-size: var(--search-bar-row-height);
   min-inline-size: var(--search-bar-row-height);
   block-size: 100%;
-  padding-inline-end: var(--spacing-2);
+}
+
+.search-bar__clear {
+  inline-size: var(--search-bar-row-height);
+  block-size: var(--search-bar-row-height);
+  color: var(--muted-foreground);
+
+  .material-icons {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-solid);
+  }
 }
 
 // Composite search input: strip hlmInput field chrome (border, ring, inset padding).
@@ -271,27 +279,66 @@
   line-height: var(--line-height-tight);
 }
 
+// No-results row: same grid geometry as ss-search-dropdown-item, muted and non-interactive.
+// @see docs/specs/ui/search-bar/search-bar.md § Empty state
 .search-bar__empty-state {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
+  display: grid;
+  grid-template-columns: var(--search-dropdown-item-media-size) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--search-dropdown-item-gap);
   width: 100%;
-  padding: var(--spacing-2) var(--spacing-1);
+  min-height: var(--search-dropdown-item-row-min-height);
+  padding-block: var(--search-dropdown-item-padding-block);
+  padding-inline: var(--search-dropdown-item-padding-inline);
   border-radius: var(--search-dropdown-item-radius);
   background: color-mix(in srgb, var(--muted-foreground) 7%, transparent);
+  color: var(--muted-foreground);
+}
+
+// Icon slot aligned to dropdown item media column.
+// @see search-dropdown-item.component.scss §search-dropdown-item__media
+.search-bar__empty-media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--search-dropdown-item-media-size);
+  block-size: var(--search-dropdown-item-media-size);
+  min-inline-size: var(--search-dropdown-item-media-size);
+}
+
+.search-bar__empty-icon {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-solid);
+  color: var(--muted-foreground);
+  opacity: 0.72;
+}
+
+.search-bar__empty-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--search-dropdown-item-content-gap);
+  min-width: 0;
+
+  > * {
+    min-width: 0;
+  }
 }
 
 .search-bar__empty-title {
-  margin: 0;
-  color: var(--foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--font-size-sm);
   line-height: var(--line-height-tight);
+  color: var(--muted-foreground);
 }
 
 .search-bar__empty-copy {
-  margin: 0;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--muted-foreground) 72%, transparent);
+  font-size: var(--font-size-2xs);
   line-height: var(--line-height-tight);
 }
 

@@ -14,12 +14,12 @@
       [attr.aria-label]="
         uploadBatchActive()
           ? t('upload.trigger.status.uploading', 'Uploading...')
-          : t('auto.0369.upload_images', 'Upload images')
+          : t('map.shell.uploadButton.aria', 'Upload media')
       "
       [attr.title]="
         uploadBatchActive()
           ? t('upload.trigger.status.uploading', 'Uploading...')
-          : t('auto.0369.upload_images', 'Upload images')
+          : t('map.shell.uploadButton.title', 'Upload media')
       "
       [class.map-upload-btn--active]="uploadPanelOpen()"
       [class.map-upload-btn--uploading]="uploadBatchActive()"

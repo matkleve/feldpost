@@ -4,7 +4,10 @@ import { MediaDownloadService } from '../media-download/media-download.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
 /**
- * Enqueues server-side Office preview generation (Gotenberg via Edge Function).
+ * Enqueues server-side preview generation via Edge Function.
+ * Session-level dedup: each mediaId is attempted at most once per page load.
+ * Failed items stay `failed` until the thumbnail worker (webhook on INSERT)
+ * or a manual backfill resets them server-side.
  * @see docs/architecture/media-preview-converter.md
  */
 @Injectable({ providedIn: 'root' })
@@ -12,33 +15,25 @@ export class MediaPreviewGenerationService {
   private readonly supabase = inject(SupabaseService);
   private readonly mediaDownload = inject(MediaDownloadService);
   private readonly inFlight = new Set<string>();
+  /** Tracks IDs already attempted this session — prevents retry spam on view. */
+  private readonly attemptedThisSession = new Set<string>();
 
   /**
    * Sets `pending` and invokes `generate-media-preview` (idempotent for pending/ready).
+   * `failed` items are not retried within the same session.
    */
   async enqueue(mediaId: string, currentStatus: PreviewGenerationStatus | null | undefined): Promise<void> {
-    let status = currentStatus ?? 'idle';
-    if (status === 'pending' || status === 'ready') {
+    const status = currentStatus ?? 'idle';
+    if (status === 'pending' || status === 'ready' || status === 'failed') {
       return;
     }
-    if (this.inFlight.has(mediaId)) {
+    if (this.inFlight.has(mediaId) || this.attemptedThisSession.has(mediaId)) {
       return;
     }
 
     this.inFlight.add(mediaId);
+    this.attemptedThisSession.add(mediaId);
     try {
-      if (status === 'failed') {
-        const { error: resetError } = await this.supabase.client
-          .from('media_items')
-          .update({ preview_generation_status: 'idle' })
-          .eq('id', mediaId);
-        if (resetError) {
-          console.warn('[media-preview-generation] failed reset failed', resetError.message);
-          return;
-        }
-        status = 'idle';
-      }
-
       const { error: pendingError } = await this.supabase.client
         .from('media_items')
         .update({ preview_generation_status: 'pending' })

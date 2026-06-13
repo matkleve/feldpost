@@ -330,7 +330,43 @@ describe('media-locations.helpers', () => {
       'Top',
     );
     expect(lines.primary).toBe('Skodagasse 12');
-    expect(lines.secondary).toBe('1080 Wien · Josefstadt · Austria');
+    expect(lines.secondary).toBe('1080 Wien · Austria');
+  });
+
+  it('formatGeocoderPickerLines prefers road over POI name and omits district', () => {
+    const lines = formatGeocoderPickerLines(
+      {
+        displayName: 'Kremsmünstererhof, Annagasse, Innere Stadt, Wien, 1010, Österreich',
+        name: 'Kremsmünstererhof',
+        address: {
+          road: 'Annagasse',
+          postcode: '1010',
+          city: 'Wien',
+          suburb: 'Innere Stadt',
+          country: 'Austria',
+        },
+      },
+      'Top',
+    );
+    expect(lines.primary).toBe('Annagasse');
+    expect(lines.secondary).toBe('1010 Wien · Austria');
+  });
+
+  it('formatGeocoderPickerLines uses street-like name when road is missing', () => {
+    const lines = formatGeocoderPickerLines(
+      {
+        displayName: 'Wilhelm Wirtinger-Gasse, St. Pölten, Austria',
+        name: 'Wilhelm Wirtinger-Gasse',
+        address: {
+          postcode: '3100',
+          city: 'St. Pölten',
+          country: 'Österreich',
+        },
+      },
+      'Top',
+    );
+    expect(lines.primary).toBe('Wilhelm Wirtinger-Gasse');
+    expect(lines.secondary).toBe('3100 St. Pölten · Österreich');
   });
 
   it('filterAndDedupeOrgSuggestions drops linked rows and duplicate ids', () => {

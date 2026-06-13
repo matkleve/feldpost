@@ -43,7 +43,7 @@
         <button
           hlmBtn
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           class="search-bar__clear shrink-0"
           type="button"
           [attr.aria-label]="t('map.searchBar.clear.aria', 'Clear search')"
@@ -246,22 +246,27 @@
 
           @if (showingEmptyState()) {
             <div class="search-bar__empty-state" role="presentation">
-              <p class="search-bar__empty-title">
-                {{
-                  t('map.searchBar.empty.noAddressFound', 'No address found for {query}').replace(
-                    '{query}',
-                    query().trim()
-                  )
-                }}
-              </p>
-              <p class="search-bar__empty-copy">
-                {{
-                  t(
-                    'map.searchBar.empty.tryDifferentAddress',
-                    'Try a different address or search term.'
-                  )
-                }}
-              </p>
+              <span class="search-bar__empty-media" aria-hidden="true">
+                <span class="material-icons search-bar__empty-icon">location_off</span>
+              </span>
+              <span class="search-bar__empty-content">
+                <span class="search-bar__empty-title">
+                  {{
+                    t('map.searchBar.empty.noAddressFound', 'No address found for {query}').replace(
+                      '{query}',
+                      query().trim()
+                    )
+                  }}
+                </span>
+                <span class="search-bar__empty-copy">
+                  {{
+                    t(
+                      'map.searchBar.empty.tryDifferentAddress',
+                      'Try a different address or search term.'
+                    )
+                  }}
+                </span>
+              </span>
             </div>
           }
         }

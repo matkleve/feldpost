@@ -194,7 +194,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     return this.matchingRecents().length > 0;
   });
-  readonly showClearButton = computed(() => this.committedCandidate() !== null);
+  readonly showClearButton = computed(
+    () => this.query().trim().length > 0 || this.committedCandidate() !== null,
+  );
 
   readonly matchingRecents = computed(() => {
     const q = this.query().trim().toLowerCase();

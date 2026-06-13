@@ -314,6 +314,24 @@ describe('SearchBarComponent', () => {
     expect(fixture.nativeElement.querySelector('.search-bar__ghost-text')).toBeNull();
   });
 
+  it('shows the clear button while typing and clears the query when clicked', async () => {
+    const fixture = TestBed.createComponent(SearchBarComponent);
+    fixture.detectChanges();
+
+    await typeSearchQuery(fixture, 'zur');
+
+    const clearButton = fixture.nativeElement.querySelector(
+      '.search-bar__clear',
+    ) as HTMLButtonElement;
+    expect(clearButton).not.toBeNull();
+
+    clearButton.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.query()).toBe('');
+    expect(fixture.componentInstance.committedCandidate()).toBeNull();
+  });
+
   it('shows the clear button after a committed candidate and clears state when clicked', () => {
     const fixture = TestBed.createComponent(SearchBarComponent);
     const clearSpy = vi.fn();

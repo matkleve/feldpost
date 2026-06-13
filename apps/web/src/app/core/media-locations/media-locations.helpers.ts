@@ -148,6 +148,62 @@ export function formatLocationDisplayLocalityLine(
   return parts.join(' · ');
 }
 
+/** Geocoder picker secondary: postcode city · country (no district). */
+export function formatGeocoderLocalityLine(
+  row: Pick<MediaItemLocationRow, 'postcode' | 'city' | 'country'>,
+): string {
+  const parts: string[] = [];
+  const postcode = row.postcode?.trim();
+  const city = row.city?.trim();
+  if (postcode && city) {
+    parts.push(`${postcode} ${city}`);
+  } else if (postcode) {
+    parts.push(postcode);
+  } else if (city) {
+    parts.push(city);
+  }
+  if (row.country?.trim()) {
+    parts.push(row.country.trim());
+  }
+  return parts.join(' · ');
+}
+
+const STREET_NAME_PATTERN = /\b(gasse|straße|strasse|weg|platz|allee|ring|promenade)\b/i;
+
+function looksLikeStreetName(value: string): boolean {
+  return STREET_NAME_PATTERN.test(value);
+}
+
+function geocoderStreetFromResult(
+  result: Pick<GeocoderSearchResult, 'address' | 'name' | 'displayName'>,
+): string | null {
+  const road = result.address?.road?.trim();
+  if (road) return road;
+
+  const name = result.name?.trim();
+  if (name && looksLikeStreetName(name)) {
+    return name;
+  }
+
+  const displayName = result.displayName?.trim();
+  if (!displayName) return null;
+
+  const firstSegment = displayName.split(',')[0]?.trim();
+  if (!firstSegment) return null;
+
+  const houseOnly = /^\d+[a-z]?$/i.test(firstSegment);
+  if (houseOnly) {
+    const second = displayName.split(',')[1]?.trim();
+    if (second) return second;
+  }
+
+  if (looksLikeStreetName(firstSegment)) {
+    return firstSegment;
+  }
+
+  return name || firstSegment;
+}
+
 /** Two-line org picker display (format D). */
 export function formatLocationPickerLines(
   row: LocationDisplayLineInput & Pick<MediaItemLocationRow, 'district' | 'country'>,
@@ -159,7 +215,7 @@ export function formatLocationPickerLines(
   };
 }
 
-/** Nominatim hit → format D (structured address fields only). */
+/** Nominatim hit → two-line search picker (street line + locality). */
 export function formatGeocoderPickerLines(
   result: Pick<GeocoderSearchResult, 'address' | 'name' | 'displayName'>,
   doorLabel: string,
@@ -171,26 +227,23 @@ export function formatGeocoderPickerLines(
     addr?.village?.trim() ||
     addr?.municipality?.trim() ||
     null;
-  const district =
-    addr?.city_district?.trim() ||
-    addr?.suburb?.trim() ||
-    addr?.borough?.trim() ||
-    addr?.quarter?.trim() ||
-    null;
-  return formatLocationPickerLines(
-    {
-      street: addr?.road?.trim() || result.name?.trim() || null,
-      house_number: addr?.house_number?.trim() || null,
-      staircase: null,
-      door: null,
-      postcode: addr?.postcode?.trim() || null,
-      city,
-      address_label: result.displayName?.trim() || null,
-      district,
-      country: addr?.country?.trim() || null,
-    },
-    doorLabel,
-  );
+  const street = geocoderStreetFromResult(result);
+  const row: LocationDisplayLineInput & Pick<MediaItemLocationRow, 'district' | 'country'> = {
+    street,
+    house_number: addr?.house_number?.trim() || null,
+    staircase: null,
+    door: null,
+    postcode: addr?.postcode?.trim() || null,
+    city,
+    address_label: result.displayName?.trim() || null,
+    district: null,
+    country: addr?.country?.trim() || null,
+  };
+
+  return {
+    primary: formatLocationDisplayPrimaryLine(row, doorLabel),
+    secondary: formatGeocoderLocalityLine(row),
+  };
 }
 
 /** Org picker: hide already-linked, blank, and duplicate rows (Recent + Results paths). */

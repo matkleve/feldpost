@@ -1,7 +1,9 @@
 import {
   buildPhotonSearchUrl,
   buildPhotonStructuredUrl,
+  isPhotonAddressLayerFeature,
   nominatimViewboxToPhotonBbox,
+  nominatimViewboxToPhotonCenter,
   photonFeatureToNominatimRow,
   photonGeoJsonToNominatimSearch,
   photonLangFromAcceptLanguage,
@@ -12,6 +14,17 @@ import { assertEquals, assertExists } from "jsr:@std/assert";
 
 Deno.test("nominatimViewboxToPhotonBbox converts search-bar viewport", () => {
   assertEquals(nominatimViewboxToPhotonBbox("15,49,17,47"), "15,47,17,49");
+});
+
+Deno.test("nominatimViewboxToPhotonCenter returns viewbox midpoint", () => {
+  assertEquals(nominatimViewboxToPhotonCenter("15,49,17,47"), {
+    lat: 48,
+    lon: 16,
+  });
+});
+
+Deno.test("nominatimViewboxToPhotonCenter rejects invalid viewbox", () => {
+  assertEquals(nominatimViewboxToPhotonCenter("1,2,3"), null);
 });
 
 Deno.test("nominatimViewboxToPhotonBbox rejects invalid viewbox", () => {
@@ -28,16 +41,28 @@ Deno.test("buildPhotonSearchUrl omits bbox when viewbox invalid", () => {
   assertEquals(url.includes("bbox="), false);
 });
 
-Deno.test("buildPhotonSearchUrl includes bbox when viewbox valid", () => {
+Deno.test("buildPhotonSearchUrl uses lat lon bias when bounded is not 1", () => {
   const url = buildPhotonSearchUrl("http://localhost:2322/", {
     q: "Wien",
     limit: 3,
     acceptLanguage: "de,en",
     viewbox: "15,49,17,47",
+    bounded: 0,
+  });
+  assertEquals(url.includes("bbox="), false);
+  assertEquals(url.includes("lat=48"), true);
+  assertEquals(url.includes("lon=16"), true);
+});
+
+Deno.test("buildPhotonSearchUrl includes bbox when bounded is 1", () => {
+  const url = buildPhotonSearchUrl("http://localhost:2322/", {
+    q: "Wien",
+    limit: 3,
+    acceptLanguage: "de,en",
+    viewbox: "15,49,17,47",
+    bounded: 1,
   });
   assertEquals(url.includes("bbox=15%2C47%2C17%2C49"), true);
-  assertEquals(url.includes("lang=de"), true);
-  assertEquals(url.includes("limit=3"), true);
 });
 
 Deno.test("photonLangFromAcceptLanguage", () => {
@@ -100,6 +125,66 @@ Deno.test("buildPhotonStructuredUrl includes lat lon zoom for bias", () => {
   assertEquals(url.includes("lon=16.34"), true);
   assertEquals(url.includes("zoom=14"), true);
   assertEquals(url.includes("limit=50"), true);
+});
+
+Deno.test("photonGeoJsonToNominatimSearch filters non-address features when addressLayer", () => {
+  const memorial: PhotonFeature = {
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [15.6, 48.2] },
+    properties: {
+      name: "Stein der Erinnerung",
+      city: "St. Pölten",
+      countrycode: "AT",
+      osm_key: "historic",
+      osm_value: "memorial",
+    },
+  };
+  const street: PhotonFeature = {
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [15.61, 48.21] },
+    properties: {
+      name: "Wilhelm Wirtinger-Gasse",
+      city: "St. Pölten",
+      postcode: "3100",
+      countrycode: "AT",
+      osm_key: "highway",
+      osm_value: "residential",
+    },
+  };
+
+  assertEquals(isPhotonAddressLayerFeature(memorial), false);
+  assertEquals(isPhotonAddressLayerFeature(street), true);
+
+  const rows = photonGeoJsonToNominatimSearch(
+    { type: "FeatureCollection", features: [memorial, street] },
+    { addressLayer: true },
+  );
+  assertEquals(rows.length, 1);
+  assertEquals(rows[0].display_name.includes("Wilhelm Wirtinger-Gasse"), true);
+});
+
+Deno.test("photonGeoJsonToNominatimSearch keeps all features when addressLayer false", () => {
+  const memorial: PhotonFeature = {
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [15.6, 48.2] },
+    properties: {
+      name: "Stein der Erinnerung",
+      city: "St. Pölten",
+      countrycode: "AT",
+    },
+  };
+  const rows = photonGeoJsonToNominatimSearch(
+    { type: "FeatureCollection", features: [memorial] },
+    { addressLayer: false },
+  );
+  assertEquals(rows.length, 1);
+});
+
+Deno.test("photonGeoJsonToNominatimSearch empty features", () => {
+  assertEquals(
+    photonGeoJsonToNominatimSearch({ type: "FeatureCollection", features: [] }),
+    [],
+  );
 });
 
 Deno.test("photonGeoJsonToNominatimSearch empty features", () => {

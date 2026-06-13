@@ -1,0 +1,12 @@
+# Thumbnail worker for Hetzner / production (bind localhost; expose via Caddy).
+# @see docs/playbooks/remote-thumbnail-worker.md
+services:
+  thumbnail-worker:
+    build:
+      context: ./worker/thumbnail
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    env_file:
+      - .env.thumbnail-worker

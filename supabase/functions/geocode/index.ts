@@ -357,7 +357,9 @@ Deno.serve(async (req: Request) => {
 
     if (upstreamKind === "photon") {
       const geoJson = (await upstreamResp.json()) as PhotonGeoJsonResponse;
-      const rows = photonGeoJsonToNominatimSearch(geoJson);
+      const rows = photonGeoJsonToNominatimSearch(geoJson, {
+        addressLayer: body.addressLayer !== false,
+      });
       console.info(`[geocode] photon features=${geoJson.features?.length ?? 0} rows=${rows.length}`);
       return new Response(JSON.stringify(rows), {
         status: 200,

@@ -61,6 +61,41 @@ export interface PhotonForwardSearchParams {
   bounded?: number;
 }
 
+/** OSM highway/place values treated as address-like when Photon addressLayer is requested. */
+const PHOTON_ADDRESS_OSM_VALUES = new Set([
+  "house",
+  "street",
+  "residential",
+  "living_street",
+  "primary",
+  "secondary",
+  "tertiary",
+  "town",
+  "city",
+  "village",
+  "hamlet",
+  "yes",
+  "apartments",
+]);
+
+/**
+ * Nominatim viewbox: west,north,east,south (minLon,maxLat,maxLon,minLat).
+ * Returns viewbox center for Photon proximity bias (lat, lon).
+ */
+export function nominatimViewboxToPhotonCenter(
+  viewbox: string,
+): { lat: number; lon: number } | null {
+  const parts = viewbox.split(",").map((s) => Number.parseFloat(s.trim()));
+  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) {
+    return null;
+  }
+  const [west, north, east, south] = parts;
+  return {
+    lat: (north + south) / 2,
+    lon: (west + east) / 2,
+  };
+}
+
 export interface PhotonStructuredSearchParams {
   street: string;
   city?: string;
@@ -168,13 +203,49 @@ export function photonFeatureToNominatimRow(
   };
 }
 
+/** Keep address-like Photon hits when mimicking Nominatim layer=address. */
+export function isPhotonAddressLayerFeature(feature: PhotonFeature): boolean {
+  const properties = feature.properties ?? {};
+  const street = properties.street?.trim() ?? "";
+  const housenumber = properties.housenumber?.trim() ?? "";
+  if (street.length > 0 || housenumber.length > 0) {
+    return true;
+  }
+
+  const osmKey = properties.osm_key?.trim().toLowerCase() ?? "";
+  const osmValue = properties.osm_value?.trim().toLowerCase() ?? "";
+  if (osmKey === "highway" && PHOTON_ADDRESS_OSM_VALUES.has(osmValue)) {
+    return true;
+  }
+  if (osmKey === "place" && PHOTON_ADDRESS_OSM_VALUES.has(osmValue)) {
+    return true;
+  }
+
+  const name = properties.name?.trim() ?? "";
+  if (name.length > 0 && /\b(gasse|straße|strasse|weg|platz|allee)\b/i.test(name)) {
+    return true;
+  }
+
+  return false;
+}
+
+export interface PhotonToNominatimOptions {
+  /** When true, drop non-address Photon features (POIs, memorials, transit stops). */
+  addressLayer?: boolean;
+}
+
 export function photonGeoJsonToNominatimSearch(
   payload: PhotonGeoJsonResponse,
+  options: PhotonToNominatimOptions = {},
 ): NominatimSearchRow[] {
   if (!payload?.features?.length) return [];
   const rows: NominatimSearchRow[] = [];
   for (let i = 0; i < payload.features.length; i++) {
-    const row = photonFeatureToNominatimRow(payload.features[i], i);
+    const feature = payload.features[i];
+    if (options.addressLayer !== false && !isPhotonAddressLayerFeature(feature)) {
+      continue;
+    }
+    const row = photonFeatureToNominatimRow(feature, i);
     if (row) rows.push(row);
   }
   return rows;
@@ -191,12 +262,23 @@ export function buildPhotonSearchUrl(
   url.searchParams.set("limit", String(params.limit ?? 5));
   url.searchParams.set("lang", photonLangFromAcceptLanguage(params.acceptLanguage));
 
-  const bbox =
+  const useHardBbox = params.bounded === 1;
+  const viewbox =
     typeof params.viewbox === "string" && params.viewbox.trim()
-      ? nominatimViewboxToPhotonBbox(params.viewbox)
+      ? params.viewbox.trim()
       : null;
-  if (bbox) {
-    url.searchParams.set("bbox", bbox);
+
+  if (viewbox && useHardBbox) {
+    const bbox = nominatimViewboxToPhotonBbox(viewbox);
+    if (bbox) {
+      url.searchParams.set("bbox", bbox);
+    }
+  } else if (viewbox) {
+    const center = nominatimViewboxToPhotonCenter(viewbox);
+    if (center) {
+      url.searchParams.set("lat", String(center.lat));
+      url.searchParams.set("lon", String(center.lon));
+    }
   }
 
   return url.toString();

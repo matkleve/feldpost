@@ -325,16 +325,6 @@ export class MediaDisplayComponent implements AfterViewInit {
         'failed',
         this.downloadContext(),
       );
-
-      const fileType = resolveFileType(
-        mediaFileIdentityFromRecord({
-          storage_path: storagePath,
-          original_filename: this.originalFilename(),
-        }),
-      );
-      if (requiresMissingThumbnailBackfill(fileType)) {
-        void this.previewGeneration.enqueue(id, 'failed');
-      }
     }
 
     this.goTo('icon-only');

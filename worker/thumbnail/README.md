@@ -46,6 +46,8 @@ docker run --rm -p 3001:3001 --env-file .env feldpost-thumbnail-worker
 
 Supabase DB webhooks from Docker should use `http://host.docker.internal:3001/generate`.
 
+**Production (Hetzner):** [docs/playbooks/remote-thumbnail-worker.md](../../docs/playbooks/remote-thumbnail-worker.md)
+
 ## Tests
 
 ```bash
