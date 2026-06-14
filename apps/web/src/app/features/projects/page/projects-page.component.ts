@@ -257,6 +257,28 @@ export class ProjectsPageComponent implements OnDestroy {
     this.detailsPanelOpen.set(false);
   }
 
+  async onMediaAdded(mediaIds: string[]): Promise<void> {
+    const projectId = this.currentProjectId();
+    if (!projectId || mediaIds.length === 0) return;
+
+    const result = await this.projectsService.assignMediaItemsToProject(mediaIds, projectId);
+    if (!result.ok) {
+      this.showMutationError(
+        'projects.media.toast.addError',
+        'Could not add media to project. Please try again.',
+      );
+      return;
+    }
+
+    this.toastService.show({
+      message: this.t('projects.media.toast.addSuccess', 'Media added to project'),
+      type: 'success',
+      dedupe: true,
+    });
+
+    void this.loadProjectMedia(projectId);
+  }
+
   onColorPickerToggled(): void {
     this.colorPickerOpen.update((value) => !value);
   }
@@ -315,6 +337,10 @@ export class ProjectsPageComponent implements OnDestroy {
   }
 
   async onArchiveProject(projectId: string): Promise<void> {
+    const project = this.projects().find((entry) => entry.id === projectId);
+    const projectName =
+      project?.name ?? this.t('projects.page.pending.subject.thisProject', 'this project');
+
     const persisted = await this.projectsService.archiveProject(projectId);
     if (!persisted) {
       this.showMutationError(
@@ -339,11 +365,16 @@ export class ProjectsPageComponent implements OnDestroy {
 
     this.showMutationSuccess(
       'projects.page.toast.archiveSuccess',
-      'Project archived',
+      'Project "{name}" archived',
+      projectName,
     );
   }
 
   async onRestoreProject(projectId: string): Promise<void> {
+    const project = this.projects().find((entry) => entry.id === projectId);
+    const projectName =
+      project?.name ?? this.t('projects.page.pending.subject.thisProject', 'this project');
+
     const persisted = await this.projectsService.restoreProject(projectId);
     if (!persisted) {
       this.showMutationError(
@@ -364,7 +395,8 @@ export class ProjectsPageComponent implements OnDestroy {
 
     this.showMutationSuccess(
       'projects.page.toast.restoreSuccess',
-      'Project restored',
+      'Project "{name}" restored',
+      projectName,
     );
   }
 
@@ -436,12 +468,12 @@ export class ProjectsPageComponent implements OnDestroy {
     });
   }
 
-  private showMutationSuccess(key: string, fallback: string): void {
+  private showMutationSuccess(key: string, fallback: string, name: string): void {
+    const message = this.t(key, fallback).replace('{name}', name);
     this.toastService.show({
-      title: this.t(key, fallback),
+      message,
       type: 'success',
       dedupe: true,
-      codeRef: { file: 'projects-page.component.ts', fn: 'showMutationSuccess' },
     });
   }
 }

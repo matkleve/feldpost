@@ -663,9 +663,9 @@ projects.page.modal.cancel,Cancel,apps/web/src/app/features/projects/projects-pa
 projects.page.toast.createError,Could not create project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not create project. Please try again.,Projekt konnte nicht erstellt werden. Bitte erneut versuchen.,Impossibile creare il progetto. Riprova.
 projects.page.toast.renameError,Could not rename project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not rename project. Please try again.,Projekt konnte nicht umbenannt werden. Bitte erneut versuchen.,Impossibile rinominare il progetto. Riprova.
 projects.page.toast.archiveError,Could not archive project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not archive project. Please try again.,Projekt konnte nicht archiviert werden. Bitte erneut versuchen.,Impossibile archiviare il progetto. Riprova.
-projects.page.toast.archiveSuccess,Project archived,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Project archived,Projekt archiviert,Progetto archiviato
+projects.page.toast.archiveSuccess,"Project ""{name}"" archived",apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,"Project ""{name}"" archived",Projekt „{name}“ archiviert,Progetto «{name}» archiviato
 projects.page.toast.restoreError,Could not restore project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not restore project. Please try again.,Projekt konnte nicht wiederhergestellt werden. Bitte erneut versuchen.,Impossibile ripristinare il progetto. Riprova.
-projects.page.toast.restoreSuccess,Project restored,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Project restored,Projekt wiederhergestellt,Progetto ripristinato
+projects.page.toast.restoreSuccess,"Project ""{name}"" restored",apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,"Project ""{name}"" restored",Projekt „{name}“ wiederhergestellt,Progetto «{name}» ripristinato
 projects.page.toast.deleteError,Could not delete archived project. Check permissions or refresh and try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not delete archived project. Check permissions or refresh and try again.,Archiviertes Projekt konnte nicht gelöscht werden. Berechtigungen prüfen oder Seite aktualisieren und erneut versuchen.,Impossibile eliminare il progetto archiviato. Controlla i permessi o aggiorna e riprova.
 projects.page.toast.deleteSuccess,Archived project deleted,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Archived project deleted,Archiviertes Projekt gelöscht,Progetto archiviato eliminato
 projects.page.pending.title.deleteArchived,Delete archived project?,apps/web/src/app/features/projects/projects-page.component.ts method:return,Delete archived project?,Archiviertes Projekt löschen?,Eliminare il progetto archiviato?
@@ -1179,4 +1179,15 @@ projects.media.exclusive.empty,No exclusive media yet,project exclusive media em
 projects.media.shared.title,Shared media,project shared media section title,Shared media,Geteilte Medien,Media condivisi
 projects.media.shared.hint,Media also used in other projects,project shared media section hint,Media also used in other projects,Medien auch in anderen Projekten,Media usati anche in altri progetti
 projects.media.shared.empty,No shared media,project shared media empty state,No shared media,Keine geteilten Medien,Nessun media condiviso
+projects.media.addButton,Add media,project media section add button,Add media,Medien hinzufügen,Aggiungi media
+projects.media.toast.addError,Could not add media to project. Please try again.,toast error adding media to project,Could not add media to project. Please try again.,Medien konnten nicht zum Projekt hinzugefügt werden. Bitte erneut versuchen.,Impossibile aggiungere media al progetto. Riprova.
+projects.media.toast.addSuccess,Media added to project,toast success adding media to project,Media added to project,Medien zum Projekt hinzugefügt,Media aggiunti al progetto
+projects.mediaPicker.title,Add media to project,media picker dialog title,Add media to project,Medien zum Projekt hinzufügen,Aggiungi media al progetto
+projects.mediaPicker.description,Select media items to add to this project.,media picker dialog description,Select media items to add to this project.,Wähle Medien aus um sie zu diesem Projekt hinzuzufügen.,Seleziona i media da aggiungere a questo progetto.
+projects.mediaPicker.searchPlaceholder,Search by name address city...,media picker search input placeholder,Search by name address city...,Nach Name Adresse Stadt suchen...,Cerca per nome indirizzo città...
+projects.mediaPicker.loading,Loading media...,media picker loading state,Loading media...,Medien werden geladen...,Caricamento media...
+projects.mediaPicker.empty,No media found,media picker empty state,No media found,Keine Medien gefunden,Nessun media trovato
+projects.mediaPicker.selected,selected,media picker selection count suffix,selected,ausgewählt,selezionati
+projects.mediaPicker.cancel,Cancel,media picker cancel button,Cancel,Abbrechen,Annulla
+projects.mediaPicker.confirm,Add,media picker confirm button,Add,Hinzufügen,Aggiungi
 "

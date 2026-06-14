@@ -20587,14 +20587,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'projects.page.toast.archiveSuccess', 'Project archived', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+values (null, 'projects.page.toast.archiveSuccess', 'Project "{name}" archived', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project archived', 'published'
+select t.id, 'en', 'Project "{name}" archived', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.archiveSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20602,7 +20602,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekt archiviert', 'published'
+select t.id, 'de', 'Projekt „{name}“ archiviert', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.archiveSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20610,7 +20610,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Progetto archiviato', 'published'
+select t.id, 'it', 'Progetto «{name}» archiviato', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.archiveSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20649,14 +20649,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'projects.page.toast.restoreSuccess', 'Project restored', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+values (null, 'projects.page.toast.restoreSuccess', 'Project "{name}" restored', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project restored', 'published'
+select t.id, 'en', 'Project "{name}" restored', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.restoreSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20664,7 +20664,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekt wiederhergestellt', 'published'
+select t.id, 'de', 'Projekt „{name}“ wiederhergestellt', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.restoreSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20672,7 +20672,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Progetto ripristinato', 'published'
+select t.id, 'it', 'Progetto «{name}» ripristinato', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.restoreSuccess'
 on conflict (app_text_id, lang) do update set

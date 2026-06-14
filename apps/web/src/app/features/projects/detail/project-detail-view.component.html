@@ -62,6 +62,7 @@
       [exclusive]="exclusiveMedia()"
       [shared]="sharedMedia()"
       [loading]="mediaLoading()"
+      (mediaAdded)="mediaAdded.emit($event)"
     />
   }
 </section>

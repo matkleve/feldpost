@@ -8,6 +8,12 @@
   overflow-y: auto;
 }
 
+.project-media-section__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
 .project-media-section__block {
   display: grid;
   gap: var(--spacing-2);

@@ -4,6 +4,19 @@
       {{ t('projects.media.loading', 'Loading media...') }}
     </div>
   } @else {
+    <div class="project-media-section__toolbar">
+      <button
+        hlmBtn
+        variant="outline"
+        size="sm"
+        type="button"
+        (click)="openPicker()"
+      >
+        <span class="material-icons" aria-hidden="true">add</span>
+        {{ t('projects.media.addButton', 'Add media') }}
+      </button>
+    </div>
+
     <section class="project-media-section__block" aria-labelledby="project-media-exclusive-heading">
       <h2 id="project-media-exclusive-heading" class="project-media-section__heading">
         {{ t('projects.media.exclusive.title', 'Project files') }}
@@ -51,3 +64,10 @@
     </section>
   }
 </section>
+
+@if (pickerOpen()) {
+  <app-media-picker-dialog
+    (confirmed)="onPickerConfirmed($event)"
+    (cancelled)="onPickerCancelled()"
+  />
+}

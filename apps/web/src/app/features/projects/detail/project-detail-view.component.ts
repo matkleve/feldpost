@@ -48,6 +48,7 @@ export class ProjectDetailViewComponent {
 
   readonly detailsToggled = output<void>();
   readonly titleRenamed = output<string>();
+  readonly mediaAdded = output<string[]>();
 
   constructor() {
     effect(() => {

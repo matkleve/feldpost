@@ -1,0 +1,98 @@
+<ng-container
+  brnDialog
+  [state]="'open'"
+  [closeOnBackdropClick]="false"
+  [aria-label]="t('projects.mediaPicker.title', 'Add media to project')"
+  [aria-modal]="true"
+>
+  <div hlmDialogOverlay></div>
+  <ng-template brnDialogContent>
+    <div hlmDialogContent class="media-picker-dialog">
+      <div hlmDialogHeader>
+        <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">
+          {{ t('projects.mediaPicker.title', 'Add media to project') }}
+        </div>
+        <p brnDialogDescription hlmDialogDescription>
+          {{ t('projects.mediaPicker.description', 'Select media items to add to this project.') }}
+        </p>
+      </div>
+
+      <div class="media-picker-dialog__search">
+        <input
+          hlmInput
+          type="text"
+          class="media-picker-dialog__search-input"
+          [placeholder]="t('projects.mediaPicker.searchPlaceholder', 'Search by name, address, city...')"
+          [attr.aria-label]="t('projects.mediaPicker.searchPlaceholder', 'Search by name, address, city...')"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+
+      <div class="media-picker-dialog__grid-container">
+        @if (loading()) {
+          <div class="media-picker-dialog__loading" role="status">
+            {{ t('projects.mediaPicker.loading', 'Loading media...') }}
+          </div>
+        } @else if (filteredItems().length === 0) {
+          <div class="media-picker-dialog__empty">
+            {{ t('projects.mediaPicker.empty', 'No media found') }}
+          </div>
+        } @else {
+          <div class="media-picker-dialog__grid" role="listbox" aria-multiselectable="true">
+            @for (item of filteredItems(); track item.id) {
+              <button
+                type="button"
+                class="media-picker-dialog__tile"
+                [class.media-picker-dialog__tile--selected]="isSelected(item.id)"
+                [attr.aria-selected]="isSelected(item.id)"
+                [attr.aria-label]="item.fileMetadata?.originalFilename ?? item.id"
+                role="option"
+                (click)="toggleSelection(item.id)"
+              >
+                <div class="media-picker-dialog__thumb">
+                  @if (thumbnailUrl(item); as url) {
+                    <img [src]="url" alt="" class="media-picker-dialog__img" loading="lazy" />
+                  }
+                </div>
+                <div class="media-picker-dialog__check" aria-hidden="true">
+                  @if (isSelected(item.id)) {
+                    <span class="material-icons">check_circle</span>
+                  } @else {
+                    <span class="material-icons">radio_button_unchecked</span>
+                  }
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div hlmDialogFooter class="media-picker-dialog__footer">
+        <span class="media-picker-dialog__count">
+          @if (selectionCount() > 0) {
+            {{ selectionCount() }} {{ t('projects.mediaPicker.selected', 'selected') }}
+          }
+        </span>
+        <div class="media-picker-dialog__actions">
+          <button
+            hlmBtn
+            variant="ghost"
+            type="button"
+            (click)="onCancel()"
+          >
+            {{ t('projects.mediaPicker.cancel', 'Cancel') }}
+          </button>
+          <button
+            hlmBtn
+            variant="default"
+            type="button"
+            [disabled]="selectionCount() === 0"
+            (click)="onConfirm()"
+          >
+            {{ t('projects.mediaPicker.confirm', 'Add') }} {{ selectionCount() > 0 ? '(' + selectionCount() + ')' : '' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ng-container>
