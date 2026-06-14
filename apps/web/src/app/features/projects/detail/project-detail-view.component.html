@@ -40,30 +40,51 @@
           [text]="statusLabel(p.status)"
         />
       </div>
-      <p class="project-detail__meta">
-        {{ locationLabel(p) }} · {{ t('projects.detail.updated', 'updated') }} {{ relativeDate(p.lastActivity) }}
-      </p>
-      <button
-        type="button"
-        hlmBtn
-        variant="outline"
-        size="sm"
-        class="project-detail__details-btn"
-        [attr.aria-expanded]="detailsPanelOpen()"
-        (click)="detailsToggled.emit()"
-      >
-        <span class="material-icons" aria-hidden="true">info</span>
-        {{ t('projects.detail.detailsButton', 'Details') }}
-      </button>
+
+      <div class="project-detail__meta-row">
+        <p class="project-detail__meta">
+          {{ locationLabel(p) }} · {{ t('projects.detail.updated', 'updated') }} {{ relativeDate(p.lastActivity) }}
+        </p>
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="project-detail__details-btn"
+          [attr.aria-expanded]="detailsPanelOpen()"
+          (click)="detailsToggled.emit()"
+        >
+          <span class="material-icons" aria-hidden="true">info</span>
+          <span>{{ t('projects.detail.detailsButton', 'Details') }}</span>
+        </button>
+      </div>
+
+      <div class="project-detail__media-actions" role="toolbar" [attr.aria-label]="t('projects.media.toolbar.aria', 'Project media actions')">
+        <button type="button" hlmBtn variant="outline" size="sm" (click)="onUploadMedia()">
+          <span class="material-icons" aria-hidden="true">upload</span>
+          <span>{{ t('projects.media.uploadButton', 'Upload media') }}</span>
+        </button>
+        <button type="button" hlmBtn variant="outline" size="sm" (click)="openPicker()">
+          <span class="material-icons" aria-hidden="true">add_link</span>
+          <span>{{ t('projects.media.linkExistingButton', 'Link existing media') }}</span>
+        </button>
+      </div>
     </header>
 
     <app-project-media-section
       class="project-detail__content"
-      [projectId]="p.id"
       [exclusive]="exclusiveMedia()"
       [shared]="sharedMedia()"
       [loading]="mediaLoading()"
-      (mediaAdded)="mediaAdded.emit($event)"
+      (mediaRemoved)="mediaRemoved.emit($event)"
     />
   }
 </section>
+
+@if (pickerOpen()) {
+  <app-media-picker-dialog
+    [excludeMediaIds]="assignedMediaIds()"
+    (confirmed)="onPickerConfirmed($event)"
+    (cancelled)="onPickerCancelled()"
+  />
+}

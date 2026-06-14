@@ -59,15 +59,39 @@
   flex-shrink: 0;
 }
 
+.project-detail__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
 .project-detail__meta {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   color: var(--muted-foreground);
   font-size: var(--font-size-sm);
 }
 
+// Compact outline control inline with metadata (hlmBtn outline sm).
+// @see docs/design/components/action-interaction-kernel.md#button-policy
 .project-detail__details-btn {
-  justify-self: start;
+  flex-shrink: 0;
   gap: var(--spacing-1);
+  min-height: 1.75rem;
+  padding-block: 0;
+  font-size: var(--font-size-xs);
+}
+
+// Project-wide media actions below meta row — same outline style as Details.
+// @see docs/specs/page/projects-dashboard.md
+.project-detail__media-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
 }
 
 .project-detail__content {

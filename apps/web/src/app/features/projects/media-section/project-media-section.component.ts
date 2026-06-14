@@ -1,15 +1,40 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import type { ProjectMediaListItem } from '../../../core/projects/projects.types';
+import type { MediaRecord } from '../../../core/media-query/media-query.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { UploadShellUiService } from '../../upload/upload-shell/upload-shell-ui.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
-import { MediaPickerDialogComponent } from '../../../shared/media-picker-dialog/media-picker-dialog.component';
+import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component';
+import { MediaItemComponent } from '../../../shared/media-item/media-item.component';
+
+function projectMediaToMediaRecord(item: ProjectMediaListItem): MediaRecord {
+  return {
+    id: item.id,
+    user_id: '',
+    organization_id: null,
+    project_id: null,
+    storage_path: item.storagePath,
+    thumbnail_path: item.thumbnailPath,
+    latitude: null,
+    longitude: null,
+    exif_latitude: null,
+    exif_longitude: null,
+    captured_at: item.capturedAt,
+    has_time: !!item.capturedAt,
+    created_at: item.createdAt,
+    address_label: null,
+    street: null,
+    city: null,
+    district: null,
+    country: null,
+    direction: null,
+    location_unresolved: null,
+  };
+}
 
 @Component({
   selector: 'app-project-media-section',
   standalone: true,
-  imports: [...HLM_BUTTON_IMPORTS, MediaPickerDialogComponent],
+  imports: [...HLM_BUTTON_IMPORTS, ItemGridComponent, MediaItemComponent],
   templateUrl: './project-media-section.component.html',
   styleUrl: './project-media-section.component.scss',
   host: {
@@ -18,46 +43,19 @@ import { MediaPickerDialogComponent } from '../../../shared/media-picker-dialog/
 })
 export class ProjectMediaSectionComponent {
   private readonly i18nService = inject(I18nService);
-  private readonly workspaceView = inject(WorkspaceViewService);
-  private readonly uploadShellUi = inject(UploadShellUiService, { optional: true });
-
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  readonly projectId = input.required<string>();
   readonly exclusive = input<ProjectMediaListItem[]>([]);
   readonly shared = input<ProjectMediaListItem[]>([]);
   readonly loading = input(false);
 
-  readonly pickerOpen = signal(false);
-  readonly mediaAdded = output<string[]>();
+  readonly mediaRemoved = output<string>();
 
-  readonly assignedMediaIds = computed(() => [
-    ...this.exclusive().map((item) => item.id),
-    ...this.shared().map((item) => item.id),
-  ]);
+  readonly exclusiveRecords = computed(() => this.exclusive().map(projectMediaToMediaRecord));
+  readonly sharedRecords = computed(() => this.shared().map(projectMediaToMediaRecord));
 
-  openPicker(): void {
-    this.pickerOpen.set(true);
-  }
-
-  onUploadMedia(): void {
-    const projectId = this.projectId();
-    if (!projectId || !this.uploadShellUi) {
-      return;
-    }
-
-    this.workspaceView.setSelectedProjectIds(new Set([projectId]));
-    this.uploadShellUi.openUploadPanel();
-  }
-
-  onPickerConfirmed(mediaIds: string[]): void {
-    this.pickerOpen.set(false);
-    if (mediaIds.length > 0) {
-      this.mediaAdded.emit(mediaIds);
-    }
-  }
-
-  onPickerCancelled(): void {
-    this.pickerOpen.set(false);
+  onRemoveMedia(mediaId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.mediaRemoved.emit(mediaId);
   }
 }

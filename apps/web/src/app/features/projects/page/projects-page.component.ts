@@ -279,6 +279,30 @@ export class ProjectsPageComponent implements OnDestroy {
     void this.loadProjectMedia(projectId);
   }
 
+  async onMediaRemoved(mediaId: string): Promise<void> {
+    const projectId = this.currentProjectId();
+    if (!projectId) return;
+
+    const ok = await this.projectsService.removeMediaFromProject(mediaId, projectId);
+    if (!ok) {
+      this.showMutationError(
+        'projects.media.toast.removeError',
+        'Could not remove media from project. Please try again.',
+      );
+      return;
+    }
+
+    this.projects.update((all) =>
+      all.map((project) =>
+        project.id === projectId
+          ? { ...project, totalImageCount: Math.max(0, project.totalImageCount - 1) }
+          : project,
+      ),
+    );
+
+    void this.loadProjectMedia(projectId);
+  }
+
   onColorPickerToggled(): void {
     this.colorPickerOpen.update((value) => !value);
   }

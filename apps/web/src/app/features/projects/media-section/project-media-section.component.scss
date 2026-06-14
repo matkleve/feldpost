@@ -13,13 +13,13 @@
   gap: var(--spacing-2);
 }
 
-// Section title row: leading icon, heading, trailing icon actions.
+// Section title row: leading icon and heading only (actions live in project header).
 // @see docs/specs/page/projects-dashboard.md
 .project-media-section__header {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  min-height: 0;
+  min-width: 0;
 }
 
 .project-media-section__section-icon {
@@ -30,7 +30,7 @@
 }
 
 .project-media-section__heading {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   margin: 0;
   font-size: var(--font-size-md);
@@ -41,22 +41,6 @@
 .project-media-section__count {
   color: var(--muted-foreground);
   font-weight: var(--font-weight-medium);
-}
-
-.project-media-section__header-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0;
-}
-
-.project-media-section__icon-btn {
-  width: 1.75rem;
-  height: 1.75rem;
-
-  .material-icons {
-    font-size: var(--font-size-lg);
-  }
 }
 
 .project-media-section__hint {
@@ -79,6 +63,7 @@
 }
 
 .project-media-section__tile {
+  position: relative;
   aspect-ratio: 1;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -94,4 +79,16 @@
     color-mix(in srgb, var(--muted-foreground) 6%, transparent) 0 0.5rem,
     color-mix(in srgb, var(--muted-foreground) 10%, transparent) 0.5rem 1rem
   );
+}
+
+// Top-right unlink control — geometry/placement only; ink from hlmBtn ghost.
+// @see docs/specs/page/projects-dashboard.md
+.project-media-section__remove {
+  position: absolute;
+  top: var(--spacing-1);
+  right: var(--spacing-1);
+  z-index: 1;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
 }

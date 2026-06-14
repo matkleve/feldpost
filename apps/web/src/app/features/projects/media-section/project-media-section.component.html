@@ -11,32 +11,6 @@
           {{ t('projects.media.exclusive.title', 'Project files') }}
           <span class="project-media-section__count">({{ exclusive().length }})</span>
         </h2>
-        <div class="project-media-section__header-actions">
-          <button
-            type="button"
-            hlmBtn
-            variant="ghost"
-            size="icon"
-            class="project-media-section__icon-btn"
-            [attr.aria-label]="t('projects.media.uploadButton', 'Upload media')"
-            [attr.title]="t('projects.media.uploadButton', 'Upload media')"
-            (click)="onUploadMedia()"
-          >
-            <span class="material-icons" aria-hidden="true">upload</span>
-          </button>
-          <button
-            type="button"
-            hlmBtn
-            variant="ghost"
-            size="icon"
-            class="project-media-section__icon-btn"
-            [attr.aria-label]="t('projects.media.addExistingButton', 'Add to project')"
-            [attr.title]="t('projects.media.addExistingButton', 'Add to project')"
-            (click)="openPicker()"
-          >
-            <span class="material-icons" aria-hidden="true">add_link</span>
-          </button>
-        </div>
       </header>
       <p class="project-media-section__hint">
         {{ t('projects.media.exclusive.hint', 'Media used only in this project') }}
@@ -48,8 +22,20 @@
       } @else {
         <div class="project-media-section__grid">
           @for (item of exclusive(); track item.id) {
-            <article class="project-media-section__tile" [attr.aria-label]="item.id">
+            <article class="project-media-section__tile">
               <div class="project-media-section__thumb" aria-hidden="true"></div>
+              <button
+                type="button"
+                hlmBtn
+                variant="ghost"
+                size="icon-sm"
+                class="project-media-section__remove"
+                [attr.aria-label]="t('projects.media.removeFromProject.aria', 'Remove from project')"
+                [attr.title]="t('projects.media.removeFromProject.aria', 'Remove from project')"
+                (click)="onRemoveMedia(item.id, $event)"
+              >
+                <span class="material-icons" aria-hidden="true">close</span>
+              </button>
             </article>
           }
         </div>
@@ -63,20 +49,6 @@
           {{ t('projects.media.shared.title', 'Shared media') }}
           <span class="project-media-section__count">({{ shared().length }})</span>
         </h2>
-        <div class="project-media-section__header-actions">
-          <button
-            type="button"
-            hlmBtn
-            variant="ghost"
-            size="icon"
-            class="project-media-section__icon-btn"
-            [attr.aria-label]="t('projects.media.addExistingButton', 'Add to project')"
-            [attr.title]="t('projects.media.addExistingButton', 'Add to project')"
-            (click)="openPicker()"
-          >
-            <span class="material-icons" aria-hidden="true">add_link</span>
-          </button>
-        </div>
       </header>
       <p class="project-media-section__hint">
         {{ t('projects.media.shared.hint', 'Media also used in other projects') }}
@@ -88,8 +60,20 @@
       } @else {
         <div class="project-media-section__grid">
           @for (item of shared(); track item.id) {
-            <article class="project-media-section__tile" [attr.aria-label]="item.id">
+            <article class="project-media-section__tile">
               <div class="project-media-section__thumb" aria-hidden="true"></div>
+              <button
+                type="button"
+                hlmBtn
+                variant="ghost"
+                size="icon-sm"
+                class="project-media-section__remove"
+                [attr.aria-label]="t('projects.media.removeFromProject.aria', 'Remove from project')"
+                [attr.title]="t('projects.media.removeFromProject.aria', 'Remove from project')"
+                (click)="onRemoveMedia(item.id, $event)"
+              >
+                <span class="material-icons" aria-hidden="true">close</span>
+              </button>
             </article>
           }
         </div>
@@ -97,11 +81,3 @@
     </section>
   }
 </section>
-
-@if (pickerOpen()) {
-  <app-media-picker-dialog
-    [excludeMediaIds]="assignedMediaIds()"
-    (confirmed)="onPickerConfirmed($event)"
-    (cancelled)="onPickerCancelled()"
-  />
-}
