@@ -4,16 +4,12 @@
 
 ## Workspace Pane — Shell
 
-### `<app-workspace-pane-shell>` — Workspace Pane Shell
+### ~~`<app-workspace-pane-shell>`~~ — DEPRECATED (merged into `app-workspace-pane`)
 
-- **File**: `apps/web/src/app/shared/workspace-pane/shell/workspace-pane-shell.component.ts`
-- **Purpose**: Resizable side-panel shell with drag-divider; manages open/closed state and width constraints.
-- **Spec**: [`docs/specs/component/workspace/sidebar.md`](workspace/sidebar.md)
-- **Variant axes**: none (all behaviour via inputs)
-- **Other inputs**: `open: boolean`, `currentWidth: number`, `minWidth: number`, `maxWidth: number`, `defaultWidth: number`
-- **Composed of**: `app-workspace-pane`, `app-drag-divider`
-- **Used in**: `app-authenticated-app-layout`
-- **Gaps**: none
+> **Status:** Merged. Shell logic now lives in `workspace-pane.component.ts`. The `app-drag-divider` is composed directly by `app-workspace-pane`.
+
+- **Replacement**: `app-workspace-pane` (see below)
+- **Original file**: removed — logic merged into `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.ts`
 
 ---
 
@@ -25,7 +21,7 @@
 - **Variant axes**: none (tab switching is functional, not visual variant)
 - **Other inputs**: `title`, `titleEditable`, `titleEditEnabled`, `titleEditValue`, `colorPickerEnabled`, `colorPickerOpen`, `detailAddressSearchRequestId`
 - **Composed of**: `app-workspace-pane-header`, `app-workspace-pane-toolbar`, `app-workspace-selected-items-grid`, `app-media-detail-view`, `app-workspace-pane-footer`, `app-group-tab-bar`
-- **Used in**: `app-workspace-pane-shell`
+- **Used in**: `app-workspace-pane`
 - **Gaps**: none
 
 ---
@@ -38,7 +34,7 @@
 - **Variant axes**: none
 - **Other inputs**: `currentWidth: number` (required)
 - **Composed of**: standalone
-- **Used in**: `app-workspace-pane-shell`
+- **Used in**: `app-workspace-pane`
 - **Gaps**: none
 
 ---
@@ -141,7 +137,7 @@
 - **Purpose**: Full toolbar for workspace views; orchestrates grouping, filter, sort, project dropdowns, and card-variant switch.
 - **Spec**: [`docs/specs/component/media/media-toolbar.md`](media/media-toolbar.md)
 - **Variant axes**: none (all state from services)
-- **Composed of**: `app-filter-dropdown`, `app-grouping-dropdown`, `app-sort-dropdown`, `app-projects-dropdown`, `app-card-variant-switch`, `app-panel-trigger`, `app-sorting-controls`
+- **Composed of**: `app-filter-dropdown`, `app-grouping-dropdown`, `app-sort-dropdown`, `app-projects-dropdown`, inline `[hlmToggleGroup]` card variant, `app-panel-trigger`, `app-sorting-controls`
 - **Used in**: `app-map-shell`, `app-media`
 - **Gaps**: none
 
@@ -167,7 +163,7 @@
 - **Purpose**: Full media detail panel; orchestrates metadata display, inline editing, address search, date editor, and action bar.
 - **Spec**: @no-spec (behaviour spread across `docs/specs/component/workspace/`)
 - **Variant axes**: none
-- **Composed of**: `app-image-detail-header`, `app-image-detail-inline-section`, `app-metadata-section`, `app-detail-actions`, `app-media-detail-media-viewer`, `app-captured-date-editor`, `app-address-search`
+- **Composed of**: `app-media-detail-header`, `app-media-detail-inline-section`, `app-metadata-section`, `app-detail-actions`, `app-media-detail-media-viewer`, `app-captured-date-editor`, `app-address-search`
 - **Used in**: `app-workspace-pane`
 - **Gaps**: none
 
@@ -197,7 +193,7 @@
   | `readonly` | `boolean` | `false`, `true` | Hides edit affordance; text only |
 - **Other inputs**: `label: string` (required), `value: string` (required)
 - **Composed of**: standalone
-- **Used in**: `app-image-detail-inline-section`
+- **Used in**: `app-media-detail-inline-section`
 - **Gaps**: none
 
 ---
@@ -209,7 +205,7 @@
 - **Spec**: [`docs/specs/component/filters/captured-date-editor.md`](filters/captured-date-editor.md)
 - **Variant axes**: none (internal state machine; state not surfaced as input)
 - **Composed of**: standalone
-- **Used in**: `app-image-detail-inline-section`
+- **Used in**: `app-media-detail-inline-section`
 - **Gaps**: none
 
 ---
@@ -252,7 +248,7 @@
 
 ---
 
-### `<app-image-detail-header>` — Image Detail Header
+### `<app-media-detail-header>` — Media Detail Header
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-header/media-detail-header.component.ts`
 - **Purpose**: Title row of the media detail panel with inline rename and context menu.
@@ -265,7 +261,7 @@
 
 ---
 
-### `<app-image-detail-inline-section>` — Image Detail Inline Section
+### `<app-media-detail-inline-section>` — Media Detail Inline Section
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.ts`
 - **Purpose**: Inline editing section for date, address, and project assignment in the media detail panel.

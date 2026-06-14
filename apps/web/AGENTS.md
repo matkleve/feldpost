@@ -57,7 +57,7 @@ src/app/
 - Matrix columns are mandatory: behavior, visual geometry owner, stacking-context owner, interaction hit-area owner, selector(s), layer, test oracle.
 - Stacking-context ownership and visual geometry ownership must be defined separately.
 - No overlay/state implementation is allowed without explicit selector-level ownership mapping.
-- Follow root governance in `AGENTS.md` section `Visual Behavior Contract (Mandatory per Component Spec)`.
+- Full contract: `.cursor/rules/visual-behavior.mdc`.
 
 ## Stable State Comments (Required)
 
@@ -80,6 +80,7 @@ Command details:
 
 - `node scripts/validate-design-system-registry.mjs`
 - `node scripts/audit-panel-breakpoints.mjs`
+- `node scripts/guard-visual-behavior.mjs`
 
 Related references:
 

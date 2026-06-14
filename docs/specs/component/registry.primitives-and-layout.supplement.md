@@ -134,19 +134,12 @@
 
 ---
 
-### `<app-segmented-switch>` — Segmented Switch
+### ~~`<app-segmented-switch>`~~ — DEPRECATED (removed)
 
-- **File**: `apps/web/src/app/shared/segmented-switch/segmented-switch.component.ts`
-- **Purpose**: Pill-style multi-option control (keyboard-navigable, ARIA `radiogroup`).
-- **Spec**: [`docs/specs/component/filters/segmented-switch.md`](filters/segmented-switch.md)
-- **Variant axes**:
-  | Input | Type | Values | Visual effect |
-  |---|---|---|---|
-  | `size` | `SegmentedSwitchSize` | `sm`, `md`, `lg` | Button height and font size |
-- **Other inputs**: `options: SegmentedSwitchOption[]`, `value`, `valueChange`
-- **Composed of**: standalone
-- **Used in**: `app-card-variant-switch`, `app-projects-toolbar`, `ss-settings-overlay`, `app-workspace-toolbar`
-- **Gaps**: none
+> **Status:** Component file deleted. All callsites migrated to `[hlmPillToggle]` + `[hlmToggleGroup]` + `[hlmToggleGroupItem]` (see entry below).
+
+- **Replacement**: `[hlmPillToggle]` directives
+- **Spec**: [`docs/specs/component/filters/segmented-switch.md`](filters/segmented-switch.md) (historical reference only)
 
 ---
 
@@ -169,19 +162,12 @@
 
 ---
 
-### `<app-card-variant-switch>` — Card Variant Switch
+### ~~`<app-card-variant-switch>`~~ — DEPRECATED (removed)
 
-- **File**: `apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts`
-- **Purpose**: Segmented control for choosing the active `CardVariant` (thumbnail size / display density).
-- **Spec**: [`docs/specs/component/ui-primitives/ui-primitives.card-variant-switch.md`](ui-primitives/ui-primitives.card-variant-switch.md)
-- **Variant axes**:
-  | Input | Type | Values | Visual effect |
-  |---|---|---|---|
-  | `size` | `'sm' \| 'md' \| 'lg'` | `sm`, `md`, `lg` | Control size (passed to inner segmented switch) |
-- **Other inputs**: `value: CardVariant` (required), `allowed: ReadonlyArray<CardVariant>` (default: all four), `valueChange`
-- **Composed of**: `app-segmented-switch`
-- **Used in**: `app-workspace-toolbar`, `app-projects-toolbar`, `app-media`
-- **Gaps**: none
+> **Status:** Component file deleted. Card variant cycling is now inline in toolbar templates using `[hlmToggleGroup]` + `card-variant-toggle.helpers.ts`.
+
+- **Replacement**: Inline `[hlmToggleGroup]` wiring per toolbar + `apps/web/src/app/shared/workspace-pane/toolbar/card-variant-toggle.helpers.ts`
+- **Spec**: [`docs/specs/component/ui-primitives/ui-primitives.card-variant-switch.md`](ui-primitives/ui-primitives.card-variant-switch.md) (historical reference only)
 
 ---
 
@@ -585,15 +571,12 @@
 
 ## View Toggle
 
-### `<app-projects-view-toggle>` — Projects View Toggle
+### ~~`<app-projects-view-toggle>`~~ — DEPRECATED (removed)
 
-- **File**: `apps/web/src/app/shared/view-toggle/projects-view-toggle.component.ts`
-- **Purpose**: Segmented control that switches between grid/table view modes for the projects page.
-- **Spec**: [`docs/specs/component/project/projects-view-toggle.md`](project/projects-view-toggle.md)
-- **Variant axes**: none (driven by `ProjectsViewMode` value from parent)
-- **Composed of**: `app-segmented-switch`
-- **Used in**: `app-projects-toolbar`
-- **Gaps**: none
+> **Status:** Component file deleted (only README remains in `shared/view-toggle/`). View mode switching is inline in projects toolbar via `[hlmToggleGroup]`.
+
+- **Replacement**: Inline `[hlmToggleGroup]` in projects toolbar
+- **Spec**: [`docs/specs/component/project/projects-view-toggle.md`](project/projects-view-toggle.md) (historical reference only)
 
 ---
 

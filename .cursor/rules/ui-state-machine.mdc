@@ -5,131 +5,50 @@ alwaysApply: true
 
 # UI State Machine Contract
 
-## Migration Exemption
-
-Work classified as **migration cleanup** (Phase 6–8 per `docs/migration/phase-6-template-cleanup.md`) is exempt from the ownership matrix and FSM contract pre-requisites defined in this file.
-
-Migration cleanup is defined as:
-- Replacing `ui-*` BEM class names with Tailwind utilities or `hlm*` directives in existing component templates
-- Wiring existing spartan `hlm*` / `brn*` directives to components that already have DOM structure
-- Removing legacy SCSS files or class names that duplicate CVA
-- Replacing legacy token variables (`var(--color-*)`) with tweakcn equivalents in existing SCSS
-
-**Migration cleanup does NOT cover:**
-- Creating new components or new visual layouts
-- Adding new states, animations, or interaction patterns
-- Any net-new visual decision not already expressed in the existing component
-
-If a change introduces a net-new visual element, the exemption does not apply and the full ownership matrix / FSM contract is required.
-
-- FSM is required whenever a component has programmatic state — state that cannot be expressed purely through CSS pseudo-classes (`:hover`, `:focus`, `:disabled`, `:checked`).
-- CSS pseudo-classes are browser-native interaction states and are not FSM states.
-- Any component with programmatic state must expose a single typed state enum as its visual API.
-- Public boolean inputs that represent visual state are forbidden.
-- State transitions must be validated by a transition guard function backed by an explicit transition map.
-- Stateful component roots must expose one visual state driver attribute: `[attr.data-state]`.
-- Parent components must pass one state value instead of coordinating multiple visual-state flags.
-
-## Universal Media Boundary Contract
-
-- `app-universal-media` is the shared rendering adapter boundary and keeps its structured `MediaRenderState` object contract.
-- Feature components still expose a single local enum visual-state API and map that enum to `MediaRenderState` at the adapter boundary.
-- Do not reintroduce multiple boolean visual-state inputs at callsites to feed `app-universal-media`.
-- Stable-state comments must document both local enum states and the mapping to `MediaRenderState` with spec references.
-
-## Stable State Comment Segmentation (Mandatory)
-
-- Every stateful component must segment state logic in `*.component.ts`, `*.component.html`, and `*.component.scss` with explicit English comment blocks.
-- Each state comment must start with `Stable state:` and describe the rendered visual behavior briefly.
-- Every state comment block must include a spec reference line (`@see docs/specs/...`).
-- In TypeScript: place state comment blocks above the enum/state contract and derived state helpers.
-- In HTML: place state comment blocks immediately before each state branch/region.
-- In SCSS: place state comment blocks immediately above each state selector block.
+Migration exemption: see `AGENTS.md` § Migration Exemption (Phase 6–8).
 
 ## When FSM is required
 
-Does NOT need FSM:
-- Components whose only state changes are CSS pseudo-classes (`:hover`, `:focus`, `:disabled`, `:checked`).
+- **Not needed:** Components whose only states are CSS pseudo-classes (`:hover`, `:focus`, `:disabled`, `:checked`).
+- **Needed:** Any component where JS tracks/switches a condition (open/closed, loading/loaded/error, selected, uploading, expanded, searching, etc.).
 
-Needs FSM:
-- Any component where JavaScript tracks or switches a condition.
-- Programmatic examples include: open/closed, loading/loaded/error, selected, uploading, expanded, results/no-results, filled, searching.
-- A searchbar has programmatic state.
-- A button with a loading spinner has programmatic state.
-- An icon alone does not.
+## Hard rules
 
-# FSM ↔ CSS ↔ DOM alignment (mandatory for layered UI)
+- Expose a single typed state enum as the visual API. No public boolean inputs for visual state.
+- State transitions validated by a guard function backed by an explicit transition map (`Record<State, State[]>`).
+- Stateful component roots: `[attr.data-state]` bound to the enum.
+- Parents pass one state value — never coordinate multiple visual-state flags.
 
-Stateful components that stack visual layers (loading, content, error, empty, etc.) must keep **three artifacts in sync**. Drift causes “build passes, UI wrong” bugs (e.g. stuck `media-ready`, overlay at `opacity: 1`, empty content layer).
+## FSM ↔ CSS ↔ DOM alignment
 
-## 1. Transition map (TypeScript)
+Three artifacts must stay in sync for layered stateful components:
 
-- `Record<State, State[]>` (e.g. `MEDIA_DISPLAY_TRANSITIONS`) is the **only** authority for `goTo(next)`.
-- **Every** `goTo('…')` in code must be grep’d against the map; if the guard returns `current`, the transition is **silently dropped**.
-- Spec prose that allows an edge (e.g. warm revisit `media-ready` → `content-visible`) **must** appear in the map the same session.
-- Add vitest for spec-documented edges (see `media-display-state.spec.ts`).
+1. **Transition map** (TS) — only authority for `goTo(next)`. Add vitest for spec-documented edges.
+2. **Layer opacity matrix** (SCSS) — for each `data-state`, set visibility for each layer explicitly in the component spec supplement.
+3. **DOM mount gates** — document non-FSM gates (computed signals, aspect-settled flags) next to the FSM table in spec.
 
-## 2. Layer opacity matrix (SCSS)
+## Stable State Comments
 
-- Before writing state SCSS, add or update **FSM layer opacity matrix** in the component supplement (example: `docs/specs/component/media/media-display.rendering-matrix.supplement.md#fsm-layer-opacity-matrix`).
-- For **each** `data-state`, set visibility for **each** layer (e.g. loading, staged, content, icon-only, error, no-media) — typically explicit `opacity` per cell; no “hidden by default only.”
-- **No CSS property changes** for a layer unless that state’s row/column says so.
-- Selectors must target the same element that carries `[attr.data-state]` (viewport or `:host` — pick one, document in spec).
+Every stateful component segments state logic with `Stable state:` comment blocks (in `.ts`, `.html`, `.scss`) including `@see docs/specs/...`.
 
-## 3. DOM mount gates (template / computed)
+## Transition & Animation Contract
 
-- If `<img>` or other content is gated by a computed (e.g. `showSharpContent`) or private signal (e.g. `gridSlotAspectSettled`), document them in the spec as **non-FSM gates** next to the FSM table.
-- Debugging: if `data-state` is `media-ready` but the user sees blank tiles, check **DOM gates** and transition map before blaming signing/cache.
+- Explicit transition map required. Choreography table + timing-token mapping in spec.
+- Forbidden: `transition: all`, hardcoded duration/easing magic numbers, unscoped animations.
 
-## 4. Separate state enums
+## Component Implementation Order
 
-- Do not assume one `data-state` namespace per feature (e.g. `MediaItemState` `idle` = selection, `MediaDisplayState` `idle` = no handoff).
+1. Element spec + ownership triad table
+2. State enum, transition map, transition guard
+3. Choreography table + timing tokens in spec
+4. Component API (`[attr.data-state]`)
+5. HTML (two-geometry-owner rule)
+6. SCSS (`@layer components` + `@layer states`)
+7. Gates: lint, build, design-system checks
+
+No HTML/CSS before steps 1–3.
 
 ## Reference implementation
 
-- Map: `apps/web/src/app/shared/media-display/media-display-state.ts`
-- Matrix SCSS: `media-display-fsm-layers` mixin in `media-display.component.scss`
-- Supplement: `docs/specs/component/media/media-display.rendering-matrix.supplement.md`
-
-# Transition & Animation Contract
-
-- Components with programmatic state must define an explicit transition map.
-- Every stateful component spec must include a transition choreography table **and** (when using stacked layers) an **FSM layer opacity matrix** before SCSS work starts.
-- All transition and animation timings must come from token variables.
-- Forbidden patterns:
-  - `transition: all ...`
-  - hardcoded duration/easing magic numbers
-  - unscoped animation not tied to state selectors
-
-# Component Implementation Order
-
-Follow this sequence for every stateful component:
-
-1. Create or update the element spec and complete ownership triad table.
-2. Define the state enum, transition map, and transition guard contract.
-3. Add the choreography table and timing-token mapping in the spec.
-4. Implement component API with a single enum state input and `[attr.data-state]` on root.
-5. Implement HTML structure using the two-geometry-owner rule.
-6. Implement SCSS in `@layer components` and `@layer states`.
-7. Run gates: lint, build, and design-system checks.
-
-No HTML/CSS implementation starts before steps 1-3 are complete.
-
-# ESLint / Stylelint and visual-contract enforcement
-
-## Contract rules (must hold in shipped code)
-
-These follow from the UI state machine and animation contracts above. Enforce via **code review** until dedicated lint rules exist:
-
-1. No public `@Input()` boolean solely for visual state on stateful components (use one typed visual API / `[attr.data-state]`).
-2. Stateful component roots expose `[attr.data-state]` where the FSM contract applies.
-3. State-driven selectors must not introduce layout geometry (`width`, `height`, `aspect-ratio`, etc.); geometry stays in `@layer components`.
-4. Transitions and animations use design tokens — no unexplained duration or easing literals.
-
-## What is automated today
-
-- **`apps/web/eslint.config.mjs`** — TypeScript and Angular template rules (including `feldpost-template/no-nested-interactive`: interactive elements must not nest inside other interactive elements). Document additional custom rules in that file when added.
-
-## Stylelint
-
-- Optional future gate: `apps/web/stylelint.config.cjs` when Stylelint rules are introduced. Until then, SCSS contracts rely on review and `npm run design-system:check`.
+- `apps/web/src/app/shared/media-display/media-display-state.ts`
+- `docs/specs/component/media/media-display.rendering-matrix.supplement.md`

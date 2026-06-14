@@ -4,7 +4,7 @@
 
 - PostgreSQL with PostGIS extension for geospatial queries
 - Row-Level Security (RLS) enforced on all tables — no exceptions
-- All data access goes through `org_id` scoping; users only see their organization's data
+- All data access goes through `organization_id` column scoping; users only see their organization's data
 - Supabase-generated TypeScript types are the single source of truth for the frontend
 
 ## Migrations

@@ -1,72 +1,40 @@
 ---
-description: SCSS ownership, geometry, typography, intermediate wrapper, two-element rule, and comment contract for all component SCSS files.
+description: SCSS ownership, geometry, typography, intermediate wrapper, two-element rule, and CSS layer architecture.
 alwaysApply: true
 ---
 
-# SCSS Ownership and Comment Contract (Mandatory)
+# SCSS Ownership Contract (Mandatory)
 
-Every SCSS file is responsible for exactly one component. Styling responsibilities
-are strictly non-overlapping across component layers.
+Every SCSS file owns exactly one component. Styling responsibilities are non-overlapping.
 
 ## Geometry ownership
 
-- Layout container components own columns, gaps, and breakpoints only.
-- Shared state-frame components own loading, error, empty, and selection visuals only.
-- Domain item components own only domain-specific visuals: typography, icons, media details.
-- Any given CSS property may be defined in exactly one component layer.
-  Defining the same property in multiple layers is forbidden.
+- Layout containers own columns, gaps, breakpoints only.
+- State-frame components own loading/error/empty/selection visuals only.
+- Domain items own domain-specific visuals (typography, icons, media details) only.
+- Any CSS property defined in exactly one component layer. Duplicate ownership = blocker.
 
-## Typography ownership rule
+## Typography ownership
 
-`h1`–`h6` elements receive `font-size`, `font-weight`, and `line-height` **only** from `apps/web/src/styles.scss` (the global baseline that runs after Tailwind Preflight).
-
-- Component SCSS must **never** redeclare `font-size`, `font-weight`, or `line-height` on heading element selectors.
-- A wrapper class that reproduces these three properties to style a heading is forbidden.
-- Allowed per component: `margin`, `padding`, `color`, `letter-spacing`, `text-align`, and other context properties.
-- When a specific context genuinely needs a variant typographic scale (e.g. compact card heading), add a modifier class to `styles.scss` — it must remain globally visible and reference the token scale.
+`h1`–`h6` get `font-size`, `font-weight`, `line-height` **only** from `apps/web/src/styles.scss`. Component SCSS must never redeclare these on heading selectors. Variant scales: add modifier class to `styles.scss`.
 
 ## Intermediate wrapper rule
 
-Structural or functional wrapper elements — any element that exists solely for
-JS hooks, Angular directives, state layers, ng-content, or similar —
-must carry zero styling. The following properties are explicitly forbidden
-on intermediate wrappers:
+Wrappers (JS hooks, directives, state layers, ng-content) carry **zero styling**. Exception: one property with a comment explaining why it can't live on layout owner or content element.
 
-width, height, min-width, min-height, max-width, max-height,
-aspect-ratio, padding, margin, position, top, right, bottom, left,
-inset, display, flex, grid, gap, overflow, transform, opacity,
-visibility, pointer-events, z-index
+## Two-element rule
 
-Exception: a single property may appear on an intermediate wrapper only if it is
-functionally unavoidable. It must be accompanied by a comment explaining exactly
-why it cannot live on the layout owner or the content element instead.
-
-## The two-element rule
-
-In any rendered stack, only two elements may carry geometry:
-
-1. The outermost layout owner — sets the space
-2. The innermost content element — fills the space (e.g. `img` with `object-fit`)
-
-Everything in between: zero styling.
+Only two elements carry geometry: (1) outermost layout owner, (2) innermost content element. Everything between: zero styling.
 
 ## CSS Layer Architecture
 
-- Component-local layering is mandatory for refactored components:
-  - `@layer components` for geometry, layout, and default visuals
-  - `@layer states` for state-driven visuals only
-- State selectors may not change geometry (`width`, `height`, `aspect-ratio`, layout geometry).
-- Geometry must be stable in the components layer.
-- Geometry changes are allowed only through data binding values (for example CSS custom properties), not through state selector toggles.
+- `@layer components` — geometry, layout, default visuals
+- `@layer states` — state-driven visuals only
+- State selectors must not change geometry. Geometry stays stable in components layer.
 
 ## Comment contract
 
-Every CSS class, custom property, and keyframe must have two comment lines directly above it:
-
-- Line 1: what it does
-- Line 2: spec reference
-
-Example:
+Every CSS class, custom property, and keyframe: two comment lines above (what it does + spec reference).
 
 ```scss
 // Defines column layout for grid-md mode, 3 columns with token-based gap

@@ -39,9 +39,10 @@
   min-width: 0;
 }
 
+// Geometry only — hover/ink owned by hlmBtn variant="ghost" (button-variants.ts).
+// @see docs/design/state-visuals.md § Interaction emphasis
 .project-detail__edit-btn {
   flex-shrink: 0;
-  color: var(--muted-foreground);
 }
 
 .project-detail__meta {

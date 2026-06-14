@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "docs/design-system/**"
+      - "docs/design/design-system/**"
       - "scripts/audit-panel-breakpoints.mjs"
       - "scripts/validate-design-system-registry.mjs"
+      - "scripts/guard-visual-behavior.mjs"
       - "apps/web/src/app/features/map/**/*.scss"
       - "apps/web/src/app/features/settings-overlay/**/*.scss"
       - "apps/web/src/app/features/upload/**/*.scss"
@@ -17,9 +18,10 @@ on:
     branches:
       - main
     paths:
-      - "docs/design-system/**"
+      - "docs/design/design-system/**"
       - "scripts/audit-panel-breakpoints.mjs"
       - "scripts/validate-design-system-registry.mjs"
+      - "scripts/guard-visual-behavior.mjs"
       - "apps/web/src/app/features/map/**/*.scss"
       - "apps/web/src/app/features/settings-overlay/**/*.scss"
       - "apps/web/src/app/features/upload/**/*.scss"

@@ -7,10 +7,11 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage).
 
 1. **Data and security** — Row-Level Security, migrations, and `supabase/AGENTS.md` (frontend is untrusted).
 2. **This file** — `AGENTS.md` at repository root (global engineering rules).
-3. **Spec system** — `docs/specs/README.md`, governance artifacts under `docs/specs/`, and **Spec split and organization policy** in this file.
-4. **Concrete specs** — implementation contracts under `docs/specs/...` for the feature or module you are changing.
-5. **Package `AGENTS.md`** — `apps/web/`, `supabase/`, or `docs/` only where they **narrow** scope; they must not contradict 1–4.
-6. **Tool overlays** — `.github/instructions/`, `.github/copilot-instructions.md`, and similar: shortcuts only; if something disagrees with 1–4, **1–4 win**.
+3. **Always-applied rules** — `.cursor/rules/*.mdc` (normative extensions of this file; same authority as #2, must not contradict #1).
+4. **Spec system** — `docs/specs/README.md`, governance artifacts under `docs/specs/`, and **Spec split and organization policy** in this file.
+5. **Concrete specs** — implementation contracts under `docs/specs/...` for the feature or module you are changing.
+6. **Package `AGENTS.md`** — `apps/web/`, `supabase/`, or `docs/` only where they **narrow** scope; they must not contradict 1–5.
+7. **Tool overlays** — `.github/instructions/`, `.github/copilot-instructions.md`, and similar: shortcuts only; if something disagrees with 1–5, **1–5 win**.
 
 Implementation contracts live under **`docs/specs/`** (not `docs/element-specs/`). Treat any legacy `element-specs` path as a rename unless explicitly archived.
 
@@ -127,6 +128,10 @@ CI workflow: `.github/workflows/i18n-check.yml`
 - **Element specs are contracts** — implement features from `docs/specs/...`; spec governance itself lives in `docs/specs/README.md`
 - **Glossary is canonical** — use exact names from `docs/glossary.md`
 - **Database-first debugging** — for overlaps, feasibility, uniqueness, publication, immutability, or history: inspect PostgreSQL constraints, triggers, and RLS **before** assuming frontend or adapter bugs (`supabase/migrations/`, `docs/architecture/database-schema.md`).
+
+## Migration Exemption (Phase 6–8)
+
+Work classified as **migration cleanup** is exempt from the ownership matrix and FSM contract pre-requisites. Migration cleanup = replacing `ui-*` BEM with Tailwind/`hlm*`, wiring existing spartan directives, removing legacy SCSS, replacing `var(--color-*)` with tweakcn equivalents. Does NOT cover new components, new states/animations, or net-new visual decisions. If a change introduces a net-new visual element, the exemption does not apply.
 
 ## Component Structure Rules (Hard Blockers)
 

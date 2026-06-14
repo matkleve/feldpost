@@ -53,7 +53,7 @@
 - **Map pierced CSS (Leaflet DivIcon / overlays):** `apps/web/src/styles/_map-shell-leaflet-global.scss` — selectors scoped under **`app-map-shell`**; **`@use`** from `apps/web/src/styles.scss` (Phase 8 Path A). See [`phase-8-global-scss-elimination.md`](../../migration/phase-8-global-scss-elimination.md) §7 and [`phase-10-visual-qa.md`](../../migration/phase-10-visual-qa.md#stacking-sanity).
 - **Spec**: @no-spec (UI system spec: `docs/specs/ui/`)
 - **Variant axes**: none
-- **Composed of**: `ss-search-bar`, `ss-gps-button`, `app-workspace-pane-shell`, `app-upload-panel`, `app-workspace-toolbar`
+- **Composed of**: `ss-search-bar`, `ss-gps-button`, `app-workspace-pane`, `app-upload-panel`, `app-workspace-toolbar`
 - **Gaps**: `@no-spec`
 
 ---
@@ -66,7 +66,7 @@
 - **Purpose**: Root of the `/media` route; wires `MediaPageHeaderComponent` and `MediaContentComponent`.
 - **Spec**: [`docs/specs/component/media/media.component.md`](media/media.component.md)
 - **Variant axes**: none
-- **Composed of**: `app-media-page-header`, `app-media-content`, `app-card-variant-switch`
+- **Composed of**: `app-media-page-header`, `app-media-content`, inline `[hlmToggleGroup]` card variant
 - **Gaps**: none
 
 ---
@@ -180,7 +180,7 @@
 - **Purpose**: Toolbar for the projects page: grouping, filter, sort, view-toggle, card-variant switch.
 - **Spec**: @no-spec
 - **Variant axes**: none
-- **Composed of**: `app-filter-dropdown`, `app-grouping-dropdown`, `app-sort-dropdown`, `app-projects-view-toggle`, `app-card-variant-switch`
+- **Composed of**: `app-filter-dropdown`, `app-grouping-dropdown`, `app-sort-dropdown`, inline `[hlmToggleGroup]` view/card-variant toggles
 - **Gaps**: `@no-spec`
 
 ---
@@ -258,7 +258,7 @@
 - **Spec**: @no-spec
 - **Variant axes**: none
 - **Other inputs**: `open: boolean`
-- **Composed of**: `app-segmented-switch` (repeated per section)
+- **Composed of**: `[hlmPillToggle]` + `[hlmToggleGroup]` (repeated per section)
 - **Gaps**: `@no-spec`
 
 ---
@@ -282,7 +282,7 @@
 - **Purpose**: Root layout shell for authenticated users; composes nav, map-shell, media, projects, and workspace pane host.
 - **Spec**: @no-spec
 - **Variant axes**: none
-- **Composed of**: `app-nav`, `app-map-shell`, `app-workspace-pane-shell`, `ss-toast-container`, `ss-settings-overlay`
+- **Composed of**: `app-nav`, `app-map-shell`, `app-workspace-pane`, `ss-toast-container`, `ss-settings-overlay`
 - **Gaps**: `@no-spec`
 
 ---
@@ -298,7 +298,7 @@ Auth components (`app-login`, `app-register`, `app-reset-password`, `app-update-
 The following inline patterns appear in two or more feature templates but have no dedicated shared component yet. Flag before duplicating:
 
 - **Auth form card**: `app-login`, `app-register`, `app-reset-password`, and `app-update-password` all render a centred card with a logo, heading, form body, and submit button using near-identical Tailwind compositions. Candidate for `<app-auth-card>` in `shared/auth/`.
-- **Context menu panel**: `app-image-detail-header` and `app-workspace-selected-items-grid` both render an inline `<div>` dropdown list with `dd-item` items positioned via absolute layout. No dedicated component — candidate for `<app-context-menu>` in `shared/`.
+- **Context menu panel**: `app-media-detail-header` and `app-workspace-selected-items-grid` both render an inline `<div>` dropdown list with `dd-item` items positioned via absolute layout. No dedicated component — candidate for `<app-context-menu>` in `shared/`.
 - **Empty-state slot**: `app-media-empty` and `app-media-error` both wrap `app-centered-layout` with an icon + heading + optional body text in near-identical structure. Candidate for a generic `<app-empty-state>` in `shared/`.
 - **Sortable column header**: `app-projects-table-view` renders sort-direction chevrons inline per column header without a shared directive or component. Candidate for a `[appSortableColumn]` directive in `shared/`.
 
