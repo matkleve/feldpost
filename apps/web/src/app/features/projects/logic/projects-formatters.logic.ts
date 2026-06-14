@@ -145,3 +145,30 @@ export function projectLabel(
   };
   return t(map[id] ?? '', fallback) || fallback;
 }
+
+/** Next numbered default when inline new-project title is left empty (e.g. Project 3). */
+export function buildDefaultProjectName(
+  projects: readonly ProjectListItem[],
+  nameTemplate: string,
+): string {
+  const prefix = nameTemplate.replace(/\s*\{number\}\s*$/, '').trim();
+  const pattern = new RegExp(`^${escapeRegExp(prefix)}\\s+(\\d+)$`, 'i');
+  let max = 0;
+
+  for (const project of projects) {
+    const match = project.name.trim().match(pattern);
+    if (!match) {
+      continue;
+    }
+    const parsed = Number.parseInt(match[1], 10);
+    if (Number.isFinite(parsed)) {
+      max = Math.max(max, parsed);
+    }
+  }
+
+  return nameTemplate.replace('{number}', String(max + 1));
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

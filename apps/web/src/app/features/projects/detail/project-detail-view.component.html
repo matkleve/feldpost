@@ -1,4 +1,4 @@
-<section class="project-detail">
+<section class="project-detail content-clamp content-clamp--list">
   @if (project(); as p) {
     <header class="project-detail__header">
       <div class="project-detail__title-row">
@@ -10,27 +10,30 @@
               hlmInput
               class="project-detail__title-input"
               type="text"
-              [value]="p.name"
+              [value]="titleDraft()"
               [attr.maxlength]="projectNameMaxLength"
               [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
-              (keydown.enter)="submitTitle(titleInput.value)"
+              (input)="onTitleDraftInput($event)"
+              (keydown.enter)="submitTitle()"
               (keydown.escape)="cancelTitleEdit()"
-              (blur)="submitTitle(titleInput.value)"
+              (blur)="submitTitle()"
             />
           } @else {
             <h1 class="project-detail__title">{{ p.name }}</h1>
-            <button
-              type="button"
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              class="project-detail__edit-btn"
-              [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
-              [attr.title]="t('projects.page.action.renameProject', 'Rename project')"
-              (click)="startTitleEdit()"
-            >
-              <span class="material-icons" aria-hidden="true">edit</span>
-            </button>
+            @if (!namingNewProject()) {
+              <button
+                type="button"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                class="project-detail__edit-btn"
+                [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
+                [attr.title]="t('projects.page.action.renameProject', 'Rename project')"
+                (click)="startTitleEdit()"
+              >
+                <span class="material-icons" aria-hidden="true">edit</span>
+              </button>
+            }
           }
         </div>
         <app-chip
@@ -65,8 +68,8 @@
           <span>{{ t('projects.media.uploadButton', 'Upload media') }}</span>
         </button>
         <button type="button" hlmBtn variant="outline" size="sm" (click)="openPicker()">
-          <span class="material-icons" aria-hidden="true">add_link</span>
-          <span>{{ t('projects.media.linkExistingButton', 'Link existing media') }}</span>
+          <span class="material-icons" aria-hidden="true">add</span>
+          <span>{{ t('projects.media.addButton', 'Add media') }}</span>
         </button>
       </div>
     </header>

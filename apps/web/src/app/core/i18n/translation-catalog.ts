@@ -4395,6 +4395,14 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Nuovo progetto',
   },
   {
+    key: 'projects.page.defaultProjectName',
+    original: 'Project {number}',
+    context: 'Default numbered project title when inline new-project naming is left empty.',
+    en: 'Project {number}',
+    de: 'Projekt {number}',
+    it: 'Progetto {number}',
+  },
+  {
     key: 'projects.toolbar.aria.controls',
     original: 'Project controls',
     context: 'ARIA label for projects page toolbar controls.',

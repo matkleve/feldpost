@@ -57,27 +57,22 @@
   gap: var(--spacing-2);
 }
 
-.media-picker-dialog__toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  min-height: 2.25rem;
+// Container query root for toolbar breakpoints (pane-toolbar host carries class).
+// @see docs/specs/component/item-grid/item-grid.md#actions
+app-pane-toolbar.media-picker-dialog__toolbar {
+  display: block;
   width: 100%;
+  min-height: 2.25rem;
   flex-shrink: 0;
-  overflow: hidden;
   container-type: inline-size;
   container-name: media-picker-toolbar;
-
-  > :not(.media-picker-dialog__toolbar-search) {
-    flex-shrink: 0;
-  }
 }
 
 .media-picker-dialog__toolbar-search {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1 1 auto;
+  width: 100%;
   min-inline-size: 0;
 }
 
@@ -100,6 +95,31 @@
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('media-picker-dialog');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('media-picker-dialog');
+
+  // Defines horizontal cluster layout for media picker dropdown triggers.
+  // @see docs/specs/component/item-grid/item-grid.md#actions
+  .media-picker-dialog__toolbar-left {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-width: 0;
+
+    > .media-picker-dialog__menu-trigger {
+      flex-shrink: 0;
+    }
+  }
+
+  // Defines right-aligned view and size controls for media picker toolbar.
+  // @see docs/specs/component/item-grid/item-grid.md#actions
+  .media-picker-dialog__toolbar-right {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-2);
+    flex-shrink: 0;
+  }
 }
 
 @layer states {

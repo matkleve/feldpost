@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { ToastService } from '../../../core/toast/toast.service';
@@ -30,10 +30,13 @@ function createProject(overrides: Partial<ProjectListItem> = {}): ProjectListIte
 }
 
 describe('ProjectsPageComponent', () => {
+  const routerEvents = new Subject<unknown>();
+
   const projectsServiceMock = {
     loadProjects: vi.fn().mockResolvedValue([]),
     loadProjectMediaSections: vi.fn().mockResolvedValue({ exclusive: [], shared: [] }),
     createDraftProject: vi.fn().mockResolvedValue(null),
+    discardDraftProject: vi.fn().mockResolvedValue(true),
     renameProject: vi.fn().mockResolvedValue(true),
     setProjectColor: vi.fn().mockResolvedValue(true),
     archiveProject: vi.fn().mockResolvedValue(true),
@@ -43,8 +46,13 @@ describe('ProjectsPageComponent', () => {
 
   const routerMock = {
     url: '/projects',
-    events: new Subject<unknown>().asObservable(),
-    navigate: vi.fn(),
+    events: routerEvents.asObservable(),
+    navigate: vi.fn().mockImplementation(async (commands: string[]) => {
+      routerMock.url = commands.join('/').replace('//', '/');
+      routerEvents.next(
+        new NavigationEnd(1, routerMock.url, routerMock.url),
+      );
+    }),
     createUrlTree: vi.fn().mockReturnValue('/projects'),
     serializeUrl: vi.fn((value: unknown) => String(value)),
   };
@@ -129,35 +137,60 @@ describe('ProjectsPageComponent', () => {
     expect(projectsServiceMock.loadProjectMediaSections).toHaveBeenCalledWith('project-42');
   });
 
-  it('opens project-name dialog without creating a project immediately', async () => {
+  it('creates a draft project and starts inline title naming without a dialog', async () => {
     const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const component = fixture.componentInstance;
-    component.onNewProject();
+    const created = createProject({ id: 'project-created', name: 'Untitled project' });
+    projectsServiceMock.createDraftProject.mockResolvedValueOnce(created);
 
-    expect(component.projectNameDialogOpen()).toBe(true);
-    expect(projectsServiceMock.createDraftProject).not.toHaveBeenCalled();
+    const component = fixture.componentInstance;
+    await component.onNewProject();
+
+    expect(projectsServiceMock.createDraftProject).toHaveBeenCalledTimes(1);
+    expect(component.namingProjectId()).toBe('project-created');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/projects', 'project-created']);
+    expect(component.projects()[0]?.id).toBe('project-created');
   });
 
-  it('creates and renames a project after project-name confirmation', async () => {
+  it('assigns a numbered default name when inline title is left empty', async () => {
+    projectsServiceMock.loadProjects.mockResolvedValueOnce([
+      createProject({ id: 'project-1', name: 'Project 1' }),
+      createProject({ id: 'project-created', name: 'Untitled project' }),
+    ]);
+    routerMock.url = '/projects/project-created';
+
     const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const created = createProject({ id: 'project-created', name: 'Draft Project' });
-    projectsServiceMock.createDraftProject.mockResolvedValueOnce(created);
-    projectsServiceMock.renameProject.mockResolvedValueOnce(true);
+    const component = fixture.componentInstance;
+    component.namingProjectId.set('project-created');
+    await component.onProjectTitleRenamed('');
+
+    expect(projectsServiceMock.renameProject).toHaveBeenCalledWith('project-created', 'Project 2');
+    expect(component.namingProjectId()).toBeNull();
+  });
+
+  it('discards a naming draft when navigating to another project', async () => {
+    projectsServiceMock.loadProjects.mockResolvedValueOnce([
+      createProject({ id: 'project-draft', name: 'Untitled project' }),
+      createProject({ id: 'project-other', name: 'Other' }),
+    ]);
+    routerMock.url = '/projects/project-draft';
+
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    component.onNewProject();
-    await component.onProjectNameDialogConfirmed('Bridge Alpha');
+    component.namingProjectId.set('project-draft');
+    await routerMock.navigate(['/projects', 'project-other']);
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-    expect(component.projectNameDialogOpen()).toBe(false);
-    expect(projectsServiceMock.createDraftProject).toHaveBeenCalledTimes(1);
-    expect(projectsServiceMock.renameProject).toHaveBeenCalledWith('project-created', 'Bridge Alpha');
-    expect(component.projects()[0]?.name).toBe('Bridge Alpha');
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/projects', 'project-created']);
+    expect(projectsServiceMock.discardDraftProject).toHaveBeenCalledWith('project-draft');
+    expect(component.projects().some((project) => project.id === 'project-draft')).toBe(false);
   });
 });

@@ -31,6 +31,7 @@ import { FilterDropdownComponent } from '../dropdown-trigger/filter/filter-dropd
 import { SortDropdownComponent } from '../dropdown-trigger/sort/sort-dropdown.component';
 import { ProjectsDropdownComponent } from '../workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
 import { ToolbarDropdownStackComponent } from '../dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
+import { PaneToolbarComponent } from '../pane-chrome/toolbar/pane-toolbar.component';
 import type { ToolbarDropdown } from '../workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 import { MEDIA_ITEM_ACTION_CONTEXT, MediaItemComponent } from '../media-item/media-item.component';
 import type { ItemDisplayMode } from '../item-grid/item.component';
@@ -55,6 +56,7 @@ import {
     SortDropdownComponent,
     ProjectsDropdownComponent,
     ToolbarDropdownStackComponent,
+    PaneToolbarComponent,
     MediaItemComponent,
   ],
   providers: [FilterService],

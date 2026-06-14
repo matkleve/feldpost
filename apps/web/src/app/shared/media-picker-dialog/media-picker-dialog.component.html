@@ -2,7 +2,7 @@
   brnDialog
   [state]="'open'"
   [closeOnBackdropClick]="false"
-  [aria-label]="t('projects.mediaPicker.title', 'Link existing media')"
+  [aria-label]="t('projects.mediaPicker.title', 'Add media')"
   [aria-modal]="true"
 >
   <div hlmDialogOverlay></div>
@@ -12,7 +12,7 @@
         <div class="media-picker-dialog__header-row">
           <div class="media-picker-dialog__header-text">
             <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">
-              {{ t('projects.mediaPicker.title', 'Link existing media') }}
+              {{ t('projects.mediaPicker.title', 'Add media') }}
             </div>
             <p brnDialogDescription hlmDialogDescription>
               {{ t('projects.mediaPicker.description', 'Choose media from your workspace.') }}
@@ -34,47 +34,49 @@
       </div>
 
       <div class="media-picker-dialog__body">
-        <div
-          class="media-picker-dialog__toolbar"
+        <app-pane-toolbar
+          class="media-picker-dialog__toolbar pane-toolbar--center-grows"
           role="toolbar"
           [attr.aria-label]="t('projects.mediaPicker.toolbar.aria', 'Media picker controls')"
         >
-          @for (btn of toolbarButtons(); track btn.id) {
-            <button
-              type="button"
-              hlmBtn
-              variant="outline"
-              size="sm"
-              class="media-picker-dialog__menu-trigger"
-              [class.media-picker-dialog__menu-trigger--open]="activeDropdown() === btn.id"
-              [attr.data-active]="btn.active() ? 'true' : null"
-              [attr.aria-label]="btn.label"
-              [attr.title]="btn.label"
-              [attr.aria-expanded]="activeDropdown() === btn.id"
-              [attr.aria-haspopup]="true"
-              (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
-            >
-              <span
-                data-dd-part="icon"
-                class="material-icons media-picker-dialog__menu-trigger-icon"
-                aria-hidden="true"
+          <div slot="left" class="media-picker-dialog__toolbar-left">
+            @for (btn of toolbarButtons(); track btn.id) {
+              <button
+                type="button"
+                hlmBtn
+                variant="outline"
+                size="sm"
+                class="media-picker-dialog__menu-trigger"
+                [class.media-picker-dialog__menu-trigger--open]="activeDropdown() === btn.id"
+                [attr.data-active]="btn.active() ? 'true' : null"
+                [attr.aria-label]="btn.label"
+                [attr.title]="btn.label"
+                [attr.aria-expanded]="activeDropdown() === btn.id"
+                [attr.aria-haspopup]="true"
+                (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
               >
-                {{ btn.icon }}
-              </span>
-              <span data-dd-part="label" class="media-picker-dialog__menu-trigger-label">{{
-                btn.label
-              }}</span>
-              <span
-                data-dd-part="chevron"
-                class="material-icons media-picker-dialog__menu-trigger-chevron"
-                aria-hidden="true"
-              >
-                expand_more
-              </span>
-            </button>
-          }
+                <span
+                  data-dd-part="icon"
+                  class="material-icons media-picker-dialog__menu-trigger-icon"
+                  aria-hidden="true"
+                >
+                  {{ btn.icon }}
+                </span>
+                <span data-dd-part="label" class="media-picker-dialog__menu-trigger-label">{{
+                  btn.label
+                }}</span>
+                <span
+                  data-dd-part="chevron"
+                  class="material-icons media-picker-dialog__menu-trigger-chevron"
+                  aria-hidden="true"
+                >
+                  expand_more
+                </span>
+              </button>
+            }
+          </div>
 
-          <label class="media-picker-dialog__toolbar-search">
+          <label slot="center" class="media-picker-dialog__toolbar-search">
             <span class="material-icons media-picker-dialog__toolbar-search-icon" aria-hidden="true">
               search
             </span>
@@ -89,51 +91,57 @@
             />
           </label>
 
-          <div class="media-picker-dialog__size-control media-picker-dialog__size-control--full" hlmPillToggle size="sm">
+          <div slot="right" class="media-picker-dialog__toolbar-right">
             <div
-              hlmToggleGroup
+              class="media-picker-dialog__size-control media-picker-dialog__size-control--full"
+              hlmPillToggle
               size="sm"
-              brnToggleGroup
-              type="single"
-              [nullable]="false"
-              [value]="cardVariant()"
-              (valueChange)="onCardVariantToggleChange($event)"
-              [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
             >
-              @for (opt of cardVariantToggleOptions(); track opt.id) {
+              <div
+                hlmToggleGroup
+                size="sm"
+                brnToggleGroup
+                type="single"
+                [nullable]="false"
+                [value]="cardVariant()"
+                (valueChange)="onCardVariantToggleChange($event)"
+                [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+              >
+                @for (opt of cardVariantToggleOptions(); track opt.id) {
+                  <button
+                    type="button"
+                    hlmToggleGroupItem
+                    size="icon"
+                    brnToggleGroupItem
+                    [value]="opt.id"
+                    [attr.aria-label]="opt.ariaLabel || opt.label"
+                    [attr.title]="opt.title || opt.label"
+                  >
+                    <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="media-picker-dialog__size-control media-picker-dialog__size-control--compact">
+              <div class="media-picker-dialog__size-control-track" hlmToggleGroup size="sm">
                 <button
                   type="button"
                   hlmToggleGroupItem
-                  size="icon"
                   brnToggleGroupItem
-                  [value]="opt.id"
-                  [attr.aria-label]="opt.ariaLabel || opt.label"
-                  [attr.title]="opt.title || opt.label"
+                  size="icon"
+                  [attr.aria-label]="compactCardVariantToggleTitle()"
+                  [attr.title]="compactCardVariantToggleTitle()"
+                  (click)="cycleCardVariant()"
                 >
-                  <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
+                  <span class="material-icons" aria-hidden="true">
+                    {{ currentCardVariantToggleOption()?.icon }}
+                  </span>
                 </button>
-              }
+              </div>
             </div>
           </div>
-
-          <div class="media-picker-dialog__size-control media-picker-dialog__size-control--compact">
-            <div class="media-picker-dialog__size-control-track" hlmToggleGroup size="sm">
-              <button
-                type="button"
-                hlmToggleGroupItem
-                brnToggleGroupItem
-                size="icon"
-                [attr.aria-label]="compactCardVariantToggleTitle()"
-                [attr.title]="compactCardVariantToggleTitle()"
-                (click)="cycleCardVariant()"
-              >
-                <span class="material-icons" aria-hidden="true">
-                  {{ currentCardVariantToggleOption()?.icon }}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
+        </app-pane-toolbar>
 
         <app-toolbar-dropdown-stack
           [activePanelId]="activeDropdown()"

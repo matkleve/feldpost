@@ -44,13 +44,15 @@ export class ProjectDetailViewComponent {
 
   private readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
 
-  readonly project = input.required<ProjectListItem>();
+  readonly project = input<ProjectListItem | null>(null);
+  readonly namingNewProject = input(false);
   readonly detailsPanelOpen = input(false);
   readonly exclusiveMedia = input<ProjectMediaListItem[]>([]);
   readonly sharedMedia = input<ProjectMediaListItem[]>([]);
   readonly mediaLoading = input(false);
 
   readonly editingTitle = signal(false);
+  readonly titleDraft = signal('');
   readonly pickerOpen = signal(false);
   readonly projectNameMaxLength = PROJECT_NAME_MAX_LENGTH;
 
@@ -66,8 +68,19 @@ export class ProjectDetailViewComponent {
 
   constructor() {
     effect(() => {
-      this.project();
+      const project = this.project();
+      if (!project) {
+        return;
+      }
+
+      if (this.namingNewProject()) {
+        this.titleDraft.set('');
+        this.editingTitle.set(true);
+        return;
+      }
+
       this.editingTitle.set(false);
+      this.titleDraft.set(project.name);
     });
 
     effect(() => {
@@ -112,16 +125,36 @@ export class ProjectDetailViewComponent {
   }
 
   startTitleEdit(): void {
+    const project = this.project();
+    if (!project) {
+      return;
+    }
+
+    this.titleDraft.set(project.name);
     this.editingTitle.set(true);
   }
 
+  onTitleDraftInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.titleDraft.set(target.value);
+  }
+
   cancelTitleEdit(): void {
+    if (this.namingNewProject()) {
+      this.submitTitle();
+      return;
+    }
+
     this.editingTitle.set(false);
   }
 
-  submitTitle(value: string): void {
+  submitTitle(): void {
+    if (!this.editingTitle()) {
+      return;
+    }
+
     this.editingTitle.set(false);
-    this.titleRenamed.emit(value);
+    this.titleRenamed.emit(this.titleDraft());
   }
 
   openPicker(): void {
@@ -129,7 +162,7 @@ export class ProjectDetailViewComponent {
   }
 
   onUploadMedia(): void {
-    const projectId = this.project().id;
+    const projectId = this.project()?.id;
     if (!projectId || !this.uploadShellUi) {
       return;
     }

@@ -23,6 +23,7 @@ import { ProjectDetailViewComponent } from '../detail/project-detail-view.compon
 import { ProjectDetailsPanelComponent } from '../details-panel/project-details-panel.component';
 import {
   applyProjectFilters,
+  buildDefaultProjectName,
   pendingActionConfirmLabel,
   pendingActionMessage,
   pendingActionTitle,
@@ -31,7 +32,6 @@ import {
 } from './projects-page.logic';
 import { FILTER_OPTIONS, SORT_OPTIONS } from './projects-page.config';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
-import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import type { PendingProjectAction } from './projects-page.config';
 
 @Component({
@@ -43,7 +43,6 @@ import type { PendingProjectAction } from './projects-page.config';
     ProjectDetailViewComponent,
     ProjectDetailsPanelComponent,
     ProjectsConfirmDialogComponent,
-    TextInputDialogComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-page.component.html',
@@ -97,7 +96,7 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly exclusiveMedia = signal<ProjectMediaListItem[]>([]);
   readonly sharedMedia = signal<ProjectMediaListItem[]>([]);
   readonly creatingProject = signal(false);
-  readonly projectNameDialogOpen = signal(false);
+  readonly namingProjectId = signal<string | null>(null);
   readonly renamingProject = signal(false);
   readonly pendingProjectAction = signal<PendingProjectAction>(null);
   readonly pendingProjectId = signal<string | null>(null);
@@ -118,6 +117,11 @@ export class ProjectsPageComponent implements OnDestroy {
     if (!projectId) return null;
     return this.projects().find((project) => project.id === projectId) ?? null;
   });
+
+  readonly isNamingCurrentProject = computed(
+    () =>
+      this.namingProjectId() !== null && this.namingProjectId() === this.currentProjectId(),
+  );
 
   readonly filterOptions = computed(() =>
     FILTER_OPTIONS.map((option) => ({
@@ -155,6 +159,11 @@ export class ProjectsPageComponent implements OnDestroy {
   constructor() {
     effect(() => {
       const projectId = this.currentProjectId();
+      const namingId = this.namingProjectId();
+      if (namingId && projectId !== namingId) {
+        void this.discardNamingDraft(namingId);
+      }
+
       if (projectId) {
         const projectsSelectedItemsContext: SelectedItemsContextPort = {
           contextKey: 'projects',
@@ -186,6 +195,10 @@ export class ProjectsPageComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    const namingId = this.namingProjectId();
+    if (namingId) {
+      void this.projectsService.discardDraftProject(namingId);
+    }
     this.workspacePaneObserver.onRouteLeave('projects');
   }
 
@@ -247,25 +260,42 @@ export class ProjectsPageComponent implements OnDestroy {
     const project = this.currentProject();
     if (!project || this.renamingProject()) return;
 
+    const isNaming = this.namingProjectId() === project.id;
     const trimmed = projectName.trim();
-    if (!trimmed || trimmed === project.name) {
+    const finalName = trimmed
+      ? trimmed
+      : buildDefaultProjectName(
+          this.projects(),
+          this.t('projects.page.defaultProjectName', 'Project {number}'),
+        );
+
+    if (!isNaming && (!trimmed || trimmed === project.name)) {
       return;
+    }
+
+    if (isNaming) {
+      this.namingProjectId.set(null);
     }
 
     this.renamingProject.set(true);
 
     try {
-      const persisted = await this.projectsService.renameProject(project.id, trimmed);
+      const persisted = await this.projectsService.renameProject(project.id, finalName);
       if (!persisted) {
+        if (isNaming) {
+          this.namingProjectId.set(project.id);
+        }
         this.showMutationError(
-          'projects.page.toast.renameError',
-          'Could not rename project. Please try again.',
+          isNaming ? 'projects.page.toast.createError' : 'projects.page.toast.renameError',
+          isNaming
+            ? 'Could not create project. Please try again.'
+            : 'Could not rename project. Please try again.',
         );
         return;
       }
 
       this.projects.update((all) =>
-        all.map((entry) => (entry.id === project.id ? { ...entry, name: trimmed } : entry)),
+        all.map((entry) => (entry.id === project.id ? { ...entry, name: finalName } : entry)),
       );
     } finally {
       this.renamingProject.set(false);
@@ -326,21 +356,15 @@ export class ProjectsPageComponent implements OnDestroy {
     this.colorPickerOpen.update((value) => !value);
   }
 
-  onNewProject(): void {
-    if (this.creatingProject() || this.projectNameDialogOpen()) return;
-    this.projectNameDialogOpen.set(true);
-  }
-
-  onProjectNameDialogCancelled(): void {
+  async onNewProject(): Promise<void> {
     if (this.creatingProject()) return;
-    this.projectNameDialogOpen.set(false);
-  }
 
-  async onProjectNameDialogConfirmed(projectName: string): Promise<void> {
-    if (this.creatingProject()) return;
+    const staleNamingId = this.namingProjectId();
+    if (staleNamingId) {
+      await this.discardNamingDraft(staleNamingId);
+    }
 
     this.creatingProject.set(true);
-    this.projectNameDialogOpen.set(false);
 
     try {
       const draft = await this.projectsService.createDraftProject();
@@ -352,21 +376,26 @@ export class ProjectsPageComponent implements OnDestroy {
         return;
       }
 
-      const renamed = await this.projectsService.renameProject(draft.id, projectName);
-      if (!renamed) {
-        this.showMutationError(
-          'projects.page.toast.createError',
-          'Could not create project. Please try again.',
-        );
-        return;
-      }
-
-      const createdProject = { ...draft, name: projectName.trim() };
-      this.projects.update((all) => [createdProject, ...all]);
-      void this.router.navigate(['/projects', createdProject.id]);
+      this.projects.update((all) => [draft, ...all]);
+      await this.router.navigate(['/projects', draft.id]);
+      this.namingProjectId.set(draft.id);
     } finally {
       this.creatingProject.set(false);
     }
+  }
+
+  private async discardNamingDraft(draftId: string): Promise<void> {
+    if (this.namingProjectId() !== draftId) {
+      return;
+    }
+
+    this.namingProjectId.set(null);
+    const discarded = await this.projectsService.discardDraftProject(draftId);
+    if (!discarded) {
+      return;
+    }
+
+    this.projects.update((all) => all.filter((project) => project.id !== draftId));
   }
 
   async onColorSelected(projectId: string, colorKey: ProjectColorKey): Promise<void> {

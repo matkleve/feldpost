@@ -612,6 +612,7 @@ projects.viewToggle.cards.title,Card view,apps/web/src/app/features/projects/pro
 projects.page.title,Projects,apps/web/src/app/features/projects/projects-page.component.html text-node,Projects,Projekte,Progetti
 projects.page.search.aria,Project search,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project search,Projektsuche,Ricerca progetto
 projects.page.action.newProject,New project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,New project,Neues Projekt,Nuovo progetto
+projects.page.defaultProjectName,Project {number},projects page inline new-project default numbered name,Project {number},Projekt {number},Progetto {number}
 projects.toolbar.aria.controls,Project controls,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project controls,Projektsteuerung,Controlli progetto
 projects.toolbar.status.aria,Project status filter,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project status filter,Projektstatus-Filter,Filtro stato progetto
 projects.toolbar.status.all,All,apps/web/src/app/features/projects/projects-page.component.html text-node,All,Alle,Tutti
@@ -1183,16 +1184,15 @@ projects.media.exclusive.empty,No exclusive media yet,project exclusive media em
 projects.media.shared.title,Shared media,project shared media section title,Shared media,Geteilte Medien,Media condivisi
 projects.media.shared.hint,Media also used in other projects,project shared media section hint,Media also used in other projects,Medien auch in anderen Projekten,Media usati anche in altri progetti
 projects.media.shared.empty,No shared media,project shared media empty state,No shared media,Keine geteilten Medien,Nessun media condiviso
-.projects.media.addButton,Add media,project media section add button,Add media,Medien hinzufügen,Aggiungi media
+projects.media.addButton,Add media,project detail add media action,Add media,Medien hinzufügen,Aggiungi media
 projects.media.uploadButton,Upload media,project files empty state upload button,Upload media,Medien hochladen,Carica media
-projects.media.linkExistingButton,Link existing media,project detail link existing media action,Link existing media,Vorhandene Medien verknüpfen,Collega media esistenti
 projects.media.toolbar.aria,Project media actions,project detail media toolbar aria,Project media actions,Projektmedien-Aktionen,Azioni media del progetto
 projects.media.addExistingButton,Add to project,link existing media to project button,Add to project,Zum Projekt hinzufügen,Aggiungi al progetto
 projects.media.toast.addError,Could not add media to project. Please try again.,toast error adding media to project,Could not add media to project. Please try again.,Medien konnten nicht zum Projekt hinzugefügt werden. Bitte erneut versuchen.,Impossibile aggiungere media al progetto. Riprova.
 projects.media.toast.addSuccess,Media added to project,toast success adding media to project,Media added to project,Medien zum Projekt hinzugefügt,Media aggiunti al progetto
 projects.media.removeFromProject.aria,Remove from project,project media tile remove button aria,Remove from project,Aus Projekt entfernen,Rimuovi dal progetto
 projects.media.toast.removeError,Could not remove media from project. Please try again.,toast error removing media from project,Could not remove media from project. Please try again.,Medien konnten nicht aus dem Projekt entfernt werden. Bitte erneut versuchen.,Impossibile rimuovere il media dal progetto. Riprova.
-projects.mediaPicker.title,Link existing media,media picker dialog title,Link existing media,Vorhandene Medien verknüpfen,Collega media esistenti
+projects.mediaPicker.title,Add media,media picker dialog title,Add media,Medien hinzufügen,Aggiungi media
 projects.mediaPicker.description,Choose media from your workspace.,media picker dialog description,Choose media from your workspace.,Wähle Medien aus deinem Workspace.,Scegli i media dal tuo workspace.
 projects.mediaPicker.toolbar.aria,Media picker controls,media picker toolbar aria-label,Media picker controls,Medienauswahl-Steuerung,Controlli selezione media
 projects.mediaPicker.close,Close,media picker close button aria-label,Close,Schließen,Chiudi

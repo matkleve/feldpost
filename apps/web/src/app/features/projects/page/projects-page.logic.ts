@@ -14,4 +14,5 @@ export {
   projectStatusLabel,
   projectLabel,
   toProjectSummary,
+  buildDefaultProjectName,
 } from '../logic/projects-formatters.logic';

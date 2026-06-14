@@ -111,6 +111,7 @@ const DEFAULT_PROJECT_COLOR: ProjectColorKey = 'clay';
 const PROJECTS_CACHE_TTL_MS = 60_000;
 const SEARCH_COUNTS_CACHE_TTL_MS = 15_000;
 const PROJECT_WORKSPACE_CACHE_TTL_MS = 30_000;
+const PROJECT_MEDIA_SECTIONS_CACHE_TTL_MS = 30_000;
 
 @Injectable({ providedIn: 'root' })
 export class ProjectsService {
@@ -125,6 +126,14 @@ export class ProjectsService {
   private readonly projectWorkspaceImagesCache = new Map<
     string,
     { value: ProjectScopedWorkspaceImage[]; expiresAt: number }
+  >();
+  private readonly projectMediaSectionsCache = new Map<
+    string,
+    { value: ProjectMediaSections; expiresAt: number }
+  >();
+  private readonly projectMediaSectionsLoadPromises = new Map<
+    string,
+    Promise<ProjectMediaSections>
   >();
   async loadProjects(): Promise<ProjectListItem[]> {
     const now = Date.now();
@@ -379,6 +388,16 @@ export class ProjectsService {
     return ok;
   }
 
+  /** Abandons an inline new-project draft (archive + delete; RLS requires archived_at). */
+  async discardDraftProject(projectId: string): Promise<boolean> {
+    const archived = await this.archiveProject(projectId);
+    if (!archived) {
+      return false;
+    }
+
+    return this.deleteProject(projectId);
+  }
+
   async setProjectColor(projectId: string, colorKey: ProjectColorKey): Promise<boolean> {
     const { data, error } = await this.supabase.client
       .from('projects')
@@ -469,6 +488,32 @@ export class ProjectsService {
 
   /** Splits project media into exclusive (one project) vs shared (multiple projects). */
   async loadProjectMediaSections(projectId: string): Promise<ProjectMediaSections> {
+    const now = Date.now();
+    const cached = this.projectMediaSectionsCache.get(projectId);
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
+    }
+
+    const inflight = this.projectMediaSectionsLoadPromises.get(projectId);
+    if (inflight) {
+      return inflight;
+    }
+
+    const promise = this.loadProjectMediaSectionsFresh(projectId);
+    this.projectMediaSectionsLoadPromises.set(projectId, promise);
+    try {
+      const value = await promise;
+      this.projectMediaSectionsCache.set(projectId, {
+        value,
+        expiresAt: Date.now() + PROJECT_MEDIA_SECTIONS_CACHE_TTL_MS,
+      });
+      return value;
+    } finally {
+      this.projectMediaSectionsLoadPromises.delete(projectId);
+    }
+  }
+
+  private async loadProjectMediaSectionsFresh(projectId: string): Promise<ProjectMediaSections> {
     const membershipResponse = await this.supabase.client
       .from('media_projects')
       .select('media_item_id')
@@ -568,7 +613,7 @@ export class ProjectsService {
     const ok = !error;
     if (ok) {
       this.invalidateProjectsReadCaches();
-      this.projectWorkspaceImagesCache.clear();
+      this.invalidateProjectMediaReadCaches();
     }
 
     return ok;
@@ -596,7 +641,7 @@ export class ProjectsService {
     }
 
     this.invalidateProjectsReadCaches();
-    this.projectWorkspaceImagesCache.clear();
+    this.invalidateProjectMediaReadCaches();
     return { ok: true, errorMessage: null };
   }
 
@@ -610,7 +655,7 @@ export class ProjectsService {
     const ok = !error;
     if (ok) {
       this.invalidateProjectsReadCaches();
-      this.projectWorkspaceImagesCache.clear();
+      this.invalidateProjectMediaReadCaches();
     }
 
     return ok;
@@ -634,7 +679,7 @@ export class ProjectsService {
     }
 
     this.invalidateProjectsReadCaches();
-    this.projectWorkspaceImagesCache.clear();
+    this.invalidateProjectMediaReadCaches();
     return { ok: true, errorMessage: null };
   }
 
@@ -647,6 +692,12 @@ export class ProjectsService {
 
   private invalidateProjectWorkspaceCache(projectId: string): void {
     this.projectWorkspaceImagesCache.delete(projectId);
+  }
+
+  private invalidateProjectMediaReadCaches(): void {
+    this.projectWorkspaceImagesCache.clear();
+    this.projectMediaSectionsCache.clear();
+    this.projectMediaSectionsLoadPromises.clear();
   }
 
   private normalizeIds(ids: readonly string[]): string[] {

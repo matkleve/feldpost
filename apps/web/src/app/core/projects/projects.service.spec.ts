@@ -211,3 +211,65 @@ describe('ProjectsService', () => {
     expect(archivedCounts['project-archived']).toBe(1);
   });
 });
+
+describe('ProjectsService.loadProjectMediaSections', () => {
+  it('reuses cached sections on repeat load for the same project', async () => {
+    const from = vi.fn();
+    let mediaItemsQueryCount = 0;
+
+    const mediaProjectsChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({
+        data: [{ media_item_id: 'media-1' }],
+        error: null,
+      }),
+      in: vi.fn().mockResolvedValue({
+        data: [{ media_item_id: 'media-1', project_id: 'project-1' }],
+        error: null,
+      }),
+    };
+
+    const mediaItemsChain = {
+      select: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      order: vi.fn().mockImplementation((): Promise<QueryResult> => {
+        mediaItemsQueryCount += 1;
+        return Promise.resolve({
+          data: [
+            {
+              id: 'media-1',
+              thumbnail_path: 'thumb-1',
+              storage_path: 'storage-1',
+              captured_at: null,
+              created_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+          error: null,
+        });
+      }),
+    };
+
+    from.mockImplementation((table: string) => {
+      if (table === 'media_projects') return mediaProjectsChain;
+      if (table === 'media_items') return mediaItemsChain;
+      return {
+        select: vi.fn().mockResolvedValue({ data: [], error: null }),
+      };
+    });
+
+    TestBed.configureTestingModule({
+      providers: [ProjectsService, { provide: SupabaseService, useValue: { client: { from } } }],
+    });
+
+    const service = TestBed.inject(ProjectsService);
+
+    const first = await service.loadProjectMediaSections('project-1');
+    const second = await service.loadProjectMediaSections('project-1');
+
+    expect(first.exclusive).toHaveLength(1);
+    expect(first.exclusive[0]?.id).toBe('media-1');
+    expect(second).toBe(first);
+    expect(mediaItemsQueryCount).toBe(1);
+    expect(from).toHaveBeenCalledTimes(3);
+  });
+});
