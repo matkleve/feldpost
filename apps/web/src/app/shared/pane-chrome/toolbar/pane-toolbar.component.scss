@@ -27,6 +27,13 @@
   min-inline-size: 0;
 }
 
+// Keeps menu triggers and view toggle at intrinsic width when center grows.
+// @see media-picker-dialog.md
+:host(.pane-toolbar--center-grows) .pane-toolbar__left,
+:host(.pane-toolbar--center-grows) .pane-toolbar__right {
+  flex: 0 0 auto;
+}
+
 .pane-toolbar__right {
   flex: 1;
   display: flex;

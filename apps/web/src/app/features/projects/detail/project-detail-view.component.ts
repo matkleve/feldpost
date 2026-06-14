@@ -1,5 +1,6 @@
 import type { ElementRef } from '@angular/core';
 import { Component, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import type {
   ProjectListItem,
   ProjectMediaListItem,
@@ -17,6 +18,17 @@ import { ProjectMediaSectionComponent } from '../media-section/project-media-sec
 import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
+import { PaneToolbarComponent } from '../../../shared/pane-chrome/toolbar/pane-toolbar.component';
+import {
+  buildCardVariantToggleOptions,
+  buildCompactCardVariantSwitchTitle,
+  getNextCardVariantToggleOption,
+} from '../../../shared/ui-primitives/card-variant-toggle.helpers';
+import { CARD_VARIANTS, type CardVariant } from '../../../shared/ui-primitives/card-variant.types';
+import { CardVariantSettingsService } from '../../../shared/ui-primitives/card-variant-settings.service';
+import { toggleSingleStringValue } from '../../../shared/ui/toggle-group/toggle-group-option.helpers';
+import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
 import { MediaPickerDialogComponent } from '../../../shared/media-picker-dialog/media-picker-dialog.component';
 
 @Component({
@@ -26,8 +38,11 @@ import { MediaPickerDialogComponent } from '../../../shared/media-picker-dialog/
     ProjectMediaSectionComponent,
     ChipComponent,
     MediaPickerDialogComponent,
+    PaneToolbarComponent,
+    ...BrnToggleGroupImports,
     ...HLM_BUTTON_IMPORTS,
     ...HLM_INPUT_IMPORTS,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
   ],
   templateUrl: './project-detail-view.component.html',
   styleUrl: './project-detail-view.component.scss',
@@ -39,6 +54,7 @@ export class ProjectDetailViewComponent {
   private readonly i18nService = inject(I18nService);
   private readonly workspaceView = inject(WorkspaceViewService);
   private readonly uploadShellUi = inject(UploadShellUiService, { optional: true });
+  private readonly cardVariantSettings = inject(CardVariantSettingsService);
 
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -55,6 +71,42 @@ export class ProjectDetailViewComponent {
   readonly titleDraft = signal('');
   readonly pickerOpen = signal(false);
   readonly projectNameMaxLength = PROJECT_NAME_MAX_LENGTH;
+  readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('projects'));
+  readonly allowedCardVariants = CARD_VARIANTS;
+
+  readonly cardVariantToggleOptions = computed(() =>
+    buildCardVariantToggleOptions((k, f) => this.t(k, f), this.allowedCardVariants, true),
+  );
+
+  readonly currentCardVariantToggleOption = computed(() => {
+    const options = this.cardVariantToggleOptions();
+    if (options.length === 0) return null;
+    const current = this.cardVariant();
+    return options.find((opt) => opt.id === current) ?? options[0];
+  });
+
+  readonly nextCardVariantToggleOption = computed(() =>
+    getNextCardVariantToggleOption(this.cardVariantToggleOptions(), this.cardVariant()),
+  );
+
+  readonly compactCardVariantToggleTitle = computed(() =>
+    buildCompactCardVariantSwitchTitle((k, f) => this.t(k, f), this.nextCardVariantToggleOption()),
+  );
+
+  readonly itemDisplayMode = computed<ItemDisplayMode>(() => {
+    switch (this.cardVariant()) {
+      case 'row':
+        return 'row';
+      case 'small':
+        return 'grid-sm';
+      case 'medium':
+        return 'grid-md';
+      case 'large':
+        return 'grid-lg';
+      default:
+        return 'grid-sm';
+    }
+  });
 
   readonly detailsToggled = output<void>();
   readonly titleRenamed = output<string>();
@@ -67,6 +119,10 @@ export class ProjectDetailViewComponent {
   ]);
 
   constructor() {
+    effect(() => {
+      this.cardVariantSettings.setVariant('projects', this.cardVariant());
+    });
+
     effect(() => {
       const project = this.project();
       if (!project) {
@@ -159,6 +215,22 @@ export class ProjectDetailViewComponent {
 
   openPicker(): void {
     this.pickerOpen.set(true);
+  }
+
+  onCardVariantToggleChange(raw: ToggleValue<string>): void {
+    const value = toggleSingleStringValue(raw);
+    if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
+      this.cardVariant.set(value);
+    }
+  }
+
+  cycleCardVariant(): void {
+    const next = this.nextCardVariantToggleOption();
+    if (!next) return;
+    const value = next.id;
+    if (value === 'row' || value === 'small' || value === 'medium' || value === 'large') {
+      this.cardVariant.set(value);
+    }
   }
 
   onUploadMedia(): void {

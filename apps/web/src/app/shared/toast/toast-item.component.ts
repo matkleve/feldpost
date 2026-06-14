@@ -18,8 +18,6 @@ import { ToastService } from '../../core/toast/toast.service';
     '[class.exiting]': "item().state === 'exiting'",
     '[class.expanded]': 'expanded()',
     '[attr.aria-live]': "item().type === 'error' ? 'assertive' : null",
-    '(mouseenter)': 'onMouseEnter()',
-    '(mouseleave)': 'onMouseLeave()',
     '(animationend)': 'onAnimationEnd()',
   },
 })
@@ -46,14 +44,6 @@ export class ToastItemComponent {
 
   toggleExpanded(): void {
     this.expanded.update((value) => !value);
-  }
-
-  onMouseEnter(): void {
-    this.toast.pause(this.item().id);
-  }
-
-  onMouseLeave(): void {
-    this.toast.resume(this.item().id);
   }
 
   onAnimationEnd(): void {

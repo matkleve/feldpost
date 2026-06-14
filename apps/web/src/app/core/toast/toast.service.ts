@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { normalizeToastOptions } from './toast.helpers';
 import type { ToastItem, ToastOptions } from './toast.types';
 
-const MAX_VISIBLE = 3;
+const MAX_QUEUE = 12;
 const DEFAULT_DURATION = 4000;
 const ERROR_DURATION = 6000;
 
@@ -105,6 +105,14 @@ export class ToastService {
     );
   }
 
+  pauseAll(): void {
+    for (const item of this._items()) {
+      if (item.state !== 'exiting') {
+        this.pause(item.id);
+      }
+    }
+  }
+
   resume(id: string): void {
     const item = this._items().find((t) => t.id === id);
     if (!item || item.duration === 0 || item.state === 'exiting') return;
@@ -113,6 +121,14 @@ export class ToastService {
       list.map((t) => (t.id === id ? { ...t, startedAt: Date.now(), remainingMs: undefined } : t)),
     );
     this.startTimer(id, remaining);
+  }
+
+  resumeAll(): void {
+    for (const item of this._items()) {
+      if (item.state !== 'exiting') {
+        this.resume(item.id);
+      }
+    }
   }
 
   /** Clears all state and timers — for test teardown only. */
@@ -143,8 +159,8 @@ export class ToastService {
 
   private enforceMaxLimit(): void {
     const active = this._items().filter((t) => t.state !== 'exiting');
-    if (active.length <= MAX_VISIBLE) return;
-    const toRemove = active.slice(0, active.length - MAX_VISIBLE);
+    if (active.length <= MAX_QUEUE) return;
+    const toRemove = active.slice(0, active.length - MAX_QUEUE);
     for (const item of toRemove) {
       this.dismiss(item.id);
     }

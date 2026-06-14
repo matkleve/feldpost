@@ -20,12 +20,12 @@
           {{ t('projects.media.exclusive.empty', 'No exclusive media yet') }}
         </p>
       } @else {
-        <app-item-grid [mode]="'grid-sm'">
+        <app-item-grid [mode]="displayMode()">
           @for (item of exclusiveRecords(); track item.id) {
             <app-media-item
               [itemId]="item.id"
               [item]="item"
-              [mode]="'grid-sm'"
+              [mode]="displayMode()"
             />
           }
         </app-item-grid>
@@ -48,12 +48,12 @@
           {{ t('projects.media.shared.empty', 'No shared media') }}
         </p>
       } @else {
-        <app-item-grid [mode]="'grid-sm'">
+        <app-item-grid [mode]="displayMode()">
           @for (item of sharedRecords(); track item.id) {
             <app-media-item
               [itemId]="item.id"
               [item]="item"
-              [mode]="'grid-sm'"
+              [mode]="displayMode()"
             />
           }
         </app-item-grid>

@@ -1,11 +1,16 @@
 // Defines project detail center column with header and scrollable media content.
 // @see docs/specs/page/projects-dashboard.md
+@use '../../../shared/dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
+
 .project-detail {
   display: flex;
   flex-direction: column;
+  align-self: flex-start;
   min-height: 0;
   height: 100%;
   width: 100%;
+  max-width: 52rem;
+  margin-inline: 0;
 }
 
 .project-detail__header {
@@ -13,6 +18,15 @@
   flex-shrink: 0;
   gap: var(--spacing-2);
   padding: var(--spacing-5);
+}
+
+// Container query root for media toolbar view-toggle breakpoints.
+// @see docs/specs/component/item-grid/item-grid.md#actions
+app-pane-toolbar.project-detail__media-toolbar {
+  display: block;
+  width: 100%;
+  container-type: inline-size;
+  container-name: project-detail-media-toolbar;
 }
 
 .project-detail__title-row {
@@ -94,6 +108,22 @@
   align-items: center;
   gap: var(--spacing-2);
 }
+
+// Right-aligned card-variant toggle cluster in project media toolbar.
+// @see docs/specs/component/item-grid/item-grid.md#actions
+.project-detail__view-toggle {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+@include fp-toolbar-breakpoints.toolbar-size-control-responsive(
+  'project-detail',
+  project-detail-media-toolbar
+);
 
 .project-detail__content {
   flex: 1 1 auto;

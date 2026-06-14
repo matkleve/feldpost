@@ -4,6 +4,7 @@ import { projectMediaListItemToMediaRecord } from '../../../core/projects/projec
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component';
+import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
 import { MediaItemComponent } from '../../../shared/media-item/media-item.component';
 
 @Component({
@@ -23,6 +24,7 @@ export class ProjectMediaSectionComponent {
   readonly exclusive = input<ProjectMediaListItem[]>([]);
   readonly shared = input<ProjectMediaListItem[]>([]);
   readonly loading = input(false);
+  readonly displayMode = input<ItemDisplayMode>('grid-sm');
 
   readonly mediaRemoved = output<string>();
 

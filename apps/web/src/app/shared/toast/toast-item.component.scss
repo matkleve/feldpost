@@ -2,6 +2,7 @@
 // @see docs/specs/service/toast/toast-system.md
 :host {
   display: block;
+  position: relative;
   pointer-events: auto;
 }
 

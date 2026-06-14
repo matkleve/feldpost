@@ -1,3 +1,9 @@
-@for (item of toast.items(); track item.id) {
-  <ss-toast-item [item]="item" />
-}
+<div
+  class="toast-stack"
+  (mouseenter)="onStackEnter()"
+  (mouseleave)="onStackLeave()"
+>
+  @for (item of toast.items(); track item.id) {
+    <ss-toast-item [item]="item" />
+  }
+</div>

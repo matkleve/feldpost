@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ToastService } from '../../core/toast/toast.service';
 import { ToastItemComponent } from './toast-item.component';
 
@@ -12,8 +12,20 @@ import { ToastItemComponent } from './toast-item.component';
     role: 'region',
     'aria-label': 'Notifications',
     'aria-live': 'polite',
+    '[class.expanded]': 'stackExpanded()',
   },
 })
 export class ToastContainerComponent {
   readonly toast = inject(ToastService);
+  readonly stackExpanded = signal(false);
+
+  onStackEnter(): void {
+    this.stackExpanded.set(true);
+    this.toast.pauseAll();
+  }
+
+  onStackLeave(): void {
+    this.stackExpanded.set(false);
+    this.toast.resumeAll();
+  }
 }

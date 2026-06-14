@@ -1,4 +1,4 @@
-<section class="project-detail content-clamp content-clamp--list">
+<section class="project-detail">
   @if (project(); as p) {
     <header class="project-detail__header">
       <div class="project-detail__title-row">
@@ -62,16 +62,69 @@
         </button>
       </div>
 
-      <div class="project-detail__media-actions" role="toolbar" [attr.aria-label]="t('projects.media.toolbar.aria', 'Project media actions')">
-        <button type="button" hlmBtn variant="outline" size="sm" (click)="onUploadMedia()">
-          <span class="material-icons" aria-hidden="true">upload</span>
-          <span>{{ t('projects.media.uploadButton', 'Upload media') }}</span>
-        </button>
-        <button type="button" hlmBtn variant="outline" size="sm" (click)="openPicker()">
-          <span class="material-icons" aria-hidden="true">add</span>
-          <span>{{ t('projects.media.addButton', 'Add media') }}</span>
-        </button>
-      </div>
+      <app-pane-toolbar
+        class="project-detail__media-toolbar"
+        role="toolbar"
+        [attr.aria-label]="t('projects.media.toolbar.aria', 'Project media actions')"
+      >
+        <div slot="left" class="project-detail__media-actions">
+          <button type="button" hlmBtn variant="outline" size="sm" (click)="onUploadMedia()">
+            <span class="material-icons" aria-hidden="true">upload</span>
+            <span>{{ t('projects.media.uploadButton', 'Upload media') }}</span>
+          </button>
+          <button type="button" hlmBtn variant="outline" size="sm" (click)="openPicker()">
+            <span class="material-icons" aria-hidden="true">add</span>
+            <span>{{ t('projects.media.addButton', 'Add media') }}</span>
+          </button>
+        </div>
+
+        <div slot="right" class="project-detail__view-toggle">
+          <div class="project-detail__size-control project-detail__size-control--full" hlmPillToggle size="sm">
+            <div
+              hlmToggleGroup
+              size="sm"
+              brnToggleGroup
+              type="single"
+              [nullable]="false"
+              [value]="cardVariant()"
+              (valueChange)="onCardVariantToggleChange($event)"
+              [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+            >
+              @for (opt of cardVariantToggleOptions(); track opt.id) {
+                <button
+                  type="button"
+                  hlmToggleGroupItem
+                  size="icon"
+                  brnToggleGroupItem
+                  [value]="opt.id"
+                  [attr.aria-label]="opt.ariaLabel || opt.label"
+                  [attr.title]="opt.title || opt.label"
+                >
+                  <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="project-detail__size-control project-detail__size-control--compact">
+            <div class="project-detail__size-control-track" hlmToggleGroup size="sm">
+              <button
+                type="button"
+                hlmToggleGroupItem
+                brnToggleGroupItem
+                size="icon"
+                [attr.aria-label]="compactCardVariantToggleTitle()"
+                [attr.title]="compactCardVariantToggleTitle()"
+                (click)="cycleCardVariant()"
+              >
+                <span class="material-icons" aria-hidden="true">
+                  {{ currentCardVariantToggleOption()?.icon }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </app-pane-toolbar>
     </header>
 
     <app-project-media-section
@@ -79,6 +132,7 @@
       [exclusive]="exclusiveMedia()"
       [shared]="sharedMedia()"
       [loading]="mediaLoading()"
+      [displayMode]="itemDisplayMode()"
       (mediaRemoved)="mediaRemoved.emit($event)"
     />
   }
