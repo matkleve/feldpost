@@ -661,6 +661,7 @@ projects.page.fileType.countAria,{count} {type},apps/web/src/app/features/projec
 projects.page.modal.aria,Project action modal,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project action modal,Projektaktionsdialog,Dialogo azione progetto
 projects.page.modal.cancel,Cancel,apps/web/src/app/features/projects/projects-page.component.html text-node,Cancel,Abbrechen,Annulla
 projects.page.toast.createError,Could not create project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not create project. Please try again.,Projekt konnte nicht erstellt werden. Bitte erneut versuchen.,Impossibile creare il progetto. Riprova.
+projects.page.toast.renameError,Could not rename project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not rename project. Please try again.,Projekt konnte nicht umbenannt werden. Bitte erneut versuchen.,Impossibile rinominare il progetto. Riprova.
 projects.page.toast.archiveError,Could not archive project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not archive project. Please try again.,Projekt konnte nicht archiviert werden. Bitte erneut versuchen.,Impossibile archiviare il progetto. Riprova.
 projects.page.toast.archiveSuccess,Project archived,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Project archived,Projekt archiviert,Progetto archiviato
 projects.page.toast.restoreError,Could not restore project. Please try again.,apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message,Could not restore project. Please try again.,Projekt konnte nicht wiederhergestellt werden. Bitte erneut versuchen.,Impossibile ripristinare il progetto. Riprova.
@@ -1156,6 +1157,7 @@ projects.dashboard.widget.storage.hint,Total storage used across projects,projec
 projects.dashboard.widget.team.title,Team,projects dashboard team widget title,Team,Team,Team
 projects.dashboard.widget.team.hint,Members with access to projects,projects dashboard team widget hint,Members with access to projects,Mitglieder mit Projektzugriff,Membri con accesso ai progetti
 projects.detail.detailsButton,Details,project detail details toggle button,Details,Details,Dettagli
+projects.detail.rename.confirm,Save,project detail rename dialog confirm button,Save,Speichern,Salva
 projects.detail.updated,updated,project detail metadata prefix,updated,aktualisiert,aggiornato
 projects.detail.location.unknown,No location,project detail unknown location,No location,Kein Standort,Nessuna posizione
 projects.detail.panel.aria,Project details,project details panel aria-label,Project details,Projektdetails,Dettagli progetto

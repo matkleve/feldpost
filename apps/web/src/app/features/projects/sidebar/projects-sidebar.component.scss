@@ -1,10 +1,11 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Defines narrow left rail geometry for Notion-style project list.
 // @see docs/specs/page/projects-dashboard.md
 :host {
   flex: 0 0 13.75rem;
   min-height: 0;
   min-width: 0;
-  border-right: 1px solid var(--border);
 }
 
 .projects-sidebar {
@@ -21,10 +22,24 @@
   width: 100%;
   justify-content: flex-start;
   gap: var(--spacing-2);
+  color: var(--muted-foreground);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover();
+  }
 
   &--active {
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    @include emphasis.selected();
     font-weight: var(--font-weight-semibold);
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    @include emphasis.selected-hover();
   }
 }
 
@@ -88,8 +103,7 @@
 
   &--open,
   &[data-active='true'] {
-    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    @include emphasis.selected-bordered(8%, 45%);
   }
 }
 
@@ -102,9 +116,7 @@
   flex-shrink: 0;
 
   &--active {
-    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
-    color: var(--primary);
+    @include emphasis.selected-bordered(8%, 45%);
   }
 }
 
@@ -124,21 +136,36 @@
   height: 2.25rem;
   gap: var(--spacing-2);
   padding-inline: var(--spacing-2);
-  border: 0;
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: transparent;
-  color: var(--foreground);
+  color: var(--muted-foreground);
   font-size: var(--font-size-sm);
   text-align: left;
   cursor: pointer;
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover {
-    background: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover();
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--interactive-focus-ring);
   }
 
   &--active {
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    @include emphasis.selected-bordered();
     font-weight: var(--font-weight-semibold);
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    @include emphasis.selected-hover();
   }
 }
 
@@ -165,7 +192,6 @@
 .projects-sidebar__footer {
   flex-shrink: 0;
   padding-top: var(--spacing-2);
-  border-top: 1px solid var(--border);
 }
 
 .projects-sidebar__new {

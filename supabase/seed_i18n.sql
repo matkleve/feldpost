@@ -20525,6 +20525,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.renameError', 'Could not rename project. Please try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not rename project. Please try again.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.renameError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt konnte nicht umbenannt werden. Bitte erneut versuchen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.renameError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile rinominare il progetto. Riprova.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.renameError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'projects.page.toast.archiveError', 'Could not archive project. Please try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

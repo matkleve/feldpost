@@ -11,7 +11,7 @@ export interface ProjectGroupedSection {
   projects: ProjectListItem[];
 }
 
-export type PendingProjectAction = 'archive' | 'restore' | 'delete' | null;
+export type PendingProjectAction = 'delete' | null;
 
 export const GROUPING_OPTIONS: GroupingProperty[] = [
   { id: 'status', icon: 'inventory_2', label: 'Status' },

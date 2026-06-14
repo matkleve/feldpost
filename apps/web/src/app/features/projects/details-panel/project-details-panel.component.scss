@@ -1,23 +1,27 @@
-// Defines floating push details panel geometry for project properties.
+// Defines floating details column slot with content-sized card (not full-height stretch).
 // @see docs/specs/page/projects-dashboard.md
 :host {
+  display: flex;
   flex: 0 0 20rem;
+  flex-direction: column;
   min-height: 0;
+  min-width: 0;
   align-self: stretch;
-  margin: var(--spacing-2);
-  border: 1px solid var(--border);
-  border-radius: var(--container-radius-panel);
-  background: var(--card);
-  box-shadow: var(--shadow-md);
+  padding-block: var(--spacing-4);
 }
 
 .project-details-panel {
   display: flex;
+  flex: 0 1 auto;
   flex-direction: column;
-  min-height: 0;
-  height: 100%;
   gap: var(--spacing-4);
+  min-height: 16rem;
+  max-height: 100%;
   padding: var(--spacing-4);
+  border: 1px solid var(--border);
+  border-radius: var(--container-radius-panel);
+  background: var(--card);
+  box-shadow: var(--shadow-md);
   overflow-y: auto;
 }
 

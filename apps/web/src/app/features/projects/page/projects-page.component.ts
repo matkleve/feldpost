@@ -19,6 +19,7 @@ import { ProjectsConfirmDialogComponent } from '../dialogs/projects-confirm-dial
 import { ProjectsSidebarComponent } from '../sidebar/projects-sidebar.component';
 import { ProjectDashboardViewComponent } from '../dashboard/project-dashboard-view.component';
 import { ProjectDetailViewComponent } from '../detail/project-detail-view.component';
+import { ProjectDetailsPanelComponent } from '../details-panel/project-details-panel.component';
 import {
   applyProjectFilters,
   pendingActionConfirmLabel,
@@ -39,6 +40,7 @@ import type { PendingProjectAction } from './projects-page.config';
     ProjectsSidebarComponent,
     ProjectDashboardViewComponent,
     ProjectDetailViewComponent,
+    ProjectDetailsPanelComponent,
     ProjectsConfirmDialogComponent,
     TextInputDialogComponent,
     ...HLM_BUTTON_IMPORTS,
@@ -93,6 +95,8 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly sharedMedia = signal<ProjectMediaListItem[]>([]);
   readonly creatingProject = signal(false);
   readonly projectNameDialogOpen = signal(false);
+  readonly projectRenameDialogOpen = signal(false);
+  readonly renamingProject = signal(false);
   readonly pendingProjectAction = signal<PendingProjectAction>(null);
   readonly pendingProjectId = signal<string | null>(null);
   readonly pendingActionBusy = signal(false);
@@ -221,6 +225,47 @@ export class ProjectsPageComponent implements OnDestroy {
     this.detailsPanelOpen.update((value) => !value);
   }
 
+  onRenameRequested(): void {
+    if (!this.currentProject() || this.renamingProject()) return;
+    this.projectRenameDialogOpen.set(true);
+  }
+
+  onRenameDialogCancelled(): void {
+    if (this.renamingProject()) return;
+    this.projectRenameDialogOpen.set(false);
+  }
+
+  async onRenameDialogConfirmed(projectName: string): Promise<void> {
+    const project = this.currentProject();
+    if (!project || this.renamingProject()) return;
+
+    const trimmed = projectName.trim();
+    if (!trimmed || trimmed === project.name) {
+      this.projectRenameDialogOpen.set(false);
+      return;
+    }
+
+    this.renamingProject.set(true);
+    this.projectRenameDialogOpen.set(false);
+
+    try {
+      const persisted = await this.projectsService.renameProject(project.id, trimmed);
+      if (!persisted) {
+        this.showMutationError(
+          'projects.page.toast.renameError',
+          'Could not rename project. Please try again.',
+        );
+        return;
+      }
+
+      this.projects.update((all) =>
+        all.map((entry) => (entry.id === project.id ? { ...entry, name: trimmed } : entry)),
+      );
+    } finally {
+      this.renamingProject.set(false);
+    }
+  }
+
   onDetailsPanelClosed(): void {
     this.detailsPanelOpen.set(false);
   }
@@ -282,9 +327,51 @@ export class ProjectsPageComponent implements OnDestroy {
     );
   }
 
-  requestDangerAction(projectId: string, action: Exclude<PendingProjectAction, null>): void {
+  async onArchiveProject(projectId: string): Promise<void> {
+    const persisted = await this.projectsService.archiveProject(projectId);
+    if (!persisted) {
+      this.showMutationError(
+        'projects.page.toast.archiveError',
+        'Could not archive project. Please try again.',
+      );
+      return;
+    }
+
+    const archivedAt = new Date().toISOString();
+    this.projects.update((all) =>
+      all.map((project) =>
+        project.id === projectId
+          ? { ...project, archivedAt, status: 'archived', updatedAt: archivedAt }
+          : project,
+      ),
+    );
+    this.detailsPanelOpen.set(false);
+    void this.router.navigate(['/projects']);
+  }
+
+  async onRestoreProject(projectId: string): Promise<void> {
+    const persisted = await this.projectsService.restoreProject(projectId);
+    if (!persisted) {
+      this.showMutationError(
+        'projects.page.toast.restoreError',
+        'Could not restore project. Please try again.',
+      );
+      return;
+    }
+
+    const restoredAt = new Date().toISOString();
+    this.projects.update((all) =>
+      all.map((project) =>
+        project.id === projectId
+          ? { ...project, archivedAt: null, status: 'active', updatedAt: restoredAt }
+          : project,
+      ),
+    );
+  }
+
+  requestDeleteProject(projectId: string): void {
     this.pendingProjectId.set(projectId);
-    this.pendingProjectAction.set(action);
+    this.pendingProjectAction.set('delete');
   }
 
   cancelPendingAction(): void {
@@ -304,47 +391,6 @@ export class ProjectsPageComponent implements OnDestroy {
     this.pendingActionBusy.set(true);
 
     try {
-      if (action === 'archive') {
-        const persisted = await this.projectsService.archiveProject(projectId);
-        if (!persisted) {
-          this.showMutationError(
-            'projects.page.toast.archiveError',
-            'Could not archive project. Please try again.',
-          );
-          return;
-        }
-
-        const archivedAt = new Date().toISOString();
-        this.projects.update((all) =>
-          all.map((project) =>
-            project.id === projectId
-              ? { ...project, archivedAt, status: 'archived', updatedAt: archivedAt }
-              : project,
-          ),
-        );
-        void this.router.navigate(['/projects']);
-      }
-
-      if (action === 'restore') {
-        const persisted = await this.projectsService.restoreProject(projectId);
-        if (!persisted) {
-          this.showMutationError(
-            'projects.page.toast.restoreError',
-            'Could not restore project. Please try again.',
-          );
-          return;
-        }
-
-        const restoredAt = new Date().toISOString();
-        this.projects.update((all) =>
-          all.map((project) =>
-            project.id === projectId
-              ? { ...project, archivedAt: null, status: 'active', updatedAt: restoredAt }
-              : project,
-          ),
-        );
-      }
-
       if (action === 'delete') {
         const persisted = await this.projectsService.deleteProject(projectId);
         if (!persisted) {
@@ -356,6 +402,7 @@ export class ProjectsPageComponent implements OnDestroy {
         }
 
         this.projects.update((all) => all.filter((project) => project.id !== projectId));
+        this.detailsPanelOpen.set(false);
         void this.router.navigate(['/projects']);
       }
 

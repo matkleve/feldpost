@@ -1,4 +1,4 @@
-<main class="projects-page" data-i18n-skip>
+<main class="projects-page content-clamp content-clamp--wide" data-i18n-skip>
   <app-projects-sidebar
     [projects]="sidebarProjects()"
     [selectedProjectId]="currentProjectId()"
@@ -19,35 +19,44 @@
     (newProject)="onNewProject()"
   />
 
-  <section class="projects-page__main">
-    @if (loadError()) {
-      <section class="projects-page__error" role="alert">
-        <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
-        <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
-        <button hlmBtn variant="outline" type="button" (click)="refreshProjects()">
-          {{ t('projects.page.error.retry', 'Retry') }}
-        </button>
-      </section>
-    } @else if (currentProjectId() && currentProject(); as project) {
+  @if (loadError()) {
+    <section class="projects-page__center projects-page__error" role="alert">
+      <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
+      <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
+      <button hlmBtn variant="outline" type="button" (click)="refreshProjects()">
+        {{ t('projects.page.error.retry', 'Retry') }}
+      </button>
+    </section>
+  } @else if (currentProjectId() && currentProject(); as project) {
+    <section class="projects-page__center">
       <app-project-detail-view
         [project]="project"
         [detailsPanelOpen]="detailsPanelOpen()"
-        [colorPickerOpen]="colorPickerOpen()"
         [exclusiveMedia]="exclusiveMedia()"
         [sharedMedia]="sharedMedia()"
         [mediaLoading]="mediaLoading()"
         (detailsToggled)="onDetailsToggled()"
-        (detailsPanelClosed)="onDetailsPanelClosed()"
+        (renameRequested)="onRenameRequested()"
+      />
+    </section>
+
+    @if (detailsPanelOpen()) {
+      <app-project-details-panel
+        [project]="project"
+        [colorPickerOpen]="colorPickerOpen()"
         (colorSelected)="onColorSelected(project.id, $event)"
         (colorPickerToggled)="onColorPickerToggled()"
-        (archiveRequested)="requestDangerAction(project.id, 'archive')"
-        (restoreRequested)="requestDangerAction(project.id, 'restore')"
-        (deleteRequested)="requestDangerAction(project.id, 'delete')"
+        (archiveRequested)="onArchiveProject(project.id)"
+        (restoreRequested)="onRestoreProject(project.id)"
+        (deleteRequested)="requestDeleteProject(project.id)"
+        (closed)="onDetailsPanelClosed()"
       />
-    } @else {
-      <app-project-dashboard-view [projects]="projects()" />
     }
-  </section>
+  } @else {
+    <section class="projects-page__center">
+      <app-project-dashboard-view [projects]="projects()" />
+    </section>
+  }
 
   <app-projects-confirm-dialog
     [open]="hasPendingAction()"
@@ -70,6 +79,18 @@
       [cancelLabel]="t('map.shell.dialog.cancel', 'Cancel')"
       (cancelled)="onProjectNameDialogCancelled()"
       (confirmed)="onProjectNameDialogConfirmed($event)"
+    />
+  }
+
+  @if (projectRenameDialogOpen() && currentProject(); as project) {
+    <app-text-input-dialog
+      [title]="t('projects.page.action.renameProject', 'Rename project')"
+      [placeholder]="t('map.shell.dialog.projectName.placeholder', 'e.g. Radius Selection North')"
+      [initialValue]="project.name"
+      [confirmLabel]="t('projects.detail.rename.confirm', 'Save')"
+      [cancelLabel]="t('map.shell.dialog.cancel', 'Cancel')"
+      (cancelled)="onRenameDialogCancelled()"
+      (confirmed)="onRenameDialogConfirmed($event)"
     />
   }
 </main>

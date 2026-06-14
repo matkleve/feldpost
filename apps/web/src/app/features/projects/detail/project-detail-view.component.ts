@@ -9,16 +9,14 @@ import {
   formatRelativeDate,
   projectStatusLabel,
 } from '../page/projects-page.logic';
-import { ProjectDetailsPanelComponent } from '../details-panel/project-details-panel.component';
 import { ProjectMediaSectionComponent } from '../media-section/project-media-section.component';
 import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
-import type { ProjectColorKey } from '../../../core/projects/projects.types';
 
 @Component({
   selector: 'app-project-detail-view',
   standalone: true,
-  imports: [ProjectDetailsPanelComponent, ProjectMediaSectionComponent, ChipComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [ProjectMediaSectionComponent, ChipComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './project-detail-view.component.html',
   styleUrl: './project-detail-view.component.scss',
   host: {
@@ -31,20 +29,14 @@ export class ProjectDetailViewComponent {
 
   readonly project = input.required<ProjectListItem>();
   readonly detailsPanelOpen = input(false);
-  readonly colorPickerOpen = input(false);
   readonly exclusiveMedia = input<ProjectMediaListItem[]>([]);
   readonly sharedMedia = input<ProjectMediaListItem[]>([]);
   readonly mediaLoading = input(false);
 
   readonly detailsToggled = output<void>();
-  readonly colorSelected = output<ProjectColorKey>();
-  readonly colorPickerToggled = output<void>();
-  readonly archiveRequested = output<void>();
-  readonly restoreRequested = output<void>();
-  readonly deleteRequested = output<void>();
-  readonly detailsPanelClosed = output<void>();
+  readonly renameRequested = output<void>();
 
-  colorFor(key: ProjectColorKey): string {
+  colorFor(key: ProjectListItem['colorKey']): string {
     return colorTokenFor(key);
   }
 

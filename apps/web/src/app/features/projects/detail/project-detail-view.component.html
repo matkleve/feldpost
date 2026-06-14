@@ -3,7 +3,21 @@
     <header class="project-detail__header">
       <div class="project-detail__title-row">
         <span class="project-detail__dot" [style.background]="colorFor(p.colorKey)"></span>
-        <h1 class="project-detail__title">{{ p.name }}</h1>
+        <div class="project-detail__title-group">
+          <h1 class="project-detail__title">{{ p.name }}</h1>
+          <button
+            type="button"
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            class="project-detail__edit-btn"
+            [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
+            [attr.title]="t('projects.page.action.renameProject', 'Rename project')"
+            (click)="renameRequested.emit()"
+          >
+            <span class="material-icons" aria-hidden="true">edit</span>
+          </button>
+        </div>
         <app-chip
           [decorative]="true"
           [variant]="statusChipVariant(p.status)"
@@ -28,26 +42,11 @@
       </button>
     </header>
 
-    <div class="project-detail__body">
-      <app-project-media-section
-        class="project-detail__content"
-        [exclusive]="exclusiveMedia()"
-        [shared]="sharedMedia()"
-        [loading]="mediaLoading()"
-      />
-
-      @if (detailsPanelOpen()) {
-        <app-project-details-panel
-          [project]="p"
-          [colorPickerOpen]="colorPickerOpen()"
-          (colorSelected)="colorSelected.emit($event)"
-          (colorPickerToggled)="colorPickerToggled.emit()"
-          (archiveRequested)="archiveRequested.emit()"
-          (restoreRequested)="restoreRequested.emit()"
-          (deleteRequested)="deleteRequested.emit()"
-          (closed)="detailsPanelClosed.emit()"
-        />
-      }
-    </div>
+    <app-project-media-section
+      class="project-detail__content"
+      [exclusive]="exclusiveMedia()"
+      [shared]="sharedMedia()"
+      [loading]="mediaLoading()"
+    />
   }
 </section>
