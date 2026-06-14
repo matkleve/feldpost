@@ -465,8 +465,10 @@ export class ProjectsPageComponent implements OnDestroy {
       ),
     );
 
-    if (this.currentProjectId() === projectId) {
-      this.showArchived.set(false);
+    // Mirror archive: switch to the matching list and keep the restored project in focus.
+    this.showArchived.set(false);
+    if (this.currentProjectId() !== projectId) {
+      void this.router.navigate(['/projects', projectId]);
     }
 
     this.showMutationSuccess(

@@ -221,4 +221,38 @@ describe('ProjectsPageComponent', () => {
     expect(component.currentProject()?.status).toBe('archived');
     expect(component.sidebarProjects().some((entry) => entry.id === 'project-1')).toBe(false);
   });
+
+  it('switches to active list on restore and keeps the restored project focused', async () => {
+    const project = createProject({
+      id: 'project-1',
+      name: 'Pilot Project',
+      status: 'archived',
+      archivedAt: '2026-03-21T10:00:00.000Z',
+    });
+    projectsServiceMock.loadProjects.mockResolvedValueOnce([project]);
+    routerMock.url = '/projects/project-1';
+
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.showArchived.set(true);
+    component.detailsPanelOpen.set(true);
+    await component.onRestoreProject('project-1');
+
+    expect(routerMock.navigate).not.toHaveBeenCalledWith(['/projects']);
+    expect(component.currentProjectId()).toBe('project-1');
+    expect(component.currentProject()?.status).toBe('active');
+    expect(component.detailsPanelOpen()).toBe(true);
+    expect(component.showArchived()).toBe(false);
+    expect(component.sidebarProjects().some((entry) => entry.id === 'project-1')).toBe(true);
+
+    component.onArchiveToggled();
+
+    expect(component.showArchived()).toBe(true);
+    expect(component.currentProjectId()).toBe('project-1');
+    expect(component.currentProject()?.status).toBe('active');
+    expect(component.sidebarProjects().some((entry) => entry.id === 'project-1')).toBe(false);
+  });
 });
