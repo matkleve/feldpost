@@ -1,0 +1,18 @@
+@if (enabled()) {
+  <button
+    hlmBtn
+    twoStepConfirm
+    #twoStep="hlmTwoStepConfirm"
+    [variant]="buttonVariant()"
+    [size]="buttonSize()"
+    [class]="buttonClasses()"
+    [class.detail-row-action--armed]="twoStep.armed()"
+    type="button"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabel(twoStep.armed())"
+    [attr.title]="title(twoStep.armed())"
+    (twoStepConfirmed)="confirmed.emit()"
+  >
+    <span class="material-icons" aria-hidden="true">{{ twoStep.armed() ? armedIcon() : idleIcon() }}</span>
+  </button>
+}

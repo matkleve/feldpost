@@ -99,9 +99,10 @@
       </button>
     </span>
     @if (effectiveVisualState() === 'delete_armed') {
-      <app-detail-row-inline-confirm-action
+      <app-inline-confirm-action
         class="media-location-row__delete-confirm"
-        slot="r2"
+        detailRowSlot="r2"
+        tone="danger"
         [disabled]="saving()"
         idleIcon="delete"
         initialAriaKey="location.action.delete"

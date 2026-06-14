@@ -1,35 +1,10 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import type { ProjectMediaListItem } from '../../../core/projects/projects.types';
-import type { MediaRecord } from '../../../core/media-query/media-query.types';
+import { projectMediaListItemToMediaRecord } from '../../../core/projects/projects.helpers';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component';
 import { MediaItemComponent } from '../../../shared/media-item/media-item.component';
-
-function projectMediaToMediaRecord(item: ProjectMediaListItem): MediaRecord {
-  return {
-    id: item.id,
-    user_id: '',
-    organization_id: null,
-    project_id: null,
-    storage_path: item.storagePath,
-    thumbnail_path: item.thumbnailPath,
-    latitude: null,
-    longitude: null,
-    exif_latitude: null,
-    exif_longitude: null,
-    captured_at: item.capturedAt,
-    has_time: !!item.capturedAt,
-    created_at: item.createdAt,
-    address_label: null,
-    street: null,
-    city: null,
-    district: null,
-    country: null,
-    direction: null,
-    location_unresolved: null,
-  };
-}
 
 @Component({
   selector: 'app-project-media-section',
@@ -51,8 +26,10 @@ export class ProjectMediaSectionComponent {
 
   readonly mediaRemoved = output<string>();
 
-  readonly exclusiveRecords = computed(() => this.exclusive().map(projectMediaToMediaRecord));
-  readonly sharedRecords = computed(() => this.shared().map(projectMediaToMediaRecord));
+  readonly exclusiveRecords = computed(() =>
+    this.exclusive().map(projectMediaListItemToMediaRecord),
+  );
+  readonly sharedRecords = computed(() => this.shared().map(projectMediaListItemToMediaRecord));
 
   onRemoveMedia(mediaId: string, event: MouseEvent): void {
     event.stopPropagation();

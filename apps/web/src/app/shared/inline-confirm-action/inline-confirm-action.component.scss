@@ -1,0 +1,43 @@
+// Layout chrome for inline confirm — interaction lives on `hlmBtn twoStepConfirm`.
+// @see docs/specs/component/inline-confirm-action/inline-confirm-action.md
+
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+:host([data-layout='detail-row']) {
+  display: contents;
+}
+
+.inline-confirm-action__button {
+  flex-shrink: 0;
+}
+
+@mixin inline-confirm-revealed {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+:host([data-reveal='sidebar-row-wrap']) .inline-confirm-action__button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+:host-context(.projects-sidebar__row-wrap:hover)
+  :host([data-reveal='sidebar-row-wrap'])
+  .inline-confirm-action__button,
+:host-context(.projects-sidebar__row-wrap:focus-within)
+  :host([data-reveal='sidebar-row-wrap'])
+  .inline-confirm-action__button,
+:host([data-reveal='sidebar-row-wrap']) .inline-confirm-action__button[data-two-step-state='armed'] {
+  @include inline-confirm-revealed;
+}
+
+@media (hover: none) {
+  :host([data-reveal='sidebar-row-wrap']) .inline-confirm-action__button {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

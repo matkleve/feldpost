@@ -12,7 +12,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../../ui/button';
 import type { MetadataValueType } from '../../../core/metadata/metadata.types';
 import { MetadataValueEditorComponent } from './metadata/metadata-value-editor.component';
-import { DetailRowInlineConfirmActionComponent } from './detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
+import { InlineConfirmActionComponent } from '../../inline-confirm-action/inline-confirm-action.component';
 import { METADATA_COMPOSE_TYPE_ICONS } from './metadata/metadata-type-icons';
 import type { MetadataComposeValueType } from '../../../core/metadata/metadata-validation.helpers';
 
@@ -22,7 +22,7 @@ import type { MetadataComposeValueType } from '../../../core/metadata/metadata-v
   imports: [
     ...HLM_BUTTON_IMPORTS,
     MetadataValueEditorComponent,
-    DetailRowInlineConfirmActionComponent,
+    InlineConfirmActionComponent,
   ],
   templateUrl: './metadata-property-row.component.html',
   styleUrls: ['./metadata-property-row.component.scss', './_detail-row-slots.scss'],

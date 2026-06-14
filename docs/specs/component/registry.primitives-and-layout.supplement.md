@@ -458,6 +458,26 @@
 
 ## Dialogs
 
+### `<app-inline-confirm-action>` — Inline Confirm Action
+
+- **File**: `apps/web/src/app/shared/inline-confirm-action/inline-confirm-action.component.ts`
+- **Purpose**: Row/sidebar layout wrapper around `hlmBtn` + `twoStepConfirm` for destructive inline actions.
+- **Spec**: [`docs/specs/component/inline-confirm-action/inline-confirm-action.md`](inline-confirm-action/inline-confirm-action.md)
+- **Primitive**: `button[hlmBtn][twoStepConfirm]` (`HlmTwoStepConfirmDirective`) — pair `variant="destructive"` for delete; FSM in `TwoStepConfirmInteraction`.
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `size` | `'md' \| 'sm'` | `md`, `sm` | Control footprint |
+  | `tone` | `'danger' \| 'remove'` | `danger`, `remove` | Idle ink colour |
+  | `detailRowSlot` | `'r1' \| 'r2' \| null` | slot or standalone | Detail-row grid placement |
+  | `revealOnParentHover` | `'detail-row' \| 'sidebar-row-wrap' \| null` | parent hover reveal |
+- **Output**: `confirmed`
+- **Composed of**: standalone
+- **Used in**: media detail rows, projects sidebar archived delete
+- **Gaps**: none
+
+---
+
 ### `<app-confirm-dialog>` — Confirm Dialog
 
 - **File**: `apps/web/src/app/shared/confirm-dialog/confirm-dialog.component.ts`

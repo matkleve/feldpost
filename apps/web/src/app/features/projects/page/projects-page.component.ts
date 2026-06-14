@@ -1,6 +1,6 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import type { OnDestroy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { FilterService } from '../../../core/filter/filter.service';
@@ -8,6 +8,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
 import { ToastService } from '../../../core/toast/toast.service';
+import { UploadManagerService } from '../../../core/upload/upload-manager.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane/workspace-pane-context.port';
 import type {
@@ -55,6 +56,8 @@ export class ProjectsPageComponent implements OnDestroy {
   private readonly projectsService = inject(ProjectsService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly uploadManager = inject(UploadManagerService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private readonly projectMediaIds = signal<Set<string>>(new Set());
@@ -169,6 +172,16 @@ export class ProjectsPageComponent implements OnDestroy {
       }
     });
 
+    this.uploadManager.imageUploaded$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const projectId = this.currentProjectId();
+        if (!projectId) {
+          return;
+        }
+        void this.loadProjectMedia(projectId);
+      });
+
     void this.refreshProjects();
   }
 
@@ -195,6 +208,12 @@ export class ProjectsPageComponent implements OnDestroy {
       const sections = await this.projectsService.loadProjectMediaSections(projectId);
       this.exclusiveMedia.set(sections.exclusive);
       this.sharedMedia.set(sections.shared);
+      this.projectMediaIds.set(
+        new Set([
+          ...sections.exclusive.map((item) => item.id),
+          ...sections.shared.map((item) => item.id),
+        ]),
+      );
     } finally {
       this.mediaLoading.set(false);
     }
@@ -429,6 +448,34 @@ export class ProjectsPageComponent implements OnDestroy {
     this.pendingProjectAction.set('delete');
   }
 
+  async onDeleteProject(projectId: string): Promise<boolean> {
+    const project = this.projects().find((entry) => entry.id === projectId);
+    const projectName =
+      project?.name ?? this.t('projects.page.pending.subject.thisProject', 'this project');
+
+    const persisted = await this.projectsService.deleteProject(projectId);
+    if (!persisted) {
+      this.showMutationError(
+        'projects.page.toast.deleteError',
+        'Could not delete archived project. Please try again.',
+      );
+      return false;
+    }
+
+    this.projects.update((all) => all.filter((entry) => entry.id !== projectId));
+    if (this.currentProjectId() === projectId) {
+      this.detailsPanelOpen.set(false);
+      void this.router.navigate(['/projects']);
+    }
+
+    this.showMutationSuccess(
+      'projects.page.toast.deleteSuccess',
+      'Project "{name}" deleted',
+      projectName,
+    );
+    return true;
+  }
+
   cancelPendingAction(): void {
     if (this.pendingActionBusy()) return;
     this.pendingProjectId.set(null);
@@ -447,18 +494,10 @@ export class ProjectsPageComponent implements OnDestroy {
 
     try {
       if (action === 'delete') {
-        const persisted = await this.projectsService.deleteProject(projectId);
-        if (!persisted) {
-          this.showMutationError(
-            'projects.page.toast.deleteError',
-            'Could not delete archived project. Please try again.',
-          );
+        const deleted = await this.onDeleteProject(projectId);
+        if (!deleted) {
           return;
         }
-
-        this.projects.update((all) => all.filter((project) => project.id !== projectId));
-        this.detailsPanelOpen.set(false);
-        void this.router.navigate(['/projects']);
       }
 
       this.pendingProjectId.set(null);

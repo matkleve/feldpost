@@ -12,7 +12,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
-import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
+import { InlineConfirmActionComponent } from '../../../inline-confirm-action/inline-confirm-action.component';
 import { HlmSpinnerComponent } from '../../../../shared/ui/spinner';
 import { HLM_BUTTON_IMPORTS } from '../../../ui/button';
 import type { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
@@ -38,7 +38,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
   imports: [
     DropdownShellComponent,
     HlmSpinnerComponent,
-    DetailRowInlineConfirmActionComponent,
+    InlineConfirmActionComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './address-search.component.html',

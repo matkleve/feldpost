@@ -20711,14 +20711,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'projects.page.toast.deleteSuccess', 'Archived project deleted', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+values (null, 'projects.page.toast.deleteSuccess', 'Project {name} deleted', 'en', 'projects page delete success toast')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Archived project deleted', 'published'
+select t.id, 'en', 'Project {name} deleted', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.deleteSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20726,7 +20726,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Archiviertes Projekt gelöscht', 'published'
+select t.id, 'de', 'Projekt „{name}“ gelöscht', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.deleteSuccess'
 on conflict (app_text_id, lang) do update set
@@ -20734,9 +20734,71 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Progetto archiviato eliminato', 'published'
+select t.id, 'it', 'Progetto „{name}“ eliminato', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.toast.deleteSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.action.delete', 'Delete project', 'en', 'projects sidebar archived row delete action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt löschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.action.confirmDelete', 'Confirm delete project', 'en', 'projects sidebar archived row delete confirm action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm delete project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projektlöschung bestätigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma eliminazione progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.confirmDelete'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -30538,7 +30600,69 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.inlineConfirm.aria', 'Confirm removal', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/detail-row-inline-confirm-action armed aria-label')
+values (null, 'common.inlineConfirm.confirmAria', 'Confirm', 'en', 'inline confirm action armed aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.inlineConfirm.confirmAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bestätigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.inlineConfirm.confirmAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.inlineConfirm.confirmAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'common.inlineConfirm.confirmTitle', 'Click again to confirm', 'en', 'inline confirm action armed title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click again to confirm', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.inlineConfirm.confirmTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zum Bestätigen erneut klicken', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.inlineConfirm.confirmTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca di nuovo per confermare', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.inlineConfirm.confirmTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.inlineConfirm.aria', 'Confirm removal', 'en', 'legacy alias for common inline confirm armed aria')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -30569,7 +30693,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.inlineConfirm.title', 'Click again to confirm', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/detail-row-inline-confirm-action armed title')
+values (null, 'workspace.imageDetail.action.inlineConfirm.title', 'Click again to confirm', 'en', 'legacy alias for common inline confirm armed title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,

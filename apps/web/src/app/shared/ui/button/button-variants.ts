@@ -7,6 +7,10 @@ const quietInteractionEmphasis =
 /** Outline quiet control — bordered rest + primary-tinted border on hover. */
 const outlineInteractionEmphasis = `border border-input bg-background hover:border-[color:color-mix(in_srgb,var(--primary)_42%,var(--border))] focus-visible:border-[color:color-mix(in_srgb,var(--primary)_42%,var(--border))] ${quietInteractionEmphasis}`;
 
+/** Destructive quiet control — destructive ink + wash (@see docs/design/state-visuals.md § Interaction emphasis). */
+const destructiveInteractionEmphasis =
+  'text-destructive bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] hover:bg-[color:color-mix(in_srgb,var(--destructive)_15%,transparent)] hover:text-destructive focus-visible:bg-[color:color-mix(in_srgb,var(--destructive)_15%,transparent)] focus-visible:text-destructive active:bg-[color:color-mix(in_srgb,var(--destructive)_18%,transparent)] active:text-destructive';
+
 /**
  * Tailwind + shadcn-style button classes; colors resolve via tweakcn tokens (--primary, --ring, etc.).
  * Horizontal padding is locked to spacing-2 (`ps-2` / `pe-2`) for all labeled sizes; logical ps/pe keeps RTL correct.
@@ -20,7 +24,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        destructive: destructiveInteractionEmphasis,
         outline: outlineInteractionEmphasis,
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: quietInteractionEmphasis,

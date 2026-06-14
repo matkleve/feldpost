@@ -70,7 +70,7 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 **Implementation owners:**
 
-- `apps/web/src/app/shared/ui/button/button-variants.ts` — `outline`, `ghost`
+- `apps/web/src/app/shared/ui/button/button-variants.ts` — `outline`, `ghost`, `destructive`
 - `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts` — lane items
 - `apps/web/src/app/shared/ui/tabs/tabs-variants.ts` — tab triggers
 - `apps/web/src/app/features/nav/nav.component.scss` — route links
@@ -86,7 +86,7 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 - `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.scss` — `__option--selected`
 - `apps/web/src/app/shared/workspace-pane/media-detail/captured-date-editor.component.scss` — calendar day `--selected`
 
-**Filled CTAs (exception):** `hlmBtn` `variant="default"` and `variant="destructive"` stay solid fills — not this table.
+**Filled CTAs (exception):** `hlmBtn` `variant="default"` stays solid fill. `variant="destructive"` uses destructive quiet emphasis (light wash + destructive ink) — same recipe as the **Destructive quiet row** row above.
 
 **Documented exceptions:**
 

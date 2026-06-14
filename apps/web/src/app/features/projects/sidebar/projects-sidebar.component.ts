@@ -14,6 +14,7 @@ import {
   SortDropdownComponent,
   type SortDropdownOption,
 } from '../../../shared/dropdown-trigger/sort/sort-dropdown.component';
+import { InlineConfirmActionComponent } from '../../../shared/inline-confirm-action/inline-confirm-action.component';
 
 type ProjectsSidebarDropdown = 'filter' | 'sort' | null;
 
@@ -25,6 +26,7 @@ type ProjectsSidebarDropdown = 'filter' | 'sort' | null;
     ToolbarDropdownStackComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
+    InlineConfirmActionComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-sidebar.component.html',
@@ -53,6 +55,7 @@ export class ProjectsSidebarComponent {
   readonly projectSelected = output<string>();
   readonly projectArchiveRequested = output<string>();
   readonly projectRestoreRequested = output<string>();
+  readonly projectDeleteRequested = output<string>();
   readonly archiveToggled = output<void>();
   readonly searchQueryChange = output<string>();
   readonly sortChanged = output<SortConfig[]>();
@@ -95,6 +98,10 @@ export class ProjectsSidebarComponent {
     event.stopPropagation();
     (event.currentTarget as HTMLElement | null)?.blur();
     this.projectRestoreRequested.emit(projectId);
+  }
+
+  onRowDeleteConfirmed(projectId: string): void {
+    this.projectDeleteRequested.emit(projectId);
   }
 
   onSearchInput(value: string): void {

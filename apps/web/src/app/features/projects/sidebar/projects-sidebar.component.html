@@ -126,6 +126,20 @@
             >
               <span class="material-icons" aria-hidden="true">unarchive</span>
             </button>
+            <app-inline-confirm-action
+              size="sm"
+              tone="danger"
+              revealOnParentHover="sidebar-row-wrap"
+              idleIcon="delete"
+              armedIcon="warning"
+              initialAriaKey="projects.sidebar.action.delete"
+              initialAriaFallback="Delete project"
+              initialTitleKey="projects.sidebar.action.delete"
+              initialTitleFallback="Delete project"
+              confirmAriaKey="projects.sidebar.action.confirmDelete"
+              confirmAriaFallback="Confirm delete project"
+              (confirmed)="onRowDeleteConfirmed(project.id)"
+            />
           }
         </div>
       }

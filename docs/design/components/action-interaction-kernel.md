@@ -102,7 +102,7 @@ Avoid accent for:
 
 ## Button Policy
 
-- **Commit CTAs:** `hlmBtn` `variant="default"` — filled `--primary`; `variant="destructive"` — filled danger.
+- **Commit CTAs:** `hlmBtn` `variant="default"` — filled `--primary`; `variant="destructive"` — destructive quiet wash + `--destructive` ink (not solid fill).
 - **Quiet actions:** `outline` and `ghost` — idle `--muted-foreground`; hover/focus `--primary` + 10% primary wash; selected/on `--interaction-selected-ink` + 10% wash; selected+hover primary wins (see state-visuals).
 - **Link-style:** `variant="link"` — primary text + underline on hover.
 - **Legacy filled secondary:** `variant="secondary"` — rare; prefer `outline` for new work.

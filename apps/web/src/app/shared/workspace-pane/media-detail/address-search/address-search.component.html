@@ -156,8 +156,9 @@
       }
     </div>
     @if (currentAddress()) {
-      <app-detail-row-inline-confirm-action
+      <app-inline-confirm-action
         class="address-search__clear-btn"
+        detailRowSlot="r1"
         initialAriaKey="workspace.addressSearch.aria.clear"
         initialAriaFallback="Clear address"
         initialTitleKey="workspace.addressSearch.aria.clear"

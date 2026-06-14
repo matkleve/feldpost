@@ -28,7 +28,7 @@ import {
 } from './media-location-copy-submenu-geometry';
 import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
-import { DetailRowInlineConfirmActionComponent } from '../detail-row-inline-confirm-action/detail-row-inline-confirm-action.component';
+import { InlineConfirmActionComponent } from '../../../inline-confirm-action/inline-confirm-action.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import type { MediaItemLocationRow } from '../../../../core/media-locations/media-locations.types';
@@ -100,7 +100,7 @@ const COPY_FIELD_ICONS: Record<MediaLocationCopyFieldId, string> = {
   imports: [
     DropdownShellComponent,
     ConfirmDialogComponent,
-    DetailRowInlineConfirmActionComponent,
+    InlineConfirmActionComponent,
     HlmMenuItemDirective,
     HlmMenuSeparatorDirective,
     ...HLM_BUTTON_IMPORTS,

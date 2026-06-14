@@ -63,7 +63,9 @@
         {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}
       </button>
     </div>
-    <app-detail-row-inline-confirm-action
+    <app-inline-confirm-action
+      detailRowSlot="r1"
+      tone="danger"
       initialAriaKey="workspace.metadata.row.removePrefix"
       [initialAriaFallback]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"
       initialTitleKey="workspace.metadata.row.removeTitle"

@@ -1,0 +1,43 @@
+// Detail-row grid adapter — action chrome + hover reveal for `.detail-row` hosts.
+// @see docs/specs/ui/media-detail/media-detail-inline-editing.md
+
+@use '../workspace-pane/media-detail/detail-row-slots';
+
+:host([data-layout='detail-row']) {
+  display: contents;
+}
+
+:host([data-layout='detail-row']) button.detail-row-action--remove,
+:host([data-layout='detail-row']) button.detail-row-action--danger {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@mixin detail-row-inline-confirm-revealed {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+:host-context(.detail-row:hover:not(.detail-row--editing))
+  :host([data-layout='detail-row'])
+  button.detail-row-action--remove,
+:host-context(.detail-row:focus-within:not(.detail-row--editing))
+  :host([data-layout='detail-row'])
+  button.detail-row-action--remove,
+:host-context(.detail-row:hover:not(.detail-row--editing))
+  :host([data-layout='detail-row'])
+  button.detail-row-action--danger,
+:host-context(.detail-row:focus-within:not(.detail-row--editing))
+  :host([data-layout='detail-row'])
+  button.detail-row-action--danger,
+:host([data-layout='detail-row']) button.detail-row-action[data-two-step-state='armed'] {
+  @include detail-row-inline-confirm-revealed;
+}
+
+@media (hover: none) {
+  :host([data-layout='detail-row']) button.detail-row-action--remove,
+  :host([data-layout='detail-row']) button.detail-row-action--danger {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
