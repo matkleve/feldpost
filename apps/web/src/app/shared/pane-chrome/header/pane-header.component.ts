@@ -37,18 +37,20 @@ import { I18nService } from '../../../core/i18n/i18n.service';
         />
       } @else {
         @if (editEnabled()) {
-          <button
-            type="button"
-            class="pane-header__title-btn"
-            [attr.aria-label]="t('workspace.pane.rename.aria', 'Rename project')"
-            [title]="t('workspace.pane.rename.title', 'Rename project')"
-            (click)="requestEdit()"
-          >
-            <span class="pane-header__title" data-i18n-skip>{{ title() }}</span>
-            <span class="pane-header__title-edit material-icons" aria-hidden="true">edit</span>
-          </button>
+          <h2 class="pane-header__title">
+            <button
+              type="button"
+              class="pane-header__title-btn"
+              [attr.aria-label]="t('workspace.pane.rename.aria', 'Rename project')"
+              [title]="t('workspace.pane.rename.title', 'Rename project')"
+              (click)="requestEdit()"
+            >
+              <span data-i18n-skip>{{ title() }}</span>
+              <span class="pane-header__title-edit material-icons" aria-hidden="true">edit</span>
+            </button>
+          </h2>
         } @else {
-          <span class="pane-header__title" data-i18n-skip>{{ title() }}</span>
+          <h2 class="pane-header__title" data-i18n-skip>{{ title() }}</h2>
         }
       }
 
