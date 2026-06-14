@@ -135,7 +135,8 @@
   border-radius: var(--container-radius-control);
   transition:
     background-color var(--motion-duration-fast) var(--motion-ease-out),
-    color var(--motion-duration-fast) var(--motion-ease-out);
+    color var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .media-item__surface--row:hover,
@@ -143,8 +144,21 @@
   background: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
+// Inset ring avoids border box growth when toggling selection.
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
 :host([data-state='selected']) .media-item__surface--row {
-  border: 1px solid var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+// Row selection uses surface highlight only — no thumbnail check overlay.
+// @see docs/specs/component/media/media-item.row-mode.supplement.md
+:host([data-mode='row']) .media-item__quiet-actions {
+  display: none;
+}
+
+:host([data-mode='row']) .media-item__slot--selected {
+  box-shadow: none;
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
 }
 
 // Fixed square leading media column for row mode.

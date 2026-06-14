@@ -20,25 +20,16 @@
           {{ t('projects.media.exclusive.empty', 'No exclusive media yet') }}
         </p>
       } @else {
-        <div class="project-media-section__grid">
-          @for (item of exclusive(); track item.id) {
-            <article class="project-media-section__tile">
-              <div class="project-media-section__thumb" aria-hidden="true"></div>
-              <button
-                type="button"
-                hlmBtn
-                variant="ghost"
-                size="icon-sm"
-                class="project-media-section__remove"
-                [attr.aria-label]="t('projects.media.removeFromProject.aria', 'Remove from project')"
-                [attr.title]="t('projects.media.removeFromProject.aria', 'Remove from project')"
-                (click)="onRemoveMedia(item.id, $event)"
-              >
-                <span class="material-icons" aria-hidden="true">close</span>
-              </button>
-            </article>
+        <app-item-grid [mode]="'grid-sm'">
+          @for (item of exclusiveRecords(); track item.id) {
+            <app-media-item
+              [itemId]="item.id"
+              [item]="item"
+              [mode]="'grid-sm'"
+              [showInteractionChrome]="false"
+            />
           }
-        </div>
+        </app-item-grid>
       }
     </section>
 
@@ -58,25 +49,16 @@
           {{ t('projects.media.shared.empty', 'No shared media') }}
         </p>
       } @else {
-        <div class="project-media-section__grid">
-          @for (item of shared(); track item.id) {
-            <article class="project-media-section__tile">
-              <div class="project-media-section__thumb" aria-hidden="true"></div>
-              <button
-                type="button"
-                hlmBtn
-                variant="ghost"
-                size="icon-sm"
-                class="project-media-section__remove"
-                [attr.aria-label]="t('projects.media.removeFromProject.aria', 'Remove from project')"
-                [attr.title]="t('projects.media.removeFromProject.aria', 'Remove from project')"
-                (click)="onRemoveMedia(item.id, $event)"
-              >
-                <span class="material-icons" aria-hidden="true">close</span>
-              </button>
-            </article>
+        <app-item-grid [mode]="'grid-sm'">
+          @for (item of sharedRecords(); track item.id) {
+            <app-media-item
+              [itemId]="item.id"
+              [item]="item"
+              [mode]="'grid-sm'"
+              [showInteractionChrome]="false"
+            />
           }
-        </div>
+        </app-item-grid>
       }
     </section>
   }

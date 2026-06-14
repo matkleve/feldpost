@@ -1188,15 +1188,18 @@ projects.media.toast.addError,Could not add media to project. Please try again.,
 projects.media.toast.addSuccess,Media added to project,toast success adding media to project,Media added to project,Medien zum Projekt hinzugefügt,Media aggiunti al progetto
 projects.media.removeFromProject.aria,Remove from project,project media tile remove button aria,Remove from project,Aus Projekt entfernen,Rimuovi dal progetto
 projects.media.toast.removeError,Could not remove media from project. Please try again.,toast error removing media from project,Could not remove media from project. Please try again.,Medien konnten nicht aus dem Projekt entfernt werden. Bitte erneut versuchen.,Impossibile rimuovere il media dal progetto. Riprova.
-projects.mediaPicker.title,Add media to project,media picker dialog title,Add media to project,Medien zum Projekt hinzufügen,Aggiungi media al progetto
-projects.mediaPicker.description,Select media items to add to this project.,media picker dialog description,Select media items to add to this project.,Wähle Medien aus um sie zu diesem Projekt hinzuzufügen.,Seleziona i media da aggiungere a questo progetto.
+projects.mediaPicker.title,Link existing media,media picker dialog title,Link existing media,Vorhandene Medien verknüpfen,Collega media esistenti
+projects.mediaPicker.description,Choose media from your workspace.,media picker dialog description,Choose media from your workspace.,Wähle Medien aus deinem Workspace.,Scegli i media dal tuo workspace.
+projects.mediaPicker.toolbar.aria,Media picker controls,media picker toolbar aria-label,Media picker controls,Medienauswahl-Steuerung,Controlli selezione media
+projects.mediaPicker.close,Close,media picker close button aria-label,Close,Schließen,Chiudi
 projects.mediaPicker.searchPlaceholder,Search media…,media picker search input placeholder,Search media…,Medien suchen…,Cerca media…
 projects.mediaPicker.searchAria,Search media,media picker search input aria-label,Search media,Medien suchen,Cerca media
 projects.mediaPicker.loading,Loading media...,media picker loading state,Loading media...,Medien werden geladen...,Caricamento media...
 projects.mediaPicker.empty,No media found,media picker empty state,No media found,Keine Medien gefunden,Nessun media trovato
 projects.mediaPicker.selected,selected,media picker selection count suffix,selected,ausgewählt,selezionati
 projects.mediaPicker.cancel,Cancel,media picker cancel button,Cancel,Abbrechen,Annulla
-projects.mediaPicker.confirm,Add,media picker confirm button,Add,Hinzufügen,Aggiungi
+projects.mediaPicker.confirm,Add,media picker confirm button without selection,Add,Hinzufügen,Aggiungi
+projects.mediaPicker.confirmWithCount,Add ({count} media),media picker confirm button with selection count,Add ({count} media),Hinzufügen ({count} Medien),Aggiungi ({count} media)
 projects.mediaPicker.loadError,Failed to load media,media picker load error,Failed to load media,Medien konnten nicht geladen werden,Impossibile caricare i media
 projects.mediaPicker.retry,Retry,media picker retry button,Retry,Erneut versuchen,Riprova
 "

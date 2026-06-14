@@ -63,20 +63,20 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-2);
+  justify-content: flex-start;
+  gap: var(--spacing-1);
   min-width: 0;
 }
 
 .project-detail__meta {
-  flex: 1 1 auto;
-  min-width: 0;
   margin: 0;
+  min-width: 0;
   color: var(--muted-foreground);
   font-size: var(--font-size-sm);
 }
 
-// Compact outline control inline with metadata (hlmBtn outline sm).
-// @see docs/design/components/action-interaction-kernel.md#button-policy
+// Compact ghost control inline with metadata, left-aligned with meta row.
+// @see docs/design/state-visuals.md § Interaction emphasis
 .project-detail__details-btn {
   flex-shrink: 0;
   gap: var(--spacing-1);

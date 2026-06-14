@@ -1,4 +1,7 @@
-// Media picker dialog — /media-style filter/sort toolbar + selectable thumbnail grid.
+@use '../dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
+
+// Media picker dialog — workspace-aligned toolbar + selectable thumbnail grid.
 // @see docs/specs/component/media-picker-dialog/media-picker-dialog.md (future)
 
 :host {
@@ -17,6 +20,33 @@
 
 .media-picker-dialog__header {
   flex-shrink: 0;
+  gap: var(--spacing-1);
+}
+
+// Title row with compact dismiss control aligned to top-right.
+// @see docs/specs/component/media-picker-dialog/media-picker-dialog.md (future)
+.media-picker-dialog__header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.media-picker-dialog__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-inline-size: 0;
+  flex: 1 1 auto;
+}
+
+.media-picker-dialog__close {
+  flex-shrink: 0;
+  margin-block-start: calc(var(--spacing-1) * -1);
+
+  .material-icons {
+    font-size: 1.125rem;
+  }
 }
 
 .media-picker-dialog__body {
@@ -24,31 +54,31 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
 }
 
 .media-picker-dialog__toolbar {
-  flex-shrink: 0;
-  width: 100%;
-  container-type: inline-size;
-  container-name: media-picker-toolbar;
-}
-
-.media-picker-dialog__toolbar-left {
   display: flex;
-  flex-wrap: nowrap;
   align-items: center;
   gap: var(--spacing-2);
-  min-width: 0;
+  min-height: 2.25rem;
+  width: 100%;
+  flex-shrink: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  container-name: media-picker-toolbar;
+
+  > :not(.media-picker-dialog__toolbar-search) {
+    flex-shrink: 0;
+  }
 }
 
 .media-picker-dialog__toolbar-search {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: min(11rem, 100%);
-  margin-inline: auto;
+  flex: 1 1 auto;
+  min-inline-size: 0;
 }
 
 .media-picker-dialog__toolbar-search-icon {
@@ -62,69 +92,35 @@
 .media-picker-dialog__toolbar-search-input {
   width: 100%;
   min-width: 0;
-  height: 2rem;
+  height: 2.25rem;
   padding-inline: 1.75rem var(--spacing-2);
   font-size: var(--font-size-2xs);
 }
 
-.media-picker-dialog__toolbar-right {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--spacing-2);
-  min-width: 0;
+@layer components {
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('media-picker-dialog');
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('media-picker-dialog');
 }
 
-.media-picker-dialog__size-control--compact {
-  display: none;
+@layer states {
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('media-picker-dialog');
 }
 
-@container media-picker-toolbar (max-width: 23.75rem) {
-  .media-picker-dialog__size-control--full {
-    display: none;
-  }
-
-  .media-picker-dialog__size-control--compact {
-    display: block;
-  }
-}
-
-.media-picker-dialog__menu-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  flex-shrink: 0;
-}
-
-.media-picker-dialog__menu-trigger-icon,
-.media-picker-dialog__menu-trigger-chevron {
-  font-size: var(--font-size-lg);
-  line-height: 1;
-}
-
-.media-picker-dialog__menu-trigger-label {
-  font-size: var(--font-size-sm);
-}
-
-.media-picker-dialog__menu-trigger--open,
-.media-picker-dialog__menu-trigger[data-active='true'] {
-  border-color: var(--primary);
-}
+@include fp-toolbar-breakpoints.toolbar-size-control-responsive('media-picker-dialog', media-picker-toolbar);
+@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('media-picker-dialog', media-picker-toolbar);
 
 .media-picker-dialog__grid-container {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--spacing-1) 0;
 }
 
 // Mirrors item-grid geometry without binding global WorkspaceSelectionService.
 // @see docs/specs/component/item-grid/item-grid.md#scss-responsibilities
 .media-picker-dialog__grid {
   display: grid;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
   align-items: start;
   min-height: 16rem;
@@ -147,7 +143,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   height: 100%;
   min-height: 16rem;
   color: var(--muted-foreground);
@@ -159,18 +155,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   flex-shrink: 0;
-  padding-top: var(--spacing-3);
+  padding-block-start: var(--spacing-2);
   border-top: 1px solid var(--border);
+  min-height: 2.25rem;
 }
 
 .media-picker-dialog__count {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   color: var(--muted-foreground);
+  line-height: 1.2;
 }
 
 .media-picker-dialog__actions {
   display: flex;
-  gap: var(--spacing-2);
+  align-items: center;
+  gap: var(--spacing-1);
 }

@@ -20,6 +20,13 @@
   flex: 0 auto;
 }
 
+// Lets projected center slot (e.g. search) consume free toolbar width.
+// @see media-picker-dialog.md
+:host(.pane-toolbar--center-grows) .pane-toolbar__center {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
 .pane-toolbar__right {
   flex: 1;
   display: flex;

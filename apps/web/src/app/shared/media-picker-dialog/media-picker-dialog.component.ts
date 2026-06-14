@@ -22,10 +22,14 @@ import {
   runMediaGalleryViewPipeline,
 } from '../../core/media-query/media-gallery-view.helpers';
 import { workspaceMediaToMediaRecord } from '../../core/workspace-view/workspace-media-mapper';
-import type { SortConfig, WorkspaceMedia } from '../../core/workspace-view/workspace-view.types';
-import { PaneToolbarComponent } from '../pane-chrome/toolbar/pane-toolbar.component';
+import type { SortConfig, WorkspaceMedia, MetadataFieldRef } from '../../core/workspace-view/workspace-view.types';
+import {
+  GroupingDropdownComponent,
+  type GroupingProperty,
+} from '../dropdown-trigger/grouping/grouping-dropdown.component';
 import { FilterDropdownComponent } from '../dropdown-trigger/filter/filter-dropdown.component';
 import { SortDropdownComponent } from '../dropdown-trigger/sort/sort-dropdown.component';
+import { ProjectsDropdownComponent } from '../workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component';
 import { ToolbarDropdownStackComponent } from '../dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
 import type { ToolbarDropdown } from '../workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 import { MEDIA_ITEM_ACTION_CONTEXT, MediaItemComponent } from '../media-item/media-item.component';
@@ -46,9 +50,10 @@ import {
     ...HLM_BUTTON_IMPORTS,
     ...HLM_INPUT_IMPORTS,
     ...HLM_TOGGLE_GROUP_IMPORTS,
-    PaneToolbarComponent,
+    GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
+    ProjectsDropdownComponent,
     ToolbarDropdownStackComponent,
     MediaItemComponent,
   ],
@@ -72,12 +77,15 @@ export class MediaPickerDialogComponent {
   readonly rawItems = signal<WorkspaceMedia[]>([]);
   readonly searchQuery = signal('');
   readonly activeSorts = signal<SortConfig[]>([{ key: 'date-captured', direction: 'desc' }]);
+  readonly activeGroupings = signal<GroupingProperty[]>([]);
+  readonly selectedProjectIds = signal<Set<string>>(new Set());
   readonly cardVariant = signal<CardVariant>('small');
   readonly allowedCardVariants = CARD_VARIANTS;
   readonly selectedIds = signal<Set<string>>(new Set());
   readonly rangeAnchorId = signal<string | null>(null);
   readonly activeDropdown = signal<ToolbarDropdown>(null);
   readonly dropdownAnchor = signal<HTMLElement | null>(null);
+  readonly isDragging = signal(false);
 
   readonly mediaItemActionContext = MEDIA_ITEM_ACTION_CONTEXT;
 
@@ -115,15 +123,31 @@ export class MediaPickerDialogComponent {
     buildCompactCardVariantSwitchTitle((k, f) => this.t(k, f), this.nextCardVariantToggleOption()),
   );
 
+  readonly hasGrouping = computed(() => this.activeGroupings().length > 0);
   readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
   readonly hasCustomSort = computed(() => {
     const sorts = this.activeSorts();
     return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';
   });
+  readonly hasProject = computed(() => this.selectedProjectIds().size > 0);
+
+  readonly availableGroupings = computed<GroupingProperty[]>(() => {
+    const activeIds = new Set(this.activeGroupings().map((g) => g.id));
+    return this.metadata
+      .groupableMetadataFields()
+      .filter((field) => !activeIds.has(field.id))
+      .map((field) => ({ id: field.id, label: field.label, icon: field.icon }));
+  });
 
   readonly toolbarButtons = computed(() => {
     this.i18nService.language();
     return [
+      {
+        id: 'grouping' as const,
+        icon: 'group_work',
+        label: this.t('workspace.toolbar.button.grouping', 'Group'),
+        active: this.hasGrouping,
+      },
       {
         id: 'filter' as const,
         icon: 'filter_list',
@@ -136,16 +160,24 @@ export class MediaPickerDialogComponent {
         label: this.t('workspace.toolbar.button.sort', 'Sort'),
         active: this.hasCustomSort,
       },
+      {
+        id: 'projects' as const,
+        icon: 'folder',
+        label: this.t('workspace.toolbar.button.projects', 'Projects'),
+        active: this.hasProject,
+      },
     ];
   });
 
   readonly gallerySections = computed(() =>
     runMediaGalleryViewPipeline({
       images: this.searchScopedItems(),
-      projectIds: new Set<string>(),
+      projectIds: this.selectedProjectIds(),
       rules: this.filterService.rules(),
       sorts: this.activeSorts(),
-      groupings: [],
+      groupings: this.activeGroupings().map(
+        (g) => ({ id: g.id, label: g.label, icon: g.icon }) as MetadataFieldRef,
+      ),
       filterService: this.filterService,
       metadata: this.metadata,
     }),
@@ -174,6 +206,17 @@ export class MediaPickerDialogComponent {
 
   readonly orderedVisibleMediaIds = computed(() => this.displayItems().map((item) => item.id));
   readonly selectionCount = computed(() => this.selectedIds().size);
+
+  readonly confirmButtonLabel = computed(() => {
+    const count = this.selectionCount();
+    if (count === 0) {
+      return this.t('projects.mediaPicker.confirm', 'Add');
+    }
+    return this.t('projects.mediaPicker.confirmWithCount', 'Add ({count} media)').replace(
+      '{count}',
+      String(count),
+    );
+  });
 
   readonly loadingPlaceholderIds = Array.from({ length: 18 }, (_, index) => index);
 
@@ -261,6 +304,22 @@ export class MediaPickerDialogComponent {
 
   onSortChanged(sorts: SortConfig[]): void {
     this.activeSorts.set(sorts);
+  }
+
+  onGroupingsChanged(active: GroupingProperty[]): void {
+    this.activeGroupings.set(active);
+  }
+
+  onProjectsChanged(selectedIds: Set<string>): void {
+    this.selectedProjectIds.set(new Set(selectedIds));
+  }
+
+  onDragStarted(): void {
+    this.isDragging.set(true);
+  }
+
+  onDragEnded(): void {
+    setTimeout(() => this.isDragging.set(false));
   }
 
   onSearchInput(event: Event): void {
