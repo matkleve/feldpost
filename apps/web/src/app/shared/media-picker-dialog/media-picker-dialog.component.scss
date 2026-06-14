@@ -16,11 +16,28 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  gap: var(--spacing-2);
 }
 
 .media-picker-dialog__header {
   flex-shrink: 0;
   gap: var(--spacing-1);
+}
+
+// Section title — global h3 scale (sm / semibold); color only here.
+// @see apps/web/src/app/features/upload/upload-panel/upload-panel.component.scss
+.media-picker-dialog__title {
+  margin: 0;
+  color: var(--foreground);
+}
+
+// Supporting copy under section label.
+// @see apps/web/src/app/features/upload/upload-panel/upload-panel.component.scss
+.media-picker-dialog__subtitle {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-reading);
+  color: var(--muted-foreground);
 }
 
 // Title row with compact dismiss control aligned to top-right.

@@ -10,11 +10,14 @@
     </div>
     <button
       type="button"
+      hlmBtn
+      variant="ghost"
+      size="icon-sm"
       class="toast-dismiss"
-      aria-label="Dismiss notification"
+      [attr.aria-label]="t('toast.dismiss', 'Dismiss notification')"
       (click)="onDismiss()"
     >
-      <span class="toast-dismiss__glyph" aria-hidden="true">×</span>
+      <span class="material-icons" aria-hidden="true">close</span>
     </button>
   </div>
 

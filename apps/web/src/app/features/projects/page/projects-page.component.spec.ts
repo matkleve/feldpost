@@ -193,4 +193,24 @@ describe('ProjectsPageComponent', () => {
     expect(projectsServiceMock.discardDraftProject).toHaveBeenCalledWith('project-draft');
     expect(component.projects().some((project) => project.id === 'project-draft')).toBe(false);
   });
+
+  it('keeps archived project selected and details panel open when archiving current project', async () => {
+    const project = createProject({ id: 'project-1', name: 'Pilot Project' });
+    projectsServiceMock.loadProjects.mockResolvedValueOnce([project]);
+    routerMock.url = '/projects/project-1';
+
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.detailsPanelOpen.set(true);
+    await component.onArchiveProject('project-1');
+
+    expect(routerMock.navigate).not.toHaveBeenCalledWith(['/projects']);
+    expect(component.currentProjectId()).toBe('project-1');
+    expect(component.currentProject()?.status).toBe('archived');
+    expect(component.detailsPanelOpen()).toBe(true);
+    expect(component.sidebarProjects().some((entry) => entry.id === 'project-1')).toBe(true);
+  });
 });

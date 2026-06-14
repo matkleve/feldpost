@@ -221,41 +221,14 @@
   }
 }
 
-// Dismiss control: compact ghost X at the trailing edge.
-// @see docs/specs/service/toast/toast-system.md
+// Dismiss control geometry — hover/ink owned by hlmBtn variant="ghost".
+// @see docs/design/state-visuals.md § Interaction emphasis
 .toast-dismiss {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition:
-    color 150ms ease,
-    background-color 150ms ease;
 
-  &:hover {
-    color: var(--foreground);
-    background: color-mix(in srgb, var(--muted) 55%, transparent);
+  .material-icons {
+    font-size: 1.125rem;
   }
-
-  &:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-}
-
-// Unicode close glyph sized to match sm controls.
-// @see docs/specs/service/toast/toast-system.md
-.toast-dismiss__glyph {
-  font-size: 1.125rem;
-  line-height: 1;
 }
 
 :host(.entering) [data-toast-surface] {

@@ -5,16 +5,18 @@
     </div>
   } @else {
     <section class="project-media-section__block" aria-labelledby="project-media-exclusive-heading">
-      <header class="project-media-section__header">
-        <span class="material-icons project-media-section__section-icon" aria-hidden="true">folder</span>
-        <h2 id="project-media-exclusive-heading" class="project-media-section__heading">
-          {{ t('projects.media.exclusive.title', 'Project files') }}
-          <span class="project-media-section__count">({{ exclusive().length }})</span>
-        </h2>
-      </header>
-      <p class="project-media-section__hint">
-        {{ t('projects.media.exclusive.hint', 'Media used only in this project') }}
-      </p>
+      <div class="project-media-section__intro">
+        <header class="project-media-section__header">
+          <span class="material-icons project-media-section__section-icon" aria-hidden="true">folder</span>
+          <h2 id="project-media-exclusive-heading" class="project-media-section__heading">
+            {{ t('projects.media.exclusive.title', 'Project files') }}
+            <span class="project-media-section__count">({{ exclusive().length }})</span>
+          </h2>
+        </header>
+        <p class="project-media-section__hint">
+          {{ t('projects.media.exclusive.hint', 'Media used only in this project') }}
+        </p>
+      </div>
       @if (exclusive().length === 0) {
         <p class="project-media-section__empty">
           {{ t('projects.media.exclusive.empty', 'No exclusive media yet') }}
@@ -26,6 +28,7 @@
               [itemId]="item.id"
               [item]="item"
               [mode]="displayMode()"
+              (pointerClick)="onItemPointerClick(item, $event)"
             />
           }
         </app-item-grid>
@@ -33,16 +36,18 @@
     </section>
 
     <section class="project-media-section__block" aria-labelledby="project-media-shared-heading">
-      <header class="project-media-section__header">
-        <span class="material-icons project-media-section__section-icon" aria-hidden="true">folder_shared</span>
-        <h2 id="project-media-shared-heading" class="project-media-section__heading">
-          {{ t('projects.media.shared.title', 'Shared media') }}
-          <span class="project-media-section__count">({{ shared().length }})</span>
-        </h2>
-      </header>
-      <p class="project-media-section__hint">
-        {{ t('projects.media.shared.hint', 'Media also used in other projects') }}
-      </p>
+      <div class="project-media-section__intro">
+        <header class="project-media-section__header">
+          <span class="material-icons project-media-section__section-icon" aria-hidden="true">folder_shared</span>
+          <h2 id="project-media-shared-heading" class="project-media-section__heading">
+            {{ t('projects.media.shared.title', 'Shared media') }}
+            <span class="project-media-section__count">({{ shared().length }})</span>
+          </h2>
+        </header>
+        <p class="project-media-section__hint">
+          {{ t('projects.media.shared.hint', 'Media also used in other projects') }}
+        </p>
+      </div>
       @if (shared().length === 0) {
         <p class="project-media-section__empty">
           {{ t('projects.media.shared.empty', 'No shared media') }}
@@ -54,6 +59,7 @@
               [itemId]="item.id"
               [item]="item"
               [mode]="displayMode()"
+              (pointerClick)="onItemPointerClick(item, $event)"
             />
           }
         </app-item-grid>
@@ -61,3 +67,11 @@
     </section>
   }
 </section>
+
+@if (showLightbox() && lightboxImageUrl(); as imageUrl) {
+  <app-photo-lightbox
+    [imageUrl]="imageUrl"
+    [alt]="t('media.page.title', 'Media')"
+    (closed)="closeLightbox()"
+  />
+}

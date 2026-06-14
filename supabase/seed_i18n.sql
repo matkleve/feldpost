@@ -22230,6 +22230,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'toast.dismiss', 'Dismiss notification', 'en', 'toast dismiss button aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Dismiss notification', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.dismiss'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benachrichtigung schließen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.dismiss'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiudi notifica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'toast.dismiss'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'toast.hideDetails', 'Hide details', 'en', 'apps/web/src/app/shared/toast/toast-item.component.html')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

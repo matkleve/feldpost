@@ -7,14 +7,14 @@
 >
   <div hlmDialogOverlay></div>
   <ng-template brnDialogContent>
-    <div hlmDialogContent class="media-picker-dialog gap-2 !p-2">
+    <div hlmDialogContent class="media-picker-dialog">
       <div hlmDialogHeader class="media-picker-dialog__header">
         <div class="media-picker-dialog__header-row">
           <div class="media-picker-dialog__header-text">
-            <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">
+            <h3 class="media-picker-dialog__title" brnDialogTitle>
               {{ t('projects.mediaPicker.title', 'Add media') }}
-            </div>
-            <p brnDialogDescription hlmDialogDescription>
+            </h3>
+            <p class="media-picker-dialog__subtitle" brnDialogDescription>
               {{ t('projects.mediaPicker.description', 'Choose media from your workspace.') }}
             </p>
           </div>
