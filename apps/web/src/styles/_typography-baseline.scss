@@ -18,6 +18,7 @@
   // Defines full pill radius for chips and circular controls (not in Tailwind @theme radius ladder)
   // @see docs/design/tokens.md §3.3
   --radius-full: 9999px;
+  --radius-pill: var(--radius-full);
 
   // Maps semantic container corners to theme radius steps (`--radius-md|lg` from `styles.scss` @theme inline)
   // @see docs/migration/phase-7-token-migration.md §Batch 44
@@ -56,6 +57,9 @@
   // Motion primitives consumed by transitions outside the legacy bridge (moved Batch 42)
   // @see docs/design/tokens.md §3.6
   --motion-duration-fast: 100ms;
+  --motion-duration-standard: 150ms;
+  --motion-duration-slow: 250ms;
+  --motion-duration-entrance: 300ms;
   --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
 
   // Defines keyboard focus-visible ring shadow (moved from legacy bridge Batch 47)

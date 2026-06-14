@@ -8,7 +8,7 @@
 }
 
 :host-context([data-theme='sandstone']) {
-  --mdv-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
+  --mdv-menu-border: var(--sandstone-border-warm);
 }
 
 // ─── Header ───

@@ -1,0 +1,42 @@
+---
+description: Mandatory component-registry and pattern lookup before new UI wiring
+alwaysApply: true
+---
+
+# Component Reuse Gate
+
+**Blocker:** Do not wire new templates, page sections, dialogs, or inline editors until this gate passes.
+
+## 1. Search (mandatory, before HTML/TS)
+
+1. Read `docs/specs/component/registry.md` and the matching `registry.*.supplement.md` slice.
+2. `grep` / semantic-search for the **interaction pattern** (e.g. "inline edit", "rename", "confirm") — not only the feature folder name.
+3. Read 1–2 existing usages in `apps/web/src/app/shared/` or the closest feature.
+
+## 2. Pattern quick reference
+
+| Need | Reuse first |
+| --- | --- |
+| Inline title / text edit | `app-pane-header`, `app-media-detail-header` |
+| Click-to-edit metadata row | `app-media-detail-inline-section`, `app-metadata-section` |
+| Irreversible / destructive confirm | `app-confirm-dialog`, `app-projects-confirm-dialog` |
+| One-shot name prompt (create flow) | `app-text-input-dialog` |
+| Toast / mutation feedback | `ToastService` + `app-toast-container` |
+| Status badge | `app-chip` |
+| Filter / sort / grouping toolbar | `app-filter-dropdown`, `app-sorting-controls`, `app-grouping-dropdown` |
+| Floating details / side panel | Existing feature panel pattern + `docs/design/shell-layout-tokens.md` |
+
+**Default:** Prefer **inline edit** over modal when the same pattern exists elsewhere (rename title, edit field in place).
+
+## 3. Decision (state before coding)
+
+Reply with one line:
+
+- **Reuse:** `<selector>` (+ how inputs/outputs map), or
+- **Gap:** `<missing variant>` → ask user before duplicating HTML or inventing a modal.
+
+## 4. Optional skills (large UI work)
+
+- `@design-audit` — before new layouts or composition plans
+- `@implement-from-spec` — when a `docs/specs/` contract exists
+- `@component-structure` — before creating a new Angular component file

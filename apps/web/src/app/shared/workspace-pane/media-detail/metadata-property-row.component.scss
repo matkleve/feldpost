@@ -12,7 +12,7 @@
 
 :host-context([data-theme='sandstone']) {
   --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --mdv-menu-item-text: #2f271f;
-  --mdv-action-text-default: #6b5a47;
-  --mdv-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
+  --mdv-menu-item-text: var(--sandstone-text-dark);
+  --mdv-action-text-default: var(--sandstone-text-muted);
+  --mdv-action-bg-hover: var(--sandstone-action-hover);
 }

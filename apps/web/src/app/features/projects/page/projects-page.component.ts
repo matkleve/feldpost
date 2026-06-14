@@ -95,7 +95,6 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly sharedMedia = signal<ProjectMediaListItem[]>([]);
   readonly creatingProject = signal(false);
   readonly projectNameDialogOpen = signal(false);
-  readonly projectRenameDialogOpen = signal(false);
   readonly renamingProject = signal(false);
   readonly pendingProjectAction = signal<PendingProjectAction>(null);
   readonly pendingProjectId = signal<string | null>(null);
@@ -225,28 +224,16 @@ export class ProjectsPageComponent implements OnDestroy {
     this.detailsPanelOpen.update((value) => !value);
   }
 
-  onRenameRequested(): void {
-    if (!this.currentProject() || this.renamingProject()) return;
-    this.projectRenameDialogOpen.set(true);
-  }
-
-  onRenameDialogCancelled(): void {
-    if (this.renamingProject()) return;
-    this.projectRenameDialogOpen.set(false);
-  }
-
-  async onRenameDialogConfirmed(projectName: string): Promise<void> {
+  async onProjectTitleRenamed(projectName: string): Promise<void> {
     const project = this.currentProject();
     if (!project || this.renamingProject()) return;
 
     const trimmed = projectName.trim();
     if (!trimmed || trimmed === project.name) {
-      this.projectRenameDialogOpen.set(false);
       return;
     }
 
     this.renamingProject.set(true);
-    this.projectRenameDialogOpen.set(false);
 
     try {
       const persisted = await this.projectsService.renameProject(project.id, trimmed);

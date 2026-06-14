@@ -37,6 +37,7 @@ This file is a verification aid only; project rules live in `AGENTS.md` and spec
 
 ## UI & Design
 
+- [ ] Component registry consulted (`docs/specs/component/registry.md` + supplements); reuse stated or gap flagged before new wiring
 - [ ] Design tokens used (`--color-clay`, `--color-bg-base`, etc.)
 - [ ] Shared layout primitives reused where applicable (`.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, `.ui-spacer`)
 - [ ] Panel surfaces that should align share the same container padding tokens or shared container modifier

@@ -253,8 +253,10 @@ Authoring and governance rules belong in AGENTS/instructions. `docs/specs/README
 Detailed normative contracts are in always-applied rule files under `.cursor/rules/`:
 
 - `scss-ownership.mdc` — SCSS ownership, geometry, typography, wrapper, comment contract, CSS layer architecture
-- `visual-behavior.mdc` — Visual Behavior Contract, Ownership Triad Rule, full spec tables, pseudo-CSS examples
-- `ui-state-machine.mdc` — FSM contract, stable state comments, animation/transition contract, component implementation order, ESLint gates
+- `visual-behavior.mdc` — Visual Behavior Contract, Ownership Triad Rule, stacking/layer rules
+- `ui-state-machine.mdc` — FSM contract, stable state comments, animation/transition contract, component implementation order
 - `i18n-workflow.mdc` — Mandatory i18n workflow and translation pipeline steps
 - `bulk-operation-safety.mdc` — Bulk replace/edit quality gates
+- `token-usage-gate.mdc` — Design token lookup table; prevents hardcoded colors, radii, spacing, motion, z-index
+- `component-reuse-gate.mdc` — Mandatory component-registry pattern lookup before new UI wiring
 - ~~`figma-integration.mdc`~~ — **archived** (Figma work deferred); recoverable at `.cursor/rules/archive/figma-integration.mdc.archived`. Token-first / i18n-from-Figma / component-scan / **No-Figma No-Component** gates in that file are **(deferred — Figma work paused)** — reference-only until the rule is restored to `.cursor/rules/figma-integration.mdc`.

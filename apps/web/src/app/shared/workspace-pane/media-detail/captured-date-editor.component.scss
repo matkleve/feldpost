@@ -17,10 +17,10 @@
 }
 
 :host-context([data-theme='sandstone']) {
-  --cde-menu-border: color-mix(in srgb, #a38d73 44%, transparent);
-  --cde-menu-item-hover-bg: color-mix(in srgb, #c59f63 14%, transparent);
-  --cde-menu-item-text: #2f271f;
-  --cde-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
+  --cde-menu-border: var(--sandstone-border-warm);
+  --cde-menu-item-hover-bg: var(--sandstone-hover-warm);
+  --cde-menu-item-text: var(--sandstone-text-dark);
+  --cde-action-bg-hover: var(--sandstone-action-hover);
 }
 
 .captured-date-editor {

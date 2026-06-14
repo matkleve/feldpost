@@ -40,7 +40,7 @@ import type { SearchFilterChip } from '../../../core/search/search.models';
       min-height: 1.75rem;
       padding: 0 var(--spacing-2);
       border: 1px solid var(--border);
-      border-radius: 999px;
+      border-radius: var(--radius-full);
       background: var(--background);
       color: var(--foreground);
       font-size: 0.8125rem;

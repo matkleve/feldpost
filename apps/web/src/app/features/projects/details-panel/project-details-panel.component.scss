@@ -71,7 +71,8 @@
 .project-details-panel__color-swatch {
   inline-size: 0.75rem;
   block-size: 0.75rem;
-  border-radius: 999px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
 }
 
 .project-details-panel__actions {

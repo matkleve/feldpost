@@ -24,11 +24,12 @@
 .project-detail__dot {
   inline-size: 0.75rem;
   block-size: 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .project-detail__title-group {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: var(--spacing-1);
   min-width: 0;
@@ -37,6 +38,14 @@
 .project-detail__title {
   margin: 0;
   min-width: 0;
+}
+
+// Inline title field — geometry/context only; ink from hlmInput + focus ring tokens.
+// @see docs/specs/component/registry.workspace-pane.supplement.md#app-pane-header
+.project-detail__title-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: var(--font-weight-semibold);
 }
 
 // Geometry only — hover/ink owned by hlmBtn variant="ghost" (button-variants.ts).

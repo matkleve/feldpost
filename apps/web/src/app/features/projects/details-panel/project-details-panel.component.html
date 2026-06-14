@@ -40,7 +40,7 @@
     <div class="project-details-panel__color">
       <button type="button" hlmBtn variant="outline" size="sm" (click)="colorPickerToggled.emit()">
         <span class="project-details-panel__color-swatch" [style.background]="colorFor(p.colorKey)"></span>
-        {{ t('projects.detail.action.changeColor', 'Change color') }}
+        <span>{{ t('projects.detail.action.changeColor', 'Change color') }}</span>
       </button>
       @if (colorPickerOpen()) {
         <app-project-color-picker
@@ -54,12 +54,12 @@
       @if (p.status === 'active') {
         <button type="button" hlmBtn variant="outline" size="sm" (click)="archiveRequested.emit()">
           <span class="material-icons" aria-hidden="true">inventory_2</span>
-          {{ t('projects.page.action.archive', 'Archive') }}
+          <span>{{ t('projects.page.action.archive', 'Archive') }}</span>
         </button>
       } @else {
         <button type="button" hlmBtn variant="outline" size="sm" (click)="restoreRequested.emit()">
           <span class="material-icons" aria-hidden="true">unarchive</span>
-          {{ t('projects.page.action.restore', 'Restore') }}
+          <span>{{ t('projects.page.action.restore', 'Restore') }}</span>
         </button>
       }
 
@@ -68,7 +68,7 @@
       @if (p.status === 'archived') {
         <button type="button" hlmBtn variant="destructive" size="sm" (click)="deleteRequested.emit()">
           <span class="material-icons" aria-hidden="true">delete</span>
-          {{ t('projects.page.action.delete', 'Delete') }}
+          <span>{{ t('projects.page.action.delete', 'Delete') }}</span>
         </button>
       }
     </div>

@@ -4,19 +4,34 @@
       <div class="project-detail__title-row">
         <span class="project-detail__dot" [style.background]="colorFor(p.colorKey)"></span>
         <div class="project-detail__title-group">
-          <h1 class="project-detail__title">{{ p.name }}</h1>
-          <button
-            type="button"
-            hlmBtn
-            variant="ghost"
-            size="icon"
-            class="project-detail__edit-btn"
-            [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
-            [attr.title]="t('projects.page.action.renameProject', 'Rename project')"
-            (click)="renameRequested.emit()"
-          >
-            <span class="material-icons" aria-hidden="true">edit</span>
-          </button>
+          @if (editingTitle()) {
+            <input
+              #titleInput
+              hlmInput
+              class="project-detail__title-input"
+              type="text"
+              [value]="p.name"
+              maxlength="120"
+              [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
+              (keydown.enter)="submitTitle(titleInput.value)"
+              (keydown.escape)="cancelTitleEdit()"
+              (blur)="submitTitle(titleInput.value)"
+            />
+          } @else {
+            <h1 class="project-detail__title">{{ p.name }}</h1>
+            <button
+              type="button"
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              class="project-detail__edit-btn"
+              [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
+              [attr.title]="t('projects.page.action.renameProject', 'Rename project')"
+              (click)="startTitleEdit()"
+            >
+              <span class="material-icons" aria-hidden="true">edit</span>
+            </button>
+          }
         </div>
         <app-chip
           [decorative]="true"

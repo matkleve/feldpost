@@ -1,0 +1,49 @@
+---
+description: Mandatory design token lookup before writing any SCSS value. Prevents hardcoded colors, radii, spacing, motion, and z-index.
+alwaysApply: true
+---
+
+# Token Usage Gate
+
+**Blocker:** Do not write hardcoded values in component SCSS without checking the token system first.
+
+## 1. Token sources (check in order)
+
+1. `apps/web/src/styles.scss` — colors, shadows, theme surfaces (`var(--primary)`, `var(--shadow-md)`, etc.)
+2. `apps/web/src/styles/_typography-baseline.scss` — spacing, font sizes, radii, motion, line-heights, focus ring
+3. `docs/design/tokens.md` — canonical reference with z-index ladder, elevation, and color semantics
+
+## 2. Lookup table (common traps)
+
+| Need | Use | Never |
+| --- | --- | --- |
+| Pill/circle radius | `var(--radius-full)` or `var(--radius-pill)` | `999px`, `9999px` |
+| Panel/card radius | `var(--radius-md)`, `var(--radius-lg)` | `4px`, `8px` |
+| Spacing/gaps | `var(--spacing-1)` through `var(--spacing-8)` | Raw `0.25rem`, `0.5rem` for gaps |
+| Font sizes | `var(--font-size-2xs)` through `var(--font-size-2xl)` | Raw `0.8125rem`, `0.6875rem` |
+| Transitions | `var(--motion-duration-fast)` (100ms), `var(--motion-duration-standard)` (150ms), `var(--motion-duration-slow)` (250ms), `var(--motion-duration-entrance)` (300ms) | Magic `120ms`, `180ms`, `200ms`, `300ms` |
+| Easing | `var(--motion-ease-out)` | Raw `cubic-bezier(...)` |
+| Z-index (product planes) | 0 / 100 / 200 / 300 / 302 / 400 / 500 / 501 | Invented values; undocumented layers |
+| Shadows | `var(--shadow-sm\|md\|lg\|xl\|2xl)` | Hardcoded box-shadow composites |
+| Sandstone theme overrides | `var(--sandstone-*)` globals from `styles.scss` | Inline hex (`#2f271f`, `#6b5a47`, etc.) |
+| Colors | `var(--primary)`, `var(--foreground)`, `var(--border)`, `var(--muted-foreground)`, etc. | `var(--color-clay)`, `var(--color-*)` legacy names |
+
+## 3. Allowed raw values (no token needed)
+
+- `1px` borders and outlines (constitution-approved)
+- `2px` focus rings
+- `inset 0` / `0` for resets
+- `100%` / `auto` / layout keywords
+
+## 4. When a token is missing
+
+If a value doesn't map to an existing token:
+1. Check if a near-equivalent exists (e.g. `--spacing-3` = `0.75rem` instead of writing `0.75rem`)
+2. If genuinely new, propose adding it to `_typography-baseline.scss` — do not invent inline values
+
+## 5. Forbidden legacy patterns
+
+- `var(--color-*)` — removed Phase 7; use semantic tweakcn names
+- `var(--fp-*)` — removed
+- `var(--overlay-rail-*)`, `var(--layout-sidebar-*)` — removed
+- Hardcoded sandstone hex — use `var(--sandstone-*)` globals

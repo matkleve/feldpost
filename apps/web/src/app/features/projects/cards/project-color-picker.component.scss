@@ -17,6 +17,6 @@
 .project-color-picker__swatch {
   inline-size: 1rem;
   block-size: 1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid var(--border-strong);
 }

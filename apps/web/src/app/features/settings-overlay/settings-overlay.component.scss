@@ -32,7 +32,7 @@
 }
 
 :host-context([data-theme='sandstone']) {
-  --settings-action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
+  --settings-action-bg-hover: var(--sandstone-action-hover);
 }
 
 @layer components {

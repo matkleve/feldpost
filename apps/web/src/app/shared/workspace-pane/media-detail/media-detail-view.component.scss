@@ -168,9 +168,9 @@
   flex-direction: column;
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
-  background: color-mix(in srgb, var(--color-clay, var(--primary)) 6%, transparent);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
   border-radius: var(--radius-md);
-  border: 1px solid color-mix(in srgb, var(--color-clay, var(--primary)) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 // Banner body: icon + text block side by side.
@@ -184,7 +184,7 @@
 // Suggest icon.
 .detail-reconciliation-banner__icon {
   font-size: 1.125rem;
-  color: var(--color-clay, var(--primary));
+  color: var(--primary);
   flex-shrink: 0;
   margin-top: 0.1rem;
 }

@@ -38,7 +38,7 @@
         [sharedMedia]="sharedMedia()"
         [mediaLoading]="mediaLoading()"
         (detailsToggled)="onDetailsToggled()"
-        (renameRequested)="onRenameRequested()"
+        (titleRenamed)="onProjectTitleRenamed($event)"
       />
     </section>
 
@@ -81,18 +81,6 @@
       [cancelLabel]="t('map.shell.dialog.cancel', 'Cancel')"
       (cancelled)="onProjectNameDialogCancelled()"
       (confirmed)="onProjectNameDialogConfirmed($event)"
-    />
-  }
-
-  @if (projectRenameDialogOpen() && currentProject(); as project) {
-    <app-text-input-dialog
-      [title]="t('projects.page.action.renameProject', 'Rename project')"
-      [placeholder]="t('map.shell.dialog.projectName.placeholder', 'e.g. Radius Selection North')"
-      [initialValue]="project.name"
-      [confirmLabel]="t('projects.detail.rename.confirm', 'Save')"
-      [cancelLabel]="t('map.shell.dialog.cancel', 'Cancel')"
-      (cancelled)="onRenameDialogCancelled()"
-      (confirmed)="onRenameDialogConfirmed($event)"
     />
   }
 </main>

@@ -250,6 +250,15 @@ html[data-theme="sandstone"] {
   --sidebar: oklch(0.9600 0.0120 72.0000);
   --sidebar-border: oklch(0.8800 0.0160 69.0000);
   --map-marker-user: oklch(0.52 0.1 250);
+
+  // Sandstone component primitives — single source for menu/action overrides
+  // @see docs/design/tokens.md (sandstone theme extensions)
+  --sandstone-text-dark: #2f271f;
+  --sandstone-text-muted: #6b5a47;
+  --sandstone-text-section: #66594a;
+  --sandstone-border-warm: color-mix(in srgb, #a38d73 44%, transparent);
+  --sandstone-hover-warm: color-mix(in srgb, #c59f63 14%, transparent);
+  --sandstone-action-hover: color-mix(in srgb, #c59f63 18%, transparent);
 }
 
 // ── Tailwind v4 CSS-first theme mapping ───────────────────────────────────────

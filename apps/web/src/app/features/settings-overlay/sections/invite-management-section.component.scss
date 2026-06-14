@@ -7,7 +7,7 @@
 }
 
 :host-context([data-theme='sandstone']) {
-  --invite-border-muted: color-mix(in srgb, #a38d73 44%, transparent);
+  --invite-border-muted: var(--sandstone-border-warm);
 }
 
 @layer components {
