@@ -194,7 +194,7 @@ describe('ProjectsPageComponent', () => {
     expect(component.projects().some((project) => project.id === 'project-draft')).toBe(false);
   });
 
-  it('keeps archived project selected and details panel open when archiving current project', async () => {
+  it('switches to archived list on archive but hides focused project when returning to active list', async () => {
     const project = createProject({ id: 'project-1', name: 'Pilot Project' });
     projectsServiceMock.loadProjects.mockResolvedValueOnce([project]);
     routerMock.url = '/projects/project-1';
@@ -211,6 +211,14 @@ describe('ProjectsPageComponent', () => {
     expect(component.currentProjectId()).toBe('project-1');
     expect(component.currentProject()?.status).toBe('archived');
     expect(component.detailsPanelOpen()).toBe(true);
+    expect(component.showArchived()).toBe(true);
     expect(component.sidebarProjects().some((entry) => entry.id === 'project-1')).toBe(true);
+
+    component.onArchiveToggled();
+
+    expect(component.showArchived()).toBe(false);
+    expect(component.currentProjectId()).toBe('project-1');
+    expect(component.currentProject()?.status).toBe('archived');
+    expect(component.sidebarProjects().some((entry) => entry.id === 'project-1')).toBe(false);
   });
 });

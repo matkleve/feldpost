@@ -142,11 +142,8 @@ export class ProjectsPageComponent implements OnDestroy {
 
   readonly sidebarProjects = computed(() => {
     const archived = this.showArchived();
-    const selectedId = this.currentProjectId();
-    const statusScoped = this.projects().filter(
-      (project) =>
-        project.id === selectedId ||
-        (archived ? project.status === 'archived' : project.status === 'active'),
+    const statusScoped = this.projects().filter((project) =>
+      archived ? project.status === 'archived' : project.status === 'active',
     );
 
     const query = this.searchQuery().trim().toLowerCase();
@@ -434,6 +431,10 @@ export class ProjectsPageComponent implements OnDestroy {
       ),
     );
 
+    if (this.currentProjectId() === projectId) {
+      this.showArchived.set(true);
+    }
+
     this.showMutationSuccess(
       'projects.page.toast.archiveSuccess',
       'Project "{name}" archived',
@@ -463,6 +464,10 @@ export class ProjectsPageComponent implements OnDestroy {
           : project,
       ),
     );
+
+    if (this.currentProjectId() === projectId) {
+      this.showArchived.set(false);
+    }
 
     this.showMutationSuccess(
       'projects.page.toast.restoreSuccess',
