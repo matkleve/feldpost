@@ -345,8 +345,10 @@ export class ProjectsPageComponent implements OnDestroy {
           : project,
       ),
     );
-    this.detailsPanelOpen.set(false);
-    void this.router.navigate(['/projects']);
+    if (this.currentProjectId() === projectId) {
+      this.detailsPanelOpen.set(false);
+      void this.router.navigate(['/projects']);
+    }
   }
 
   async onRestoreProject(projectId: string): Promise<void> {

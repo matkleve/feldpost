@@ -76,7 +76,12 @@
 
 .project-details-panel__actions {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: var(--spacing-2);
   margin-top: auto;
+}
+
+.project-details-panel__actions-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
 }

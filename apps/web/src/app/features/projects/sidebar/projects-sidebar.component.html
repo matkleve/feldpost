@@ -85,17 +85,49 @@
       </div>
     } @else {
       @for (project of projects(); track project.id) {
-        <button
-          type="button"
-          role="option"
-          class="projects-sidebar__row"
-          [class.projects-sidebar__row--active]="project.id === selectedProjectId()"
-          [attr.aria-selected]="project.id === selectedProjectId()"
-          (click)="onProjectClick(project.id)"
+        <div
+          class="projects-sidebar__row-wrap"
+          [class.projects-sidebar__row-wrap--active]="project.id === selectedProjectId()"
         >
-          <span class="projects-sidebar__dot" [style.background]="colorFor(project)"></span>
-          <span class="projects-sidebar__name">{{ project.name }}</span>
-        </button>
+          <button
+            type="button"
+            role="option"
+            class="projects-sidebar__row"
+            [attr.aria-selected]="project.id === selectedProjectId()"
+            (click)="onProjectClick(project.id)"
+          >
+            <span class="projects-sidebar__dot" [style.background]="colorFor(project)"></span>
+            <span class="projects-sidebar__name">{{ project.name }}</span>
+          </button>
+
+          @if (project.status === 'active') {
+            <button
+              type="button"
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              class="projects-sidebar__row-action"
+              [attr.aria-label]="t('projects.page.action.archive', 'Archive')"
+              [attr.title]="t('projects.page.action.archive', 'Archive')"
+              (click)="onRowArchiveClick($event, project.id)"
+            >
+              <span class="material-icons" aria-hidden="true">inventory_2</span>
+            </button>
+          } @else {
+            <button
+              type="button"
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              class="projects-sidebar__row-action"
+              [attr.aria-label]="t('projects.page.action.restore', 'Restore')"
+              [attr.title]="t('projects.page.action.restore', 'Restore')"
+              (click)="onRowRestoreClick($event, project.id)"
+            >
+              <span class="material-icons" aria-hidden="true">unarchive</span>
+            </button>
+          }
+        </div>
       }
 
       @if (projects().length === 0) {

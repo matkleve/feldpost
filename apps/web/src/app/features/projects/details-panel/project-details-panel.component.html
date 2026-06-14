@@ -53,13 +53,21 @@
     <div class="project-details-panel__actions">
       @if (p.status === 'active') {
         <button type="button" hlmBtn variant="outline" size="sm" (click)="archiveRequested.emit()">
+          <span class="material-icons" aria-hidden="true">inventory_2</span>
           {{ t('projects.page.action.archive', 'Archive') }}
         </button>
       } @else {
         <button type="button" hlmBtn variant="outline" size="sm" (click)="restoreRequested.emit()">
+          <span class="material-icons" aria-hidden="true">unarchive</span>
           {{ t('projects.page.action.restore', 'Restore') }}
         </button>
+      }
+
+      <span class="project-details-panel__actions-spacer" aria-hidden="true"></span>
+
+      @if (p.status === 'archived') {
         <button type="button" hlmBtn variant="destructive" size="sm" (click)="deleteRequested.emit()">
+          <span class="material-icons" aria-hidden="true">delete</span>
           {{ t('projects.page.action.delete', 'Delete') }}
         </button>
       }

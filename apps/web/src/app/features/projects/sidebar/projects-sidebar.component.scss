@@ -3,7 +3,7 @@
 // Defines narrow left rail geometry for Notion-style project list.
 // @see docs/specs/page/projects-dashboard.md
 :host {
-  flex: 0 0 13.75rem;
+  flex: 0 0 17.5rem;
   min-height: 0;
   min-width: 0;
 }
@@ -129,44 +129,81 @@
   overflow-y: auto;
 }
 
-.projects-sidebar__row {
-  display: grid;
-  grid-template-columns: 0.5rem minmax(0, 1fr);
+.projects-sidebar__row-wrap {
+  display: flex;
   align-items: center;
-  height: 2.25rem;
-  gap: var(--spacing-2);
+  gap: var(--spacing-1);
+  min-height: 2.25rem;
   padding-inline: var(--spacing-2);
-  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  background: transparent;
   color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  text-align: left;
-  cursor: pointer;
   transition:
     background var(--motion-duration-fast) var(--motion-ease-out),
-    color var(--motion-duration-fast) var(--motion-ease-out),
-    border-color var(--motion-duration-fast) var(--motion-ease-out);
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover,
-  &:focus-visible {
+  &:focus-within {
     @include emphasis.hover();
   }
 
-  &:focus-visible {
-    outline: none;
+  &:focus-within {
     box-shadow: var(--interactive-focus-ring);
   }
 
   &--active {
-    @include emphasis.selected-bordered();
-    font-weight: var(--font-weight-semibold);
+    @include emphasis.selected();
+
+    .projects-sidebar__row {
+      font-weight: var(--font-weight-semibold);
+    }
   }
 
   &--active:hover,
-  &--active:focus-visible {
+  &--active:focus-within {
     @include emphasis.selected-hover();
   }
+}
+
+.projects-sidebar__row {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  gap: var(--spacing-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.projects-sidebar__row-action {
+  flex-shrink: 0;
+  width: 1.75rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  color: inherit;
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
+
+  .material-icons {
+    font-size: 1.125rem;
+    line-height: 1;
+  }
+}
+
+.projects-sidebar__row-wrap:hover .projects-sidebar__row-action,
+.projects-sidebar__row-wrap:focus-within .projects-sidebar__row-action {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .projects-sidebar__dot {

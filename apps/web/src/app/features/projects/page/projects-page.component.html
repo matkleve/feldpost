@@ -13,6 +13,8 @@
     [hasCustomSort]="hasCustomSort()"
     (dashboardSelected)="onDashboardSelected()"
     (projectSelected)="onProjectSelected($event)"
+    (projectArchiveRequested)="onArchiveProject($event)"
+    (projectRestoreRequested)="onRestoreProject($event)"
     (archiveToggled)="onArchiveToggled()"
     (searchQueryChange)="onSearchQueryChange($event)"
     (sortChanged)="onSortChanged($event)"

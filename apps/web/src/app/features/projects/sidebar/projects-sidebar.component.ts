@@ -51,6 +51,8 @@ export class ProjectsSidebarComponent {
 
   readonly dashboardSelected = output<void>();
   readonly projectSelected = output<string>();
+  readonly projectArchiveRequested = output<string>();
+  readonly projectRestoreRequested = output<string>();
   readonly archiveToggled = output<void>();
   readonly searchQueryChange = output<string>();
   readonly sortChanged = output<SortConfig[]>();
@@ -81,6 +83,16 @@ export class ProjectsSidebarComponent {
 
   onProjectClick(projectId: string): void {
     this.projectSelected.emit(projectId);
+  }
+
+  onRowArchiveClick(event: MouseEvent, projectId: string): void {
+    event.stopPropagation();
+    this.projectArchiveRequested.emit(projectId);
+  }
+
+  onRowRestoreClick(event: MouseEvent, projectId: string): void {
+    event.stopPropagation();
+    this.projectRestoreRequested.emit(projectId);
   }
 
   onSearchInput(value: string): void {
