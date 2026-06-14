@@ -1134,4 +1134,46 @@ map.shell.toast.removeFromProjects.removeError,Removing from projects failed.,ma
 map.shell.toast.removeFromProjects.empty,No project assignments found.,map-shell warning toast when media has no project assignments,No project assignments found.,Keine Projektzuordnungen gefunden.,Nessuna assegnazione al progetto trovata.
 map.gps.toast.locationFailed.title,Could not get your location,gps-button error toast title when geolocation fails,Could not get your location,Standort konnte nicht ermittelt werden,Impossibile ottenere la posizione
 map.gps.toast.locationFailed.body,Check browser location permission and try again.,gps-button error toast body when geolocation fails,Check browser location permission and try again.,Prüfen Sie die Browser-Standortfreigabe und versuchen Sie es erneut.,Controlla il permesso di localizzazione del browser e riprova.
+projects.sidebar.dashboard,Dashboard,projects sidebar dashboard button,Dashboard,Dashboard,Dashboard
+projects.sidebar.archive.showActive,Show active projects,projects sidebar archive toggle aria when showing archived,Show active projects,Aktive Projekte anzeigen,Mostra progetti attivi
+projects.sidebar.archive.showArchived,Show archived projects,projects sidebar archive toggle aria when showing active,Show archived projects,Archivierte Projekte anzeigen,Mostra progetti archiviati
+projects.sidebar.list.aria,Projects,projects sidebar list aria-label,Projects,Projekte,Progetti
+projects.sidebar.empty.archived,No archived projects,projects sidebar empty archived list,No archived projects,Keine archivierten Projekte,Nessun progetto archiviato
+projects.sidebar.empty.active,No active projects,projects sidebar empty active list,No active projects,Keine aktiven Projekte,Nessun progetto attivo
+projects.dashboard.title,Projects dashboard,projects dashboard heading,Projects dashboard,Projekt-Dashboard,Dashboard progetti
+projects.dashboard.subtitle,{count} projects in your organization,projects dashboard subtitle,{count} projects in your organization,{count} Projekte in Ihrer Organisation,{count} progetti nella tua organizzazione
+projects.dashboard.widget.map.title,Map preview,projects dashboard hero widget title,Map preview,Kartenvorschau,Anteprima mappa
+projects.dashboard.widget.map.hint,Bounding box of all media locations,projects dashboard hero widget hint,Bounding box of all media locations,Begrenzungsrahmen aller Medienstandorte,Riquadro di tutte le posizioni media
+projects.dashboard.widget.activity.title,Activity,projects dashboard activity widget title,Activity,Aktivität,Attività
+projects.dashboard.widget.activity.hint,Recent uploads geocoding and location updates,projects dashboard activity widget hint,Recent uploads geocoding and location updates,Aktuelle Uploads Geokodierung und Standortaktualisierungen,Caricamenti recenti geocodifica e aggiornamenti posizione
+projects.dashboard.widget.fileTypes.title,File types,projects dashboard file types widget title,File types,Dateitypen,Tipi di file
+projects.dashboard.widget.fileTypes.hint,Photo video document breakdown,projects dashboard file types widget hint,Photo / video / document breakdown,Foto- / Video- / Dokumentaufteilung,Ripartizione foto / video / documenti
+projects.dashboard.widget.uploadTimeline.title,Upload timeline,projects dashboard upload timeline widget title,Upload timeline,Upload-Zeitachse,Cronologia caricamenti
+projects.dashboard.widget.uploadTimeline.hint,Uploads per day over the last 30 days,projects dashboard upload timeline widget hint,Uploads per day over the last 30 days,Uploads pro Tag in den letzten 30 Tagen,Caricamenti al giorno negli ultimi 30 giorni
+projects.dashboard.widget.storage.title,Storage,projects dashboard storage widget title,Storage,Speicher,Archiviazione
+projects.dashboard.widget.storage.hint,Total storage used across projects,projects dashboard storage widget hint,Total storage used across projects,Gesamtspeicher über alle Projekte,Spazio totale usato nei progetti
+projects.dashboard.widget.team.title,Team,projects dashboard team widget title,Team,Team,Team
+projects.dashboard.widget.team.hint,Members with access to projects,projects dashboard team widget hint,Members with access to projects,Mitglieder mit Projektzugriff,Membri con accesso ai progetti
+projects.detail.detailsButton,Details,project detail details toggle button,Details,Details,Dettagli
+projects.detail.updated,updated,project detail metadata prefix,updated,aktualisiert,aggiornato
+projects.detail.location.unknown,No location,project detail unknown location,No location,Kein Standort,Nessuna posizione
+projects.detail.panel.aria,Project details,project details panel aria-label,Project details,Projektdetails,Dettagli progetto
+projects.detail.panel.title,Details,project details panel title,Details,Details,Dettagli
+projects.detail.panel.close,Close details,project details panel close button,Close details,Details schließen,Chiudi dettagli
+projects.detail.field.status,Status,project details panel status field,Status,Status,Stato
+projects.detail.field.location,Location,project details panel location field,Location,Standort,Posizione
+projects.detail.field.mediaCount,Media,project details panel media count field,Media,Medien,Media
+projects.detail.field.lastActivity,Last activity,project details panel last activity field,Last activity,Letzte Aktivität,Ultima attività
+projects.detail.field.updated,Updated,project details panel updated field,Updated,Aktualisiert,Aggiornato
+projects.detail.action.changeColor,Change color,project details panel change color action,Change color,Farbe ändern,Cambia colore
+projects.page.action.archive,Archive,project details archive action,Archive,Archivieren,Archivia
+projects.page.action.restore,Restore,project details restore action,Restore,Wiederherstellen,Ripristina
+projects.page.action.delete,Delete,project details delete action,Delete,Löschen,Elimina
+projects.media.loading,Loading media...,project media section loading,Loading media...,Medien werden geladen...,Caricamento media...
+projects.media.exclusive.title,Project files,project exclusive media section title,Project files,Projektdateien,File di progetto
+projects.media.exclusive.hint,Media used only in this project,project exclusive media section hint,Media used only in this project,Medien nur in diesem Projekt,Media usati solo in questo progetto
+projects.media.exclusive.empty,No exclusive media yet,project exclusive media empty state,No exclusive media yet,Noch keine exklusiven Medien,Nessun media esclusivo
+projects.media.shared.title,Shared media,project shared media section title,Shared media,Geteilte Medien,Media condivisi
+projects.media.shared.hint,Media also used in other projects,project shared media section hint,Media also used in other projects,Medien auch in anderen Projekten,Media usati anche in altri progetti
+projects.media.shared.empty,No shared media,project shared media empty state,No shared media,Keine geteilten Medien,Nessun media condiviso
 "

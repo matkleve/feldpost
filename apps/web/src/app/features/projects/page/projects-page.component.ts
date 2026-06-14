@@ -1,10 +1,8 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import type { OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { FilterService } from '../../../core/filter/filter.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { ToastService } from '../../../core/toast/toast.service';
@@ -13,77 +11,44 @@ import type { SelectedItemsContextPort } from '../../../core/workspace-pane/work
 import type {
   ProjectColorKey,
   ProjectListItem,
-  ProjectStatusFilter,
-  ProjectsViewMode,
+  ProjectMediaListItem,
 } from '../../../core/projects/projects.types';
-import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
-import { type GroupingProperty } from '../../../shared/dropdown-trigger/grouping/grouping-dropdown.component';
-import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
 import { ProjectsConfirmDialogComponent } from '../dialogs/projects-confirm-dialog.component';
-import { ProjectsGridViewComponent } from '../views/projects-grid-view.component';
-import { ProjectsPageHeaderComponent } from '../chrome/projects-page-header.component';
+import { ProjectsSidebarComponent } from '../sidebar/projects-sidebar.component';
+import { ProjectDashboardViewComponent } from '../dashboard/project-dashboard-view.component';
+import { ProjectDetailViewComponent } from '../detail/project-detail-view.component';
 import {
-  applyProjectFilters,
-  buildGroupedSections,
-  colorTokenFor,
-  formatRelativeDate,
   pendingActionConfirmLabel,
   pendingActionMessage,
   pendingActionTitle,
-  projectLabel,
-  projectStatusLabel,
-  sortProjects,
-  tableAriaSort,
-  tableSortDirection,
 } from './projects-page.logic';
-import { ProjectsBoardViewComponent } from '../views/projects-board-view.component';
-import { ProjectsTableViewComponent } from '../views/projects-table-view.component';
-import { ProjectsToolbarComponent } from '../chrome/projects-toolbar.component';
-import { CardVariantSettingsService } from '../../../shared/ui-primitives/card-variant-settings.service';
-import { CARD_VARIANTS, type CardVariant } from '../../../shared/ui-primitives/card-variant.types';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
-import { ProjectLocationPickerComponent } from '../cards/project-location-picker.component';
-
-import {
-  FILTER_OPTIONS,
-  GROUPING_OPTIONS,
-  type PendingProjectAction,
-  type ProjectGroupedSection,
-  SORT_OPTIONS,
-} from './projects-page.config';
+import type { PendingProjectAction } from './projects-page.config';
 
 @Component({
   selector: 'app-projects-page',
   standalone: true,
   imports: [
-    CommonModule,
-    GroupHeaderComponent,
-    ProjectsBoardViewComponent,
+    ProjectsSidebarComponent,
+    ProjectDashboardViewComponent,
+    ProjectDetailViewComponent,
     ProjectsConfirmDialogComponent,
-    ProjectsGridViewComponent,
-    ProjectsPageHeaderComponent,
-    ProjectsTableViewComponent,
-    ProjectsToolbarComponent,
     TextInputDialogComponent,
-    ProjectLocationPickerComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.scss',
-  providers: [FilterService],
 })
 export class ProjectsPageComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
   private readonly projectsService = inject(ProjectsService);
-  private readonly filterService = inject(FilterService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
-  private readonly cardVariantSettings = inject(CardVariantSettingsService);
 
-  // Project-scoped media selection for workspace pane
   private readonly projectMediaIds = signal<Set<string>>(new Set());
+
   readonly t = (key: string, fallback = ''): string => {
     const value = this.i18nService.t(key, fallback);
     if (typeof value === 'string' && value.trim().length > 0) return value;
@@ -99,151 +64,62 @@ export class ProjectsPageComponent implements OnDestroy {
     ),
     { initialValue: this.router.url },
   );
+
   readonly currentProjectId = computed(() => {
     const match = this.currentUrl().match(/^\/projects\/([^/?#]+)/);
-    return match?.[1] ? decodeURIComponent(match[1]) : null;
+    const segment = match?.[1] ? decodeURIComponent(match[1]) : null;
+    if (!segment || segment === 'settings') return null;
+    return segment;
   });
 
   readonly loading = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly projects = signal<ProjectListItem[]>([]);
-  readonly statusFilter = signal<ProjectStatusFilter>('all');
-  readonly viewMode = signal<ProjectsViewMode>(this.restoreViewMode());
-  readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('projects'));
-  readonly activeGroupings = signal<GroupingProperty[]>([]);
-  readonly activeSorts = signal<SortConfig[]>([]);
+  readonly showArchived = signal(false);
+  readonly detailsPanelOpen = signal(false);
+  readonly colorPickerOpen = signal(false);
+  readonly mediaLoading = signal(false);
+  readonly exclusiveMedia = signal<ProjectMediaListItem[]>([]);
+  readonly sharedMedia = signal<ProjectMediaListItem[]>([]);
   readonly creatingProject = signal(false);
   readonly projectNameDialogOpen = signal(false);
   readonly pendingProjectAction = signal<PendingProjectAction>(null);
   readonly pendingProjectId = signal<string | null>(null);
   readonly pendingActionBusy = signal(false);
 
-  readonly groupingOptions = computed(() =>
-    GROUPING_OPTIONS.map((option) => ({
-      ...option,
-      label: projectLabel(option.id, option.label, this.t),
-    })),
-  );
-  readonly filterOptions = computed(() =>
-    FILTER_OPTIONS.map((option) => ({
-      ...option,
-      label: projectLabel(option.id, option.label, this.t),
-    })),
-  );
-  readonly sortOptions = computed(() =>
-    SORT_OPTIONS.map((option) => ({
-      ...option,
-      label: projectLabel(option.id, option.label, this.t),
-    })),
-  );
-  readonly hasArchivedProjects = computed(() =>
-    this.projects().some((project) => project.status === 'archived'),
-  );
-  readonly hasGrouping = computed(() => this.activeGroupings().length > 0);
-  readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
-  readonly hasCustomSort = computed(() => this.activeSorts().length > 0);
   readonly hasPendingAction = computed(
     () => !!this.pendingProjectAction() && !!this.pendingProjectId(),
   );
-  readonly allowedCardVariants = CARD_VARIANTS;
+
   readonly pendingProject = computed(() => {
     const projectId = this.pendingProjectId();
-    if (!projectId) {
-      return null;
-    }
-
+    if (!projectId) return null;
     return this.projects().find((project) => project.id === projectId) ?? null;
   });
+
   readonly currentProject = computed(() => {
     const projectId = this.currentProjectId();
-    if (!projectId) {
-      return null;
-    }
-
+    if (!projectId) return null;
     return this.projects().find((project) => project.id === projectId) ?? null;
   });
-  readonly breadcrumbCurrentLabel = computed(
-    () => this.currentProject()?.name ?? this.currentProjectId() ?? '',
-  );
-  readonly visibleProjects = computed(() => {
-    const status = this.statusFilter();
-    const rules = this.filterService.rules().filter((rule) => rule.property && rule.operator);
-    const statusScoped = this.projects().filter((project) =>
-      status === 'all' ? true : project.status === status,
-    );
-    const filterScoped = applyProjectFilters(statusScoped, rules);
-    return sortProjects(filterScoped, this.activeSorts());
-  });
-  readonly groupedSections = computed<ProjectGroupedSection[]>(() => {
-    const projects = this.visibleProjects();
-    const groupings = this.activeGroupings();
-    if (groupings.length === 0) {
-      return [
-        { id: 'all-projects', heading: '', level: 0, projectCount: projects.length, projects },
-      ];
-    }
-    return buildGroupedSections(projects, groupings, [], this.t);
-  });
-  readonly projectCountLabel = computed(() => {
-    const total = this.visibleProjects().length;
-    if (total === 1) {
-      return this.t('projects.page.count.single', '1 project');
-    }
-    return this.t('projects.page.count.multi', '{count} projects').replace(
-      '{count}',
-      String(total),
-    );
-  });
-  readonly tableSortDirectionFn = (columnKey: string): 'asc' | 'desc' | null =>
-    tableSortDirection(this.activeSorts(), columnKey);
-  readonly tableAriaSortFn = (columnKey: string): 'ascending' | 'descending' | 'none' =>
-    tableAriaSort(this.activeSorts(), columnKey);
-  readonly colorTokenForFn = (key: ProjectColorKey): string => colorTokenFor(key);
-  readonly formatRelativeDateFn = (value: string | null): string =>
-    formatRelativeDate(value, this.t);
-  readonly projectStatusLabelFn = (status: ProjectListItem['status']): string =>
-    projectStatusLabel(status, this.t);
 
   constructor() {
     effect(() => {
-      this.cardVariantSettings.setVariant('projects', this.cardVariant());
-    });
-
-    // Persist view mode — @see docs/specs/page/projects-page.md § View Mode State
-    effect(() => {
-      try {
-        localStorage.setItem('feldpost.projects.viewMode', this.viewMode());
-      } catch {
-        // localStorage unavailable in some environments; ignore silently
-      }
-    });
-
-    effect(() => {
-      const labelsById = new Map(this.groupingOptions().map((option) => [option.id, option.label]));
-      this.activeGroupings.update((current) =>
-        current.map((entry) => ({ ...entry, label: labelsById.get(entry.id) ?? entry.label })),
-      );
-    });
-
-    // Bind/unbind workspace pane context when project is selected
-    effect(() => {
       const projectId = this.currentProjectId();
       if (projectId) {
-        // Project selected: bind project-scoped context
         const projectsSelectedItemsContext: SelectedItemsContextPort = {
           contextKey: 'projects',
           selectedMediaIds$: this.projectMediaIds,
-          requestOpenDetail: () => {
-            // TODO: Open detail view for project media
-          },
-          requestSetHover: () => {
-            // TODO: Set hover state for project media
-          },
+          requestOpenDetail: () => undefined,
+          requestSetHover: () => undefined,
         };
         this.workspacePaneObserver.onContextRebind(projectsSelectedItemsContext);
+        void this.loadProjectMedia(projectId);
       } else {
-        // No project selected: keep context unbound (workspace pane empty)
-        // onRouteLeave will be called in ngOnDestroy
+        this.detailsPanelOpen.set(false);
+        this.colorPickerOpen.set(false);
+        this.exclusiveMedia.set([]);
+        this.sharedMedia.set([]);
       }
     });
 
@@ -267,28 +143,53 @@ export class ProjectsPageComponent implements OnDestroy {
     }
   }
 
-  onStatusFilterChange(value: ProjectStatusFilter): void {
-    this.statusFilter.set(value);
+  async loadProjectMedia(projectId: string): Promise<void> {
+    this.mediaLoading.set(true);
+    try {
+      const sections = await this.projectsService.loadProjectMediaSections(projectId);
+      this.exclusiveMedia.set(sections.exclusive);
+      this.sharedMedia.set(sections.shared);
+    } finally {
+      this.mediaLoading.set(false);
+    }
+  }
+
+  onDashboardSelected(): void {
+    void this.router.navigate(['/projects']);
+  }
+
+  onProjectSelected(projectId: string): void {
+    void this.router.navigate(['/projects', projectId]);
+  }
+
+  onArchiveToggled(): void {
+    this.showArchived.update((value) => !value);
+  }
+
+  onDetailsToggled(): void {
+    this.detailsPanelOpen.update((value) => !value);
+  }
+
+  onDetailsPanelClosed(): void {
+    this.detailsPanelOpen.set(false);
+  }
+
+  onColorPickerToggled(): void {
+    this.colorPickerOpen.update((value) => !value);
   }
 
   onNewProject(): void {
-    if (this.creatingProject() || this.projectNameDialogOpen()) {
-      return;
-    }
+    if (this.creatingProject() || this.projectNameDialogOpen()) return;
     this.projectNameDialogOpen.set(true);
   }
 
   onProjectNameDialogCancelled(): void {
-    if (this.creatingProject()) {
-      return;
-    }
+    if (this.creatingProject()) return;
     this.projectNameDialogOpen.set(false);
   }
 
   async onProjectNameDialogConfirmed(projectName: string): Promise<void> {
-    if (this.creatingProject()) {
-      return;
-    }
+    if (this.creatingProject()) return;
 
     this.creatingProject.set(true);
     this.projectNameDialogOpen.set(false);
@@ -314,7 +215,7 @@ export class ProjectsPageComponent implements OnDestroy {
 
       const createdProject = { ...draft, name: projectName.trim() };
       this.projects.update((all) => [createdProject, ...all]);
-      this.viewMode.set('grid');
+      void this.router.navigate(['/projects', createdProject.id]);
     } finally {
       this.creatingProject.set(false);
     }
@@ -322,10 +223,9 @@ export class ProjectsPageComponent implements OnDestroy {
 
   async onColorSelected(projectId: string, colorKey: ProjectColorKey): Promise<void> {
     const persisted = await this.projectsService.setProjectColor(projectId, colorKey);
-    if (!persisted) {
-      return;
-    }
+    if (!persisted) return;
 
+    this.colorPickerOpen.set(false);
     this.projects.update((all) =>
       all.map((project) => (project.id === projectId ? { ...project, colorKey } : project)),
     );
@@ -337,10 +237,7 @@ export class ProjectsPageComponent implements OnDestroy {
   }
 
   cancelPendingAction(): void {
-    if (this.pendingActionBusy()) {
-      return;
-    }
-
+    if (this.pendingActionBusy()) return;
     this.pendingProjectId.set(null);
     this.pendingProjectAction.set(null);
   }
@@ -374,6 +271,7 @@ export class ProjectsPageComponent implements OnDestroy {
               : project,
           ),
         );
+        void this.router.navigate(['/projects']);
       }
 
       if (action === 'restore') {
@@ -407,6 +305,7 @@ export class ProjectsPageComponent implements OnDestroy {
         }
 
         this.projects.update((all) => all.filter((project) => project.id !== projectId));
+        void this.router.navigate(['/projects']);
       }
 
       this.pendingProjectId.set(null);
@@ -438,17 +337,5 @@ export class ProjectsPageComponent implements OnDestroy {
       dedupe: true,
       codeRef: { file: 'projects-page.component.ts', fn: 'showMutationError' },
     });
-  }
-
-  // Restores persisted view mode from localStorage — @see docs/specs/page/projects-page.md § View Mode State
-  private restoreViewMode(): ProjectsViewMode {
-    const VALID: ReadonlySet<ProjectsViewMode> = new Set(['grid', 'list', 'map', 'board']);
-    try {
-      const stored = localStorage.getItem('feldpost.projects.viewMode') as ProjectsViewMode | null;
-      if (stored && VALID.has(stored)) return stored;
-    } catch {
-      // localStorage unavailable; use default
-    }
-    return 'grid';
   }
 }

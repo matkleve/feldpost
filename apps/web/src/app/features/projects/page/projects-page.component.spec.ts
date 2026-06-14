@@ -1,14 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { ToastService } from '../../../core/toast/toast.service';
+import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { ProjectsPageComponent } from './projects-page.component';
-import { ProjectsToolbarComponent } from '../chrome/projects-toolbar.component';
 import type { ProjectListItem } from '../../../core/projects/projects.types';
-import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
+import { Subject } from 'rxjs';
 
 function createProject(overrides: Partial<ProjectListItem> = {}): ProjectListItem {
   return {
@@ -34,6 +32,7 @@ function createProject(overrides: Partial<ProjectListItem> = {}): ProjectListIte
 describe('ProjectsPageComponent', () => {
   const projectsServiceMock = {
     loadProjects: vi.fn().mockResolvedValue([]),
+    loadProjectMediaSections: vi.fn().mockResolvedValue({ exclusive: [], shared: [] }),
     createDraftProject: vi.fn().mockResolvedValue(null),
     renameProject: vi.fn().mockResolvedValue(true),
     setProjectColor: vi.fn().mockResolvedValue(true),
@@ -42,30 +41,22 @@ describe('ProjectsPageComponent', () => {
     deleteProject: vi.fn().mockResolvedValue(true),
   };
 
+  const routerMock = {
+    url: '/projects',
+    events: new Subject<unknown>().asObservable(),
+    navigate: vi.fn(),
+    createUrlTree: vi.fn().mockReturnValue('/projects'),
+    serializeUrl: vi.fn((value: unknown) => String(value)),
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
-    TestBed.overrideComponent(ProjectsPageComponent, {
-      remove: {
-        imports: [ProjectsToolbarComponent],
-      },
-      add: {
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      },
-    });
+    routerMock.url = '/projects';
 
     await TestBed.configureTestingModule({
       imports: [ProjectsPageComponent],
       providers: [
-        {
-          provide: Router,
-          useValue: {
-            url: '/projects',
-            events: new Subject<unknown>().asObservable(),
-            navigate: vi.fn(),
-            createUrlTree: vi.fn().mockReturnValue('/projects'),
-            serializeUrl: vi.fn((value: unknown) => String(value)),
-          },
-        },
+        { provide: Router, useValue: routerMock },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -85,6 +76,13 @@ describe('ProjectsPageComponent', () => {
             show: vi.fn(),
           },
         },
+        {
+          provide: WorkspacePaneObserverAdapter,
+          useValue: {
+            onContextRebind: vi.fn(),
+            onRouteLeave: vi.fn(),
+          },
+        },
       ],
     }).compileComponents();
   });
@@ -97,90 +95,38 @@ describe('ProjectsPageComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const errorPanel = (fixture.nativeElement as HTMLElement).querySelector('.projects-error');
+    const errorPanel = (fixture.nativeElement as HTMLElement).querySelector('.projects-page__error');
     expect(errorPanel).not.toBeNull();
     expect(errorPanel?.textContent).toContain('Could not load projects');
     expect(errorPanel?.textContent).toContain('Retry');
   });
 
-  it('applies aria-sort semantics to table headers from the active primary sort', async () => {
+  it('shows dashboard view on /projects without a selected project', async () => {
     projectsServiceMock.loadProjects.mockResolvedValueOnce([createProject()]);
 
     const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-
-    const component = fixture.componentInstance;
-    component.viewMode.set('list');
-    component.projects.set([createProject()]);
-    component.activeSorts.set([{ key: 'name', direction: 'asc' } as SortConfig]);
-    fixture.detectChanges();
-
-    const headers = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      '.projects-table thead th',
-    );
-    expect(headers.length).toBe(7);
-    expect(headers[0]?.getAttribute('aria-sort')).toBe('ascending');
-    expect(headers[1]?.getAttribute('aria-sort')).toBe('none');
-    expect(headers[2]?.getAttribute('aria-sort')).toBe('none');
-    expect(headers[3]?.getAttribute('aria-sort')).toBe('none');
-    expect(headers[4]?.getAttribute('aria-sort')).toBe('none');
-    expect(headers[5]?.getAttribute('aria-sort')).toBe('none');
-    expect(headers[6]?.getAttribute('aria-sort')).toBe('none');
-  });
-
-  it('renders semantic table structure in list mode', async () => {
-    projectsServiceMock.loadProjects.mockResolvedValueOnce([createProject()]);
-
-    const fixture = TestBed.createComponent(ProjectsPageComponent);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const component = fixture.componentInstance;
-    component.viewMode.set('list');
-    component.projects.set([createProject()]);
     fixture.detectChanges();
 
     const host = fixture.nativeElement as HTMLElement;
-    const table = host.querySelector('.projects-table');
-    const rowHeaderCell = host.querySelector('.projects-table tbody th[scope="row"]');
-    const headerLabels = Array.from(host.querySelectorAll('.projects-table thead th')).map(
-      (node) => node.textContent?.trim(),
-    );
-    expect(table).not.toBeNull();
-    expect(host.querySelector('.projects-table thead')).not.toBeNull();
-    expect(host.querySelector('.projects-table tbody')).not.toBeNull();
-    expect(rowHeaderCell?.textContent).toContain('Pilot Project');
-    expect(headerLabels).toEqual([
-      'Name',
-      'Image count',
-      'Status',
-      'Primary district',
-      'Primary city',
-      'Updated',
-      'Last activity',
-    ]);
+    expect(host.querySelector('app-project-dashboard-view')).not.toBeNull();
+    expect(host.querySelector('app-project-detail-view')).toBeNull();
   });
 
-  it('shows breadcrumb current-page semantics on detail routes', async () => {
+  it('loads project media when route has a project id', async () => {
     projectsServiceMock.loadProjects.mockResolvedValueOnce([
       createProject({ id: 'project-42', name: 'Site 42' }),
     ]);
-
-    const router = TestBed.inject(Router) as unknown as { url: string };
-    router.url = '/projects/project-42';
+    routerMock.url = '/projects/project-42';
 
     const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    fixture.componentInstance.projects.set([createProject({ id: 'project-42', name: 'Site 42' })]);
-    fixture.detectChanges();
 
-    const host = fixture.nativeElement as HTMLElement;
-    const breadcrumb = host.querySelector('.projects-breadcrumbs');
-    const current = host.querySelector('.projects-breadcrumbs__item--current');
-    expect(breadcrumb).not.toBeNull();
-    expect(current?.textContent).toContain('Site 42');
+    expect(fixture.componentInstance.currentProjectId()).toBe('project-42');
+    expect(fixture.componentInstance.currentProject()?.name).toBe('Site 42');
+    expect(projectsServiceMock.loadProjectMediaSections).toHaveBeenCalledWith('project-42');
   });
 
   it('opens project-name dialog without creating a project immediately', async () => {
@@ -212,5 +158,6 @@ describe('ProjectsPageComponent', () => {
     expect(projectsServiceMock.createDraftProject).toHaveBeenCalledTimes(1);
     expect(projectsServiceMock.renameProject).toHaveBeenCalledWith('project-created', 'Bridge Alpha');
     expect(component.projects()[0]?.name).toBe('Bridge Alpha');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/projects', 'project-created']);
   });
 });

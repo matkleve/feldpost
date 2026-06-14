@@ -7,7 +7,6 @@ export interface ProjectFileTypeCount {
 }
 
 export type ProjectStatusFilter = 'all' | 'active' | 'archived';
-export type ProjectsViewMode = 'grid' | 'list' | 'map' | 'board';
 export type ProjectsSortMode = 'name' | 'updated' | 'image-count';
 export type ProjectColorKey = 'clay' | 'accent' | 'success' | 'warning' | `brand-hue-${number}`;
 
@@ -97,3 +96,18 @@ export interface ProjectsImageMetadataRow {
 }
 
 export type ProjectScopedWorkspaceImage = WorkspaceImage;
+
+/** Media row for project detail exclusive/shared sections — @see docs/specs/page/projects-dashboard.md */
+export interface ProjectMediaListItem {
+  id: string;
+  thumbnailPath: string | null;
+  storagePath: string | null;
+  capturedAt: string | null;
+  createdAt: string;
+  projectMembershipCount: number;
+}
+
+export interface ProjectMediaSections {
+  exclusive: ProjectMediaListItem[];
+  shared: ProjectMediaListItem[];
+}

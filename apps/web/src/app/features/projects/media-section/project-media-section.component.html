@@ -1,0 +1,53 @@
+<section class="project-media-section">
+  @if (loading()) {
+    <div class="project-media-section__loading" role="status">
+      {{ t('projects.media.loading', 'Loading media...') }}
+    </div>
+  } @else {
+    <section class="project-media-section__block" aria-labelledby="project-media-exclusive-heading">
+      <h2 id="project-media-exclusive-heading" class="project-media-section__heading">
+        {{ t('projects.media.exclusive.title', 'Project files') }}
+        <span class="project-media-section__count">({{ exclusive().length }})</span>
+      </h2>
+      <p class="project-media-section__hint">
+        {{ t('projects.media.exclusive.hint', 'Media used only in this project') }}
+      </p>
+      @if (exclusive().length === 0) {
+        <p class="project-media-section__empty">
+          {{ t('projects.media.exclusive.empty', 'No exclusive media yet') }}
+        </p>
+      } @else {
+        <div class="project-media-section__grid">
+          @for (item of exclusive(); track item.id) {
+            <article class="project-media-section__tile" [attr.aria-label]="item.id">
+              <div class="project-media-section__thumb" aria-hidden="true"></div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="project-media-section__block" aria-labelledby="project-media-shared-heading">
+      <h2 id="project-media-shared-heading" class="project-media-section__heading">
+        {{ t('projects.media.shared.title', 'Shared media') }}
+        <span class="project-media-section__count">({{ shared().length }})</span>
+      </h2>
+      <p class="project-media-section__hint">
+        {{ t('projects.media.shared.hint', 'Media also used in other projects') }}
+      </p>
+      @if (shared().length === 0) {
+        <p class="project-media-section__empty">
+          {{ t('projects.media.shared.empty', 'No shared media') }}
+        </p>
+      } @else {
+        <div class="project-media-section__grid">
+          @for (item of shared(); track item.id) {
+            <article class="project-media-section__tile" [attr.aria-label]="item.id">
+              <div class="project-media-section__thumb" aria-hidden="true"></div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

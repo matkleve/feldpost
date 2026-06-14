@@ -1,0 +1,68 @@
+<aside class="project-details-panel" role="complementary" [attr.aria-label]="t('projects.detail.panel.aria', 'Project details')">
+  <header class="project-details-panel__header">
+    <h2 class="project-details-panel__title">{{ t('projects.detail.panel.title', 'Details') }}</h2>
+    <button
+      type="button"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      [attr.aria-label]="t('projects.detail.panel.close', 'Close details')"
+      (click)="closed.emit()"
+    >
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (project(); as p) {
+    <dl class="project-details-panel__fields">
+      <div class="project-details-panel__field">
+        <dt>{{ t('projects.detail.field.status', 'Status') }}</dt>
+        <dd>{{ statusLabel(p.status) }}</dd>
+      </div>
+      <div class="project-details-panel__field">
+        <dt>{{ t('projects.detail.field.location', 'Location') }}</dt>
+        <dd>{{ locationLabel(p) }}</dd>
+      </div>
+      <div class="project-details-panel__field">
+        <dt>{{ t('projects.detail.field.mediaCount', 'Media') }}</dt>
+        <dd>{{ p.totalImageCount }}</dd>
+      </div>
+      <div class="project-details-panel__field">
+        <dt>{{ t('projects.detail.field.lastActivity', 'Last activity') }}</dt>
+        <dd>{{ relativeDate(p.lastActivity) }}</dd>
+      </div>
+      <div class="project-details-panel__field">
+        <dt>{{ t('projects.detail.field.updated', 'Updated') }}</dt>
+        <dd>{{ relativeDate(p.updatedAt) }}</dd>
+      </div>
+    </dl>
+
+    <div class="project-details-panel__color">
+      <button type="button" hlmBtn variant="outline" size="sm" (click)="colorPickerToggled.emit()">
+        <span class="project-details-panel__color-swatch" [style.background]="colorFor(p.colorKey)"></span>
+        {{ t('projects.detail.action.changeColor', 'Change color') }}
+      </button>
+      @if (colorPickerOpen()) {
+        <app-project-color-picker
+          [selectedColor]="p.colorKey"
+          (colorSelected)="colorSelected.emit($event)"
+        />
+      }
+    </div>
+
+    <div class="project-details-panel__actions">
+      @if (p.status === 'active') {
+        <button type="button" hlmBtn variant="outline" size="sm" (click)="archiveRequested.emit()">
+          {{ t('projects.page.action.archive', 'Archive') }}
+        </button>
+      } @else {
+        <button type="button" hlmBtn variant="outline" size="sm" (click)="restoreRequested.emit()">
+          {{ t('projects.page.action.restore', 'Restore') }}
+        </button>
+        <button type="button" hlmBtn variant="destructive" size="sm" (click)="deleteRequested.emit()">
+          {{ t('projects.page.action.delete', 'Delete') }}
+        </button>
+      }
+    </div>
+  }
+</aside>

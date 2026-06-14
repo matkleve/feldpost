@@ -1,0 +1,82 @@
+<div class="projects-sidebar">
+  <div class="projects-sidebar__top">
+    <button
+      type="button"
+      hlmBtn
+      variant="ghost"
+      size="sm"
+      class="projects-sidebar__dashboard"
+      [class.projects-sidebar__dashboard--active]="dashboardActive()"
+      (click)="dashboardSelected.emit()"
+    >
+      <span class="material-icons" aria-hidden="true">dashboard</span>
+      <span>{{ t('projects.sidebar.dashboard', 'Dashboard') }}</span>
+    </button>
+
+    <button
+      type="button"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="projects-sidebar__archive"
+      [class.projects-sidebar__archive--active]="showArchived()"
+      [attr.aria-pressed]="showArchived()"
+      [attr.aria-label]="
+        showArchived()
+          ? t('projects.sidebar.archive.showActive', 'Show active projects')
+          : t('projects.sidebar.archive.showArchived', 'Show archived projects')
+      "
+      [attr.title]="
+        showArchived()
+          ? t('projects.sidebar.archive.showActive', 'Show active projects')
+          : t('projects.sidebar.archive.showArchived', 'Show archived projects')
+      "
+      (click)="archiveToggled.emit()"
+    >
+      <span class="material-icons" aria-hidden="true">inventory_2</span>
+    </button>
+  </div>
+
+  <div
+    class="projects-sidebar__list"
+    role="listbox"
+    [attr.aria-label]="t('projects.sidebar.list.aria', 'Projects')"
+  >
+    @if (loading()) {
+      <div class="projects-sidebar__loading" role="status">
+        {{ t('projects.page.loading.aria', 'Loading projects') }}
+      </div>
+    } @else {
+      @for (project of visibleProjects(); track project.id) {
+        <button
+          type="button"
+          role="option"
+          class="projects-sidebar__row"
+          [class.projects-sidebar__row--active]="project.id === selectedProjectId()"
+          [attr.aria-selected]="project.id === selectedProjectId()"
+          (click)="onProjectClick(project.id)"
+        >
+          <span class="projects-sidebar__dot" [style.background]="colorFor(project)"></span>
+          <span class="projects-sidebar__name">{{ project.name }}</span>
+        </button>
+      }
+
+      @if (visibleProjects().length === 0) {
+        <div class="projects-sidebar__empty">
+          {{
+            showArchived()
+              ? t('projects.sidebar.empty.archived', 'No archived projects')
+              : t('projects.sidebar.empty.active', 'No active projects')
+          }}
+        </div>
+      }
+    }
+  </div>
+
+  <div class="projects-sidebar__footer">
+    <button type="button" hlmBtn variant="outline" size="sm" class="projects-sidebar__new" (click)="newProject.emit()">
+      <span class="material-icons" aria-hidden="true">add</span>
+      <span>{{ t('projects.page.action.newProject', 'New project') }}</span>
+    </button>
+  </div>
+</div>

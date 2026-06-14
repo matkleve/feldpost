@@ -14,6 +14,8 @@ import type {
   ProjectSelectOption,
   ProjectStatusFilter,
   ProjectScopedWorkspaceImage,
+  ProjectMediaListItem,
+  ProjectMediaSections,
 } from './projects.types';
 
 interface ProjectRow {
@@ -462,6 +464,83 @@ export class ProjectsService {
     }
 
     return [];
+  }
+
+  /** Splits project media into exclusive (one project) vs shared (multiple projects). */
+  async loadProjectMediaSections(projectId: string): Promise<ProjectMediaSections> {
+    const membershipResponse = await this.supabase.client
+      .from('media_projects')
+      .select('media_item_id')
+      .eq('project_id', projectId);
+
+    if (membershipResponse.error || !Array.isArray(membershipResponse.data)) {
+      return { exclusive: [], shared: [] };
+    }
+
+    const mediaItemIds = (membershipResponse.data as Array<{ media_item_id: string | null }>)
+      .map((row) => row.media_item_id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0);
+
+    if (mediaItemIds.length === 0) {
+      return { exclusive: [], shared: [] };
+    }
+
+    const countsResponse = await this.supabase.client
+      .from('media_projects')
+      .select('media_item_id,project_id')
+      .in('media_item_id', mediaItemIds);
+
+    if (countsResponse.error || !Array.isArray(countsResponse.data)) {
+      return { exclusive: [], shared: [] };
+    }
+
+    const membershipCountByMediaId = new Map<string, number>();
+    for (const row of countsResponse.data as MediaProjectMembershipRow[]) {
+      if (!row.media_item_id) continue;
+      membershipCountByMediaId.set(
+        row.media_item_id,
+        (membershipCountByMediaId.get(row.media_item_id) ?? 0) + 1,
+      );
+    }
+
+    const mediaResponse = await this.supabase.client
+      .from('media_items')
+      .select('id,thumbnail_path,storage_path,captured_at,created_at')
+      .in('id', mediaItemIds)
+      .order('created_at', { ascending: false });
+
+    if (mediaResponse.error || !Array.isArray(mediaResponse.data)) {
+      return { exclusive: [], shared: [] };
+    }
+
+    const exclusive: ProjectMediaListItem[] = [];
+    const shared: ProjectMediaListItem[] = [];
+
+    for (const row of mediaResponse.data as Array<{
+      id: string;
+      thumbnail_path: string | null;
+      storage_path: string | null;
+      captured_at: string | null;
+      created_at: string;
+    }>) {
+      const membershipCount = membershipCountByMediaId.get(row.id) ?? 1;
+      const item: ProjectMediaListItem = {
+        id: row.id,
+        thumbnailPath: row.thumbnail_path,
+        storagePath: row.storage_path,
+        capturedAt: row.captured_at,
+        createdAt: row.created_at,
+        projectMembershipCount: membershipCount,
+      };
+
+      if (membershipCount <= 1) {
+        exclusive.push(item);
+      } else {
+        shared.push(item);
+      }
+    }
+
+    return { exclusive, shared };
   }
 
   async loadMediaProjectMemberships(mediaItemId: string): Promise<string[]> {

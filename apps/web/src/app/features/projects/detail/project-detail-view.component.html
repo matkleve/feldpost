@@ -1,0 +1,53 @@
+<section class="project-detail">
+  @if (project(); as p) {
+    <header class="project-detail__header">
+      <div class="project-detail__title-row">
+        <span class="project-detail__dot" [style.background]="colorFor(p.colorKey)"></span>
+        <h1 class="project-detail__title">{{ p.name }}</h1>
+        <span class="project-detail__status" [attr.data-status]="p.status">
+          <span class="material-icons" aria-hidden="true">
+            {{ p.status === 'archived' ? 'inventory_2' : 'radio_button_checked' }}
+          </span>
+          {{ statusLabel(p.status) }}
+        </span>
+      </div>
+      <p class="project-detail__meta">
+        {{ locationLabel(p) }} · {{ t('projects.detail.updated', 'updated') }} {{ relativeDate(p.lastActivity) }}
+      </p>
+      <button
+        type="button"
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="project-detail__details-btn"
+        [attr.aria-expanded]="detailsPanelOpen()"
+        (click)="detailsToggled.emit()"
+      >
+        <span class="material-icons" aria-hidden="true">info</span>
+        {{ t('projects.detail.detailsButton', 'Details') }}
+      </button>
+    </header>
+
+    <div class="project-detail__body">
+      <app-project-media-section
+        class="project-detail__content"
+        [exclusive]="exclusiveMedia()"
+        [shared]="sharedMedia()"
+        [loading]="mediaLoading()"
+      />
+
+      @if (detailsPanelOpen()) {
+        <app-project-details-panel
+          [project]="p"
+          [colorPickerOpen]="colorPickerOpen()"
+          (colorSelected)="colorSelected.emit($event)"
+          (colorPickerToggled)="colorPickerToggled.emit()"
+          (archiveRequested)="archiveRequested.emit()"
+          (restoreRequested)="restoreRequested.emit()"
+          (deleteRequested)="deleteRequested.emit()"
+          (closed)="detailsPanelClosed.emit()"
+        />
+      }
+    </div>
+  }
+</section>
