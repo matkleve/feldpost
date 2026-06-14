@@ -1,6 +1,8 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import type { ProjectMediaListItem } from '../../../core/projects/projects.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { UploadShellUiService } from '../../upload/upload-shell/upload-shell-ui.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { MediaPickerDialogComponent } from '../../../shared/media-picker-dialog/media-picker-dialog.component';
 
@@ -16,8 +18,12 @@ import { MediaPickerDialogComponent } from '../../../shared/media-picker-dialog/
 })
 export class ProjectMediaSectionComponent {
   private readonly i18nService = inject(I18nService);
+  private readonly workspaceView = inject(WorkspaceViewService);
+  private readonly uploadShellUi = inject(UploadShellUiService, { optional: true });
+
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
+  readonly projectId = input.required<string>();
   readonly exclusive = input<ProjectMediaListItem[]>([]);
   readonly shared = input<ProjectMediaListItem[]>([]);
   readonly loading = input(false);
@@ -25,8 +31,23 @@ export class ProjectMediaSectionComponent {
   readonly pickerOpen = signal(false);
   readonly mediaAdded = output<string[]>();
 
+  readonly assignedMediaIds = computed(() => [
+    ...this.exclusive().map((item) => item.id),
+    ...this.shared().map((item) => item.id),
+  ]);
+
   openPicker(): void {
     this.pickerOpen.set(true);
+  }
+
+  onUploadMedia(): void {
+    const projectId = this.projectId();
+    if (!projectId || !this.uploadShellUi) {
+      return;
+    }
+
+    this.workspaceView.setSelectedProjectIds(new Set([projectId]));
+    this.uploadShellUi.openUploadPanel();
   }
 
   onPickerConfirmed(mediaIds: string[]): void {

@@ -8,7 +8,7 @@
   <div hlmDialogOverlay></div>
   <ng-template brnDialogContent>
     <div hlmDialogContent class="media-picker-dialog">
-      <div hlmDialogHeader>
+      <div hlmDialogHeader class="media-picker-dialog__header">
         <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">
           {{ t('projects.mediaPicker.title', 'Add media to project') }}
         </div>
@@ -17,54 +17,168 @@
         </p>
       </div>
 
-      <div class="media-picker-dialog__search">
-        <input
-          hlmInput
-          type="text"
-          class="media-picker-dialog__search-input"
-          [placeholder]="t('projects.mediaPicker.searchPlaceholder', 'Search by name, address, city...')"
-          [attr.aria-label]="t('projects.mediaPicker.searchPlaceholder', 'Search by name, address, city...')"
-          (input)="onSearchInput($event)"
-        />
-      </div>
-
-      <div class="media-picker-dialog__grid-container">
-        @if (loading()) {
-          <div class="media-picker-dialog__loading" role="status">
-            {{ t('projects.mediaPicker.loading', 'Loading media...') }}
-          </div>
-        } @else if (filteredItems().length === 0) {
-          <div class="media-picker-dialog__empty">
-            {{ t('projects.mediaPicker.empty', 'No media found') }}
-          </div>
-        } @else {
-          <div class="media-picker-dialog__grid" role="listbox" aria-multiselectable="true">
-            @for (item of filteredItems(); track item.id) {
+      <div class="media-picker-dialog__body">
+        <app-pane-toolbar class="media-picker-dialog__toolbar">
+          <div slot="left" class="media-picker-dialog__toolbar-left">
+            @for (btn of toolbarButtons(); track btn.id) {
               <button
                 type="button"
-                class="media-picker-dialog__tile"
-                [class.media-picker-dialog__tile--selected]="isSelected(item.id)"
-                [attr.aria-selected]="isSelected(item.id)"
-                [attr.aria-label]="item.fileMetadata?.originalFilename ?? item.id"
-                role="option"
-                (click)="toggleSelection(item.id)"
+                hlmBtn
+                variant="outline"
+                size="sm"
+                class="media-picker-dialog__menu-trigger"
+                [class.media-picker-dialog__menu-trigger--open]="activeDropdown() === btn.id"
+                [attr.data-active]="btn.active() ? 'true' : null"
+                [attr.aria-label]="btn.label"
+                [attr.title]="btn.label"
+                [attr.aria-expanded]="activeDropdown() === btn.id"
+                [attr.aria-haspopup]="true"
+                (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
               >
-                <div class="media-picker-dialog__thumb">
-                  @if (thumbnailUrl(item); as url) {
-                    <img [src]="url" alt="" class="media-picker-dialog__img" loading="lazy" />
-                  }
-                </div>
-                <div class="media-picker-dialog__check" aria-hidden="true">
-                  @if (isSelected(item.id)) {
-                    <span class="material-icons">check_circle</span>
-                  } @else {
-                    <span class="material-icons">radio_button_unchecked</span>
-                  }
-                </div>
+                <span class="material-icons media-picker-dialog__menu-trigger-icon" aria-hidden="true">
+                  {{ btn.icon }}
+                </span>
+                <span class="media-picker-dialog__menu-trigger-label">{{ btn.label }}</span>
+                <span class="material-icons media-picker-dialog__menu-trigger-chevron" aria-hidden="true">
+                  expand_more
+                </span>
               </button>
             }
           </div>
-        }
+
+          <label slot="center" class="media-picker-dialog__toolbar-search">
+            <span class="material-icons media-picker-dialog__toolbar-search-icon" aria-hidden="true">
+              search
+            </span>
+            <input
+              hlmInput
+              type="search"
+              class="media-picker-dialog__toolbar-search-input"
+              [value]="searchQuery()"
+              [placeholder]="t('projects.mediaPicker.searchPlaceholder', 'Search media…')"
+              [attr.aria-label]="t('projects.mediaPicker.searchAria', 'Search media')"
+              (input)="onSearchInput($event)"
+            />
+          </label>
+
+          <div slot="right" class="media-picker-dialog__toolbar-right">
+            <div class="media-picker-dialog__size-control media-picker-dialog__size-control--full" hlmPillToggle size="sm">
+              <div
+                hlmToggleGroup
+                size="sm"
+                brnToggleGroup
+                type="single"
+                [nullable]="false"
+                [value]="cardVariant()"
+                (valueChange)="onCardVariantToggleChange($event)"
+                [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+              >
+                @for (opt of cardVariantToggleOptions(); track opt.id) {
+                  <button
+                    type="button"
+                    hlmToggleGroupItem
+                    size="icon"
+                    brnToggleGroupItem
+                    [value]="opt.id"
+                    [attr.aria-label]="opt.ariaLabel || opt.label"
+                    [attr.title]="opt.title || opt.label"
+                  >
+                    <span class="material-icons" aria-hidden="true">{{ opt.icon }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="media-picker-dialog__size-control media-picker-dialog__size-control--compact">
+              <div class="media-picker-dialog__size-control-track" hlmToggleGroup size="sm">
+                <button
+                  type="button"
+                  hlmToggleGroupItem
+                  brnToggleGroupItem
+                  size="icon"
+                  [attr.aria-label]="compactCardVariantToggleTitle()"
+                  [attr.title]="compactCardVariantToggleTitle()"
+                  (click)="cycleCardVariant()"
+                >
+                  <span class="material-icons" aria-hidden="true">
+                    {{ currentCardVariantToggleOption()?.icon }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </app-pane-toolbar>
+
+        <app-toolbar-dropdown-stack
+          [activePanelId]="activeDropdown()"
+          [anchor]="dropdownAnchor()"
+          (closeRequested)="closeDropdown()"
+        >
+          @switch (activeDropdown()) {
+            @case ('filter') {
+              <app-filter-dropdown />
+            }
+            @case ('sort') {
+              <app-sort-dropdown
+                [activeSortsInput]="activeSorts()"
+                (sortChanged)="onSortChanged($event)"
+              />
+            }
+          }
+        </app-toolbar-dropdown-stack>
+
+        <div class="media-picker-dialog__grid-container">
+          @if (loadError()) {
+            <div class="media-picker-dialog__state" role="alert">
+              <p>{{ loadError() }}</p>
+              <button hlmBtn variant="outline" size="sm" type="button" (click)="onRetryLoad()">
+                {{ t('projects.mediaPicker.retry', 'Retry') }}
+              </button>
+            </div>
+          } @else if (loading()) {
+            <div
+              class="media-picker-dialog__grid"
+              [class.media-picker-dialog__grid--grid-sm]="itemMode() === 'grid-sm'"
+              [class.media-picker-dialog__grid--grid-md]="itemMode() === 'grid-md'"
+              [class.media-picker-dialog__grid--grid-lg]="itemMode() === 'grid-lg'"
+              [class.media-picker-dialog__grid--row]="itemMode() === 'row'"
+              role="presentation"
+            >
+              @for (placeholderId of loadingPlaceholderIds; track placeholderId) {
+                <app-media-item
+                  [itemId]="'placeholder-' + placeholderId"
+                  [mode]="itemMode()"
+                />
+              }
+            </div>
+          } @else if (displayItems().length === 0) {
+            <div class="media-picker-dialog__state" role="status">
+              {{ t('projects.mediaPicker.empty', 'No media found') }}
+            </div>
+          } @else {
+            <div
+              class="media-picker-dialog__grid"
+              [class.media-picker-dialog__grid--grid-sm]="itemMode() === 'grid-sm'"
+              [class.media-picker-dialog__grid--grid-md]="itemMode() === 'grid-md'"
+              [class.media-picker-dialog__grid--grid-lg]="itemMode() === 'grid-lg'"
+              [class.media-picker-dialog__grid--row]="itemMode() === 'row'"
+              role="listbox"
+              aria-multiselectable="true"
+            >
+              @for (item of displayItems(); track item.id) {
+                <app-media-item
+                  [itemId]="item.id"
+                  [item]="item"
+                  [mode]="itemMode()"
+                  [state]="isSelected(item.id) ? 'selected' : 'idle'"
+                  [actionContextId]="mediaItemActionContext"
+                  (pointerClick)="onItemPointerClick(item.id, $event)"
+                  (selectedChange)="onSelectionToggled(item.id, $event)"
+                />
+              }
+            </div>
+          }
+        </div>
       </div>
 
       <div hlmDialogFooter class="media-picker-dialog__footer">
@@ -74,12 +188,7 @@
           }
         </span>
         <div class="media-picker-dialog__actions">
-          <button
-            hlmBtn
-            variant="ghost"
-            type="button"
-            (click)="onCancel()"
-          >
+          <button hlmBtn variant="ghost" type="button" (click)="onCancel()">
             {{ t('projects.mediaPicker.cancel', 'Cancel') }}
           </button>
           <button
@@ -89,7 +198,10 @@
             [disabled]="selectionCount() === 0"
             (click)="onConfirm()"
           >
-            {{ t('projects.mediaPicker.confirm', 'Add') }} {{ selectionCount() > 0 ? '(' + selectionCount() + ')' : '' }}
+            {{ t('projects.mediaPicker.confirm', 'Add') }}
+            @if (selectionCount() > 0) {
+              ({{ selectionCount() }})
+            }
           </button>
         </div>
       </div>

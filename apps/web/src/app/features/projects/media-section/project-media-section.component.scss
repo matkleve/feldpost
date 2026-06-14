@@ -8,26 +8,55 @@
   overflow-y: auto;
 }
 
-.project-media-section__toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
 .project-media-section__block {
   display: grid;
   gap: var(--spacing-2);
 }
 
+// Section title row: leading icon, heading, trailing icon actions.
+// @see docs/specs/page/projects-dashboard.md
+.project-media-section__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: 0;
+}
+
+.project-media-section__section-icon {
+  flex-shrink: 0;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  color: var(--muted-foreground);
+}
+
 .project-media-section__heading {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
 }
 
 .project-media-section__count {
   color: var(--muted-foreground);
   font-weight: var(--font-weight-medium);
+}
+
+.project-media-section__header-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0;
+}
+
+.project-media-section__icon-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+
+  .material-icons {
+    font-size: var(--font-size-lg);
+  }
 }
 
 .project-media-section__hint {

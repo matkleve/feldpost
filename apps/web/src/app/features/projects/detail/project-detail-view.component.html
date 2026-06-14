@@ -59,6 +59,7 @@
 
     <app-project-media-section
       class="project-detail__content"
+      [projectId]="p.id"
       [exclusive]="exclusiveMedia()"
       [shared]="sharedMedia()"
       [loading]="mediaLoading()"

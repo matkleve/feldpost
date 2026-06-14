@@ -1179,15 +1179,20 @@ projects.media.exclusive.empty,No exclusive media yet,project exclusive media em
 projects.media.shared.title,Shared media,project shared media section title,Shared media,Geteilte Medien,Media condivisi
 projects.media.shared.hint,Media also used in other projects,project shared media section hint,Media also used in other projects,Medien auch in anderen Projekten,Media usati anche in altri progetti
 projects.media.shared.empty,No shared media,project shared media empty state,No shared media,Keine geteilten Medien,Nessun media condiviso
-projects.media.addButton,Add media,project media section add button,Add media,Medien hinzufügen,Aggiungi media
+.projects.media.addButton,Add media,project media section add button,Add media,Medien hinzufügen,Aggiungi media
+projects.media.uploadButton,Upload media,project files empty state upload button,Upload media,Medien hochladen,Carica media
+projects.media.addExistingButton,Add to project,link existing media to project button,Add to project,Zum Projekt hinzufügen,Aggiungi al progetto
 projects.media.toast.addError,Could not add media to project. Please try again.,toast error adding media to project,Could not add media to project. Please try again.,Medien konnten nicht zum Projekt hinzugefügt werden. Bitte erneut versuchen.,Impossibile aggiungere media al progetto. Riprova.
 projects.media.toast.addSuccess,Media added to project,toast success adding media to project,Media added to project,Medien zum Projekt hinzugefügt,Media aggiunti al progetto
 projects.mediaPicker.title,Add media to project,media picker dialog title,Add media to project,Medien zum Projekt hinzufügen,Aggiungi media al progetto
 projects.mediaPicker.description,Select media items to add to this project.,media picker dialog description,Select media items to add to this project.,Wähle Medien aus um sie zu diesem Projekt hinzuzufügen.,Seleziona i media da aggiungere a questo progetto.
-projects.mediaPicker.searchPlaceholder,Search by name address city...,media picker search input placeholder,Search by name address city...,Nach Name Adresse Stadt suchen...,Cerca per nome indirizzo città...
+projects.mediaPicker.searchPlaceholder,Search media…,media picker search input placeholder,Search media…,Medien suchen…,Cerca media…
+projects.mediaPicker.searchAria,Search media,media picker search input aria-label,Search media,Medien suchen,Cerca media
 projects.mediaPicker.loading,Loading media...,media picker loading state,Loading media...,Medien werden geladen...,Caricamento media...
 projects.mediaPicker.empty,No media found,media picker empty state,No media found,Keine Medien gefunden,Nessun media trovato
 projects.mediaPicker.selected,selected,media picker selection count suffix,selected,ausgewählt,selezionati
 projects.mediaPicker.cancel,Cancel,media picker cancel button,Cancel,Abbrechen,Annulla
 projects.mediaPicker.confirm,Add,media picker confirm button,Add,Hinzufügen,Aggiungi
+projects.mediaPicker.loadError,Failed to load media,media picker load error,Failed to load media,Medien konnten nicht geladen werden,Impossibile caricare i media
+projects.mediaPicker.retry,Retry,media picker retry button,Retry,Erneut versuchen,Riprova
 "
