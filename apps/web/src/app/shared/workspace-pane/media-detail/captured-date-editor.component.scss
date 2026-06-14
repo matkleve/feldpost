@@ -10,22 +10,11 @@
   display: block;
   min-height: 0;
   min-width: 0;
-  --cde-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
-  --cde-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --cde-menu-item-text: var(--foreground);
-  --cde-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
-}
-
-:host-context([data-theme='sandstone']) {
-  --cde-menu-border: var(--sandstone-border-warm);
-  --cde-menu-item-hover-bg: var(--sandstone-hover-warm);
-  --cde-menu-item-text: var(--sandstone-text-dark);
-  --cde-action-bg-hover: var(--sandstone-action-hover);
 }
 
 .captured-date-editor {
   background: var(--popover);
-  border: 1px solid var(--cde-menu-border);
+  border: 1px solid var(--menu-border-subtle);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-2);
@@ -41,7 +30,7 @@
     align-items: center;
     gap: var(--spacing-1);
     padding-bottom: var(--spacing-1);
-    border-bottom: 1px solid var(--cde-menu-border);
+    border-bottom: 1px solid var(--menu-border-subtle);
   }
 
   &__date-input,
@@ -104,7 +93,7 @@
 
     &:hover {
       color: var(--primary);
-      background: var(--cde-action-bg-hover);
+      background: var(--action-hover);
     }
   }
 
@@ -128,8 +117,8 @@
     }
 
     &:hover {
-      color: var(--cde-menu-item-text);
-      background: var(--cde-action-bg-hover);
+      color: var(--menu-item-text);
+      background: var(--action-hover);
     }
   }
 
@@ -170,7 +159,7 @@
       color 80ms ease-out;
 
     &:hover:not(&--selected) {
-      background: var(--cde-menu-item-hover-bg);
+      background: var(--menu-item-hover);
     }
 
     &--other-month {
@@ -202,7 +191,7 @@
     justify-content: space-between;
     align-items: center;
     padding-top: var(--spacing-1);
-    border-top: 1px solid var(--cde-menu-border);
+    border-top: 1px solid var(--menu-border-subtle);
   }
 
   &__clear-btn,

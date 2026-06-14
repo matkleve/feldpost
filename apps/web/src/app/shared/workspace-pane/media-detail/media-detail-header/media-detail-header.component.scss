@@ -4,11 +4,6 @@
 :host {
   display: block;
   flex-shrink: 0;
-  --mdv-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
-}
-
-:host-context([data-theme='sandstone']) {
-  --mdv-menu-border: var(--sandstone-border-warm);
 }
 
 // ─── Header ───

@@ -29,22 +29,27 @@
 
 .project-detail__title-group {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   align-items: center;
   gap: var(--spacing-1);
   min-width: 0;
+  max-width: min(30rem, 100%);
 }
 
 .project-detail__title {
   margin: 0;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-// Inline title field — geometry/context only; ink from hlmInput + focus ring tokens.
-// @see docs/specs/component/registry.workspace-pane.supplement.md#app-pane-header
+// Inline title field — content-sized like workspace pane-header title input.
+// @see apps/web/src/app/shared/pane-chrome/header/pane-header.component.scss
 .project-detail__title-input {
-  flex: 1 1 auto;
+  width: 100%;
   min-width: 0;
+  flex: 0 1 auto;
   font-weight: var(--font-weight-semibold);
 }
 

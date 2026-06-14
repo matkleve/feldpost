@@ -33,7 +33,7 @@
 
   &:hover:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__center,
   &:focus-within:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__center {
-    background: var(--mdv-menu-item-hover-bg, color-mix(in srgb, var(--primary) 8%, transparent));
+    background: var(--menu-item-hover);
 
     .detail-row__icon,
     .detail-row__label,
@@ -72,7 +72,7 @@
     // @see docs/specs/ui/media-detail/media-detail-inline-section.md
     &:hover:not(.detail-row--editing) .detail-row__center,
     &:focus-within:not(.detail-row--editing) .detail-row__center {
-      background: var(--mdv-menu-item-hover-bg, color-mix(in srgb, var(--primary) 8%, transparent));
+      background: var(--menu-item-hover);
     }
 
     // Readonly rows keep one action-rail height (no multi-line value growth).
@@ -253,7 +253,7 @@
   padding: 0;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
-  color: var(--mdv-action-text-default, var(--muted-foreground));
+  color: var(--action-text);
   opacity: 0;
   pointer-events: none;
   transition:

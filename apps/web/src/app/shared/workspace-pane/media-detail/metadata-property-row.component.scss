@@ -4,15 +4,4 @@
 :host {
   display: block;
   min-width: 0;
-  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --mdv-menu-item-text: var(--foreground);
-  --mdv-action-text-default: var(--muted-foreground);
-  --mdv-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
-}
-
-:host-context([data-theme='sandstone']) {
-  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --mdv-menu-item-text: var(--sandstone-text-dark);
-  --mdv-action-text-default: var(--sandstone-text-muted);
-  --mdv-action-bg-hover: var(--sandstone-action-hover);
 }

@@ -87,11 +87,13 @@ export class ProjectsSidebarComponent {
 
   onRowArchiveClick(event: MouseEvent, projectId: string): void {
     event.stopPropagation();
+    (event.currentTarget as HTMLElement | null)?.blur();
     this.projectArchiveRequested.emit(projectId);
   }
 
   onRowRestoreClick(event: MouseEvent, projectId: string): void {
     event.stopPropagation();
+    (event.currentTarget as HTMLElement | null)?.blur();
     this.projectRestoreRequested.emit(projectId);
   }
 

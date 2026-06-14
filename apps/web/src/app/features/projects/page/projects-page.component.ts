@@ -336,6 +336,11 @@ export class ProjectsPageComponent implements OnDestroy {
       this.detailsPanelOpen.set(false);
       void this.router.navigate(['/projects']);
     }
+
+    this.showMutationSuccess(
+      'projects.page.toast.archiveSuccess',
+      'Project archived',
+    );
   }
 
   async onRestoreProject(projectId: string): Promise<void> {
@@ -355,6 +360,11 @@ export class ProjectsPageComponent implements OnDestroy {
           ? { ...project, archivedAt: null, status: 'active', updatedAt: restoredAt }
           : project,
       ),
+    );
+
+    this.showMutationSuccess(
+      'projects.page.toast.restoreSuccess',
+      'Project restored',
     );
   }
 
@@ -423,6 +433,15 @@ export class ProjectsPageComponent implements OnDestroy {
       type: 'error',
       dedupe: true,
       codeRef: { file: 'projects-page.component.ts', fn: 'showMutationError' },
+    });
+  }
+
+  private showMutationSuccess(key: string, fallback: string): void {
+    this.toastService.show({
+      title: this.t(key, fallback),
+      type: 'success',
+      dedupe: true,
+      codeRef: { file: 'projects-page.component.ts', fn: 'showMutationSuccess' },
     });
   }
 }

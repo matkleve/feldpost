@@ -4,6 +4,7 @@ import type {
   ProjectListItem,
   ProjectMediaListItem,
 } from '../../../core/projects/projects.types';
+import { PROJECT_NAME_MAX_LENGTH } from '../../../core/projects/projects.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import {
   colorTokenFor,
@@ -43,6 +44,7 @@ export class ProjectDetailViewComponent {
   readonly mediaLoading = input(false);
 
   readonly editingTitle = signal(false);
+  readonly projectNameMaxLength = PROJECT_NAME_MAX_LENGTH;
 
   readonly detailsToggled = output<void>();
   readonly titleRenamed = output<string>();

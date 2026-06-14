@@ -25,6 +25,9 @@ alwaysApply: true
 | Easing | `var(--motion-ease-out)` | Raw `cubic-bezier(...)` |
 | Z-index (product planes) | 0 / 100 / 200 / 300 / 302 / 400 / 500 / 501 | Invented values; undocumented layers |
 | Shadows | `var(--shadow-sm\|md\|lg\|xl\|2xl)` | Hardcoded box-shadow composites |
+| Menu/action hover bg | `var(--menu-item-hover)`, `var(--action-hover)` | `color-mix(in srgb, var(--primary) 8%...)` inline |
+| Menu border | `var(--menu-border-subtle)` | `color-mix(in srgb, var(--border) 72%...)` inline |
+| Menu/action text | `var(--menu-item-text)`, `var(--action-text)`, `var(--section-text)` | `var(--foreground)` / `var(--muted-foreground)` for themed rows |
 | Sandstone theme overrides | `var(--sandstone-*)` globals from `styles.scss` | Inline hex (`#2f271f`, `#6b5a47`, etc.) |
 | Colors | `var(--primary)`, `var(--foreground)`, `var(--border)`, `var(--muted-foreground)`, etc. | `var(--color-clay)`, `var(--color-*)` legacy names |
 
@@ -47,3 +50,5 @@ If a value doesn't map to an existing token:
 - `var(--fp-*)` — removed
 - `var(--overlay-rail-*)`, `var(--layout-sidebar-*)` — removed
 - Hardcoded sandstone hex — use `var(--sandstone-*)` globals
+- `:host-context([data-theme='sandstone'])` — **banned**; all theme variance lives in global interaction tokens
+- Component-local `--mdv-*`, `--cde-*`, `--invite-*` var bridges — **removed**; use global `--menu-*` / `--action-*` tokens directly

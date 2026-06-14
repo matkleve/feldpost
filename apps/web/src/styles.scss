@@ -123,6 +123,14 @@
   --auth-map-veil-stop-b: color-mix(in srgb, var(--background) 40%, transparent);
   --auth-map-veil-stop-c: color-mix(in srgb, var(--background) 78%, transparent);
   --auth-map-veil-flat: color-mix(in srgb, var(--background) 26%, transparent);
+
+  // Interaction-level semantic tokens (dark derives from already-dark semantic vars)
+  --menu-border-subtle: color-mix(in srgb, var(--border) 72%, transparent);
+  --menu-item-hover: color-mix(in srgb, var(--primary) 8%, transparent);
+  --menu-item-text: var(--foreground);
+  --action-text: var(--muted-foreground);
+  --action-hover: color-mix(in srgb, var(--primary) 12%, transparent);
+  --section-text: var(--muted-foreground);
 }
 
 // ── tweakcn design token foundation — light mode ───────────────────────────────
@@ -220,6 +228,14 @@
   --auth-map-veil-stop-b: color-mix(in srgb, var(--card) 35%, transparent);
   --auth-map-veil-stop-c: color-mix(in srgb, var(--card) 72%, transparent);
   --auth-map-veil-flat: color-mix(in srgb, var(--card) 22%, transparent);
+
+  // Interaction-level semantic tokens — components consume these directly
+  // @see .cursor/rules/token-usage-gate.mdc
+  --menu-border-subtle: color-mix(in srgb, var(--border) 72%, transparent);
+  --menu-item-hover: color-mix(in srgb, var(--primary) 8%, transparent);
+  --menu-item-text: var(--foreground);
+  --action-text: var(--muted-foreground);
+  --action-hover: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 // ── Dark mode token overrides ──────────────────────────────────────────────────
@@ -251,7 +267,7 @@ html[data-theme="sandstone"] {
   --sidebar-border: oklch(0.8800 0.0160 69.0000);
   --map-marker-user: oklch(0.52 0.1 250);
 
-  // Sandstone component primitives — single source for menu/action overrides
+  // Sandstone raw palette (consumed by interaction tokens below)
   // @see docs/design/tokens.md (sandstone theme extensions)
   --sandstone-text-dark: #2f271f;
   --sandstone-text-muted: #6b5a47;
@@ -259,6 +275,14 @@ html[data-theme="sandstone"] {
   --sandstone-border-warm: color-mix(in srgb, #a38d73 44%, transparent);
   --sandstone-hover-warm: color-mix(in srgb, #c59f63 14%, transparent);
   --sandstone-action-hover: color-mix(in srgb, #c59f63 18%, transparent);
+
+  // Interaction-level semantic tokens — sandstone overrides
+  --menu-border-subtle: var(--sandstone-border-warm);
+  --menu-item-hover: var(--sandstone-hover-warm);
+  --menu-item-text: var(--sandstone-text-dark);
+  --action-text: var(--sandstone-text-muted);
+  --action-hover: var(--sandstone-action-hover);
+  --section-text: var(--sandstone-text-section);
 }
 
 // ── Tailwind v4 CSS-first theme mapping ───────────────────────────────────────

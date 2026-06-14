@@ -11,7 +11,7 @@
               class="project-detail__title-input"
               type="text"
               [value]="p.name"
-              maxlength="120"
+              [attr.maxlength]="projectNameMaxLength"
               [attr.aria-label]="t('projects.page.action.renameProject', 'Rename project')"
               (keydown.enter)="submitTitle(titleInput.value)"
               (keydown.escape)="cancelTitleEdit()"

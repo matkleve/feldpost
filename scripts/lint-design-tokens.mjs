@@ -114,6 +114,24 @@ if (existsSync(resolve(process.cwd(), stylesPath))) {
   }
 }
 
+// ── Banned :host-context sandstone blocks ────────────────────────────────────
+
+const hostContextHits = rg(":host-context\\(\\[data-theme.*sandstone", [appScss], "--glob '*.scss'");
+if (hostContextHits) {
+  for (const line of hostContextHits.split("\n").filter(Boolean)) {
+    errors.push(`Banned :host-context sandstone — use global --menu-*/--action-* tokens: ${line}`);
+  }
+}
+
+// ── Banned component-local theme bridge vars ─────────────────────────────────
+
+const localBridgeHits = rg("\\-\\-mdv-|\\-\\-cde-|\\-\\-invite-border-muted", [appScss], "--glob '*.scss'");
+if (localBridgeHits) {
+  for (const line of localBridgeHits.split("\n").filter(Boolean)) {
+    errors.push(`Removed local theme bridge var — use global tokens: ${line}`);
+  }
+}
+
 // ── Report ──────────────────────────────────────────────────────────────────
 
 if (warnings.length > 0) {

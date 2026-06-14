@@ -6,6 +6,7 @@
     "design-system:audit-breakpoints": "node scripts/audit-panel-breakpoints.mjs",
     "design-system:validate-registry": "node scripts/validate-design-system-registry.mjs",
     "design-system:guard-visual-behavior": "node scripts/guard-visual-behavior.mjs",
+    "design-system:contrast-audit": "node scripts/audit-theme-contrast.mjs",
     "i18n:generate-language": "node scripts/generate-i18n-language.mjs",
     "i18n:validate-language": "node scripts/validate-i18n-language.mjs",
     "i18n:normalize-diacritics": "node scripts/normalize-i18n-diacritics.mjs",

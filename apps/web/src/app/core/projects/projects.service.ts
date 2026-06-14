@@ -17,6 +17,7 @@ import type {
   ProjectMediaListItem,
   ProjectMediaSections,
 } from './projects.types';
+import { PROJECT_NAME_MAX_LENGTH } from './projects.types';
 
 interface ProjectRow {
   id: string;
@@ -280,7 +281,7 @@ export class ProjectsService {
   // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § Data Flow
   async createProject(name: string): Promise<ProjectListItem | null> {
     const trimmed = name.trim();
-    if (!trimmed) {
+    if (!trimmed || trimmed.length > PROJECT_NAME_MAX_LENGTH) {
       return null;
     }
 
@@ -311,7 +312,7 @@ export class ProjectsService {
 
   async renameProject(projectId: string, name: string): Promise<boolean> {
     const trimmed = name.trim();
-    if (!trimmed) {
+    if (!trimmed || trimmed.length > PROJECT_NAME_MAX_LENGTH) {
       return false;
     }
 

@@ -28,6 +28,11 @@ export default defineConfig({
       testMatch: /phase-10-matrix\.spec\.ts/,
       use: { ...devices['Pixel 5'] },
     },
+    {
+      name: 'theme-smoke',
+      testMatch: /theme-toggle\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
   webServer: {
     command: 'npx ng serve --port 4200',

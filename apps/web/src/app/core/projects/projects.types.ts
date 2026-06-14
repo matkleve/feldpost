@@ -1,6 +1,9 @@
 import type { FileTypeCategory } from '../media/media-renderer.types';
 import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
 
+/** Display-name limit for project create/rename (matches text-input-dialog + inline editors). */
+export const PROJECT_NAME_MAX_LENGTH = 120;
+
 export interface ProjectFileTypeCount {
   category: FileTypeCategory;
   count: number;

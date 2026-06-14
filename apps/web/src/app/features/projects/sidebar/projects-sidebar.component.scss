@@ -34,7 +34,6 @@
 
   &--active {
     @include emphasis.selected();
-    font-weight: var(--font-weight-semibold);
   }
 
   &--active:hover,
@@ -141,25 +140,15 @@
     background var(--motion-duration-fast) var(--motion-ease-out),
     color var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover,
-  &:focus-within {
+  &:hover {
     @include emphasis.hover();
-  }
-
-  &:focus-within {
-    box-shadow: var(--interactive-focus-ring);
   }
 
   &--active {
     @include emphasis.selected();
-
-    .projects-sidebar__row {
-      font-weight: var(--font-weight-semibold);
-    }
   }
 
-  &--active:hover,
-  &--active:focus-within {
+  &--active:hover {
     @include emphasis.selected-hover();
   }
 }

@@ -7,17 +7,6 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --mdv-menu-item-text: var(--foreground);
-  --mdv-action-text-default: var(--muted-foreground);
-  --mdv-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
-}
-
-:host-context([data-theme='sandstone']) {
-  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --mdv-menu-item-text: var(--sandstone-text-dark);
-  --mdv-action-text-default: var(--sandstone-text-muted);
-  --mdv-action-bg-hover: var(--sandstone-action-hover);
 }
 
 .detail-section {
@@ -65,10 +54,7 @@
 
 // Center tint — same token as other detail rows (hover + editing).
 // @see docs/specs/ui/media-detail/metadata-section.md
-$metadata-row-center-bg: var(
-  --mdv-menu-item-hover-bg,
-  color-mix(in srgb, var(--primary) 8%, transparent)
-);
+$metadata-row-center-bg: var(--menu-item-hover);
 
 // Parent grid assigns center column width (1fr); inner grid only lays out icon/label/value slots.
 // Editing padding is included in row height via border-box so the row does not grow past --detail-row-action-size.

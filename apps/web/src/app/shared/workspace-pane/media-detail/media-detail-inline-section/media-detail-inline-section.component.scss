@@ -12,19 +12,6 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  --mdv-menu-border: color-mix(in srgb, var(--border) 72%, transparent);
-  --mdv-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --mdv-menu-item-text: var(--foreground);
-  --mdv-action-text-default: var(--muted-foreground);
-  --mdv-action-bg-hover: color-mix(in srgb, var(--primary) 12%, transparent);
-}
-
-:host-context([data-theme='sandstone']) {
-  --mdv-menu-border: var(--sandstone-border-warm);
-  --mdv-menu-item-hover-bg: var(--sandstone-hover-warm);
-  --mdv-menu-item-text: var(--sandstone-text-dark);
-  --mdv-action-text-default: var(--sandstone-text-muted);
-  --mdv-action-bg-hover: var(--sandstone-action-hover);
 }
 
 // Section block — label + rows (Details, Location, …)
@@ -79,10 +66,10 @@
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-1);
-    border: 1px solid var(--mdv-menu-border);
+    border: 1px solid var(--menu-border-subtle);
     border-radius: var(--radius-full);
     background: color-mix(in srgb, var(--card) 88%, transparent);
-    color: var(--mdv-menu-item-text);
+    color: var(--menu-item-text);
     min-height: 2rem;
     padding: 0 var(--spacing-2);
     font-size: var(--font-size-sm);
@@ -95,7 +82,7 @@
     }
 
     &:hover {
-      background: var(--mdv-menu-item-hover-bg);
+      background: var(--menu-item-hover);
     }
   }
 
@@ -163,7 +150,7 @@
 
   &__divider {
     height: 1px;
-    background: var(--mdv-menu-border);
+    background: var(--menu-border-subtle);
     margin: var(--spacing-1) var(--spacing-2);
   }
 
@@ -176,7 +163,7 @@
     border: none;
     border-radius: var(--radius-sm);
     background: transparent;
-    color: var(--mdv-menu-item-text);
+    color: var(--menu-item-text);
     text-align: left;
     min-height: 2rem;
     padding: var(--spacing-1) var(--spacing-2);
@@ -185,7 +172,7 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--mdv-menu-item-hover-bg);
+      background: var(--menu-item-hover);
     }
 
     &:disabled {
@@ -210,7 +197,7 @@
     border: none;
     border-radius: 0.375rem;
     background: transparent;
-    color: var(--mdv-action-text-default);
+    color: var(--action-text);
     cursor: pointer;
 
     .material-icons {
@@ -218,8 +205,8 @@
     }
 
     &:hover:not(:disabled) {
-      background: var(--mdv-action-bg-hover);
-      color: var(--mdv-menu-item-text);
+      background: var(--action-hover);
+      color: var(--menu-item-text);
     }
 
     &:disabled {
@@ -276,7 +263,7 @@
 
   &__create-value {
     margin-left: auto;
-    color: var(--mdv-menu-item-text);
+    color: var(--menu-item-text);
     max-width: 10rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -400,12 +387,10 @@
   }
 }
 
-// Sandstone: section text color for tag editor create-row label
+// Section text color for tag editor create-row label
 // @see docs/migration/phase-7-token-migration.md §Batch 40
-:host-context([data-theme='sandstone']) {
-  .detail-tags__create-label {
-    color: var(--sandstone-text-section);
-  }
+.detail-tags__create-label {
+  color: var(--section-text);
 }
 
 // ─── Correction badge ───

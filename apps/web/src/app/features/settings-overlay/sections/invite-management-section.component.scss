@@ -3,11 +3,6 @@
 :host {
   display: block;
   --invite-stroke-width: 1.5px;
-  --invite-border-muted: color-mix(in srgb, var(--border) 72%, transparent);
-}
-
-:host-context([data-theme='sandstone']) {
-  --invite-border-muted: var(--sandstone-border-warm);
 }
 
 @layer components {
