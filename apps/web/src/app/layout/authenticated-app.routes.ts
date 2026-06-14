@@ -22,6 +22,11 @@ const loadMedia = () =>
 const loadProjects = () =>
   import('../features/projects/page/projects-page.component').then((m) => m.ProjectsPageComponent);
 
+const loadProjectsDashboardPreview = () =>
+  import('../features/projects-dashboard-preview/projects-dashboard-preview.component').then(
+    (m) => m.ProjectsDashboardPreviewComponent,
+  );
+
 export const AUTHENTICATED_APP_ROUTES: Routes = [
   {
     path: '',
@@ -43,6 +48,11 @@ export const AUTHENTICATED_APP_ROUTES: Routes = [
       {
         matcher: projectsShellMatcher,
         loadComponent: loadProjects,
+      },
+      {
+        // Throwaway design check-in route for the projects list + dashboard layout idea.
+        path: 'projects-dashboard-preview',
+        loadComponent: loadProjectsDashboardPreview,
       },
       {
         path: 'settings/:section/:subsection',
