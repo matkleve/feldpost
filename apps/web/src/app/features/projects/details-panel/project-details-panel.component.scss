@@ -1,10 +1,14 @@
-// Defines push details panel geometry (~320px) for project properties.
+// Defines floating push details panel geometry for project properties.
 // @see docs/specs/page/projects-dashboard.md
 :host {
   flex: 0 0 20rem;
   min-height: 0;
-  border-left: 1px solid var(--border);
+  align-self: stretch;
+  margin: var(--spacing-2);
+  border: 1px solid var(--border);
+  border-radius: var(--container-radius-panel);
   background: var(--card);
+  box-shadow: var(--shadow-md);
 }
 
 .project-details-panel {

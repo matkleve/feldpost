@@ -11,13 +11,14 @@ import {
 } from '../page/projects-page.logic';
 import { ProjectDetailsPanelComponent } from '../details-panel/project-details-panel.component';
 import { ProjectMediaSectionComponent } from '../media-section/project-media-section.component';
+import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import type { ProjectColorKey } from '../../../core/projects/projects.types';
 
 @Component({
   selector: 'app-project-detail-view',
   standalone: true,
-  imports: [ProjectDetailsPanelComponent, ProjectMediaSectionComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [ProjectDetailsPanelComponent, ProjectMediaSectionComponent, ChipComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './project-detail-view.component.html',
   styleUrl: './project-detail-view.component.scss',
   host: {
@@ -49,6 +50,14 @@ export class ProjectDetailViewComponent {
 
   statusLabel(status: ProjectListItem['status']): string {
     return projectStatusLabel(status, this.t);
+  }
+
+  statusChipVariant(status: ProjectListItem['status']): 'status-success' | 'neutral' {
+    return status === 'archived' ? 'neutral' : 'status-success';
+  }
+
+  statusChipIcon(status: ProjectListItem['status']): string {
+    return status === 'archived' ? 'inventory_2' : 'radio_button_checked';
   }
 
   relativeDate(value: string | null): string {

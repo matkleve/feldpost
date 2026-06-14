@@ -3,8 +3,10 @@ import type { OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
+import { FilterService } from '../../../core/filter/filter.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
+import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
 import { ToastService } from '../../../core/toast/toast.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane/workspace-pane-context.port';
@@ -18,10 +20,14 @@ import { ProjectsSidebarComponent } from '../sidebar/projects-sidebar.component'
 import { ProjectDashboardViewComponent } from '../dashboard/project-dashboard-view.component';
 import { ProjectDetailViewComponent } from '../detail/project-detail-view.component';
 import {
+  applyProjectFilters,
   pendingActionConfirmLabel,
   pendingActionMessage,
   pendingActionTitle,
+  projectLabel,
+  sortProjects,
 } from './projects-page.logic';
+import { FILTER_OPTIONS, SORT_OPTIONS } from './projects-page.config';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import type { PendingProjectAction } from './projects-page.config';
@@ -39,9 +45,11 @@ import type { PendingProjectAction } from './projects-page.config';
   ],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.scss',
+  providers: [FilterService],
 })
 export class ProjectsPageComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
+  private readonly filterService = inject(FilterService);
   private readonly projectsService = inject(ProjectsService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
@@ -75,6 +83,8 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly loading = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly projects = signal<ProjectListItem[]>([]);
+  readonly searchQuery = signal('');
+  readonly activeSorts = signal<SortConfig[]>([]);
   readonly showArchived = signal(false);
   readonly detailsPanelOpen = signal(false);
   readonly colorPickerOpen = signal(false);
@@ -101,6 +111,39 @@ export class ProjectsPageComponent implements OnDestroy {
     const projectId = this.currentProjectId();
     if (!projectId) return null;
     return this.projects().find((project) => project.id === projectId) ?? null;
+  });
+
+  readonly filterOptions = computed(() =>
+    FILTER_OPTIONS.map((option) => ({
+      ...option,
+      label: projectLabel(option.id, option.label, this.t),
+    })),
+  );
+
+  readonly sortOptions = computed(() =>
+    SORT_OPTIONS.map((option) => ({
+      ...option,
+      label: projectLabel(option.id, option.label, this.t),
+    })),
+  );
+
+  readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
+  readonly hasCustomSort = computed(() => this.activeSorts().length > 0);
+
+  readonly sidebarProjects = computed(() => {
+    const archived = this.showArchived();
+    const statusScoped = this.projects().filter((project) =>
+      archived ? project.status === 'archived' : project.status === 'active',
+    );
+
+    const query = this.searchQuery().trim().toLowerCase();
+    const searchScoped = query
+      ? statusScoped.filter((project) => project.name.toLowerCase().includes(query))
+      : statusScoped;
+
+    const rules = this.filterService.rules().filter((rule) => rule.property && rule.operator);
+    const filterScoped = applyProjectFilters(searchScoped, rules);
+    return sortProjects(filterScoped, this.activeSorts());
   });
 
   constructor() {
@@ -164,6 +207,14 @@ export class ProjectsPageComponent implements OnDestroy {
 
   onArchiveToggled(): void {
     this.showArchived.update((value) => !value);
+  }
+
+  onSearchQueryChange(value: string): void {
+    this.searchQuery.set(value);
+  }
+
+  onSortChanged(sorts: SortConfig[]): void {
+    this.activeSorts.set(sorts);
   }
 
   onDetailsToggled(): void {

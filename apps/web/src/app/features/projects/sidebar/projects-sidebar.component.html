@@ -1,22 +1,59 @@
 <div class="projects-sidebar">
-  <div class="projects-sidebar__top">
-    <button
-      type="button"
-      hlmBtn
-      variant="ghost"
-      size="sm"
-      class="projects-sidebar__dashboard"
-      [class.projects-sidebar__dashboard--active]="dashboardActive()"
-      (click)="dashboardSelected.emit()"
-    >
-      <span class="material-icons" aria-hidden="true">dashboard</span>
-      <span>{{ t('projects.sidebar.dashboard', 'Dashboard') }}</span>
-    </button>
+  <button
+    type="button"
+    hlmBtn
+    variant="ghost"
+    size="sm"
+    class="projects-sidebar__dashboard"
+    [class.projects-sidebar__dashboard--active]="dashboardActive()"
+    (click)="dashboardSelected.emit()"
+  >
+    <span class="material-icons" aria-hidden="true">dashboard</span>
+    <span>{{ t('projects.sidebar.dashboard', 'Dashboard') }}</span>
+  </button>
+
+  <label class="projects-sidebar__search">
+    <span class="material-icons projects-sidebar__search-icon" aria-hidden="true">search</span>
+    <input
+      class="projects-sidebar__search-input"
+      type="search"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="onSearchInput($event)"
+      [attr.placeholder]="t('projects.sidebar.search.placeholder', 'Search projects…')"
+      [attr.aria-label]="t('projects.page.search.aria', 'Project search')"
+    />
+  </label>
+
+  <div
+    class="projects-sidebar__toolbar"
+    role="toolbar"
+    [attr.aria-label]="t('projects.toolbar.aria.controls', 'Project controls')"
+  >
+    @for (btn of toolbarButtons(); track btn.id) {
+      <button
+        type="button"
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="projects-sidebar__toolbar-btn"
+        [class.projects-sidebar__toolbar-btn--open]="activeDropdown() === btn.id"
+        [attr.data-active]="btn.active ? 'true' : null"
+        [attr.aria-label]="btn.label"
+        [attr.title]="btn.label"
+        [attr.aria-expanded]="activeDropdown() === btn.id"
+        [attr.aria-haspopup]="true"
+        (click)="toggleDropdown(btn.id, $event)"
+      >
+        <span class="material-icons projects-sidebar__toolbar-icon" aria-hidden="true">{{ btn.icon }}</span>
+      </button>
+    }
+
+    <span class="projects-sidebar__toolbar-spacer" aria-hidden="true"></span>
 
     <button
       type="button"
       hlmBtn
-      variant="ghost"
+      variant="outline"
       size="icon"
       class="projects-sidebar__archive"
       [class.projects-sidebar__archive--active]="showArchived()"
@@ -47,7 +84,7 @@
         {{ t('projects.page.loading.aria', 'Loading projects') }}
       </div>
     } @else {
-      @for (project of visibleProjects(); track project.id) {
+      @for (project of projects(); track project.id) {
         <button
           type="button"
           role="option"
@@ -61,7 +98,7 @@
         </button>
       }
 
-      @if (visibleProjects().length === 0) {
+      @if (projects().length === 0) {
         <div class="projects-sidebar__empty">
           {{
             showArchived()
@@ -80,3 +117,24 @@
     </button>
   </div>
 </div>
+
+<app-toolbar-dropdown-stack
+  [activePanelId]="activeDropdown()"
+  [anchor]="dropdownAnchor()"
+  [outsideCloseEnabled]="!isDragging()"
+  (closeRequested)="closeDropdown()"
+>
+  @switch (activeDropdown()) {
+    @case ('filter') {
+      <app-filter-dropdown [propertyOptionsInput]="filterOptions()" />
+    }
+    @case ('sort') {
+      <app-sort-dropdown
+        [optionsInput]="sortOptions()"
+        [activeSortsInput]="activeSorts()"
+        [defaultSorts]="[]"
+        (sortChanged)="onSortChanged($event)"
+      />
+    }
+  }
+</app-toolbar-dropdown-stack>

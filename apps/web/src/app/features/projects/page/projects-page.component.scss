@@ -6,7 +6,7 @@
   height: 100%;
   min-height: 0;
   min-width: 0;
-  padding-left: 4.5rem;
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-5) 4.5rem;
   overflow: hidden;
 }
 
@@ -24,6 +24,7 @@
   flex-direction: column;
   min-height: 0;
   min-width: 0;
+  padding: var(--spacing-2);
   overflow: hidden;
 }
 

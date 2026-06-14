@@ -4,12 +4,12 @@
       <div class="project-detail__title-row">
         <span class="project-detail__dot" [style.background]="colorFor(p.colorKey)"></span>
         <h1 class="project-detail__title">{{ p.name }}</h1>
-        <span class="project-detail__status" [attr.data-status]="p.status">
-          <span class="material-icons" aria-hidden="true">
-            {{ p.status === 'archived' ? 'inventory_2' : 'radio_button_checked' }}
-          </span>
-          {{ statusLabel(p.status) }}
-        </span>
+        <app-chip
+          [decorative]="true"
+          [variant]="statusChipVariant(p.status)"
+          [icon]="statusChipIcon(p.status)"
+          [text]="statusLabel(p.status)"
+        />
       </div>
       <p class="project-detail__meta">
         {{ locationLabel(p) }} · {{ t('projects.detail.updated', 'updated') }} {{ relativeDate(p.lastActivity) }}

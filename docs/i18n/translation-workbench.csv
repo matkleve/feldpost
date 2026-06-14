@@ -1135,6 +1135,7 @@ map.shell.toast.removeFromProjects.empty,No project assignments found.,map-shell
 map.gps.toast.locationFailed.title,Could not get your location,gps-button error toast title when geolocation fails,Could not get your location,Standort konnte nicht ermittelt werden,Impossibile ottenere la posizione
 map.gps.toast.locationFailed.body,Check browser location permission and try again.,gps-button error toast body when geolocation fails,Check browser location permission and try again.,Prüfen Sie die Browser-Standortfreigabe und versuchen Sie es erneut.,Controlla il permesso di localizzazione del browser e riprova.
 projects.sidebar.dashboard,Dashboard,projects sidebar dashboard button,Dashboard,Dashboard,Dashboard
+projects.sidebar.search.placeholder,Search projects…,projects sidebar search input placeholder,Search projects…,Projekte suchen…,Cerca progetti…
 projects.sidebar.archive.showActive,Show active projects,projects sidebar archive toggle aria when showing archived,Show active projects,Aktive Projekte anzeigen,Mostra progetti attivi
 projects.sidebar.archive.showArchived,Show archived projects,projects sidebar archive toggle aria when showing active,Show archived projects,Archivierte Projekte anzeigen,Mostra progetti archiviati
 projects.sidebar.list.aria,Projects,projects sidebar list aria-label,Projects,Projekte,Progetti
