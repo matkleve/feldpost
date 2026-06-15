@@ -31,6 +31,15 @@ The **center column is always `52rem`** (`content-clamp--list` width) in the sam
 | --- | --- | --- |
 | `leftRail` | `true` | Mount left slot in gutter column 1 |
 | `rightRailOpen` | `false` | Mount right slot in gutter column 3 |
+| `centerExpanded` | `false` | When right rail is closed, span center across columns 2–3 (`/projects` without details) |
+
+## Modes
+
+| Mode | `centerExpanded` | `rightRailOpen` | Center width |
+| --- | --- | --- | --- |
+| `/media` | `false` | `false` | fixed `52rem` (column 2) |
+| `/projects` dashboard / detail | `true` | `false` | columns 2–3 (center + right gutter) |
+| `/projects` with details | `false` | `true` | fixed `52rem` + details in column 3 |
 
 ## Ownership
 

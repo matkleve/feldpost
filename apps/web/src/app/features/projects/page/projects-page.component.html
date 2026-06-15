@@ -1,4 +1,9 @@
-<app-page-grid [leftRail]="true" [rightRailOpen]="detailsPanelOpen()" data-i18n-skip>
+<app-page-grid
+  [leftRail]="true"
+  [rightRailOpen]="detailsPanelOpen()"
+  [centerExpanded]="!detailsPanelOpen()"
+  data-i18n-skip
+>
   <app-projects-sidebar
     pageGridLeft
     [projects]="sidebarProjects()"

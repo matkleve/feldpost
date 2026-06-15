@@ -1,18 +1,21 @@
-// Defines dashboard right-pane layout with hero + secondary widgets.
+// Defines dashboard layout: pinned header + scrollable widget body.
 // @see docs/specs/page/projects-dashboard.md
 .project-dashboard {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
   height: 100%;
-  gap: var(--spacing-4);
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .project-dashboard__header {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: var(--spacing-1);
+  padding-block-end: var(--spacing-4);
+  background: var(--background);
 }
 
 .project-dashboard__title {
@@ -27,20 +30,26 @@
 
 .project-dashboard__layout {
   display: grid;
+  flex: 1 1 auto;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: var(--spacing-3);
-  align-items: start;
+  align-items: stretch;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .project-dashboard__secondary {
   display: grid;
   gap: var(--spacing-3);
+  min-height: 0;
 }
 
 .project-dashboard__widget {
   display: flex;
   flex-direction: column;
   min-height: 8rem;
+  height: 100%;
   gap: var(--spacing-2);
   padding: var(--spacing-3);
   border: 1px solid var(--border);

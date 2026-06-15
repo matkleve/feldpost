@@ -20,4 +20,7 @@ export class PageGridComponent {
 
   /** When true, mounts `[pageGridRight]` in the right gutter column (start-aligned). */
   readonly rightRailOpen = input(false);
+
+  /** When true and the right rail is closed, center spans columns 2–3 (projects dashboard / detail without details). */
+  readonly centerExpanded = input(false);
 }

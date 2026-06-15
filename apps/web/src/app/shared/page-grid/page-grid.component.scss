@@ -48,6 +48,14 @@
   padding-bottom: calc(var(--spacing-8) * 2);
 }
 
+// Projects without details panel — absorb center + right gutter tracks.
+// @see docs/design/page-rail-grid.md
+.page-grid__rail--center-expanded {
+  grid-column: 2 / -1;
+  width: auto;
+  padding-bottom: 0;
+}
+
 // Right gutter slot — details panel sits start-aligned beside the center column.
 // @see docs/design/page-rail-grid.md
 .page-grid__rail--right {

@@ -5,7 +5,10 @@
     </div>
   }
 
-  <div class="page-grid__rail page-grid__rail--center">
+  <div
+    class="page-grid__rail page-grid__rail--center"
+    [class.page-grid__rail--center-expanded]="centerExpanded() && !rightRailOpen()"
+  >
     <ng-content select="[pageGridCenter]" />
   </div>
 
