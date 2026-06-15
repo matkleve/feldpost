@@ -1,0 +1,143 @@
+import {
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import {
+  buildTimespaceHistogram,
+  clickBandRange,
+  dragRange,
+  parseDateInputValue,
+  ratioFromClientX,
+  selectionOverlayPercents,
+  toDateInputValue,
+} from '../../../core/workspace-view/timespace.helpers';
+import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
+
+@Component({
+  selector: 'app-timespace-dropdown',
+  templateUrl: './timespace-dropdown.component.html',
+  styleUrl: './timespace-dropdown.component.scss',
+  imports: [...HLM_INPUT_IMPORTS],
+})
+export class TimespaceDropdownComponent {
+  private readonly i18nService = inject(I18nService);
+  private readonly viewService = inject(WorkspaceViewService);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
+
+  private readonly chartRef = viewChild<ElementRef<HTMLElement>>('chart');
+
+  /** Stable state: pointer drag in progress on the histogram track. */
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  private readonly dragStartRatio = signal<number | null>(null);
+  private readonly dragCurrentRatio = signal<number | null>(null);
+
+  private readonly histogramSource = computed(() => {
+    this.viewService.rawImages();
+    this.viewService.selectedProjectIds();
+    const projectIds = this.viewService.selectedProjectIds();
+    const images = this.viewService.rawImages();
+    if (projectIds.size === 0) return images;
+    return images.filter((img) => {
+      const ids = img.projectIds?.length ? img.projectIds : img.projectId ? [img.projectId] : [];
+      return ids.some((id) => projectIds.has(id));
+    });
+  });
+
+  readonly histogram = computed(() => buildTimespaceHistogram(this.histogramSource()));
+
+  readonly fromInput = computed(() => toDateInputValue(this.viewService.timeRange()?.from ?? null));
+  readonly toInput = computed(() => toDateInputValue(this.viewService.timeRange()?.to ?? null));
+  readonly hasActiveFilter = this.viewService.hasTimeRange;
+
+  readonly selectionOverlay = computed(() => {
+    const hist = this.histogram();
+    if (!hist) return null;
+    const dragStart = this.dragStartRatio();
+    const dragCurrent = this.dragCurrentRatio();
+    if (dragStart != null && dragCurrent != null) {
+      const range = dragRange(hist.domainStartMs, hist.domainEndMs, dragStart, dragCurrent);
+      return selectionOverlayPercents(range, hist.domainStartMs, hist.domainEndMs);
+    }
+    return selectionOverlayPercents(
+      this.viewService.timeRange(),
+      hist.domainStartMs,
+      hist.domainEndMs,
+    );
+  });
+
+  readonly selectionIsActive = computed(
+    () => this.hasActiveFilter() || this.dragStartRatio() != null,
+  );
+
+  onFromInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    const from = parseDateInputValue(value);
+    const current = this.viewService.timeRange();
+    this.commitRange({ from, to: current?.to ?? null });
+  }
+
+  onToInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    const to = parseDateInputValue(value);
+    const current = this.viewService.timeRange();
+    this.commitRange({ from: current?.from ?? null, to });
+  }
+
+  onChartPointerDown(event: PointerEvent): void {
+    const chart = this.chartRef()?.nativeElement;
+    if (!chart || event.button !== 0) return;
+    chart.setPointerCapture(event.pointerId);
+    const ratio = ratioFromClientX(event.clientX, chart.getBoundingClientRect());
+    this.dragStartRatio.set(ratio);
+    this.dragCurrentRatio.set(ratio);
+  }
+
+  onChartPointerMove(event: PointerEvent): void {
+    if (this.dragStartRatio() == null) return;
+    const chart = this.chartRef()?.nativeElement;
+    if (!chart) return;
+    this.dragCurrentRatio.set(ratioFromClientX(event.clientX, chart.getBoundingClientRect()));
+  }
+
+  onChartPointerUp(event: PointerEvent): void {
+    const chart = this.chartRef()?.nativeElement;
+    const hist = this.histogram();
+    const start = this.dragStartRatio();
+    const end = this.dragCurrentRatio();
+    if (!chart || !hist || start == null || end == null) {
+      this.clearDrag();
+      return;
+    }
+
+    chart.releasePointerCapture(event.pointerId);
+    const moved = Math.abs(end - start) > 0.008;
+    const range = moved
+      ? dragRange(hist.domainStartMs, hist.domainEndMs, start, end)
+      : clickBandRange(hist.domainStartMs, hist.domainEndMs, start);
+    this.commitRange(range);
+    this.clearDrag();
+  }
+
+  onChartPointerCancel(): void {
+    this.clearDrag();
+  }
+
+  private clearDrag(): void {
+    this.dragStartRatio.set(null);
+    this.dragCurrentRatio.set(null);
+  }
+
+  private commitRange(range: { from: Date | null; to: Date | null }): void {
+    if (range.from && range.to && range.from.getTime() > range.to.getTime()) {
+      this.viewService.setTimeRange({ from: range.to, to: range.from });
+      return;
+    }
+    this.viewService.setTimeRange(range);
+  }
+}

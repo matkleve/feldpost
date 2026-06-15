@@ -89,3 +89,9 @@ export interface MetadataFieldRef {
 
 /** Discrete thumbnail size presets used by snap-slider controls. */
 export type ThumbnailSizePreset = 'row' | 'small' | 'medium' | 'large';
+
+/** Inclusive calendar date range for map/workspace temporal filtering. */
+export interface TimeRange {
+  from: Date | null;
+  to: Date | null;
+}

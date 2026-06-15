@@ -449,6 +449,15 @@ auto.0460.z_b_radius_auswahl_nord,z. B. Radius Auswahl Nord,apps/web/src/app/fea
 auto.0461.zoom_to_location,Zoom to location,apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal,Zoom to location,Auf Standort zoomen,Zoom sulla posizione
 auto.0462.zu_projekt_zuweisen,Zu Projekt zuweisen...,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Zu Projekt zuweisen...,Zu Projekt zuweisen...,Assegna al progetto...
 map.searchBar.placeholder.search,"Search address, project, group�",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"Search address, project, group…","Suche nach Adresse, Projekt, Gruppe…","Cerca indirizzo, progetto, gruppo…"
+map.filter.toolbar.aria,Map filters,apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.html attr:aria-label,Map filters,Kartenfilter,Filtri mappa
+map.filter.button.filter,Filter,apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button,Filter,Filter,Filtra
+map.filter.button.projects,Projects,apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button,Projects,Projekte,Progetti
+map.filter.button.timespace,Timespace,apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button,Timespace,Zeitraum,Periodo
+map.filter.timespace.aria,Time range,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html attr:aria-label,Time range,Zeitraum,Intervallo temporale
+map.filter.timespace.from,From,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,From,Von,Da
+map.filter.timespace.to,To,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,To,Bis,A
+map.filter.timespace.chartAria,Media timeline,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html chart aria,Media timeline,Medien-Zeitachse,Cronologia media
+map.filter.timespace.empty,No dated media yet.,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html empty state,No dated media yet.,Noch keine datierten Medien.,Nessun media datato ancora.
 map.searchBar.placeholder.example.denishgasse,"Denisgasse 46, Vienna",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"Denisgasse 46, Vienna","Denisgasse 46, Wien","Denisgasse 46, Vienna"
 map.searchBar.placeholder.example.coordsDecimal,"48.2082, 16.3738",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"48.2082, 16.3738","48.2082, 16.3738","48.2082, 16.3738"
 map.searchBar.placeholder.example.mapsUrl,maps.google.com/�,apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,maps.google.com/…,maps.google.com/…,maps.google.com/…

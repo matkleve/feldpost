@@ -14,7 +14,9 @@ import type {
   SortConfig,
   MetadataFieldRef,
   ThumbnailSizePreset,
+  TimeRange,
 } from './workspace-view.types';
+import { isTimeRangeActive, matchesTimeRange } from './timespace.helpers';
 
 const DEFAULT_SORTS: SortConfig[] = [{ key: 'date-captured', direction: 'desc' }];
 const THUMBNAIL_SIZE_PRESET_STORAGE_KEY = 'sitesnap.settings.workspace.thumbnailSizePreset';
@@ -69,6 +71,10 @@ export class WorkspaceViewService {
 
   private readonly _selectedProjectIds = signal<Set<string>>(new Set());
   readonly selectedProjectIds = this._selectedProjectIds.asReadonly();
+
+  private readonly _timeRange = signal<TimeRange | null>(null);
+  readonly timeRange = this._timeRange.asReadonly();
+  readonly hasTimeRange = computed(() => isTimeRangeActive(this._timeRange()));
 
   private readonly _activeSorts = signal<SortConfig[]>(DEFAULT_SORTS);
   readonly activeSorts = this._activeSorts.asReadonly();
@@ -128,9 +134,17 @@ export class WorkspaceViewService {
     });
   });
 
-  /** Step 2: Apply filter rules from FilterService. */
-  private readonly ruleFiltered = computed(() => {
+  /** Step 2: Apply temporal range (capture date, else upload date). */
+  private readonly timeFiltered = computed(() => {
     const images = this.projectFiltered();
+    const range = this._timeRange();
+    if (!isTimeRangeActive(range)) return images;
+    return images.filter((img) => matchesTimeRange(img, range));
+  });
+
+  /** Step 3: Apply filter rules from FilterService. */
+  private readonly ruleFiltered = computed(() => {
+    const images = this.timeFiltered();
     const rules = this.filterService.rules();
     if (rules.length === 0) return images;
     return images.filter((img) => this.filterService.matchesClientSide(img, rules));
@@ -177,6 +191,16 @@ export class WorkspaceViewService {
 
   /** Total count after all filters applied. */
   readonly totalImageCount = computed(() => this.ruleFiltered().length);
+
+  /** Media ids that pass project, time, and rule filters — used by map marker visibility. */
+  readonly filteredImageIds = computed(() => new Set(this.ruleFiltered().map((img) => img.id)));
+
+  readonly hasMapFilters = computed(
+    () =>
+      this._selectedProjectIds().size > 0 ||
+      this.hasTimeRange() ||
+      this.filterService.activeCount() > 0,
+  );
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Public API Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -470,6 +494,7 @@ export class WorkspaceViewService {
     this._rawImages.set([]);
     this._selectionActive.set(false);
     this._selectedProjectIds.set(new Set());
+    this._timeRange.set(null);
     this.filterService.clearAll();
     this._activeSorts.set(DEFAULT_SORTS);
     this._activeGroupings.set([]);
@@ -495,6 +520,17 @@ export class WorkspaceViewService {
 
   setSelectedProjectIds(projectIds: Set<string>): void {
     this._selectedProjectIds.set(projectIds);
+  }
+
+  setTimeRange(range: TimeRange | null): void {
+    if (!range || (!range.from && !range.to)) {
+      this._timeRange.set(null);
+      return;
+    }
+    this._timeRange.set({
+      from: range.from ?? null,
+      to: range.to ?? null,
+    });
   }
 
   setActiveSorts(sorts: SortConfig[]): void {

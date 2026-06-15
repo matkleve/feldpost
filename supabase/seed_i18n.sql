@@ -13953,6 +13953,285 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.toolbar.aria', 'Map filters', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Map filters', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.toolbar.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kartenfilter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.toolbar.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Filtri mappa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.toolbar.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.button.filter', 'Filter', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Filter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.filter'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Filter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.filter'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Filtra', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.filter'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.button.projects', 'Projects', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Projects', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.projects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.projects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.projects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.button.timespace', 'Timespace', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Timespace', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.timespace'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zeitraum', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.timespace'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Periodo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.button.timespace'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.aria', 'Time range', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Time range', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zeitraum', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Intervallo temporale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.from', 'From', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'From', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.from'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Von', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.from'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Da', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.from'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.to', 'To', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'To', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.to'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bis', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.to'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'A', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.to'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.chartAria', 'Media timeline', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html chart aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media timeline', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.chartAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medien-Zeitachse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.chartAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cronologia media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.chartAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.empty', 'No dated media yet.', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html empty state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No dated media yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch keine datierten Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun media datato ancora.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'map.searchBar.placeholder.example.denishgasse', 'Denisgasse 46, Vienna', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

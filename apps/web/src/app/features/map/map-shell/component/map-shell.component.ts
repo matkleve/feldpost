@@ -28,6 +28,7 @@ import {
   OnDestroy,
   afterNextRender,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -49,6 +50,7 @@ import {
 } from '../../../../core/upload/upload-manager.service';
 import { buildLocationUpdateFailureToast } from '../../../../core/media-location-update/location-update-toast.util';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
+import { FilterService } from '../../../../core/filter/filter.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import {
   MediaDownloadService,
@@ -60,6 +62,7 @@ import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types
 import { MediaDeleteUndoService } from '../../../../core/media-delete/media-delete-undo.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../../search-bar/search-bar.component';
+import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-toolbar.component';
 import { SearchQueryContext } from '../../../../core/search/search.models';
 import { searchQueryContextsEqual } from '../../../../core/search/search-bar-helpers';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
@@ -205,6 +208,7 @@ const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
   selector: 'app-map-shell',
   imports: [
     SearchBarComponent,
+    MapFilterToolbarComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
     ...BrnToggleGroupImports,
@@ -256,6 +260,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly geocodingService = inject(GeocodingService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
+  private readonly filterService = inject(FilterService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
@@ -786,6 +791,19 @@ export class MapShellComponent implements OnDestroy {
     this.workspacePaneLayoutMapEffectsService.registerMapEffects(
       this.workspacePaneMapEffectsRegistration,
     );
+
+    let mapFilterEffectReady = false;
+    effect(() => {
+      this.workspaceViewService.filteredImageIds();
+      this.workspaceViewService.selectedProjectIds();
+      this.workspaceViewService.timeRange();
+      this.filterService.rules();
+      if (!mapFilterEffectReady) {
+        mapFilterEffectReady = true;
+        return;
+      }
+      this.reapplyViewportMarkerFilter();
+    });
 
     afterNextRender(() => {
       const isJsdom =
@@ -3492,7 +3510,28 @@ export class MapShellComponent implements OnDestroy {
 
     this.lastViewportRpcRows = result.data;
 
-    const incoming = this.buildIncomingViewportMarkers(result.data);
+    this.reconcileViewportMarkerRows(result.data);
+
+    // Clear optimistic flag from surviving markers.
+    for (const state of this.uploadedPhotoMarkers.values()) {
+      state.optimistic = false;
+    }
+
+    // If a zoom target was requested while this area was still loading,
+    // try highlighting now that markers are reconciled.
+    this.flushPendingZoomHighlight();
+  }
+
+  /** Reconcile cached viewport rows after client-side map filters change. */
+  private reapplyViewportMarkerFilter(): void {
+    if (!this.map || !this.lastViewportRpcRows) {
+      return;
+    }
+    this.reconcileViewportMarkerRows(this.lastViewportRpcRows);
+  }
+
+  private reconcileViewportMarkerRows(rows: ViewportMarkerRow[]): void {
+    const incoming = this.buildIncomingViewportMarkers(rows);
     const recyclableKeys = this.collectRecyclableMarkerKeys(incoming);
     this.mapMarkerReconcileFacade.reconcileIncomingViewportMarkers(
       incoming as Map<string, ReconcileIncomingRow>,
@@ -3505,18 +3544,7 @@ export class MapShellComponent implements OnDestroy {
     );
 
     this.pruneStaleSelectedMarkerKeys();
-
-    // Clear optimistic flag from surviving markers.
-    for (const state of this.uploadedPhotoMarkers.values()) {
-      state.optimistic = false;
-    }
-
-    // Lazy-load thumbnails for all single-image markers in viewport.
     this.maybeLoadThumbnails();
-
-    // If a zoom target was requested while this area was still loading,
-    // try highlighting now that markers are reconciled.
-    this.flushPendingZoomHighlight();
     this.refreshActiveWorkspaceHoverLink();
 
     if (
@@ -3537,8 +3565,23 @@ export class MapShellComponent implements OnDestroy {
 
     // Build the incoming marker set keyed the same way we store them.
     const incoming = new Map<string, MergedViewportRow>();
+    const allowedIds = this.workspaceViewService.filteredImageIds();
+    const hasFilters = this.workspaceViewService.hasMapFilters();
+
     for (const row of merged) {
       if (typeof row.cluster_lat !== 'number' || typeof row.cluster_lng !== 'number') continue;
+
+      if (hasFilters) {
+        if (row.image_count === 1) {
+          const mediaId = row.media_item_id ?? row.image_id;
+          if (!mediaId || !allowedIds.has(mediaId)) {
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
+
       const key =
         row.image_count === 1 && row.location_id
           ? `loc:${row.location_id}`

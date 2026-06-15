@@ -11,6 +11,10 @@ export const TOOLBAR_MENU_PANEL_MIN_PX = 288;
 export const TOOLBAR_MENU_FILTER_PANEL_MIN_PX = 512;
 /** Filter panel viewport cap — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--filter` (**40rem === 640px** at 16px root). */
 export const TOOLBAR_MENU_FILTER_PANEL_MAX_PX = 640;
+/** Timespace panel floor — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--timespace` (**28rem === 448px** at 16px root). */
+export const TOOLBAR_MENU_TIMESPACE_PANEL_MIN_PX = 448;
+/** Timespace panel viewport cap — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--timespace` (**36rem === 576px** at 16px root). */
+export const TOOLBAR_MENU_TIMESPACE_PANEL_MAX_PX = 576;
 
 /** Viewport clamp width for toolbar shell positioning (sort, grouping, projects, and non-filter panels). */
 export const TOOLBAR_MENU_SHELL_MIN_PX = TOOLBAR_MENU_PANEL_MIN_PX;
@@ -23,14 +27,22 @@ export const TOOLBAR_MENU_FILTER_CLAMP_PX = TOOLBAR_MENU_FILTER_PANEL_MIN_PX;
 
 const TOOLBAR_DROPDOWN_PANEL_BASE = 'toolbar-dropdown option-menu-surface';
 
-/** `panelClass` for `app-dropdown-shell` — adds `toolbar-dropdown--filter` when the open panel is filter. */
+/** `panelClass` for `app-dropdown-shell` — adds modifier classes per open panel. */
 export function toolbarDropdownPanelClass(activePanelId: string | null): string {
-  return activePanelId === 'filter' ? `${TOOLBAR_DROPDOWN_PANEL_BASE} toolbar-dropdown--filter` : TOOLBAR_DROPDOWN_PANEL_BASE;
+  if (activePanelId === 'filter') {
+    return `${TOOLBAR_DROPDOWN_PANEL_BASE} toolbar-dropdown--filter`;
+  }
+  if (activePanelId === 'timespace') {
+    return `${TOOLBAR_DROPDOWN_PANEL_BASE} toolbar-dropdown--timespace`;
+  }
+  return TOOLBAR_DROPDOWN_PANEL_BASE;
 }
 
-/** Horizontal width used to clamp `left` when opening a toolbar menu (match shell width for fixed menus, cap width for filter). */
+/** Horizontal width used to clamp `left` when opening a toolbar menu. */
 export function toolbarDropdownPositionWidthPx(activePanelId: string | null): number {
-  return activePanelId === 'filter' ? TOOLBAR_MENU_FILTER_PANEL_MAX_PX : TOOLBAR_MENU_SHELL_MIN_PX;
+  if (activePanelId === 'filter') return TOOLBAR_MENU_FILTER_PANEL_MAX_PX;
+  if (activePanelId === 'timespace') return TOOLBAR_MENU_TIMESPACE_PANEL_MAX_PX;
+  return TOOLBAR_MENU_SHELL_MIN_PX;
 }
 
 export interface ClampToolbarDropdownLeftParams {

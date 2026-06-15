@@ -47,6 +47,15 @@
     max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
   }
 
+  // Timespace: horizontal histogram strip — wider than standard menus.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  :host.toolbar-dropdown.toolbar-dropdown--timespace {
+    width: max-content;
+    max-width: min(36rem, calc(100vw - 2rem));
+    min-width: min(28rem, calc(100vw - 2rem));
+    max-height: min(calc(8rem + 2 * var(--spacing-2)), calc(100vh - 2rem));
+  }
+
   // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).
   // Standalone rule — does NOT require toolbar-dropdown because the media-detail shell uses anchor
   // positioning, not the toolbar width floor. Max-width caps at 20rem per spec table.

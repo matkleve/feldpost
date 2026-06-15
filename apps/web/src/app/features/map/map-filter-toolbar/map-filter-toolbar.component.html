@@ -1,0 +1,55 @@
+<div
+  class="map-filter-toolbar"
+  role="toolbar"
+  [attr.aria-label]="t('map.filter.toolbar.aria', 'Map filters')"
+>
+  @for (btn of buttons(); track btn.id) {
+    <button
+      type="button"
+      hlmBtn
+      variant="outline"
+      size="sm"
+      class="map-filter-toolbar__menu-trigger"
+      [class.map-filter-toolbar__menu-trigger--open]="activeDropdown() === btn.id"
+      [attr.data-active]="btn.active() ? 'true' : null"
+      [attr.aria-label]="btn.label"
+      [attr.title]="btn.label"
+      [attr.aria-expanded]="activeDropdown() === btn.id"
+      [attr.aria-haspopup]="true"
+      (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
+    >
+      <span
+        data-dd-part="icon"
+        class="material-icons map-filter-toolbar__menu-trigger-icon"
+        aria-hidden="true"
+        >{{ btn.icon }}</span
+      >
+      <span data-dd-part="label" class="map-filter-toolbar__menu-trigger-label">{{ btn.label }}</span>
+      <span
+        data-dd-part="chevron"
+        class="material-icons map-filter-toolbar__menu-trigger-chevron"
+        aria-hidden="true"
+        >expand_more</span
+      >
+    </button>
+  }
+</div>
+
+<app-toolbar-dropdown-stack
+  [activePanelId]="activeDropdown()"
+  [anchor]="dropdownAnchor()"
+  [outsideCloseEnabled]="!isDragging()"
+  (closeRequested)="closeDropdown()"
+>
+  @switch (activeDropdown()) {
+    @case ('filter') {
+      <app-filter-dropdown />
+    }
+    @case ('projects') {
+      <app-projects-dropdown (projectsChanged)="onProjectsChanged($event)" />
+    }
+    @case ('timespace') {
+      <app-timespace-dropdown />
+    }
+  }
+</app-toolbar-dropdown-stack>

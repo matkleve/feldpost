@@ -1,0 +1,46 @@
+@use '../../../shared/dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
+@use '../../../shared/dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
+@use '../../../../styles/frosted-chrome';
+
+:host {
+  --map-filter-safe-inline: max(
+    var(--spacing-3),
+    var(--map-upload-chrome-inline, calc(5rem + var(--spacing-1)))
+  );
+
+  position: absolute;
+  top: calc(var(--spacing-3) + 2.75rem + var(--spacing-2));
+  left: var(--map-filter-safe-inline);
+  z-index: 200;
+  display: block;
+  max-width: calc(100% - (2 * var(--map-filter-safe-inline)));
+}
+
+// Floating trigger row below the search bar — left aligned with gap between buttons.
+// @see docs/specs/component/map/map-filter-toolbar.md
+.map-filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding: 0;
+}
+
+@layer components {
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('map-filter-toolbar');
+  @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('map-filter-toolbar');
+
+  // Frosted chrome on triggers to match search bar / map floating controls.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .map-filter-toolbar__menu-trigger {
+    @include frosted-chrome.surface;
+  }
+}
+
+@layer states {
+  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('map-filter-toolbar');
+}
+
+@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('map-filter-toolbar', map-filter-toolbar);
