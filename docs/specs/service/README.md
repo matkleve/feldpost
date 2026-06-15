@@ -20,6 +20,7 @@ Symmetry tracker: [service-spec-symmetry-matrix](../../backlog/service-spec-symm
 | Module | Canonical facade spec |
 | --- | --- |
 | auth | [auth/auth-service.md](auth/auth-service.md) |
+| chat | [chat/chat-service.md](chat/chat-service.md) |
 | filter | [filter/filter-service.md](filter/filter-service.md) |
 | filename-parser | [filename-parser/filename-parser.md](filename-parser/filename-parser.md) |
 | folder-scan | [folder-scan/folder-scan.md](folder-scan/folder-scan.md) |

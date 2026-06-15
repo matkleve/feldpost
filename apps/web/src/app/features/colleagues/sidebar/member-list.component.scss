@@ -40,7 +40,14 @@
   flex-shrink: 0;
 }
 
-.member-list__channels h2,
+.member-list__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-2);
+}
+
+.member-list__section-header h2,
 .member-list__members h2 {
   margin: 0 0 var(--spacing-2);
   font-size: var(--font-size-xs);

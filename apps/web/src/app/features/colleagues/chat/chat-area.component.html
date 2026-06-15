@@ -1,4 +1,4 @@
-<section class="chat-area">
+<div class="chat-area">
   <header class="chat-area__header">
     <h1>{{ channelTitle(channel()) }}</h1>
     <app-rail-search-field
@@ -11,23 +11,137 @@
     />
   </header>
 
-  <div class="chat-area__messages" role="log" aria-live="polite">
-    @for (message of messages(); track message.id) {
-      <article class="chat-area__message">
-        <header>
-          <strong>{{ message.authorName ?? t('colleagues.chat.unknown_author', 'Colleague') }}</strong>
-          <time>{{ message.createdAt | date: 'short' }}</time>
-          @if (message.editedAt) {
-            <span class="chat-area__edited">{{ t('colleagues.chat.edited', 'edited') }}</span>
-          }
-        </header>
-        <p>{{ message.content }}</p>
-        <button type="button" class="chat-area__reply" (click)="onReply(message.id)">
-          {{ t('colleagues.chat.reply', 'Reply in thread') }}
+  @if (showSearchResults() && searchResults().length > 0) {
+    <section class="chat-area__search-results" aria-label="{{ t('colleagues.chat.search_results', 'Search results') }}">
+      <header>
+        <span>{{ t('colleagues.chat.search_results', 'Search results') }}</span>
+        <button type="button" class="chat-area__link-btn" (click)="showSearchResults.set(false)">
+          {{ t('common.close', 'Close') }}
         </button>
-      </article>
-    } @empty {
-      <p class="chat-area__empty">{{ t('colleagues.chat.empty', 'No messages yet. Say hello.') }}</p>
+      </header>
+      @for (result of searchResults(); track result.id) {
+        <button type="button" class="chat-area__search-hit" (click)="onSearchResultClick(result)">
+          <strong>{{ result.authorName ?? t('colleagues.chat.unknown_author', 'Colleague') }}</strong>
+          <span>{{ result.content }}</span>
+        </button>
+      }
+    </section>
+  }
+
+  <div class="chat-area__body">
+    <div class="chat-area__messages" role="log" aria-live="polite">
+      @for (group of groupedMessages(); track group.date) {
+        <div class="chat-area__date-sep" role="separator">{{ group.date }}</div>
+        @for (message of group.messages; track message.id) {
+          <article
+            class="chat-area__message"
+            [class.chat-area__message--own]="isOwnMessage(message)"
+            [id]="'chat-msg-' + message.id"
+          >
+            <header>
+              <strong>{{ message.authorName ?? t('colleagues.chat.unknown_author', 'Colleague') }}</strong>
+              <time>{{ message.createdAt | date: 'shortTime' }}</time>
+              @if (message.editedAt) {
+                <span class="chat-area__edited">{{ t('colleagues.chat.edited', 'edited') }}</span>
+              }
+            </header>
+
+            @if (editingMessageId() === message.id) {
+              <textarea
+                rows="2"
+                [ngModel]="editDraft()"
+                (ngModelChange)="editDraft.set($event)"
+              ></textarea>
+              <div class="chat-area__message-actions">
+                <button type="button" hlmBtn size="sm" (click)="onSaveEdit(message.id)">{{ t('common.save', 'Save') }}</button>
+                <button type="button" hlmBtn size="sm" variant="outline" (click)="onCancelEdit()">{{ t('common.cancel', 'Cancel') }}</button>
+              </div>
+            } @else {
+              <p>{{ message.content }}</p>
+
+              @if (message.attachments?.length) {
+                <div class="chat-area__attachments">
+                  @for (file of message.attachments ?? []; track file.id) {
+                    @if (file.fileType?.startsWith('image/')) {
+                      <img class="chat-area__attachment-img" [src]="file.fileUrl" [alt]="file.fileName ?? ''" />
+                    } @else {
+                      <a class="chat-area__attachment-link" [href]="file.fileUrl" target="_blank" rel="noopener">
+                        {{ file.fileName ?? t('colleagues.chat.attachment', 'Attachment') }}
+                      </a>
+                    }
+                  }
+                </div>
+              }
+
+              @if (message.entityLinks?.length) {
+                <div class="chat-area__entity-links">
+                  @for (link of message.entityLinks ?? []; track link.id) {
+                    <span class="chat-area__entity-card">
+                      <span class="material-icons" aria-hidden="true">link</span>
+                      {{ link.entityLabel ?? link.entityType }}
+                    </span>
+                  }
+                </div>
+              }
+
+              @if (groupReactions(message.reactions).length) {
+                <div class="chat-area__reactions">
+                  @for (reaction of groupReactions(message.reactions); track reaction.emoji) {
+                    <button
+                      type="button"
+                      class="chat-area__reaction"
+                      [class.chat-area__reaction--active]="reaction.userIds.includes(currentUserId() ?? '')"
+                      (click)="onToggleReaction(message.id, reaction.emoji)"
+                    >
+                      {{ reaction.emoji }} {{ reaction.count }}
+                    </button>
+                  }
+                </div>
+              }
+            }
+
+            <div class="chat-area__message-toolbar">
+              <button type="button" class="chat-area__link-btn" (click)="onOpenThread(message)">
+                {{ t('colleagues.chat.reply', 'Reply in thread') }}
+                @if (message.threadReplyCount && message.threadReplyCount > 0) {
+                  <span class="chat-area__thread-count">{{ message.threadReplyCount }}</span>
+                }
+              </button>
+              @if (isOwnMessage(message)) {
+                <button type="button" class="chat-area__link-btn" (click)="onStartEdit(message)">
+                  {{ t('colleagues.chat.edit', 'Edit') }}
+                </button>
+              }
+              @if (isOwnMessage(message) || canDeleteAny()) {
+                <button type="button" class="chat-area__link-btn chat-area__link-btn--danger" (click)="onDelete(message.id)">
+                  {{ t('colleagues.chat.delete', 'Delete') }}
+                </button>
+              }
+              <button type="button" class="chat-area__link-btn" (click)="reactionPickerMessageId.set(message.id)">
+                {{ t('colleagues.chat.react', 'React') }}
+              </button>
+            </div>
+
+            @if (reactionPickerMessageId() === message.id) {
+              <div class="chat-area__reaction-picker">
+                @for (emoji of quickReactions; track emoji) {
+                  <button type="button" (click)="onToggleReaction(message.id, emoji)">{{ emoji }}</button>
+                }
+              </div>
+            }
+          </article>
+        }
+      } @empty {
+        <p class="chat-area__empty">{{ t('colleagues.chat.empty', 'No messages yet. Say hello.') }}</p>
+      }
+    </div>
+
+    @if (threadParent(); as parent) {
+      <app-thread-panel
+        [parentMessage]="parent"
+        [channelId]="channel()!.id"
+        (closed)="onCloseThread()"
+      />
     }
   </div>
 
@@ -35,11 +149,29 @@
     <p class="chat-area__typing">{{ t('colleagues.chat.typing', 'Someone is typing…') }}</p>
   }
 
-  @if (threadParentId()) {
-    <p class="chat-area__thread-hint">{{ t('colleagues.chat.thread_mode', 'Replying in thread') }}</p>
-  }
-
   <footer class="chat-area__composer">
+    @if (attachmentFile()) {
+      <p class="chat-area__attachment-hint">
+        {{ t('colleagues.chat.attachment_selected', 'Attachment') }}: {{ attachmentFile()!.name }}
+        <button type="button" class="chat-area__link-btn" (click)="attachmentFile.set(null)">{{ t('common.remove', 'Remove') }}</button>
+      </p>
+    }
+    <div class="chat-area__composer-tools">
+      <label class="chat-area__file-label">
+        <span class="material-icons" aria-hidden="true">attach_file</span>
+        <input type="file" hidden (change)="onFileSelected($event)" />
+      </label>
+      <select
+        [ngModel]="selectedProjectId()"
+        (ngModelChange)="selectedProjectId.set($event)"
+        [attr.aria-label]="t('colleagues.chat.link_project', 'Link project')"
+      >
+        <option [ngValue]="null">{{ t('colleagues.chat.link_project_none', 'No project link') }}</option>
+        @for (project of projects(); track project.id) {
+          <option [ngValue]="project.id">{{ project.name }}</option>
+        }
+      </select>
+    </div>
     <textarea
       rows="3"
       [placeholder]="t('colleagues.chat.placeholder', 'Write a message')"
@@ -50,4 +182,4 @@
     ></textarea>
     <button hlmBtn type="button" (click)="onSend()">{{ t('colleagues.chat.send', 'Send') }}</button>
   </footer>
-</section>
+</div>

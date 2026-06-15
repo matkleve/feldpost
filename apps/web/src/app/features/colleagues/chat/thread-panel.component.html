@@ -1,0 +1,45 @@
+<aside class="thread-panel" aria-label="{{ t('colleagues.chat.thread_title', 'Thread') }}">
+  <header class="thread-panel__header">
+    <h2>{{ t('colleagues.chat.thread_title', 'Thread') }}</h2>
+    <button type="button" hlmBtn variant="ghost" size="icon" (click)="onClose()" [attr.aria-label]="t('common.close', 'Close')">
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  <article class="thread-panel__parent">
+    <header>
+      <strong>{{ parentMessage().authorName ?? t('colleagues.chat.unknown_author', 'Colleague') }}</strong>
+      <time>{{ parentMessage().createdAt | date: 'short' }}</time>
+    </header>
+    <p>{{ parentMessage().content }}</p>
+  </article>
+
+  <div class="thread-panel__replies" role="log" aria-live="polite">
+    @if (loading()) {
+      <p class="thread-panel__status">{{ t('colleagues.chat.thread_loading', 'Loading replies…') }}</p>
+    } @else {
+      @for (reply of replies(); track reply.id) {
+        <article class="thread-panel__reply">
+          <header>
+            <strong>{{ reply.authorName ?? t('colleagues.chat.unknown_author', 'Colleague') }}</strong>
+            <time>{{ reply.createdAt | date: 'short' }}</time>
+          </header>
+          <p>{{ reply.content }}</p>
+        </article>
+      } @empty {
+        <p class="thread-panel__status">{{ t('colleagues.chat.thread_empty', 'No replies yet.') }}</p>
+      }
+    }
+  </div>
+
+  <footer class="thread-panel__composer">
+    <textarea
+      rows="2"
+      [placeholder]="t('colleagues.chat.thread_placeholder', 'Reply in thread')"
+      [ngModel]="draft()"
+      (ngModelChange)="draft.set($event)"
+      (keydown.enter)="$event.preventDefault(); onSend()"
+    ></textarea>
+    <button hlmBtn type="button" (click)="onSend()">{{ t('colleagues.chat.send', 'Send') }}</button>
+  </footer>
+</aside>

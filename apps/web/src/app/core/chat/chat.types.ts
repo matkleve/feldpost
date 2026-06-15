@@ -12,6 +12,28 @@ export interface ChatChannel {
   unreadCount?: number;
 }
 
+export interface ChatMessageReaction {
+  emoji: string;
+  userId: string;
+}
+
+export interface ChatMessageAttachment {
+  id: string;
+  messageId: string;
+  mediaItemId: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileType: string | null;
+}
+
+export interface ChatMessageEntityLink {
+  id: string;
+  messageId: string;
+  entityType: 'project' | 'media' | 'timespace';
+  entityId: string;
+  entityLabel?: string;
+}
+
 export interface ChatMessage {
   id: string;
   channelId: string;
@@ -23,6 +45,9 @@ export interface ChatMessage {
   createdAt: string;
   authorName?: string;
   threadReplyCount?: number;
+  reactions?: ChatMessageReaction[];
+  attachments?: ChatMessageAttachment[];
+  entityLinks?: ChatMessageEntityLink[];
 }
 
 export interface TypingIndicator {
@@ -34,4 +59,12 @@ export interface SendMessageInput {
   channelId: string;
   content: string;
   parentId?: string | null;
+  attachmentFile?: File | null;
+  entityLink?: {
+    entityType: 'project' | 'media' | 'timespace';
+    entityId: string;
+    entityLabel?: string;
+  } | null;
 }
+
+export const CHAT_QUICK_REACTIONS = ['👍', '❤️', '✅', '👀', '🔥', '😂'] as const;

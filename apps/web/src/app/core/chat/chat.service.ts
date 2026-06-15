@@ -1,159 +1,106 @@
 import { Injectable, inject, signal } from '@angular/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
-import { SupabaseService } from '../supabase/supabase.service';
 import { AuthService } from '../auth/auth.service';
+import { ChatChannelsAdapter } from './adapters/channels.adapter';
+import { ChatMessagesAdapter } from './adapters/messages.adapter';
+import { ChatRealtimeAdapter } from './adapters/realtime.adapter';
 import type { ChatChannel, ChatMessage, SendMessageInput } from './chat.types';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private readonly supabase = inject(SupabaseService);
   private readonly authService = inject(AuthService);
+  private readonly channelsAdapter = inject(ChatChannelsAdapter);
+  private readonly messagesAdapter = inject(ChatMessagesAdapter);
+  private readonly realtimeAdapter = inject(ChatRealtimeAdapter);
 
   private realtimeChannel: RealtimeChannel | null = null;
   private subscribedChannelId: string | null = null;
 
   readonly liveMessages = signal<ChatMessage[]>([]);
   readonly typingUserIds = signal<Set<string>>(new Set());
+  readonly searchResults = signal<ChatMessage[]>([]);
 
   async loadChannels(): Promise<{ data: ChatChannel[]; error: Error | null }> {
-    const { data, error } = await this.supabase.client
-      .from('chat_channels')
-      .select('*')
-      .is('archived_at', null)
-      .order('created_at');
+    const result = await this.channelsAdapter.loadChannels();
+    const userId = this.authService.user()?.id;
+    if (!userId || result.error) return result;
 
-    if (error) {
-      return { data: [], error: new Error(error.message) };
-    }
-
+    const unread = await this.channelsAdapter.loadUnreadCounts(userId);
     return {
-      data: (data ?? []).map((row) => this.toChannel(row)),
+      data: result.data.map((channel) => ({
+        ...channel,
+        unreadCount: unread.get(channel.id) ?? 0,
+      })),
       error: null,
     };
   }
 
   async createChannel(name: string, type: 'public' | 'private' = 'public'): Promise<{ data: ChatChannel | null; error: Error | null }> {
-    const userId = this.authService.user()?.id ?? null;
-    const orgId = await this.resolveOrganizationId();
-    const { data, error } = await this.supabase.client
-      .from('chat_channels')
-      .insert({ name, type, created_by: userId, organization_id: orgId })
-      .select('*')
-      .single();
+    const userId = this.authService.user()?.id;
+    if (!userId) return { data: null, error: new Error('Not authenticated.') };
 
-    if (error || !data) {
-      return { data: null, error: new Error(error?.message ?? 'Could not create channel.') };
-    }
+    const orgId = await this.channelsAdapter.resolveOrganizationId(userId);
+    return this.channelsAdapter.createChannel(name, type, userId, orgId);
+  }
 
-    if (userId) {
-      await this.supabase.client.from('chat_channel_members').upsert({
-        channel_id: data.id,
-        user_id: userId,
-        role: 'owner',
-      });
-    }
+  async archiveChannel(channelId: string): Promise<{ error: Error | null }> {
+    return this.channelsAdapter.archiveChannel(channelId);
+  }
 
-    return { data: this.toChannel(data), error: null };
+  async addChannelMember(channelId: string, userId: string): Promise<{ error: Error | null }> {
+    return this.channelsAdapter.addChannelMember(channelId, userId);
   }
 
   async findOrCreateDm(otherUserId: string): Promise<{ data: ChatChannel | null; error: Error | null }> {
     const userId = this.authService.user()?.id;
-    if (!userId) {
-      return { data: null, error: new Error('Not authenticated.') };
-    }
+    if (!userId) return { data: null, error: new Error('Not authenticated.') };
 
-    const { data: channels, error } = await this.supabase.client
-      .from('chat_channels')
-      .select('*, chat_channel_members(user_id)')
-      .eq('type', 'dm');
-
-    if (error) {
-      return { data: null, error: new Error(error.message) };
-    }
-
-    for (const channel of channels ?? []) {
-      const members = (channel.chat_channel_members as Array<{ user_id: string }>) ?? [];
-      const memberIds = new Set(members.map((m) => m.user_id));
-      if (memberIds.has(userId) && memberIds.has(otherUserId) && memberIds.size === 2) {
-        return { data: this.toChannel(channel), error: null };
-      }
-    }
-
-    const orgId = await this.resolveOrganizationId();
-    const { data: created, error: createError } = await this.supabase.client
-      .from('chat_channels')
-      .insert({ type: 'dm', created_by: userId, organization_id: orgId })
-      .select('*')
-      .single();
-
-    if (createError || !created) {
-      return { data: null, error: new Error(createError?.message ?? 'Could not create DM.') };
-    }
-
-    await this.supabase.client.from('chat_channel_members').insert([
-      { channel_id: created.id, user_id: userId, role: 'owner' },
-      { channel_id: created.id, user_id: otherUserId, role: 'member' },
-    ]);
-
-    return { data: this.toChannel(created), error: null };
+    const orgId = await this.channelsAdapter.resolveOrganizationId(userId);
+    return this.channelsAdapter.findOrCreateDm(userId, otherUserId, orgId);
   }
 
   async loadMessages(channelId: string, limit = 50): Promise<{ data: ChatMessage[]; error: Error | null }> {
-    const { data, error } = await this.supabase.client
-      .from('chat_messages')
-      .select('*, profiles(full_name)')
-      .eq('channel_id', channelId)
-      .is('parent_id', null)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: true })
-      .limit(limit);
-
-    if (error) {
-      return { data: [], error: new Error(error.message) };
+    const result = await this.messagesAdapter.loadMessages(channelId, limit);
+    if (!result.error) {
+      this.liveMessages.set(result.data);
     }
-
-    const messages = (data ?? []).map((row) => this.toMessage(row));
-    this.liveMessages.set(messages);
-    return { data: messages, error: null };
+    return result;
   }
 
   async loadThreadReplies(parentId: string): Promise<{ data: ChatMessage[]; error: Error | null }> {
-    const { data, error } = await this.supabase.client
-      .from('chat_messages')
-      .select('*, profiles(full_name)')
-      .eq('parent_id', parentId)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      return { data: [], error: new Error(error.message) };
-    }
-
-    return { data: (data ?? []).map((row) => this.toMessage(row)), error: null };
+    return this.messagesAdapter.loadThreadReplies(parentId);
   }
 
   async sendMessage(input: SendMessageInput): Promise<{ data: ChatMessage | null; error: Error | null }> {
     const userId = this.authService.user()?.id;
-    if (!userId) {
-      return { data: null, error: new Error('Not authenticated.') };
+    if (!userId) return { data: null, error: new Error('Not authenticated.') };
+
+    const result = await this.messagesAdapter.sendMessage(input, userId);
+    if (result.error || !result.data) return result;
+
+    const message = result.data;
+
+    if (input.attachmentFile) {
+      const orgId = await this.channelsAdapter.resolveOrganizationId(userId);
+      const upload = await this.messagesAdapter.uploadChatFile(orgId, userId, input.attachmentFile);
+      if (upload.path) {
+        await this.messagesAdapter.attachFile(message.id, {
+          fileUrl: upload.path,
+          fileName: input.attachmentFile.name,
+          fileType: input.attachmentFile.type,
+        });
+      }
     }
 
-    const { data, error } = await this.supabase.client
-      .from('chat_messages')
-      .insert({
-        channel_id: input.channelId,
-        user_id: userId,
-        content: input.content,
-        parent_id: input.parentId ?? null,
-      })
-      .select('*, profiles(full_name)')
-      .single();
-
-    if (error || !data) {
-      return { data: null, error: new Error(error?.message ?? 'Could not send message.') };
+    if (input.entityLink) {
+      await this.messagesAdapter.attachEntityLink(
+        message.id,
+        input.entityLink.entityType,
+        input.entityLink.entityId,
+        input.entityLink.entityLabel,
+      );
     }
 
-    const message = this.toMessage(data);
     if (!input.parentId) {
       this.liveMessages.update((messages) => [...messages, message]);
     }
@@ -163,78 +110,81 @@ export class ChatService {
   }
 
   async editMessage(messageId: string, content: string): Promise<{ error: Error | null }> {
-    const { error } = await this.supabase.client
-      .from('chat_messages')
-      .update({ content, edited_at: new Date().toISOString() })
-      .eq('id', messageId);
-
-    return { error: error ? new Error(error.message) : null };
+    return this.messagesAdapter.editMessage(messageId, content);
   }
 
   async deleteMessage(messageId: string): Promise<{ error: Error | null }> {
-    const { error } = await this.supabase.client
-      .from('chat_messages')
-      .update({ deleted_at: new Date().toISOString(), content: '' })
-      .eq('id', messageId);
-
-    return { error: error ? new Error(error.message) : null };
+    return this.messagesAdapter.deleteMessage(messageId);
   }
 
   async searchMessages(query: string): Promise<{ data: ChatMessage[]; error: Error | null }> {
-    const { data, error } = await this.supabase.client
-      .from('chat_messages')
-      .select('*, profiles(full_name)')
-      .textSearch('search_vector', query, { type: 'plain', config: 'simple' })
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) {
-      return { data: [], error: new Error(error.message) };
+    const result = await this.messagesAdapter.searchMessages(query);
+    if (!result.error) {
+      this.searchResults.set(result.data);
     }
+    return result;
+  }
 
-    return { data: (data ?? []).map((row) => this.toMessage(row)), error: null };
+  async addReaction(messageId: string, emoji: string): Promise<{ error: Error | null }> {
+    const userId = this.authService.user()?.id;
+    if (!userId) return { error: new Error('Not authenticated.') };
+    return this.messagesAdapter.addReaction(messageId, userId, emoji);
+  }
+
+  async removeReaction(messageId: string, emoji: string): Promise<{ error: Error | null }> {
+    const userId = this.authService.user()?.id;
+    if (!userId) return { error: new Error('Not authenticated.') };
+    return this.messagesAdapter.removeReaction(messageId, userId, emoji);
+  }
+
+  async toggleReaction(messageId: string, emoji: string): Promise<{ error: Error | null }> {
+    const userId = this.authService.user()?.id;
+    if (!userId) return { error: new Error('Not authenticated.') };
+
+    const message = this.liveMessages().find((entry) => entry.id === messageId);
+    const hasReaction = message?.reactions?.some((r) => r.emoji === emoji && r.userId === userId);
+    if (hasReaction) {
+      return this.removeReaction(messageId, emoji);
+    }
+    return this.addReaction(messageId, emoji);
   }
 
   async markChannelRead(channelId: string): Promise<void> {
     const userId = this.authService.user()?.id;
     if (!userId) return;
-
-    await this.supabase.client.from('chat_channel_members').upsert({
-      channel_id: channelId,
-      user_id: userId,
-      last_read_at: new Date().toISOString(),
-    });
+    await this.channelsAdapter.markChannelRead(channelId, userId);
   }
 
   subscribeToChannel(channelId: string): void {
-    if (this.subscribedChannelId === channelId && this.realtimeChannel) {
-      return;
-    }
+    if (this.subscribedChannelId === channelId && this.realtimeChannel) return;
 
     this.unsubscribe();
-
     this.subscribedChannelId = channelId;
-    this.realtimeChannel = this.supabase.client
-      .channel(`chat:${channelId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `channel_id=eq.${channelId}` },
-        (payload) => {
-          const message = this.toMessage(payload.new as Record<string, unknown>);
-          if (!message.parentId) {
-            this.liveMessages.update((messages) => {
-              if (messages.some((entry) => entry.id === message.id)) {
-                return messages;
-              }
-              return [...messages, message];
-            });
-          }
-        },
-      )
-      .on('broadcast', { event: 'typing' }, (payload) => {
-        const userId = (payload['payload'] as { userId?: string }).userId;
-        if (!userId || userId === this.authService.user()?.id) return;
+
+    const currentUserId = this.authService.user()?.id;
+    this.realtimeChannel = this.realtimeAdapter.subscribeToChannel(channelId, {
+      onMessageInsert: (message) => {
+        if (message.parentId) return;
+        this.liveMessages.update((messages) => {
+          if (messages.some((entry) => entry.id === message.id)) return messages;
+          return [...messages, message];
+        });
+      },
+      onMessageUpdate: (message) => {
+        if (message.parentId) return;
+        if (message.deletedAt) {
+          this.liveMessages.update((messages) => messages.filter((entry) => entry.id !== message.id));
+          return;
+        }
+        this.liveMessages.update((messages) =>
+          messages.map((entry) => (entry.id === message.id ? message : entry)),
+        );
+      },
+      onMessageDelete: (messageId) => {
+        this.liveMessages.update((messages) => messages.filter((entry) => entry.id !== messageId));
+      },
+      onTyping: (userId) => {
+        if (!currentUserId || userId === currentUserId) return;
         this.typingUserIds.update((set) => new Set(set).add(userId));
         setTimeout(() => {
           this.typingUserIds.update((set) => {
@@ -243,102 +193,41 @@ export class ChatService {
             return next;
           });
         }, 3000);
-      })
-      .subscribe();
+      },
+      onReactionChange: () => {
+        if (this.subscribedChannelId) {
+          void this.loadMessages(this.subscribedChannelId);
+        }
+      },
+    });
+  }
+
+  subscribeToThread(parentId: string, onInsert: (message: ChatMessage) => void): RealtimeChannel {
+    return this.realtimeAdapter.subscribeToThread(parentId, onInsert);
   }
 
   broadcastTyping(channelId: string): void {
     const userId = this.authService.user()?.id;
-    if (!userId) return;
-
-    void this.supabase.client.channel(`chat:${channelId}`).send({
-      type: 'broadcast',
-      event: 'typing',
-      payload: { userId },
-    });
+    if (!userId || !this.realtimeChannel || this.subscribedChannelId !== channelId) return;
+    this.realtimeAdapter.broadcastTyping(this.realtimeChannel, userId);
   }
 
   subscribePresence(channelId: string, onSync: (onlineUserIds: Set<string>) => void): RealtimeChannel {
-    const userId = this.authService.user()?.id;
-    const channel = this.supabase.client.channel(`presence:${channelId}`, {
-      config: { presence: { key: userId ?? 'anonymous' } },
-    });
-
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState<Record<string, Array<Record<string, unknown>>>>();
-        const online = new Set<string>();
-        for (const presences of Object.values(state)) {
-          for (const presence of presences) {
-            const userId = presence['user_id'];
-            if (typeof userId === 'string') online.add(userId);
-          }
-        }
-        onSync(online);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED' && userId) {
-          await channel.track({ user_id: userId });
-        }
-      });
-
-    return channel;
+    return this.realtimeAdapter.subscribePresence(channelId, this.authService.user()?.id, onSync);
   }
 
   unsubscribe(): void {
     if (this.realtimeChannel) {
-      void this.supabase.client.removeChannel(this.realtimeChannel);
+      this.realtimeAdapter.removeChannel(this.realtimeChannel);
       this.realtimeChannel = null;
     }
     this.subscribedChannelId = null;
     this.liveMessages.set([]);
     this.typingUserIds.set(new Set());
+    this.searchResults.set([]);
   }
 
-  private async resolveOrganizationId(): Promise<string> {
-    const userId = this.authService.user()?.id;
-    if (!userId) throw new Error('Not authenticated.');
-
-    const { data, error } = await this.supabase.client
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', userId)
-      .single();
-
-    if (error || !data?.organization_id) {
-      throw new Error('Organization context missing.');
-    }
-
-    return data.organization_id as string;
-  }
-
-  private toChannel(row: Record<string, unknown>): ChatChannel {
-    return {
-      id: row['id'] as string,
-      organizationId: row['organization_id'] as string,
-      name: (row['name'] as string | null) ?? null,
-      description: (row['description'] as string | null) ?? null,
-      type: row['type'] as ChatChannel['type'],
-      createdBy: (row['created_by'] as string | null) ?? null,
-      createdAt: row['created_at'] as string,
-      archivedAt: (row['archived_at'] as string | null) ?? null,
-    };
-  }
-
-  private toMessage(row: Record<string, unknown>): ChatMessage {
-    const profile = row['profiles'] as { full_name?: string } | Array<{ full_name?: string }> | null;
-    const profileName = Array.isArray(profile) ? profile[0]?.full_name : profile?.full_name;
-
-    return {
-      id: row['id'] as string,
-      channelId: row['channel_id'] as string,
-      userId: row['user_id'] as string,
-      content: row['content'] as string,
-      parentId: (row['parent_id'] as string | null) ?? null,
-      editedAt: (row['edited_at'] as string | null) ?? null,
-      deletedAt: (row['deleted_at'] as string | null) ?? null,
-      createdAt: row['created_at'] as string,
-      authorName: profileName ?? undefined,
-    };
+  removeChannel(channel: RealtimeChannel): void {
+    this.realtimeAdapter.removeChannel(channel);
   }
 }

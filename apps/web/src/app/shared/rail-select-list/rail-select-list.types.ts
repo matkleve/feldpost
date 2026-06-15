@@ -33,6 +33,7 @@ export interface RailSelectListItem {
   label: string;
   secondaryLabel?: string;
   secondaryColor?: string | null;
+  badge?: number;
   leading?: RailSelectListLeading;
   actions?: RailSelectListRowAction[];
 }

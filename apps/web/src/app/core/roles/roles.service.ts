@@ -195,6 +195,13 @@ export class RoleService {
     return !error && data === true;
   }
 
+  async hasPermission(permissionKey: string): Promise<boolean> {
+    const { data, error } = await this.supabase.client.rpc('has_permission', {
+      p_permission_key: permissionKey,
+    });
+    return !error && data === true;
+  }
+
   private toRole(row: OrgRoleRow): OrgRole {
     return {
       id: row.id,

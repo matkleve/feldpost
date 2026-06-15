@@ -1,0 +1,20 @@
+@if (open()) {
+  <div class="channel-create-dialog" role="dialog" aria-modal="true" [attr.aria-label]="t('colleagues.channel.create_title', 'Create channel')">
+    <div class="channel-create-dialog__backdrop" (click)="hide()"></div>
+    <form class="channel-create-dialog__panel" (submit)="$event.preventDefault(); onConfirm()">
+      <h2>{{ t('colleagues.channel.create_title', 'Create channel') }}</h2>
+      <label>
+        {{ t('colleagues.channel.name_label', 'Channel name') }}
+        <input hlmInput type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="channelName" required />
+      </label>
+      <label class="channel-create-dialog__checkbox">
+        <input type="checkbox" [ngModel]="isPrivate()" (ngModelChange)="isPrivate.set($event)" name="isPrivate" />
+        {{ t('colleagues.channel.private_label', 'Private channel') }}
+      </label>
+      <div class="channel-create-dialog__actions">
+        <button hlmBtn type="button" variant="outline" (click)="hide()">{{ t('common.cancel', 'Cancel') }}</button>
+        <button hlmBtn type="submit">{{ t('colleagues.channel.create_confirm', 'Create') }}</button>
+      </div>
+    </form>
+  </div>
+}

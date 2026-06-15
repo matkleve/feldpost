@@ -45,6 +45,9 @@
               </span>
             }
           </span>
+          @if (item.badge && item.badge > 0) {
+            <span class="rail-select-list__badge" aria-label="Unread">{{ item.badge }}</span>
+          }
         </button>
 
         @for (action of item.actions ?? []; track action.action.id) {

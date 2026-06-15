@@ -1,0 +1,47 @@
+// Modal overlay for channel creation
+// @see chat-system strategy phase 4
+.channel-create-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.channel-create-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--foreground) 24%, transparent);
+}
+
+.channel-create-dialog__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  width: min(100%, 24rem);
+  padding: var(--spacing-5);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  box-shadow: var(--shadow-lg);
+}
+
+.channel-create-dialog__panel label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-sm);
+}
+
+.channel-create-dialog__checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.channel-create-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}

@@ -624,6 +624,55 @@ projects.viewToggle.cards.aria,Card view,apps/web/src/app/features/projects/proj
 projects.viewToggle.cards.title,Card view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:title,Card view,Kartenansicht,Vista schede
 projects.page.title,Projects,apps/web/src/app/features/projects/projects-page.component.html text-node,Projects,Projekte,Progetti
 colleagues.page.title,Team,apps/web/src/app/features/colleagues/sidebar/member-list.component.html text-node,Team,Team,Team
+colleagues.sidebar.label,Team,colleagues sidebar nav aria-label,Team,Team,Team
+colleagues.tab.members,Members,colleagues sidebar tab,Members,Mitglieder,Membri
+colleagues.tab.invites,Invites,colleagues sidebar tab,Invites,Einladungen,Inviti
+colleagues.channels.title,Channels,colleagues channel list heading,Channels,Kanäle,Canali
+colleagues.channels.empty,No channels,colleagues empty channel list,No channels,Keine Kanäle,Nessun canale
+colleagues.channel.create,Create channel,colleagues create channel button aria,Create channel,Kanal erstellen,Crea canale
+colleagues.channel.create_title,Create channel,colleagues channel dialog title,Create channel,Kanal erstellen,Crea canale
+colleagues.channel.name_label,Channel name,colleagues channel dialog field,Channel name,Kanalname,Nome canale
+colleagues.channel.private_label,Private channel,colleagues channel dialog checkbox,Private channel,Privater Kanal,Canale privato
+colleagues.channel.create_confirm,Create,colleagues channel dialog submit,Create,Erstellen,Crea
+colleagues.channel.archive,Archive channel,colleagues channel archive action,Archive channel,Kanal archivieren,Archivia canale
+colleagues.channel.invite_member,Invite to channel,colleagues invite member to private channel,Invite to channel,Zum Kanal einladen,Invita al canale
+colleagues.channel.dm,Direct message,colleagues DM channel label,Direct message,Direktnachricht,Messaggio diretto
+colleagues.channel.unnamed,Channel,colleagues unnamed channel fallback,Channel,Kanal,Canale
+colleagues.members.title,Colleagues,colleagues member list heading,Colleagues,Kolleginnen und Kollegen,Colleghi
+colleagues.members.search,Search colleagues,colleagues member search placeholder,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
+colleagues.members.search_aria,Search colleagues,colleagues member search aria,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
+colleagues.members.loading,Loading colleagues,colleagues member list loading,Loading colleagues,Lade Kolleginnen und Kollegen,Caricamento colleghi
+colleagues.members.empty,No colleagues found,colleagues empty member list,No colleagues found,Keine Kolleginnen und Kollegen gefunden,Nessun collega trovato
+colleagues.members.unnamed,Unnamed,colleagues member without name,Unnamed,Unbenannt,Senza nome
+colleagues.member.message,Message,colleagues message member action,Message,Nachricht,Messaggio
+colleagues.member.select_hint,Select a colleague to view details.,colleagues empty detail panel,Select a colleague to view details.,Wähle eine Person für Details.,Seleziona un collega per i dettagli.
+colleagues.page.error.title,Could not load colleagues,colleagues page load error title,Could not load colleagues,Kolleginnen und Kollegen konnten nicht geladen werden,Impossibile caricare i colleghi
+colleagues.chat.search,Search messages,colleagues chat search placeholder,Search messages,Nachrichten suchen,Cerca messaggi
+colleagues.chat.search_results,Search results,colleagues chat search results panel,Search results,Suchergebnisse,Risultati di ricerca
+colleagues.chat.unknown_author,Colleague,colleagues chat unknown author,Colleague,Kollegin oder Kollege,Collega
+colleagues.chat.edited,edited,colleagues chat edited badge,edited,bearbeitet,modificato
+colleagues.chat.reply,Reply in thread,colleagues chat thread reply action,Reply in thread,Im Thread antworten,Rispondi nel thread
+colleagues.chat.empty,No messages yet. Say hello.,colleagues chat empty state,No messages yet. Say hello.,Noch keine Nachrichten. Sag Hallo.,Nessun messaggio. Saluta.
+colleagues.chat.typing,Someone is typing…,colleagues chat typing indicator,Someone is typing…,Jemand tippt…,Qualcuno sta scrivendo…
+colleagues.chat.placeholder,Write a message,colleagues chat composer placeholder,Write a message,Nachricht schreiben,Scrivi un messaggio
+colleagues.chat.send,Send,colleagues chat send button,Send,Senden,Invia
+colleagues.chat.no_channel,Select a channel,colleagues chat no channel selected,Select a channel,Kanal auswählen,Seleziona un canale
+colleagues.chat.dm,Direct message,colleagues chat DM title,Direct message,Direktnachricht,Messaggio diretto
+colleagues.chat.thread_title,Thread,colleagues thread panel title,Thread,Thread,Thread
+colleagues.chat.thread_loading,Loading replies…,colleagues thread loading,Loading replies…,Antworten werden geladen…,Caricamento risposte…
+colleagues.chat.thread_empty,No replies yet.,colleagues thread empty,No replies yet.,Noch keine Antworten.,Nessuna risposta.
+colleagues.chat.thread_placeholder,Reply in thread,colleagues thread composer placeholder,Reply in thread,Im Thread antworten,Rispondi nel thread
+colleagues.chat.edit,Edit,colleagues chat edit message,Edit,Bearbeiten,Modifica
+colleagues.chat.delete,Delete,colleagues chat delete message,Delete,Löschen,Elimina
+colleagues.chat.react,React,colleagues chat react action,React,Reagieren,Reagisci
+colleagues.chat.attachment,Attachment,colleagues chat file attachment label,Attachment,Anhang,Allegato
+colleagues.chat.attachment_selected,Attachment,colleagues chat selected file hint,Attachment,Anhang,Allegato
+colleagues.chat.link_project,Link project,colleagues chat project link select aria,Link project,Projekt verknüpfen,Collega progetto
+colleagues.chat.link_project_none,No project link,colleagues chat no project link option,No project link,Kein Projekt,Nessun progetto
+common.close,Close,shared close action,Close,Schließen,Chiudi
+common.cancel,Cancel,shared cancel action,Cancel,Abbrechen,Annulla
+common.save,Save,shared save action,Save,Speichern,Salva
+common.remove,Remove,shared remove action,Remove,Entfernen,Rimuovi
 organization.page.title,Organization,apps/web/src/app/features/organization/sidebar/organization-sidebar.component.html text-node,Organization,Organisation,Organizzazione
 projects.page.search.aria,Project search,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project search,Projektsuche,Ricerca progetto
 projects.page.action.newProject,New project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,New project,Neues Projekt,Nuovo progetto

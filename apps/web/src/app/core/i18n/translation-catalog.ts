@@ -519,6 +519,22 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Team',
   },
   {
+    key: 'colleagues.chat.send',
+    original: 'Send',
+    context: 'Colleagues chat composer send button.',
+    en: 'Send',
+    de: 'Senden',
+    it: 'Invia',
+  },
+  {
+    key: 'colleagues.chat.search',
+    original: 'Search messages',
+    context: 'Colleagues chat message search field.',
+    en: 'Search messages',
+    de: 'Nachrichten suchen',
+    it: 'Cerca messaggi',
+  },
+  {
     key: 'organization.page.title',
     original: 'Organization',
     context: 'Organization page left-rail title.',

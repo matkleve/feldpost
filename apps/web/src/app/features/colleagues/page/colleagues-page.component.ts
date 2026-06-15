@@ -1,6 +1,7 @@
 import { Component, computed, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { filter, map, startWith } from 'rxjs';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { MemberService } from '../../../core/members/members.service';
@@ -66,6 +67,9 @@ export class ColleaguesPageComponent implements OnDestroy {
   readonly selectedChannelId = signal<string | null>(null);
   readonly onlineUserIds = signal<Set<string>>(new Set());
   readonly ownRoleLevel = signal(0);
+  readonly canManageChannels = signal(false);
+  readonly canDeleteAnyMessage = signal(false);
+  private presenceChannel: RealtimeChannel | null = null;
 
   readonly selectedMember = computed(() => {
     const id = this.selectedMemberId();
@@ -90,11 +94,13 @@ export class ColleaguesPageComponent implements OnDestroy {
     void this.refresh();
 
     this.destroyRef.onDestroy(() => {
+      this.teardownPresence();
       this.chatService.unsubscribe();
     });
   }
 
   ngOnDestroy(): void {
+    this.teardownPresence();
     this.chatService.unsubscribe();
   }
 
@@ -102,11 +108,13 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.loading.set(true);
     this.loadError.set(null);
 
-    const [membersResult, rolesResult, channelsResult, level] = await Promise.all([
+    const [membersResult, rolesResult, channelsResult, level, canManage, canDeleteAny] = await Promise.all([
       this.memberService.loadMembers(),
       this.roleService.loadRoles(),
       this.chatService.loadChannels(),
       this.roleService.getOwnRoleLevel(),
+      this.roleService.hasPermission('chat.channels.manage'),
+      this.roleService.hasPermission('chat.messages.delete_any'),
     ]);
 
     if (membersResult.error || rolesResult.error || channelsResult.error) {
@@ -124,6 +132,8 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.roles.set(rolesResult.data);
     this.channels.set(channelsResult.data);
     this.ownRoleLevel.set(level);
+    this.canManageChannels.set(canManage);
+    this.canDeleteAnyMessage.set(canDeleteAny);
 
     if (membersResult.data.length > 0) {
       const currentId = this.selectedMemberId();
@@ -182,18 +192,75 @@ export class ColleaguesPageComponent implements OnDestroy {
     await this.refresh();
   }
 
+  async onChannelCreate(payload: { name: string; type: 'public' | 'private' }): Promise<void> {
+    const result = await this.chatService.createChannel(payload.name, payload.type);
+    if (result.data) {
+      this.channels.update((list) => [...list, result.data!]);
+      await this.selectChannel(result.data.id);
+    }
+  }
+
+  async onChannelArchive(channelId: string): Promise<void> {
+    const result = await this.chatService.archiveChannel(channelId);
+    if (!result.error) {
+      this.channels.update((list) => list.filter((channel) => channel.id !== channelId));
+      if (this.selectedChannelId() === channelId) {
+        const next = this.channels()[0];
+        if (next) {
+          await this.selectChannel(next.id);
+        } else {
+          this.selectedChannelId.set(null);
+        }
+      }
+    }
+  }
+
+  async onChannelMemberInvite(payload: { channelId: string; userId: string }): Promise<void> {
+    await this.chatService.addChannelMember(payload.channelId, payload.userId);
+  }
+
+  async onMessageEdited(payload: { messageId: string; content: string }): Promise<void> {
+    await this.chatService.editMessage(payload.messageId, payload.content);
+    const channelId = this.selectedChannelId();
+    if (channelId) {
+      await this.chatService.loadMessages(channelId);
+    }
+  }
+
+  async onMessageDeleted(messageId: string): Promise<void> {
+    await this.chatService.deleteMessage(messageId);
+  }
+
+  async onReactionToggled(payload: { messageId: string; emoji: string }): Promise<void> {
+    await this.chatService.toggleReaction(payload.messageId, payload.emoji);
+    const channelId = this.selectedChannelId();
+    if (channelId) {
+      await this.chatService.loadMessages(channelId);
+    }
+  }
+
   private async selectChannel(channelId: string): Promise<void> {
     this.selectedChannelId.set(channelId);
+    this.teardownPresence();
     this.chatService.subscribeToChannel(channelId);
     await this.chatService.loadMessages(channelId);
     await this.chatService.markChannelRead(channelId);
 
-    const presenceChannel = this.chatService.subscribePresence(channelId, (online) => {
+    this.presenceChannel = this.chatService.subscribePresence(channelId, (online) => {
       this.onlineUserIds.set(online);
     });
 
-    presenceChannel.on('presence', { event: 'leave' }, () => {
-      // sync handled by subscribePresence callback
-    });
+    const channelsResult = await this.chatService.loadChannels();
+    if (!channelsResult.error) {
+      this.channels.set(channelsResult.data);
+    }
+  }
+
+  private teardownPresence(): void {
+    if (this.presenceChannel) {
+      void this.chatService.removeChannel(this.presenceChannel);
+      this.presenceChannel = null;
+    }
+    this.onlineUserIds.set(new Set());
   }
 }

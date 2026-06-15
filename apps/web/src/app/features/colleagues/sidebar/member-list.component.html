@@ -11,7 +11,21 @@
   </div>
 
   <section class="member-list__channels">
-    <h2>{{ t('colleagues.channels.title', 'Channels') }}</h2>
+    <div class="member-list__section-header">
+      <h2>{{ t('colleagues.channels.title', 'Channels') }}</h2>
+      @if (canManageChannels()) {
+        <button
+          type="button"
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          [attr.aria-label]="t('colleagues.channel.create', 'Create channel')"
+          (click)="openCreateChannelDialog()"
+        >
+          <span class="material-icons" aria-hidden="true">add</span>
+        </button>
+      }
+    </div>
     <app-rail-select-list
       [compact]="true"
       [items]="channelListItems()"
@@ -19,6 +33,7 @@
       [listAriaLabel]="t('colleagues.channels.title', 'Channels')"
       [emptyMessage]="t('colleagues.channels.empty', 'No channels')"
       (itemSelected)="channelSelected.emit($event)"
+      (actionTriggered)="onChannelAction($event)"
     />
   </section>
 
@@ -41,4 +56,8 @@
       (actionTriggered)="onMemberAction($event)"
     />
   </section>
+
+  <app-channel-create-dialog
+    (confirmed)="onChannelCreateConfirmed($event)"
+  />
 </nav>
