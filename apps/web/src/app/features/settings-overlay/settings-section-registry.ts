@@ -82,15 +82,6 @@ export function buildSettingsSectionRegistry(): readonly SettingsSectionRegistry
       subtitleFallback: 'Identity and sign-in context',
       visibility: 'all-members',
     },
-    {
-      id: 'invite-management',
-      icon: 'qr_code_2',
-      titleKey: 'settings.overlay.section.invites.title',
-      titleFallback: 'Invite Management',
-      subtitleKey: 'settings.overlay.section.invites.subtitle',
-      subtitleFallback: 'Role-scoped QR and share links',
-      visibility: 'all-members',
-    },
   ];
 }
 

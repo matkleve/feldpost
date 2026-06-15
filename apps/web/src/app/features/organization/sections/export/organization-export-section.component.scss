@@ -1,0 +1,23 @@
+.org-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.org-section__header p {
+  margin: var(--spacing-1) 0 0;
+  color: var(--muted-foreground);
+}
+
+.org-export__list {
+  margin: var(--spacing-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.org-export__list li {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--border);
+}

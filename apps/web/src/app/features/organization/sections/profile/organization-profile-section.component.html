@@ -1,0 +1,63 @@
+<section class="org-section">
+  <header class="org-section__header">
+    <h1>{{ t('organization.profile.title', 'Company profile') }}</h1>
+    <p>{{ t('organization.profile.subtitle', 'Identity and contact details for your organization.') }}</p>
+  </header>
+
+  @if (profile(); as org) {
+    <form class="org-section__form" (ngSubmit)="onSave()">
+      <div hlmFormField>
+        <label hlmLabel for="org-name">{{ t('organization.profile.name', 'Organization name') }}</label>
+        <input hlmInput id="org-name" name="orgName" [(ngModel)]="draftName" required />
+      </div>
+
+      <div hlmFormField>
+        <label hlmLabel for="org-description">{{ t('organization.profile.description', 'Description') }}</label>
+        <textarea hlmInput id="org-description" name="orgDescription" rows="3" [(ngModel)]="draftDescription"></textarea>
+      </div>
+
+      <div hlmFormField>
+        <label hlmLabel for="org-industry">{{ t('organization.profile.industry', 'Industry') }}</label>
+        <input hlmInput id="org-industry" name="orgIndustry" [(ngModel)]="draftIndustry" />
+      </div>
+
+      <div class="org-section__grid">
+        <div hlmFormField>
+          <label hlmLabel for="org-email">{{ t('organization.profile.email', 'Email') }}</label>
+          <input hlmInput id="org-email" name="orgEmail" type="email" [(ngModel)]="draftEmail" />
+        </div>
+        <div hlmFormField>
+          <label hlmLabel for="org-phone">{{ t('organization.profile.phone', 'Phone') }}</label>
+          <input hlmInput id="org-phone" name="orgPhone" [(ngModel)]="draftPhone" />
+        </div>
+      </div>
+
+      <div hlmFormField>
+        <label hlmLabel for="org-website">{{ t('organization.profile.website', 'Website') }}</label>
+        <input hlmInput id="org-website" name="orgWebsite" [(ngModel)]="draftWebsite" />
+      </div>
+
+      <div hlmFormField>
+        <label hlmLabel for="org-address">{{ t('organization.profile.address', 'Address') }}</label>
+        <input hlmInput id="org-address" name="orgAddress" [(ngModel)]="draftAddressLine1" />
+      </div>
+
+      <div class="org-section__grid">
+        <div hlmFormField>
+          <label hlmLabel for="org-city">{{ t('organization.profile.city', 'City') }}</label>
+          <input hlmInput id="org-city" name="orgCity" [(ngModel)]="draftCity" />
+        </div>
+        <div hlmFormField>
+          <label hlmLabel for="org-postal">{{ t('organization.profile.postal', 'Postal code') }}</label>
+          <input hlmInput id="org-postal" name="orgPostal" [(ngModel)]="draftPostalCode" />
+        </div>
+        <div hlmFormField>
+          <label hlmLabel for="org-country">{{ t('organization.profile.country', 'Country') }}</label>
+          <input hlmInput id="org-country" name="orgCountry" [(ngModel)]="draftCountry" />
+        </div>
+      </div>
+
+      <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+    </form>
+  }
+</section>

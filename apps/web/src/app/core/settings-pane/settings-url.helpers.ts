@@ -98,6 +98,17 @@ export function resolveShellBasePath(shellSegments: readonly string[]): string {
     return '/projects';
   }
 
+  if (shellSegments[0] === 'colleagues') {
+    return '/colleagues';
+  }
+
+  if (shellSegments[0] === 'organization') {
+    if (shellSegments.length >= 2) {
+      return `/organization/${shellSegments[1]}`;
+    }
+    return '/organization';
+  }
+
   return '/map';
 }
 

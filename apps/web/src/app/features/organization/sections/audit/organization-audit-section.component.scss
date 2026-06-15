@@ -1,0 +1,22 @@
+.org-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.org-section__header p {
+  margin: var(--spacing-1) 0 0;
+  color: var(--muted-foreground);
+}
+
+.org-audit__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.org-audit__table th,
+.org-audit__table td {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}

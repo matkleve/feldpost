@@ -14,24 +14,30 @@ import {
   buildTimespaceHistogram,
   clickBandRange,
   dragRange,
+  formatTimespaceDisplayDate,
   parseDateInputValue,
   ratioFromClientX,
   selectionOverlayPercents,
   toDateInputValue,
+  type TimespaceBin,
 } from '../../../core/workspace-view/timespace.helpers';
-import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 
 @Component({
   selector: 'app-timespace-dropdown',
   templateUrl: './timespace-dropdown.component.html',
   styleUrl: './timespace-dropdown.component.scss',
-  imports: [...HLM_INPUT_IMPORTS],
 })
 export class TimespaceDropdownComponent implements OnInit {
   private readonly i18nService = inject(I18nService);
   private readonly viewService = inject(WorkspaceViewService);
   protected readonly catalog = inject(MapTimespaceCatalogService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
+
+  /** BCP-47 locale for date picker + formatted labels (de-AT / it-IT / en-GB). */
+  readonly dateInputLocale = this.i18nService.locale;
+
+  /** Pixel height of the histogram bar track — bars use explicit px, not % height. */
+  protected readonly chartTrackHeightPx = 40;
 
   private readonly chartRef = viewChild<ElementRef<HTMLElement>>('chart');
 
@@ -62,6 +68,25 @@ export class TimespaceDropdownComponent implements OnInit {
 
   readonly fromInput = computed(() => toDateInputValue(this.viewService.timeRange()?.from ?? null));
   readonly toInput = computed(() => toDateInputValue(this.viewService.timeRange()?.to ?? null));
+
+  readonly fromDisplay = computed(() => {
+    this.i18nService.language();
+    const from = this.viewService.timeRange()?.from ?? null;
+    if (!from) {
+      return this.t('map.filter.timespace.datePlaceholder', '—');
+    }
+    return formatTimespaceDisplayDate(from, this.dateInputLocale());
+  });
+
+  readonly toDisplay = computed(() => {
+    this.i18nService.language();
+    const to = this.viewService.timeRange()?.to ?? null;
+    if (!to) {
+      return this.t('map.filter.timespace.datePlaceholder', '—');
+    }
+    return formatTimespaceDisplayDate(to, this.dateInputLocale());
+  });
+
   readonly hasActiveFilter = this.viewService.hasTimeRange;
 
   readonly selectionOverlay = computed(() => {
@@ -83,6 +108,13 @@ export class TimespaceDropdownComponent implements OnInit {
   readonly selectionIsActive = computed(
     () => this.hasActiveFilter() || this.dragStartRatio() != null,
   );
+
+  protected barHeightPx(bin: TimespaceBin): number {
+    if (bin.count <= 0) {
+      return 0;
+    }
+    return Math.max(2, Math.round((bin.heightPct / 100) * this.chartTrackHeightPx));
+  }
 
   onFromInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;

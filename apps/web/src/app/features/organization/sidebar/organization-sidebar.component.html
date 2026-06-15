@@ -1,0 +1,22 @@
+<nav class="organization-sidebar" aria-label="{{ t('organization.sidebar.label', 'Organization sections') }}">
+  <header class="organization-sidebar__header">
+    <h2>{{ t('organization.sidebar.title', 'Organization') }}</h2>
+  </header>
+
+  <ul class="organization-sidebar__list" role="list">
+    @for (section of sections(); track section.id) {
+      <li>
+        <button
+          type="button"
+          class="organization-sidebar__item"
+          [class.organization-sidebar__item--active]="activeSection() === section.id"
+          [disabled]="loading()"
+          (click)="sectionSelected.emit(section.id)"
+        >
+          <span class="material-icons" aria-hidden="true">{{ section.icon }}</span>
+          <span>{{ t(section.labelKey, section.labelFallback) }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+</nav>

@@ -1,0 +1,30 @@
+.org-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.org-section__header p {
+  margin: var(--spacing-1) 0 0;
+  color: var(--muted-foreground);
+}
+
+.org-billing__plan {
+  padding: var(--spacing-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.org-billing__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-4);
+}
+
+.org-billing__table th,
+.org-billing__table td {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}

@@ -1,0 +1,21 @@
+<section class="org-section">
+  <header class="org-section__header">
+    <h1>{{ t('organization.branding.title', 'Branding') }}</h1>
+    <p>{{ t('organization.branding.subtitle', 'Organization color overrides applied to the workspace theme.') }}</p>
+  </header>
+  <form class="org-section__form" (ngSubmit)="onSave()">
+    <div hlmFormField>
+      <label hlmLabel for="brand-primary">{{ t('organization.branding.primary', 'Primary color') }}</label>
+      <input hlmInput id="brand-primary" type="color" [ngModel]="primaryColor()" (ngModelChange)="primaryColor.set($event)" name="primary" />
+    </div>
+    <div hlmFormField>
+      <label hlmLabel for="brand-accent">{{ t('organization.branding.accent', 'Accent color') }}</label>
+      <input hlmInput id="brand-accent" type="color" [ngModel]="accentColor()" (ngModelChange)="accentColor.set($event)" name="accent" />
+    </div>
+    <div hlmFormField>
+      <label hlmLabel for="brand-bg">{{ t('organization.branding.background', 'Background color') }}</label>
+      <input hlmInput id="brand-bg" type="color" [ngModel]="backgroundColor()" (ngModelChange)="backgroundColor.set($event)" name="background" />
+    </div>
+    <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+  </form>
+</section>

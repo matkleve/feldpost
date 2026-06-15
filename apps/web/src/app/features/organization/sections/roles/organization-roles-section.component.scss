@@ -1,0 +1,85 @@
+.org-roles {
+  display: grid;
+  grid-template-columns: 14rem 1fr;
+  gap: var(--spacing-4);
+  min-height: 0;
+}
+
+.org-roles__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.org-roles__card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  cursor: pointer;
+  text-align: left;
+}
+
+.org-roles__card--active {
+  border-color: var(--primary);
+}
+
+.org-roles__badge {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.org-roles__level {
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+}
+
+.org-roles__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 0;
+}
+
+.org-roles__detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.org-roles__permissions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.org-roles__permission-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.org-roles__permission-group li label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) 0;
+}
+
+.org-roles__create {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border);
+}
+
+.org-roles__placeholder {
+  color: var(--muted-foreground);
+}

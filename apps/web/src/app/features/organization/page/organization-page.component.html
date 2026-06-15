@@ -1,0 +1,56 @@
+<app-page-grid
+  [leftRail]="true"
+  [rightRailOpen]="rightRailOpen()"
+  [centerExpanded]="!rightRailOpen()"
+  data-i18n-skip
+>
+  <app-organization-sidebar
+    pageGridLeft
+    [sections]="sections"
+    [activeSection]="activeSection()"
+    [loading]="loading()"
+    (sectionSelected)="onSectionSelected($event)"
+  />
+
+  <section pageGridCenter class="organization-page__center">
+    @if (loadError()) {
+      <div role="alert" class="organization-page__error">
+        <h2>{{ t('organization.page.error.title', 'Could not load organization') }}</h2>
+        <p>{{ loadError() }}</p>
+      </div>
+    } @else {
+      @switch (activeSection()) {
+        @case ('profile') {
+          <app-organization-profile-section
+            [profile]="profile()"
+            (saved)="onProfileSaved($event)"
+          />
+        }
+        @case ('roles') {
+          <app-organization-roles-section
+            [roles]="roles()"
+            [permissions]="permissions()"
+            [selectedRoleId]="selectedRoleId()"
+            (roleSelected)="onRoleSelected($event)"
+            (rolesChanged)="onRolesChanged()"
+          />
+        }
+        @case ('branding') {
+          <app-organization-branding-section />
+        }
+        @case ('billing') {
+          <app-organization-billing-section />
+        }
+        @case ('integrations') {
+          <app-organization-integrations-section />
+        }
+        @case ('export') {
+          <app-organization-export-section />
+        }
+        @case ('audit') {
+          <app-organization-audit-section />
+        }
+      }
+    }
+  </section>
+</app-page-grid>

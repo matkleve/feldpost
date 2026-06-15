@@ -503,6 +503,22 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Progetti',
   },
   {
+    key: 'nav.item.colleagues',
+    original: 'Colleagues',
+    context: 'Main navigation label for colleagues route.',
+    en: 'Colleagues',
+    de: 'Kolleginnen und Kollegen',
+    it: 'Colleghi',
+  },
+  {
+    key: 'nav.item.organization',
+    original: 'Organization',
+    context: 'Main navigation label for organization admin route.',
+    en: 'Organization',
+    de: 'Organisation',
+    it: 'Organizzazione',
+  },
+  {
     key: 'nav.settings.title',
     original: 'Settings',
     context: 'Tooltip and visible label for settings button in nav.',

@@ -36,7 +36,7 @@ export class UserProfileService {
 
     const { data: roleRows, error: rolesError } = await this.supabase.client
       .from('user_roles')
-      .select('roles(name)')
+      .select('org_roles(name)')
       .eq('user_id', userId);
 
     if (rolesError) {
@@ -45,7 +45,7 @@ export class UserProfileService {
 
     const roles = (roleRows ?? [])
       .map((row) => {
-        const rolePayload = row.roles as { name?: string } | Array<{ name?: string }> | null;
+        const rolePayload = row.org_roles as { name?: string } | Array<{ name?: string }> | null;
         if (!rolePayload) return null;
         if (Array.isArray(rolePayload)) {
           return rolePayload[0]?.name ?? null;

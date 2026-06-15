@@ -1,0 +1,23 @@
+<section class="org-section">
+  <header class="org-section__header">
+    <h1>{{ t('organization.export.title', 'Data export') }}</h1>
+    <p>{{ t('organization.export.subtitle', 'Request a full organization export as JSON.') }}</p>
+  </header>
+
+  <button hlmBtn type="button" (click)="onRequestExport()">
+    {{ t('organization.export.request', 'Request export') }}
+  </button>
+
+  <ul class="org-export__list">
+    @for (job of jobs(); track job.id) {
+      <li>
+        <span>{{ job.createdAt | date: 'medium' }}</span>
+        <span>{{ job.format }}</span>
+        <span>{{ job.status }}</span>
+        @if (job.downloadUrl) {
+          <a [href]="job.downloadUrl" target="_blank" rel="noopener">{{ t('organization.export.download', 'Download') }}</a>
+        }
+      </li>
+    }
+  </ul>
+</section>

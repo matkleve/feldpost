@@ -1,0 +1,38 @@
+<section class="org-section">
+  <header class="org-section__header">
+    <h1>{{ t('organization.billing.title', 'Billing') }}</h1>
+    <p>{{ t('organization.billing.subtitle', 'Current plan and invoice history.') }}</p>
+  </header>
+
+  @if (subscription(); as sub) {
+    <div class="org-billing__plan">
+      <h2>{{ sub.planName }}</h2>
+      <p>{{ t('organization.billing.status', 'Status') }}: {{ sub.status }}</p>
+      <p>{{ t('organization.billing.storage', 'Storage limit') }}: {{ sub.storageLimitMb }} MB</p>
+      <p>{{ t('organization.billing.members', 'Member limit') }}: {{ sub.memberLimit }}</p>
+    </div>
+  }
+
+  <table class="org-billing__table">
+    <thead>
+      <tr>
+        <th>{{ t('organization.billing.invoice_date', 'Date') }}</th>
+        <th>{{ t('organization.billing.invoice_amount', 'Amount') }}</th>
+        <th>{{ t('organization.billing.invoice_status', 'Status') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (invoice of invoices(); track invoice.id) {
+        <tr>
+          <td>{{ invoice.issuedAt | date: 'mediumDate' }}</td>
+          <td>{{ invoice.amountCents / 100 | number: '1.2-2' }} {{ invoice.currency }}</td>
+          <td>{{ invoice.status }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="3">{{ t('organization.billing.no_invoices', 'No invoices yet.') }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

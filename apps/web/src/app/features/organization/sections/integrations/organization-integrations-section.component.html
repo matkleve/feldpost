@@ -1,0 +1,33 @@
+<section class="org-section">
+  <header class="org-section__header">
+    <h1>{{ t('organization.integrations.title', 'API keys') }}</h1>
+    <p>{{ t('organization.integrations.subtitle', 'Generate and revoke integration keys for your organization.') }}</p>
+  </header>
+
+  @if (revealedKey(); as key) {
+    <div class="org-integrations__revealed" role="status">
+      <p>{{ t('organization.integrations.copy_once', 'Copy this key now — it will not be shown again.') }}</p>
+      <code>{{ key }}</code>
+    </div>
+  }
+
+  <form class="org-section__form" (ngSubmit)="onCreateKey()">
+    <div hlmFormField>
+      <label hlmLabel for="api-key-name">{{ t('organization.integrations.key_name', 'Key name') }}</label>
+      <input hlmInput id="api-key-name" [ngModel]="newKeyName()" (ngModelChange)="newKeyName.set($event)" name="keyName" />
+    </div>
+    <button hlmBtn type="submit">{{ t('organization.integrations.generate', 'Generate key') }}</button>
+  </form>
+
+  <ul class="org-integrations__list">
+    @for (key of apiKeys(); track key.id) {
+      <li>
+        <span>{{ key.name }}</span>
+        <code>{{ key.keyPrefix }}…</code>
+        <button hlmBtn variant="outline" type="button" (click)="onRevoke(key.id)">
+          {{ t('organization.integrations.revoke', 'Revoke') }}
+        </button>
+      </li>
+    }
+  </ul>
+</section>

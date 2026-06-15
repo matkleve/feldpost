@@ -141,6 +141,12 @@ export function toDateInputValue(date: Date | null): string {
   return `${y}-${m}-${d}`;
 }
 
+/** Locale-aware short date for timespace display fields (follows app language, not OS default). */
+export function formatTimespaceDisplayDate(date: Date | null, locale: string): string {
+  if (!date) return '';
+  return date.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 export function parseDateInputValue(value: string): Date | null {
   if (!value) return null;
   const parsed = Date.parse(`${value}T00:00:00.000Z`);

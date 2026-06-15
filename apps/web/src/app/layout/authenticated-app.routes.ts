@@ -11,6 +11,8 @@ import {
   mapShellMatcher,
   mediaShellMatcher,
   projectsShellMatcher,
+  organizationShellMatcher,
+  colleaguesShellMatcher,
 } from './authenticated-shell-matchers';
 
 const loadShellRoutePlaceholder = () =>
@@ -21,6 +23,12 @@ const loadMedia = () =>
 
 const loadProjects = () =>
   import('../features/projects/page/projects-page.component').then((m) => m.ProjectsPageComponent);
+
+const loadOrganization = () =>
+  import('../features/organization/page/organization-page.component').then((m) => m.OrganizationPageComponent);
+
+const loadColleagues = () =>
+  import('../features/colleagues/page/colleagues-page.component').then((m) => m.ColleaguesPageComponent);
 
 export const AUTHENTICATED_APP_ROUTES: Routes = [
   {
@@ -43,6 +51,14 @@ export const AUTHENTICATED_APP_ROUTES: Routes = [
       {
         matcher: projectsShellMatcher,
         loadComponent: loadProjects,
+      },
+      {
+        matcher: colleaguesShellMatcher,
+        loadComponent: loadColleagues,
+      },
+      {
+        matcher: organizationShellMatcher,
+        loadComponent: loadOrganization,
       },
       {
         path: 'settings/:section/:subsection',

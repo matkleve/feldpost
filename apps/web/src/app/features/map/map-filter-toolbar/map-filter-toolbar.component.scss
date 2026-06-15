@@ -25,9 +25,19 @@
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('map-filter-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('map-filter-toolbar');
 
-  // Frosted chrome on triggers to match search bar / map floating controls.
+  // Closed triggers: solid card chrome (opaque), not frosted — matches map floating control hierarchy.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .map-filter-toolbar__menu-trigger {
+    background: var(--card);
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  // Open dropdown trigger: frosted glass like search bar shell.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .map-filter-toolbar__menu-trigger--open {
     @include frosted-chrome.surface;
   }
 }

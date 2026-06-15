@@ -1,0 +1,57 @@
+<section class="chat-area">
+  <header class="chat-area__header">
+    <h1>{{ channelTitle(channel()) }}</h1>
+    <div class="chat-area__search">
+      <input
+        type="search"
+        [placeholder]="t('colleagues.chat.search', 'Search messages')"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        (keydown.enter)="onSearch()"
+      />
+      <button hlmBtn variant="outline" type="button" (click)="onSearch()">
+        {{ t('colleagues.chat.search_button', 'Search') }}
+      </button>
+    </div>
+  </header>
+
+  <div class="chat-area__messages" role="log" aria-live="polite">
+    @for (message of messages(); track message.id) {
+      <article class="chat-area__message">
+        <header>
+          <strong>{{ message.authorName ?? t('colleagues.chat.unknown_author', 'Colleague') }}</strong>
+          <time>{{ message.createdAt | date: 'short' }}</time>
+          @if (message.editedAt) {
+            <span class="chat-area__edited">{{ t('colleagues.chat.edited', 'edited') }}</span>
+          }
+        </header>
+        <p>{{ message.content }}</p>
+        <button type="button" class="chat-area__reply" (click)="onReply(message.id)">
+          {{ t('colleagues.chat.reply', 'Reply in thread') }}
+        </button>
+      </article>
+    } @empty {
+      <p class="chat-area__empty">{{ t('colleagues.chat.empty', 'No messages yet. Say hello.') }}</p>
+    }
+  </div>
+
+  @if (typingUserIds().size > 0) {
+    <p class="chat-area__typing">{{ t('colleagues.chat.typing', 'Someone is typing…') }}</p>
+  }
+
+  @if (threadParentId()) {
+    <p class="chat-area__thread-hint">{{ t('colleagues.chat.thread_mode', 'Replying in thread') }}</p>
+  }
+
+  <footer class="chat-area__composer">
+    <textarea
+      rows="3"
+      [placeholder]="t('colleagues.chat.placeholder', 'Write a message')"
+      [ngModel]="draft()"
+      (ngModelChange)="draft.set($event)"
+      (input)="onDraftInput()"
+      (keydown.enter)="$event.preventDefault(); onSend()"
+    ></textarea>
+    <button hlmBtn type="button" (click)="onSend()">{{ t('colleagues.chat.send', 'Send') }}</button>
+  </footer>
+</section>

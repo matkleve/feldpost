@@ -1,0 +1,54 @@
+<aside class="member-detail">
+  <header class="member-detail__header">
+    <h2>{{ member().fullName || t('colleagues.members.unnamed', 'Unnamed') }}</h2>
+    <button type="button" class="member-detail__close" (click)="closed.emit()" [attr.aria-label]="t('common.close', 'Close')">
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  <div class="member-detail__avatar">{{ member().fullName.charAt(0).toUpperCase() || '?' }}</div>
+
+  <dl class="member-detail__meta">
+    <div>
+      <dt>{{ t('colleagues.member.role', 'Role') }}</dt>
+      <dd>
+        @if (canManage()) {
+          <select [value]="member().roleId" (change)="onRoleChange($any($event.target).value)">
+            @for (role of assignableRoles(); track role.id) {
+              <option [value]="role.id">{{ role.displayName }}</option>
+            }
+          </select>
+        } @else {
+          {{ member().roleDisplayName }}
+        }
+      </dd>
+    </div>
+    <div>
+      <dt>{{ t('colleagues.member.joined', 'Joined') }}</dt>
+      <dd>{{ member().createdAt | date: 'mediumDate' }}</dd>
+    </div>
+    @if (member().suspendedAt) {
+      <div>
+        <dt>{{ t('colleagues.member.status', 'Status') }}</dt>
+        <dd>{{ t('colleagues.member.suspended', 'Suspended') }}</dd>
+      </div>
+    }
+  </dl>
+
+  <div class="member-detail__actions">
+    <button hlmBtn type="button" (click)="onMessage()">{{ t('colleagues.member.message', 'Message') }}</button>
+
+    @if (canManage()) {
+      <button hlmBtn variant="outline" type="button" (click)="onSuspendToggle()">
+        @if (member().suspendedAt) {
+          {{ t('colleagues.member.unsuspend', 'Unsuspend') }}
+        } @else {
+          {{ t('colleagues.member.suspend', 'Suspend') }}
+        }
+      </button>
+      <button hlmBtn variant="destructive" type="button" (click)="onRemove()">
+        {{ t('colleagues.member.remove', 'Remove') }}
+      </button>
+    }
+  </div>
+</aside>

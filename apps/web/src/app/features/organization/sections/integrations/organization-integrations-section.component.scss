@@ -1,0 +1,38 @@
+.org-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.org-section__header p {
+  margin: var(--spacing-1) 0 0;
+  color: var(--muted-foreground);
+}
+
+.org-section__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  max-width: 40rem;
+}
+
+.org-integrations__revealed {
+  padding: var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.org-integrations__list {
+  margin: var(--spacing-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.org-integrations__list li {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--border);
+}

@@ -1858,8 +1858,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   onQrInviteCommandRequested(): void {
-    void this.router.navigateByUrl('/map/settings/invite-management/qr');
-    this.settingsPaneService.openInviteManagementFromCommand('worker');
+    void this.router.navigateByUrl('/colleagues?tab=invites');
   }
 
   /** Closes the Image Detail View and returns to the thumbnail grid. */

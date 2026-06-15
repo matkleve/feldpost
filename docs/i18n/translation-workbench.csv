@@ -454,6 +454,7 @@ map.filter.button.filter,Filter,apps/web/src/app/features/map/map-filter-toolbar
 map.filter.button.projects,Projects,apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button,Projects,Projekte,Progetti
 map.filter.button.timespace,Timespace,apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button,Timespace,Zeitraum,Periodo
 map.filter.timespace.aria,Time range,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html attr:aria-label,Time range,Zeitraum,Intervallo temporale
+map.filter.timespace.datePlaceholder,—,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.ts empty date display,—,—,—
 map.filter.timespace.from,From,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,From,Von,Da
 map.filter.timespace.to,To,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,To,Bis,A
 map.filter.timespace.chartAria,Media timeline,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html chart aria,Media timeline,Medien-Zeitachse,Cronologia media

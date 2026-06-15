@@ -73,6 +73,8 @@ export class NavComponent {
     { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
     { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
     { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
+    { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
+    { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
   ]);
 
   /** Map shell uses `/`, `/map`, and `/map/settings/...` — not only `/`. */
@@ -86,6 +88,12 @@ export class NavComponent {
     }
     if (item.route === '/projects') {
       return shell === 'projects';
+    }
+    if (item.route === '/colleagues') {
+      return shell === 'colleagues';
+    }
+    if (item.route === '/organization') {
+      return shell === 'organization';
     }
     return false;
   }

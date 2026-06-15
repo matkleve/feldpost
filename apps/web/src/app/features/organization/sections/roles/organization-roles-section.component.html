@@ -1,0 +1,86 @@
+<section class="org-section">
+  <header class="org-section__header">
+    <h1>{{ t('organization.roles.title', 'Roles & permissions') }}</h1>
+    <p>{{ t('organization.roles.subtitle', 'Define hierarchy and capabilities for your team.') }}</p>
+  </header>
+
+  <div class="org-roles">
+    <aside class="org-roles__list" aria-label="{{ t('organization.roles.list', 'Role list') }}">
+      @for (role of roles(); track role.id) {
+        <button
+          type="button"
+          class="org-roles__card"
+          [class.org-roles__card--active]="selectedRoleId() === role.id"
+          (click)="onRoleClick(role.id)"
+        >
+          <span class="org-roles__badge" [style.background]="role.color ?? 'var(--muted)'"></span>
+          <span class="org-roles__name">{{ role.displayName }}</span>
+          <span class="org-roles__level">L{{ role.level }}</span>
+        </button>
+      }
+    </aside>
+
+    <div class="org-roles__detail">
+      @if (activeRole(); as role) {
+        <header class="org-roles__detail-header">
+          <h2>{{ role.displayName }}</h2>
+          @if (!role.isSystem) {
+            <button hlmBtn variant="outline" type="button" [disabled]="saving()" (click)="onDeleteRole(role)">
+              {{ t('organization.roles.delete', 'Delete role') }}
+            </button>
+          }
+        </header>
+
+        <div class="org-roles__permissions">
+          @for (entry of groupedPermissions() | keyvalue; track entry.key) {
+            <section class="org-roles__permission-group">
+              <h3>{{ entry.key }}</h3>
+              <ul>
+                @for (permission of entry.value; track permission.id) {
+                  <li>
+                    <label>
+                      <input
+                        type="checkbox"
+                        [checked]="isPermissionChecked(permission.id)"
+                        [disabled]="role.isSystem && role.name === 'admin'"
+                        (change)="onPermissionToggle(permission.id, $any($event.target).checked)"
+                      />
+                      <span>{{ permission.description }}</span>
+                    </label>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        </div>
+
+        <button hlmBtn type="button" [disabled]="saving()" (click)="onSavePermissions()">
+          {{ t('organization.roles.save_permissions', 'Save permissions') }}
+        </button>
+      } @else {
+        <p class="org-roles__placeholder">{{ t('organization.roles.select', 'Select a role to edit permissions.') }}</p>
+      }
+    </div>
+  </div>
+
+  <section class="org-roles__create">
+    <h2>{{ t('organization.roles.create', 'Create role') }}</h2>
+    <div class="org-section__grid">
+      <div hlmFormField>
+        <label hlmLabel for="role-name">{{ t('organization.roles.internal_name', 'Internal name') }}</label>
+        <input hlmInput id="role-name" [ngModel]="newRoleName()" (ngModelChange)="newRoleName.set($event)" />
+      </div>
+      <div hlmFormField>
+        <label hlmLabel for="role-display">{{ t('organization.roles.display_name', 'Display name') }}</label>
+        <input hlmInput id="role-display" [ngModel]="newRoleDisplayName()" (ngModelChange)="newRoleDisplayName.set($event)" />
+      </div>
+      <div hlmFormField>
+        <label hlmLabel for="role-level">{{ t('organization.roles.level', 'Level') }}</label>
+        <input hlmInput id="role-level" type="number" min="1" max="99" [ngModel]="newRoleLevel()" (ngModelChange)="newRoleLevel.set(+$event)" />
+      </div>
+    </div>
+    <button hlmBtn type="button" [disabled]="saving()" (click)="onCreateRole()">
+      {{ t('organization.roles.create_button', 'Create role') }}
+    </button>
+  </section>
+</section>

@@ -1,6 +1,6 @@
 import { primaryPathSegments } from '../core/settings-pane/settings-url.helpers';
 
-export type AuthenticatedActiveShell = 'map' | 'media' | 'projects';
+export type AuthenticatedActiveShell = 'map' | 'media' | 'projects' | 'colleagues' | 'organization';
 
 /**
  * Resolves which authenticated shell is active from the primary router URL.
@@ -19,6 +19,14 @@ export function resolveAuthenticatedActiveShell(url: string): AuthenticatedActiv
 
   if (head === 'projects') {
     return 'projects';
+  }
+
+  if (head === 'colleagues') {
+    return 'colleagues';
+  }
+
+  if (head === 'organization') {
+    return 'organization';
   }
 
   return 'map';

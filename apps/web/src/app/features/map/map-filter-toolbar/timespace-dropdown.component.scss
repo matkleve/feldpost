@@ -46,24 +46,66 @@
     color: var(--muted-foreground);
   }
 
-  // Compact date control — browser-native calendar picker on focus/click.
+  // Locale-formatted display + invisible native date input for picker.
   // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-input {
+  .timespace-dropdown__date-control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
     width: 100%;
     min-width: 0;
     height: 1.75rem;
-    padding-block: 0;
+    padding-inline: var(--spacing-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    box-sizing: border-box;
+  }
+
+  // Formatted date text from I18nService locale (not OS/browser default).
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__date-display {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--font-size-2xs);
+    color: var(--foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+
+  // Native picker stretched over control; display text shows locale-formatted value.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__date-input--native {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
     font-size: var(--font-size-2xs);
   }
 
-  // Histogram track — owns stacking context for bars + selection overlay.
+  // Trailing calendar affordance on compact date control.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__date-icon {
+    flex-shrink: 0;
+    font-size: var(--font-size-sm);
+    color: var(--muted-foreground);
+    pointer-events: none;
+  }
+
+  // Histogram track — fixed height so bar px heights resolve.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__chart {
     position: relative;
     width: 100%;
-    min-height: 3.25rem;
-    display: flex;
-    align-items: flex-end;
+    height: 3.25rem;
     padding-block: var(--spacing-1);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
@@ -72,18 +114,17 @@
     touch-action: none;
     user-select: none;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
-  // Bar row — narrow vertical strokes across the full track width.
+  // Bar row — fills chart interior; bars align to bottom edge.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__bars {
+    position: absolute;
+    inset: var(--spacing-1);
     display: flex;
     align-items: flex-end;
     gap: 1px;
-    width: 100%;
-    height: 100%;
-    min-height: 2.5rem;
-    padding-inline: var(--spacing-1);
     box-sizing: border-box;
   }
 
@@ -95,8 +136,14 @@
     max-width: 4px;
     align-self: flex-end;
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--chart-1) 82%, transparent);
+    background: color-mix(in srgb, var(--chart-1) 88%, transparent);
     transition: height var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+  // Zero-count bins stay invisible but keep flex slot for hit-testing symmetry.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__bar--empty {
+    background: transparent;
   }
 
   // Selected time window overlay on the histogram track.
@@ -109,6 +156,7 @@
     background: color-mix(in srgb, var(--chart-1) 12%, transparent);
     pointer-events: none;
     box-sizing: border-box;
+    z-index: 1;
   }
 
   // Committed / interacting selection uses primary emphasis.
@@ -121,7 +169,12 @@
   // Loading / empty / error status copy centered in chart track.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__status {
-    margin: auto;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
     padding-inline: var(--spacing-2);
     font-size: var(--font-size-2xs);
     color: var(--muted-foreground);
