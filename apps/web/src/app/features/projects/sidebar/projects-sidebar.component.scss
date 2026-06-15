@@ -83,6 +83,37 @@
   }
 }
 
+// Scrollable project groups — starred section + recency headings.
+// @see docs/design/page-rail-grid.md
+.projects-sidebar__list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+// Small uppercase group label above compact rail lists.
+// @see docs/design/page-rail-grid.md
+.projects-sidebar__group-heading {
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-2) var(--spacing-1);
+  color: var(--muted-foreground);
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.projects-sidebar__status {
+  margin: 0;
+  padding: var(--spacing-3);
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
 .projects-sidebar__footer {
   flex-shrink: 0;
   padding-top: var(--spacing-2);

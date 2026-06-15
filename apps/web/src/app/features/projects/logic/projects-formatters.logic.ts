@@ -1,6 +1,35 @@
 import type { ProjectColorKey, ProjectListItem, ProjectSummary } from '../../../core/projects/projects.types';
 import type { PendingProjectAction } from '../page/projects-page.config';
 
+export type ProjectSidebarActivityGroupKey = 'today' | 'lastWeek' | 'lastMonth' | 'older';
+
+export const PROJECT_SIDEBAR_ACTIVITY_GROUP_ORDER: readonly ProjectSidebarActivityGroupKey[] = [
+  'today',
+  'lastWeek',
+  'lastMonth',
+  'older',
+];
+
+/** Buckets sidebar projects by recency of last activity (or updatedAt fallback). */
+export function projectSidebarActivityGroupKey(
+  lastActivity: string | null,
+  updatedAt: string,
+): ProjectSidebarActivityGroupKey {
+  const value = lastActivity ?? updatedAt;
+  const deltaMs = Date.now() - new Date(value).getTime();
+  const days = Math.floor(deltaMs / (24 * 60 * 60 * 1000));
+  if (days <= 0) {
+    return 'today';
+  }
+  if (days <= 7) {
+    return 'lastWeek';
+  }
+  if (days <= 30) {
+    return 'lastMonth';
+  }
+  return 'older';
+}
+
 export function pendingActionTitle(
   action: PendingProjectAction,
   t: (key: string, fallback?: string) => string,

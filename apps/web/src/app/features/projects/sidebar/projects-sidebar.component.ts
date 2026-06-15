@@ -4,6 +4,11 @@ import type { ProjectListItem } from '../../../core/projects/projects.types';
 import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { colorTokenFor } from '../page/projects-page.logic';
+import {
+  PROJECT_SIDEBAR_ACTIVITY_GROUP_ORDER,
+  projectSidebarActivityGroupKey,
+  type ProjectSidebarActivityGroupKey,
+} from '../logic/projects-formatters.logic';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { PageRailTitleComponent } from '../../../shared/page-rail-title';
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
@@ -19,6 +24,12 @@ import {
 } from '../../../shared/dropdown-trigger/sort/sort-dropdown.component';
 
 type ProjectsSidebarDropdown = 'filter' | 'sort' | null;
+
+interface ProjectSidebarTimeGroup {
+  key: ProjectSidebarActivityGroupKey;
+  label: string;
+  items: RailSelectListItem[];
+}
 
 @Component({
   selector: 'app-projects-sidebar',
@@ -41,7 +52,7 @@ type ProjectsSidebarDropdown = 'filter' | 'sort' | null;
 })
 export class ProjectsSidebarComponent {
   private readonly i18nService = inject(I18nService);
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   readonly projects = input<ProjectListItem[]>([]);
   readonly selectedProjectId = input<string | null>(null);
@@ -68,6 +79,9 @@ export class ProjectsSidebarComponent {
   readonly activeDropdown = signal<ProjectsSidebarDropdown>(null);
   readonly dropdownAnchor = signal<HTMLElement | null>(null);
   readonly isDragging = signal(false);
+  readonly starredProjectIds = signal<Set<string>>(this.readStarredProjectIds());
+
+  private static readonly STARRED_PROJECTS_STORAGE_KEY = 'feldpost.projects.starred';
 
   readonly toolbarButtons = computed(() => [
     {
@@ -84,55 +98,45 @@ export class ProjectsSidebarComponent {
     },
   ]);
 
-  readonly projectListItems = computed<RailSelectListItem[]>(() =>
-    this.projects().map((project) => {
-      const actions: RailSelectListItem['actions'] =
-        project.status === 'active'
-          ? [
-              {
-                type: 'button',
-                action: {
-                  id: 'archive',
-                  icon: 'inventory_2',
-                  ariaLabel: this.t('projects.page.action.archive', 'Archive'),
-                  title: this.t('projects.page.action.archive', 'Archive'),
-                },
-              },
-            ]
-          : [
-              {
-                type: 'button',
-                action: {
-                  id: 'restore',
-                  icon: 'unarchive',
-                  ariaLabel: this.t('projects.page.action.restore', 'Restore'),
-                  title: this.t('projects.page.action.restore', 'Restore'),
-                },
-              },
-              {
-                type: 'confirm',
-                action: {
-                  id: 'delete',
-                  idleIcon: 'delete',
-                  armedIcon: 'warning',
-                  initialAriaKey: 'projects.sidebar.action.delete',
-                  initialAriaFallback: 'Delete project',
-                  initialTitleKey: 'projects.sidebar.action.delete',
-                  initialTitleFallback: 'Delete project',
-                  confirmAriaKey: 'projects.sidebar.action.confirmDelete',
-                  confirmAriaFallback: 'Confirm delete project',
-                  tone: 'danger',
-                },
-              },
-            ];
+  readonly starredProjectItems = computed(() =>
+    this.projects()
+      .filter((project) => this.starredProjectIds().has(project.id))
+      .map((project) => this.toProjectListItem(project)),
+  );
 
-      return {
-        id: project.id,
-        label: project.name,
-        leading: { kind: 'dot', color: colorTokenFor(project.colorKey) },
-        actions,
-      };
-    }),
+  readonly projectTimeGroups = computed((): ProjectSidebarTimeGroup[] => {
+    const starred = this.starredProjectIds();
+    const buckets = new Map<ProjectSidebarActivityGroupKey, ProjectListItem[]>();
+
+    for (const project of this.projects()) {
+      if (starred.has(project.id)) {
+        continue;
+      }
+      const key = projectSidebarActivityGroupKey(project.lastActivity, project.updatedAt);
+      const list = buckets.get(key) ?? [];
+      list.push(project);
+      buckets.set(key, list);
+    }
+
+    return PROJECT_SIDEBAR_ACTIVITY_GROUP_ORDER.flatMap((key) => {
+      const projectsInGroup = buckets.get(key);
+      if (!projectsInGroup?.length) {
+        return [];
+      }
+      return [
+        {
+          key,
+          label: this.activityGroupLabel(key),
+          items: projectsInGroup.map((project) => this.toProjectListItem(project)),
+        },
+      ];
+    });
+  });
+
+  readonly hasVisibleProjects = computed(
+    () =>
+      this.starredProjectItems().length > 0 ||
+      this.projectTimeGroups().some((group) => group.items.length > 0),
   );
 
   readonly projectListEmptyMessage = computed(() =>
@@ -147,6 +151,9 @@ export class ProjectsSidebarComponent {
 
   onProjectListAction(event: { itemId: string; actionId: string }): void {
     switch (event.actionId) {
+      case 'star':
+        this.toggleProjectStar(event.itemId);
+        break;
       case 'archive':
         this.projectArchiveRequested.emit(event.itemId);
         break;
@@ -181,5 +188,120 @@ export class ProjectsSidebarComponent {
 
   onSortChanged(sorts: SortConfig[]): void {
     this.sortChanged.emit(sorts);
+  }
+
+  private activityGroupLabel(key: ProjectSidebarActivityGroupKey): string {
+    switch (key) {
+      case 'today':
+        return this.t('projects.sidebar.group.today', 'Today');
+      case 'lastWeek':
+        return this.t('projects.sidebar.group.lastWeek', 'Last week');
+      case 'lastMonth':
+        return this.t('projects.sidebar.group.lastMonth', 'Last month');
+      case 'older':
+        return this.t('projects.sidebar.group.older', 'Older');
+    }
+  }
+
+  private toProjectListItem(project: ProjectListItem): RailSelectListItem {
+    const isStarred = this.starredProjectIds().has(project.id);
+    const actions: RailSelectListItem['actions'] = [
+      {
+        type: 'button',
+        action: {
+          id: 'star',
+          icon: isStarred ? 'star' : 'star_border',
+          alwaysVisible: isStarred,
+          active: isStarred,
+          ariaLabel: isStarred
+            ? this.t('projects.sidebar.action.unstar', 'Remove from favorites')
+            : this.t('projects.sidebar.action.star', 'Add to favorites'),
+          title: isStarred
+            ? this.t('projects.sidebar.action.unstar', 'Remove from favorites')
+            : this.t('projects.sidebar.action.star', 'Add to favorites'),
+        },
+      },
+      ...(project.status === 'active'
+        ? [
+            {
+              type: 'button' as const,
+              action: {
+                id: 'archive',
+                icon: 'inventory_2',
+                ariaLabel: this.t('projects.page.action.archive', 'Archive'),
+                title: this.t('projects.page.action.archive', 'Archive'),
+              },
+            },
+          ]
+        : [
+            {
+              type: 'button' as const,
+              action: {
+                id: 'restore',
+                icon: 'unarchive',
+                ariaLabel: this.t('projects.page.action.restore', 'Restore'),
+                title: this.t('projects.page.action.restore', 'Restore'),
+              },
+            },
+            {
+              type: 'confirm' as const,
+              action: {
+                id: 'delete',
+                idleIcon: 'delete',
+                armedIcon: 'warning',
+                initialAriaKey: 'projects.sidebar.action.delete',
+                initialAriaFallback: 'Delete project',
+                initialTitleKey: 'projects.sidebar.action.delete',
+                initialTitleFallback: 'Delete project',
+                confirmAriaKey: 'projects.sidebar.action.confirmDelete',
+                confirmAriaFallback: 'Confirm delete project',
+                tone: 'danger' as const,
+              },
+            },
+          ]),
+    ];
+
+    return {
+      id: project.id,
+      label: project.name,
+      leading: { kind: 'dot', color: colorTokenFor(project.colorKey) },
+      actions,
+    };
+  }
+
+  private toggleProjectStar(projectId: string): void {
+    this.starredProjectIds.update((current) => {
+      const next = new Set(current);
+      if (next.has(projectId)) {
+        next.delete(projectId);
+      } else {
+        next.add(projectId);
+      }
+      this.persistStarredProjectIds(next);
+      return next;
+    });
+  }
+
+  private readStarredProjectIds(): Set<string> {
+    try {
+      const raw = localStorage.getItem(ProjectsSidebarComponent.STARRED_PROJECTS_STORAGE_KEY);
+      if (!raw) {
+        return new Set();
+      }
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) {
+        return new Set();
+      }
+      return new Set(parsed.filter((id): id is string => typeof id === 'string'));
+    } catch {
+      return new Set();
+    }
+  }
+
+  private persistStarredProjectIds(ids: Set<string>): void {
+    localStorage.setItem(
+      ProjectsSidebarComponent.STARRED_PROJECTS_STORAGE_KEY,
+      JSON.stringify([...ids]),
+    );
   }
 }

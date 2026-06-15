@@ -106,14 +106,12 @@ export class MemberListComponent {
 
       if (this.canManageChannels()) {
         actions.push({
-          type: 'confirm',
+          type: 'button',
           action: {
             id: 'archive',
-            idleIcon: 'archive',
-            armedIcon: 'check',
-            initialAriaKey: 'colleagues.channel.archive',
-            initialAriaFallback: 'Archive channel',
-            tone: 'danger',
+            icon: 'archive',
+            ariaLabel: this.t('colleagues.channel.archive', 'Archive channel'),
+            title: this.t('colleagues.channel.archive', 'Archive channel'),
           },
         });
       }
@@ -149,7 +147,6 @@ export class MemberListComponent {
 
   onMemberSelected(memberId: string): void {
     this.memberSelected.emit(memberId);
-    this.memberMessageRequested.emit(memberId);
   }
 
   onChannelAction(event: { itemId: string; actionId: string }): void {

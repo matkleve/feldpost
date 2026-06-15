@@ -218,7 +218,8 @@ export class ColleaguesPageComponent implements OnDestroy {
 
   onMemberSelected(memberId: string): void {
     this.creatingChannel.set(false);
-    this.selectedMemberId.set(memberId);
+    this.channelDetailDismissed.set(true);
+    void this.openDirectMessage(memberId);
   }
 
   onMemberPanelClosed(): void {
@@ -247,14 +248,26 @@ export class ColleaguesPageComponent implements OnDestroy {
   }
 
   async onMessageMember(memberId: string): Promise<void> {
+    await this.openDirectMessage(memberId);
+  }
+
+  private async openDirectMessage(memberId: string): Promise<void> {
+    this.selectedMemberId.set(memberId);
     const result = await this.chatService.findOrCreateDm(memberId);
+    if (result.error) {
+      this.toastService.show({
+        type: 'error',
+        message: this.t('colleagues.chat.error.open_dm', 'Could not open direct message.'),
+        detail: result.error.message,
+      });
+      return;
+    }
     if (result.data) {
       this.channels.update((channels) => {
         if (channels.some((c) => c.id === result.data!.id)) return channels;
         return [...channels, result.data!];
       });
       await this.selectChannel(result.data.id);
-      this.selectedMemberId.set(memberId);
     }
   }
 

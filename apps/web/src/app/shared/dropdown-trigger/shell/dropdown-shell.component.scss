@@ -45,6 +45,7 @@
     max-width: min(40rem, calc(100vw - 2rem));
     min-width: min(32rem, calc(100vw - 2rem));
     max-height: min(calc(18rem * 1.6), calc(100vh - 2rem));
+    min-height: 0;
   }
 
   // Timespace: horizontal histogram strip — wider than standard menus.

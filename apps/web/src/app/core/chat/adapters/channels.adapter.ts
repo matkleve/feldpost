@@ -100,41 +100,27 @@ export class ChatChannelsAdapter {
   async findOrCreateDm(
     userId: string,
     otherUserId: string,
-    orgId: string,
+    _orgId: string,
   ): Promise<{ data: ChatChannel | null; error: Error | null }> {
-    const { data: channels, error } = await this.supabase.client
-      .from('chat_channels')
-      .select('*, chat_channel_members(user_id)')
-      .eq('type', 'dm');
+    const { data: channelId, error } = await this.supabase.client.rpc('find_or_create_dm_channel', {
+      p_other_user_id: otherUserId,
+    });
 
-    if (error) {
-      return { data: null, error: new Error(error.message) };
+    if (error || !channelId) {
+      return { data: null, error: new Error(error?.message ?? 'Could not open direct message.') };
     }
 
-    for (const channel of channels ?? []) {
-      const members = (channel.chat_channel_members as Array<{ user_id: string }>) ?? [];
-      const memberIds = new Set(members.map((m) => m.user_id));
-      if (memberIds.has(userId) && memberIds.has(otherUserId) && memberIds.size === 2) {
-        return { data: toChannel(channel), error: null };
-      }
-    }
-
-    const { data: created, error: createError } = await this.supabase.client
+    const { data: channel, error: loadError } = await this.supabase.client
       .from('chat_channels')
-      .insert({ type: 'dm', created_by: userId, organization_id: orgId })
       .select('*')
+      .eq('id', channelId as string)
       .single();
 
-    if (createError || !created) {
-      return { data: null, error: new Error(createError?.message ?? 'Could not create DM.') };
+    if (loadError || !channel) {
+      return { data: null, error: new Error(loadError?.message ?? 'Could not load direct message.') };
     }
 
-    await this.supabase.client.from('chat_channel_members').insert([
-      { channel_id: created.id, user_id: userId, role: 'owner' },
-      { channel_id: created.id, user_id: otherUserId, role: 'member' },
-    ]);
-
-    return { data: toChannel(created), error: null };
+    return { data: toChannel(channel), error: null };
   }
 
   async markChannelRead(channelId: string, userId: string): Promise<void> {

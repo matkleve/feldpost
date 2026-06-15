@@ -1,14 +1,15 @@
 <div class="filter-dropdown-host block w-max max-w-full min-w-0">
   <app-standard-dropdown
     class="filter-dropdown"
-    [style.--std-dropdown-min-height]="'7rem'"
+    [style.--std-dropdown-min-height]="'0'"
     [showSearch]="false"
     [scrollMode]="'none'"
     [actionLabel]="t('workspace.filter.action.add', 'Add a filter')"
     (actionRequested)="filterService.addRule()"
     (itemsScroll)="onRulesScroll()"
   >
-    <div class="filter-dropdown__body min-w-0 w-max max-w-full" dropdown-items>
+    <div class="filter-dropdown__items-band min-w-0 w-max max-w-full" dropdown-items>
+      <div class="filter-dropdown__body">
       <div class="filter-dropdown__size-anchor filter-rule" aria-hidden="true">
         <button
           hlmBtn
@@ -196,6 +197,7 @@
           }
         </div>
       }
+      </div>
     </div>
   </app-standard-dropdown>
 

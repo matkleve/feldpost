@@ -21300,32 +21300,32 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'colleagues.chat.placeholder_channel', 'Message #{name}', 'en', 'colleagues chat channel composer placeholder')
+values (null, 'colleagues.chat.error.open_dm', 'Could not open direct message.', 'en', 'colleagues open DM error')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Message #{name}', 'published'
+select t.id, 'en', 'Could not open direct message.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'colleagues.chat.placeholder_channel'
+where t.organization_id is null and t.key = 'colleagues.chat.error.open_dm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Nachricht in #{name}', 'published'
+select t.id, 'de', 'Direktnachricht konnte nicht geöffnet werden.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'colleagues.chat.placeholder_channel'
+where t.organization_id is null and t.key = 'colleagues.chat.error.open_dm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Messaggio in #{name}', 'published'
+select t.id, 'it', 'Impossibile aprire il messaggio diretto.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'colleagues.chat.placeholder_channel'
+where t.organization_id is null and t.key = 'colleagues.chat.error.open_dm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -22659,6 +22659,223 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', '{count} progetti', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.count.multi'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.section.starred', 'Starred', 'en', 'apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html section heading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Starred', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.section.starred'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Favoriten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.section.starred'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Preferiti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.section.starred'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.group.today', 'Today', 'en', 'apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Today', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.today'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Heute', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.today'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Oggi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.today'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.group.lastWeek', 'Last week', 'en', 'apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Last week', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.lastWeek'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Letzte Woche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.lastWeek'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Settimana scorsa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.lastWeek'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.group.lastMonth', 'Last month', 'en', 'apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Last month', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.lastMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Letzter Monat', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.lastMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Mese scorso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.lastMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.group.older', 'Older', 'en', 'apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Older', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.older'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Älter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.older'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Più vecchi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.group.older'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.action.star', 'Add to favorites', 'en', 'apps/web/src/app/features/projects/sidebar/projects-sidebar.component.ts star action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add to favorites', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.star'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zu Favoriten hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.star'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi ai preferiti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.star'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.sidebar.action.unstar', 'Remove from favorites', 'en', 'apps/web/src/app/features/projects/sidebar/projects-sidebar.component.ts unstar action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove from favorites', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.unstar'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus Favoriten entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.unstar'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi dai preferiti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.sidebar.action.unstar'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

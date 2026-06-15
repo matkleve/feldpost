@@ -686,7 +686,7 @@ colleagues.chat.empty,No messages yet. Say hello.,colleagues chat empty state,No
 colleagues.chat.typing,Someone is typing…,colleagues chat typing indicator,Someone is typing…,Jemand tippt…,Qualcuno sta scrivendo…
 colleagues.chat.placeholder,Write a message,colleagues chat composer placeholder,Write a message,Nachricht schreiben,Scrivi un messaggio
 colleagues.chat.placeholder_dm,Message {name},colleagues chat DM composer placeholder,Message {name},Nachricht an {name},Messaggio a {name}
-colleagues.chat.placeholder_channel,Message #{name},colleagues chat channel composer placeholder,Message #{name},Nachricht in #{name},Messaggio in #{name}
+colleagues.chat.error.open_dm,Could not open direct message.,colleagues open DM error,Could not open direct message.,Direktnachricht konnte nicht geöffnet werden.,Impossibile aprire il messaggio diretto.
 colleagues.chat.send,Send,colleagues chat send button,Send,Senden,Invia
 colleagues.chat.no_channel,Select a channel,colleagues chat no channel selected,Select a channel,Kanal auswählen,Seleziona un canale
 colleagues.chat.dm,Direct message,colleagues chat DM title,Direct message,Direktnachricht,Messaggio diretto
@@ -730,6 +730,13 @@ projects.page.list.aria,Projects list,apps/web/src/app/features/projects/project
 projects.page.cards.aria,Projects card grid,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Projects card grid,Projektkartenraster,Griglia schede progetti
 projects.page.count.single,1 project,apps/web/src/app/features/projects/projects-page.component.ts computed-label,1 project,1 Projekt,1 progetto
 projects.page.count.multi,{count} projects,apps/web/src/app/features/projects/projects-page.component.ts computed-label,{count} projects,{count} Projekte,{count} progetti
+projects.sidebar.section.starred,Starred,apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html section heading,Starred,Favoriten,Preferiti
+projects.sidebar.group.today,Today,apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading,Today,Heute,Oggi
+projects.sidebar.group.lastWeek,Last week,apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading,Last week,Letzte Woche,Settimana scorsa
+projects.sidebar.group.lastMonth,Last month,apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading,Last month,Letzter Monat,Mese scorso
+projects.sidebar.group.older,Older,apps/web/src/app/features/projects/sidebar/projects-sidebar.component.html time group heading,Older,Älter,Più vecchi
+projects.sidebar.action.star,Add to favorites,apps/web/src/app/features/projects/sidebar/projects-sidebar.component.ts star action,Add to favorites,Zu Favoriten hinzufügen,Aggiungi ai preferiti
+projects.sidebar.action.unstar,Remove from favorites,apps/web/src/app/features/projects/sidebar/projects-sidebar.component.ts unstar action,Remove from favorites,Aus Favoriten entfernen,Rimuovi dai preferiti
 projects.page.relative.noActivity,No activity,apps/web/src/app/features/projects/projects-page.component.ts relative-time,No activity,Keine Aktivitat,Nessuna attivita
 projects.page.relative.today,Today,apps/web/src/app/features/projects/projects-page.component.ts relative-time,Today,Heute,Oggi
 projects.page.relative.yesterday,Yesterday,apps/web/src/app/features/projects/projects-page.component.ts relative-time,Yesterday,Gestern,Ieri

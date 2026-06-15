@@ -56,10 +56,11 @@
   overflow: hidden;
 }
 
-// Filter toolbar: cap rules band here so one scroll host owns `scrollbar-gutter: stable` (see `.standard-dropdown__items`).
+// Filter toolbar: cap rules band; gutter only when overflow (no dead track when idle).
 // @see docs/specs/component/filters/dropdown-system.md
 .standard-dropdown__items.standard-dropdown__items--filter-rules-band {
   max-height: min(18rem, 50vh);
+  scrollbar-gutter: auto;
 }
 
 // Search clear: never `transform` (hlmBtn `[class]` can drop template hooks; `data-*` + `!important` wins over stray utilities).
