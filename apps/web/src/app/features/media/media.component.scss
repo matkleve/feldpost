@@ -1,6 +1,6 @@
 @use '../../shared/dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
 @use '../../shared/dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
-// Scroll owner for /media (parent chain: router-outlet child height 100% + layout min-height 0).
+// Scroll owner for /media (parent chain: router-outlet child height 100% + layout min height 0).
 // @see apps/web/src/styles/layout/app.scss
 :host {
   display: block;
@@ -10,13 +10,6 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-}
-
-// Page padding lives on scrollable content only (upload chrome is layout-fixed top-right).
-// @see docs/specs/page/media-page.md
-.media-page-body {
-  padding: var(--spacing-6);
-  padding-bottom: calc(var(--spacing-8) * 2);
 }
 
 // Container query root for toolbar breakpoints (pane-toolbar host carries class).

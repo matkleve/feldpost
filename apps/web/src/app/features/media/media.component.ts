@@ -18,6 +18,7 @@ import type { OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../shared/ui/toggle-group';
+import { PageGridComponent } from '../../shared/page-grid';
 import { VStackComponent } from '../../shared/containers';
 import { MediaPageHeaderComponent, type MediaPageHeaderState } from './media-page-header.component';
 import { MediaContentComponent, type MediaContentState } from './media-content.component';
@@ -67,6 +68,7 @@ import type { ToolbarDropdown } from '../../shared/workspace-pane/toolbar/worksp
   selector: 'app-media',
   standalone: true,
   imports: [
+    PageGridComponent,
     VStackComponent,
     MediaPageHeaderComponent,
     MediaContentComponent,

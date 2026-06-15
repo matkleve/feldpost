@@ -1,4 +1,4 @@
-// Host clears fixed nav pill; horizontal inset is the outer gutter pair.
+// Host padding matches /media — outer inset; center column is fixed 52rem (content-clamp--list).
 // @see docs/design/page-rail-grid.md
 :host {
   display: block;
@@ -6,35 +6,55 @@
   height: 100%;
   min-height: 0;
   min-width: 0;
-  padding-block: var(--spacing-5);
-  padding-inline: var(--spacing-5);
+  padding-block: var(--spacing-6);
+  padding-inline-end: var(--spacing-6);
   padding-inline-start: 4.5rem;
   overflow: hidden;
 }
 
-// Defines centered rail band: fixed side rails + one growing center track (no inner 1fr gutters).
+// Three tracks: left gutter | fixed center (content-clamp--list) | right gutter.
 // @see docs/design/page-rail-grid.md
 .page-grid {
   --page-grid-left-width: 17.5rem;
   --page-grid-right-width: 20rem;
   --page-grid-center-max: 52rem;
-  --page-grid-band-max: 90rem;
 
   display: grid;
   width: 100%;
-  max-width: var(--page-grid-band-max);
   height: 100%;
   min-height: 0;
   min-width: 0;
-  margin-inline: auto;
+  grid-template-columns: minmax(0, 1fr) var(--page-grid-center-max) minmax(0, 1fr);
   column-gap: var(--spacing-4);
   align-items: stretch;
 }
 
-// Single-column pages cap readable width like content-clamp--list on /media.
+// Left gutter slot — project list sits end-aligned, does not shift the center column.
 // @see docs/design/page-rail-grid.md
-.page-grid--single {
-  max-width: var(--page-grid-center-max);
+.page-grid__rail--left {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  width: var(--page-grid-left-width);
+}
+
+// Canonical content column — same width/position as content-clamp--list on /media.
+// @see docs/design/page-rail-grid.md
+.page-grid__rail--center {
+  grid-column: 2;
+  grid-row: 1;
+  box-sizing: border-box;
+  width: 100%;
+  padding-bottom: calc(var(--spacing-8) * 2);
+}
+
+// Right gutter slot — details panel sits start-aligned beside the center column.
+// @see docs/design/page-rail-grid.md
+.page-grid__rail--right {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: start;
+  width: var(--page-grid-right-width);
 }
 
 // Rail slots participate as flex columns for full-height children.
@@ -45,22 +65,4 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-}
-
-// Left list rail — fixed track width from grid template.
-// @see docs/design/page-rail-grid.md
-.page-grid__rail--left {
-  width: 100%;
-}
-
-// Main content rail — sole flexible track; absorbs band width after fixed rails.
-// @see docs/design/page-rail-grid.md
-.page-grid__rail--center {
-  width: 100%;
-}
-
-// Push details rail — fixed track width from grid template.
-// @see docs/design/page-rail-grid.md
-.page-grid__rail--right {
-  width: 100%;
 }

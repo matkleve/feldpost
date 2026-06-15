@@ -1,8 +1,4 @@
-<div
-  class="page-grid"
-  [class.page-grid--single]="!leftRail()"
-  [style.grid-template-columns]="gridTemplateColumns()"
->
+<div class="page-grid">
   @if (leftRail()) {
     <div class="page-grid__rail page-grid__rail--left">
       <ng-content select="[pageGridLeft]" />

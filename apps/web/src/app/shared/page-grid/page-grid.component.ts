@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
- * Centered page rail grid: flexible gutters, optional left/right rails, growing center.
+ * Centered page rail grid: fixed 52rem center column (aligned with /media), side rails in outer gutters.
  * @see docs/design/page-rail-grid.md
  */
 @Component({
@@ -15,22 +15,9 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   },
 })
 export class PageGridComponent {
-  /** When true, reserves the left rail column for projected `[pageGridLeft]` content. */
+  /** When true, mounts `[pageGridLeft]` in the left gutter column (end-aligned). */
   readonly leftRail = input(true);
 
-  /** When true, reserves the right rail column for projected `[pageGridRight]` content. */
+  /** When true, mounts `[pageGridRight]` in the right gutter column (start-aligned). */
   readonly rightRailOpen = input(false);
-
-  readonly gridTemplateColumns = computed(() => {
-    const left = this.leftRail();
-    const right = this.rightRailOpen();
-
-    if (left && right) {
-      return 'var(--page-grid-left-width) minmax(0, 1fr) var(--page-grid-right-width)';
-    }
-    if (left) {
-      return 'var(--page-grid-left-width) minmax(0, 1fr)';
-    }
-    return 'minmax(0, 1fr)';
-  });
 }

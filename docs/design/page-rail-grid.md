@@ -1,52 +1,45 @@
 # Page rail grid
 
-**Status:** Shipped on `/projects` (2026-06-14). Replaces per-page `content-clamp--wide` + flex split for multi-rail layouts.
+**Status:** Shipped on `/projects` and `/media` (2026-06-14).
 
 ## Model
 
-Viewport-wide shell outlet hosts a **centered grid band** (`max-width: 90rem`). Host padding is the outer gutter; optional left/right rails use fixed widths; the **center rail is the only flexible track** and absorbs remaining band width (dashboard widgets use full center; project detail may cap inner content at `52rem`).
+The **center column is always `52rem`** (`content-clamp--list` width) in the same grid position on every page. Side rails sit in the outer gutter tracks and do **not** push the center column sideways.
 
 ```text
-[ host padding = outer gutter ]
+[ host padding: spacing-6 + nav 4.5rem start ]
 
-| L-rail (17.5rem)? | CENTER (1fr — grows) | R-rail (20rem)? |
+| 1fr left gutter | 52rem CENTER | 1fr right gutter |
 
-[ band max 90rem, centered in outlet ]
+  [sidebar end-aligned]     [title + content]     [details start-aligned]
 ```
 
-| Mode | Columns | Use |
-| --- | --- | --- |
-| `single` | `1fr` (band capped `52rem`) | Account, media-like pages (`leftRail=false`) |
-| `split-left` | `left · center` | Projects dashboard / detail without details panel |
-| `split-both` | `left · center · right` | Projects with details panel open |
-
-Do **not** add extra `1fr` gutter columns inside the band — they steal width from the center track (three-way `1fr` split made the dashboard too narrow).
+| Page | Left gutter | Center | Right gutter |
+| --- | --- | --- | --- |
+| `/media` | empty | header + grid | empty |
+| `/projects` | project list | dashboard / detail | details panel (optional) |
 
 ## Component
 
 - **Selector:** `app-page-grid`
 - **Code:** `apps/web/src/app/shared/page-grid/`
-- **Slots (projection):** `[pageGridLeft]`, `[pageGridCenter]`, `[pageGridRight]`
+- **Slots:** `[pageGridLeft]`, `[pageGridCenter]`, `[pageGridRight]`
 
 ### Inputs
 
 | Input | Default | Meaning |
 | --- | --- | --- |
-| `leftRail` | `true` | Mount left column in template |
-| `rightRailOpen` | `false` | Mount right column |
-
-Nav pill clearance (`padding-inline-start: 4.5rem`) lives on `app-page-grid` `:host`, not on feature pages.
+| `leftRail` | `true` | Mount left slot in gutter column 1 |
+| `rightRailOpen` | `false` | Mount right slot in gutter column 3 |
 
 ## Ownership
 
 | Concern | Owner |
 | --- | --- |
-| Grid geometry, gutters, rail widths | `page-grid.component.scss` |
-| Center content max-width (e.g. 52rem detail) | Feature inner components (`project-detail-view`) |
-| Map shell | Exempt — map-primary layout unchanged |
+| Grid tracks, gutter alignment, host padding | `page-grid.component.scss` |
+| Page content | Projected center slot children |
+| Map shell | Exempt |
 
-## Migration
+## Anti-pattern
 
-1. `/projects` — done
-2. `/media` — optional; keep `content-clamp--list` until second pass
-3. Deprecate `content-clamp--wide` for split layouts (keep `content-clamp` for single-column pages)
+Do **not** use a growing `1fr` center track — it breaks alignment with `/media`. Do **not** add extra horizontal padding on dashboard/detail wrappers; host + fixed center define the title column.

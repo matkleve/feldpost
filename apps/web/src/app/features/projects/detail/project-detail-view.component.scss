@@ -5,19 +5,15 @@
 .project-detail {
   display: flex;
   flex-direction: column;
-  align-self: flex-start;
   min-height: 0;
   height: 100%;
   width: 100%;
-  max-width: 52rem;
-  margin-inline: 0;
 }
 
 .project-detail__header {
   display: grid;
   flex-shrink: 0;
   gap: var(--spacing-2);
-  padding: var(--spacing-5);
 }
 
 // Container query root for media toolbar view-toggle breakpoints.
@@ -128,6 +124,6 @@ app-pane-toolbar.project-detail__media-toolbar {
 .project-detail__content {
   flex: 1 1 auto;
   min-height: 0;
-  padding: 0 var(--spacing-5) var(--spacing-5);
+  padding-bottom: var(--spacing-5);
   overflow: hidden;
 }

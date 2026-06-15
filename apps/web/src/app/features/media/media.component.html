@@ -1,9 +1,7 @@
-<!-- Renders the /media page content stack in a flat host-owned layout. -->
-<!-- @see docs/specs/component/item-grid/item-grid.md#data -->
-<!-- Stacks header, toolbar, content, and progressive-loading footer with token spacing. -->
-<!-- @see docs/specs/component/item-grid/item-grid.md#actions -->
-  <div class="media-page-body">
-<app-vstack class="content-clamp content-clamp--list" [spacing]="4">
+<!-- Renders the /media page content stack in the shared page-grid center column. -->
+<!-- @see docs/design/page-rail-grid.md -->
+<app-page-grid [leftRail]="false" [rightRailOpen]="false">
+  <app-vstack pageGridCenter [spacing]="4">
   <!-- Page Header with Breadcrumb -->
   <!-- Renders media title, breadcrumb, and loaded-count summary. -->
   <!-- @see docs/specs/component/item-grid/item-grid.md#data -->
@@ -141,5 +139,5 @@
     (zoomToLocationRequested)="onZoomToLocation($event)"
     (retry)="onRetryLoad()"
   />
-</app-vstack>
-  </div>
+  </app-vstack>
+</app-page-grid>
