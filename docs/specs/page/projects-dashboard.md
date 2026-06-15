@@ -8,7 +8,7 @@ A split-layout projects surface: a narrow left rail lists projects as compact si
 
 ## What It Looks Like
 
-Full-height flex row inside the authenticated shell. The page host applies left padding so content clears the fixed nav pill (`padding-left: 4.5rem`). The left rail is ~220px wide with a top **Dashboard** button, an **Archive** toggle (Cursor-style: switches between active and archived project lists), and a scrollable list of rows (8px color dot + truncated project name only — no thumbnails, counts, or status badges in the rail). The right pane fills remaining width.
+Full-height page grid inside the authenticated shell: `app-page-grid` owns nav clearance, centered band, and optional left/right rails. See [page-rail-grid.md](../../design/page-rail-grid.md).
 
 **Right pane — Dashboard mode** (`/projects`, no project selected): widget grid with one hero module (map/location preview) and secondary modules (activity, file types, upload timeline, storage, team).
 

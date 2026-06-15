@@ -31,6 +31,7 @@ import {
   sortProjects,
 } from './projects-page.logic';
 import { FILTER_OPTIONS, SORT_OPTIONS } from './projects-page.config';
+import { PageGridComponent } from '../../../shared/page-grid';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import type { PendingProjectAction } from './projects-page.config';
 
@@ -38,6 +39,7 @@ import type { PendingProjectAction } from './projects-page.config';
   selector: 'app-projects-page',
   standalone: true,
   imports: [
+    PageGridComponent,
     ProjectsSidebarComponent,
     ProjectDashboardViewComponent,
     ProjectDetailViewComponent,

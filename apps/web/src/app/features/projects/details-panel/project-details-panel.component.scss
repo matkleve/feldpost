@@ -1,11 +1,12 @@
-// Defines floating details column slot with content-sized card (not full-height stretch).
-// @see docs/specs/page/projects-dashboard.md
+// Defines floating details column inside page-grid right rail.
+// @see docs/design/page-rail-grid.md
 :host {
   display: flex;
-  flex: 0 0 20rem;
+  flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
+  height: 100%;
   align-self: stretch;
   padding-block: var(--spacing-4);
 }

@@ -1,11 +1,14 @@
 @use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
-// Defines narrow left rail geometry for Notion-style project list.
-// @see docs/specs/page/projects-dashboard.md
+// Defines narrow left rail list inside page-grid left column.
+// @see docs/design/page-rail-grid.md
 :host {
-  flex: 0 0 17.5rem;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   min-height: 0;
   min-width: 0;
+  height: 100%;
 }
 
 .projects-sidebar {

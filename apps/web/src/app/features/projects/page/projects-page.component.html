@@ -1,5 +1,6 @@
-<main class="projects-page content-clamp content-clamp--wide" data-i18n-skip>
+<app-page-grid [leftRail]="true" [rightRailOpen]="detailsPanelOpen()" data-i18n-skip>
   <app-projects-sidebar
+    pageGridLeft
     [projects]="sidebarProjects()"
     [selectedProjectId]="currentProjectId()"
     [showArchived]="showArchived()"
@@ -23,7 +24,7 @@
   />
 
   @if (loadError()) {
-    <section class="projects-page__center projects-page__error" role="alert">
+    <section pageGridCenter class="projects-page__center projects-page__error" role="alert">
       <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
       <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
       <button hlmBtn variant="outline" type="button" (click)="refreshProjects()">
@@ -31,7 +32,7 @@
       </button>
     </section>
   } @else if (currentProjectId() && currentProject(); as project) {
-    <section class="projects-page__center">
+    <section pageGridCenter class="projects-page__center">
       <app-project-detail-view
         [project]="project"
         [namingNewProject]="isNamingCurrentProject()"
@@ -48,6 +49,7 @@
 
     @if (detailsPanelOpen()) {
       <app-project-details-panel
+        pageGridRight
         [project]="project"
         [colorPickerOpen]="colorPickerOpen()"
         (colorSelected)="onColorSelected(project.id, $event)"
@@ -59,21 +61,20 @@
       />
     }
   } @else {
-    <section class="projects-page__center">
+    <section pageGridCenter class="projects-page__center">
       <app-project-dashboard-view [projects]="projects()" />
     </section>
   }
+</app-page-grid>
 
-  <app-projects-confirm-dialog
-    [open]="hasPendingAction()"
-    [title]="pendingActionTitle()"
-    [message]="pendingActionMessage()"
-    [confirmLabel]="pendingActionConfirmLabel()"
-    [cancelLabel]="t('common.cancel', 'Cancel')"
-    [busy]="pendingActionBusy()"
-    [danger]="pendingProjectAction() === 'delete'"
-    (cancel)="cancelPendingAction()"
-    (confirm)="confirmPendingAction()"
-  />
-
-</main>
+<app-projects-confirm-dialog
+  [open]="hasPendingAction()"
+  [title]="pendingActionTitle()"
+  [message]="pendingActionMessage()"
+  [confirmLabel]="pendingActionConfirmLabel()"
+  [cancelLabel]="t('common.cancel', 'Cancel')"
+  [busy]="pendingActionBusy()"
+  [danger]="pendingProjectAction() === 'delete'"
+  (cancel)="cancelPendingAction()"
+  (confirm)="confirmPendingAction()"
+/>

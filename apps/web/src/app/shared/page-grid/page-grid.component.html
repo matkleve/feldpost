@@ -1,0 +1,24 @@
+<div
+  class="page-grid"
+  [style.grid-template-columns]="gridTemplateColumns()"
+>
+  <div class="page-grid__gutter page-grid__gutter--start" aria-hidden="true"></div>
+
+  @if (leftRail()) {
+    <div class="page-grid__rail page-grid__rail--left">
+      <ng-content select="[pageGridLeft]" />
+    </div>
+  }
+
+  <div class="page-grid__rail page-grid__rail--center">
+    <ng-content select="[pageGridCenter]" />
+  </div>
+
+  @if (rightRailOpen()) {
+    <div class="page-grid__rail page-grid__rail--right">
+      <ng-content select="[pageGridRight]" />
+    </div>
+  }
+
+  <div class="page-grid__gutter page-grid__gutter--end" aria-hidden="true"></div>
+</div>

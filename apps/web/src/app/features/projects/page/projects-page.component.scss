@@ -1,23 +1,10 @@
-// Split-layout shell with nav-pill clearance, wide clamp, and three-pane project view.
-// @see docs/specs/page/projects-dashboard.md
+// Projects page host — geometry owned by app-page-grid; center rail fills scrollable column.
+// @see docs/design/page-rail-grid.md
 :host {
-  display: flex;
-  box-sizing: border-box;
+  display: block;
   height: 100%;
   min-height: 0;
   min-width: 0;
-  padding: var(--spacing-5) var(--spacing-5) var(--spacing-5) 4.5rem;
-  overflow: hidden;
-}
-
-.projects-page {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: stretch;
-  gap: var(--spacing-4);
-  min-height: 0;
-  min-width: 0;
-  width: 100%;
 }
 
 .projects-page__center {
@@ -26,6 +13,7 @@
   flex-direction: column;
   min-height: 0;
   min-width: 0;
+  height: 100%;
   overflow: hidden;
 }
 
