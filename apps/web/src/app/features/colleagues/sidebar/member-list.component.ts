@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { OrgMember } from '../../../core/members/members.types';
 import type { ChatChannel } from '../../../core/chat/chat.types';
@@ -8,6 +9,7 @@ import { PageRailTitleComponent } from '../../../shared/page-rail-title';
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
 import { RailSelectListComponent, type RailSelectListItem } from '../../../shared/rail-select-list';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
 
 @Component({
   selector: 'app-member-list',
@@ -17,6 +19,8 @@ import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
     RailSearchFieldComponent,
     RailSelectListComponent,
     ChannelCreateDialogComponent,
+    ...BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './member-list.component.html',
@@ -156,5 +160,12 @@ export class MemberListComponent {
 
   onChannelCreateConfirmed(payload: { name: string; type: 'public' | 'private' }): void {
     this.channelCreateRequested.emit(payload);
+  }
+
+  onTabToggle(value: ToggleValue<string>): void {
+    const tab = String(value);
+    if (tab === 'members' || tab === 'invites') {
+      this.tabChange.emit(tab);
+    }
   }
 }

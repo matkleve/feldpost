@@ -519,6 +519,14 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Team',
   },
   {
+    key: 'colleagues.tabs.aria',
+    original: 'Team sections',
+    context: 'Aria label for Members/Invites segmented control on colleagues page.',
+    en: 'Team sections',
+    de: 'Team-Bereiche',
+    it: 'Sezioni team',
+  },
+  {
     key: 'colleagues.chat.send',
     original: 'Send',
     context: 'Colleagues chat composer send button.',

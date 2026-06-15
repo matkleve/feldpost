@@ -17,23 +17,12 @@
 }
 
 .member-list__tabs {
-  display: flex;
   flex-shrink: 0;
-  gap: var(--spacing-2);
+  width: 100%;
 }
 
-.member-list__tabs button {
-  flex: 1;
-  padding: var(--spacing-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--card);
-  cursor: pointer;
-}
-
-.member-list__tabs button.active {
-  border-color: var(--primary);
-  background: var(--menu-item-hover);
+.member-list__tab-group {
+  width: 100%;
 }
 
 .member-list__channels {

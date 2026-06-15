@@ -1,35 +1,26 @@
--- Chat RLS hardening: channel access helper, membership-scoped private/DM reads,
--- reactions/attachments policies, channel manage policies.
+-- Chat RLS hardening: break circular RLS dependency, membership-scoped
+-- private/DM reads, reactions/attachments policies, channel manage policies.
 
 -- =============================================================================
--- Helper: can the current user access a chat channel?
--- Public channels: any org member. Private/DM: channel members only.
+-- Fix circular RLS: chat_channel_members must NOT subquery chat_channels.
+-- Members can see their own memberships + memberships for channels they belong to.
 -- =============================================================================
-create or replace function public.can_access_chat_channel(p_channel_id uuid)
-returns boolean
-language sql stable security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.chat_channels c
-    where c.id = p_channel_id
-      and c.organization_id = public.user_org_id()
-      and c.archived_at is null
-      and (
-        c.type = 'public'
-        or exists (
-          select 1
-          from public.chat_channel_members m
-          where m.channel_id = c.id
-            and m.user_id = auth.uid()
-        )
-      )
+drop policy if exists "chat_channel_members: member read" on public.chat_channel_members;
+
+create policy "chat_channel_members: member read"
+  on public.chat_channel_members for select to authenticated
+  using (
+    user_id = auth.uid()
+    or exists (
+      select 1
+      from public.chat_channel_members my_m
+      where my_m.channel_id = chat_channel_members.channel_id
+        and my_m.user_id = auth.uid()
+    )
   );
-$$;
 
 -- =============================================================================
--- chat_channels policies
+-- chat_channels policies (no circular dependency)
 -- =============================================================================
 drop policy if exists "chat_channels: org read" on public.chat_channels;
 
@@ -57,6 +48,47 @@ create policy "chat_channels: manage update"
     )
   )
   with check (organization_id = public.user_org_id());
+
+-- =============================================================================
+-- Helper: can the current user access a chat channel?
+-- Uses plpgsql SECURITY DEFINER to bypass RLS on the lookup tables,
+-- avoiding circular policy evaluation.
+-- =============================================================================
+create or replace function public.can_access_chat_channel(p_channel_id uuid)
+returns boolean
+language plpgsql stable security definer
+set search_path = public
+as $$
+declare
+  v_type public.chat_channel_type;
+  v_org_id uuid;
+  v_archived_at timestamptz;
+begin
+  select c.type, c.organization_id, c.archived_at
+    into v_type, v_org_id, v_archived_at
+    from public.chat_channels c
+   where c.id = p_channel_id;
+
+  if not found or v_archived_at is not null then
+    return false;
+  end if;
+
+  if v_org_id <> public.user_org_id() then
+    return false;
+  end if;
+
+  if v_type = 'public' then
+    return true;
+  end if;
+
+  return exists (
+    select 1
+    from public.chat_channel_members m
+    where m.channel_id = p_channel_id
+      and m.user_id = auth.uid()
+  );
+end;
+$$;
 
 -- =============================================================================
 -- chat_messages policies (membership-scoped for private/DM)

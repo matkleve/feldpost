@@ -161,15 +161,7 @@ export class ColleaguesPageComponent implements OnDestroy {
   }
 
   onMemberPanelClosed(): void {
-    const members = this.members();
-    if (members.length === 0) {
-      this.selectedMemberId.set(null);
-      return;
-    }
-
-    const currentIndex = members.findIndex((member) => member.id === this.selectedMemberId());
-    const nextMember = members[currentIndex + 1] ?? members[0];
-    this.selectedMemberId.set(nextMember.id);
+    this.selectedMemberId.set(null);
   }
 
   async onChannelSelected(channelId: string): Promise<void> {

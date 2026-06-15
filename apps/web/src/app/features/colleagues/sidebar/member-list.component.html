@@ -1,13 +1,43 @@
 <nav class="member-list" aria-label="{{ t('colleagues.sidebar.label', 'Team') }}">
   <app-page-rail-title [title]="t('colleagues.page.title', 'Team')" />
 
-  <div class="member-list__tabs">
-    <button type="button" [class.active]="activeTab() === 'members'" (click)="tabChange.emit('members')">
-      {{ t('colleagues.tab.members', 'Members') }}
-    </button>
-    <button type="button" [class.active]="activeTab() === 'invites'" (click)="tabChange.emit('invites')">
-      {{ t('colleagues.tab.invites', 'Invites') }}
-    </button>
+  <div class="member-list__tabs" hlmPillToggle size="sm" fill>
+    <div
+      hlmToggleGroup
+      size="sm"
+      class="member-list__tab-group w-full"
+      brnToggleGroup
+      type="single"
+      [nullable]="false"
+      [value]="activeTab()"
+      (valueChange)="onTabToggle($event)"
+      [attr.aria-label]="t('colleagues.tabs.aria', 'Team sections')"
+    >
+      <button
+        type="button"
+        hlmToggleGroupItem
+        size="sm"
+        brnToggleGroupItem
+        value="members"
+        [attr.aria-label]="t('colleagues.tab.members', 'Members')"
+        [attr.title]="t('colleagues.tab.members', 'Members')"
+      >
+        <span class="material-icons" aria-hidden="true">groups</span>
+        <span>{{ t('colleagues.tab.members', 'Members') }}</span>
+      </button>
+      <button
+        type="button"
+        hlmToggleGroupItem
+        size="sm"
+        brnToggleGroupItem
+        value="invites"
+        [attr.aria-label]="t('colleagues.tab.invites', 'Invites')"
+        [attr.title]="t('colleagues.tab.invites', 'Invites')"
+      >
+        <span class="material-icons" aria-hidden="true">mail</span>
+        <span>{{ t('colleagues.tab.invites', 'Invites') }}</span>
+      </button>
+    </div>
   </div>
 
   <section class="member-list__channels">
