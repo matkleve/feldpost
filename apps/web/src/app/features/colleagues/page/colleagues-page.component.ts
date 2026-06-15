@@ -362,11 +362,6 @@ export class ColleaguesPageComponent implements OnDestroy {
         message: this.t('colleagues.chat.error.edit', 'Could not edit message.'),
         detail: result.error.message,
       });
-      return;
-    }
-    const channelId = this.selectedChannelId();
-    if (channelId) {
-      await this.chatService.loadMessages(channelId);
     }
   }
 
@@ -389,11 +384,6 @@ export class ColleaguesPageComponent implements OnDestroy {
         message: this.t('colleagues.chat.error.reaction', 'Could not update reaction.'),
         detail: result.error.message,
       });
-      return;
-    }
-    const channelId = this.selectedChannelId();
-    if (channelId) {
-      await this.chatService.loadMessages(channelId);
     }
   }
 
@@ -403,6 +393,10 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.chatService.subscribeToChannel(channelId);
     await this.chatService.loadMessages(channelId);
     await this.chatService.markChannelRead(channelId);
+
+    this.channels.update((list) =>
+      list.map((ch) => (ch.id === channelId ? { ...ch, unreadCount: 0 } : ch)),
+    );
 
     const channel = this.channels().find((c) => c.id === channelId);
     if (channel) {
@@ -414,11 +408,6 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.presenceChannel = this.chatService.subscribePresence(channelId, (online) => {
       this.onlineUserIds.set(online);
     });
-
-    const channelsResult = await this.chatService.loadChannels();
-    if (!channelsResult.error) {
-      this.channels.set(channelsResult.data);
-    }
   }
 
   private async loadChannelMembers(channelId: string): Promise<void> {

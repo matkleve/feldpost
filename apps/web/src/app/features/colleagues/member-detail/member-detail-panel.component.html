@@ -1,12 +1,13 @@
 <aside class="member-detail">
   <header class="member-detail__header">
-    <h2>{{ member().fullName || t('colleagues.members.unnamed', 'Unnamed') }}</h2>
+    <h2>{{ t('colleagues.member.details_title', 'Details') }}</h2>
     <button type="button" class="member-detail__close" (click)="closed.emit()" [attr.aria-label]="t('common.close', 'Close')">
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
   </header>
 
   <div class="member-detail__avatar">{{ member().fullName.charAt(0).toUpperCase() || '?' }}</div>
+  <p class="member-detail__name">{{ member().fullName || t('colleagues.members.unnamed', 'Unnamed') }}</p>
 
   <dl class="member-detail__meta">
     <div>

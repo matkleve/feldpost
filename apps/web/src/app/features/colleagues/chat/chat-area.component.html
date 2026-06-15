@@ -157,8 +157,8 @@
     }
   </div>
 
-  @if (typingUserIds().size > 0) {
-    <p class="chat-area__typing">{{ t('colleagues.chat.typing', 'Someone is typing…') }}</p>
+  @if (typingText(); as typing) {
+    <p class="chat-area__typing">{{ typing }}</p>
   }
 
   <footer class="chat-area__composer">

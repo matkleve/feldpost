@@ -34,6 +34,12 @@
   font-weight: 600;
 }
 
+.member-detail__name {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
 .member-detail__meta {
   display: flex;
   flex-direction: column;

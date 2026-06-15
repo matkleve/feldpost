@@ -36,6 +36,7 @@
         [headerTitle]="chatHeaderTitle()"
         [messages]="chatService.liveMessages()"
         [typingUserIds]="chatService.typingUserIds()"
+        [channelMembers]="channelMembers()"
         [searchResults]="chatService.searchResults()"
         [canDeleteAny]="canDeleteAnyMessage()"
         (messageSent)="chatService.sendMessage($event)"

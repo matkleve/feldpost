@@ -15,24 +15,40 @@ export class ChatService {
 
   private realtimeChannel: RealtimeChannel | null = null;
   private subscribedChannelId: string | null = null;
+  private channelsCache: { data: ChatChannel[]; timestamp: number } | null = null;
+  private messageCache = new Map<string, ChatMessage[]>();
+  private static readonly CHANNELS_CACHE_TTL = 30_000;
 
   readonly liveMessages = signal<ChatMessage[]>([]);
   readonly typingUserIds = signal<Set<string>>(new Set());
   readonly searchResults = signal<ChatMessage[]>([]);
 
-  async loadChannels(): Promise<{ data: ChatChannel[]; error: Error | null }> {
+  async loadChannels(forceRefresh = false): Promise<{ data: ChatChannel[]; error: Error | null }> {
+    const now = Date.now();
+    if (
+      !forceRefresh &&
+      this.channelsCache &&
+      now - this.channelsCache.timestamp < ChatService.CHANNELS_CACHE_TTL
+    ) {
+      return { data: this.channelsCache.data, error: null };
+    }
+
     const result = await this.channelsAdapter.loadChannels();
     const userId = this.authService.user()?.id;
     if (!userId || result.error) return result;
 
     const unread = await this.channelsAdapter.loadUnreadCounts(userId);
-    return {
-      data: result.data.map((channel) => ({
-        ...channel,
-        unreadCount: unread.get(channel.id) ?? 0,
-      })),
-      error: null,
-    };
+    const data = result.data.map((channel) => ({
+      ...channel,
+      unreadCount: unread.get(channel.id) ?? 0,
+    }));
+
+    this.channelsCache = { data, timestamp: now };
+    return { data, error: null };
+  }
+
+  invalidateChannelsCache(): void {
+    this.channelsCache = null;
   }
 
   async createChannel(name: string, type: 'public' | 'private' = 'public'): Promise<{ data: ChatChannel | null; error: Error | null }> {
@@ -40,11 +56,15 @@ export class ChatService {
     if (!userId) return { data: null, error: new Error('Not authenticated.') };
 
     const orgId = await this.channelsAdapter.resolveOrganizationId(userId);
-    return this.channelsAdapter.createChannel(name, type, userId, orgId);
+    const result = await this.channelsAdapter.createChannel(name, type, userId, orgId);
+    if (!result.error) this.invalidateChannelsCache();
+    return result;
   }
 
   async archiveChannel(channelId: string): Promise<{ error: Error | null }> {
-    return this.channelsAdapter.archiveChannel(channelId);
+    const result = await this.channelsAdapter.archiveChannel(channelId);
+    if (!result.error) this.invalidateChannelsCache();
+    return result;
   }
 
   async addChannelMember(channelId: string, userId: string): Promise<{ error: Error | null }> {
@@ -64,9 +84,15 @@ export class ChatService {
   }
 
   async loadMessages(channelId: string, limit = 50): Promise<{ data: ChatMessage[]; error: Error | null }> {
+    const cached = this.messageCache.get(channelId);
+    if (cached) {
+      this.liveMessages.set(cached);
+    }
+
     const result = await this.messagesAdapter.loadMessages(channelId, limit);
     if (!result.error) {
       this.liveMessages.set(result.data);
+      this.messageCache.set(channelId, result.data);
     }
     return result;
   }
@@ -107,6 +133,7 @@ export class ChatService {
 
     if (!input.parentId) {
       this.liveMessages.update((messages) => [...messages, message]);
+      this.messageCache.set(input.channelId, this.liveMessages());
     }
 
     await this.markChannelRead(input.channelId);
@@ -173,19 +200,23 @@ export class ChatService {
           if (messages.some((entry) => entry.id === message.id)) return messages;
           return [...messages, message];
         });
+        this.syncCache(channelId);
       },
       onMessageUpdate: (message) => {
         if (message.parentId) return;
         if (message.deletedAt) {
           this.liveMessages.update((messages) => messages.filter((entry) => entry.id !== message.id));
+          this.syncCache(channelId);
           return;
         }
         this.liveMessages.update((messages) =>
           messages.map((entry) => (entry.id === message.id ? message : entry)),
         );
+        this.syncCache(channelId);
       },
       onMessageDelete: (messageId) => {
         this.liveMessages.update((messages) => messages.filter((entry) => entry.id !== messageId));
+        this.syncCache(channelId);
       },
       onTyping: (userId) => {
         if (!currentUserId || userId === currentUserId) return;
@@ -229,6 +260,15 @@ export class ChatService {
     this.liveMessages.set([]);
     this.typingUserIds.set(new Set());
     this.searchResults.set([]);
+  }
+
+  clearAllCaches(): void {
+    this.channelsCache = null;
+    this.messageCache.clear();
+  }
+
+  private syncCache(channelId: string): void {
+    this.messageCache.set(channelId, this.liveMessages());
   }
 
   removeChannel(channel: RealtimeChannel): void {

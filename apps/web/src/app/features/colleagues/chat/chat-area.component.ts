@@ -3,7 +3,7 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ChatService } from '../../../core/chat/chat.service';
-import { CHAT_QUICK_REACTIONS, type ChatChannel, type ChatMessage, type SendMessageInput } from '../../../core/chat/chat.types';
+import { CHAT_QUICK_REACTIONS, type ChatChannel, type ChatChannelMember, type ChatMessage, type SendMessageInput } from '../../../core/chat/chat.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { groupReactions } from '../../../core/chat/chat.helpers';
@@ -35,6 +35,7 @@ export class ChatAreaComponent {
   readonly headerTitle = input<string | null>(null);
   readonly messages = input<ChatMessage[]>([]);
   readonly typingUserIds = input<Set<string>>(new Set());
+  readonly channelMembers = input<ChatChannelMember[]>([]);
   readonly searchResults = input<ChatMessage[]>([]);
   readonly canDeleteAny = input(false);
 
@@ -66,6 +67,18 @@ export class ChatAreaComponent {
   });
 
   readonly isDmChannel = computed(() => this.channel()?.type === 'dm');
+
+  readonly typingText = computed(() => {
+    const ids = this.typingUserIds();
+    if (ids.size === 0) return '';
+    const members = this.channelMembers();
+    const names = [...ids]
+      .map((id) => members.find((m) => m.userId === id)?.fullName)
+      .filter((n): n is string => !!n);
+    if (names.length === 0) return this.t('colleagues.chat.typing', 'Someone is typing…');
+    if (names.length === 1) return `${names[0]} ${this.t('colleagues.chat.typing_verb', 'is typing…')}`;
+    return `${names.join(', ')} ${this.t('colleagues.chat.typing_verb_plural', 'are typing…')}`;
+  });
 
   readonly composerPlaceholder = computed(() => {
     const channel = this.channel();
