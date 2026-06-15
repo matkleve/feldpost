@@ -4,19 +4,23 @@
 
 ## Model
 
-Viewport-wide shell outlet hosts a **centered grid band** (`max-width: 90rem`). Outer columns are flexible gutters; optional left/right rails occupy fixed token widths; the center rail absorbs remaining space.
+Viewport-wide shell outlet hosts a **centered grid band** (`max-width: 90rem`). Host padding is the outer gutter; optional left/right rails use fixed widths; the **center rail is the only flexible track** and absorbs remaining band width (dashboard widgets use full center; project detail may cap inner content at `52rem`).
 
 ```text
-| 1fr gutter | L-rail (17.5rem)? | CENTER (minmax 0 1fr) | R-rail (20rem)? | 1fr gutter |
+[ host padding = outer gutter ]
+
+| L-rail (17.5rem)? | CENTER (1fr — grows) | R-rail (20rem)? |
+
+[ band max 90rem, centered in outlet ]
 ```
 
 | Mode | Columns | Use |
 | --- | --- | --- |
-| `single` | `1fr · center · 1fr` | Account, narrow pages (`leftRail=false`) |
-| `split-left` | `1fr · left · center · 1fr` | Projects dashboard / detail without details panel |
-| `split-both` | `1fr · left · center · right · 1fr` | Projects with details panel open |
+| `single` | `1fr` (band capped `52rem`) | Account, media-like pages (`leftRail=false`) |
+| `split-left` | `left · center` | Projects dashboard / detail without details panel |
+| `split-both` | `left · center · right` | Projects with details panel open |
 
-Gutters grow first on wide screens; rail widths stay fixed; center grows until the band hits `90rem`.
+Do **not** add extra `1fr` gutter columns inside the band — they steal width from the center track (three-way `1fr` split made the dashboard too narrow).
 
 ## Component
 

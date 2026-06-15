@@ -1,9 +1,8 @@
 <div
   class="page-grid"
+  [class.page-grid--single]="!leftRail()"
   [style.grid-template-columns]="gridTemplateColumns()"
 >
-  <div class="page-grid__gutter page-grid__gutter--start" aria-hidden="true"></div>
-
   @if (leftRail()) {
     <div class="page-grid__rail page-grid__rail--left">
       <ng-content select="[pageGridLeft]" />
@@ -19,6 +18,4 @@
       <ng-content select="[pageGridRight]" />
     </div>
   }
-
-  <div class="page-grid__gutter page-grid__gutter--end" aria-hidden="true"></div>
 </div>

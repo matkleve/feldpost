@@ -1,4 +1,4 @@
-// Host clears fixed nav pill and fills the authenticated shell outlet.
+// Host clears fixed nav pill; horizontal inset is the outer gutter pair.
 // @see docs/design/page-rail-grid.md
 :host {
   display: block;
@@ -7,12 +7,12 @@
   min-height: 0;
   min-width: 0;
   padding-block: var(--spacing-5);
-  padding-inline: var(--spacing-5) var(--spacing-5);
+  padding-inline: var(--spacing-5);
   padding-inline-start: 4.5rem;
   overflow: hidden;
 }
 
-// Defines centered rail band with gutter + optional side columns.
+// Defines centered rail band: fixed side rails + one growing center track (no inner 1fr gutters).
 // @see docs/design/page-rail-grid.md
 .page-grid {
   --page-grid-left-width: 17.5rem;
@@ -31,10 +31,10 @@
   align-items: stretch;
 }
 
-// Flexible outer gutters absorb extra viewport width before rails grow.
+// Single-column pages cap readable width like content-clamp--list on /media.
 // @see docs/design/page-rail-grid.md
-.page-grid__gutter {
-  min-width: 0;
+.page-grid--single {
+  max-width: var(--page-grid-center-max);
 }
 
 // Rail slots participate as flex columns for full-height children.
@@ -53,7 +53,7 @@
   width: 100%;
 }
 
-// Main content rail — grows within center track; inner features may cap readability width.
+// Main content rail — sole flexible track; absorbs band width after fixed rails.
 // @see docs/design/page-rail-grid.md
 .page-grid__rail--center {
   width: 100%;

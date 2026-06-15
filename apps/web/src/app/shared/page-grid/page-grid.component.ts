@@ -26,11 +26,11 @@ export class PageGridComponent {
     const right = this.rightRailOpen();
 
     if (left && right) {
-      return '1fr var(--page-grid-left-width) minmax(0, 1fr) var(--page-grid-right-width) 1fr';
+      return 'var(--page-grid-left-width) minmax(0, 1fr) var(--page-grid-right-width)';
     }
     if (left) {
-      return '1fr var(--page-grid-left-width) minmax(0, 1fr) 1fr';
+      return 'var(--page-grid-left-width) minmax(0, 1fr)';
     }
-    return '1fr minmax(0, min(var(--page-grid-center-max), 100%)) 1fr';
+    return 'minmax(0, 1fr)';
   });
 }
