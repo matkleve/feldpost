@@ -455,6 +455,7 @@ map.filter.button.projects,Projects,apps/web/src/app/features/map/map-filter-too
 map.filter.button.timespace,Timespace,apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.ts toolbar button,Timespace,Zeitraum,Periodo
 map.filter.timespace.aria,Time range,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html attr:aria-label,Time range,Zeitraum,Intervallo temporale
 map.filter.timespace.datePlaceholder,—,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.ts empty date display,—,—,—
+map.filter.timespace.dateFormatPlaceholder,DD.MM.YYYY,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input placeholder,DD.MM.YYYY,TT.MM.JJJJ,GG.MM.AAAA
 map.filter.timespace.from,From,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,From,Von,Da
 map.filter.timespace.to,To,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,To,Bis,A
 map.filter.timespace.chartAria,Media timeline,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html chart aria,Media timeline,Medien-Zeitachse,Cronologia media
@@ -622,6 +623,8 @@ projects.viewToggle.list.title,List view,apps/web/src/app/features/projects/proj
 projects.viewToggle.cards.aria,Card view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:aria-label,Card view,Kartenansicht,Vista schede
 projects.viewToggle.cards.title,Card view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:title,Card view,Kartenansicht,Vista schede
 projects.page.title,Projects,apps/web/src/app/features/projects/projects-page.component.html text-node,Projects,Projekte,Progetti
+colleagues.page.title,Team,apps/web/src/app/features/colleagues/sidebar/member-list.component.html text-node,Team,Team,Team
+organization.page.title,Organization,apps/web/src/app/features/organization/sidebar/organization-sidebar.component.html text-node,Organization,Organisation,Organizzazione
 projects.page.search.aria,Project search,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project search,Projektsuche,Ricerca progetto
 projects.page.action.newProject,New project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,New project,Neues Projekt,Nuovo progetto
 projects.page.defaultProjectName,Project {number},projects page inline new-project default numbered name,Project {number},Projekt {number},Progetto {number}

@@ -5,10 +5,10 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: var(--spacing-2);
+    gap: var(--spacing-1);
     width: 100%;
     min-width: 0;
-    padding: var(--spacing-2);
+    padding: var(--spacing-1);
     box-sizing: border-box;
   }
 
@@ -19,12 +19,12 @@
     min-width: 0;
   }
 
-  // Bottom row — compact from/to date fields (native date picker opens calendar UI).
+  // Bottom row — compact from/to date fields.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__dates-row {
     display: flex;
     align-items: flex-end;
-    gap: var(--spacing-2);
+    gap: var(--spacing-1);
     width: 100%;
     min-width: 0;
   }
@@ -63,32 +63,24 @@
     box-sizing: border-box;
   }
 
-  // Formatted date text from I18nService locale (not OS/browser default).
+  // Dot-separated date text field (DD.MM.YYYY) — no native picker chrome.
   // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-display {
+  .timespace-dropdown__date-input {
     flex: 1 1 auto;
     min-width: 0;
-    font-size: var(--font-size-2xs);
-    color: var(--foreground);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: none;
-  }
-
-  // Native picker stretched over control; display text shows locale-formatted value.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-input--native {
-    position: absolute;
-    inset: 0;
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
     border: 0;
-    opacity: 0;
-    cursor: pointer;
+    background: transparent;
     font-size: var(--font-size-2xs);
+    color: var(--foreground);
+    outline: none;
+
+    &::placeholder {
+      color: var(--muted-foreground);
+    }
   }
 
   // Trailing calendar affordance on compact date control.
@@ -106,7 +98,6 @@
     position: relative;
     width: 100%;
     height: 3.25rem;
-    padding-block: var(--spacing-1);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: color-mix(in srgb, var(--card) 72%, transparent);
@@ -117,11 +108,29 @@
     overflow: hidden;
   }
 
-  // Bar row — fills chart interior; bars align to bottom edge.
+  // Inset track shell — selection + bars never kiss outer chart border.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  // Padded inner coordinate space for bars, overlay, and pointer hit-testing.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__track-inner {
+    position: absolute;
+    inset-block: 0;
+    inset-inline: var(--spacing-1);
+    box-sizing: border-box;
+  }
+
+  // Bar row — fills track interior; bars align to bottom edge.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__bars {
     position: absolute;
-    inset: var(--spacing-1);
+    inset: 0;
     display: flex;
     align-items: flex-end;
     gap: 1px;
@@ -146,11 +155,11 @@
     background: transparent;
   }
 
-  // Selected time window overlay on the histogram track.
+  // Selected time window overlay inside padded track.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__selection {
     position: absolute;
-    inset-block: var(--spacing-1);
+    inset-block: 0;
     border-radius: var(--radius-sm);
     border: 2px solid color-mix(in srgb, var(--chart-1) 70%, var(--primary));
     background: color-mix(in srgb, var(--chart-1) 12%, transparent);
@@ -175,7 +184,7 @@
     align-items: center;
     justify-content: center;
     margin: 0;
-    padding-inline: var(--spacing-2);
+    padding-inline: var(--spacing-1);
     font-size: var(--font-size-2xs);
     color: var(--muted-foreground);
     text-align: center;

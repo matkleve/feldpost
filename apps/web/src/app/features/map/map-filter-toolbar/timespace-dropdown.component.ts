@@ -15,10 +15,10 @@ import {
   clickBandRange,
   dragRange,
   formatTimespaceDisplayDate,
-  parseDateInputValue,
+  parseTimespaceDisplayDate,
   ratioFromClientX,
   selectionOverlayPercents,
-  toDateInputValue,
+  type TimeRange,
   type TimespaceBin,
 } from '../../../core/workspace-view/timespace.helpers';
 
@@ -33,13 +33,14 @@ export class TimespaceDropdownComponent implements OnInit {
   protected readonly catalog = inject(MapTimespaceCatalogService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
-  /** BCP-47 locale for date picker + formatted labels (de-AT / it-IT / en-GB). */
+  /** BCP-47 locale for native date picker chrome. */
   readonly dateInputLocale = this.i18nService.locale;
 
   /** Pixel height of the histogram bar track — bars use explicit px, not % height. */
   protected readonly chartTrackHeightPx = 40;
 
   private readonly chartRef = viewChild<ElementRef<HTMLElement>>('chart');
+  private readonly trackInnerRef = viewChild<ElementRef<HTMLElement>>('trackInner');
 
   /** Stable state: pointer drag in progress on the histogram track. */
   // @see docs/specs/component/map/map-filter-toolbar.md
@@ -66,23 +67,36 @@ export class TimespaceDropdownComponent implements OnInit {
 
   readonly histogram = computed(() => buildTimespaceHistogram(this.histogramSource()));
 
-  readonly fromInput = computed(() => toDateInputValue(this.viewService.timeRange()?.from ?? null));
-  readonly toInput = computed(() => toDateInputValue(this.viewService.timeRange()?.to ?? null));
+  /** Live range while dragging; otherwise committed workspace range. */
+  private readonly effectiveRange = computed((): TimeRange | null => {
+    const hist = this.histogram();
+    if (!hist) {
+      return this.viewService.timeRange();
+    }
+
+    const dragStart = this.dragStartRatio();
+    const dragCurrent = this.dragCurrentRatio();
+    if (dragStart != null && dragCurrent != null) {
+      return dragRange(hist.domainStartMs, hist.domainEndMs, dragStart, dragCurrent);
+    }
+
+    return this.viewService.timeRange();
+  });
 
   readonly fromDisplay = computed(() => {
     this.i18nService.language();
-    const from = this.viewService.timeRange()?.from ?? null;
+    const from = this.effectiveRange()?.from ?? null;
     if (!from) {
-      return this.t('map.filter.timespace.datePlaceholder', '—');
+      return '';
     }
     return formatTimespaceDisplayDate(from, this.dateInputLocale());
   });
 
   readonly toDisplay = computed(() => {
     this.i18nService.language();
-    const to = this.viewService.timeRange()?.to ?? null;
+    const to = this.effectiveRange()?.to ?? null;
     if (!to) {
-      return this.t('map.filter.timespace.datePlaceholder', '—');
+      return '';
     }
     return formatTimespaceDisplayDate(to, this.dateInputLocale());
   });
@@ -92,14 +106,8 @@ export class TimespaceDropdownComponent implements OnInit {
   readonly selectionOverlay = computed(() => {
     const hist = this.histogram();
     if (!hist) return null;
-    const dragStart = this.dragStartRatio();
-    const dragCurrent = this.dragCurrentRatio();
-    if (dragStart != null && dragCurrent != null) {
-      const range = dragRange(hist.domainStartMs, hist.domainEndMs, dragStart, dragCurrent);
-      return selectionOverlayPercents(range, hist.domainStartMs, hist.domainEndMs);
-    }
     return selectionOverlayPercents(
-      this.viewService.timeRange(),
+      this.effectiveRange(),
       hist.domainStartMs,
       hist.domainEndMs,
     );
@@ -116,16 +124,16 @@ export class TimespaceDropdownComponent implements OnInit {
     return Math.max(2, Math.round((bin.heightPct / 100) * this.chartTrackHeightPx));
   }
 
-  onFromInput(event: Event): void {
+  onFromTextInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    const from = parseDateInputValue(value);
+    const from = parseTimespaceDisplayDate(value);
     const current = this.viewService.timeRange();
     this.commitRange({ from, to: current?.to ?? null });
   }
 
-  onToInput(event: Event): void {
+  onToTextInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    const to = parseDateInputValue(value);
+    const to = parseTimespaceDisplayDate(value);
     const current = this.viewService.timeRange();
     this.commitRange({ from: current?.from ?? null, to });
   }
@@ -134,16 +142,17 @@ export class TimespaceDropdownComponent implements OnInit {
     const chart = this.chartRef()?.nativeElement;
     if (!chart || event.button !== 0) return;
     chart.setPointerCapture(event.pointerId);
-    const ratio = ratioFromClientX(event.clientX, chart.getBoundingClientRect());
+    const ratio = this.pointerRatio(event.clientX);
     this.dragStartRatio.set(ratio);
     this.dragCurrentRatio.set(ratio);
+    this.applyDragRange(ratio);
   }
 
   onChartPointerMove(event: PointerEvent): void {
     if (this.dragStartRatio() == null) return;
-    const chart = this.chartRef()?.nativeElement;
-    if (!chart) return;
-    this.dragCurrentRatio.set(ratioFromClientX(event.clientX, chart.getBoundingClientRect()));
+    const ratio = this.pointerRatio(event.clientX);
+    this.dragCurrentRatio.set(ratio);
+    this.applyDragRange(ratio);
   }
 
   onChartPointerUp(event: PointerEvent): void {
@@ -167,6 +176,26 @@ export class TimespaceDropdownComponent implements OnInit {
 
   onChartPointerCancel(): void {
     this.clearDrag();
+  }
+
+  private pointerRatio(clientX: number): number {
+    const trackInner = this.trackInnerRef()?.nativeElement;
+    const chart = this.chartRef()?.nativeElement;
+    const rect = (trackInner ?? chart)?.getBoundingClientRect();
+    if (!rect) {
+      return 0;
+    }
+    return ratioFromClientX(clientX, rect);
+  }
+
+  private applyDragRange(endRatio: number): void {
+    const hist = this.histogram();
+    const start = this.dragStartRatio();
+    if (!hist || start == null) {
+      return;
+    }
+    const range = dragRange(hist.domainStartMs, hist.domainEndMs, start, endRatio);
+    this.commitRange(range);
   }
 
   private clearDrag(): void {

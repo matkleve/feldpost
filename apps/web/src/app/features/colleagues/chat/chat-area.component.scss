@@ -17,8 +17,8 @@
 }
 
 .chat-area__search {
-  display: flex;
-  gap: var(--spacing-2);
+  width: min(100%, 18rem);
+  flex-shrink: 0;
 }
 
 .chat-area__messages {

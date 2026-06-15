@@ -1,4 +1,6 @@
 <div class="projects-sidebar">
+  <app-page-rail-title [title]="t('projects.page.title', 'Projects')" />
+
   <button
     type="button"
     hlmBtn
@@ -12,17 +14,12 @@
     <span>{{ t('projects.sidebar.dashboard', 'Dashboard') }}</span>
   </button>
 
-  <label class="projects-sidebar__search">
-    <span class="material-icons projects-sidebar__search-icon" aria-hidden="true">search</span>
-    <input
-      class="projects-sidebar__search-input"
-      type="search"
-      [ngModel]="searchQuery()"
-      (ngModelChange)="onSearchInput($event)"
-      [attr.placeholder]="t('projects.sidebar.search.placeholder', 'Search projects…')"
-      [attr.aria-label]="t('projects.page.search.aria', 'Project search')"
-    />
-  </label>
+  <app-rail-search-field
+    [value]="searchQuery()"
+    [placeholder]="t('projects.sidebar.search.placeholder', 'Search projects…')"
+    [ariaLabel]="t('projects.page.search.aria', 'Project search')"
+    (valueChange)="onSearchInput($event)"
+  />
 
   <div
     class="projects-sidebar__toolbar"
@@ -74,87 +71,16 @@
     </button>
   </div>
 
-  <div
-    class="projects-sidebar__list"
-    role="listbox"
-    [attr.aria-label]="t('projects.sidebar.list.aria', 'Projects')"
-  >
-    @if (loading()) {
-      <div class="projects-sidebar__loading" role="status">
-        {{ t('projects.page.loading.aria', 'Loading projects') }}
-      </div>
-    } @else {
-      @for (project of projects(); track project.id) {
-        <div
-          class="projects-sidebar__row-wrap"
-          [class.projects-sidebar__row-wrap--active]="project.id === selectedProjectId()"
-        >
-          <button
-            type="button"
-            role="option"
-            class="projects-sidebar__row"
-            [attr.aria-selected]="project.id === selectedProjectId()"
-            (click)="onProjectClick(project.id)"
-          >
-            <span class="projects-sidebar__dot" [style.background]="colorFor(project)"></span>
-            <span class="projects-sidebar__name">{{ project.name }}</span>
-          </button>
-
-          @if (project.status === 'active') {
-            <button
-              type="button"
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              class="projects-sidebar__row-action"
-              [attr.aria-label]="t('projects.page.action.archive', 'Archive')"
-              [attr.title]="t('projects.page.action.archive', 'Archive')"
-              (click)="onRowArchiveClick($event, project.id)"
-            >
-              <span class="material-icons" aria-hidden="true">inventory_2</span>
-            </button>
-          } @else {
-            <button
-              type="button"
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              class="projects-sidebar__row-action"
-              [attr.aria-label]="t('projects.page.action.restore', 'Restore')"
-              [attr.title]="t('projects.page.action.restore', 'Restore')"
-              (click)="onRowRestoreClick($event, project.id)"
-            >
-              <span class="material-icons" aria-hidden="true">unarchive</span>
-            </button>
-            <app-inline-confirm-action
-              size="sm"
-              tone="danger"
-              revealOnParentHover="sidebar-row-wrap"
-              idleIcon="delete"
-              armedIcon="warning"
-              initialAriaKey="projects.sidebar.action.delete"
-              initialAriaFallback="Delete project"
-              initialTitleKey="projects.sidebar.action.delete"
-              initialTitleFallback="Delete project"
-              confirmAriaKey="projects.sidebar.action.confirmDelete"
-              confirmAriaFallback="Confirm delete project"
-              (confirmed)="onRowDeleteConfirmed(project.id)"
-            />
-          }
-        </div>
-      }
-
-      @if (projects().length === 0) {
-        <div class="projects-sidebar__empty">
-          {{
-            showArchived()
-              ? t('projects.sidebar.empty.archived', 'No archived projects')
-              : t('projects.sidebar.empty.active', 'No active projects')
-          }}
-        </div>
-      }
-    }
-  </div>
+  <app-rail-select-list
+    [items]="projectListItems()"
+    [selectedId]="selectedProjectId()"
+    [loading]="loading()"
+    [listAriaLabel]="t('projects.sidebar.list.aria', 'Projects')"
+    [loadingMessage]="t('projects.page.loading.aria', 'Loading projects')"
+    [emptyMessage]="projectListEmptyMessage()"
+    (itemSelected)="onProjectClick($event)"
+    (actionTriggered)="onProjectListAction($event)"
+  />
 
   <div class="projects-sidebar__footer">
     <button type="button" hlmBtn variant="outline" size="sm" class="projects-sidebar__new" (click)="newProject.emit()">

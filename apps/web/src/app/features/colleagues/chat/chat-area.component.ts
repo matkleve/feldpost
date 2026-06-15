@@ -3,12 +3,13 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { ChatChannel, ChatMessage, SendMessageInput } from '../../../core/chat/chat.types';
+import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 @Component({
   selector: 'app-chat-area',
   standalone: true,
-  imports: [DatePipe, FormsModule, ...HLM_BUTTON_IMPORTS],
+  imports: [DatePipe, FormsModule, RailSearchFieldComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './chat-area.component.html',
   styleUrl: './chat-area.component.scss',
   host: {

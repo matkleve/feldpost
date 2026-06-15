@@ -86,8 +86,6 @@ export class ColleaguesPageComponent implements OnDestroy {
     })),
   );
 
-  readonly detailPanelOpen = computed(() => !!this.selectedMemberId());
-
   constructor() {
     void this.refresh();
 
@@ -127,6 +125,14 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.channels.set(channelsResult.data);
     this.ownRoleLevel.set(level);
 
+    if (membersResult.data.length > 0) {
+      const currentId = this.selectedMemberId();
+      const stillExists = currentId && membersResult.data.some((member) => member.id === currentId);
+      if (!stillExists) {
+        this.selectedMemberId.set(membersResult.data[0].id);
+      }
+    }
+
     const defaultChannel = channelsResult.data.find((c) => c.name === 'general') ?? channelsResult.data[0];
     if (defaultChannel && !this.selectedChannelId()) {
       this.selectedChannelId.set(defaultChannel.id);
@@ -145,7 +151,15 @@ export class ColleaguesPageComponent implements OnDestroy {
   }
 
   onMemberPanelClosed(): void {
-    this.selectedMemberId.set(null);
+    const members = this.members();
+    if (members.length === 0) {
+      this.selectedMemberId.set(null);
+      return;
+    }
+
+    const currentIndex = members.findIndex((member) => member.id === this.selectedMemberId());
+    const nextMember = members[currentIndex + 1] ?? members[0];
+    this.selectedMemberId.set(nextMember.id);
   }
 
   async onChannelSelected(channelId: string): Promise<void> {

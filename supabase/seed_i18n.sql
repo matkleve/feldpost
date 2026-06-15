@@ -14139,6 +14139,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.dateFormatPlaceholder', 'DD.MM.YYYY', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'DD.MM.YYYY', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.dateFormatPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'TT.MM.JJJJ', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.dateFormatPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'GG.MM.AAAA', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.dateFormatPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'map.filter.timespace.from', 'From', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -19311,6 +19342,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Progetti', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.page.title', 'Team', 'en', 'apps/web/src/app/features/colleagues/sidebar/member-list.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Team', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Team', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Team', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.page.title', 'Organization', 'en', 'apps/web/src/app/features/organization/sidebar/organization-sidebar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organization', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisation', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

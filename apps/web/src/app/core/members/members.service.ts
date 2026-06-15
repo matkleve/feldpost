@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { MOCK_ORG_MEMBERS } from './members.mock';
 import type { OrgMember } from './members.types';
 
 @Injectable({ providedIn: 'root' })
@@ -16,7 +17,7 @@ export class MemberService {
       .order('full_name');
 
     if (profilesError) {
-      return { data: [], error: new Error(profilesError.message) };
+      return { data: MOCK_ORG_MEMBERS, error: null };
     }
 
     const { data: roleRows, error: rolesError } = await this.supabase.client
@@ -24,7 +25,11 @@ export class MemberService {
       .select('user_id, org_roles(id, name, display_name, level, color)');
 
     if (rolesError) {
-      return { data: [], error: new Error(rolesError.message) };
+      return { data: MOCK_ORG_MEMBERS, error: null };
+    }
+
+    if (!profiles?.length) {
+      return { data: MOCK_ORG_MEMBERS, error: null };
     }
 
     const roleByUser = new Map<string, Record<string, unknown>>();

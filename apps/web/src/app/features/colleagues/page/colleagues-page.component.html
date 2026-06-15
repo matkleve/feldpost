@@ -1,35 +1,22 @@
 <app-page-grid
   [leftRail]="true"
-  [rightRailOpen]="detailPanelOpen()"
-  [centerExpanded]="!detailPanelOpen()"
+  [rightRailOpen]="true"
+  [centerExpanded]="false"
   data-i18n-skip
 >
-  @if (sidebarTab() === 'members') {
-    <app-member-list
-      pageGridLeft
-      [members]="membersWithPresence()"
-      [selectedMemberId]="selectedMemberId()"
-      [channels]="channels()"
-      [selectedChannelId]="selectedChannelId()"
-      [loading]="loading()"
-      [activeTab]="sidebarTab()"
-      (tabChange)="onTabChange($event)"
-      (memberSelected)="onMemberSelected($event)"
-      (channelSelected)="onChannelSelected($event)"
-    />
-  } @else {
-    <aside pageGridLeft class="colleagues-page__invites-rail">
-      <div class="colleagues-page__tabs">
-        <button type="button" [class.active]="sidebarTab() === 'members'" (click)="onTabChange('members')">
-          {{ t('colleagues.tab.members', 'Members') }}
-        </button>
-        <button type="button" [class.active]="sidebarTab() === 'invites'" (click)="onTabChange('invites')">
-          {{ t('colleagues.tab.invites', 'Invites') }}
-        </button>
-      </div>
-      <app-colleagues-invites-panel />
-    </aside>
-  }
+  <app-member-list
+    pageGridLeft
+    [members]="membersWithPresence()"
+    [selectedMemberId]="selectedMemberId()"
+    [channels]="channels()"
+    [selectedChannelId]="selectedChannelId()"
+    [loading]="loading()"
+    [activeTab]="sidebarTab()"
+    (tabChange)="onTabChange($event)"
+    (memberSelected)="onMemberSelected($event)"
+    (channelSelected)="onChannelSelected($event)"
+    (memberMessageRequested)="onMessageMember($event)"
+  />
 
   <section pageGridCenter class="colleagues-page__center">
     @if (loadError()) {
@@ -38,10 +25,7 @@
         <p>{{ loadError() }}</p>
       </div>
     } @else if (sidebarTab() === 'invites') {
-      <div class="colleagues-page__invites-center">
-        <h1>{{ t('colleagues.invites.title', 'Invite colleagues') }}</h1>
-        <p>{{ t('colleagues.invites.hint', 'Use the sidebar to create QR invites for new team members.') }}</p>
-      </div>
+      <app-colleagues-invites-panel class="colleagues-page__invites-center" />
     } @else {
       <app-chat-area
         [channel]="selectedChannel()"
@@ -54,7 +38,7 @@
     }
   </section>
 
-  @if (detailPanelOpen() && selectedMember(); as member) {
+  @if (selectedMember(); as member) {
     <app-member-detail-panel
       pageGridRight
       [member]="member"
@@ -64,5 +48,9 @@
       (messageRequested)="onMessageMember($event)"
       (memberUpdated)="onMemberUpdated()"
     />
+  } @else {
+    <aside pageGridRight class="colleagues-page__detail-empty">
+      <p>{{ t('colleagues.member.select_hint', 'Select a colleague to view details.') }}</p>
+    </aside>
   }
 </app-page-grid>

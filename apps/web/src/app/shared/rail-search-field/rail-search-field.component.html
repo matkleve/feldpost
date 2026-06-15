@@ -1,0 +1,12 @@
+<label class="rail-search-field">
+  <span class="material-icons rail-search-field__icon" aria-hidden="true">search</span>
+  <input
+    class="rail-search-field__input"
+    type="search"
+    [value]="value()"
+    [attr.placeholder]="placeholder()"
+    [attr.aria-label]="ariaLabel()"
+    (input)="onInput($event)"
+    (keydown.enter)="onEnter($event)"
+  />
+</label>

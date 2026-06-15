@@ -1,0 +1,90 @@
+<div
+  class="rail-select-list"
+  role="listbox"
+  [attr.aria-label]="listAriaLabel()"
+>
+  @if (loading()) {
+    <div class="rail-select-list__status" role="status">
+      {{ loadingMessage() }}
+    </div>
+  } @else {
+    @for (item of items(); track item.id) {
+      <div
+        class="rail-select-list__row-wrap"
+        [class.rail-select-list__row-wrap--active]="item.id === selectedId()"
+      >
+        <button
+          type="button"
+          role="option"
+          class="rail-select-list__row"
+          [attr.aria-selected]="item.id === selectedId()"
+          (click)="onItemClick(item.id)"
+        >
+          @switch (leadingKind(item)) {
+            @case ('dot') {
+              <span class="rail-select-list__dot" [style.background]="dotColor(item)"></span>
+            }
+            @case ('avatar') {
+              <span
+                class="rail-select-list__avatar"
+                [class.rail-select-list__avatar--online]="avatarOnline(item)"
+              >
+                {{ avatarText(item) }}
+              </span>
+            }
+            @case ('icon') {
+              <span class="material-icons rail-select-list__icon" aria-hidden="true">{{ iconName(item) }}</span>
+            }
+          }
+
+          <span class="rail-select-list__labels">
+            <span class="rail-select-list__label">{{ item.label }}</span>
+            @if (item.secondaryLabel) {
+              <span class="rail-select-list__secondary" [style.color]="item.secondaryColor ?? null">
+                {{ item.secondaryLabel }}
+              </span>
+            }
+          </span>
+        </button>
+
+        @for (action of item.actions ?? []; track action.action.id) {
+          @if (action.type === 'button') {
+            <button
+              type="button"
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              class="rail-select-list__row-action"
+              [attr.aria-label]="action.action.ariaLabel"
+              [attr.title]="action.action.title ?? action.action.ariaLabel"
+              (click)="onActionClick($event, item.id, action.action.id)"
+            >
+              <span class="material-icons" aria-hidden="true">{{ action.action.icon }}</span>
+            </button>
+          } @else {
+            <app-inline-confirm-action
+              size="sm"
+              [tone]="action.action.tone ?? 'danger'"
+              revealOnParentHover="sidebar-row-wrap"
+              [idleIcon]="action.action.idleIcon"
+              [armedIcon]="action.action.armedIcon"
+              [initialAriaKey]="action.action.initialAriaKey"
+              [initialAriaFallback]="action.action.initialAriaFallback"
+              [initialTitleKey]="action.action.initialTitleKey ?? null"
+              [initialTitleFallback]="action.action.initialTitleFallback ?? null"
+              [confirmAriaKey]="action.action.confirmAriaKey ?? 'common.inlineConfirm.confirmAria'"
+              [confirmAriaFallback]="action.action.confirmAriaFallback ?? 'Confirm'"
+              (confirmed)="onConfirmAction(item.id, action.action.id)"
+            />
+          }
+        }
+      </div>
+    }
+
+    @if (items().length === 0) {
+      <div class="rail-select-list__status">
+        {{ emptyMessage() }}
+      </div>
+    }
+  }
+</div>

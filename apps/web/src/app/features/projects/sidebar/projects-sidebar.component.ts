@@ -5,6 +5,9 @@ import type { SortConfig } from '../../../core/workspace-view/workspace-view.typ
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { colorTokenFor } from '../page/projects-page.logic';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { PageRailTitleComponent } from '../../../shared/page-rail-title';
+import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
+import { RailSelectListComponent, type RailSelectListItem } from '../../../shared/rail-select-list';
 import { ToolbarDropdownStackComponent } from '../../../shared/dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
 import {
   FilterDropdownComponent,
@@ -14,7 +17,6 @@ import {
   SortDropdownComponent,
   type SortDropdownOption,
 } from '../../../shared/dropdown-trigger/sort/sort-dropdown.component';
-import { InlineConfirmActionComponent } from '../../../shared/inline-confirm-action/inline-confirm-action.component';
 
 type ProjectsSidebarDropdown = 'filter' | 'sort' | null;
 
@@ -23,10 +25,12 @@ type ProjectsSidebarDropdown = 'filter' | 'sort' | null;
   standalone: true,
   imports: [
     FormsModule,
+    PageRailTitleComponent,
+    RailSearchFieldComponent,
+    RailSelectListComponent,
     ToolbarDropdownStackComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
-    InlineConfirmActionComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-sidebar.component.html',
@@ -80,28 +84,79 @@ export class ProjectsSidebarComponent {
     },
   ]);
 
-  colorFor(project: ProjectListItem): string {
-    return colorTokenFor(project.colorKey);
-  }
+  readonly projectListItems = computed<RailSelectListItem[]>(() =>
+    this.projects().map((project) => {
+      const actions: RailSelectListItem['actions'] =
+        project.status === 'active'
+          ? [
+              {
+                type: 'button',
+                action: {
+                  id: 'archive',
+                  icon: 'inventory_2',
+                  ariaLabel: this.t('projects.page.action.archive', 'Archive'),
+                  title: this.t('projects.page.action.archive', 'Archive'),
+                },
+              },
+            ]
+          : [
+              {
+                type: 'button',
+                action: {
+                  id: 'restore',
+                  icon: 'unarchive',
+                  ariaLabel: this.t('projects.page.action.restore', 'Restore'),
+                  title: this.t('projects.page.action.restore', 'Restore'),
+                },
+              },
+              {
+                type: 'confirm',
+                action: {
+                  id: 'delete',
+                  idleIcon: 'delete',
+                  armedIcon: 'warning',
+                  initialAriaKey: 'projects.sidebar.action.delete',
+                  initialAriaFallback: 'Delete project',
+                  initialTitleKey: 'projects.sidebar.action.delete',
+                  initialTitleFallback: 'Delete project',
+                  confirmAriaKey: 'projects.sidebar.action.confirmDelete',
+                  confirmAriaFallback: 'Confirm delete project',
+                  tone: 'danger',
+                },
+              },
+            ];
+
+      return {
+        id: project.id,
+        label: project.name,
+        leading: { kind: 'dot', color: colorTokenFor(project.colorKey) },
+        actions,
+      };
+    }),
+  );
+
+  readonly projectListEmptyMessage = computed(() =>
+    this.showArchived()
+      ? this.t('projects.sidebar.empty.archived', 'No archived projects')
+      : this.t('projects.sidebar.empty.active', 'No active projects'),
+  );
 
   onProjectClick(projectId: string): void {
     this.projectSelected.emit(projectId);
   }
 
-  onRowArchiveClick(event: MouseEvent, projectId: string): void {
-    event.stopPropagation();
-    (event.currentTarget as HTMLElement | null)?.blur();
-    this.projectArchiveRequested.emit(projectId);
-  }
-
-  onRowRestoreClick(event: MouseEvent, projectId: string): void {
-    event.stopPropagation();
-    (event.currentTarget as HTMLElement | null)?.blur();
-    this.projectRestoreRequested.emit(projectId);
-  }
-
-  onRowDeleteConfirmed(projectId: string): void {
-    this.projectDeleteRequested.emit(projectId);
+  onProjectListAction(event: { itemId: string; actionId: string }): void {
+    switch (event.actionId) {
+      case 'archive':
+        this.projectArchiveRequested.emit(event.itemId);
+        break;
+      case 'restore':
+        this.projectRestoreRequested.emit(event.itemId);
+        break;
+      case 'delete':
+        this.projectDeleteRequested.emit(event.itemId);
+        break;
+    }
   }
 
   onSearchInput(value: string): void {

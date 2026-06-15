@@ -31,6 +31,12 @@
 :host-context(.projects-sidebar__row-wrap:focus-within)
   :host([data-reveal='sidebar-row-wrap'])
   .inline-confirm-action__button,
+:host-context(.rail-select-list__row-wrap:hover)
+  :host([data-reveal='sidebar-row-wrap'])
+  .inline-confirm-action__button,
+:host-context(.rail-select-list__row-wrap:focus-within)
+  :host([data-reveal='sidebar-row-wrap'])
+  .inline-confirm-action__button,
 :host([data-reveal='sidebar-row-wrap']) .inline-confirm-action__button[data-two-step-state='armed'] {
   @include inline-confirm-revealed;
 }

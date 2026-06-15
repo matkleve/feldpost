@@ -141,11 +141,44 @@ export function toDateInputValue(date: Date | null): string {
   return `${y}-${m}-${d}`;
 }
 
-/** Locale-aware short date for timespace display fields (follows app language, not OS default). */
-export function formatTimespaceDisplayDate(date: Date | null, locale: string): string {
+/** Locale-aware short date for timespace fields — dot separators per product convention. */
+export function formatTimespaceDisplayDate(date: Date | null, _locale: string): string {
   if (!date) return '';
-  return date.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}.${month}.${year}`;
 }
+
+/**
+ * Parses compact EU display dates for timespace fields (DD.MM.YYYY and common variants).
+ * Returns UTC midnight Date or null when empty / unparseable.
+ */
+export function parseTimespaceDisplayDate(raw: string): Date | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const sepMatch = trimmed.match(/^(\d{1,2})[./\-](\d{1,2})(?:[./\-](\d{2,4}))?$/);
+  if (sepMatch) {
+    const day = parseInt(sepMatch[1], 10);
+    const month = parseInt(sepMatch[2], 10);
+    let year = sepMatch[3] ? parseInt(sepMatch[3], 10) : new Date().getUTCFullYear();
+    if (year < 100) year += 2000;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return parseDateInputValue(iso);
+  }
+
+  const parsed = Date.parse(trimmed);
+  if (!Number.isFinite(parsed)) return null;
+  const d = new Date(parsed);
+  return parseDateInputValue(
+    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`,
+  );
+}
+
+/** Inset so full-span selections do not touch the histogram track edges. */
+const SELECTION_EDGE_INSET_PCT = 2.5;
 
 export function parseDateInputValue(value: string): Date | null {
   if (!value) return null;
@@ -164,10 +197,13 @@ export function selectionOverlayPercents(
 
   const fromMs = range.from ? startOfUtcDay(range.from.getTime()) : domainStartMs;
   const toMs = range.to ? endOfUtcDay(range.to.getTime()) : domainEndMs;
-  const leftPct = ((fromMs - domainStartMs) / span) * 100;
-  const widthPct = ((toMs - fromMs) / span) * 100;
+  const rawLeft = ((fromMs - domainStartMs) / span) * 100;
+  const rawWidth = ((toMs - fromMs) / span) * 100;
+  const innerSpan = 100 - 2 * SELECTION_EDGE_INSET_PCT;
+  const leftPct = SELECTION_EDGE_INSET_PCT + (rawLeft / 100) * innerSpan;
+  const widthPct = (rawWidth / 100) * innerSpan;
   return {
-    leftPct: Math.min(Math.max(leftPct, 0), 100),
-    widthPct: Math.min(Math.max(widthPct, 0.5), 100 - leftPct),
+    leftPct: Math.min(Math.max(leftPct, SELECTION_EDGE_INSET_PCT), 100 - SELECTION_EDGE_INSET_PCT),
+    widthPct: Math.min(Math.max(widthPct, 0.5), 100 - leftPct - SELECTION_EDGE_INSET_PCT),
   };
 }

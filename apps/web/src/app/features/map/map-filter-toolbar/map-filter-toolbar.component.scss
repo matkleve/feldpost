@@ -24,26 +24,55 @@
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('map-filter-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('map-filter-toolbar');
-
-  // Closed triggers: solid card chrome (opaque), not frosted — matches map floating control hierarchy.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .map-filter-toolbar__menu-trigger {
-    background: var(--card);
-    border-color: var(--border);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  // Open dropdown trigger: frosted glass like search bar shell.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .map-filter-toolbar__menu-trigger--open {
-    @include frosted-chrome.surface;
-  }
 }
 
 @layer states {
-  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('map-filter-toolbar');
+  // Chevron rotation only — active/open chrome is unlayered below (beats hlmBtn transparent hovers).
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .map-filter-toolbar__menu-trigger--open [data-dd-part='chevron'] {
+    transform: rotate(180deg);
+  }
 }
 
 @include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('map-filter-toolbar', map-filter-toolbar);
+
+// Unlayered — frosted glass like search bar; must beat hlmBtn outline `bg-background` / transparent hovers.
+// @see docs/specs/component/map/map-filter-toolbar.md
+// @see apps/web/src/app/features/map/search-bar/search-bar.component.scss
+button.map-filter-toolbar__menu-trigger {
+  @include frosted-chrome.surface;
+  color: var(--foreground);
+  border-radius: var(--radius-md);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+button.map-filter-toolbar__menu-trigger:hover:not(:disabled),
+button.map-filter-toolbar__menu-trigger:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 8%, color-mix(in srgb, var(--card) 85%, transparent));
+  border-color: color-mix(in srgb, var(--primary) 42%, color-mix(in srgb, var(--border) 50%, transparent));
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  color: var(--foreground);
+}
+
+button.map-filter-toolbar__menu-trigger[data-active='true'],
+button.map-filter-toolbar__menu-trigger.map-filter-toolbar__menu-trigger--open {
+  background: color-mix(in srgb, var(--primary) 12%, color-mix(in srgb, var(--card) 85%, transparent));
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  color: var(--primary);
+}
+
+button.map-filter-toolbar__menu-trigger[data-active='true']:hover:not(:disabled),
+button.map-filter-toolbar__menu-trigger.map-filter-toolbar__menu-trigger--open:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 16%, color-mix(in srgb, var(--card) 85%, transparent));
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border));
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  color: var(--primary);
+}

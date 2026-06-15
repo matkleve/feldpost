@@ -1,4 +1,6 @@
-<nav class="member-list" aria-label="{{ t('colleagues.sidebar.label', 'Colleagues') }}">
+<nav class="member-list" aria-label="{{ t('colleagues.sidebar.label', 'Team') }}">
+  <app-page-rail-title [title]="t('colleagues.page.title', 'Team')" />
+
   <div class="member-list__tabs">
     <button type="button" [class.active]="activeTab() === 'members'" (click)="tabChange.emit('members')">
       {{ t('colleagues.tab.members', 'Members') }}
@@ -10,53 +12,33 @@
 
   <section class="member-list__channels">
     <h2>{{ t('colleagues.channels.title', 'Channels') }}</h2>
-    <ul>
-      @for (channel of channels(); track channel.id) {
-        <li>
-          <button
-            type="button"
-            class="member-list__channel"
-            [class.member-list__channel--active]="selectedChannelId() === channel.id"
-            (click)="channelSelected.emit(channel.id)"
-          >
-            # {{ channelLabel(channel) }}
-          </button>
-        </li>
-      }
-    </ul>
+    <app-rail-select-list
+      [compact]="true"
+      [items]="channelListItems()"
+      [selectedId]="selectedChannelId()"
+      [listAriaLabel]="t('colleagues.channels.title', 'Channels')"
+      [emptyMessage]="t('colleagues.channels.empty', 'No channels')"
+      (itemSelected)="channelSelected.emit($event)"
+    />
   </section>
 
   <section class="member-list__members">
     <h2>{{ t('colleagues.members.title', 'Colleagues') }}</h2>
-    <input
-      type="search"
-      class="member-list__search"
+    <app-rail-search-field
+      [value]="searchQuery()"
       [placeholder]="t('colleagues.members.search', 'Search colleagues')"
-      [ngModel]="searchQuery()"
-      (ngModelChange)="searchQuery.set($event)"
+      [ariaLabel]="t('colleagues.members.search_aria', 'Search colleagues')"
+      (valueChange)="searchQuery.set($event)"
     />
-    <ul role="listbox">
-      @for (member of filteredMembers(); track member.id) {
-        <li>
-          <button
-            type="button"
-            role="option"
-            class="member-list__row"
-            [class.member-list__row--active]="selectedMemberId() === member.id"
-            [attr.aria-selected]="selectedMemberId() === member.id"
-            [disabled]="loading()"
-            (click)="memberSelected.emit(member.id)"
-          >
-            <span class="member-list__avatar" [class.member-list__avatar--online]="member.isOnline">
-              {{ member.fullName.charAt(0).toUpperCase() || '?' }}
-            </span>
-            <span class="member-list__meta">
-              <span class="member-list__name">{{ member.fullName || t('colleagues.members.unnamed', 'Unnamed') }}</span>
-              <span class="member-list__role" [style.color]="member.roleColor ?? 'inherit'">{{ member.roleDisplayName }}</span>
-            </span>
-          </button>
-        </li>
-      }
-    </ul>
+    <app-rail-select-list
+      [items]="memberListItems()"
+      [selectedId]="selectedMemberId()"
+      [loading]="loading()"
+      [listAriaLabel]="t('colleagues.members.title', 'Colleagues')"
+      [loadingMessage]="t('colleagues.members.loading', 'Loading colleagues')"
+      [emptyMessage]="t('colleagues.members.empty', 'No colleagues found')"
+      (itemSelected)="memberSelected.emit($event)"
+      (actionTriggered)="onMemberAction($event)"
+    />
   </section>
 </nav>

@@ -1,0 +1,14 @@
+// Page title above left rail lists (projects, team, organization).
+// @see docs/design/page-rail-grid.md
+.page-rail-title {
+  flex-shrink: 0;
+}
+
+.page-rail-title__heading {
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}

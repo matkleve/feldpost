@@ -23,24 +23,28 @@
           {{ t('map.filter.timespace.loading', 'Loading timeline…') }}
         </p>
       } @else if (histogram(); as hist) {
-        <div class="timespace-dropdown__bars" aria-hidden="true">
-          @for (bin of hist.bins; track bin.index) {
-            <span
-              class="timespace-dropdown__bar"
-              [class.timespace-dropdown__bar--empty]="bin.count === 0"
-              [style.height.px]="barHeightPx(bin)"
-            ></span>
-          }
+        <div #track class="timespace-dropdown__track">
+          <div #trackInner class="timespace-dropdown__track-inner">
+            <div class="timespace-dropdown__bars" aria-hidden="true">
+              @for (bin of hist.bins; track bin.index) {
+                <span
+                  class="timespace-dropdown__bar"
+                  [class.timespace-dropdown__bar--empty]="bin.count === 0"
+                  [style.height.px]="barHeightPx(bin)"
+                ></span>
+              }
+            </div>
+            @if (selectionOverlay(); as overlay) {
+              <div
+                class="timespace-dropdown__selection"
+                [class.timespace-dropdown__selection--active]="selectionIsActive()"
+                [style.left.%]="overlay.leftPct"
+                [style.width.%]="overlay.widthPct"
+                aria-hidden="true"
+              ></div>
+            }
+          </div>
         </div>
-        @if (selectionOverlay(); as overlay) {
-          <div
-            class="timespace-dropdown__selection"
-            [class.timespace-dropdown__selection--active]="selectionIsActive()"
-            [style.left.%]="overlay.leftPct"
-            [style.width.%]="overlay.widthPct"
-            aria-hidden="true"
-          ></div>
-        }
       } @else {
         <p class="timespace-dropdown__status">
           {{
@@ -57,14 +61,16 @@
     <label class="timespace-dropdown__date-field">
       <span class="timespace-dropdown__date-label">{{ t('map.filter.timespace.from', 'From') }}</span>
       <div class="timespace-dropdown__date-control" [attr.lang]="dateInputLocale()">
-        <span class="timespace-dropdown__date-display" aria-hidden="true">{{ fromDisplay() }}</span>
         <input
-          class="timespace-dropdown__date-input timespace-dropdown__date-input--native"
-          type="date"
-          [attr.lang]="dateInputLocale()"
+          class="timespace-dropdown__date-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          [attr.placeholder]="t('map.filter.timespace.dateFormatPlaceholder', 'DD.MM.YYYY')"
           [attr.aria-label]="t('map.filter.timespace.from', 'From')"
-          [value]="fromInput()"
-          (change)="onFromInput($event)"
+          [value]="fromDisplay()"
+          (change)="onFromTextInput($event)"
+          (keydown.enter)="onFromTextInput($event)"
         />
         <span class="material-icons timespace-dropdown__date-icon" aria-hidden="true">calendar_today</span>
       </div>
@@ -73,14 +79,16 @@
     <label class="timespace-dropdown__date-field">
       <span class="timespace-dropdown__date-label">{{ t('map.filter.timespace.to', 'To') }}</span>
       <div class="timespace-dropdown__date-control" [attr.lang]="dateInputLocale()">
-        <span class="timespace-dropdown__date-display" aria-hidden="true">{{ toDisplay() }}</span>
         <input
-          class="timespace-dropdown__date-input timespace-dropdown__date-input--native"
-          type="date"
-          [attr.lang]="dateInputLocale()"
+          class="timespace-dropdown__date-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          [attr.placeholder]="t('map.filter.timespace.dateFormatPlaceholder', 'DD.MM.YYYY')"
           [attr.aria-label]="t('map.filter.timespace.to', 'To')"
-          [value]="toInput()"
-          (change)="onToInput($event)"
+          [value]="toDisplay()"
+          (change)="onToTextInput($event)"
+          (keydown.enter)="onToTextInput($event)"
         />
         <span class="material-icons timespace-dropdown__date-icon" aria-hidden="true">calendar_today</span>
       </div>

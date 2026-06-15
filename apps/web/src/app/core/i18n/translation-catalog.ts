@@ -511,6 +511,22 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Colleghi',
   },
   {
+    key: 'colleagues.page.title',
+    original: 'Team',
+    context: 'Colleagues page left-rail title (gender-neutral).',
+    en: 'Team',
+    de: 'Team',
+    it: 'Team',
+  },
+  {
+    key: 'organization.page.title',
+    original: 'Organization',
+    context: 'Organization page left-rail title.',
+    en: 'Organization',
+    de: 'Organisation',
+    it: 'Organizzazione',
+  },
+  {
     key: 'nav.item.organization',
     original: 'Organization',
     context: 'Main navigation label for organization admin route.',

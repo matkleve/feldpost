@@ -1,18 +1,14 @@
 <section class="chat-area">
   <header class="chat-area__header">
     <h1>{{ channelTitle(channel()) }}</h1>
-    <div class="chat-area__search">
-      <input
-        type="search"
-        [placeholder]="t('colleagues.chat.search', 'Search messages')"
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event)"
-        (keydown.enter)="onSearch()"
-      />
-      <button hlmBtn variant="outline" type="button" (click)="onSearch()">
-        {{ t('colleagues.chat.search_button', 'Search') }}
-      </button>
-    </div>
+    <app-rail-search-field
+      class="chat-area__search"
+      [value]="searchQuery()"
+      [placeholder]="t('colleagues.chat.search', 'Search messages')"
+      [ariaLabel]="t('colleagues.chat.search', 'Search messages')"
+      (valueChange)="searchQuery.set($event)"
+      (submitted)="onSearch()"
+    />
   </header>
 
   <div class="chat-area__messages" role="log" aria-live="polite">
