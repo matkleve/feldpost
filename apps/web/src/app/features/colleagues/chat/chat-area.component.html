@@ -6,34 +6,15 @@
       }
       <h1>{{ displayTitle() }}</h1>
     </div>
-    <button
-      type="button"
-      hlmBtn
-      variant="ghost"
-      size="icon"
-      class="chat-area__header-search-btn"
-      [class.chat-area__header-search-btn--active]="headerSearchOpen()"
-      [attr.aria-pressed]="headerSearchOpen()"
-      [attr.aria-label]="t('colleagues.chat.search', 'Search messages')"
-      [attr.title]="t('colleagues.chat.search', 'Search messages')"
-      (click)="toggleHeaderSearch()"
-    >
-      <span class="material-icons" aria-hidden="true">search</span>
-    </button>
+    <app-rail-search-field
+      class="chat-area__header-search"
+      [value]="searchQuery()"
+      [placeholder]="t('colleagues.chat.search', 'Search messages')"
+      [ariaLabel]="t('colleagues.chat.search', 'Search messages')"
+      (valueChange)="onSearchQueryChange($event)"
+      (submitted)="onSearch()"
+    />
   </header>
-
-  @if (headerSearchOpen()) {
-    <div class="chat-area__search-row">
-      <app-rail-search-field
-        class="chat-area__search"
-        [value]="searchQuery()"
-        [placeholder]="t('colleagues.chat.search', 'Search messages')"
-        [ariaLabel]="t('colleagues.chat.search', 'Search messages')"
-        (valueChange)="searchQuery.set($event)"
-        (submitted)="onSearch()"
-      />
-    </div>
-  }
 
   @if (showSearchResults() && searchResults().length > 0) {
     <section class="chat-area__search-results" aria-label="{{ t('colleagues.chat.search_results', 'Search results') }}">

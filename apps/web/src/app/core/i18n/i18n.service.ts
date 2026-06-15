@@ -335,7 +335,7 @@ export class I18nService {
     return new Intl.NumberFormat(this.locale(), options).format(value);
   }
 
-  /** Compact date field display — follows active language locale (Settings → Language). */
+  /** Compact date field display — locale field order, dot separators (DD.MM.YYYY). */
   formatDateFieldValue(date: Date | null): string {
     this.languageSignal();
     return formatDateFieldValue(date, this.locale());

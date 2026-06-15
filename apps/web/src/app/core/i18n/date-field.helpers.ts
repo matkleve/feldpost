@@ -14,6 +14,9 @@ export function parseIsoDateValue(value: string): Date | null {
   return Number.isFinite(parsed) ? new Date(parsed) : null;
 }
 
+/** Separator for compact date fields — product convention (DD.MM.YYYY), not locale literals. */
+const DATE_FIELD_SEPARATOR = '.';
+
 function dateFieldFormatParts(locale: string): Intl.DateTimeFormatPart[] {
   return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
@@ -23,7 +26,7 @@ function dateFieldFormatParts(locale: string): Intl.DateTimeFormatPart[] {
   }).formatToParts(new Date(Date.UTC(2026, 2, 27)));
 }
 
-/** Placeholder hint derived from active locale (e.g. DD.MM.YYYY, DD/MM/YYYY). */
+/** Placeholder hint derived from active locale field order (always DD.MM.YYYY-style dots). */
 export function dateFieldPlaceholderForLocale(locale: string): string {
   return dateFieldFormatParts(locale)
     .map((part) => {
@@ -35,7 +38,7 @@ export function dateFieldPlaceholderForLocale(locale: string): string {
         case 'year':
           return 'YYYY';
         case 'literal':
-          return part.value;
+          return DATE_FIELD_SEPARATOR;
         default:
           return '';
       }
@@ -43,15 +46,22 @@ export function dateFieldPlaceholderForLocale(locale: string): string {
     .join('');
 }
 
-/** Display value for compact date fields — follows Settings → Language locale. */
+/** Display value for compact date fields — locale field order, dot separators. */
 export function formatDateFieldValue(date: Date | null, locale: string): string {
   if (!date) return '';
-  return new Intl.DateTimeFormat(locale, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(date);
+
+  const values: Record<'day' | 'month' | 'year', string> = {
+    day: String(date.getUTCDate()).padStart(2, '0'),
+    month: String(date.getUTCMonth() + 1).padStart(2, '0'),
+    year: String(date.getUTCFullYear()),
+  };
+
+  return dateFieldFormatParts(locale)
+    .filter((part): part is Intl.DateTimeFormatPart & { type: 'day' | 'month' | 'year' } =>
+      part.type === 'day' || part.type === 'month' || part.type === 'year',
+    )
+    .map((part) => values[part.type])
+    .join(DATE_FIELD_SEPARATOR);
 }
 
 /**

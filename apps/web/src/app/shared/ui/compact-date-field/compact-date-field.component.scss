@@ -2,11 +2,17 @@
   // Labeled compact date row — single thin shell aligned to hlmBtn size="sm" (2.25rem).
   // @see apps/web/src/app/shared/ui/button/button-variants.ts
   // @see apps/web/src/app/shared/dropdown-trigger/scss/_toolbar-breakpoints.scss
+  :host {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
   .compact-date-field {
     display: flex;
-    flex: 1 1 0;
     flex-direction: column;
     gap: var(--spacing-1);
+    width: 100%;
     min-width: 0;
   }
 

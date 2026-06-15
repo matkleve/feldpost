@@ -274,7 +274,13 @@ export class DropdownShellComponent {
     if (this.host.nativeElement.contains(target)) {
       return true;
     }
-    return !!this.anchor()?.contains(target);
+    if (this.anchor()?.contains(target)) {
+      return true;
+    }
+    if (target instanceof HTMLElement && target.closest('[data-filter-picker-flyout]')) {
+      return true;
+    }
+    return false;
   }
 
   onEscape(): void {

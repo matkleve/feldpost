@@ -8,6 +8,7 @@ import { MetadataService } from '../metadata/metadata.service';
 import { MediaDownloadService } from '../media-download/media-download.service';
 import { normalizePreviewGenerationStatus } from '../media/preview-generation-status.types';
 import { MediaLocationsService } from '../media-locations/media-locations.service';
+import { MapTimespaceCatalogService } from '../map-timespace/map-timespace-catalog.service';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -31,6 +32,7 @@ export class WorkspaceViewService {
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly mediaLocationsService = inject(MediaLocationsService);
+  private readonly mapTimespaceCatalog = inject(MapTimespaceCatalogService);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -193,7 +195,26 @@ export class WorkspaceViewService {
   readonly totalImageCount = computed(() => this.ruleFiltered().length);
 
   /** Media ids that pass project, time, and rule filters — used by map marker visibility. */
-  readonly filteredImageIds = computed(() => new Set(this.ruleFiltered().map((img) => img.id)));
+  readonly filteredImageIds = computed(() => {
+    const pipelineSet = new Set(this.ruleFiltered().map((img) => img.id));
+    if (!this.hasMapFilters()) {
+      return pipelineSet;
+    }
+    // Workspace selection loaded — pipeline is authoritative (all filter types).
+    if (this._rawImages().length > 0) {
+      return pipelineSet;
+    }
+    // Rule filters need loaded image metadata; cannot derive from the timespace catalog alone.
+    if (this.filterService.activeCount() > 0) {
+      return pipelineSet;
+    }
+    // Map browse mode: derive allowed ids from org-wide catalog timestamps.
+    this.mapTimespaceCatalog.entries();
+    return this.mapTimespaceCatalog.idsMatchingFilters(
+      this._selectedProjectIds(),
+      this._timeRange(),
+    );
+  });
 
   readonly hasMapFilters = computed(
     () =>

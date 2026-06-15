@@ -13,10 +13,11 @@
 }
 
 @layer components {
-  // Bottom row — compact from/to date fields.
+  // Bottom row — compact from/to date fields fill panel width evenly.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__dates-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: stretch;
     gap: var(--spacing-1);
     width: 100%;
@@ -97,16 +98,15 @@
     background: color-mix(in srgb, var(--primary) 14%, transparent);
   }
 
-  // Footer — reset (left) and matched item count (right).
+  // Footer — reset (left) and matched item count (right-bottom).
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__footer {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     gap: var(--spacing-1);
     width: 100%;
     min-width: 0;
-    min-height: 2.25rem;
   }
 
   // Left slot keeps count right-aligned when reset is hidden.
@@ -132,13 +132,13 @@
     transition: transform var(--motion-duration-fast) var(--motion-ease-out);
   }
 
-  // Matched media count for current project + time range scope.
+  // Matched media count — equal inset from panel bottom-right (shell spacing-1 + no footer slack).
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__count {
     margin-left: auto;
     flex: 0 0 auto;
     font-size: var(--font-size-2xs);
-    line-height: var(--line-height-tight);
+    line-height: 1;
     color: var(--muted-foreground);
     white-space: nowrap;
   }

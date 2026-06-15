@@ -1,7 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
+import {
+  isTimeRangeActive,
+  matchesTimeRange,
+  type TimeRange,
+} from '../workspace-view/timespace.helpers';
 
 export interface TimespaceCatalogEntry {
+  id: string;
   capturedAt: string | null;
   createdAt: string;
   projectIds: string[];
@@ -75,6 +81,7 @@ export class MapTimespaceCatalogService {
 
       this._entries.set(
         accum.map((row) => ({
+          id: row.id,
           capturedAt: row.captured_at,
           createdAt: row.created_at,
           projectIds: projectIdsByMediaId.get(row.id) ?? [],
@@ -115,5 +122,17 @@ export class MapTimespaceCatalogService {
     }
 
     return result;
+  }
+
+  /** Media ids matching project + time filters — used when the map has no workspace selection loaded. */
+  idsMatchingFilters(projectIds: ReadonlySet<string>, timeRange: TimeRange | null): Set<string> {
+    let entries = this._entries();
+    if (projectIds.size > 0) {
+      entries = entries.filter((entry) => entry.projectIds.some((id) => projectIds.has(id)));
+    }
+    if (isTimeRangeActive(timeRange)) {
+      entries = entries.filter((entry) => matchesTimeRange(entry, timeRange));
+    }
+    return new Set(entries.map((entry) => entry.id));
   }
 }

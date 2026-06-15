@@ -59,13 +59,36 @@ button.map-filter-toolbar__menu-trigger:focus-visible:not(:disabled) {
   color: var(--foreground);
 }
 
-button.map-filter-toolbar__menu-trigger[data-active='true'],
-button.map-filter-toolbar__menu-trigger.map-filter-toolbar__menu-trigger--open {
-  background: color-mix(in srgb, var(--primary) 12%, color-mix(in srgb, var(--card) 85%, transparent));
-  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+// Selected / open trigger — cool selection ink (not primary).
+@mixin map-filter-trigger-selected {
+  background: color-mix(
+    in srgb,
+    var(--interaction-selected-ink) 12%,
+    color-mix(in srgb, var(--card) 85%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  color: var(--primary);
+  color: var(--interaction-selected-ink);
+
+  .material-icons {
+    color: inherit;
+  }
+}
+
+// Filter applied or menu open — blue at rest, focus, and pressed; primary only on hover.
+// @see docs/design/state-visuals.md § Interaction emphasis
+button.map-filter-toolbar__menu-trigger[data-active='true'],
+button.map-filter-toolbar__menu-trigger.map-filter-toolbar__menu-trigger--open {
+  @include map-filter-trigger-selected;
+}
+
+// Beat hlmBtn outline `active:text-primary` / `focus-visible:text-primary` after click-open.
+button.map-filter-toolbar__menu-trigger[data-active='true']:active:not(:disabled),
+button.map-filter-toolbar__menu-trigger.map-filter-toolbar__menu-trigger--open:active:not(:disabled),
+button.map-filter-toolbar__menu-trigger[data-active='true']:focus-visible:not(:disabled),
+button.map-filter-toolbar__menu-trigger.map-filter-toolbar__menu-trigger--open:focus-visible:not(:disabled) {
+  @include map-filter-trigger-selected;
 }
 
 button.map-filter-toolbar__menu-trigger[data-active='true']:hover:not(:disabled),
@@ -75,4 +98,8 @@ button.map-filter-toolbar__menu-trigger.map-filter-toolbar__menu-trigger--open:h
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   color: var(--primary);
+
+  .material-icons {
+    color: inherit;
+  }
 }

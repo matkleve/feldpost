@@ -8,6 +8,7 @@
   <div
     class="page-grid__rail page-grid__rail--center"
     [class.page-grid__rail--center-expanded]="centerExpanded() && !rightRailOpen()"
+    [class.page-grid__rail--center-flush]="flushBottom()"
   >
     <ng-content select="[pageGridCenter]" />
   </div>

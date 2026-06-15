@@ -16,7 +16,7 @@
 .filter-rules {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
 }
 
 // Stable state: rule row idle / hover — neutral surface tint (quiet toolbar vocabulary).
@@ -24,8 +24,8 @@
 .filter-rule {
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
-  padding: var(--spacing-1);
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
   border-radius: var(--radius-sm);
 
   &:hover {

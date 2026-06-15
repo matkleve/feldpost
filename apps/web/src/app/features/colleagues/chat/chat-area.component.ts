@@ -52,7 +52,6 @@ export class ChatAreaComponent {
   readonly editingMessageId = signal<string | null>(null);
   readonly editDraft = signal('');
   readonly showSearchResults = signal(false);
-  readonly headerSearchOpen = signal(false);
   readonly attachmentFile = signal<File | null>(null);
   readonly selectedProjectId = signal<string | null>(null);
   readonly projects = signal<Array<{ id: string; name: string }>>([]);
@@ -113,11 +112,10 @@ export class ChatAreaComponent {
     return trimmed.charAt(0).toUpperCase();
   }
 
-  toggleHeaderSearch(): void {
-    this.headerSearchOpen.update((open) => !open);
-    if (!this.headerSearchOpen()) {
+  onSearchQueryChange(value: string): void {
+    this.searchQuery.set(value);
+    if (!value.trim()) {
       this.showSearchResults.set(false);
-      this.searchQuery.set('');
     }
   }
 

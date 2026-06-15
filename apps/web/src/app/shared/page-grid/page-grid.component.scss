@@ -12,6 +12,12 @@
   overflow: hidden;
 }
 
+// Full-height center content (colleagues chat) — drop host bottom inset.
+// @see docs/design/page-rail-grid.md
+:host.page-grid-host--flush-bottom {
+  padding-block-end: 0;
+}
+
 // Three tracks: left gutter | fixed center (content-clamp--list) | right gutter.
 // @see docs/design/page-rail-grid.md
 .page-grid {
@@ -46,6 +52,12 @@
   box-sizing: border-box;
   width: 100%;
   padding-bottom: calc(var(--spacing-8) * 2);
+}
+
+// Chat and other viewport-tall center panes — no scroll tail below content.
+// @see docs/design/page-rail-grid.md
+.page-grid__rail--center-flush {
+  padding-bottom: 0;
 }
 
 // Projects without details panel — absorb center + right gutter tracks.

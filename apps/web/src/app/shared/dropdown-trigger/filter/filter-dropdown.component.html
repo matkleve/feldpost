@@ -206,9 +206,11 @@
     @let activeRule = ruleById(pk.ruleId);
     @if (fly && activeRule) {
       <div
+        #pickerFlyout
         data-filter-picker-flyout
         class="filter-rule__picker-flyout"
         role="listbox"
+        (click)="$event.stopPropagation()"
         [style.top.px]="fly.top"
         [style.left.px]="fly.left"
         [style.width.px]="fly.width"

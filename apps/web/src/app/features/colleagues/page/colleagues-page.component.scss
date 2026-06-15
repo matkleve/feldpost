@@ -12,6 +12,8 @@
   min-width: 0;
   flex: 1 1 auto;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .colleagues-page__error {

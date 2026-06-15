@@ -1,4 +1,17 @@
-import { Component, HostListener, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  DestroyRef,
+  HostListener,
+  Injector,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  viewChild,
+  ElementRef,
+} from '@angular/core';
 import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../../core/filter/filter-rule-evaluator';
 import { FilterService } from '../../../core/filter/filter.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
@@ -34,6 +47,9 @@ export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);
   private readonly metadata = inject(MetadataService);
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly pickerFlyoutRef = viewChild<ElementRef<HTMLElement>>('pickerFlyout');
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   constructor() {
@@ -45,6 +61,30 @@ export class FilterDropdownComponent {
       const exists = this.filterService.rules().some((r) => r.id === open.ruleId);
       if (!exists) {
         this.closePickerFlyout();
+      }
+    });
+
+    effect(() => {
+      const open = this.openRulePicker();
+      const geom = this.pickerFlyoutGeom();
+      if (!open || !geom) {
+        return;
+      }
+      afterNextRender(
+        () => {
+          const el = this.pickerFlyoutRef()?.nativeElement;
+          if (el && typeof document !== 'undefined' && el.parentElement !== document.body) {
+            document.body.appendChild(el);
+          }
+        },
+        { injector: this.injector },
+      );
+    });
+
+    this.destroyRef.onDestroy(() => {
+      const el = this.pickerFlyoutRef()?.nativeElement;
+      if (el?.parentElement === document.body) {
+        el.remove();
       }
     });
   }

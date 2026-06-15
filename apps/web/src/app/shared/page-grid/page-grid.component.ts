@@ -12,6 +12,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'page-grid-host',
+    '[class.page-grid-host--flush-bottom]': 'flushBottom()',
   },
 })
 export class PageGridComponent {
@@ -23,4 +24,7 @@ export class PageGridComponent {
 
   /** When true and the right rail is closed, center spans columns 2–3 (projects dashboard / detail without details). */
   readonly centerExpanded = input(false);
+
+  /** When true, removes bottom inset on host + center rail so full-height panes (e.g. chat) reach the viewport edge. */
+  readonly flushBottom = input(false);
 }
