@@ -37,22 +37,15 @@
     user-select: none;
     box-sizing: border-box;
     overflow: hidden;
+    --timespace-selection-inset: var(--spacing-1);
+    --timespace-bars-inset: var(--spacing-2);
   }
 
-  // Padded inner coordinate space — 2× shell inset for bar placement.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__track-inner {
-    position: absolute;
-    inset-block: 0;
-    inset-inline: calc(2 * var(--spacing-1));
-    box-sizing: border-box;
-  }
-
-  // Bar row — fills track interior; bars align to bottom edge.
+  // Bar row — inset spacing-2 from chart border; bars align to bottom edge.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__bars {
     position: absolute;
-    inset: 0;
+    inset: var(--timespace-bars-inset);
     display: flex;
     align-items: flex-end;
     gap: 1px;
@@ -77,11 +70,18 @@
     background: transparent;
   }
 
-  // Selected time window overlay inside padded track.
+  // Selected time window — inset spacing-1; left/width map 0–100% across inner span.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__selection {
     position: absolute;
-    inset-block: 0;
+    inset-block: var(--timespace-selection-inset);
+    left: calc(
+      var(--timespace-selection-inset) + (100% - 2 * var(--timespace-selection-inset)) *
+        var(--selection-left, 0) / 100
+    );
+    width: calc(
+      (100% - 2 * var(--timespace-selection-inset)) * var(--selection-width, 0) / 100
+    );
     border-radius: var(--radius-sm);
     border: 2px solid color-mix(in srgb, var(--chart-1) 70%, var(--primary));
     background: color-mix(in srgb, var(--chart-1) 12%, transparent);
@@ -95,6 +95,52 @@
   .timespace-dropdown__selection--active {
     border-color: var(--primary);
     background: color-mix(in srgb, var(--primary) 14%, transparent);
+  }
+
+  // Footer — reset (left) and matched item count (right).
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-1);
+    width: 100%;
+    min-width: 0;
+    min-height: 2.25rem;
+  }
+
+  // Left slot keeps count right-aligned when reset is hidden.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__footer-start {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  // Ghost reset — matches grouping dropdown toolbar reset sizing.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__reset {
+    color: var(--muted-foreground);
+  }
+
+  // Reset glyph — 1.125rem material icon in icon-sm control.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__reset-icon {
+    font-size: var(--font-size-lg);
+    line-height: 1;
+    transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+  // Matched media count for current project + time range scope.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__count {
+    margin-left: auto;
+    flex: 0 0 auto;
+    font-size: var(--font-size-2xs);
+    line-height: var(--line-height-tight);
+    color: var(--muted-foreground);
+    white-space: nowrap;
   }
 
   // Loading / empty / error status copy centered in chart track.

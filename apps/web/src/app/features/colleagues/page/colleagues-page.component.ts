@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { filter, map, startWith } from 'rxjs';
+import { AuthService } from '../../../core/auth/auth.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { MemberService } from '../../../core/members/members.service';
 import type { OrgMember } from '../../../core/members/members.types';
@@ -45,6 +46,7 @@ export class ColleaguesPageComponent implements OnDestroy {
   readonly chatService = inject(ChatService);
   private readonly roleService = inject(RoleService);
   private readonly toastService = inject(ToastService);
+  private readonly authService = inject(AuthService);
 
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -102,6 +104,30 @@ export class ColleaguesPageComponent implements OnDestroy {
       isOnline: this.onlineUserIds().has(member.id),
     })),
   );
+
+  readonly chatHeaderTitle = computed(() => {
+    const channel = this.selectedChannel();
+    if (!channel) {
+      return this.t('colleagues.chat.no_channel', 'Select a channel');
+    }
+
+    if (channel.type === 'dm') {
+      const selected = this.selectedMember();
+      if (selected?.fullName) {
+        return selected.fullName;
+      }
+
+      const ownId = this.authService.user()?.id;
+      const otherMember = this.channelMembers().find((member) => member.userId !== ownId);
+      if (otherMember?.fullName) {
+        return otherMember.fullName;
+      }
+
+      return this.t('colleagues.chat.dm', 'Direct message');
+    }
+
+    return channel.name ?? this.t('colleagues.channel.unnamed', 'Channel');
+  });
 
   constructor() {
     void this.refresh();
@@ -366,7 +392,7 @@ export class ColleaguesPageComponent implements OnDestroy {
     await this.chatService.markChannelRead(channelId);
 
     const channel = this.channels().find((c) => c.id === channelId);
-    if (channel && channel.type !== 'dm') {
+    if (channel) {
       await this.loadChannelMembers(channelId);
     } else {
       this.channelMembers.set([]);

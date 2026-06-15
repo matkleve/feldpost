@@ -12,13 +12,11 @@ import {
   CapturedDateEditorComponent,
   type DateSaveEvent,
 } from '../../workspace-pane/media-detail/captured-date-editor.component';
-import { HLM_BUTTON_IMPORTS } from '../button';
-import { HLM_INPUT_IMPORTS } from '../input';
 
 @Component({
   selector: 'app-compact-date-field',
   standalone: true,
-  imports: [...HLM_INPUT_IMPORTS, ...HLM_BUTTON_IMPORTS, CapturedDateEditorComponent],
+  imports: [CapturedDateEditorComponent],
   templateUrl: './compact-date-field.component.html',
   styleUrl: './compact-date-field.component.scss',
 })

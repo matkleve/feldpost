@@ -1,6 +1,7 @@
 @layer components {
-  // Labeled compact date row — locale-formatted text + calendar popover trigger.
-  // @see docs/specs/component/map/map-filter-toolbar.md
+  // Labeled compact date row — single thin shell aligned to hlmBtn size="sm" (2.25rem).
+  // @see apps/web/src/app/shared/ui/button/button-variants.ts
+  // @see apps/web/src/app/shared/dropdown-trigger/scss/_toolbar-breakpoints.scss
   .compact-date-field {
     display: flex;
     flex: 1 1 0;
@@ -16,7 +17,7 @@
     color: var(--muted-foreground);
   }
 
-  // Control shell — uniform spacing-1 inset; calendar popover anchor.
+  // Single bordered control — matches toolbar `hlmBtn size="sm"` height (mid / 2.25rem).
   // @see docs/specs/component/map/map-filter-toolbar.md
   .compact-date-field__control {
     position: relative;
@@ -25,47 +26,68 @@
     gap: var(--spacing-1);
     width: 100%;
     min-width: 0;
-    min-height: 1.75rem;
-    padding: var(--spacing-1);
+    height: 2.25rem;
+    padding-inline: var(--spacing-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: var(--background);
     box-sizing: border-box;
+
+    &:focus-within {
+      border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+      box-shadow: var(--interactive-focus-ring);
+    }
   }
 
-  // Text input — overrides hlmInput default px-3 / h-10 for compact toolbar use.
+  // Borderless text — geometry owned by __control only (no hlmInput second shell).
   // @see docs/specs/component/map/map-filter-toolbar.md
   .compact-date-field__input {
     flex: 1 1 auto;
     min-width: 0;
-    height: auto;
-    min-height: 0;
+    height: 100%;
+    margin: 0;
     padding: 0;
     border: 0;
     background: transparent;
-    font-size: var(--font-size-2xs);
+    font-size: var(--font-size-sm);
     line-height: var(--line-height-tight);
-    box-shadow: none;
+    color: var(--foreground);
+    outline: none;
 
-    &:focus-visible {
-      box-shadow: none;
-      outline: none;
+    &::placeholder {
+      color: var(--muted-foreground);
     }
   }
 
-  // Calendar trigger — icon-only, no extra horizontal padding.
+  // Trailing calendar affordance — no extra button chrome inside the shell.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .compact-date-field__calendar-btn {
+    display: inline-flex;
     flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    min-width: 1.25rem;
-    min-height: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
     padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
     color: var(--muted-foreground);
+    cursor: pointer;
 
     .material-icons {
       font-size: var(--font-size-sm);
+    }
+
+    &:hover {
+      color: var(--foreground);
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--interactive-focus-ring);
     }
   }
 

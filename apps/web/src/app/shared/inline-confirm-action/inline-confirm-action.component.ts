@@ -54,7 +54,11 @@ export class InlineConfirmActionComponent {
 
   readonly buttonVariant = computed(() => (this.tone() === 'danger' ? 'destructive' : 'ghost'));
 
-  readonly buttonSize = computed(() => (this.size() === 'sm' ? 'icon-sm' : 'icon'));
+  readonly buttonSize = computed(() => {
+    if (this.size() === 'xs') return 'icon-xs';
+    if (this.size() === 'sm') return 'icon-sm';
+    return 'icon';
+  });
 
   readonly buttonClasses = computed(() => {
     const classes = ['inline-confirm-action__button'];

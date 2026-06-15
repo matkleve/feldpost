@@ -135,6 +135,37 @@ export function ratioFromClientX(clientX: number, rect: DOMRect): number {
   return Math.min(Math.max(x / Math.max(rect.width, 1), 0), 1);
 }
 
+/** Maps pointer X to 0–1 across the chart inner span after a CSS length inset. */
+export function ratioFromClientXInInsetBox(
+  clientX: number,
+  element: HTMLElement,
+  insetVarName: string,
+): number {
+  const style = getComputedStyle(element);
+  const insetValue =
+    style.getPropertyValue(insetVarName).trim() || style.getPropertyValue('--spacing-1').trim();
+  const insetPx = cssLengthToPx(element, insetValue);
+  const rect = element.getBoundingClientRect();
+  const innerLeft = rect.left + insetPx;
+  const innerWidth = rect.width - 2 * insetPx;
+  return ratioFromClientX(clientX, { left: innerLeft, width: innerWidth } as DOMRect);
+}
+
+function cssLengthToPx(element: HTMLElement, value: string): number {
+  if (!value) {
+    return 0;
+  }
+  if (value.endsWith('px')) {
+    return parseFloat(value);
+  }
+  const probe = element.ownerDocument.createElement('div');
+  probe.style.cssText = `position:absolute;visibility:hidden;width:${value}`;
+  element.appendChild(probe);
+  const px = probe.getBoundingClientRect().width;
+  element.removeChild(probe);
+  return px;
+}
+
 export function toDateInputValue(date: Date | null): string {
   return toIsoDateValue(date);
 }
@@ -142,9 +173,6 @@ export function toDateInputValue(date: Date | null): string {
 export function parseDateInputValue(value: string): Date | null {
   return parseIsoDateValue(value);
 }
-
-/** Inset so full-span selections do not touch the histogram track edges. */
-const SELECTION_EDGE_INSET_PCT = 2.5;
 
 export function selectionOverlayPercents(
   range: TimeRange | null,
@@ -157,13 +185,10 @@ export function selectionOverlayPercents(
 
   const fromMs = range.from ? startOfUtcDay(range.from.getTime()) : domainStartMs;
   const toMs = range.to ? endOfUtcDay(range.to.getTime()) : domainEndMs;
-  const rawLeft = ((fromMs - domainStartMs) / span) * 100;
-  const rawWidth = ((toMs - fromMs) / span) * 100;
-  const innerSpan = 100 - 2 * SELECTION_EDGE_INSET_PCT;
-  const leftPct = SELECTION_EDGE_INSET_PCT + (rawLeft / 100) * innerSpan;
-  const widthPct = (rawWidth / 100) * innerSpan;
+  const leftPct = ((fromMs - domainStartMs) / span) * 100;
+  const widthPct = ((toMs - fromMs) / span) * 100;
   return {
-    leftPct: Math.min(Math.max(leftPct, SELECTION_EDGE_INSET_PCT), 100 - SELECTION_EDGE_INSET_PCT),
-    widthPct: Math.min(Math.max(widthPct, 0.5), 100 - leftPct - SELECTION_EDGE_INSET_PCT),
+    leftPct: Math.min(Math.max(leftPct, 0), 100),
+    widthPct: Math.min(Math.max(widthPct, 0.5), 100 - leftPct),
   };
 }

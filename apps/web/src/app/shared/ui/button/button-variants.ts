@@ -37,6 +37,7 @@ export const buttonVariants = cva(
         lg: 'h-11 rounded-md ps-2 pe-2 [&_.material-icons]:text-lg',
         icon: 'h-10 w-10',
         'icon-sm': 'h-8 w-8',
+        'icon-xs': 'h-6 w-6',
         'icon-md': 'h-9 w-9',
       },
       // Semantic hook for icon+label rows; horizontal padding stays spacing-2 for every placement (kernel lock).

@@ -14356,6 +14356,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.reset.aria', 'Reset time range', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html reset button aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reset time range', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.reset.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zeitraum zurücksetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.reset.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Reimposta intervallo temporale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.reset.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.count.single', '1 item', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html footer item count singular')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '1 item', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.count.single'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '1 Element', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.count.single'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '1 elemento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.count.single'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.count.multi', '{count} items', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html footer item count plural')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} items', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.count.multi'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Elemente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.count.multi'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} elementi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.count.multi'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'map.searchBar.placeholder.example.denishgasse', 'Denisgasse 46, Vienna', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -21171,6 +21264,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Scrivi un messaggio', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.chat.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.chat.placeholder_dm', 'Message {name}', 'en', 'colleagues chat DM composer placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Message {name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.placeholder_dm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nachricht an {name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.placeholder_dm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Messaggio a {name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.placeholder_dm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.chat.placeholder_channel', 'Message #{name}', 'en', 'colleagues chat channel composer placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Message #{name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.placeholder_channel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nachricht in #{name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.placeholder_channel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Messaggio in #{name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.placeholder_channel'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

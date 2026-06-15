@@ -462,6 +462,9 @@ map.filter.timespace.chartAria,Media timeline,apps/web/src/app/features/map/map-
 map.filter.timespace.empty,No media in this organization yet.,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html empty state,No media in this organization yet.,Noch keine Medien in dieser Organisation.,Nessun media in questa organizzazione.
 map.filter.timespace.loadError,Could not load timeline.,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html error state,Could not load timeline.,Zeitachse konnte nicht geladen werden.,Impossibile caricare la cronologia.
 map.filter.timespace.loading,Loading timeline…,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html loading state,Loading timeline…,Zeitachse wird geladen…,Caricamento cronologia…
+map.filter.timespace.reset.aria,Reset time range,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html reset button aria,Reset time range,Zeitraum zurücksetzen,Reimposta intervallo temporale
+map.filter.timespace.count.single,1 item,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html footer item count singular,1 item,1 Element,1 elemento
+map.filter.timespace.count.multi,{count} items,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html footer item count plural,{count} items,{count} Elemente,{count} elementi
 map.searchBar.placeholder.example.denishgasse,"Denisgasse 46, Vienna",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"Denisgasse 46, Vienna","Denisgasse 46, Wien","Denisgasse 46, Vienna"
 map.searchBar.placeholder.example.coordsDecimal,"48.2082, 16.3738",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"48.2082, 16.3738","48.2082, 16.3738","48.2082, 16.3738"
 map.searchBar.placeholder.example.mapsUrl,maps.google.com/�,apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,maps.google.com/…,maps.google.com/…,maps.google.com/…
@@ -682,6 +685,8 @@ colleagues.chat.reply,Reply in thread,colleagues chat thread reply action,Reply 
 colleagues.chat.empty,No messages yet. Say hello.,colleagues chat empty state,No messages yet. Say hello.,Noch keine Nachrichten. Sag Hallo.,Nessun messaggio. Saluta.
 colleagues.chat.typing,Someone is typing…,colleagues chat typing indicator,Someone is typing…,Jemand tippt…,Qualcuno sta scrivendo…
 colleagues.chat.placeholder,Write a message,colleagues chat composer placeholder,Write a message,Nachricht schreiben,Scrivi un messaggio
+colleagues.chat.placeholder_dm,Message {name},colleagues chat DM composer placeholder,Message {name},Nachricht an {name},Messaggio a {name}
+colleagues.chat.placeholder_channel,Message #{name},colleagues chat channel composer placeholder,Message #{name},Nachricht in #{name},Messaggio in #{name}
 colleagues.chat.send,Send,colleagues chat send button,Send,Senden,Invia
 colleagues.chat.no_channel,Select a channel,colleagues chat no channel selected,Select a channel,Kanal auswählen,Seleziona un canale
 colleagues.chat.dm,Direct message,colleagues chat DM title,Direct message,Direktnachricht,Messaggio diretto

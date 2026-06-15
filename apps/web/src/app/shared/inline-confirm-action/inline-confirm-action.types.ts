@@ -1,5 +1,5 @@
 /** Square control density for inline confirm actions. */
-export type InlineConfirmSize = 'md' | 'sm';
+export type InlineConfirmSize = 'md' | 'sm' | 'xs';
 
 /** Idle emphasis before arming — destructive vs primary remove. */
 export type InlineConfirmTone = 'danger' | 'remove';

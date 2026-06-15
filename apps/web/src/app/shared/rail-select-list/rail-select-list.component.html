@@ -56,7 +56,7 @@
               type="button"
               hlmBtn
               variant="ghost"
-              size="icon"
+              [size]="dense() ? 'icon-xs' : 'icon-sm'"
               class="rail-select-list__row-action"
               [class.rail-select-list__row-action--pinned]="action.action.alwaysVisible || action.action.active"
               [class.rail-select-list__row-action--active]="action.action.active"
@@ -69,7 +69,7 @@
             </button>
           } @else {
             <app-inline-confirm-action
-              size="sm"
+              [size]="dense() ? 'xs' : 'sm'"
               [tone]="action.action.tone ?? 'danger'"
               revealOnParentHover="sidebar-row-wrap"
               [idleIcon]="action.action.idleIcon"

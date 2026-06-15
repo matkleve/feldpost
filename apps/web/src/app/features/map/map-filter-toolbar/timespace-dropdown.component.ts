@@ -14,17 +14,20 @@ import {
   buildTimespaceHistogram,
   clickBandRange,
   dragRange,
-  ratioFromClientX,
+  isTimeRangeActive,
+  matchesTimeRange,
+  ratioFromClientXInInsetBox,
   selectionOverlayPercents,
   type TimeRange,
   type TimespaceBin,
 } from '../../../core/workspace-view/timespace.helpers';
 import { CompactDateFieldComponent } from '../../../shared/ui/compact-date-field/compact-date-field.component';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 @Component({
   selector: 'app-timespace-dropdown',
   standalone: true,
-  imports: [CompactDateFieldComponent],
+  imports: [CompactDateFieldComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './timespace-dropdown.component.html',
   styleUrl: './timespace-dropdown.component.scss',
   host: {
@@ -49,7 +52,6 @@ export class TimespaceDropdownComponent implements OnInit {
   protected readonly chartTrackHeightPx = 40;
 
   private readonly chartRef = viewChild<ElementRef<HTMLElement>>('chart');
-  private readonly trackInnerRef = viewChild<ElementRef<HTMLElement>>('trackInner');
 
   /** Stable state: pointer drag in progress on the histogram track. */
   // @see docs/specs/component/map/map-filter-toolbar.md
@@ -60,7 +62,7 @@ export class TimespaceDropdownComponent implements OnInit {
     this.catalog.ensureLoaded();
   }
 
-  private readonly histogramSource = computed(() => {
+  private readonly scopedEntries = computed(() => {
     this.catalog.entries();
     this.viewService.selectedProjectIds();
 
@@ -74,7 +76,27 @@ export class TimespaceDropdownComponent implements OnInit {
     return entries.filter((entry) => entry.projectIds.some((id) => projectIds.has(id)));
   });
 
-  readonly histogram = computed(() => buildTimespaceHistogram(this.histogramSource()));
+  readonly histogram = computed(() => buildTimespaceHistogram(this.scopedEntries()));
+
+  readonly matchedItemCount = computed(() => {
+    const entries = this.scopedEntries();
+    const range = this.effectiveRange();
+    if (!isTimeRangeActive(range)) {
+      return entries.length;
+    }
+    return entries.filter((entry) => matchesTimeRange(entry, range)).length;
+  });
+
+  readonly itemCountLabel = computed(() => {
+    const count = this.matchedItemCount();
+    if (count === 1) {
+      return this.t('map.filter.timespace.count.single', '1 item');
+    }
+    return this.t('map.filter.timespace.count.multi', '{count} items').replace(
+      '{count}',
+      String(count),
+    );
+  });
 
   readonly effectiveRange = computed((): TimeRange | null => {
     const hist = this.histogram();
@@ -99,6 +121,11 @@ export class TimespaceDropdownComponent implements OnInit {
   onToDateChange(to: Date | null): void {
     const current = this.viewService.timeRange();
     this.commitRange({ from: current?.from ?? null, to });
+  }
+
+  onReset(): void {
+    this.clearDrag();
+    this.viewService.setTimeRange(null);
   }
 
   readonly hasActiveFilter = this.viewService.hasTimeRange;
@@ -165,13 +192,11 @@ export class TimespaceDropdownComponent implements OnInit {
   }
 
   private pointerRatio(clientX: number): number {
-    const trackInner = this.trackInnerRef()?.nativeElement;
     const chart = this.chartRef()?.nativeElement;
-    const rect = (trackInner ?? chart)?.getBoundingClientRect();
-    if (!rect) {
+    if (!chart) {
       return 0;
     }
-    return ratioFromClientX(clientX, rect);
+    return ratioFromClientXInInsetBox(clientX, chart, '--timespace-selection-inset');
   }
 
   private applyDragRange(endRatio: number): void {

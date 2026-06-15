@@ -5,7 +5,6 @@
   <div class="compact-date-field__control" [attr.lang]="i18nService.locale()">
     <input
       #textField
-      hlmInput
       class="compact-date-field__input"
       type="text"
       inputmode="numeric"
@@ -18,9 +17,6 @@
     />
     <button
       type="button"
-      hlmBtn
-      variant="ghost"
-      size="icon-sm"
       class="compact-date-field__calendar-btn"
       [attr.aria-label]="t('shared.dateField.openCalendar', 'Open calendar')"
       [attr.aria-expanded]="calendarOpen()"

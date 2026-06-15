@@ -68,7 +68,7 @@
             type="button"
             hlmBtn
             variant="ghost"
-            size="icon"
+            size="icon-sm"
             class="member-list__section-action"
             [attr.aria-label]="t('colleagues.channel.create', 'Create channel')"
             [attr.title]="t('colleagues.channel.create', 'Create channel')"
@@ -81,7 +81,7 @@
           type="button"
           hlmBtn
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           class="member-list__section-action"
           [class.member-list__section-action--active]="channelSearchOpen()"
           [attr.aria-pressed]="channelSearchOpen()"
@@ -98,7 +98,6 @@
       <div class="member-list__section-body">
         @if (channelSearchOpen()) {
           <app-rail-search-field
-            class="member-list__section-search"
             [value]="channelSearchQuery()"
             [placeholder]="t('colleagues.channels.search', 'Search channels')"
             [ariaLabel]="t('colleagues.channels.search_aria', 'Search channels')"
@@ -107,8 +106,6 @@
         }
 
         <app-rail-select-list
-          [compact]="true"
-          [dense]="true"
           [items]="channelListItems()"
           [selectedId]="selectedChannelId()"
           [listAriaLabel]="t('colleagues.channels.title', 'Channels')"
@@ -147,7 +144,7 @@
           type="button"
           hlmBtn
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           class="member-list__section-action"
           [class.member-list__section-action--active]="dmSearchOpen()"
           [attr.aria-pressed]="dmSearchOpen()"
@@ -164,7 +161,6 @@
       <div class="member-list__section-body">
         @if (dmSearchOpen()) {
           <app-rail-search-field
-            class="member-list__section-search"
             [value]="searchQuery()"
             [placeholder]="t('colleagues.direct_messages.search', 'Search direct messages')"
             [ariaLabel]="t('colleagues.direct_messages.search_aria', 'Search direct messages')"
@@ -173,7 +169,6 @@
         }
 
         <app-rail-select-list
-          [dense]="true"
           [items]="memberListItems()"
           [selectedId]="selectedMemberId()"
           [loading]="loading()"

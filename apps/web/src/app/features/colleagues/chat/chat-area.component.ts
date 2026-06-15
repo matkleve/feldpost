@@ -32,6 +32,7 @@ export class ChatAreaComponent {
   readonly groupReactions = groupReactions;
 
   readonly channel = input<ChatChannel | null>(null);
+  readonly headerTitle = input<string | null>(null);
   readonly messages = input<ChatMessage[]>([]);
   readonly typingUserIds = input<Set<string>>(new Set());
   readonly searchResults = input<ChatMessage[]>([]);
@@ -51,12 +52,33 @@ export class ChatAreaComponent {
   readonly editingMessageId = signal<string | null>(null);
   readonly editDraft = signal('');
   readonly showSearchResults = signal(false);
+  readonly headerSearchOpen = signal(false);
   readonly attachmentFile = signal<File | null>(null);
   readonly selectedProjectId = signal<string | null>(null);
   readonly projects = signal<Array<{ id: string; name: string }>>([]);
   readonly reactionPickerMessageId = signal<string | null>(null);
 
   readonly currentUserId = computed(() => this.authService.user()?.id ?? null);
+
+  readonly displayTitle = computed(() => {
+    const title = this.headerTitle();
+    if (title) return title;
+    return this.channelTitle(this.channel());
+  });
+
+  readonly isDmChannel = computed(() => this.channel()?.type === 'dm');
+
+  readonly composerPlaceholder = computed(() => {
+    const channel = this.channel();
+    const title = this.displayTitle();
+    if (!channel) {
+      return this.t('colleagues.chat.placeholder', 'Write a message');
+    }
+    if (channel.type === 'dm') {
+      return this.t('colleagues.chat.placeholder_dm', 'Message {name}').replace('{name}', title);
+    }
+    return this.t('colleagues.chat.placeholder_channel', 'Message #{name}').replace('{name}', title);
+  });
 
   readonly groupedMessages = computed(() => {
     const items = this.messages();
@@ -82,8 +104,21 @@ export class ChatAreaComponent {
 
   channelTitle(channel: ChatChannel | null): string {
     if (!channel) return this.t('colleagues.chat.no_channel', 'Select a channel');
-    if (channel.type === 'dm') return this.t('colleagues.chat.dm', 'Direct message');
     return channel.name ?? this.t('colleagues.channel.unnamed', 'Channel');
+  }
+
+  authorInitials(name: string | undefined): string {
+    const trimmed = (name ?? '').trim();
+    if (!trimmed) return '?';
+    return trimmed.charAt(0).toUpperCase();
+  }
+
+  toggleHeaderSearch(): void {
+    this.headerSearchOpen.update((open) => !open);
+    if (!this.headerSearchOpen()) {
+      this.showSearchResults.set(false);
+      this.searchQuery.set('');
+    }
   }
 
   isOwnMessage(message: ChatMessage): boolean {

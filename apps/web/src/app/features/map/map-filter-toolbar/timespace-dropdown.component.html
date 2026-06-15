@@ -16,26 +16,24 @@
       {{ t('map.filter.timespace.loading', 'Loading timeline…') }}
     </p>
   } @else if (histogram(); as hist) {
-    <div #trackInner class="timespace-dropdown__track-inner">
-      <div class="timespace-dropdown__bars" aria-hidden="true">
-        @for (bin of hist.bins; track bin.index) {
-          <span
-            class="timespace-dropdown__bar"
-            [class.timespace-dropdown__bar--empty]="bin.count === 0"
-            [style.height.px]="barHeightPx(bin)"
-          ></span>
-        }
-      </div>
-      @if (selectionOverlay(); as overlay) {
-        <div
-          class="timespace-dropdown__selection"
-          [class.timespace-dropdown__selection--active]="selectionIsActive()"
-          [style.left.%]="overlay.leftPct"
-          [style.width.%]="overlay.widthPct"
-          aria-hidden="true"
-        ></div>
+    <div class="timespace-dropdown__bars" aria-hidden="true">
+      @for (bin of hist.bins; track bin.index) {
+        <span
+          class="timespace-dropdown__bar"
+          [class.timespace-dropdown__bar--empty]="bin.count === 0"
+          [style.height.px]="barHeightPx(bin)"
+        ></span>
       }
     </div>
+    @if (selectionOverlay(); as overlay) {
+      <div
+        class="timespace-dropdown__selection"
+        [class.timespace-dropdown__selection--active]="selectionIsActive()"
+        [style.--selection-left]="overlay.leftPct"
+        [style.--selection-width]="overlay.widthPct"
+        aria-hidden="true"
+      ></div>
+    }
   } @else {
     <p class="timespace-dropdown__status">
       {{
@@ -60,4 +58,31 @@
     [ariaLabel]="t('map.filter.timespace.to', 'To')"
     (valueChange)="onToDateChange($event)"
   />
+</div>
+
+<div class="timespace-dropdown__footer">
+  <div class="timespace-dropdown__footer-start">
+    @if (hasActiveFilter()) {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="timespace-dropdown__reset"
+        type="button"
+        data-fp-timespace-reset="true"
+        (click)="onReset()"
+        [attr.aria-label]="t('map.filter.timespace.reset.aria', 'Reset time range')"
+      >
+        <span
+          class="timespace-dropdown__reset-icon material-icons"
+          data-fp-timespace-reset-icon="true"
+          aria-hidden="true"
+          >restart_alt</span
+        >
+      </button>
+    }
+  </div>
+  @if (histogram()) {
+    <span class="timespace-dropdown__count" aria-live="polite">{{ itemCountLabel() }}</span>
+  }
 </div>
