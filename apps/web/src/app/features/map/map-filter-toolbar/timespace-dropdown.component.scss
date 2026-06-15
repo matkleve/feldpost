@@ -1,95 +1,26 @@
+@use '../../../shared/dropdown-trigger/scss/dropdown-panel-flex-chain' as panel-flex;
+
+:host {
+  @include panel-flex.panel-flex-child;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  // Inset owned by `.option-menu-surface` on `app-dropdown-shell` (spacing-1) — no inner padding.
+  // @see docs/specs/component/filters/dropdown-system.md#padding-ownership-normative
+}
+
 @layer components {
-  // Two-row timespace panel: histogram track on top, compact date fields below.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacing-1);
-    width: 100%;
-    min-width: 0;
-    padding: var(--spacing-1);
-    box-sizing: border-box;
-  }
-
-  // Top row — full-width histogram track.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__chart-row {
-    width: 100%;
-    min-width: 0;
-  }
-
   // Bottom row — compact from/to date fields.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__dates-row {
     display: flex;
-    align-items: flex-end;
+    align-items: stretch;
     gap: var(--spacing-1);
     width: 100%;
     min-width: 0;
-  }
-
-  // Single labeled date field in the bottom row.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-field {
-    display: flex;
-    flex: 1 1 0;
-    flex-direction: column;
-    gap: var(--spacing-1);
-    min-width: 0;
-  }
-
-  // Visible field label above compact date input.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-label {
-    font-size: var(--font-size-2xs);
-    color: var(--muted-foreground);
-  }
-
-  // Locale-formatted display + invisible native date input for picker.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-control {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-1);
-    width: 100%;
-    min-width: 0;
-    height: 1.75rem;
-    padding-inline: var(--spacing-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--background);
-    box-sizing: border-box;
-  }
-
-  // Dot-separated date text field (DD.MM.YYYY) — no native picker chrome.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    font-size: var(--font-size-2xs);
-    color: var(--foreground);
-    outline: none;
-
-    &::placeholder {
-      color: var(--muted-foreground);
-    }
-  }
-
-  // Trailing calendar affordance on compact date control.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date-icon {
-    flex-shrink: 0;
-    font-size: var(--font-size-sm);
-    color: var(--muted-foreground);
-    pointer-events: none;
   }
 
   // Histogram track — fixed height so bar px heights resolve.
@@ -108,21 +39,12 @@
     overflow: hidden;
   }
 
-  // Inset track shell — selection + bars never kiss outer chart border.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__track {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-  }
-
-  // Padded inner coordinate space for bars, overlay, and pointer hit-testing.
+  // Padded inner coordinate space — 2× shell inset for bar placement.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__track-inner {
     position: absolute;
     inset-block: 0;
-    inset-inline: var(--spacing-1);
+    inset-inline: calc(2 * var(--spacing-1));
     box-sizing: border-box;
   }
 
@@ -184,9 +106,10 @@
     align-items: center;
     justify-content: center;
     margin: 0;
-    padding-inline: var(--spacing-1);
+    padding: var(--spacing-1);
     font-size: var(--font-size-2xs);
     color: var(--muted-foreground);
     text-align: center;
+    box-sizing: border-box;
   }
 }

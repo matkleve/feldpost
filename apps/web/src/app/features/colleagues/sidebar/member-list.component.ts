@@ -46,12 +46,14 @@ export class MemberListComponent {
   readonly memberMessageRequested = output<string>();
   readonly channelCreateOpen = output<void>();
   readonly channelArchiveRequested = output<string>();
-  readonly channelMemberInviteRequested = output<{ channelId: string; userId: string }>();
 
   readonly searchQuery = signal('');
   readonly channelSearchQuery = signal('');
+  readonly channelsExpanded = signal(true);
+  readonly channelSearchOpen = signal(false);
+  readonly dmExpanded = signal(true);
+  readonly dmSearchOpen = signal(false);
   readonly starredChannelIds = signal<Set<string>>(this.readStarredChannelIds());
-  readonly inviteMemberId = signal<string | null>(null);
 
   private static readonly STARRED_CHANNELS_STORAGE_KEY = 'feldpost.chat.starredChannels';
 
@@ -118,7 +120,7 @@ export class MemberListComponent {
 
       return {
         id: channel.id,
-        label: `# ${this.channelLabel(channel)}`,
+        label: this.channelLabel(channel),
         badge: channel.unreadCount,
         leading: { kind: 'icon', name: channel.type === 'private' ? 'lock' : 'tag' },
         actions,
@@ -130,45 +132,13 @@ export class MemberListComponent {
     this.filteredMembers().map((member) => ({
       id: member.id,
       label: member.fullName || this.t('colleagues.members.unnamed', 'Unnamed'),
-      secondaryLabel: member.roleDisplayName,
-      secondaryColor: member.roleColor,
       leading: {
-        kind: 'avatar',
+        kind: 'avatar' as const,
         text: member.fullName.charAt(0).toUpperCase() || '?',
         online: member.isOnline,
       },
-      actions: [
-        {
-          type: 'button',
-          action: {
-            id: 'message',
-            icon: 'chat',
-            ariaLabel: this.t('colleagues.member.message', 'Message'),
-            title: this.t('colleagues.member.message', 'Message'),
-          },
-        },
-        ...(this.selectedChannel()?.type === 'private' && this.canManageChannels()
-          ? [
-              {
-                type: 'button' as const,
-                action: {
-                  id: 'invite',
-                  icon: 'person_add',
-                  ariaLabel: this.t('colleagues.channel.invite_member', 'Invite to channel'),
-                  title: this.t('colleagues.channel.invite_member', 'Invite to channel'),
-                },
-              },
-            ]
-          : []),
-      ],
     })),
   );
-
-  readonly selectedChannel = computed(() => {
-    const id = this.selectedChannelId();
-    if (!id) return null;
-    return this.channels().find((channel) => channel.id === id) ?? null;
-  });
 
   channelLabel(channel: ChatChannel): string {
     if (channel.type === 'dm') {
@@ -177,17 +147,9 @@ export class MemberListComponent {
     return channel.name ?? this.t('colleagues.channel.unnamed', 'Channel');
   }
 
-  onMemberAction(event: { itemId: string; actionId: string }): void {
-    if (event.actionId === 'message') {
-      this.memberMessageRequested.emit(event.itemId);
-      return;
-    }
-    if (event.actionId === 'invite') {
-      const channelId = this.selectedChannelId();
-      if (channelId) {
-        this.channelMemberInviteRequested.emit({ channelId, userId: event.itemId });
-      }
-    }
+  onMemberSelected(memberId: string): void {
+    this.memberSelected.emit(memberId);
+    this.memberMessageRequested.emit(memberId);
   }
 
   onChannelAction(event: { itemId: string; actionId: string }): void {
@@ -234,6 +196,16 @@ export class MemberListComponent {
 
   openCreateChannel(): void {
     this.channelCreateOpen.emit();
+  }
+
+  toggleChannelSearch(event: Event): void {
+    event.stopPropagation();
+    this.channelSearchOpen.update((open) => !open);
+  }
+
+  toggleDmSearch(event: Event): void {
+    event.stopPropagation();
+    this.dmSearchOpen.update((open) => !open);
   }
 
   onTabToggle(value: ToggleValue<string>): void {

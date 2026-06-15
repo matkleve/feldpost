@@ -1,4 +1,5 @@
 import type { WorkspaceImage } from './workspace-view.types';
+import { parseIsoDateValue, toIsoDateValue } from '../i18n/date-field.helpers';
 
 /** Inclusive calendar date range for map/workspace temporal filtering. */
 export interface TimeRange {
@@ -128,63 +129,22 @@ export function dragRange(
   };
 }
 
+
 export function ratioFromClientX(clientX: number, rect: DOMRect): number {
   const x = clientX - rect.left;
   return Math.min(Math.max(x / Math.max(rect.width, 1), 0), 1);
 }
 
 export function toDateInputValue(date: Date | null): string {
-  if (!date) return '';
-  const y = date.getUTCFullYear();
-  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(date.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return toIsoDateValue(date);
 }
 
-/** Locale-aware short date for timespace fields — dot separators per product convention. */
-export function formatTimespaceDisplayDate(date: Date | null, _locale: string): string {
-  if (!date) return '';
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const year = date.getUTCFullYear();
-  return `${day}.${month}.${year}`;
-}
-
-/**
- * Parses compact EU display dates for timespace fields (DD.MM.YYYY and common variants).
- * Returns UTC midnight Date or null when empty / unparseable.
- */
-export function parseTimespaceDisplayDate(raw: string): Date | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-
-  const sepMatch = trimmed.match(/^(\d{1,2})[./\-](\d{1,2})(?:[./\-](\d{2,4}))?$/);
-  if (sepMatch) {
-    const day = parseInt(sepMatch[1], 10);
-    const month = parseInt(sepMatch[2], 10);
-    let year = sepMatch[3] ? parseInt(sepMatch[3], 10) : new Date().getUTCFullYear();
-    if (year < 100) year += 2000;
-    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-    const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return parseDateInputValue(iso);
-  }
-
-  const parsed = Date.parse(trimmed);
-  if (!Number.isFinite(parsed)) return null;
-  const d = new Date(parsed);
-  return parseDateInputValue(
-    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`,
-  );
+export function parseDateInputValue(value: string): Date | null {
+  return parseIsoDateValue(value);
 }
 
 /** Inset so full-span selections do not touch the histogram track edges. */
 const SELECTION_EDGE_INSET_PCT = 2.5;
-
-export function parseDateInputValue(value: string): Date | null {
-  if (!value) return null;
-  const parsed = Date.parse(`${value}T00:00:00.000Z`);
-  return Number.isFinite(parsed) ? new Date(parsed) : null;
-}
 
 export function selectionOverlayPercents(
   range: TimeRange | null,

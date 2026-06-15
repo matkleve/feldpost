@@ -1,97 +1,63 @@
 <div
-  class="timespace-dropdown"
-  role="group"
-  [attr.lang]="dateInputLocale()"
-  [attr.aria-label]="t('map.filter.timespace.aria', 'Time range')"
+  #chart
+  class="timespace-dropdown__chart"
+  role="slider"
+  [attr.aria-label]="t('map.filter.timespace.chartAria', 'Media timeline')"
+  [attr.aria-valuemin]="0"
+  [attr.aria-valuemax]="100"
+  tabindex="0"
+  (pointerdown)="onChartPointerDown($event)"
+  (pointermove)="onChartPointerMove($event)"
+  (pointerup)="onChartPointerUp($event)"
+  (pointercancel)="onChartPointerCancel()"
 >
-  <div class="timespace-dropdown__chart-row">
-    <div
-      #chart
-      class="timespace-dropdown__chart"
-      role="slider"
-      [attr.aria-label]="t('map.filter.timespace.chartAria', 'Media timeline')"
-      [attr.aria-valuemin]="0"
-      [attr.aria-valuemax]="100"
-      tabindex="0"
-      (pointerdown)="onChartPointerDown($event)"
-      (pointermove)="onChartPointerMove($event)"
-      (pointerup)="onChartPointerUp($event)"
-      (pointercancel)="onChartPointerCancel()"
-    >
-      @if (catalog.loading()) {
-        <p class="timespace-dropdown__status">
-          {{ t('map.filter.timespace.loading', 'Loading timeline…') }}
-        </p>
-      } @else if (histogram(); as hist) {
-        <div #track class="timespace-dropdown__track">
-          <div #trackInner class="timespace-dropdown__track-inner">
-            <div class="timespace-dropdown__bars" aria-hidden="true">
-              @for (bin of hist.bins; track bin.index) {
-                <span
-                  class="timespace-dropdown__bar"
-                  [class.timespace-dropdown__bar--empty]="bin.count === 0"
-                  [style.height.px]="barHeightPx(bin)"
-                ></span>
-              }
-            </div>
-            @if (selectionOverlay(); as overlay) {
-              <div
-                class="timespace-dropdown__selection"
-                [class.timespace-dropdown__selection--active]="selectionIsActive()"
-                [style.left.%]="overlay.leftPct"
-                [style.width.%]="overlay.widthPct"
-                aria-hidden="true"
-              ></div>
-            }
-          </div>
-        </div>
-      } @else {
-        <p class="timespace-dropdown__status">
-          {{
-            catalog.loadError()
-              ? t('map.filter.timespace.loadError', 'Could not load timeline.')
-              : t('map.filter.timespace.empty', 'No media in this organization yet.')
-          }}
-        </p>
+  @if (catalog.loading()) {
+    <p class="timespace-dropdown__status">
+      {{ t('map.filter.timespace.loading', 'Loading timeline…') }}
+    </p>
+  } @else if (histogram(); as hist) {
+    <div #trackInner class="timespace-dropdown__track-inner">
+      <div class="timespace-dropdown__bars" aria-hidden="true">
+        @for (bin of hist.bins; track bin.index) {
+          <span
+            class="timespace-dropdown__bar"
+            [class.timespace-dropdown__bar--empty]="bin.count === 0"
+            [style.height.px]="barHeightPx(bin)"
+          ></span>
+        }
+      </div>
+      @if (selectionOverlay(); as overlay) {
+        <div
+          class="timespace-dropdown__selection"
+          [class.timespace-dropdown__selection--active]="selectionIsActive()"
+          [style.left.%]="overlay.leftPct"
+          [style.width.%]="overlay.widthPct"
+          aria-hidden="true"
+        ></div>
       }
     </div>
-  </div>
+  } @else {
+    <p class="timespace-dropdown__status">
+      {{
+        catalog.loadError()
+          ? t('map.filter.timespace.loadError', 'Could not load timeline.')
+          : t('map.filter.timespace.empty', 'No media in this organization yet.')
+      }}
+    </p>
+  }
+</div>
 
-  <div class="timespace-dropdown__dates-row">
-    <label class="timespace-dropdown__date-field">
-      <span class="timespace-dropdown__date-label">{{ t('map.filter.timespace.from', 'From') }}</span>
-      <div class="timespace-dropdown__date-control" [attr.lang]="dateInputLocale()">
-        <input
-          class="timespace-dropdown__date-input"
-          type="text"
-          inputmode="numeric"
-          autocomplete="off"
-          [attr.placeholder]="t('map.filter.timespace.dateFormatPlaceholder', 'DD.MM.YYYY')"
-          [attr.aria-label]="t('map.filter.timespace.from', 'From')"
-          [value]="fromDisplay()"
-          (change)="onFromTextInput($event)"
-          (keydown.enter)="onFromTextInput($event)"
-        />
-        <span class="material-icons timespace-dropdown__date-icon" aria-hidden="true">calendar_today</span>
-      </div>
-    </label>
-
-    <label class="timespace-dropdown__date-field">
-      <span class="timespace-dropdown__date-label">{{ t('map.filter.timespace.to', 'To') }}</span>
-      <div class="timespace-dropdown__date-control" [attr.lang]="dateInputLocale()">
-        <input
-          class="timespace-dropdown__date-input"
-          type="text"
-          inputmode="numeric"
-          autocomplete="off"
-          [attr.placeholder]="t('map.filter.timespace.dateFormatPlaceholder', 'DD.MM.YYYY')"
-          [attr.aria-label]="t('map.filter.timespace.to', 'To')"
-          [value]="toDisplay()"
-          (change)="onToTextInput($event)"
-          (keydown.enter)="onToTextInput($event)"
-        />
-        <span class="material-icons timespace-dropdown__date-icon" aria-hidden="true">calendar_today</span>
-      </div>
-    </label>
-  </div>
+<div class="timespace-dropdown__dates-row">
+  <app-compact-date-field
+    [label]="t('map.filter.timespace.from', 'From')"
+    [value]="effectiveRange()?.from ?? null"
+    [ariaLabel]="t('map.filter.timespace.from', 'From')"
+    (valueChange)="onFromDateChange($event)"
+  />
+  <app-compact-date-field
+    [label]="t('map.filter.timespace.to', 'To')"
+    [value]="effectiveRange()?.to ?? null"
+    [ariaLabel]="t('map.filter.timespace.to', 'To')"
+    (valueChange)="onToDateChange($event)"
+  />
 </div>

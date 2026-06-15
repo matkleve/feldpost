@@ -14139,32 +14139,32 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.filter.timespace.dateFormatPlaceholder', 'DD.MM.YYYY', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input placeholder')
+values (null, 'shared.dateField.openCalendar', 'Open calendar', 'en', 'apps/web/src/app/shared/ui/compact-date-field/compact-date-field.component.html calendar button aria')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'DD.MM.YYYY', 'published'
+select t.id, 'en', 'Open calendar', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'map.filter.timespace.dateFormatPlaceholder'
+where t.organization_id is null and t.key = 'shared.dateField.openCalendar'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'TT.MM.JJJJ', 'published'
+select t.id, 'de', 'Kalender öffnen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'map.filter.timespace.dateFormatPlaceholder'
+where t.organization_id is null and t.key = 'shared.dateField.openCalendar'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'GG.MM.AAAA', 'published'
+select t.id, 'it', 'Apri calendario', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'map.filter.timespace.dateFormatPlaceholder'
+where t.organization_id is null and t.key = 'shared.dateField.openCalendar'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -19595,6 +19595,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channels.search_toggle', 'Search channels', 'en', 'colleagues channel search toggle button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search channels', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search_toggle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kanäle suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search_toggle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca canali', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search_toggle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channels.actions_aria', 'Channel section actions', 'en', 'colleagues channel section toolbar aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Channel section actions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.actions_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktionen für Kanäle', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.actions_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Azioni sezione canali', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.actions_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'colleagues.channel.star', 'Add to favorites', 'en', 'colleagues channel star action')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -20551,6 +20613,223 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Senza nome', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.members.unnamed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.direct_messages.title', 'Direct messages', 'en', 'colleagues DM sidebar section')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Direct messages', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Direktnachrichten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Messaggi diretti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.direct_messages.search', 'Search direct messages', 'en', 'colleagues DM search placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search direct messages', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Direktnachrichten suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca messaggi diretti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.direct_messages.search_aria', 'Search direct messages', 'en', 'colleagues DM search aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search direct messages', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Direktnachrichten suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca messaggi diretti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.direct_messages.loading', 'Loading direct messages', 'en', 'colleagues DM list loading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading direct messages', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Lade Direktnachrichten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento messaggi diretti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.direct_messages.empty', 'No direct messages', 'en', 'colleagues empty DM list')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No direct messages', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Direktnachrichten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun messaggio diretto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.direct_messages.search_toggle', 'Search direct messages', 'en', 'colleagues DM search toggle button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search direct messages', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search_toggle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Direktnachrichten suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search_toggle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca messaggi diretti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.search_toggle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.direct_messages.actions_aria', 'Direct message section actions', 'en', 'colleagues DM section toolbar aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Direct message section actions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.actions_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktionen für Direktnachrichten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.actions_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Azioni sezione messaggi diretti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.direct_messages.actions_aria'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

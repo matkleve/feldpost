@@ -1,6 +1,11 @@
 ﻿import { computed, Injectable, signal } from '@angular/core';
 import { TRANSLATION_BY_KEY, TRANSLATION_BY_ORIGINAL } from './translation-catalog';
 import type { LanguageCode } from './translation-catalog';
+import {
+  dateFieldPlaceholderForLocale,
+  formatDateFieldValue,
+  parseDateFieldValue,
+} from './date-field.helpers';
 import { environment } from '../../../environments/environment';
 
 const LANGUAGE_STORAGE_KEY = 'feldpost.settings.language';
@@ -328,6 +333,24 @@ export class I18nService {
 
   formatNumber(value: number, options?: Intl.NumberFormatOptions): string {
     return new Intl.NumberFormat(this.locale(), options).format(value);
+  }
+
+  /** Compact date field display — follows active language locale (Settings → Language). */
+  formatDateFieldValue(date: Date | null): string {
+    this.languageSignal();
+    return formatDateFieldValue(date, this.locale());
+  }
+
+  /** Parse compact date field text for the active locale. */
+  parseDateFieldValue(raw: string): Date | null {
+    this.languageSignal();
+    return parseDateFieldValue(raw, this.locale());
+  }
+
+  /** Placeholder pattern for compact date fields (locale-derived). */
+  dateFieldPlaceholder(): string {
+    this.languageSignal();
+    return dateFieldPlaceholderForLocale(this.locale());
   }
 
   private firstNonEmpty(...values: Array<string | undefined | null>): string | undefined {

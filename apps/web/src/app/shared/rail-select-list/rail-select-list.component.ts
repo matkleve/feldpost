@@ -16,6 +16,7 @@ import type {
   host: {
     class: 'rail-select-list-host',
     '[class.rail-select-list--compact]': 'compact()',
+    '[class.rail-select-list--dense]': 'dense()',
   },
 })
 export class RailSelectListComponent {
@@ -23,6 +24,7 @@ export class RailSelectListComponent {
   readonly selectedId = input<string | null>(null);
   readonly loading = input(false);
   readonly compact = input(false);
+  readonly dense = input(false);
   readonly listAriaLabel = input('List');
   readonly loadingMessage = input('Loading…');
   readonly emptyMessage = input('No items');

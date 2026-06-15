@@ -33,6 +33,12 @@
     border-bottom: 1px solid var(--menu-border-subtle);
   }
 
+  &__header--date-only {
+    .captured-date-editor__date-input {
+      flex: 1 1 100%;
+    }
+  }
+
   &__date-input,
   &__time-input {
     flex: 1 1 50%;

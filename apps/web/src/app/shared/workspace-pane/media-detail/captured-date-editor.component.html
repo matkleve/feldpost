@@ -1,7 +1,7 @@
 <!-- CapturedDateEditorComponent — Notion-style calendar + time editor -->
 <div class="captured-date-editor">
   <!-- Header: date + time split fields -->
-  <div class="captured-date-editor__header">
+  <div class="captured-date-editor__header" [class.captured-date-editor__header--date-only]="dateOnly()">
     <input
       #dateField
       hlmInput
@@ -14,6 +14,7 @@
       (blur)="onDateBlur()"
       (keydown)="onDateKeydown($event)"
     />
+    @if (!dateOnly()) {
     <input
       #timeField
       hlmInput
@@ -27,6 +28,7 @@
       (blur)="onTimeBlur()"
       (keydown)="onTimeKeydown($event)"
     />
+    }
   </div>
 
   <!-- Month navigation -->

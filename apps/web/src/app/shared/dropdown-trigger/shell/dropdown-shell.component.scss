@@ -53,8 +53,9 @@
     width: max-content;
     max-width: min(36rem, calc(100vw - 2rem));
     min-width: min(28rem, calc(100vw - 2rem));
-    max-height: min(calc(8rem + 2 * var(--spacing-1)), calc(100vh - 2rem));
-    padding: 0;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
   }
 
   // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).

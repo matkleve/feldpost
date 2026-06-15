@@ -15,6 +15,7 @@ import {
   input,
   output,
   signal,
+  booleanAttribute,
 } from '@angular/core';
 import type { OnDestroy, OnInit } from '@angular/core';
 import { parseTimeInput } from '../../../shared/ui-primitives/parse-time-input';
@@ -53,6 +54,9 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
 
   /** Initial time in HH:MM format. */
   readonly initialTime = input<string>('');
+
+  /** When true, hides the time field (date-only picker surfaces). */
+  readonly dateOnly = input(false, { transform: booleanAttribute });
 
   // ── Outputs ────────────────────────────────────────────────────────────────
 
