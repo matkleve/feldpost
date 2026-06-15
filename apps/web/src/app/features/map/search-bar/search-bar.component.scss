@@ -2,22 +2,11 @@
 @use '../../../../styles/subtle-scrollbar';
 
 :host {
-  --search-bar-safe-inline: max(
-    var(--spacing-3),
-    var(--map-upload-chrome-inline, calc(5rem + var(--spacing-1)))
-  );
   --search-bar-viewport-inset: var(--spacing-3);
 
-  position: absolute;
-  top: var(--spacing-3);
-  left: 50%;
-  z-index: 200;
-  width: min(36rem, calc(100% - (2 * var(--search-bar-safe-inline))));
-  transform: translateX(-50%);
-
-  @media (max-width: 47.9375rem) {
-    width: calc(100% - (2 * var(--search-bar-safe-inline)));
-  }
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
 
 // Sidebar-aligned panel + row rhythm — @see apps/web/src/app/features/nav/nav.component.scss

@@ -14201,14 +14201,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.filter.timespace.empty', 'No dated media yet.', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html empty state')
+values (null, 'map.filter.timespace.empty', 'No media in this organization yet.', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html empty state')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'No dated media yet.', 'published'
+select t.id, 'en', 'No media in this organization yet.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.filter.timespace.empty'
 on conflict (app_text_id, lang) do update set
@@ -14216,7 +14216,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Noch keine datierten Medien.', 'published'
+select t.id, 'de', 'Noch keine Medien in dieser Organisation.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.filter.timespace.empty'
 on conflict (app_text_id, lang) do update set
@@ -14224,9 +14224,71 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessun media datato ancora.', 'published'
+select t.id, 'it', 'Nessun media in questa organizzazione.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.filter.timespace.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.loadError', 'Could not load timeline.', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html error state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not load timeline.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.loadError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zeitachse konnte nicht geladen werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.loadError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile caricare la cronologia.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.loadError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.loading', 'Loading timeline…', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html loading state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading timeline…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zeitachse wird geladen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento cronologia…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.loading'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -1,12 +1,14 @@
 import {
   Component,
   ElementRef,
+  OnInit,
   computed,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import { MapTimespaceCatalogService } from '../../../core/map-timespace/map-timespace-catalog.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import {
   buildTimespaceHistogram,
@@ -25,9 +27,10 @@ import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
   styleUrl: './timespace-dropdown.component.scss',
   imports: [...HLM_INPUT_IMPORTS],
 })
-export class TimespaceDropdownComponent {
+export class TimespaceDropdownComponent implements OnInit {
   private readonly i18nService = inject(I18nService);
   private readonly viewService = inject(WorkspaceViewService);
+  protected readonly catalog = inject(MapTimespaceCatalogService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   private readonly chartRef = viewChild<ElementRef<HTMLElement>>('chart');
@@ -37,16 +40,22 @@ export class TimespaceDropdownComponent {
   private readonly dragStartRatio = signal<number | null>(null);
   private readonly dragCurrentRatio = signal<number | null>(null);
 
+  ngOnInit(): void {
+    this.catalog.ensureLoaded();
+  }
+
   private readonly histogramSource = computed(() => {
-    this.viewService.rawImages();
+    this.catalog.entries();
     this.viewService.selectedProjectIds();
+
     const projectIds = this.viewService.selectedProjectIds();
-    const images = this.viewService.rawImages();
-    if (projectIds.size === 0) return images;
-    return images.filter((img) => {
-      const ids = img.projectIds?.length ? img.projectIds : img.projectId ? [img.projectId] : [];
-      return ids.some((id) => projectIds.has(id));
-    });
+    const entries = this.catalog.entries();
+
+    if (projectIds.size === 0) {
+      return entries;
+    }
+
+    return entries.filter((entry) => entry.projectIds.some((id) => projectIds.has(id)));
   });
 
   readonly histogram = computed(() => buildTimespaceHistogram(this.histogramSource()));

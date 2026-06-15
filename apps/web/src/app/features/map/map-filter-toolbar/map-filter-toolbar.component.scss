@@ -3,17 +3,10 @@
 @use '../../../../styles/frosted-chrome';
 
 :host {
-  --map-filter-safe-inline: max(
-    var(--spacing-3),
-    var(--map-upload-chrome-inline, calc(5rem + var(--spacing-1)))
-  );
-
-  position: absolute;
-  top: calc(var(--spacing-3) + 2.75rem + var(--spacing-2));
-  left: var(--map-filter-safe-inline);
-  z-index: 200;
   display: block;
-  max-width: calc(100% - (2 * var(--map-filter-safe-inline)));
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
 }
 
 // Floating trigger row below the search bar — left aligned with gap between buttons.

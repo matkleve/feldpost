@@ -63,11 +63,16 @@ export function buildTimespaceHistogram(
   images: readonly Pick<WorkspaceImage, 'capturedAt' | 'createdAt'>[],
   binCount = 72,
 ): TimespaceHistogram | null {
-  if (images.length === 0) {
+  const dated = images.filter((img) => {
+    const raw = img.capturedAt ?? img.createdAt;
+    return !!raw && Number.isFinite(new Date(raw).getTime());
+  });
+
+  if (dated.length === 0) {
     return null;
   }
 
-  const timestamps = images.map((img) => effectiveMediaTimestampMs(img));
+  const timestamps = dated.map((img) => effectiveMediaTimestampMs(img));
   const minTs = Math.min(...timestamps);
   const maxTs = Math.max(...timestamps);
   const todayEnd = endOfUtcDay(Date.now());

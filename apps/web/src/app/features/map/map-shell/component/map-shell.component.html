@@ -226,15 +226,17 @@
     }
   }
 
-  <ss-search-bar
-    [queryContext]="searchQueryContext()"
-    (mapCenterRequested)="onSearchMapCenterRequested($event)"
-    (clearRequested)="onSearchClearRequested()"
-    (goToLocationRequested)="goToUserPosition()"
-    (qrInviteCommandRequested)="onQrInviteCommandRequested()"
-  />
+  <div class="map-search-chrome">
+    <ss-search-bar
+      [queryContext]="searchQueryContext()"
+      (mapCenterRequested)="onSearchMapCenterRequested($event)"
+      (clearRequested)="onSearchClearRequested()"
+      (goToLocationRequested)="goToUserPosition()"
+      (qrInviteCommandRequested)="onQrInviteCommandRequested()"
+    />
 
-  <app-map-filter-toolbar />
+    <app-map-filter-toolbar />
+  </div>
 
   <!-- GPS button — bottom-right of map zone -->
   <button

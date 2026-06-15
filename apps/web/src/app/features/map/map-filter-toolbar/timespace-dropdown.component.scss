@@ -1,8 +1,9 @@
 @layer components {
-  // Horizontal timespace strip: date inputs flank a histogram track.
+  // Two-row timespace panel: histogram track on top, compact date fields below.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown {
     display: flex;
+    flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-2);
     width: 100%;
@@ -11,29 +12,56 @@
     box-sizing: border-box;
   }
 
-  // Date input column — fixed width so chart absorbs remaining space.
+  // Top row — full-width histogram track.
   // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__date {
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
+  .timespace-dropdown__chart-row {
+    width: 100%;
+    min-width: 0;
   }
 
-  // Compact date control for toolbar dropdown footprint.
+  // Bottom row — compact from/to date fields (native date picker opens calendar UI).
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__dates-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--spacing-2);
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Single labeled date field in the bottom row.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__date-field {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    min-width: 0;
+  }
+
+  // Visible field label above compact date input.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__date-label {
+    font-size: var(--font-size-2xs);
+    color: var(--muted-foreground);
+  }
+
+  // Compact date control — browser-native calendar picker on focus/click.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__date-input {
-    width: 8.5rem;
+    width: 100%;
     min-width: 0;
-    font-size: var(--font-size-xs);
+    height: 1.75rem;
+    padding-block: 0;
+    font-size: var(--font-size-2xs);
   }
 
   // Histogram track — owns stacking context for bars + selection overlay.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__chart {
     position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 3.5rem;
+    width: 100%;
+    min-height: 3.25rem;
     display: flex;
     align-items: flex-end;
     padding-block: var(--spacing-1);
@@ -43,6 +71,7 @@
     cursor: crosshair;
     touch-action: none;
     user-select: none;
+    box-sizing: border-box;
   }
 
   // Bar row — narrow vertical strokes across the full track width.
@@ -53,11 +82,12 @@
     gap: 1px;
     width: 100%;
     height: 100%;
+    min-height: 2.5rem;
     padding-inline: var(--spacing-1);
     box-sizing: border-box;
   }
 
-  // Individual histogram bar — blue when outside active selection semantics.
+  // Individual histogram bar — chart token blue.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__bar {
     flex: 1 1 0;
@@ -88,27 +118,13 @@
     background: color-mix(in srgb, var(--primary) 14%, transparent);
   }
 
-  // Empty histogram placeholder copy.
+  // Loading / empty / error status copy centered in chart track.
   // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__empty {
+  .timespace-dropdown__status {
     margin: auto;
     padding-inline: var(--spacing-2);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-2xs);
     color: var(--muted-foreground);
     text-align: center;
-  }
-
-  // Screen-reader-only date field labels.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
   }
 }
