@@ -1,10 +1,9 @@
 /**
  * MediaPageHeader — Page header for /media route
  *
- * Displays breadcrumb navigation and media count.
+ * Displays page title and media count.
  */
 import { Component, input, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 
 export type MediaPageHeaderState = 'loading' | 'ready';
@@ -12,7 +11,6 @@ export type MediaPageHeaderState = 'loading' | 'ready';
 @Component({
   selector: 'app-media-page-header',
   standalone: true,
-  imports: [RouterLink],
   templateUrl: './media-page-header.component.html',
   styleUrl: './media-page-header.component.scss',
   host: {

@@ -1,18 +1,5 @@
-<!-- Renders page-header container for media route title, breadcrumb, and count summary. -->
+<!-- Renders page-header container for media route title and count summary. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
-<!-- Renders breadcrumb navigation context for the current media page location. -->
-<!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
-<nav class="media-page-header__breadcrumb" [attr.aria-label]="t('media.page.title', 'Media')">
-  <!-- Provides breadcrumb link back to authenticated app root. -->
-  <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
-  <a [routerLink]="['/']">{{ t('nav.home', 'Home') }}</a>
-  <!-- Displays breadcrumb separator and is hidden from assistive tech. -->
-  <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
-  <span aria-hidden="true">/</span>
-  <!-- Displays current breadcrumb terminal node with media title text. -->
-  <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
-  <span>{{ title() }}</span>
-</nav>
 <!-- Renders main page heading for the /media route. -->
 <!-- @see docs/specs/component/item-grid/item-grid.md#wiring -->
 <h1 class="media-page-header__title">{{ title() }}</h1>

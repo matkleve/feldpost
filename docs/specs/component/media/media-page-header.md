@@ -3,7 +3,7 @@
 ## What It Is
 
 Media Page Header is the header contract for the `/media` route shell.
-It MUST own breadcrumb/title/count presentation for the media page header region.
+It MUST own title/count presentation for the media page header region.
 It MUST NOT own media list lifecycle, toolbar commands, or pane orchestration.
 
 ## Documentation Phase Boundary
@@ -23,8 +23,7 @@ It MUST NOT own media list lifecycle, toolbar commands, or pane orchestration.
 
 ## What It Looks Like
 
-The component MUST render breadcrumb navigation, page title, and count summary in one stable header block.
-The breadcrumb MUST expose home-to-media context.
+The component MUST render page title and count summary in one stable header block.
 The count row MUST render loading text while header state is `loading`, then render count summaries when state is `ready`.
 
 ## Where It Lives
@@ -42,7 +41,6 @@ The count row MUST render loading text while header state is `loading`, then ren
 | 2 | Parent binds `state='ready'` with known counts | Header MUST render deterministic count summary. | ready count summary visible |
 | 3 | Parent provides `title` | Header MUST render provided page title text. | title visible |
 | 4 | Parent provides `mediaCount` and `totalCount` with `totalCount > mediaCount` | Header MUST render loaded-of-total summary text. | loaded-of-total summary visible |
-| 5 | User activates breadcrumb home link | Header MUST route via home link contract. | route intent emitted by anchor navigation |
 
 ## Normative Boundary Contract
 
@@ -55,7 +53,6 @@ The count row MUST render loading text while header state is `loading`, then ren
 
 ```text
 MediaPageHeaderComponent
-├── breadcrumb nav
 ├── page title
 └── count summary
 ```
@@ -72,7 +69,6 @@ MediaPageHeaderComponent
 ```mermaid
 flowchart TD
   A[MediaComponent] --> B[MediaPageHeaderComponent]
-  B --> C[breadcrumb]
   B --> D[title]
   B --> E[count summary]
 ```
@@ -95,7 +91,7 @@ State ownership rule:
 | File | Purpose |
 | --- | --- |
 | `apps/web/src/app/features/media/media-page-header.component.ts` | Header inputs and derived summary helpers |
-| `apps/web/src/app/features/media/media-page-header.component.html` | Breadcrumb, title, and summary template |
+| `apps/web/src/app/features/media/media-page-header.component.html` | Title and summary template |
 | `apps/web/src/app/features/media/media-page-header.component.scss` | Header-only visuals |
 | `docs/specs/component/media/media.component.md` | Parent shell lifecycle contract |
 
@@ -115,7 +111,7 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] Header renders breadcrumb, title, and count summary in one stable block.
+- [ ] Header renders title and count summary in one stable block.
 - [ ] Header state is input-driven by parent shell only (`loading` or `ready`).
 - [ ] Loaded-of-total text appears only when `totalCount > mediaCount`.
 - [ ] Component has no ownership of shell FSM transitions or toolbar commands.
