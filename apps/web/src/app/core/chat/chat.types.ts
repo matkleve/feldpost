@@ -12,6 +12,13 @@ export interface ChatChannel {
   unreadCount?: number;
 }
 
+export interface ChatChannelMember {
+  userId: string;
+  role: 'owner' | 'member';
+  fullName: string;
+  joinedAt: string;
+}
+
 export interface ChatMessageReaction {
   emoji: string;
   userId: string;

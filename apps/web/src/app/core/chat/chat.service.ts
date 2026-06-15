@@ -4,7 +4,7 @@ import { AuthService } from '../auth/auth.service';
 import { ChatChannelsAdapter } from './adapters/channels.adapter';
 import { ChatMessagesAdapter } from './adapters/messages.adapter';
 import { ChatRealtimeAdapter } from './adapters/realtime.adapter';
-import type { ChatChannel, ChatMessage, SendMessageInput } from './chat.types';
+import type { ChatChannel, ChatChannelMember, ChatMessage, SendMessageInput } from './chat.types';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -49,6 +49,10 @@ export class ChatService {
 
   async addChannelMember(channelId: string, userId: string): Promise<{ error: Error | null }> {
     return this.channelsAdapter.addChannelMember(channelId, userId);
+  }
+
+  async loadChannelMembers(channelId: string): Promise<{ data: ChatChannelMember[]; error: Error | null }> {
+    return this.channelsAdapter.loadChannelMembers(channelId);
   }
 
   async findOrCreateDm(otherUserId: string): Promise<{ data: ChatChannel | null; error: Error | null }> {

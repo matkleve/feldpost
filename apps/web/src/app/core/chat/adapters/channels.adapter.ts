@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { toChannel } from '../chat.helpers';
-import type { ChatChannel } from '../chat.types';
+import type { ChatChannel, ChatChannelMember } from '../chat.types';
 
 @Injectable({ providedIn: 'root' })
 export class ChatChannelsAdapter {
@@ -60,13 +60,41 @@ export class ChatChannelsAdapter {
     userId: string,
     role: 'owner' | 'member' = 'member',
   ): Promise<{ error: Error | null }> {
-    const { error } = await this.supabase.client.from('chat_channel_members').upsert({
-      channel_id: channelId,
-      user_id: userId,
-      role,
+    const { error } = await this.supabase.client.rpc('invite_chat_channel_member', {
+      p_channel_id: channelId,
+      p_user_id: userId,
     });
 
-    return { error: error ? new Error(error.message) : null };
+    if (error) {
+      return { error: new Error(error.message) };
+    }
+
+    return { error: null };
+  }
+
+  async loadChannelMembers(channelId: string): Promise<{ data: ChatChannelMember[]; error: Error | null }> {
+    const { data, error } = await this.supabase.client
+      .from('chat_channel_members')
+      .select('user_id, role, joined_at, profiles(full_name)')
+      .eq('channel_id', channelId)
+      .order('joined_at');
+
+    if (error) {
+      return { data: [], error: new Error(error.message) };
+    }
+
+    const members = (data ?? []).map((row) => {
+      const profile = row.profiles as { full_name?: string | null } | Array<{ full_name?: string | null }> | null;
+      const resolved = Array.isArray(profile) ? profile[0] : profile;
+      return {
+        userId: row.user_id as string,
+        role: row.role as 'owner' | 'member',
+        fullName: (resolved?.full_name as string | null) ?? '',
+        joinedAt: row.joined_at as string,
+      };
+    });
+
+    return { data: members, error: null };
   }
 
   async findOrCreateDm(

@@ -19533,6 +19533,130 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channels.search', 'Search channels', 'en', 'colleagues channel search placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search channels', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kanäle suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca canali', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channels.search_aria', 'Search channels', 'en', 'colleagues channel search aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search channels', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kanäle suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca canali', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channels.search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.star', 'Add to favorites', 'en', 'colleagues channel star action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add to favorites', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.star'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zu Favoriten hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.star'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi ai preferiti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.star'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.unstar', 'Remove from favorites', 'en', 'colleagues channel unstar action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove from favorites', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.unstar'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus Favoriten entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.unstar'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi dai preferiti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.unstar'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'colleagues.channel.create', 'Create channel', 'en', 'colleagues create channel button aria')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -19807,6 +19931,440 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Canale', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.channel.unnamed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.type_label', 'Type', 'en', 'colleagues channel detail type label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Type', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Typ', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tipo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.type_public', 'Public', 'en', 'colleagues channel type public')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Public', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_public'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Öffentlich', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_public'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Pubblico', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_public'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.type_private', 'Private', 'en', 'colleagues channel type private')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Private', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_private'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Privat', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_private'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Privato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.type_private'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.created_label', 'Created', 'en', 'colleagues channel detail created label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Created', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.created_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erstellt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.created_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Creato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.created_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.description_label', 'Description', 'en', 'colleagues channel detail description label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Description', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Beschreibung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Descrizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.members_title', 'Members', 'en', 'colleagues channel detail members heading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Members', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mitglieder', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Membri', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.members_loading', 'Loading members', 'en', 'colleagues channel members loading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading members', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Lade Mitglieder', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento membri', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.members_empty', 'No members yet', 'en', 'colleagues channel members empty')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No members yet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch keine Mitglieder', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ancora nessun membro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.members_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.add_members_title', 'Add colleagues', 'en', 'colleagues channel add members heading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add colleagues', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kolleginnen und Kollegen hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi colleghi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.add_members_search_aria', 'Search colleagues to add', 'en', 'colleagues channel add members search aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search colleagues to add', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kolleginnen und Kollegen zum Hinzufügen suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca colleghi da aggiungere', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.add_members_empty', 'Everyone is already in this channel', 'en', 'colleagues channel add members empty')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Everyone is already in this channel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Alle sind bereits in diesem Kanal', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tutti sono già in questo canale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.add_members_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.role_owner', 'Owner', 'en', 'colleagues channel member role owner')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Owner', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.role_owner'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Eigentümer', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.role_owner'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Proprietario', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.role_owner'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.role_member', 'Member', 'en', 'colleagues channel member role member')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Member', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.role_member'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mitglied', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.role_member'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Membro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.role_member'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.detail.select_hint', 'Select a colleague or channel to view details.', 'en', 'colleagues empty right panel hint')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Select a colleague or channel to view details.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.detail.select_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wähle eine Person oder einen Kanal für Details.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.detail.select_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Seleziona un collega o un canale per i dettagli.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.detail.select_hint'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -17,7 +17,7 @@
     (memberSelected)="onMemberSelected($event)"
     (channelSelected)="onChannelSelected($event)"
     (memberMessageRequested)="onMessageMember($event)"
-    (channelCreateRequested)="onChannelCreate($event)"
+    (channelCreateOpen)="onChannelCreateOpen()"
     (channelArchiveRequested)="onChannelArchive($event)"
     (channelMemberInviteRequested)="onChannelMemberInvite($event)"
   />
@@ -47,7 +47,14 @@
     }
   </section>
 
-  @if (selectedMember(); as member) {
+  @if (creatingChannel()) {
+    <app-channel-detail-panel
+      pageGridRight
+      mode="create"
+      (closed)="onChannelPanelClosed()"
+      (created)="onChannelCreate($event)"
+    />
+  } @else if (selectedMember(); as member) {
     <app-member-detail-panel
       pageGridRight
       [member]="member"
@@ -57,9 +64,22 @@
       (messageRequested)="onMessageMember($event)"
       (memberUpdated)="onMemberUpdated()"
     />
+  } @else if (showChannelDetail() && selectedChannel(); as channel) {
+    <app-channel-detail-panel
+      pageGridRight
+      mode="view"
+      [channel]="channel"
+      [members]="channelMembers()"
+      [colleagues]="membersWithPresence()"
+      [canManage]="canManageChannels()"
+      [membersLoading]="channelMembersLoading()"
+      (closed)="onChannelPanelClosed()"
+      (memberInviteRequested)="onChannelMemberInviteFromPanel($event)"
+      (archiveRequested)="onChannelDetailArchive()"
+    />
   } @else {
     <aside pageGridRight class="colleagues-page__detail-empty">
-      <p>{{ t('colleagues.member.select_hint', 'Select a colleague to view details.') }}</p>
+      <p>{{ t('colleagues.detail.select_hint', 'Select a colleague or channel to view details.') }}</p>
     </aside>
   }
 </app-page-grid>

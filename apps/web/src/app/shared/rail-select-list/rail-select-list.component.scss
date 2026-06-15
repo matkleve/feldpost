@@ -85,6 +85,15 @@
     font-size: 1.125rem;
     line-height: 1;
   }
+
+  &--pinned {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &--active {
+    color: var(--primary);
+  }
 }
 
 .rail-select-list__row-wrap:hover .rail-select-list__row-action,

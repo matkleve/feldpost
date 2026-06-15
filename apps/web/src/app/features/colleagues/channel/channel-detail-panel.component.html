@@ -1,0 +1,86 @@
+<aside class="channel-detail">
+  <header class="channel-detail__header">
+    <h2>
+      @if (mode() === 'create') {
+        {{ t('colleagues.channel.create_title', 'Create channel') }}
+      } @else if (channel(); as ch) {
+        # {{ ch.name ?? t('colleagues.channel.unnamed', 'Channel') }}
+      }
+    </h2>
+    <button type="button" class="channel-detail__close" (click)="closed.emit()" [attr.aria-label]="t('common.close', 'Close')">
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (mode() === 'create') {
+    <form class="channel-detail__create" (submit)="$event.preventDefault(); onCreateSubmit()">
+      <label class="channel-detail__field">
+        <span>{{ t('colleagues.channel.name_label', 'Channel name') }}</span>
+        <input hlmInput type="text" [ngModel]="draftName()" (ngModelChange)="draftName.set($event)" name="channelName" required />
+      </label>
+      <label class="channel-detail__checkbox">
+        <input type="checkbox" [ngModel]="isPrivate()" (ngModelChange)="isPrivate.set($event)" name="isPrivate" />
+        {{ t('colleagues.channel.private_label', 'Private channel') }}
+      </label>
+      <button hlmBtn type="submit" class="channel-detail__submit">
+        {{ t('colleagues.channel.create_confirm', 'Create') }}
+      </button>
+    </form>
+  } @else if (channel(); as ch) {
+    <dl class="channel-detail__meta">
+      <div>
+        <dt>{{ t('colleagues.channel.type_label', 'Type') }}</dt>
+        <dd>{{ channelTypeLabel(ch) }}</dd>
+      </div>
+      <div>
+        <dt>{{ t('colleagues.channel.created_label', 'Created') }}</dt>
+        <dd>{{ ch.createdAt | date: 'mediumDate' }}</dd>
+      </div>
+      @if (ch.description) {
+        <div>
+          <dt>{{ t('colleagues.channel.description_label', 'Description') }}</dt>
+          <dd>{{ ch.description }}</dd>
+        </div>
+      }
+    </dl>
+
+    <section class="channel-detail__section">
+      <h3>{{ t('colleagues.channel.members_title', 'Members') }}</h3>
+      <app-rail-select-list
+        [compact]="true"
+        [items]="memberListItems()"
+        [selectedId]="null"
+        [loading]="membersLoading()"
+        [listAriaLabel]="t('colleagues.channel.members_title', 'Members')"
+        [loadingMessage]="t('colleagues.channel.members_loading', 'Loading members')"
+        [emptyMessage]="t('colleagues.channel.members_empty', 'No members yet')"
+      />
+    </section>
+
+    @if (canManage()) {
+      <section class="channel-detail__section">
+        <h3>{{ t('colleagues.channel.add_members_title', 'Add colleagues') }}</h3>
+        <app-rail-search-field
+          [value]="addMemberSearch()"
+          [placeholder]="t('colleagues.members.search', 'Search colleagues')"
+          [ariaLabel]="t('colleagues.channel.add_members_search_aria', 'Search colleagues to add')"
+          (valueChange)="addMemberSearch.set($event)"
+        />
+        <app-rail-select-list
+          [compact]="true"
+          [items]="inviteListItems()"
+          [selectedId]="null"
+          [listAriaLabel]="t('colleagues.channel.add_members_title', 'Add colleagues')"
+          [emptyMessage]="t('colleagues.channel.add_members_empty', 'Everyone is already in this channel')"
+          (actionTriggered)="onInviteAction($event)"
+        />
+      </section>
+
+      <div class="channel-detail__actions">
+        <button hlmBtn variant="destructive" type="button" (click)="archiveRequested.emit()">
+          {{ t('colleagues.channel.archive', 'Archive channel') }}
+        </button>
+      </div>
+    }
+  }
+</aside>

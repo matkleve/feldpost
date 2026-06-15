@@ -629,6 +629,10 @@ colleagues.tab.members,Members,colleagues sidebar tab,Members,Mitglieder,Membri
 colleagues.tab.invites,Invites,colleagues sidebar tab,Invites,Einladungen,Inviti
 colleagues.channels.title,Channels,colleagues channel list heading,Channels,Kanäle,Canali
 colleagues.channels.empty,No channels,colleagues empty channel list,No channels,Keine Kanäle,Nessun canale
+colleagues.channels.search,Search channels,colleagues channel search placeholder,Search channels,Kanäle suchen,Cerca canali
+colleagues.channels.search_aria,Search channels,colleagues channel search aria,Search channels,Kanäle suchen,Cerca canali
+colleagues.channel.star,Add to favorites,colleagues channel star action,Add to favorites,Zu Favoriten hinzufügen,Aggiungi ai preferiti
+colleagues.channel.unstar,Remove from favorites,colleagues channel unstar action,Remove from favorites,Aus Favoriten entfernen,Rimuovi dai preferiti
 colleagues.channel.create,Create channel,colleagues create channel button aria,Create channel,Kanal erstellen,Crea canale
 colleagues.channel.create_title,Create channel,colleagues channel dialog title,Create channel,Kanal erstellen,Crea canale
 colleagues.channel.name_label,Channel name,colleagues channel dialog field,Channel name,Kanalname,Nome canale
@@ -638,6 +642,20 @@ colleagues.channel.archive,Archive channel,colleagues channel archive action,Arc
 colleagues.channel.invite_member,Invite to channel,colleagues invite member to private channel,Invite to channel,Zum Kanal einladen,Invita al canale
 colleagues.channel.dm,Direct message,colleagues DM channel label,Direct message,Direktnachricht,Messaggio diretto
 colleagues.channel.unnamed,Channel,colleagues unnamed channel fallback,Channel,Kanal,Canale
+colleagues.channel.type_label,Type,colleagues channel detail type label,Type,Typ,Tipo
+colleagues.channel.type_public,Public,colleagues channel type public,Public,Öffentlich,Pubblico
+colleagues.channel.type_private,Private,colleagues channel type private,Private,Privat,Privato
+colleagues.channel.created_label,Created,colleagues channel detail created label,Created,Erstellt,Creato
+colleagues.channel.description_label,Description,colleagues channel detail description label,Description,Beschreibung,Descrizione
+colleagues.channel.members_title,Members,colleagues channel detail members heading,Members,Mitglieder,Membri
+colleagues.channel.members_loading,Loading members,colleagues channel members loading,Loading members,Lade Mitglieder,Caricamento membri
+colleagues.channel.members_empty,No members yet,colleagues channel members empty,No members yet,Noch keine Mitglieder,Ancora nessun membro
+colleagues.channel.add_members_title,Add colleagues,colleagues channel add members heading,Add colleagues,Kolleginnen und Kollegen hinzufügen,Aggiungi colleghi
+colleagues.channel.add_members_search_aria,Search colleagues to add,colleagues channel add members search aria,Search colleagues to add,Kolleginnen und Kollegen zum Hinzufügen suchen,Cerca colleghi da aggiungere
+colleagues.channel.add_members_empty,Everyone is already in this channel,colleagues channel add members empty,Everyone is already in this channel,Alle sind bereits in diesem Kanal,Tutti sono già in questo canale
+colleagues.channel.role_owner,Owner,colleagues channel member role owner,Owner,Eigentümer,Proprietario
+colleagues.channel.role_member,Member,colleagues channel member role member,Member,Mitglied,Membro
+colleagues.detail.select_hint,Select a colleague or channel to view details.,colleagues empty right panel hint,Select a colleague or channel to view details.,Wähle eine Person oder einen Kanal für Details.,Seleziona un collega o un canale per i dettagli.
 colleagues.members.title,Colleagues,colleagues member list heading,Colleagues,Kolleginnen und Kollegen,Colleghi
 colleagues.members.search,Search colleagues,colleagues member search placeholder,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
 colleagues.members.search_aria,Search colleagues,colleagues member search aria,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
@@ -1271,4 +1289,15 @@ projects.mediaPicker.confirm,Add,media picker confirm button without selection,A
 projects.mediaPicker.confirmWithCount,Add ({count} media),media picker confirm button with selection count,Add ({count} media),Hinzufügen ({count} Medien),Aggiungi ({count} media)
 projects.mediaPicker.loadError,Failed to load media,media picker load error,Failed to load media,Medien konnten nicht geladen werden,Impossibile caricare i media
 projects.mediaPicker.retry,Retry,media picker retry button,Retry,Erneut versuchen,Riprova
+colleagues.page.error.members,Could not load team members.,colleagues page members load error toast,Could not load team members.,Teammitglieder konnten nicht geladen werden.,Impossibile caricare i membri del team.
+colleagues.page.error.chat,Chat is temporarily unavailable.,colleagues page chat load error toast,Chat is temporarily unavailable.,Chat ist vorübergehend nicht verfügbar.,La chat è temporaneamente non disponibile.
+colleagues.chat.error.create_channel,Could not create channel.,chat create channel error toast,Could not create channel.,Kanal konnte nicht erstellt werden.,Impossibile creare il canale.
+colleagues.chat.error.archive_channel,Could not archive channel.,chat archive channel error toast,Could not archive channel.,Kanal konnte nicht archiviert werden.,Impossibile archiviare il canale.
+colleagues.chat.error.invite_member,Could not invite member.,chat invite member error toast,Could not invite member.,Mitglied konnte nicht eingeladen werden.,Impossibile invitare il membro.
+colleagues.chat.error.edit,Could not edit message.,chat edit message error toast,Could not edit message.,Nachricht konnte nicht bearbeitet werden.,Impossibile modificare il messaggio.
+colleagues.chat.error.delete,Could not delete message.,chat delete message error toast,Could not delete message.,Nachricht konnte nicht gelöscht werden.,Impossibile eliminare il messaggio.
+colleagues.chat.error.reaction,Could not update reaction.,chat reaction error toast,Could not update reaction.,Reaktion konnte nicht aktualisiert werden.,Impossibile aggiornare la reazione.
+colleagues.chat.toast.channel_created,Channel created.,chat channel created success toast,Channel created.,Kanal erstellt.,Canale creato.
+colleagues.chat.toast.channel_archived,Channel archived.,chat channel archived success toast,Channel archived.,Kanal archiviert.,Canale archiviato.
+colleagues.chat.toast.member_invited,Member invited to channel.,chat member invited success toast,Member invited to channel.,Mitglied zum Kanal eingeladen.,Membro invitato al canale.
 "

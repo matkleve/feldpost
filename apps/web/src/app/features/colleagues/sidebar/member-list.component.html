@@ -41,21 +41,29 @@
   </div>
 
   <section class="member-list__channels">
-    <div class="member-list__section-header">
-      <h2>{{ t('colleagues.channels.title', 'Channels') }}</h2>
-      @if (canManageChannels()) {
-        <button
-          type="button"
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          [attr.aria-label]="t('colleagues.channel.create', 'Create channel')"
-          (click)="openCreateChannelDialog()"
-        >
-          <span class="material-icons" aria-hidden="true">add</span>
-        </button>
-      }
-    </div>
+    <h2>{{ t('colleagues.channels.title', 'Channels') }}</h2>
+
+    @if (canManageChannels()) {
+      <button
+        type="button"
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="member-list__add-channel"
+        (click)="openCreateChannel()"
+      >
+        <span class="material-icons" aria-hidden="true">add</span>
+        <span>{{ t('colleagues.channel.create', 'Create channel') }}</span>
+      </button>
+    }
+
+    <app-rail-search-field
+      [value]="channelSearchQuery()"
+      [placeholder]="t('colleagues.channels.search', 'Search channels')"
+      [ariaLabel]="t('colleagues.channels.search_aria', 'Search channels')"
+      (valueChange)="channelSearchQuery.set($event)"
+    />
+
     <app-rail-select-list
       [compact]="true"
       [items]="channelListItems()"
@@ -86,8 +94,4 @@
       (actionTriggered)="onMemberAction($event)"
     />
   </section>
-
-  <app-channel-create-dialog
-    (confirmed)="onChannelCreateConfirmed($event)"
-  />
 </nav>

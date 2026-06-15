@@ -9,6 +9,10 @@ export interface RailSelectListButtonAction {
   icon: string;
   ariaLabel: string;
   title?: string;
+  /** Keep action visible when row is not hovered (e.g. starred channels). */
+  alwaysVisible?: boolean;
+  /** Emphasize active toggle state (e.g. filled star). */
+  active?: boolean;
 }
 
 export interface RailSelectListConfirmAction {
