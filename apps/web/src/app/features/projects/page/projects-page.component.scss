@@ -25,3 +25,8 @@
   border-radius: var(--container-radius-panel);
   background: color-mix(in srgb, var(--card) 88%, var(--warning));
 }
+
+.projects-page__error-body {
+  display: grid;
+  gap: var(--spacing-2);
+}

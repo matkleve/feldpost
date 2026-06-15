@@ -23,16 +23,16 @@
     (newProject)="onNewProject()"
   />
 
-  @if (loadError()) {
-    <section pageGridCenter class="projects-page__center projects-page__error" role="alert">
-      <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
-      <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
-      <button hlmBtn variant="outline" type="button" (click)="refreshProjects()">
-        {{ t('projects.page.error.retry', 'Retry') }}
-      </button>
-    </section>
-  } @else if (currentProjectId() && currentProject(); as project) {
-    <section pageGridCenter class="projects-page__center">
+  <section pageGridCenter class="projects-page__center" [class.projects-page__error]="!!loadError()">
+    @if (loadError()) {
+      <div role="alert" class="projects-page__error-body">
+        <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
+        <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
+        <button hlmBtn variant="outline" type="button" (click)="refreshProjects()">
+          {{ t('projects.page.error.retry', 'Retry') }}
+        </button>
+      </div>
+    } @else if (currentProjectId() && currentProject(); as project) {
       <app-project-detail-view
         [project]="project"
         [namingNewProject]="isNamingCurrentProject()"
@@ -45,25 +45,23 @@
         (mediaAdded)="onMediaAdded($event)"
         (mediaRemoved)="onMediaRemoved($event)"
       />
-    </section>
-
-    @if (detailsPanelOpen()) {
-      <app-project-details-panel
-        pageGridRight
-        [project]="project"
-        [colorPickerOpen]="colorPickerOpen()"
-        (colorSelected)="onColorSelected(project.id, $event)"
-        (colorPickerToggled)="onColorPickerToggled()"
-        (archiveRequested)="onArchiveProject(project.id)"
-        (restoreRequested)="onRestoreProject(project.id)"
-        (deleteRequested)="requestDeleteProject(project.id)"
-        (closed)="onDetailsPanelClosed()"
-      />
-    }
-  } @else {
-    <section pageGridCenter class="projects-page__center">
+    } @else {
       <app-project-dashboard-view [projects]="projects()" />
-    </section>
+    }
+  </section>
+
+  @if (detailsPanelOpen() && currentProject(); as project) {
+    <app-project-details-panel
+      pageGridRight
+      [project]="project"
+      [colorPickerOpen]="colorPickerOpen()"
+      (colorSelected)="onColorSelected(project.id, $event)"
+      (colorPickerToggled)="onColorPickerToggled()"
+      (archiveRequested)="onArchiveProject(project.id)"
+      (restoreRequested)="onRestoreProject(project.id)"
+      (deleteRequested)="requestDeleteProject(project.id)"
+      (closed)="onDetailsPanelClosed()"
+    />
   }
 </app-page-grid>
 
