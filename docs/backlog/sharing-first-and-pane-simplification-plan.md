@@ -23,6 +23,9 @@ the genuinely-open work is small and listed under "Remaining".
 4. **Security tag = secrecy, not audit.** Security-tagged media never leave via an
    anonymous link (no OTP request-access flow). Cross-company visibility is governed
    by roles inside the app, not by share links.
+5. **Workspace pane stays a fixed split pane (R3-B).** No floating overlay; keep the
+   current layout-owned split + drag-divider. Simplification (R3-C/A) happens inside
+   that split, not as a new overlay.
 
 ---
 
@@ -58,7 +61,7 @@ the genuinely-open work is small and listed under "Remaining".
   opener is a logged-in org member). External anonymous opens stay anonymous.
 
 ### R3 — Workspace pane simplification (the only untouched redesign)
-- **B (blocker, decide first):** floating overlay vs. the current fixed split pane.
+- **B (decided):** keep the fixed split pane (no floating overlay).
 - **C:** strip pane toolbar to Sort + grid + Remove + footer (Grouping out; Filter/Projects
   already live in the map filter toolbar, R-side). Update `docs/specs/ui/workspace/workspace-pane.md`
   and `docs/specs/component/workspace/active-selection-view.md`.
@@ -92,6 +95,5 @@ the genuinely-open work is small and listed under "Remaining".
 
 ## Open decisions
 
-- **R3-B:** floating overlay or keep fixed split pane?
 - **R2:** how are external (non-account) opens attributed in chat — anonymous only?
 - **R4:** exact semantics of "security tag" once multi-org projects exist.
