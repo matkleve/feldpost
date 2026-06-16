@@ -67,13 +67,8 @@ import { SearchQueryContext } from '../../../../core/search/search.models';
 import { searchQueryContextsEqual } from '../../../../core/search/search-bar-helpers';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { SettingsPaneService } from '../../../../core/settings-pane/settings-pane.service';
-import { MapSessionCacheService } from '../../../../core/map-session-cache/map-session-cache.service';
 import { ROUTE_SESSION_SHELL_KEYS } from '../../../../core/route-session-cache/route-session-cache.keys';
 import { RouteSessionCacheService } from '../../../../core/route-session-cache/route-session-cache.service';
-import type {
-  MapSessionSnapshot,
-  MapViewportMarkerRow,
-} from '../../../../core/map-session-cache/map-session-cache.types';
 import { ProjectSelectDialogComponent } from '../../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
@@ -84,21 +79,11 @@ import { ActionEngineService } from '../../../../core/action/action-engine.servi
 import { ResolvedAction } from '../../../../core/action/action-types';
 import {
   buildPhotoMarkerHtml,
-  PHOTO_MARKER_ICON_SIZE,
   PhotoMarkerZoomLevel,
 } from '../../../../core/map/marker-factory';
 import { MapShellState } from './map-shell.state';
-import { DetailZoomHighlightService } from '../markers/detail-zoom-highlight.service';
-import { ViewportMarkerQueryService } from '../markers/viewport-marker-query.service';
-import {
-  MapMarkerReconcileFacade,
-  PhotoMarkerState,
-  ReconcileDependencies,
-  ReconcileIncomingRow,
-} from '../markers/map-marker-reconcile.facade';
-import { MapMarkerClusterMergeService } from '../markers/map-marker-cluster-merge.service';
-import { MapMarkerReuseStrategyService } from '../markers/map-marker-reuse-strategy.service';
-import { ZoomTargetMarkerService } from '../markers/zoom-target-marker.service';
+import { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
+import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
 import {
   MapContextActionsService,
   type RemoveImagesFromProjectsResult,
@@ -125,7 +110,6 @@ import {
   MapDivIcon,
   MapInstance,
   MapLatLng,
-  MapLatLngBounds,
   MapLayerGroup,
   MapMarker,
   MapMouseEvent,
@@ -170,23 +154,6 @@ import type {
   RadiusMenuActionId,
 } from '../workspace/map-workspace-actions.types';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
-
-type ViewportMarkerRow = {
-  cluster_lat: number;
-  cluster_lng: number;
-  image_count: number;
-  image_id: string | null;
-  media_item_id?: string | null;
-  location_id?: string | null;
-  direction: number | null;
-  storage_path: string | null;
-  thumbnail_path: string | null;
-  exif_latitude: number | null;
-  exif_longitude: number | null;
-  created_at: string | null;
-};
-
-type MergedViewportRow = ViewportMarkerRow & { sourceCells: Array<{ lat: number; lng: number }> };
 
 
 @Component({
@@ -239,15 +206,9 @@ export class MapShellComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly settingsPaneService = inject(SettingsPaneService);
-  private readonly mapSessionCache = inject(MapSessionCacheService);
   private readonly routeSessionCache = inject(RouteSessionCacheService);
   private readonly state = inject(MapShellState);
-  private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
-  private readonly viewportMarkerQueryService = inject(ViewportMarkerQueryService);
-  private readonly mapMarkerReconcileFacade = inject(MapMarkerReconcileFacade);
-  private readonly mapMarkerClusterMergeService = inject(MapMarkerClusterMergeService);
-  private readonly mapMarkerReuseStrategyService = inject(MapMarkerReuseStrategyService);
-  private readonly zoomTargetMarkerService = inject(ZoomTargetMarkerService);
+  private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
   private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
@@ -559,9 +520,6 @@ export class MapShellComponent implements OnDestroy {
   /** Timer handle for the moveend debounce. */
   private moveEndDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  /** AbortController for in-flight viewport queries. */
-  private viewportQueryController: AbortController | null = null;
-
   /** Tracks the last zoom level to detect threshold crossings. */
   private lastZoomLevel: PhotoMarkerZoomLevel = 'mid';
 
@@ -580,15 +538,6 @@ export class MapShellComponent implements OnDestroy {
   private nativeContextMenuBypassUntil = 0;
   private markerContextMenuSuppressUntil = 0;
 
-  /**
-   * Bounds that were last fetched (including 10% buffer).
-   * Used to skip RPC when the viewport is still within the buffered area.
-   */
-  private lastFetchedBounds: MapLatLngBounds | null = null;
-  private lastFetchedZoom: number | null = null;
-  /** Last viewport RPC payload — persisted to session cache on destroy. */
-  private lastViewportRpcRows: ViewportMarkerRow[] | null = null;
-  private isRestoringFromSessionCache = false;
   /** Set true after first Leaflet init; never cleared on activeShell hide/show. */
   private mapInitialized = false;
 
@@ -676,7 +625,7 @@ export class MapShellComponent implements OnDestroy {
         mapFilterEffectReady = true;
         return;
       }
-      this.reapplyViewportMarkerFilter();
+      this.mapViewportCoordinatorService.reapplyViewportMarkerFilter();
     });
 
     afterNextRender(() => {
@@ -715,7 +664,7 @@ export class MapShellComponent implements OnDestroy {
     this.cleanupMarkerLayersAndCaches();
     this.cleanupUploadManagerSubscriptions();
     this.cleanupMapUiState();
-    this.persistMapSessionCache();
+    this.mapViewportCoordinatorService.persistMapSessionCache();
     this.destroyMapInstance();
   }
 
@@ -732,8 +681,7 @@ export class MapShellComponent implements OnDestroy {
       this.moveEndDebounceTimer = null;
     }
 
-    this.viewportQueryController?.abort();
-    this.viewportQueryController = null;
+    this.mapViewportCoordinatorService.cancelPendingQuery();
   }
 
   private detachGlobalListeners(): void {
@@ -1182,10 +1130,10 @@ export class MapShellComponent implements OnDestroy {
         this.markerSelectionService.setSelectedMarkerKeys(new Set());
         this.workspaceSelectionService.clearSelection();
         this.workspaceViewService.clearActiveSelection();
-        await this.queryViewportMarkers();
+        await this.mapViewportCoordinatorService.queryViewportMarkers();
       },
       onAfterUndo: async () => {
-        await this.queryViewportMarkers();
+        await this.mapViewportCoordinatorService.queryViewportMarkers();
       },
     });
 
@@ -1355,7 +1303,7 @@ export class MapShellComponent implements OnDestroy {
     const result = await this.locationResolverService.resolvePendingMediaItem(mediaIds[0]);
     if (result.status === 'resolved') {
       this.showMapToast('map.shell.toast.locationResolved', 'Location resolved successfully.', 'success');
-      await this.queryViewportMarkers();
+      await this.mapViewportCoordinatorService.queryViewportMarkers();
       this.onMapMenuCloseRequested();
       return;
     }
@@ -1370,7 +1318,7 @@ export class MapShellComponent implements OnDestroy {
         },
       );
       if (result.changed) {
-        await this.queryViewportMarkers();
+        await this.mapViewportCoordinatorService.queryViewportMarkers();
       }
       this.onMapMenuCloseRequested();
       return;
@@ -1452,7 +1400,7 @@ export class MapShellComponent implements OnDestroy {
       'success',
     );
     this.onBatchAddressDialogCancelled();
-    await this.queryViewportMarkers();
+    await this.mapViewportCoordinatorService.queryViewportMarkers();
   }
 
   onDetailAddressSearchRequestConsumed(requestId: number): void {
@@ -1646,10 +1594,10 @@ export class MapShellComponent implements OnDestroy {
           this.markerSelectionService.setSelectedMarkerKeys(new Set());
           this.workspaceSelectionService.clearSelection();
           this.workspaceViewService.clearActiveSelection();
-          await this.queryViewportMarkers();
+          await this.mapViewportCoordinatorService.queryViewportMarkers();
         },
         onAfterUndo: async () => {
-          await this.queryViewportMarkers();
+          await this.mapViewportCoordinatorService.queryViewportMarkers();
         },
       });
 
@@ -1688,7 +1636,7 @@ export class MapShellComponent implements OnDestroy {
         });
       },
       onAfterUndo: async () => {
-        await this.queryViewportMarkers();
+        await this.mapViewportCoordinatorService.queryViewportMarkers();
       },
     });
 
@@ -1813,7 +1761,7 @@ export class MapShellComponent implements OnDestroy {
     if (!this.map) return;
     this.upsertUploadedPhotoMarker(event);
     this.resolveDraftMediaMarkerUpload(event);
-    void this.queryViewportMarkers();
+    void this.mapViewportCoordinatorService.queryViewportMarkers();
   }
 
   /** Enters placement mode for a file with no GPS EXIF data. */
@@ -1995,6 +1943,18 @@ export class MapShellComponent implements OnDestroy {
       suppressMarkerContextMenuFor: (ms) => { this.markerContextMenuSuppressUntil = Date.now() + ms; },
     });
 
+    this.mapViewportCoordinatorService.bind({
+      getMap: () => this.map,
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      getPhotoMarkerLayer: () => this.photoMarkerLayer,
+      getMarkersByMediaId: () => this.markersByMediaId,
+      getSelectedMarkerKey: () => this.selectedMarkerKey(),
+      setSelectedMarkerKey: (key) => this.state.setSelectedMarkerKey(key),
+      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
+      setSelectedMarkerKeys: (keys) => this.state.setSelectedMarkerKeys(keys),
+      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
+
     this.searchService.updateViewportBounds(this.map);
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
@@ -2062,11 +2022,11 @@ export class MapShellComponent implements OnDestroy {
           if (!this.map) {
             return;
           }
-          if (this.tryRestoreViewportFromSessionCache()) {
+          if (this.mapViewportCoordinatorService.tryRestoreViewportFromSessionCache()) {
             this.map.invalidateSize();
             return;
           }
-          void this.queryViewportMarkers();
+          void this.mapViewportCoordinatorService.queryViewportMarkers();
         }, 120);
       },
     });
@@ -2569,7 +2529,7 @@ export class MapShellComponent implements OnDestroy {
           return;
         }
 
-        void this.queryViewportMarkers();
+        void this.mapViewportCoordinatorService.queryViewportMarkers();
       }),
     );
   }
@@ -2596,7 +2556,7 @@ export class MapShellComponent implements OnDestroy {
     this.mediaDeleteUndo.mediaRestored$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        void this.queryViewportMarkers();
+        void this.mapViewportCoordinatorService.queryViewportMarkers();
       });
   }
 
@@ -2648,7 +2608,7 @@ export class MapShellComponent implements OnDestroy {
       }
     }
 
-    void this.queryViewportMarkers();
+    void this.mapViewportCoordinatorService.queryViewportMarkers();
   }
 
   /**
@@ -2740,264 +2700,6 @@ export class MapShellComponent implements OnDestroy {
     // Maintain secondary index for upload manager event lookups.
     if (event.id) {
       registerMarkerKeyForMedia(this.markersByMediaId, event.id, markerKey);
-    }
-  }
-
-  private persistMapSessionCache(): void {
-    if (!this.map || !this.lastFetchedBounds || this.lastFetchedZoom === null || !this.lastViewportRpcRows) {
-      return;
-    }
-
-    const center = this.map.getCenter();
-    this.mapSessionCache.write({
-      centerLat: center.lat,
-      centerLng: center.lng,
-      zoom: this.map.getZoom() ?? this.lastFetchedZoom,
-      fetchSouth: this.lastFetchedBounds.getSouth(),
-      fetchWest: this.lastFetchedBounds.getWest(),
-      fetchNorth: this.lastFetchedBounds.getNorth(),
-      fetchEast: this.lastFetchedBounds.getEast(),
-      roundedZoom: this.lastFetchedZoom,
-      viewportRows: this.lastViewportRpcRows,
-      cachedAt: Date.now(),
-    });
-  }
-
-  private tryRestoreViewportFromSessionCache(): boolean {
-    if (this.uploadedPhotoMarkers.size > 0) {
-      return true;
-    }
-
-    const snapshot = this.mapSessionCache.read();
-    if (!snapshot || !this.map) {
-      return false;
-    }
-
-    this.isRestoringFromSessionCache = true;
-
-    try {
-      return this.restoreViewportFromSessionSnapshot(snapshot);
-    } finally {
-      this.isRestoringFromSessionCache = false;
-    }
-  }
-
-  private restoreViewportFromSessionSnapshot(snapshot: MapSessionSnapshot): boolean {
-    if (!this.map) {
-      return false;
-    }
-
-    this.map.setView([snapshot.centerLat, snapshot.centerLng], snapshot.zoom, { animate: false });
-    this.lastFetchedBounds = this.mapLeafletService.createBounds(
-      [snapshot.fetchSouth, snapshot.fetchWest],
-      [snapshot.fetchNorth, snapshot.fetchEast],
-    );
-    this.lastFetchedZoom = snapshot.roundedZoom;
-    this.lastViewportRpcRows = [...snapshot.viewportRows];
-
-    const rows = snapshot.viewportRows as ViewportMarkerRow[];
-    const incoming = this.buildIncomingViewportMarkers(rows);
-    const recyclableKeys = this.collectRecyclableMarkerKeys(incoming);
-    this.mapMarkerReconcileFacade.reconcileIncomingViewportMarkers(
-      incoming as Map<string, ReconcileIncomingRow>,
-      recyclableKeys,
-      this.getReconcileDependencies(),
-    );
-    this.mapMarkerReconcileFacade.removeRecyclableMarkers(
-      recyclableKeys,
-      this.getReconcileDependencies(),
-    );
-
-    this.pruneStaleSelectedMarkerKeys();
-
-    for (const state of this.uploadedPhotoMarkers.values()) {
-      state.optimistic = false;
-    }
-
-    this.thumbnailLoaderService.maybeLoadThumbnails();
-    this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
-    this.markerSelectionService.refreshActiveWorkspaceHoverLink();
-
-    return true;
-  }
-
-  /**
-   * Viewport-driven marker query.
-   * Calls the `viewport_markers` RPC which returns server-side clusters
-   * at low zoom and individual markers at high zoom. Reconciles the
-   * result against existing markers (add / remove / update).
-   */
-  private async queryViewportMarkers(): Promise<void> {
-    if (!this.map) return;
-
-    // Abort any in-flight query.
-    this.viewportQueryController?.abort();
-    const controller = new AbortController();
-    this.viewportQueryController = controller;
-
-    const result = await this.viewportMarkerQueryService.fetchViewportMarkers<ViewportMarkerRow>(
-      this.map,
-      controller.signal,
-    );
-
-    // If this query was aborted, discard the result.
-    if (result.aborted) return;
-    this.viewportQueryController = null;
-
-    // Cache the fetched bounds so small pans can skip the RPC.
-    this.lastFetchedBounds = this.mapLeafletService.createBounds(
-      [result.fetchSouth, result.fetchWest],
-      [result.fetchNorth, result.fetchEast],
-    );
-    this.lastFetchedZoom = result.roundedZoom;
-
-    if (result.error || !result.data) {
-      this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
-      return;
-    }
-
-    this.lastViewportRpcRows = result.data;
-
-    this.reconcileViewportMarkerRows(result.data);
-
-    // Clear optimistic flag from surviving markers.
-    for (const state of this.uploadedPhotoMarkers.values()) {
-      state.optimistic = false;
-    }
-
-    // If a zoom target was requested while this area was still loading,
-    // try highlighting now that markers are reconciled.
-    this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
-  }
-
-  /** Reconcile cached viewport rows after client-side map filters change. */
-  private reapplyViewportMarkerFilter(): void {
-    if (!this.map || !this.lastViewportRpcRows) {
-      return;
-    }
-    this.reconcileViewportMarkerRows(this.lastViewportRpcRows);
-  }
-
-  private reconcileViewportMarkerRows(rows: ViewportMarkerRow[]): void {
-    const incoming = this.buildIncomingViewportMarkers(rows);
-    const recyclableKeys = this.collectRecyclableMarkerKeys(incoming);
-    this.mapMarkerReconcileFacade.reconcileIncomingViewportMarkers(
-      incoming as Map<string, ReconcileIncomingRow>,
-      recyclableKeys,
-      this.getReconcileDependencies(),
-    );
-    this.mapMarkerReconcileFacade.removeRecyclableMarkers(
-      recyclableKeys,
-      this.getReconcileDependencies(),
-    );
-
-    this.pruneStaleSelectedMarkerKeys();
-    this.thumbnailLoaderService.maybeLoadThumbnails();
-    this.markerSelectionService.refreshActiveWorkspaceHoverLink();
-    this.markerSelectionService.pruneStaleLinkedHoverFromMap();
-  }
-
-  private buildIncomingViewportMarkers(rows: ViewportMarkerRow[]): Map<string, MergedViewportRow> {
-    const merged = this.mapMarkerClusterMergeService.mergeOverlappingClusters(
-      this.map,
-      rows,
-      PHOTO_MARKER_ICON_SIZE[0],
-    );
-
-    // Build the incoming marker set keyed the same way we store them.
-    const incoming = new Map<string, MergedViewportRow>();
-    const allowedIds = this.workspaceViewService.filteredImageIds();
-    const hasFilters = this.workspaceViewService.hasMapFilters();
-
-    for (const row of merged) {
-      if (typeof row.cluster_lat !== 'number' || typeof row.cluster_lng !== 'number') continue;
-
-      if (hasFilters) {
-        if (row.image_count === 1) {
-          const mediaId = row.media_item_id ?? row.image_id;
-          if (!mediaId || !allowedIds.has(mediaId)) {
-            continue;
-          }
-        } else {
-          continue;
-        }
-      }
-
-      const key =
-        row.image_count === 1 && row.location_id
-          ? `loc:${row.location_id}`
-          : this.toMarkerKey(row.cluster_lat, row.cluster_lng);
-      incoming.set(key, row);
-    }
-
-    return incoming;
-  }
-
-  private collectRecyclableMarkerKeys(incoming: Map<string, MergedViewportRow>): Set<string> {
-    // Mark non-optimistic outgoing markers as recyclable first. Some can be
-    // re-used for incoming markers so they animate to the new centroid.
-    const recyclableKeys = new Set<string>();
-    for (const [key, state] of this.uploadedPhotoMarkers) {
-      if (state.optimistic) continue;
-      if (!incoming.has(key)) {
-        recyclableKeys.add(key);
-      }
-    }
-    return recyclableKeys;
-  }
-
-  private getReconcileDependencies(): ReconcileDependencies {
-    return {
-      photoMarkerLayer: this.photoMarkerLayer!,
-      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-      markersByMediaId: this.markersByMediaId,
-      selectedMarkerKey: () => this.selectedMarkerKey(),
-      setSelectedMarkerKey: (markerKey: string | null) =>
-        this.state.setSelectedMarkerKey(markerKey),
-      findReusableMarkerKey: (row, keys) =>
-        this.mapMarkerReuseStrategyService.findReusableMarkerKey(
-          this.map,
-          this.markersByMediaId,
-          this.uploadedPhotoMarkers,
-          row,
-          keys,
-        ),
-      findSpawnOriginForIncomingRow: (row, keys) =>
-        this.mapMarkerReuseStrategyService.findSpawnOriginForIncomingRow(
-          this.map,
-          this.uploadedPhotoMarkers,
-          row,
-          keys,
-        ),
-      buildFallbackLabelFromPath: (path) => this.markerRenderService.buildFallbackLabelFromPath(path),
-      buildPhotoMarkerIcon: (markerKey, override) => this.markerRenderService.buildPhotoMarkerIcon(markerKey, override),
-      attachMarkerInteractions: (markerKey, marker, fadeIn) =>
-        this.markerBindingService.attachMarkerInteractions(markerKey, marker, { fadeIn }),
-      bindMarkerClickInteraction: (markerKey, marker) =>
-        this.markerBindingService.bindMarkerClickInteraction(markerKey, marker),
-      bindMarkerContextInteraction: (markerKey, marker) =>
-        this.markerBindingService.bindMarkerContextInteraction(markerKey, marker),
-      bindMarkerHoverInteraction: (markerKey, marker) =>
-        this.markerBindingService.bindMarkerHoverInteraction(markerKey, marker),
-      animateMarkerPosition: (marker, lat, lng) => this.markerBindingService.animateMarkerPosition(marker, lat, lng),
-      refreshPhotoMarker: (markerKey) => this.markerRenderService.refreshPhotoMarker(markerKey),
-      cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
-      suppressMarkerFadeIn: this.isRestoringFromSessionCache,
-    };
-  }
-
-  private pruneStaleSelectedMarkerKeys(): void {
-    const staleSelectedKeys = new Set(this.selectedMarkerKeys());
-    let selectedKeysChanged = false;
-    for (const markerKey of staleSelectedKeys) {
-      if (this.uploadedPhotoMarkers.has(markerKey)) {
-        continue;
-      }
-      staleSelectedKeys.delete(markerKey);
-      selectedKeysChanged = true;
-    }
-    if (selectedKeysChanged) {
-      this.state.setSelectedMarkerKeys(staleSelectedKeys);
     }
   }
 
@@ -3105,7 +2807,7 @@ export class MapShellComponent implements OnDestroy {
     const zoomChanged = currentZoom !== this.lastZoomLevel;
 
     if (!this.isViewportStillInFetchedBuffer(zoomChanged)) {
-      void this.queryViewportMarkers();
+      void this.mapViewportCoordinatorService.queryViewportMarkers();
     }
 
     // Refresh existing marker icons if zoom-level threshold changed.
@@ -3118,14 +2820,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private isViewportStillInFetchedBuffer(zoomChanged: boolean): boolean {
-    if (zoomChanged || !this.lastFetchedBounds || !this.map) {
-      return false;
-    }
-
-    const mapZoom = Math.round(this.map.getZoom() ?? 0);
-    return (
-      this.lastFetchedZoom === mapZoom && this.lastFetchedBounds.contains(this.map.getBounds())
-    );
+    return this.mapViewportCoordinatorService.isViewportStillInFetchedBuffer(zoomChanged);
   }
 
   /**
