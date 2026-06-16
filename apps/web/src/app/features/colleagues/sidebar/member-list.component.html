@@ -138,7 +138,7 @@
 
         <app-rail-select-list
           [items]="memberListItems()"
-          [selectedId]="selectedMemberId()"
+          [selectedId]="activeDmMemberId()"
           [loading]="loading()"
           [listAriaLabel]="t('colleagues.direct_messages.title', 'Direct messages')"
           [loadingMessage]="t('colleagues.direct_messages.loading', 'Loading direct messages')"

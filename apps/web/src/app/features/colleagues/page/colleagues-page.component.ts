@@ -73,7 +73,7 @@ export class ColleaguesPageComponent implements OnDestroy {
   readonly members = signal<OrgMember[]>([]);
   readonly roles = signal<OrgRole[]>([]);
   readonly channels = signal<ChatChannel[]>([]);
-  readonly selectedMemberId = signal<string | null>(null);
+  readonly inspectorMemberId = signal<string | null>(null);
   readonly selectedChannelId = signal<string | null>(null);
   readonly creatingChannel = signal(false);
   readonly channelDetailDismissed = signal(false);
@@ -85,8 +85,8 @@ export class ColleaguesPageComponent implements OnDestroy {
   readonly canDeleteAnyMessage = signal(false);
   private presenceChannel: RealtimeChannel | null = null;
 
-  readonly selectedMember = computed(() => {
-    const id = this.selectedMemberId();
+  readonly inspectorMember = computed(() => {
+    const id = this.inspectorMemberId();
     if (!id) return null;
     return this.members().find((member) => member.id === id) ?? null;
   });
@@ -95,6 +95,14 @@ export class ColleaguesPageComponent implements OnDestroy {
     const id = this.selectedChannelId();
     if (!id) return null;
     return this.channels().find((channel) => channel.id === id) ?? null;
+  });
+
+  readonly activeDmMemberId = computed(() => {
+    const channel = this.selectedChannel();
+    if (!channel || channel.type !== 'dm') return null;
+    const ownId = this.authService.user()?.id;
+    const otherMember = this.channelMembers().find((member) => member.userId !== ownId);
+    return otherMember?.userId ?? null;
   });
 
   readonly showChannelDetail = computed(() => {
@@ -116,11 +124,6 @@ export class ColleaguesPageComponent implements OnDestroy {
     }
 
     if (channel.type === 'dm') {
-      const selected = this.selectedMember();
-      if (selected?.fullName) {
-        return selected.fullName;
-      }
-
       const ownId = this.authService.user()?.id;
       const otherMember = this.channelMembers().find((member) => member.userId !== ownId);
       if (otherMember?.fullName) {
@@ -174,14 +177,6 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.roles.set(rolesResult.data);
     this.ownRoleLevel.set(level);
 
-    if (membersResult.data.length > 0) {
-      const currentId = this.selectedMemberId();
-      const stillExists = currentId && membersResult.data.some((member) => member.id === currentId);
-      if (!stillExists && !this.creatingChannel() && !this.showChannelDetail()) {
-        this.selectedMemberId.set(membersResult.data[0].id);
-      }
-    }
-
     this.loading.set(false);
 
     await this.refreshChat();
@@ -232,18 +227,25 @@ export class ColleaguesPageComponent implements OnDestroy {
   onMemberSelected(memberId: string): void {
     this.exitInvitesIfActive();
     this.creatingChannel.set(false);
-    this.channelDetailDismissed.set(true);
+    this.inspectorMemberId.set(null);
     void this.openDirectMessage(memberId);
   }
 
   onMemberPanelClosed(): void {
-    this.selectedMemberId.set(null);
+    this.inspectorMemberId.set(null);
+  }
+
+  onChatMemberProfileOpen(): void {
+    const memberId = this.activeDmMemberId();
+    if (memberId) {
+      this.inspectorMemberId.set(memberId);
+    }
   }
 
   onChannelCreateOpen(): void {
     this.creatingChannel.set(true);
     this.channelDetailDismissed.set(false);
-    this.selectedMemberId.set(null);
+    this.inspectorMemberId.set(null);
   }
 
   onChannelPanelClosed(): void {
@@ -258,7 +260,7 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.exitInvitesIfActive();
     this.creatingChannel.set(false);
     this.channelDetailDismissed.set(false);
-    this.selectedMemberId.set(null);
+    this.inspectorMemberId.set(null);
     await this.selectChannel(channelId);
   }
 
@@ -272,7 +274,6 @@ export class ColleaguesPageComponent implements OnDestroy {
 
   private async openDirectMessage(memberId: string): Promise<void> {
     this.exitInvitesIfActive();
-    this.selectedMemberId.set(memberId);
     const result = await this.chatService.findOrCreateDm(memberId);
     if (result.error) {
       this.toastService.show({

@@ -28,7 +28,7 @@ export class MemberListComponent {
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly members = input<OrgMember[]>([]);
-  readonly selectedMemberId = input<string | null>(null);
+  readonly activeDmMemberId = input<string | null>(null);
   readonly channels = input<ChatChannel[]>([]);
   readonly selectedChannelId = input<string | null>(null);
   readonly loading = input(false);
@@ -38,7 +38,6 @@ export class MemberListComponent {
   readonly invitesToggle = output<void>();
   readonly memberSelected = output<string>();
   readonly channelSelected = output<string>();
-  readonly memberMessageRequested = output<string>();
   readonly channelCreateOpen = output<void>();
   readonly channelArchiveRequested = output<string>();
 

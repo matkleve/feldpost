@@ -8,7 +8,7 @@
   <app-member-list
     pageGridLeft
     [members]="membersWithPresence()"
-    [selectedMemberId]="selectedMemberId()"
+    [activeDmMemberId]="activeDmMemberId()"
     [channels]="channels()"
     [selectedChannelId]="selectedChannelId()"
     [loading]="loading()"
@@ -17,7 +17,6 @@
     (invitesToggle)="onInvitesToggle()"
     (memberSelected)="onMemberSelected($event)"
     (channelSelected)="onChannelSelected($event)"
-    (memberMessageRequested)="onMessageMember($event)"
     (channelCreateOpen)="onChannelCreateOpen()"
     (channelArchiveRequested)="onChannelArchive($event)"
   />
@@ -48,6 +47,7 @@
         (messageEdited)="onMessageEdited($event)"
         (messageDeleted)="onMessageDeleted($event)"
         (reactionToggled)="onReactionToggled($event)"
+        (memberProfileRequested)="onChatMemberProfileOpen()"
       />
     }
   </section>
@@ -64,7 +64,7 @@
       pageGridRight
       (messageRequested)="onMessageMember($event)"
     />
-  } @else if (selectedMember(); as member) {
+  } @else if (inspectorMember(); as member) {
     <app-member-detail-panel
       pageGridRight
       [member]="member"
@@ -88,7 +88,7 @@
     />
   } @else {
     <aside pageGridRight class="colleagues-page__detail-empty">
-      <p>{{ t('colleagues.detail.select_hint', 'Select a colleague or channel to view details.') }}</p>
+      <p>{{ t('colleagues.detail.select_hint', 'Select a channel to view details.') }}</p>
     </aside>
   }
 </app-page-grid>

@@ -705,7 +705,7 @@ colleagues.channel.add_members_search_aria,Search colleagues to add,colleagues c
 colleagues.channel.add_members_empty,Everyone is already in this channel,colleagues channel add members empty,Everyone is already in this channel,Alle sind bereits in diesem Kanal,Tutti sono già in questo canale
 colleagues.channel.role_owner,Owner,colleagues channel member role owner,Owner,Eigentümer,Proprietario
 colleagues.channel.role_member,Member,colleagues channel member role member,Member,Mitglied,Membro
-colleagues.detail.select_hint,Select a colleague or channel to view details.,colleagues empty right panel hint,Select a colleague or channel to view details.,Wähle eine Person oder einen Kanal für Details.,Seleziona un collega o un canale per i dettagli.
+colleagues.detail.select_hint,Select a channel to view details.,colleagues empty right panel hint,Select a channel to view details.,Wähle einen Kanal für Details.,Seleziona un canale per i dettagli.
 colleagues.members.title,Colleagues,colleagues member list heading,Colleagues,Kolleginnen und Kollegen,Colleghi
 colleagues.members.search,Search colleagues,colleagues member search placeholder,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
 colleagues.members.search_aria,Search colleagues,colleagues member search aria,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
@@ -735,6 +735,7 @@ colleagues.chat.error.open_dm,Could not open direct message.,colleagues open DM 
 colleagues.chat.send,Send,colleagues chat send button,Send,Senden,Invia
 colleagues.chat.no_channel,Select a channel,colleagues chat no channel selected,Select a channel,Kanal auswählen,Seleziona un canale
 colleagues.chat.dm,Direct message,colleagues chat DM title,Direct message,Direktnachricht,Messaggio diretto
+colleagues.chat.open_member_profile,View colleague profile,colleagues chat DM header open profile,View colleague profile,Profil anzeigen,Visualizza profilo collega
 colleagues.chat.thread_title,Thread,colleagues thread panel title,Thread,Thread,Thread
 colleagues.chat.thread_loading,Loading replies…,colleagues thread loading,Loading replies…,Antworten werden geladen…,Caricamento risposte…
 colleagues.chat.thread_empty,No replies yet.,colleagues thread empty,No replies yet.,Noch keine Antworten.,Nessuna risposta.

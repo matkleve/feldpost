@@ -20,8 +20,41 @@
 .chat-area__header-title {
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
   min-width: 0;
+}
+
+.chat-area__header-title--profile {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+    background: var(--action-hover);
+    color: var(--primary);
+  }
+}
+
+.chat-area__header-avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 
 .chat-area__header h1 {

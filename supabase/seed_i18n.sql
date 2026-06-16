@@ -21889,14 +21889,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'colleagues.detail.select_hint', 'Select a colleague or channel to view details.', 'en', 'colleagues empty right panel hint')
+values (null, 'colleagues.detail.select_hint', 'Select a channel to view details.', 'en', 'colleagues empty right panel hint')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Select a colleague or channel to view details.', 'published'
+select t.id, 'en', 'Select a channel to view details.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.detail.select_hint'
 on conflict (app_text_id, lang) do update set
@@ -21904,7 +21904,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wähle eine Person oder einen Kanal für Details.', 'published'
+select t.id, 'de', 'Wähle einen Kanal für Details.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.detail.select_hint'
 on conflict (app_text_id, lang) do update set
@@ -21912,7 +21912,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Seleziona un collega o un canale per i dettagli.', 'published'
+select t.id, 'it', 'Seleziona un canale per i dettagli.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.detail.select_hint'
 on conflict (app_text_id, lang) do update set
@@ -22814,6 +22814,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Messaggio diretto', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.chat.dm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.chat.open_member_profile', 'View colleague profile', 'en', 'colleagues chat DM header open profile')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'View colleague profile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.open_member_profile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Profil anzeigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.open_member_profile'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Visualizza profilo collega', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.open_member_profile'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -1,11 +1,23 @@
 <div class="chat-area">
   <header class="chat-area__header">
-    <div class="chat-area__header-title">
-      @if (channel() && !isDmChannel()) {
-        <span class="chat-area__header-prefix" aria-hidden="true">#</span>
-      }
-      <h1>{{ displayTitle() }}</h1>
-    </div>
+    @if (isDmChannel()) {
+      <button
+        type="button"
+        class="chat-area__header-title chat-area__header-title--profile"
+        [attr.aria-label]="t('colleagues.chat.open_member_profile', 'View colleague profile')"
+        (click)="onMemberProfileOpen()"
+      >
+        <span class="chat-area__header-avatar" aria-hidden="true">{{ dmPeerInitials() }}</span>
+        <h1>{{ displayTitle() }}</h1>
+      </button>
+    } @else {
+      <div class="chat-area__header-title">
+        @if (channel()) {
+          <span class="chat-area__header-prefix" aria-hidden="true">#</span>
+        }
+        <h1>{{ displayTitle() }}</h1>
+      </div>
+    }
     <app-rail-search-field
       class="chat-area__header-search"
       [value]="searchQuery()"

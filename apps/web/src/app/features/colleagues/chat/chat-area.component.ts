@@ -46,6 +46,7 @@ export class ChatAreaComponent {
   readonly messageDeleted = output<string>();
   readonly reactionToggled = output<{ messageId: string; emoji: string }>();
   readonly threadOpened = output<ChatMessage>();
+  readonly memberProfileRequested = output<void>();
 
   readonly draft = signal('');
   readonly searchQuery = signal('');
@@ -67,6 +68,12 @@ export class ChatAreaComponent {
   });
 
   readonly isDmChannel = computed(() => this.channel()?.type === 'dm');
+
+  readonly dmPeerInitials = computed(() => {
+    const title = this.displayTitle();
+    const trimmed = title.trim();
+    return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
+  });
 
   readonly typingText = computed(() => {
     const ids = this.typingUserIds();
@@ -219,5 +226,11 @@ export class ChatAreaComponent {
     }
     const element = document.getElementById(`chat-msg-${message.id}`);
     element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  onMemberProfileOpen(): void {
+    if (this.isDmChannel()) {
+      this.memberProfileRequested.emit();
+    }
   }
 }
