@@ -131,6 +131,7 @@ import { MapZoomOrchestratorService } from '../../../../core/map-zoom/map-zoom-o
 import { LocationMapPickNavigationService } from '../../../../core/workspace-pane/location-map-pick-navigation.service';
 import { MediaDetailLocationSyncService } from '../../../../core/media-detail-data/media-detail-location-sync.service';
 import { MapShellGpsService } from '../leaflet/map-shell-gps.service';
+import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { DeferredStartupHandles, MapDeferredStartupService } from '../leaflet/map-deferred-startup.service';
 import { MapProjectActionsService } from '../workspace/map-project-actions.service';
 import { MapProjectDialogService } from '../workspace/map-project-dialog.service';
@@ -283,6 +284,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly locationMapPickNavigationService = inject(LocationMapPickNavigationService);
   private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
   readonly gpsService = inject(MapShellGpsService);
+  readonly searchService = inject(MapShellSearchService);
   private readonly mapDeferredStartupService = inject(MapDeferredStartupService);
   private readonly mapProjectActionsService = inject(MapProjectActionsService);
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
@@ -363,11 +365,6 @@ export class MapShellComponent implements OnDestroy {
 
   /** Whether the map is in placement mode (drives the banner + cursor class). */
   readonly placementActive = signal(false);
-  readonly searchPlacementActive = signal(false);
-  private readonly searchViewportBounds = signal<
-    { north: number; east: number; south: number; west: number } | undefined
-  >(undefined);
-  private readonly searchCountryCodes = signal<string[] | undefined>(undefined);
 
   private readonly searchDataCentroid = computed<{ lat: number; lng: number } | undefined>(() => {
     const all = this.workspaceViewService.rawImages();
@@ -435,9 +432,9 @@ export class MapShellComponent implements OnDestroy {
               lng: userPos[1],
             }
           : undefined,
-        viewportBounds: this.searchViewportBounds(),
+        viewportBounds: this.searchService.searchViewportBounds(),
         dataCentroid: this.searchDataCentroid(),
-        countryCodes: this.searchCountryCodes(),
+        countryCodes: this.searchService.searchCountryCodes(),
       };
     },
     { equal: searchQueryContextsEqual },
@@ -573,10 +570,6 @@ export class MapShellComponent implements OnDestroy {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   private userLocationMarker: MapMarker | null = null;
-  private searchLocationMarker: MapMarker | null = null;
-  private uploadPreviewMarker: MapMarker | null = null;
-  private searchLocationPreviewMarkers: MapMarker[] = [];
-  private pendingSearchMapCenter: { lat: number; lng: number; label: string } | null = null;
   private draftMediaMarkerLeaflet: MapMarker | null = null;
   private readonly uploadedPhotoMarkers = new Map<
     string,
@@ -824,7 +817,7 @@ export class MapShellComponent implements OnDestroy {
   private cleanupMapUiState(): void {
     this.removeUserLocationMarker();
     this.removeDraftMediaMarker();
-    this.clearSearchLocationMarker();
+    this.searchService.clearLocationMarker();
     this.cancelRadiusDrawing();
     this.pendingSecondaryPress = null;
     this.closeContextMenus();
@@ -903,7 +896,7 @@ export class MapShellComponent implements OnDestroy {
     if (!coords) return;
     this.state.setDraftMediaMarker({ lat: coords.lat, lng: coords.lng, uploadCount: 0 });
     this.renderOrUpdateDraftMediaMarker([coords.lat, coords.lng]);
-    this.searchPlacementActive.set(false);
+    this.searchService.setPlacementActive(false);
     this.placementActive.set(false);
     if (!this.photoPanelOpen()) {
       this.state.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
@@ -2034,7 +2027,7 @@ export class MapShellComponent implements OnDestroy {
     this.pendingPlacementKey = null;
     this.pendingUploadedLocationMapPick = null;
     this.placementActive.set(false);
-    this.searchPlacementActive.set(false);
+    this.searchService.setPlacementActive(false);
     this.map?.getContainer().classList.remove('map-container--placing');
     this.navigateBackAfterLocationMapPick();
   }
@@ -2051,7 +2044,7 @@ export class MapShellComponent implements OnDestroy {
       (coords) => {
         this.renderOrUpdateUserLocationMarker(coords);
         this.triggerUserLocationFoundState();
-        void this.refreshSearchCountryCode(coords[0], coords[1]);
+        void this.searchService.refreshCountryCode(coords[0], coords[1]);
       },
       () => this.removeUserLocationMarker(),
     );
@@ -2063,7 +2056,7 @@ export class MapShellComponent implements OnDestroy {
 
   onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
     if (!this.map) {
-      this.pendingSearchMapCenter = event;
+      this.searchService.pendingSearchMapCenter = event;
       return;
     }
 
@@ -2078,13 +2071,13 @@ export class MapShellComponent implements OnDestroy {
     this.setViewWithPaneOffset(event.lat, event.lng, MapShellComponent.STREET_PROXIMITY_ZOOM, {
       animate: false,
     });
-    this.updateSearchViewportBounds();
-    this.renderOrUpdateSearchLocationMarker([event.lat, event.lng]);
-    void this.refreshSearchCountryCode(event.lat, event.lng);
+    this.searchService.updateViewportBounds(this.map);
+    this.searchService.renderOrUpdateLocationMarker([event.lat, event.lng], this.map);
+    void this.searchService.refreshCountryCode(event.lat, event.lng);
   }
 
   onSearchClearRequested(): void {
-    this.clearSearchLocationMarker();
+    this.searchService.clearLocationMarker();
   }
 
   onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
@@ -2092,21 +2085,21 @@ export class MapShellComponent implements OnDestroy {
       event.points?.length && event.points.length > 0
         ? event.points
         : [{ lat: event.lat, lng: event.lng }];
-    this.renderSearchLocationPreviewMarkers(points);
+    this.searchService.renderPreviewMarkers(points, this.map);
   }
 
   onUploadLocationPreviewCleared(): void {
-    if (this.searchPlacementActive()) {
+    if (this.searchService.searchPlacementActive()) {
       return;
     }
-    this.clearSearchLocationPreviewMarkers();
+    this.searchService.clearPreviewMarkers();
   }
 
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
     this.pendingPlacementKey = null;
     this.pendingUploadedLocationMapPick = event;
     this.placementActive.set(false);
-    this.searchPlacementActive.set(true);
+    this.searchService.setPlacementActive(true);
     this.map?.getContainer().classList.add('map-container--placing');
   }
 
@@ -2136,12 +2129,12 @@ export class MapShellComponent implements OnDestroy {
     // LayerGroup for all photo markers — batch add/remove.
     this.photoMarkerLayer = this.mapLeafletService.createPhotoMarkerLayer(this.map);
 
-    this.updateSearchViewportBounds();
+    this.searchService.updateViewportBounds(this.map);
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
-    if (this.pendingSearchMapCenter) {
-      this.applySearchMapCenter(this.pendingSearchMapCenter);
-      this.pendingSearchMapCenter = null;
+    if (this.searchService.pendingSearchMapCenter) {
+      this.applySearchMapCenter(this.searchService.pendingSearchMapCenter);
+      this.searchService.pendingSearchMapCenter = null;
     }
 
     const pendingZoom = this.mapZoomOrchestrator.consumePending();
@@ -2177,7 +2170,7 @@ export class MapShellComponent implements OnDestroy {
     this.map.on('moveend', () => {
       this.lastMapMoveAt = Date.now();
       this.handleMoveEnd();
-      this.updateSearchViewportBounds();
+      this.searchService.updateViewportBounds(this.map);
     });
 
     this.map.on('idle', () => {
@@ -2219,7 +2212,7 @@ export class MapShellComponent implements OnDestroy {
 
   private initGeolocation(): void {
     this.gpsService.initBackground((coords) => {
-      void this.refreshSearchCountryCode(coords[0], coords[1]);
+      void this.searchService.refreshCountryCode(coords[0], coords[1]);
     });
   }
 
@@ -2304,7 +2297,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    if (!this.searchPlacementActive()) {
+    if (!this.searchService.searchPlacementActive()) {
       this.clearMapSelectionState();
       return;
     }
@@ -2313,7 +2306,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private shouldAllowPrimaryDeselection(isPrimaryClick: boolean): boolean {
-    if (!isPrimaryClick || this.searchPlacementActive()) {
+    if (!isPrimaryClick || this.searchService.searchPlacementActive()) {
       return false;
     }
 
@@ -2333,7 +2326,7 @@ export class MapShellComponent implements OnDestroy {
       !activeDraft ||
       activeDraft.uploadCount !== 0 ||
       !!this.pendingPlacementKey ||
-      this.searchPlacementActive()
+      this.searchService.searchPlacementActive()
     ) {
       return false;
     }
@@ -2376,10 +2369,10 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private completeSearchPlacement(latlng: MapLatLng): void {
-    this.renderOrUpdateSearchLocationMarker([latlng.lat, latlng.lng]);
+    this.searchService.renderOrUpdateLocationMarker([latlng.lat, latlng.lng], this.map);
     const pendingUploadLocation = this.pendingUploadedLocationMapPick;
     this.pendingUploadedLocationMapPick = null;
-    this.searchPlacementActive.set(false);
+    this.searchService.setPlacementActive(false);
     this.map?.getContainer().classList.remove('map-container--placing');
 
     if (!pendingUploadLocation) {
@@ -2491,7 +2484,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     event.originalEvent.preventDefault();
-    if (!this.map || this.placementActive() || this.searchPlacementActive()) {
+    if (!this.map || this.placementActive() || this.searchService.searchPlacementActive()) {
       return;
     }
 
@@ -2654,7 +2647,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private startRadiusSelectionDraw(startLatLng: MapLatLng, additive: boolean): void {
-    if (!this.map || this.placementActive() || this.searchPlacementActive()) {
+    if (!this.map || this.placementActive() || this.searchService.searchPlacementActive()) {
       return;
     }
 
@@ -2901,26 +2894,6 @@ export class MapShellComponent implements OnDestroy {
     }, 1000);
   }
 
-  private renderOrUpdateSearchLocationMarker(coords: [number, number]): void {
-    if (!this.map) return;
-
-    if (!this.searchLocationMarker) {
-      this.searchLocationMarker = this.mapLeafletService.createSearchLocationMarker(coords);
-
-      try {
-        this.searchLocationMarker.addTo(this.map);
-      } catch {
-        // Leaflet map not yet fully initialized (panes not ready).
-        // Reset marker to null and silently fail; will retry on next call.
-        this.searchLocationMarker = null;
-        return;
-      }
-      return;
-    }
-
-    this.searchLocationMarker.setLatLng(coords);
-  }
-
   private renderOrUpdateDraftMediaMarker(coords: [number, number]): void {
     if (!this.map) return;
 
@@ -2982,72 +2955,6 @@ export class MapShellComponent implements OnDestroy {
     this.removeDraftMediaMarker();
     this.setSelectedMarker(uploadedKey);
     this.setSelectedMarkerKeys(new Set([uploadedKey]));
-  }
-
-  private clearSearchLocationMarker(): void {
-    this.searchLocationMarker?.remove();
-    this.searchLocationMarker = null;
-  }
-
-  private renderSearchLocationPreviewMarkers(
-    points: ReadonlyArray<{ lat: number; lng: number }>,
-  ): void {
-    if (!this.map) {
-      return;
-    }
-    this.clearSearchLocationPreviewMarkers();
-    if (points.length === 1) {
-      this.uploadPreviewMarker = this.mapLeafletService.createSearchLocationMarker([
-        points[0]!.lat,
-        points[0]!.lng,
-      ]);
-      try {
-        this.uploadPreviewMarker.addTo(this.map);
-      } catch {
-        this.uploadPreviewMarker.remove();
-        this.uploadPreviewMarker = null;
-      }
-      return;
-    }
-    for (const point of points) {
-      const marker = this.mapLeafletService.createSearchLocationMarker([point.lat, point.lng]);
-      try {
-        marker.addTo(this.map);
-        this.searchLocationPreviewMarkers.push(marker);
-      } catch {
-        marker.remove();
-      }
-    }
-  }
-
-  private clearSearchLocationPreviewMarkers(): void {
-    for (const marker of this.searchLocationPreviewMarkers) {
-      marker.remove();
-    }
-    this.searchLocationPreviewMarkers = [];
-    this.uploadPreviewMarker?.remove();
-    this.uploadPreviewMarker = null;
-  }
-
-  private async refreshSearchCountryCode(lat: number, lng: number): Promise<void> {
-    const result = await this.geocodingService.reverse(lat, lng);
-    const countryCode = result?.countryCode?.toLowerCase();
-    if (!countryCode) return;
-    this.searchCountryCodes.set([countryCode]);
-  }
-
-  private updateSearchViewportBounds(): void {
-    const bounds = this.map?.getBounds();
-    if (!bounds) return;
-
-    const quantizeCoord = (value: number): number => Math.round(value * 1e5) / 1e5;
-
-    this.searchViewportBounds.set({
-      north: quantizeCoord(bounds.getNorth()),
-      east: quantizeCoord(bounds.getEast()),
-      south: quantizeCoord(bounds.getSouth()),
-      west: quantizeCoord(bounds.getWest()),
-    });
   }
 
   /**

@@ -43,7 +43,7 @@
   <div
     #mapContainer
     class="map-container"
-    [class.map-container--placing]="placementActive() || searchPlacementActive()"
+    [class.map-container--placing]="placementActive() || searchService.searchPlacementActive()"
     tabindex="-1"
     aria-label="Site map"
     aria-haspopup="menu"
@@ -274,7 +274,7 @@
   </button>
 
   <!-- Placement mode banner -->
-  @if (placementActive() || searchPlacementActive()) {
+  @if (placementActive() || searchService.searchPlacementActive()) {
     <div class="map-placement-banner" role="status" aria-live="assertive">
       <span class="material-icons" aria-hidden="true">pin_drop</span>
       {{ placementBannerText() }}
