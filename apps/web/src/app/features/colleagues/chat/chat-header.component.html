@@ -70,28 +70,30 @@
   </div>
 
   @if (isInteractive()) {
-    <nav class="chat-header__tabs" [attr.aria-label]="t('colleagues.chat.conversation_nav', 'Conversation navigation')">
-      <button
-        type="button"
-        class="chat-header__tab"
-        [class.chat-header__tab--active]="activeTab() === 'messages'"
-        [attr.aria-current]="activeTab() === 'messages' ? 'page' : null"
-        (click)="onTabSelect('messages')"
+    <div
+      class="chat-header__tabs"
+      hlmTabs
+      brnTabs
+      [brnTabs]="activeTab()"
+      (brnTabsChange)="onBrnTabsChange($event)"
+    >
+      <div
+        hlmTabsList
+        brnTabsList
+        variant="line"
+        class="chat-header__tab-list w-full justify-start"
+        [attr.aria-label]="t('colleagues.chat.conversation_nav', 'Conversation navigation')"
       >
-        <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
-        <span class="chat-header__tab-label">{{ t('colleagues.chat.tab.messages', 'Messages') }}</span>
-      </button>
-      <button
-        type="button"
-        class="chat-header__tab"
-        [class.chat-header__tab--active]="activeTab() === 'files'"
-        [attr.aria-current]="activeTab() === 'files' ? 'page' : null"
-        (click)="onTabSelect('files')"
-      >
-        <span class="material-icons" aria-hidden="true">attach_file</span>
-        <span class="chat-header__tab-label">{{ t('colleagues.chat.tab.files', 'Files') }}</span>
-      </button>
-    </nav>
+        <button brnTabsTrigger="messages" hlmTabsTrigger class="gap-1">
+          <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
+          <span class="chat-header__tab-label">{{ t('colleagues.chat.tab.messages', 'Messages') }}</span>
+        </button>
+        <button brnTabsTrigger="files" hlmTabsTrigger class="gap-1">
+          <span class="material-icons" aria-hidden="true">attach_file</span>
+          <span class="chat-header__tab-label">{{ t('colleagues.chat.tab.files', 'Files') }}</span>
+        </button>
+      </div>
+    </div>
   }
 </header>
 

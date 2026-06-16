@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { BrnTabsImports } from '@spartan-ng/brain/tabs';
 import type { ChatChannelMember } from '../../../core/chat/chat.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { filterByToolbarDropdownSearch } from '../../../shared/dropdown-trigger/helpers/dropdown-search-filter.helpers';
@@ -7,12 +8,15 @@ import { ToolbarDropdownStackComponent } from '../../../shared/dropdown-trigger/
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HlmMenuItemDirective } from '../../../shared/ui/menu';
+import { HLM_TABS_IMPORTS } from '../../../shared/ui/tabs';
 import type { ChatConversationTab, ChatDetailsRequest, ChatHeaderVariant } from './chat-header.types';
 
 @Component({
   selector: 'app-chat-header',
   standalone: true,
   imports: [
+    ...BrnTabsImports,
+    ...HLM_TABS_IMPORTS,
     RailSearchFieldComponent,
     ToolbarDropdownStackComponent,
     StandardDropdownComponent,
@@ -70,8 +74,10 @@ export class ChatHeaderComponent {
     });
   }
 
-  onTabSelect(tab: ChatConversationTab): void {
-    this.tabChange.emit(tab);
+  onBrnTabsChange(tab: string | undefined): void {
+    if (tab === 'messages' || tab === 'files') {
+      this.tabChange.emit(tab);
+    }
   }
 
   onTitleOpen(): void {

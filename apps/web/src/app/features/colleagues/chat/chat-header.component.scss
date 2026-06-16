@@ -136,43 +136,19 @@
   max-width: 14rem;
 }
 
+// Conversation tab row geometry; interaction emphasis from hlmTabs line variant.
+// @see docs/specs/component/ui-primitives/ui-primitives.tab.md
 .chat-header__tabs {
-  display: flex;
-  align-items: stretch;
-  gap: var(--spacing-4);
+  flex-shrink: 0;
   margin-top: var(--spacing-1);
-}
-
-.chat-header__tab {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: var(--spacing-2) 0;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition:
-    color var(--motion-duration-fast) var(--motion-ease-out),
-    border-color var(--motion-duration-fast) var(--motion-ease-out);
 
   .material-icons {
     font-size: var(--font-size-md);
   }
-
-  &:hover,
-  &:focus-visible {
-    outline: none;
-    color: var(--foreground);
-  }
 }
 
-.chat-header__tab--active {
-  border-bottom-color: var(--interaction-selected-ink);
-  color: var(--foreground);
+.chat-header__tab-list {
+  gap: var(--spacing-4);
 }
 
 @container chat-header (max-width: 36rem) {
@@ -203,7 +179,7 @@
     display: none;
   }
 
-  .chat-header__tabs {
+  .chat-header__tab-list {
     gap: var(--spacing-3);
   }
 

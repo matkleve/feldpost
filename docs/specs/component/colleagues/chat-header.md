@@ -40,7 +40,9 @@ Shared header shell for channel and direct-message conversations on the colleagu
 ## Behaviour
 
 - **Unified chrome**: Channels and DMs share the same top row (identity + actions) and Messages tab strip.
+- **Conversation tabs**: `hlmTabs` / `BrnTabs` with `variant="line"` (`@see docs/specs/component/ui-primitives/ui-primitives.tab.md`); parent owns `activeTab` via `tabChange`.
 - **Right rail is explicit**: Header never auto-opens the rail; the page opens it only after `detailsRequested`.
+- **Details toggle**: Clicking title or Details again while the matching inspector is open closes the right rail.
 - **Members dropdown (channel only)**: Opens anchored dropdown with search; lists members read-only (no rail navigation).
 - **Variant reset**: Switching variant closes the members dropdown.
 
@@ -55,3 +57,4 @@ Shared header shell for channel and direct-message conversations on the colleagu
 - [x] Title and Details emit `detailsRequested` for both channel and DM
 - [x] Channel member count opens searchable dropdown without opening right rail
 - [x] Message search field delegates to parent via existing chat-area handlers
+- [x] Conversation tabs use shared `hlmTabs` line variant (primary hover, selected-ink active + underline)

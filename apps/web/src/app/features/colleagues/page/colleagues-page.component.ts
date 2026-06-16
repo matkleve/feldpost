@@ -262,12 +262,21 @@ export class ColleaguesPageComponent implements OnDestroy {
       if (!memberId) {
         return;
       }
+      if (this.rightRailInspector() === 'member' && this.inspectorMemberId() === memberId) {
+        this.onMemberPanelClosed();
+        return;
+      }
       this.inspectorMemberId.set(memberId);
       this.rightRailInspector.set('member');
       return;
     }
 
     if (this.selectedChannel()?.type === 'dm') {
+      return;
+    }
+
+    if (this.rightRailInspector() === 'channel') {
+      this.onChannelPanelClosed();
       return;
     }
 
