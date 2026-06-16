@@ -2,28 +2,44 @@
 
 **Code:** `apps/web/src/app/core/chat/`
 
+## Role in the system
+
+The chat service is **not** the primary purpose of feldpost. It is the coordination layer that accompanies sharing activity. Design principle: chat must never develop enough weight to compete with the primary media/project workflow.
+
+Consequence for the service architecture: the service caches aggressively and minimises network requests, because chat reacts to other actions — users frequently switch between map/projects and chat, not the other way around.
+
 ## Facade
 
 `ChatService` orchestrates channel/message operations and exposes signals:
 
-- `liveMessages` — top-level messages for active channel
-- `typingUserIds` — broadcast typing state
+- `liveMessages` — top-level messages for the active channel
+- `typingUserIds` — broadcast typing state (Set of user IDs)
 - `searchResults` — full-text search hits
+
+## Caching
+
+| Layer | Strategy | Invalidation |
+| --- | --- | --- |
+| Channels + Unread | 30-second TTL in `channelsCache` | Immediately on `createChannel()` / `archiveChannel()` |
+| Messages per channel | `messageCache: Map<channelId, ChatMessage[]>` — no TTL | Realtime events keep cache live; `loadMessages()` replaces after fetch |
+
+Callers of `loadMessages()` receive cached state immediately (zero latency), then fresh state after the fetch completes.
 
 ## Adapters
 
 | Adapter | Responsibility |
 | --- | --- |
 | `ChatChannelsAdapter` | CRUD channels, DMs, members, unread counts |
-| `ChatMessagesAdapter` | Messages, threads, reactions, attachments, links |
+| `ChatMessagesAdapter` | Messages, threads, reactions, attachments, entity links |
 | `ChatRealtimeAdapter` | Postgres changes, broadcast typing, presence |
 
 ## Realtime contract
 
 - Channel subscription: `chat:{channelId}` with INSERT/UPDATE/DELETE on `chat_messages`
-- Typing: broadcast on same channel
+- Typing: broadcast on the same channel
 - Presence: `presence:{channelId}` with `user_id` track payload
 - Thread: `thread:{parentId}` INSERT filter on `parent_id`
+- All realtime inserts/updates/deletes also update `messageCache`
 
 ## Security
 
