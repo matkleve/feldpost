@@ -46,8 +46,9 @@
   --card-foreground: oklch(0.8109 0 0);
   --popover: var(--background);
   --popover-foreground: oklch(0.8109 0 0);
-  --primary: oklch(0.796 0.134 80);
-  --primary-foreground: var(--background);
+  --primary: oklch(0.62 0.12 245);
+  --primary-foreground: oklch(1.0000 0 0);
+  --brand-gold: oklch(0.796 0.134 80);
   --secondary: oklch(0.5940 0.0443 196.0233);
   --secondary-foreground: var(--background);
   --muted: oklch(0.2520 0 0);
@@ -58,7 +59,7 @@
   --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.2520 0 0);
   --input: oklch(0.2520 0 0);
-  --ring: oklch(0.796 0.134 80);
+  --ring: oklch(0.62 0.12 245);
   --chart-1: oklch(0.5940 0.0443 196.0233);
   --chart-2: oklch(0.796 0.134 80);
   --chart-3: oklch(0.8721 0.0864 68.5474);
@@ -66,12 +67,12 @@
   --chart-5: oklch(0.6830 0 0);
   --sidebar: oklch(0.1822 0 0);
   --sidebar-foreground: oklch(0.8109 0 0);
-  --sidebar-primary: oklch(0.796 0.134 80);
-  --sidebar-primary-foreground: var(--background);
+  --sidebar-primary: oklch(0.62 0.12 245);
+  --sidebar-primary-foreground: oklch(1.0000 0 0);
   --sidebar-accent: oklch(0.3211 0 0);
   --sidebar-accent-foreground: oklch(0.8109 0 0);
   --sidebar-border: oklch(0.2520 0 0);
-  --sidebar-ring: oklch(0.796 0.134 80);
+  --sidebar-ring: oklch(0.62 0.12 245);
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Libre Caslon Text", ui-serif, Georgia, serif;
   --font-mono: "Courier Prime", ui-monospace, monospace;
@@ -102,7 +103,7 @@
   --filetype-video: oklch(0.62 0.14 25);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 75%, var(--foreground));
   --filetype-document: oklch(0.62 0.12 245);
-  --interaction-selected-ink: var(--filetype-document);
+  --interaction-selected-ink: var(--primary);
   --app-violet-accent: oklch(0.72 0.14 290);
   --map-marker-user: var(--chart-1);
   --map-marker-search: var(--primary);
@@ -135,7 +136,8 @@
 
 // ── tweakcn design token foundation — light mode ───────────────────────────────
 // Single CSS variable foundation for spartan/ui.
-// --primary = oklch(0.748 0.128 84.6) ≈ Feldpost brand gold #c9a84c (tonal stop 70).
+// --primary = oklch(0.50 0.10 245) — Feldpost interactive blue (same value as --filetype-document).
+// --brand-gold = oklch(0.748 0.128 84.6) ≈ Feldpost brand gold #c9a84c (tonal stop 70) — for sandstone + explicit brand use.
 // @see docs/design/tokens.md §3.1a
 :root {
   --background: oklch(1.0000 0 0);
@@ -144,8 +146,9 @@
   --card-foreground: oklch(0.2101 0.0318 264.6645);
   --popover: oklch(1.0000 0 0);
   --popover-foreground: oklch(0.2101 0.0318 264.6645);
-  --primary: oklch(0.748 0.128 84.6);
+  --primary: oklch(0.50 0.10 245);
   --primary-foreground: oklch(1.0000 0 0);
+  --brand-gold: oklch(0.748 0.128 84.6);
   --secondary: oklch(0.4716 0.0393 65.1728);
   --secondary-foreground: oklch(1.0000 0 0);
   --muted: oklch(0.9670 0.0029 264.5419);
@@ -156,7 +159,7 @@
   --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.9276 0.0058 264.5313);
   --input: oklch(0.9276 0.0058 264.5313);
-  --ring: oklch(0.748 0.128 84.6);
+  --ring: oklch(0.50 0.10 245);
   --chart-1: oklch(0.5940 0.0443 196.0233);
   --chart-2: oklch(0.748 0.128 84.6);
   --chart-3: oklch(0.8721 0.0864 68.5474);
@@ -164,12 +167,12 @@
   --chart-5: oklch(0.6830 0 0);
   --sidebar: oklch(0.9670 0.0029 264.5419);
   --sidebar-foreground: oklch(0.2101 0.0318 264.6645);
-  --sidebar-primary: oklch(0.748 0.128 84.6);
+  --sidebar-primary: oklch(0.50 0.10 245);
   --sidebar-primary-foreground: oklch(1.0000 0 0);
   --sidebar-accent: oklch(1.0000 0 0);
   --sidebar-accent-foreground: oklch(0.2101 0.0318 264.6645);
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
-  --sidebar-ring: oklch(0.748 0.128 84.6);
+  --sidebar-ring: oklch(0.50 0.10 245);
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Libre Caslon Text", ui-serif, Georgia, serif;
   --font-mono: "Courier Prime", ui-monospace, monospace;
@@ -204,9 +207,9 @@
   --filetype-pdf: oklch(0.52 0.17 25);
   --filetype-video: oklch(0.52 0.16 25);
   --filetype-document: oklch(0.5 0.1 245);
-  // Cool selection ink for quiet controls (nav active, toggle on) — not tweakcn --secondary (olive in light).
+  // Selection ink for quiet controls (nav active, toggle on) — now equals --primary (blue).
   // @see docs/design/state-visuals.md § Interaction emphasis
-  --interaction-selected-ink: var(--filetype-document);
+  --interaction-selected-ink: var(--primary);
   --filetype-spreadsheet: var(--success);
   --filetype-presentation: oklch(0.56 0.15 42);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
@@ -266,6 +269,10 @@ html[data-theme="sandstone"] {
   --sidebar: oklch(0.9600 0.0120 72.0000);
   --sidebar-border: oklch(0.8800 0.0160 69.0000);
   --map-marker-user: oklch(0.52 0.1 250);
+  // Sandstone keeps gold as primary (warm brand theme — blue primary is the default/dark theme).
+  --primary: var(--brand-gold);
+  --ring: var(--brand-gold);
+  --sidebar-primary: var(--brand-gold);
 
   // Sandstone raw palette (consumed by interaction tokens below)
   // @see docs/design/tokens.md (sandstone theme extensions)

@@ -89,10 +89,12 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 
 | Token | Value | Use |
 | ----- | ----- | --- |
-| `--interaction-selected-ink` | `var(--filetype-document)` | Persistent **selected/on** ink for quiet controls (nav active route, toggle `data-state=on`). **Not** the same as tweakcn `--secondary` (olive filled button in light mode). |
+| `--primary` | `oklch(0.50 0.10 245)` light / `oklch(0.62 0.12 245)` dark | **Interactive blue** — hover fills, CTA buttons, selected/active states. Sandstone theme overrides back to gold via `--brand-gold`. |
+| `--brand-gold` | `oklch(0.748 0.128 84.6)` light / `oklch(0.796 0.134 80)` dark | Feldpost brand gold `#c9a84c` — preserved for sandstone primary, chart-2, org branding reference. |
+| `--interaction-selected-ink` | `var(--primary)` | Persistent **selected/on** ink for quiet controls (nav active route, toggle `data-state=on`). Now equals primary (blue). |
 | Hover / attention ink | `var(--primary)` | Quiet control hover/focus; see `docs/design/state-visuals.md` § Interaction emphasis |
 
-Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette` (dark redefines `--filetype-document` for contrast).
+Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette`. Sandstone overrides `--primary` back to `var(--brand-gold)` for warm-theme consistency.
 
 #### Reference palette — primary (gold-amber, seed `#c9a84c` @ stop 70)
 

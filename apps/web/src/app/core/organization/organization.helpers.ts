@@ -2,7 +2,7 @@ import type { OrgBranding } from './organization.types';
 
 /** Feldpost default theme colors for color-picker display when no org override is stored. Hex mirrors :root tokens in styles.scss. */
 export const FELDPOST_BRAND_DEFAULTS = {
-  primaryColor: '#c9a84c',
+  primaryColor: '#3d5fa8',
   accentColor: '#f2f2f2',
   backgroundColor: '#ffffff',
 } as const satisfies Record<
