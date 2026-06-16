@@ -640,6 +640,7 @@ colleagues.invites.referrals.empty,No one has joined via your invites yet.,colle
 colleagues.invites.referrals.error,Could not load referrals.,colleagues invites right panel error,Could not load referrals.,Empfehlungen konnten nicht geladen werden.,Impossibile caricare i referral.
 colleagues.invites.referrals.message,Message,colleagues invites referral row action,Message,Nachricht,Messaggio
 colleagues.invites.editor.quickTitle,Quick invite,colleagues invites editor heading quick,Quick invite,Schnelle Einladung,Invito rapido
+colleagues.invites.editor.composeTitle,Invite link,colleagues invites editor heading compose,Invite link,Einladungslink,Link di invito
 colleagues.invites.editor.editTitle,Edit invite link,colleagues invites editor heading edit,Edit invite link,Einladungslink bearbeiten,Modifica link di invito
 colleagues.invites.editor.quickSubtitle,Share a one-time invite or save it as a reusable link.,colleagues invites editor subtitle quick,Share a one-time invite or save it as a reusable link.,Teile eine Einmal-Einladung oder speichere sie als wiederverwendbaren Link.,Condividi un invito monouso o salvalo come link riutilizzabile.
 colleagues.invites.editor.oneTimeSubtitle,Generate a QR code and share it once.,colleagues invites editor subtitle one-time,Generate a QR code and share it once.,Erstelle einen QR-Code und teile ihn einmalig.,Genera un codice QR e condividilo una volta.
@@ -667,6 +668,12 @@ colleagues.invites.validity.preset.thisMonth,This month,colleagues invites valid
 colleagues.invites.validity.preset.nextMonth,Next month,colleagues invites validity preset,Next month,Nächster Monat,Mese prossimo
 colleagues.invites.validity.preset.1y,1 year,colleagues invites validity preset,1 year,1 Jahr,1 anno
 colleagues.invites.validity.preset.custom,Custom,colleagues invites validity preset,Custom,Benutzerdefiniert,Personalizzato
+colleagues.invites.validity.fromLabel,Valid from,colleagues invites validity custom from,Valid from,Gültig ab,Valido da
+colleagues.invites.validity.toLabel,Valid until,colleagues invites validity custom to,Valid until,Gültig bis,Valido fino a
+colleagues.invites.validity.fromHelper,Leave empty to make the link effective immediately.,colleagues invites validity custom from helper,Leave empty to make the link effective immediately.,Leer lassen damit der Link sofort gültig ist.,Lascia vuoto per rendere il link effettivo subito.
+colleagues.invites.validity.endRequired,Choose an end date to continue.,colleagues invites validity validation,Choose an end date to continue.,Wähle ein Enddatum um fortzufahren.,Scegli una data di fine per continuare.
+colleagues.invites.validity.invalidPreset,Choose a validity window.,colleagues invites validity validation,Choose a validity window.,Wähle einen Gültigkeitszeitraum.,Scegli una finestra di validità.
+colleagues.invites.validity.invalidWindow,Invalid validity window.,colleagues invites validity validation,Invalid validity window.,Ungültiger Gültigkeitszeitraum.,Finestra di validità non valida.
 colleagues.invites.status.active,Active,colleagues invites status chip,Active,Aktiv,Attivo
 colleagues.invites.status.scheduled,Scheduled,colleagues invites status chip,Scheduled,Geplant,Programmato
 colleagues.invites.status.paused,Paused,colleagues invites status chip,Paused,Pausiert,In pausa

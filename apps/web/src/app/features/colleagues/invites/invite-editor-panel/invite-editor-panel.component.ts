@@ -15,8 +15,12 @@ import { toCanvas } from 'qrcode';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { InvitesService } from '../../../../core/invites/invites.service';
 import {
-  DISPLAY_NAME_MAX_LENGTH,
+  assertValidityWindow,
   buildValidityPresets,
+  defaultCustomValidityWindow,
+  DISPLAY_NAME_MAX_LENGTH,
+  fromDatetimeLocalInputValue,
+  toDatetimeLocalInputValue,
 } from '../../../../core/invites/invites.helpers';
 import type {
   CreateReusableInvitePayload,
@@ -37,7 +41,8 @@ import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_FORM_FIELD_IMPORTS } from '../../../../shared/ui/form-field';
 import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { HLM_LABEL_IMPORTS } from '../../../../shared/ui/label';
-import { HLM_SELECT_IMPORTS } from '../../../../shared/ui/select';
+import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shell/dropdown-shell.component';
+import { HLM_MENU_IMPORTS } from '../../../../shared/ui/menu';
 import { HLM_SWITCH_IMPORTS } from '../../../../shared/ui/switch';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
@@ -54,7 +59,8 @@ import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/togg
     ...HLM_FORM_FIELD_IMPORTS,
     ...HLM_INPUT_IMPORTS,
     ...HLM_LABEL_IMPORTS,
-    ...HLM_SELECT_IMPORTS,
+    DropdownShellComponent,
+    ...HLM_MENU_IMPORTS,
     ...HLM_SWITCH_IMPORTS,
     BrnToggleGroupImports,
     ...HLM_TOGGLE_GROUP_IMPORTS,
@@ -73,7 +79,8 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
   private expirationTimer: ReturnType<typeof setInterval> | null = null;
   private qrRenderSequence = 0;
 
-  readonly roleSelect = viewChild<ElementRef<HTMLSelectElement>>('roleSelect');
+  readonly roleTrigger = viewChild<ElementRef<HTMLButtonElement>>('roleTrigger');
+  readonly validityTrigger = viewChild<ElementRef<HTMLButtonElement>>('validityTrigger');
   readonly qrCanvas = viewChild<ElementRef<HTMLCanvasElement>>('qrCanvas');
   readonly nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
 
@@ -107,6 +114,12 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
   readonly inviteKind = signal<InviteComposeKind>('oneTime');
   readonly reusableName = signal('');
   readonly selectedPresetId = signal('now-30d');
+  readonly customValidFromLocal = signal(defaultCustomValidityWindow().validFrom);
+  readonly customValidToLocal = signal(defaultCustomValidityWindow().expiresAt);
+  readonly roleDropdownOpen = signal(false);
+  readonly validityDropdownOpen = signal(false);
+  readonly roleTriggerEl = signal<HTMLElement | null>(null);
+  readonly validityTriggerEl = signal<HTMLElement | null>(null);
   readonly displayNameMaxLength = DISPLAY_NAME_MAX_LENGTH;
 
   readonly validityPresets = signal<ValidityPreset[]>(buildValidityPresets());
@@ -134,6 +147,20 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
       if (this.validityFocus() && this.mode() === 'editReusable') {
         queueMicrotask(() => this.nameInput()?.nativeElement.focus());
       }
+    });
+
+    effect(() => {
+      if (this.mode() !== 'editReusable') {
+        return;
+      }
+      const draft = this.editDraft();
+      if (!draft) {
+        return;
+      }
+      const match = this.validityPresets().find(
+        (preset) => preset.validFrom === draft.validFrom && preset.expiresAt === draft.expiresAt,
+      );
+      this.selectedPresetId.set(match?.id ?? 'custom');
     });
   }
 
@@ -301,6 +328,165 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
     return this.mode() === 'quickDraft' && this.inviteKind() === 'reusable';
   }
 
+  showCustomValidity(): boolean {
+    return this.selectedPresetIdValue() === 'custom';
+  }
+
+  roleLabel(): string {
+    return this.currentRole() === 'clerk'
+      ? this.t('settings.inviteManagement.targetRole.option.clerk', 'Clerk')
+      : this.t('settings.inviteManagement.targetRole.option.worker', 'Worker');
+  }
+
+  validityLabel(): string {
+    const presetId = this.selectedPresetIdValue();
+    if (presetId === 'custom') {
+      return this.t('colleagues.invites.validity.preset.custom', 'Custom');
+    }
+
+    const preset = this.validityPresets().find((item) => item.id === presetId);
+    return preset ? this.presetLabel(preset) : '';
+  }
+
+  rolePanelWidth(): number {
+    return this.roleTrigger()?.nativeElement.getBoundingClientRect().width ?? 240;
+  }
+
+  validityPanelWidth(): number {
+    return this.validityTrigger()?.nativeElement.getBoundingClientRect().width ?? 240;
+  }
+
+  customValidFromValue(): string {
+    if (this.mode() === 'editReusable') {
+      return toDatetimeLocalInputValue(this.editDraft()?.validFrom);
+    }
+    return this.customValidFromLocal();
+  }
+
+  customValidToValue(): string {
+    if (this.mode() === 'editReusable') {
+      return toDatetimeLocalInputValue(this.editDraft()?.expiresAt);
+    }
+    return this.customValidToLocal();
+  }
+
+  toggleRoleDropdown(event: Event): void {
+    event.stopPropagation();
+    const next = !this.roleDropdownOpen();
+    this.roleDropdownOpen.set(next);
+    if (next) {
+      this.validityDropdownOpen.set(false);
+      this.roleTriggerEl.set(this.roleTrigger()?.nativeElement ?? null);
+    }
+  }
+
+  closeRoleDropdown(): void {
+    this.roleDropdownOpen.set(false);
+  }
+
+  toggleValidityDropdown(event: Event): void {
+    event.stopPropagation();
+    const next = !this.validityDropdownOpen();
+    this.validityDropdownOpen.set(next);
+    if (next) {
+      this.roleDropdownOpen.set(false);
+      this.validityTriggerEl.set(this.validityTrigger()?.nativeElement ?? null);
+    }
+  }
+
+  closeValidityDropdown(): void {
+    this.validityDropdownOpen.set(false);
+  }
+
+  async selectRole(nextRole: InviteTargetRole): Promise<void> {
+    this.closeRoleDropdown();
+    if (nextRole === this.currentRole()) {
+      return;
+    }
+
+    if (this.mode() === 'editReusable') {
+      const draft = this.editDraft();
+      if (draft) {
+        this.editDraftChange.emit({ ...draft, targetRole: nextRole });
+      }
+      return;
+    }
+
+    if (this.mode() === 'quickDraft' && this.inviteKind() === 'reusable') {
+      this.targetRole.set(nextRole);
+      return;
+    }
+
+    this.targetRole.set(nextRole);
+
+    if (this.manageOwnDraft()) {
+      await this.regenerateOwnDraft(nextRole);
+      return;
+    }
+
+    const current = this.invite();
+    if (current) {
+      try {
+        const invite = await this.inviteService.regenerateInvite(current.inviteId, nextRole);
+        this.roleRegenerated.emit(invite);
+      } catch (error) {
+        this.lastError.set(
+          error instanceof Error ? error.message : 'Unable to regenerate invite.',
+        );
+      }
+    }
+  }
+
+  selectValidityPreset(presetId: string): void {
+    this.closeValidityDropdown();
+    this.selectedPresetId.set(presetId);
+
+    if (presetId === 'custom') {
+      this.ensureCustomValidityDefaults();
+      return;
+    }
+
+    const preset = this.validityPresets().find((item) => item.id === presetId);
+    const draft = this.editDraft();
+    if (this.mode() === 'editReusable' && preset && draft) {
+      this.editDraftChange.emit({
+        ...draft,
+        validFrom: preset.validFrom,
+        expiresAt: preset.expiresAt,
+      });
+    }
+  }
+
+  onCustomValidFromChange(value: string): void {
+    if (this.mode() === 'editReusable') {
+      const draft = this.editDraft();
+      if (!draft) {
+        return;
+      }
+      this.editDraftChange.emit({
+        ...draft,
+        validFrom: value ? fromDatetimeLocalInputValue(value) : null,
+      });
+      return;
+    }
+    this.customValidFromLocal.set(value);
+  }
+
+  onCustomValidToChange(value: string): void {
+    if (this.mode() === 'editReusable') {
+      const draft = this.editDraft();
+      if (!draft) {
+        return;
+      }
+      this.editDraftChange.emit({
+        ...draft,
+        expiresAt: value ? fromDatetimeLocalInputValue(value) : draft.expiresAt,
+      });
+      return;
+    }
+    this.customValidToLocal.set(value);
+  }
+
   onInviteKindChange(raw: ToggleValue<string>): void {
     const next = toggleSingleStringValue(raw);
     if (next !== 'oneTime' && next !== 'reusable') {
@@ -333,36 +519,7 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
 
   async onRoleChange(event: Event): Promise<void> {
     const nextRole = (event.target as HTMLSelectElement).value as InviteTargetRole;
-
-    if (this.mode() === 'editReusable') {
-      const draft = this.editDraft();
-      if (draft) {
-        this.editDraftChange.emit({ ...draft, targetRole: nextRole });
-      }
-      return;
-    }
-
-    if (this.mode() === 'quickDraft' && this.inviteKind() === 'reusable') {
-      this.targetRole.set(nextRole);
-      return;
-    }
-
-    this.targetRole.set(nextRole);
-
-    if (this.manageOwnDraft()) {
-      await this.regenerateOwnDraft(nextRole);
-      return;
-    }
-
-    const current = this.invite();
-    if (current) {
-      try {
-        const invite = await this.inviteService.regenerateInvite(current.inviteId, nextRole);
-        this.roleRegenerated.emit(invite);
-      } catch (error) {
-        this.lastError.set(error instanceof Error ? error.message : 'Unable to regenerate invite.');
-      }
-    }
+    await this.selectRole(nextRole);
   }
 
   async onRegenerate(): Promise<void> {
@@ -406,16 +563,16 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const preset = this.validityPresets().find((p) => p.id === this.selectedPresetId());
-    if (!preset) {
+    const validity = this.resolveValidityWindow();
+    if (!validity) {
       return;
     }
 
     this.saveAsReusable.emit({
       displayName: name,
       targetRole: this.currentRole(),
-      validFrom: preset.validFrom,
-      expiresAt: preset.expiresAt,
+      validFrom: validity.validFrom,
+      expiresAt: validity.expiresAt,
     });
   }
 
@@ -425,11 +582,16 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const validity = this.resolveValidityWindow();
+    if (!validity) {
+      return;
+    }
+
     this.saveReusable.emit({
       displayName: draft.displayName,
       targetRole: draft.targetRole,
-      validFrom: draft.validFrom,
-      expiresAt: draft.expiresAt,
+      validFrom: validity.validFrom,
+      expiresAt: validity.expiresAt,
       paused: draft.paused,
     });
   }
@@ -460,34 +622,10 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
 
   onPresetChange(event: Event): void {
     const presetId = (event.target as HTMLSelectElement).value;
-    this.selectedPresetId.set(presetId);
-
-    if (this.mode() !== 'editReusable') {
-      return;
-    }
-
-    const preset = this.validityPresets().find((p) => p.id === presetId);
-    const draft = this.editDraft();
-    if (preset && draft) {
-      this.editDraftChange.emit({
-        ...draft,
-        validFrom: preset.validFrom,
-        expiresAt: preset.expiresAt,
-      });
-    }
+    this.selectValidityPreset(presetId);
   }
 
   selectedPresetIdValue(): string {
-    if (this.mode() === 'editReusable') {
-      const draft = this.editDraft();
-      if (!draft) {
-        return 'now-30d';
-      }
-      const match = this.validityPresets().find(
-        (p) => p.validFrom === draft.validFrom && p.expiresAt === draft.expiresAt,
-      );
-      return match?.id ?? 'custom';
-    }
     return this.selectedPresetId();
   }
 
@@ -563,6 +701,69 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
     return this.t(preset.labelKey, preset.labelFallback);
   }
 
+  private ensureCustomValidityDefaults(): void {
+    if (this.mode() === 'editReusable') {
+      const draft = this.editDraft();
+      if (!draft) {
+        return;
+      }
+      if (!draft.expiresAt) {
+        const defaults = defaultCustomValidityWindow();
+        this.editDraftChange.emit({
+          ...draft,
+          validFrom: draft.validFrom ?? null,
+          expiresAt: fromDatetimeLocalInputValue(defaults.expiresAt),
+        });
+      }
+      return;
+    }
+
+    if (!this.customValidToLocal()) {
+      const defaults = defaultCustomValidityWindow();
+      this.customValidFromLocal.set(defaults.validFrom);
+      this.customValidToLocal.set(defaults.expiresAt);
+    }
+  }
+
+  private resolveValidityWindow(): { validFrom: string | null; expiresAt: string } | null {
+    const presetId = this.selectedPresetIdValue();
+    if (presetId !== 'custom') {
+      const preset = this.validityPresets().find((item) => item.id === presetId);
+      if (!preset) {
+        this.lastError.set(
+          this.t('colleagues.invites.validity.invalidPreset', 'Choose a validity window.'),
+        );
+        return null;
+      }
+      return { validFrom: preset.validFrom, expiresAt: preset.expiresAt };
+    }
+
+    const validFromRaw = this.customValidFromValue();
+    const expiresAtRaw = this.customValidToValue();
+    if (!expiresAtRaw) {
+      this.lastError.set(
+        this.t('colleagues.invites.validity.endRequired', 'Choose an end date to continue.'),
+      );
+      return null;
+    }
+
+    const validFrom = validFromRaw ? fromDatetimeLocalInputValue(validFromRaw) : null;
+    const expiresAt = fromDatetimeLocalInputValue(expiresAtRaw);
+
+    try {
+      assertValidityWindow(validFrom, expiresAt);
+    } catch (error) {
+      this.lastError.set(
+        error instanceof Error
+          ? error.message
+          : this.t('colleagues.invites.validity.invalidWindow', 'Invalid validity window.'),
+      );
+      return null;
+    }
+
+    return { validFrom, expiresAt };
+  }
+
   private async initializeOwnDraft(targetRole: InviteTargetRole): Promise<void> {
     this.panelMode.set('ready');
     this.lastError.set(null);
@@ -578,7 +779,7 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
 
       if (this.openContext() === 'command') {
         queueMicrotask(() => {
-          this.roleSelect()?.nativeElement.focus();
+          this.roleTrigger()?.nativeElement.focus();
         });
       }
     } catch (error) {

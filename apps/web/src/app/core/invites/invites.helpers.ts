@@ -180,6 +180,38 @@ export function normalizeDisplayName(value: string): string {
   return value.trim().slice(0, DISPLAY_NAME_MAX_LENGTH);
 }
 
+/** Formats an ISO timestamp for `<input type="datetime-local">` in the user's local timezone. */
+export function toDatetimeLocalInputValue(iso: string | null | undefined): string {
+  if (!iso) {
+    return '';
+  }
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** Parses a `datetime-local` value into an ISO timestamp. */
+export function fromDatetimeLocalInputValue(value: string): string {
+  return new Date(value).toISOString();
+}
+
+/** Default custom validity window for compose mode (now → +30 days). */
+export function defaultCustomValidityWindow(now: Date = new Date()): {
+  validFrom: string;
+  expiresAt: string;
+} {
+  const expiresAt = addDays(now, REUSABLE_DEFAULT_EXPIRY_DAYS);
+  return {
+    validFrom: toDatetimeLocalInputValue(now.toISOString()),
+    expiresAt: toDatetimeLocalInputValue(expiresAt.toISOString()),
+  };
+}
+
 export function toReusableViewModel(row: QrInviteRow, now: Date = new Date()): ReusableInviteViewModel {
   return {
     inviteId: row.id,

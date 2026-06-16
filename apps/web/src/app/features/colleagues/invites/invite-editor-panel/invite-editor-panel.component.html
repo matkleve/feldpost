@@ -21,7 +21,7 @@
                 t('colleagues.invites.editor.editTitle', 'Edit invite link')
             }}
           } @else {
-            {{ t('colleagues.invites.editor.quickTitle', 'Quick invite') }}
+            {{ t('colleagues.invites.editor.composeTitle', 'Invite link') }}
           }
         </h3>
         <p>
@@ -66,12 +66,6 @@
           [decorative]="true"
         />
       }
-      @if (showLiveQr() && displayInvite(); as invite) {
-        <p class="invite-editor__expires">
-          {{ t('settings.inviteManagement.expiresLabel', 'Expires:') }}
-          {{ invite.expiresAt | date: 'short' }}
-        </p>
-      }
     </header>
 
     @if (showTypeToggle()) {
@@ -108,6 +102,13 @@
       </div>
     }
 
+    @if (showLiveQr() && displayInvite(); as invite) {
+      <p class="invite-editor__expires">
+        {{ t('settings.inviteManagement.expiresLabel', 'Expires:') }}
+        {{ invite.expiresAt | date: 'short' }}
+      </p>
+    }
+
     <div class="invite-editor__body">
       <div class="invite-editor__stack">
         @if (showReusableFields()) {
@@ -121,6 +122,7 @@
                 #nameInput
                 id="invite-link-name"
                 type="text"
+                class="invite-editor__control"
                 [maxlength]="displayNameMaxLength"
                 [ngModel]="nameValue()"
                 (ngModelChange)="onNameChange($event)"
@@ -149,22 +151,56 @@
               t('settings.inviteManagement.targetRole.label', 'Target role')
             }}</label>
             <div class="invite-editor__role-row">
-              <select
-                hlmSelect
-                #roleSelect
-                id="invite-role-select"
-                class="min-w-0"
-                [value]="currentRole()"
-                [disabled]="isRegenerateDisabled()"
-                (change)="onRoleChange($event)"
-              >
-                <option value="worker">
-                  {{ t('settings.inviteManagement.targetRole.option.worker', 'Worker') }}
-                </option>
-                <option value="clerk">
-                  {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
-                </option>
-              </select>
+              <div class="invite-editor__select-host">
+                <button
+                  #roleTrigger
+                  id="invite-role-select"
+                  type="button"
+                  hlmBtn
+                  variant="outline"
+                  class="invite-editor__menu-trigger w-full"
+                  [class.invite-editor__menu-trigger--open]="roleDropdownOpen()"
+                  [disabled]="isRegenerateDisabled()"
+                  [attr.aria-expanded]="roleDropdownOpen()"
+                  [attr.aria-haspopup]="'listbox'"
+                  (click)="toggleRoleDropdown($event)"
+                >
+                  <span data-dd-part="label" class="min-w-0 truncate">{{ roleLabel() }}</span>
+                  <span data-dd-part="chevron" class="material-icons" aria-hidden="true"
+                    >expand_more</span
+                  >
+                </button>
+                @if (roleDropdownOpen()) {
+                  <app-dropdown-shell
+                    class="invite-editor__dropdown-shell"
+                    panelClass="option-menu-surface address-search-panel"
+                    [anchor]="roleTriggerEl()"
+                    [minWidth]="rolePanelWidth()"
+                    (closeRequested)="closeRoleDropdown()"
+                  >
+                    <div class="option-menu-list" role="listbox" [attr.aria-label]="roleLabel()">
+                      <button
+                        type="button"
+                        hlmMenuItem
+                        class="invite-editor__menu-item"
+                        (mousedown)="$event.preventDefault()"
+                        (click)="selectRole('worker')"
+                      >
+                        {{ t('settings.inviteManagement.targetRole.option.worker', 'Worker') }}
+                      </button>
+                      <button
+                        type="button"
+                        hlmMenuItem
+                        class="invite-editor__menu-item"
+                        (mousedown)="$event.preventDefault()"
+                        (click)="selectRole('clerk')"
+                      >
+                        {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
+                      </button>
+                    </div>
+                  </app-dropdown-shell>
+                }
+              </div>
               @if (mode() === 'quickDraft' && inviteKind() === 'oneTime' && manageOwnDraft()) {
                 <button
                   hlmBtn
@@ -197,23 +233,103 @@
               <label hlmLabel for="invite-validity-preset">{{
                 t('colleagues.invites.validity.label', 'Validity')
               }}</label>
-              <select
-                hlmSelect
-                id="invite-validity-preset"
-                class="min-w-0"
-                [value]="selectedPresetIdValue()"
-                (change)="onPresetChange($event)"
-              >
-                @for (preset of validityPresets(); track preset.id) {
-                  <option [value]="preset.id">{{ presetLabel(preset) }}</option>
+              <div class="invite-editor__select-host">
+                <button
+                  #validityTrigger
+                  id="invite-validity-preset"
+                  type="button"
+                  hlmBtn
+                  variant="outline"
+                  class="invite-editor__menu-trigger w-full"
+                  [class.invite-editor__menu-trigger--open]="validityDropdownOpen()"
+                  [attr.aria-expanded]="validityDropdownOpen()"
+                  [attr.aria-haspopup]="'listbox'"
+                  (click)="toggleValidityDropdown($event)"
+                >
+                  <span data-dd-part="label" class="min-w-0 truncate">{{ validityLabel() }}</span>
+                  <span data-dd-part="chevron" class="material-icons" aria-hidden="true"
+                    >expand_more</span
+                  >
+                </button>
+                @if (validityDropdownOpen()) {
+                  <app-dropdown-shell
+                    class="invite-editor__dropdown-shell"
+                    panelClass="option-menu-surface address-search-panel"
+                    [anchor]="validityTriggerEl()"
+                    [minWidth]="validityPanelWidth()"
+                    (closeRequested)="closeValidityDropdown()"
+                  >
+                    <div
+                      class="option-menu-list"
+                      role="listbox"
+                      [attr.aria-label]="
+                        t('colleagues.invites.validity.label', 'Validity')
+                      "
+                    >
+                      @for (preset of validityPresets(); track preset.id) {
+                        <button
+                          type="button"
+                          hlmMenuItem
+                          class="invite-editor__menu-item"
+                          (mousedown)="$event.preventDefault()"
+                          (click)="selectValidityPreset(preset.id)"
+                        >
+                          {{ presetLabel(preset) }}
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        hlmMenuItem
+                        class="invite-editor__menu-item"
+                        (mousedown)="$event.preventDefault()"
+                        (click)="selectValidityPreset('custom')"
+                      >
+                        {{ t('colleagues.invites.validity.preset.custom', 'Custom') }}
+                      </button>
+                    </div>
+                  </app-dropdown-shell>
                 }
-                @if (mode() === 'editReusable') {
-                  <option value="custom">
-                    {{ t('colleagues.invites.validity.preset.custom', 'Custom') }}
-                  </option>
-                }
-              </select>
+              </div>
             </hlm-form-field>
+
+            @if (showCustomValidity()) {
+              <div class="invite-editor__custom-dates">
+                <hlm-form-field class="invite-editor__field">
+                  <label hlmLabel for="invite-valid-from">{{
+                    t('colleagues.invites.validity.fromLabel', 'Valid from')
+                  }}</label>
+                  <input
+                    hlmInput
+                    id="invite-valid-from"
+                    type="datetime-local"
+                    class="invite-editor__control"
+                    [ngModel]="customValidFromValue()"
+                    (ngModelChange)="onCustomValidFromChange($event)"
+                  />
+                  <p class="invite-editor__helper">
+                    {{
+                      t(
+                        'colleagues.invites.validity.fromHelper',
+                        'Leave empty to make the link effective immediately.'
+                      )
+                    }}
+                  </p>
+                </hlm-form-field>
+                <hlm-form-field class="invite-editor__field">
+                  <label hlmLabel for="invite-valid-to">{{
+                    t('colleagues.invites.validity.toLabel', 'Valid until')
+                  }}</label>
+                  <input
+                    hlmInput
+                    id="invite-valid-to"
+                    type="datetime-local"
+                    class="invite-editor__control"
+                    [ngModel]="customValidToValue()"
+                    (ngModelChange)="onCustomValidToChange($event)"
+                  />
+                </hlm-form-field>
+              </div>
+            }
           </section>
         }
 
@@ -272,50 +388,41 @@
             <div class="invite-editor__share-row">
               <button
                 hlmBtn
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                size="sm"
                 type="button"
-                class="invite-editor__icon-button"
-                [attr.aria-label]="
-                  t('settings.inviteManagement.share.copy.aria', 'Copy invite link')
-                "
-                [attr.title]="t('settings.inviteManagement.share.copy.title', 'Copy invite link')"
+                class="invite-editor__share-button"
                 [disabled]="isShareDisabled()"
                 (click)="onCopyLink()"
               >
                 <span class="material-icons" aria-hidden="true">content_copy</span>
+                <span>{{ t('settings.inviteManagement.share.copy.title', 'Copy invite link') }}</span>
               </button>
               <button
                 hlmBtn
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                size="sm"
                 type="button"
-                class="invite-editor__icon-button"
-                [attr.aria-label]="
-                  t('settings.inviteManagement.share.email.aria', 'Share invite via email')
-                "
-                [attr.title]="t('settings.inviteManagement.share.email.title', 'Share via email')"
+                class="invite-editor__share-button"
                 [disabled]="isShareDisabled()"
                 (click)="onShareEmail()"
               >
                 <span class="material-icons" aria-hidden="true">mail</span>
+                <span>{{ t('settings.inviteManagement.share.email.title', 'Share via email') }}</span>
               </button>
               <button
                 hlmBtn
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                size="sm"
                 type="button"
-                class="invite-editor__icon-button"
-                [attr.aria-label]="
-                  t('settings.inviteManagement.share.whatsapp.aria', 'Share invite via WhatsApp')
-                "
-                [attr.title]="
-                  t('settings.inviteManagement.share.whatsapp.title', 'Share via WhatsApp')
-                "
+                class="invite-editor__share-button"
                 [disabled]="isShareDisabled()"
                 (click)="onShareWhatsApp()"
               >
                 <span class="material-icons" aria-hidden="true">chat</span>
+                <span>{{
+                  t('settings.inviteManagement.share.whatsapp.title', 'Share via WhatsApp')
+                }}</span>
               </button>
             </div>
           </section>
