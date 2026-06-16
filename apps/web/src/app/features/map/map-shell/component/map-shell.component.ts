@@ -109,7 +109,6 @@ import {
 } from '../context-menu/map-context-actions.service';
 import { MarkerContextPhotoDeleteService } from '../markers/marker-context-photo-delete.service';
 import { PhotoMarkerIconStateService } from '../markers/photo-marker-icon-state.service';
-import { MarkerSelectionSyncService } from '../markers/marker-selection-sync.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
 import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
@@ -118,6 +117,7 @@ import {
   MapZoomHighlightOrchestratorService,
   DETAIL_LOCATION_FOCUS_ZOOM,
 } from '../markers/map-zoom-highlight-orchestrator.service';
+import { MapMarkerSelectionService } from '../markers/map-marker-selection.service';
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapCircle,
@@ -260,10 +260,10 @@ export class MapShellComponent implements OnDestroy {
   private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly markerMotionService = inject(MarkerMotionService);
-  private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
   private readonly thumbnailLoaderService = inject(MapThumbnailLoaderService);
   private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
+  private readonly markerSelectionService = inject(MapMarkerSelectionService);
   readonly basemapService = inject(MapShellBasemapService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
@@ -649,9 +649,6 @@ export class MapShellComponent implements OnDestroy {
   };
   private lastMapMoveAt = 0;
   private lastMapIdleAt = 0;
-  private activeWorkspaceHover: ThumbnailCardHoverEvent | null = null;
-  private linkedHoverMarkerFromWorkspaceKey: string | null = null;
-  private linkedHoverMarkerFromMapKey: string | null = null;
   private workspacePaneMapEffectsRegistration: WorkspacePaneLayoutMapEffects | null = null;
   private readonly mapSelectedItemsContext: SelectedItemsContextPort = {
     contextKey: 'map',
@@ -659,10 +656,10 @@ export class MapShellComponent implements OnDestroy {
     requestOpenDetail: (mediaId: string) => this.openDetailView(mediaId),
     requestSetHover: (mediaId: string | null) => {
       if (!mediaId) {
-        this.setLinkedHoverMarkerFromWorkspace(null);
+        this.markerSelectionService.setLinkedHoverMarkerFromWorkspace(null);
         return;
       }
-      this.setLinkedHoverMarkerFromWorkspace(getFirstMarkerKeyForMedia(this.markersByMediaId, mediaId) ?? null);
+      this.markerSelectionService.setLinkedHoverMarkerFromWorkspace(getFirstMarkerKeyForMedia(this.markersByMediaId, mediaId) ?? null);
     },
   };
 
@@ -864,8 +861,8 @@ export class MapShellComponent implements OnDestroy {
     }
     this.state.setPhotoPanelOpen(true);
     this.patchDetailMediaId(null);
-    this.setSelectedMarker(null);
-    this.setSelectedMarkerKeys(new Set());
+    this.markerSelectionService.setSelectedMarker(null);
+    this.markerSelectionService.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
     this.uploadShellUi.openUploadPanel();
@@ -1202,8 +1199,8 @@ export class MapShellComponent implements OnDestroy {
       mediaItemIds: uniqueImageIds,
       onAfterDelete: async () => {
         this.patchDetailMediaId(null);
-        this.setSelectedMarker(null);
-        this.setSelectedMarkerKeys(new Set());
+        this.markerSelectionService.setSelectedMarker(null);
+        this.markerSelectionService.setSelectedMarkerKeys(new Set());
         this.workspaceSelectionService.clearSelection();
         this.workspaceViewService.clearActiveSelection();
         await this.queryViewportMarkers();
@@ -1666,8 +1663,8 @@ export class MapShellComponent implements OnDestroy {
         mediaItemIds: uniqueImageIds,
         onAfterDelete: async () => {
           this.patchDetailMediaId(null);
-          this.setSelectedMarker(null);
-          this.setSelectedMarkerKeys(new Set());
+          this.markerSelectionService.setSelectedMarker(null);
+          this.markerSelectionService.setSelectedMarkerKeys(new Set());
           this.workspaceSelectionService.clearSelection();
           this.workspaceViewService.clearActiveSelection();
           await this.queryViewportMarkers();
@@ -1706,8 +1703,8 @@ export class MapShellComponent implements OnDestroy {
           selectedMarkerKeys: this.selectedMarkerKeys(),
           detailMediaId: this.detailMediaId(),
           cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
-          setSelectedMarker: (markerKey) => this.setSelectedMarker(markerKey),
-          setSelectedMarkerKeys: (markerKeys) => this.setSelectedMarkerKeys(markerKeys),
+          setSelectedMarker: (markerKey) => this.markerSelectionService.setSelectedMarker(markerKey),
+          setSelectedMarkerKeys: (markerKeys) => this.markerSelectionService.setSelectedMarkerKeys(markerKeys),
           setDetailImageId: (mediaId) => this.patchDetailMediaId(mediaId),
         });
       },
@@ -1735,8 +1732,8 @@ export class MapShellComponent implements OnDestroy {
     if ((this.draftMediaMarker()?.uploadCount ?? 0) === 0) {
       this.removeDraftMediaMarker();
     }
-    this.setSelectedMarker(null);
-    this.setSelectedMarkerKeys(new Set());
+    this.markerSelectionService.setSelectedMarker(null);
+    this.markerSelectionService.setSelectedMarkerKeys(new Set());
     this.clearRadiusSelectionVisuals();
   }
 
@@ -1816,16 +1813,11 @@ export class MapShellComponent implements OnDestroy {
   }
 
   onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
-    this.activeWorkspaceHover = event;
-    const markerKey = this.zoomHighlightOrchestrator.resolveZoomTargetMarkerKey(event.mediaId, event.lat, event.lng, true);
-    this.setLinkedHoverMarkerFromWorkspace(markerKey);
+    this.markerSelectionService.onWorkspaceHoverStarted(event);
   }
 
   onWorkspaceItemHoverEnded(mediaId: string): void {
-    if (this.activeWorkspaceHover?.mediaId === mediaId) {
-      this.activeWorkspaceHover = null;
-    }
-    this.setLinkedHoverMarkerFromWorkspace(null);
+    this.markerSelectionService.onWorkspaceHoverEnded(mediaId);
   }
 
   // ── Upload panel ──────────────────────────────────────────────────────────
@@ -1965,9 +1957,21 @@ export class MapShellComponent implements OnDestroy {
     // LayerGroup for all photo markers — batch add/remove.
     this.photoMarkerLayer = this.mapLeafletService.createPhotoMarkerLayer(this.map);
 
+    this.markerSelectionService.bind({
+      getSelectedMarkerKey: () => this.selectedMarkerKey(),
+      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
+      setSelectedMarkerKey: (key) => this.state.setSelectedMarkerKey(key),
+      setSelectedMarkerKeys: (keys) => this.state.setSelectedMarkerKeys(keys),
+      setLinkedHoveredWorkspaceMediaIds: (ids) => this.state.setLinkedHoveredWorkspaceMediaIds(ids),
+      isRadiusDraftHighlighted: (key) => this.radiusDraftHighlightedKeys.has(key),
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      getRawImages: () => this.workspaceViewService.rawImages(),
+      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
+
     this.markerRenderService.bind({
-      isSelected: (key) => this.isMarkerSelected(key),
-      isLinkedHovered: (key) => this.isMarkerLinkedHovered(key),
+      isSelected: (key) => this.markerSelectionService.isMarkerSelected(key),
+      isLinkedHovered: (key) => this.markerSelectionService.isMarkerLinkedHovered(key),
       getMap: () => this.map,
       getMarkers: () => this.uploadedPhotoMarkers,
     });
@@ -2208,8 +2212,8 @@ export class MapShellComponent implements OnDestroy {
     this.uploadShellUi.closeUploadPanel();
     // Deselect the active marker but keep the workspace pane open.
     // The pane is closed only via its own close button.
-    this.setSelectedMarker(null);
-    this.setSelectedMarkerKeys(new Set());
+    this.markerSelectionService.setSelectedMarker(null);
+    this.markerSelectionService.setSelectedMarkerKeys(new Set());
     this.patchDetailMediaId(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
@@ -2682,7 +2686,7 @@ export class MapShellComponent implements OnDestroy {
         this.workspaceViewService.fetchClusterImages(cells, zoom),
     });
 
-    this.setSelectedMarkerKeys(result.selectedMarkerKeys);
+    this.markerSelectionService.setSelectedMarkerKeys(result.selectedMarkerKeys);
     const imageIds = result.images.map((image) => image.id);
     if (additive) {
       const mergedIds = Array.from(
@@ -2698,7 +2702,7 @@ export class MapShellComponent implements OnDestroy {
     }
     this.state.setPhotoPanelOpen(true);
     this.patchDetailMediaId(null);
-    this.setSelectedMarker(null);
+    this.markerSelectionService.setSelectedMarker(null);
   }
 
   private renderOrUpdateDraftMediaMarker(coords: [number, number]): void {
@@ -2760,8 +2764,8 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.removeDraftMediaMarker();
-    this.setSelectedMarker(uploadedKey);
-    this.setSelectedMarkerKeys(new Set([uploadedKey]));
+    this.markerSelectionService.setSelectedMarker(uploadedKey);
+    this.markerSelectionService.setSelectedMarkerKeys(new Set([uploadedKey]));
   }
 
   /**
@@ -2838,8 +2842,8 @@ export class MapShellComponent implements OnDestroy {
         selectedMarkerKeys: this.selectedMarkerKeys(),
         detailMediaId: this.detailMediaId(),
         cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
-        setSelectedMarker: (key) => this.setSelectedMarker(key),
-        setSelectedMarkerKeys: (keys) => this.setSelectedMarkerKeys(keys),
+        setSelectedMarker: (key) => this.markerSelectionService.setSelectedMarker(key),
+        setSelectedMarkerKeys: (keys) => this.markerSelectionService.setSelectedMarkerKeys(keys),
         setDetailImageId: (id) => this.patchDetailMediaId(id),
       });
     }
@@ -2912,7 +2916,7 @@ export class MapShellComponent implements OnDestroy {
       existing.direction ??= event.direction;
 
       if (nextCount > 1 && this.selectedMarkerKey() === markerKey) {
-        this.setSelectedMarker(null);
+        this.markerSelectionService.setSelectedMarker(null);
         this.state.setPhotoPanelOpen(false);
       }
 
@@ -3022,7 +3026,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.thumbnailLoaderService.maybeLoadThumbnails();
     this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
-    this.refreshActiveWorkspaceHoverLink();
+    this.markerSelectionService.refreshActiveWorkspaceHoverLink();
 
     return true;
   }
@@ -3099,15 +3103,8 @@ export class MapShellComponent implements OnDestroy {
 
     this.pruneStaleSelectedMarkerKeys();
     this.thumbnailLoaderService.maybeLoadThumbnails();
-    this.refreshActiveWorkspaceHoverLink();
-
-    if (
-      this.linkedHoverMarkerFromMapKey &&
-      !this.uploadedPhotoMarkers.has(this.linkedHoverMarkerFromMapKey)
-    ) {
-      this.setLinkedHoverMarkerFromMap(null);
-      this.state.setLinkedHoveredWorkspaceMediaIds(new Set());
-    }
+    this.markerSelectionService.refreshActiveWorkspaceHoverLink();
+    this.markerSelectionService.pruneStaleLinkedHoverFromMap();
   }
 
   private buildIncomingViewportMarkers(rows: ViewportMarkerRow[]): Map<string, MergedViewportRow> {
@@ -3221,7 +3218,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     // Always open pane and mark marker selected.
-    this.setSelectedMarker(markerKey);
+    this.markerSelectionService.setSelectedMarker(markerKey);
     this.ensurePhotoPanelOpen();
 
     // Load images at this marker's grid position(s) into the workspace view.
@@ -3262,7 +3259,7 @@ export class MapShellComponent implements OnDestroy {
     // Ctrl/Meta-click appends marker results to the current active selection.
     const selectedKeys = new Set(this.selectedMarkerKeys());
     selectedKeys.add(markerKey);
-    this.setSelectedMarkerKeys(selectedKeys);
+    this.markerSelectionService.setSelectedMarkerKeys(selectedKeys);
     void this.addMarkerCellsToSelection(cells, zoom);
     this.patchDetailMediaId(null);
   }
@@ -3274,7 +3271,7 @@ export class MapShellComponent implements OnDestroy {
     cells: Array<{ lat: number; lng: number }>,
     zoom: number,
   ): void {
-    this.setSelectedMarkerKeys(new Set([markerKey]));
+    this.markerSelectionService.setSelectedMarkerKeys(new Set([markerKey]));
 
     if (markerCount === 1 && mediaId) {
       this.workspaceSelectionService.setSingle(mediaId);
@@ -3370,15 +3367,15 @@ export class MapShellComponent implements OnDestroy {
   private bindMarkerHoverInteraction(markerKey: string, marker: MapMarker): void {
     this.markerInteractionService.bindHover(marker, {
       onEnter: () => {
-        this.setLinkedHoverMarkerFromMap(markerKey);
-        this.setLinkedHoveredWorkspaceImageIdsForMarker(markerKey);
+        this.markerSelectionService.setLinkedHoverMarkerFromMap(markerKey);
+        this.markerSelectionService.setLinkedHoveredWorkspaceImageIdsForMarker(markerKey);
       },
       onLeave: () => {
-        if (this.linkedHoverMarkerFromMapKey !== markerKey) {
+        if (this.markerSelectionService.getLinkedHoverMarkerFromMapKey() !== markerKey) {
           return;
         }
-        this.setLinkedHoverMarkerFromMap(null);
-        this.state.setLinkedHoveredWorkspaceMediaIds(new Set());
+        this.markerSelectionService.setLinkedHoverMarkerFromMap(null);
+        this.markerSelectionService.setLinkedHoveredWorkspaceImageIdsForMarker(null);
       },
     });
   }
@@ -3446,99 +3443,6 @@ export class MapShellComponent implements OnDestroy {
     el.addEventListener('click', () => {
       el.classList.remove('map-photo-marker--long-pressed');
     });
-  }
-
-  private setSelectedMarker(markerKey: string | null): void {
-    const previousMarkerKey = this.selectedMarkerKey();
-    if (previousMarkerKey === markerKey) {
-      return;
-    }
-
-    this.state.setSelectedMarkerKey(markerKey);
-
-    if (previousMarkerKey) {
-      this.markerRenderService.refreshPhotoMarker(previousMarkerKey);
-    }
-
-    if (markerKey) {
-      this.markerRenderService.refreshPhotoMarker(markerKey);
-    }
-  }
-
-  private setSelectedMarkerKeys(nextKeys: Set<string>): void {
-    const previousKeys = this.selectedMarkerKeys();
-
-    if (this.markerSelectionSyncService.areSameKeySet(previousKeys, nextKeys)) {
-      return;
-    }
-
-    this.state.setSelectedMarkerKeys(nextKeys);
-    this.markerSelectionSyncService.refreshChangedKeySet(previousKeys, nextKeys, (markerKey) =>
-      this.markerRenderService.refreshPhotoMarker(markerKey),
-    );
-  }
-
-  private isMarkerSelected(markerKey: string): boolean {
-    return (
-      markerKey === this.selectedMarkerKey() ||
-      this.selectedMarkerKeys().has(markerKey) ||
-      this.radiusDraftHighlightedKeys.has(markerKey)
-    );
-  }
-
-  private isMarkerLinkedHovered(markerKey: string): boolean {
-    // Map hover visuals are handled by CSS :hover to avoid icon re-renders while hovering.
-    // Keep JS-linked hover only for workspace-originated hover state.
-    return markerKey === this.linkedHoverMarkerFromWorkspaceKey;
-  }
-
-  private setLinkedHoverMarkerFromWorkspace(markerKey: string | null): void {
-    const previous = this.linkedHoverMarkerFromWorkspaceKey;
-    const changed = this.markerSelectionSyncService.applySingleMarkerChange(
-      previous,
-      markerKey,
-      (key) => this.markerRenderService.refreshPhotoMarker(key),
-    );
-    if (!changed) return;
-    this.linkedHoverMarkerFromWorkspaceKey = markerKey;
-  }
-
-  private setLinkedHoverMarkerFromMap(markerKey: string | null): void {
-    if (this.linkedHoverMarkerFromMapKey === markerKey) {
-      return;
-    }
-    this.linkedHoverMarkerFromMapKey = markerKey;
-  }
-
-  private setLinkedHoveredWorkspaceImageIdsForMarker(markerKey: string | null): void {
-    if (!markerKey) {
-      this.state.setLinkedHoveredWorkspaceMediaIds(new Set());
-      return;
-    }
-
-    const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    const matchedIds = this.markerSelectionSyncService.buildLinkedWorkspaceImageIds(
-      markerState,
-      this.workspaceViewService.rawImages(),
-      (lat, lng) => this.toMarkerKey(lat, lng),
-    );
-    this.state.setLinkedHoveredWorkspaceMediaIds(matchedIds);
-  }
-
-  private refreshActiveWorkspaceHoverLink(): void {
-    const activeHover = this.activeWorkspaceHover;
-    if (!activeHover) {
-      this.setLinkedHoverMarkerFromWorkspace(null);
-      return;
-    }
-
-    const markerKey = this.zoomHighlightOrchestrator.resolveZoomTargetMarkerKey(
-      activeHover.mediaId,
-      activeHover.lat,
-      activeHover.lng,
-      true,
-    );
-    this.setLinkedHoverMarkerFromWorkspace(markerKey);
   }
 
   /**
@@ -3718,8 +3622,8 @@ export class MapShellComponent implements OnDestroy {
 
   private clearActiveRadiusSelection(): void {
     this.clearRadiusSelectionVisuals();
-    this.setSelectedMarker(null);
-    this.setSelectedMarkerKeys(new Set());
+    this.markerSelectionService.setSelectedMarker(null);
+    this.markerSelectionService.setSelectedMarkerKeys(new Set());
     this.patchDetailMediaId(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
