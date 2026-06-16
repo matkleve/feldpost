@@ -30,7 +30,9 @@
           (click)="onDetailsOpen()"
         >
           <span class="material-icons" aria-hidden="true">info</span>
-          {{ t('colleagues.chat.details_button', 'Details') }}
+          <span class="chat-header__details-btn-label">
+            {{ t('colleagues.chat.details_button', 'Details') }}
+          </span>
         </button>
       </div>
     } @else {
@@ -77,7 +79,7 @@
         (click)="onTabSelect('messages')"
       >
         <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
-        {{ t('colleagues.chat.tab.messages', 'Messages') }}
+        <span class="chat-header__tab-label">{{ t('colleagues.chat.tab.messages', 'Messages') }}</span>
       </button>
       <button
         type="button"
@@ -87,7 +89,7 @@
         (click)="onTabSelect('files')"
       >
         <span class="material-icons" aria-hidden="true">attach_file</span>
-        {{ t('colleagues.chat.tab.files', 'Files') }}
+        <span class="chat-header__tab-label">{{ t('colleagues.chat.tab.files', 'Files') }}</span>
       </button>
     </nav>
   }

@@ -10,6 +10,9 @@ export type InviteOpenContext = 'settings' | 'command';
 
 export type InviteEditorMode = 'quickDraft' | 'editReusable';
 
+/** Compose flow in column 1 before a reusable row exists in column 2. */
+export type InviteComposeKind = 'oneTime' | 'reusable';
+
 export type ReusableInviteStatus = 'active' | 'scheduled' | 'paused' | 'expired';
 
 export interface QrInviteRow {

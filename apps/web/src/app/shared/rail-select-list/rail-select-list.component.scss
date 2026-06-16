@@ -77,17 +77,17 @@
     background var(--motion-duration-fast) var(--motion-ease-out),
     color var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover,
-  &:focus-within {
+  &:hover:not(.rail-select-list__row-wrap--active),
+  &:focus-within:not(.rail-select-list__row-wrap--active) {
     @include emphasis.hover();
   }
 
-  &--active {
+  &--active,
+  &--active:focus-within {
     @include emphasis.selected();
   }
 
-  &--active:hover,
-  &--active:focus-within {
+  &--active:hover {
     @include emphasis.selected-hover();
   }
 

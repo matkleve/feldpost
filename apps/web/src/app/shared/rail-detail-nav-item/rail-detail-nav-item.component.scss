@@ -43,17 +43,20 @@
     @include emphasis.selected-bordered(10%, 42%);
   }
 
-  &--active:hover:not(:disabled),
-  &--active:focus-visible {
+  &--active:hover:not(:disabled) {
     @include emphasis.selected-hover(10%);
     border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
-    box-shadow: var(--interactive-focus-ring);
-    outline: none;
 
     .rail-detail-nav-item__media,
     .rail-detail-nav-item__chevron {
       color: var(--primary);
     }
+  }
+
+  &--active:focus-visible:not(:disabled) {
+    @include emphasis.selected-bordered(10%, 42%);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
   }
 
   &:not(.rail-detail-nav-item--active):focus-visible {

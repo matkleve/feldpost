@@ -17,6 +17,7 @@ export class ChatService {
   private subscribedChannelId: string | null = null;
   private channelsCache: { data: ChatChannel[]; timestamp: number } | null = null;
   private messageCache = new Map<string, ChatMessage[]>();
+  private membersCache = new Map<string, ChatChannelMember[]>();
   private static readonly CHANNELS_CACHE_TTL = 30_000;
 
   readonly liveMessages = signal<ChatMessage[]>([]);
@@ -77,19 +78,31 @@ export class ChatService {
   }
 
   async addChannelMember(channelId: string, userId: string): Promise<{ error: Error | null }> {
-    return this.channelsAdapter.addChannelMember(channelId, userId);
+    const result = await this.channelsAdapter.addChannelMember(channelId, userId);
+    if (!result.error) this.invalidateMembersCache(channelId);
+    return result;
   }
 
   async loadChannelMembers(channelId: string): Promise<{ data: ChatChannelMember[]; error: Error | null }> {
-    return this.channelsAdapter.loadChannelMembers(channelId);
+    const cached = this.membersCache.get(channelId);
+    if (cached) return { data: cached, error: null };
+
+    const result = await this.channelsAdapter.loadChannelMembers(channelId);
+    if (!result.error) {
+      this.membersCache.set(channelId, result.data);
+    }
+    return result;
+  }
+
+  invalidateMembersCache(channelId: string): void {
+    this.membersCache.delete(channelId);
   }
 
   async findOrCreateDm(otherUserId: string): Promise<{ data: ChatChannel | null; error: Error | null }> {
     const userId = this.authService.user()?.id;
     if (!userId) return { data: null, error: new Error('Not authenticated.') };
 
-    const orgId = await this.channelsAdapter.resolveOrganizationId(userId);
-    return this.channelsAdapter.findOrCreateDm(userId, otherUserId, orgId);
+    return this.channelsAdapter.findOrCreateDm(userId, otherUserId);
   }
 
   async loadMessages(channelId: string, limit = 50): Promise<{ data: ChatMessage[]; error: Error | null }> {
@@ -275,6 +288,7 @@ export class ChatService {
   clearAllCaches(): void {
     this.channelsCache = null;
     this.messageCache.clear();
+    this.membersCache.clear();
   }
 
   private syncCache(channelId: string): void {

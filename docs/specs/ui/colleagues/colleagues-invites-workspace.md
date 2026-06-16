@@ -28,7 +28,7 @@ Invites add **employees to the organization** with a preset role (`worker` or `c
 | 1 | Opens Invites tab | Auto-creates one-shot draft (`reusable=false`, default role `worker`, 7-day expiry); renders column 1 | route `tab=invites` |
 | 2 | Raises role on draft | Regenerates one-shot token/QR for selected role | `hlmSelect` change |
 | 3 | Shares one-shot (copy/email/WhatsApp) | Same as qr-invite-flow; logs `invite_share_events` | share buttons |
-| 4 | Clicks **Save as reusable** (quick-draft mode) | Name + validity step; creates new `reusable=true` row in column 2 | footer CTA |
+| 4 | Clicks **Create link** (reusable compose) | Validates label + validity; creates `reusable=true` row in column 2; column 1 opens selected link with QR + share | footer CTA |
 | 5 | Clicks reusable row in either list | Column 1 **edit reusable**; row highlighted | `app-rail-select-list` `itemSelected` |
 | 6 | Clicks **Reuse** on expired row | Same as row select; column 1 opens with validity focused for reclaim | action `reuse` |
 | 7 | Clicks **Save** (edit mode) | Persists changes; row moves between Active / Expired sections by date | footer CTA |
@@ -61,12 +61,13 @@ sequenceDiagram
 ```text
 app-colleagues-invites-workspace
 ├── column-1: app-invite-editor-panel
+│   ├── compose kind toggle: oneTime | reusable [quickDraft only]
 │   ├── mode quickDraft | editReusable
-│   ├── [edit] display name (hlmInput)
+│   ├── [reusable] display name (hlmInput)
 │   ├── role hlmSelect + app-chip status
-│   ├── validity presets / custom dates [edit + create-reusable]
-│   ├── QR canvas + link + share icons
-│   └── footer: Save as reusable | Save + Cancel | Regenerate/Revoke [quick only]
+│   ├── validity presets / custom dates [reusable compose + edit]
+│   ├── QR canvas + link + share icons [oneTime + edit; placeholder until reusable created]
+│   └── footer: Create link [reusable compose] | Save + Cancel + pause [edit]
 ├── column-2: app-invite-reusable-links-panel
 │   ├── h3/p section chrome
 │   ├── [Active links] app-rail-select-list (compact)

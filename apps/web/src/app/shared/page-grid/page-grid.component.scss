@@ -30,7 +30,7 @@
   height: 100%;
   min-height: 0;
   min-width: 0;
-  grid-template-columns: minmax(0, 1fr) var(--page-grid-center-max) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--page-grid-center-max)) minmax(0, 1fr);
   column-gap: var(--spacing-4);
   align-items: stretch;
 }

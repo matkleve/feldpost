@@ -20,6 +20,7 @@ import {
 } from '../../../../core/invites/invites.helpers';
 import type {
   CreateReusableInvitePayload,
+  InviteComposeKind,
   InviteEditorMode,
   InviteOpenContext,
   InvitePanelMode,
@@ -38,6 +39,9 @@ import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { HLM_LABEL_IMPORTS } from '../../../../shared/ui/label';
 import { HLM_SELECT_IMPORTS } from '../../../../shared/ui/select';
 import { HLM_SWITCH_IMPORTS } from '../../../../shared/ui/switch';
+import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
+import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
 
 @Component({
   selector: 'app-invite-editor-panel',
@@ -52,6 +56,8 @@ import { HLM_SWITCH_IMPORTS } from '../../../../shared/ui/switch';
     ...HLM_LABEL_IMPORTS,
     ...HLM_SELECT_IMPORTS,
     ...HLM_SWITCH_IMPORTS,
+    BrnToggleGroupImports,
+    ...HLM_TOGGLE_GROUP_IMPORTS,
   ],
   templateUrl: './invite-editor-panel.component.html',
   styleUrl: './invite-editor-panel.component.scss',
@@ -98,7 +104,7 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
   readonly qrVisible = signal(false);
   readonly shareInFlight = signal(false);
   readonly lastError = signal<string | null>(null);
-  readonly saveAsReusableOpen = signal(false);
+  readonly inviteKind = signal<InviteComposeKind>('oneTime');
   readonly reusableName = signal('');
   readonly selectedPresetId = signal('now-30d');
   readonly displayNameMaxLength = DISPLAY_NAME_MAX_LENGTH;
@@ -175,6 +181,9 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
   currentRole(): InviteTargetRole {
     if (this.mode() === 'editReusable') {
       return this.editDraft()?.targetRole ?? 'worker';
+    }
+    if (this.mode() === 'quickDraft' && this.inviteKind() === 'reusable') {
+      return this.targetRole();
     }
     return this.manageOwnDraft() ? this.targetRole() : (this.invite()?.targetRole ?? 'worker');
   }
@@ -258,11 +267,55 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
   }
 
   isShareDisabled(): boolean {
+    if (!this.showShareActions()) {
+      return true;
+    }
+
     const invite = this.displayInvite();
     if (!invite) {
       return true;
     }
     return this.shareInFlight() || this.qrLoading() || invite.status !== 'active';
+  }
+
+  showTypeToggle(): boolean {
+    return this.mode() === 'quickDraft';
+  }
+
+  showReusableFields(): boolean {
+    return this.mode() === 'editReusable' || this.inviteKind() === 'reusable';
+  }
+
+  showLiveQr(): boolean {
+    return this.mode() === 'editReusable' || this.inviteKind() === 'oneTime';
+  }
+
+  showShareActions(): boolean {
+    if (this.mode() === 'editReusable') {
+      return true;
+    }
+    return this.inviteKind() === 'oneTime';
+  }
+
+  showCreateReusableFooter(): boolean {
+    return this.mode() === 'quickDraft' && this.inviteKind() === 'reusable';
+  }
+
+  onInviteKindChange(raw: ToggleValue<string>): void {
+    const next = toggleSingleStringValue(raw);
+    if (next !== 'oneTime' && next !== 'reusable') {
+      return;
+    }
+
+    this.inviteKind.set(next);
+    this.lastError.set(null);
+
+    if (next === 'oneTime') {
+      this.reusableName.set('');
+      return;
+    }
+
+    this.targetRole.set(this.invite()?.targetRole ?? this.targetRole());
   }
 
   isRegenerateDisabled(): boolean {
@@ -286,6 +339,11 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
       if (draft) {
         this.editDraftChange.emit({ ...draft, targetRole: nextRole });
       }
+      return;
+    }
+
+    if (this.mode() === 'quickDraft' && this.inviteKind() === 'reusable') {
+      this.targetRole.set(nextRole);
       return;
     }
 
@@ -338,19 +396,13 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSaveAsReusableClick(): void {
-    this.saveAsReusableOpen.set(true);
-    this.reusableName.set('');
-    this.selectedPresetId.set('now-30d');
-    queueMicrotask(() => this.nameInput()?.nativeElement.focus());
-  }
-
-  onSaveAsReusableConfirm(): void {
+  onCreateReusable(): void {
     const name = this.reusableName().trim();
     if (!name) {
       this.lastError.set(
         this.t('colleagues.invites.editor.nameRequired', 'Enter a link label to continue.'),
       );
+      queueMicrotask(() => this.nameInput()?.nativeElement.focus());
       return;
     }
 
@@ -365,7 +417,6 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
       validFrom: preset.validFrom,
       expiresAt: preset.expiresAt,
     });
-    this.saveAsReusableOpen.set(false);
   }
 
   onSaveReusable(): void {
@@ -384,7 +435,8 @@ export class InviteEditorPanelComponent implements OnInit, OnDestroy {
   }
 
   onCancelEdit(): void {
-    this.saveAsReusableOpen.set(false);
+    this.inviteKind.set('oneTime');
+    this.reusableName.set('');
     this.cancelEdit.emit();
   }
 

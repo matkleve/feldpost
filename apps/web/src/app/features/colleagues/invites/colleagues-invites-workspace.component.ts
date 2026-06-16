@@ -71,8 +71,17 @@ export class ColleaguesInvitesWorkspaceComponent implements OnInit {
     this.loadError.set(null);
 
     try {
-      await this.invitesService.createReusableInvite(payload);
+      const created = await this.invitesService.createReusableInvite(payload);
       await this.refreshReusables();
+
+      if (this.column1Mode() === 'quickDraft' && this.activeOneShot()) {
+        this.stashedOneShot.set(this.activeOneShot());
+      }
+
+      this.selectedReusableId.set(created.inviteId);
+      this.column1Mode.set('editReusable');
+      this.editDraft.set(this.toEditDraft(created));
+
       this.toastService.show({
         type: 'success',
         message: this.t('colleagues.invites.toast.savedReusable', 'Reusable link created.'),

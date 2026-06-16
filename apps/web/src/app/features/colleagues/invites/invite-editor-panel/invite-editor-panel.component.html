@@ -32,11 +32,18 @@
                 'Update the reusable link label, role, and validity window.'
               )
             }}
+          } @else if (inviteKind() === 'reusable') {
+            {{
+              t(
+                'colleagues.invites.editor.reusableSubtitle',
+                'Create a named link you can share multiple times.'
+              )
+            }}
           } @else {
             {{
               t(
-                'colleagues.invites.editor.quickSubtitle',
-                'Share a one-time invite or save it as a reusable link.'
+                'colleagues.invites.editor.oneTimeSubtitle',
+                'Generate a QR code and share it once.'
               )
             }}
           }
@@ -50,7 +57,7 @@
           [variant]="derivedStatusVariant()"
           [decorative]="true"
         />
-      } @else if (displayInvite(); as invite) {
+      } @else if (showLiveQr() && displayInvite(); as invite) {
         <app-chip
           class="invite-editor__status-chip"
           [icon]="statusIcon()"
@@ -59,7 +66,7 @@
           [decorative]="true"
         />
       }
-      @if (displayInvite(); as invite) {
+      @if (showLiveQr() && displayInvite(); as invite) {
         <p class="invite-editor__expires">
           {{ t('settings.inviteManagement.expiresLabel', 'Expires:') }}
           {{ invite.expiresAt | date: 'short' }}
@@ -67,9 +74,43 @@
       }
     </header>
 
-    <div class="invite-editor__surface">
+    @if (showTypeToggle()) {
+      <div class="invite-editor__kind-toggle" hlmPillToggle fill>
+        <div
+          hlmToggleGroup
+          class="invite-editor__kind-toggle-group w-full"
+          brnToggleGroup
+          type="single"
+          [nullable]="false"
+          [value]="inviteKind()"
+          (valueChange)="onInviteKindChange($event)"
+          [attr.aria-label]="
+            t('colleagues.invites.editor.kindAria', 'Invite link type')
+          "
+        >
+          <button
+            hlmToggleGroupItem
+            brnToggleGroupItem
+            type="button"
+            value="oneTime"
+          >
+            {{ t('colleagues.invites.editor.kindOneTime', 'One-time') }}
+          </button>
+          <button
+            hlmToggleGroupItem
+            brnToggleGroupItem
+            type="button"
+            value="reusable"
+          >
+            {{ t('colleagues.invites.editor.kindReusable', 'Reusable') }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <div class="invite-editor__body">
       <div class="invite-editor__stack">
-        @if (mode() === 'editReusable' || saveAsReusableOpen()) {
+        @if (showReusableFields()) {
           <section class="invite-editor__name-block">
             <hlm-form-field class="invite-editor__field">
               <label hlmLabel for="invite-link-name">
@@ -124,7 +165,7 @@
                   {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
                 </option>
               </select>
-              @if (mode() === 'quickDraft' && manageOwnDraft()) {
+              @if (mode() === 'quickDraft' && inviteKind() === 'oneTime' && manageOwnDraft()) {
                 <button
                   hlmBtn
                   variant="ghost"
@@ -150,7 +191,7 @@
           </hlm-form-field>
         </section>
 
-        @if (mode() === 'editReusable' || saveAsReusableOpen()) {
+        @if (showReusableFields()) {
           <section class="invite-editor__validity-block">
             <hlm-form-field class="invite-editor__field">
               <label hlmLabel for="invite-validity-preset">{{
@@ -180,140 +221,162 @@
           class="invite-editor__qr-block"
           [attr.aria-label]="t('settings.inviteManagement.aria.qrPreview', 'QR preview')"
         >
-          <div class="invite-editor__qr-frame">
-            @if (qrLoading() || !displayInvite()) {
-              <span
-                class="invite-editor__qr-spinner"
-                [attr.aria-label]="t('settings.inviteManagement.aria.loadingQr', 'Loading QR code')"
-              ></span>
-            }
-            <canvas
-              #qrCanvas
-              class="invite-editor__qr-canvas"
-              [class.invite-editor__qr-canvas--visible]="qrVisible()"
-              [attr.aria-label]="t('settings.inviteManagement.aria.inviteQr', 'Invite QR code')"
-            ></canvas>
-          </div>
-          <p class="invite-editor__link-label">
-            {{ t('settings.inviteManagement.link.label', 'Invite link') }}
-          </p>
-          <p class="invite-editor__link-preview">
-            {{
-              displayInvite()?.inviteUrl ??
-                t('settings.inviteManagement.link.generating', 'Generating link...')
-            }}
-          </p>
+          @if (showLiveQr()) {
+            <div class="invite-editor__qr-frame">
+              @if (qrLoading() || !displayInvite()) {
+                <span
+                  class="invite-editor__qr-spinner"
+                  [attr.aria-label]="
+                    t('settings.inviteManagement.aria.loadingQr', 'Loading QR code')
+                  "
+                ></span>
+              }
+              <canvas
+                #qrCanvas
+                class="invite-editor__qr-canvas"
+                [class.invite-editor__qr-canvas--visible]="qrVisible()"
+                [attr.aria-label]="t('settings.inviteManagement.aria.inviteQr', 'Invite QR code')"
+              ></canvas>
+            </div>
+            <p class="invite-editor__link-label">
+              {{ t('settings.inviteManagement.link.label', 'Invite link') }}
+            </p>
+            <p class="invite-editor__link-preview">
+              {{
+                displayInvite()?.inviteUrl ??
+                  t('settings.inviteManagement.link.generating', 'Generating link...')
+              }}
+            </p>
+          } @else {
+            <div class="invite-editor__qr-frame invite-editor__qr-frame--placeholder">
+              <span class="material-icons invite-editor__qr-placeholder-icon" aria-hidden="true"
+                >qr_code_2</span
+              >
+              <p class="invite-editor__qr-placeholder-text">
+                {{
+                  t(
+                    'colleagues.invites.editor.qrPlaceholder',
+                    'Create the link to generate a QR code.'
+                  )
+                }}
+              </p>
+            </div>
+          }
         </section>
 
-        <section
-          class="invite-editor__share-block"
-          [attr.aria-label]="t('settings.inviteManagement.aria.shareActions', 'Share actions')"
-        >
-          <div class="invite-editor__share-row">
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              type="button"
-              class="invite-editor__icon-button"
-              [attr.aria-label]="t('settings.inviteManagement.share.copy.aria', 'Copy invite link')"
-              [attr.title]="t('settings.inviteManagement.share.copy.title', 'Copy invite link')"
-              [disabled]="isShareDisabled()"
-              (click)="onCopyLink()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              type="button"
-              class="invite-editor__icon-button"
-              [attr.aria-label]="
-                t('settings.inviteManagement.share.email.aria', 'Share invite via email')
-              "
-              [attr.title]="t('settings.inviteManagement.share.email.title', 'Share via email')"
-              [disabled]="isShareDisabled()"
-              (click)="onShareEmail()"
-            >
-              <span class="material-icons" aria-hidden="true">mail</span>
-            </button>
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              type="button"
-              class="invite-editor__icon-button"
-              [attr.aria-label]="
-                t('settings.inviteManagement.share.whatsapp.aria', 'Share invite via WhatsApp')
-              "
-              [attr.title]="t('settings.inviteManagement.share.whatsapp.title', 'Share via WhatsApp')"
-              [disabled]="isShareDisabled()"
-              (click)="onShareWhatsApp()"
-            >
-              <span class="material-icons" aria-hidden="true">chat</span>
-            </button>
-          </div>
-        </section>
+        @if (showShareActions()) {
+          <section
+            class="invite-editor__share-block"
+            [attr.aria-label]="t('settings.inviteManagement.aria.shareActions', 'Share actions')"
+          >
+            <div class="invite-editor__share-row">
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                type="button"
+                class="invite-editor__icon-button"
+                [attr.aria-label]="
+                  t('settings.inviteManagement.share.copy.aria', 'Copy invite link')
+                "
+                [attr.title]="t('settings.inviteManagement.share.copy.title', 'Copy invite link')"
+                [disabled]="isShareDisabled()"
+                (click)="onCopyLink()"
+              >
+                <span class="material-icons" aria-hidden="true">content_copy</span>
+              </button>
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                type="button"
+                class="invite-editor__icon-button"
+                [attr.aria-label]="
+                  t('settings.inviteManagement.share.email.aria', 'Share invite via email')
+                "
+                [attr.title]="t('settings.inviteManagement.share.email.title', 'Share via email')"
+                [disabled]="isShareDisabled()"
+                (click)="onShareEmail()"
+              >
+                <span class="material-icons" aria-hidden="true">mail</span>
+              </button>
+              <button
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                type="button"
+                class="invite-editor__icon-button"
+                [attr.aria-label]="
+                  t('settings.inviteManagement.share.whatsapp.aria', 'Share invite via WhatsApp')
+                "
+                [attr.title]="
+                  t('settings.inviteManagement.share.whatsapp.title', 'Share via WhatsApp')
+                "
+                [disabled]="isShareDisabled()"
+                (click)="onShareWhatsApp()"
+              >
+                <span class="material-icons" aria-hidden="true">chat</span>
+              </button>
+            </div>
+          </section>
+        }
       </div>
 
       @if (lastError()) {
         <p class="invite-editor__inline-error" role="status">{{ lastError() }}</p>
       }
 
-      <footer class="invite-editor__footer">
-        @if (mode() === 'editReusable') {
-          <div class="invite-editor__pause-row">
-            <label class="invite-editor__pause-label" for="invite-pause-switch">
-              {{ t('colleagues.invites.editor.pauseLabel', 'Link active') }}
-            </label>
-            <button
-              id="invite-pause-switch"
-              type="button"
-              role="switch"
-              [attr.aria-checked]="pauseChecked()"
-              [disabled]="isPauseDisabled()"
-              (click)="onPauseToggle()"
-            >
-              <span
-                hlmSwitch
-                [attr.data-state]="pauseChecked() ? 'checked' : 'unchecked'"
-                [class.pointer-events-none]="true"
+      @if (mode() === 'editReusable' || showCreateReusableFooter()) {
+        <footer class="invite-editor__footer">
+          @if (mode() === 'editReusable') {
+            <div class="invite-editor__pause-row">
+              <label class="invite-editor__pause-label" for="invite-pause-switch">
+                {{ t('colleagues.invites.editor.pauseLabel', 'Link active') }}
+              </label>
+              <button
+                id="invite-pause-switch"
+                type="button"
+                role="switch"
+                [attr.aria-checked]="pauseChecked()"
+                [disabled]="isPauseDisabled()"
+                (click)="onPauseToggle()"
               >
-                <span hlmSwitchThumb [checked]="pauseChecked()"></span>
-              </span>
-            </button>
-          </div>
-          <div class="invite-editor__footer-actions">
-            <button hlmBtn variant="ghost" type="button" (click)="onCancelEdit()">
-              {{ t('colleagues.invites.editor.cancel', 'Cancel') }}
-            </button>
-            <button
-              hlmBtn
-              type="button"
-              [disabled]="saveInFlight()"
-              (click)="onSaveReusable()"
-            >
-              {{ t('colleagues.invites.editor.save', 'Save') }}
-            </button>
-          </div>
-        } @else if (saveAsReusableOpen()) {
-          <div class="invite-editor__footer-actions">
-            <button hlmBtn variant="ghost" type="button" (click)="onCancelEdit()">
-              {{ t('colleagues.invites.editor.cancel', 'Cancel') }}
-            </button>
-            <button hlmBtn type="button" [disabled]="saveInFlight()" (click)="onSaveAsReusableConfirm()">
-              {{ t('colleagues.invites.editor.saveAsReusable', 'Save as reusable') }}
-            </button>
-          </div>
-        } @else if (!manageOwnDraft()) {
-          <div class="invite-editor__footer-actions">
-            <button hlmBtn type="button" (click)="onSaveAsReusableClick()">
-              {{ t('colleagues.invites.editor.saveAsReusable', 'Save as reusable') }}
-            </button>
-          </div>
-        }
-      </footer>
+                <span
+                  hlmSwitch
+                  [attr.data-state]="pauseChecked() ? 'checked' : 'unchecked'"
+                  [class.pointer-events-none]="true"
+                >
+                  <span hlmSwitchThumb [checked]="pauseChecked()"></span>
+                </span>
+              </button>
+            </div>
+            <div class="invite-editor__footer-actions">
+              <button hlmBtn variant="ghost" type="button" (click)="onCancelEdit()">
+                {{ t('colleagues.invites.editor.cancel', 'Cancel') }}
+              </button>
+              <button
+                hlmBtn
+                type="button"
+                [disabled]="saveInFlight()"
+                (click)="onSaveReusable()"
+              >
+                {{ t('colleagues.invites.editor.save', 'Save') }}
+              </button>
+            </div>
+          } @else {
+            <div class="invite-editor__footer-actions">
+              <button
+                hlmBtn
+                type="button"
+                [disabled]="saveInFlight()"
+                (click)="onCreateReusable()"
+              >
+                {{ t('colleagues.invites.editor.createLink', 'Create link') }}
+              </button>
+            </div>
+          }
+        </footer>
+      }
     </div>
   }
 </section>

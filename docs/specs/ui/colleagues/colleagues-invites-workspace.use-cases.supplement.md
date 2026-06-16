@@ -29,6 +29,32 @@ These scenarios describe how **organization members** invite **new employees** i
 | Role change breaks printed QR | Confirm on Save when role changes |
 
 ```mermaid
+flowchart TB
+  subgraph col1["Column 1 — Editor"]
+    T[Kind toggle: one-time | reusable]
+    F[Fields: role OR label + role + validity]
+    Q[QR + link preview]
+    A[Share icons OR Create link]
+    T --> F --> Q --> A
+    E[Edit reusable selected from col 2]
+  end
+  subgraph col2["Column 2 — Links"]
+    A2[Active links list]
+    X2[Expired links list]
+  end
+  A -->|Create link| A2
+  A2 -->|Select row| E
+  X2 -->|Reuse / select| E
+```
+
+**Column 1 vertical order (compose):**
+
+1. **Kind toggle** — `One-time` vs `Reusable` (hidden while editing a row from column 2).
+2. **Fields** — one-time: target role only; reusable: link label, role, validity preset.
+3. **QR block** — live QR for one-time; placeholder until reusable is created.
+4. **Actions** — one-time: share row (copy / email / WhatsApp); reusable compose: **Create link** only; after create or when editing: share row + Save/Cancel footer.
+
+```mermaid
 flowchart LR
   subgraph col1["Column 1 — Editor"]
     Q[Quick draft]
@@ -56,7 +82,7 @@ flowchart LR
 **Goal:** New hire scans QR and joins as `worker` today.
 
 1. Open Team → **Invites**.
-2. Column 1 shows auto-generated quick invite (worker, 7 days).
+2. Column 1 defaults to **One-time**; shows auto-generated quick invite (worker, 7 days).
 3. Clerk shows QR or taps WhatsApp share.
 4. New employee registers; appears in column 3 after acceptance.
 
@@ -83,11 +109,12 @@ flowchart LR
 **Actor:** HR clerk  
 **Goal:** Same link on intranet poster for multiple hires this quarter.
 
-1. Set role to `worker` on quick draft.
-2. Click **Save as reusable**.
+1. Set role to `worker` on quick draft (or switch to **Reusable** first).
+2. Toggle **Reusable**.
 3. Enter link label: `Q2 onboarding`.
 4. Keep default validity (30 days) or pick 90 days.
-5. Row appears in column 2; copy link to poster.
+5. Click **Create link**.
+6. Row appears in column 2; column 1 opens the link with QR and share actions.
 
 **Success:** Multiple signups allowed; each recorded in `invite_signups`; link stays in column 2.
 

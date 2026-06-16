@@ -15,10 +15,24 @@
     flex-direction: column;
     gap: var(--spacing-3);
     min-width: 0;
+  }
+
+  .invite-editor__state--error {
     padding: var(--spacing-4);
     border-radius: max(2px, calc(var(--radius-sm) - 2px));
     border: 1px solid var(--border);
     background: var(--card);
+  }
+
+  .invite-editor__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    min-width: 0;
+  }
+
+  .invite-editor__kind-toggle {
+    min-width: 0;
   }
 
   .invite-editor__header {
@@ -106,6 +120,25 @@
     background: color-mix(in srgb, var(--card) 92%, transparent);
   }
 
+  .invite-editor__qr-frame--placeholder {
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+    text-align: center;
+    background: color-mix(in srgb, var(--muted) 28%, transparent);
+  }
+
+  .invite-editor__qr-placeholder-icon {
+    font-size: var(--font-size-2xl);
+    color: var(--muted-foreground);
+  }
+
+  .invite-editor__qr-placeholder-text {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.45;
+    color: var(--muted-foreground);
+  }
+
   :host-context(html[data-theme='dark']) .invite-editor__qr-frame {
     background: var(--background);
   }
@@ -181,7 +214,6 @@
     flex-direction: column;
     gap: var(--spacing-3);
     padding-top: var(--spacing-2);
-    border-top: 1px solid var(--border);
   }
 
   .invite-editor__pause-row {

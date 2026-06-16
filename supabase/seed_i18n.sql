@@ -19936,6 +19936,223 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.oneTimeSubtitle', 'Generate a QR code and share it once.', 'en', 'colleagues invites editor subtitle one-time')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Generate a QR code and share it once.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.oneTimeSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erstelle einen QR-Code und teile ihn einmalig.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.oneTimeSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Genera un codice QR e condividilo una volta.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.oneTimeSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.reusableSubtitle', 'Create a named link you can share multiple times.', 'en', 'colleagues invites editor subtitle reusable')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create a named link you can share multiple times.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.reusableSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erstelle einen benannten Link den du mehrfach teilen kannst.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.reusableSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea un link con nome da condividere più volte.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.reusableSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.kindAria', 'Invite link type', 'en', 'colleagues invites editor kind toggle aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite link type', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungstyp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tipo di invito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindAria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.kindOneTime', 'One-time', 'en', 'colleagues invites editor kind one-time')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'One-time', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindOneTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einmalig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindOneTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Monouso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindOneTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.kindReusable', 'Reusable', 'en', 'colleagues invites editor kind reusable')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reusable', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wiederverwendbar', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riutilizzabile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.kindReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.createLink', 'Create link', 'en', 'colleagues invites editor action create')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.createLink'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link anlegen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.createLink'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.createLink'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.qrPlaceholder', 'Create the link to generate a QR code.', 'en', 'colleagues invites editor qr placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create the link to generate a QR code.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.qrPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Lege den Link an um einen QR-Code zu erzeugen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.qrPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea il link per generare un codice QR.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.qrPlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'colleagues.invites.editor.editSubtitle', 'Update the reusable link label role and validity window.', 'en', 'colleagues invites editor subtitle edit')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

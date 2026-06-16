@@ -1,6 +1,8 @@
 @use '../../../../styles/frosted-chrome';
 
 .chat-area {
+  container-type: inline-size;
+  container-name: chat-area;
   display: flex;
   min-height: 0;
   min-width: 0;
@@ -199,12 +201,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--spacing-2);
 }
 
 .chat-area__composer-tools {
   display: flex;
   align-items: center;
+  flex: 1 1 auto;
   gap: var(--spacing-1);
   min-width: 0;
 }
@@ -455,4 +459,19 @@
   margin: 0;
   color: var(--muted-foreground);
   font-size: var(--font-size-2xs);
+}
+
+@container chat-area (max-width: 28rem) {
+  .chat-area__messages,
+  .chat-area__files,
+  .chat-area__composer,
+  .chat-area__typing,
+  .chat-area__attachment-hint,
+  .chat-area__search-results {
+    padding-inline: var(--spacing-3);
+  }
+
+  .chat-area__composer-project select {
+    max-width: 6rem;
+  }
 }

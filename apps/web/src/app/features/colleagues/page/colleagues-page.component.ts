@@ -129,8 +129,6 @@ export class ColleaguesPageComponent implements OnDestroy {
     return false;
   });
 
-  readonly centerExpanded = computed(() => !this.rightRailOpen());
-
   readonly membersWithPresence = computed(() =>
     this.members().map((member) => ({
       ...member,
@@ -474,18 +472,28 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.selectedChannelId.set(channelId);
     this.teardownPresence();
     this.chatService.subscribeToChannel(channelId);
-    await this.chatService.loadMessages(channelId);
-    await this.chatService.markChannelRead(channelId);
+    this.channelMembersLoading.set(true);
+
+    // All three are independent — run in parallel
+    const [, , membersResult] = await Promise.all([
+      this.chatService.loadMessages(channelId),
+      this.chatService.markChannelRead(channelId),
+      this.chatService.loadChannelMembers(channelId),
+    ]);
 
     this.channels.update((list) =>
       list.map((ch) => (ch.id === channelId ? { ...ch, unreadCount: 0 } : ch)),
     );
 
-    const channel = this.channels().find((c) => c.id === channelId);
-    if (channel) {
-      await this.loadChannelMembers(channelId);
+    this.channelMembersLoading.set(false);
+    if (membersResult.error) {
+      this.toastService.show({
+        type: 'error',
+        message: this.t('colleagues.chat.error.load_members', 'Could not load channel members.'),
+        detail: membersResult.error.message,
+      });
     } else {
-      this.channelMembers.set([]);
+      this.channelMembers.set(membersResult.data);
     }
 
     this.presenceChannel = this.chatService.subscribePresence(channelId, (online) => {

@@ -642,6 +642,13 @@ colleagues.invites.referrals.message,Message,colleagues invites referral row act
 colleagues.invites.editor.quickTitle,Quick invite,colleagues invites editor heading quick,Quick invite,Schnelle Einladung,Invito rapido
 colleagues.invites.editor.editTitle,Edit invite link,colleagues invites editor heading edit,Edit invite link,Einladungslink bearbeiten,Modifica link di invito
 colleagues.invites.editor.quickSubtitle,Share a one-time invite or save it as a reusable link.,colleagues invites editor subtitle quick,Share a one-time invite or save it as a reusable link.,Teile eine Einmal-Einladung oder speichere sie als wiederverwendbaren Link.,Condividi un invito monouso o salvalo come link riutilizzabile.
+colleagues.invites.editor.oneTimeSubtitle,Generate a QR code and share it once.,colleagues invites editor subtitle one-time,Generate a QR code and share it once.,Erstelle einen QR-Code und teile ihn einmalig.,Genera un codice QR e condividilo una volta.
+colleagues.invites.editor.reusableSubtitle,Create a named link you can share multiple times.,colleagues invites editor subtitle reusable,Create a named link you can share multiple times.,Erstelle einen benannten Link den du mehrfach teilen kannst.,Crea un link con nome da condividere più volte.
+colleagues.invites.editor.kindAria,Invite link type,colleagues invites editor kind toggle aria,Invite link type,Einladungstyp,Tipo di invito
+colleagues.invites.editor.kindOneTime,One-time,colleagues invites editor kind one-time,One-time,Einmalig,Monouso
+colleagues.invites.editor.kindReusable,Reusable,colleagues invites editor kind reusable,Reusable,Wiederverwendbar,Riutilizzabile
+colleagues.invites.editor.createLink,Create link,colleagues invites editor action create,Create link,Link anlegen,Crea link
+colleagues.invites.editor.qrPlaceholder,Create the link to generate a QR code.,colleagues invites editor qr placeholder,Create the link to generate a QR code.,Lege den Link an um einen QR-Code zu erzeugen.,Crea il link per generare un codice QR.
 colleagues.invites.editor.editSubtitle,Update the reusable link label role and validity window.,colleagues invites editor subtitle edit,Update the reusable link label role and validity window.,Aktualisiere Bezeichnung Rolle und Gültigkeitszeitraum des wiederverwendbaren Links.,Aggiorna etichetta ruolo e finestra di validità del link riutilizzabile.
 colleagues.invites.editor.nameLabel,Link label,colleagues invites editor name field,Link label,Link-Bezeichnung,Etichetta link
 colleagues.invites.editor.namePlaceholder,e.g. April onboarding,colleagues invites editor name placeholder,e.g. April onboarding,z. B. Onboarding April,ad es. onboarding aprile

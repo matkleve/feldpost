@@ -14,17 +14,17 @@
     background var(--motion-duration-fast) var(--motion-ease-out),
     color var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover,
-  &:focus-visible {
+  &:hover:not(.rail-nav-button--active),
+  &:focus-visible:not(.rail-nav-button--active) {
     @include emphasis.hover();
   }
 
-  &--active {
+  &--active,
+  &--active:focus-visible {
     @include emphasis.selected();
   }
 
-  &--active:hover,
-  &--active:focus-visible {
+  &--active:hover {
     @include emphasis.selected-hover();
   }
 }

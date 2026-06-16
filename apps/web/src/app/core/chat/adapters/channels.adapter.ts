@@ -123,7 +123,6 @@ export class ChatChannelsAdapter {
   async findOrCreateDm(
     userId: string,
     otherUserId: string,
-    _orgId: string,
   ): Promise<{ data: ChatChannel | null; error: Error | null }> {
     const { data: channelId, error } = await this.supabase.client.rpc('find_or_create_dm_channel', {
       p_other_user_id: otherUserId,
