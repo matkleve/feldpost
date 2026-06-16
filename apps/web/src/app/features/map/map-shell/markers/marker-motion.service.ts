@@ -1,11 +1,40 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import * as L from 'leaflet';
 
 export type MarkerMotionPreference = 'off' | 'smooth';
 
+const STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
+const EVENT_NAME = 'sitesnap:map-marker-motion-changed';
+
 @Injectable({ providedIn: 'root' })
 export class MarkerMotionService {
   private readonly markerMoveAnimationRaf = new WeakMap<L.Marker, number>();
+
+  private readonly _preference = signal<MarkerMotionPreference>('smooth');
+  readonly preference = this._preference.asReadonly();
+
+  private readonly prefEventHandler = (event: Event): void => {
+    const detail = (event as CustomEvent<{ markerMotion?: MarkerMotionPreference }>).detail;
+    const candidate = detail?.markerMotion;
+    if (candidate === 'off' || candidate === 'smooth') {
+      this._preference.set(candidate);
+      return;
+    }
+    this._preference.set(this.readMarkerMotionPreference(STORAGE_KEY));
+  };
+
+  initPreference(): void {
+    this._preference.set(this.readMarkerMotionPreference(STORAGE_KEY));
+    if (typeof window !== 'undefined') {
+      window.addEventListener(EVENT_NAME, this.prefEventHandler);
+    }
+  }
+
+  detachPreferenceListener(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener(EVENT_NAME, this.prefEventHandler);
+    }
+  }
 
   readMarkerMotionPreference(storageKey: string): MarkerMotionPreference {
     if (typeof window === 'undefined') return 'smooth';

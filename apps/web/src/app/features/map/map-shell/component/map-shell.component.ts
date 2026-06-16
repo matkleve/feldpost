@@ -163,8 +163,6 @@ import type {
 } from '../workspace/map-workspace-actions.types';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 
-type MarkerMotionPreference = 'off' | 'smooth';
-
 type ViewportMarkerRow = {
   cluster_lat: number;
   cluster_lng: number;
@@ -195,8 +193,6 @@ type MarkerRenderSnapshot = {
   zoomLevel: PhotoMarkerZoomLevel;
 };
 
-const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
-const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
 
 @Component({
   selector: 'app-map-shell',
@@ -670,18 +666,6 @@ export class MapShellComponent implements OnDestroy {
    * handling upload manager events (replace, attach).
    */
   private readonly markersByMediaId = new Map<string, string[]>();
-  private readonly markerMotionPreference = signal<MarkerMotionPreference>('smooth');
-  private readonly markerMotionEventHandler = (event: Event): void => {
-    const detail = (event as CustomEvent<{ markerMotion?: MarkerMotionPreference }>).detail;
-    const candidate = detail?.markerMotion;
-    if (candidate === 'off' || candidate === 'smooth') {
-      this.markerMotionPreference.set(candidate);
-      return;
-    }
-    this.markerMotionPreference.set(
-      this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
-    );
-  };
   private readonly mapContainerContextMenuHandler = (event: MouseEvent): void => {
     if (event.button !== 2) {
       return;
@@ -783,10 +767,7 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
-      this.markerMotionPreference.set(
-        this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
-      );
-      window.addEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
+      this.markerMotionService.initPreference();
       this.initMap();
       this.subscribeToUploadManagerEvents();
       this.subscribeToMediaDeleteEvents();
@@ -838,9 +819,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private detachGlobalListeners(): void {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
-    }
+    this.markerMotionService.detachPreferenceListener();
   }
 
   private cleanupMarkerLayersAndCaches(): void {
@@ -3819,7 +3798,7 @@ export class MapShellComponent implements OnDestroy {
   /** Fade in newly added marker elements for smoother cluster reconciliation. */
   private triggerMarkerFadeIn(el: HTMLElement): void {
     if (
-      this.markerMotionPreference() === 'off' ||
+      this.markerMotionService.preference() === 'off' ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
       return;
@@ -3837,7 +3816,7 @@ export class MapShellComponent implements OnDestroy {
       marker,
       lat,
       lng,
-      this.markerMotionPreference(),
+      this.markerMotionService.preference(),
       MapShellComponent.MARKER_MOVE_DURATION_MS,
     );
   }
