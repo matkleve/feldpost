@@ -99,10 +99,7 @@ import {
 } from '../markers/map-marker-reconcile.facade';
 import { MapMarkerClusterMergeService } from '../markers/map-marker-cluster-merge.service';
 import { MapMarkerReuseStrategyService } from '../markers/map-marker-reuse-strategy.service';
-import { RadiusSelectionService } from '../radius/radius-selection.service';
 import { ZoomTargetMarkerService } from '../markers/zoom-target-marker.service';
-import { RadiusCommittedVisual, RadiusVisualsService } from '../radius/radius-visuals.service';
-import { RadiusDraftHighlightService } from '../radius/radius-draft-highlight.service';
 import {
   MapContextActionsService,
   type RemoveImagesFromProjectsResult,
@@ -118,6 +115,10 @@ import {
   DETAIL_LOCATION_FOCUS_ZOOM,
 } from '../markers/map-zoom-highlight-orchestrator.service';
 import { MapMarkerSelectionService } from '../markers/map-marker-selection.service';
+import {
+  RadiusDrawingOrchestratorService,
+  RADIUS_CLICK_GUARD_MS,
+} from '../radius/radius-drawing-orchestrator.service';
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapCircle,
@@ -211,8 +212,6 @@ type MergedViewportRow = ViewportMarkerRow & { sourceCells: Array<{ lat: number;
 export class MapShellComponent implements OnDestroy {
   private static readonly PLACEMENT_CLICK_GUARD_MS = 220;
   private static readonly MARKER_MOVE_DURATION_MS = 320;
-  private static readonly RADIUS_SELECTION_MIN_METERS = 10;
-  private static readonly RADIUS_CLICK_GUARD_MS = 220;
   private static readonly CONTEXT_MENU_DRAG_THRESHOLD_PX = 8;
   private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_MS = 2000;
   private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_PX = 24;
@@ -251,11 +250,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly viewportMarkerQueryService = inject(ViewportMarkerQueryService);
   private readonly mapMarkerReconcileFacade = inject(MapMarkerReconcileFacade);
   private readonly mapMarkerClusterMergeService = inject(MapMarkerClusterMergeService);
-  private readonly radiusSelectionService = inject(RadiusSelectionService);
   private readonly mapMarkerReuseStrategyService = inject(MapMarkerReuseStrategyService);
   private readonly zoomTargetMarkerService = inject(ZoomTargetMarkerService);
-  private readonly radiusVisualsService = inject(RadiusVisualsService);
-  private readonly radiusDraftHighlightService = inject(RadiusDraftHighlightService);
   private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
@@ -264,6 +260,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly thumbnailLoaderService = inject(MapThumbnailLoaderService);
   private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
   private readonly markerSelectionService = inject(MapMarkerSelectionService);
+  private readonly radiusDrawingService = inject(RadiusDrawingOrchestratorService);
   readonly basemapService = inject(MapShellBasemapService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
@@ -573,14 +570,6 @@ export class MapShellComponent implements OnDestroy {
 
   /** LayerGroup for all photo markers — enables batch add/remove. */
   private photoMarkerLayer: MapLayerGroup | null = null;
-  private radiusDrawStartLatLng: MapLatLng | null = null;
-  private radiusDrawActive = false;
-  private radiusDrawAdditive = false;
-  private radiusDraftLine: MapPolyline | null = null;
-  private radiusDraftCircle: MapCircle | null = null;
-  private radiusDraftLabel: MapMarker | null = null;
-  private radiusDrawMoveHandler: ((event: MapMouseEvent) => void) | null = null;
-  private radiusDrawMouseUpHandler: ((event: MapMouseEvent) => void) | null = null;
   private pendingSecondaryPress: {
     startPoint: MapPoint;
     startLatLng: MapLatLng;
@@ -588,8 +577,6 @@ export class MapShellComponent implements OnDestroy {
     startClientY: number;
     additive: boolean;
   } | null = null;
-  private radiusDraftHighlightedKeys = new Set<string>();
-  private readonly radiusCommittedVisuals: RadiusCommittedVisual[] = [];
   private suppressMapClickUntil = 0;
   private lastSecondaryContextClickAt: number | null = null;
   private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
@@ -776,11 +763,11 @@ export class MapShellComponent implements OnDestroy {
     this.gpsService.removeLocationMarker();
     this.removeDraftMediaMarker();
     this.searchService.clearLocationMarker();
-    this.cancelRadiusDrawing();
+    this.radiusDrawingService.cancelDraw();
     this.pendingSecondaryPress = null;
     this.closeContextMenus();
     this.mapProjectDialogService.closeAllDialogs(this.state);
-    this.clearRadiusSelectionVisuals();
+    this.radiusDrawingService.clearSelectionVisuals();
   }
 
   private destroyMapInstance(): void {
@@ -997,12 +984,7 @@ export class MapShellComponent implements OnDestroy {
     if (!coords || !this.map) return;
 
     const center = this.mapLeafletService.createLatLng(coords.lat, coords.lng);
-    const radiusMeters = MapShellComponent.QUICK_RADIUS_METERS;
-    const edge = this.radiusVisualsService.offsetLatLngEast(center, radiusMeters);
-
-    this.clearRadiusSelectionVisuals();
-    this.addRadiusSelectionVisual(center, radiusMeters, edge);
-    await this.selectRadiusImages(center, radiusMeters, false);
+    await this.radiusDrawingService.startQuickRadius(center, MapShellComponent.QUICK_RADIUS_METERS);
     this.onMapMenuCloseRequested();
   }
 
@@ -1734,7 +1716,7 @@ export class MapShellComponent implements OnDestroy {
     }
     this.markerSelectionService.setSelectedMarker(null);
     this.markerSelectionService.setSelectedMarkerKeys(new Set());
-    this.clearRadiusSelectionVisuals();
+    this.radiusDrawingService.clearSelectionVisuals();
   }
 
   onQrInviteCommandRequested(): void {
@@ -1963,7 +1945,7 @@ export class MapShellComponent implements OnDestroy {
       setSelectedMarkerKey: (key) => this.state.setSelectedMarkerKey(key),
       setSelectedMarkerKeys: (keys) => this.state.setSelectedMarkerKeys(keys),
       setLinkedHoveredWorkspaceMediaIds: (ids) => this.state.setLinkedHoveredWorkspaceMediaIds(ids),
-      isRadiusDraftHighlighted: (key) => this.radiusDraftHighlightedKeys.has(key),
+      isRadiusDraftHighlighted: (key) => this.radiusDrawingService.isDraftHighlighted(key),
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getRawImages: () => this.workspaceViewService.rawImages(),
       toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
@@ -1987,6 +1969,21 @@ export class MapShellComponent implements OnDestroy {
       getLastMapMoveAt: () => this.lastMapMoveAt,
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getMarkersByMediaId: () => this.markersByMediaId,
+      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
+
+    this.radiusDrawingService.bind({
+      getMap: () => this.map,
+      isPlacementActive: () => this.placementActive(),
+      isSearchPlacementActive: () => this.searchService.searchPlacementActive(),
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
+      isPhotoPanelOpen: () => this.photoPanelOpen(),
+      setWorkspacePaneWidth: (width) => this.state.setWorkspacePaneWidth(width),
+      patchDetailMediaId: (id) => this.patchDetailMediaId(id),
+      closeContextMenus: () => this.closeContextMenus(),
+      suppressMapClickFor: (ms) => { this.suppressMapClickUntil = Date.now() + ms; },
+      getWorkspacePaneOpeningWidth: () => this.getWorkspacePaneOpeningWidth(),
       toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
@@ -2164,9 +2161,7 @@ export class MapShellComponent implements OnDestroy {
 
     const hasMarkerSelection =
       this.selectedMarkerKey() !== null || this.selectedMarkerKeys().size > 0;
-    const hasRadiusSelection = this.radiusSelectionService.hasCommittedSelection(
-      this.radiusCommittedVisuals,
-    );
+    const hasRadiusSelection = this.radiusDrawingService.hasCommittedSelection();
     const hasWorkspaceSelection = this.workspaceViewService.selectionActive();
     return hasMarkerSelection || hasRadiusSelection || hasWorkspaceSelection;
   }
@@ -2217,7 +2212,7 @@ export class MapShellComponent implements OnDestroy {
     this.patchDetailMediaId(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
-    this.clearRadiusSelectionVisuals();
+    this.radiusDrawingService.clearSelectionVisuals();
   }
 
   private completeSearchPlacement(latlng: MapLatLng): void {
@@ -2351,7 +2346,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private handleMapMouseMove(event: MapMouseEvent): void {
-    if (!this.map || !this.pendingSecondaryPress || this.radiusDrawActive) {
+    if (!this.map || !this.pendingSecondaryPress || this.radiusDrawingService.isDrawActive()) {
       return;
     }
 
@@ -2366,8 +2361,8 @@ export class MapShellComponent implements OnDestroy {
 
     const { startLatLng, additive } = this.pendingSecondaryPress;
     this.pendingSecondaryPress = null;
-    this.startRadiusSelectionDraw(startLatLng, additive);
-    this.updateRadiusSelectionDraft(event.latlng);
+    this.radiusDrawingService.startDraw(startLatLng, additive);
+    this.radiusDrawingService.updateDraft(event.latlng);
   }
 
   private handleMapMouseUp(event: MapMouseEvent): void {
@@ -2389,7 +2384,7 @@ export class MapShellComponent implements OnDestroy {
 
     // Short secondary click should open the context menu. Radius drawing already
     // clears pendingSecondaryPress during mousemove once drag threshold is crossed.
-    if (!this.pendingSecondaryPress || this.radiusDrawActive) {
+    if (!this.pendingSecondaryPress || this.radiusDrawingService.isDrawActive()) {
       return;
     }
 
@@ -2418,7 +2413,7 @@ export class MapShellComponent implements OnDestroy {
 
     // Mouse-up opens the menu for short right-click interactions. Keep this as a
     // fallback for platforms where only contextmenu is emitted.
-    if (this.radiusDrawActive || !this.pendingSecondaryPress) {
+    if (this.radiusDrawingService.isDrawActive() || !this.pendingSecondaryPress) {
       return;
     }
 
@@ -2432,21 +2427,15 @@ export class MapShellComponent implements OnDestroy {
     clientX: number,
     clientY: number,
   ): void {
-    if (this.radiusSelectionService.hasCommittedSelection(this.radiusCommittedVisuals)) {
-      if (
-        this.radiusSelectionService.isInsideAnyCommittedRadius(
-          this.map,
-          this.radiusCommittedVisuals,
-          latlng,
-        )
-      ) {
+    if (this.radiusDrawingService.hasCommittedSelection()) {
+      if (this.radiusDrawingService.isInsideAnyCommittedRadius(latlng)) {
         this.openRadiusContextMenuAt(latlng, clientX, clientY);
         return;
       }
 
       this.clearActiveRadiusSelection();
       this.closeContextMenus();
-      this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+      this.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
       return;
     }
 
@@ -2496,213 +2485,6 @@ export class MapShellComponent implements OnDestroy {
     }
 
     return !!target.closest('.map-photo-marker, .leaflet-marker-icon');
-  }
-
-  private startRadiusSelectionDraw(startLatLng: MapLatLng, additive: boolean): void {
-    if (!this.map || this.placementActive() || this.searchService.searchPlacementActive()) {
-      return;
-    }
-
-    this.cancelRadiusDrawing();
-    this.closeContextMenus();
-
-    this.radiusDrawActive = true;
-    this.radiusDrawAdditive = additive;
-    this.radiusDrawStartLatLng = startLatLng;
-    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
-
-    this.radiusDraftLine = this.mapLeafletService.createRadiusDraftLine(this.map, startLatLng);
-
-    this.radiusDraftCircle = this.mapLeafletService.createRadiusDraftCircle(this.map, startLatLng);
-
-    this.radiusDraftLabel = this.radiusVisualsService
-      .createLabelMarker(startLatLng, 0, 0)
-      .addTo(this.map);
-
-    this.radiusDrawMoveHandler = (moveEvent: MapMouseEvent) => {
-      this.updateRadiusSelectionDraft(moveEvent.latlng);
-    };
-
-    this.radiusDrawMouseUpHandler = (upEvent: MapMouseEvent) => {
-      void this.commitRadiusSelection(upEvent.latlng);
-    };
-
-    this.map.on('mousemove', this.radiusDrawMoveHandler);
-    this.map.on('mouseup', this.radiusDrawMouseUpHandler);
-  }
-
-  private updateRadiusSelectionDraft(currentLatLng: MapLatLng): void {
-    if (!this.map || !this.radiusDrawStartLatLng) {
-      return;
-    }
-
-    const radiusMeters = this.map.distance(this.radiusDrawStartLatLng, currentLatLng);
-    const labelLatLng = this.radiusVisualsService.getLabelLatLng(
-      this.radiusDrawStartLatLng,
-      currentLatLng,
-    );
-    const labelAngleDeg = this.radiusVisualsService.getReadableLineAngleDeg(
-      this.map,
-      this.radiusDrawStartLatLng,
-      currentLatLng,
-    );
-
-    this.radiusDraftLine?.setLatLngs([this.radiusDrawStartLatLng, currentLatLng]);
-    this.radiusDraftCircle?.setRadius(radiusMeters);
-    this.radiusDraftLabel?.setLatLng(labelLatLng);
-    this.radiusVisualsService.updateLabelMarker(this.radiusDraftLabel, radiusMeters, labelAngleDeg);
-    this.updateRadiusDraftMarkerHighlights(this.radiusDrawStartLatLng, radiusMeters);
-  }
-
-  private async commitRadiusSelection(endLatLng: MapLatLng): Promise<void> {
-    if (!this.map || !this.radiusDrawStartLatLng) {
-      this.cancelRadiusDrawing();
-      return;
-    }
-
-    const center = this.radiusDrawStartLatLng;
-    const radiusMeters = this.map.distance(center, endLatLng);
-    const additive = this.radiusDrawAdditive;
-
-    this.cancelRadiusDrawing(true);
-
-    if (radiusMeters < MapShellComponent.RADIUS_SELECTION_MIN_METERS) {
-      this.clearRadiusDraftMarkerHighlights();
-      return;
-    }
-
-    if (!additive) {
-      this.clearRadiusSelectionVisuals();
-    }
-
-    this.addRadiusSelectionVisual(center, radiusMeters, endLatLng);
-    await this.selectRadiusImages(center, radiusMeters, additive);
-    this.clearRadiusDraftMarkerHighlights();
-    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
-  }
-
-  private cancelRadiusDrawing(preserveDraftHighlights = false): void {
-    if (this.map && this.radiusDrawMoveHandler) {
-      this.map.off('mousemove', this.radiusDrawMoveHandler);
-    }
-
-    if (this.map && this.radiusDrawMouseUpHandler) {
-      this.map.off('mouseup', this.radiusDrawMouseUpHandler);
-    }
-
-    this.radiusDrawMoveHandler = null;
-    this.radiusDrawMouseUpHandler = null;
-    this.radiusDrawActive = false;
-    this.radiusDrawAdditive = false;
-    this.radiusDrawStartLatLng = null;
-
-    this.radiusDraftLine?.remove();
-    this.radiusDraftLine = null;
-    this.radiusDraftCircle?.remove();
-    this.radiusDraftCircle = null;
-    this.radiusDraftLabel?.remove();
-    this.radiusDraftLabel = null;
-
-    if (!preserveDraftHighlights) {
-      this.clearRadiusDraftMarkerHighlights();
-    }
-  }
-
-  private updateRadiusDraftMarkerHighlights(center: MapLatLng, radiusMeters: number): void {
-    if (!this.map) {
-      return;
-    }
-
-    const previousKeys = this.radiusDraftHighlightedKeys;
-    const nextKeys = this.radiusDraftHighlightService.updateDraftHighlights({
-      map: this.map,
-      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-      currentKeys: previousKeys,
-      center,
-      radiusMeters,
-    });
-
-    if (nextKeys === previousKeys) {
-      return;
-    }
-
-    this.radiusDraftHighlightedKeys = nextKeys;
-
-    for (const markerKey of previousKeys) {
-      if (!nextKeys.has(markerKey)) {
-        this.markerRenderService.refreshPhotoMarker(markerKey);
-      }
-    }
-
-    for (const markerKey of nextKeys) {
-      if (!previousKeys.has(markerKey)) {
-        this.markerRenderService.refreshPhotoMarker(markerKey);
-      }
-    }
-  }
-
-  private clearRadiusDraftMarkerHighlights(): void {
-    const previousKeys = this.radiusDraftHighlightedKeys;
-    const nextKeys = this.radiusDraftHighlightService.clearDraftHighlights(previousKeys);
-    if (nextKeys === previousKeys) {
-      return;
-    }
-
-    this.radiusDraftHighlightedKeys = nextKeys;
-    for (const markerKey of previousKeys) {
-      this.markerRenderService.refreshPhotoMarker(markerKey);
-    }
-  }
-
-  private clearRadiusSelectionVisuals(): void {
-    this.radiusVisualsService.clearCommittedSelectionVisuals(this.radiusCommittedVisuals);
-  }
-
-  private addRadiusSelectionVisual(center: MapLatLng, radiusMeters: number, edge: MapLatLng): void {
-    if (!this.map) return;
-
-    this.radiusCommittedVisuals.push(
-      this.radiusVisualsService.addCommittedSelectionVisual(this.map, center, radiusMeters, edge),
-    );
-  }
-
-  private async selectRadiusImages(
-    center: MapLatLng,
-    radiusMeters: number,
-    additive: boolean,
-  ): Promise<void> {
-    if (!this.map) return;
-
-    const result = await this.radiusSelectionService.selectRadiusImages({
-      map: this.map,
-      center,
-      radiusMeters,
-      additive,
-      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-      selectedMarkerKeys: this.selectedMarkerKeys(),
-      toMarkerKey: (lat: number, lng: number) => this.toMarkerKey(lat, lng),
-      currentImages: this.workspaceViewService.rawImages(),
-      fetchClusterImages: (cells, zoom) =>
-        this.workspaceViewService.fetchClusterImages(cells, zoom),
-    });
-
-    this.markerSelectionService.setSelectedMarkerKeys(result.selectedMarkerKeys);
-    const imageIds = result.images.map((image) => image.id);
-    if (additive) {
-      const mergedIds = Array.from(
-        new Set([...this.workspaceSelectionService.selectedMediaIds(), ...imageIds]),
-      );
-      this.workspaceSelectionService.selectAllInScope(mergedIds);
-    } else {
-      this.workspaceSelectionService.selectAllInScope(imageIds);
-    }
-
-    if (!this.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
-    }
-    this.state.setPhotoPanelOpen(true);
-    this.patchDetailMediaId(null);
-    this.markerSelectionService.setSelectedMarker(null);
   }
 
   private renderOrUpdateDraftMediaMarker(coords: [number, number]): void {
@@ -3338,17 +3120,11 @@ export class MapShellComponent implements OnDestroy {
    * radius then marker menu).
    */
   private handleMarkerSecondaryOpen(markerKey: string, event: MouseEvent | PointerEvent): void {
-    if (this.radiusSelectionService.hasCommittedSelection(this.radiusCommittedVisuals)) {
+    if (this.radiusDrawingService.hasCommittedSelection()) {
       const state = this.uploadedPhotoMarkers.get(markerKey);
       if (state) {
         const markerLatLng = this.mapLeafletService.createLatLng(state.lat, state.lng);
-        const isInsideCommittedRadius = this.radiusSelectionService.isInsideAnyCommittedRadius(
-          this.map,
-          this.radiusCommittedVisuals,
-          markerLatLng,
-        );
-
-        if (isInsideCommittedRadius) {
+        if (this.radiusDrawingService.isInsideAnyCommittedRadius(markerLatLng)) {
           this.openRadiusContextMenuAt(markerLatLng, event.clientX, event.clientY);
           return;
         }
@@ -3506,7 +3282,7 @@ export class MapShellComponent implements OnDestroy {
     this.state.setMapContextMenuPosition(position);
     this.state.setMapContextMenuOpen(true);
     this.focusFirstOpenMapMenuItem();
-    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+    this.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
   }
 
   private openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
@@ -3517,7 +3293,7 @@ export class MapShellComponent implements OnDestroy {
     this.state.setRadiusContextMenuPosition(position);
     this.state.setRadiusContextMenuOpen(true);
     this.focusFirstOpenMapMenuItem();
-    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+    this.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
   }
 
   private openMarkerContextMenu(markerKey: string, sourceEvent?: MouseEvent | PointerEvent): void {
@@ -3572,7 +3348,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.state.setMarkerContextMenuOpen(true);
     this.focusFirstOpenMapMenuItem();
-    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+    this.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
   }
 
   private focusMapContainer(): void {
@@ -3621,7 +3397,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private clearActiveRadiusSelection(): void {
-    this.clearRadiusSelectionVisuals();
+    this.radiusDrawingService.clearSelectionVisuals();
     this.markerSelectionService.setSelectedMarker(null);
     this.markerSelectionService.setSelectedMarkerKeys(new Set());
     this.patchDetailMediaId(null);
