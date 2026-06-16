@@ -89,7 +89,6 @@ import {
 } from '../../../../core/map/marker-factory';
 import { MapShellState } from './map-shell.state';
 import { DetailZoomHighlightService } from '../markers/detail-zoom-highlight.service';
-import { MarkerInteractionService } from '../markers/marker-interaction.service';
 import { ViewportMarkerQueryService } from '../markers/viewport-marker-query.service';
 import {
   MapMarkerReconcileFacade,
@@ -115,6 +114,7 @@ import {
   DETAIL_LOCATION_FOCUS_ZOOM,
 } from '../markers/map-zoom-highlight-orchestrator.service';
 import { MapMarkerSelectionService } from '../markers/map-marker-selection.service';
+import { MapMarkerBindingService } from '../markers/map-marker-binding.service';
 import {
   RadiusDrawingOrchestratorService,
   RADIUS_CLICK_GUARD_MS,
@@ -211,17 +211,14 @@ type MergedViewportRow = ViewportMarkerRow & { sourceCells: Array<{ lat: number;
 })
 export class MapShellComponent implements OnDestroy {
   private static readonly PLACEMENT_CLICK_GUARD_MS = 220;
-  private static readonly MARKER_MOVE_DURATION_MS = 320;
   private static readonly CONTEXT_MENU_DRAG_THRESHOLD_PX = 8;
   private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_MS = 2000;
   private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_PX = 24;
   private static readonly CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
-  private static readonly MARKER_CONTEXT_MENU_SUPPRESS_MS = 320;
   private static readonly QUICK_RADIUS_METERS = 250;
   private static readonly HOUSE_PROXIMITY_ZOOM = 19;
   private static readonly STREET_PROXIMITY_ZOOM = 17;
   private static readonly CONTEXT_MENU_SHEET_BREAKPOINT_PX = 768;
-  private static readonly MARKER_LONG_PRESS_MS = 500;
   private static readonly WORKSPACE_PANE_DEFAULT_WIDTH = 360;
   private static readonly WORKSPACE_PANE_MIN_WIDTH = 280;
   private static readonly WORKSPACE_PANE_MAX_WIDTH = 640;
@@ -246,7 +243,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly routeSessionCache = inject(RouteSessionCacheService);
   private readonly state = inject(MapShellState);
   private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
-  private readonly markerInteractionService = inject(MarkerInteractionService);
   private readonly viewportMarkerQueryService = inject(ViewportMarkerQueryService);
   private readonly mapMarkerReconcileFacade = inject(MapMarkerReconcileFacade);
   private readonly mapMarkerClusterMergeService = inject(MapMarkerClusterMergeService);
@@ -260,6 +256,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly thumbnailLoaderService = inject(MapThumbnailLoaderService);
   private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
   private readonly markerSelectionService = inject(MapMarkerSelectionService);
+  private readonly markerBindingService = inject(MapMarkerBindingService);
   private readonly radiusDrawingService = inject(RadiusDrawingOrchestratorService);
   readonly basemapService = inject(MapShellBasemapService);
   private readonly mapLeafletService = inject(MapLeafletService);
@@ -748,7 +745,7 @@ export class MapShellComponent implements OnDestroy {
       uploadedPhotoMarkers: this.uploadedPhotoMarkers,
       photoMarkerLayer: this.photoMarkerLayer,
       markersByMediaId: this.markersByMediaId,
-      cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+      cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
     });
   }
 
@@ -1684,7 +1681,7 @@ export class MapShellComponent implements OnDestroy {
           selectedMarkerKey: this.selectedMarkerKey(),
           selectedMarkerKeys: this.selectedMarkerKeys(),
           detailMediaId: this.detailMediaId(),
-          cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+          cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
           setSelectedMarker: (markerKey) => this.markerSelectionService.setSelectedMarker(markerKey),
           setSelectedMarkerKeys: (markerKeys) => this.markerSelectionService.setSelectedMarkerKeys(markerKeys),
           setDetailImageId: (mediaId) => this.patchDetailMediaId(mediaId),
@@ -1985,6 +1982,17 @@ export class MapShellComponent implements OnDestroy {
       suppressMapClickFor: (ms) => { this.suppressMapClickUntil = Date.now() + ms; },
       getWorkspacePaneOpeningWidth: () => this.getWorkspacePaneOpeningWidth(),
       toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
+
+    this.markerBindingService.bind({
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      handlePhotoMarkerClick: (markerKey, event) => this.handlePhotoMarkerClick(markerKey, event),
+      consumeNativeContextMenuBypass: () => this.consumeNativeContextMenuBypass(),
+      clearPendingSecondaryPress: () => { this.pendingSecondaryPress = null; },
+      openRadiusContextMenuAt: (latlng, x, y) => this.openRadiusContextMenuAt(latlng, x, y),
+      clearActiveRadiusSelection: () => this.clearActiveRadiusSelection(),
+      openMarkerContextMenu: (markerKey, event) => this.openMarkerContextMenu(markerKey, event),
+      suppressMarkerContextMenuFor: (ms) => { this.markerContextMenuSuppressUntil = Date.now() + ms; },
     });
 
     this.searchService.updateViewportBounds(this.map);
@@ -2623,7 +2631,7 @@ export class MapShellComponent implements OnDestroy {
         selectedMarkerKey: this.selectedMarkerKey(),
         selectedMarkerKeys: this.selectedMarkerKeys(),
         detailMediaId: this.detailMediaId(),
-        cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+        cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
         setSelectedMarker: (key) => this.markerSelectionService.setSelectedMarker(key),
         setSelectedMarkerKeys: (keys) => this.markerSelectionService.setSelectedMarkerKeys(keys),
         setDetailImageId: (id) => this.patchDetailMediaId(id),
@@ -2716,7 +2724,7 @@ export class MapShellComponent implements OnDestroy {
     );
 
     this.photoMarkerLayer!.addLayer(marker);
-    this.attachMarkerInteractions(markerKey, marker);
+    this.markerBindingService.attachMarkerInteractions(markerKey, marker);
 
     this.uploadedPhotoMarkers.set(markerKey, {
       marker,
@@ -2964,16 +2972,16 @@ export class MapShellComponent implements OnDestroy {
       buildFallbackLabelFromPath: (path) => this.markerRenderService.buildFallbackLabelFromPath(path),
       buildPhotoMarkerIcon: (markerKey, override) => this.markerRenderService.buildPhotoMarkerIcon(markerKey, override),
       attachMarkerInteractions: (markerKey, marker, fadeIn) =>
-        this.attachMarkerInteractions(markerKey, marker, { fadeIn }),
+        this.markerBindingService.attachMarkerInteractions(markerKey, marker, { fadeIn }),
       bindMarkerClickInteraction: (markerKey, marker) =>
-        this.bindMarkerClickInteraction(markerKey, marker),
+        this.markerBindingService.bindMarkerClickInteraction(markerKey, marker),
       bindMarkerContextInteraction: (markerKey, marker) =>
-        this.bindMarkerContextInteraction(markerKey, marker),
+        this.markerBindingService.bindMarkerContextInteraction(markerKey, marker),
       bindMarkerHoverInteraction: (markerKey, marker) =>
-        this.bindMarkerHoverInteraction(markerKey, marker),
-      animateMarkerPosition: (marker, lat, lng) => this.animateMarkerPosition(marker, lat, lng),
+        this.markerBindingService.bindMarkerHoverInteraction(markerKey, marker),
+      animateMarkerPosition: (marker, lat, lng) => this.markerBindingService.animateMarkerPosition(marker, lat, lng),
       refreshPhotoMarker: (markerKey) => this.markerRenderService.refreshPhotoMarker(markerKey),
-      cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+      cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
       suppressMarkerFadeIn: this.isRestoringFromSessionCache,
     };
   }
@@ -3042,7 +3050,7 @@ export class MapShellComponent implements OnDestroy {
     const selectedKeys = new Set(this.selectedMarkerKeys());
     selectedKeys.add(markerKey);
     this.markerSelectionService.setSelectedMarkerKeys(selectedKeys);
-    void this.addMarkerCellsToSelection(cells, zoom);
+    void this.markerBindingService.addMarkerCellsToSelection(cells, zoom);
     this.patchDetailMediaId(null);
   }
 
@@ -3071,154 +3079,6 @@ export class MapShellComponent implements OnDestroy {
   ): Promise<void> {
     const images = await this.workspaceViewService.fetchClusterImages(cells, zoom);
     this.workspaceSelectionService.selectAllInScope(images.map((image) => image.id));
-  }
-
-  /** Attach click + touch long-press interactions consistently for each new marker. */
-  private attachMarkerInteractions(
-    markerKey: string,
-    marker: MapMarker,
-    options?: { fadeIn?: boolean },
-  ): void {
-    const shouldFadeIn = options?.fadeIn ?? true;
-    this.bindMarkerClickInteraction(markerKey, marker);
-    this.bindMarkerContextInteraction(markerKey, marker);
-    this.bindMarkerHoverInteraction(markerKey, marker);
-    // Attach long-press handler for touch direction cone after element is in DOM.
-    marker.once('add', () => {
-      const el = marker.getElement();
-      if (el) {
-        this.attachLongPressHandler(el, markerKey);
-        if (shouldFadeIn) {
-          this.triggerMarkerFadeIn(el);
-        }
-      }
-    });
-  }
-
-  /** Ensure marker click always resolves to the current marker key. */
-  private bindMarkerClickInteraction(markerKey: string, marker: MapMarker): void {
-    this.markerInteractionService.bindClick(marker, (event: MapMouseEvent) =>
-      this.handlePhotoMarkerClick(markerKey, event),
-    );
-  }
-
-  private bindMarkerContextInteraction(markerKey: string, marker: MapMarker): void {
-    this.markerInteractionService.bindContextMenu(marker, {
-      shouldBypass: () => this.consumeNativeContextMenuBypass(),
-      onSecondaryReset: () => {
-        this.pendingSecondaryPress = null;
-      },
-      onOpen: (event: MouseEvent) => {
-        this.handleMarkerSecondaryOpen(markerKey, event);
-      },
-    });
-  }
-
-  /**
-   * Marker right-click and touch long-press must share the same precedence as
-   * map-secondary-click-system (radius-inside → radius menu; outside → dismiss
-   * radius then marker menu).
-   */
-  private handleMarkerSecondaryOpen(markerKey: string, event: MouseEvent | PointerEvent): void {
-    if (this.radiusDrawingService.hasCommittedSelection()) {
-      const state = this.uploadedPhotoMarkers.get(markerKey);
-      if (state) {
-        const markerLatLng = this.mapLeafletService.createLatLng(state.lat, state.lng);
-        if (this.radiusDrawingService.isInsideAnyCommittedRadius(markerLatLng)) {
-          this.openRadiusContextMenuAt(markerLatLng, event.clientX, event.clientY);
-          return;
-        }
-
-        // Clicking a marker outside the active radius exits radius mode
-        // and falls through to marker/cluster context for that marker.
-        this.clearActiveRadiusSelection();
-      }
-    }
-
-    this.markerContextMenuSuppressUntil =
-      Date.now() + MapShellComponent.MARKER_CONTEXT_MENU_SUPPRESS_MS;
-    this.openMarkerContextMenu(markerKey, event);
-  }
-
-  private bindMarkerHoverInteraction(markerKey: string, marker: MapMarker): void {
-    this.markerInteractionService.bindHover(marker, {
-      onEnter: () => {
-        this.markerSelectionService.setLinkedHoverMarkerFromMap(markerKey);
-        this.markerSelectionService.setLinkedHoveredWorkspaceImageIdsForMarker(markerKey);
-      },
-      onLeave: () => {
-        if (this.markerSelectionService.getLinkedHoverMarkerFromMapKey() !== markerKey) {
-          return;
-        }
-        this.markerSelectionService.setLinkedHoverMarkerFromMap(null);
-        this.markerSelectionService.setLinkedHoveredWorkspaceImageIdsForMarker(null);
-      },
-    });
-  }
-
-  private async addMarkerCellsToSelection(
-    cells: Array<{ lat: number; lng: number }>,
-    zoom: number,
-  ): Promise<void> {
-    const incoming = await this.workspaceViewService.fetchClusterImages(cells, zoom);
-    const mergedIds = Array.from(
-      new Set([
-        ...this.workspaceSelectionService.selectedMediaIds(),
-        ...incoming.map((image) => image.id),
-      ]),
-    );
-    this.workspaceSelectionService.selectAllInScope(mergedIds);
-  }
-
-  /** Fade in newly added marker elements for smoother cluster reconciliation. */
-  private triggerMarkerFadeIn(el: HTMLElement): void {
-    if (
-      this.markerMotionService.preference() === 'off' ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      return;
-    }
-    this.markerInteractionService.triggerFadeIn(el, 300);
-  }
-
-  /**
-   * Animate marker movement when a surviving marker gets a new centroid.
-   * Uses frame-based interpolation with easing so interrupted updates
-   * can be retargeted cleanly without visual popping.
-   */
-  private animateMarkerPosition(marker: MapMarker, lat: number, lng: number): void {
-    this.markerMotionService.animateMarkerPosition(
-      marker,
-      lat,
-      lng,
-      this.markerMotionService.preference(),
-      MapShellComponent.MARKER_MOVE_DURATION_MS,
-    );
-  }
-
-  private cancelMarkerMoveAnimation(marker: MapMarker): void {
-    this.markerMotionService.cancelMarkerMoveAnimation(marker);
-  }
-
-  /**
-   * Attach a 500 ms long-press handler to a marker element.
-   * On long press, toggles `.map-photo-marker--long-pressed` so the direction
-   * cone is visible on touch devices (mirrors the desktop `:hover` affordance).
-   */
-  private attachLongPressHandler(el: HTMLElement, markerKey: string): void {
-    this.markerInteractionService.attachLongPress(
-      el,
-      MapShellComponent.MARKER_LONG_PRESS_MS,
-      (event: PointerEvent) => {
-        el.classList.add('map-photo-marker--long-pressed');
-        this.handleMarkerSecondaryOpen(markerKey, event);
-      },
-    );
-
-    // Dismiss on tap/click.
-    el.addEventListener('click', () => {
-      el.classList.remove('map-photo-marker--long-pressed');
-    });
   }
 
   /**
