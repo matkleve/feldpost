@@ -187,8 +187,15 @@
 
   // Hover affordance for rail section buttons (non-active rows)
   // @see docs/design/state-visuals.md § Interaction emphasis
-  .settings-overlay__section-item:hover:not(.settings-overlay__section-item--active) {
+  .settings-overlay__section-item:hover:not(.settings-overlay__section-item--active),
+  .settings-overlay__section-item:focus-visible:not(.settings-overlay__section-item--active) {
     @include emphasis.hover(10%);
+
+    .settings-overlay__section-media,
+    .settings-overlay__section-chevron,
+    .settings-overlay__section-label strong {
+      color: var(--primary);
+    }
   }
 
   // Selected section emphasis on the rail row — cool selection ink
@@ -205,6 +212,11 @@
     border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
     box-shadow: var(--settings-focus-ring);
     outline: none;
+
+    .settings-overlay__section-media,
+    .settings-overlay__section-chevron {
+      color: var(--primary);
+    }
   }
 
   // Focus ring for keyboard navigation on rail rows (non-active)
@@ -224,11 +236,6 @@
 
   .settings-overlay__section-item--active .settings-overlay__section-media {
     color: var(--interaction-selected-ink);
-  }
-
-  .settings-overlay__section-item--active:hover .settings-overlay__section-media,
-  .settings-overlay__section-item--active:focus-visible .settings-overlay__section-media {
-    color: var(--primary);
   }
 
   // Section title line in the rail list (two-line clamp for long locale strings)

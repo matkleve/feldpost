@@ -131,13 +131,25 @@
   align-items: center;
   gap: var(--spacing-1);
   padding: var(--spacing-2) 0;
+  border: 0;
   border-bottom: 2px solid transparent;
+  background: transparent;
   color: var(--muted-foreground);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    color var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
 
   .material-icons {
     font-size: var(--font-size-md);
+  }
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+    color: var(--foreground);
   }
 }
 

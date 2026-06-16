@@ -1,5 +1,15 @@
 import type { OrgBranding } from './organization.types';
 
+/** Feldpost default theme colors (light / sandstone) for branding picker display and reset. */
+export const FELDPOST_BRAND_DEFAULTS = {
+  primaryColor: '#c9a84c',
+  accentColor: '#f2f2f2',
+  backgroundColor: '#ffffff',
+} as const satisfies Record<
+  keyof Pick<OrgBranding, 'primaryColor' | 'accentColor' | 'backgroundColor'>,
+  string
+>;
+
 const BRANDING_CSS_VARS = {
   primaryColor: '--primary',
   accentColor: '--accent',
@@ -25,6 +35,15 @@ export function applyOrgBrandingToDocument(
       root.style.removeProperty(cssVar);
     }
   }
+}
+
+/** Removes org branding overrides and restores theme-defined CSS variables. */
+export function clearOrgBrandingFromDocument(): void {
+  applyOrgBrandingToDocument({
+    primaryColor: null,
+    accentColor: null,
+    backgroundColor: null,
+  });
 }
 
 /** Downloads a completed export job payload as a JSON file in the browser. */

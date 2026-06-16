@@ -1,3 +1,5 @@
+@use '../../../../styles/frosted-chrome';
+
 :host {
   display: flex;
   min-height: 0;
@@ -48,10 +50,8 @@
   min-height: 16rem;
   max-height: 100%;
   padding: var(--spacing-4);
-  border: 1px solid var(--border);
   border-radius: var(--container-radius-panel);
-  background: var(--card);
-  box-shadow: var(--shadow-md);
+  @include frosted-chrome.surface;
 
   p {
     margin: 0;

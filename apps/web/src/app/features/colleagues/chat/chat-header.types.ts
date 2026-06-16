@@ -1,5 +1,7 @@
 export type ChatHeaderVariant = 'channel' | 'dm' | 'empty';
 
+export type ChatConversationTab = 'messages' | 'files';
+
 export type ChatDetailsKind = 'channel' | 'member';
 
 export type ChatChannelDetailTab = 'about' | 'members';

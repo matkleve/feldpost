@@ -69,10 +69,26 @@
 
   @if (isInteractive()) {
     <nav class="chat-header__tabs" [attr.aria-label]="t('colleagues.chat.conversation_nav', 'Conversation navigation')">
-      <span class="chat-header__tab chat-header__tab--active" aria-current="page">
+      <button
+        type="button"
+        class="chat-header__tab"
+        [class.chat-header__tab--active]="activeTab() === 'messages'"
+        [attr.aria-current]="activeTab() === 'messages' ? 'page' : null"
+        (click)="onTabSelect('messages')"
+      >
         <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
         {{ t('colleagues.chat.tab.messages', 'Messages') }}
-      </span>
+      </button>
+      <button
+        type="button"
+        class="chat-header__tab"
+        [class.chat-header__tab--active]="activeTab() === 'files'"
+        [attr.aria-current]="activeTab() === 'files' ? 'page' : null"
+        (click)="onTabSelect('files')"
+      >
+        <span class="material-icons" aria-hidden="true">attach_file</span>
+        {{ t('colleagues.chat.tab.files', 'Files') }}
+      </button>
     </nav>
   }
 </header>

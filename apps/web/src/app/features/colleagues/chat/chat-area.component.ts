@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ChatService } from '../../../core/chat/chat.service';
@@ -9,7 +9,7 @@ import { ProjectsService } from '../../../core/projects/projects.service';
 import { groupReactions } from '../../../core/chat/chat.helpers';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { ChatHeaderComponent } from './chat-header.component';
-import type { ChatDetailsRequest, ChatHeaderVariant } from './chat-header.types';
+import type { ChatConversationTab, ChatDetailsRequest, ChatHeaderVariant } from './chat-header.types';
 import { ThreadPanelComponent } from './thread-panel.component';
 
 @Component({
@@ -59,6 +59,7 @@ export class ChatAreaComponent {
   readonly selectedProjectId = signal<string | null>(null);
   readonly projects = signal<Array<{ id: string; name: string }>>([]);
   readonly reactionPickerMessageId = signal<string | null>(null);
+  readonly conversationTab = signal<ChatConversationTab>('messages');
 
   readonly currentUserId = computed(() => this.authService.user()?.id ?? null);
 
@@ -116,7 +117,41 @@ export class ChatAreaComponent {
     return groups;
   });
 
+  readonly channelFiles = computed(() => {
+    const files: Array<{
+      id: string;
+      fileName: string;
+      fileUrl: string;
+      fileType: string | null;
+      messageId: string;
+      sharedAt: string;
+      authorName?: string;
+    }> = [];
+
+    for (const message of this.messages()) {
+      for (const attachment of message.attachments ?? []) {
+        if (!attachment.fileUrl) continue;
+        files.push({
+          id: attachment.id,
+          fileName: attachment.fileName ?? this.t('colleagues.chat.attachment', 'Attachment'),
+          fileUrl: attachment.fileUrl,
+          fileType: attachment.fileType,
+          messageId: message.id,
+          sharedAt: message.createdAt,
+          authorName: message.authorName,
+        });
+      }
+    }
+
+    return files.sort((a, b) => b.sharedAt.localeCompare(a.sharedAt));
+  });
+
   constructor() {
+    effect(() => {
+      this.channel()?.id;
+      this.conversationTab.set('messages');
+    });
+
     void this.projectsService.loadProjects().then((list) => {
       this.projects.set(list.map((p) => ({ id: p.id, name: p.name })));
     });
@@ -136,6 +171,13 @@ export class ChatAreaComponent {
   onSearchQueryChange(value: string): void {
     this.searchQuery.set(value);
     if (!value.trim()) {
+      this.showSearchResults.set(false);
+    }
+  }
+
+  onTabChange(tab: ChatConversationTab): void {
+    this.conversationTab.set(tab);
+    if (tab === 'messages') {
       this.showSearchResults.set(false);
     }
   }

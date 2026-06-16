@@ -22354,6 +22354,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.chat.tab.files', 'Files', 'en', 'colleagues chat header tab')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.tab.files'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.tab.files'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.tab.files'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.chat.files.empty', 'No files shared in this conversation yet.', 'en', 'colleagues chat files tab empty state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No files shared in this conversation yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.files.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'In dieser Unterhaltung wurden noch keine Dateien geteilt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.files.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In questa conversazione non sono ancora stati condivisi file.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.chat.files.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'colleagues.channel.members_title', 'Members', 'en', 'colleagues channel detail members heading')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -25790,6 +25852,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Branding salvato.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.branding.saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.reset', 'Reset to Feldpost defaults', 'en', 'organization branding reset button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reset to Feldpost defaults', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.reset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auf Feldpost-Standardfarben zurücksetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.reset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristina colori predefiniti Feldpost', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.reset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.reset_done', 'Feldpost default colors restored.', 'en', 'organization branding reset toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Feldpost default colors restored.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.reset_done'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Feldpost-Standardfarben wiederhergestellt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.reset_done'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Colori predefiniti Feldpost ripristinati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.reset_done'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

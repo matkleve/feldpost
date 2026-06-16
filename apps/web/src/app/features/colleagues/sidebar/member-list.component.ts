@@ -13,7 +13,7 @@ import { RailSelectListComponent, type RailSelectListItem } from '../../../share
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 interface MessagingSidebarTimeGroup {
-  key: MessagingSidebarActivityGroupKey | 'starred';
+  key: MessagingSidebarActivityGroupKey;
   label: string;
   items: RailSelectListItem[];
 }
@@ -53,6 +53,11 @@ export class MemberListComponent {
   readonly channelArchiveRequested = output<string>();
 
   readonly searchQuery = signal('');
+  readonly channelSearchQuery = signal('');
+  readonly channelsExpanded = signal(true);
+  readonly channelSearchOpen = signal(false);
+  readonly dmExpanded = signal(true);
+  readonly dmSearchOpen = signal(false);
   readonly starredChannelIds = signal<Set<string>>(this.readStarredChannelIds());
 
   private static readonly STARRED_CHANNELS_STORAGE_KEY = 'feldpost.chat.starredChannels';
@@ -70,7 +75,7 @@ export class MemberListComponent {
   });
 
   readonly filteredChannels = computed(() => {
-    const query = this.searchQuery().trim().toLowerCase();
+    const query = this.channelSearchQuery().trim().toLowerCase();
     let list = this.sidebarChannels();
     if (query) {
       list = list.filter((channel) => this.channelLabel(channel).toLowerCase().includes(query));
@@ -84,21 +89,18 @@ export class MemberListComponent {
     return this.members().filter((member) => member.fullName.toLowerCase().includes(query));
   });
 
-  readonly starredChannelListItems = computed(() => {
+  readonly channelListItems = computed<RailSelectListItem[]>(() => {
     const starred = this.starredChannelIds();
-    return this.filteredChannels()
-      .filter((channel) => starred.has(channel.id))
-      .sort((a, b) => this.channelActivityAt(b).localeCompare(this.channelActivityAt(a)))
+    return [...this.filteredChannels()]
+      .sort((a, b) => {
+        const aStarred = starred.has(a.id);
+        const bStarred = starred.has(b.id);
+        if (aStarred !== bStarred) {
+          return aStarred ? -1 : 1;
+        }
+        return this.channelActivityAt(b).localeCompare(this.channelActivityAt(a));
+      })
       .map((channel) => this.toChannelListItem(channel));
-  });
-
-  readonly channelTimeGroups = computed((): MessagingSidebarTimeGroup[] => {
-    const starred = this.starredChannelIds();
-    return this.buildTimeGroups(
-      this.filteredChannels().filter((channel) => !starred.has(channel.id)),
-      (channel) => this.channelActivityAt(channel),
-      (channel) => this.toChannelListItem(channel),
-    );
   });
 
   readonly dmTimeGroups = computed((): MessagingSidebarTimeGroup[] =>
@@ -147,6 +149,16 @@ export class MemberListComponent {
 
   openCreateChannel(): void {
     this.channelCreateOpen.emit();
+  }
+
+  toggleChannelSearch(event: Event): void {
+    event.stopPropagation();
+    this.channelSearchOpen.update((open) => !open);
+  }
+
+  toggleDmSearch(event: Event): void {
+    event.stopPropagation();
+    this.dmSearchOpen.update((open) => !open);
   }
 
   onInvitesClick(): void {

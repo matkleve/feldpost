@@ -5,9 +5,11 @@
     [memberCount]="memberCount()"
     [channelMembers]="channelMembers()"
     [searchQuery]="searchQuery()"
+    [activeTab]="conversationTab()"
     (detailsRequested)="detailsRequested.emit($event)"
     (searchQueryChange)="onSearchQueryChange($event)"
     (searchSubmitted)="onSearch()"
+    (tabChange)="onTabChange($event)"
   />
 
   @if (showSearchResults() && searchResults().length > 0) {
@@ -28,6 +30,29 @@
   }
 
   <div class="chat-area__main">
+    @if (conversationTab() === 'files') {
+      <div class="chat-area__files" role="region" [attr.aria-label]="t('colleagues.chat.tab.files', 'Files')">
+        @for (file of channelFiles(); track file.id) {
+          <article class="chat-area__file-row">
+            @if (file.fileType?.startsWith('image/')) {
+              <img class="chat-area__file-thumb" [src]="file.fileUrl" [alt]="file.fileName" />
+            } @else {
+              <span class="chat-area__file-icon material-icons" aria-hidden="true">insert_drive_file</span>
+            }
+            <div class="chat-area__file-meta">
+              <a class="chat-area__file-link" [href]="file.fileUrl" target="_blank" rel="noopener">{{ file.fileName }}</a>
+              <p class="chat-area__file-subline">
+                {{ file.authorName ?? t('colleagues.chat.unknown_author', 'Colleague') }}
+                ·
+                <time>{{ file.sharedAt | date: 'medium' }}</time>
+              </p>
+            </div>
+          </article>
+        } @empty {
+          <p class="chat-area__empty">{{ t('colleagues.chat.files.empty', 'No files shared in this conversation yet.') }}</p>
+        }
+      </div>
+    } @else {
     <div class="chat-area__messages" role="log" aria-live="polite">
       @for (group of groupedMessages(); track group.date) {
         <div class="chat-area__date-sep" role="separator">{{ group.date }}</div>
@@ -149,12 +174,14 @@
         (closed)="onCloseThread()"
       />
     }
+    }
   </div>
 
-  @if (typingText(); as typing) {
+  @if (conversationTab() === 'messages' && typingText(); as typing) {
     <p class="chat-area__typing">{{ typing }}</p>
   }
 
+  @if (conversationTab() === 'messages') {
   <footer class="chat-area__composer">
     @if (attachmentFile()) {
       <p class="chat-area__attachment-hint">
@@ -212,4 +239,5 @@
       </div>
     </div>
   </footer>
+  }
 </div>

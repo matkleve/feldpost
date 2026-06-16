@@ -130,9 +130,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     inject(WorkspaceSelectedItemsSyncService);
 
     void this.organizationService.loadBranding().then((result) => {
-      if (result.data) {
-        applyOrgBrandingToDocument(result.data);
-      }
+      applyOrgBrandingToDocument(result.data);
     });
 
     effect(() => {

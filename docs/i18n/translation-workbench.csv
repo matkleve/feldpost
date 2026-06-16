@@ -720,6 +720,8 @@ colleagues.chat.conversation_nav,Conversation navigation,colleagues chat header 
 colleagues.chat.open_details,Open conversation details,colleagues chat DM header title button aria,Open conversation details,Unterhaltungsdetails öffnen,Apri dettagli conversazione
 colleagues.chat.details_button,Details,colleagues chat header details button unified,Details,Details,Dettagli
 colleagues.chat.tab.messages,Messages,colleagues chat header tab,Messages,Nachrichten,Messaggi
+colleagues.chat.tab.files,Files,colleagues chat header tab,Files,Dateien,File
+colleagues.chat.files.empty,No files shared in this conversation yet.,colleagues chat files tab empty state,No files shared in this conversation yet.,In dieser Unterhaltung wurden noch keine Dateien geteilt.,In questa conversazione non sono ancora stati condivisi file.
 colleagues.channel.members_title,Members,colleagues channel detail members heading,Members,Mitglieder,Membri
 colleagues.channel.members_loading,Loading members,colleagues channel members loading,Loading members,Lade Mitglieder,Caricamento membri
 colleagues.channel.members_empty,No members yet,colleagues channel members empty,No members yet,Noch keine Mitglieder,Ancora nessun membro
@@ -831,6 +833,8 @@ organization.branding.primary,Primary color,organization branding field label,Pr
 organization.branding.accent,Accent color,organization branding field label,Accent color,Akzentfarbe,Colore di accento
 organization.branding.background,Background color,organization branding field label,Background color,Hintergrundfarbe,Colore di sfondo
 organization.branding.saved,Branding saved.,organization branding toast,Branding saved.,Branding gespeichert.,Branding salvato.
+organization.branding.reset,Reset to Feldpost defaults,organization branding reset button,Reset to Feldpost defaults,Auf Feldpost-Standardfarben zurücksetzen,Ripristina colori predefiniti Feldpost
+organization.branding.reset_done,Feldpost default colors restored.,organization branding reset toast,Feldpost default colors restored.,Feldpost-Standardfarben wiederhergestellt.,Colori predefiniti Feldpost ripristinati.
 organization.billing.title,Billing,organization billing section title,Billing,Abrechnung,Fatturazione
 organization.billing.subtitle,Current plan and invoice history.,organization billing section subtitle,Current plan and invoice history.,Aktueller Tarif und Rechnungsverlauf.,Piano attuale e storico fatture.
 organization.billing.status,Status,organization billing field label,Status,Status,Stato

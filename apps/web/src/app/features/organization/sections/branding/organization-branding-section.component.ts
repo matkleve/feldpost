@@ -1,6 +1,6 @@
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { applyOrgBrandingToDocument } from '../../../../core/organization/organization.helpers';
+import { applyOrgBrandingToDocument, clearOrgBrandingFromDocument, FELDPOST_BRAND_DEFAULTS } from '../../../../core/organization/organization.helpers';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { OrganizationService } from '../../../../core/organization/organization.service';
 import { ToastService } from '../../../../core/toast/toast.service';
@@ -23,6 +23,7 @@ export class OrganizationBrandingSectionComponent {
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly canEdit = input(true);
+  readonly feldpostDefaults = FELDPOST_BRAND_DEFAULTS;
 
   readonly primaryColor = signal('');
   readonly accentColor = signal('');
@@ -40,8 +41,8 @@ export class OrganizationBrandingSectionComponent {
       this.primaryColor.set(result.data.primaryColor ?? '');
       this.accentColor.set(result.data.accentColor ?? '');
       this.backgroundColor.set(result.data.backgroundColor ?? '');
-      applyOrgBrandingToDocument(result.data);
     }
+    applyOrgBrandingToDocument(result.data);
   }
 
   async onSave(): Promise<void> {
@@ -64,6 +65,31 @@ export class OrganizationBrandingSectionComponent {
     });
     this.toastService.show({
       message: this.t('organization.branding.saved', 'Branding saved.'),
+      type: 'success',
+    });
+  }
+
+  async onReset(): Promise<void> {
+    this.primaryColor.set('');
+    this.accentColor.set('');
+    this.backgroundColor.set('');
+
+    const result = await this.organizationService.saveBranding({
+      primaryColor: null,
+      accentColor: null,
+      backgroundColor: null,
+    });
+    if (result.error) {
+      this.toastService.show({
+        message: result.error.message,
+        type: 'error',
+      });
+      return;
+    }
+
+    clearOrgBrandingFromDocument();
+    this.toastService.show({
+      message: this.t('organization.branding.reset_done', 'Feldpost default colors restored.'),
       type: 'success',
     });
   }

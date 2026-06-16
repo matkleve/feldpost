@@ -7,7 +7,7 @@ import { ToolbarDropdownStackComponent } from '../../../shared/dropdown-trigger/
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HlmMenuItemDirective } from '../../../shared/ui/menu';
-import type { ChatDetailsRequest, ChatHeaderVariant } from './chat-header.types';
+import type { ChatConversationTab, ChatDetailsRequest, ChatHeaderVariant } from './chat-header.types';
 
 @Component({
   selector: 'app-chat-header',
@@ -35,9 +35,12 @@ export class ChatHeaderComponent {
   readonly channelMembers = input<ChatChannelMember[]>([]);
   readonly searchQuery = input('');
 
+  readonly activeTab = input<ChatConversationTab>('messages');
+
   readonly detailsRequested = output<ChatDetailsRequest>();
   readonly searchQueryChange = output<string>();
   readonly searchSubmitted = output<void>();
+  readonly tabChange = output<ChatConversationTab>();
 
   readonly membersDropdownOpen = signal(false);
   readonly membersDropdownAnchor = signal<HTMLElement | null>(null);
@@ -65,6 +68,10 @@ export class ChatHeaderComponent {
       this.variant();
       this.closeMembersDropdown();
     });
+  }
+
+  onTabSelect(tab: ChatConversationTab): void {
+    this.tabChange.emit(tab);
   }
 
   onTitleOpen(): void {
