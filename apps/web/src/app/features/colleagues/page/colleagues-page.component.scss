@@ -32,8 +32,30 @@
 
 .colleagues-page__detail-empty {
   display: flex;
-  align-items: flex-start;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-self: stretch;
+  height: 100%;
+  padding-block: var(--spacing-4);
+}
+
+.colleagues-page__detail-card {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 16rem;
+  max-height: 100%;
   padding: var(--spacing-4);
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--container-radius-panel);
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+
+  p {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: var(--font-size-sm);
+  }
 }

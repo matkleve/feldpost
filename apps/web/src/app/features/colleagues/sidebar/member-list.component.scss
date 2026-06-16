@@ -21,12 +21,25 @@
 .member-list__invites-button {
   flex-shrink: 0;
   width: 100%;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: var(--spacing-2);
+  color: var(--muted-foreground);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover();
+  }
 
   &--active {
-    border-color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 10%, var(--background));
-    color: var(--foreground);
+    @include emphasis.selected();
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    @include emphasis.selected-hover();
   }
 }
 

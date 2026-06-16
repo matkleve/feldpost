@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { ChatChannel, ChatChannelMember } from '../../../core/chat/chat.types';
@@ -24,9 +24,6 @@ export type ChannelDetailMode = 'create' | 'view';
   ],
   templateUrl: './channel-detail-panel.component.html',
   styleUrl: './channel-detail-panel.component.scss',
-  host: {
-    class: 'flex min-h-0 min-w-0 flex-col',
-  },
 })
 export class ChannelDetailPanelComponent {
   private readonly i18nService = inject(I18nService);
@@ -42,11 +39,20 @@ export class ChannelDetailPanelComponent {
   readonly closed = output<void>();
   readonly created = output<{ name: string; type: 'public' | 'private' }>();
   readonly memberInviteRequested = output<string>();
+  readonly descriptionUpdated = output<string>();
   readonly archiveRequested = output<void>();
 
   readonly draftName = signal('');
+  readonly draftDescription = signal('');
   readonly isPrivate = signal(false);
   readonly addMemberSearch = signal('');
+
+  constructor() {
+    effect(() => {
+      const channel = this.channel();
+      this.draftDescription.set(channel?.description ?? '');
+    });
+  }
 
   readonly memberListItems = computed<RailSelectListItem[]>(() =>
     this.members().map((member) => ({
@@ -69,8 +75,6 @@ export class ChannelDetailPanelComponent {
       .map((colleague) => ({
         id: colleague.id,
         label: colleague.fullName || this.t('colleagues.members.unnamed', 'Unnamed'),
-        secondaryLabel: colleague.roleDisplayName,
-        secondaryColor: colleague.roleColor,
         leading: {
           kind: 'avatar' as const,
           text: colleague.fullName.charAt(0).toUpperCase() || '?',
@@ -111,5 +115,16 @@ export class ChannelDetailPanelComponent {
     if (event.actionId === 'invite') {
       this.memberInviteRequested.emit(event.itemId);
     }
+  }
+
+  onDescriptionBlur(): void {
+    const channel = this.channel();
+    if (!channel || !this.canManage()) return;
+
+    const next = this.draftDescription().trim();
+    const current = (channel.description ?? '').trim();
+    if (next === current) return;
+
+    this.descriptionUpdated.emit(next);
   }
 }

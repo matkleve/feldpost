@@ -55,6 +55,24 @@ export class ChatChannelsAdapter {
     return { error: error ? new Error(error.message) : null };
   }
 
+  async updateChannel(
+    channelId: string,
+    patch: { description?: string | null },
+  ): Promise<{ data: ChatChannel | null; error: Error | null }> {
+    const { data, error } = await this.supabase.client
+      .from('chat_channels')
+      .update({ description: patch.description ?? null })
+      .eq('id', channelId)
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      return { data: null, error: new Error(error?.message ?? 'Could not update channel.') };
+    }
+
+    return { data: toChannel(data), error: null };
+  }
+
   async addChannelMember(
     channelId: string,
     userId: string,

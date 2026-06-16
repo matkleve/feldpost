@@ -697,6 +697,9 @@ colleagues.channel.type_public,Public,colleagues channel type public,Public,Öff
 colleagues.channel.type_private,Private,colleagues channel type private,Private,Privat,Privato
 colleagues.channel.created_label,Created,colleagues channel detail created label,Created,Erstellt,Creato
 colleagues.channel.description_label,Description,colleagues channel detail description label,Description,Beschreibung,Descrizione
+colleagues.channel.description_placeholder,Add a description…,colleagues channel description placeholder,Add a description…,Beschreibung hinzufügen…,Aggiungi una descrizione…
+colleagues.channel.description_empty,No description,colleagues channel description empty read-only,No description,Keine Beschreibung,Nessuna descrizione
+colleagues.channel.details_title,Channel details,colleagues channel detail panel aria,Channel details,Kanaldetails,Dettagli canale
 colleagues.channel.members_title,Members,colleagues channel detail members heading,Members,Mitglieder,Membri
 colleagues.channel.members_loading,Loading members,colleagues channel members loading,Loading members,Lade Mitglieder,Caricamento membri
 colleagues.channel.members_empty,No members yet,colleagues channel members empty,No members yet,Noch keine Mitglieder,Ancora nessun membro
@@ -709,6 +712,7 @@ colleagues.detail.select_hint,Select a channel to view details.,colleagues empty
 colleagues.members.title,Colleagues,colleagues member list heading,Colleagues,Kolleginnen und Kollegen,Colleghi
 colleagues.members.search,Search colleagues,colleagues member search placeholder,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
 colleagues.members.search_aria,Search colleagues,colleagues member search aria,Search colleagues,Kolleginnen und Kollegen suchen,Cerca colleghi
+rail.search.clear_aria,Clear search,rail search field clear button aria,Clear search,Suche leeren,Cancella ricerca
 colleagues.members.loading,Loading colleagues,colleagues member list loading,Loading colleagues,Lade Kolleginnen und Kollegen,Caricamento colleghi
 colleagues.members.empty,No colleagues found,colleagues empty member list,No colleagues found,Keine Kolleginnen und Kollegen gefunden,Nessun collega trovato
 colleagues.members.unnamed,Unnamed,colleagues member without name,Unnamed,Unbenannt,Senza nome
@@ -1360,6 +1364,7 @@ colleagues.page.error.members,Could not load team members.,colleagues page membe
 colleagues.page.error.chat,Chat is temporarily unavailable.,colleagues page chat load error toast,Chat is temporarily unavailable.,Chat ist vorübergehend nicht verfügbar.,La chat è temporaneamente non disponibile.
 colleagues.chat.error.create_channel,Could not create channel.,chat create channel error toast,Could not create channel.,Kanal konnte nicht erstellt werden.,Impossibile creare il canale.
 colleagues.chat.error.archive_channel,Could not archive channel.,chat archive channel error toast,Could not archive channel.,Kanal konnte nicht archiviert werden.,Impossibile archiviare il canale.
+colleagues.chat.error.update_channel,Could not update channel.,chat update channel error toast,Could not update channel.,Kanal konnte nicht aktualisiert werden.,Impossibile aggiornare il canale.
 colleagues.chat.error.invite_member,Could not invite member.,chat invite member error toast,Could not invite member.,Mitglied konnte nicht eingeladen werden.,Impossibile invitare il membro.
 colleagues.chat.error.edit,Could not edit message.,chat edit message error toast,Could not edit message.,Nachricht konnte nicht bearbeitet werden.,Impossibile modificare il messaggio.
 colleagues.chat.error.delete,Could not delete message.,chat delete message error toast,Could not delete message.,Nachricht konnte nicht gelöscht werden.,Impossibile eliminare il messaggio.

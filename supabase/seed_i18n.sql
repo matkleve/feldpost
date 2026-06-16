@@ -21641,6 +21641,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.description_placeholder', 'Add a description…', 'en', 'colleagues channel description placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add a description…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Beschreibung hinzufügen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi una descrizione…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.description_empty', 'No description', 'en', 'colleagues channel description empty read-only')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No description', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Beschreibung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna descrizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.description_empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.channel.details_title', 'Channel details', 'en', 'colleagues channel detail panel aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Channel details', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.details_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kanaldetails', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.details_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Dettagli canale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.channel.details_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'colleagues.channel.members_title', 'Members', 'en', 'colleagues channel detail members heading')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -22008,6 +22101,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Cerca colleghi', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'colleagues.members.search_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'rail.search.clear_aria', 'Clear search', 'en', 'rail search field clear button aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Clear search', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'rail.search.clear_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Suche leeren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'rail.search.clear_aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cancella ricerca', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'rail.search.clear_aria'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -1,13 +1,20 @@
-<aside class="channel-detail">
+<aside class="channel-detail" role="complementary" [attr.aria-label]="t('colleagues.channel.details_title', 'Channel details')">
   <header class="channel-detail__header">
-    <h2>
+    <h2 class="channel-detail__title">
       @if (mode() === 'create') {
         {{ t('colleagues.channel.create_title', 'Create channel') }}
       } @else if (channel(); as ch) {
         # {{ ch.name ?? t('colleagues.channel.unnamed', 'Channel') }}
       }
     </h2>
-    <button type="button" class="channel-detail__close" (click)="closed.emit()" [attr.aria-label]="t('common.close', 'Close')">
+    <button
+      type="button"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      (click)="closed.emit()"
+      [attr.aria-label]="t('common.close', 'Close')"
+    >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
   </header>
@@ -28,20 +35,37 @@
     </form>
   } @else if (channel(); as ch) {
     <dl class="channel-detail__meta">
-      <div>
+      <div class="channel-detail__field">
         <dt>{{ t('colleagues.channel.type_label', 'Type') }}</dt>
         <dd>{{ channelTypeLabel(ch) }}</dd>
       </div>
-      <div>
+      <div class="channel-detail__field">
         <dt>{{ t('colleagues.channel.created_label', 'Created') }}</dt>
         <dd>{{ ch.createdAt | date: 'mediumDate' }}</dd>
       </div>
-      @if (ch.description) {
-        <div>
-          <dt>{{ t('colleagues.channel.description_label', 'Description') }}</dt>
-          <dd>{{ ch.description }}</dd>
-        </div>
-      }
+      <div class="channel-detail__field">
+        <dt>{{ t('colleagues.channel.description_label', 'Description') }}</dt>
+        <dd>
+          @if (canManage()) {
+            <textarea
+              hlmInput
+              class="channel-detail__description"
+              rows="3"
+              [ngModel]="draftDescription()"
+              (ngModelChange)="draftDescription.set($event)"
+              (blur)="onDescriptionBlur()"
+              [placeholder]="t('colleagues.channel.description_placeholder', 'Add a description…')"
+              [attr.aria-label]="t('colleagues.channel.description_label', 'Description')"
+            ></textarea>
+          } @else if (ch.description) {
+            {{ ch.description }}
+          } @else {
+            <span class="channel-detail__description-empty">
+              {{ t('colleagues.channel.description_empty', 'No description') }}
+            </span>
+          }
+        </dd>
+      </div>
     </dl>
 
     <section class="channel-detail__section">
@@ -77,7 +101,7 @@
       </section>
 
       <div class="channel-detail__actions">
-        <button hlmBtn variant="destructive" type="button" (click)="archiveRequested.emit()">
+        <button hlmBtn variant="outline" size="sm" type="button" (click)="archiveRequested.emit()">
           {{ t('colleagues.channel.archive', 'Archive channel') }}
         </button>
       </div>

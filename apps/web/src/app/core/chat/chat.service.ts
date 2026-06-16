@@ -67,6 +67,15 @@ export class ChatService {
     return result;
   }
 
+  async updateChannel(
+    channelId: string,
+    patch: { description?: string | null },
+  ): Promise<{ data: ChatChannel | null; error: Error | null }> {
+    const result = await this.channelsAdapter.updateChannel(channelId, patch);
+    if (!result.error) this.invalidateChannelsCache();
+    return result;
+  }
+
   async addChannelMember(channelId: string, userId: string): Promise<{ error: Error | null }> {
     return this.channelsAdapter.addChannelMember(channelId, userId);
   }

@@ -84,11 +84,14 @@
       [membersLoading]="channelMembersLoading()"
       (closed)="onChannelPanelClosed()"
       (memberInviteRequested)="onChannelMemberInviteFromPanel($event)"
+      (descriptionUpdated)="onChannelDescriptionUpdated($event)"
       (archiveRequested)="onChannelDetailArchive()"
     />
   } @else {
     <aside pageGridRight class="colleagues-page__detail-empty">
-      <p>{{ t('colleagues.detail.select_hint', 'Select a channel to view details.') }}</p>
+      <div class="colleagues-page__detail-card">
+        <p>{{ t('colleagues.detail.select_hint', 'Select a channel to view details.') }}</p>
+      </div>
     </aside>
   }
 </app-page-grid>

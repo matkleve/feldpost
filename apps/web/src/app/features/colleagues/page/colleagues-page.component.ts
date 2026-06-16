@@ -351,6 +351,29 @@ export class ColleaguesPageComponent implements OnDestroy {
     }
   }
 
+  async onChannelDescriptionUpdated(description: string): Promise<void> {
+    const channelId = this.selectedChannelId();
+    if (!channelId) return;
+
+    const result = await this.chatService.updateChannel(channelId, {
+      description: description || null,
+    });
+    if (result.error) {
+      this.toastService.show({
+        type: 'error',
+        message: this.t('colleagues.chat.error.update_channel', 'Could not update channel.'),
+        detail: result.error.message,
+      });
+      return;
+    }
+
+    if (result.data) {
+      this.channels.update((list) =>
+        list.map((channel) => (channel.id === channelId ? result.data! : channel)),
+      );
+    }
+  }
+
   async onChannelMemberInviteFromPanel(userId: string): Promise<void> {
     const channelId = this.selectedChannelId();
     if (!channelId) return;

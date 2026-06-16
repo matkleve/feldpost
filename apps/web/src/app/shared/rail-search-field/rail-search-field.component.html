@@ -1,12 +1,24 @@
-<label class="rail-search-field">
+<div class="rail-search-field" role="search">
   <span class="material-icons rail-search-field__icon" aria-hidden="true">search</span>
   <input
     class="rail-search-field__input"
-    type="search"
+    [class.rail-search-field__input--clearable]="hasValue()"
+    type="text"
     [value]="value()"
     [attr.placeholder]="placeholder()"
     [attr.aria-label]="ariaLabel()"
     (input)="onInput($event)"
     (keydown.enter)="onEnter($event)"
   />
-</label>
+  @if (hasValue()) {
+    <button
+      type="button"
+      class="rail-search-field__clear"
+      [attr.aria-label]="t('rail.search.clear_aria', 'Clear search')"
+      (mousedown)="$event.preventDefault()"
+      (click)="onClear($event)"
+    >
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  }
+</div>

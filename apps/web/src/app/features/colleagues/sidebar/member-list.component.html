@@ -7,14 +7,15 @@
   <button
     type="button"
     hlmBtn
-    variant="outline"
+    variant="ghost"
     size="sm"
     class="member-list__invites-button"
     [class.member-list__invites-button--active]="invitesActive()"
     [attr.aria-pressed]="invitesActive()"
     (click)="onInvitesClick()"
   >
-    {{ t('colleagues.tab.invites', 'Invites') }}
+    <span class="material-icons" aria-hidden="true">link</span>
+    <span>{{ t('colleagues.tab.invites', 'Invites') }}</span>
   </button>
 
   <section class="member-list__channels">
