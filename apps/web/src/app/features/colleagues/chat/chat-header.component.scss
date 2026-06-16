@@ -97,6 +97,18 @@
   .material-icons {
     font-size: var(--font-size-md);
   }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--primary);
+    background: var(--action-hover);
+  }
+
+  &[data-active='true'] {
+    border-color: var(--primary);
+    background: var(--action-hover);
+    color: var(--primary);
+  }
 }
 
 .chat-header__members-btn {

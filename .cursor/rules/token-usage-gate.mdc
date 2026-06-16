@@ -44,7 +44,22 @@ If a value doesn't map to an existing token:
 1. Check if a near-equivalent exists (e.g. `--spacing-3` = `0.75rem` instead of writing `0.75rem`)
 2. If genuinely new, propose adding it to `_typography-baseline.scss` — do not invent inline values
 
-## 5. Forbidden legacy patterns
+## 5. hlmBtn + component SCSS specificity trap (mandatory read)
+
+Angular component SCSS attribute scoping raises specificity by +1 attribute selector. This means:
+
+```scss
+/* This component SCSS rule has specificity 0,2,0 (class + Angular attr) */
+.my-btn { color: var(--muted-foreground); }
+
+/* hlmBtn ghost Tailwind hover has specificity 0,1,0 — LOSES */
+/* → hover:text-primary never fires → button color frozen on hover */
+```
+
+**Rule:** If you set `color:` on an `hlmBtn` element via component SCSS, you MUST also add an explicit `&:hover, &:focus-visible { color: var(--primary); }` block in the same SCSS.  
+Never rely on `hlmBtn`'s Tailwind hover to win against your own component `color:` rule.
+
+## 6. Forbidden legacy patterns
 
 - `var(--color-*)` — removed Phase 7; use semantic tweakcn names
 - `var(--fp-*)` — removed
