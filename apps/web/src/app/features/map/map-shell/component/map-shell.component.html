@@ -246,29 +246,29 @@
     class="map-gps-btn"
     type="button"
     [attr.aria-label]="
-      gpsLocating()
+      gpsService.gpsLocating()
         ? 'Finding my location'
-        : gpsTrackingActive()
+        : gpsService.gpsTrackingActive()
           ? 'Stop GPS tracking'
           : 'Go to my location'
     "
     [title]="
-      gpsLocating()
+      gpsService.gpsLocating()
         ? 'Finding my location'
-        : gpsTrackingActive()
+        : gpsService.gpsTrackingActive()
           ? 'Stop GPS tracking'
           : 'Go to my location'
     "
-    [attr.aria-pressed]="gpsTrackingActive()"
-    [class.map-gps-btn--locating]="gpsLocating()"
-    [class.map-gps-btn--active]="gpsTrackingActive()"
+    [attr.aria-pressed]="gpsService.gpsTrackingActive()"
+    [class.map-gps-btn--locating]="gpsService.gpsLocating()"
+    [class.map-gps-btn--active]="gpsService.gpsTrackingActive()"
     (click)="goToUserPosition()"
   >
-    @if (gpsLocating()) {
+    @if (gpsService.gpsLocating()) {
       <span class="map-gps-btn__spinner" aria-hidden="true"></span>
     } @else {
       <span class="material-icons" aria-hidden="true">{{
-        gpsTrackingActive() ? 'gps_fixed' : 'gps_not_fixed'
+        gpsService.gpsTrackingActive() ? 'gps_fixed' : 'gps_not_fixed'
       }}</span>
     }
   </button>

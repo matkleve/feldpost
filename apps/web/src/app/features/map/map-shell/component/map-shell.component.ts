@@ -130,7 +130,7 @@ import { MapFocusPayloadService } from '../context-menu/map-focus-payload.servic
 import { MapZoomOrchestratorService } from '../../../../core/map-zoom/map-zoom-orchestrator.service';
 import { LocationMapPickNavigationService } from '../../../../core/workspace-pane/location-map-pick-navigation.service';
 import { MediaDetailLocationSyncService } from '../../../../core/media-detail-data/media-detail-location-sync.service';
-import { MapGeolocationService } from '../leaflet/map-geolocation.service';
+import { MapShellGpsService } from '../leaflet/map-shell-gps.service';
 import { DeferredStartupHandles, MapDeferredStartupService } from '../leaflet/map-deferred-startup.service';
 import { MapProjectActionsService } from '../workspace/map-project-actions.service';
 import { MapProjectDialogService } from '../workspace/map-project-dialog.service';
@@ -215,8 +215,6 @@ type MarkerRenderSnapshot = {
   },
 })
 export class MapShellComponent implements OnDestroy {
-  private static readonly GPS_TRACKING_INTERVAL_MS = 60000;
-  private static readonly GPS_RECENTER_MIN_ZOOM = 16;
   private static readonly PLACEMENT_CLICK_GUARD_MS = 220;
   private static readonly DETAIL_LOCATION_FOCUS_ZOOM = 21;
   private static readonly DETAIL_LOCATION_MARKER_PULSE_MS = 1500;
@@ -284,7 +282,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly locationMapPickNavigationService = inject(LocationMapPickNavigationService);
   private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
-  private readonly mapGeolocationService = inject(MapGeolocationService);
+  readonly gpsService = inject(MapShellGpsService);
   private readonly mapDeferredStartupService = inject(MapDeferredStartupService);
   private readonly mapProjectActionsService = inject(MapProjectActionsService);
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
@@ -390,7 +388,7 @@ export class MapShellComponent implements OnDestroy {
       .map((img) => ({ lat: img.latitude, lng: img.longitude }));
 
     if (points.length === 0) {
-      const pos = this.userPosition();
+      const pos = this.gpsService.userPosition();
       if (!pos) return undefined;
       return { lat: pos[0], lng: pos[1] };
     }
@@ -425,7 +423,7 @@ export class MapShellComponent implements OnDestroy {
       const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
       const activeProjectId =
         selectedProjectIds.size > 0 ? Array.from(selectedProjectIds.values())[0] : undefined;
-      const userPos = this.userPosition();
+      const userPos = this.gpsService.userPosition();
 
       return {
         activeProjectId,
@@ -444,19 +442,6 @@ export class MapShellComponent implements OnDestroy {
     },
     { equal: searchQueryContextsEqual },
   );
-
-  // ── GPS state ────────────────────────────────────────────────────────────
-
-  /**
-   * User's GPS position, populated after geolocation resolves.
-   * Null when geolocation is denied/unavailable or not yet resolved.
-   */
-  readonly userPosition = signal<[number, number] | null>(null);
-
-  /** True while waiting for a GPS fix after pressing the button. */
-  readonly gpsLocating = signal(false);
-  /** True when GPS tracking mode is enabled via the toggle button. */
-  readonly gpsTrackingActive = signal(false);
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -698,7 +683,6 @@ export class MapShellComponent implements OnDestroy {
     markerBootstrapTimer: null,
   };
   private userLocationFoundTimer: ReturnType<typeof setTimeout> | null = null;
-  private gpsTrackingTimer: ReturnType<typeof setInterval> | null = null;
   private lastMapMoveAt = 0;
   private lastMapIdleAt = 0;
   private activeWorkspaceHover: ThumbnailCardHoverEvent | null = null;
@@ -797,8 +781,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private cleanupGpsAndTracking(): void {
-    this.gpsLocating.set(false);
-    this.stopGpsTracking();
+    this.gpsService.stopTracking();
 
     if (this.userLocationFoundTimer) {
       clearTimeout(this.userLocationFoundTimer);
@@ -2063,37 +2046,14 @@ export class MapShellComponent implements OnDestroy {
    * @see docs/specs/component/map/gps-button.md
    */
   goToUserPosition(): void {
-    if (this.gpsTrackingActive()) {
-      this.stopGpsTracking();
-      return;
-    }
-
-    this.gpsTrackingActive.set(true);
-    this.gpsLocating.set(true);
-
-    this.mapGeolocationService.requestCurrentPosition(
-      {
-        onSuccess: (coords) => {
-          if (!this.gpsTrackingActive()) {
-            this.gpsLocating.set(false);
-            return;
-          }
-
-          this.userPosition.set(coords);
-          void this.refreshSearchCountryCode(coords[0], coords[1]);
-          const zoom = Math.max(this.map?.getZoom() ?? 0, MapShellComponent.GPS_RECENTER_MIN_ZOOM);
-          this.map?.setView(coords, zoom);
-          this.renderOrUpdateUserLocationMarker(coords);
-          this.triggerUserLocationFoundState();
-          this.startGpsTracking();
-          this.gpsLocating.set(false);
-        },
-        onError: () => {
-          this.stopGpsTracking();
-          this.gpsLocating.set(false);
-        },
+    this.gpsService.goTo(
+      this.map,
+      (coords) => {
+        this.renderOrUpdateUserLocationMarker(coords);
+        this.triggerUserLocationFoundState();
+        void this.refreshSearchCountryCode(coords[0], coords[1]);
       },
-      { maximumAge: 0 },
+      () => this.removeUserLocationMarker(),
     );
   }
 
@@ -2258,43 +2218,9 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private initGeolocation(): void {
-    this.mapGeolocationService.requestCurrentPosition({
-      onSuccess: (coords) => {
-        this.userPosition.set(coords);
-        void this.refreshSearchCountryCode(coords[0], coords[1]);
-      },
-      onError: () => {
-        // Geolocation denied or unavailable — Vienna fallback already set.
-      },
+    this.gpsService.initBackground((coords) => {
+      void this.refreshSearchCountryCode(coords[0], coords[1]);
     });
-  }
-
-  private startGpsTracking(): void {
-    this.gpsTrackingTimer = this.mapGeolocationService.clearTrackingTimer(this.gpsTrackingTimer);
-
-    this.gpsTrackingTimer = this.mapGeolocationService.startTracking({
-      intervalMs: MapShellComponent.GPS_TRACKING_INTERVAL_MS,
-      isTrackingActive: () => this.gpsTrackingActive(),
-      onTickStart: () => this.gpsLocating.set(true),
-      onSuccess: (coords) => {
-        this.userPosition.set(coords);
-        void this.refreshSearchCountryCode(coords[0], coords[1]);
-        this.renderOrUpdateUserLocationMarker(coords);
-        this.triggerUserLocationFoundState();
-        this.gpsLocating.set(false);
-      },
-      onError: () => {
-        // When tracking can no longer get a fix, leave toggle mode.
-        this.stopGpsTracking();
-        this.gpsLocating.set(false);
-      },
-    });
-  }
-
-  private stopGpsTracking(): void {
-    this.gpsTrackingActive.set(false);
-    this.gpsTrackingTimer = this.mapGeolocationService.clearTrackingTimer(this.gpsTrackingTimer);
-    this.removeUserLocationMarker();
   }
 
   private removeUserLocationMarker(): void {
