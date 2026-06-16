@@ -26043,14 +26043,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'organization.branding.subtitle', 'Organization color overrides applied to the workspace theme.', 'en', 'organization branding section subtitle')
+values (null, 'organization.branding.subtitle', 'Logo and theme colors applied across your workspace.', 'en', 'organization branding section subtitle')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Organization color overrides applied to the workspace theme.', 'published'
+select t.id, 'en', 'Logo and theme colors applied across your workspace.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.branding.subtitle'
 on conflict (app_text_id, lang) do update set
@@ -26058,7 +26058,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Organisationsfarben werden auf das Arbeitsbereich-Design angewendet.', 'published'
+select t.id, 'de', 'Logo und Designfarben für deinen Arbeitsbereich.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.branding.subtitle'
 on conflict (app_text_id, lang) do update set
@@ -26066,9 +26066,443 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'I colori dell''organizzazione si applicano al tema dell''area di lavoro.', 'published'
+select t.id, 'it', 'Logo e colori del tema applicati all''area di lavoro.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.branding.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_title', 'Logo', 'en', 'organization branding logo group title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_hint', 'PNG', 'en', 'organization branding logo hint')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PNG', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'JPG', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'WebP', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_upload', 'Upload logo', 'en', 'organization branding logo upload action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_upload'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Logo hochladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_upload'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Carica logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_upload'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_uploading', 'Uploading…', 'en', 'organization branding logo uploading state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploading…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird hochgeladen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_remove', 'Remove logo', 'en', 'organization branding logo remove action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Logo entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_uploaded', 'Logo uploaded.', 'en', 'organization branding logo upload toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Logo uploaded.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_uploaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Logo hochgeladen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_uploaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Logo caricato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_uploaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_removed', 'Logo removed.', 'en', 'organization branding logo remove toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Logo removed.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_removed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Logo entfernt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_removed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Logo rimosso.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_removed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.logo_alt', 'Organization logo', 'en', 'organization branding logo image alt')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organization logo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_alt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisationslogo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_alt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Logo organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.logo_alt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.colors_title', 'Theme colors', 'en', 'organization branding colors group title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Theme colors', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.colors_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Designfarben', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.colors_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Colori del tema', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.colors_title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.colors_hint', 'Override workspace primary', 'en', 'organization branding colors hint')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Override workspace primary', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.colors_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'accent', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.colors_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'and background. Reset restores Feldpost defaults.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.colors_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.preview', 'Branding preview', 'en', 'organization branding preview aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Branding preview', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Branding-Vorschau', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Anteprima branding', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.preview_name', 'Your organization', 'en', 'organization branding preview placeholder name')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Your organization', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_name'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Deine Organisation', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_name'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La tua organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_name'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.preview_chip', 'Workspace', 'en', 'organization branding preview chip label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Workspace', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_chip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Arbeitsbereich', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_chip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Area di lavoro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_chip'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.preview_hint', 'Live preview of logo and colors before you save.', 'en', 'organization branding preview hint')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Live preview of logo and colors before you save.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Live-Vorschau von Logo und Farben vor dem Speichern.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Anteprima live di logo e colori prima del salvataggio.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.preview_hint'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

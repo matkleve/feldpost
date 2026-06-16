@@ -23,7 +23,6 @@ export class OrganizationProfileSectionComponent {
   readonly saved = output<Partial<OrganizationProfile>>();
 
   draftName = '';
-  draftLogoUrl = '';
   draftDescription = '';
   draftIndustry = '';
   draftEmail = '';
@@ -40,7 +39,6 @@ export class OrganizationProfileSectionComponent {
       const profile = this.profile();
       if (!profile) return;
       this.draftName = profile.name;
-      this.draftLogoUrl = profile.logoUrl ?? '';
       this.draftDescription = profile.description ?? '';
       this.draftIndustry = profile.industry ?? '';
       this.draftEmail = profile.email ?? '';
@@ -57,7 +55,6 @@ export class OrganizationProfileSectionComponent {
   onSave(): void {
     this.saved.emit({
       name: this.draftName.trim(),
-      logoUrl: this.draftLogoUrl.trim() || null,
       description: this.draftDescription.trim() || null,
       industry: this.draftIndustry.trim() || null,
       email: this.draftEmail.trim() || null,

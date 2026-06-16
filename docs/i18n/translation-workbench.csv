@@ -839,7 +839,21 @@ organization.roles.create_button,Create role,organization roles create action,Cr
 organization.roles.delete_confirm.title,Delete role?,organization roles confirm title,Delete role?,Rolle löschen?,Eliminare il ruolo?
 organization.roles.delete_confirm.message,This role will be removed permanently. Users assigned to it must be reassigned first.,organization roles confirm body,This role will be removed permanently. Users assigned to it must be reassigned first.,Diese Rolle wird dauerhaft entfernt. Zugewiesene Nutzer müssen zuerst neu zugewiesen werden.,Questo ruolo verrà rimosso definitivamente. Gli utenti assegnati devono essere riassegnati prima.
 organization.branding.title,Branding,organization branding section title,Branding,Branding,Branding
-organization.branding.subtitle,Organization color overrides applied to the workspace theme.,organization branding section subtitle,Organization color overrides applied to the workspace theme.,Organisationsfarben werden auf das Arbeitsbereich-Design angewendet.,I colori dell'organizzazione si applicano al tema dell'area di lavoro.
+organization.branding.subtitle,Logo and theme colors applied across your workspace.,organization branding section subtitle,Logo and theme colors applied across your workspace.,Logo und Designfarben für deinen Arbeitsbereich.,Logo e colori del tema applicati all'area di lavoro.
+organization.branding.logo_title,Logo,organization branding logo group title,Logo,Logo,Logo
+organization.branding.logo_hint,PNG JPG WebP or SVG. Max 2 MB. Shown in navigation and exports.,organization branding logo hint,PNG, JPG, WebP, or SVG. Max 2 MB. Shown in navigation and exports.,PNG, JPG, WebP oder SVG. Max. 2 MB. Wird in Navigation und Exporten angezeigt.,PNG, JPG, WebP o SVG. Max 2 MB. Mostrato in navigazione ed esportazioni.
+organization.branding.logo_upload,Upload logo,organization branding logo upload action,Upload logo,Logo hochladen,Carica logo
+organization.branding.logo_uploading,Uploading…,organization branding logo uploading state,Uploading…,Wird hochgeladen…,Caricamento…
+organization.branding.logo_remove,Remove logo,organization branding logo remove action,Remove logo,Logo entfernen,Rimuovi logo
+organization.branding.logo_uploaded,Logo uploaded.,organization branding logo upload toast,Logo uploaded.,Logo hochgeladen.,Logo caricato.
+organization.branding.logo_removed,Logo removed.,organization branding logo remove toast,Logo removed.,Logo entfernt.,Logo rimosso.
+organization.branding.logo_alt,Organization logo,organization branding logo image alt,Organization logo,Organisationslogo,Logo organizzazione
+organization.branding.colors_title,Theme colors,organization branding colors group title,Theme colors,Designfarben,Colori del tema
+organization.branding.colors_hint,Override workspace primary accent and background. Reset restores Feldpost defaults.,organization branding colors hint,Override workspace primary, accent, and background. Reset restores Feldpost defaults.,Überschreibe Primär-, Akzent- und Hintergrundfarbe. Zurücksetzen stellt Feldpost-Standard wieder her.,Sostituisci primario, accento e sfondo. Il ripristino ripristina i valori predefiniti Feldpost.
+organization.branding.preview,Branding preview,organization branding preview aria,Branding preview,Branding-Vorschau,Anteprima branding
+organization.branding.preview_name,Your organization,organization branding preview placeholder name,Your organization,Deine Organisation,La tua organizzazione
+organization.branding.preview_chip,Workspace,organization branding preview chip label,Workspace,Arbeitsbereich,Area di lavoro
+organization.branding.preview_hint,Live preview of logo and colors before you save.,organization branding preview hint,Live preview of logo and colors before you save.,Live-Vorschau von Logo und Farben vor dem Speichern.,Anteprima live di logo e colori prima del salvataggio.
 organization.branding.primary,Primary color,organization branding field label,Primary color,Primärfarbe,Colore primario
 organization.branding.accent,Accent color,organization branding field label,Accent color,Akzentfarbe,Colore di accento
 organization.branding.background,Background color,organization branding field label,Background color,Hintergrundfarbe,Colore di sfondo

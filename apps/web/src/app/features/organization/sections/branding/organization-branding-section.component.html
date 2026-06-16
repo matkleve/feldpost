@@ -1,7 +1,7 @@
-<section class="org-section">
+<section class="org-branding org-section org-section--wide">
   <header class="org-section__header">
     <h2 class="org-section__title">{{ t('organization.branding.title', 'Branding') }}</h2>
-    <p>{{ t('organization.branding.subtitle', 'Organization color overrides applied to the workspace theme.') }}</p>
+    <p>{{ t('organization.branding.subtitle', 'Logo and theme colors applied across your workspace.') }}</p>
   </header>
 
   @if (!canEdit()) {
@@ -20,48 +20,146 @@
       </button>
     </div>
   } @else {
-    <form class="org-section__form" (ngSubmit)="onSave()">
-      <div hlmFormField class="org-section__color-field">
-        <label hlmLabel for="brand-primary">{{ t('organization.branding.primary', 'Primary color') }}</label>
-        <input
-          id="brand-primary"
-          type="color"
-          [ngModel]="primaryColor() || feldpostDefaults.primaryColor"
-          (ngModelChange)="primaryColor.set($event)"
-          name="primary"
-          [disabled]="!canEdit()"
-        />
-      </div>
-      <div hlmFormField class="org-section__color-field">
-        <label hlmLabel for="brand-accent">{{ t('organization.branding.accent', 'Accent color') }}</label>
-        <input
-          id="brand-accent"
-          type="color"
-          [ngModel]="accentColor() || feldpostDefaults.accentColor"
-          (ngModelChange)="accentColor.set($event)"
-          name="accent"
-          [disabled]="!canEdit()"
-        />
-      </div>
-      <div hlmFormField class="org-section__color-field">
-        <label hlmLabel for="brand-bg">{{ t('organization.branding.background', 'Background color') }}</label>
-        <input
-          id="brand-bg"
-          type="color"
-          [ngModel]="backgroundColor() || feldpostDefaults.backgroundColor"
-          (ngModelChange)="backgroundColor.set($event)"
-          name="background"
-          [disabled]="!canEdit()"
-        />
-      </div>
-      @if (canEdit()) {
-        <div class="org-section__actions">
-          <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
-          <button hlmBtn type="button" variant="outline" (click)="onReset()">
-            {{ t('organization.branding.reset', 'Reset to Feldpost defaults') }}
-          </button>
+    <form class="org-branding__layout" (ngSubmit)="onSave()">
+      <aside
+        class="org-branding__preview"
+        [attr.aria-label]="t('organization.branding.preview', 'Branding preview')"
+        [style.--preview-primary]="previewPrimary()"
+        [style.--preview-accent]="previewAccent()"
+        [style.--preview-background]="previewBackground()"
+      >
+        <div class="org-branding__preview-card">
+          <div class="org-branding__preview-logo" [class.org-branding__preview-logo--empty]="!logoUrl()">
+            @if (logoUrl(); as logo) {
+              <img [src]="logo" [alt]="t('organization.branding.logo_alt', 'Organization logo preview')" />
+            } @else {
+              <span class="material-icons" aria-hidden="true">business</span>
+            }
+          </div>
+          <p class="org-branding__preview-name">{{ organizationName() || t('organization.branding.preview_name', 'Your organization') }}</p>
+          <span class="org-branding__preview-chip">{{ t('organization.branding.preview_chip', 'Workspace') }}</span>
         </div>
-      }
+        <p class="org-branding__preview-hint">{{ t('organization.branding.preview_hint', 'Live preview of logo and colors before you save.') }}</p>
+      </aside>
+
+      <div class="org-branding__controls">
+        <section class="org-branding__group">
+          <h3 class="org-branding__group-title">{{ t('organization.branding.logo_title', 'Logo') }}</h3>
+          <p class="org-branding__group-lead">{{ t('organization.branding.logo_hint', 'PNG, JPG, WebP, or SVG. Max 2 MB. Shown in navigation and exports.') }}</p>
+
+          <div class="org-branding__logo-row">
+            <div class="org-branding__logo-thumb" [class.org-branding__logo-thumb--empty]="!logoUrl()">
+              @if (logoUrl(); as logo) {
+                <img [src]="logo" [alt]="t('organization.branding.logo_alt', 'Organization logo')" />
+              } @else {
+                <span class="material-icons" aria-hidden="true">image</span>
+              }
+            </div>
+
+            @if (canEdit()) {
+              <div class="org-branding__logo-actions">
+                <label class="org-branding__upload-btn" [class.org-branding__upload-btn--busy]="logoUploading()">
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden (change)="onLogoSelected($event)" [disabled]="logoUploading()" />
+                  {{ logoUploading() ? t('organization.branding.logo_uploading', 'Uploading…') : t('organization.branding.logo_upload', 'Upload logo') }}
+                </label>
+                @if (logoUrl()) {
+                  <button hlmBtn type="button" variant="outline" [disabled]="logoUploading()" (click)="onRemoveLogo()">
+                    {{ t('organization.branding.logo_remove', 'Remove logo') }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="org-branding__group">
+          <h3 class="org-branding__group-title">{{ t('organization.branding.colors_title', 'Theme colors') }}</h3>
+          <p class="org-branding__group-lead">{{ t('organization.branding.colors_hint', 'Override workspace primary, accent, and background. Reset restores Feldpost defaults.') }}</p>
+
+          <div class="org-branding__color-grid">
+            <div class="org-branding__color-row">
+              <label class="org-branding__color-label" for="brand-primary">{{ t('organization.branding.primary', 'Primary color') }}</label>
+              <input
+                id="brand-primary"
+                class="org-branding__color-swatch"
+                type="color"
+                [ngModel]="colorValue('primaryColor')"
+                (ngModelChange)="onColorPickerChange('primaryColor', $event)"
+                name="primary"
+                [disabled]="!canEdit()"
+              />
+              <input
+                hlmInput
+                class="org-branding__color-hex"
+                type="text"
+                [ngModel]="colorValue('primaryColor')"
+                (ngModelChange)="onColorHexChange('primaryColor', $event)"
+                name="primaryHex"
+                [disabled]="!canEdit()"
+                spellcheck="false"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="org-branding__color-row">
+              <label class="org-branding__color-label" for="brand-accent">{{ t('organization.branding.accent', 'Accent color') }}</label>
+              <input
+                id="brand-accent"
+                class="org-branding__color-swatch"
+                type="color"
+                [ngModel]="colorValue('accentColor')"
+                (ngModelChange)="onColorPickerChange('accentColor', $event)"
+                name="accent"
+                [disabled]="!canEdit()"
+              />
+              <input
+                hlmInput
+                class="org-branding__color-hex"
+                type="text"
+                [ngModel]="colorValue('accentColor')"
+                (ngModelChange)="onColorHexChange('accentColor', $event)"
+                name="accentHex"
+                [disabled]="!canEdit()"
+                spellcheck="false"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="org-branding__color-row">
+              <label class="org-branding__color-label" for="brand-bg">{{ t('organization.branding.background', 'Background color') }}</label>
+              <input
+                id="brand-bg"
+                class="org-branding__color-swatch"
+                type="color"
+                [ngModel]="colorValue('backgroundColor')"
+                (ngModelChange)="onColorPickerChange('backgroundColor', $event)"
+                name="background"
+                [disabled]="!canEdit()"
+              />
+              <input
+                hlmInput
+                class="org-branding__color-hex"
+                type="text"
+                [ngModel]="colorValue('backgroundColor')"
+                (ngModelChange)="onColorHexChange('backgroundColor', $event)"
+                name="backgroundHex"
+                [disabled]="!canEdit()"
+                spellcheck="false"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </section>
+
+        @if (canEdit()) {
+          <div class="org-section__actions org-branding__actions">
+            <button hlmBtn type="submit">{{ t('common.save', 'Save colors') }}</button>
+            <button hlmBtn type="button" variant="outline" (click)="onReset()">
+              {{ t('organization.branding.reset', 'Reset to Feldpost defaults') }}
+            </button>
+          </div>
+        }
+      </div>
     </form>
   }
 </section>

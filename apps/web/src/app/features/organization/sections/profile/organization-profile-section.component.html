@@ -18,11 +18,6 @@
       </div>
 
       <div hlmFormField>
-        <label hlmLabel for="org-logo">{{ t('organization.profile.logo_url', 'Logo URL') }}</label>
-        <input hlmInput id="org-logo" name="orgLogo" [(ngModel)]="draftLogoUrl" [disabled]="!canEdit()" />
-      </div>
-
-      <div hlmFormField>
         <label hlmLabel for="org-description">{{ t('organization.profile.description', 'Description') }}</label>
         <textarea hlmInput id="org-description" name="orgDescription" rows="3" [(ngModel)]="draftDescription" [disabled]="!canEdit()"></textarea>
       </div>

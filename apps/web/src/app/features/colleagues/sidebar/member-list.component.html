@@ -21,9 +21,9 @@
     (valueChange)="searchQuery.set($event)"
   />
 
-  <div pageRailBody>
-    <app-rail-section
-      icon="tag"
+  <app-rail-section
+    pageRailBody
+    icon="tag"
       [label]="t('colleagues.channels.title', 'Channels')"
       [expanded]="channelsExpanded()"
       (expandedChange)="channelsExpanded.set($event)"
@@ -53,6 +53,7 @@
     </app-rail-section>
 
     <app-rail-section
+      pageRailBody
       icon="chat_bubble_outline"
       [label]="t('colleagues.direct_messages.title', 'Direct messages')"
       [expanded]="dmExpanded()"
@@ -77,5 +78,4 @@
         <app-rail-status [message]="t('colleagues.direct_messages.empty', 'No direct messages')" />
       }
     </app-rail-section>
-  </div>
 </app-page-rail>

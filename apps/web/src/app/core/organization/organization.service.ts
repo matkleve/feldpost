@@ -55,6 +55,57 @@ export class OrganizationService {
     return { data: this.toProfile(data), error: null };
   }
 
+  async uploadOrganizationLogo(file: File): Promise<{ data: string | null; error: Error | null }> {
+    const allowed = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']);
+    if (!allowed.has(file.type)) {
+      return { data: null, error: new Error('Unsupported logo file type.') };
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      return { data: null, error: new Error('Logo must be 2 MB or smaller.') };
+    }
+
+    const profile = await this.loadProfile();
+    if (!profile.data) {
+      return { data: null, error: profile.error ?? new Error('Organization missing.') };
+    }
+
+    const orgId = profile.data.id;
+    const ext = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/svg+xml' ? 'svg' : file.type.split('/')[1] ?? 'png';
+    const path = `${orgId}/logo.${ext}`;
+
+    const { error: uploadError } = await this.supabase.client.storage
+      .from('org-branding')
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) {
+      return { data: null, error: new Error(uploadError.message) };
+    }
+
+    const { data: publicData } = this.supabase.client.storage.from('org-branding').getPublicUrl(path);
+    const cacheBustedUrl = `${publicData.publicUrl}?v=${Date.now()}`;
+    const update = await this.updateProfile({ logoUrl: cacheBustedUrl });
+    if (update.error) {
+      return { data: null, error: update.error };
+    }
+
+    return { data: cacheBustedUrl, error: null };
+  }
+
+  async removeOrganizationLogo(): Promise<{ error: Error | null }> {
+    const profile = await this.loadProfile();
+    if (!profile.data) {
+      return { error: profile.error ?? new Error('Organization missing.') };
+    }
+
+    const orgId = profile.data.id;
+    await this.supabase.client.storage
+      .from('org-branding')
+      .remove(['png', 'jpg', 'jpeg', 'webp', 'svg'].map((ext) => `${orgId}/logo.${ext}`));
+
+    const update = await this.updateProfile({ logoUrl: null });
+    return { error: update.error };
+  }
+
   async loadBranding(): Promise<{ data: OrgBranding | null; error: Error | null }> {
     const { data, error } = await this.supabase.client.from('org_branding').select('*').maybeSingle();
 

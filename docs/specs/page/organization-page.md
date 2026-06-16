@@ -94,7 +94,7 @@ RLS is authoritative; UI gates are progressive disclosure only.
 - [x] Roles section does not reserve an empty right rail.
 - [x] Export jobs complete via `process_org_export_job` and download from payload.
 - [x] Branding colors apply to document CSS variables on load and save; reset restores Feldpost defaults.
-- [ ] Logo file upload to storage (URL field shipped; upload deferred).
+- [x] Logo upload on Branding section (`org-branding` storage bucket + profile `logo_url`).
 - [ ] API key authentication endpoint (keys stored; validation deferred).
 
 ## Settings
