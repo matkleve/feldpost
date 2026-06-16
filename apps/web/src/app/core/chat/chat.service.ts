@@ -109,6 +109,8 @@ export class ChatService {
     const cached = this.messageCache.get(channelId);
     if (cached) {
       this.liveMessages.set(cached);
+      void this.refreshMessages(channelId, limit);
+      return { data: cached, error: null };
     }
 
     const result = await this.messagesAdapter.loadMessages(channelId, limit);
@@ -117,6 +119,10 @@ export class ChatService {
       this.messageCache.set(channelId, result.data);
     }
     return result;
+  }
+
+  peekMembers(channelId: string): ChatChannelMember[] | undefined {
+    return this.membersCache.get(channelId);
   }
 
   async loadThreadReplies(parentId: string): Promise<{ data: ChatMessage[]; error: Error | null }> {
@@ -212,8 +218,14 @@ export class ChatService {
   subscribeToChannel(channelId: string): void {
     if (this.subscribedChannelId === channelId && this.realtimeChannel) return;
 
-    this.unsubscribe();
+    if (this.realtimeChannel) {
+      this.realtimeAdapter.removeChannel(this.realtimeChannel);
+      this.realtimeChannel = null;
+    }
+    this.typingUserIds.set(new Set());
+    this.searchResults.set([]);
     this.subscribedChannelId = channelId;
+    this.liveMessages.set(this.messageCache.get(channelId) ?? []);
 
     const currentUserId = this.authService.user()?.id;
     this.realtimeChannel = this.realtimeAdapter.subscribeToChannel(channelId, {
@@ -293,6 +305,14 @@ export class ChatService {
 
   private syncCache(channelId: string): void {
     this.messageCache.set(channelId, this.liveMessages());
+  }
+
+  private async refreshMessages(channelId: string, limit: number): Promise<void> {
+    const result = await this.messagesAdapter.loadMessages(channelId, limit);
+    if (!result.error && this.subscribedChannelId === channelId) {
+      this.liveMessages.set(result.data);
+      this.messageCache.set(channelId, result.data);
+    }
   }
 
   removeChannel(channel: RealtimeChannel): void {

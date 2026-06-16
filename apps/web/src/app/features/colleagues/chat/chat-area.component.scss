@@ -6,9 +6,11 @@
   display: flex;
   min-height: 0;
   min-width: 0;
+  width: 100%;
   flex: 1 1 auto;
   flex-direction: column;
   background: var(--background);
+  overflow: hidden;
 }
 
 .chat-area__main {
@@ -461,7 +463,7 @@
   font-size: var(--font-size-2xs);
 }
 
-@container chat-area (max-width: 28rem) {
+@container chat-area (max-width: 30rem) {
   .chat-area__messages,
   .chat-area__files,
   .chat-area__composer,
@@ -471,7 +473,11 @@
     padding-inline: var(--spacing-3);
   }
 
+  .chat-area__composer-bar {
+    align-items: flex-end;
+  }
+
   .chat-area__composer-project select {
-    max-width: 6rem;
+    max-width: 5.5rem;
   }
 }

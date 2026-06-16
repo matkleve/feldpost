@@ -320,6 +320,13 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.exitInvitesIfActive();
     this.rightRailInspector.set('closed');
     this.inspectorMemberId.set(null);
+
+    const existing = this.findDmChannelForMember(memberId);
+    if (existing) {
+      await this.selectChannel(existing.id);
+      return;
+    }
+
     const result = await this.chatService.findOrCreateDm(memberId);
     if (result.error) {
       this.toastService.show({
@@ -481,18 +488,24 @@ export class ColleaguesPageComponent implements OnDestroy {
     this.selectedChannelId.set(channelId);
     this.teardownPresence();
     this.chatService.subscribeToChannel(channelId);
-    this.channelMembersLoading.set(true);
 
-    // All three are independent — run in parallel
-    const [, , membersResult] = await Promise.all([
-      this.chatService.loadMessages(channelId),
-      this.chatService.markChannelRead(channelId),
-      this.chatService.loadChannelMembers(channelId),
-    ]);
+    const cachedMembers = this.chatService.peekMembers(channelId);
+    if (cachedMembers) {
+      this.channelMembers.set(cachedMembers);
+      this.channelMembersLoading.set(false);
+    } else {
+      this.channelMembersLoading.set(true);
+    }
 
+    void this.chatService.markChannelRead(channelId);
     this.channels.update((list) =>
       list.map((ch) => (ch.id === channelId ? { ...ch, unreadCount: 0 } : ch)),
     );
+
+    const [, membersResult] = await Promise.all([
+      this.chatService.loadMessages(channelId),
+      cachedMembers ? Promise.resolve({ data: cachedMembers, error: null }) : this.chatService.loadChannelMembers(channelId),
+    ]);
 
     this.channelMembersLoading.set(false);
     if (membersResult.error) {
@@ -501,13 +514,19 @@ export class ColleaguesPageComponent implements OnDestroy {
         message: this.t('colleagues.chat.error.load_members', 'Could not load channel members.'),
         detail: membersResult.error.message,
       });
-    } else {
+    } else if (!cachedMembers) {
       this.channelMembers.set(membersResult.data);
     }
 
     this.presenceChannel = this.chatService.subscribePresence(channelId, (online) => {
       this.onlineUserIds.set(online);
     });
+  }
+
+  private findDmChannelForMember(memberId: string): ChatChannel | undefined {
+    return this.channels().find(
+      (channel) => channel.type === 'dm' && channel.dmPeerUserId === memberId,
+    );
   }
 
   private async loadChannelMembers(channelId: string): Promise<void> {

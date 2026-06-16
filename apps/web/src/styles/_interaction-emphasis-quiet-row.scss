@@ -1,21 +1,22 @@
 // Quiet-row interaction emphasis — ink and fill only (geometry stays in component SCSS).
 // @see docs/design/state-visuals.md § Interaction emphasis
 
-// Hover / keyboard highlight — primary attention
+// Hover / keyboard highlight — warm gold ambient (--brand-gold); does NOT use --primary (blue).
+// Hover = warm invitation signal. Selected = cool blue definitive state. Keep distinct.
 // @see docs/design/state-visuals.md § Interaction emphasis
 @mixin hover($bg-percent: 10%) {
-  background: color-mix(in srgb, var(--primary) #{$bg-percent}, transparent);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--brand-gold) #{$bg-percent}, transparent);
+  color: var(--brand-gold);
 }
 
-// Persistent selected / active — cool selection ink
+// Persistent selected / active — --primary (blue) via --interaction-selected-ink.
 // @see docs/design/state-visuals.md § Interaction emphasis
 @mixin selected($bg-percent: 10%) {
   background: color-mix(in srgb, var(--interaction-selected-ink) #{$bg-percent}, transparent);
   color: var(--interaction-selected-ink);
 }
 
-// Selected row while hovered — primary wins
+// Selected row while hovered — primary (blue) wins over hover gold.
 // @see docs/design/state-visuals.md § Interaction emphasis
 @mixin selected-hover($bg-percent: 10%) {
   background: color-mix(in srgb, var(--primary) #{$bg-percent}, transparent);

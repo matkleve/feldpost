@@ -127,10 +127,10 @@
 
   // Interaction-level semantic tokens (dark derives from already-dark semantic vars)
   --menu-border-subtle: color-mix(in srgb, var(--border) 72%, transparent);
-  --menu-item-hover: color-mix(in srgb, var(--primary) 8%, transparent);
+  --menu-item-hover: color-mix(in srgb, var(--brand-gold) 8%, transparent);
   --menu-item-text: var(--foreground);
   --action-text: var(--muted-foreground);
-  --action-hover: color-mix(in srgb, var(--primary) 12%, transparent);
+  --action-hover: color-mix(in srgb, var(--brand-gold) 12%, transparent);
   --section-text: var(--muted-foreground);
 }
 
@@ -235,10 +235,10 @@
   // Interaction-level semantic tokens — components consume these directly
   // @see .cursor/rules/token-usage-gate.mdc
   --menu-border-subtle: color-mix(in srgb, var(--border) 72%, transparent);
-  --menu-item-hover: color-mix(in srgb, var(--primary) 8%, transparent);
+  --menu-item-hover: color-mix(in srgb, var(--brand-gold) 8%, transparent);
   --menu-item-text: var(--foreground);
   --action-text: var(--muted-foreground);
-  --action-hover: color-mix(in srgb, var(--primary) 12%, transparent);
+  --action-hover: color-mix(in srgb, var(--brand-gold) 12%, transparent);
 }
 
 // ── Dark mode token overrides ──────────────────────────────────────────────────
