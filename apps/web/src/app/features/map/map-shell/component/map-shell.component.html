@@ -18,11 +18,11 @@
       brnToggleGroup
       type="single"
       [nullable]="false"
-      [value]="mapViewMode()"
+      [value]="basemapService.mapViewMode()"
       (valueChange)="onMapViewModeChange($event)"
       aria-label="Map style"
     >
-      @for (option of mapViewOptions(); track option.id) {
+      @for (option of basemapService.mapViewOptions(); track option.id) {
         <button
           hlmToggleGroupItem
           size="icon"

@@ -78,8 +78,6 @@ import { ProjectSelectDialogComponent } from '../../../../shared/project-select-
 import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
-import type { ToggleGroupOption } from '../../../../shared/ui/toggle-group/toggle-group-option.types';
-import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
@@ -114,8 +112,7 @@ import { MarkerContextPhotoDeleteService } from '../markers/marker-context-photo
 import { PhotoMarkerIconStateService } from '../markers/photo-marker-icon-state.service';
 import { MarkerSelectionSyncService } from '../markers/marker-selection-sync.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
-import { MapBasemapPreference, MapPreferencesService } from '../leaflet/map-preferences.service';
-import { MapBasemapLayerService } from '../leaflet/map-basemap-layer.service';
+import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapCircle,
   MapDivIcon,
@@ -127,7 +124,6 @@ import {
   MapMouseEvent,
   MapPoint,
   MapPolyline,
-  MapTileLayer,
   MapLeafletService,
 } from '../leaflet/map-leaflet.service';
 import { MapFocusPayloadService } from '../context-menu/map-focus-payload.service';
@@ -168,7 +164,6 @@ import type {
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 
 type MarkerMotionPreference = 'off' | 'smooth';
-type MapViewMode = 'street' | 'photo';
 
 type ViewportMarkerRow = {
   cluster_lat: number;
@@ -202,7 +197,6 @@ type MarkerRenderSnapshot = {
 
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
-const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
 
 @Component({
   selector: 'app-map-shell',
@@ -288,8 +282,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly markerMotionService = inject(MarkerMotionService);
   private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
-  private readonly mapPreferencesService = inject(MapPreferencesService);
-  private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
+  readonly basemapService = inject(MapShellBasemapService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
   private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
@@ -468,31 +461,6 @@ export class MapShellComponent implements OnDestroy {
   readonly gpsLocating = signal(false);
   /** True when GPS tracking mode is enabled via the toggle button. */
   readonly gpsTrackingActive = signal(false);
-  readonly mapBasemap = signal<MapBasemapPreference>(
-    this.mapPreferencesService.readBasemapPreference(MAP_BASEMAP_STORAGE_KEY),
-  );
-  readonly mapViewOptions = computed<ReadonlyArray<ToggleGroupOption>>(() => [
-    {
-      id: 'street',
-      label: 'Street',
-      icon: 'map',
-      ariaLabel: 'Street map',
-      title: 'Street map',
-    },
-    {
-      id: 'photo',
-      label: 'Photo',
-      icon: 'satellite_alt',
-      ariaLabel: 'Photo map',
-      title: 'Photo map',
-    },
-  ]);
-  readonly mapViewMode = computed<MapViewMode>(() => {
-    if (this.mapBasemap() === 'satellite') {
-      return 'photo';
-    }
-    return 'street';
-  });
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -659,7 +627,6 @@ export class MapShellComponent implements OnDestroy {
 
   /** LayerGroup for all photo markers — enables batch add/remove. */
   private photoMarkerLayer: MapLayerGroup | null = null;
-  private activeBaseTileLayer: MapTileLayer | null = null;
   private radiusDrawStartLatLng: MapLatLng | null = null;
   private radiusDrawActive = false;
   private radiusDrawAdditive = false;
@@ -2151,34 +2118,8 @@ export class MapShellComponent implements OnDestroy {
     );
   }
 
-  toggleMapBasemap(): void {
-    const next: MapBasemapPreference = this.mapBasemap() === 'default' ? 'satellite' : 'default';
-    this.mapBasemap.set(next);
-    this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, next);
-    this.applyMapBasemapLayer();
-  }
-
-  setMapViewMode(mode: MapViewMode): void {
-    const previousBasemap = this.mapBasemap();
-
-    if (mode === 'photo') {
-      this.mapBasemap.set('satellite');
-    } else {
-      this.mapBasemap.set('default');
-    }
-
-    this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, this.mapBasemap());
-
-    if (this.mapBasemap() !== previousBasemap) {
-      this.applyMapBasemapLayer();
-    }
-  }
-
   onMapViewModeChange(raw: ToggleValue<string>): void {
-    const mode = toggleSingleStringValue(raw);
-    if (mode === 'street' || mode === 'photo') {
-      this.setMapViewMode(mode);
-    }
+    this.basemapService.onViewModeChange(raw, this.map);
   }
 
   onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
@@ -2388,12 +2329,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private applyMapBasemapLayer(): void {
-    const result = this.mapBasemapLayerService.applyBasemapLayer({
-      map: this.map,
-      activeBaseTileLayer: this.activeBaseTileLayer,
-      basemap: this.mapBasemap(),
-    });
-    this.activeBaseTileLayer = result.activeBaseTileLayer;
+    this.basemapService.applyToMap(this.map);
   }
 
   private applyPendingMapFocus(): void {
