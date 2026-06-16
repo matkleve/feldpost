@@ -113,6 +113,7 @@ import { MarkerSelectionSyncService } from '../markers/marker-selection-sync.ser
 import { MarkerMotionService } from '../markers/marker-motion.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
 import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
+import { MapThumbnailLoaderService } from '../markers/map-thumbnail-loader.service';
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapCircle,
@@ -266,6 +267,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly markerMotionService = inject(MarkerMotionService);
   private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
+  private readonly thumbnailLoaderService = inject(MapThumbnailLoaderService);
   readonly basemapService = inject(MapShellBasemapService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
@@ -2105,6 +2107,11 @@ export class MapShellComponent implements OnDestroy {
       getMarkers: () => this.uploadedPhotoMarkers,
     });
 
+    this.thumbnailLoaderService.bind({
+      getMap: () => this.map,
+      getMarkers: () => this.uploadedPhotoMarkers,
+    });
+
     this.searchService.updateViewportBounds(this.map);
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
@@ -3139,7 +3146,7 @@ export class MapShellComponent implements OnDestroy {
       state.optimistic = false;
     }
 
-    this.maybeLoadThumbnails();
+    this.thumbnailLoaderService.maybeLoadThumbnails();
     this.flushPendingZoomHighlight();
     this.refreshActiveWorkspaceHoverLink();
 
@@ -3217,7 +3224,7 @@ export class MapShellComponent implements OnDestroy {
     );
 
     this.pruneStaleSelectedMarkerKeys();
-    this.maybeLoadThumbnails();
+    this.thumbnailLoaderService.maybeLoadThumbnails();
     this.refreshActiveWorkspaceHoverLink();
 
     if (
@@ -3713,109 +3720,6 @@ export class MapShellComponent implements OnDestroy {
    * Only requests signed URLs for markers without a URL yet, and proactively
    * refreshes URLs older than 50 minutes.
    */
-  private maybeLoadThumbnails(): void {
-    if (!this.map) return;
-
-    const bounds = this.map.getBounds();
-    const staleThreshold = 50 * 60 * 1000; // 50 minutes
-
-    this.mediaDownloadService.invalidateStale(staleThreshold);
-
-    for (const [key, state] of this.uploadedPhotoMarkers) {
-      if (!this.isSingleMarkerInBounds(state, bounds)) continue;
-      this.clearStaleThumbnailIfNeeded(state, staleThreshold);
-      this.scheduleThumbnailLoadIfNeeded(key, state);
-    }
-  }
-
-  private isSingleMarkerInBounds(
-    state: { count: number; lat: number; lng: number },
-    bounds: MapLatLngBounds,
-  ): boolean {
-    return state.count === 1 && bounds.contains([state.lat, state.lng]);
-  }
-
-  private clearStaleThumbnailIfNeeded(
-    state: { thumbnailUrl?: string; signedAt?: number },
-    staleThreshold: number,
-  ): void {
-    if (!state.thumbnailUrl || !state.signedAt) {
-      return;
-    }
-    if (Date.now() - state.signedAt <= staleThreshold) {
-      return;
-    }
-
-    // Proactively clear stale URLs so they get re-signed.
-    state.thumbnailUrl = undefined;
-    state.signedAt = undefined;
-  }
-
-  private scheduleThumbnailLoadIfNeeded(
-    key: string,
-    state: {
-      thumbnailSourcePath?: string;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      signedAt?: number;
-    },
-  ): void {
-    if (state.thumbnailUrl || !state.thumbnailSourcePath || state.thumbnailLoading) {
-      return;
-    }
-    void this.lazyLoadThumbnail(key, state);
-  }
-
-  /**
-   * Fetch a signed thumbnail URL for one marker with server-side
-   * image transformation (80×80 cover). Updates the marker icon
-   * once the URL is available, or leaves the placeholder on error.
-   */
-  private async lazyLoadThumbnail(
-    key: string,
-    state: {
-      mediaId?: string;
-      thumbnailSourcePath?: string;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      signedAt?: number;
-    },
-  ): Promise<void> {
-    if (!state.thumbnailSourcePath || state.thumbnailUrl || state.thumbnailLoading) return;
-
-    state.thumbnailLoading = true;
-    this.markerRenderService.refreshPhotoMarker(key);
-
-    const mediaId = state.mediaId;
-    if (mediaId) {
-      const cached = this.mediaDownloadService.getCachedUrl(mediaId, 'marker');
-      if (cached) {
-        state.thumbnailLoading = false;
-        state.thumbnailUrl = cached;
-        state.signedAt = Date.now();
-        this.markerRenderService.refreshPhotoMarker(key);
-        return;
-      }
-    }
-
-    const result = mediaId
-      ? await this.mediaDownloadService.resolveMarkerPreview(mediaId, state.thumbnailSourcePath)
-      : await this.mediaDownloadService.getSignedUrl(state.thumbnailSourcePath, 'marker');
-
-    if (result.url) {
-      const loaded = await this.mediaDownloadService.preload(result.url);
-      state.thumbnailLoading = false;
-      if (loaded) {
-        state.thumbnailUrl = result.url;
-        state.signedAt = Date.now();
-      }
-    } else {
-      state.thumbnailLoading = false;
-    }
-    // On error or preload failure: thumbnailUrl stays undefined → placeholder remains visible.
-    this.markerRenderService.refreshPhotoMarker(key);
-  }
-
   private openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
     const position = this.mapContextActionsService.clampContextMenuPosition(clientX, clientY);
     this.state.setRadiusContextMenuOpen(false);
