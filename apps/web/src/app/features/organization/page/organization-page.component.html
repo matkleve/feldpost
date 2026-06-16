@@ -1,9 +1,4 @@
-<app-page-grid
-  [leftRail]="true"
-  [rightRailOpen]="rightRailOpen()"
-  [centerExpanded]="!rightRailOpen()"
-  data-i18n-skip
->
+<app-page-grid [leftRail]="true" data-i18n-skip>
   <app-organization-sidebar
     pageGridLeft
     [sections]="visibleSections()"
@@ -12,12 +7,19 @@
     (sectionSelected)="onSectionSelected($event)"
   />
 
-  <section pageGridCenter class="organization-page__center">
+  <section pageGridCenter class="organization-page__center" aria-live="polite">
     @if (loadError()) {
       <div role="alert" class="organization-page__error">
         <h2>{{ t('organization.page.error.title', 'Could not load organization') }}</h2>
-        <p>{{ loadError() }}</p>
+        <p>{{ t('organization.page.error.message', 'Organization data could not be loaded. Please try again.') }}</p>
+        <button hlmBtn type="button" variant="outline" (click)="refresh()">
+          {{ t('organization.page.error.retry', 'Retry') }}
+        </button>
       </div>
+    } @else if (loading()) {
+      <p class="organization-page__loading" role="status">
+        {{ t('organization.page.loading', 'Loading organization…') }}
+      </p>
     } @else if (visibleSections().length === 0) {
       <div role="status" class="organization-page__error">
         <h2>{{ t('organization.page.no_access.title', 'No organization sections available') }}</h2>
@@ -52,7 +54,7 @@
           <app-organization-integrations-section [canEdit]="canEditActiveSection()" />
         }
         @case ('export') {
-          <app-organization-export-section />
+          <app-organization-export-section [canEdit]="canEditActiveSection()" />
         }
         @case ('audit') {
           <app-organization-audit-section />

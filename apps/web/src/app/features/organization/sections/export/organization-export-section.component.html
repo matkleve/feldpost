@@ -1,25 +1,50 @@
 <section class="org-section">
   <header class="org-section__header">
-    <h1>{{ t('organization.export.title', 'Data export') }}</h1>
+    <h2 class="org-section__title">{{ t('organization.export.title', 'Data export') }}</h2>
     <p>{{ t('organization.export.subtitle', 'Request a full organization export as JSON.') }}</p>
   </header>
 
-  <button hlmBtn type="button" [disabled]="requesting()" (click)="onRequestExport()">
-    {{ t('organization.export.request', 'Request export') }}
-  </button>
-
-  <ul class="org-export__list">
-    @for (job of jobs(); track job.id) {
-      <li>
-        <span>{{ job.createdAt | date: 'medium' }}</span>
-        <span>{{ job.format }}</span>
-        <span>{{ job.status }}</span>
-        @if (job.status === 'completed' && job.payload) {
-          <button hlmBtn variant="outline" type="button" (click)="onDownload(job)">
-            {{ t('organization.export.download', 'Download') }}
-          </button>
-        }
-      </li>
+  @if (loading()) {
+    <p class="org-section__state" role="status">{{ t('organization.section.loading', 'Loading…') }}</p>
+  } @else if (loadError(); as error) {
+    <div class="org-section__state-row">
+      <p class="org-section__state org-section__state--error" role="alert">{{ error }}</p>
+      <button hlmBtn type="button" variant="outline" size="sm" (click)="load()">
+        {{ t('organization.section.retry', 'Retry') }}
+      </button>
+    </div>
+  } @else {
+    @if (canEdit()) {
+      <div class="org-section__toolbar">
+        <button hlmBtn type="button" [disabled]="requesting()" (click)="onRequestExport()">
+          {{ t('organization.export.request', 'Request export') }}
+        </button>
+      </div>
+    } @else {
+      <p class="org-section__notice" role="status">
+        {{ t('organization.export.read_only', 'You need export permission to request new exports.') }}
+      </p>
     }
-  </ul>
+
+    @if (jobs().length > 0) {
+      <ul class="org-section__list">
+        @for (job of jobs(); track job.id) {
+          <li>
+            <span>{{ job.createdAt | date: 'medium' }}</span>
+            <span class="org-export__format">{{ job.format | uppercase }}</span>
+            <app-chip [text]="statusLabel(job.status)" [variant]="statusChipVariant(job.status)" />
+            @if (job.status === 'completed' && job.payload) {
+              <button hlmBtn variant="outline" type="button" (click)="onDownload(job)">
+                {{ t('organization.export.download', 'Download') }}
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="org-section__state" role="status">
+        {{ t('organization.export.empty', 'No exports yet. Request one to download organization data.') }}
+      </p>
+    }
+  }
 </section>

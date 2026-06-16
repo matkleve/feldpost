@@ -1,7 +1,7 @@
 @use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
-// Defines narrow left rail list inside page-grid left column.
-// @see docs/design/page-rail-grid.md
+// Projects-specific toolbar and footer inside shared page-rail shell.
+// @see docs/specs/component/page-rail/page-rail.md
 :host {
   display: flex;
   flex: 1 1 auto;
@@ -9,40 +9,6 @@
   min-height: 0;
   min-width: 0;
   height: 100%;
-}
-
-.projects-sidebar {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-  gap: var(--spacing-3);
-  padding: var(--spacing-4);
-}
-
-.projects-sidebar__dashboard {
-  flex-shrink: 0;
-  width: 100%;
-  justify-content: flex-start;
-  gap: var(--spacing-2);
-  color: var(--muted-foreground);
-  transition:
-    background var(--motion-duration-fast) var(--motion-ease-out),
-    color var(--motion-duration-fast) var(--motion-ease-out);
-
-  &:hover,
-  &:focus-visible {
-    @include emphasis.hover();
-  }
-
-  &--active {
-    @include emphasis.selected();
-  }
-
-  &--active:hover,
-  &--active:focus-visible {
-    @include emphasis.selected-hover();
-  }
 }
 
 .projects-sidebar__toolbar {
@@ -81,37 +47,6 @@
   &--active {
     @include emphasis.selected-bordered(8%, 45%);
   }
-}
-
-// Scrollable project groups — starred section + recency headings.
-// @see docs/design/page-rail-grid.md
-.projects-sidebar__list {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: var(--spacing-1);
-  min-height: 0;
-  overflow-y: auto;
-}
-
-// Small uppercase group label above compact rail lists.
-// @see docs/design/page-rail-grid.md
-.projects-sidebar__group-heading {
-  margin: 0;
-  padding: var(--spacing-2) var(--spacing-2) var(--spacing-1);
-  color: var(--muted-foreground);
-  font-size: var(--font-size-2xs);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.projects-sidebar__status {
-  margin: 0;
-  padding: var(--spacing-3);
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  text-align: center;
 }
 
 .projects-sidebar__footer {

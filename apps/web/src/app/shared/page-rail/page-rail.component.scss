@@ -1,0 +1,30 @@
+// Page-grid left rail column shell — gap, padding, scroll region.
+// @see docs/specs/component/page-rail/page-rail.md
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.page-rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+}
+
+// Scrollable main body for sections, grouped lists, or custom nav rows.
+// @see docs/design/page-rail-grid.md
+.page-rail__scroll {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-height: 0;
+  overflow-y: auto;
+}

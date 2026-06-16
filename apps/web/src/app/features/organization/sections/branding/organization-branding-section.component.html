@@ -1,52 +1,67 @@
 <section class="org-section">
   <header class="org-section__header">
-    <h1>{{ t('organization.branding.title', 'Branding') }}</h1>
+    <h2 class="org-section__title">{{ t('organization.branding.title', 'Branding') }}</h2>
     <p>{{ t('organization.branding.subtitle', 'Organization color overrides applied to the workspace theme.') }}</p>
   </header>
-  <form class="org-section__form" (ngSubmit)="onSave()">
-    <div hlmFormField>
-      <label hlmLabel for="brand-primary">{{ t('organization.branding.primary', 'Primary color') }}</label>
-      <input
-        hlmInput
-        id="brand-primary"
-        type="color"
-        [ngModel]="primaryColor() || feldpostDefaults.primaryColor"
-        (ngModelChange)="primaryColor.set($event)"
-        name="primary"
-        [disabled]="!canEdit()"
-      />
+
+  @if (!canEdit()) {
+    <p class="org-section__notice" role="status">
+      {{ t('organization.branding.read_only', 'You can preview branding. Saving requires organization settings permission.') }}
+    </p>
+  }
+
+  @if (loading()) {
+    <p class="org-section__state" role="status">{{ t('organization.section.loading', 'Loading…') }}</p>
+  } @else if (loadError(); as error) {
+    <div class="org-section__state-row">
+      <p class="org-section__state org-section__state--error" role="alert">{{ error }}</p>
+      <button hlmBtn type="button" variant="outline" size="sm" (click)="load()">
+        {{ t('organization.section.retry', 'Retry') }}
+      </button>
     </div>
-    <div hlmFormField>
-      <label hlmLabel for="brand-accent">{{ t('organization.branding.accent', 'Accent color') }}</label>
-      <input
-        hlmInput
-        id="brand-accent"
-        type="color"
-        [ngModel]="accentColor() || feldpostDefaults.accentColor"
-        (ngModelChange)="accentColor.set($event)"
-        name="accent"
-        [disabled]="!canEdit()"
-      />
-    </div>
-    <div hlmFormField>
-      <label hlmLabel for="brand-bg">{{ t('organization.branding.background', 'Background color') }}</label>
-      <input
-        hlmInput
-        id="brand-bg"
-        type="color"
-        [ngModel]="backgroundColor() || feldpostDefaults.backgroundColor"
-        (ngModelChange)="backgroundColor.set($event)"
-        name="background"
-        [disabled]="!canEdit()"
-      />
-    </div>
-    @if (canEdit()) {
-      <div class="org-section__actions">
-        <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
-        <button hlmBtn type="button" variant="outline" (click)="onReset()">
-          {{ t('organization.branding.reset', 'Reset to Feldpost defaults') }}
-        </button>
+  } @else {
+    <form class="org-section__form" (ngSubmit)="onSave()">
+      <div hlmFormField class="org-section__color-field">
+        <label hlmLabel for="brand-primary">{{ t('organization.branding.primary', 'Primary color') }}</label>
+        <input
+          id="brand-primary"
+          type="color"
+          [ngModel]="primaryColor() || feldpostDefaults.primaryColor"
+          (ngModelChange)="primaryColor.set($event)"
+          name="primary"
+          [disabled]="!canEdit()"
+        />
       </div>
-    }
-  </form>
+      <div hlmFormField class="org-section__color-field">
+        <label hlmLabel for="brand-accent">{{ t('organization.branding.accent', 'Accent color') }}</label>
+        <input
+          id="brand-accent"
+          type="color"
+          [ngModel]="accentColor() || feldpostDefaults.accentColor"
+          (ngModelChange)="accentColor.set($event)"
+          name="accent"
+          [disabled]="!canEdit()"
+        />
+      </div>
+      <div hlmFormField class="org-section__color-field">
+        <label hlmLabel for="brand-bg">{{ t('organization.branding.background', 'Background color') }}</label>
+        <input
+          id="brand-bg"
+          type="color"
+          [ngModel]="backgroundColor() || feldpostDefaults.backgroundColor"
+          (ngModelChange)="backgroundColor.set($event)"
+          name="background"
+          [disabled]="!canEdit()"
+        />
+      </div>
+      @if (canEdit()) {
+        <div class="org-section__actions">
+          <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+          <button hlmBtn type="button" variant="outline" (click)="onReset()">
+            {{ t('organization.branding.reset', 'Reset to Feldpost defaults') }}
+          </button>
+        </div>
+      }
+    </form>
+  }
 </section>

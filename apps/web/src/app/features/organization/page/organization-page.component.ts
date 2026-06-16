@@ -13,6 +13,7 @@ import { ToastService } from '../../../core/toast/toast.service';
 import type { OrganizationProfile } from '../../../core/organization/organization.types';
 import type { OrgPermission, OrgRole } from '../../../core/roles/roles.types';
 import { PageGridComponent } from '../../../shared/page-grid';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { OrganizationSidebarComponent } from '../sidebar/organization-sidebar.component';
 import { OrganizationProfileSectionComponent } from '../sections/profile/organization-profile-section.component';
 import { OrganizationRolesSectionComponent } from '../sections/roles/organization-roles-section.component';
@@ -33,6 +34,7 @@ import {
   standalone: true,
   imports: [
     PageGridComponent,
+    ...HLM_BUTTON_IMPORTS,
     OrganizationSidebarComponent,
     OrganizationProfileSectionComponent,
     OrganizationRolesSectionComponent,
@@ -96,16 +98,6 @@ export class OrganizationPageComponent {
     this.grantedPermissionKeys().has('org.billing.view'),
   );
 
-  readonly selectedRole = computed(() => {
-    const roleId = this.selectedRoleId();
-    if (!roleId) return null;
-    return this.roles().find((role) => role.id === roleId) ?? null;
-  });
-
-  readonly rightRailOpen = computed(
-    () => this.activeSection() === 'roles' && !!this.selectedRoleId(),
-  );
-
   constructor() {
     void this.refresh();
     effect(() => {
@@ -114,6 +106,15 @@ export class OrganizationPageComponent {
       if (this.loading() || visible.length === 0) return;
       if (!visible.some((section) => section.id === active)) {
         void this.router.navigate(['/organization', visible[0].id], { replaceUrl: true });
+      }
+    });
+    effect(() => {
+      const url = this.currentUrl();
+      const match = url.match(/^\/organization\/([^/?#]+)/);
+      const segment = match?.[1];
+      if (!segment) return;
+      if (!ORGANIZATION_SECTIONS.some((section) => section.id === segment)) {
+        void this.router.navigate(['/organization', 'profile'], { replaceUrl: true });
       }
     });
     if (this.router.url === '/organization' || this.router.url.startsWith('/organization?')) {
@@ -144,10 +145,7 @@ export class OrganizationPageComponent {
 
     if (profileResult.error || rolesResult.error || permissionsResult.error) {
       this.loadError.set(
-        profileResult.error?.message ??
-          rolesResult.error?.message ??
-          permissionsResult.error?.message ??
-          'Could not load organization.',
+        this.t('organization.page.error.title', 'Could not load organization'),
       );
       this.loading.set(false);
       return;
@@ -165,10 +163,6 @@ export class OrganizationPageComponent {
 
   onRoleSelected(roleId: string): void {
     this.selectedRoleId.set(roleId);
-  }
-
-  onRolePanelClosed(): void {
-    this.selectedRoleId.set(null);
   }
 
   async onProfileSaved(patch: Partial<OrganizationProfile>): Promise<void> {

@@ -1,42 +1,63 @@
-<section class="org-section">
+<section class="org-section org-section--wide">
   <header class="org-section__header">
-    <h1>{{ t('organization.billing.title', 'Billing') }}</h1>
+    <h2 class="org-section__title">{{ t('organization.billing.title', 'Billing') }}</h2>
     <p>{{ t('organization.billing.subtitle', 'Current plan and invoice history.') }}</p>
   </header>
 
-  @if (subscription(); as sub) {
-    <div class="org-billing__plan">
-      <h2>{{ sub.planName }}</h2>
-      <p>{{ t('organization.billing.status', 'Status') }}: {{ sub.status }}</p>
-      <p>{{ t('organization.billing.storage', 'Storage limit') }}: {{ sub.storageLimitMb }} MB</p>
-      <p>{{ t('organization.billing.members', 'Member limit') }}: {{ sub.memberLimit }}</p>
+  @if (loading()) {
+    <p class="org-section__state" role="status">{{ t('organization.section.loading', 'Loading…') }}</p>
+  } @else if (loadError(); as error) {
+    <div class="org-section__state-row">
+      <p class="org-section__state org-section__state--error" role="alert">{{ error }}</p>
+      <button hlmBtn type="button" variant="outline" size="sm" (click)="load()">
+        {{ t('organization.section.retry', 'Retry') }}
+      </button>
     </div>
-  }
-
-  @if (canViewInvoices()) {
-    <table class="org-billing__table">
-    <thead>
-      <tr>
-        <th>{{ t('organization.billing.invoice_date', 'Date') }}</th>
-        <th>{{ t('organization.billing.invoice_amount', 'Amount') }}</th>
-        <th>{{ t('organization.billing.invoice_status', 'Status') }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (invoice of invoices(); track invoice.id) {
-        <tr>
-          <td>{{ invoice.issuedAt | date: 'mediumDate' }}</td>
-          <td>{{ invoice.amountCents / 100 | number: '1.2-2' }} {{ invoice.currency }}</td>
-          <td>{{ invoice.status }}</td>
-        </tr>
-      } @empty {
-        <tr>
-          <td colspan="3">{{ t('organization.billing.no_invoices', 'No invoices yet.') }}</td>
-        </tr>
-      }
-    </tbody>
-    </table>
   } @else {
-    <p class="org-billing__restricted">{{ t('organization.billing.invoices_restricted', 'Invoice history requires billing view permission.') }}</p>
+    @if (subscription(); as sub) {
+      <div class="org-section__panel org-billing__plan">
+        <p class="org-billing__plan-name">{{ sub.planName }}</p>
+        <p>
+          {{ t('organization.billing.status', 'Status') }}:
+          <app-chip [text]="statusLabel('subscription', sub.status)" [variant]="statusChipVariant(sub.status)" />
+        </p>
+        <p>{{ t('organization.billing.storage', 'Storage limit') }}: {{ sub.storageLimitMb }} MB</p>
+        <p>{{ t('organization.billing.members', 'Member limit') }}: {{ sub.memberLimit }}</p>
+      </div>
+    } @else {
+      <p class="org-section__state" role="status">
+        {{ t('organization.billing.no_subscription', 'No subscription plan is configured yet.') }}
+      </p>
+    }
+
+    @if (canViewInvoices()) {
+      <table class="org-section__data-table org-billing__table">
+        <caption class="org-section__sr-only">{{ t('organization.billing.invoices_caption', 'Invoice history') }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ t('organization.billing.invoice_date', 'Date') }}</th>
+            <th scope="col">{{ t('organization.billing.invoice_amount', 'Amount') }}</th>
+            <th scope="col">{{ t('organization.billing.invoice_status', 'Status') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (invoice of invoices(); track invoice.id) {
+            <tr>
+              <td>{{ invoice.issuedAt | date: 'mediumDate' }}</td>
+              <td>{{ invoice.amountCents / 100 | number: '1.2-2' }} {{ invoice.currency }}</td>
+              <td>
+                <app-chip [text]="statusLabel('invoice', invoice.status)" [variant]="invoiceChipVariant(invoice.status)" />
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3">{{ t('organization.billing.no_invoices', 'No invoices yet.') }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <p class="org-billing__restricted">{{ t('organization.billing.invoices_restricted', 'Invoice history requires billing view permission.') }}</p>
+    }
   }
 </section>

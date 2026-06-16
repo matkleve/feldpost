@@ -1,0 +1,30 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
+// Primary rail nav row geometry and selected/hover emphasis.
+// @see docs/specs/component/page-rail/page-rail.md
+.rail-nav-button {
+  flex-shrink: 0;
+  width: 100%;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  justify-content: flex-start;
+  gap: var(--spacing-2);
+  color: var(--muted-foreground);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover();
+  }
+
+  &--active {
+    @include emphasis.selected();
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    @include emphasis.selected-hover();
+  }
+}

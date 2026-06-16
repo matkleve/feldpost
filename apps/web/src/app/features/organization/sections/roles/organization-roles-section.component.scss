@@ -1,3 +1,17 @@
+@use '../../styles/organization-section';
+
+:host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
+}
+
+.org-roles__detail > button,
+.org-roles__create > button {
+  align-self: flex-start;
+  width: auto;
+}
+
 .org-roles {
   display: grid;
   grid-template-columns: 14rem 1fr;

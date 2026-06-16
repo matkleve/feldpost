@@ -86,10 +86,14 @@ RLS is authoritative; UI gates are progressive disclosure only.
 
 - [x] Route `/organization/:section` renders split layout with section rail.
 - [x] Rail nav matches settings overlay interaction emphasis (selected ink, chevron rows).
+- [x] Rail shows page subtitle under title.
 - [x] Sections hidden when user lacks `viewPermissionKey`.
-- [x] Write controls disabled/hidden without `editPermissionKey`.
+- [x] Write controls disabled/hidden without `editPermissionKey`; read-only notices where applicable.
+- [x] Page and sections expose loading, empty, and error+retry states.
+- [x] Invalid `/organization/:section` URLs redirect to a valid section.
+- [x] Roles section does not reserve an empty right rail.
 - [x] Export jobs complete via `process_org_export_job` and download from payload.
-- [x] Branding colors apply to document CSS variables on load and save.
+- [x] Branding colors apply to document CSS variables on load and save; reset restores Feldpost defaults.
 - [ ] Logo file upload to storage (URL field shipped; upload deferred).
 - [ ] API key authentication endpoint (keys stored; validation deferred).
 

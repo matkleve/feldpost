@@ -30,6 +30,7 @@ export class OrganizationProfileSectionComponent {
   draftPhone = '';
   draftWebsite = '';
   draftAddressLine1 = '';
+  draftAddressLine2 = '';
   draftCity = '';
   draftPostalCode = '';
   draftCountry = '';
@@ -46,6 +47,7 @@ export class OrganizationProfileSectionComponent {
       this.draftPhone = profile.phone ?? '';
       this.draftWebsite = profile.website ?? '';
       this.draftAddressLine1 = profile.addressLine1 ?? '';
+      this.draftAddressLine2 = profile.addressLine2 ?? '';
       this.draftCity = profile.city ?? '';
       this.draftPostalCode = profile.postalCode ?? '';
       this.draftCountry = profile.country ?? '';
@@ -62,6 +64,7 @@ export class OrganizationProfileSectionComponent {
       phone: this.draftPhone.trim() || null,
       website: this.draftWebsite.trim() || null,
       addressLine1: this.draftAddressLine1.trim() || null,
+      addressLine2: this.draftAddressLine2.trim() || null,
       city: this.draftCity.trim() || null,
       postalCode: this.draftPostalCode.trim() || null,
       country: this.draftCountry.trim() || null,

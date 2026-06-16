@@ -1,0 +1,9 @@
+// Centered muted status line in scrollable rail bodies.
+// @see docs/specs/component/page-rail/page-rail.md
+.rail-status {
+  margin: 0;
+  padding: var(--spacing-2);
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}

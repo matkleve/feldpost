@@ -287,6 +287,24 @@
 
 ---
 
+### Organization Feature
+
+#### `<app-organization-page>` — Organization Page
+
+- **File**: `apps/web/src/app/features/organization/page/organization-page.component.ts`
+- **Purpose**: Split-layout organization administration shell with permission-gated section rail.
+- **Spec**: [`docs/specs/page/organization-page.md`](../page/organization-page.md)
+- **Composed of**: `app-organization-sidebar`, section components under `sections/`
+- **Gaps**: per-section child specs tracked from page spec
+
+#### `<app-organization-sidebar>` — Organization Sidebar
+
+- **File**: `apps/web/src/app/features/organization/sidebar/organization-sidebar.component.ts`
+- **Purpose**: Settings-overlay-style section navigation for organization admin.
+- **Spec**: [`docs/specs/page/organization-page.md`](../page/organization-page.md) (rail contract)
+
+---
+
 ### Auth Feature
 
 Auth components (`app-login`, `app-register`, `app-reset-password`, `app-update-password`, `app-auth-map-layer`, `app-account-feature`) are route-level page components. They have no reusable variant axes and no shared-component promotion candidates. Omitted from the variant table to keep this registry focused on composable building blocks.

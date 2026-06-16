@@ -1,0 +1,45 @@
+<section class="rail-section">
+  <div
+    class="rail-section__header"
+    [class.rail-section__header--collapsible]="collapsible()"
+  >
+    @if (collapsible()) {
+      <button
+        type="button"
+        class="rail-section__heading"
+        [attr.aria-expanded]="expanded()"
+        (click)="expanded.set(!expanded())"
+      >
+        <span class="rail-section__icon" aria-hidden="true">
+          <span class="material-icons rail-section__symbol">{{ icon() }}</span>
+          <span
+            class="material-icons rail-section__caret"
+            [class.rail-section__caret--collapsed]="!expanded()"
+          >arrow_drop_down</span>
+        </span>
+        <span class="rail-section__label">{{ label() }}</span>
+      </button>
+    } @else {
+      <div class="rail-section__heading rail-section__heading--static">
+        <span class="rail-section__icon" aria-hidden="true">
+          <span class="material-icons rail-section__symbol">{{ icon() }}</span>
+        </span>
+        <span class="rail-section__label">{{ label() }}</span>
+      </div>
+    }
+
+    <div
+      class="rail-section__actions"
+      role="toolbar"
+      [attr.aria-label]="actionsAriaLabel()"
+    >
+      <ng-content select="[railSectionActions]" />
+    </div>
+  </div>
+
+  @if (!collapsible() || expanded()) {
+    <div class="rail-section__body">
+      <ng-content />
+    </div>
+  }
+</section>

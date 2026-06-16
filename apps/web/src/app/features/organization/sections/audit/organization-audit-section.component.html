@@ -1,29 +1,43 @@
-<section class="org-section">
+<section class="org-section org-section--wide">
   <header class="org-section__header">
-    <h1>{{ t('organization.audit.title', 'Audit log') }}</h1>
+    <h2 class="org-section__title">{{ t('organization.audit.title', 'Audit log') }}</h2>
     <p>{{ t('organization.audit.subtitle', 'Recent organization actions and changes.') }}</p>
   </header>
 
-  <table class="org-audit__table">
-    <thead>
-      <tr>
-        <th>{{ t('organization.audit.when', 'When') }}</th>
-        <th>{{ t('organization.audit.action', 'Action') }}</th>
-        <th>{{ t('organization.audit.entity', 'Entity') }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (entry of entries(); track entry.id) {
+  @if (loading()) {
+    <p class="org-section__state" role="status">{{ t('organization.section.loading', 'Loading…') }}</p>
+  } @else if (loadError(); as error) {
+    <div class="org-section__state-row">
+      <p class="org-section__state org-section__state--error" role="alert">{{ error }}</p>
+      <button hlmBtn type="button" variant="outline" size="sm" (click)="load()">
+        {{ t('organization.section.retry', 'Retry') }}
+      </button>
+    </div>
+  } @else {
+    <table class="org-section__data-table org-audit__table">
+      <caption class="org-audit__sr-only">{{ t('organization.audit.caption', 'Organization audit log') }}</caption>
+      <thead>
         <tr>
-          <td>{{ entry.createdAt | date: 'medium' }}</td>
-          <td>{{ entry.action }}</td>
-          <td>{{ entry.entityType }}</td>
+          <th scope="col">{{ t('organization.audit.when', 'When') }}</th>
+          <th scope="col">{{ t('organization.audit.action', 'Action') }}</th>
+          <th scope="col">{{ t('organization.audit.entity', 'Entity') }}</th>
+          <th scope="col">{{ t('organization.audit.user', 'User') }}</th>
         </tr>
-      } @empty {
-        <tr>
-          <td colspan="3">{{ t('organization.audit.empty', 'No audit entries yet.') }}</td>
-        </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @for (entry of entries(); track entry.id) {
+          <tr>
+            <td>{{ entry.createdAt | date: 'medium' }}</td>
+            <td>{{ entry.action }}</td>
+            <td>{{ entry.entityType }}@if (entry.entityId) { <span class="org-audit__entity-id">({{ entry.entityId }})</span> }</td>
+            <td>{{ entry.userId ?? t('organization.audit.system', 'System') }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4">{{ t('organization.audit.empty', 'No audit entries yet.') }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
 </section>

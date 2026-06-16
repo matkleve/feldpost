@@ -1,23 +1,20 @@
-<div class="projects-sidebar">
+<app-page-rail [ariaLabel]="t('projects.sidebar.label', 'Projects')">
   <app-page-rail-title
+    pageRailTitle
     icon="folder"
     [title]="t('projects.page.title', 'Projects')"
   />
 
-  <button
-    type="button"
-    hlmBtn
-    variant="ghost"
-    size="sm"
-    class="projects-sidebar__dashboard"
-    [class.projects-sidebar__dashboard--active]="dashboardActive()"
-    (click)="dashboardSelected.emit()"
-  >
-    <span class="material-icons" aria-hidden="true">dashboard</span>
-    <span>{{ t('projects.sidebar.dashboard', 'Dashboard') }}</span>
-  </button>
+  <app-rail-nav-button
+    pageRailNav
+    icon="dashboard"
+    [label]="t('projects.sidebar.dashboard', 'Dashboard')"
+    [active]="dashboardActive()"
+    (clicked)="dashboardSelected.emit()"
+  />
 
   <app-rail-search-field
+    pageRailSearch
     [value]="searchQuery()"
     [placeholder]="t('projects.sidebar.search.placeholder', 'Search projects…')"
     [ariaLabel]="t('projects.page.search.aria', 'Project search')"
@@ -25,6 +22,7 @@
   />
 
   <div
+    pageRailToolbar
     class="projects-sidebar__toolbar"
     role="toolbar"
     [attr.aria-label]="t('projects.toolbar.aria.controls', 'Project controls')"
@@ -75,21 +73,17 @@
   </div>
 
   <div
-    class="projects-sidebar__list"
+    pageRailBody
     role="region"
     [attr.aria-label]="t('projects.sidebar.list.aria', 'Projects')"
   >
     @if (loading()) {
-      <p class="projects-sidebar__status" role="status">
-        {{ t('projects.page.loading.aria', 'Loading projects') }}
-      </p>
+      <app-rail-status [message]="t('projects.page.loading.aria', 'Loading projects')" />
     } @else if (!hasVisibleProjects()) {
-      <p class="projects-sidebar__status">{{ projectListEmptyMessage() }}</p>
+      <app-rail-status [message]="projectListEmptyMessage()" />
     } @else {
       @if (starredProjectItems().length > 0) {
-        <p class="projects-sidebar__group-heading">
-          {{ t('projects.sidebar.section.starred', 'Starred') }}
-        </p>
+        <app-rail-group-heading [label]="t('projects.sidebar.section.starred', 'Starred')" />
         <app-rail-select-list
           [items]="starredProjectItems()"
           [selectedId]="selectedProjectId()"
@@ -102,7 +96,7 @@
       }
 
       @for (group of projectTimeGroups(); track group.key) {
-        <p class="projects-sidebar__group-heading">{{ group.label }}</p>
+        <app-rail-group-heading [label]="group.label" />
         <app-rail-select-list
           [items]="group.items"
           [selectedId]="selectedProjectId()"
@@ -116,13 +110,13 @@
     }
   </div>
 
-  <div class="projects-sidebar__footer">
+  <div pageRailFooter class="projects-sidebar__footer">
     <button type="button" hlmBtn variant="outline" size="sm" class="projects-sidebar__new" (click)="newProject.emit()">
       <span class="material-icons" aria-hidden="true">add</span>
       <span>{{ t('projects.page.action.newProject', 'New project') }}</span>
     </button>
   </div>
-</div>
+</app-page-rail>
 
 <app-toolbar-dropdown-stack
   [activePanelId]="activeDropdown()"

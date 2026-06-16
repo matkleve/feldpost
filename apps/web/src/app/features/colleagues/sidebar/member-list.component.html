@@ -1,161 +1,81 @@
-<nav class="member-list" aria-label="{{ t('colleagues.sidebar.label', 'Messaging') }}">
+<app-page-rail [ariaLabel]="t('colleagues.sidebar.label', 'Messaging')">
   <app-page-rail-title
+    pageRailTitle
     icon="forum"
     [title]="t('colleagues.page.title', 'Messaging')"
   />
 
-  <button
-    type="button"
-    hlmBtn
-    variant="ghost"
-    size="sm"
-    class="member-list__invites-button"
-    [class.member-list__invites-button--active]="invitesActive()"
-    [attr.aria-pressed]="invitesActive()"
-    (click)="onInvitesClick()"
-  >
-    <span class="material-icons" aria-hidden="true">link</span>
-    <span>{{ t('colleagues.tab.invites', 'Invites') }}</span>
-  </button>
+  <app-rail-nav-button
+    pageRailNav
+    icon="link"
+    [label]="t('colleagues.tab.invites', 'Invites')"
+    [active]="invitesActive()"
+    (clicked)="onInvitesClick()"
+  />
 
-  <section class="member-list__channels">
-    <div class="member-list__section-header">
-      <button
-        type="button"
-        class="member-list__section-heading"
-        [attr.aria-expanded]="channelsExpanded()"
-        (click)="channelsExpanded.set(!channelsExpanded())"
-      >
-        <span class="member-list__section-icon" aria-hidden="true">
-          <span class="material-icons member-list__section-symbol">tag</span>
-          <span
-            class="material-icons member-list__section-caret"
-            [class.member-list__section-caret--collapsed]="!channelsExpanded()"
-          >arrow_drop_down</span>
-        </span>
-        <span class="member-list__section-label">{{ t('colleagues.channels.title', 'Channels') }}</span>
-      </button>
+  <app-rail-search-field
+    pageRailSearch
+    [value]="searchQuery()"
+    [placeholder]="t('colleagues.sidebar.search.placeholder', 'Search messaging…')"
+    [ariaLabel]="t('colleagues.sidebar.search.aria', 'Search channels and direct messages')"
+    (valueChange)="searchQuery.set($event)"
+  />
 
-      <div
-        class="member-list__section-actions"
-        role="toolbar"
-        [attr.aria-label]="t('colleagues.channels.actions_aria', 'Channel section actions')"
-      >
-        @if (canManageChannels()) {
-          <button
-            type="button"
-            class="member-list__section-action"
-            [attr.aria-label]="t('colleagues.channel.create', 'Create channel')"
-            [attr.title]="t('colleagues.channel.create', 'Create channel')"
-            (click)="openCreateChannel(); $event.stopPropagation()"
-          >
-            <span class="material-icons" aria-hidden="true">add</span>
-          </button>
-        }
+  <div pageRailBody>
+    <app-rail-section
+      icon="tag"
+      [label]="t('colleagues.channels.title', 'Channels')"
+      [expanded]="channelsExpanded()"
+      (expandedChange)="channelsExpanded.set($event)"
+      [actionsAriaLabel]="t('colleagues.channels.actions_aria', 'Channel section actions')"
+    >
+      @if (canManageChannels()) {
         <button
+          railSectionActions
           type="button"
-          class="member-list__section-action"
-          [class.member-list__section-action--active]="channelSearchOpen()"
-          [attr.aria-pressed]="channelSearchOpen()"
-          [attr.aria-label]="t('colleagues.channels.search_toggle', 'Search channels')"
-          [attr.title]="t('colleagues.channels.search_toggle', 'Search channels')"
-          (click)="toggleChannelSearch($event)"
+          [attr.aria-label]="t('colleagues.channel.create', 'Create channel')"
+          [attr.title]="t('colleagues.channel.create', 'Create channel')"
+          (click)="openCreateChannel(); $event.stopPropagation()"
         >
-          <span class="material-icons" aria-hidden="true">manage_search</span>
+          <span class="material-icons" aria-hidden="true">add</span>
         </button>
-      </div>
-    </div>
+      }
 
-    @if (channelsExpanded()) {
-      <div class="member-list__section-body">
-        @if (channelSearchOpen()) {
-          <app-rail-search-field
-            [value]="channelSearchQuery()"
-            [placeholder]="t('colleagues.channels.search', 'Search channels')"
-            [ariaLabel]="t('colleagues.channels.search_aria', 'Search channels')"
-            (valueChange)="channelSearchQuery.set($event)"
-          />
-        }
+      <app-rail-select-list
+        [compact]="true"
+        [items]="channelListItems()"
+        [selectedId]="selectedChannelId()"
+        [listAriaLabel]="t('colleagues.channels.title', 'Channels')"
+        [emptyMessage]="t('colleagues.channels.empty', 'No channels')"
+        (itemSelected)="channelSelected.emit($event)"
+        (actionTriggered)="onChannelAction($event)"
+      />
+    </app-rail-section>
 
+    <app-rail-section
+      icon="chat_bubble_outline"
+      [label]="t('colleagues.direct_messages.title', 'Direct messages')"
+      [expanded]="dmExpanded()"
+      (expandedChange)="dmExpanded.set($event)"
+      [fillHeight]="true"
+    >
+      @for (group of dmTimeGroups(); track group.key) {
+        <app-rail-group-heading [label]="group.label" />
         <app-rail-select-list
           [compact]="true"
-          [items]="channelListItems()"
-          [selectedId]="selectedChannelId()"
-          [listAriaLabel]="t('colleagues.channels.title', 'Channels')"
-          [emptyMessage]="t('colleagues.channels.empty', 'No channels')"
-          (itemSelected)="channelSelected.emit($event)"
-          (actionTriggered)="onChannelAction($event)"
+          [items]="group.items"
+          [selectedId]="activeDmMemberId()"
+          [loading]="loading()"
+          [listAriaLabel]="group.label"
+          [loadingMessage]="t('colleagues.direct_messages.loading', 'Loading direct messages')"
+          [emptyMessage]="t('colleagues.direct_messages.empty', 'No direct messages')"
+          (itemSelected)="onMemberSelected($event)"
         />
-      </div>
-    }
-  </section>
+      }
 
-  <section class="member-list__direct-messages">
-    <div class="member-list__section-header">
-      <button
-        type="button"
-        class="member-list__section-heading"
-        [attr.aria-expanded]="dmExpanded()"
-        (click)="dmExpanded.set(!dmExpanded())"
-      >
-        <span class="member-list__section-icon" aria-hidden="true">
-          <span class="material-icons member-list__section-symbol">chat_bubble_outline</span>
-          <span
-            class="material-icons member-list__section-caret"
-            [class.member-list__section-caret--collapsed]="!dmExpanded()"
-          >arrow_drop_down</span>
-        </span>
-        <span class="member-list__section-label">{{ t('colleagues.direct_messages.title', 'Direct messages') }}</span>
-      </button>
-
-      <div
-        class="member-list__section-actions"
-        role="toolbar"
-        [attr.aria-label]="t('colleagues.direct_messages.actions_aria', 'Direct message section actions')"
-      >
-        <button
-          type="button"
-          class="member-list__section-action"
-          [class.member-list__section-action--active]="dmSearchOpen()"
-          [attr.aria-pressed]="dmSearchOpen()"
-          [attr.aria-label]="t('colleagues.direct_messages.search_toggle', 'Search direct messages')"
-          [attr.title]="t('colleagues.direct_messages.search_toggle', 'Search direct messages')"
-          (click)="toggleDmSearch($event)"
-        >
-          <span class="material-icons" aria-hidden="true">manage_search</span>
-        </button>
-      </div>
-    </div>
-
-    @if (dmExpanded()) {
-      <div class="member-list__section-body">
-        @if (dmSearchOpen()) {
-          <app-rail-search-field
-            [value]="searchQuery()"
-            [placeholder]="t('colleagues.direct_messages.search', 'Search direct messages')"
-            [ariaLabel]="t('colleagues.direct_messages.search_aria', 'Search direct messages')"
-            (valueChange)="searchQuery.set($event)"
-          />
-        }
-
-        @for (group of dmTimeGroups(); track group.key) {
-          <p class="member-list__group-heading">{{ group.label }}</p>
-          <app-rail-select-list
-            [compact]="true"
-            [items]="group.items"
-            [selectedId]="activeDmMemberId()"
-            [loading]="loading()"
-            [listAriaLabel]="group.label"
-            [loadingMessage]="t('colleagues.direct_messages.loading', 'Loading direct messages')"
-            [emptyMessage]="t('colleagues.direct_messages.empty', 'No direct messages')"
-            (itemSelected)="onMemberSelected($event)"
-          />
-        }
-
-        @if (!loading() && dmTimeGroups().length === 0) {
-          <p class="member-list__status">{{ t('colleagues.direct_messages.empty', 'No direct messages') }}</p>
-        }
-      </div>
-    }
-  </section>
-</nav>
+      @if (!loading() && dmTimeGroups().length === 0) {
+        <app-rail-status [message]="t('colleagues.direct_messages.empty', 'No direct messages')" />
+      }
+    </app-rail-section>
+  </div>
+</app-page-rail>

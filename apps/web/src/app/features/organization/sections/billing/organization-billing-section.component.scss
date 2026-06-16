@@ -1,30 +1,40 @@
-.org-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
+@use '../../styles/organization-section';
+
+:host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
 }
 
-.org-section__header p {
-  margin: var(--spacing-1) 0 0;
+.org-billing__plan-name {
+  margin: 0 0 var(--spacing-2);
+  color: var(--foreground);
+}
+
+.org-billing__plan p {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.org-billing__restricted {
+  margin: 0;
+  font-size: var(--font-size-sm);
   color: var(--muted-foreground);
 }
 
-.org-billing__plan {
-  padding: var(--spacing-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--card);
-}
-
-.org-billing__table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: var(--spacing-4);
-}
-
-.org-billing__table th,
-.org-billing__table td {
-  padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid var(--border);
-  text-align: left;
+.org-section__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

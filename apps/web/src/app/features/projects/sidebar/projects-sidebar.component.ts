@@ -10,8 +10,12 @@ import {
   type ProjectSidebarActivityGroupKey,
 } from '../logic/projects-formatters.logic';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { PageRailComponent } from '../../../shared/page-rail';
 import { PageRailTitleComponent } from '../../../shared/page-rail-title';
+import { RailNavButtonComponent } from '../../../shared/rail-nav-button';
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
+import { RailGroupHeadingComponent } from '../../../shared/rail-group-heading';
+import { RailStatusComponent } from '../../../shared/rail-status';
 import { RailSelectListComponent, type RailSelectListItem } from '../../../shared/rail-select-list';
 import { ToolbarDropdownStackComponent } from '../../../shared/dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
 import {
@@ -36,8 +40,12 @@ interface ProjectSidebarTimeGroup {
   standalone: true,
   imports: [
     FormsModule,
+    PageRailComponent,
     PageRailTitleComponent,
+    RailNavButtonComponent,
     RailSearchFieldComponent,
+    RailGroupHeadingComponent,
+    RailStatusComponent,
     RailSelectListComponent,
     ToolbarDropdownStackComponent,
     FilterDropdownComponent,

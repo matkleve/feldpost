@@ -1,38 +1,24 @@
-.org-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
+@use '../../styles/organization-section';
+
+:host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
 }
 
-.org-section__header p {
-  margin: var(--spacing-1) 0 0;
+.org-integrations__revealed p {
+  margin: 0 0 var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+}
+
+.org-integrations__revealed code {
+  display: block;
+  overflow-x: auto;
+  font-size: var(--font-size-xs);
+}
+
+.org-integrations__list code {
   color: var(--muted-foreground);
-}
-
-.org-section__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-  max-width: 40rem;
-}
-
-.org-integrations__revealed {
-  padding: var(--spacing-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--card);
-}
-
-.org-integrations__list {
-  margin: var(--spacing-4) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.org-integrations__list li {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-2) 0;
-  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-xs);
 }

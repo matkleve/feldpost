@@ -2,6 +2,48 @@
 
 > Linked from [`registry.md`](registry.md). Split-out catalog body; excluded from element-spec lint (`.supplement.md`).
 
+## Page rail composition
+
+### `<app-page-rail>` — Page Rail Shell
+
+- **File**: `apps/web/src/app/shared/page-rail/`
+- **Purpose**: Composable left-rail column inside `app-page-grid` (title, nav, search, toolbar, scroll body, footer slots).
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+- **Slots**: `pageRailTitle`, `pageRailNav`, `pageRailSearch`, `pageRailToolbar`, `pageRailBody`, `pageRailFooter`
+- **Used in**: `projects-sidebar`, `member-list`, `organization-sidebar`
+
+### `<app-rail-nav-button>` — Rail Nav Button
+
+- **File**: `apps/web/src/app/shared/rail-nav-button/`
+- **Purpose**: Primary rail row (dashboard, invites) with quiet-row emphasis.
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+
+### `<app-rail-section>` — Rail Section
+
+- **File**: `apps/web/src/app/shared/rail-section/`
+- **Purpose**: Collapsible section with icon heading and projected header actions (`railSectionActions`).
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+
+### `<app-rail-group-heading>` — Rail Group Heading
+
+- **File**: `apps/web/src/app/shared/rail-group-heading/`
+- **Purpose**: Uppercase recency bucket label above `app-rail-select-list` groups.
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+
+### `<app-rail-detail-nav-item>` — Rail Detail Nav Item
+
+- **File**: `apps/web/src/app/shared/rail-detail-nav-item/`
+- **Purpose**: Settings-overlay-style row (icon, title, subtitle, chevron) for organization-style rails.
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+
+### `<app-rail-status>` — Rail Status
+
+- **File**: `apps/web/src/app/shared/rail-status/`
+- **Purpose**: Centered empty/loading copy inside scrollable rail bodies.
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+
+---
+
 ## Shared UI Primitives
 
 ### `<app-chip>` — Chip

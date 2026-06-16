@@ -783,6 +783,11 @@ common.remove,Remove,shared remove action,Remove,Entfernen,Rimuovi
 organization.page.title,Organization,organization page rail title,Organization,Organisation,Organizzazione
 organization.page.subtitle,Company settings and administration,organization page rail subtitle,Company settings and administration,Unternehmenseinstellungen und Verwaltung,Impostazioni aziendali e amministrazione
 organization.page.error.title,Could not load organization,organization page load error title,Could not load organization,Organisation konnte nicht geladen werden,Impossibile caricare l'organizzazione
+organization.page.error.message,Organization data could not be loaded. Please try again.,organization page load error body,Organization data could not be loaded. Please try again.,Organisationsdaten konnten nicht geladen werden. Bitte versuche es erneut.,Impossibile caricare i dati dell'organizzazione. Riprova.
+organization.page.error.retry,Retry,organization page load error retry,Retry,Erneut versuchen,Riprova
+organization.page.loading,Loading organization…,organization page loading state,Loading organization…,Organisation wird geladen…,Caricamento organizzazione…
+organization.section.loading,Loading…,organization section loading state,Loading…,Wird geladen…,Caricamento…
+organization.section.retry,Retry,organization section error retry,Retry,Erneut versuchen,Riprova
 organization.page.no_access.title,No organization sections available,organization page no permission title,No organization sections available,Keine Organisationsbereiche verfügbar,Nessuna sezione organizzazione disponibile
 organization.page.no_access.message,Your role does not include organization administration permissions.,organization page no permission body,Your role does not include organization administration permissions.,Deine Rolle umfasst keine Berechtigungen für die Organisationsverwaltung.,Il tuo ruolo non include i permessi di amministrazione dell'organizzazione.
 organization.sidebar.label,Organization sections,organization sidebar aria label,Organization sections,Organisationsbereiche,Sezioni organizzazione
@@ -809,7 +814,10 @@ organization.profile.industry,Industry,organization profile field label,Industry
 organization.profile.email,Email,organization profile field label,Email,E-Mail,E-mail
 organization.profile.phone,Phone,organization profile field label,Phone,Telefon,Telefono
 organization.profile.website,Website,organization profile field label,Website,Website,Sito web
-organization.profile.address,Address,organization profile field label,Address,Adresse,Indirizzo
+organization.profile.address,Address line 1,organization profile field label,Address line 1,Adresszeile 1,Indirizzo riga 1
+organization.profile.address_line2,Address line 2,organization profile field label,Address line 2,Adresszeile 2,Indirizzo riga 2
+organization.profile.read_only,You can view organization details. Editing requires organization settings permission.,organization profile read-only notice,You can view organization details. Editing requires organization settings permission.,Du kannst Organisationsdetails ansehen. Bearbeiten erfordert die Berechtigung für Organisationseinstellungen.,Puoi visualizzare i dettagli dell'organizzazione. La modifica richiede il permesso per le impostazioni dell'organizzazione.
+organization.profile.unavailable,Organization profile is not available.,organization profile missing state,Organization profile is not available.,Organisationsprofil ist nicht verfügbar.,Profilo organizzazione non disponibile.
 organization.profile.city,City,organization profile field label,City,Stadt,Città
 organization.profile.postal,Postal code,organization profile field label,Postal code,Postleitzahl,CAP
 organization.profile.country,Country,organization profile field label,Country,Land,Paese
@@ -819,6 +827,9 @@ organization.roles.subtitle,Define hierarchy and capabilities for your team.,org
 organization.roles.list,Role list,organization roles list aria,Role list,Rollenliste,Elenco ruoli
 organization.roles.delete,Delete role,organization roles delete action,Delete role,Rolle löschen,Elimina ruolo
 organization.roles.save_permissions,Save permissions,organization roles save action,Save permissions,Berechtigungen speichern,Salva permessi
+organization.roles.permissions_saved,Role permissions saved.,organization roles save toast,Role permissions saved.,Rollenberechtigungen gespeichert.,Permessi del ruolo salvati.
+organization.roles.created,Role created.,organization roles create toast,Role created.,Rolle erstellt.,Ruolo creato.
+organization.roles.deleted,Role deleted.,organization roles delete toast,Role deleted.,Rolle gelöscht.,Ruolo eliminato.
 organization.roles.select,Select a role to edit permissions.,organization roles empty state,Select a role to edit permissions.,Wähle eine Rolle zum Bearbeiten der Berechtigungen.,Seleziona un ruolo per modificare i permessi.
 organization.roles.create,Create role,organization roles create heading,Create role,Rolle erstellen,Crea ruolo
 organization.roles.internal_name,Internal name,organization roles field label,Internal name,Interner Name,Nome interno
@@ -835,6 +846,7 @@ organization.branding.background,Background color,organization branding field la
 organization.branding.saved,Branding saved.,organization branding toast,Branding saved.,Branding gespeichert.,Branding salvato.
 organization.branding.reset,Reset to Feldpost defaults,organization branding reset button,Reset to Feldpost defaults,Auf Feldpost-Standardfarben zurücksetzen,Ripristina colori predefiniti Feldpost
 organization.branding.reset_done,Feldpost default colors restored.,organization branding reset toast,Feldpost default colors restored.,Feldpost-Standardfarben wiederhergestellt.,Colori predefiniti Feldpost ripristinati.
+organization.branding.read_only,You can preview branding. Saving requires organization settings permission.,organization branding read-only notice,You can preview branding. Saving requires organization settings permission.,Du kannst das Branding ansehen. Speichern erfordert die Berechtigung für Organisationseinstellungen.,Puoi visualizzare il branding. Il salvataggio richiede il permesso per le impostazioni dell'organizzazione.
 organization.billing.title,Billing,organization billing section title,Billing,Abrechnung,Fatturazione
 organization.billing.subtitle,Current plan and invoice history.,organization billing section subtitle,Current plan and invoice history.,Aktueller Tarif und Rechnungsverlauf.,Piano attuale e storico fatture.
 organization.billing.status,Status,organization billing field label,Status,Status,Stato
@@ -844,6 +856,8 @@ organization.billing.invoice_date,Date,organization billing table header,Date,Da
 organization.billing.invoice_amount,Amount,organization billing table header,Amount,Betrag,Importo
 organization.billing.invoice_status,Status,organization billing table header,Status,Status,Stato
 organization.billing.no_invoices,No invoices yet.,organization billing empty state,No invoices yet.,Noch keine Rechnungen.,Nessuna fattura ancora.
+organization.billing.no_subscription,No subscription plan is configured yet.,organization billing no plan state,No subscription plan is configured yet.,Noch kein Abonnement konfiguriert.,Nessun piano di abbonamento configurato.
+organization.billing.invoices_caption,Invoice history,organization billing table caption,Invoice history,Rechnungsverlauf,Cronologia fatture
 organization.billing.invoices_restricted,Invoice history requires billing view permission.,organization billing restricted message,Invoice history requires billing view permission.,Rechnungsverlauf erfordert die Berechtigung zur Rechnungsansicht.,Lo storico fatture richiede il permesso di visualizzazione fatturazione.
 organization.integrations.title,API keys,organization integrations section title,API keys,API-Schlüssel,Chiavi API
 organization.integrations.subtitle,Generate and revoke integration keys for your organization.,organization integrations section subtitle,Generate and revoke integration keys for your organization.,Erstelle und widerrufe Integrationsschlüssel für deine Organisation.,Genera e revoca chiavi di integrazione per la tua organizzazione.
@@ -853,17 +867,44 @@ organization.integrations.generate,Generate key,organization integrations action
 organization.integrations.revoke,Revoke,organization integrations action,Revoke,Widerrufen,Revoca
 organization.integrations.revoke_confirm.title,Revoke API key?,organization integrations confirm title,Revoke API key?,API-Schlüssel widerrufen?,Revocare la chiave API?
 organization.integrations.revoke_confirm.message,Integrations using this key will stop working immediately.,organization integrations confirm body,Integrations using this key will stop working immediately.,Integrationen mit diesem Schlüssel funktionieren sofort nicht mehr.,Le integrazioni che usano questa chiave smetteranno di funzionare immediatamente.
+organization.integrations.read_only,You can view API keys. Creating or revoking keys requires API key management permission.,organization integrations read-only notice,You can view API keys. Creating or revoking keys requires API key management permission.,Du kannst API-Schlüssel ansehen. Erstellen oder Widerrufen erfordert die Berechtigung zur API-Schlüssel-Verwaltung.,Puoi visualizzare le chiavi API. Creare o revocare richiede il permesso di gestione chiavi API.
+organization.integrations.empty,No API keys yet.,organization integrations empty state,No API keys yet.,Noch keine API-Schlüssel.,Nessuna chiave API ancora.
+organization.integrations.copy,Copy key,organization integrations copy action,Copy key,Schlüssel kopieren,Copia chiave
+organization.integrations.copied,API key copied to clipboard.,organization integrations copy toast,API key copied to clipboard.,API-Schlüssel in die Zwischenablage kopiert.,Chiave API copiata negli appunti.
+organization.integrations.copy_failed,Could not copy API key.,organization integrations copy error toast,Could not copy API key.,API-Schlüssel konnte nicht kopiert werden.,Impossibile copiare la chiave API.
+organization.integrations.created,API key created.,organization integrations create toast,API key created.,API-Schlüssel erstellt.,Chiave API creata.
+organization.integrations.revoked,API key revoked.,organization integrations revoke toast,API key revoked.,API-Schlüssel widerrufen.,Chiave API revocata.
 organization.export.title,Data export,organization export section title,Data export,Datenexport,Esportazione dati
 organization.export.subtitle,Request a full organization export as JSON.,organization export section subtitle,Request a full organization export as JSON.,Fordere einen vollständigen Organisationsexport als JSON an.,Richiedi un'esportazione completa dell'organizzazione in JSON.
 organization.export.request,Request export,organization export action,Request export,Export anfordern,Richiedi esportazione
 organization.export.download,Download,organization export action,Download,Herunterladen,Scarica
 organization.export.ready,Export is ready to download.,organization export toast,Export is ready to download.,Export steht zum Download bereit.,L'esportazione è pronta per il download.
+organization.export.read_only,You need export permission to request new exports.,organization export read-only notice,You need export permission to request new exports.,Du benötigst Exportberechtigung um neue Exporte anzufordern.,Serve il permesso di esportazione per richiedere nuove esportazioni.
+organization.export.empty,No exports yet. Request one to download organization data.,organization export empty state,No exports yet. Request one to download organization data.,Noch keine Exporte. Fordere einen an um Organisationsdaten herunterzuladen.,Nessuna esportazione ancora. Richiedine una per scaricare i dati dell'organizzazione.
 organization.audit.title,Audit log,organization audit section title,Audit log,Audit-Protokoll,Registro di controllo
 organization.audit.subtitle,Recent organization actions and changes.,organization audit section subtitle,Recent organization actions and changes.,Aktuelle Organisationsaktionen und Änderungen.,Azioni e modifiche recenti dell'organizzazione.
 organization.audit.when,When,organization audit table header,When,Wann,Quando
 organization.audit.action,Action,organization audit table header,Action,Aktion,Azione
 organization.audit.entity,Entity,organization audit table header,Entity,Entität,Entità
 organization.audit.empty,No audit entries yet.,organization audit empty state,No audit entries yet.,Noch keine Audit-Einträge.,Nessuna voce di controllo ancora.
+organization.audit.caption,Organization audit log,organization audit table caption,Organization audit log,Organisations-Audit-Protokoll,Registro di controllo organizzazione
+organization.audit.user,User,organization audit table header,User,Benutzer,Utente
+organization.audit.system,System,organization audit system actor label,System,System,Sistema
+organization.status.export.completed,Completed,organization export status label,Completed,Abgeschlossen,Completato
+organization.status.export.failed,Failed,organization export status label,Failed,Fehlgeschlagen,Non riuscito
+organization.status.export.pending,Pending,organization export status label,Pending,Ausstehend,In attesa
+organization.status.export.processing,Processing,organization export status label,Processing,Wird verarbeitet,In elaborazione
+organization.status.invoice.paid,Paid,organization invoice status label,Paid,Bezahlt,Pagato
+organization.status.invoice.open,Open,organization invoice status label,Open,Offen,Aperto
+organization.status.invoice.draft,Draft,organization invoice status label,Draft,Entwurf,Bozza
+organization.status.invoice.void,Void,organization invoice status label,Void,Ungültig,Annullato
+organization.status.invoice.uncollectible,Uncollectible,organization invoice status label,Uncollectible,Nicht einziehbar,Inesigibile
+organization.status.subscription.active,Active,organization subscription status label,Active,Aktiv,Attivo
+organization.status.subscription.trialing,Trialing,organization subscription status label,Trialing,Testphase,In prova
+organization.status.subscription.past_due,Past due,organization subscription status label,Past due,Überfällig,Scaduto
+organization.status.subscription.paused,Paused,organization subscription status label,Paused,Pausiert,In pausa
+organization.status.subscription.canceled,Canceled,organization subscription status label,Canceled,Gekündigt,Annullato
+organization.status.subscription.cancelled,Cancelled,organization subscription status label,Cancelled,Gekündigt,Annullato
 projects.page.search.aria,Project search,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project search,Projektsuche,Ricerca progetto
 projects.page.action.newProject,New project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,New project,Neues Projekt,Nuovo progetto
 projects.page.defaultProjectName,Project {number},projects page inline new-project default numbered name,Project {number},Projekt {number},Progetto {number}

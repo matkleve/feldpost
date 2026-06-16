@@ -1,39 +1,67 @@
 <section class="org-section">
   <header class="org-section__header">
-    <h1>{{ t('organization.integrations.title', 'API keys') }}</h1>
+    <h2 class="org-section__title">{{ t('organization.integrations.title', 'API keys') }}</h2>
     <p>{{ t('organization.integrations.subtitle', 'Generate and revoke integration keys for your organization.') }}</p>
   </header>
 
-  @if (revealedKey(); as key) {
-    <div class="org-integrations__revealed" role="status">
-      <p>{{ t('organization.integrations.copy_once', 'Copy this key now — it will not be shown again.') }}</p>
-      <code>{{ key }}</code>
+  @if (loading()) {
+    <p class="org-section__state" role="status">{{ t('organization.section.loading', 'Loading…') }}</p>
+  } @else if (loadError(); as error) {
+    <div class="org-section__state-row">
+      <p class="org-section__state org-section__state--error" role="alert">{{ error }}</p>
+      <button hlmBtn type="button" variant="outline" size="sm" (click)="load()">
+        {{ t('organization.section.retry', 'Retry') }}
+      </button>
     </div>
-  }
-
-  @if (canEdit()) {
-    <form class="org-section__form" (ngSubmit)="onCreateKey()">
-      <div hlmFormField>
-        <label hlmLabel for="api-key-name">{{ t('organization.integrations.key_name', 'Key name') }}</label>
-        <input hlmInput id="api-key-name" [ngModel]="newKeyName()" (ngModelChange)="newKeyName.set($event)" name="keyName" />
-      </div>
-      <button hlmBtn type="submit">{{ t('organization.integrations.generate', 'Generate key') }}</button>
-    </form>
-  }
-
-  <ul class="org-integrations__list">
-    @for (key of apiKeys(); track key.id) {
-      <li>
-        <span>{{ key.name }}</span>
-        <code>{{ key.keyPrefix }}…</code>
-        @if (canEdit()) {
-          <button hlmBtn variant="outline" type="button" (click)="onRevokeClick(key.id)">
-            {{ t('organization.integrations.revoke', 'Revoke') }}
+  } @else {
+    @if (revealedKey(); as key) {
+      <div class="org-section__panel org-integrations__revealed" role="status">
+        <p>{{ t('organization.integrations.copy_once', 'Copy this key now — it will not be shown again.') }}</p>
+        <code>{{ key }}</code>
+        <div class="org-section__actions">
+          <button hlmBtn type="button" variant="outline" (click)="onCopyRevealedKey()">
+            {{ t('organization.integrations.copy', 'Copy key') }}
           </button>
-        }
-      </li>
+        </div>
+      </div>
     }
-  </ul>
+
+    @if (canEdit()) {
+      <form class="org-section__form" (ngSubmit)="onCreateKey()">
+        <div hlmFormField>
+          <label hlmLabel for="api-key-name">{{ t('organization.integrations.key_name', 'Key name') }}</label>
+          <input hlmInput id="api-key-name" [ngModel]="newKeyName()" (ngModelChange)="newKeyName.set($event)" name="keyName" />
+        </div>
+        <div class="org-section__actions">
+          <button hlmBtn type="submit">{{ t('organization.integrations.generate', 'Generate key') }}</button>
+        </div>
+      </form>
+    } @else {
+      <p class="org-section__notice" role="status">
+        {{ t('organization.integrations.read_only', 'You can view API keys. Creating or revoking keys requires API key management permission.') }}
+      </p>
+    }
+
+    @if (apiKeys().length > 0) {
+      <ul class="org-section__list org-integrations__list">
+        @for (key of apiKeys(); track key.id) {
+          <li>
+            <span>{{ key.name }}</span>
+            <code>{{ key.keyPrefix }}…</code>
+            @if (canEdit()) {
+              <button hlmBtn variant="outline" type="button" (click)="onRevokeClick(key.id)">
+                {{ t('organization.integrations.revoke', 'Revoke') }}
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="org-section__state" role="status">
+        {{ t('organization.integrations.empty', 'No API keys yet.') }}
+      </p>
+    }
+  }
 </section>
 
 @if (revokeDialogOpen()) {

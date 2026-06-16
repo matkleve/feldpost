@@ -1,0 +1,10 @@
+<nav class="page-rail" [attr.aria-label]="ariaLabel()">
+  <ng-content select="[pageRailTitle]" />
+  <ng-content select="[pageRailNav]" />
+  <ng-content select="[pageRailSearch]" />
+  <ng-content select="[pageRailToolbar]" />
+  <div class="page-rail__scroll" role="region">
+    <ng-content select="[pageRailBody]" />
+  </div>
+  <ng-content select="[pageRailFooter]" />
+</nav>

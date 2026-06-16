@@ -1,7 +1,7 @@
 <app-page-grid
   [leftRail]="true"
-  [rightRailOpen]="true"
-  [centerExpanded]="false"
+  [rightRailOpen]="rightRailOpen()"
+  [centerExpanded]="centerExpanded()"
   [flushBottom]="true"
   data-i18n-skip
 >
@@ -89,11 +89,5 @@
       (descriptionUpdated)="onChannelDescriptionUpdated($event)"
       (archiveRequested)="onChannelDetailArchive()"
     />
-  } @else {
-    <aside pageGridRight class="colleagues-page__detail-empty">
-      <div class="colleagues-page__detail-card">
-        <p>{{ t('colleagues.detail.select_hint', 'Select a channel to view details.') }}</p>
-      </div>
-    </aside>
   }
 </app-page-grid>

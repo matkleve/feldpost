@@ -12,15 +12,27 @@
   min-width: 0;
   flex: 1 1 auto;
   flex-direction: column;
-  padding: var(--spacing-4);
+  padding: var(--spacing-5);
+  overflow: auto;
+  background: var(--card);
+  container-type: inline-size;
+  container-name: organization-detail;
 }
 
 .organization-page__error {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
+  max-width: 36rem;
   padding: var(--spacing-6);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--card);
+}
+
+.organization-page__loading {
+  margin: 0;
+  max-width: 36rem;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
 }

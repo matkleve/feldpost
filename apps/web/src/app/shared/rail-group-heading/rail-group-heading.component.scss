@@ -1,0 +1,11 @@
+// Small uppercase group label above rail-select-list groups.
+// @see docs/specs/component/page-rail/page-rail.md
+.rail-group-heading {
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-2) var(--spacing-1);
+  color: var(--muted-foreground);
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

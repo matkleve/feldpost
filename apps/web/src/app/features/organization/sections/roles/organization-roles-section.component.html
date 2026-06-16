@@ -1,16 +1,18 @@
-<section class="org-section">
+<section class="org-section org-section--wide">
   <header class="org-section__header">
-    <h1>{{ t('organization.roles.title', 'Roles & permissions') }}</h1>
+    <h2 class="org-section__title">{{ t('organization.roles.title', 'Roles & permissions') }}</h2>
     <p>{{ t('organization.roles.subtitle', 'Define hierarchy and capabilities for your team.') }}</p>
   </header>
 
   <div class="org-roles">
-    <aside class="org-roles__list" aria-label="{{ t('organization.roles.list', 'Role list') }}">
+    <div class="org-roles__list" role="list" aria-label="{{ t('organization.roles.list', 'Role list') }}">
       @for (role of roles(); track role.id) {
         <button
           type="button"
+          role="listitem"
           class="org-roles__card"
           [class.org-roles__card--active]="selectedRoleId() === role.id"
+          [attr.aria-current]="selectedRoleId() === role.id ? 'true' : null"
           (click)="onRoleClick(role.id)"
         >
           <span class="org-roles__badge" [style.background]="role.color ?? 'var(--muted)'"></span>
@@ -18,7 +20,7 @@
           <span class="org-roles__level">L{{ role.level }}</span>
         </button>
       }
-    </aside>
+    </div>
 
     <div class="org-roles__detail">
       @if (activeRole(); as role) {

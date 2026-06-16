@@ -1,23 +1,7 @@
-.org-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
+@use '../../styles/organization-section';
 
-.org-section__header p {
-  margin: var(--spacing-1) 0 0;
-  color: var(--muted-foreground);
-}
-
-.org-section__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-  max-width: 40rem;
-}
-
-.org-section__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-2);
+:host {
+  display: block;
+  min-height: 0;
+  min-width: 0;
 }

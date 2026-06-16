@@ -1,18 +1,17 @@
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { applyOrgBrandingToDocument, clearOrgBrandingFromDocument, FELDPOST_BRAND_DEFAULTS } from '../../../../core/organization/organization.helpers';
+import { clearOrgBrandingFromDocument, applyOrgBrandingToDocument, FELDPOST_BRAND_DEFAULTS } from '../../../../core/organization/organization.helpers';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { OrganizationService } from '../../../../core/organization/organization.service';
 import { ToastService } from '../../../../core/toast/toast.service';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_FORM_FIELD_IMPORTS } from '../../../../shared/ui/form-field';
-import { HLM_INPUT_IMPORTS } from '../../../../shared/ui/input';
 import { HLM_LABEL_IMPORTS } from '../../../../shared/ui/label';
 
 @Component({
   selector: 'app-organization-branding-section',
   standalone: true,
-  imports: [FormsModule, ...HLM_BUTTON_IMPORTS, ...HLM_FORM_FIELD_IMPORTS, ...HLM_INPUT_IMPORTS, ...HLM_LABEL_IMPORTS],
+  imports: [FormsModule, ...HLM_BUTTON_IMPORTS, ...HLM_FORM_FIELD_IMPORTS, ...HLM_LABEL_IMPORTS],
   templateUrl: './organization-branding-section.component.html',
   styleUrl: './organization-branding-section.component.scss',
 })
@@ -25,6 +24,8 @@ export class OrganizationBrandingSectionComponent {
   readonly canEdit = input(true);
   readonly feldpostDefaults = FELDPOST_BRAND_DEFAULTS;
 
+  readonly loading = signal(true);
+  readonly loadError = signal<string | null>(null);
   readonly primaryColor = signal('');
   readonly accentColor = signal('');
   readonly backgroundColor = signal('');
@@ -35,14 +36,20 @@ export class OrganizationBrandingSectionComponent {
     });
   }
 
-  private async load(): Promise<void> {
+  async load(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set(null);
     const result = await this.organizationService.loadBranding();
+    this.loading.set(false);
+    if (result.error) {
+      this.loadError.set(result.error.message);
+      return;
+    }
     if (result.data) {
       this.primaryColor.set(result.data.primaryColor ?? '');
       this.accentColor.set(result.data.accentColor ?? '');
       this.backgroundColor.set(result.data.backgroundColor ?? '');
     }
-    applyOrgBrandingToDocument(result.data);
   }
 
   async onSave(): Promise<void> {

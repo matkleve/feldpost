@@ -7,10 +7,14 @@ import {
   messagingSidebarActivityGroupKey,
   type MessagingSidebarActivityGroupKey,
 } from '../logic/messaging-sidebar-activity.logic';
+import { PageRailComponent } from '../../../shared/page-rail';
 import { PageRailTitleComponent } from '../../../shared/page-rail-title';
+import { RailNavButtonComponent } from '../../../shared/rail-nav-button';
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
+import { RailSectionComponent } from '../../../shared/rail-section';
+import { RailGroupHeadingComponent } from '../../../shared/rail-group-heading';
+import { RailStatusComponent } from '../../../shared/rail-status';
 import { RailSelectListComponent, type RailSelectListItem } from '../../../shared/rail-select-list';
-import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 interface MessagingSidebarTimeGroup {
   key: MessagingSidebarActivityGroupKey;
@@ -22,10 +26,14 @@ interface MessagingSidebarTimeGroup {
   selector: 'app-member-list',
   standalone: true,
   imports: [
+    PageRailComponent,
     PageRailTitleComponent,
+    RailNavButtonComponent,
     RailSearchFieldComponent,
+    RailSectionComponent,
+    RailGroupHeadingComponent,
+    RailStatusComponent,
     RailSelectListComponent,
-    ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './member-list.component.html',
   styleUrl: './member-list.component.scss',
@@ -53,11 +61,8 @@ export class MemberListComponent {
   readonly channelArchiveRequested = output<string>();
 
   readonly searchQuery = signal('');
-  readonly channelSearchQuery = signal('');
   readonly channelsExpanded = signal(true);
-  readonly channelSearchOpen = signal(false);
   readonly dmExpanded = signal(true);
-  readonly dmSearchOpen = signal(false);
   readonly starredChannelIds = signal<Set<string>>(this.readStarredChannelIds());
 
   private static readonly STARRED_CHANNELS_STORAGE_KEY = 'feldpost.chat.starredChannels';
@@ -75,7 +80,7 @@ export class MemberListComponent {
   });
 
   readonly filteredChannels = computed(() => {
-    const query = this.channelSearchQuery().trim().toLowerCase();
+    const query = this.searchQuery().trim().toLowerCase();
     let list = this.sidebarChannels();
     if (query) {
       list = list.filter((channel) => this.channelLabel(channel).toLowerCase().includes(query));
@@ -149,16 +154,6 @@ export class MemberListComponent {
 
   openCreateChannel(): void {
     this.channelCreateOpen.emit();
-  }
-
-  toggleChannelSearch(event: Event): void {
-    event.stopPropagation();
-    this.channelSearchOpen.update((open) => !open);
-  }
-
-  toggleDmSearch(event: Event): void {
-    event.stopPropagation();
-    this.dmSearchOpen.update((open) => !open);
   }
 
   onInvitesClick(): void {

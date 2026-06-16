@@ -1,6 +1,6 @@
 import type { OrgBranding } from './organization.types';
 
-/** Feldpost default theme colors (light / sandstone) for branding picker display and reset. */
+/** Feldpost default theme colors for color-picker display when no org override is stored. Hex mirrors :root tokens in styles.scss. */
 export const FELDPOST_BRAND_DEFAULTS = {
   primaryColor: '#c9a84c',
   accentColor: '#f2f2f2',

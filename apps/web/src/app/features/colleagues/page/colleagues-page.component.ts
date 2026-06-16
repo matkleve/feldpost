@@ -121,6 +121,16 @@ export class ColleaguesPageComponent implements OnDestroy {
     () => this.rightRailInspector() === 'member' && !!this.inspectorMember(),
   );
 
+  readonly rightRailOpen = computed(() => {
+    if (this.creatingChannel()) return true;
+    if (this.sidebarTab() === 'invites') return true;
+    if (this.showMemberDetail()) return true;
+    if (this.showChannelDetail()) return true;
+    return false;
+  });
+
+  readonly centerExpanded = computed(() => !this.rightRailOpen());
+
   readonly membersWithPresence = computed(() =>
     this.members().map((member) => ({
       ...member,

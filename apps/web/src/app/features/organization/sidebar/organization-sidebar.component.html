@@ -1,44 +1,20 @@
-<nav class="organization-sidebar" aria-label="{{ t('organization.sidebar.label', 'Organization sections') }}">
+<app-page-rail [ariaLabel]="t('organization.sidebar.label', 'Organization sections')">
   <app-page-rail-title
+    pageRailTitle
     icon="business"
     [title]="t('organization.page.title', 'Organization')"
   />
 
-  <div class="organization-sidebar__section-list" role="list">
+  <div pageRailBody class="organization-sidebar__section-list" role="list">
     @for (section of sections(); track section.id) {
-      <button
-        type="button"
-        class="organization-sidebar__section-item"
-        [class.organization-sidebar__section-item--active]="activeSection() === section.id"
-        [attr.aria-current]="activeSection() === section.id ? 'true' : null"
+      <app-rail-detail-nav-item
+        [icon]="section.icon"
+        [title]="t(section.labelKey, section.labelFallback)"
+        [subtitle]="t(section.subtitleKey, section.subtitleFallback)"
+        [active]="activeSection() === section.id"
         [disabled]="loading()"
-        (click)="sectionSelected.emit(section.id)"
-      >
-        <span
-          class="organization-sidebar__section-media flex size-5 shrink-0 items-center justify-center"
-          aria-hidden="true"
-        >
-          <span class="material-icons text-base leading-none">{{ section.icon }}</span>
-        </span>
-        <span class="organization-sidebar__section-label flex min-w-0 flex-1 flex-col gap-0.5">
-          <strong
-            class="min-w-0 font-semibold"
-            [attr.title]="t(section.labelKey, section.labelFallback)"
-          >
-            {{ t(section.labelKey, section.labelFallback) }}
-          </strong>
-          <small
-            class="min-w-0 text-xs text-muted-foreground"
-            [attr.title]="t(section.subtitleKey, section.subtitleFallback)"
-          >
-            {{ t(section.subtitleKey, section.subtitleFallback) }}
-          </small>
-        </span>
-        <span
-          class="organization-sidebar__section-chevron material-icons ml-auto shrink-0"
-          aria-hidden="true"
-        >chevron_right</span>
-      </button>
+        (clicked)="sectionSelected.emit(section.id)"
+      />
     }
   </div>
-</nav>
+</app-page-rail>

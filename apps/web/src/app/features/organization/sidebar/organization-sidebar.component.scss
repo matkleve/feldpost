@@ -1,7 +1,5 @@
-@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
-
-// Organization left rail — page-rail title like projects; section rows like settings overlay.
-// @see docs/design/page-rail-grid.md
+// Organization rail body list spacing inside shared page-rail shell.
+// @see docs/specs/component/page-rail/page-rail.md
 :host {
   display: flex;
   flex: 1 1 auto;
@@ -11,117 +9,9 @@
   height: 100%;
 }
 
-@layer components {
-  .organization-sidebar {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    height: 100%;
-    gap: var(--spacing-3);
-    padding: var(--spacing-4);
-  }
-
-  .organization-sidebar__section-list {
-    display: grid;
-    flex: 1 1 auto;
-    gap: var(--spacing-1);
-    min-height: 0;
-    overflow: auto;
-    padding-right: var(--spacing-1);
-  }
-
-  // Flex row for icon + stacked label + chevron — settings overlay section item contract.
-  // @see docs/specs/ui/settings-overlay/settings-overlay.md
-  .organization-sidebar__section-item {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-3);
-    min-width: 0;
-    min-height: 3.25rem;
-    padding-block: var(--spacing-2);
-    padding-inline: var(--spacing-3);
-    width: 100%;
-    border: 1px solid transparent;
-    border-radius: max(2px, calc(var(--radius-sm) - 4px));
-    background: transparent;
-    text-align: left;
-    color: var(--foreground);
-    cursor: pointer;
-    transition:
-      border-color var(--motion-duration-fast) var(--motion-ease-out),
-      background var(--motion-duration-fast) var(--motion-ease-out),
-      color var(--motion-duration-fast) var(--motion-ease-out),
-      box-shadow var(--motion-duration-fast) var(--motion-ease-out);
-  }
-
-  .organization-sidebar__section-item:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .organization-sidebar__section-item:hover:not(.organization-sidebar__section-item--active):not(:disabled),
-  .organization-sidebar__section-item:focus-visible:not(.organization-sidebar__section-item--active):not(:disabled) {
-    @include emphasis.hover(10%);
-
-    .organization-sidebar__section-media,
-    .organization-sidebar__section-chevron,
-    .organization-sidebar__section-label strong {
-      color: var(--primary);
-    }
-  }
-
-  .organization-sidebar__section-item--active {
-    @include emphasis.selected-bordered(10%, 42%);
-  }
-
-  .organization-sidebar__section-item--active:hover:not(:disabled),
-  .organization-sidebar__section-item--active:focus-visible {
-    @include emphasis.selected-hover(10%);
-    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
-    box-shadow: var(--interactive-focus-ring);
-    outline: none;
-
-    .organization-sidebar__section-media,
-    .organization-sidebar__section-chevron {
-      color: var(--primary);
-    }
-  }
-
-  .organization-sidebar__section-item:not(.organization-sidebar__section-item--active):focus-visible {
-    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
-    box-shadow: var(--interactive-focus-ring);
-    outline: none;
-  }
-
-  .organization-sidebar__section-media {
-    color: var(--muted-foreground);
-    align-self: center;
-  }
-
-  .organization-sidebar__section-item--active .organization-sidebar__section-media {
-    color: var(--interaction-selected-ink);
-  }
-
-  .organization-sidebar__section-label {
-    min-width: 0;
-  }
-
-  .organization-sidebar__section-label strong,
-  .organization-sidebar__section-label small {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-
-  .organization-sidebar__section-label strong {
-    font-size: var(--font-size-sm);
-  }
-
-  .organization-sidebar__section-chevron {
-    font-size: var(--font-size-sm);
-    color: var(--muted-foreground);
-    align-self: center;
-  }
+.organization-sidebar__section-list {
+  display: grid;
+  gap: var(--spacing-1);
+  min-height: 0;
+  padding-right: var(--spacing-1);
 }

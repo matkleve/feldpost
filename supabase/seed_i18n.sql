@@ -24307,6 +24307,161 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.page.error.message', 'Organization data could not be loaded. Please try again.', 'en', 'organization page load error body')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organization data could not be loaded. Please try again.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.error.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisationsdaten konnten nicht geladen werden. Bitte versuche es erneut.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.error.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile caricare i dati dell''organizzazione. Riprova.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.error.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.page.error.retry', 'Retry', 'en', 'organization page load error retry')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Retry', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.error.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erneut versuchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.error.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprova', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.error.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.page.loading', 'Loading organization…', 'en', 'organization page loading state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading organization…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisation wird geladen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento organizzazione…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.page.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.section.loading', 'Loading…', 'en', 'organization section loading state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.section.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird geladen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.section.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.section.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.section.retry', 'Retry', 'en', 'organization section error retry')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Retry', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.section.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erneut versuchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.section.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprova', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.section.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'organization.page.no_access.title', 'No organization sections available', 'en', 'organization page no permission title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -25113,14 +25268,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'organization.profile.address', 'Address', 'en', 'organization profile field label')
+values (null, 'organization.profile.address', 'Address line 1', 'en', 'organization profile field label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Address', 'published'
+select t.id, 'en', 'Address line 1', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.profile.address'
 on conflict (app_text_id, lang) do update set
@@ -25128,7 +25283,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adresse', 'published'
+select t.id, 'de', 'Adresszeile 1', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.profile.address'
 on conflict (app_text_id, lang) do update set
@@ -25136,9 +25291,102 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Indirizzo', 'published'
+select t.id, 'it', 'Indirizzo riga 1', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.profile.address'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.profile.address_line2', 'Address line 2', 'en', 'organization profile field label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address line 2', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.address_line2'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresszeile 2', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.address_line2'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Indirizzo riga 2', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.address_line2'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.profile.read_only', 'You can view organization details. Editing requires organization settings permission.', 'en', 'organization profile read-only notice')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'You can view organization details. Editing requires organization settings permission.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Du kannst Organisationsdetails ansehen. Bearbeiten erfordert die Berechtigung für Organisationseinstellungen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Puoi visualizzare i dettagli dell''organizzazione. La modifica richiede il permesso per le impostazioni dell''organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.profile.unavailable', 'Organization profile is not available.', 'en', 'organization profile missing state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organization profile is not available.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisationsprofil ist nicht verfügbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Profilo organizzazione non disponibile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.profile.unavailable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -25418,6 +25666,99 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Salva permessi', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.roles.save_permissions'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.roles.permissions_saved', 'Role permissions saved.', 'en', 'organization roles save toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Role permissions saved.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.permissions_saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rollenberechtigungen gespeichert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.permissions_saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Permessi del ruolo salvati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.permissions_saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.roles.created', 'Role created.', 'en', 'organization roles create toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Role created.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.created'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rolle erstellt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.created'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ruolo creato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.created'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.roles.deleted', 'Role deleted.', 'en', 'organization roles delete toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Role deleted.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.deleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rolle gelöscht.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.deleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ruolo eliminato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.roles.deleted'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -25919,6 +26260,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.branding.read_only', 'You can preview branding. Saving requires organization settings permission.', 'en', 'organization branding read-only notice')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'You can preview branding. Saving requires organization settings permission.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Du kannst das Branding ansehen. Speichern erfordert die Berechtigung für Organisationseinstellungen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Puoi visualizzare il branding. Il salvataggio richiede il permesso per le impostazioni dell''organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.branding.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'organization.billing.title', 'Billing', 'en', 'organization billing section title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -26193,6 +26565,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Nessuna fattura ancora.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.billing.no_invoices'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.billing.no_subscription', 'No subscription plan is configured yet.', 'en', 'organization billing no plan state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No subscription plan is configured yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.billing.no_subscription'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch kein Abonnement konfiguriert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.billing.no_subscription'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun piano di abbonamento configurato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.billing.no_subscription'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.billing.invoices_caption', 'Invoice history', 'en', 'organization billing table caption')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invoice history', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.billing.invoices_caption'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rechnungsverlauf', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.billing.invoices_caption'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cronologia fatture', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.billing.invoices_caption'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -26477,6 +26911,223 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.integrations.read_only', 'You can view API keys. Creating or revoking keys requires API key management permission.', 'en', 'organization integrations read-only notice')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'You can view API keys. Creating or revoking keys requires API key management permission.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Du kannst API-Schlüssel ansehen. Erstellen oder Widerrufen erfordert die Berechtigung zur API-Schlüssel-Verwaltung.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Puoi visualizzare le chiavi API. Creare o revocare richiede il permesso di gestione chiavi API.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.integrations.empty', 'No API keys yet.', 'en', 'organization integrations empty state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No API keys yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch keine API-Schlüssel.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna chiave API ancora.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.integrations.copy', 'Copy key', 'en', 'organization integrations copy action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy key', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Schlüssel kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia chiave', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.integrations.copied', 'API key copied to clipboard.', 'en', 'organization integrations copy toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'API key copied to clipboard.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'API-Schlüssel in die Zwischenablage kopiert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiave API copiata negli appunti.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.integrations.copy_failed', 'Could not copy API key.', 'en', 'organization integrations copy error toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not copy API key.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copy_failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'API-Schlüssel konnte nicht kopiert werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copy_failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile copiare la chiave API.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.copy_failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.integrations.created', 'API key created.', 'en', 'organization integrations create toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'API key created.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.created'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'API-Schlüssel erstellt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.created'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiave API creata.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.created'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.integrations.revoked', 'API key revoked.', 'en', 'organization integrations revoke toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'API key revoked.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.revoked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'API-Schlüssel widerrufen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.revoked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiave API revocata.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.integrations.revoked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'organization.export.title', 'Data export', 'en', 'organization export section title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -26627,6 +27278,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'L''esportazione è pronta per il download.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.export.ready'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.export.read_only', 'You need export permission to request new exports.', 'en', 'organization export read-only notice')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'You need export permission to request new exports.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.export.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Du benötigst Exportberechtigung um neue Exporte anzufordern.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.export.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Serve il permesso di esportazione per richiedere nuove esportazioni.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.export.read_only'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.export.empty', 'No exports yet. Request one to download organization data.', 'en', 'organization export empty state')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No exports yet. Request one to download organization data.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.export.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch keine Exporte. Fordere einen an um Organisationsdaten herunterzuladen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.export.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna esportazione ancora. Richiedine una per scaricare i dati dell''organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.export.empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -26813,6 +27526,564 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Nessuna voce di controllo ancora.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.audit.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.audit.caption', 'Organization audit log', 'en', 'organization audit table caption')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organization audit log', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.caption'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisations-Audit-Protokoll', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.caption'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Registro di controllo organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.caption'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.audit.user', 'User', 'en', 'organization audit table header')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'User', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.user'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benutzer', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.user'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Utente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.user'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.audit.system', 'System', 'en', 'organization audit system actor label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'System', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.system'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'System', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.system'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Sistema', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.audit.system'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.export.completed', 'Completed', 'en', 'organization export status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Completed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.completed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abgeschlossen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.completed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Completato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.completed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.export.failed', 'Failed', 'en', 'organization export status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Failed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fehlgeschlagen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non riuscito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.export.pending', 'Pending', 'en', 'organization export status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Pending', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.pending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ausstehend', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.pending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In attesa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.pending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.export.processing', 'Processing', 'en', 'organization export status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Processing', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.processing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird verarbeitet', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.processing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In elaborazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.export.processing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.invoice.paid', 'Paid', 'en', 'organization invoice status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Paid', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.paid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bezahlt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.paid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Pagato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.paid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.invoice.open', 'Open', 'en', 'organization invoice status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Open', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Offen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aperto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.invoice.draft', 'Draft', 'en', 'organization invoice status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Draft', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.draft'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Entwurf', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.draft'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Bozza', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.draft'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.invoice.void', 'Void', 'en', 'organization invoice status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Void', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.void'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ungültig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.void'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annullato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.void'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.invoice.uncollectible', 'Uncollectible', 'en', 'organization invoice status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uncollectible', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.uncollectible'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nicht einziehbar', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.uncollectible'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inesigibile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.invoice.uncollectible'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.subscription.active', 'Active', 'en', 'organization subscription status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Active', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktiv', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Attivo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.subscription.trialing', 'Trialing', 'en', 'organization subscription status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Trialing', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.trialing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Testphase', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.trialing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In prova', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.trialing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.subscription.past_due', 'Past due', 'en', 'organization subscription status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Past due', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.past_due'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Überfällig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.past_due'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scaduto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.past_due'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.subscription.paused', 'Paused', 'en', 'organization subscription status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Paused', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.paused'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pausiert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.paused'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In pausa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.paused'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.subscription.canceled', 'Canceled', 'en', 'organization subscription status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Canceled', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.canceled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gekündigt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.canceled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annullato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.canceled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'organization.status.subscription.cancelled', 'Cancelled', 'en', 'organization subscription status label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancelled', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.cancelled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gekündigt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.cancelled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annullato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'organization.status.subscription.cancelled'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

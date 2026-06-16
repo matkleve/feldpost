@@ -5,6 +5,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { RoleService } from '../../../../core/roles/roles.service';
 import { groupPermissionsByCategory } from '../../../../core/roles/roles.helpers';
 import type { OrgPermission, OrgRole } from '../../../../core/roles/roles.types';
+import { ToastService } from '../../../../core/toast/toast.service';
 import { ConfirmDialogComponent } from '../../../../shared/confirm-dialog/confirm-dialog.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { HLM_FORM_FIELD_IMPORTS } from '../../../../shared/ui/form-field';
@@ -29,6 +30,7 @@ import { HLM_LABEL_IMPORTS } from '../../../../shared/ui/label';
 export class OrganizationRolesSectionComponent {
   private readonly i18nService = inject(I18nService);
   private readonly roleService = inject(RoleService);
+  private readonly toastService = inject(ToastService);
 
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -71,9 +73,11 @@ export class OrganizationRolesSectionComponent {
 
   private async loadRolePermissions(roleId: string): Promise<void> {
     const result = await this.roleService.loadRolePermissionIds(roleId);
-    if (!result.error) {
-      this.assignedPermissionIds.set(new Set(result.data));
+    if (result.error) {
+      this.toastService.show({ message: result.error.message, type: 'error' });
+      return;
     }
+    this.assignedPermissionIds.set(new Set(result.data));
   }
 
   onRoleClick(roleId: string): void {
@@ -99,8 +103,16 @@ export class OrganizationRolesSectionComponent {
     const role = this.activeRole();
     if (!role) return;
     this.saving.set(true);
-    await this.roleService.updateRolePermissions(role.id, [...this.assignedPermissionIds()]);
+    const result = await this.roleService.updateRolePermissions(role.id, [...this.assignedPermissionIds()]);
     this.saving.set(false);
+    if (result.error) {
+      this.toastService.show({ message: result.error.message, type: 'error' });
+      return;
+    }
+    this.toastService.show({
+      message: this.t('organization.roles.permissions_saved', 'Role permissions saved.'),
+      type: 'success',
+    });
     this.rolesChanged.emit();
   }
 
@@ -118,9 +130,17 @@ export class OrganizationRolesSectionComponent {
     });
     this.saving.set(false);
 
+    if (result.error) {
+      this.toastService.show({ message: result.error.message, type: 'error' });
+      return;
+    }
     if (result.data) {
       this.newRoleName.set('');
       this.newRoleDisplayName.set('');
+      this.toastService.show({
+        message: this.t('organization.roles.created', 'Role created.'),
+        type: 'success',
+      });
       this.rolesChanged.emit();
       this.roleSelected.emit(result.data.id);
     }
@@ -138,8 +158,16 @@ export class OrganizationRolesSectionComponent {
     this.deleteDialogOpen.set(false);
     this.pendingDeleteRole.set(null);
     this.saving.set(true);
-    await this.roleService.deleteRole(role.id);
+    const result = await this.roleService.deleteRole(role.id);
     this.saving.set(false);
+    if (result.error) {
+      this.toastService.show({ message: result.error.message, type: 'error' });
+      return;
+    }
+    this.toastService.show({
+      message: this.t('organization.roles.deleted', 'Role deleted.'),
+      type: 'success',
+    });
     this.rolesChanged.emit();
   }
 

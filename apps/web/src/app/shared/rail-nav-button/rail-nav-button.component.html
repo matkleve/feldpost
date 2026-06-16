@@ -1,0 +1,13 @@
+<button
+  type="button"
+  hlmBtn
+  variant="ghost"
+  size="sm"
+  class="rail-nav-button"
+  [class.rail-nav-button--active]="active()"
+  [attr.aria-pressed]="pressed() ?? active()"
+  (click)="clicked.emit()"
+>
+  <span class="material-icons" aria-hidden="true">{{ icon() }}</span>
+  <span>{{ label() }}</span>
+</button>

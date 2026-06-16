@@ -25,6 +25,22 @@ The **center column is always `52rem`** (`content-clamp--list` width) in the sam
 - **Code:** `apps/web/src/app/shared/page-grid/`
 - **Slots:** `[pageGridLeft]`, `[pageGridCenter]`, `[pageGridRight]`
 
+### Left-rail composition (`app-page-rail`)
+
+Feature sidebars project into `[pageGridLeft]` using **`app-page-rail`** and child primitives — see [`docs/specs/component/page-rail/page-rail.md`](../specs/component/page-rail/page-rail.md).
+
+| Piece | Selector |
+| --- | --- |
+| Shell | `app-page-rail` |
+| Title | `app-page-rail-title` |
+| Primary nav | `app-rail-nav-button` |
+| Search | `app-rail-search-field` |
+| Collapsible section | `app-rail-section` |
+| Group label | `app-rail-group-heading` |
+| Select rows | `app-rail-select-list` |
+| Detail nav rows | `app-rail-detail-nav-item` |
+| Empty/loading | `app-rail-status` |
+
 ### Inputs
 
 | Input | Default | Meaning |

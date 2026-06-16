@@ -1,8 +1,14 @@
 <section class="org-section">
   <header class="org-section__header">
-    <h1>{{ t('organization.profile.title', 'Company profile') }}</h1>
+    <h2 class="org-section__title">{{ t('organization.profile.title', 'Company profile') }}</h2>
     <p>{{ t('organization.profile.subtitle', 'Identity and contact details for your organization.') }}</p>
   </header>
+
+  @if (!canEdit()) {
+    <p class="org-section__notice" role="status">
+      {{ t('organization.profile.read_only', 'You can view organization details. Editing requires organization settings permission.') }}
+    </p>
+  }
 
   @if (profile(); as org) {
     <form class="org-section__form" (ngSubmit)="onSave()">
@@ -43,8 +49,13 @@
       </div>
 
       <div hlmFormField>
-        <label hlmLabel for="org-address">{{ t('organization.profile.address', 'Address') }}</label>
+        <label hlmLabel for="org-address">{{ t('organization.profile.address', 'Address line 1') }}</label>
         <input hlmInput id="org-address" name="orgAddress" [(ngModel)]="draftAddressLine1" [disabled]="!canEdit()" />
+      </div>
+
+      <div hlmFormField>
+        <label hlmLabel for="org-address2">{{ t('organization.profile.address_line2', 'Address line 2') }}</label>
+        <input hlmInput id="org-address2" name="orgAddress2" [(ngModel)]="draftAddressLine2" [disabled]="!canEdit()" />
       </div>
 
       <div class="org-section__grid">
@@ -63,8 +74,14 @@
       </div>
 
       @if (canEdit()) {
-        <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+        <div class="org-section__actions">
+          <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+        </div>
       }
     </form>
+  } @else {
+    <p class="org-section__state" role="status">
+      {{ t('organization.profile.unavailable', 'Organization profile is not available.') }}
+    </p>
   }
 </section>
