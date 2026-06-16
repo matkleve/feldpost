@@ -29,7 +29,10 @@
         <p>{{ loadError() }}</p>
       </div>
     } @else if (sidebarTab() === 'invites') {
-      <app-colleagues-invites-panel class="colleagues-page__invites-center" />
+      <app-colleagues-invites-workspace
+        class="colleagues-page__invites-center"
+        (referralsRefresh)="onReferralsRefresh()"
+      />
     } @else {
       <app-chat-area
         [channel]="selectedChannel()"
@@ -57,7 +60,10 @@
       (created)="onChannelCreate($event)"
     />
   } @else if (sidebarTab() === 'invites') {
-    <app-colleagues-invite-referrals-panel pageGridRight />
+    <app-colleagues-invite-referrals-panel
+      pageGridRight
+      (messageRequested)="onMessageMember($event)"
+    />
   } @else if (selectedMember(); as member) {
     <app-member-detail-panel
       pageGridRight
@@ -65,7 +71,6 @@
       [roles]="roles()"
       [ownRoleLevel]="ownRoleLevel()"
       (closed)="onMemberPanelClosed()"
-      (messageRequested)="onMessageMember($event)"
       (memberUpdated)="onMemberUpdated()"
     />
   } @else if (showChannelDetail() && selectedChannel(); as channel) {

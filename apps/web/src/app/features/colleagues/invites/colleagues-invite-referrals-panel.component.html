@@ -27,7 +27,7 @@
     </p>
   } @else {
     <ul class="invite-referrals__list">
-      @for (referral of referrals(); track referral.inviteId) {
+      @for (referral of referrals(); track referral.inviteId + referral.userId) {
         <li class="invite-referrals__item">
           <span class="invite-referrals__avatar" aria-hidden="true">
             {{ referral.fullName.charAt(0).toUpperCase() || '?' }}
@@ -36,10 +36,20 @@
             <span class="invite-referrals__name">
               {{ referral.fullName || t('colleagues.members.unnamed', 'Unnamed') }}
             </span>
-            <time class="invite-referrals__date" [attr.datetime]="referral.acceptedAt">
-              {{ referral.acceptedAt | date: 'medium' }}
+            <time class="invite-referrals__date" [attr.datetime]="referral.joinedAt">
+              {{ referral.joinedAt | date: 'medium' }}
             </time>
           </div>
+          <button
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            type="button"
+            class="invite-referrals__message"
+            (click)="onMessage(referral.userId)"
+          >
+            {{ t('colleagues.invites.referrals.message', 'Message') }}
+          </button>
         </li>
       }
     </ul>

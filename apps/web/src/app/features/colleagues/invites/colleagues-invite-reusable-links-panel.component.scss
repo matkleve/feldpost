@@ -1,0 +1,30 @@
+@layer components {
+  .invite-links__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    min-width: 0;
+  }
+
+  .invite-links__section + .invite-links__section {
+    margin-top: var(--spacing-4);
+  }
+
+  .invite-links__group-heading {
+    margin: 0;
+    padding: var(--spacing-2) var(--spacing-2) var(--spacing-1);
+    color: var(--muted-foreground);
+    font-size: var(--font-size-2xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .invite-links__empty,
+  .invite-links__state {
+    margin: 0;
+    padding: var(--spacing-2);
+    color: var(--muted-foreground);
+    font-size: var(--font-size-sm);
+  }
+}

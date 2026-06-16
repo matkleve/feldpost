@@ -1,55 +1,75 @@
-<aside class="member-detail">
-  <header class="member-detail__header">
-    <h2>{{ t('colleagues.member.details_title', 'Details') }}</h2>
-    <button type="button" class="member-detail__close" (click)="closed.emit()" [attr.aria-label]="t('common.close', 'Close')">
+<aside class="member-detail-panel" role="complementary" [attr.aria-label]="t('colleagues.member.details_title', 'Details')">
+  <header class="member-detail-panel__header">
+    <h2 class="member-detail-panel__title">{{ t('colleagues.member.details_title', 'Details') }}</h2>
+    <button
+      type="button"
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      [attr.aria-label]="t('common.close', 'Close')"
+      (click)="closed.emit()"
+    >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
   </header>
 
-  <div class="member-detail__avatar">{{ member().fullName.charAt(0).toUpperCase() || '?' }}</div>
-  <p class="member-detail__name">{{ member().fullName || t('colleagues.members.unnamed', 'Unnamed') }}</p>
+  <div class="member-detail-panel__avatar">{{ member().fullName.charAt(0).toUpperCase() || '?' }}</div>
+  <p class="member-detail-panel__name">{{ member().fullName || t('colleagues.members.unnamed', 'Unnamed') }}</p>
 
-  <dl class="member-detail__meta">
-    <div>
+  <dl class="member-detail-panel__fields">
+    <div class="member-detail-panel__field">
       <dt>{{ t('colleagues.member.role', 'Role') }}</dt>
       <dd>
         @if (canManage()) {
-          <select [value]="member().roleId" (change)="onRoleChange($any($event.target).value)">
-            @for (role of assignableRoles(); track role.id) {
-              <option [value]="role.id">{{ role.displayName }}</option>
-            }
-          </select>
+          <hlm-form-field class="member-detail-panel__role-field">
+            <select
+              hlmSelect
+              class="member-detail-panel__role-select"
+              [value]="member().roleId"
+              [attr.aria-label]="t('colleagues.member.role', 'Role')"
+              (change)="onRoleChange($any($event.target).value)"
+            >
+              @for (role of assignableRoles(); track role.id) {
+                <option [value]="role.id">{{ role.displayName }}</option>
+              }
+            </select>
+          </hlm-form-field>
         } @else {
           {{ member().roleDisplayName }}
         }
       </dd>
     </div>
-    <div>
+    <div class="member-detail-panel__field">
       <dt>{{ t('colleagues.member.joined', 'Joined') }}</dt>
       <dd>{{ member().createdAt | date: 'mediumDate' }}</dd>
     </div>
     @if (member().suspendedAt) {
-      <div>
+      <div class="member-detail-panel__field">
         <dt>{{ t('colleagues.member.status', 'Status') }}</dt>
         <dd>{{ t('colleagues.member.suspended', 'Suspended') }}</dd>
       </div>
     }
   </dl>
 
-  <div class="member-detail__actions">
-    <button hlmBtn type="button" (click)="onMessage()">{{ t('colleagues.member.message', 'Message') }}</button>
+  @if (canManage()) {
+    <div class="member-detail-panel__actions">
+      <button type="button" hlmBtn variant="outline" size="sm" (click)="onSuspendToggle()">
+        <span class="material-icons" aria-hidden="true">{{ member().suspendedAt ? 'play_circle' : 'pause_circle' }}</span>
+        <span>
+          @if (member().suspendedAt) {
+            {{ t('colleagues.member.unsuspend', 'Unsuspend') }}
+          } @else {
+            {{ t('colleagues.member.suspend', 'Suspend') }}
+          }
+        </span>
+      </button>
 
-    @if (canManage()) {
-      <button hlmBtn variant="outline" type="button" (click)="onSuspendToggle()">
-        @if (member().suspendedAt) {
-          {{ t('colleagues.member.unsuspend', 'Unsuspend') }}
-        } @else {
-          {{ t('colleagues.member.suspend', 'Suspend') }}
-        }
+      <span class="member-detail-panel__actions-spacer" aria-hidden="true"></span>
+
+      <button type="button" hlmBtn variant="destructive" size="sm" (click)="onRemove()">
+        <span class="material-icons" aria-hidden="true">person_remove</span>
+        <span>{{ t('colleagues.member.remove', 'Remove') }}</span>
       </button>
-      <button hlmBtn variant="destructive" type="button" (click)="onRemove()">
-        {{ t('colleagues.member.remove', 'Remove') }}
-      </button>
-    }
-  </div>
+    </div>
+  }
 </aside>

@@ -24,7 +24,7 @@ The register card keeps the existing auth map-shell composition and adds an expl
 | 4   | Submits malformed invite code                 | Form stays blocked; inline format error shown                                            | regex validation            |
 | 5   | Submits weak password                         | Form stays blocked; password policy errors shown                                         | password validators         |
 | 6   | Submits valid form                            | Auth signup sends `invite_token_hash` metadata                                           | `AuthService.signUp()`      |
-| 7   | Backend trigger validates invite              | Profile is created in invite org; invite role assigned; invite status becomes `accepted` | `handle_new_user()` trigger |
+| 7   | Backend trigger validates invite              | Profile is created in invite org; invite role assigned; one-shot invite `accepted` or reusable `invite_signups` row inserted | `handle_new_user()` trigger |
 | 8   | Backend rejects invite (expired/revoked/used) | Register shows API error alert; account is not created                                   | trigger exception           |
 
 ```mermaid

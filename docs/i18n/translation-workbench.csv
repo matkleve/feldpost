@@ -635,6 +635,46 @@ colleagues.invites.referrals.subtitle,Colleagues who registered using one of you
 colleagues.invites.referrals.loading,Loading referrals…,colleagues invites right panel loading,Loading referrals…,Empfehlungen werden geladen…,Caricamento referral…
 colleagues.invites.referrals.empty,No one has joined via your invites yet.,colleagues invites right panel empty,No one has joined via your invites yet.,Noch ist niemand über deine Einladungen beigetreten.,Nessuno si è ancora unito tramite i tuoi inviti.
 colleagues.invites.referrals.error,Could not load referrals.,colleagues invites right panel error,Could not load referrals.,Empfehlungen konnten nicht geladen werden.,Impossibile caricare i referral.
+colleagues.invites.referrals.message,Message,colleagues invites referral row action,Message,Nachricht,Messaggio
+colleagues.invites.editor.quickTitle,Quick invite,colleagues invites editor heading quick,Quick invite,Schnelle Einladung,Invito rapido
+colleagues.invites.editor.editTitle,Edit invite link,colleagues invites editor heading edit,Edit invite link,Einladungslink bearbeiten,Modifica link di invito
+colleagues.invites.editor.quickSubtitle,Share a one-time invite or save it as a reusable link.,colleagues invites editor subtitle quick,Share a one-time invite or save it as a reusable link.,Teile eine Einmal-Einladung oder speichere sie als wiederverwendbaren Link.,Condividi un invito monouso o salvalo come link riutilizzabile.
+colleagues.invites.editor.editSubtitle,Update the reusable link label role and validity window.,colleagues invites editor subtitle edit,Update the reusable link label role and validity window.,Aktualisiere Bezeichnung Rolle und Gültigkeitszeitraum des wiederverwendbaren Links.,Aggiorna etichetta ruolo e finestra di validità del link riutilizzabile.
+colleagues.invites.editor.nameLabel,Link label,colleagues invites editor name field,Link label,Link-Bezeichnung,Etichetta link
+colleagues.invites.editor.namePlaceholder,e.g. April onboarding,colleagues invites editor name placeholder,e.g. April onboarding,z. B. Onboarding April,ad es. onboarding aprile
+colleagues.invites.editor.nameHelper,Internal name so you can tell links apart.,colleagues invites editor name helper,Internal name so you can tell links apart.,Interner Name um Links zu unterscheiden.,Nome interno per distinguere i link.
+colleagues.invites.editor.nameRequired,Enter a link label to continue.,colleagues invites editor validation,Enter a link label to continue.,Gib eine Link-Bezeichnung ein um fortzufahren.,Inserisci un'etichetta per continuare.
+colleagues.invites.editor.saveAsReusable,Save as reusable,colleagues invites editor action,Save as reusable,Als wiederverwendbar speichern,Salva come riutilizzabile
+colleagues.invites.editor.save,Save,colleagues invites editor action,Save,Speichern,Salva
+colleagues.invites.editor.cancel,Cancel,colleagues invites editor action,Cancel,Abbrechen,Annulla
+colleagues.invites.editor.pauseLabel,Link active,colleagues invites editor pause switch,Link active,Link aktiv,Link attivo
+colleagues.invites.validity.label,Validity,colleagues invites validity field,Validity,Gültigkeit,Validità
+colleagues.invites.validity.preset.now30,Effective now 30 days,colleagues invites validity preset,Effective now 30 days,Ab sofort 30 Tage,Effettivo ora 30 giorni
+colleagues.invites.validity.preset.7d,7 days,colleagues invites validity preset,7 days,7 Tage,7 giorni
+colleagues.invites.validity.preset.30d,30 days,colleagues invites validity preset,30 days,30 Tage,30 giorni
+colleagues.invites.validity.preset.90d,90 days,colleagues invites validity preset,90 days,90 Tage,90 giorni
+colleagues.invites.validity.preset.thisMonth,This month,colleagues invites validity preset,This month,Dieser Monat,Questo mese
+colleagues.invites.validity.preset.nextMonth,Next month,colleagues invites validity preset,Next month,Nächster Monat,Mese prossimo
+colleagues.invites.validity.preset.1y,1 year,colleagues invites validity preset,1 year,1 Jahr,1 anno
+colleagues.invites.validity.preset.custom,Custom,colleagues invites validity preset,Custom,Benutzerdefiniert,Personalizzato
+colleagues.invites.status.active,Active,colleagues invites status chip,Active,Aktiv,Attivo
+colleagues.invites.status.scheduled,Scheduled,colleagues invites status chip,Scheduled,Geplant,Programmato
+colleagues.invites.status.paused,Paused,colleagues invites status chip,Paused,Pausiert,In pausa
+colleagues.invites.status.expired,Expired,colleagues invites status chip,Expired,Abgelaufen,Scaduto
+colleagues.invites.links.activeTitle,Active links,colleagues invites links section,Active links,Aktive Links,Link attivi
+colleagues.invites.links.expiredTitle,Expired links,colleagues invites links section,Expired links,Abgelaufene Links,Link scaduti
+colleagues.invites.links.activeEmpty,No active reusable links yet.,colleagues invites links empty,No active reusable links yet.,Noch keine aktiven wiederverwendbaren Links.,Nessun link riutilizzabile attivo.
+colleagues.invites.links.expiredEmpty,No expired links.,colleagues invites links empty,No expired links.,Keine abgelaufenen Links.,Nessun link scaduto.
+colleagues.invites.links.loading,Loading invite links…,colleagues invites links loading,Loading invite links…,Einladungslinks werden geladen…,Caricamento link di invito…
+colleagues.invites.links.until,Until {date},colleagues invites links row secondary,Until {date},Bis {date},Fino al {date}
+colleagues.invites.links.action.copy,Copy link,colleagues invites links row action,Copy link,Link kopieren,Copia link
+colleagues.invites.links.action.pause,Pause link,colleagues invites links row action,Pause link,Link pausieren,Metti in pausa
+colleagues.invites.links.action.resume,Resume link,colleagues invites links row action,Resume link,Link fortsetzen,Riprendi link
+colleagues.invites.links.action.reuse,Reuse link,colleagues invites links row action,Reuse link,Link wiederverwenden,Riutilizza link
+colleagues.invites.toast.savedReusable,Reusable link created.,colleagues invites toast,Reusable link created.,Wiederverwendbarer Link erstellt.,Link riutilizzabile creato.
+colleagues.invites.toast.saved,Invite link updated.,colleagues invites toast,Invite link updated.,Einladungslink aktualisiert.,Link di invito aggiornato.
+colleagues.invites.toast.copied,Invite link copied.,colleagues invites toast,Invite link copied.,Einladungslink kopiert.,Link di invito copiato.
+colleagues.invites.error.load,Could not load invites workspace.,colleagues invites workspace error,Could not load invites workspace.,Einladungsbereich konnte nicht geladen werden.,Impossibile caricare l'area inviti.
 colleagues.channels.title,Channels,colleagues channel list heading,Channels,Kanäle,Canali
 colleagues.channels.empty,No channels,colleagues empty channel list,No channels,Keine Kanäle,Nessun canale
 colleagues.channels.search,Search channels,colleagues channel search placeholder,Search channels,Kanäle suchen,Cerca canali

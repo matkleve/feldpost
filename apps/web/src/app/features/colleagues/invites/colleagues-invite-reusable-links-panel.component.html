@@ -1,0 +1,43 @@
+@if (loading()) {
+  <p class="invite-links__state" role="status">
+    {{ t('colleagues.invites.links.loading', 'Loading invite links…') }}
+  </p>
+} @else {
+  <section class="invite-links__section" aria-labelledby="invite-links-active-title">
+    <h3 id="invite-links-active-title" class="invite-links__group-heading">
+      {{ t('colleagues.invites.links.activeTitle', 'Active links') }}
+    </h3>
+    @if (activeItems().length === 0) {
+      <p class="invite-links__empty">
+        {{ t('colleagues.invites.links.activeEmpty', 'No active reusable links yet.') }}
+      </p>
+    } @else {
+      <app-rail-select-list
+        [items]="activeItems()"
+        [selectedId]="selectedId()"
+        [compact]="true"
+        (itemSelected)="onItemSelected($event)"
+        (actionTriggered)="onAction($event)"
+      />
+    }
+  </section>
+
+  <section class="invite-links__section" aria-labelledby="invite-links-expired-title">
+    <h3 id="invite-links-expired-title" class="invite-links__group-heading">
+      {{ t('colleagues.invites.links.expiredTitle', 'Expired links') }}
+    </h3>
+    @if (expiredItems().length === 0) {
+      <p class="invite-links__empty">
+        {{ t('colleagues.invites.links.expiredEmpty', 'No expired links.') }}
+      </p>
+    } @else {
+      <app-rail-select-list
+        [items]="expiredItems()"
+        [selectedId]="selectedId()"
+        [compact]="true"
+        (itemSelected)="onItemSelected($event)"
+        (actionTriggered)="onAction($event)"
+      />
+    }
+  </section>
+}

@@ -24,8 +24,10 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Identity Profile | ui/settings-overlay/account-settings-section.md | display name edit policy, formatting, and save behavior. |
 | Interaction & Shortcuts | ui/settings-overlay/settings-overlay.md | grouped keyboard shortcut reference by category, including implementation status visibility. |
 | Interaction & Shortcuts | ui/settings-overlay/shortcut-reference-settings.md | grouped keyboard shortcut reference by category, including implementation status visibility. |
-| Invite Management | ui/settings-overlay/qr-invite-flow.md | invite creation, acceptance, and revocation controls. |
+| Invite Management | ui/settings-overlay/qr-invite-flow.md | one-shot creation, acceptance, and revocation controls. |
 | Invite Management | ui/settings-overlay/settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
+| Invite validity cap | ui/colleagues/colleagues-invites-workspace.md | hard product maximum **365 days** from effective start (`valid_from` or creation). Not configurable to unlimited; applies to **admin** the same as clerk/worker. |
+| Invite validity cap | ui/settings-overlay/qr-invite-flow.md | maximum **365 days** for reusables (all roles); see [colleagues-invites-workspace](../colleagues/colleagues-invites-workspace.md). |
 | Language / Locale | ui/settings-overlay/language-locale-settings.md | UI language switch between English, German, and Italian with locale-specific formatting and runtime translation fallback behavior. |
 | Language / Locale | ui/settings-overlay/settings-overlay.md | UI language and regional formatting defaults; language switch labels stay native (`English`, `Deutsch`, `Italiano`) regardless of active UI language. |
 | Map Basemap | component/map/map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
@@ -41,7 +43,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Project Color Palette | component/project/project-color-picker.md | temporary one-click random brand-hue generation (`brand-hue-###`) derived from brand orange by varying hue. |
 | Project Color Palette | page/projects-page.md | enabled semantic project color options and default fallback color. |
 | Projects View Mode | page/projects-page.md | default layout mode (`list` or `cards`) and persistence behavior. |
-| QR Invite Preferences | ui/settings-overlay/qr-invite-flow.md | default target role, auto-generate-on-open behavior, invite expiration window, and enabled share channels. |
+| QR Invite Preferences | ui/settings-overlay/qr-invite-flow.md | default target role, auto-generate-on-open behavior, one-shot expiration window (7 days), and enabled share channels. |
 | QR Invite Preferences | ui/settings-overlay/settings-overlay.md | default role, auto-generation behavior, expiration policy, and allowed share channels for QR invites. |
 | Roles & Permissions | ui/settings-overlay/settings-overlay.md | role-based capability visibility and access constraints. |
 | Search Tuning | ui/search-bar/search-tuning-settings.md | org-level geocoder/search filters, weights, penalties, orchestrator timing, provider limits. |

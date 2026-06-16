@@ -1,0 +1,30 @@
+@if (loadError()) {
+  <div class="invites-workspace__error" role="alert">
+    <p>{{ loadError() }}</p>
+  </div>
+} @else {
+  <div class="invites-workspace__grid">
+    <app-invite-editor-panel
+      class="invites-workspace__editor"
+      [mode]="column1Mode()"
+      [invite]="column1Mode() === 'quickDraft' ? activeOneShot() : null"
+      [editDraft]="editDraft()"
+      [validityFocus]="validityFocus()"
+      [saveInFlight]="saveInFlight()"
+      (roleRegenerated)="onRoleRegenerated($event)"
+      (saveAsReusable)="onSaveAsReusable($event)"
+      (saveReusable)="onSaveReusable($event)"
+      (cancelEdit)="onCancelEdit()"
+      (editDraftChange)="onEditDraftChange($event)"
+    />
+
+    <app-colleagues-invite-reusable-links-panel
+      class="invites-workspace__links"
+      [reusables]="reusables()"
+      [selectedId]="selectedReusableId()"
+      [loading]="linksLoading()"
+      (itemSelected)="onReusableSelected($event)"
+      (actionTriggered)="onListAction($event)"
+    />
+  </div>
+}

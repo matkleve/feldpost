@@ -1,0 +1,31 @@
+@layer components {
+  .invites-workspace__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-4);
+    min-height: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: start;
+  }
+
+  .invites-workspace__editor,
+  .invites-workspace__links {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .invites-workspace__error {
+    padding: var(--spacing-4);
+    color: var(--destructive);
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 48rem) {
+  @layer components {
+    .invites-workspace__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

@@ -1,20 +1,23 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, input, output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { MemberService } from '../../../core/members/members.service';
 import type { OrgMember } from '../../../core/members/members.types';
 import type { OrgRole } from '../../../core/roles/roles.types';
 import { canAssignRole } from '../../../core/roles/roles.helpers';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
 import { HLM_SELECT_IMPORTS } from '../../../shared/ui/select';
 
 @Component({
   selector: 'app-member-detail-panel',
   standalone: true,
-  imports: [DatePipe, FormsModule, ...HLM_BUTTON_IMPORTS, ...HLM_SELECT_IMPORTS],
+  imports: [DatePipe, ...HLM_BUTTON_IMPORTS, ...HLM_FORM_FIELD_IMPORTS, ...HLM_SELECT_IMPORTS],
   templateUrl: './member-detail-panel.component.html',
   styleUrl: './member-detail-panel.component.scss',
+  host: {
+    class: 'flex min-h-0 min-w-0 flex-col',
+  },
 })
 export class MemberDetailPanelComponent {
   private readonly i18nService = inject(I18nService);
@@ -27,7 +30,6 @@ export class MemberDetailPanelComponent {
   readonly ownRoleLevel = input(0);
 
   readonly closed = output<void>();
-  readonly messageRequested = output<string>();
   readonly memberUpdated = output<void>();
 
   readonly assignableRoles = computed(() =>
@@ -60,9 +62,5 @@ export class MemberDetailPanelComponent {
     await this.memberService.removeMember(this.member().id);
     this.memberUpdated.emit();
     this.closed.emit();
-  }
-
-  onMessage(): void {
-    this.messageRequested.emit(this.member().id);
   }
 }

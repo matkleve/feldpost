@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import type { RealtimeChannel } from '@supabase/supabase-js';
@@ -17,7 +17,7 @@ import { MemberListComponent } from '../sidebar/member-list.component';
 import { ChatAreaComponent } from '../chat/chat-area.component';
 import { MemberDetailPanelComponent } from '../member-detail/member-detail-panel.component';
 import { ChannelDetailPanelComponent } from '../channel/channel-detail-panel.component';
-import { ColleaguesInvitesPanelComponent } from '../invites/colleagues-invites-panel.component';
+import { ColleaguesInvitesWorkspaceComponent } from '../invites/colleagues-invites-workspace.component';
 import { ColleaguesInviteReferralsPanelComponent } from '../invites/colleagues-invite-referrals-panel.component';
 
 export type ColleaguesSidebarTab = 'members' | 'invites';
@@ -31,7 +31,7 @@ export type ColleaguesSidebarTab = 'members' | 'invites';
     ChatAreaComponent,
     MemberDetailPanelComponent,
     ChannelDetailPanelComponent,
-    ColleaguesInvitesPanelComponent,
+    ColleaguesInvitesWorkspaceComponent,
     ColleaguesInviteReferralsPanelComponent,
   ],
   templateUrl: './colleagues-page.component.html',
@@ -51,6 +51,8 @@ export class ColleaguesPageComponent implements OnDestroy {
   private readonly authService = inject(AuthService);
 
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
+  readonly referralsPanel = viewChild(ColleaguesInviteReferralsPanelComponent);
 
   readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -264,7 +266,12 @@ export class ColleaguesPageComponent implements OnDestroy {
     await this.openDirectMessage(memberId);
   }
 
+  onReferralsRefresh(): void {
+    void this.referralsPanel()?.reload();
+  }
+
   private async openDirectMessage(memberId: string): Promise<void> {
+    this.exitInvitesIfActive();
     this.selectedMemberId.set(memberId);
     const result = await this.chatService.findOrCreateDm(memberId);
     if (result.error) {

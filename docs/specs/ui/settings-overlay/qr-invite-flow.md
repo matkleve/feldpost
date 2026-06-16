@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A role-scoped invite flow that creates a join QR code immediately when Invite Management is opened, and also from command-mode search via `/image`. The QR or link can be shared through channels like email or WhatsApp, and the invited person joins the same organization with a preselected role.
+A role-scoped **one-shot** invite flow that creates a join QR code immediately when Invite Management is opened, and also from command-mode search via `/image`. The QR or link can be shared through channels like email or WhatsApp; the invited person joins the same organization with a preselected role. **Persistent reusable links** and the Team three-column layout are specified in [colleagues-invites-workspace](../colleagues/colleagues-invites-workspace.md) — this document covers the **ephemeral draft block** only.
 
 ## What It Looks Like
 
@@ -11,7 +11,7 @@ The feature appears as a dedicated section in Settings Overlay and as a command 
 ## Where It Lives
 
 - **Route**: Global on map shell; no dedicated route segment.
-- **Parent**: `SettingsOverlayComponent` for settings entry and `SearchBarComponent` for slash-command entry.
+- **Parent**: `SettingsOverlayComponent` for settings entry; `app-colleagues-invites-workspace` column 1 on Team Invites tab; `SearchBarComponent` for slash-command entry.
 - **Appears when**:
   - Invite Management section is opened in Settings Overlay.
   - User types `/image` and commits `Create QR Invite` command in Search Bar.
@@ -32,6 +32,7 @@ The feature appears as a dedicated section in Settings Overlay and as a command 
 | 10  | Creator clicks `Revoke`                          | Invite state becomes revoked and further acceptance is blocked                                                                          | update invite status                  |
 | 11  | `user` or `viewer` role attempts invite creation | UI shows permission-denied message; no invite row created                                                                               | RLS insert deny                       |
 | 12  | Network/create error on auto-generation          | Shows retry state with actionable `Try again` button                                                                                    | service error                         |
+| 13  | User clicks **Save as reusable** (Team Invites only) | Opens name + validity flow; creates separate reusable row — see [colleagues-invites-workspace](../colleagues/colleagues-invites-workspace.md) | not part of Settings overlay v1 |
 
 ```mermaid
 sequenceDiagram
@@ -71,7 +72,8 @@ QrInviteFlowHost (Settings section or command entry host)
 │   │       │   ├── CopyLinkButton
 │   │       │   ├── ShareEmailButton
 │   │       │   └── ShareWhatsAppButton
-│   └── InviteHistoryList [optional, later extension]
+│   │       └── SaveAsReusableButton [Team Invites column 1 only]
+│   └── (Reusable list + referrals: colleagues-invites-workspace)
 └── InviteErrorOrEmptyState [conditional]
 ```
 
@@ -90,39 +92,10 @@ QrInviteFlowHost (Settings section or command entry host)
 | expiresAt      | `qr_invites.expires_at`       | `string`                                           |
 | acceptedAt     | `qr_invites.accepted_at`      | `string \| null`                                   |
 | acceptedUserId | `qr_invites.accepted_user_id` | `string \| null`                                   |
+| reusable       | `qr_invites.reusable`         | `boolean` (default `false` for this flow)          |
 | shareEvents    | `invite_share_events`         | `InviteShareEvent[]`                               |
 
-```mermaid
-erDiagram
-    organizations ||--o{ qr_invites : scopes
-    auth_users ||--o{ qr_invites : creates
-    auth_users ||--o| qr_invites : accepts
-    qr_invites ||--o{ invite_share_events : logs
-
-    qr_invites {
-        uuid id PK
-        uuid organization_id FK
-        uuid created_by FK
-        text target_role
-        text invite_url
-        text qr_payload
-        text token_hash
-        text status
-        timestamptz expires_at
-        timestamptz accepted_at
-        uuid accepted_user_id FK
-        timestamptz created_at
-        timestamptz updated_at
-    }
-
-    invite_share_events {
-        uuid id PK
-        uuid invite_id FK
-        uuid actor_user_id FK
-        text channel
-        timestamptz created_at
-    }
-```
+One-shot rows: `reusable=false`, `display_name` null, `valid_from` null, `expires_at` default 7 days. Full ER diagram: [data supplement](./qr-invite-flow.data.supplement.md). Reusable workspace: [colleagues-invites-workspace](../colleagues/colleagues-invites-workspace.md).
 
 ## State
 
@@ -141,8 +114,8 @@ erDiagram
 | `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts`   | Invite settings section host                        |
 | `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html` | Invite UI template with role picker and QR preview  |
 | `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.scss` | Invite layout and visual states                     |
-| `apps/web/src/app/core/invites/invite.service.ts`                                              | Invite create/regenerate/revoke/share orchestration |
-| `apps/web/src/app/core/invites/invite.types.ts`                                                | Shared invite DTOs and UI models                    |
+| `apps/web/src/app/core/invites/invites.service.ts`                                              | Invite create/regenerate/revoke/share orchestration |
+| `apps/web/src/app/core/invites/invites.types.ts`                                                | Shared invite DTOs and UI models                    |
 | `apps/web/src/app/core/search/search.models.ts`                                                | Extend command union with invite command            |
 | `apps/web/src/app/core/search/search-orchestrator.service.ts`                                  | Emit `/image` invite command candidate              |
 | `apps/web/src/app/features/map/search-bar/search-bar.component.ts`                             | Handle invite command commit routing                |
@@ -153,7 +126,7 @@ erDiagram
 
 ### Injected Services
 
-- `InviteService`: creates and manages invite drafts and share-event logging.
+- `InvitesService`: creates and manages invite drafts and share-event logging.
 - `SearchOrchestratorService`: exposes command candidate for `/image` invite action.
 - `SettingsOverlaySectionRegistry`: exposes Invite Management section.
 - `Clipboard` / Web Share adapter abstraction: channel execution for link distribution.
@@ -191,21 +164,11 @@ flowchart LR
 
 ## Acceptance Criteria
 
-[x] Opening Invite Management auto-generates an active invite and visible QR without extra clicks.
-[x] `/image` command mode can launch the same invite flow from Search Bar.
-[x] Visual block order is always `Role picker -> QR preview -> Share actions` on desktop and mobile.
-[x] Role picker supports `clerk` and `worker` and regenerates invite payload when changed.
-[x] Share actions include copy link, email share, and WhatsApp share.
-[x] Every share action writes an `invite_share_events` row.
-[x] Invite states include `active`, `expired`, `revoked`, `accepted` and are reflected in UI.
-[x] Revoked or expired invites cannot be accepted.
-[x] RLS prevents viewers and out-of-org users from creating invites.
-[x] Clerk users can create clerk/worker invites.
-[x] Only `admin`, `clerk`, and `worker` can create QR invites; baseline `user` cannot.
-
-- [ ] Admin can later change granted role after acceptance (handled outside this element).
+- [ ] One-shot behavior per shipped checkboxes in `docs/use-cases/qr-invite-flow.md`.
+- [ ] Team column 1 shares this draft block; reusables in [colleagues-invites-workspace](../colleagues/colleagues-invites-workspace.md).
 
 ## Settings
 
-- **QR Invite Preferences**: default target role, auto-generate-on-open behavior, invite expiration window, and enabled share channels.
-- **Invite Management**: invite creation, acceptance, and revocation controls.
+- **QR Invite Preferences**: default target role, auto-generate-on-open behavior, one-shot expiration window (7 days), and enabled share channels.
+- **Invite Management**: one-shot creation, acceptance, and revocation controls.
+- **Invite validity cap**: maximum **365 days** for reusables (all roles); see [colleagues-invites-workspace](../colleagues/colleagues-invites-workspace.md).

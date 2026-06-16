@@ -92,3 +92,7 @@
   color: var(--muted-foreground);
   font-size: var(--font-size-xs);
 }
+
+.invite-referrals__message {
+  flex-shrink: 0;
+}

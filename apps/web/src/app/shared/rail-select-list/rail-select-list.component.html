@@ -9,12 +9,15 @@
     </div>
   } @else {
     @for (item of items(); track item.id) {
-      <div class="rail-select-list__row-wrap">
+      <div
+        class="rail-select-list__row-wrap"
+        [class.rail-select-list__row-wrap--active]="item.id === selectedId()"
+        [class.rail-select-list__row-wrap--with-actions]="(item.actions?.length ?? 0) > 0"
+      >
         <button
           type="button"
           role="option"
           class="rail-select-list__row"
-          [class.rail-select-list__row--active]="item.id === selectedId()"
           [attr.aria-selected]="item.id === selectedId()"
           (click)="onItemClick(item.id)"
         >
@@ -52,9 +55,6 @@
           @if (action.type === 'button') {
             <button
               type="button"
-              hlmBtn
-              variant="ghost"
-              [size]="dense() ? 'icon-xs' : 'icon-sm'"
               class="rail-select-list__row-action"
               [class.rail-select-list__row-action--pinned]="action.action.alwaysVisible || action.action.active"
               [class.rail-select-list__row-action--active]="action.action.active"

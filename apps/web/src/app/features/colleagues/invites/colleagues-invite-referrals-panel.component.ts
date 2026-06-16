@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, output, signal } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { InvitesService } from '../../../core/invites/invites.service';
 import type { InviteReferralViewModel } from '../../../core/invites/invites.types';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 @Component({
   selector: 'app-colleagues-invite-referrals-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ...HLM_BUTTON_IMPORTS],
   templateUrl: './colleagues-invite-referrals-panel.component.html',
   styleUrl: './colleagues-invite-referrals-panel.component.scss',
   host: {
@@ -20,12 +21,22 @@ export class ColleaguesInviteReferralsPanelComponent implements OnInit {
 
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
+  readonly messageRequested = output<string>();
+
   readonly referrals = signal<InviteReferralViewModel[]>([]);
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
 
   ngOnInit(): void {
     void this.loadReferrals();
+  }
+
+  async reload(): Promise<void> {
+    await this.loadReferrals();
+  }
+
+  onMessage(userId: string): void {
+    this.messageRequested.emit(userId);
   }
 
   private async loadReferrals(): Promise<void> {

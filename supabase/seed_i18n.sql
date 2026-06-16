@@ -19719,6 +19719,1246 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.referrals.message', 'Message', 'en', 'colleagues invites referral row action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Message', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.referrals.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nachricht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.referrals.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Messaggio', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.referrals.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.quickTitle', 'Quick invite', 'en', 'colleagues invites editor heading quick')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Quick invite', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.quickTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Schnelle Einladung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.quickTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Invito rapido', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.quickTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.editTitle', 'Edit invite link', 'en', 'colleagues invites editor heading edit')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Edit invite link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.editTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungslink bearbeiten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.editTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modifica link di invito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.editTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.quickSubtitle', 'Share a one-time invite or save it as a reusable link.', 'en', 'colleagues invites editor subtitle quick')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share a one-time invite or save it as a reusable link.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.quickSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Teile eine Einmal-Einladung oder speichere sie als wiederverwendbaren Link.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.quickSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condividi un invito monouso o salvalo come link riutilizzabile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.quickSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.editSubtitle', 'Update the reusable link label role and validity window.', 'en', 'colleagues invites editor subtitle edit')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Update the reusable link label role and validity window.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.editSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktualisiere Bezeichnung Rolle und Gültigkeitszeitraum des wiederverwendbaren Links.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.editSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiorna etichetta ruolo e finestra di validità del link riutilizzabile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.editSubtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.nameLabel', 'Link label', 'en', 'colleagues invites editor name field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Link label', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link-Bezeichnung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Etichetta link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.namePlaceholder', 'e.g. April onboarding', 'en', 'colleagues invites editor name placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'e.g. April onboarding', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.namePlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'z. B. Onboarding April', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.namePlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'ad es. onboarding aprile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.namePlaceholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.nameHelper', 'Internal name so you can tell links apart.', 'en', 'colleagues invites editor name helper')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Internal name so you can tell links apart.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameHelper'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Interner Name um Links zu unterscheiden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameHelper'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nome interno per distinguere i link.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameHelper'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.nameRequired', 'Enter a link label to continue.', 'en', 'colleagues invites editor validation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter a link label to continue.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameRequired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gib eine Link-Bezeichnung ein um fortzufahren.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameRequired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci un''etichetta per continuare.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.nameRequired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.saveAsReusable', 'Save as reusable', 'en', 'colleagues invites editor action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save as reusable', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.saveAsReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Als wiederverwendbar speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.saveAsReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva come riutilizzabile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.saveAsReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.save', 'Save', 'en', 'colleagues invites editor action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Save', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.save'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Speichern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.save'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salva', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.save'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.cancel', 'Cancel', 'en', 'colleagues invites editor action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abbrechen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.editor.pauseLabel', 'Link active', 'en', 'colleagues invites editor pause switch')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Link active', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.pauseLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link aktiv', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.pauseLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link attivo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.editor.pauseLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.label', 'Validity', 'en', 'colleagues invites validity field')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Validity', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gültigkeit', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Validità', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.now30', 'Effective now 30 days', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Effective now 30 days', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.now30'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ab sofort 30 Tage', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.now30'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Effettivo ora 30 giorni', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.now30'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.7d', '7 days', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '7 days', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.7d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '7 Tage', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.7d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '7 giorni', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.7d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.30d', '30 days', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '30 days', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.30d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '30 Tage', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.30d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '30 giorni', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.30d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.90d', '90 days', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '90 days', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.90d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '90 Tage', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.90d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '90 giorni', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.90d'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.thisMonth', 'This month', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This month', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.thisMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieser Monat', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.thisMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo mese', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.thisMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.nextMonth', 'Next month', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Next month', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.nextMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nächster Monat', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.nextMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Mese prossimo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.nextMonth'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.1y', '1 year', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '1 year', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.1y'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '1 Jahr', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.1y'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '1 anno', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.1y'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.validity.preset.custom', 'Custom', 'en', 'colleagues invites validity preset')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Custom', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.custom'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benutzerdefiniert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.custom'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Personalizzato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.validity.preset.custom'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.status.active', 'Active', 'en', 'colleagues invites status chip')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Active', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktiv', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Attivo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.status.scheduled', 'Scheduled', 'en', 'colleagues invites status chip')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Scheduled', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.scheduled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Geplant', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.scheduled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Programmato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.scheduled'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.status.paused', 'Paused', 'en', 'colleagues invites status chip')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Paused', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.paused'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pausiert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.paused'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In pausa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.paused'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.status.expired', 'Expired', 'en', 'colleagues invites status chip')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Expired', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.expired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abgelaufen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.expired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scaduto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.status.expired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.activeTitle', 'Active links', 'en', 'colleagues invites links section')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Active links', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.activeTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktive Links', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.activeTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link attivi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.activeTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.expiredTitle', 'Expired links', 'en', 'colleagues invites links section')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Expired links', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.expiredTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abgelaufene Links', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.expiredTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link scaduti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.expiredTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.activeEmpty', 'No active reusable links yet.', 'en', 'colleagues invites links empty')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No active reusable links yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.activeEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch keine aktiven wiederverwendbaren Links.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.activeEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun link riutilizzabile attivo.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.activeEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.expiredEmpty', 'No expired links.', 'en', 'colleagues invites links empty')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No expired links.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.expiredEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine abgelaufenen Links.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.expiredEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun link scaduto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.expiredEmpty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.loading', 'Loading invite links…', 'en', 'colleagues invites links loading')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading invite links…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungslinks werden geladen…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento link di invito…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.until', 'Until {date}', 'en', 'colleagues invites links row secondary')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Until {date}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.until'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bis {date}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.until'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Fino al {date}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.until'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.action.copy', 'Copy link', 'en', 'colleagues invites links row action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.action.pause', 'Pause link', 'en', 'colleagues invites links row action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Pause link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.pause'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link pausieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.pause'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Metti in pausa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.pause'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.action.resume', 'Resume link', 'en', 'colleagues invites links row action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resume link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.resume'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link fortsetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.resume'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprendi link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.resume'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.links.action.reuse', 'Reuse link', 'en', 'colleagues invites links row action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reuse link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.reuse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link wiederverwenden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.reuse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riutilizza link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.links.action.reuse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.toast.savedReusable', 'Reusable link created.', 'en', 'colleagues invites toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reusable link created.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.savedReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wiederverwendbarer Link erstellt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.savedReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link riutilizzabile creato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.savedReusable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.toast.saved', 'Invite link updated.', 'en', 'colleagues invites toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite link updated.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungslink aktualisiert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link di invito aggiornato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.saved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.toast.copied', 'Invite link copied.', 'en', 'colleagues invites toast')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite link copied.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungslink kopiert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link di invito copiato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.toast.copied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'colleagues.invites.error.load', 'Could not load invites workspace.', 'en', 'colleagues invites workspace error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not load invites workspace.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.error.load'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungsbereich konnte nicht geladen werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.error.load'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile caricare l''area inviti.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'colleagues.invites.error.load'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'colleagues.channels.title', 'Channels', 'en', 'colleagues channel list heading')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
