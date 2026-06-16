@@ -82,7 +82,6 @@ import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shel
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ResolvedAction } from '../../../../core/action/action-types';
-import { fileTypeBadge } from '../../../../core/media/file-type-registry';
 import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_SIZE,
@@ -112,6 +111,8 @@ import { MarkerContextPhotoDeleteService } from '../markers/marker-context-photo
 import { PhotoMarkerIconStateService } from '../markers/photo-marker-icon-state.service';
 import { MarkerSelectionSyncService } from '../markers/marker-selection-sync.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
+import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
+import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapCircle,
@@ -180,19 +181,6 @@ type ViewportMarkerRow = {
 };
 
 type MergedViewportRow = ViewportMarkerRow & { sourceCells: Array<{ lat: number; lng: number }> };
-
-type MarkerRenderSnapshot = {
-  count: number;
-  thumbnailUrl?: string;
-  thumbnailLoading?: boolean;
-  fallbackLabel?: string;
-  direction?: number;
-  corrected?: boolean;
-  uploading?: boolean;
-  selected: boolean;
-  linkedHover: boolean;
-  zoomLevel: PhotoMarkerZoomLevel;
-};
 
 
 @Component({
@@ -277,6 +265,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly markerMotionService = inject(MarkerMotionService);
   private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
+  private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
   readonly basemapService = inject(MapShellBasemapService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
@@ -569,25 +558,10 @@ export class MapShellComponent implements OnDestroy {
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  private userLocationMarker: MapMarker | null = null;
   private draftMediaMarkerLeaflet: MapMarker | null = null;
   private readonly uploadedPhotoMarkers = new Map<
     string,
-    PhotoMarkerState & {
-      /** Snapshot of the last rendered state for dirty-checking. */
-      lastRendered?: {
-        count: number;
-        thumbnailUrl?: string;
-        thumbnailLoading?: boolean;
-        fallbackLabel?: string;
-        direction?: number;
-        corrected?: boolean;
-        uploading?: boolean;
-        selected: boolean;
-        linkedHover: boolean;
-        zoomLevel: PhotoMarkerZoomLevel;
-      };
-    }
+    PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }
   >();
 
   /** Timer handle for the moveend debounce. */
@@ -675,7 +649,6 @@ export class MapShellComponent implements OnDestroy {
     startupTimer: null,
     markerBootstrapTimer: null,
   };
-  private userLocationFoundTimer: ReturnType<typeof setTimeout> | null = null;
   private lastMapMoveAt = 0;
   private lastMapIdleAt = 0;
   private activeWorkspaceHover: ThumbnailCardHoverEvent | null = null;
@@ -775,11 +748,7 @@ export class MapShellComponent implements OnDestroy {
 
   private cleanupGpsAndTracking(): void {
     this.gpsService.stopTracking();
-
-    if (this.userLocationFoundTimer) {
-      clearTimeout(this.userLocationFoundTimer);
-      this.userLocationFoundTimer = null;
-    }
+    this.gpsService.removeLocationMarker();
   }
 
   private cleanupDeferredAndQueryState(): void {
@@ -815,7 +784,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private cleanupMapUiState(): void {
-    this.removeUserLocationMarker();
+    this.gpsService.removeLocationMarker();
     this.removeDraftMediaMarker();
     this.searchService.clearLocationMarker();
     this.cancelRadiusDrawing();
@@ -2042,11 +2011,11 @@ export class MapShellComponent implements OnDestroy {
     this.gpsService.goTo(
       this.map,
       (coords) => {
-        this.renderOrUpdateUserLocationMarker(coords);
-        this.triggerUserLocationFoundState();
+        this.gpsService.renderOrUpdateLocationMarker(coords, this.map);
+        this.gpsService.triggerLocationFoundState();
         void this.searchService.refreshCountryCode(coords[0], coords[1]);
       },
-      () => this.removeUserLocationMarker(),
+      () => this.gpsService.removeLocationMarker(),
     );
   }
 
@@ -2128,6 +2097,13 @@ export class MapShellComponent implements OnDestroy {
 
     // LayerGroup for all photo markers — batch add/remove.
     this.photoMarkerLayer = this.mapLeafletService.createPhotoMarkerLayer(this.map);
+
+    this.markerRenderService.bind({
+      isSelected: (key) => this.isMarkerSelected(key),
+      isLinkedHovered: (key) => this.isMarkerLinkedHovered(key),
+      getMap: () => this.map,
+      getMarkers: () => this.uploadedPhotoMarkers,
+    });
 
     this.searchService.updateViewportBounds(this.map);
     this.applyPendingMapFocus();
@@ -2216,15 +2192,6 @@ export class MapShellComponent implements OnDestroy {
     });
   }
 
-  private removeUserLocationMarker(): void {
-    if (this.userLocationFoundTimer) {
-      clearTimeout(this.userLocationFoundTimer);
-      this.userLocationFoundTimer = null;
-    }
-
-    this.userLocationMarker?.remove();
-    this.userLocationMarker = null;
-  }
 
   private applyMapBasemapLayer(): void {
     this.basemapService.applyToMap(this.map);
@@ -2778,13 +2745,13 @@ export class MapShellComponent implements OnDestroy {
 
     for (const markerKey of previousKeys) {
       if (!nextKeys.has(markerKey)) {
-        this.refreshPhotoMarker(markerKey);
+        this.markerRenderService.refreshPhotoMarker(markerKey);
       }
     }
 
     for (const markerKey of nextKeys) {
       if (!previousKeys.has(markerKey)) {
-        this.refreshPhotoMarker(markerKey);
+        this.markerRenderService.refreshPhotoMarker(markerKey);
       }
     }
   }
@@ -2798,7 +2765,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.radiusDraftHighlightedKeys = nextKeys;
     for (const markerKey of previousKeys) {
-      this.refreshPhotoMarker(markerKey);
+      this.markerRenderService.refreshPhotoMarker(markerKey);
     }
   }
 
@@ -2853,47 +2820,6 @@ export class MapShellComponent implements OnDestroy {
     this.setSelectedMarker(null);
   }
 
-  private renderOrUpdateUserLocationMarker(coords: [number, number]): void {
-    if (!this.map) return;
-
-    if (!this.userLocationMarker) {
-      this.userLocationMarker = this.mapLeafletService.createUserLocationMarker(coords);
-
-      try {
-        this.userLocationMarker.addTo(this.map);
-      } catch {
-        // Leaflet map not yet fully initialized (panes not ready).
-        // Reset marker to null and silently fail; will retry on next call.
-        this.userLocationMarker = null;
-        return;
-      }
-      return;
-    }
-
-    this.userLocationMarker.setLatLng(coords);
-  }
-
-  private triggerUserLocationFoundState(): void {
-    if (!this.userLocationMarker) {
-      return;
-    }
-
-    const markerElement = this.userLocationMarker.getElement();
-    if (!markerElement) {
-      return;
-    }
-
-    markerElement.classList.add('map-user-location-marker--fresh');
-    if (this.userLocationFoundTimer) {
-      clearTimeout(this.userLocationFoundTimer);
-    }
-
-    this.userLocationFoundTimer = setTimeout(() => {
-      markerElement.classList.remove('map-user-location-marker--fresh');
-      this.userLocationFoundTimer = null;
-    }, 1000);
-  }
-
   private renderOrUpdateDraftMediaMarker(coords: [number, number]): void {
     if (!this.map) return;
 
@@ -2925,7 +2851,7 @@ export class MapShellComponent implements OnDestroy {
       buildPhotoMarkerHtml({
         count: 1,
         selected: true,
-        zoomLevel: this.getPhotoMarkerZoomLevel(),
+        zoomLevel: this.markerRenderService.getPhotoMarkerZoomLevel(),
       }),
     );
   }
@@ -3066,7 +2992,7 @@ export class MapShellComponent implements OnDestroy {
       state.thumbnailUrl = event.localObjectUrl;
       state.signedAt = undefined;
       state.direction = event.direction ?? state.direction;
-      this.refreshPhotoMarker(markerKey);
+      this.markerRenderService.refreshPhotoMarker(markerKey);
     }
   }
 
@@ -3087,7 +3013,7 @@ export class MapShellComponent implements OnDestroy {
       state.signedAt = undefined;
       state.direction = event.direction ?? state.direction;
       state.thumbnailSourcePath = event.newStoragePath;
-      this.refreshPhotoMarker(markerKey);
+      this.markerRenderService.refreshPhotoMarker(markerKey);
     }
   }
 
@@ -3109,13 +3035,13 @@ export class MapShellComponent implements OnDestroy {
         this.state.setPhotoPanelOpen(false);
       }
 
-      existing.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
+      existing.marker.setIcon(this.markerRenderService.buildPhotoMarkerIcon(markerKey));
       return;
     }
 
     const marker = this.mapLeafletService.createPhotoMarker(
       [event.lat, event.lng],
-      this.buildPhotoMarkerIcon(markerKey, {
+      this.markerRenderService.buildPhotoMarkerIcon(markerKey, {
         count: 1,
         thumbnailUrl: event.thumbnailUrl,
         direction: event.direction,
@@ -3375,8 +3301,8 @@ export class MapShellComponent implements OnDestroy {
           row,
           keys,
         ),
-      buildFallbackLabelFromPath: (path) => this.buildFallbackLabelFromPath(path),
-      buildPhotoMarkerIcon: (markerKey, override) => this.buildPhotoMarkerIcon(markerKey, override),
+      buildFallbackLabelFromPath: (path) => this.markerRenderService.buildFallbackLabelFromPath(path),
+      buildPhotoMarkerIcon: (markerKey, override) => this.markerRenderService.buildPhotoMarkerIcon(markerKey, override),
       attachMarkerInteractions: (markerKey, marker, fadeIn) =>
         this.attachMarkerInteractions(markerKey, marker, { fadeIn }),
       bindMarkerClickInteraction: (markerKey, marker) =>
@@ -3386,7 +3312,7 @@ export class MapShellComponent implements OnDestroy {
       bindMarkerHoverInteraction: (markerKey, marker) =>
         this.bindMarkerHoverInteraction(markerKey, marker),
       animateMarkerPosition: (marker, lat, lng) => this.animateMarkerPosition(marker, lat, lng),
-      refreshPhotoMarker: (markerKey) => this.refreshPhotoMarker(markerKey),
+      refreshPhotoMarker: (markerKey) => this.markerRenderService.refreshPhotoMarker(markerKey),
       cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
       suppressMarkerFadeIn: this.isRestoringFromSessionCache,
     };
@@ -3405,44 +3331,6 @@ export class MapShellComponent implements OnDestroy {
     if (selectedKeysChanged) {
       this.state.setSelectedMarkerKeys(staleSelectedKeys);
     }
-  }
-
-  private buildPhotoMarkerIcon(
-    markerKey: string,
-    override?: Partial<{
-      count: number;
-      thumbnailUrl?: string;
-      fallbackLabel?: string;
-      direction?: number;
-      corrected?: boolean;
-      uploading?: boolean;
-    }>,
-  ): MapDivIcon {
-    const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    const fallbackLabel =
-      override?.fallbackLabel ??
-      markerState?.fallbackLabel ??
-      this.getMarkerFallbackLabel(markerState);
-    const iconState = this.photoMarkerIconStateService.resolveIconState(
-      markerState,
-      override,
-      fallbackLabel,
-    );
-
-    return this.mapLeafletService.createPhotoMarkerIcon(
-      buildPhotoMarkerHtml({
-        count: iconState.count,
-        thumbnailUrl: iconState.thumbnailUrl,
-        fallbackLabel: iconState.fallbackLabel,
-        bearing: iconState.direction,
-        selected: this.isMarkerSelected(markerKey),
-        linkedHover: this.isMarkerLinkedHovered(markerKey),
-        corrected: iconState.corrected,
-        uploading: iconState.uploading,
-        loading: iconState.loading,
-        zoomLevel: this.getPhotoMarkerZoomLevel(),
-      }),
-    );
   }
 
   private handlePhotoMarkerClick(markerKey: string, clickEvent?: MapMouseEvent): void {
@@ -3688,11 +3576,11 @@ export class MapShellComponent implements OnDestroy {
     this.state.setSelectedMarkerKey(markerKey);
 
     if (previousMarkerKey) {
-      this.refreshPhotoMarker(previousMarkerKey);
+      this.markerRenderService.refreshPhotoMarker(previousMarkerKey);
     }
 
     if (markerKey) {
-      this.refreshPhotoMarker(markerKey);
+      this.markerRenderService.refreshPhotoMarker(markerKey);
     }
   }
 
@@ -3705,7 +3593,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.state.setSelectedMarkerKeys(nextKeys);
     this.markerSelectionSyncService.refreshChangedKeySet(previousKeys, nextKeys, (markerKey) =>
-      this.refreshPhotoMarker(markerKey),
+      this.markerRenderService.refreshPhotoMarker(markerKey),
     );
   }
 
@@ -3728,7 +3616,7 @@ export class MapShellComponent implements OnDestroy {
     const changed = this.markerSelectionSyncService.applySingleMarkerChange(
       previous,
       markerKey,
-      (key) => this.refreshPhotoMarker(key),
+      (key) => this.markerRenderService.refreshPhotoMarker(key),
     );
     if (!changed) return;
     this.linkedHoverMarkerFromWorkspaceKey = markerKey;
@@ -3791,7 +3679,7 @@ export class MapShellComponent implements OnDestroy {
     // Skip query if still in a zoom animation — it'll fire after zoomend.
     if (this.zoomAnimating) return;
 
-    const currentZoom = this.getPhotoMarkerZoomLevel();
+    const currentZoom = this.markerRenderService.getPhotoMarkerZoomLevel();
     this.closeContextMenus();
     const zoomChanged = currentZoom !== this.lastZoomLevel;
 
@@ -3803,7 +3691,7 @@ export class MapShellComponent implements OnDestroy {
     if (zoomChanged) {
       this.lastZoomLevel = currentZoom;
       for (const markerKey of this.uploadedPhotoMarkers.keys()) {
-        this.refreshPhotoMarker(markerKey);
+        this.markerRenderService.refreshPhotoMarker(markerKey);
       }
     }
   }
@@ -3896,7 +3784,7 @@ export class MapShellComponent implements OnDestroy {
     if (!state.thumbnailSourcePath || state.thumbnailUrl || state.thumbnailLoading) return;
 
     state.thumbnailLoading = true;
-    this.refreshPhotoMarker(key);
+    this.markerRenderService.refreshPhotoMarker(key);
 
     const mediaId = state.mediaId;
     if (mediaId) {
@@ -3905,7 +3793,7 @@ export class MapShellComponent implements OnDestroy {
         state.thumbnailLoading = false;
         state.thumbnailUrl = cached;
         state.signedAt = Date.now();
-        this.refreshPhotoMarker(key);
+        this.markerRenderService.refreshPhotoMarker(key);
         return;
       }
     }
@@ -3925,147 +3813,7 @@ export class MapShellComponent implements OnDestroy {
       state.thumbnailLoading = false;
     }
     // On error or preload failure: thumbnailUrl stays undefined → placeholder remains visible.
-    this.refreshPhotoMarker(key);
-  }
-
-  private refreshPhotoMarker(markerKey: string): void {
-    const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    if (!markerState) {
-      return;
-    }
-
-    const snapshot = this.buildMarkerRenderSnapshot(markerKey, markerState);
-
-    // Skip DOM update when nothing visual has changed.
-    if (this.hasSameMarkerRender(markerState.lastRendered, snapshot)) {
-      return;
-    }
-
-    markerState.lastRendered = snapshot;
-    this.renderPhotoMarker(markerKey, markerState, snapshot);
-  }
-
-  private buildMarkerRenderSnapshot(
-    markerKey: string,
-    markerState: {
-      count: number;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      fallbackLabel?: string;
-      direction?: number;
-      corrected?: boolean;
-      uploading?: boolean;
-    },
-  ): MarkerRenderSnapshot {
-    return {
-      count: markerState.count,
-      thumbnailUrl: markerState.thumbnailUrl,
-      thumbnailLoading: markerState.thumbnailLoading,
-      fallbackLabel: markerState.fallbackLabel,
-      direction: markerState.direction,
-      corrected: markerState.corrected,
-      uploading: markerState.uploading,
-      selected: this.isMarkerSelected(markerKey),
-      linkedHover: this.isMarkerLinkedHovered(markerKey),
-      zoomLevel: this.getPhotoMarkerZoomLevel(),
-    };
-  }
-
-  private hasSameMarkerRender(
-    previous: MarkerRenderSnapshot | undefined,
-    next: MarkerRenderSnapshot,
-  ): boolean {
-    if (!previous) {
-      return false;
-    }
-
-    const checks = [
-      previous.count === next.count,
-      previous.thumbnailUrl === next.thumbnailUrl,
-      previous.thumbnailLoading === next.thumbnailLoading,
-      previous.fallbackLabel === next.fallbackLabel,
-      previous.direction === next.direction,
-      previous.corrected === next.corrected,
-      previous.uploading === next.uploading,
-      previous.selected === next.selected,
-      previous.linkedHover === next.linkedHover,
-      previous.zoomLevel === next.zoomLevel,
-    ];
-
-    return checks.every(Boolean);
-  }
-
-  private renderPhotoMarker(
-    markerKey: string,
-    markerState: {
-      marker: MapMarker;
-      count: number;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      fallbackLabel?: string;
-      direction?: number;
-      corrected?: boolean;
-      uploading?: boolean;
-      thumbnailSourcePath?: string;
-    },
-    snapshot: MarkerRenderSnapshot,
-  ): void {
-    const markerElement = markerState.marker.getElement();
-
-    // Direct innerHTML swap instead of setIcon() — avoids destroying
-    // and recreating the entire DOM subtree for every update.
-    if (markerElement) {
-      markerElement.innerHTML = buildPhotoMarkerHtml({
-        count: markerState.count,
-        thumbnailUrl: markerState.thumbnailUrl,
-        fallbackLabel: markerState.fallbackLabel ?? this.getMarkerFallbackLabel(markerState),
-        bearing: markerState.direction,
-        selected: snapshot.selected,
-        linkedHover: snapshot.linkedHover,
-        corrected: markerState.corrected,
-        uploading: markerState.uploading,
-        loading: markerState.thumbnailLoading,
-        zoomLevel: snapshot.zoomLevel,
-      });
-      return;
-    }
-
-    // Fallback if element not yet in DOM.
-    markerState.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
-  }
-
-  private getMarkerFallbackLabel(
-    state:
-      | {
-          count: number;
-          thumbnailSourcePath?: string;
-          fallbackLabel?: string;
-        }
-      | undefined,
-  ): string | undefined {
-    if (!state || state.count !== 1) return undefined;
-    if (state.fallbackLabel) return state.fallbackLabel;
-    return this.buildFallbackLabelFromPath(state.thumbnailSourcePath);
-  }
-
-  private buildFallbackLabelFromPath(path: string | undefined): string | undefined {
-    if (!path) return undefined;
-
-    return fileTypeBadge({ fileName: path }) ?? undefined;
-  }
-
-  private getPhotoMarkerZoomLevel(): PhotoMarkerZoomLevel {
-    const zoom = this.map?.getZoom() ?? 13;
-
-    if (zoom >= 16) {
-      return 'near';
-    }
-
-    if (zoom >= 13) {
-      return 'mid';
-    }
-
-    return 'far';
+    this.markerRenderService.refreshPhotoMarker(key);
   }
 
   private openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
