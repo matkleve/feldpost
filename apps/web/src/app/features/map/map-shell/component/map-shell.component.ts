@@ -114,6 +114,10 @@ import { MarkerMotionService } from '../markers/marker-motion.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
 import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
 import { MapThumbnailLoaderService } from '../markers/map-thumbnail-loader.service';
+import {
+  MapZoomHighlightOrchestratorService,
+  DETAIL_LOCATION_FOCUS_ZOOM,
+} from '../markers/map-zoom-highlight-orchestrator.service';
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapCircle,
@@ -206,15 +210,6 @@ type MergedViewportRow = ViewportMarkerRow & { sourceCells: Array<{ lat: number;
 })
 export class MapShellComponent implements OnDestroy {
   private static readonly PLACEMENT_CLICK_GUARD_MS = 220;
-  private static readonly DETAIL_LOCATION_FOCUS_ZOOM = 21;
-  private static readonly DETAIL_LOCATION_MARKER_PULSE_MS = 1500;
-  private static readonly DETAIL_LOCATION_HIGHLIGHT_RETRY_MS = 120;
-  private static readonly DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES = 50;
-  private static readonly DETAIL_LOCATION_RENDER_SETTLE_MS = 180;
-  private static readonly DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS = 260;
-  private static readonly DETAIL_LOCATION_WAIT_FOR_SINGLE_MS = 2800;
-  private static readonly DETAIL_LOCATION_IDLE_FALLBACK_MS = 1400;
-  private static readonly DETAIL_LOCATION_PENDING_TTL_MS = 12000;
   private static readonly MARKER_MOVE_DURATION_MS = 320;
   private static readonly RADIUS_SELECTION_MIN_METERS = 10;
   private static readonly RADIUS_CLICK_GUARD_MS = 220;
@@ -268,6 +263,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
   private readonly thumbnailLoaderService = inject(MapThumbnailLoaderService);
+  private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
   readonly basemapService = inject(MapShellBasemapService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
@@ -656,12 +652,6 @@ export class MapShellComponent implements OnDestroy {
   private activeWorkspaceHover: ThumbnailCardHoverEvent | null = null;
   private linkedHoverMarkerFromWorkspaceKey: string | null = null;
   private linkedHoverMarkerFromMapKey: string | null = null;
-  private pendingZoomHighlight: {
-    mediaId: string;
-    lat: number;
-    lng: number;
-    requestedAt: number;
-  } | null = null;
   private workspacePaneMapEffectsRegistration: WorkspacePaneLayoutMapEffects | null = null;
   private readonly mapSelectedItemsContext: SelectedItemsContextPort = {
     contextKey: 'map',
@@ -1806,14 +1796,9 @@ export class MapShellComponent implements OnDestroy {
         ? MapShellComponent.HOUSE_PROXIMITY_ZOOM
         : event.zoomMode === 'street'
           ? MapShellComponent.STREET_PROXIMITY_ZOOM
-          : MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM;
+          : DETAIL_LOCATION_FOCUS_ZOOM;
 
-    this.pendingZoomHighlight = {
-      mediaId: event.mediaId,
-      lat: event.lat,
-      lng: event.lng,
-      requestedAt: Date.now(),
-    };
+    this.zoomHighlightOrchestrator.setPending(event.mediaId, event.lat, event.lng);
 
     // Keep Leaflet dimensions in sync with the currently visible map area
     // before calculating the fly-to center.
@@ -1822,17 +1807,17 @@ export class MapShellComponent implements OnDestroy {
       animate: false,
     });
 
-    this.waitForMapIdleThenFlushZoomHighlight();
+    this.zoomHighlightOrchestrator.waitForMapIdleThenFlushZoomHighlight();
 
     // Safety flush while waiting for marker query / reconciliation.
-    setTimeout(() => this.flushPendingZoomHighlight(), 140);
+    setTimeout(() => this.zoomHighlightOrchestrator.flushPendingZoomHighlight(), 140);
 
     void this.mapZoomOrchestrator.consumePending();
   }
 
   onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
     this.activeWorkspaceHover = event;
-    const markerKey = this.resolveZoomTargetMarkerKey(event.mediaId, event.lat, event.lng, true);
+    const markerKey = this.zoomHighlightOrchestrator.resolveZoomTargetMarkerKey(event.mediaId, event.lat, event.lng, true);
     this.setLinkedHoverMarkerFromWorkspace(markerKey);
   }
 
@@ -1841,126 +1826,6 @@ export class MapShellComponent implements OnDestroy {
       this.activeWorkspaceHover = null;
     }
     this.setLinkedHoverMarkerFromWorkspace(null);
-  }
-
-  private highlightZoomTargetMarker(mediaId: string, lat: number, lng: number, attempt = 0): void {
-    const pendingForImage = this.detailZoomHighlightService.getPendingForImage(
-      this.pendingZoomHighlight,
-      mediaId,
-    );
-    const allowClusterFallback = this.detailZoomHighlightService.shouldAllowClusterFallback(
-      pendingForImage,
-      MapShellComponent.DETAIL_LOCATION_WAIT_FOR_SINGLE_MS,
-    );
-
-    const markerKey = this.resolveZoomTargetMarkerKey(mediaId, lat, lng, allowClusterFallback);
-    if (!markerKey) {
-      this.scheduleZoomHighlightRetry(mediaId, lat, lng, attempt);
-      return;
-    }
-
-    if (
-      this.detailZoomHighlightService.shouldWaitForMapIdle(
-        pendingForImage,
-        this.lastMapIdleAt,
-        MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS,
-      )
-    ) {
-      this.scheduleZoomHighlightRetry(mediaId, lat, lng, attempt);
-      return;
-    }
-
-    const markerWrapper = this.resolveZoomHighlightMarkerWrapper(markerKey);
-    if (!markerWrapper || !this.isZoomHighlightRenderReady(markerWrapper)) {
-      this.scheduleZoomHighlightRetry(mediaId, lat, lng, attempt);
-      return;
-    }
-
-    this.startZoomMarkerSpotlight(markerWrapper);
-    this.clearPendingZoomHighlightForImage(mediaId);
-  }
-
-  private scheduleZoomHighlightRetry(
-    mediaId: string,
-    lat: number,
-    lng: number,
-    attempt: number,
-  ): void {
-    this.detailZoomHighlightService.scheduleRetry(
-      attempt,
-      MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES,
-      MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_RETRY_MS,
-      () => this.highlightZoomTargetMarker(mediaId, lat, lng, attempt + 1),
-    );
-  }
-
-  private resolveZoomHighlightMarkerWrapper(markerKey: string): HTMLElement | null {
-    const markerElement = this.uploadedPhotoMarkers
-      .get(markerKey)
-      ?.marker.getElement() as HTMLElement | null;
-    return this.detailZoomHighlightService.resolveMarkerWrapper(markerElement);
-  }
-
-  private clearPendingZoomHighlightForImage(mediaId: string): void {
-    if (this.pendingZoomHighlight?.mediaId === mediaId) {
-      this.pendingZoomHighlight = null;
-    }
-  }
-
-  private flushPendingZoomHighlight(): void {
-    const pending = this.pendingZoomHighlight;
-    if (!pending) return;
-
-    if (Date.now() - pending.requestedAt > MapShellComponent.DETAIL_LOCATION_PENDING_TTL_MS) {
-      this.pendingZoomHighlight = null;
-      return;
-    }
-
-    this.highlightZoomTargetMarker(pending.mediaId, pending.lat, pending.lng);
-  }
-
-  private waitForMapIdleThenFlushZoomHighlight(): void {
-    if (!this.map) return;
-
-    this.detailZoomHighlightService.waitForIdleOrTimeout(
-      this.map,
-      MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS,
-      () => this.flushPendingZoomHighlight(),
-    );
-  }
-
-  private isZoomHighlightRenderReady(markerElement: HTMLElement): boolean {
-    return this.detailZoomHighlightService.isRenderReady(
-      markerElement,
-      this.lastMapMoveAt,
-      MapShellComponent.DETAIL_LOCATION_RENDER_SETTLE_MS,
-    );
-  }
-
-  private startZoomMarkerSpotlight(markerElement: HTMLElement): void {
-    this.detailZoomHighlightService.startSpotlight(
-      markerElement,
-      MapShellComponent.DETAIL_LOCATION_MARKER_PULSE_MS,
-    );
-  }
-
-  private resolveZoomTargetMarkerKey(
-    mediaId: string,
-    lat: number,
-    lng: number,
-    allowClusterFallback: boolean,
-  ): string | null {
-    return this.zoomTargetMarkerService.findMarkerKeyForZoomTarget({
-      mediaId,
-      lat,
-      lng,
-      allowClusterFallback,
-      map: this.map,
-      markersByMediaId: this.markersByMediaId,
-      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-      toMarkerKey: (latValue: number, lngValue: number) => this.toMarkerKey(latValue, lngValue),
-      clusterFallbackMaxMeters: MapShellComponent.DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS,
-    });
   }
 
   // ── Upload panel ──────────────────────────────────────────────────────────
@@ -2112,6 +1977,15 @@ export class MapShellComponent implements OnDestroy {
       getMarkers: () => this.uploadedPhotoMarkers,
     });
 
+    this.zoomHighlightOrchestrator.bind({
+      getMap: () => this.map,
+      getLastMapIdleAt: () => this.lastMapIdleAt,
+      getLastMapMoveAt: () => this.lastMapMoveAt,
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      getMarkersByMediaId: () => this.markersByMediaId,
+      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
+
     this.searchService.updateViewportBounds(this.map);
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
@@ -2158,7 +2032,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.map.on('idle', () => {
       this.lastMapIdleAt = Date.now();
-      this.flushPendingZoomHighlight();
+      this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
     });
   }
 
@@ -2214,7 +2088,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.setViewWithPaneOffset(payload.lat, payload.lng, MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM);
+    this.setViewWithPaneOffset(payload.lat, payload.lng, DETAIL_LOCATION_FOCUS_ZOOM);
     this.pendingMapFocus.set(null);
   }
 
@@ -3147,7 +3021,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.thumbnailLoaderService.maybeLoadThumbnails();
-    this.flushPendingZoomHighlight();
+    this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
     this.refreshActiveWorkspaceHoverLink();
 
     return true;
@@ -3184,7 +3058,7 @@ export class MapShellComponent implements OnDestroy {
     this.lastFetchedZoom = result.roundedZoom;
 
     if (result.error || !result.data) {
-      this.flushPendingZoomHighlight();
+      this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
       return;
     }
 
@@ -3199,7 +3073,7 @@ export class MapShellComponent implements OnDestroy {
 
     // If a zoom target was requested while this area was still loading,
     // try highlighting now that markers are reconciled.
-    this.flushPendingZoomHighlight();
+    this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
   }
 
   /** Reconcile cached viewport rows after client-side map filters change. */
@@ -3658,7 +3532,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const markerKey = this.resolveZoomTargetMarkerKey(
+    const markerKey = this.zoomHighlightOrchestrator.resolveZoomTargetMarkerKey(
       activeHover.mediaId,
       activeHover.lat,
       activeHover.lng,
