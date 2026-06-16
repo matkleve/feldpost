@@ -88,7 +88,7 @@
 
   &:hover,
   &.address-field-combobox__result-item--focused {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    background: var(--menu-item-hover);
 
     .address-field-combobox__result-label,
     .address-field-combobox__result-subtitle {

@@ -113,7 +113,7 @@
 
   &:hover,
   &.address-search__result-item--focused {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    background: var(--menu-item-hover);
 
     .address-search__result-icon,
     .address-search__result-label {

@@ -35,7 +35,7 @@
     cursor: pointer;
 
     &:hover {
-      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      background: var(--menu-item-hover);
       border-color: color-mix(in srgb, var(--border) 78%, var(--foreground)); /* TODO(phase8): no tweakcn equiv yet */
       color: var(--foreground);
     }

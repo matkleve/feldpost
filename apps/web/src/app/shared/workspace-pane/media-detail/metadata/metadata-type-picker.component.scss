@@ -1,3 +1,5 @@
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Icon-only type trigger (type name shown in menu + aria-label only).
 // @see docs/specs/ui/media-detail/metadata-type-picker.md
 .metadata-type-picker__trigger {
@@ -24,8 +26,7 @@
 }
 
 .metadata-type-picker__trigger--open {
-  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
-  color: var(--primary);
+  @include emphasis.hover(10%);
   border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
 }
 
@@ -67,7 +68,7 @@
 
   &:hover,
   &:focus-visible {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    background: var(--menu-item-hover);
 
     .metadata-type-picker__result-icon,
     .metadata-type-picker__result-label {

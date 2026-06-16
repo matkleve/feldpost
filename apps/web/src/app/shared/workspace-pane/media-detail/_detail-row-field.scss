@@ -3,7 +3,7 @@
 
 @mixin detail-row-editing-center {
   --detail-row-field-inset: 0.125rem;
-  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  background: var(--action-hover);
   align-items: stretch;
   padding-block: var(--detail-row-field-inset);
   padding-inline-end: var(--detail-row-field-inset);

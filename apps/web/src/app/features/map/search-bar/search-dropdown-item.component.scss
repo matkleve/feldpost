@@ -1,3 +1,5 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Item row: grid layout with icon column + content column; configurable via context tokens.
 // @see docs/migration/phase-6-template-cleanup.md §ui-item → component-local row classes
 .search-dropdown-item {
@@ -30,13 +32,7 @@
 
 .search-dropdown-item:hover,
 .search-dropdown-item--active {
-  background: color-mix(in srgb, var(--primary) 12%, transparent);
-  color: var(--primary);
-
-  .search-dropdown-item__icon,
-  .search-dropdown-item__label {
-    color: var(--primary);
-  }
+  @include emphasis.hover(12%);
 
   .search-dropdown-item__secondary,
   .search-dropdown-item__meta {

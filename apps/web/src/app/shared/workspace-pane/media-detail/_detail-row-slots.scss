@@ -2,6 +2,7 @@
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 
 @use './detail-row-field';
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 // Match block content width/inset to grid column 3 (between the four action rails).
 @mixin detail-row-center-width {
@@ -294,8 +295,7 @@
   &.detail-row-action--remove:hover,
   &.detail-row-action--remove:focus-visible,
   &.detail-row-action--remove.detail-row-action--armed {
-    color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    @include emphasis.hover(10%);
     outline-color: var(--primary);
   }
 

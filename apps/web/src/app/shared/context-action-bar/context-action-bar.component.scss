@@ -6,8 +6,6 @@
 :host {
   display: block;
   min-width: 0;
-  --cab-menu-item-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
-  --cab-menu-item-text: var(--foreground);
 }
 
 .context-action-bar--footer {
@@ -74,7 +72,7 @@
 
   &:hover:not(:disabled):not([disabled]),
   &:focus-visible {
-    background: var(--cab-menu-item-hover-bg);
+    background: var(--menu-item-hover);
 
     .context-action-bar__icon,
     .context-action-bar__label {

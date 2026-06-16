@@ -118,8 +118,7 @@
   &--preview,
   .sort-dropdown__option:hover &,
   .sort-dropdown__option--hovered & {
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
-    color: var(--primary);
+    @include emphasis.hover(12%);
   }
 }
 

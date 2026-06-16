@@ -89,7 +89,7 @@
 
   &--empty.cdk-drop-list-receiving,
   &--empty.grouping-drop-zone--dragging.cdk-drop-list-receiving {
-    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    @include emphasis.hover(10%);
     outline: 1.5px dashed var(--primary);
     outline-offset: -1.5px;
 
@@ -102,7 +102,7 @@
 // --- Selected row (multi-select via Ctrl+Click) ---
 // @see docs/design/state-visuals.md § Interaction emphasis
 .grouping-row--selected {
-  background: color-mix(in srgb, var(--interaction-selected-ink) 14%, transparent);
+  @include emphasis.selected(14%);
   border-left: 2px solid var(--interaction-selected-ink);
 
   &:hover {

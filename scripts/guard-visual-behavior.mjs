@@ -39,7 +39,9 @@ function expectNotContains(relativePath, content, blocked, message) {
 
 function selectorBlock(content, selector) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(`${escaped}\\s*\\{([\\s\\S]*?)\\}`, "m");
+  // Require the selector to start at the beginning of a line (with optional indentation)
+  // to avoid matching compound selectors like `:host(...) .my-class { ... }`.
+  const regex = new RegExp(`(?:^|\\n)[ \\t]*${escaped}\\s*\\{([\\s\\S]*?)\\}`, "m");
   const match = content.match(regex);
   return match ? match[1] : null;
 }

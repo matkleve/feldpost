@@ -51,7 +51,7 @@
 
   &:hover,
   &:focus-visible {
-    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    background: color-mix(in srgb, var(--primary) 10%, transparent); // emphasis-ok: background-only hover; no token for 10% bg-only; color stays foreground
   }
 
   &:focus-visible {

@@ -291,7 +291,7 @@
 
   &--over {
     border-color: var(--primary);
-    background-color: color-mix(in srgb, var(--primary) 8%, transparent);
+    background-color: var(--menu-item-hover);
   }
 }
 

@@ -57,7 +57,7 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 **Rule:** Quiet interactive controls (nav links, `hlmBtn` `outline`/`ghost`, toggle items, menu rows) use this recipe unless a **dedicated element spec** documents an exception with a test oracle.
 
-**Canonical tokens:** `--primary` (hover / attention), `--interaction-selected-ink` (persistent selected/on), `--muted-foreground` (idle ink). Mix recipe: `color-mix(in srgb, <ink> 10%, transparent)` for fills; outline borders may use `color-mix(in srgb, <ink> 42%, var(--border))`.
+**Canonical tokens:** `--primary` (hover / attention), `--interaction-selected-ink` (persistent selected/on), `--muted-foreground` (idle ink), `--menu-item-hover` (= primary 8%), `--action-hover` (= primary 12%). Mix recipe: `color-mix(in srgb, <ink> 10%, transparent)` for fills; outline borders may use `color-mix(in srgb, <ink> 42%, var(--border))`. **Prefer the mixin/token — see Mandatory implementation contract below.**
 
 | State | Ink | Background | Border (outline hosts) |
 | ----- | --- | ------------ | ---------------------- |
@@ -68,6 +68,26 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 | **Selected + hover** | `--primary` (wins) | primary 10% mix | same as hover |
 | **Destructive quiet row** | `--destructive` | destructive 10% mix (hover) / 15% (`:active`) | — |
 
+### Mandatory implementation contract (blocker)
+
+**Never** write `color-mix(in srgb, var(--primary) X%, transparent)` or `color-mix(in srgb, var(--interaction-selected-ink) X%, transparent)` inline in component SCSS for hover/selected states. Use the shared abstractions below.
+
+| Need | Use | Never inline |
+| ---- | --- | ------------ |
+| List-row hover background (8%) | `var(--menu-item-hover)` | `color-mix(in srgb, var(--primary) 8%, transparent)` |
+| Action/control hover (12%) | `var(--action-hover)` | `color-mix(in srgb, var(--primary) 12%, transparent)` |
+| Full hover treatment (bg + ink) | `@include emphasis.hover(X%)` from `_interaction-emphasis-quiet-row.scss` | raw `background:` + `color:` pair |
+| Persistent selected state | `@include emphasis.selected(X%)` | `color-mix(in srgb, var(--interaction-selected-ink) X%, transparent)` |
+| Selected row + pointer over it | `@include emphasis.selected-hover(X%)` | `color-mix(in srgb, var(--primary) X%, transparent)` on selected element |
+| Selected + border indicator | `@include emphasis.selected-bordered(X%, Y%)` | `background + border-color` pair with selected-ink |
+
+**Import path** (adjust `../` levels to reach `src/styles/`):
+```scss
+@use '<relative-path>/styles/interaction-emphasis-quiet-row' as emphasis;
+```
+
+**Guard:** `npm run design-system:check` runs `scripts/guard-interaction-emphasis.mjs` which fails CI if a component SCSS file uses inline `color-mix` for hover/selected when the mixin/token should be used instead.
+
 **Implementation owners:**
 
 - `apps/web/src/app/shared/ui/button/button-variants.ts` — `outline`, `ghost`, `destructive`
@@ -76,13 +96,13 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 - `apps/web/src/app/features/nav/nav.component.scss` — route links
 - `apps/web/src/app/features/map/map-shell/_map-shell-upload.scss` — map/media upload trigger (`.map-upload-btn`)
 - `apps/web/src/styles/_option-menu-item-states.scss` — menu rows (hover already primary; destructive branch unchanged)
-- `apps/web/src/styles/_interaction-emphasis-quiet-row.scss` — shared SCSS mixins for feature list rows
+- `apps/web/src/styles/_interaction-emphasis-quiet-row.scss` — **canonical mixin source** for feature list rows
 - `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.component.scss` — resolver choice rows
 - `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` — section rail + TOC
 - `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.scss` — option rows
 - `apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.scss` — embedded multi-select rows
 - `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.scss` — picker options
-- `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.scss` — multi-select rows
+- `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.scss` — multi-select rows
 - `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.scss` — `__option--selected`
 - `apps/web/src/app/shared/workspace-pane/media-detail/captured-date-editor.component.scss` — calendar day `--selected`
 
@@ -109,5 +129,6 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 ## Changelog
 
+- **2026-06-16** — Added **Mandatory implementation contract** table: inline `color-mix` for hover/selected is now a CI-blocked pattern; all existing usages migrated to `emphasis.*` mixins or `--menu-item-hover`/`--action-hover` tokens. Guard added to `scripts/guard-interaction-emphasis.mjs` and wired into `design-system:check`.
 - **2026-05-27** — **Interaction emphasis** contract for quiet controls (hover primary, selected `--interaction-selected-ink`).
 - **2026-05-05** — Initial publication: **disabled** contract for native buttons and **Panel Trigger**; closes SPEC GAP referenced in `specs/panel-trigger.spec.md`.

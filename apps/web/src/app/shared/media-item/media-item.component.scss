@@ -141,7 +141,7 @@
 
 .media-item__surface--row:hover,
 :host([data-state='selected']) .media-item__surface--row {
-  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  background: var(--action-hover);
 }
 
 // Inset ring avoids border box growth when toggling selection.

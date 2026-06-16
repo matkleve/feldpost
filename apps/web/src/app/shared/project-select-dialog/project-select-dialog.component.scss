@@ -43,7 +43,7 @@
     cursor: pointer;
 
     &:hover {
-      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      background: var(--menu-item-hover);
     }
 
     &:focus-visible {

@@ -1,3 +1,5 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Shared container-query breakpoints for workspace-aligned pane toolbars (menu triggers + view toggle).
 // @see docs/specs/ui/workspace/workspace-pane.md
 
@@ -107,8 +109,7 @@ $toolbar-view-toggle-compact-max: 23.75rem;
     &:hover,
     &[data-state='on']:hover,
     &[data-state='off']:hover {
-      background: color-mix(in srgb, var(--primary) 10%, transparent);
-      color: var(--primary);
+      @include emphasis.hover(10%);
     }
   }
 }

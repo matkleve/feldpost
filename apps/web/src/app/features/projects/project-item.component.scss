@@ -151,7 +151,7 @@
 .project-item__surface--row:hover,
 .project-item__surface--row:focus-within,
 :host([data-state='selected']) .project-item__surface--row {
-  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  background: var(--action-hover);
 }
 
 .project-item__row-chip {

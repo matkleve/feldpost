@@ -1,5 +1,6 @@
 // M-UI1: raw hex values replaced with design-system tokens.
 @use '../../../../styles/frosted-chrome';
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 :host {
   display: block;
@@ -71,7 +72,7 @@
     padding: var(--spacing-2) var(--spacing-3);
     font-size: var(--font-size-xs);
     color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    background: color-mix(in srgb, var(--primary) 8%, transparent); // emphasis-ok: semantic status chip fill (not hover)
     border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
     border-radius: var(--radius-sm);
   }
@@ -148,8 +149,7 @@
     &:hover,
     &:focus-visible {
       border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
-      background: color-mix(in srgb, var(--primary) 10%, transparent);
-      color: var(--primary);
+      @include emphasis.hover(10%);
     }
 
     &:focus-visible {
@@ -159,8 +159,7 @@
 
     &--dragging {
       border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
-      background: color-mix(in srgb, var(--primary) 10%, transparent);
-      color: var(--primary);
+      @include emphasis.hover(10%);
     }
   }
 
@@ -764,7 +763,7 @@
 
     &:hover:not(:disabled) {
       color: var(--primary);
-      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      background: var(--menu-item-hover);
     }
 
     &:focus-visible {

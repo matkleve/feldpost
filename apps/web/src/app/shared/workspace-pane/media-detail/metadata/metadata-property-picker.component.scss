@@ -62,7 +62,7 @@
 
   &:hover,
   &:focus-visible {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    background: var(--menu-item-hover);
 
     .metadata-property-picker__result-label {
       color: var(--primary);

@@ -97,7 +97,7 @@
 
 .workspace-projects-toolbar__archived-btn--active {
   border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
-  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  background: var(--menu-item-hover);
 }
 
 @container workspace-projects-toolbar (max-width: 26rem) {
