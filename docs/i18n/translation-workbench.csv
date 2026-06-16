@@ -626,10 +626,15 @@ projects.viewToggle.list.title,List view,apps/web/src/app/features/projects/proj
 projects.viewToggle.cards.aria,Card view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:aria-label,Card view,Kartenansicht,Vista schede
 projects.viewToggle.cards.title,Card view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:title,Card view,Kartenansicht,Vista schede
 projects.page.title,Projects,apps/web/src/app/features/projects/projects-page.component.html text-node,Projects,Projekte,Progetti
-colleagues.page.title,Team,apps/web/src/app/features/colleagues/sidebar/member-list.component.html text-node,Team,Team,Team
-colleagues.sidebar.label,Team,colleagues sidebar nav aria-label,Team,Team,Team
+colleagues.page.title,Messaging,apps/web/src/app/features/colleagues/sidebar/member-list.component.html text-node,Messaging,Nachrichten,Messaggi
+colleagues.sidebar.label,Messaging,colleagues sidebar nav aria-label,Messaging,Nachrichten,Messaggi
 colleagues.tab.members,Members,colleagues sidebar tab,Members,Mitglieder,Membri
 colleagues.tab.invites,Invites,colleagues sidebar tab,Invites,Einladungen,Inviti
+colleagues.invites.referrals.title,Joined via your invite,colleagues invites right panel heading,Joined via your invite,Über deine Einladung beigetreten,Entrati tramite il tuo invito
+colleagues.invites.referrals.subtitle,Colleagues who registered using one of your invite links.,colleagues invites right panel subtitle,Colleagues who registered using one of your invite links.,Kolleginnen und Kollegen die sich über einen deiner Einladungslinks registriert haben.,Colleghi che si sono registrati tramite uno dei tuoi link di invito.
+colleagues.invites.referrals.loading,Loading referrals…,colleagues invites right panel loading,Loading referrals…,Empfehlungen werden geladen…,Caricamento referral…
+colleagues.invites.referrals.empty,No one has joined via your invites yet.,colleagues invites right panel empty,No one has joined via your invites yet.,Noch ist niemand über deine Einladungen beigetreten.,Nessuno si è ancora unito tramite i tuoi inviti.
+colleagues.invites.referrals.error,Could not load referrals.,colleagues invites right panel error,Could not load referrals.,Empfehlungen konnten nicht geladen werden.,Impossibile caricare i referral.
 colleagues.channels.title,Channels,colleagues channel list heading,Channels,Kanäle,Canali
 colleagues.channels.empty,No channels,colleagues empty channel list,No channels,Keine Kanäle,Nessun canale
 colleagues.channels.search,Search channels,colleagues channel search placeholder,Search channels,Kanäle suchen,Cerca canali

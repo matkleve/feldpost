@@ -27,6 +27,8 @@ export class MediaPageHeaderComponent {
   };
 
   readonly title = input('Media');
+  /** Material Icons ligature aligned with main nav (e.g. `perm_media`). */
+  readonly icon = input<string | null>(null);
   readonly mediaCount = input<number | null>(null);
   readonly totalCount = input<number | null>(null);
   readonly state = input<MediaPageHeaderState>('ready');

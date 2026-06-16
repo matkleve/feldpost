@@ -18,6 +18,7 @@ import { ChatAreaComponent } from '../chat/chat-area.component';
 import { MemberDetailPanelComponent } from '../member-detail/member-detail-panel.component';
 import { ChannelDetailPanelComponent } from '../channel/channel-detail-panel.component';
 import { ColleaguesInvitesPanelComponent } from '../invites/colleagues-invites-panel.component';
+import { ColleaguesInviteReferralsPanelComponent } from '../invites/colleagues-invite-referrals-panel.component';
 
 export type ColleaguesSidebarTab = 'members' | 'invites';
 
@@ -31,6 +32,7 @@ export type ColleaguesSidebarTab = 'members' | 'invites';
     MemberDetailPanelComponent,
     ChannelDetailPanelComponent,
     ColleaguesInvitesPanelComponent,
+    ColleaguesInviteReferralsPanelComponent,
   ],
   templateUrl: './colleagues-page.component.html',
   styleUrl: './colleagues-page.component.scss',
@@ -212,11 +214,21 @@ export class ColleaguesPageComponent implements OnDestroy {
     }
   }
 
-  onTabChange(tab: ColleaguesSidebarTab): void {
-    void this.router.navigate(['/colleagues'], { queryParams: tab === 'invites' ? { tab: 'invites' } : {} });
+  onInvitesToggle(): void {
+    const nextTab: ColleaguesSidebarTab = this.sidebarTab() === 'invites' ? 'members' : 'invites';
+    void this.router.navigate(['/colleagues'], {
+      queryParams: nextTab === 'invites' ? { tab: 'invites' } : {},
+    });
+  }
+
+  private exitInvitesIfActive(): void {
+    if (this.sidebarTab() === 'invites') {
+      void this.router.navigate(['/colleagues']);
+    }
   }
 
   onMemberSelected(memberId: string): void {
+    this.exitInvitesIfActive();
     this.creatingChannel.set(false);
     this.channelDetailDismissed.set(true);
     void this.openDirectMessage(memberId);
@@ -241,6 +253,7 @@ export class ColleaguesPageComponent implements OnDestroy {
   }
 
   async onChannelSelected(channelId: string): Promise<void> {
+    this.exitInvitesIfActive();
     this.creatingChannel.set(false);
     this.channelDetailDismissed.set(false);
     this.selectedMemberId.set(null);

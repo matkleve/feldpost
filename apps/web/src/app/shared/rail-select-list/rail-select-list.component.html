@@ -9,14 +9,12 @@
     </div>
   } @else {
     @for (item of items(); track item.id) {
-      <div
-        class="rail-select-list__row-wrap"
-        [class.rail-select-list__row-wrap--active]="item.id === selectedId()"
-      >
+      <div class="rail-select-list__row-wrap">
         <button
           type="button"
           role="option"
           class="rail-select-list__row"
+          [class.rail-select-list__row--active]="item.id === selectedId()"
           [attr.aria-selected]="item.id === selectedId()"
           (click)="onItemClick(item.id)"
         >

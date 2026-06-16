@@ -23,7 +23,8 @@ import type {
   InviteStatus,
   QrInviteViewModel,
 } from '../../../core/invites/invites.types';
-import { HLM_BADGE_IMPORTS } from '../../../shared/ui/badge';
+import type { ChipVariant } from '../../../shared/components/chip/chip.component';
+import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
 import { HLM_LABEL_IMPORTS } from '../../../shared/ui/label';
@@ -33,7 +34,7 @@ import { HLM_SELECT_IMPORTS } from '../../../shared/ui/select';
   standalone: true,
   imports: [
     CommonModule,
-    ...HLM_BADGE_IMPORTS,
+    ChipComponent,
     ...HLM_BUTTON_IMPORTS,
     ...HLM_FORM_FIELD_IMPORTS,
     ...HLM_LABEL_IMPORTS,
@@ -61,14 +62,14 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   readonly inviteRevoked = output<string>();
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  inviteStatusBadgeVariant(status: InviteStatus): 'success' | 'warning' | 'destructive' | 'info' {
+  inviteStatusChipVariant(status: InviteStatus): ChipVariant {
     switch (status) {
       case 'active':
-        return 'success';
+        return 'status-success';
       case 'expired':
-        return 'warning';
+        return 'status-warning';
       case 'revoked':
-        return 'destructive';
+        return 'status-danger';
       case 'accepted':
         return 'info';
     }

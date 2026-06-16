@@ -1,0 +1,94 @@
+:host {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.invite-referrals {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  overflow: auto;
+}
+
+.invite-referrals__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.invite-referrals__header p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+}
+
+.invite-referrals__state {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+}
+
+.invite-referrals__state--error {
+  color: var(--destructive);
+}
+
+.invite-referrals__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.invite-referrals__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.invite-referrals__avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--spacing-8);
+  height: var(--spacing-8);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+  color: var(--foreground);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.invite-referrals__meta {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(var(--spacing-1) * 0.5);
+}
+
+.invite-referrals__name {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.invite-referrals__date {
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+}

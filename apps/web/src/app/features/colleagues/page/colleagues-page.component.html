@@ -12,9 +12,9 @@
     [channels]="channels()"
     [selectedChannelId]="selectedChannelId()"
     [loading]="loading()"
-    [activeTab]="sidebarTab()"
+    [invitesActive]="sidebarTab() === 'invites'"
     [canManageChannels]="canManageChannels()"
-    (tabChange)="onTabChange($event)"
+    (invitesToggle)="onInvitesToggle()"
     (memberSelected)="onMemberSelected($event)"
     (channelSelected)="onChannelSelected($event)"
     (memberMessageRequested)="onMessageMember($event)"
@@ -56,6 +56,8 @@
       (closed)="onChannelPanelClosed()"
       (created)="onChannelCreate($event)"
     />
+  } @else if (sidebarTab() === 'invites') {
+    <app-colleagues-invite-referrals-panel pageGridRight />
   } @else if (selectedMember(); as member) {
     <app-member-detail-panel
       pageGridRight

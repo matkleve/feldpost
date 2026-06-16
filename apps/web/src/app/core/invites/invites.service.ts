@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import type {
+  InviteReferralViewModel,
   InviteShareChannel,
   InviteTargetRole,
   InviteStatus,
@@ -77,6 +78,46 @@ export class InvitesService {
     if (error) {
       throw new Error(error.message);
     }
+  }
+
+  async loadAcceptedReferrals(): Promise<InviteReferralViewModel[]> {
+    const userId = this.requireUserId();
+
+    const { data, error } = await this.supabase.client
+      .from('qr_invites')
+      .select('id, accepted_at, accepted_user_id, target_role, profiles:accepted_user_id(full_name)')
+      .eq('created_by', userId)
+      .eq('status', 'accepted')
+      .not('accepted_user_id', 'is', null)
+      .not('accepted_at', 'is', null)
+      .order('accepted_at', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data ?? []).flatMap((row) => {
+      const acceptedAt = row.accepted_at as string | null;
+      const acceptedUserId = row.accepted_user_id as string | null;
+      if (!acceptedAt || !acceptedUserId) {
+        return [];
+      }
+
+      const profile = row.profiles as { full_name: string | null } | { full_name: string | null }[] | null;
+      const fullName = Array.isArray(profile)
+        ? (profile[0]?.full_name ?? '')
+        : (profile?.full_name ?? '');
+
+      return [
+        {
+          inviteId: row.id as string,
+          userId: acceptedUserId,
+          fullName,
+          acceptedAt,
+          targetRole: row.target_role as InviteTargetRole,
+        },
+      ];
+    });
   }
 
   async logShareEvent(inviteId: string, channel: InviteShareChannel): Promise<void> {

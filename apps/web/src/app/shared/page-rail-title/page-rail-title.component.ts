@@ -13,4 +13,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class PageRailTitleComponent {
   readonly title = input.required<string>();
+  /** Material Icons ligature name shown before the title (e.g. `folder`). */
+  readonly icon = input<string | null>(null);
 }

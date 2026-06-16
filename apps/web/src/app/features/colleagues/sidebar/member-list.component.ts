@@ -1,14 +1,11 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { OrgMember } from '../../../core/members/members.types';
 import type { ChatChannel } from '../../../core/chat/chat.types';
-import type { ColleaguesSidebarTab } from '../page/colleagues-page.component';
 import { PageRailTitleComponent } from '../../../shared/page-rail-title';
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
 import { RailSelectListComponent, type RailSelectListItem } from '../../../shared/rail-select-list';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
-import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
 
 @Component({
   selector: 'app-member-list',
@@ -17,8 +14,6 @@ import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../shared/ui/toggle-group';
     PageRailTitleComponent,
     RailSearchFieldComponent,
     RailSelectListComponent,
-    ...BrnToggleGroupImports,
-    ...HLM_TOGGLE_GROUP_IMPORTS,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './member-list.component.html',
@@ -37,10 +32,10 @@ export class MemberListComponent {
   readonly channels = input<ChatChannel[]>([]);
   readonly selectedChannelId = input<string | null>(null);
   readonly loading = input(false);
-  readonly activeTab = input<ColleaguesSidebarTab>('members');
+  readonly invitesActive = input(false);
   readonly canManageChannels = input(false);
 
-  readonly tabChange = output<ColleaguesSidebarTab>();
+  readonly invitesToggle = output<void>();
   readonly memberSelected = output<string>();
   readonly channelSelected = output<string>();
   readonly memberMessageRequested = output<string>();
@@ -205,10 +200,7 @@ export class MemberListComponent {
     this.dmSearchOpen.update((open) => !open);
   }
 
-  onTabToggle(value: ToggleValue<string>): void {
-    const tab = String(value);
-    if (tab === 'members' || tab === 'invites') {
-      this.tabChange.emit(tab);
-    }
+  onInvitesClick(): void {
+    this.invitesToggle.emit();
   }
 }

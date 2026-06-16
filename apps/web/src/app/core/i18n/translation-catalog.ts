@@ -512,11 +512,11 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
   },
   {
     key: 'colleagues.page.title',
-    original: 'Team',
+    original: 'Messaging',
     context: 'Colleagues page left-rail title (gender-neutral).',
-    en: 'Team',
-    de: 'Team',
-    it: 'Team',
+    en: 'Messaging',
+    de: 'Nachrichten',
+    it: 'Messaggi',
   },
   {
     key: 'colleagues.tabs.aria',

@@ -1,3 +1,5 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: flex;
   flex: 1 1 auto;
@@ -16,13 +18,16 @@
   padding: var(--spacing-4);
 }
 
-.member-list__tabs {
+.member-list__invites-button {
   flex-shrink: 0;
   width: 100%;
-}
+  justify-content: center;
 
-.member-list__tab-group {
-  width: 100%;
+  &--active {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, var(--background));
+    color: var(--foreground);
+  }
 }
 
 .member-list__channels,
@@ -44,16 +49,24 @@
 
 .member-list__section-header {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--spacing-1);
   min-height: 2.25rem;
-  padding: var(--spacing-2);
   border-radius: var(--radius-md);
-  transition: background var(--motion-duration-fast) var(--motion-ease-out);
+  color: var(--muted-foreground);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover,
   &:focus-within {
-    background: var(--menu-item-hover);
+    @include emphasis.hover();
+
+    .member-list__section-heading,
+    .member-list__section-action,
+    .member-list__section-icon .material-icons {
+      color: var(--primary);
+    }
   }
 }
 
@@ -61,16 +74,19 @@
   display: flex;
   flex: 1 1 auto;
   align-items: center;
+  align-self: stretch;
   gap: var(--spacing-2);
   min-width: 0;
-  padding: 0;
+  padding: var(--spacing-2);
   border: 0;
+  border-radius: var(--radius-md);
   background: transparent;
-  color: var(--muted-foreground);
+  color: inherit;
   font-size: var(--font-size-sm);
   font-weight: 600;
   text-align: left;
   cursor: pointer;
+  transition: color var(--motion-duration-fast) var(--motion-ease-out);
 
   &:focus-visible {
     outline: none;
@@ -141,19 +157,42 @@
 }
 
 .member-list__section-action {
+  display: inline-grid;
   flex-shrink: 0;
-  color: var(--muted-foreground);
+  place-items: center;
+  align-self: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
   .material-icons {
     font-size: 1.125rem;
     line-height: 1;
   }
 
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover();
+    outline: none;
+  }
+
   &--active {
     opacity: 1;
     pointer-events: auto;
-    color: var(--foreground);
-    background: var(--action-hover);
+    @include emphasis.selected();
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    @include emphasis.selected-hover();
   }
 }
 

@@ -1,44 +1,21 @@
-<nav class="member-list" aria-label="{{ t('colleagues.sidebar.label', 'Team') }}">
-  <app-page-rail-title [title]="t('colleagues.page.title', 'Team')" />
+<nav class="member-list" aria-label="{{ t('colleagues.sidebar.label', 'Messaging') }}">
+  <app-page-rail-title
+    icon="forum"
+    [title]="t('colleagues.page.title', 'Messaging')"
+  />
 
-  <div class="member-list__tabs" hlmPillToggle size="sm" fill>
-    <div
-      hlmToggleGroup
-      size="sm"
-      class="member-list__tab-group w-full"
-      brnToggleGroup
-      type="single"
-      [nullable]="false"
-      [value]="activeTab()"
-      (valueChange)="onTabToggle($event)"
-      [attr.aria-label]="t('colleagues.tabs.aria', 'Team sections')"
-    >
-      <button
-        type="button"
-        hlmToggleGroupItem
-        size="sm"
-        brnToggleGroupItem
-        value="members"
-        [attr.aria-label]="t('colleagues.tab.members', 'Members')"
-        [attr.title]="t('colleagues.tab.members', 'Members')"
-      >
-        <span class="material-icons" aria-hidden="true">groups</span>
-        <span>{{ t('colleagues.tab.members', 'Members') }}</span>
-      </button>
-      <button
-        type="button"
-        hlmToggleGroupItem
-        size="sm"
-        brnToggleGroupItem
-        value="invites"
-        [attr.aria-label]="t('colleagues.tab.invites', 'Invites')"
-        [attr.title]="t('colleagues.tab.invites', 'Invites')"
-      >
-        <span class="material-icons" aria-hidden="true">mail</span>
-        <span>{{ t('colleagues.tab.invites', 'Invites') }}</span>
-      </button>
-    </div>
-  </div>
+  <button
+    type="button"
+    hlmBtn
+    variant="outline"
+    size="sm"
+    class="member-list__invites-button"
+    [class.member-list__invites-button--active]="invitesActive()"
+    [attr.aria-pressed]="invitesActive()"
+    (click)="onInvitesClick()"
+  >
+    {{ t('colleagues.tab.invites', 'Invites') }}
+  </button>
 
   <section class="member-list__channels">
     <div class="member-list__section-header">
@@ -66,9 +43,6 @@
         @if (canManageChannels()) {
           <button
             type="button"
-            hlmBtn
-            variant="ghost"
-            size="icon-sm"
             class="member-list__section-action"
             [attr.aria-label]="t('colleagues.channel.create', 'Create channel')"
             [attr.title]="t('colleagues.channel.create', 'Create channel')"
@@ -79,9 +53,6 @@
         }
         <button
           type="button"
-          hlmBtn
-          variant="ghost"
-          size="icon-sm"
           class="member-list__section-action"
           [class.member-list__section-action--active]="channelSearchOpen()"
           [attr.aria-pressed]="channelSearchOpen()"
@@ -142,9 +113,6 @@
       >
         <button
           type="button"
-          hlmBtn
-          variant="ghost"
-          size="icon-sm"
           class="member-list__section-action"
           [class.member-list__section-action--active]="dmSearchOpen()"
           [attr.aria-pressed]="dmSearchOpen()"

@@ -38,5 +38,13 @@ export interface QrInviteViewModel {
   acceptedUserId: string | null;
 }
 
+export interface InviteReferralViewModel {
+  inviteId: string;
+  userId: string;
+  fullName: string;
+  acceptedAt: string;
+  targetRole: InviteTargetRole;
+}
+
 
 

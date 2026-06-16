@@ -1,5 +1,8 @@
 <nav class="organization-sidebar" aria-label="{{ t('organization.sidebar.label', 'Organization sections') }}">
-  <app-page-rail-title [title]="t('organization.page.title', 'Organization')" />
+  <app-page-rail-title
+    icon="business"
+    [title]="t('organization.page.title', 'Organization')"
+  />
 
   <ul class="organization-sidebar__list" role="list">
     @for (section of sections(); track section.id) {

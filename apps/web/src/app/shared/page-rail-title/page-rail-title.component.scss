@@ -1,14 +1,29 @@
-// Page title above left rail lists (projects, team, organization).
+// Page title above left rail lists (projects, messaging, organization).
 // @see docs/design/page-rail-grid.md
 .page-rail-title {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.page-rail-title__icon {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  line-height: 1;
+  color: var(--foreground);
 }
 
 .page-rail-title__heading {
   margin: 0;
+  min-width: 0;
+  overflow: hidden;
   color: var(--foreground);
   font-size: var(--font-size-sm);
   font-weight: 600;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   text-transform: uppercase;
 }

@@ -9,11 +9,28 @@
 // Styles page-level heading typography for media title.
 // @see docs/specs/component/item-grid/item-grid.md#wiring
 .media-page-header__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
   margin: 0;
+  min-width: 0;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   color: var(--foreground);
+}
+
+.media-page-header__icon {
+  flex-shrink: 0;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.media-page-header__title-text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 // Styles media count summary typography below the main title.
